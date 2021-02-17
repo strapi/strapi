@@ -50,11 +50,12 @@ const updateNonLocalizedFields = async (entry, { model }) => {
 
 /**
  * Remove entry from localizations & udpate realted localizations
+ * This method should be used only after an entry is deleted
  * @param {Object} entry entry to remove from localizations
  * @param {Object} options
  * @param {Object} options.model corresponding model
  */
-const removeEntryFromLocalizations = async (entry, { model }) => {
+const removeEntryFromRelatedLocalizations = async (entry, { model }) => {
   if (Array.isArray(entry.localizations)) {
     const newLocalizations = entry.localizations.filter(({ id }) => id != entry.id);
 
@@ -70,5 +71,5 @@ module.exports = {
   assignDefaultLocale,
   addLocalizations,
   updateNonLocalizedFields,
-  removeEntryFromLocalizations,
+  removeEntryFromRelatedLocalizations,
 };

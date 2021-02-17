@@ -31,7 +31,7 @@ module.exports = async () => {
       strapi.db.lifecycles.register({
         model: model.uid,
         async beforeCreate(data) {
-          await getService('lcoalizations').assignDefaultLocale(data);
+          await getService('localizations').assignDefaultLocale(data);
         },
         async afterCreate(entry) {
           await getService('localizations').addLocalizations(entry, { model });
@@ -40,7 +40,7 @@ module.exports = async () => {
           await getService('localizations').updateNonLocalizedFields(entry, { model });
         },
         async afterDelete(entry) {
-          await getService('localizations').removeEntryFromLocalizations(entry, { model });
+          await getService('localizations').removeEntryFromRelatedLocalizations(entry, { model });
         },
       });
     });

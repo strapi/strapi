@@ -30,6 +30,4 @@ class LifecycleManager {
   }
 }
 
-module.exports = strapi => {
-  return new LifecycleManager(strapi);
-};
+module.exports = () => new LifecycleManager();

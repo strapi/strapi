@@ -4,7 +4,7 @@ const {
   assignDefaultLocale,
   addLocalizations,
   updateNonLocalizedFields,
-  removeEntryFromLocalizations,
+  removeEntryFromRelatedLocalizations,
 } = require('../localizations');
 
 const model = {
@@ -164,7 +164,7 @@ describe('localizations service', () => {
     });
   });
 
-  describe('removeEntryFromLocalizations', () => {
+  describe('removeEntryFromRelatedLocalizations', () => {
     test('Does nothing if no localizations set', async () => {
       const update = jest.fn();
       global.strapi = {
@@ -175,7 +175,7 @@ describe('localizations service', () => {
 
       const entry = { id: 1, locale: 'test' };
 
-      await removeEntryFromLocalizations(entry, { model });
+      await removeEntryFromRelatedLocalizations(entry, { model });
 
       expect(update).not.toHaveBeenCalled();
     });
@@ -197,7 +197,7 @@ describe('localizations service', () => {
         ],
       };
 
-      await removeEntryFromLocalizations(entry, { model });
+      await removeEntryFromRelatedLocalizations(entry, { model });
 
       expect(update).toHaveBeenCalledTimes(1);
       expect(update).toHaveBeenCalledWith(
