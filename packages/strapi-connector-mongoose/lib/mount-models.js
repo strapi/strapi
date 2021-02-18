@@ -301,7 +301,7 @@ module.exports = async ({ models, target }, ctx) => {
     const definitionDidChange = await didDefinitionChange(definition, instance);
 
     // run migrations
-    await strapi.db.migrations.runMigration(migrateSchema, {
+    await strapi.db.migrations.run(migrateSchema, {
       definition,
       model: modelInstance,
       ORM: instance,

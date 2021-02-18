@@ -398,7 +398,7 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
   // run migrations
-  await strapi.db.migrations.runMigration(migrateSchemas, {
+  await strapi.db.migrations.run(migrateSchemas, {
     ORM,
     loadedModel,
     definition,
