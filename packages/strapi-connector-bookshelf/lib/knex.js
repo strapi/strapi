@@ -97,7 +97,9 @@ module.exports = strapi => {
             socketPath: _.get(connection.settings, 'socketPath'),
             ssl: _.get(connection.settings, 'ssl', false),
             timezone: _.get(connection.settings, 'timezone', 'utc'),
-            filename: _.get(connection.settings, 'filename', '.tmp/data.db'),
+            filename: _.get(connection.settings, 'filename')
+              ? connection.settings.filename
+              : '.tmp/data.db',
           },
           ...connection.options,
           debug: _.get(connection.options, 'debug', false),
