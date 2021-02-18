@@ -8,9 +8,11 @@ import Wrapper from './Wrapper';
 const ContentTypeCollapse = ({
   allActions,
   contentTypeName,
+  label,
   index,
   isActive,
   onClickToggleCollapse,
+  pathToData,
   properties,
 }) => {
   const handleClickToggleCollapse = useCallback(() => {
@@ -29,8 +31,9 @@ const ContentTypeCollapse = ({
         availableActions={availableActions}
         isActive={isActive}
         isGrey={index % 2 === 0}
-        name={contentTypeName}
+        label={label}
         onClickToggle={handleClickToggleCollapse}
+        pathToData={pathToData}
       />
       {isActive &&
         properties.map(({ label, value, children: childrenForm }, i) => {
@@ -39,6 +42,7 @@ const ContentTypeCollapse = ({
               availableActions={availableActions}
               childrenForm={childrenForm}
               label={label}
+              pathToData={pathToData}
               propertyName={value}
               key={value}
               isLast={i === properties.length - 1}
@@ -55,7 +59,9 @@ ContentTypeCollapse.propTypes = {
   contentTypeName: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   isActive: PropTypes.bool.isRequired,
+  label: PropTypes.string.isRequired,
   onClickToggleCollapse: PropTypes.func.isRequired,
+  pathToData: PropTypes.string.isRequired,
   properties: PropTypes.array.isRequired,
 };
 

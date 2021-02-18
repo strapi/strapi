@@ -1,29 +1,28 @@
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import ContentTypeCollapse from '../ContentTypeCollapse';
 
-const ContentTypeCollapses = ({ actions, subjects }) => {
+const ContentTypeCollapses = ({ actions, pathToData, subjects }) => {
   const [collapseToOpen, setCollapseToOpen] = useState(null);
 
-  const handleClickToggleCollapse = useCallback(
-    collapseName => {
-      const nextCollapseToOpen = collapseToOpen === collapseName ? null : collapseName;
+  const handleClickToggleCollapse = collapseName => {
+    const nextCollapseToOpen = collapseToOpen === collapseName ? null : collapseName;
 
-      setCollapseToOpen(nextCollapseToOpen);
-    },
-    [collapseToOpen]
-  );
+    setCollapseToOpen(nextCollapseToOpen);
+  };
 
-  return Object.keys(subjects).map((subject, index) => {
+  return subjects.map(({ uid, label, properties }, index) => {
     return (
       <ContentTypeCollapse
         allActions={actions}
-        key={subject}
-        contentTypeName={subject}
-        isActive={collapseToOpen === subject}
+        key={uid}
+        contentTypeName={uid}
+        label={label}
+        isActive={collapseToOpen === uid}
         index={index}
         onClickToggleCollapse={handleClickToggleCollapse}
-        properties={subjects[subject].properties}
+        pathToData={`${pathToData}..${uid}`}
+        properties={properties}
       />
     );
   });
@@ -31,12 +30,19 @@ const ContentTypeCollapses = ({ actions, subjects }) => {
 
 ContentTypeCollapses.defaultProps = {
   actions: [],
-  subjects: {},
+  subjects: [],
 };
 
 ContentTypeCollapses.propTypes = {
   actions: PropTypes.array.isRequired,
-  subjects: PropTypes.object,
+  pathToData: PropTypes.string.isRequired,
+  subjects: PropTypes.arrayOf(
+    PropTypes.shape({
+      uid: PropTypes.string.isRequired,
+      label: PropTypes.string.isRequired,
+      properties: PropTypes.array.isRequired,
+    })
+  ),
 };
 
 export default memo(ContentTypeCollapses);

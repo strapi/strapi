@@ -5,7 +5,7 @@ const generateHeadersFromActions = (actions, propertyName) => {
       action.applyToProperties.indexOf(propertyName) !== -1 &&
       action.isDisplayed;
 
-    return { label: action.label, isActionRelatedToCurrentProperty };
+    return { label: action.label, actionId: action.actionId, isActionRelatedToCurrentProperty };
   });
 };
 

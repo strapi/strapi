@@ -1,7 +1,10 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
 import styled from 'styled-components';
+import { usePermissionsDataManager } from '../../../contexts/PermissionsDataManagerContext';
+import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import CollapseLabel from '../../../CollapseLabel';
@@ -16,9 +19,22 @@ const SubLevelWrapper = styled.div`
   padding-bottom: 8px;
 `;
 
-const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
+const SubActionRow = ({
+  childrenForm,
+  recursiveLevel,
+  pathToDataFromActionRow,
+  propertyActions,
+  parentName,
+  propertyName,
+}) => {
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
   const [rowToOpen, setRowToOpen] = useState(null);
-  const handleClickToggleSubLevel = useCallback(name => {
+
+  const handleClickToggleSubLevel = name => {
     setRowToOpen(prev => {
       if (prev === name) {
         return null;
@@ -26,9 +42,9 @@ const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
 
       return name;
     });
-  }, []);
+  };
 
-  const displayedRecursiveValue = useMemo(() => {
+  const displayedRecursiveChildren = useMemo(() => {
     if (!rowToOpen) {
       return null;
     }
@@ -44,7 +60,6 @@ const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
         const isArrayType = Array.isArray(subChildrenForm);
         const isSmall = isArrayType || index + 1 === childrenForm.length;
         const isActive = rowToOpen === value;
-        console.log({ label, isSmall });
 
         return (
           <LeftBorderTimeline key={value} isVisible={isVisible}>
@@ -77,23 +92,61 @@ const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
                   </CollapseLabel>
                 </RowStyle>
                 <Flex style={{ flex: 1 }}>
-                  {propertyActions.map(action => {
-                    if (!action.isActionRelatedToCurrentProperty) {
-                      return <HiddenAction key={action.label} />;
+                  {propertyActions.map(({ actionId, label, isActionRelatedToCurrentProperty }) => {
+                    if (!isActionRelatedToCurrentProperty) {
+                      return <HiddenAction key={actionId} />;
+                    }
+                    /*
+                     * Usually we use a 'dot' in order to know the key path of an object for which we want to change the value.
+                     * Since an action and a subject are both separated by '.' or '::' we chose to use the '..' separators
+                     */
+                    const checkboxName = [
+                      ...pathToDataFromActionRow.split('..'),
+                      actionId,
+                      propertyName,
+                      ...parentName.split('..'),
+                      value,
+                    ];
+
+                    const checkboxValue = get(modifiedData, checkboxName, false);
+
+                    if (!subChildrenForm) {
+                      return (
+                        <CheckboxWithCondition
+                          key={label}
+                          name={checkboxName.join('..')}
+                          onChange={onChangeSimpleCheckbox}
+                          value={checkboxValue}
+                        />
+                      );
                     }
 
-                    return <CheckboxWithCondition key={action.label} name="todo" />;
+                    const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
+                      checkboxValue
+                    );
+
+                    return (
+                      <CheckboxWithCondition
+                        key={label}
+                        name={checkboxName.join('..')}
+                        onChange={onChangeParentCheckbox}
+                        value={hasAllActionsSelected}
+                        someChecked={hasSomeActionsSelected}
+                      />
+                    );
                   })}
                 </Flex>
               </Flex>
             </RowWrapper>
-            {displayedRecursiveValue && isActive && (
+            {displayedRecursiveChildren && isActive && (
               <SubLevelWrapper>
                 <SubActionRow
-                  // name={displayedRecursiveValue.key}
+                  parentName={`${parentName}..${value}`}
+                  pathToDataFromActionRow={pathToDataFromActionRow}
                   propertyActions={propertyActions}
+                  propertyName={propertyName}
                   recursiveLevel={recursiveLevel + 1}
-                  childrenForm={displayedRecursiveValue.children}
+                  childrenForm={displayedRecursiveChildren.children}
                 />
               </SubLevelWrapper>
             )}
@@ -104,14 +157,13 @@ const SubActionRow = ({ childrenForm, recursiveLevel, propertyActions }) => {
   );
 };
 
-SubActionRow.defaultProps = {
-  recursiveLevel: 0,
-};
-
 SubActionRow.propTypes = {
   childrenForm: PropTypes.array.isRequired,
+  parentName: PropTypes.string.isRequired,
+  pathToDataFromActionRow: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,
-  recursiveLevel: PropTypes.number,
+  propertyName: PropTypes.string.isRequired,
+  recursiveLevel: PropTypes.number.isRequired,
 };
 
 export default memo(SubActionRow);

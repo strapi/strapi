@@ -146,6 +146,7 @@ const data = {
         plugin: 'plugin::content-manager',
       },
     ],
+
     settings: [
       {
         displayName: 'Create',
@@ -283,8 +284,10 @@ const data = {
 
     singleTypes: {}, // same format as under,
     collectionTypes: {
-      subjects: {
-        address: {
+      subjects: [
+        {
+          uid: 'address',
+          label: 'Address',
           properties: [
             {
               label: 'Fields',
@@ -315,7 +318,9 @@ const data = {
             },
           ],
         },
-        restaurant: {
+        {
+          uid: 'restaurant',
+          label: 'Restaurant',
           properties: [
             {
               label: 'Fields',
@@ -384,10 +389,12 @@ const data = {
             },
           ],
         },
-        // test: {
+        // {
+        //   uid: 'test',
+        //   label: 'test',
         //   properties: [],
         // },
-      },
+      ],
       actions: [
         {
           label: 'Create',
@@ -398,24 +405,26 @@ const data = {
         {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
-          subjects: ['restaurant', 'addresse'],
+          subjects: ['restaurant', 'address'],
           applyToProperties: ['fields', 'locales'],
         },
         {
           label: 'Update',
           actionId: 'content-manager.explorer.update',
-          subjects: ['addresse', 'restaurant'],
+          subjects: ['address', 'erestaurant'],
           applyToProperties: ['fields'],
         },
         {
           label: 'Delete',
           actionId: 'content-manager.explorer.delete',
           subjects: ['restaurant', 'address'],
+          applyToProperties: [],
         },
         {
           label: 'Publish',
           actionId: 'content-manager.explorer.publish',
           subjects: ['restaurant'],
+          applyToProperties: ['locales'],
         },
       ],
     },

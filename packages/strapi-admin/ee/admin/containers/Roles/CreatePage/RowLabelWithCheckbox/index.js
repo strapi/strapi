@@ -4,10 +4,21 @@ import { Checkbox, Text } from '@buffetjs/core';
 import CollapseLabel from '../CollapseLabel';
 import Wrapper from './Wrapper';
 
-const RowLabel = ({ isCollapsable, label, children, onClick, textColor, width }) => {
+const RowLabelWithCheckbox = ({
+  children,
+  isCollapsable,
+  label,
+  onChange,
+  onClick,
+  checkboxName,
+  someChecked,
+  textColor,
+  value,
+  width,
+}) => {
   return (
     <Wrapper width={width}>
-      <Checkbox name="todo" value={false} />
+      <Checkbox name={checkboxName} onChange={onChange} someChecked={someChecked} value={value} />
       <CollapseLabel
         title={label}
         alignItems="center"
@@ -30,20 +41,28 @@ const RowLabel = ({ isCollapsable, label, children, onClick, textColor, width })
   );
 };
 
-RowLabel.defaultProps = {
+RowLabelWithCheckbox.defaultProps = {
   children: null,
+  checkboxName: '',
+  onChange: () => {},
+  value: false,
+  someChecked: false,
   isCollapsable: false,
   textColor: 'grey',
   width: '18rem',
 };
 
-RowLabel.propTypes = {
+RowLabelWithCheckbox.propTypes = {
+  checkboxName: PropTypes.string,
   children: PropTypes.node,
-  isCollapsable: PropTypes.bool,
   label: PropTypes.string.isRequired,
+  isCollapsable: PropTypes.bool,
+  onChange: PropTypes.func,
   onClick: PropTypes.func.isRequired,
+  someChecked: PropTypes.bool,
   textColor: PropTypes.string,
+  value: PropTypes.bool,
   width: PropTypes.string,
 };
 
-export default memo(RowLabel);
+export default memo(RowLabelWithCheckbox);

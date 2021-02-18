@@ -12,6 +12,7 @@ const CollapsePropertyMatrix = ({
   isLast,
   isOdd,
   label,
+  pathToData,
   propertyName,
 }) => {
   const propertyActions = useMemo(
@@ -31,6 +32,8 @@ const CollapsePropertyMatrix = ({
             name={value}
             required={required}
             propertyActions={propertyActions}
+            pathToData={pathToData}
+            propertyName={propertyName}
           />
         ))}
       </Padded>
@@ -44,6 +47,7 @@ CollapsePropertyMatrix.propTypes = {
   isOdd: PropTypes.bool.isRequired,
   isLast: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
+  pathToData: PropTypes.string.isRequired,
   propertyName: PropTypes.string.isRequired,
 };
 

@@ -1,33 +1,130 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
+import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex, Padded } from '@buffetjs/core';
+import { usePermissionsDataManager } from '../../contexts/PermissionsDataManagerContext';
 import CheckboxWithCondition from '../../CheckboxWithCondition';
 import Chevron from '../../Chevron';
+import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
+import ConditionsModal from '../../ConditionsModal';
 import HiddenAction from '../../HiddenAction';
+import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import Wrapper from './Wrapper';
-import RowLabel from '../../RowLabel';
+import generateCheckboxesActions from './utils/generateCheckboxesActions';
 
-const Collapse = ({ availableActions, isActive, isGrey, name, onClickToggle }) => {
+const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pathToData }) => {
+  const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
+  const {
+    modifiedData,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
+
+  const handleToggleModalIsOpen = () => {
+    setModalState(prevState => ({ isMounted: true, isOpen: !prevState.isOpen }));
+  };
+
+  const handleModalClose = () => {
+    setModalState(prevState => ({ ...prevState, isMounted: false }));
+  };
+
+  // This corresponds to the data related to the CT left checkbox
+  // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true}, update: {}, ... } } } }
+  const mainData = get(modifiedData, pathToData.split('..'), {});
+  // The utils we are using: getCheckboxState, retrieves all the boolean leafs of an object in order
+  // to return the state of checkbox. Since the conditions are not related to the property we need to remove the key from the object.
+  const dataWithoutCondition = useMemo(() => {
+    return Object.keys(mainData).reduce((acc, current) => {
+      acc[current] = removeConditionKeyFromData(mainData[current]);
+
+      return acc;
+    }, {});
+  }, [mainData]);
+  const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
+
+  // Here we create an array of <checkbox>, since the state of each one of them is used in
+  // order to know if whether or not we need to display the associated action in
+  // the <ConditionsModal />
+  const checkboxesActions = useMemo(() => {
+    return generateCheckboxesActions(availableActions, modifiedData, pathToData);
+  }, [availableActions, modifiedData, pathToData]);
+
+  const doesConditionButtonHasConditions = checkboxesActions.some(
+    ({ hasConditions }) => hasConditions
+  );
+
   return (
     <Wrapper isActive={isActive} isGrey={isGrey}>
       <Flex style={{ flex: 1 }}>
         <Padded left size="sm" />
-        <RowLabel label={name} onClick={onClickToggle} isCollapsable>
+        <RowLabelWithCheckbox
+          isCollapsable
+          label={label}
+          checkboxName={pathToData}
+          onChange={onChangeParentCheckbox}
+          onClick={onClickToggle}
+          someChecked={hasSomeActionsSelected}
+          value={hasAllActionsSelected}
+        >
           <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
-        </RowLabel>
+        </RowLabelWithCheckbox>
 
         <Flex style={{ flex: 1 }}>
-          {availableActions.map(action => {
-            if (!action.isDisplayed) {
-              return <HiddenAction key={action.actionId} />;
-            }
+          {checkboxesActions.map(
+            ({
+              actionId,
+              hasConditions,
+              hasAllActionsSelected,
+              hasSomeActionsSelected,
+              isDisplayed,
+              isParentCheckbox,
+              checkboxName,
+            }) => {
+              if (!isDisplayed) {
+                return <HiddenAction key={actionId} />;
+              }
 
-            return <CheckboxWithCondition key={action.actionId} name={action.actionId} />;
-          })}
+              if (isParentCheckbox) {
+                return (
+                  <CheckboxWithCondition
+                    key={actionId}
+                    hasConditions={hasConditions}
+                    name={checkboxName}
+                    onChange={onChangeParentCheckbox}
+                    someChecked={hasSomeActionsSelected}
+                    value={hasAllActionsSelected}
+                  />
+                );
+              }
+
+              return (
+                <CheckboxWithCondition
+                  key={actionId}
+                  hasConditions={hasConditions}
+                  name={checkboxName}
+                  onChange={onChangeSimpleCheckbox}
+                  value={hasAllActionsSelected}
+                />
+              );
+            }
+          )}
         </Flex>
-        <ConditionsButton isRight onClick={() => console.log('todo')} />
+        <ConditionsButton
+          isRight
+          onClick={handleToggleModalIsOpen}
+          hasConditions={doesConditionButtonHasConditions}
+        />
       </Flex>
+      {modalState.isMounted && (
+        <ConditionsModal
+          headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+          actions={checkboxesActions}
+          isOpen={modalState.isOpen}
+          onClosed={handleModalClose}
+          onToggle={handleToggleModalIsOpen}
+        />
+      )}
     </Wrapper>
   );
 };
@@ -36,8 +133,9 @@ Collapse.propTypes = {
   availableActions: PropTypes.array.isRequired,
   isActive: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
-  name: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
   onClickToggle: PropTypes.func.isRequired,
+  pathToData: PropTypes.string.isRequired,
 };
 
 export default Collapse;

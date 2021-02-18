@@ -1,20 +1,38 @@
 import React, { memo, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { get } from 'lodash';
 import { Padded, Flex } from '@buffetjs/core';
+import { usePermissionsDataManager } from '../../../contexts/PermissionsDataManagerContext';
+import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
-import RowLabel from '../../../RowLabel';
+import RowLabelWithCheckbox from '../../../RowLabelWithCheckbox';
 import SubActionRow from '../SubActionRow';
 import Wrapper from './Wrapper';
+import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 
-const ActionRow = ({ childrenForm, label, name, required, propertyActions }) => {
+const ActionRow = ({
+  childrenForm,
+  label,
+  name,
+  required,
+  pathToData,
+  propertyActions,
+  propertyName,
+}) => {
   const [rowToOpen, setRowToOpen] = useState(null);
+  const {
+    modifiedData,
+    onChangeCollectionTypeLeftActionRowCheckbox,
+    onChangeParentCheckbox,
+    onChangeSimpleCheckbox,
+  } = usePermissionsDataManager();
 
   const isActive = rowToOpen === name;
 
-  const recursiveValues = useMemo(() => {
+  const recursiveChildren = useMemo(() => {
     if (!Array.isArray(childrenForm)) {
       return [];
     }
@@ -22,7 +40,7 @@ const ActionRow = ({ childrenForm, label, name, required, propertyActions }) => 
     return childrenForm;
   }, [childrenForm]);
 
-  const isCollapsable = recursiveValues.length > 0;
+  const isCollapsable = recursiveChildren.length > 0;
 
   const handleClick = useCallback(() => {
     if (isCollapsable) {
@@ -36,39 +54,77 @@ const ActionRow = ({ childrenForm, label, name, required, propertyActions }) => 
     }
   }, [isCollapsable, name]);
 
+  const handleChangeLeftRowCheckbox = ({ target: { value } }) => {
+    onChangeCollectionTypeLeftActionRowCheckbox(pathToData, propertyName, name, value);
+  };
+
+  const { hasAllActionsSelected, hasSomeActionsSelected } = useMemo(() => {
+    return getRowLabelCheckboxeState(propertyActions, modifiedData, pathToData, propertyName, name);
+  }, [propertyActions, modifiedData, pathToData, propertyName, name]);
+
   return (
     <>
-      <Wrapper alignItems="center" isCollapsable={isCollapsable}>
+      <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <RowLabel
+          <RowLabelWithCheckbox
             width="15rem"
+            onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
             label={label}
-            // TODO
-            textColor="grey"
+            someChecked={hasSomeActionsSelected}
+            value={hasAllActionsSelected}
           >
             {required && <RequiredSign />}
             <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
-          </RowLabel>
+          </RowLabelWithCheckbox>
           <Flex style={{ flex: 1 }}>
-            {propertyActions.map(action => {
-              if (!action.isActionRelatedToCurrentProperty) {
-                return <HiddenAction key={action.label} />;
+            {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
+              if (!isActionRelatedToCurrentProperty) {
+                return <HiddenAction key={label} />;
               }
 
-              return <CheckboxWithCondition key={action.label} name="todo" />;
+              const checkboxName = [...pathToData.split('..'), actionId, propertyName, name];
+
+              if (!isCollapsable) {
+                const checkboxValue = get(modifiedData, checkboxName, false);
+
+                return (
+                  <CheckboxWithCondition
+                    key={actionId}
+                    name={checkboxName.join('..')}
+                    onChange={onChangeSimpleCheckbox}
+                    value={checkboxValue}
+                  />
+                );
+              }
+
+              const data = get(modifiedData, checkboxName, {});
+
+              const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
+
+              return (
+                <CheckboxWithCondition
+                  key={label}
+                  name={checkboxName.join('..')}
+                  onChange={onChangeParentCheckbox}
+                  value={hasAllActionsSelected}
+                  someChecked={hasSomeActionsSelected}
+                />
+              );
             })}
           </Flex>
         </Flex>
       </Wrapper>
       {isActive && (
         <SubActionRow
-          // label={label}
-          // name={name}
+          childrenForm={recursiveChildren}
+          parentName={name}
+          pathToDataFromActionRow={pathToData}
+          propertyName={propertyName}
           propertyActions={propertyActions}
-          childrenForm={recursiveValues}
+          recursiveLevel={0}
         />
       )}
     </>
@@ -84,7 +140,9 @@ ActionRow.propTypes = {
   childrenForm: PropTypes.array,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  pathToData: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,
+  propertyName: PropTypes.string.isRequired,
   required: PropTypes.bool,
 };
 
