@@ -54,7 +54,7 @@ const ApplicationInfosPage = () => {
 
   return (
     <div>
-      <PageTitle name="Infos" />
+      <PageTitle name="Application" />
       <Header {...headerProps} />
       <BaselineAlignment top size="3px" />
       <Bloc>
