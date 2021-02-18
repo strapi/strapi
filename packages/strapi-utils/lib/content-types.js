@@ -67,7 +67,12 @@ const getWritableAttributes = (model = {}) => {
 };
 
 const getNonVisibleAttributes = model => {
-  return _.uniq([model.primaryKey, ...getTimestamps(model), ...NON_VISIBLE_ATTRIBUTES]);
+  return _.uniq([
+    model.primaryKey,
+    ...NON_VISIBLE_ATTRIBUTES,
+    ...getTimestamps(model),
+    ...getNonWritableAttributes(model),
+  ]);
 };
 
 const getVisibleAttributes = model => {
@@ -173,9 +178,13 @@ const getGlobalId = (model, modelName, prefix) => {
   return model.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
+const isRelationalAttribute = attribute =>
+  _.has(attribute, 'model') || _.has(attribute, 'collection');
+
 module.exports = {
   isScalarAttribute,
   isMediaAttribute,
+  isRelationalAttribute,
   getPrivateAttributes,
   getTimestampsAttributes,
   isPrivateAttribute,

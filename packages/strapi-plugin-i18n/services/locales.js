@@ -14,6 +14,8 @@ const create = locale => strapi.query('locale', 'i18n').create(locale);
 
 const update = (params, updates) => strapi.query('locale', 'i18n').update(params, updates);
 
+const deleteFn = ({ id }) => strapi.query('locale', 'i18n').delete({ id });
+
 const setDefaultLocale = ({ code }) => getCoreStore().set({ key: 'default_locale', value: code });
 
 const getDefaultLocale = () => getCoreStore().get({ key: 'default_locale' });
@@ -42,4 +44,5 @@ module.exports = {
   setDefaultLocale,
   getDefaultLocale,
   setIsDefault,
+  delete: deleteFn,
 };
