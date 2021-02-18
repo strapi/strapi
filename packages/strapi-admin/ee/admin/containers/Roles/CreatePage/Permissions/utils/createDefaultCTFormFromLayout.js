@@ -90,7 +90,7 @@ const findLayouts = (allLayouts, subjects) => {
  * }
  */
 const createDefaultCTFormFromLayout = ({ subjects }, actionArray, conditionArray) => {
-  return actionArray.reduce((acc, current) => {
+  return actionArray.reduce((defaultForm, current) => {
     const actionSubjects = current.subjects;
 
     const subjectLayouts = findLayouts(subjects, actionSubjects);
@@ -99,18 +99,18 @@ const createDefaultCTFormFromLayout = ({ subjects }, actionArray, conditionArray
     // for instance the D&P permission is applied only with the cts that
     // have the D&P features enabled
     if (isEmpty(subjectLayouts)) {
-      return acc;
+      return defaultForm;
     }
 
     // The object has the following shape: { [ctUID]: { [actionId]: { [property]: { enabled: false } } } }
-    const contentTypesActions = Object.keys(subjectLayouts).reduce((acc2, currentCTUID) => {
+    const contentTypesActions = Object.keys(subjectLayouts).reduce((acc, currentCTUID) => {
       const { actionId, applyToProperties } = current;
       const conditionsForm = createDefaultConditionsForm(conditionArray);
 
       if (isEmpty(applyToProperties)) {
-        set(acc2, [currentCTUID, actionId], { enabled: false, conditions: conditionsForm });
+        set(acc, [currentCTUID, actionId], { enabled: false, conditions: conditionsForm });
 
-        return acc2;
+        return acc;
       }
 
       const propertiesForm = createDefaultPropertiesForm(
@@ -118,12 +118,12 @@ const createDefaultCTFormFromLayout = ({ subjects }, actionArray, conditionArray
         subjectLayouts[currentCTUID]
       );
 
-      set(acc2, [currentCTUID, actionId], { ...propertiesForm, conditions: conditionsForm });
+      set(acc, [currentCTUID, actionId], { ...propertiesForm, conditions: conditionsForm });
 
-      return acc2;
+      return acc;
     }, {});
 
-    return merge(acc, contentTypesActions);
+    return merge(defaultForm, contentTypesActions);
   }, {});
 };
 

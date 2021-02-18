@@ -8,7 +8,7 @@ import CheckboxWithCondition from '../../../CheckboxWithCondition';
 import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
-import RowLabel from '../../../RowLabel';
+import RowLabelWithCheckbox from '../../../RowLabelWithCheckbox';
 import SubActionRow from '../SubActionRow';
 import Wrapper from './Wrapper';
 import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
@@ -67,7 +67,7 @@ const ActionRow = ({
       <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive}>
         <Flex style={{ flex: 1 }}>
           <Padded left size="sm" />
-          <RowLabel
+          <RowLabelWithCheckbox
             width="15rem"
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
@@ -78,7 +78,7 @@ const ActionRow = ({
           >
             {required && <RequiredSign />}
             <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
-          </RowLabel>
+          </RowLabelWithCheckbox>
           <Flex style={{ flex: 1 }}>
             {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
               if (!isActionRelatedToCurrentProperty) {

@@ -4,7 +4,7 @@ import { Checkbox, Text } from '@buffetjs/core';
 import CollapseLabel from '../CollapseLabel';
 import Wrapper from './Wrapper';
 
-const RowLabel = ({
+const RowLabelWithCheckbox = ({
   children,
   isCollapsable,
   label,
@@ -41,7 +41,7 @@ const RowLabel = ({
   );
 };
 
-RowLabel.defaultProps = {
+RowLabelWithCheckbox.defaultProps = {
   children: null,
   checkboxName: '',
   onChange: () => {},
@@ -52,7 +52,7 @@ RowLabel.defaultProps = {
   width: '18rem',
 };
 
-RowLabel.propTypes = {
+RowLabelWithCheckbox.propTypes = {
   checkboxName: PropTypes.string,
   children: PropTypes.node,
   label: PropTypes.string.isRequired,
@@ -65,4 +65,4 @@ RowLabel.propTypes = {
   width: PropTypes.string,
 };
 
-export default memo(RowLabel);
+export default memo(RowLabelWithCheckbox);

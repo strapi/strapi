@@ -9,7 +9,7 @@ import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
 import HiddenAction from '../../HiddenAction';
-import RowLabel from '../../RowLabel';
+import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import Wrapper from './Wrapper';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
 
@@ -29,10 +29,10 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
     setModalState(prevState => ({ ...prevState, isMounted: false }));
   };
 
-  // This corresponds to the data related to the CT left checkboxe
+  // This corresponds to the data related to the CT left checkbox
   // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true}, update: {}, ... } } } }
   const mainData = get(modifiedData, pathToData.split('..'), {});
-  // The utils we are using: getCheckboxState, retrieves if all the boolean values of an object in order
+  // The utils we are using: getCheckboxState, retrieves all the boolean leafs of an object in order
   // to return the state of checkbox. Since the conditions are not related to the property we need to remove the key from the object.
   const dataWithoutCondition = useMemo(() => {
     return Object.keys(mainData).reduce((acc, current) => {
@@ -58,7 +58,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
     <Wrapper isActive={isActive} isGrey={isGrey}>
       <Flex style={{ flex: 1 }}>
         <Padded left size="sm" />
-        <RowLabel
+        <RowLabelWithCheckbox
           isCollapsable
           label={label}
           checkboxName={pathToData}
@@ -68,7 +68,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
           value={hasAllActionsSelected}
         >
           <Chevron icon={isActive ? 'chevron-up' : 'chevron-down'} />
-        </RowLabel>
+        </RowLabelWithCheckbox>
 
         <Flex style={{ flex: 1 }}>
           {checkboxesActions.map(
