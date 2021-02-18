@@ -98,7 +98,7 @@ const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model 
     }
   }
 
-  // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
+  // Remove from attributes (auto handled by bookshelf and not displayed on ctb)
   if (loadedModel.hasTimestamps) {
     delete definition.attributes[loadedModel.hasTimestamps[0]];
     delete definition.attributes[loadedModel.hasTimestamps[1]];

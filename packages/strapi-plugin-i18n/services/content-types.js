@@ -95,10 +95,22 @@ const copyNonLocalizedAttributes = (model, entry) => {
   return pipe(pick(nonLocalizedAttributes), removeIds)(entry);
 };
 
+/**
+ * Returns the list of attribute names that are localized
+ * @param {object} model
+ * @returns {string[]}
+ */
+const getLocalizedAttributes = model => {
+  return getVisibleAttributes(model).filter(
+    attributeName => isLocalizedAttribute(model, attributeName)
+  );
+}
+
 module.exports = {
   isLocalized,
   getValidLocale,
   getNewLocalizationsFor,
+  getLocalizedAttributes,
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
 };

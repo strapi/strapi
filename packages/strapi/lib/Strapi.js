@@ -341,14 +341,13 @@ class Strapi {
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
-
-    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
-    await this.db.initialize();
-
     this.store = createCoreStore({
       environment: this.config.environment,
       db: this.db,
     });
+
+    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
+    await this.db.initialize();
 
     this.webhookStore = createWebhookStore({ db: this.db });
 
