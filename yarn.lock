@@ -12836,6 +12836,14 @@ match-sorter@^4.0.2:
     "@babel/runtime" "^7.10.5"
     remove-accents "0.4.2"
 
+match-sorter@^6.0.2:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/match-sorter/-/match-sorter-6.2.0.tgz#e3f29d4733ef835a0baccc7b9d291c07264985e8"
+  integrity sha512-yhmUTR5q6JP/ssR1L1y083Wp+C+TdR8LhYTxWI4IRgEUr8IXJu2mE6L3SwryCgX95/5J7qZdEg0G091sOxr1FQ==
+  dependencies:
+    "@babel/runtime" "^7.12.5"
+    remove-accents "0.4.2"
+
 mathml-tag-names@^2.1.0:
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/mathml-tag-names/-/mathml-tag-names-2.1.3.tgz#4ddadd67308e780cf16a47685878ee27b736a0a3"
@@ -16050,6 +16058,14 @@ react-portal@^4.2.0:
   integrity sha512-fE9kOBagwmTXZ3YGRYb4gcMy+kSA+yLO0xnPankjRlfBv4uCpFXqKPfkpsGQQR15wkZ9EssnvTOl1yMzbkxhPQ==
   dependencies:
     prop-types "^15.5.8"
+
+react-query@3.8.3:
+  version "3.8.3"
+  resolved "https://registry.yarnpkg.com/react-query/-/react-query-3.8.3.tgz#1310e710537c24483e4d167c4e84861771345281"
+  integrity sha512-hLnTC/pZLrc6KxmGJ3O0w1qATjRIOpEFTG4RbHIWcN/xXsfogsINzSppFSknBAJjxBxylobDkyi8Z5c90BeI8Q==
+  dependencies:
+    "@babel/runtime" "^7.5.5"
+    match-sorter "^6.0.2"
 
 react-redux@7.2.0:
   version "7.2.0"

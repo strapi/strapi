@@ -24,6 +24,8 @@ export { default as HeaderModalTitle } from './components/HeaderModalTitle';
 export { default as HeaderSearch } from './components/HeaderSearch';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
+export { default as EmptyState } from './components/EmptyState';
+export * from './components/Tabs';
 
 export { default as InputAddonWithErrors } from './components/InputAddonWithErrors';
 export { default as InputCheckbox } from './components/InputCheckbox';
