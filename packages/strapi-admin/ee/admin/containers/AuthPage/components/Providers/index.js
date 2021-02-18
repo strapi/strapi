@@ -17,15 +17,17 @@ const ProviderWrapper = styled.div`
 `;
 
 const Providers = () => {
+  const ssoEnabled = ENABLED_EE_FEATURES.includes('sso');
+
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-  const { isLoading, data: providers } = useAuthProviders();
+  const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });
 
   const handleClick = () => {
     push('/auth/login');
   };
 
-  if (!isLoading && providers.length === 0) {
+  if (!ssoEnabled || (!isLoading && providers.length === 0)) {
     return <Redirect to="/auth/login" />;
   }
 

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { set, toString } = require('lodash/fp');
+const { set } = require('lodash/fp');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
 const { createPermission } = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
@@ -156,10 +156,6 @@ const count = async (params = {}) => {
  * @returns {Promise<void>}
  */
 const checkRolesIdForDeletion = async (ids = []) => {
-  const adminStore = await strapi.store({ type: 'core', environment: '', name: 'admin' });
-  const {
-    providers: { defaultRole },
-  } = await adminStore.get({ key: 'auth' });
   const superAdminRole = await getSuperAdmin();
 
   if (superAdminRole && stringIncludes(ids, superAdminRole.id)) {
@@ -170,12 +166,6 @@ const checkRolesIdForDeletion = async (ids = []) => {
     const usersCount = await getUsersCount(roleId);
     if (usersCount !== 0) {
       throw new Error('Some roles are still assigned to some users');
-    }
-
-    if (defaultRole && toString(defaultRole) === toString(roleId)) {
-      throw new Error(
-        'This role is used as the default SSO role. Make sure to change this configuration before deleting the role'
-      );
     }
   }
 };

@@ -27,6 +27,7 @@ module.exports = ({
   options = {
     backend: 'http://localhost:1337',
     publicPath: '/admin/',
+    features: [],
   },
 }) => {
   const isProduction = env === 'production';
@@ -188,6 +189,7 @@ module.exports = ({
         MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
         PUBLIC_PATH: JSON.stringify(options.publicPath),
         PROJECT_TYPE: JSON.stringify(useEE ? 'Enterprise' : 'Community'),
+        ENABLED_EE_FEATURES: JSON.stringify(options.features),
       }),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
         const splitPath = resource.context.split(`${path.sep}src${path.sep}`);

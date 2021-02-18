@@ -75,4 +75,10 @@ module.exports = {
   validateProfileUpdateInput,
   validateUserUpdateInput,
   validateUsersDeleteInput,
+
+  schemas: {
+    userCreationSchema,
+    usersDeleteSchema,
+    userUpdateSchema,
+  },
 };

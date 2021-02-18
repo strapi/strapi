@@ -1,40 +1,47 @@
 'use strict';
 
 const passport = require('koa-passport');
+const { isFunction } = require('lodash/fp');
 
-const createProviderRegistry = require('./passport/provider-registry');
 const createLocalStrategy = require('./passport/local-strategy');
 
-const providerRegistry = createProviderRegistry();
+const authEventsMapper = {
+  onConnectionSuccess: 'admin.auth.success',
+  onConnectionError: 'admin.auth.error',
+};
 
-const getProviderCallbackUrl = providerName => `/admin/connect/${providerName}`;
+const valueIsFunctionType = ([, value]) => isFunction(value);
+const keyIsValidEventName = ([key]) => {
+  return Object.keys(strapi.admin.services.passport.authEventsMapper).includes(key);
+};
 
-const syncProviderRegistryWithConfig = () => {
-  const { providers = [] } = strapi.config.get('server.admin.auth', {});
+const getPassportStrategies = () => [createLocalStrategy(strapi)];
 
-  providerRegistry.registerMany(providers);
+const registerAuthEvents = () => {
+  const { events = {} } = strapi.config.get('server.admin.auth', {});
+  const { authEventsMapper } = strapi.admin.services.passport;
+
+  const eventList = Object.entries(events)
+    .filter(keyIsValidEventName)
+    .filter(valueIsFunctionType);
+
+  for (const [eventName, handler] of eventList) {
+    strapi.eventHub.on(authEventsMapper[eventName], handler);
+  }
 };
 
 const init = () => {
-  syncProviderRegistryWithConfig();
+  strapi.admin.services.passport
+    .getPassportStrategies()
+    .forEach(strategy => passport.use(strategy));
 
-  const localStrategy = createLocalStrategy(strapi);
-
-  const providers = providerRegistry.toArray();
-  const strategies = providers.map(provider => provider.createStrategy(strapi));
-
-  // Register the local strategy
-  passport.use(localStrategy);
-
-  // And add the ones provided with the config
-  strategies.forEach(provider => passport.use(provider));
+  registerAuthEvents();
 
   return passport.initialize();
 };
 
 module.exports = {
   init,
-  syncProviderRegistryWithConfig,
-  providerRegistry,
-  getProviderCallbackUrl,
+  getPassportStrategies,
+  authEventsMapper,
 };
