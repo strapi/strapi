@@ -23,8 +23,6 @@ const PermissionRow = ({
       : permissions.category;
   }, [permissions]);
 
-  console.log({ permissions, categoryName });
-
   return (
     <RowContainer isWhite={isWhite}>
       <RowStyle

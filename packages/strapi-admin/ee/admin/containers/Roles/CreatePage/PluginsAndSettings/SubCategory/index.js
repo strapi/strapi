@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
@@ -8,9 +8,11 @@ import { get } from 'lodash';
 import { usePermissionsDataManager } from '../../contexts/PermissionsDataManagerContext';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
+import ConditionsModal from '../../ConditionsModal';
 import CheckboxWrapper from './CheckboxWrapper';
-import Wrapper from './Wrapper';
 import ConditionsButtonWrapper from './ConditionsButtonWrapper';
+import Wrapper from './Wrapper';
+import { formatActions, getConditionsButtonState } from './utils';
 
 const Border = styled.div`
   flex: 1;
@@ -19,7 +21,8 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ categoryName, actions, pathToData }) => {
+const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => {
+  const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -38,6 +41,18 @@ const SubCategory = ({ categoryName, actions, pathToData }) => {
 
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
+  const handleToggleModalIsOpen = () => {
+    setModalState(prevState => ({ isMounted: true, isOpen: !prevState.isOpen }));
+  };
+
+  const handleModalClose = () => {
+    setModalState(prevState => ({ ...prevState, isMounted: false }));
+  };
+
+  // We need to format the actions so it matches the shape of the ConditionsModal actions props
+  const formattedActions = formatActions(actions, modifiedData, pathToData);
+  const doesButtonHasCondition = getConditionsButtonState(get(modifiedData, [...pathToData], {}));
+
   return (
     <>
       <Wrapper>
@@ -50,7 +65,7 @@ const SubCategory = ({ categoryName, actions, pathToData }) => {
               fontSize="xs"
               textTransform="uppercase"
             >
-              {categoryName}
+              {subCategoryName}
             </Text>
           </Padded>
           <Border />
@@ -70,17 +85,19 @@ const SubCategory = ({ categoryName, actions, pathToData }) => {
         <BaselineAlignment top size="1px" />
         <Padded top size="xs">
           <Flex flexWrap="wrap">
-            {actions.map(sc => {
-              const checkboxName = [...pathToData, sc.action, 'enabled'];
-              const value = get(modifiedData, checkboxName, false);
-
+            {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
-                <CheckboxWrapper disabled hasConditions={false} key={sc.action}>
+                <CheckboxWrapper
+                  // TODO
+                  disabled={false}
+                  hasConditions={hasConditions}
+                  key={action}
+                >
                   <Checkbox
-                    name={checkboxName.join('..')}
+                    name={checkboxName}
                     // TODO
                     disabled={false}
-                    message={sc.displayName}
+                    message={displayName}
                     onChange={onChangeSimpleCheckbox}
                     value={value}
                   />
@@ -89,10 +106,22 @@ const SubCategory = ({ categoryName, actions, pathToData }) => {
             })}
           </Flex>
           <ConditionsButtonWrapper disabled={false} hasConditions={false}>
-            <ConditionsButton hasConditions={false} onClick={() => {}} />
+            <ConditionsButton
+              hasConditions={doesButtonHasCondition}
+              onClick={handleToggleModalIsOpen}
+            />
           </ConditionsButtonWrapper>
         </Padded>
       </Wrapper>
+      {modalState.isMounted && (
+        <ConditionsModal
+          headerBreadCrumbs={[categoryName, subCategoryName]}
+          actions={formattedActions}
+          isOpen={modalState.isOpen}
+          onClosed={handleModalClose}
+          onToggle={handleToggleModalIsOpen}
+        />
+      )}
     </>
   );
 };
@@ -100,6 +129,7 @@ const SubCategory = ({ categoryName, actions, pathToData }) => {
 SubCategory.propTypes = {
   actions: PropTypes.array.isRequired,
   categoryName: PropTypes.string.isRequired,
+  subCategoryName: PropTypes.string.isRequired,
   pathToData: PropTypes.array.isRequired,
 };
 
