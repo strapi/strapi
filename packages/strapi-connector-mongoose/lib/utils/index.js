@@ -9,14 +9,8 @@ const { parseType } = require('strapi-utils');
  */
 
 module.exports = (mongoose = Mongoose) => {
-  mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(
-    mongoose,
-    2
-  );
-  mongoose.Schema.Types.Float = require('mongoose-float').loadType(
-    mongoose,
-    20
-  );
+  mongoose.Schema.Types.Decimal = require('mongoose-float').loadType(mongoose, 2);
+  mongoose.Schema.Types.Float = require('mongoose-float').loadType(mongoose, 20);
 
   /**
    * Convert MongoDB ID to the stringify version as GraphQL throws an error if not.
@@ -28,6 +22,10 @@ module.exports = (mongoose = Mongoose) => {
   };
 
   const convertType = (name, attr) => {
+    if (_.has(attr, 'columnType')) {
+      return { type: attr.columnType };
+    }
+
     switch (attr.type.toLowerCase()) {
       case 'array':
         return { type: Array };
@@ -38,14 +36,18 @@ module.exports = (mongoose = Mongoose) => {
       case 'time':
         return {
           type: String,
-          validate: value => parseType({ type: 'time', value }),
-          set: value => parseType({ type: 'time', value }),
+          validate: value =>
+            (!attr.required && _.isNil(value)) || parseType({ type: 'time', value }),
+          set: value =>
+            !attr.required && _.isNil(value) ? value : parseType({ type: 'time', value }),
         };
       case 'date':
         return {
           type: String,
-          validate: value => parseType({ type: 'date', value }),
-          set: value => parseType({ type: 'date', value }),
+          validate: value =>
+            (!attr.required && _.isNil(value)) || parseType({ type: 'date', value }),
+          set: value =>
+            !attr.required && _.isNil(value) ? value : parseType({ type: 'date', value }),
         };
       case 'datetime':
         return {

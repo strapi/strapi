@@ -8,25 +8,22 @@ import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import Cross from '../../icons/Cross';
-import Filter from '../../icons/Filter';
-import SearchIcon from '../../icons/Search';
-import { Wrapper, Infos, Clear } from './components';
+import { HeaderSearch, GlobalContext } from 'strapi-helper-plugin';
+import getTrad from '../../utils/getTrad';
 
 const WAIT = 400;
 
 class Search extends React.Component {
-  state = { value: this.props.initValue };
+  static contextType = GlobalContext;
+
+  state = { didType: false, value: this.props.initValue };
 
   timer = null;
 
   componentDidUpdate(prevProps) {
     const { model, value } = this.props;
 
-    if (
-      prevProps.model !== model ||
-      (!isEmpty(prevProps.value) && isEmpty(value))
-    ) {
+    if (prevProps.model !== model || (!isEmpty(prevProps.value) && isEmpty(value))) {
       this.resetState();
     }
   }
@@ -34,55 +31,43 @@ class Search extends React.Component {
   resetState = () => this.setState({ value: '' });
 
   handleChange = ({ target }) => {
+    if (!this.state.didType) {
+      this.context.emitEvent('didSearch');
+    }
+
     clearTimeout(this.timer);
-    this.setState({ value: target.value });
+    this.setState({ value: target.value, didType: !!target.value });
     this.timer = setTimeout(() => this.triggerChange(target.value), WAIT);
   };
 
   handleClick = () => {
-    this.setState({ value: '' });
+    this.setState({ value: '', didType: false });
     this.triggerChange('');
   };
 
-  triggerChange = value =>
-    this.props.changeParams({
-      target: {
-        name: '_q',
-        value,
-      },
-    });
+  triggerChange = value => {
+    const method = value ? 'push' : 'remove';
+    const params = method === 'push' ? { _q: value, page: 1 } : { _q: '' };
+
+    this.props.changeParams(params, method);
+  };
 
   render() {
     const { model } = this.props;
     const { value } = this.state;
 
     return (
-      <Wrapper>
-        <div>
-          <SearchIcon />
-        </div>
-        <div>
-          <FormattedMessage id="content-manager.components.Search.placeholder">
-            {message => (
-              <input
-                onChange={this.handleChange}
-                placeholder={message}
-                type="text"
-                value={value}
-              />
-            )}
-          </FormattedMessage>
-          {value !== '' && (
-            <Clear onClick={this.handleClick}>
-              <Cross />
-            </Clear>
-          )}
-        </div>
-        <Infos>
-          <Filter />
-          {upperFirst(model)}
-        </Infos>
-      </Wrapper>
+      <FormattedMessage id={getTrad('components.Search.placeholder')}>
+        {placeholder => (
+          <HeaderSearch
+            label={upperFirst(model)}
+            onChange={this.handleChange}
+            onClear={this.handleClick}
+            placeholder={placeholder}
+            value={value}
+          />
+        )}
+      </FormattedMessage>
     );
   }
 }

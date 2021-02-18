@@ -4,31 +4,39 @@
  * BackHeader
  *
  */
-import styled from 'styled-components';
 
-const BackHeader = styled.div`
-  position: fixed;
-  top: 0;
-  height: 6rem;
-  width: 6.5rem;
-  line-height: 6rem;
-  z-index: 1050;
-  text-align: center;
-  background-color: #ffffff;
-  color: #81848a;
-  border-top: 1px solid #f3f4f4;
-  border-right: 1px solid #f3f4f4;
-  border-left: 1px solid #f3f4f4;
-  cursor: pointer;
-  &:before {
-    content: '\f053';
-    font-family: 'FontAwesome';
-    font-size: 1.8rem;
-    font-weight: bolder;
-  }
-  &:hover {
-    background-color: #f3f4f4;
-  }
-`;
+import React from 'react';
+import { get } from 'lodash';
+import { useRouteMatch } from 'react-router-dom';
+import PropTypes from 'prop-types';
+import { useGlobalContext } from '../../contexts/GlobalContext';
+import StyledBackHeader from './StyledBackHeader';
+
+const BackHeader = props => {
+  const { emitEvent } = useGlobalContext();
+  const pluginsParams = useRouteMatch('/plugins/:pluginId');
+  const settingsParams = useRouteMatch('/settings/:settingType');
+  const pluginId = get(pluginsParams, ['params', 'pluginId'], null);
+  const settingType = get(settingsParams, ['params', 'settingType'], null);
+  const location = pluginId || settingType;
+
+  const handleClick = e => {
+    if (location) {
+      emitEvent('didGoBack', { location });
+    }
+
+    props.onClick(e);
+  };
+
+  return <StyledBackHeader {...props} onClick={handleClick} />;
+};
+
+BackHeader.defaultProps = {
+  onClick: () => {},
+};
+
+BackHeader.propTypes = {
+  onClick: PropTypes.func,
+};
 
 export default BackHeader;

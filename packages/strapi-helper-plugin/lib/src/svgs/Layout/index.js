@@ -11,9 +11,13 @@ const Layout = styled(SvgCompo)`
   }
   &.colored {
     > g {
-      fill: #007eff;
+      fill: ${({ fill }) => fill};
     }
   }
 `;
+
+Layout.defaultProps = {
+  fill: '#007eff',
+};
 
 export default Layout;

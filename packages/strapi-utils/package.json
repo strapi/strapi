@@ -1,8 +1,8 @@
 {
   "name": "strapi-utils",
-  "version": "3.0.0-beta.19.3",
+  "version": "3.5.0",
   "description": "Shared utilities for the Strapi packages",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "strapi",
     "utilities",
@@ -14,23 +14,23 @@
   },
   "main": "./lib",
   "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
     "date-fns": "^2.8.1",
-    "lodash": "4.17.12",
+    "lodash": "4.17.20",
     "pino": "^4.7.1",
-    "pluralize": "^7.0.0",
-    "shelljs": "^0.8.3",
-    "yup": "0.28.1"
+    "pluralize": "^8.0.0",
+    "yup": "0.29.3"
   },
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {
@@ -41,9 +41,9 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.0.0",
+    "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "MIT",
-  "gitHead": "c85658a19b8fef0f3164c19693a45db305dc07a9"
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

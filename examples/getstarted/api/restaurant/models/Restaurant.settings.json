@@ -1,11 +1,11 @@
 {
-  "connection": "default",
   "collectionName": "restaurants",
   "info": {
     "name": "restaurant",
     "description": ""
   },
   "options": {
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": ["created_at", "updated_at"],
     "comment": ""
@@ -44,7 +44,6 @@
       "max": 35.12
     },
     "address": {
-      "required": true,
       "model": "address"
     },
     "cover": {

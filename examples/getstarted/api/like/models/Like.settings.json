@@ -1,11 +1,12 @@
 {
-  "connection": "default",
+  "kind": "collectionType",
   "collectionName": "likes",
   "info": {
     "name": "like",
     "description": ""
   },
   "options": {
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": true,
     "comment": ""
@@ -18,6 +19,10 @@
     "review": {
       "model": "review",
       "via": "likes"
+    },
+    "address": {
+      "via": "likes",
+      "model": "address"
     }
   }
 }

@@ -13,7 +13,6 @@ const Wrapper = styled.button`
   padding: 0;
   padding-top: 5px;
   border-radius: 2px;
-  border: 0;
   text-align: center;
   border: solid 1px #fafafb;
   background-color: #fafafb;
@@ -21,7 +20,6 @@ const Wrapper = styled.button`
   &:focus {
     outline: 0;
   }
-
 
   div:first-of-type {
     display: flex;
@@ -34,7 +32,7 @@ const Wrapper = styled.button`
     font-size: 12px;
 
     svg {
-      margin auto;
+      margin: auto;
     }
   }
 
@@ -63,11 +61,12 @@ const Wrapper = styled.button`
     cursor: initial;
   }
 
-  &:hover, &.active {
+  &:hover,
+  &.active {
     border-color: #aed4fb;
     background-color: #e6f0fb;
 
-    div:first-of-type  {
+    div:first-of-type {
       background-color: #aed4fb;
       color: #007eff;
     }

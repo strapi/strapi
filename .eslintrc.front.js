@@ -1,6 +1,7 @@
 module.exports = {
   parser: 'babel-eslint',
   extends: [
+    'airbnb',
     'eslint:recommended',
     'plugin:react/recommended',
     'plugin:redux-saga/recommended',
@@ -29,6 +30,7 @@ module.exports = {
     expect: false,
     assert: false,
     chai: false,
+    ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
     REMOTE_URL: true,
     BACKEND_URL: true,
@@ -36,18 +38,18 @@ module.exports = {
     MODE: true,
     NODE_ENV: true,
   },
-  extends: ['airbnb'],
   settings: {
     react: {
       version: '16.5.2',
     },
   },
   rules: {
+    'import/no-unresolved': 0,
     'generator-star-spacing': 0,
     'no-console': 0,
     'require-atomic-updates': 0,
     'react-hooks/rules-of-hooks': 'error',
-    'react-hooks/exhaustive-deps': 'warn',
+    'react-hooks/exhaustive-deps': 'error',
     'arrow-body-style': 0,
     'arrow-parens': 0,
     camelcase: 0,
@@ -58,18 +60,7 @@ module.exports = {
         treatUndefinedAsUnspecified: true,
       },
     ],
-    indent: [
-      2,
-      2,
-      {
-        flatTernaryExpressions: false,
-        SwitchCase: 1,
-        ignoredNodes: [
-          'ConditionalExpression',
-          "VariableDeclarator[kind='const']",
-        ],
-      },
-    ],
+    'template-curly-spacing': 0,
     'func-names': ['error', 'never'],
     'function-paren-newline': 0,
     'implicit-arrow-linebreak': 0,
@@ -97,10 +88,7 @@ module.exports = {
     'no-plusplus': 0,
     'no-shadow': 0,
     'no-underscore-dangle': 0,
-    'no-use-before-define': [
-      'error',
-      { functions: false, classes: false, variables: false },
-    ],
+    'no-use-before-define': ['error', { functions: false, classes: false, variables: false }],
     'object-curly-newline': [2, { multiline: true, consistent: true }],
     'operator-linebreak': 0,
     'padding-line-between-statements': [
@@ -124,9 +112,11 @@ module.exports = {
     'react/destructuring-assignment': 0,
     'react/jsx-filename-extension': [1, { extensions: ['.js', '.jsx'] }],
     'react/forbid-prop-types': 0,
+    'react/no-unused-prop-types': 2,
     'react/jsx-props-no-spreading': 0,
     'react/jsx-one-expression-per-line': 0,
     'react/state-in-constructor': 0,
     'react/static-property-placement': 0,
+    'react/display-name': 0,
   },
 };

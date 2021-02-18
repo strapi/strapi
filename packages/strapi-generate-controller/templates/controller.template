@@ -1,7 +1,7 @@
 'use strict';
 
 /**
- * A set of functions called "actions" for `<%= globalID %>`
+ * A set of functions called "actions" for `<%= name %>`
  */
 
 module.exports = {

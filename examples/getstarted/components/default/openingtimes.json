@@ -1,5 +1,4 @@
 {
-  "connection": "default",
   "collectionName": "components_openingtimes",
   "info": {
     "name": "openingtimes",
@@ -14,6 +13,7 @@
     },
     "time": {
       "type": "string"
-    }
+    },
+    "dishrep": { "type": "component", "repeatable": true, "component": "default.dish" }
   }
 }

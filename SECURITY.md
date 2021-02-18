@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-As of November 2019 (and until this document is updated), only the v3.0.0-beta tags of Strapi are supported for updates. Any previous versions are currently not supported and users are advised to use them "at their own risk".
+As of May 2020 (and until this document is updated), only the v3.0.0 *stable* release of Strapi is supported for updates. Any previous versions are currently not supported and users are advised to use them "at their own risk".
 
 ## Reporting a Vulnerability
 

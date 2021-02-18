@@ -54,14 +54,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         .setIn(['modifiedData', 'contentType'], contentType);
 
       const expected = state.setIn(
-        [
-          'modifiedData',
-          'contentType',
-          'schema',
-          'attributes',
-          'dz',
-          'components',
-        ],
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'dz', 'components'],
         fromJS(['default.other', 'default.test'])
       );
 
@@ -179,9 +172,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
     it('Should add the component to the dz field and to the modifiedData.components if the added component is not already in the modifiedData.components', () => {
       const componentUID = 'default.openingtimes';
       const component = get(testData, ['components', componentUID]);
-      const contentType = fromJS(
-        testData.contentTypes['application::address.address']
-      ).setIn(
+      const contentType = fromJS(testData.contentTypes['application::address.address']).setIn(
         ['schema', 'attributes', 'dz'],
         fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
       );
@@ -196,14 +187,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
           fromJS(get(testData, ['components', 'default.dish']))
         )
         .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            'dz',
-            'components',
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', 'dz', 'components'],
           fromJS([componentUID, 'default.dish'])
         );
 
@@ -219,9 +203,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
     it('Should add the component to the dz field and not to the modifiedData.components if the added component is already in the modifiedData.components', () => {
       const componentUID = 'default.openingtimes';
       const component = get(testData, ['components', componentUID]);
-      const contentType = fromJS(
-        testData.contentTypes['application::address.address']
-      ).setIn(
+      const contentType = fromJS(testData.contentTypes['application::address.address']).setIn(
         ['schema', 'attributes', 'dz'],
         fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
       );
@@ -235,14 +217,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         .setIn(['modifiedData', 'contentType'], contentType);
 
       const expected = state.setIn(
-        [
-          'modifiedData',
-          'contentType',
-          'schema',
-          'attributes',
-          'dz',
-          'components',
-        ],
+        ['modifiedData', 'contentType', 'schema', 'attributes', 'dz', 'components'],
         fromJS([componentUID, 'default.dish'])
       );
 
@@ -312,10 +287,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
 
       const expected = state
         .setIn(['components', action.uid], fromJS(compoToCreate))
-        .setIn(
-          ['modifiedData', 'components', action.uid],
-          fromJS(compoToCreate)
-        );
+        .setIn(['modifiedData', 'components', action.uid], fromJS(compoToCreate));
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -341,9 +313,7 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         })
       );
 
-      expect(
-        reducer(initialState, { type: 'CREATE_SCHEMA', uid, data })
-      ).toEqual(expected);
+      expect(reducer(initialState, { type: 'CREATE_SCHEMA', uid, data })).toEqual(expected);
     });
   });
 
@@ -361,44 +331,50 @@ describe('CTB | containers | DataManagerProvider | reducer | basics actions ', (
         .setIn(['contentTypes'], fromJS({ baz: {} }))
         .setIn(['initialContentTypes'], fromJS({ baz: {} }));
 
-      expect(reducer(state, { type: 'DELETE_NOT_SAVED_TYPE' })).toEqual(
-        expected
-      );
+      expect(reducer(state, { type: 'DELETE_NOT_SAVED_TYPE' })).toEqual(expected);
     });
   });
 
   describe('GET_DATA_SUCCEEDED', () => {
-    const components = {
-      'default.test': {
-        uid: 'default.test',
-        category: 'default',
-        schema: {
-          attributes: {},
+    it('should add api data for the content type builder (content type, components and reserved names)', () => {
+      const components = {
+        'default.test': {
+          uid: 'default.test',
+          category: 'default',
+          schema: {
+            attributes: {},
+          },
         },
-      },
-    };
-    const contentTypes = {
-      'application::test.test': {
-        uid: 'application::test.test',
-        schema: {
-          attributes: {},
+      };
+      const contentTypes = {
+        'application::test.test': {
+          uid: 'application::test.test',
+          schema: {
+            attributes: {},
+          },
         },
-      },
-    };
-    const expected = initialState
-      .set('components', fromJS(components))
-      .set('contentTypes', fromJS(contentTypes))
-      .set('initialContentTypes', fromJS(contentTypes))
-      .set('initialComponents', fromJS(components))
-      .set('isLoading', false);
+      };
+      const reservedNames = {
+        models: ['admin', 'ctb'],
+        attributes: ['attributes', 'length'],
+      };
+      const expected = initialState
+        .set('components', fromJS(components))
+        .set('contentTypes', fromJS(contentTypes))
+        .set('reservedNames', fromJS(reservedNames))
+        .set('initialContentTypes', fromJS(contentTypes))
+        .set('initialComponents', fromJS(components))
+        .set('isLoading', false);
 
-    expect(
-      reducer(initialState, {
-        type: 'GET_DATA_SUCCEEDED',
-        components,
-        contentTypes,
-      })
-    ).toEqual(expected);
+      expect(
+        reducer(initialState, {
+          type: 'GET_DATA_SUCCEEDED',
+          components,
+          contentTypes,
+          reservedNames,
+        })
+      ).toEqual(expected);
+    });
   });
 
   describe('RELOAD_PLUGIN', () => {

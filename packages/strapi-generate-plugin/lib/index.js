@@ -19,42 +19,42 @@ module.exports = {
   templatesDirectory: path.resolve(__dirname, '..', 'templates'),
   before: require('./before'),
   targets: {
-    'plugins/:humanizeId/.gitignore': {
+    'plugins/:name/.gitignore': {
       copy: 'gitignore',
     },
 
     // Use the default `controller` file as a template for
     // every generated controller.
-    'plugins/:humanizeId/controllers/:filename': {
+    'plugins/:name/controllers/:filename': {
       template: 'controller.template',
     },
 
     // every generated controller.
-    'plugins/:humanizeId/services/:filename': {
+    'plugins/:name/services/:filename': {
       template: 'service.template',
     },
 
     // Generate routes.
-    'plugins/:humanizeId/config/routes.json': {
+    'plugins/:name/config/routes.json': {
       jsonfile: routesJSON,
     },
 
     // Main package.
-    'plugins/:humanizeId/package.json': {
+    'plugins/:name/package.json': {
       jsonfile: packageJSON,
     },
 
     // Copy dot files.
-    'plugins/:humanizeId/.editorconfig': {
+    'plugins/:name/.editorconfig': {
       copy: 'editorconfig',
     },
 
-    'plugins/:humanizeId/.gitattributes': {
+    'plugins/:name/.gitattributes': {
       copy: 'gitattributes',
     },
 
     // Copy Markdown files with some information.
-    'plugins/:humanizeId/README.md': {
+    'plugins/:name/README.md': {
       template: 'README.md',
     },
   },

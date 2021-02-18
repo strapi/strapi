@@ -1,58 +1,54 @@
 /* eslint-disable react/no-array-index-key */
 /* eslint-disable import/no-cycle */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get } from 'lodash';
+import { useContentTypeLayout } from '../../hooks';
 import NonRepeatableWrapper from '../NonRepeatableWrapper';
 import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
 
-const NonRepeatableComponent = ({
-  fields,
-  isFromDynamicZone,
-  name,
-  schema,
-}) => {
-  const getField = fieldName =>
-    get(schema, ['schema', 'attributes', fieldName], {});
-  const getMeta = fieldName =>
-    get(schema, ['metadatas', fieldName, 'edit'], {});
+const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, name }) => {
+  const { getComponentLayout } = useContentTypeLayout();
+  const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
+    componentUid,
+    getComponentLayout,
+  ]);
+  const fields = componentLayoutData.layouts.edit;
 
   return (
     <NonRepeatableWrapper isFromDynamicZone={isFromDynamicZone}>
       {fields.map((fieldRow, key) => {
         return (
           <div className="row" key={key}>
-            {fieldRow.map(field => {
-              const currentField = getField(field.name);
-              const isComponent = get(currentField, 'type', '') === 'component';
-              const keys = `${name}.${field.name}`;
+            {fieldRow.map(({ name: fieldName, size, metadatas, fieldSchema, queryInfos }) => {
+              const isComponent = fieldSchema.type === 'component';
+              const keys = `${name}.${fieldName}`;
 
               if (isComponent) {
-                const componentUid = currentField.component;
-                const metas = getMeta(field.name);
+                const compoUid = fieldSchema.component;
 
                 return (
                   <FieldComponent
-                    key={field.name}
-                    componentUid={componentUid}
-                    isRepeatable={currentField.repeatable}
-                    label={metas.label}
-                    max={currentField.max}
-                    min={currentField.min}
+                    key={fieldName}
+                    componentUid={compoUid}
+                    isRepeatable={fieldSchema.repeatable}
+                    label={metadatas.label}
+                    max={fieldSchema.max}
+                    min={fieldSchema.min}
                     name={keys}
                   />
                 );
               }
 
               return (
-                <div key={field.name} className={`col-${field.size}`}>
+                <div key={fieldName} className={`col-${size}`}>
                   <Inputs
                     keys={keys}
-                    layout={schema}
-                    name={field.name}
-                    onChange={() => {}}
+                    fieldSchema={fieldSchema}
+                    metadatas={metadatas}
+                    componentUid={componentUid}
+                    queryInfos={queryInfos}
                   />
                 </div>
               );
@@ -65,15 +61,13 @@ const NonRepeatableComponent = ({
 };
 
 NonRepeatableComponent.defaultProps = {
-  fields: [],
   isFromDynamicZone: false,
 };
 
 NonRepeatableComponent.propTypes = {
-  fields: PropTypes.array,
+  componentUid: PropTypes.string.isRequired,
   isFromDynamicZone: PropTypes.bool,
   name: PropTypes.string.isRequired,
-  schema: PropTypes.object.isRequired,
 };
 
 export default NonRepeatableComponent;

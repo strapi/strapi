@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ListHeaderButton } from '../ListButton';
+
 import Title from './Title';
 import Wrapper from './Wrapper';
 
@@ -8,22 +8,7 @@ import Wrapper from './Wrapper';
 function ListHeader({ actions, title }) {
   return (
     <Wrapper>
-      <div className="list-header-actions">
-        {actions.map(action => {
-          const { disabled, label, onClick } = action;
-
-          return (
-            <ListHeaderButton
-              key={label}
-              onClick={onClick}
-              disabled={disabled || false}
-              {...action}
-            >
-              {label}
-            </ListHeaderButton>
-          );
-        })}
-      </div>
+      <div className="list-header-actions">{actions}</div>
       <div className="list-header-title">
         {title.map(item => {
           return <Title key={item}>{item}&nbsp;</Title>;

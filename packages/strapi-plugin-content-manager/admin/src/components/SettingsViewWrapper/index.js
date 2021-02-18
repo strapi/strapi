@@ -20,7 +20,7 @@ import Separator from '../Separator';
 const SettingsViewWrapper = ({
   children,
   history: { goBack },
-  getListDisplayedFields,
+  displayedFields,
   inputs,
   initialData,
   isEditSettings,
@@ -35,8 +35,8 @@ const SettingsViewWrapper = ({
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
-  const getAttributes = useMemo(() => {
-    return get(modifiedData, ['schema', 'attributes'], {});
+  const attributes = useMemo(() => {
+    return get(modifiedData, ['attributes'], {});
   }, [modifiedData]);
 
   const toggleWarningCancel = () => setWarningCancel(prevState => !prevState);
@@ -48,7 +48,7 @@ const SettingsViewWrapper = ({
         color: 'cancel',
         onClick: toggleWarningCancel,
         label: formatMessage({
-          id: `${pluginId}.popUpWarning.button.cancel`,
+          id: 'app.components.Button.reset',
         }),
         type: 'button',
         disabled: isEqual(modifiedData, initialData),
@@ -94,22 +94,21 @@ const SettingsViewWrapper = ({
     if (input.name === 'settings.defaultSortBy') {
       return [
         'id',
-        ...getListDisplayedFields().filter(
-          name =>
-            get(getAttributes, [name, 'type'], '') !== 'media' &&
-            name !== 'id' &&
-            get(getAttributes, [name, 'type'], '') !== 'richtext'
-        ),
+        ...displayedFields.filter(name => {
+          const type = get(attributes, [name, 'type']);
+
+          return !['media', 'richtext', 'dynamiczone', 'relation'].includes(type) && name !== 'id';
+        }),
       ];
     }
 
     if (input.name === 'settings.mainField') {
-      const attributes = getAttributes;
       const options = Object.keys(attributes).filter(attr => {
         const type = get(attributes, [attr, 'type'], '');
 
         return (
           ![
+            'dynamiczone',
             'json',
             'text',
             'relation',
@@ -118,6 +117,7 @@ const SettingsViewWrapper = ({
             'date',
             'media',
             'richtext',
+            'timestamp',
           ].includes(type) && !!type
         );
       });
@@ -163,16 +163,9 @@ const SettingsViewWrapper = ({
                   return (
                     <FormattedMessage key={input.name} id={input.label.id}>
                       {label => (
-                        <div
-                          className={input.customBootstrapClass}
-                          style={{ marginBottom: 1 }}
-                        >
+                        <div className={input.customBootstrapClass}>
                           <FormattedMessage
-                            id={get(
-                              input,
-                              'description.id',
-                              'app.utils.defaultMessage'
-                            )}
+                            id={get(input, 'description.id', 'app.utils.defaultMessage')}
                           >
                             {description => (
                               <Input
@@ -191,7 +184,7 @@ const SettingsViewWrapper = ({
                   );
                 })}
                 <div className="col-12">
-                  <Separator style={{ marginBottom: 23 }} />
+                  <Separator style={{ marginBottom: 20 }} />
                 </div>
               </div>
               <SectionTitle />
@@ -202,10 +195,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningCancel}
             toggleModal={toggleWarningCancel}
             content={{
-              title: `${pluginId}.popUpWarning.title`,
               message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
-              cancel: `${pluginId}.popUpWarning.button.cancel`,
-              confirm: `${pluginId}.popUpWarning.button.confirm`,
             }}
             popUpWarningType="danger"
             onConfirm={() => {
@@ -217,10 +207,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningSubmit}
             toggleModal={toggleWarningSubmit}
             content={{
-              title: `${pluginId}.popUpWarning.title`,
               message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
-              cancel: `${pluginId}.popUpWarning.button.cancel`,
-              confirm: `${pluginId}.popUpWarning.button.confirm`,
             }}
             popUpWarningType="danger"
             onConfirm={async () => {
@@ -235,7 +222,7 @@ const SettingsViewWrapper = ({
 };
 
 SettingsViewWrapper.defaultProps = {
-  getListDisplayedFields: () => [],
+  displayedFields: [],
   inputs: [],
   initialData: {},
   isEditSettings: false,
@@ -258,7 +245,7 @@ SettingsViewWrapper.defaultProps = {
 
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
-  getListDisplayedFields: PropTypes.func,
+  displayedFields: PropTypes.array,
   history: PropTypes.shape({
     goBack: PropTypes.func.isRequired,
   }).isRequired,

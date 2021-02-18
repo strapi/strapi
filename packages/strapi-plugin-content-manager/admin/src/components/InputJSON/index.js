@@ -13,15 +13,15 @@ import 'codemirror/addon/lint/javascript-lint';
 import 'codemirror/addon/edit/closebrackets';
 import 'codemirror/addon/selection/mark-selection';
 import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/3024-night.css';
+import 'codemirror/theme/solarized.css';
 
-import { isEmpty, trimStart } from 'lodash';
+import { trimStart } from 'lodash';
 import jsonlint from './jsonlint';
 import Wrapper from './components';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const DEFAULT_THEME = '3024-night';
+const DEFAULT_THEME = 'solarized dark';
 
 class InputJSON extends React.Component {
   timer = null;
@@ -54,11 +54,7 @@ class InputJSON extends React.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (
-      isEmpty(prevProps.value) &&
-      !isEmpty(this.props.value) &&
-      !this.state.hasInitValue
-    ) {
+    if (prevProps.value !== this.props.value && !this.codeMirror.state.focused) {
       this.setInitValue();
     }
   }
@@ -67,11 +63,11 @@ class InputJSON extends React.Component {
     const { value } = this.props;
 
     try {
-      this.setState({ hasInitValue: true });
-
       if (value === null) return this.codeMirror.setValue('');
 
-      return this.codeMirror.setValue(stringify(value, null, 2));
+      const nextValue = typeof value !== 'string' ? stringify(value, null, 2) : value;
+
+      return this.codeMirror.setValue(nextValue);
     } catch (err) {
       return this.setState({ error: true });
     }
@@ -118,17 +114,13 @@ class InputJSON extends React.Component {
     }
   };
 
-  handleChange = () => {
-    const { hasInitValue } = this.state;
-    const { name, onChange } = this.props;
-    let value = this.codeMirror.getValue();
-
-    if (!hasInitValue) {
-      this.setState({ hasInitValue: true });
-
-      // Fix for the input firing on onChange event on mount
+  handleChange = (doc, change) => {
+    if (change.origin === 'setValue') {
       return;
     }
+
+    const { name, onChange } = this.props;
+    let value = doc.getValue();
 
     if (value === '') {
       value = null;
@@ -150,10 +142,7 @@ class InputJSON extends React.Component {
     }
 
     clearTimeout(this.timer);
-    this.timer = setTimeout(
-      () => this.testJSON(this.codeMirror.getValue()),
-      WAIT
-    );
+    this.timer = setTimeout(() => this.testJSON(doc.getValue()), WAIT);
   };
 
   testJSON = value => {
@@ -170,13 +159,8 @@ class InputJSON extends React.Component {
     }
 
     return (
-      <Wrapper>
-        <textarea
-          ref={this.editor}
-          autoComplete="off"
-          id={this.props.name}
-          defaultValue=""
-        />
+      <Wrapper disabled={this.props.disabled}>
+        <textarea ref={this.editor} autoComplete="off" id={this.props.name} defaultValue="" />
       </Wrapper>
     );
   }

@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = async (ctx, next) => {
   const pluginStore = strapi.store({
     environment: '',
@@ -13,9 +15,14 @@ module.exports = async (ctx, next) => {
   if (!ctx.session.documentation) {
     const querystring = ctx.querystring ? `?${ctx.querystring}` : '';
 
-    return ctx.redirect(`${strapi.plugins.documentation.config['x-strapi-config'].path}/login${querystring}`);
+    return ctx.redirect(
+      `${strapi.config.server.url}${strapi.plugins.documentation.config['x-strapi-config'].path}/login${querystring}`
+    );
   }
-  const isValid = strapi.plugins['users-permissions'].services.user.validatePassword(ctx.session.documentation, config.password);
+  const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
+    ctx.session.documentation,
+    config.password
+  );
 
   if (!isValid) {
     ctx.session.documentation = null;

@@ -73,7 +73,7 @@ class OverlayBlocker extends React.Component {
       <div className="buttonContainer">
         <a
           className={cn('primary', 'btn')}
-          href="https://strapi.io/documentation/configurations/configurations.html#server"
+          href="https://strapi.io/documentation"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -110,7 +110,7 @@ class OverlayBlocker extends React.Component {
 
     if (this.props.isOpen) {
       return ReactDOM.createPortal(
-        <Overlay>
+        <Overlay noGradient={this.props.noGradient}>
           <div>{content}</div>
         </Overlay>,
         this.overlayContainer
@@ -126,6 +126,7 @@ OverlayBlocker.defaultProps = {
   description: 'components.OverlayBlocker.description',
   icon: 'sync-alt',
   isOpen: false,
+  noGradient: false,
   title: 'components.OverlayBlocker.title',
 };
 
@@ -134,6 +135,7 @@ OverlayBlocker.propTypes = {
   description: PropTypes.string,
   icon: PropTypes.string,
   isOpen: PropTypes.bool,
+  noGradient: PropTypes.bool,
   title: PropTypes.string,
 };
 

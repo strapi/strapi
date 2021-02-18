@@ -9,13 +9,13 @@ const _ = require('lodash');
 
 const stopProcess = require('./utils/stop-process');
 const { trackUsage, captureStderr } = require('./utils/usage');
-const packageJSON = require('./resources/json/package.json');
-const databaseJSON = require('./resources/json/database.json.js');
+const mergeTemplate = require('./utils/merge-template.js');
 
-module.exports = async function createProject(
-  scope,
-  { connection, dependencies }
-) {
+const packageJSON = require('./resources/json/package.json');
+const createDatabaseConfig = require('./resources/templates/database.js');
+const createServerConfig = require('./resources/templates/server.js');
+
+module.exports = async function createProject(scope, { client, connection, dependencies }) {
   console.log('Creating files.');
 
   const { rootPath } = scope;
@@ -29,12 +29,11 @@ module.exports = async function createProject(
     const dotFiles = await fse.readdir(join(resources, 'dot-files'));
     await Promise.all(
       dotFiles.map(name => {
-        return fse.copy(
-          join(resources, 'dot-files', name),
-          join(rootPath, `.${name}`)
-        );
+        return fse.copy(join(resources, 'dot-files', name), join(rootPath, `.${name}`));
       })
     );
+
+    await trackUsage({ event: 'didCopyProjectFiles', scope });
 
     // copy templates
     await fse.writeJSON(
@@ -51,25 +50,39 @@ module.exports = async function createProject(
       }
     );
 
+    await trackUsage({ event: 'didWritePackageJSON', scope });
+
     // ensure node_modules is created
     await fse.ensureDir(join(rootPath, 'node_modules'));
 
-    await Promise.all(
-      ['development', 'staging', 'production'].map(env => {
-        return fse.writeJSON(
-          join(rootPath, `config/environments/${env}/database.json`),
-          databaseJSON({
-            connection,
-            env,
-          }),
-          { spaces: 2 }
-        );
+    // create config/database.js
+    await fse.writeFile(
+      join(rootPath, `config/database.js`),
+      createDatabaseConfig({
+        client,
+        connection,
       })
     );
+
+    // create config/server.js
+    await fse.writeFile(join(rootPath, `config/server.js`), createServerConfig());
+    await trackUsage({ event: 'didCopyConfigurationFiles', scope });
+
+    // merge template files if a template is specified
+    const hasTemplate = Boolean(scope.template);
+    if (hasTemplate) {
+      try {
+        await mergeTemplate(scope, rootPath);
+      } catch (error) {
+        throw new Error(`⛔️ Template installation failed: ${error.message}`);
+      }
+    }
   } catch (err) {
     await fse.remove(scope.rootPath);
     throw err;
   }
+
+  await trackUsage({ event: 'willInstallProjectDependencies', scope });
 
   const installPrefix = chalk.yellow('Installing dependencies:');
   const loader = ora(installPrefix).start();
@@ -93,6 +106,8 @@ module.exports = async function createProject(
 
     loader.stop();
     console.log(`Dependencies installed ${chalk.green('successfully')}.`);
+
+    await trackUsage({ event: 'didInstallProjectDependencies', scope });
   } catch (error) {
     loader.stop();
     await trackUsage({
@@ -115,13 +130,11 @@ module.exports = async function createProject(
     );
     console.log(`Don't give up, your project was created correctly.`);
     console.log(
-      `Fix the issues mentionned in the installation errors and try to run the following command:`
+      `Fix the issues mentioned in the installation errors and try to run the following command:`
     );
     console.log();
     console.log(
-      `cd ${chalk.green(rootPath)} && ${chalk.cyan(
-        scope.useYarn ? 'yarn' : 'npm'
-      )} install`
+      `cd ${chalk.green(rootPath)} && ${chalk.cyan(scope.useYarn ? 'yarn' : 'npm')} install`
     );
     console.log();
 

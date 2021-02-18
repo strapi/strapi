@@ -3,15 +3,17 @@
 const _ = require('lodash');
 const yup = require('yup');
 
+const { hasComponent } = require('../../utils/attributes');
+const { modelTypes, VALID_UID_TARGETS } = require('../../services/constants');
 const {
   validators,
   areEnumValuesUnique,
+  isValidDefaultJSON,
   isValidName,
   isValidEnum,
   isValidUID,
+  isValidRegExpPattern,
 } = require('./common');
-const { hasComponent } = require('../../utils/attributes');
-const { modelTypes, VALID_UID_TARGETS } = require('./constants');
 
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
@@ -49,6 +51,10 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         multiple: yup.boolean(),
         required: validators.required,
         unique: validators.unique,
+        allowedTypes: yup
+          .array()
+          .of(yup.string().oneOf(['images', 'videos', 'files']))
+          .min(1),
       };
     }
 
@@ -80,6 +86,19 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .test(isValidUID),
         minLength: validators.minLength,
         maxLength: validators.maxLength.max(256).test(maxLengthIsGreaterThanOrEqualToMinLength),
+        options: yup.object().shape({
+          separator: yup.string(),
+          lowercase: yup.boolean(),
+          decamelize: yup.boolean(),
+          customReplacements: yup.array().of(
+            yup
+              .array()
+              .of(yup.string())
+              .min(2)
+              .max(2)
+          ),
+          preserveLeadingUnderscore: yup.boolean(),
+        }),
       };
     }
 
@@ -94,6 +113,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
         unique: validators.unique,
         minLength: validators.minLength,
         maxLength: validators.maxLength,
+        regex: yup.string().test(isValidRegExpPattern),
       };
     }
     case 'richtext': {
@@ -106,6 +126,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
     }
     case 'json': {
       return {
+        default: yup.mixed().test(isValidDefaultJSON),
         required: validators.required,
         unique: validators.unique,
       };

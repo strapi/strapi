@@ -31,6 +31,10 @@ export default ({ key, saga, mode, pluginId }) => WrappedComponent => {
       this.injectors = getInjectors(context.store);
       const sagaName = pluginId ? `${pluginId}_${key}` : key;
 
+      console.warn(
+        'Warning: strapi.injectSaga will be removed in the next major release. \n Please update your code.'
+      );
+
       this.injectors.injectSaga(sagaName, { saga, mode }, this.props);
     }
 
@@ -58,6 +62,10 @@ const useInjectSaga = ({ key, saga, mode, pluginId }) => {
   React.useEffect(() => {
     const injectors = getInjectors(context.store);
     injectors.injectSaga(sagaName, { saga, mode });
+
+    console.warn(
+      'Warning: strapi.useInjectSaga will be removed in the next major release. \n Please update your code.'
+    );
 
     return () => {
       injectors.ejectSaga(sagaName);

@@ -7,9 +7,9 @@ const { yup } = require('strapi-utils');
 /**
  * Utility function to compose validators
  */
-const composeValidators = (...fns) => attr => {
+const composeValidators = (...fns) => (attr, { isDraft }) => {
   return fns.reduce((validator, fn) => {
-    return fn(attr, validator);
+    return fn(attr, validator, { isDraft });
   }, yup.mixed());
 };
 
@@ -20,8 +20,8 @@ const composeValidators = (...fns) => attr => {
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
-const addMinLengthValidator = ({ minLength }, validator) =>
-  _.isInteger(minLength) ? validator.min(minLength) : validator;
+const addMinLengthValidator = ({ minLength }, validator, { isDraft }) =>
+  _.isInteger(minLength) && !isDraft ? validator.min(minLength) : validator;
 
 /**
  * Adds maxLength validator
@@ -48,7 +48,7 @@ const addMaxIntegerValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(_.toInteger(max)) : validator;
 
 /**
- * Adds min float/decimal validatore
+ * Adds min float/decimal validator
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
@@ -56,19 +56,28 @@ const addMinFloatValidator = ({ min }, validator) =>
   _.isNumber(min) ? validator.min(min) : validator;
 
 /**
- * Adds max float/decimal validatore
+ * Adds max float/decimal validator
  * @param {Object} attribute model attribute
  * @param {Object} validator yup validator
  */
 const addMaxFloatValidator = ({ max }, validator) =>
   _.isNumber(max) ? validator.max(max) : validator;
 
+/**
+ * Adds regex validator
+ * @param {Object} attribute model attribute
+ * @param {Object} validator yup validator
+ */
+const addStringRegexValidator = ({ regex }, validator) =>
+  _.isUndefined(regex) ? validator : validator.matches(new RegExp(regex));
+
 /* Type validators */
 
 const stringValidator = composeValidators(
-  () => yup.string().strict(),
+  () => yup.string().transform((val, originalVal) => originalVal),
   addMinLengthValidator,
-  addMaxLengthValidator
+  addMaxLengthValidator,
+  addStringRegexValidator
 );
 
 const emailValidator = composeValidators(stringValidator, (attr, validator) => validator.email());

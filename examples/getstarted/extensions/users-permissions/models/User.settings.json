@@ -1,15 +1,12 @@
 {
-  "connection": "default",
   "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
     "description": ""
   },
   "options": {
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ]
+    "draftAndPublish": false,
+    "timestamps": ["created_at", "updated_at"]
   },
   "attributes": {
     "username": {
@@ -36,6 +33,11 @@
       "private": true
     },
     "resetPasswordToken": {
+      "type": "string",
+      "configurable": false,
+      "private": true
+    },
+    "confirmationToken": {
       "type": "string",
       "configurable": false,
       "private": true

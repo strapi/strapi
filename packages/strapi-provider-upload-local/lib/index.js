@@ -7,44 +7,61 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
-/* eslint-disable no-unused-vars */
+const { errors } = require('strapi-plugin-upload');
+
 module.exports = {
-  provider: 'local',
-  name: 'Local server',
-  init: (config) => {
+  init({ sizeLimit = 1000000 } = {}) {
+    const verifySize = file => {
+      if (file.size > sizeLimit) {
+        throw errors.entityTooLarge();
+      }
+    };
+    const configPublicPath = strapi.config.get(
+      'middleware.settings.public.path',
+      strapi.config.paths.static
+    );
+
+    const uploadDir = path.resolve(strapi.dir, configPublicPath);
+
     return {
-      upload: (file) => {
+      upload(file) {
+        verifySize(file);
+
         return new Promise((resolve, reject) => {
           // write file in public/assets folder
-          fs.writeFile(path.join(strapi.config.public.path, `/uploads/${file.hash}${file.ext}`), file.buffer, (err) => {
+          fs.writeFile(
+            path.join(uploadDir, `/uploads/${file.hash}${file.ext}`),
+            file.buffer,
+            err => {
+              if (err) {
+                return reject(err);
+              }
+
+              file.url = `/uploads/${file.hash}${file.ext}`;
+
+              resolve();
+            }
+          );
+        });
+      },
+      delete(file) {
+        return new Promise((resolve, reject) => {
+          const filePath = path.join(uploadDir, `/uploads/${file.hash}${file.ext}`);
+
+          if (!fs.existsSync(filePath)) {
+            return resolve("File doesn't exist");
+          }
+
+          // remove file from public/assets folder
+          fs.unlink(filePath, err => {
             if (err) {
               return reject(err);
             }
-
-            file.url = `/uploads/${file.hash}${file.ext}`;
 
             resolve();
           });
         });
       },
-      delete: (file) => {
-        return new Promise((resolve, reject) => {
-          const filePath = path.join(strapi.config.public.path, `/uploads/${file.hash}${file.ext}`);
-
-          if (!fs.existsSync(filePath)) {
-            return resolve('File doesn\'t exist');
-          }
-
-          // remove file from public/assets folder
-          fs.unlink(filePath, (err) => {
-            if (err) {
-              return reject(err);
-            }
-
-            resolve();
-          });
-        });
-      }
     };
-  }
+  },
 };

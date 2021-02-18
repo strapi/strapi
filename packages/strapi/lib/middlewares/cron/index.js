@@ -19,9 +19,25 @@ module.exports = strapi => {
      */
 
     initialize() {
-      _.forEach(_.keys(strapi.config.functions.cron), task => {
-        cron.scheduleJob(task, strapi.config.functions.cron[task]);
-      });
+      if (strapi.config.get('server.cron.enabled', false) === true) {
+        _.forEach(_.keys(strapi.config.get('functions.cron', {})), taskExpression => {
+          const taskValue = strapi.config.functions.cron[taskExpression];
+
+          if (_.isFunction(taskValue)) {
+            return cron.scheduleJob(taskExpression, taskValue);
+          }
+
+          const options = _.get(taskValue, 'options', {});
+
+          cron.scheduleJob(
+            {
+              rule: taskExpression,
+              ...options,
+            },
+            taskValue.task
+          );
+        });
+      }
     },
   };
 };

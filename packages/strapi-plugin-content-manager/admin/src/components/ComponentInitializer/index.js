@@ -7,15 +7,20 @@ import NonRepeatableWrapper from '../NonRepeatableWrapper';
 import PlusButton from '../PlusButton';
 import P from './P';
 
-const ComponentInitializer = ({ componentUid, name }) => {
+const ComponentInitializer = ({ componentUid, isReadOnly, name }) => {
   const { addNonRepeatableComponentToField } = useDataManager();
 
   return (
-    <NonRepeatableWrapper isEmpty>
-      <PlusButton
-        onClick={() => addNonRepeatableComponentToField(name, componentUid)}
-        type="button"
-      />
+    <NonRepeatableWrapper
+      isEmpty
+      isReadOnly={isReadOnly}
+      onClick={() => {
+        if (!isReadOnly) {
+          addNonRepeatableComponentToField(name, componentUid);
+        }
+      }}
+    >
+      <PlusButton type="button" />
       <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
         {msg => <P style={{ paddingTop: 78 }}>{msg}</P>}
       </FormattedMessage>
@@ -24,11 +29,13 @@ const ComponentInitializer = ({ componentUid, name }) => {
 };
 
 ComponentInitializer.defaultProps = {
+  isReadOnly: false,
   name: '',
 };
 
 ComponentInitializer.propTypes = {
   componentUid: PropTypes.string.isRequired,
+  isReadOnly: PropTypes.bool,
   name: PropTypes.string,
 };
 

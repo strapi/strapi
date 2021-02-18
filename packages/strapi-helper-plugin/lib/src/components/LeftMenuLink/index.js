@@ -2,16 +2,20 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 
-function LeftMenuLink({ children, to }) {
+import Icon from './Icon';
+
+function LeftMenuLink({ children, to, CustomComponent }) {
   return (
     <NavLink to={to}>
-      <p>{children}</p>
+      <Icon />
+      {CustomComponent ? <CustomComponent /> : <p>{children}</p>}
     </NavLink>
   );
 }
 
 LeftMenuLink.defaultProps = {
   children: null,
+  CustomComponent: null,
 };
 
 LeftMenuLink.propTypes = {

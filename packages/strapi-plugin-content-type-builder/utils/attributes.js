@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const utils = require('strapi-utils');
 
 const toUID = (name, plugin) => {
   const modelUID = Object.keys(strapi.contentTypes).find(key => {
@@ -29,9 +30,7 @@ const hasComponent = model => {
 const isConfigurable = attribute => _.get(attribute, 'configurable', true);
 
 const isRelation = attribute =>
-  _.has(attribute, 'target') ||
-  _.has(attribute, 'model') ||
-  _.has(attribute, 'collection');
+  _.has(attribute, 'target') || _.has(attribute, 'model') || _.has(attribute, 'collection');
 
 /**
  * Formats a component's attributes
@@ -40,7 +39,9 @@ const isRelation = attribute =>
  * @param {Object} context.component - the associated component
  */
 const formatAttributes = model => {
-  return Object.keys(model.attributes).reduce((acc, key) => {
+  const { getVisibleAttributes } = utils.contentTypes;
+
+  return getVisibleAttributes(model).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});
@@ -57,9 +58,7 @@ const formatAttribute = (key, attribute, { model }) => {
   if (_.has(attribute, 'type')) return attribute;
 
   // format relations
-  const relation = (model.associations || []).find(
-    assoc => assoc.alias === key
-  );
+  const relation = (model.associations || []).find(assoc => assoc.alias === key);
   const { plugin, configurable } = attribute;
   let targetEntity = attribute.model || attribute.collection;
 
@@ -69,6 +68,7 @@ const formatAttribute = (key, attribute, { model }) => {
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
       configurable: configurable === false ? false : undefined,
+      allowedTypes: attribute.allowedTypes,
     };
   } else {
     return {
@@ -84,6 +84,7 @@ const formatAttribute = (key, attribute, { model }) => {
         ['attributes', attribute.via, 'columnName'],
         undefined
       ),
+      private: attribute.private ? true : false,
       unique: attribute.unique ? true : false,
       autoPopulate: attribute.autoPopulate,
     };
@@ -143,7 +144,6 @@ module.exports = {
   hasComponent,
   isRelation,
   isConfigurable,
-
   replaceTemporaryUIDs,
   formatAttributes,
   formatAttribute,

@@ -1,8 +1,8 @@
 'use strict';
 
 // Dependencies.
-const fs = require('fs-extra');
 const path = require('path');
+const fs = require('fs-extra');
 const _ = require('lodash');
 const glob = require('../load/glob');
 const findPackagePath = require('../load/package-path');
@@ -17,18 +17,17 @@ module.exports = async function(strapi) {
 
   const loaders = createLoaders(strapi);
 
-  await Promise.all([
-    // load installed middlewares
-    loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares),
-    // internal middlewares
-    loaders.loadInternalMiddlexares(middlewares),
-    // local middleware
-    loaders.loadLocalMiddlewares(appPath, middlewares),
-    // plugins middlewares
-    loaders.loadPluginsMiddlewares(installedPlugins, middlewares),
-    // local plugin middlewares
-    loaders.loadLocalPluginsMiddlewares(appPath, middlewares),
-  ]);
+  await loaders.loadMiddlewareDependencies(installedMiddlewares, middlewares);
+  // internal middlewares
+  await loaders.loadInternalMiddlewares(middlewares);
+  // local middleware
+  await loaders.loadLocalMiddlewares(appPath, middlewares);
+  // plugins middlewares
+  await loaders.loadPluginsMiddlewares(installedPlugins, middlewares);
+  // local plugin middlewares
+  await loaders.loadLocalPluginsMiddlewares(appPath, middlewares);
+  // load admin middlwares
+  await loaders.loadAdminMiddlewares(middlewares);
 
   return middlewares;
 };
@@ -49,21 +48,15 @@ const createLoaders = strapi => {
     });
   };
 
-  const loadInternalMiddlexares = middlewares =>
-    loadMiddlewaresInDir(
-      path.resolve(__dirname, '..', 'middlewares'),
-      middlewares
-    );
+  const loadInternalMiddlewares = middlewares =>
+    loadMiddlewaresInDir(path.resolve(__dirname, '..', 'middlewares'), middlewares);
 
   const loadLocalMiddlewares = (appPath, middlewares) =>
     loadMiddlewaresInDir(path.resolve(appPath, 'middlewares'), middlewares);
 
   const loadPluginsMiddlewares = async (plugins, middlewares) => {
     for (let pluginName of plugins) {
-      const dir = path.resolve(
-        findPackagePath(`strapi-plugin-${pluginName}`),
-        'middlewares'
-      );
+      const dir = path.resolve(findPackagePath(`strapi-plugin-${pluginName}`), 'middlewares');
       await loadMiddlewaresInDir(dir, middlewares);
     }
   };
@@ -84,11 +77,20 @@ const createLoaders = strapi => {
     }
   };
 
+  const loadAdminMiddlewares = async middlewares => {
+    const middlewaresDir = 'middlewares';
+    const dir = path.resolve(findPackagePath(`strapi-admin`), middlewaresDir);
+    await loadMiddlewaresInDir(dir, middlewares);
+
+    // load ee admin middlewares if they exist
+    if (process.env.STRAPI_DISABLE_EE !== 'true' && strapi.EE) {
+      await loadMiddlewaresInDir(`${dir}/../ee/${middlewaresDir}`, middlewares);
+    }
+  };
+
   const loadMiddlewareDependencies = async (packages, middlewares) => {
     for (let packageName of packages) {
-      const baseDir = path.dirname(
-        require.resolve(`strapi-middleware-${packageName}`)
-      );
+      const baseDir = path.dirname(require.resolve(`strapi-middleware-${packageName}`));
       const files = await glob('*(index|defaults).*(js|json)', {
         cwd: baseDir,
         absolute: true,
@@ -118,10 +120,11 @@ const createLoaders = strapi => {
   };
 
   return {
-    loadInternalMiddlexares,
+    loadInternalMiddlewares,
     loadLocalMiddlewares,
     loadPluginsMiddlewares,
     loadLocalPluginsMiddlewares,
     loadMiddlewareDependencies,
+    loadAdminMiddlewares,
   };
 };

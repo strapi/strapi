@@ -30,21 +30,13 @@ const RelationFormNaturePicker = ({
   target,
 }) => {
   const { contentTypes, modifiedData } = useDataManager();
-  const ctRelations = [
-    'oneWay',
-    'oneToOne',
-    'oneToMany',
-    'manyToOne',
-    'manyToMany',
-    'manyWay',
-  ];
+  const ctRelations = ['oneWay', 'oneToOne', 'oneToMany', 'manyToOne', 'manyToMany', 'manyWay'];
   const componentRelations = ['oneWay', 'manyWay'];
   const dataType =
     naturePickerType === 'contentType'
       ? get(modifiedData, [naturePickerType, 'schema', 'kind'], '')
       : naturePickerType;
-  const relationsType =
-    dataType === 'collectionType' ? ctRelations : componentRelations;
+  const relationsType = dataType === 'collectionType' ? ctRelations : componentRelations;
 
   const areDisplayedNamesInverted = nature === 'manyToOne';
   const targetLabel = get(contentTypes, [target, 'schema', 'name'], 'unknown');
@@ -54,10 +46,8 @@ const RelationFormNaturePicker = ({
   const rightTarget = areDisplayedNamesInverted
     ? oneThatIsCreatingARelationWithAnother
     : targetLabel;
-  const leftDisplayedValue = pluralize(
-    leftTarget,
-    nature === 'manyToMany' ? 2 : 1
-  );
+  const leftDisplayedValue = pluralize(leftTarget, nature === 'manyToMany' ? 2 : 1);
+  const restrictedRelations = get(contentTypes, [target, 'schema', 'restrictRelationsTo'], null);
 
   const rightDisplayedValue = pluralize(
     rightTarget,
@@ -70,21 +60,26 @@ const RelationFormNaturePicker = ({
         <div className="nature-buttons">
           {relationsType.map(relationNature => {
             const Asset = relations[relationNature];
+            const isEnabled =
+              restrictedRelations === null || restrictedRelations.includes(relationNature);
 
             return (
               <Asset
                 key={relationNature}
                 isSelected={nature === relationNature}
+                style={{ cursor: isEnabled ? 'pointer' : 'not-allowed' }}
                 onClick={() => {
-                  onChange({
-                    target: {
-                      name: 'nature',
-                      value: relationNature,
-                      targetContentType: target,
-                      oneThatIsCreatingARelationWithAnother,
-                      type: 'relation',
-                    },
-                  });
+                  if (isEnabled) {
+                    onChange({
+                      target: {
+                        name: 'nature',
+                        value: relationNature,
+                        targetContentType: target,
+                        oneThatIsCreatingARelationWithAnother,
+                        type: 'relation',
+                      },
+                    });
+                  }
                 }}
               />
             );

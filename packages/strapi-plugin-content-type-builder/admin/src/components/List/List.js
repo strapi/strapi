@@ -74,7 +74,6 @@ const Wrapper = styled(List)`
         justify-content: center;
         align-items: center;
         width: 100%;
-        // height: 90px;
         position: absolute;
         top: 0;
         left: 0;
@@ -87,7 +86,6 @@ const Wrapper = styled(List)`
         }
         ul.nav {
           width: 100%;
-          // height: 90px;
           display: flex;
           flex-wrap: nowrap;
           overflow-x: auto;
@@ -111,8 +109,7 @@ const Wrapper = styled(List)`
     position: absolute;
     bottom: 14px;
     left: 34px;
-    background-color: ${({ isFromDynamicZone }) =>
-      isFromDynamicZone ? '#AED4FB' : '#f3f4f4'};
+    background-color: ${({ isFromDynamicZone }) => (isFromDynamicZone ? '#AED4FB' : '#f3f4f4')};
 
     color: transparent;
     text-align: center;

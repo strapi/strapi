@@ -18,26 +18,11 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const contentTypeService =
-      strapi.plugins['content-type-builder'].services.contenttypes;
+    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => {
-        if (uid.startsWith('strapi::')) return false;
-        if (uid === 'plugins::upload.file') return false; // TODO: add a flag in the content type instead
-
-        if (
-          kind &&
-          _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind
-        ) {
-          return false;
-        }
-
-        return true;
-      })
-      .map(uid =>
-        contentTypeService.formatContentType(strapi.contentTypes[uid])
-      );
+      .filter(uid => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
+      .map(uid => contentTypeService.formatContentType(strapi.contentTypes[uid]));
 
     ctx.send({
       data: contentTypes,
@@ -53,8 +38,7 @@ module.exports = {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
-    const contentTypeService =
-      strapi.plugins['content-type-builder'].services.contenttypes;
+    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     ctx.send({ data: contentTypeService.formatContentType(contentType) });
   },
@@ -71,26 +55,25 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService =
-        strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
-      const component = await contentTypeService.createContentType({
+      const contentType = await contentTypeService.createContentType({
         contentType: body.contentType,
         components: body.components,
       });
 
       if (_.isEmpty(strapi.api)) {
-        strapi.emit('didCreateFirstContentType');
+        await strapi.telemetry.send('didCreateFirstContentType', { kind: contentType.kind });
       } else {
-        strapi.emit('didCreateContentType');
+        await strapi.telemetry.send('didCreateContentType', { kind: contentType.kind });
       }
 
       setImmediate(() => strapi.reload());
 
-      ctx.send({ data: { uid: component.uid } }, 201);
+      ctx.send({ data: { uid: contentType.uid } }, 201);
     } catch (error) {
       strapi.log.error(error);
-      strapi.emit('didNotCreateContentType', error);
+      await strapi.telemetry.send('didNotCreateContentType', { error: error.message });
       ctx.send({ error: error.message }, 400);
     }
   },
@@ -112,8 +95,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService =
-        strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
       const component = await contentTypeService.editContentType(uid, {
         contentType: body.contentType,
@@ -139,8 +121,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService =
-        strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
       const component = await contentTypeService.deleteContentType(uid);
 

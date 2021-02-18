@@ -41,9 +41,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
       component() {
         return this.morphTo(
           'component',
-          ...relatedComponents.map(component => {
-            return GLOBALS[component.globalId];
-          })
+          ...relatedComponents.map(component => GLOBALS[component.globalId])
         );
       },
     });
@@ -53,7 +51,7 @@ const createComponentModels = async ({ model, definition, ORM, GLOBALS }) => {
 
     componentAttributes.forEach(name => {
       model[name] = function relation() {
-        return this.hasMany(joinModel).query(qb => {
+        return this.hasMany(joinModel, joinColumn).query(qb => {
           qb.where('field', name)
             .whereIn(
               'component_type',

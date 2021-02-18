@@ -1,3 +1,5 @@
+'use strict';
+
 const _ = require('lodash');
 
 /**
@@ -6,10 +8,12 @@ const _ = require('lodash');
  * @throws ApolloError if the body is a bad request
  */
 function checkBadRequest(contextBody) {
-  if (_.get(contextBody, 'output.payload.statusCode', 200) !== 200) {
-    const statusCode = _.get(contextBody, 'output.payload.statusCode', 400);
-    const message = _.get(contextBody, 'output.payload.message', 'Bad Request');
-    throw new Error(message, statusCode, _.omit(contextBody, ['output']));
+  if (_.get(contextBody, 'statusCode', 200) !== 200) {
+    const message = _.get(contextBody, 'error', 'Bad Request');
+    const exception = new Error(message);
+    exception.code = _.get(contextBody, 'statusCode', 400);
+    exception.data = contextBody;
+    throw exception;
   }
 }
 
@@ -34,6 +38,12 @@ module.exports = {
       type: String
     }
 
+    input UsersPermissionsRegisterInput {
+      username: String!
+      email: String!
+      password: String!
+    }
+
     input UsersPermissionsLoginInput {
       identifier: String!
       password: String!
@@ -41,8 +51,12 @@ module.exports = {
     }
 
     type UsersPermissionsLoginPayload {
-      jwt: String!
+      jwt: String
       user: UsersPermissionsMe!
+    }
+
+    type UserPermissionsPasswordPayload {
+      ok: Boolean!
     }
   `,
   query: `
@@ -50,7 +64,10 @@ module.exports = {
   `,
   mutation: `
     login(input: UsersPermissionsLoginInput!): UsersPermissionsLoginPayload!
-    register(input: UserInput!): UsersPermissionsLoginPayload!
+    register(input: UsersPermissionsRegisterInput!): UsersPermissionsLoginPayload!
+    forgotPassword(email: String!): UserPermissionsPasswordPayload
+    resetPassword(password: String!, passwordConfirmation: String!, code: String!): UsersPermissionsLoginPayload
+    emailConfirmation(confirmation: String!): UsersPermissionsLoginPayload
   `,
   resolver: {
     Query: {
@@ -95,9 +112,11 @@ module.exports = {
         description: 'Update an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.updateRole',
         resolver: async (obj, options, { context }) => {
+          context.params = { ...context.params, ...options.input };
+          context.params.role = context.params.id;
+
           await strapi.plugins['users-permissions'].controllers.userspermissions.updateRole(
-            context.params,
-            context.body
+            context
           );
 
           return { ok: true };
@@ -107,6 +126,9 @@ module.exports = {
         description: 'Delete an existing role',
         resolverOf: 'plugins::users-permissions.userspermissions.deleteRole',
         resolver: async (obj, options, { context }) => {
+          context.params = { ...context.params, ...options.input };
+          context.params.role = context.params.id;
+
           await strapi.plugins['users-permissions'].controllers.userspermissions.deleteRole(
             context
           );
@@ -193,6 +215,60 @@ module.exports = {
           let output = context.body.toJSON ? context.body.toJSON() : context.body;
 
           checkBadRequest(output);
+          return {
+            user: output.user || output,
+            jwt: output.jwt,
+          };
+        },
+      },
+      forgotPassword: {
+        description: 'Request a reset password token',
+        resolverOf: 'plugins::users-permissions.auth.forgotPassword',
+        resolver: async (obj, options, { context }) => {
+          context.request.body = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.forgotPassword(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            ok: output.ok || output,
+          };
+        },
+      },
+      resetPassword: {
+        description: 'Reset user password. Confirm with a code (resetToken from forgotPassword)',
+        resolverOf: 'plugins::users-permissions.auth.resetPassword',
+        resolver: async (obj, options, { context }) => {
+          context.request.body = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.resetPassword(context);
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
+          return {
+            user: output.user || output,
+            jwt: output.jwt,
+          };
+        },
+      },
+      emailConfirmation: {
+        description: 'Confirm an email users email address',
+        resolverOf: 'plugins::users-permissions.auth.emailConfirmation',
+        resolver: async (obj, options, { context }) => {
+          context.query = _.toPlainObject(options);
+
+          await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(
+            context,
+            null,
+            true
+          );
+          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+
+          checkBadRequest(output);
+
           return {
             user: output.user || output,
             jwt: output.jwt,

@@ -4,9 +4,9 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
+const { nameToSlug, nameToCollectionName } = require('strapi-utils');
 const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
-const { nameToSlug, nameToCollectionName } = require('../../utils/helpers');
-const { typeKinds } = require('../../controllers/validation/constants');
+const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -63,15 +63,7 @@ module.exports = function createComponentBuilder() {
 
       this.contentTypes.set(uid, contentType);
 
-      const defaultConnection = _.get(
-        strapi,
-        ['config', 'currentEnvironment', 'database', 'defaultConnection'],
-        'default'
-      );
-
-      const defaultCollectionName = `${nameToCollectionName(
-        pluralize(infos.name)
-      )}`;
+      const defaultCollectionName = `${nameToCollectionName(pluralize(infos.name))}`;
 
       // support self referencing content type relation
       Object.keys(infos.attributes).forEach(key => {
@@ -83,14 +75,16 @@ module.exports = function createComponentBuilder() {
 
       contentType
         .setUID(uid)
-        .set('connection', infos.connection || defaultConnection)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
-        .set(['info', 'name'], infos.name)
-        .set(['info', 'description'], infos.description)
+        .set('info', {
+          name: infos.name,
+          description: infos.description,
+        })
         .set('options', {
           increments: true,
           timestamps: true,
+          draftAndPublish: infos.draftAndPublish || false,
         })
         .setAttributes(this.convertAttributes(infos.attributes));
 
@@ -125,31 +119,18 @@ module.exports = function createComponentBuilder() {
         return _.has(oldAttributes, key) && !isConfigurable(oldAttributes[key]);
       });
 
-      const newKeys = _.difference(
-        Object.keys(newAttributes),
-        Object.keys(oldAttributes)
-      );
+      const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
 
-      const deletedKeys = _.difference(
-        Object.keys(oldAttributes),
-        Object.keys(newAttributes)
-      );
+      const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
 
-      const remainingKeys = _.intersection(
-        Object.keys(oldAttributes),
-        Object.keys(newAttributes)
-      );
+      const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
 
       // remove old relations
       deletedKeys.forEach(key => {
         const attribute = oldAttributes[key];
 
         // if the old relation has a target attribute. we need to remove it
-        if (
-          isConfigurable(attribute) &&
-          isRelation(attribute) &&
-          _.has(attribute, 'via')
-        ) {
+        if (isConfigurable(attribute) && isRelation(attribute) && _.has(attribute, 'via')) {
           this.unsetRelation(attribute);
         }
       });
@@ -172,15 +153,11 @@ module.exports = function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
-          if (
-            _.has(oldAttribute, 'via') &&
-            oldAttribute.via !== newAttribute.targetAttribute
-          ) {
+          if (_.has(oldAttribute, 'via') && oldAttribute.via !== newAttribute.targetAttribute) {
             this.unsetRelation(oldAttribute);
           }
 
-          newAttribute.autoPopulate =
-            newAttribute.autoPopulate || oldAttribute.autoPopulate;
+          newAttribute.autoPopulate = newAttribute.autoPopulate || oldAttribute.autoPopulate;
 
           return this.setRelation({
             key,
@@ -206,11 +183,11 @@ module.exports = function createComponentBuilder() {
       });
 
       contentType
-        .set('connection', infos.connection)
         .set('collectionName', infos.collectionName)
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
+        .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
@@ -239,16 +216,9 @@ module.exports = function createComponentBuilder() {
  * @param {Object} options options
  * @param {string} options.name component name
  */
-const createContentTypeUID = ({ name }) =>
-  `application::${nameToSlug(name)}.${nameToSlug(name)}`;
+const createContentTypeUID = ({ name }) => `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 
-const generateRelation = ({
-  key,
-  attribute,
-  plugin,
-  modelName,
-  targetAttribute = {},
-}) => {
+const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute = {} }) => {
   const opts = {
     via: key,
     plugin,

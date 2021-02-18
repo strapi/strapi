@@ -2,34 +2,24 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-const utilsModels = require('strapi-utils').models;
+const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
 const relations = require('./relations');
-const buildDatabaseSchema = require('./buildDatabaseSchema');
+const buildDatabaseSchema = require('./build-database-schema');
 const {
   createComponentJoinTables,
   createComponentModels,
 } = require('./generate-component-relations');
 const { createParser } = require('./parser');
 const { createFormatter } = require('./formatter');
-
 const populateFetch = require('./populate');
 
-const PIVOT_PREFIX = '_pivot_';
+const {
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = contentTypesUtils.constants;
 
-const LIFECYCLES = {
-  creating: 'beforeCreate',
-  created: 'afterCreate',
-  destroying: 'beforeDestroy',
-  destroyed: 'afterDestroy',
-  updating: 'beforeUpdate',
-  updated: 'afterUpdate',
-  fetching: 'beforeFetch',
-  'fetching:collection': 'beforeFetchAll',
-  fetched: 'afterFetch',
-  'fetched:collection': 'afterFetchAll',
-  saving: 'beforeSave',
-  saved: 'afterSave',
-};
+const PIVOT_PREFIX = '_pivot_';
 
 const getDatabaseName = connection => {
   const dbName = _.get(connection.settings, 'database');
@@ -46,12 +36,61 @@ const getDatabaseName = connection => {
   }
 };
 
-module.exports = ({ models, target }, ctx) => {
+const isARelatedField = (morphAttrInfo, attr) => {
+  const samePlugin =
+    morphAttrInfo.plugin === attr.plugin || (_.isNil(morphAttrInfo.plugin) && _.isNil(attr.plugin));
+  const sameModel = [attr.model, attr.collection].includes(morphAttrInfo.model);
+  const isMorph = attr.via === morphAttrInfo.name;
+
+  return isMorph && sameModel && samePlugin;
+};
+
+const getRelatedFieldsOfMorphModel = morphAttrInfo => morphModel => {
+  const relatedFields = _.reduce(
+    morphModel.attributes,
+    (fields, attr, attrName) => {
+      return isARelatedField(morphAttrInfo, attr) ? fields.concat(attrName) : fields;
+    },
+    []
+  );
+
+  return { collectionName: morphModel.collectionName, relatedFields };
+};
+
+module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) => {
   const { GLOBALS, connection, ORM } = ctx;
 
   // Parse every authenticated model.
-  const updates = Object.keys(models).map(async model => {
+  const updateModel = async model => {
     const definition = models[model];
+
+    if (!definition.uid.startsWith('strapi::') && definition.modelType !== 'component') {
+      if (contentTypesUtils.hasDraftAndPublish(definition)) {
+        definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+          type: 'datetime',
+          configurable: false,
+        };
+      }
+
+      const isPrivate = !_.get(definition, 'options.populateCreatorFields', false);
+
+      definition.attributes[CREATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+        private: isPrivate,
+      };
+
+      definition.attributes[UPDATED_BY_ATTRIBUTE] = {
+        model: 'user',
+        plugin: 'admin',
+        configurable: false,
+        writable: false,
+        private: isPrivate,
+      };
+    }
+
     definition.globalName = _.upperFirst(_.camelCase(definition.globalId));
     definition.associations = [];
 
@@ -62,20 +101,18 @@ module.exports = ({ models, target }, ctx) => {
     definition.orm = 'bookshelf';
     definition.databaseName = getDatabaseName(connection);
     definition.client = _.get(connection.settings, 'client');
-    _.defaults(definition, {
-      primaryKey: 'id',
-      primaryKeyType: _.get(definition, 'options.idAttributeType', 'integer'),
-    });
+    definition.primaryKey = 'id';
+    definition.primaryKeyType = 'integer';
 
-    // Use default timestamp column names if value is `true`
-    if (_.get(definition, 'options.timestamps', false) === true) {
-      _.set(definition, 'options.timestamps', ['created_at', 'updated_at']);
-    }
-    // Use false for values other than `Boolean` or `Array`
-    if (
-      !_.isArray(_.get(definition, 'options.timestamps')) &&
-      !_.isBoolean(_.get(definition, 'options.timestamps'))
-    ) {
+    target[model].allAttributes = { ...definition.attributes };
+
+    const createdAtCol = _.get(definition, 'options.timestamps.0', 'created_at');
+    const updatedAtCol = _.get(definition, 'options.timestamps.1', 'updated_at');
+    if (_.get(definition, 'options.timestamps', false)) {
+      _.set(definition, 'options.timestamps', [createdAtCol, updatedAtCol]);
+      target[model].allAttributes[createdAtCol] = { type: 'timestamp' };
+      target[model].allAttributes[updatedAtCol] = { type: 'timestamp' };
+    } else {
       _.set(definition, 'options.timestamps', false);
     }
 
@@ -84,14 +121,10 @@ module.exports = ({ models, target }, ctx) => {
       {
         requireFetch: false,
         tableName: definition.collectionName,
-        hasTimestamps: _.get(definition, 'options.timestamps', false),
-        idAttribute: _.get(definition, 'options.idAttribute', 'id'),
+        hasTimestamps: definition.options.timestamps,
         associations: [],
         defaults: Object.keys(definition.attributes).reduce((acc, current) => {
-          if (
-            definition.attributes[current].type &&
-            definition.attributes[current].default
-          ) {
+          if (definition.attributes[current].type && definition.attributes[current].default) {
             acc[current] = definition.attributes[current].default;
           }
 
@@ -114,9 +147,7 @@ module.exports = ({ models, target }, ctx) => {
           const pivot = this.pivot && !omitPivot && this.pivot.attributes;
 
           // Remove pivot attributes with prefix.
-          _.keys(pivot).forEach(
-            key => delete attributes[`${PIVOT_PREFIX}${key}`]
-          );
+          _.keys(pivot).forEach(key => delete attributes[`${PIVOT_PREFIX}${key}`]);
 
           // Add pivot attributes without prefix.
           const pivotAttributes = _.mapKeys(
@@ -147,28 +178,21 @@ module.exports = ({ models, target }, ctx) => {
       }
 
       const { nature, verbose } =
-        utilsModels.getNature(details, name, undefined, model.toLowerCase()) ||
-        {};
+        utilsModels.getNature({
+          attribute: details,
+          attributeName: name,
+          modelName: model.toLowerCase(),
+        }) || {};
 
       // Build associations key
-      utilsModels.defineAssociations(
-        model.toLowerCase(),
-        definition,
-        details,
-        name
-      );
+      utilsModels.defineAssociations(model.toLowerCase(), definition, details, name);
 
       let globalId;
       const globalName = details.model || details.collection || '';
 
       // Exclude polymorphic association.
       if (globalName !== '*') {
-        globalId = details.plugin
-          ? _.get(
-              strapi.plugins,
-              `${details.plugin}.models.${globalName.toLowerCase()}.globalId`
-            )
-          : _.get(strapi.models, `${globalName.toLowerCase()}.globalId`);
+        globalId = strapi.db.getModel(globalName.toLowerCase(), details.plugin).globalId;
       }
 
       switch (verbose) {
@@ -225,38 +249,31 @@ module.exports = ({ models, target }, ctx) => {
         }
         case 'belongsTo': {
           loadedModel[name] = function() {
-            return this.belongsTo(
-              GLOBALS[globalId],
-              _.get(details, 'columnName', name)
-            );
+            return this.belongsTo(GLOBALS[globalId], _.get(details, 'columnName', name));
           };
           break;
         }
         case 'belongsToMany': {
-          const targetModel = details.plugin
-            ? strapi.plugins[details.plugin].models[details.collection]
-            : strapi.models[details.collection];
+          const targetModel = strapi.db.getModel(details.collection, details.plugin);
 
           // Force singular foreign key
           details.attribute = singular(details.collection);
-          details.column = targetModel.primaryKey;
+          details.column = 'id';
 
           // Set this info to be able to see if this field is a real database's field.
           details.isVirtual = true;
 
           if (nature === 'manyWay') {
-            const joinTableName = `${definition.collectionName}__${_.snakeCase(
-              name
-            )}`;
+            const joinTableName =
+              details.collectionName || `${definition.collectionName}__${_.snakeCase(name)}`;
 
-            const foreignKey = `${singular(definition.collectionName)}_${
-              definition.primaryKey
-            }`;
+            const foreignKey = `${singular(definition.collectionName)}_${definition.primaryKey}`;
 
             let otherKey = `${details.attribute}_${details.column}`;
 
             if (otherKey === foreignKey) {
               otherKey = `related_${otherKey}`;
+              details.attribute = `related_${details.attribute}`;
             }
 
             loadedModel[name] = function() {
@@ -275,12 +292,10 @@ module.exports = ({ models, target }, ctx) => {
               return collection;
             };
           } else {
-            const joinTableName =
-              _.get(details, 'collectionName') ||
-              utilsModels.getCollectionName(
-                targetModel.attributes[details.via],
-                details
-              );
+            const joinTableName = utilsModels.getCollectionName(
+              targetModel.attributes[details.via],
+              details
+            );
 
             const relationship = targetModel.attributes[details.via];
 
@@ -326,6 +341,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.model];
 
           const globalId = `${model.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphOne(
@@ -333,10 +349,7 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(
-                _.get(model, ['attributes', details.via, 'filter'], 'field'),
-                name
-              );
+              qb.where(filter, name);
             });
           };
           break;
@@ -347,6 +360,7 @@ module.exports = ({ models, target }, ctx) => {
             : strapi.models[details.collection];
 
           const globalId = `${collection.collectionName}_morph`;
+          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphMany(
@@ -354,55 +368,22 @@ module.exports = ({ models, target }, ctx) => {
               details.via,
               `${definition.collectionName}`
             ).query(qb => {
-              qb.where(
-                _.get(model, ['attributes', details.via, 'filter'], 'field'),
-                name
-              );
+              qb.where(filter, name).orderBy('order');
             });
           };
           break;
         }
         case 'belongsToMorph':
         case 'belongsToManyMorph': {
-          const association = definition.associations.find(
-            association => association.alias === name
+          const association = _.find(definition.associations, { alias: name });
+          const morphAttrInfo = {
+            plugin: definition.plugin,
+            model: definition.modelName,
+            name,
+          };
+          const morphModelsAndFields = association.related.map(
+            getRelatedFieldsOfMorphModel(morphAttrInfo)
           );
-
-          const morphValues = association.related.map(id => {
-            let models = Object.values(strapi.models).filter(
-              model => model.globalId === id
-            );
-
-            if (models.length === 0) {
-              models = Object.values(strapi.components).filter(
-                model => model.globalId === id
-              );
-            }
-
-            if (models.length === 0) {
-              models = Object.keys(strapi.plugins).reduce((acc, current) => {
-                const models = Object.values(
-                  strapi.plugins[current].models
-                ).filter(model => model.globalId === id);
-
-                if (acc.length === 0 && models.length > 0) {
-                  acc = models;
-                }
-
-                return acc;
-              }, []);
-            }
-
-            if (models.length === 0) {
-              strapi.log.error(`Impossible to register the '${model}' model.`);
-              strapi.log.error(
-                'The collection name cannot be found for the morphTo method.'
-              );
-              strapi.stop();
-            }
-
-            return models[0].collectionName;
-          });
 
           // Define new model.
           const options = {
@@ -417,9 +398,9 @@ module.exports = ({ models, target }, ctx) => {
             related: function() {
               return this.morphTo(
                 name,
-                ...association.related.map((id, index) => [
-                  GLOBALS[id],
-                  morphValues[index],
+                ...association.related.map(morphModel => [
+                  GLOBALS[morphModel.globalId],
+                  morphModel.collectionName,
                 ])
               );
             },
@@ -432,18 +413,31 @@ module.exports = ({ models, target }, ctx) => {
 
           // Hack Bookshelf to create a many-to-many polymorphic association.
           // Upload has many Upload_morph that morph to different model.
+          const populateFn = qb => {
+            qb.where(qb => {
+              for (const modelAndFields of morphModelsAndFields) {
+                qb.orWhere(qb => {
+                  qb.where({ related_type: modelAndFields.collectionName }).whereIn(
+                    'field',
+                    modelAndFields.relatedFields
+                  );
+                });
+              }
+            });
+          };
+
           loadedModel[name] = function() {
             if (verbose === 'belongsToMorph') {
               return this.hasOne(
                 GLOBALS[options.tableName],
                 `${definition.collectionName}_id`
-              );
+              ).query(populateFn);
             }
 
             return this.hasMany(
               GLOBALS[options.tableName],
               `${definition.collectionName}_id`
-            );
+            ).query(populateFn);
           };
           break;
         }
@@ -469,9 +463,7 @@ module.exports = ({ models, target }, ctx) => {
         return _.mapKeys(params, (value, key) => {
           const attr = definition.attributes[key] || {};
 
-          return _.isPlainObject(attr) && _.isString(attr['columnName'])
-            ? attr['columnName']
-            : key;
+          return _.isPlainObject(attr) && _.isString(attr['columnName']) ? attr['columnName'] : key;
         });
       };
 
@@ -504,20 +496,16 @@ module.exports = ({ models, target }, ctx) => {
             case 'component': {
               const { repeatable } = attr;
 
-              const components = relations[key]
-                .toJSON()
-                .map(el => el.component);
+              const components = relations[key].toJSON().map(el => el.component);
 
-              attrs[key] =
-                repeatable === true ? components : _.first(components) || null;
+              attrs[key] = repeatable === true ? components : _.first(components) || null;
 
               break;
             }
             case 'dynamiczone': {
               attrs[key] = relations[key].toJSON().map(el => {
                 const componentKey = Object.keys(strapi.components).find(
-                  key =>
-                    strapi.components[key].collectionName === el.component_type
+                  key => strapi.components[key].collectionName === el.component_type
                 );
 
                 return {
@@ -540,12 +528,10 @@ module.exports = ({ models, target }, ctx) => {
 
           if (relation) {
             // Extract raw JSON data.
-            attrs[association.alias] = relation.toJSON
-              ? relation.toJSON(options)
-              : relation;
+            attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
 
             // Retrieve opposite model.
-            const model = strapi.getModel(
+            const model = strapi.db.getModel(
               association.collection || association.model,
               association.plugin
             );
@@ -553,8 +539,7 @@ module.exports = ({ models, target }, ctx) => {
             // Reformat data by bypassing the many-to-many relationship.
             switch (association.nature) {
               case 'oneToManyMorph':
-                attrs[association.alias] =
-                  attrs[association.alias][model.collectionName] || null;
+                attrs[association.alias] = attrs[association.alias][model.collectionName] || null;
                 break;
               case 'manyToManyMorph':
                 attrs[association.alias] = attrs[association.alias].map(
@@ -602,9 +587,7 @@ module.exports = ({ models, target }, ctx) => {
 
           if (relation) {
             // Extract raw JSON data.
-            attrs[association.alias] = relation.toJSON
-              ? relation.toJSON(options)
-              : relation;
+            attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
           }
         });
 
@@ -616,69 +599,32 @@ module.exports = ({ models, target }, ctx) => {
         // Load bookshelf plugin arguments from model options
         this.constructor.__super__.initialize.apply(this, arguments);
 
-        _.forEach(LIFECYCLES, (fn, key) => {
-          if (_.isFunction(target[model.toLowerCase()][fn])) {
-            this.on(key, target[model.toLowerCase()][fn]);
-          }
-        });
-
-        // Update withRelated level to bypass many-to-many association for polymorphic relationshiips.
-        // Apply only during fetching.
         this.on('fetching fetching:collection', (instance, attrs, options) => {
           populateFetch(definition, options);
-
-          return _.isFunction(target[model.toLowerCase()]['beforeFetchAll'])
-            ? target[model.toLowerCase()]['beforeFetchAll']
-            : Promise.resolve();
         });
 
         this.on('saving', (instance, attrs) => {
           instance.attributes = _.assign(instance.attributes, mapper(attrs));
-
-          return _.isFunction(target[model.toLowerCase()]['beforeSave'])
-            ? target[model.toLowerCase()]['beforeSave']
-            : Promise.resolve();
         });
 
         const formatValue = createFormatter(definition.client);
         function formatEntry(entry) {
           Object.keys(entry.attributes).forEach(key => {
+            if (key.startsWith('_strapi_tmp_')) {
+              delete entry.attributes[key];
+              return;
+            }
             const attr = definition.attributes[key] || {};
             entry.attributes[key] = formatValue(attr, entry.attributes[key]);
           });
         }
 
-        function formatOutput(instance) {
+        this.on('saved fetched fetched:collection', instance => {
           if (Array.isArray(instance.models)) {
             instance.models.forEach(entry => formatEntry(entry));
           } else {
             formatEntry(instance);
           }
-        }
-
-        const events = [
-          {
-            name: 'saved',
-            target: 'afterSave',
-          },
-          {
-            name: 'fetched',
-            target: 'afterFetch',
-          },
-          {
-            name: 'fetched:collection',
-            target: 'afterFetchAll',
-          },
-        ];
-
-        events.forEach(event => {
-          this.on(event.name, instance => {
-            formatOutput(instance);
-
-            return _.isFunction(target[model.toLowerCase()][event.target])
-              ? target[model.toLowerCase()][event.target]
-              : Promise.resolve();
-          });
         });
       };
 
@@ -696,7 +642,6 @@ module.exports = ({ models, target }, ctx) => {
           'columnName'
         )
       );
-
       GLOBALS[definition.globalId] = ORM.Model.extend(loadedModel);
 
       // Expose ORM functions through the `strapi.models[xxx]`
@@ -706,22 +651,53 @@ module.exports = ({ models, target }, ctx) => {
       // Push attributes to be aware of model schema.
       target[model]._attributes = definition.attributes;
       target[model].updateRelations = relations.update;
+      target[model].deleteRelations = relations.deleteRelations;
+      target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
 
-      await buildDatabaseSchema({
-        ORM,
-        definition,
-        loadedModel,
-        connection,
-        model: target[model],
-      });
+      return async () => {
+        try {
+          await buildDatabaseSchema({
+            ORM,
+            definition,
+            loadedModel,
+            connection,
+            model: target[model],
+          });
 
-      await createComponentJoinTables({ definition, ORM });
+          await createComponentJoinTables({ definition, ORM });
+        } catch (err) {
+          if (['ER_TOO_LONG_IDENT'].includes(err.code)) {
+            strapi.stopWithError(
+              err,
+              `A table name is too long. If it is the name of a join table automatically generated by Strapi, you can customise it by adding \`collectionName: "customName"\` in the corresponding model's attribute.
+    When this happens on a manyToMany relation, make sure to set this parameter on the dominant side of the relation (e.g: where \`dominant: true\` is set)`
+            );
+          }
+
+          strapi.stopWithError(err);
+        }
+      };
     } catch (err) {
-      strapi.log.error(`Impossible to register the '${model}' model.`);
-      strapi.log.error(err);
-      strapi.stop();
-    }
-  });
+      if (err instanceof TypeError || err instanceof ReferenceError) {
+        strapi.stopWithError(err, `Impossible to register the '${model}' model.`);
+      }
 
-  return Promise.all(updates);
+      strapi.stopWithError(err);
+    }
+  };
+
+  const finalizeUpdates = [];
+  for (const model of _.keys(models)) {
+    const finalizeUpdate = await updateModel(model);
+    finalizeUpdates.push(finalizeUpdate);
+  }
+
+  if (selfFinalize) {
+    for (const finalizeUpdate of finalizeUpdates) {
+      await finalizeUpdate();
+    }
+    return [];
+  }
+
+  return finalizeUpdates;
 };

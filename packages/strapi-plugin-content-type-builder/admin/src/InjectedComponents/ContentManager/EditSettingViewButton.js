@@ -6,11 +6,12 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext, CheckPermissions } from 'strapi-helper-plugin';
 import { get } from 'lodash';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import getTrad from '../../utils/getTrad';
+import pluginPermissions from '../../permissions';
 
 // Create link from content-type-builder to content-manager
 function EditViewButton(props) {
@@ -31,9 +32,7 @@ function EditViewButton(props) {
   const category = get(modifiedData, 'category', '');
 
   const suffixUrl =
-    type === 'content-types'
-      ? props.getModelName()
-      : `${category}/${componentSlug}`;
+    type === 'content-types' ? props.getModelName() : `${category}/${componentSlug}`;
 
   const handleClick = () => {
     emitEvent('willEditEditLayout');
@@ -49,22 +48,22 @@ function EditViewButton(props) {
   }
 
   return (
-    <Button
-      {...props}
-      onClick={handleClick}
-      icon={<FontAwesomeIcon icon="cog" style={{ fontSize: 13 }} />}
-      label={formatMessage({
-        id: getTrad(
-          `injected-components.content-manager.edit-settings-view.link.${type}`
-        ),
-      })}
-      style={{
-        paddingLeft: 15,
-        paddingRight: 15,
-        outline: 0,
-        fontWeight: 600,
-      }}
-    />
+    <CheckPermissions permissions={pluginPermissions.main}>
+      <Button
+        {...props}
+        onClick={handleClick}
+        icon={<FontAwesomeIcon icon="cog" style={{ fontSize: 13 }} />}
+        label={formatMessage({
+          id: getTrad(`injected-components.content-manager.edit-settings-view.link.${type}`),
+        })}
+        style={{
+          paddingLeft: 15,
+          paddingRight: 15,
+          outline: 0,
+          fontWeight: 600,
+        }}
+      />
+    </CheckPermissions>
   );
 }
 

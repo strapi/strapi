@@ -1,9 +1,16 @@
-// /**
-//  *
-//  * app.js
-//  *
-//  * Entry point of the application
-//  */
+/**
+ *
+ * app.js
+ *
+ * Entry point of the application
+ */
+
+// NOTE TO PLUGINS DEVELOPERS:
+// If you modify this file by adding new options to a plugin entry point
+// Here's the file: strapi/docs/3.0.0-beta.x/plugin-development/frontend-field-api.md
+// Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
+// Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
+// IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 /* eslint-disable */
 
@@ -11,7 +18,6 @@ import '@babel/polyfill';
 import 'sanitize.css/sanitize.css';
 
 // Third party css library needed
-import 'react-datetime/css/react-datetime.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import 'font-awesome/css/font-awesome.min.css';
 import '@fortawesome/fontawesome-free/css/all.css';
@@ -21,15 +27,19 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-
+// Strapi provider with the internal APIs
+import { StrapiProvider } from 'strapi-helper-plugin';
 import { merge } from 'lodash';
-import { Fonts } from '@buffetjs/styles';
+import Fonts from './components/Fonts';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';
 import { showNotification } from './containers/NotificationProvider/actions';
+import { showNotification as showNewNotification } from './containers/NewNotification/actions';
 
 import basename from './utils/basename';
+import getInjectors from './utils/reducerInjectors';
 import injectReducer from './utils/injectReducer';
 import injectSaga from './utils/injectSaga';
+import Strapi from './utils/Strapi';
 
 // Import root component
 import App from './containers/App';
@@ -47,6 +57,8 @@ import history from './utils/history';
 
 import plugins from './plugins';
 
+const strapi = Strapi();
+
 const initialState = {};
 const store = configureStore(initialState, history);
 const { dispatch } = store;
@@ -57,7 +69,13 @@ Object.keys(plugins).forEach(current => {
     return plugin;
   };
   const currentPluginFn = plugins[current];
+
+  // By updating this by adding required methods
+  // to load a plugin you need to update this file
+  // strapi-generate-plugins/files/admin/src/index.js needs to be updated
   const plugin = currentPluginFn({
+    registerComponent: strapi.componentApi.registerComponent,
+    registerField: strapi.fieldApi.registerField,
     registerPlugin,
     settingsBaseURL: SETTINGS_BASE_URL || '/settings',
   });
@@ -78,6 +96,13 @@ Object.keys(plugins).forEach(current => {
     return acc;
   }, {});
 
+  // Inject plugins reducers
+  const pluginReducers = plugin.reducers || {};
+
+  Object.keys(pluginReducers).forEach(reducerName => {
+    getInjectors(store).injectReducer(reducerName, pluginReducers[reducerName]);
+  });
+
   try {
     merge(translationMessages, pluginTradsPrefixed);
     dispatch(pluginLoaded(plugin));
@@ -97,7 +122,14 @@ const remoteURL = (() => {
 })();
 
 const displayNotification = (message, status) => {
+  console.warn(
+    // Validate the text
+    'Deprecated: Will be deleted.\nPlease use strapi.notification.toggle(config).\nDocs : https://strapi.io/documentation/developer-docs/latest/plugin-development/frontend-development.html#strapi-notification'
+  );
   dispatch(showNotification(message, status));
+};
+const displayNewNotification = config => {
+  dispatch(showNewNotification(config));
 };
 const lockApp = data => {
   dispatch(freezeApp(data));
@@ -106,12 +138,25 @@ const unlockApp = () => {
   dispatch(unfreezeApp());
 };
 
+const lockAppWithOverlay = () => {
+  const overlayblockerParams = {
+    children: <div />,
+    noGradient: true,
+  };
+
+  lockApp(overlayblockerParams);
+};
+
 window.strapi = Object.assign(window.strapi || {}, {
   node: MODE || 'host',
   env: NODE_ENV,
   remoteURL,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
+    // New notification api
+    toggle: config => {
+      displayNewNotification(config);
+    },
     success: message => {
       displayNotification(message, 'success');
     },
@@ -141,6 +186,7 @@ window.strapi = Object.assign(window.strapi || {}, {
     window.navigator.userLanguage ||
     'en',
   lockApp,
+  lockAppWithOverlay,
   unlockApp,
   injectReducer,
   injectSaga,
@@ -150,12 +196,14 @@ window.strapi = Object.assign(window.strapi || {}, {
 const render = messages => {
   ReactDOM.render(
     <Provider store={store}>
-      <Fonts />
-      <LanguageProvider messages={messages}>
-        <BrowserRouter basename={basename}>
-          <App store={store} />
-        </BrowserRouter>
-      </LanguageProvider>
+      <StrapiProvider strapi={strapi}>
+        <Fonts />
+        <LanguageProvider messages={messages}>
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </LanguageProvider>
+      </StrapiProvider>
     </Provider>,
     MOUNT_NODE
   );
@@ -170,24 +218,7 @@ if (module.hot) {
 }
 
 if (NODE_ENV !== 'test') {
-  // Chunked polyfill for browsers without Intl support
-  if (!window.Intl) {
-    new Promise(resolve => {
-      resolve(import('intl'));
-    })
-      .then(() =>
-        Promise.all([
-          import('intl/locale-data/jsonp/en.js'),
-          import('intl/locale-data/jsonp/de.js'),
-        ])
-      )
-      .then(() => render(translationMessages))
-      .catch(err => {
-        throw err;
-      });
-  } else {
-    render(translationMessages);
-  }
+  render(translationMessages);
 }
 
 // @Pierre Burgy exporting dispatch for the notifications...

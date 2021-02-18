@@ -1,16 +1,34 @@
-import { fromJS } from 'immutable';
-
-import { setAppError } from '../actions';
+import produce from 'immer';
+import packageJSON from '../../../../../package.json';
+import {
+  setAppError,
+  getUserPermissions,
+  getUserPermissionsError,
+  getUserPermissionsSucceeded,
+  getStrapiLatestReleaseSucceeded,
+} from '../actions';
 import adminReducer from '../reducer';
 
 describe('adminReducer', () => {
   let state;
 
   beforeEach(() => {
-    state = fromJS({
+    state = {
       appError: false,
-      pluginsFromMarketplace: [],
+      isLoading: true,
+      latestStrapiReleaseTag: `v${packageJSON.version}`,
+      userPermissions: [],
+      shouldUpdateStrapi: false,
+    };
+  });
+
+  it('should set the latest release version', () => {
+    const expected = produce(state, draft => {
+      draft.shouldUpdateStrapi = true;
+      draft.latestStrapiReleaseTag = 'v3.3.4';
     });
+
+    expect(adminReducer(state, getStrapiLatestReleaseSucceeded('v3.3.4', true))).toEqual(expected);
   });
 
   it('returns the initial state', () => {
@@ -19,9 +37,39 @@ describe('adminReducer', () => {
     expect(adminReducer(undefined, {})).toEqual(expected);
   });
 
-  it('should handle the setaAppError action correctly', () => {
-    const expected = state.set('appError', true);
+  it('should handle the setAppError action correctly', () => {
+    const expected = produce(state, draft => {
+      draft.appError = true;
+    });
 
     expect(adminReducer(state, setAppError())).toEqual(expected);
+  });
+
+  it('should handle the getUserPermissions action correctly', () => {
+    const expected = produce(state, draft => {
+      draft.isLoading = true;
+    });
+
+    expect(adminReducer(state, getUserPermissions())).toEqual(expected);
+  });
+
+  it('should handle the getUserPermissionsError action correctly', () => {
+    const error = 'Error';
+    const expected = produce(state, draft => {
+      draft.isLoading = false;
+      draft.error = error;
+    });
+
+    expect(adminReducer(state, getUserPermissionsError(error))).toEqual(expected);
+  });
+
+  it('should handle the getUserPermissionsSucceeded action correctly', () => {
+    const data = ['permission 1', 'permission 2'];
+    const expected = produce(state, draft => {
+      draft.isLoading = false;
+      draft.userPermissions = data;
+    });
+
+    expect(adminReducer(state, getUserPermissionsSucceeded(data))).toEqual(expected);
   });
 });

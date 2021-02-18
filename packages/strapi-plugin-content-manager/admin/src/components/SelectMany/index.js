@@ -2,27 +2,28 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { useDrop } from 'react-dnd';
-
 import Select, { createFilter } from 'react-select';
 import ItemTypes from '../../utils/ItemTypes';
-
 import { ListShadow, ListWrapper } from './components';
 import ListItem from './ListItem';
 
 function SelectMany({
   addRelation,
+  components,
+  displayNavigationLink,
   mainField,
   name,
   isDisabled,
   isLoading,
   move,
-  nextSearch,
   onInputChange,
   onMenuClose,
+  onMenuOpen,
   onMenuScrollToBottom,
   onRemove,
   options,
   placeholder,
+  styles,
   targetModel,
   value,
 }) {
@@ -58,12 +59,12 @@ function SelectMany({
   return (
     <>
       <Select
+        components={components}
         isDisabled={isDisabled}
         id={name}
         filterOption={(candidate, input) => {
           if (!isEmpty(value)) {
-            const isSelected =
-              value.findIndex(item => item.id === candidate.value.id) !== -1;
+            const isSelected = value.findIndex(item => item.id === candidate.value.id) !== -1;
 
             if (isSelected) {
               return false;
@@ -76,6 +77,7 @@ function SelectMany({
 
           return true;
         }}
+        mainField={mainField}
         isLoading={isLoading}
         isMulti
         isSearchable
@@ -83,8 +85,10 @@ function SelectMany({
         onChange={addRelation}
         onInputChange={onInputChange}
         onMenuClose={onMenuClose}
+        onMenuOpen={onMenuOpen}
         onMenuScrollToBottom={onMenuScrollToBottom}
         placeholder={placeholder}
+        styles={styles}
         value={[]}
       />
 
@@ -95,11 +99,16 @@ function SelectMany({
               <ListItem
                 key={data.id}
                 data={data}
+                displayNavigationLink={displayNavigationLink}
+                isDisabled={isDisabled}
                 findRelation={findRelation}
                 mainField={mainField}
                 moveRelation={moveRelation}
-                nextSearch={nextSearch}
-                onRemove={() => onRemove(`${name}.${index}`)}
+                onRemove={() => {
+                  if (!isDisabled) {
+                    onRemove(`${name}.${index}`);
+                  }
+                }}
                 targetModel={targetModel}
               />
             ))}
@@ -112,24 +121,33 @@ function SelectMany({
 }
 
 SelectMany.defaultProps = {
+  components: {},
   move: () => {},
   value: null,
 };
 
 SelectMany.propTypes = {
   addRelation: PropTypes.func.isRequired,
+  components: PropTypes.object,
+  displayNavigationLink: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
-  mainField: PropTypes.string.isRequired,
+  isLoading: PropTypes.bool.isRequired,
+  mainField: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    schema: PropTypes.shape({
+      type: PropTypes.string.isRequired,
+    }).isRequired,
+  }).isRequired,
   move: PropTypes.func,
   name: PropTypes.string.isRequired,
-  nextSearch: PropTypes.string.isRequired,
-  isLoading: PropTypes.bool.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
+  onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   onRemove: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,
+  styles: PropTypes.object.isRequired,
   targetModel: PropTypes.string.isRequired,
   value: PropTypes.array,
 };

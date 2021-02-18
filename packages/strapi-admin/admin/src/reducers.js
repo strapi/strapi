@@ -5,8 +5,10 @@
 import { combineReducers } from 'redux-immutable';
 
 import globalReducer from './containers/App/reducer';
+import adminReducer from './containers/Admin/reducer';
 import languageProviderReducer from './containers/LanguageProvider/reducer';
 import notificationProviderReducer from './containers/NotificationProvider/reducer';
+import newNotificationReducer from './containers/NewNotification/reducer';
 
 /**
  * Creates the main reducer with the dynamically injected ones
@@ -14,8 +16,10 @@ import notificationProviderReducer from './containers/NotificationProvider/reduc
 export default function createReducer(injectedReducers) {
   return combineReducers({
     app: globalReducer,
+    admin: adminReducer,
     language: languageProviderReducer,
     notification: notificationProviderReducer,
+    newNotification: newNotificationReducer,
     ...injectedReducers,
   });
 }

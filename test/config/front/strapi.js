@@ -7,6 +7,8 @@
 
 // Setup the strapi functioon global variable
 
+import '@testing-library/jest-dom/extend-expect';
+
 const React = require('react');
 const hoistNonReactStatics = require('hoist-non-react-statics');
 
@@ -23,6 +25,7 @@ const hoc = () => WrappedComponent => {
 };
 
 global.strapi = {
+  backendURL: 'http://localhost:1337',
   injectReducer: hoc,
   injectSaga: hoc,
   notification: {

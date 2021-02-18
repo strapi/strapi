@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
 
 const useFetch = () => {
+  const isMounted = useRef(true);
   const [state, setState] = useState({
     error: false,
     isLoading: true,
@@ -9,28 +10,23 @@ const useFetch = () => {
   });
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
+
     const fetchData = async () => {
       try {
-        const response = await request(
-          'https://blog.strapi.io/ghost/api/v0.1/posts/?client_id=ghost-frontend&client_secret=1f260788b4ec&limit=2',
+        const { data } = await axios.get(
+          'https://strapi.io/api/blog-posts?_limit=2&_sort=publishedAt:desc',
           {
-            method: 'GET',
-            headers: {
-              'Access-Control-Allow-Origin': '*',
-            },
-            signal,
-          },
-          false,
-          false,
-          { noAuth: true }
+            cancelToken: source.token,
+          }
         );
-        const posts = response.posts.reduce((acc, curr) => {
+
+        const posts = data.reduce((acc, curr) => {
           acc.push({
-            title: curr.title,
+            title: curr.seo.metaTitle,
             link: curr.slug,
-            content: curr.meta_description,
+            content: curr.seo.metaDescription,
           });
 
           return acc;
@@ -38,14 +34,17 @@ const useFetch = () => {
 
         setState({ isLoading: false, posts, error: false });
       } catch (err) {
-        setState({ isLoading: false, error: true, posts: [] });
+        if (isMounted.current) {
+          setState({ isLoading: false, error: true, posts: [] });
+        }
       }
     };
 
     fetchData();
 
     return () => {
-      abortController.abort();
+      isMounted.current = false;
+      source.cancel('abort');
     };
   }, []);
 

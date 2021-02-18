@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const path = require('path');
 const cluster = require('cluster');
 const fs = require('fs-extra');
@@ -8,26 +7,23 @@ const chokidar = require('chokidar');
 const execa = require('execa');
 
 const { logger } = require('strapi-utils');
-const loadConfigFile = require('../load/load-config-files');
-
+const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 
 /**
  * `$ strapi develop`
  *
  */
-module.exports = async function({ build, watchAdmin }) {
+module.exports = async function({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
-  const envConfigDir = path.join(dir, 'config', 'environments', 'development');
-  const serverConfig = await loadConfigFile(envConfigDir, 'server.+(js|json)');
-  const adminWatchIgnoreFiles = _.get(
-    serverConfig,
-    'admin.watchIgnoreFiles',
-    []
-  );
+  const config = loadConfiguration(dir);
 
+  const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
+  const serveAdminPanel = config.get('server.admin.serveAdminPanel', true);
+
+  const buildExists = fs.existsSync(path.join(dir, 'build'));
   // Don't run the build process if the admin is in watch mode
-  if (build && !watchAdmin && !fs.existsSync(path.join(dir, 'build'))) {
+  if (build && !watchAdmin && serveAdminPanel && !buildExists) {
     try {
       execa.shellSync('npm run -s build -- --no-optimization', {
         stdio: 'inherit',
@@ -38,17 +34,10 @@ module.exports = async function({ build, watchAdmin }) {
   }
 
   try {
-    const strapiInstance = strapi({
-      dir,
-      autoReload: true,
-      serveAdminPanel: watchAdmin ? false : true,
-    });
-
     if (cluster.isMaster) {
-      //  Start the front-end dev server
       if (watchAdmin) {
         try {
-          execa('npm', ['run', '-s', 'strapi', 'watch-admin'], {
+          execa('npm', ['run', '-s', 'strapi', 'watch-admin', '--', '--browser', browser], {
             stdio: 'inherit',
           });
         } catch (err) {
@@ -59,7 +48,7 @@ module.exports = async function({ build, watchAdmin }) {
       cluster.on('message', (worker, message) => {
         switch (message) {
           case 'reload':
-            strapiInstance.log.info('The server is restarting\n');
+            logger.info('The server is restarting\n');
             worker.send('isKilled');
             break;
           case 'kill':
@@ -78,10 +67,17 @@ module.exports = async function({ build, watchAdmin }) {
     }
 
     if (cluster.isWorker) {
+      const strapiInstance = strapi({
+        dir,
+        autoReload: true,
+        serveAdminPanel: watchAdmin ? false : true,
+      });
+
       watchFileChanges({
         dir,
         strapiInstance,
         watchIgnoreFiles: adminWatchIgnoreFiles,
+        polling,
       });
 
       process.on('message', message => {
@@ -111,12 +107,9 @@ module.exports = async function({ build, watchAdmin }) {
  * @param {Strapi} options.strapi - Strapi instance
  * @param {array} options.watchIgnoreFiles - Array of custom file paths that should not be watched
  */
-function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
+function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles, polling }) {
   const restart = () => {
-    if (
-      strapiInstance.reload.isWatching &&
-      !strapiInstance.reload.isReloading
-    ) {
+    if (strapiInstance.reload.isWatching && !strapiInstance.reload.isReloading) {
       strapiInstance.reload.isReloading = true;
       strapiInstance.reload();
     }
@@ -124,6 +117,7 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
 
   const watcher = chokidar.watch(dir, {
     ignoreInitial: true,
+    usePolling: polling,
     ignored: [
       /(^|[/\\])\../, // dot files
       /tmp/,
@@ -139,8 +133,6 @@ function watchFileChanges({ dir, strapiInstance, watchIgnoreFiles }) {
       '**/index.html',
       '**/public',
       '**/public/**',
-      '**/cypress',
-      '**/cypress/**',
       '**/*.db*',
       '**/exports/**',
       ...watchIgnoreFiles,

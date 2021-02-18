@@ -5,10 +5,11 @@ import { ErrorMessage, Description } from '@buffetjs/styles';
 import { Label, Error } from '@buffetjs/core';
 import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
-import { request, LoadingIndicator } from 'strapi-helper-plugin';
+import { request, LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
-import { isEmpty } from 'lodash';
+import { get } from 'lodash';
 
+import getTrad from '../../utils/getTrad';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
 import useDataManager from '../../hooks/useDataManager';
@@ -20,6 +21,7 @@ import Input from './InputUID';
 import Wrapper from './Wrapper';
 import SubLabel from './SubLabel';
 import UID_REGEX from './regex';
+import RightContentLabel from './RightContentLabel';
 
 const InputContainer = styled.div`
   position: relative;
@@ -40,15 +42,15 @@ const InputUID = ({
   contentTypeUID,
   description,
   error: inputError,
+  label: inputLabel,
   name,
   onChange,
-  required,
   validations,
   value,
   editable,
   ...inputProps
 }) => {
-  const { modifiedData, initialData } = useDataManager();
+  const { modifiedData, initialData, layout } = useDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);
@@ -59,11 +61,13 @@ const InputUID = ({
   const wrapperRef = useRef(null);
   const generateUid = useRef();
   const initialValue = initialData[name];
-  const isCreation = isEmpty(initialData);
+  const createdAtName = get(layout, ['options', 'timestamps', 0]);
+  const isCreation = !initialData[createdAtName];
+  const { formatMessage } = useGlobalContext();
 
-  generateUid.current = async () => {
+  generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
-    const requestURL = getRequestUrl('explorer/uid/generate');
+    const requestURL = getRequestUrl('uid/generate');
     try {
       const { data } = await request(requestURL, {
         method: 'POST',
@@ -73,7 +77,8 @@ const InputUID = ({
           data: modifiedData,
         },
       });
-      onChange({ target: { name, value: data, type: 'text' } });
+
+      onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
       setIsLoading(false);
     } catch (err) {
       console.error({ err });
@@ -83,14 +88,20 @@ const InputUID = ({
 
   const checkAvailability = async () => {
     setIsLoading(true);
-    const requestURL = getRequestUrl('explorer/uid/check-availability');
+
+    const requestURL = getRequestUrl('uid/check-availability');
+
+    if (!value) {
+      return;
+    }
+
     try {
       const data = await request(requestURL, {
         method: 'POST',
         body: {
           contentTypeUID,
           field: name,
-          value: value ? value.trim() : null,
+          value: value ? value.trim() : '',
         },
       });
       setAvailability(data);
@@ -105,12 +116,13 @@ const InputUID = ({
     }
   };
 
-  useEffect(() => {
-    if (!value && required) {
-      generateUid.current();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // FIXME: we need to find a better way to autofill the input when it is required.
+  // useEffect(() => {
+  //   if (!value && validations.required) {
+  //     generateUid.current(true);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, []);
 
   useEffect(() => {
     if (
@@ -143,9 +155,15 @@ const InputUID = ({
   }, [availability]);
 
   useEffect(() => {
-    if (!isCustomized && isCreation && debouncedTargetFieldValue !== null) {
-      generateUid.current();
+    if (
+      !isCustomized &&
+      isCreation &&
+      debouncedTargetFieldValue &&
+      modifiedData[attribute.targetField]
+    ) {
+      generateUid.current(true);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedTargetFieldValue, isCustomized, isCreation]);
 
   useClickAwayListener(wrapperRef, () => setIsSuggestionOpen(false));
@@ -196,14 +214,15 @@ const InputUID = ({
       validations={{ ...validations, regex: UID_REGEX }}
     >
       {({ canCheck, onBlur, error, dispatch }) => {
-        const hasError = error && error !== null;
+        const hasError = Boolean(error);
 
         return (
           <Wrapper ref={wrapperRef}>
-            <Name htmlFor={name}>{name}</Name>
+            <Name htmlFor={name}>{inputLabel}</Name>
             <InputContainer>
               <Input
                 {...inputProps}
+                containsEndAdornment={editable}
                 editable={editable}
                 error={hasError}
                 onFocus={handleFocus}
@@ -215,12 +234,23 @@ const InputUID = ({
                 value={value || ''}
               />
               <RightContent>
-                <RightLabel availability={availability} label={label} />
+                {label && (
+                  <RightContentLabel color="blue">
+                    {formatMessage({
+                      id: getTrad('components.uid.regenerate'),
+                    })}
+                  </RightContentLabel>
+                )}
+                {!isLoading && !label && availability && (
+                  <RightLabel
+                    isAvailable={availability.isAvailable || value === availability.suggestion}
+                  />
+                )}
                 {editable && (
                   <RegenerateButton
                     onMouseEnter={handleGenerateMouseEnter}
                     onMouseLeave={handleGenerateMouseLeave}
-                    onClick={generateUid.current}
+                    onClick={() => generateUid.current()}
                   >
                     {isLoading ? (
                       <LoadingIndicator small />
@@ -262,9 +292,9 @@ InputUID.propTypes = {
   description: PropTypes.string,
   editable: PropTypes.bool,
   error: PropTypes.string,
+  label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  required: PropTypes.bool,
   validations: PropTypes.object,
   value: PropTypes.string,
 };
@@ -273,7 +303,6 @@ InputUID.defaultProps = {
   description: '',
   editable: false,
   error: null,
-  required: false,
   validations: {},
   value: '',
 };

@@ -2,8 +2,7 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 
 export default strapi => {
-  const pluginDescription =
-    pluginPkg.strapi.description || pluginPkg.description;
+  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 
   const plugin = {
     blockerComponent: null,

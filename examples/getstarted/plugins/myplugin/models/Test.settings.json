@@ -1,8 +1,10 @@
 {
-  "connection": "default",
   "info": {
     "name": "test",
     "description": ""
+  },
+  "options": {
+    "draftAndPublish": false
   },
   "attributes": {
     "type": {

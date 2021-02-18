@@ -4,13 +4,10 @@
  * Module dependencies
  */
 
-// Node.js core.
-const fs = require('fs');
-const path = require('path');
-
 // Public node modules.
 const _ = require('lodash');
 const pluralize = require('pluralize');
+const { nameToSlug } = require('strapi-utils');
 
 /**
  * This `before` function is run before generating targets.
@@ -26,8 +23,7 @@ module.exports = (scope, cb) => {
   }
 
   // Format `id`.
-  const name = scope.name || _.trim(_.camelCase(scope.id));
-  const environment = process.env.NODE_ENV || 'development';
+  const name = scope.name || nameToSlug(scope.id);
 
   scope.contentTypeKind = scope.args.kind || 'collectionType';
 
@@ -58,12 +54,6 @@ module.exports = (scope, cb) => {
     filePath,
   });
 
-  // Humanize output.
-  _.defaults(scope, {
-    humanizeId: name,
-    humanizedPath: filePath,
-  });
-
   // Validate optional attribute arguments.
   const invalidAttributes = [];
 
@@ -79,9 +69,7 @@ module.exports = (scope, cb) => {
 
         // Handle invalid attributes.
         if (!parts[1] || !parts[0]) {
-          invalidAttributes.push(
-            'Error: Invalid attribute notation `' + attribute + '`.'
-          );
+          invalidAttributes.push('Error: Invalid attribute notation `' + attribute + '`.');
           return;
         }
 
@@ -126,33 +114,10 @@ module.exports = (scope, cb) => {
     : _.snakeCase(pluralize(name));
 
   // Set description
-  scope.description = _.has(scope.args, 'description')
-    ? scope.args.description
-    : '';
+  scope.description = _.has(scope.args, 'description') ? scope.args.description : '';
 
-  // Get default connection
-  try {
-    scope.connection = scope.args.connection;
-    if (!scope.args.connection) {
-      try {
-        scope.connection = JSON.parse(
-          fs.readFileSync(
-            path.resolve(
-              scope.rootPath,
-              'config',
-              'environments',
-              environment,
-              'database.json'
-            )
-          )
-        ).defaultConnection;
-      } catch (err) {
-        scope.connection = 'default';
-      }
-    }
-  } catch (err) {
-    return cb.invalid(err);
-  }
+  // Set connection
+  scope.connection = _.get(scope.args, 'connection', undefined);
 
   scope.schema = JSON.stringify(
     {
@@ -163,6 +128,7 @@ module.exports = (scope, cb) => {
         description: scope.description,
       },
       options: {
+        draftAndPublish: scope.args.draftAndPublish === 'true',
         increments: true,
         timestamps: true,
         comment: '',

@@ -21,45 +21,31 @@ function parseJSON(response) {
  * @return {object|undefined} Returns either the response, or throws an error
  */
 function checkStatus(response, checkToken = true) {
-  if (
-    (response.status >= 200 && response.status < 300) ||
-    response.status === 0
-  ) {
+  if ((response.status >= 200 && response.status < 300) || response.status === 0) {
     return response;
   }
 
+  // TODO handle 403...
+
   if (response.status === 401 && auth.getToken() && checkToken) {
-    return checkTokenValidity(response);
+    // Temporary fix until we create a new request helper
+    auth.clearAppStorage();
+    window.location.reload();
   }
 
-  return parseJSON(response).then(responseFormatted => {
-    const error = new Error(response.statusText);
-    error.response = response;
-    error.response.payload = responseFormatted;
-    throw error;
-  });
-}
+  return parseJSON(response)
+    .then(responseFormatted => {
+      const error = new Error(response.statusText);
+      error.response = response;
+      error.response.payload = responseFormatted;
+      throw error;
+    })
+    .catch(() => {
+      const error = new Error(response.statusText);
+      error.response = response;
 
-function checkTokenValidity(response) {
-  const options = {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${auth.getToken()}`,
-    },
-  };
-
-  if (auth.getToken()) {
-    return fetch(`${strapi.backendURL}/users/me`, options).then(() => {
-      if (response.status === 401) {
-        window.location = `${strapi.remoteURL}/plugins/users-permissions/auth/login`;
-
-        auth.clearAppStorage();
-      }
-
-      return checkStatus(response, false);
+      throw error;
     });
-  }
 }
 
 /**
@@ -93,8 +79,7 @@ function serverRestartWatcher(response) {
         if (res.status >= 400) {
           throw new Error('not available');
         }
-        // Hide the global OverlayBlocker
-        strapi.unlockApp();
+
         resolve(response);
       })
       .catch(() => {
@@ -114,13 +99,7 @@ function serverRestartWatcher(response) {
  * @return {object}           The response data
  */
 export default function request(...args) {
-  let [
-    url,
-    options = {},
-    shouldWatchServerRestart,
-    stringify = true,
-    ...rest
-  ] = args;
+  let [url, options = {}, shouldWatchServerRestart, stringify = true, ...rest] = args;
   let noAuth;
 
   try {
@@ -168,9 +147,6 @@ export default function request(...args) {
     .then(parseJSON)
     .then(response => {
       if (shouldWatchServerRestart) {
-        // Display the global OverlayBlocker
-        strapi.lockApp(shouldWatchServerRestart);
-
         return serverRestartWatcher(response);
       }
 

@@ -8,15 +8,13 @@ const loadFiles = require('../load/load-files');
 const loadConfig = require('../load/load-config-files');
 
 module.exports = async ({ dir, config }) => {
-  const localPlugins = await loadLocalPlugins({ dir });
+  const localPlugins = await loadLocalPlugins({ dir, config });
   const plugins = await loadPlugins({
     installedPlugins: config.installedPlugins,
+    config,
   });
 
-  const pluginsIntersection = _.intersection(
-    Object.keys(localPlugins),
-    Object.keys(plugins)
-  );
+  const pluginsIntersection = _.intersection(Object.keys(localPlugins), Object.keys(plugins));
 
   if (pluginsIntersection.length > 0) {
     throw new Error(
@@ -30,7 +28,7 @@ module.exports = async ({ dir, config }) => {
   return _.merge(plugins, localPlugins);
 };
 
-const loadLocalPlugins = async ({ dir }) => {
+const loadLocalPlugins = async ({ dir, config }) => {
   const pluginsDir = join(dir, 'plugins');
 
   if (!existsSync(pluginsDir)) return {};
@@ -39,11 +37,14 @@ const loadLocalPlugins = async ({ dir }) => {
     loadFiles(pluginsDir, '{*/!(config)/*.*(js|json),*/package.json}'),
     loadConfig(pluginsDir, '*/config/**/*.+(js|json)'),
   ]);
-
-  return _.merge(files, configs);
+  const userConfigs = Object.keys(files).reduce((acc, plugin) => {
+    acc[plugin] = { config: config.get(['plugins', plugin], {}) };
+    return acc;
+  }, {});
+  return _.merge(files, configs, userConfigs);
 };
 
-const loadPlugins = async ({ installedPlugins }) => {
+const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
 
   for (let plugin of installedPlugins) {
@@ -51,12 +52,16 @@ const loadPlugins = async ({ installedPlugins }) => {
 
     const files = await loadFiles(
       pluginPath,
-      '{!(config|node_modules|test)//*.*(js|json),package.json}'
+      '{!(config|node_modules|tests)/*.*(js|json),package.json}'
     );
 
-    const conf = await loadConfig(pluginPath);
+    const { config: pluginConfig } = await loadConfig(pluginPath);
 
-    _.set(plugins, plugin, _.assign({}, conf, files));
+    const userConfig = config.get(['plugins', plugin], {});
+
+    const mergedConfig = _.merge(pluginConfig, userConfig);
+
+    _.set(plugins, plugin, _.assign({}, files, { config: mergedConfig }));
   }
 
   return plugins;

@@ -1,6 +1,5 @@
-/* eslint-disable */
-
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { themePropTypes } from 'strapi-helper-plugin';
 
 const Table = styled.table`
   border-radius: 3px;
@@ -24,36 +23,6 @@ const Table = styled.table`
       display: inline;
     }
   }
-`;
-
-const Thead = styled.thead`
-  background: #f3f3f3;
-  height: 43px;
-  overflow: hidden;
-
-  th {
-    height: 43px;
-    border: none !important;
-    font-size: 1.3rem;
-    vertical-align: middle !important;
-    > span {
-      position: relative;
-      &.sortable {
-        cursor: pointer;
-      }
-    }
-  }
-  ${({ isBulkable }) => {
-    if (isBulkable) {
-      return css`
-        > tr {
-          th:first-child {
-            width: 50px;
-          }
-        }
-      `;
-    }
-  }}
 `;
 
 const TableEmpty = styled.tr`
@@ -94,101 +63,22 @@ const TableRow = styled.tr`
   }
 `;
 
-const Arrow = styled.span`
-  &:after {
-    content: '\f0d8';
-    font-family: 'FontAwesome';
-    font-size: 13px;
-    font-weight: 600;
-    position: absolute;
-    top: 0px;
-    right: -12px;
-  }
-  &.isAsc {
-    &:after {
-      transform: rotateZ(180deg);
-    }
-  }
+const LoadingContainer = styled.div`
+  display: block;
+  margin: auto;
 `;
 
-const Truncate = styled.div``;
-
-const Truncated = styled.p`
-  overflow-x: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-bottom: 0;
-`;
-
-const TableDelete = styled.tr`
+const LoadingWrapper = styled.div`
   width: 100%;
-  height: 36px;
-  background: #f7f8f8;
-
-  td {
-    height: 36px;
-    line-height: 36px;
-    font-size: 1.3rem;
-    font-weight: 400;
-    color: #333740;
-    text-align: left;
-    border-collapse: collapse;
-    border-top: 1px solid #f1f1f2 !important;
-  }
+  height: 108px;
+  display: flex;
+  background: ${props => props.theme.main.colors.white};
+  box-shadow: 0 2px 4px ${props => props.theme.main.colors.darkGrey};
+  clip-path: inset(0px -5px -5px -5px);
 `;
 
-const ActionContainer = styled.td`
-  text-align: right;
-
-  i,
-  svg {
-    margin-left: 15px;
-    font-size: 1rem;
-    height: 1rem;
-    color: #333740;
-
-    &:first-of-type {
-      margin-left: 0px;
-    }
-  }
-`;
-const DeleteSpan = styled.span`
-  font-weight: 600;
-  -webkit-font-smoothing: antialiased;
-  &:after {
-    content: '—';
-    margin: 0 7px;
-    font-size: 13px;
-    font-weight: 600;
-  }
-`;
-
-const DeletAllSpan = styled.span`
-  position: absolute;
-  color: #f64d0a;
-  font-weight: 500;
-  cursor: pointer;
-  &:after {
-    position: relative;
-    top: -1px;
-    content: '\f1f8';
-    margin-left: 7px;
-    font-size: 13px;
-    font-family: FontAwesome;
-    -webkit-font-smoothing: antialiased;
-  }
-`;
-
-export {
-  ActionContainer,
-  Arrow,
-  DeletAllSpan,
-  DeleteSpan,
-  Table,
-  TableDelete,
-  TableEmpty,
-  TableRow,
-  Thead,
-  Truncate,
-  Truncated,
+LoadingWrapper.propTypes = {
+  ...themePropTypes,
 };
+
+export { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow };

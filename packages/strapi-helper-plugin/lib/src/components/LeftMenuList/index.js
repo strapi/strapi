@@ -1,6 +1,6 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
-import { get, isEmpty, isObject } from 'lodash';
+import { get, isEmpty, isObject, toLower } from 'lodash';
 import { useGlobalContext } from '../../contexts/GlobalContext';
 import matchSorter from 'match-sorter';
 import LeftMenuLink from '../LeftMenuLink';
@@ -9,7 +9,7 @@ import LeftMenuHeader from '../LeftMenuHeader';
 import List from './List';
 import Wrapper from './Wrapper';
 
-function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleItems }) {
+function LeftMenuList({ customLink, links, title, searchable }) {
   const [search, setSearch] = useState('');
   const { formatMessage } = useGlobalContext();
 
@@ -54,12 +54,13 @@ function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleIte
       return links.map(link => {
         return {
           ...link,
-          links: matchSorter(link.links, search, { keys: ['title'] }),
+          links: matchSorter(link.links, toLower(search), {
+            keys: [item => toLower(item.title)],
+          }),
         };
       });
     }
-
-    return matchSorter(links, search, { keys: ['title'] });
+    return matchSorter(links, toLower(search), { keys: [item => toLower(item.title)] });
   };
 
   const renderCompo = (link, i) => {
@@ -94,15 +95,15 @@ function LeftMenuList({ customLink, links, title, searchable, numberOfVisibleIte
     title: formatTitleWithIntl(title),
   };
 
+  // TODO refacto this component
+
   return (
     <Wrapper>
       <div className="list-header">
         <LeftMenuHeader {...headerProps} />
       </div>
       <div>
-        <List numberOfVisibleItems={numberOfVisibleItems}>
-          {getList().map((link, i) => renderCompo(link, i))}
-        </List>
+        <List>{getList().map((link, i) => renderCompo(link, i))}</List>
         {Component && isValidElement(<Component />) && <Component {...componentProps} />}
       </div>
     </Wrapper>
@@ -114,7 +115,6 @@ LeftMenuList.defaultProps = {
   links: [],
   title: null,
   searchable: false,
-  numberOfVisibleItems: null,
 };
 
 LeftMenuList.propTypes = {
@@ -130,7 +130,6 @@ LeftMenuList.propTypes = {
     id: PropTypes.string,
   }),
   searchable: PropTypes.bool,
-  numberOfVisibleItems: PropTypes.number,
 };
 
 export default LeftMenuList;

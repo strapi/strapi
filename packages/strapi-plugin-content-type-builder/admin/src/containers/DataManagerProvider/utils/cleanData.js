@@ -55,14 +55,14 @@ const formatMainDataType = (data, isComponent = false) => {
   );
   const initObj = isComponent ? { category: get(data, 'category', '') } : {};
 
-  const formattedContentType = Object.assign(
-    initObj,
-    omit(data.schema, 'attributes'),
-    { attributes: formattedAttributes }
-  );
+  const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
+    attributes: formattedAttributes,
+  });
 
   delete formattedContentType.uid;
   delete formattedContentType.isTemporary;
+  delete formattedContentType.editable;
+  delete formattedContentType.restrictRelationsTo;
 
   return formattedContentType;
 };
@@ -74,28 +74,17 @@ const formatMainDataType = (data, isComponent = false) => {
  * @param {Boolean} isCreatingMainData
  * @param {Boolean} isComponent
  */
-const formatAttributes = (
-  attributes,
-  mainDataUID,
-  isCreatingMainData,
-  isComponent
-) => {
+const formatAttributes = (attributes, mainDataUID, isCreatingMainData, isComponent) => {
   return Object.keys(attributes).reduce((acc, current) => {
     const currentAttribute = get(attributes, current, {});
     const hasARelationWithMainDataUID = currentAttribute.target === mainDataUID;
     const isRelationType = has(currentAttribute, 'nature');
-    const currentTargetAttribute = get(
-      currentAttribute,
-      'targetAttribute',
-      null
-    );
+    const currentTargetAttribute = get(currentAttribute, 'targetAttribute', null);
 
     if (!hasARelationWithMainDataUID) {
       if (isRelationType) {
         const relationAttr = Object.assign({}, currentAttribute, {
-          targetAttribute: formatRelationTargetAttribute(
-            currentTargetAttribute
-          ),
+          targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
         });
 
         acc[current] = removeNullKeys(relationAttr);
@@ -141,17 +130,10 @@ const getComponentsToPost = (
   mainDataUID,
   isCreatingData = false
 ) => {
-  const componentsToFormat = getCreatedAndModifiedComponents(
-    allComponents,
-    initialComponents
-  );
+  const componentsToFormat = getCreatedAndModifiedComponents(allComponents, initialComponents);
   const formattedComponents = componentsToFormat.map(compoUID => {
     const currentCompo = get(allComponents, compoUID, {});
-    const formattedComponent = formatComponent(
-      currentCompo,
-      mainDataUID,
-      isCreatingData
-    );
+    const formattedComponent = formatComponent(currentCompo, mainDataUID, isCreatingData);
 
     return formattedComponent;
   });
@@ -163,11 +145,14 @@ const sortContentType = types =>
   sortBy(
     Object.keys(types)
       .map(uid => ({
+        editable: types[uid].schema.editable,
         name: uid,
         title: types[uid].schema.name,
+        plugin: types[uid].plugin || null,
         uid,
         to: `/plugins/${pluginId}/content-types/${uid}`,
         kind: types[uid].schema.kind,
+        restrictRelationsTo: types[uid].schema.restrictRelationsTo,
       }))
       .filter(obj => obj !== null),
     obj => camelCase(obj.title)

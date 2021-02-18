@@ -1,418 +1,456 @@
+import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { useEffect, useReducer, useState } from 'react';
-import { Prompt, useParams, useRouteMatch } from 'react-router-dom';
-import { LoadingIndicatorPage, request, useGlobalContext } from 'strapi-helper-plugin';
+import { Prompt, Redirect } from 'react-router-dom';
+import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
 import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
-import pluginId from '../../pluginId';
-import init from './init';
+import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
-import {
-  createYupSchema,
-  getYupInnerErrors,
-  getFilesToUpload,
-  createDefaultForm,
-  cleanData,
-} from './utils';
+import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
 
-const getRequestUrl = path => `/${pluginId}/explorer/${path}`;
-
-const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPreviousPage, slug }) => {
-  const { id } = useParams();
-  // Retrieve the search
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+const EditViewDataManagerProvider = ({
+  allLayoutData,
+  allowedActions: { canCreate, canRead, canUpdate },
+  children,
+  componentsDataStructure,
+  contentTypeDataStructure,
+  createActionAllowedFields,
+  from,
+  initialValues,
+  isCreatingEntry,
+  isLoadingForData,
+  isSingleType,
+  onPost,
+  onPublish,
+  onPut,
+  onUnpublish,
+  readActionAllowedFields,
+  // Not sure this is needed anymore
+  redirectToPreviousPage,
+  slug,
+  status,
+  updateActionAllowedFields,
+}) => {
+  const [reducerState, dispatch] = useReducer(reducer, initialState);
   const {
     formErrors,
     initialData,
-    isLoading,
     modifiedData,
     modifiedDZName,
-    shouldShowLoadingState,
     shouldCheckErrors,
   } = reducerState.toJS();
-  const [isCreatingEntry, setIsCreatingEntry] = useState(id === 'create');
-  const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
-  const abortController = new AbortController();
-  const { signal } = abortController;
-  const { emitEvent, formatMessage } = useGlobalContext();
-  const {
-    params: { contentType },
-  } = useRouteMatch('/plugins/content-manager/:contentType');
-  const isSingleType = contentType === 'singleType';
 
+  const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
+
+  const hasDraftAndPublish = useMemo(() => {
+    return get(currentContentTypeLayout, ['options', 'draftAndPublish'], false);
+  }, [currentContentTypeLayout]);
+
+  const shouldNotRunValidations = useMemo(() => {
+    return hasDraftAndPublish && !initialData.published_at;
+  }, [hasDraftAndPublish, initialData.published_at]);
+
+  const { emitEvent, formatMessage } = useGlobalContext();
+  const emitEventRef = useRef(emitEvent);
+
+  const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
+    if (isLoadingForData) {
+      return false;
+    }
+
+    if (!isCreatingEntry) {
+      return false;
+    }
+
+    if (canCreate === false) {
+      return true;
+    }
+
+    return false;
+  }, [isCreatingEntry, canCreate, isLoadingForData]);
+
+  const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
+    if (isLoadingForData) {
+      return false;
+    }
+
+    if (isCreatingEntry) {
+      return false;
+    }
+
+    if (canRead === false && canUpdate === false) {
+      return true;
+    }
+
+    return false;
+  }, [isLoadingForData, isCreatingEntry, canRead, canUpdate]);
+
+  // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
-    if (!isLoading) {
+    if (!isLoadingForData) {
       checkFormErrors();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldCheckErrors]);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const data = await request(getRequestUrl(`${slug}/${id || ''}`), {
-          method: 'GET',
-          signal,
-        });
+    if (shouldRedirectToHomepageWhenEditingEntry) {
+      strapi.notification.info(getTrad('permissions.not-allowed.update'));
+    }
+  }, [shouldRedirectToHomepageWhenEditingEntry]);
 
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        if (id && err.code !== 20) {
-          strapi.notification.error(`${pluginId}.error.record.fetch`);
-        }
-        if (!id && err.response.status === 404) {
-          setIsCreatingEntry(true);
-        }
-      }
-    };
+  useEffect(() => {
+    if (shouldRedirectToHomepageWhenCreatingEntry) {
+      strapi.notification.info(getTrad('permissions.not-allowed.create'));
+    }
+  }, [shouldRedirectToHomepageWhenCreatingEntry]);
 
-    const componentsDataStructure = Object.keys(allLayoutData.components).reduce((acc, current) => {
-      acc[current] = createDefaultForm(
-        get(allLayoutData, ['components', current, 'schema', 'attributes'], {}),
-        allLayoutData.components
-      );
-
-      return acc;
-    }, {});
-    const contentTypeDataStructure = createDefaultForm(
-      currentContentTypeLayout.schema.attributes,
-      allLayoutData.components
-    );
-
-    // Force state to be cleared when navigation from one entry to another
-    dispatch({ type: 'RESET_PROPS' });
+  useEffect(() => {
     dispatch({
       type: 'SET_DEFAULT_DATA_STRUCTURES',
       componentsDataStructure,
       contentTypeDataStructure,
     });
+  }, [componentsDataStructure, contentTypeDataStructure]);
 
-    if (!isCreatingEntry) {
-      fetchData();
-    } else {
-      // Will create default form
-      dispatch({
-        type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
-        contentTypeDataStructure,
-      });
-    }
+  useEffect(() => {
+    dispatch({
+      type: 'INIT_FORM',
+      initialValues,
+    });
+  }, [initialValues]);
 
-    return () => {
-      abortController.abort();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, slug, isCreatingEntry]);
+  const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
+    emitEventRef.current('didAddComponentToDynamicZone');
 
-  const addComponentToDynamicZone = (keys, componentUid, shouldCheckErrors = false) => {
-    emitEvent('addComponentToDynamicZone');
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
       keys: keys.split('.'),
       componentUid,
       shouldCheckErrors,
     });
-  };
+  }, []);
 
-  const addNonRepeatableComponentToField = (keys, componentUid) => {
+  const addNonRepeatableComponentToField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD',
       keys: keys.split('.'),
       componentUid,
     });
-  };
+  }, []);
 
-  const addRelation = ({ target: { name, value } }) => {
+  const addRelation = useCallback(({ target: { name, value } }) => {
     dispatch({
       type: 'ADD_RELATION',
       keys: name.split('.'),
       value,
     });
-  };
+  }, []);
 
-  const addRepeatableComponentToField = (keys, componentUid, shouldCheckErrors = false) => {
-    dispatch({
-      type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
-      keys: keys.split('.'),
-      componentUid,
-      shouldCheckErrors,
-    });
-  };
+  const addRepeatableComponentToField = useCallback(
+    (keys, componentUid, shouldCheckErrors = false) => {
+      dispatch({
+        type: 'ADD_REPEATABLE_COMPONENT_TO_FIELD',
+        keys: keys.split('.'),
+        componentUid,
+        shouldCheckErrors,
+      });
+    },
+    []
+  );
 
-  const checkFormErrors = async (dataToSet = {}) => {
-    const schema = createYupSchema(currentContentTypeLayout, {
-      components: get(allLayoutData, 'components', {}),
-    });
-    let errors = {};
-    const updatedData = cloneDeep(modifiedData);
+  const yupSchema = useMemo(() => {
+    const options = { isCreatingEntry, isDraft: shouldNotRunValidations, isFromComponent: false };
 
-    if (!isEmpty(updatedData)) {
-      set(updatedData, dataToSet.path, dataToSet.value);
-    }
+    return createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: allLayoutData.components || {},
+      },
+      options
+    );
+  }, [
+    allLayoutData.components,
+    currentContentTypeLayout,
+    isCreatingEntry,
+    shouldNotRunValidations,
+  ]);
 
-    try {
-      // Validate the form using yup
-      await schema.validate(updatedData, { abortEarly: false });
-    } catch (err) {
-      errors = getYupInnerErrors(err);
+  const checkFormErrors = useCallback(
+    async (dataToSet = {}) => {
+      let errors = {};
+      const updatedData = cloneDeep(modifiedData);
 
-      if (modifiedDZName) {
-        errors = Object.keys(errors).reduce((acc, current) => {
-          const dzName = current.split('.')[0];
-
-          if (dzName !== modifiedDZName) {
-            acc[current] = errors[current];
-          }
-
-          return acc;
-        }, {});
+      if (!isEmpty(updatedData)) {
+        set(updatedData, dataToSet.path, dataToSet.value);
       }
-    }
 
-    dispatch({
-      type: 'SET_ERRORS',
-      errors,
-    });
-  };
+      try {
+        // Validate the form using yup
+        await yupSchema.validate(updatedData, { abortEarly: false });
+      } catch (err) {
+        errors = getYupInnerErrors(err);
 
-  const handleChange = ({ target: { name, value, type } }) => {
-    let inputValue = value;
+        if (modifiedDZName) {
+          errors = Object.keys(errors).reduce((acc, current) => {
+            const dzName = current.split('.')[0];
 
-    // Empty string is not a valid date,
-    // Set the date to null when it's empty
-    if (type === 'date' && value === '') {
-      inputValue = null;
-    }
+            if (dzName !== modifiedDZName) {
+              acc[current] = errors[current];
+            }
 
-    // Allow to reset enum
-    if (type === 'select-one' && value === '') {
-      inputValue = null;
-    }
+            return acc;
+          }, {});
+        }
+      }
 
-    // Allow to reset number input
-    if (type === 'number' && value === '') {
-      inputValue = null;
-    }
+      dispatch({
+        type: 'SET_FORM_ERRORS',
+        errors,
+      });
+    },
+    [modifiedDZName, modifiedData, yupSchema]
+  );
 
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name.split('.'),
-      value: inputValue,
-    });
-  };
+  const handleChange = useCallback(
+    ({ target: { name, value, type } }, shouldSetInitialValue = false) => {
+      let inputValue = value;
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+      // Empty string is not a valid date,
+      // Set the date to null when it's empty
+      if (type === 'date' && value === '') {
+        inputValue = null;
+      }
 
-    // Create yup schema
-    const schema = createYupSchema(currentContentTypeLayout, {
-      components: get(allLayoutData, 'components', {}),
-    });
+      if (type === 'password' && !value) {
+        dispatch({
+          type: 'REMOVE_PASSWORD_FIELD',
+          keys: name.split('.'),
+        });
 
-    try {
-      // Validate the form using yup
-      await schema.validate(modifiedData, { abortEarly: false });
-      // Set the loading state in the plugin header
-      const filesToUpload = getFilesToUpload(modifiedData);
-      // Remove keys that are not needed
-      // Clean relations
+        return;
+      }
+
+      // Allow to reset enum
+      if (type === 'select-one' && value === '') {
+        inputValue = null;
+      }
+
+      // Allow to reset number input
+      if (type === 'number' && value === '') {
+        inputValue = null;
+      }
+
+      dispatch({
+        type: 'ON_CHANGE',
+        keys: name.split('.'),
+        value: inputValue,
+        shouldSetInitialValue,
+      });
+    },
+    []
+  );
+
+  const createFormData = useCallback(
+    data => {
+      // First we need to remove the added keys needed for the dnd
+      const preparedData = removeKeyInObject(cloneDeep(data), '__temp_key__');
+      // Then we need to apply our helper
       const cleanedData = cleanData(
-        cloneDeep(modifiedData),
+        preparedData,
         currentContentTypeLayout,
         allLayoutData.components
       );
 
-      const formData = new FormData();
+      return cleanedData;
+    },
+    [allLayoutData.components, currentContentTypeLayout]
+  );
 
-      formData.append('data', JSON.stringify(cleanedData));
+  const trackerProperty = useMemo(() => {
+    if (!hasDraftAndPublish) {
+      return {};
+    }
 
-      Object.keys(filesToUpload).forEach(key => {
-        const files = filesToUpload[key];
+    return shouldNotRunValidations ? { status: 'draft' } : {};
+  }, [hasDraftAndPublish, shouldNotRunValidations]);
 
-        files.forEach(file => {
-          formData.append(`files.${key}`, file);
-        });
-      });
+  const handleSubmit = useCallback(
+    async e => {
+      e.preventDefault();
+      let errors = {};
 
-      // Change the request helper default headers so we can pass a FormData
-      const headers = {};
-      const method = isCreatingEntry ? 'POST' : 'PUT';
-      let endPoint;
-
-      // All endpoints for creation and edition are the same for both content types
-      // But, the id from the URL didn't exist for the single types.
-      // So, we use the id of the modified data if this one is setted.
-      if (isCreatingEntry) {
-        endPoint = slug;
-      } else if (modifiedData) {
-        endPoint = `${slug}/${modifiedData.id}`;
-      } else {
-        endPoint = `${slug}/${id}`;
-      }
-
-      emitEvent(isCreatingEntry ? 'willCreateEntry' : 'willEditEntry');
-
+      // First validate the form
       try {
-        // Time to actually send the data
-        await request(
-          getRequestUrl(endPoint),
-          {
-            method,
-            headers,
-            body: formData,
-            signal,
-          },
-          false,
-          false
-        );
-        emitEvent(isCreatingEntry ? 'didCreateEntry' : 'didEditEntry');
-        dispatch({
-          type: 'SUBMIT_SUCCESS',
-        });
-        strapi.notification.success(`${pluginId}.success.record.save`);
+        await yupSchema.validate(modifiedData, { abortEarly: false });
 
-        if (isSingleType) {
-          setIsCreatingEntry(false);
+        const formData = createFormData(modifiedData);
+
+        if (isCreatingEntry) {
+          onPost(formData, trackerProperty);
         } else {
-          redirectToPreviousPage();
+          onPut(formData, trackerProperty);
         }
       } catch (err) {
-        console.error({ err });
-        const error = get(
-          err,
-          ['response', 'payload', 'message', '0', 'messages', '0', 'id'],
-          'SERVER ERROR'
-        );
+        console.error('ValidationError');
+        console.error(err);
 
-        setIsSubmitting(false);
-        emitEvent(isCreatingEntry ? 'didNotCreateEntry' : 'didNotEditEntry', {
-          error: err,
-        });
-        strapi.notification.error(error);
+        errors = getYupInnerErrors(err);
       }
-    } catch (err) {
-      const errors = getYupInnerErrors(err);
-      console.error({ err, errors });
 
       dispatch({
-        type: 'SUBMIT_ERRORS',
+        type: 'SET_FORM_ERRORS',
         errors,
       });
-    }
-  };
+    },
+    [createFormData, isCreatingEntry, modifiedData, onPost, onPut, trackerProperty, yupSchema]
+  );
 
-  const moveComponentDown = (dynamicZoneName, currentIndex) => {
-    emitEvent('changeComponentsOrder');
+  const handlePublish = useCallback(async () => {
+    // Create yup schema here's we need to apply all the validations
+    const schema = createYupSchema(
+      currentContentTypeLayout,
+      {
+        components: get(allLayoutData, 'components', {}),
+      },
+      { isCreatingEntry, isDraft: false, isFromComponent: false }
+    );
+    let errors = {};
+
+    try {
+      // Validate the form using yup
+      await schema.validate(modifiedData, { abortEarly: false });
+
+      onPublish();
+    } catch (err) {
+      console.error('ValidationError');
+      console.error(err);
+
+      errors = getYupInnerErrors(err);
+    }
+
     dispatch({
-      type: 'MOVE_COMPONENT_DOWN',
-      dynamicZoneName,
-      currentIndex,
-      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      type: 'SET_FORM_ERRORS',
+      errors,
     });
-  };
-  const moveComponentUp = (dynamicZoneName, currentIndex) => {
-    emitEvent('changeComponentsOrder');
-    dispatch({
-      type: 'MOVE_COMPONENT_UP',
-      dynamicZoneName,
-      currentIndex,
-      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
-    });
-  };
-  const moveComponentField = (pathToComponent, dragIndex, hoverIndex) => {
+  }, [allLayoutData, currentContentTypeLayout, isCreatingEntry, modifiedData, onPublish]);
+
+  const shouldCheckDZErrors = useCallback(
+    dzName => {
+      const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
+      const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
+
+      return shouldCheckErrors;
+    },
+    [formErrors]
+  );
+
+  const moveComponentDown = useCallback(
+    (dynamicZoneName, currentIndex) => {
+      emitEventRef.current('changeComponentsOrder');
+
+      dispatch({
+        type: 'MOVE_COMPONENT_DOWN',
+        dynamicZoneName,
+        currentIndex,
+        shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      });
+    },
+    [shouldCheckDZErrors]
+  );
+
+  const moveComponentUp = useCallback(
+    (dynamicZoneName, currentIndex) => {
+      emitEventRef.current('changeComponentsOrder');
+
+      dispatch({
+        type: 'MOVE_COMPONENT_UP',
+        dynamicZoneName,
+        currentIndex,
+        shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      });
+    },
+    [shouldCheckDZErrors]
+  );
+
+  const moveComponentField = useCallback((pathToComponent, dragIndex, hoverIndex) => {
     dispatch({
       type: 'MOVE_COMPONENT_FIELD',
       pathToComponent,
       dragIndex,
       hoverIndex,
     });
-  };
+  }, []);
 
-  const moveRelation = (dragIndex, overIndex, name) => {
+  const moveRelation = useCallback((dragIndex, overIndex, name) => {
     dispatch({
       type: 'MOVE_FIELD',
       dragIndex,
       overIndex,
       keys: name.split('.'),
     });
-  };
+  }, []);
 
-  const onRemoveRelation = keys => {
+  const onRemoveRelation = useCallback(keys => {
     dispatch({
       type: 'REMOVE_RELATION',
       keys,
     });
-  };
+  }, []);
 
-  const shouldCheckDZErrors = dzName => {
-    const doesDZHaveError = Object.keys(formErrors).some(key => key.split('.')[0] === dzName);
-    const shouldCheckErrors = !isEmpty(formErrors) && doesDZHaveError;
+  const removeComponentFromDynamicZone = useCallback(
+    (dynamicZoneName, index) => {
+      emitEventRef.current('removeComponentFromDynamicZone');
 
-    return shouldCheckErrors;
-  };
+      dispatch({
+        type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
+        dynamicZoneName,
+        index,
+        shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
+      });
+    },
+    [shouldCheckDZErrors]
+  );
 
-  const removeComponentFromDynamicZone = (dynamicZoneName, index) => {
-    emitEvent('removeComponentFromDynamicZone');
-
-    dispatch({
-      type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',
-      dynamicZoneName,
-      index,
-      shouldCheckErrors: shouldCheckDZErrors(dynamicZoneName),
-    });
-  };
-  const removeComponentFromField = (keys, componentUid) => {
+  const removeComponentFromField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'REMOVE_COMPONENT_FROM_FIELD',
       keys: keys.split('.'),
       componentUid,
     });
-  };
+  }, []);
 
-  const removeRepeatableField = (keys, componentUid) => {
+  const removeRepeatableField = useCallback((keys, componentUid) => {
     dispatch({
       type: 'REMOVE_REPEATABLE_FIELD',
       keys: keys.split('.'),
       componentUid,
     });
-  };
+  }, []);
 
-  const setIsSubmitting = (value = true) => {
-    dispatch({ type: 'IS_SUBMITTING', value });
-  };
-
-  const deleteSuccess = () => {
-    dispatch({
-      type: 'DELETE_SUCCEEDED',
-    });
-  };
-
-  const resetData = () => {
-    dispatch({
-      type: 'RESET_DATA',
-    });
-  };
-
-  const clearData = () => {
-    if (isSingleType) {
-      setIsCreatingEntry(true);
-    }
-
-    dispatch({
-      type: 'SET_DEFAULT_MODIFIED_DATA_STRUCTURE',
-      contentTypeDataStructure: {},
-    });
-  };
-
-  const triggerFormValidation = () => {
+  const triggerFormValidation = useCallback(() => {
     dispatch({
       type: 'TRIGGER_FORM_VALIDATION',
     });
-  };
+  }, []);
 
-  const showLoader = !isCreatingEntry && isLoading;
+  const overlayBlockerParams = useMemo(
+    () => ({
+      children: <div />,
+      noGradient: true,
+    }),
+    []
+  );
+
+  // Redirect the user to the homepage if he is not allowed to create a document
+  if (shouldRedirectToHomepageWhenCreatingEntry) {
+    return <Redirect to="/" />;
+  }
+
+  // Redirect the user to the previous page if he is not allowed to read/update a document
+  if (shouldRedirectToHomepageWhenEditingEntry) {
+    return <Redirect to={from} />;
+  }
 
   return (
     <EditViewDataManagerContext.Provider
@@ -423,10 +461,14 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
         addRepeatableComponentToField,
         allLayoutData,
         checkFormErrors,
-        clearData,
-        deleteSuccess,
+        createActionAllowedFields,
         formErrors,
+        hasDraftAndPublish,
         initialData,
+        isCreatingEntry,
+        isSingleType,
+        shouldNotRunValidations,
+        status,
         layout: currentContentTypeLayout,
         modifiedData,
         moveComponentDown,
@@ -434,42 +476,67 @@ const EditViewDataManagerProvider = ({ allLayoutData, children, redirectToPrevio
         moveComponentUp,
         moveRelation,
         onChange: handleChange,
+        onPublish: handlePublish,
+        onUnpublish,
         onRemoveRelation,
+        readActionAllowedFields,
         redirectToPreviousPage,
         removeComponentFromDynamicZone,
         removeComponentFromField,
         removeRepeatableField,
-        resetData,
-        setIsSubmitting,
-        shouldShowLoadingState,
         slug,
         triggerFormValidation,
+        updateActionAllowedFields,
       }}
     >
-      {showLoader ? (
-        <LoadingIndicatorPage />
-      ) : (
-        <>
-          <Prompt
-            when={!isEqual(modifiedData, initialData)}
-            message={formatMessage({ id: 'global.prompt.unsaved' })}
-          />
-          <form onSubmit={handleSubmit}>{children}</form>
-        </>
-      )}
+      <>
+        <OverlayBlocker
+          key="overlayBlocker"
+          isOpen={status !== 'resolved'}
+          {...overlayBlockerParams}
+        />
+        {isLoadingForData ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <>
+            <Prompt
+              when={!isEqual(modifiedData, initialData)}
+              message={formatMessage({ id: 'global.prompt.unsaved' })}
+            />
+            <form onSubmit={handleSubmit}>{children}</form>
+          </>
+        )}
+      </>
     </EditViewDataManagerContext.Provider>
   );
 };
 
 EditViewDataManagerProvider.defaultProps = {
+  from: '/',
   redirectToPreviousPage: () => {},
 };
 
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
-  children: PropTypes.node.isRequired,
+  allowedActions: PropTypes.object.isRequired,
+  children: PropTypes.arrayOf(PropTypes.element).isRequired,
+  componentsDataStructure: PropTypes.object.isRequired,
+  contentTypeDataStructure: PropTypes.object.isRequired,
+  createActionAllowedFields: PropTypes.array.isRequired,
+  from: PropTypes.string,
+  initialValues: PropTypes.object.isRequired,
+  isCreatingEntry: PropTypes.bool.isRequired,
+  isLoadingForData: PropTypes.bool.isRequired,
+  isSingleType: PropTypes.bool.isRequired,
+  onPost: PropTypes.func.isRequired,
+  onPublish: PropTypes.func.isRequired,
+  onPut: PropTypes.func.isRequired,
+  onUnpublish: PropTypes.func.isRequired,
+  readActionAllowedFields: PropTypes.array.isRequired,
   redirectToPreviousPage: PropTypes.func,
   slug: PropTypes.string.isRequired,
+  status: PropTypes.string.isRequired,
+  updateActionAllowedFields: PropTypes.array.isRequired,
 };
 
 export default EditViewDataManagerProvider;

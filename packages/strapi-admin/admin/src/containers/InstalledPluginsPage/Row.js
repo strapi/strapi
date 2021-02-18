@@ -1,33 +1,17 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { IconLinks } from '@buffetjs/core';
-import { useGlobalContext, PopUpWarning } from 'strapi-helper-plugin';
+import { IconLinks, Text } from '@buffetjs/core';
+import { CustomRow } from '@buffetjs/styles';
+import { useGlobalContext, PopUpWarning, CheckPermissions } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useHistory } from 'react-router-dom';
-import { faTrash, faCog } from '@fortawesome/free-solid-svg-icons';
-import Text from '../../components/Text';
-import CustomRow from './CustomRow';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import adminPermissions from '../../permissions';
 import LogoContainer from './Logo';
 
-// TODO: remove the upload plugin when the media lib feature is merged.
-const PLUGINS_WITH_CONFIG = ['email', 'upload'];
-
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
-  const { currentEnvironment, formatMessage } = useGlobalContext();
+  const { formatMessage } = useGlobalContext();
   const [isOpen, setIsOpen] = useState(false);
-  const { push } = useHistory();
   const links = [];
-
-  if (PLUGINS_WITH_CONFIG.includes(id)) {
-    links.push({
-      icon: <FontAwesomeIcon icon={faCog} />,
-      onClick: () => {
-        const settingsPath = `/plugins/${id}/configurations/${currentEnvironment}`;
-
-        push(settingsPath);
-      },
-    });
-  }
 
   const handleClickConfirm = () => {
     handleToggle();
@@ -40,14 +24,18 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
 
   if (!isRequired) {
     links.push({
-      icon: <FontAwesomeIcon icon={faTrash} />,
+      icon: (
+        <CheckPermissions permissions={adminPermissions.marketplace.uninstall}>
+          <FontAwesomeIcon icon={faTrashAlt} />
+        </CheckPermissions>
+      ),
       onClick: handleToggle,
     });
   }
 
   return (
     <CustomRow>
-      <td style={{ paddingLeft: 30, paddingTop: 0, width: 100, verticalAlign: 'bottom' }}>
+      <td style={{ paddingTop: 0, width: 100, verticalAlign: 'bottom' }}>
         <LogoContainer>
           {logo && <img src={logo} alt="icon" />}
           {!logo && (
@@ -58,7 +46,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
         </LogoContainer>
       </td>
       <td>
-        <p>
+        <Text>
           <Text
             as="span"
             fontSize="xs"
@@ -74,7 +62,7 @@ const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
               defaultMessage: description,
             })}
           </Text>
-        </p>
+        </Text>
       </td>
 
       <td>

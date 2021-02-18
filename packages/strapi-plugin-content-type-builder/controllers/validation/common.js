@@ -1,6 +1,7 @@
 'use strict';
 
 const yup = require('yup');
+const _ = require('lodash');
 
 const validators = {
   required: yup.boolean(),
@@ -74,14 +75,44 @@ const areEnumValuesUnique = {
   },
 };
 
+const isValidRegExpPattern = {
+  name: 'isValidRegExpPattern',
+  message: '${path} must be a valid RexExp pattern string',
+  test: val => val === '' || new RegExp(val),
+};
+
+const isValidDefaultJSON = {
+  name: 'isValidDefaultJSON',
+  message: '${path} is not a valid JSON',
+  test: val => {
+    if (val === undefined) {
+      return true;
+    }
+
+    if (_.isNumber(val) || _.isNull(val) || _.isObject(val) || _.isArray(val)) {
+      return true;
+    }
+
+    try {
+      JSON.parse(val);
+
+      return true;
+    } catch (err) {
+      return false;
+    }
+  },
+};
+
 module.exports = {
   validators,
   areEnumValuesUnique,
   isValidCollectionName,
   isValidCategoryName,
+  isValidDefaultJSON,
   isValidName,
   isValidIcon,
   isValidKey,
   isValidEnum,
   isValidUID,
+  isValidRegExpPattern,
 };

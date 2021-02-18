@@ -38,18 +38,9 @@ const DraggedFieldWithPreview = forwardRef(
     const isFullSize = size === 12;
     const display = isFullSize && dragStart ? 'none' : '';
     const width = isFullSize && dragStart ? 0 : '100%';
-    const higherFields = [
-      'json',
-      'text',
-      'file',
-      'media',
-      'component',
-      'richtext',
-      'dynamiczone',
-    ];
+    const higherFields = ['json', 'text', 'file', 'media', 'component', 'richtext', 'dynamiczone'];
     const withLongerHeight = higherFields.includes(type) && !dragStart;
-    const getCompoInfos = uid =>
-      get(componentLayouts, [uid, 'schema', 'info'], { name: '', icon: '' });
+    const getCompoInfos = uid => get(componentLayouts, [uid, 'info'], { name: '', icon: '' });
 
     const componentData = get(componentLayouts, [componentUid], {});
     const componentLayout = get(componentData, ['layouts', 'edit'], []);
@@ -69,14 +60,8 @@ const DraggedFieldWithPreview = forwardRef(
           }
         }}
       >
-        <Wrapper
-          ref={refs.dropRef}
-          withLongerHeight={withLongerHeight}
-          style={style}
-        >
-          {dragStart && isFullSize && (
-            <PreviewCarret style={{ marginRight: '-10px' }} />
-          )}
+        <Wrapper ref={refs.dropRef} withLongerHeight={withLongerHeight} style={style}>
+          {dragStart && isFullSize && <PreviewCarret style={{ marginRight: '-10px' }} />}
           <>
             {showLeftCarret && <Carret />}
 
@@ -98,8 +83,7 @@ const DraggedFieldWithPreview = forwardRef(
               >
                 {type === 'component' &&
                   componentLayout.map((row, i) => {
-                    const marginBottom =
-                      i === componentLayout.length - 1 ? '29px' : '';
+                    const marginBottom = i === componentLayout.length - 1 ? '29px' : '';
                     const marginTop = i === 0 ? '5px' : '';
 
                     return (
@@ -114,7 +98,7 @@ const DraggedFieldWithPreview = forwardRef(
                         {row.map(field => {
                           const fieldType = get(
                             componentData,
-                            ['schema', 'attributes', field.name, 'type'],
+                            ['attributes', field.name, 'type'],
                             ''
                           );
                           const label = get(
@@ -135,9 +119,7 @@ const DraggedFieldWithPreview = forwardRef(
                                 label={label}
                                 name={field.name}
                                 isSub
-                                withLongerHeight={higherFields.includes(
-                                  fieldType
-                                )}
+                                withLongerHeight={higherFields.includes(fieldType)}
                               />
                             </div>
                           );

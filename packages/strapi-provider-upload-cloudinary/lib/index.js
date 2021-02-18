@@ -5,43 +5,46 @@
  */
 
 // Public node modules.
-/* eslint-disable prefer-template */
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
+const { errors } = require('strapi-plugin-upload');
 
 module.exports = {
-  provider: 'cloudinary',
-  name: 'Cloudinary',
-  auth: {
-    cloud_name: {
-      label: 'Cloud name',
-      type: 'text',
-    },
-    api_key: {
-      label: 'API Key',
-      type: 'text',
-    },
-    api_secret: {
-      label: 'API Secret',
-      type: 'password',
-    },
-  },
-  init: config => {
-    cloudinary.config({
-      cloud_name: config.cloud_name,
-      api_key: config.api_key,
-      api_secret: config.api_secret,
-    });
+  init(config) {
+    cloudinary.config(config);
 
     return {
-      upload(file) {
+      upload(file, customConfig = {}) {
         return new Promise((resolve, reject) => {
+          const config = {
+            resource_type: 'auto',
+            public_id: file.hash,
+          };
+
+          if (file.ext) {
+            config.filename = `${file.hash}${file.ext}`;
+          }
+
           const upload_stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto' },
+            { ...config, ...customConfig },
             (err, image) => {
               if (err) {
-                return reject(err);
+                if (err.message.includes('File size too large')) {
+                  return reject(errors.entityTooLarge());
+                }
+                return reject(errors.unknownError(`Error uploading to cloudinary: ${err.message}`));
               }
+
+              if (image.resource_type === 'video') {
+                file.previewUrl = cloudinary.url(`${image.public_id}.gif`, {
+                  video_sampling: 6,
+                  delay: 200,
+                  width: 250,
+                  crop: 'scale',
+                  resource_type: 'video',
+                });
+              }
+
               file.url = image.secure_url;
               file.provider_metadata = {
                 public_id: image.public_id,
@@ -50,23 +53,24 @@ module.exports = {
               resolve();
             }
           );
+
           intoStream(file.buffer).pipe(upload_stream);
         });
       },
-      async delete(file) {
+      async delete(file, customConfig = {}) {
         try {
           const { resource_type, public_id } = file.provider_metadata;
           const response = await cloudinary.uploader.destroy(public_id, {
             invalidate: true,
             resource_type: resource_type || 'image',
+            ...customConfig,
           });
-          if (response.result !== 'ok') {
-            throw {
-              error: new Error(response.result),
-            };
+
+          if (response.result !== 'ok' && response.result !== 'not found') {
+            throw errors.unknownError(`Error deleting on cloudinary: ${response.result}`);
           }
         } catch (error) {
-          throw error.error;
+          throw errors.unknownError(`Error deleting on cloudinary: ${error.message}`);
         }
       },
     };

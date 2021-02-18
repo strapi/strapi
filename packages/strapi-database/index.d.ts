@@ -10,6 +10,7 @@ export class DatabaseManager {
   initialize(): Promise<DatabaseManager>;
   query(model: string, plugin: string): Repository;
   getModel(model: string, plugin: string): Model;
+  getModelByAssoc(assoc: object): Model;
 }
 
 class Model {}

@@ -1,16 +1,16 @@
 'use strict';
 
-// Dependencies.
 const http = require('http');
 const path = require('path');
-const { EventEmitter } = require('events');
 const fse = require('fs-extra');
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const { logger, models } = require('strapi-utils');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
+const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
+const { createDatabaseManager } = require('strapi-database');
+const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
@@ -18,54 +18,30 @@ const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
-const getPrefixedDeps = require('./utils/get-prefixed-dependencies');
-
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
-const {
-  webhookModel,
-  createWebhookStore,
-} = require('./services/webhook-store');
+const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
-const createEntityValidator = require('./services/entity-validator');
-const { createDatabaseManager } = require('strapi-database');
-
-const CONFIG_PATHS = {
-  admin: 'admin',
-  api: 'api',
-  config: 'config',
-  controllers: 'controllers',
-  models: 'models',
-  plugins: 'plugins',
-  policies: 'policies',
-  tmp: '.tmp',
-  services: 'services',
-  static: 'public',
-  validators: 'validators',
-  views: 'views',
-};
+const entityValidator = require('./services/entity-validator');
+const createTelemetry = require('./services/metrics');
+const createUpdateNotifier = require('./utils/update-notifier');
+const ee = require('./utils/ee');
 
 /**
  * Construct an Strapi instance.
  *
  * @constructor
  */
-
-class Strapi extends EventEmitter {
+class Strapi {
   constructor(opts = {}) {
-    super();
-
-    this.setMaxListeners(100);
-
     this.reload = this.reload();
 
     // Expose `koa`.
     this.app = new Koa();
     this.router = new Router();
 
-    // Mount the HTTP server.
-    this.server = http.createServer(this.app.callback());
+    this.initServer();
 
     // Logger.
     this.log = logger;
@@ -76,67 +52,37 @@ class Strapi extends EventEmitter {
     };
 
     this.dir = opts.dir || process.cwd();
+
     this.admin = {};
     this.plugins = {};
-    this.config = this.initConfig(opts);
+    this.config = loadConfiguration(this.dir, opts);
+    this.app.proxy = this.config.get('server.proxy');
+
+    this.isLoaded = false;
 
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
+
+    createUpdateNotifier(this).notify();
   }
 
-  initConfig({ autoReload = false, serveAdminPanel = true } = {}) {
-    const pkgJSON = require(path.resolve(this.dir, 'package.json'));
+  get EE() {
+    return ee({ dir: this.dir, logger });
+  }
 
-    const config = {
-      serveAdminPanel,
-      launchedAt: Date.now(),
-      appPath: this.dir,
-      autoReload,
-      host: process.env.HOST || process.env.HOSTNAME || 'localhost',
-      port: process.env.PORT || 1337,
-      environment: _.toLower(process.env.NODE_ENV) || 'development',
-      environments: {},
-      admin: {},
-      paths: CONFIG_PATHS,
-      middleware: {},
-      hook: {},
-      functions: {},
-      routes: {},
-      info: pkgJSON,
-      installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
-      installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
-      installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
-    };
+  handleRequest(req, res) {
+    if (!this.requestHandler) {
+      this.requestHandler = this.app.callback();
+    }
 
-    Object.defineProperty(config, 'get', {
-      value(path, defaultValue = null) {
-        return _.get(config, path, defaultValue);
-      },
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    Object.defineProperty(config, 'set', {
-      value(path, value) {
-        return _.set(config, path, value);
-      },
-      enumerable: false,
-      configurable: false,
-      writable: false,
-    });
-
-    return config;
+    return this.requestHandler(req, res);
   }
 
   requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(
-      this.dir,
-      'config/functions/bootstrap.js'
-    );
+    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
 
     if (fse.existsSync(bootstrapPath)) {
       require(bootstrapPath);
@@ -154,15 +100,15 @@ class Strapi extends EventEmitter {
       chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
     });
 
+    const isEE = strapi.EE === true && ee.isEE === true;
+
     infoTable.push(
       [chalk.blue('Time'), `${new Date()}`],
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [
-        chalk.blue('Version'),
-        `${this.config.info.strapi} (node v${this.config.info.node})`,
-      ]
+      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
+      [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
     );
 
     console.log(infoTable.toString());
@@ -176,14 +122,15 @@ class Strapi extends EventEmitter {
 
     console.log(chalk.bold('One more thing...'));
     console.log(
-      chalk.grey(
-        'Create your first administrator 💻 by going to the administration panel at:'
-      )
+      chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
     );
     console.log();
 
     const addressTable = new CLITable();
-    addressTable.push([chalk.bold(this.config.admin.url)]);
+
+    const adminUrl = getAbsoluteAdminUrl(strapi.config);
+    addressTable.push([chalk.bold(adminUrl)]);
+
     console.log(`${addressTable.toString()}`);
     console.log();
   }
@@ -194,80 +141,24 @@ class Strapi extends EventEmitter {
     console.log(chalk.bold('Welcome back!'));
 
     if (this.config.serveAdminPanel === true) {
-      console.log(
-        chalk.grey(
-          'To manage your project 🚀, go to the administration panel at:'
-        )
-      );
-      console.log(chalk.bold(this.config.admin.url));
+      console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
+      const adminUrl = getAbsoluteAdminUrl(strapi.config);
+      console.log(chalk.bold(adminUrl));
       console.log();
     }
 
     console.log(chalk.grey('To access the server ⚡️, go to:'));
-    console.log(chalk.bold(this.config.url));
+    const serverUrl = getAbsoluteServerUrl(strapi.config);
+    console.log(chalk.bold(serverUrl));
     console.log();
   }
 
-  async start(cb) {
-    try {
-      // Emit starting event.
-      this.emit('server:starting');
-
-      await this.load();
-
-      // Run bootstrap function.
-      await this.runBootstrapFunctions();
-      // Freeze object.
-      await this.freeze();
-      // Is the project initialised?
-      const isInitialised = await utils.isInitialised(this);
-
-      this.app.use(this.router.routes()).use(this.router.allowedMethods());
-
-      // Launch server.
-      this.server.listen(this.config.port, async err => {
-        if (err) return this.stopWithError(err);
-
-        if (!isInitialised) {
-          this.logFirstStartupMessage();
-        } else {
-          this.logStartupMessage();
-        }
-
-        // Emit started event.
-        this.emit('server:started');
-
-        if (cb && typeof cb === 'function') {
-          cb();
-        }
-
-        if (
-          (this.config.environment === 'development' &&
-            _.get(
-              this.config.currentEnvironment,
-              'server.admin.autoOpen',
-              true
-            ) !== false) ||
-          !isInitialised
-        ) {
-          await utils.openBrowser.call(this);
-        }
-      });
-    } catch (err) {
-      this.stopWithError(err);
-    }
-  }
-
-  /**
-   * Add behaviors to the server
-   */
-  async enhancer() {
+  initServer() {
+    this.server = http.createServer(this.handleRequest.bind(this));
     // handle port in use cleanly
     this.server.on('error', err => {
       if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(
-          `The port ${err.port} is already used by another application.`
-        );
+        return this.stopWithError(`The port ${err.port} is already used by another application.`);
       }
 
       this.log.error(err);
@@ -294,15 +185,115 @@ class Strapi extends EventEmitter {
     };
   }
 
-  stopWithError(err) {
+  async start(cb) {
+    try {
+      if (!this.isLoaded) {
+        await this.load();
+      }
+
+      this.app.use(this.router.routes()).use(this.router.allowedMethods());
+
+      // Launch server.
+      this.listen(cb);
+    } catch (err) {
+      this.stopWithError(err);
+    }
+  }
+
+  async destroy() {
+    if (_.has(this, 'server.destroy')) {
+      this.server.destroy();
+    }
+
+    await Promise.all(
+      Object.values(this.plugins).map(plugin => {
+        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
+          return plugin.destroy();
+        }
+      })
+    );
+
+    if (_.has(this, 'admin')) {
+      await this.admin.destroy();
+    }
+
+    this.eventHub.removeAllListeners();
+
+    if (_.has(this, 'db')) {
+      await this.db.destroy();
+    }
+
+    delete global.strapi;
+  }
+
+  /**
+   * Add behaviors to the server
+   */
+  async listen(cb) {
+    const onListen = async err => {
+      if (err) return this.stopWithError(err);
+
+      // Is the project initialised?
+      const isInitialised = await utils.isInitialised(this);
+
+      // Should the startup message be displayed?
+      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
+        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
+        : false;
+
+      if (hideStartupMessage === false) {
+        if (!isInitialised) {
+          this.logFirstStartupMessage();
+        } else {
+          this.logStartupMessage();
+        }
+      }
+
+      // Emit started event.
+      const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
+      await this.telemetry.send('didStartServer', { database: databaseClients });
+
+      if (cb && typeof cb === 'function') {
+        cb();
+      }
+
+      if (
+        (this.config.environment === 'development' &&
+          this.config.get('server.admin.autoOpen', true) !== false) ||
+        !isInitialised
+      ) {
+        await utils.openBrowser.call(this);
+      }
+    };
+
+    const listenSocket = this.config.get('server.socket');
+    const listenErrHandler = err => onListen(err).catch(err => this.stopWithError(err));
+
+    if (listenSocket) {
+      this.server.listen(listenSocket, listenErrHandler);
+    } else {
+      this.server.listen(
+        this.config.get('server.port'),
+        this.config.get('server.host'),
+        listenErrHandler
+      );
+    }
+  }
+
+  stopWithError(err, customMessage) {
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
+    if (customMessage) {
+      this.log.error(customMessage);
+    }
     this.log.error(err);
     return this.stop();
   }
 
   stop(exitCode = 1) {
     // Destroy server and available connections.
-    this.server.destroy();
+    if (_.has(this, 'server.destroy')) {
+      this.server.destroy();
+    }
 
     if (this.config.autoReload) {
       process.send('stop');
@@ -313,10 +304,8 @@ class Strapi extends EventEmitter {
   }
 
   async load() {
-    await this.enhancer();
-
     this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
+      if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
         ctx.set('strapi', 'You are so French!');
         ctx.status = 204;
       } else {
@@ -325,8 +314,6 @@ class Strapi extends EventEmitter {
     });
 
     const modules = await loadModules(this);
-
-    _.merge(this.config, modules.config);
 
     this.api = modules.api;
     this.admin = modules.admin;
@@ -337,19 +324,16 @@ class Strapi extends EventEmitter {
 
     await bootstrap(this);
 
-    // Usage.
-    await utils.usage(this.config);
-
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
       eventHub: this.eventHub,
       logger: this.log,
-      configuration: this.config.get('currentEnvironment.server.webhooks', {}),
+      configuration: this.config.get('server.webhooks', {}),
     });
 
     // Init core store
-    this.models['core_store'] = coreStoreModel;
-    this.models['strapi_webhooks'] = webhookModel;
+    this.models['core_store'] = coreStoreModel(this.config);
+    this.models['strapi_webhooks'] = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
     await this.db.initialize();
@@ -363,9 +347,7 @@ class Strapi extends EventEmitter {
 
     await this.startWebhooks();
 
-    this.entityValidator = createEntityValidator({
-      strapi: this,
-    });
+    this.entityValidator = entityValidator;
 
     this.entityService = createEntityService({
       db: this.db,
@@ -373,9 +355,18 @@ class Strapi extends EventEmitter {
       entityValidator: this.entityValidator,
     });
 
+    this.telemetry = createTelemetry(this);
+
     // Initialize hooks and middlewares.
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
+
+    await this.runBootstrapFunctions();
+    await this.freeze();
+
+    this.isLoaded = true;
+
+    return this;
   }
 
   async startWebhooks() {
@@ -424,39 +415,32 @@ class Strapi extends EventEmitter {
   }
 
   async runBootstrapFunctions() {
-    const timeoutMs = this.config.bootstrapTimeout || 3500;
-    const warnOnTimeout = () =>
-      setTimeout(() => {
-        this.log.warn(
-          `The bootstrap function is taking unusually long to execute (${timeoutMs} miliseconds).`
-        );
-        this.log.warn('Make sure you call it?');
-      }, timeoutMs);
-
-    async function execBootstrap(fn) {
+    const execBootstrap = async fn => {
       if (!fn) return;
 
-      const timer = warnOnTimeout();
-      try {
-        await fn();
-      } finally {
-        clearTimeout(timer);
-      }
-    }
+      return fn();
+    };
 
+    // plugins bootstrap
     const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(
-        _.get(this.plugins[plugin], 'config.functions.bootstrap')
-      ).catch(err => {
+      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
         strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
         strapi.log.error(err);
         strapi.stop();
       });
     });
-
     await Promise.all(pluginBoostraps);
 
-    return execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // user bootstrap
+    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+
+    // admin bootstrap : should always run after the others
+    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
+    return execBootstrap(adminBootstrap).catch(err => {
+      strapi.log.error(`Bootstrap function in admin failed`);
+      strapi.log.error(err);
+      strapi.stop();
+    });
   }
 
   async freeze() {

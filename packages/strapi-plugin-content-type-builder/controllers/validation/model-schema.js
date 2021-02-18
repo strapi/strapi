@@ -3,11 +3,7 @@
 const _ = require('lodash');
 const yup = require('yup');
 
-const {
-  modelTypes,
-  FORBIDDEN_ATTRIBUTE_NAMES,
-  typeKinds,
-} = require('./constants');
+const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('../../services/constants');
 const { isValidCollectionName, isValidKey } = require('./common');
 const getTypeValidator = require('./types');
 const getRelationValidator = require('./relations');
@@ -19,6 +15,7 @@ const createSchema = (types, relations, { modelType } = {}) => {
       .min(1)
       .required('name.required'),
     description: yup.string(),
+    draftAndPublish: yup.boolean(),
     connection: yup.string(),
     collectionName: yup
       .string()
@@ -44,7 +41,7 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
       .shape(
         _.mapValues(attributes, (attribute, key) => {
           if (isForbiddenKey(key)) {
-            return forbiddenValidator;
+            return forbiddenValidator();
           }
 
           if (_.has(attribute, 'type')) {
@@ -67,15 +64,25 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
   });
 };
 
-const isForbiddenKey = key => FORBIDDEN_ATTRIBUTE_NAMES.includes(key);
+const isForbiddenKey = key => {
+  return [
+    ...FORBIDDEN_ATTRIBUTE_NAMES,
+    ...strapi.plugins['content-type-builder'].services.builder.getReservedNames().attributes,
+  ].includes(key);
+};
 
-const forbiddenValidator = yup.object().test({
-  name: 'forbiddenKeys',
-  message: `Attribute keys cannot be one of ${FORBIDDEN_ATTRIBUTE_NAMES.join(
-    ', '
-  )}`,
-  test: () => false,
-});
+const forbiddenValidator = () => {
+  const reservedNames = [
+    ...FORBIDDEN_ATTRIBUTE_NAMES,
+    ...strapi.plugins['content-type-builder'].services.builder.getReservedNames().attributes,
+  ];
+
+  return yup.mixed().test({
+    name: 'forbiddenKeys',
+    message: `Attribute keys cannot be one of ${reservedNames.join(', ')}`,
+    test: () => false,
+  });
+};
 
 const typeOrRelationValidator = yup.object().test({
   name: 'mustHaveTypeOrTarget',

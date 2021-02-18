@@ -8,11 +8,7 @@ const canEditContentType = (data, modifiedData) => {
     return true;
   }
 
-  const contentTypeAttributes = get(
-    data,
-    ['contentType', 'schema', 'attributes'],
-    ''
-  );
+  const contentTypeAttributes = get(data, ['contentType', 'schema', 'attributes'], '');
   const relationAttributes = Object.values(contentTypeAttributes).filter(
     ({ nature }) => nature && !['oneWay', 'manyWay'].includes(nature)
   );

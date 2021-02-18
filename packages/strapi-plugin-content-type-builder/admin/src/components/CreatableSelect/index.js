@@ -1,6 +1,7 @@
 import React from 'react';
 import Creatable from 'react-select/creatable';
 import PropTypes from 'prop-types';
+import { uniqBy } from 'lodash';
 import useDataManager from '../../hooks/useDataManager';
 
 const CreatableSelect = ({ onChange, name, styles, value }) => {
@@ -19,7 +20,13 @@ const CreatableSelect = ({ onChange, name, styles, value }) => {
   };
 
   const formatOptions = () => {
-    return allComponentsCategories.map(cat => ({ value: cat, label: cat }));
+    const options = allComponentsCategories.map(cat => ({ value: cat, label: cat }));
+
+    if (value) {
+      return uniqBy(options.concat({ value, label: value }), 'value');
+    }
+
+    return options;
   };
 
   const getValue = () => {

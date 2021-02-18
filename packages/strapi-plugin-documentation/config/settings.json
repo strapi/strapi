@@ -17,7 +17,8 @@
   },
   "x-strapi-config": {
     "path": "/documentation",
-    "showGeneratedFiles": true
+    "showGeneratedFiles": true,
+    "generateDefaultResponse": true
   },
   "servers": [
     {
@@ -35,7 +36,7 @@
   ],
   "externalDocs": {
     "description": "Find out more",
-    "url": "https://strapi.io/documentation/3.0.0-beta.x/"
+    "url": "https://strapi.io/documentation/developer-docs/latest/"
   },
   "security": [
     {

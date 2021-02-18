@@ -1,5 +1,11 @@
+'use strict';
+
 const _ = require('lodash');
+const { each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
+const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
+
+const BOOLEAN_OPERATORS = ['or'];
 
 /**
  * Build filters on a bookshelf query
@@ -8,18 +14,21 @@ const { singular } = require('pluralize');
  * @param {Object} options.filters - Filters params (start, limit, sort, where)
  */
 const buildQuery = ({ model, filters }) => qb => {
-  if (_.has(filters, 'where') && Array.isArray(filters.where)) {
+  const joinsTree = buildJoinsAndFilter(qb, model, filters);
+
+  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
     qb.distinct();
-    buildJoinsAndFilter(qb, model, filters.where);
   }
 
   if (_.has(filters, 'sort')) {
-    qb.orderBy(
-      filters.sort.map(({ field, order }) => ({
-        column: field,
-        order,
-      }))
-    );
+    const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
+    const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
+    const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
+    const columns = [`${joinsTree.alias}.*`, ...orderColumns];
+
+    qb.distinct()
+      .column(columns)
+      .orderBy(orderBy);
   }
 
   if (_.has(filters, 'start')) {
@@ -29,20 +38,56 @@ const buildQuery = ({ model, filters }) => qb => {
   if (_.has(filters, 'limit') && filters.limit >= 0) {
     qb.limit(filters.limit);
   }
+
+  if (_.has(filters, 'publicationState')) {
+    runPopulateQueries(
+      toQueries({ publicationState: { query: filters.publicationState, model } }),
+      qb
+    );
+  }
+};
+
+/**
+ * Build a bookshelf sort clause (simple or deep) based on a joins tree
+ * @param tree - The joins tree that contains the aliased associations
+ */
+const buildSortClauseFromTree = tree => ({ field, order }) => {
+  if (!field.includes('.')) {
+    return {
+      column: `${tree.alias}.${field}`,
+      order,
+      alias: `_strapi_tmp_${tree.alias}_${field}`,
+    };
+  }
+
+  const [relation, attribute] = field.split('.');
+  for (const { alias, assoc } of Object.values(tree.joins)) {
+    if (relation === assoc.alias) {
+      return {
+        column: `${alias}.${attribute}`,
+        order,
+        alias: `_strapi_tmp_${alias}_${attribute}`,
+      };
+    }
+  }
+
+  return {};
 };
 
 /**
  * Add joins and where filters
  * @param {Object} qb - knex query builder
  * @param {Object} model - Bookshelf model
- * @param {Array<Object>} whereClauses - an array of where clause
+ * @param {Object} filters - The query filters
  */
-const buildJoinsAndFilter = (qb, model, whereClauses) => {
-  const aliasMap = {};
+const buildJoinsAndFilter = (qb, model, filters) => {
+  const { where: whereClauses = [], sort: sortClauses = [] } = filters;
+
   /**
    * Returns an alias for a name (simple incremental alias name)
    * @param {string} name - name to alias
    */
+  const aliasMap = {};
   const generateAlias = name => {
     if (!aliasMap[name]) {
       aliasMap[name] = 1;
@@ -58,17 +103,14 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {Object} qb - Knex query builder
    * @param {Object} tree - Query tree
    */
-  const buildQueryFromTree = (qb, queryTree) => {
+  const buildJoinsFromTree = (qb, queryTree) => {
     // build joins
-    Object.keys(queryTree.children).forEach(key => {
-      const subQueryTree = queryTree.children[key];
+    Object.keys(queryTree.joins).forEach(key => {
+      const subQueryTree = queryTree.joins[key];
       buildJoin(qb, subQueryTree.assoc, queryTree, subQueryTree);
 
-      buildQueryFromTree(qb, subQueryTree);
+      buildJoinsFromTree(qb, subQueryTree);
     });
-
-    // build where clauses
-    queryTree.where.forEach(w => buildWhereClause({ qb, ...w }));
   };
 
   /**
@@ -79,43 +121,50 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
    * @param {Object} destinationInfo - destination with which we are making a join
    */
   const buildJoin = (qb, assoc, originInfo, destinationInfo) => {
-    if (assoc.nature === 'manyToMany') {
+    if (['manyToMany', 'manyWay'].includes(assoc.nature)) {
       const joinTableAlias = generateAlias(assoc.tableCollectionName);
+
+      let originColumnNameInJoinTable;
+      if (assoc.nature === 'manyToMany') {
+        originColumnNameInJoinTable = `${joinTableAlias}.${singular(
+          destinationInfo.model.attributes[assoc.via].attribute
+        )}_${destinationInfo.model.attributes[assoc.via].column}`;
+      } else if (assoc.nature === 'manyWay') {
+        originColumnNameInJoinTable = `${joinTableAlias}.${singular(
+          originInfo.model.collectionName
+        )}_${originInfo.model.primaryKey}`;
+      }
 
       qb.leftJoin(
         `${originInfo.model.databaseName}.${assoc.tableCollectionName} AS ${joinTableAlias}`,
-        `${joinTableAlias}.${singular(
-          destinationInfo.model.attributes[assoc.via].attribute
-        )}_${destinationInfo.model.attributes[assoc.via].column}`,
+        originColumnNameInJoinTable,
         `${originInfo.alias}.${originInfo.model.primaryKey}`
       );
 
       qb.leftJoin(
         `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-        `${joinTableAlias}.${singular(
-          originInfo.model.attributes[assoc.alias].attribute
-        )}_${originInfo.model.attributes[assoc.alias].column}`,
+        `${joinTableAlias}.${singular(originInfo.model.attributes[assoc.alias].attribute)}_${
+          originInfo.model.attributes[assoc.alias].column
+        }`,
         `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`
       );
-      return;
+    } else {
+      const externalKey =
+        assoc.type === 'collection'
+          ? `${destinationInfo.alias}.${assoc.via || destinationInfo.model.primaryKey}`
+          : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
+
+      const internalKey =
+        assoc.type === 'collection'
+          ? `${originInfo.alias}.${originInfo.model.primaryKey}`
+          : `${originInfo.alias}.${assoc.alias}`;
+
+      qb.leftJoin(
+        `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
+        externalKey,
+        internalKey
+      );
     }
-
-    const externalKey =
-      assoc.type === 'collection'
-        ? `${destinationInfo.alias}.${assoc.via ||
-            destinationInfo.model.primaryKey}`
-        : `${destinationInfo.alias}.${destinationInfo.model.primaryKey}`;
-
-    const internalKey =
-      assoc.type === 'collection'
-        ? `${originInfo.alias}.${originInfo.model.primaryKey}`
-        : `${originInfo.alias}.${assoc.alias}`;
-
-    qb.leftJoin(
-      `${destinationInfo.model.databaseName}.${destinationInfo.model.collectionName} AS ${destinationInfo.alias}`,
-      externalKey,
-      internalKey
-    );
   };
 
   /**
@@ -128,71 +177,106 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
       alias: generateAlias(model.collectionName),
       assoc,
       model,
-      where: [],
-      children: {},
+      joins: {},
     };
   };
 
-  /**
-   * Builds a Strapi query tree easy
-   * @param {Array<Object>} whereClauses - Array of Strapi where clause
-   * @param {Object} model - Strapi model
-   * @param {Object} queryTree - queryTree
-   */
-  const buildQueryTree = (whereClauses, model, queryTree) => {
-    for (let whereClause of whereClauses) {
-      const { field, operator, value } = whereClause;
-      let [key, ...parts] = field.split('.');
-
-      const assoc = findAssoc(model, key);
-
-      // if the key is an attribute add as where clause
-      if (!assoc) {
-        queryTree.where.push({
-          field: `${queryTree.alias}.${key}`,
-          operator,
-          value,
-        });
-        continue;
-      }
-
-      const assocModel = findModelByAssoc(assoc);
-
-      // if the last part of the path is an association
-      // add the primary key of the model to the parts
-      if (parts.length === 0) {
-        parts = [assocModel.primaryKey];
-      }
-
-      // init sub query tree
-      if (!queryTree.children[key]) {
-        queryTree.children[key] = createTreeNode(assocModel, assoc);
-      }
-
-      buildQueryTree(
-        [
-          {
-            field: parts.join('.'),
-            operator,
-            value,
-          },
-        ],
-        assocModel,
-        queryTree.children[key]
-      );
-    }
-
-    return queryTree;
-  };
-
-  const root = buildQueryTree(whereClauses, model, {
+  // tree made to create the joins structure
+  const tree = {
     alias: model.collectionName,
     assoc: null,
     model,
-    where: [],
-    children: {},
-  });
-  return buildQueryFromTree(qb, root);
+    joins: {},
+  };
+
+  /**
+   * Returns the SQL path for a query field.
+   * Adds table to the joins tree
+   * @param {string} field a field used to filter
+   * @param {Object} tree joins tree
+   */
+  const generateNestedJoins = (field, tree) => {
+    let [key, ...parts] = field.split('.');
+
+    const assoc = findAssoc(tree.model, key);
+    // if the key is an attribute add as where clause
+    if (!assoc) {
+      return `${tree.alias}.${key}`;
+    }
+
+    const assocModel = strapi.db.getModelByAssoc(assoc);
+
+    // if the last part of the path is an association
+    // add the primary key of the model to the parts
+    if (parts.length === 0) {
+      parts = [assocModel.primaryKey];
+    }
+
+    // init sub query tree
+    if (!tree.joins[key]) {
+      tree.joins[key] = createTreeNode(assocModel, assoc);
+    }
+
+    return generateNestedJoins(parts.join('.'), tree.joins[key]);
+  };
+
+  const generateNestedJoinsFromFields = each(field => generateNestedJoins(field, tree));
+
+  /**
+   * Format every where clauses whith the right table name aliases.
+   * Add table joins to the joins list
+   * @param {Array<{field, operator, value}>} whereClauses a list of where clauses
+   * @param {Object} context
+   * @param {Object} context.model model on which the query is run
+   */
+  const buildWhereClauses = (whereClauses, { model }) => {
+    return whereClauses.map(whereClause => {
+      const { field, operator, value } = whereClause;
+
+      if (BOOLEAN_OPERATORS.includes(operator)) {
+        return { field, operator, value: value.map(v => buildWhereClauses(v, { model })) };
+      }
+
+      const path = generateNestedJoins(field, tree);
+
+      return {
+        field: path,
+        operator,
+        value,
+      };
+    });
+  };
+
+  /**
+   * Add queries on tree's joins (deep search, deep sort) based on given filters
+   * @param tree - joins tree
+   */
+  const addFiltersQueriesToJoinTree = tree => {
+    _.each(tree.joins, value => {
+      const { alias, model } = value;
+
+      // PublicationState
+      runPopulateQueries(
+        toQueries({
+          publicationState: { query: filters.publicationState, model, alias },
+        }),
+        qb
+      );
+
+      addFiltersQueriesToJoinTree(value);
+    });
+  };
+
+  const aliasedWhereClauses = buildWhereClauses(whereClauses, { model });
+  aliasedWhereClauses.forEach(w => buildWhereClause({ qb, ...w }));
+
+  // Force needed joins for deep sort clauses
+  generateNestedJoinsFromFields(sortClauses.map(prop('field')));
+
+  buildJoinsFromTree(qb, tree);
+  addFiltersQueriesToJoinTree(tree);
+
+  return tree;
 };
 
 /**
@@ -205,17 +289,29 @@ const buildJoinsAndFilter = (qb, model, whereClauses) => {
  * @param {Object} options.value - Filter value
  */
 const buildWhereClause = ({ qb, field, operator, value }) => {
-  if (Array.isArray(value) && !['in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
-        subQb.orWhere(q =>
-          buildWhereClause({ qb: q, field, operator, value: val })
-        );
+        subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
       }
     });
   }
 
   switch (operator) {
+    case 'or':
+      return qb.where(orQb => {
+        value.forEach(orClause => {
+          orQb.orWhere(subQb => {
+            if (Array.isArray(orClause)) {
+              orClause.forEach(orClause =>
+                subQb.where(andQb => buildWhereClause({ qb: andQb, ...orClause }))
+              );
+            } else {
+              buildWhereClause({ qb: subQb, ...orClause });
+            }
+          });
+        });
+      });
     case 'eq':
       return qb.where(field, value);
     case 'ne':
@@ -233,9 +329,9 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
     case 'nin':
       return qb.whereNotIn(field, Array.isArray(value) ? value : [value]);
     case 'contains':
-      return qb.whereRaw('LOWER(??) LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [field, `%${value}%`]);
     case 'ncontains':
-      return qb.whereRaw('LOWER(??) NOT LIKE LOWER(?)', [field, `%${value}%`]);
+      return qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [field, `%${value}%`]);
     case 'containss':
       return qb.where(field, 'like', `%${value}%`);
     case 'ncontainss':
@@ -249,16 +345,14 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
   }
 };
 
-/**
- * Returns a Bookshelf model based on a model association
- * @param {Object} assoc - A strapi association
- */
-const findModelByAssoc = assoc => {
-  const { models } = assoc.plugin ? strapi.plugins[assoc.plugin] : strapi;
-  return models[assoc.collection || assoc.model];
+const fieldLowerFn = qb => {
+  // Postgres requires string to be passed
+  if (qb.client.config.client === 'pg') {
+    return 'LOWER(CAST(?? AS VARCHAR))';
+  }
+  return 'LOWER(??)';
 };
 
-const findAssoc = (model, key) =>
-  model.associations.find(assoc => assoc.alias === key);
+const findAssoc = (model, key) => model.associations.find(assoc => assoc.alias === key);
 
 module.exports = buildQuery;

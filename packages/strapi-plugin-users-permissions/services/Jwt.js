@@ -9,8 +9,6 @@
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-const defaultJwtOptions = { expiresIn: '30d' };
-
 module.exports = {
   getToken(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.request.query);
@@ -41,12 +39,10 @@ module.exports = {
   },
 
   issue(payload, jwtOptions = {}) {
-    _.defaults(jwtOptions, defaultJwtOptions);
+    _.defaults(jwtOptions, strapi.plugins['users-permissions'].config.jwt);
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      process.env.JWT_SECRET ||
-        _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') ||
-        'oursecret',
+      _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
       jwtOptions
     );
   },
@@ -55,9 +51,7 @@ module.exports = {
     return new Promise(function(resolve, reject) {
       jwt.verify(
         token,
-        process.env.JWT_SECRET ||
-          _.get(strapi.plugins['users-permissions'], 'config.jwtSecret') ||
-          'oursecret',
+        _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
         {},
         function(err, tokenPayload = {}) {
           if (err) {

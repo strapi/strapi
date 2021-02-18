@@ -43,8 +43,16 @@ module.exports = function createSchemaHandler(infos) {
       return initialState.category;
     },
 
+    get kind() {
+      return _.get(state.schema, 'kind', 'collectionType');
+    },
+
     get uid() {
       return state.uid;
+    },
+
+    get writable() {
+      return _.get(state, 'plugin') !== 'admin';
     },
 
     setUID(val) {
@@ -81,7 +89,8 @@ module.exports = function createSchemaHandler(infos) {
     set(path, val) {
       modified = true;
 
-      _.set(state.schema, path, val || _.get(state.schema, path));
+      const value = _.defaultTo(val, _.get(state.schema, path));
+      _.set(state.schema, path, value);
 
       return this;
     },
@@ -162,9 +171,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attributes[key].components.filter(
-            val => val !== uid
-          );
+          const updatedComponentList = attributes[key].components.filter(val => val !== uid);
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
       });
@@ -187,9 +194,7 @@ module.exports = function createSchemaHandler(infos) {
           Array.isArray(attr.components) &&
           attr.components.includes(uid)
         ) {
-          const updatedComponentList = attr.components.map(val =>
-            val === uid ? newUID : val
-          );
+          const updatedComponentList = attr.components.map(val => (val === uid ? newUID : val));
 
           this.set(['attributes', key, 'components'], updatedComponentList);
         }
@@ -200,6 +205,10 @@ module.exports = function createSchemaHandler(infos) {
 
     // save the schema to disk
     async flush() {
+      if (!this.writable) {
+        return;
+      }
+
       const initialPath = path.join(initialState.dir, initialState.filename);
       const filePath = path.join(state.dir, state.filename);
 
@@ -210,7 +219,10 @@ module.exports = function createSchemaHandler(infos) {
         if (list.length === 0) {
           await fse.remove(initialState.dir);
         }
+
+        return;
       }
+
       if (modified === true) {
         await fse.ensureFile(filePath);
 
@@ -236,6 +248,8 @@ module.exports = function createSchemaHandler(infos) {
             await fse.remove(initialState.dir);
           }
         }
+
+        return;
       }
 
       return Promise.resolve();
@@ -243,6 +257,10 @@ module.exports = function createSchemaHandler(infos) {
 
     // reset the schema to its initial value
     async rollback() {
+      if (!this.writable) {
+        return;
+      }
+
       const initialPath = path.join(initialState.dir, initialState.filename);
       const filePath = path.join(state.dir, state.filename);
 

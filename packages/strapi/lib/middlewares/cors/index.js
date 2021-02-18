@@ -20,9 +20,6 @@ module.exports = strapi => {
      * Initialize the hook
      */
     initialize() {
-      if (strapi.config.currentEnvironment.security.cors.enabled !== true)
-        return;
-
       const {
         origin,
         expose,
@@ -31,14 +28,20 @@ module.exports = strapi => {
         methods,
         headers,
         keepHeadersOnError,
-      } = Object.assign({}, defaults, strapi.config.middleware.settings.cors);
+      } = Object.assign({}, defaults, strapi.config.get('middleware.settings.cors'));
 
       strapi.app.use(
         cors({
-          origin: function(ctx) {
-            const whitelist = Array.isArray(origin)
-              ? origin
-              : origin.split(/\s*,\s*/);
+          origin: async function(ctx) {
+            let originList;
+
+            if (typeof origin === 'function') {
+              originList = await origin(ctx);
+            } else {
+              originList = origin;
+            }
+
+            const whitelist = Array.isArray(originList) ? originList : originList.split(/\s*,\s*/);
 
             const requestOrigin = ctx.accept.headers.origin;
             if (whitelist.includes('*')) {

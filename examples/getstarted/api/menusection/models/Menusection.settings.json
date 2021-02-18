@@ -1,16 +1,14 @@
 {
-  "connection": "default",
+  "kind": "collectionType",
   "collectionName": "menusections",
   "info": {
     "name": "menusection",
     "description": ""
   },
   "options": {
+    "draftAndPublish": false,
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -22,7 +20,8 @@
     "dishes": {
       "component": "default.dish",
       "type": "component",
-      "repeatable": true
+      "repeatable": true,
+      "required": true
     },
     "menu": {
       "model": "menu",
