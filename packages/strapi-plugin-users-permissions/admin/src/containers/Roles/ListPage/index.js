@@ -136,7 +136,7 @@ const RoleListPage = () => {
 
   return (
     <>
-      <Helmet title="Settings - Roles" />
+      <Helmet title={formatMessage({ id: getTrad('page.title') })} />
 
       <Header
         icon

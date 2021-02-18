@@ -112,7 +112,7 @@ const SettingsPage = () => {
 
   return (
     <>
-      <Helmet title="Settings - Media Library" />
+      <Helmet title={formatMessage({ id: getTrad('page.title') })} />
 
       <Header {...headerProps} />
       <Wrapper>
