@@ -45,7 +45,7 @@ const Ul = styled.ul`
         content: attr(datadescr);
         position: absolute;
         left: 0;
-        color: #007eff;
+        color: ${({ theme }) => theme.main.colors.mediumBlue};
         font-weight: 700;
         z-index: 100;
       }
@@ -57,7 +57,7 @@ const Ul = styled.ul`
         left: -30px;
         right: -30px;
         bottom: 0;
-        background-color: #e6f0fb;
+        background-color: ${({ theme }) => theme.main.colors.lightBlue};
       }
     }
   }

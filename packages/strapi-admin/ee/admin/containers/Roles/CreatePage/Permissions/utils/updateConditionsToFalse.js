@@ -1,6 +1,11 @@
 import { isObject, has, omit } from 'lodash';
 import { createArrayOfValues } from '../../utils';
 
+/**
+ * Changes all the conditions leaf when the properties are all falsy
+ * @param {object} obj the modifiedData state
+ * @returns {object} the mutated modifiedData
+ */
 const updateConditionsToFalse = obj => {
   return Object.keys(obj).reduce((acc, current) => {
     const currentValue = obj[current];

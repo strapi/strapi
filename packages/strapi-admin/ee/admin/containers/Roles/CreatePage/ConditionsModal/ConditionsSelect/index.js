@@ -11,7 +11,7 @@ import SingleValue from './SingleValue';
 import selectStyle from '../utils/selectStyle';
 
 const Wrapper = styled.div`
-  padding-left: 30px;
+  padding-left: ${({ theme }) => theme.main.sizes.paddings.md};
   width: 60%;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'default')};
 `;
