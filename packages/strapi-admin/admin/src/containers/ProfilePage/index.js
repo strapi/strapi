@@ -50,6 +50,8 @@ const ProfilePage = () => {
       <PageTitle title="User profile" />
       <BackHeader onClick={goBack} />
 
+      <BaselineAlignment top size="2px" />
+
       <form onSubmit={handleSubmit}>
         <ContainerFluid padding="18px 30px 0 30px">
           <Header
@@ -62,7 +64,7 @@ const ProfilePage = () => {
           />
         </ContainerFluid>
 
-        <BaselineAlignment top size="3px" />
+        <BaselineAlignment top size="5px" />
 
         {/* Experience block */}
         <Padded size="md" left right bottom>
@@ -75,6 +77,8 @@ const ProfilePage = () => {
                   </Title>
                 </Padded>
               </Col>
+
+              <BaselineAlignment top size="9px" />
 
               <Row>
                 {Object.keys(form).map(key => (
@@ -92,6 +96,8 @@ const ProfilePage = () => {
           </Bloc>
         </Padded>
 
+        <BaselineAlignment top size="13px" />
+
         {/* Password block */}
         <Padded size="md" left right bottom>
           <Bloc>
@@ -103,6 +109,8 @@ const ProfilePage = () => {
                   </Title>
                 </Padded>
               </Col>
+
+              <BaselineAlignment top size="9px" />
 
               <Row>
                 <SizedInput
@@ -130,6 +138,8 @@ const ProfilePage = () => {
           </Bloc>
         </Padded>
 
+        <BaselineAlignment top size="13px" />
+
         {/* Interface block */}
         <Padded size="md" left right bottom>
           <Bloc>
@@ -141,6 +151,8 @@ const ProfilePage = () => {
                   </Title>
                 </Padded>
               </Col>
+
+              <BaselineAlignment top size="7px" />
 
               <div className="col-6">
                 <ProfilePageLabel htmlFor="">
