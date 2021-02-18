@@ -5,7 +5,6 @@ import { Col } from 'reactstrap';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import { useIntl } from 'react-intl';
-import { useTheme } from 'styled-components';
 import ContainerFluid from '../../components/ContainerFluid';
 import PageTitle from '../../components/PageTitle';
 import SizedInput from '../../components/SizedInput';
@@ -18,9 +17,6 @@ import { Title, ProfilePageLabel } from './components';
 import Bloc from '../../components/Bloc';
 
 const ProfilePage = () => {
-  const {
-    main: { colors },
-  } = useTheme();
   const { goBack } = useHistory();
   const { currentLanguage, selectLanguage } = useLanguages();
   const { formatMessage } = useIntl();
@@ -170,7 +166,7 @@ const ProfilePage = () => {
                 </Select>
 
                 <Padded size="sm" top bottom>
-                  <Text color={colors.grey}>
+                  <Text color="grey">
                     {formatMessage({
                       id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
                     })}
