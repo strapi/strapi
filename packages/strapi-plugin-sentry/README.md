@@ -9,6 +9,18 @@ The official plugin to track Strapi errors with Sentry.
 - Attach useful metadata to Sentry events, to help you with debugging
 - Expose a global Sentry service
 
+## Installation
+
+To install this plugin, you need to add an NPM dependency to your Strapi application.
+
+```sh
+# Using Yarn
+yarn add strapi-plugin-sentry
+
+# Or using NPM
+npm install strapi-plugin-sentry
+```
+
 ## Configuration
 
 | property       | type (default)   | description                                                                                                                                                                              |
