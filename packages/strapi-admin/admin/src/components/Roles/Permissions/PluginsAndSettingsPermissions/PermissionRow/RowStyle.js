@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import { Text } from '@buffetjs/core';
 
 const activeStyle = theme => `
-    background-color: #e4f0fc;
+    background-color: ${theme.main.colors.lightestBlue};
     border: 1px solid ${theme.main.colors.darkBlue};
     ${Text} {
       color: ${theme.main.colors.mediumBlue};
@@ -19,7 +19,7 @@ const RowStyle = styled.div`
   background-color: ${({ theme, isWhite }) => theme.main.colors[isWhite ? 'white' : 'lightGrey']};
   cursor: pointer;
   &:hover {
-    background-color: #e4f0fc;
+    background-color: ${({ theme }) => theme.main.colors.lightestBlue};
     ${({ theme }) => activeStyle(theme)};
   }
   ${({ isActive, theme }) => isActive && activeStyle(theme)};

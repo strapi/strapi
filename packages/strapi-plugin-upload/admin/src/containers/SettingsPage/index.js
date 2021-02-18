@@ -1,11 +1,10 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
+import { Text } from '@buffetjs/core';
 import { isEqual } from 'lodash';
 import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
 
 import { getRequestUrl, getTrad } from '../../utils';
-import Text from '../../components/Text';
-// import Divider from './Divider';
 import SectionTitleWrapper from './SectionTitleWrapper';
 import Wrapper from './Wrapper';
 import init from './init';

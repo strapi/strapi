@@ -37,7 +37,7 @@ const buildSearchOr = (model, query) => {
 
   const searchOr = Object.keys(model.attributes).reduce((acc, curr) => {
     if (model.attributes[curr].searchable === false) {
-      return acc
+      return acc;
     }
     switch (model.attributes[curr].type) {
       case 'biginteger':

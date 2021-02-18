@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pencil, Plus } from '@buffetjs/icons';
+import { Tooltip } from '@buffetjs/styles';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
@@ -10,22 +11,33 @@ import Wrapper from './Wrapper';
 
 const CardControl = ({ title, color, onClick, small, type, iconStyle }) => {
   const { formatMessage } = useGlobalContext();
+  const [tooltipIsDisplayed, setTooltipIsDisplayed] = useState(false);
+
+  const handleToggleTooltip = () => {
+    setTooltipIsDisplayed(prev => !prev);
+  };
 
   return (
-    <Wrapper
-      title={formatMessage({ id: getTrad(`control-card.${title}`) })}
-      onClick={onClick}
-      color={color}
-      type={type}
-      small={small}
-    >
-      {type === 'pencil' && <Pencil fill={color} />}
-      {type === 'plus' && <Plus fill={color} />}
-      {type === 'download' && <DownloadIcon fill={color} />}
-      {!['pencil', 'clear', 'plus', 'download'].includes(type) && (
-        <FontAwesomeIcon style={iconStyle} icon={type} />
-      )}
-    </Wrapper>
+    <>
+      <Wrapper
+        onClick={onClick}
+        color={color}
+        type={type}
+        small={small}
+        onMouseEnter={handleToggleTooltip}
+        onMouseLeave={handleToggleTooltip}
+        data-for={type}
+        data-tip={formatMessage({ id: getTrad(`control-card.${title}`) })}
+      >
+        {type === 'pencil' && <Pencil fill={color} />}
+        {type === 'plus' && <Plus fill={color} />}
+        {type === 'download' && <DownloadIcon fill={color} />}
+        {!['pencil', 'clear', 'plus', 'download'].includes(type) && (
+          <FontAwesomeIcon style={iconStyle} icon={type} />
+        )}
+      </Wrapper>
+      {tooltipIsDisplayed && <Tooltip id={type} />}
+    </>
   );
 };
 
