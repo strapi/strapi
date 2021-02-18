@@ -1,6 +1,6 @@
 {
   "name": "strapi-provider-upload-local",
-  "version": "3.4.6",
+  "version": "3.5.0",
   "description": "Local provider for strapi upload",
   "homepage": "https://strapi.io",
   "keywords": [

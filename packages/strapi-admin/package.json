@@ -1,6 +1,6 @@
 {
   "name": "strapi-admin",
-  "version": "3.4.6",
+  "version": "3.5.0",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -86,8 +86,8 @@
     "react-redux": "7.2.0",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-tooltip": "4.2.11",
     "react-select": "^4.0.2",
+    "react-tooltip": "4.2.11",
     "react-transition-group": "4.4.1",
     "react-virtualized": "^9.21.2",
     "reactstrap": "8.4.1",
@@ -98,8 +98,8 @@
     "sanitize.css": "^4.1.0",
     "semver": "7.3.4",
     "sift": "13.1.10",
-    "strapi-helper-plugin": "3.4.6",
-    "strapi-utils": "3.4.6",
+    "strapi-helper-plugin": "3.5.0",
+    "strapi-utils": "3.5.0",
     "style-loader": "^0.23.1",
     "styled-components": "^5.0.0",
     "terser-webpack-plugin": "^1.2.3",
