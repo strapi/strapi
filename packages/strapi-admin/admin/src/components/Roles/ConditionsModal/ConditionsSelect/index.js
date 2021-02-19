@@ -27,10 +27,7 @@ const ConditionsSelect = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Wrapper
-      // TODO
-      disabled={isFormDisabled}
-    >
+    <Wrapper disabled={isFormDisabled}>
       <Select
         components={{
           ClearIndicator,

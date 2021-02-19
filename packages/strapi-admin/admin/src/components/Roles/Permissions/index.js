@@ -21,10 +21,10 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         return formatPermissionsToAPI(modifiedData);
       },
       resetForm: () => {
-        console.log('todo');
+        dispatch({ type: 'RESET_FORM' });
       },
       setFormAfterSubmit: () => {
-        console.log('todo');
+        dispatch({ type: 'SET_FORM_AFTER_SUBMIT' });
       },
     };
   });
