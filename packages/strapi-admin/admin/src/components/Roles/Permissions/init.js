@@ -1,32 +1,33 @@
-import { get } from 'lodash';
+import createDefaultCTFormFromLayout from './utils/createDefaultCTFormFromLayout';
+import createDefaultPluginsFormFromLayout from './utils/createDefaultPluginsFormFromLayout';
+import formatLayoutForSettingsAndPlugins from './utils/formatLayoutForSettingsAndPlugins';
 
-import { CONTENT_MANAGER_PREFIX } from './utils';
-
-const init = (state, permissionsLayout, permissions, role) => {
-  let customPermissionsLayout = permissionsLayout;
-
-  // Customize permissions layout for the Author role
-  if (role.code === 'strapi-author') {
-    // The publish action have to be hidden in CE for the author role.
-    const contentTypesLayout = get(permissionsLayout, ['sections', 'contentTypes'], []).filter(
-      pLayout => pLayout.action !== `${CONTENT_MANAGER_PREFIX}.publish`
-    );
-
-    customPermissionsLayout = {
-      ...customPermissionsLayout,
-      sections: {
-        ...customPermissionsLayout.sections,
-        contentTypes: contentTypesLayout,
-      },
-    };
-  }
+const init = layout => {
+  const {
+    conditions,
+    sections: { collectionTypes, singleTypes, plugins, settings },
+  } = layout;
+  const layouts = {
+    collectionTypes,
+    singleTypes,
+    plugins: formatLayoutForSettingsAndPlugins(plugins, 'plugin'),
+    settings: formatLayoutForSettingsAndPlugins(settings, 'category'),
+  };
+  const defaultForm = {
+    collectionTypes: createDefaultCTFormFromLayout(
+      collectionTypes,
+      collectionTypes.actions || [],
+      conditions
+    ),
+    singleTypes: createDefaultCTFormFromLayout(singleTypes, singleTypes.actions || [], conditions),
+    plugins: createDefaultPluginsFormFromLayout(layouts.plugins, conditions),
+    settings: createDefaultPluginsFormFromLayout(layouts.settings, conditions),
+  };
 
   return {
-    ...state,
-    ...permissions,
-    permissionsLayout: customPermissionsLayout,
-    initialData: permissions,
-    isSuperAdmin: role && role.code === 'strapi-super-admin',
+    initialData: defaultForm,
+    modifiedData: defaultForm,
+    layouts,
   };
 };
 

@@ -19,8 +19,8 @@ import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormCard from '../../../../../admin/src/components/FormBloc';
 import { ButtonWithNumber } from '../../../../../admin/src/components/Roles';
 import SizedInput from '../../../../../admin/src/components/SizedInput';
+import Permissions from '../../../../../admin/src/components/Roles/Permissions';
 import { formatPermissionsToApi } from '../../../../../admin/src/utils';
-import Permissions from './Permissions';
 
 import schema from './utils/schema';
 
