@@ -1,5 +1,5 @@
 import { merge, get, isEmpty, set } from 'lodash';
-
+import findMatchingPermission from './findMatchingPermissions';
 /**
  * Creates the default condition form: { [conditionId]: false }
  * @param {object} conditions.id Id of the condition
@@ -154,9 +154,6 @@ const createDefaultCTFormFromLayout = (
     return merge(defaultForm, contentTypesActions);
   }, {});
 };
-
-const findMatchingPermission = (permissions, action, subject) =>
-  permissions.find(perm => perm.action === action && perm.subject === subject);
 
 export default createDefaultCTFormFromLayout;
 export {

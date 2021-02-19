@@ -51,7 +51,51 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
       };
 
-      expect(createSubCategoryForm(actions, conditions)).toEqual(expected);
+      expect(createSubCategoryForm(actions, conditions, [])).toEqual(expected);
+    });
+
+    it('should return an object with all the leafs set to true when the permission exists', () => {
+      const actions = [
+        {
+          displayName: 'Update and delete',
+          action: 'plugins::documentation.settings.update',
+          subCategory: 'settings',
+          plugin: 'plugin::documentation',
+        },
+        {
+          displayName: 'Regenerate',
+          action: 'plugins::documentation.settings.regenerate',
+          subCategory: 'settings',
+          plugin: 'plugin::documentation',
+        },
+      ];
+
+      const permissions = [
+        {
+          action: 'plugins::documentation.settings.update',
+          subject: null,
+          conditions: ['admin::has-same-role-as-creator'],
+        },
+      ];
+
+      const expected = {
+        'plugins::documentation.settings.update': {
+          enabled: true,
+          conditions: {
+            'admin::is-creator': false,
+            'admin::has-same-role-as-creator': true,
+          },
+        },
+        'plugins::documentation.settings.regenerate': {
+          enabled: false,
+          conditions: {
+            'admin::is-creator': false,
+            'admin::has-same-role-as-creator': false,
+          },
+        },
+      };
+
+      expect(createSubCategoryForm(actions, conditions, permissions)).toEqual(expected);
     });
   });
 
@@ -117,7 +161,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
       };
 
-      expect(createChildrenDefaultForm(chilrenForm, conditions)).toEqual(expected);
+      expect(createChildrenDefaultForm(chilrenForm, conditions, [])).toEqual(expected);
     });
   });
 
@@ -221,7 +265,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
       };
 
-      expect(createDefaultPluginsFormFromLayout(data, conditions)).toEqual(expected);
+      expect(createDefaultPluginsFormFromLayout(data, conditions, [])).toEqual(expected);
     });
   });
 });

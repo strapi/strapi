@@ -20,9 +20,14 @@ const init = (layout, permissions) => {
       conditions,
       permissions
     ),
-    singleTypes: createDefaultCTFormFromLayout(singleTypes, singleTypes.actions || [], conditions),
-    plugins: createDefaultPluginsFormFromLayout(layouts.plugins, conditions),
-    settings: createDefaultPluginsFormFromLayout(layouts.settings, conditions),
+    singleTypes: createDefaultCTFormFromLayout(
+      singleTypes,
+      singleTypes.actions || [],
+      conditions,
+      permissions
+    ),
+    plugins: createDefaultPluginsFormFromLayout(layouts.plugins, conditions, permissions),
+    settings: createDefaultPluginsFormFromLayout(layouts.settings, conditions, permissions),
   };
 
   return {
