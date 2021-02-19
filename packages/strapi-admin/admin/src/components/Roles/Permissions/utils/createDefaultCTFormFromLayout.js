@@ -1,13 +1,13 @@
-import { merge, isEmpty, set } from 'lodash';
+import { merge, get, isEmpty, set } from 'lodash';
 
 /**
  * Creates the default condition form: { [conditionId]: false }
  * @param {object} conditions.id Id of the condition
  * @returns {object}
  */
-const createDefaultConditionsForm = conditions =>
+const createDefaultConditionsForm = (conditions, initialConditions = []) =>
   conditions.reduce((acc, current) => {
-    acc[current.id] = false;
+    acc[current.id] = initialConditions.indexOf(current.id) !== -1;
 
     return acc;
   }, {});
@@ -16,16 +16,26 @@ const createDefaultConditionsForm = conditions =>
  * Create the default form a property (fields, locales) with all the values
  * set to false
  * @param {object} property.children ex: {children: [{value: 'foo',}]}
+ * @param {array<string>} The found property values retrieved from the role associated permissions
  * @returns {object} ex: { foo: false }
  *
  */
-const createDefaultPropertyForms = ({ children }) => {
+const createDefaultPropertyForms = ({ children }, propertyValues, prefix = '') => {
   return children.reduce((acc, current) => {
     if (current.children) {
-      return { ...acc, [current.value]: createDefaultPropertyForms(current) };
+      return {
+        ...acc,
+        [current.value]: createDefaultPropertyForms(
+          current,
+          propertyValues,
+          `${prefix}${current.value}.`
+        ),
+      };
     }
 
-    acc[current.value] = false;
+    const hasProperty = propertyValues.indexOf(`${prefix}${current.value}`) !== -1;
+
+    acc[current.value] = hasProperty;
 
     return acc;
   }, {});
@@ -43,12 +53,16 @@ const createDefaultPropertyForms = ({ children }) => {
  * }
  * @returns {object} In this case it will return { fields: { name: false } }
  */
-const createDefaultPropertiesForm = (propertiesArray, ctLayout) => {
+const createDefaultPropertiesForm = (propertiesArray, ctLayout, matchingPermission) => {
   return propertiesArray.reduce((acc, currentPropertyName) => {
     const foundProperty = ctLayout.properties.find(({ value }) => value === currentPropertyName);
 
     if (foundProperty) {
-      const propertyForm = createDefaultPropertyForms(foundProperty);
+      const matchingPermissionPropertyValues = get(matchingPermission, foundProperty.value, []);
+      const propertyForm = createDefaultPropertyForms(
+        foundProperty,
+        matchingPermissionPropertyValues
+      );
 
       acc[currentPropertyName] = propertyForm;
     }
@@ -89,7 +103,12 @@ const findLayouts = (allLayouts, subjects) => {
  *  }
  * }
  */
-const createDefaultCTFormFromLayout = ({ subjects }, actionArray, conditionArray) => {
+const createDefaultCTFormFromLayout = (
+  { subjects },
+  actionArray,
+  conditionArray,
+  initialPermissions = []
+) => {
   return actionArray.reduce((defaultForm, current) => {
     const actionSubjects = current.subjects;
 
@@ -105,17 +124,26 @@ const createDefaultCTFormFromLayout = ({ subjects }, actionArray, conditionArray
     // The object has the following shape: { [ctUID]: { [actionId]: { [property]: { enabled: false } } } }
     const contentTypesActions = Object.keys(subjectLayouts).reduce((acc, currentCTUID) => {
       const { actionId, applyToProperties } = current;
-      const conditionsForm = createDefaultConditionsForm(conditionArray);
+
+      const matchingPermission = findMatchingPermission(initialPermissions, actionId, currentCTUID);
+      const conditionsForm = createDefaultConditionsForm(
+        conditionArray,
+        get(matchingPermission, 'conditions', [])
+      );
 
       if (isEmpty(applyToProperties)) {
-        set(acc, [currentCTUID, actionId], { enabled: false, conditions: conditionsForm });
+        set(acc, [currentCTUID, actionId], {
+          enabled: matchingPermission !== undefined,
+          conditions: conditionsForm,
+        });
 
         return acc;
       }
 
       const propertiesForm = createDefaultPropertiesForm(
         applyToProperties,
-        subjectLayouts[currentCTUID]
+        subjectLayouts[currentCTUID],
+        matchingPermission
       );
 
       set(acc, [currentCTUID, actionId], { ...propertiesForm, conditions: conditionsForm });
@@ -126,6 +154,9 @@ const createDefaultCTFormFromLayout = ({ subjects }, actionArray, conditionArray
     return merge(defaultForm, contentTypesActions);
   }, {});
 };
+
+const findMatchingPermission = (permissions, action, subject) =>
+  permissions.find(perm => perm.action === action && perm.subject === subject);
 
 export default createDefaultCTFormFromLayout;
 export {

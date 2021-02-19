@@ -10,9 +10,9 @@ import formatPermissionsToAPI from './utils/formatPermissionsToAPI';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const Permissions = forwardRef(({ layout, isFormDisabled }, ref) => {
+const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) => {
   const [{ layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
-    init(layout)
+    init(layout, permissions)
   );
 
   useImperativeHandle(ref, () => {
@@ -112,11 +112,13 @@ const Permissions = forwardRef(({ layout, isFormDisabled }, ref) => {
 });
 
 Permissions.defaultProps = {
+  permissions: [],
   layout,
 };
 Permissions.propTypes = {
   layout: PropTypes.object,
   isFormDisabled: PropTypes.bool.isRequired,
+  permissions: PropTypes.array,
 };
 
 export default memo(Permissions);
