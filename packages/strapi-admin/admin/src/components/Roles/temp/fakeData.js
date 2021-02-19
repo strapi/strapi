@@ -286,7 +286,7 @@ const data = {
     collectionTypes: {
       subjects: [
         {
-          uid: 'address',
+          uid: 'application::address.address',
           label: 'Address',
           properties: [
             {
@@ -319,7 +319,7 @@ const data = {
           ],
         },
         {
-          uid: 'restaurant',
+          uid: 'application::restaurant.restaurant',
           label: 'Restaurant',
           properties: [
             {
@@ -327,13 +327,109 @@ const data = {
               value: 'fields',
               children: [
                 {
-                  label: 'f1',
-                  value: 'f1',
+                  label: 'Name',
+                  value: 'name',
                   required: true,
                 },
                 {
-                  label: 'f2',
-                  value: 'f2',
+                  label: 'Slug',
+                  value: 'slug',
+                },
+                {
+                  label: 'CLOSING_PERIOD',
+                  value: 'closing_period',
+                  children: [
+                    {
+                      label: 'label',
+                      value: 'label',
+                    },
+                    {
+                      label: 'start_date',
+                      value: 'start_date',
+                    },
+                    {
+                      label: 'end_date',
+                      value: 'end_date',
+                    },
+                    {
+                      label: 'media',
+                      value: 'media',
+                    },
+                    {
+                      label: 'dish',
+                      value: 'dish',
+                      children: [
+                        {
+                          label: 'name',
+                          value: 'name',
+                        },
+                        {
+                          label: 'description',
+                          value: 'description',
+                        },
+                        {
+                          label: 'price',
+                          value: 'price',
+                        },
+                        {
+                          label: 'picture',
+                          value: 'picture',
+                        },
+                        {
+                          label: 'very_long_description',
+                          value: 'very_long_description',
+                        },
+                        {
+                          label: 'categories',
+                          value: 'categories',
+                        },
+                      ],
+                    },
+                  ],
+                },
+                {
+                  label: 'contact_email',
+                  value: 'contact_email',
+                },
+                {
+                  label: 'stars',
+                  value: 'stars',
+                },
+                {
+                  label: 'averagePrice',
+                  value: 'averagePrice',
+                },
+                {
+                  label: 'address',
+                  value: 'address',
+                },
+                {
+                  label: 'cover',
+                  value: 'cover',
+                },
+                {
+                  label: 'timestamp',
+                  value: 'timestamp',
+                },
+                {
+                  label: 'images',
+                  value: 'images',
+                },
+                {
+                  label: 'short_description',
+                  value: 'short_description',
+                },
+                {
+                  label: 'since',
+                  value: 'since',
+                },
+                {
+                  label: 'categories',
+                  value: 'categories',
+                },
+                {
+                  label: 'description',
+                  value: 'description',
                 },
                 {
                   // nested compo
@@ -350,43 +446,37 @@ const data = {
                       required: true,
                     },
                     {
-                      label: 'closing',
-                      value: 'closing',
-                      children: [
-                        {
-                          label: 'name',
-                          value: 'name',
-                          children: [{ label: 'test', value: 'test' }],
-                        },
-                      ],
+                      label: 'is_available',
+                      value: 'is_available',
                     },
                   ],
                 },
                 {
+                  label: 'menu',
+                  value: 'menu',
+                },
+
+                {
                   label: 'dz',
                   value: 'dz',
                 },
-                {
-                  label: 'relation',
-                  value: 'relation',
-                },
               ],
             },
-            {
-              label: 'Locales',
-              value: 'locales',
-              children: [
-                {
-                  label: 'French',
-                  value: 'fr',
-                },
-                {
-                  label: 'English',
-                  required: true,
-                  value: 'en',
-                },
-              ],
-            },
+            // {
+            //   label: 'Locales',
+            //   value: 'locales',
+            //   children: [
+            //     {
+            //       label: 'French',
+            //       value: 'fr',
+            //     },
+            //     {
+            //       label: 'English',
+            //       required: true,
+            //       value: 'en',
+            //     },
+            //   ],
+            // },
           ],
         },
         // {
@@ -398,34 +488,42 @@ const data = {
       actions: [
         {
           label: 'Create',
-          actionId: 'content-manager.explorer.create',
-          subjects: ['restaurant', 'address'],
-          applyToProperties: ['fields', 'locales'],
+          actionId: 'plugins::content-manager.explorer.create',
+          subjects: ['application::restaurant.restaurant', 'application::address.address'],
+          applyToProperties: [
+            'fields',
+            // Commenting the locales since the API does not support this yet
+            // 'locales'
+          ],
         },
         {
           label: 'Read',
-          actionId: 'content-manager.explorer.read',
-          subjects: ['restaurant', 'address'],
-          applyToProperties: ['fields', 'locales'],
+          actionId: 'plugins::content-manager.explorer.read',
+          subjects: ['application::restaurant.restaurant', 'application::address.address'],
+          applyToProperties: [
+            'fields',
+            // 'locales'
+          ],
         },
         {
           label: 'Update',
-          actionId: 'content-manager.explorer.update',
-          subjects: ['address', 'erestaurant'],
+          actionId: 'plugins::content-manager.explorer.update',
+          subjects: ['application::address.address', 'application::restaurant.restaurant'],
           applyToProperties: ['fields'],
         },
         {
           label: 'Delete',
-          actionId: 'content-manager.explorer.delete',
-          subjects: ['restaurant', 'address'],
+          actionId: 'plugins::content-manager.explorer.delete',
+          subjects: ['application::restaurant.restaurant', 'application::address.address'],
           applyToProperties: [],
         },
-        {
-          label: 'Publish',
-          actionId: 'content-manager.explorer.publish',
-          subjects: ['restaurant'],
-          applyToProperties: ['locales'],
-        },
+        // {
+        //   label: 'Publish',
+        //   actionId: 'plugins::content-manager.explorer.publish',
+        //   subjects: ['application::restaurant.restaurante'],
+        //   applyToProperties: [],
+        //   // applyToProperties: ['locales'],
+        // },
       ],
     },
   },

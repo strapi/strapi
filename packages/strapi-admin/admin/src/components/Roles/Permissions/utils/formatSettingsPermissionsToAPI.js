@@ -1,3 +1,8 @@
+/**
+ * Returns an array of condition names when a condition is enabled
+ * @param {object} conditions
+ * @config {boolean}
+ */
 const createConditionsArray = conditions => {
   return Object.entries(conditions)
     .filter(([, conditionValue]) => {

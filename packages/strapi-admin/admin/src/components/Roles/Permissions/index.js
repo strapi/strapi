@@ -23,6 +23,9 @@ const Permissions = forwardRef(({ layout, isFormDisabled }, ref) => {
       resetForm: () => {
         console.log('todo');
       },
+      setFormAfterSubmit: () => {
+        console.log('todo');
+      },
     };
   });
 
