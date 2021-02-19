@@ -22,7 +22,11 @@ const EditPage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
 
-  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
+  const {
+    isLoading: isLayoutLoading,
+    // TODO
+    // data: permissionsLayout,
+  } = useFetchPermissionsLayout(id);
   const {
     role,
     permissions: rolePermissions,
@@ -93,10 +97,12 @@ const EditPage = () => {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
           body: {
+            // TODO
             permissions: formatPermissionsToApi(permissionsToSend),
           },
         });
 
+        // TODO
         if (checkConditionsDiff()) {
           emitEvent('didUpdateConditions');
         }
@@ -166,9 +172,9 @@ const EditPage = () => {
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
                   <Permissions
-                    permissionsLayout={permissionsLayout}
-                    rolePermissions={rolePermissions}
-                    role={role}
+                    // // permissionsLayout={permissionsLayout}
+                    // // rolePermissions={rolePermissions}
+                    // role={role}
                     ref={permissionsRef}
                   />
                 </Padded>
