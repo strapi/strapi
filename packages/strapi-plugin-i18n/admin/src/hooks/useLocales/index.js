@@ -1,46 +1,27 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useQuery } from 'react-query';
 import { request } from 'strapi-helper-plugin';
-import reducer, { initialState } from './reducer';
 
-const fetchLocalesList = async (dispatch, signal) => {
+const fetchLocalesList = async () => {
   try {
-    dispatch({
-      type: 'GET_DATA',
-    });
-
     const data = await request('/i18n/locales', {
       method: 'GET',
-      signal,
     });
 
-    dispatch({
-      type: 'GET_DATA_SUCCEEDED',
-      data,
-    });
+    return data;
   } catch (e) {
-    if (e.name === 'AbortError') return;
-
     strapi.notification.toggle({
       type: 'warning',
       message: { id: 'notification.error' },
     });
+
+    return e;
   }
 };
 
 const useLocales = () => {
-  const abortCtrlRef = useRef(new AbortController());
-  const [{ locales, isLoading }, dispatch] = useReducer(reducer, initialState);
+  const { isLoading, data, refetch } = useQuery('locales', fetchLocalesList);
 
-  const refetch = () => fetchLocalesList(dispatch, abortCtrlRef.current.signal);
-
-  useEffect(() => {
-    const abortCtrl = abortCtrlRef.current;
-    fetchLocalesList(dispatch, abortCtrl.signal);
-
-    return () => abortCtrl.abort();
-  }, []);
-
-  return { locales, isLoading, refetch };
+  return { locales: data, isLoading, refetch };
 };
 
 export default useLocales;

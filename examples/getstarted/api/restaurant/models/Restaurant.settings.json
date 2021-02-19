@@ -10,6 +10,11 @@
     "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "name": {
       "maxLength": 50,

@@ -1,0 +1,5 @@
+{
+  "sentry": {
+    "enabled": true
+  }
+}

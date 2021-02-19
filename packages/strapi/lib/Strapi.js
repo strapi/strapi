@@ -28,6 +28,11 @@ const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
 
+const LIFECYCLES = {
+  REGISTER: 'register',
+  BOOTSTRAP: 'bootstrap',
+};
+
 /**
  * Construct an Strapi instance.
  *
@@ -336,6 +341,8 @@ class Strapi {
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
+
+    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     await this.db.initialize();
 
     this.store = createCoreStore({
@@ -361,7 +368,7 @@ class Strapi {
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
 
-    await this.runBootstrapFunctions();
+    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
     await this.freeze();
 
     this.isLoaded = true;
@@ -414,30 +421,37 @@ class Strapi {
     return reload;
   }
 
-  async runBootstrapFunctions() {
-    const execBootstrap = async fn => {
-      if (!fn) return;
+  async runLifecyclesFunctions(lifecycleName) {
+    const execLifecycle = async fn => {
+      if (!fn) {
+        return;
+      }
 
       return fn();
     };
 
-    // plugins bootstrap
-    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
-        strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
-        strapi.log.error(err);
-        strapi.stop();
-      });
-    });
-    await Promise.all(pluginBoostraps);
+    const configPath = `functions.${lifecycleName}`;
 
-    // user bootstrap
-    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // plugins
+    await Promise.all(
+      Object.keys(this.plugins).map(plugin => {
+        const pluginFunc = _.get(this.plugins[plugin], `config.${configPath}`);
 
-    // admin bootstrap : should always run after the others
-    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
-    return execBootstrap(adminBootstrap).catch(err => {
-      strapi.log.error(`Bootstrap function in admin failed`);
+        return execLifecycle(pluginFunc).catch(err => {
+          strapi.log.error(`${lifecycleName} function in plugin "${plugin}" failed`);
+          strapi.log.error(err);
+          strapi.stop();
+        });
+      })
+    );
+
+    // user
+    await execLifecycle(_.get(this.config, configPath));
+
+    // admin
+    const adminFunc = _.get(this.admin.config, configPath);
+    return execLifecycle(adminFunc).catch(err => {
+      strapi.log.error(`${lifecycleName} function in admin failed`);
       strapi.log.error(err);
       strapi.stop();
     });

@@ -1,13 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalHeader, ModalSection, ModalFooter } from 'strapi-helper-plugin';
+import { Modal, ModalFooter, TabPanel } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
-import { Button, Label, InputText } from '@buffetjs/core';
-import Select from 'react-select';
+import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
-import { object, string } from 'yup';
+import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
+import BaseForm from './BaseForm';
+import SettingsModal from '../SettingsModal';
 
 const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   const { isEditing, editLocale } = useEditLocale();
@@ -34,48 +35,26 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
       <Formik
         initialValues={{ displayName: localeToEdit ? localeToEdit.name : '' }}
         onSubmit={handleSubmit}
-        validationSchema={object().shape({
-          displayName: string().max(50, 'Settings.locales.modal.edit.locales.displayName.error'),
-        })}
+        validationSchema={localeFormSchema}
       >
-        {({ values, handleSubmit, handleChange, errors }) => (
+        {({ handleSubmit, errors }) => (
           <form onSubmit={handleSubmit}>
-            <ModalHeader
-              headerBreadcrumbs={[formatMessage({ id: getTrad('Settings.list.actions.edit') })]}
-            />
-            <ModalSection>
-              <div>
-                <span id="locale-code">
-                  <Label htmlFor="">
-                    {formatMessage({ id: getTrad('Settings.locales.modal.edit.locales.label') })}
-                  </Label>
-                </span>
+            <SettingsModal
+              title={formatMessage({
+                id: getTrad('Settings.locales.modal.title'),
+              })}
+              breadCrumb={[formatMessage({ id: getTrad('Settings.list.actions.edit') })]}
+              tabsAriaLabel={formatMessage({
+                id: getTrad('Settings.locales.modal.edit.tab.label'),
+              })}
+              tabsId="i18n-settings-tabs-edit"
+            >
+              <TabPanel>
+                <BaseForm options={options} defaultOption={defaultOption} />
+              </TabPanel>
+              <TabPanel>advanced</TabPanel>
+            </SettingsModal>
 
-                <Select
-                  aria-labelledby="locale-code"
-                  options={options}
-                  defaultValue={defaultOption}
-                  isDisabled
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="displayName">
-                  {formatMessage({
-                    id: getTrad('Settings.locales.modal.edit.locales.displayName'),
-                  })}
-                </Label>
-                <InputText name="displayName" value={values.displayName} onChange={handleChange} />
-
-                {errors.displayName && (
-                  <small>
-                    {formatMessage({
-                      id: getTrad(' Settings.locales.modal.edit.locales.displayName.error'),
-                    })}
-                  </small>
-                )}
-              </div>
-            </ModalSection>
             <ModalFooter>
               <section>
                 <Button type="button" color="cancel" onClick={onClose}>

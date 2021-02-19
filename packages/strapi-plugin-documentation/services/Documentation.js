@@ -348,7 +348,7 @@ module.exports = {
         }
 
         if (isField) {
-          acc.properties[curr] = { type: this.getType(attribute.type) };
+          acc.properties[curr] = { type: this.getType(attribute.type), enum: attribute.enum };
         } else {
           const newGetter = getter.slice();
           newGetter.splice(newGetter.length - 1, 1, 'associations');
@@ -359,6 +359,7 @@ module.exports = {
           switch (relationNature) {
             case 'manyToMany':
             case 'oneToMany':
+            case 'manyWay':
             case 'manyToManyMorph':
               acc.properties[curr] = {
                 type: 'array',
@@ -573,6 +574,7 @@ module.exports = {
           switch (relationNature) {
             case 'manyToMany':
             case 'oneToMany':
+            case 'manyWay':
             case 'manyToManyMorph':
               acc.properties[current] = {
                 type: 'array',

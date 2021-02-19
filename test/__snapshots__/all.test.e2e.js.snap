@@ -317,6 +317,11 @@ Object {
     "schema": Object {
       "attributes": Object {
         "title": Object {
+          "pluginOptions": Object {
+            "i18n": Object {
+              "localized": true,
+            },
+          },
           "type": "string",
         },
       },
@@ -324,10 +329,15 @@ Object {
       "connection": "default",
       "description": "",
       "draftAndPublish": false,
-      "editable": true,
       "kind": "collectionType",
       "name": "Test Collection Type",
+      "pluginOptions": Object {
+        "i18n": Object {
+          "localized": true,
+        },
+      },
       "restrictRelationsTo": null,
+      "visible": true,
     },
     "uid": "application::test-collection-type.test-collection-type",
   },
@@ -348,10 +358,10 @@ Object {
       "connection": "default",
       "description": "",
       "draftAndPublish": true,
-      "editable": true,
       "kind": "collectionType",
       "name": "CT with DP",
       "restrictRelationsTo": null,
+      "visible": true,
     },
     "uid": "application::ct-with-dp.ct-with-dp",
   },
@@ -365,6 +375,11 @@ Object {
     "schema": Object {
       "attributes": Object {
         "title": Object {
+          "pluginOptions": Object {
+            "i18n": Object {
+              "localized": true,
+            },
+          },
           "type": "string",
         },
       },
@@ -372,10 +387,15 @@ Object {
       "connection": "default",
       "description": "",
       "draftAndPublish": false,
-      "editable": true,
       "kind": "singleType",
       "name": "Test Single Type",
+      "pluginOptions": Object {
+        "i18n": Object {
+          "localized": true,
+        },
+      },
       "restrictRelationsTo": null,
+      "visible": true,
     },
     "uid": "application::test-single-type.test-single-type",
   },

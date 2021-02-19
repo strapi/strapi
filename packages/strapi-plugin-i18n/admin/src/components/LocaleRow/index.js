@@ -30,12 +30,15 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
           <FontAwesomeIcon icon="trash-alt" />
         </span>
       ) : null,
-      onClick: () => onDelete(locale),
+      onClick: e => {
+        e.stopPropagation();
+        onDelete(locale);
+      },
     });
   }
 
   return (
-    <CustomRow>
+    <CustomRow onClick={() => onEdit(locale)}>
       <td>
         <Text>{locale.code}</Text>
       </td>

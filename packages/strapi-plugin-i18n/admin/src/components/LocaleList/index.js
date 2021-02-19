@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { EmptyState, ListButton } from 'strapi-helper-plugin';
-import { List, Button } from '@buffetjs/custom';
+import { List } from '@buffetjs/custom';
+import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import PropTypes from 'prop-types';
-import { useLocales } from '../../hooks';
+import useLocales from '../../hooks/useLocales';
 import LocaleRow from '../LocaleRow';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
 import ModalDelete from '../ModalDelete';
 
-const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
+const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal }) => {
   const [localeToDelete, setLocaleToDelete] = useState();
   const [localeToEdit, setLocaleToEdit] = useState();
   const { locales, isLoading, refetch } = useLocales();
   const { formatMessage } = useIntl();
 
+  // Delete actions
   const closeModalToDelete = () => setLocaleToDelete(undefined);
   const handleDeleteLocale = canDeleteLocale ? setLocaleToDelete : undefined;
 
+  // Edit actions
   const closeModalToEdit = () => {
     refetch();
     setLocaleToEdit(undefined);
   };
-
   const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
 
   if (isLoading || (locales && locales.length > 0)) {
@@ -62,11 +64,11 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
         description={formatMessage({ id: getTrad('Settings.list.empty.description') })}
       />
 
-      {canCreateLocale && (
+      {onToggleCreateModal && (
         <ListButton>
           <Button
             label={formatMessage({ id: getTrad('Settings.list.actions.add') })}
-            onClick={() => undefined}
+            onClick={onToggleCreateModal}
             color="primary"
             type="button"
             icon={<Plus fill="#007eff" width="11px" height="11px" />}
@@ -77,10 +79,14 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, canCreateLocale }) => {
   );
 };
 
+LocaleList.defaultProps = {
+  onToggleCreateModal: undefined,
+};
+
 LocaleList.propTypes = {
   canUpdateLocale: PropTypes.bool.isRequired,
   canDeleteLocale: PropTypes.bool.isRequired,
-  canCreateLocale: PropTypes.bool.isRequired,
+  onToggleCreateModal: PropTypes.func,
 };
 
 export default LocaleList;

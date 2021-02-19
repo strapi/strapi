@@ -3,6 +3,11 @@
     "name": "permission",
     "description": ""
   },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    }
+  },
   "attributes": {
     "type": {
       "type": "string",

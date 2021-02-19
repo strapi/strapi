@@ -62,6 +62,8 @@ const pluginsToLoad = [];
 
 Object.keys(plugins).forEach(current => {
   const registerPlugin = plugin => {
+    strapi.registerPlugin(plugin);
+
     return plugin;
   };
   const currentPluginFn = plugins[current];
@@ -115,6 +117,12 @@ const { dispatch } = store;
 // Load plugins, this will be removed in the v4, temporary fix until the plugin API
 // https://plugin-api-rfc.vercel.app/plugin-api/admin.html
 pluginsToLoad.forEach(plugin => {
+  const bootPlugin = plugin.boot;
+
+  if (bootPlugin) {
+    bootPlugin(strapi);
+  }
+
   dispatch(pluginLoaded(plugin));
 });
 

@@ -6,6 +6,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
+  useStrapi,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
@@ -61,6 +62,10 @@ const DataManagerProvider = ({
   reservedNames,
 }) => {
   const dispatch = useDispatch();
+  const {
+    strapi: { getPlugin },
+  } = useStrapi();
+  const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const {
     autoReload,
@@ -421,7 +426,7 @@ const DataManagerProvider = ({
 
   const redirectEndpoint = useMemo(() => {
     const allowedEndpoints = Object.keys(contentTypes)
-      .filter(uid => get(contentTypes, [uid, 'schema', 'editable'], true))
+      .filter(uid => get(contentTypes, [uid, 'schema', 'visible'], true))
       .sort();
 
     return get(allowedEndpoints, '0', '');
@@ -444,10 +449,15 @@ const DataManagerProvider = ({
       };
 
       if (isInContentTypeView) {
-        body.contentType = {
-          ...formatMainDataType(modifiedData.contentType),
-          ...additionalContentTypeData,
-        };
+        const contentType = apis.forms.mutateContentTypeSchema(
+          {
+            ...formatMainDataType(modifiedData.contentType),
+            ...additionalContentTypeData,
+          },
+          initialData.contentType
+        );
+
+        body.contentType = contentType;
 
         emitEvent('willSaveContentType');
       } else {

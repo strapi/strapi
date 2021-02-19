@@ -11,14 +11,8 @@ const PROVIDER_URLS_MAP = {
 const getAdminStore = async () => strapi.store({ type: 'core', environment: '', name: 'admin' });
 
 const getPrefixedRedirectUrls = () => {
-  const { host, port, path } = strapi.config.get('admin');
-
-  let baseUrl = host || '';
-  if (baseUrl && port) {
-    baseUrl = `${baseUrl}:${port}`;
-  }
-
-  const prefixUrl = url => `${baseUrl}${path}${url}`;
+  const { url: adminUrl } = strapi.config.get('admin');
+  const prefixUrl = url => `${adminUrl || ''}${url}`;
 
   return mapValues(prefixUrl, PROVIDER_URLS_MAP);
 };
