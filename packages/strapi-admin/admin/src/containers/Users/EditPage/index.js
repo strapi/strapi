@@ -99,7 +99,9 @@ const EditPage = ({ canUpdate }) => {
               );
             })}
           </FormBloc>
+
           <BaselineAlignment top size="2px" />
+
           <Padded top size="md">
             {!isLoading && (
               <FormBloc

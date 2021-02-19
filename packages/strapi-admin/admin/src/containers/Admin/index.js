@@ -31,7 +31,7 @@ import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
 import InstalledPluginsPage from '../InstalledPluginsPage';
-import LocaleToggle from '../LocaleToggle';
+
 import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
@@ -292,7 +292,6 @@ export class Admin extends React.Component {
             <NavTopRightWrapper>
               {/* Injection zone not ready yet */}
               <Logout />
-              <LocaleToggle isLogged />
             </NavTopRightWrapper>
             <div className="adminPageRightWrapper">
               <Header />
