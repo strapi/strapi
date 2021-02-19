@@ -3,6 +3,7 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
+import IS_DISABLED from 'ee_else_ce/components/Roles/GlobalActions/utils/constants';
 import { usePermissionsDataManager } from '../../../hooks';
 import CheckboxWithCondition from '../CheckboxWithCondition';
 import { findDisplayedActions, getCheckboxesState } from './utils';
@@ -27,7 +28,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
           return (
             <CheckboxWithCondition
               key={actionId}
-              disabled={isFormDisabled}
+              disabled={isFormDisabled || IS_DISABLED}
               message={formatMessage({
                 id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
                 defaultMessage: label,
