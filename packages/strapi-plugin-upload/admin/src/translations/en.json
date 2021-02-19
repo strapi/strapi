@@ -1,4 +1,5 @@
 {
+  "page.title": "Settings - Media Library",
   "button.next": "Next",
   "checkControl.crop-duplicate": "Duplicate & crop the asset",
   "checkControl.crop-original": "Crop the original asset",
@@ -27,6 +28,7 @@
   "input.label-bold": "Drag & drop",
   "input.label-normal": "to upload or",
   "input.placeholder": "Click to select an asset or drag & drop a file in this area",
+  "input.placeholder.icon": "Drop the asset in this zone",
   "input.url.description": "Separate your URL links by a carriage return.",
   "input.url.label": "URL",
   "list.assets-empty.subtitle": "Add one to the list.",

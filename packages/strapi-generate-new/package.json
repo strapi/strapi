@@ -1,6 +1,6 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.4.6",
+  "version": "3.5.0",
   "description": "Generate a new Strapi application.",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -13,7 +13,7 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "@sentry/node": "^6.0.3",
+    "@sentry/node": "6.1.0",
     "chalk": "^2.4.2",
     "execa": "^1.0.0",
     "fs-extra": "^9.0.1",

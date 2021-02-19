@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.4.6",
+  "version": "3.5.0",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -9,12 +9,12 @@
     "required": true
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.3-next.2",
-    "@buffetjs/custom": "3.3.3-next.2",
-    "@buffetjs/hooks": "3.3.3-next.2",
-    "@buffetjs/icons": "3.3.3-next.2",
-    "@buffetjs/styles": "3.3.3-next.2",
-    "@buffetjs/utils": "3.3.3-next.2",
+    "@buffetjs/core": "3.3.4",
+    "@buffetjs/custom": "3.3.4",
+    "@buffetjs/hooks": "3.3.4",
+    "@buffetjs/icons": "3.3.4",
+    "@buffetjs/styles": "3.3.4",
+    "@buffetjs/utils": "3.3.4",
     "@sindresorhus/slugify": "1.1.0",
     "classnames": "^2.2.6",
     "codemirror": "^5.59.0",
@@ -28,7 +28,7 @@
     "markdown-it-deflist": "^2.0.3",
     "markdown-it-emoji": "^2.0.0",
     "markdown-it-footnote": "^3.0.2",
-    "markdown-it-ins": "^3.0.0",
+    "markdown-it-ins": "^3.0.1",
     "markdown-it-mark": "^3.0.1",
     "markdown-it-sub": "^1.0.0",
     "markdown-it-sup": "^1.0.0",
@@ -40,14 +40,13 @@
     "react-redux": "^7.0.2",
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
-    "react-tooltip": "4.2.11",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "sanitize-html": "2.1.1",
-    "strapi-helper-plugin": "3.4.6",
-    "strapi-utils": "3.4.6",
+    "strapi-helper-plugin": "3.5.0",
+    "strapi-utils": "3.5.0",
     "yup": "^0.27.0"
   },
   "author": {

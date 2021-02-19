@@ -1,6 +1,7 @@
 import React, { memo, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Count } from '@buffetjs/core';
+import { Tooltip } from '@buffetjs/styles';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
@@ -8,7 +9,6 @@ import Truncate from '../Truncate';
 import Truncated from '../Truncated';
 import CountWrapper from './CountWrapper';
 import RelationPreviewTooltip from './RelationPreviewTooltip';
-import Tooltip from '../Tooltip';
 
 const RelationPreviewList = ({
   options: {

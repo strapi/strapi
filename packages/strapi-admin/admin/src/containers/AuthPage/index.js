@@ -5,16 +5,17 @@ import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
 import { BaselineAlignment, auth, useQuery } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
+import forms from 'ee_else_ce/containers/AuthPage/utils/forms';
+
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
 import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
-import { forms } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
-const AuthPage = ({ hasAdmin }) => {
+const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
   const {
     params: { authType },
@@ -220,6 +221,7 @@ const AuthPage = ({ hasAdmin }) => {
         });
       }
       // Redirect to the homePage
+      setHasAdmin(true);
       push('/');
     } catch (err) {
       if (err.response) {
@@ -266,13 +268,11 @@ const AuthPage = ({ hasAdmin }) => {
     }
   };
 
-  // Redirect the user to the login page if the endpoint does not exist
-  if (!forms[authType]) {
-    return <Redirect to="/" />;
-  }
-
-  // Redirect the user to the login page if there is already an admin user
-  if (hasAdmin && authType === 'register-admin') {
+  // Redirect the user to the login page if
+  // the endpoint does not exist or
+  // there is already an admin user oo
+  // the user is already logged in
+  if (!forms[authType] || (hasAdmin && authType === 'register-admin') || auth.getToken()) {
     return <Redirect to="/" />;
   }
 
@@ -281,32 +281,25 @@ const AuthPage = ({ hasAdmin }) => {
     return <Redirect to="/auth/register-admin" />;
   }
 
-  // Redirect the user to the homepage if he is logged in
-  if (auth.getToken()) {
-    return <Redirect to="/" />;
-  }
-
   return (
-    <>
-      <Padded bottom size="md">
-        <PageTitle title={upperFirst(authType)} />
-        <NavTopRightWrapper>
-          <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
-        </NavTopRightWrapper>
-        <BaselineAlignment top size="78px">
-          <Component
-            {...rest}
-            fieldsToDisable={fieldsToDisable}
-            formErrors={formErrors}
-            inputsPrefix={inputsPrefix}
-            modifiedData={modifiedData}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            requestError={requestError}
-          />
-        </BaselineAlignment>
-      </Padded>
-    </>
+    <Padded bottom size="md">
+      <PageTitle title={upperFirst(authType)} />
+      <NavTopRightWrapper>
+        <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
+      </NavTopRightWrapper>
+      <BaselineAlignment top size="78px">
+        <Component
+          {...rest}
+          fieldsToDisable={fieldsToDisable}
+          formErrors={formErrors}
+          inputsPrefix={inputsPrefix}
+          modifiedData={modifiedData}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          requestError={requestError}
+        />
+      </BaselineAlignment>
+    </Padded>
   );
 };
 
@@ -316,6 +309,7 @@ AuthPage.defaultProps = {
 
 AuthPage.propTypes = {
   hasAdmin: PropTypes.bool,
+  setHasAdmin: PropTypes.func.isRequired,
 };
 
 export default AuthPage;
