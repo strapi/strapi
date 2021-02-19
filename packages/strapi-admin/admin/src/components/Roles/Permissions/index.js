@@ -111,7 +111,6 @@ Permissions.defaultProps = {
   layout,
 };
 Permissions.propTypes = {
-  // Todo
   layout: PropTypes.object,
   isFormDisabled: PropTypes.bool.isRequired,
 };

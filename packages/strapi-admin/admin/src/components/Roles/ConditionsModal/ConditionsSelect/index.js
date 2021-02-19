@@ -40,7 +40,6 @@ const ConditionsSelect = ({
           MenuList,
         }}
         arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-        // TODO
         isDisabled={isFormDisabled}
         name={name}
         onChange={onChange}

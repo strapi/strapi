@@ -5,6 +5,7 @@ import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { BaselineAlignment } from 'strapi-helper-plugin';
 import { get } from 'lodash';
+import IS_DISABLED from 'ee_else_ce/components/Roles/PluginsAndSettings/SubCategory/utils/constants';
 import { usePermissionsDataManager } from '../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
@@ -74,8 +75,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
             <Checkbox
               name={pathToData.join('..')}
               message={formatMessage({ id: 'app.utils.select-all' })}
-              // TODO
-              disabled={isFormDisabled}
+              disabled={isFormDisabled || IS_DISABLED}
               onChange={onChangeParentCheckbox}
               someChecked={hasSomeActionsSelected}
               value={hasAllActionsSelected}
@@ -88,15 +88,13 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
                 <CheckboxWrapper
-                  // TODO
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || IS_DISABLED}
                   hasConditions={hasConditions}
                   key={action}
                 >
                   <Checkbox
                     name={checkboxName}
-                    // TODO
-                    disabled={isFormDisabled}
+                    disabled={isFormDisabled || IS_DISABLED}
                     message={displayName}
                     onChange={onChangeSimpleCheckbox}
                     value={value}

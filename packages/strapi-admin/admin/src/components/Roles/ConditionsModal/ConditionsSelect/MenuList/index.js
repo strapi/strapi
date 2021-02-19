@@ -6,6 +6,7 @@ import { get } from 'lodash';
 import { Checkbox, Flex } from '@buffetjs/core';
 import { Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import IS_DISABLED from 'ee_else_ce/components/Roles/ConditionsModal/ConditionsSelect/MenuList/utils/constants';
 import { getCheckboxState } from '../../../utils';
 import createCollapsesObject from './utils/createCollapsesObject';
 import SubUl from './SubUl';
@@ -27,14 +28,9 @@ const MenuList = ({ selectProps, ...rest }) => {
     setCollapses(prevState => ({ ...prevState, [collapseName]: !collapses[collapseName] }));
   };
 
-  console.log({ selectProps });
-
   return (
     <Component {...rest}>
-      <Ul
-        // TODO
-        disabled={false}
-      >
+      <Ul disabled={IS_DISABLED}>
         {arrayOfOptionsGroupedByCategory.map((category, index) => {
           const [categoryName, conditions] = category;
           const checkboxName = `${selectProps.name}..${categoryName}`;
@@ -50,18 +46,19 @@ const MenuList = ({ selectProps, ...rest }) => {
                 <Flex justifyContent="space-between">
                   <Label
                     htmlFor="overrideReactSelectBehavior"
-                    onClick={() =>
-                      selectProps.onCategoryChange({
-                        keys: [selectProps.name, categoryName],
-                        value: !hasAllConditionsSelected,
-                      })}
+                    onClick={() => {
+                      if (!IS_DISABLED) {
+                        selectProps.onCategoryChange({
+                          keys: [selectProps.name, categoryName],
+                          value: !hasAllConditionsSelected,
+                        });
+                      }
+                    }}
                   >
                     <Flex>
                       <Checkbox
-                        // TODO
-                        disabled={false}
+                        disabled={IS_DISABLED}
                         id="checkCategory"
-                        // TODO
                         name={checkboxName}
                         onChange={() => {}}
                         someChecked={hasSomeConditionsSelected}
@@ -96,10 +93,12 @@ const MenuList = ({ selectProps, ...rest }) => {
                           htmlFor={condition.id}
                           message={condition.displayName}
                           onClick={() => {
-                            selectProps.onChange({
-                              keys: [selectProps.name, categoryName, condition.id],
-                              value: !checkboxValue,
-                            });
+                            if (!IS_DISABLED) {
+                              selectProps.onChange({
+                                keys: [selectProps.name, categoryName, condition.id],
+                                value: !checkboxValue,
+                              });
+                            }
                           }}
                         >
                           <Flex>

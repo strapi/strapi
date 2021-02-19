@@ -198,13 +198,7 @@ const CreatePage = () => {
               </FormCard>
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
-                  <Permissions
-                    // permissionsLayout={permissionsLayout}
-                    isFormDisabled={false}
-                    ref={permissionsRef}
-                    // rolePermissions={rolePermissions}
-                    // role={role}
-                  />
+                  <Permissions isFormDisabled={false} ref={permissionsRef} />
                 </Padded>
               )}
             </ContainerFluid>
