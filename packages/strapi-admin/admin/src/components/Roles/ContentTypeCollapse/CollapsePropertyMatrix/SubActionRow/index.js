@@ -21,6 +21,7 @@ const SubLevelWrapper = styled.div`
 
 const SubActionRow = ({
   childrenForm,
+  isFormDisabled,
   recursiveLevel,
   pathToDataFromActionRow,
   propertyActions,
@@ -114,6 +115,7 @@ const SubActionRow = ({
                       return (
                         <CheckboxWithCondition
                           key={label}
+                          disabled={isFormDisabled}
                           name={checkboxName.join('..')}
                           onChange={onChangeSimpleCheckbox}
                           value={checkboxValue}
@@ -128,6 +130,7 @@ const SubActionRow = ({
                     return (
                       <CheckboxWithCondition
                         key={label}
+                        disabled={isFormDisabled}
                         name={checkboxName.join('..')}
                         onChange={onChangeParentCheckbox}
                         value={hasAllActionsSelected}
@@ -141,6 +144,7 @@ const SubActionRow = ({
             {displayedRecursiveChildren && isActive && (
               <SubLevelWrapper>
                 <SubActionRow
+                  isFormDisabled={isFormDisabled}
                   parentName={`${parentName}..${value}`}
                   pathToDataFromActionRow={pathToDataFromActionRow}
                   propertyActions={propertyActions}
@@ -159,6 +163,7 @@ const SubActionRow = ({
 
 SubActionRow.propTypes = {
   childrenForm: PropTypes.array.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   parentName: PropTypes.string.isRequired,
   pathToDataFromActionRow: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,

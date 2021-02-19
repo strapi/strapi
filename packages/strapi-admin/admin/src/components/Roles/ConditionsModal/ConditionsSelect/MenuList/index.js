@@ -27,6 +27,8 @@ const MenuList = ({ selectProps, ...rest }) => {
     setCollapses(prevState => ({ ...prevState, [collapseName]: !collapses[collapseName] }));
   };
 
+  console.log({ selectProps });
+
   return (
     <Component {...rest}>
       <Ul

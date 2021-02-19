@@ -11,6 +11,7 @@ const CollapsePropertyMatrix = ({
   childrenForm,
   isLast,
   isOdd,
+  isFormDisabled,
   label,
   pathToData,
   propertyName,
@@ -29,6 +30,7 @@ const CollapsePropertyMatrix = ({
             childrenForm={childrenForm}
             key={value}
             label={label}
+            isFormDisabled={isFormDisabled}
             name={value}
             required={required}
             propertyActions={propertyActions}
@@ -46,6 +48,7 @@ CollapsePropertyMatrix.propTypes = {
   availableActions: PropTypes.array.isRequired,
   isOdd: PropTypes.bool.isRequired,
   isLast: PropTypes.bool.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   pathToData: PropTypes.string.isRequired,
   propertyName: PropTypes.string.isRequired,

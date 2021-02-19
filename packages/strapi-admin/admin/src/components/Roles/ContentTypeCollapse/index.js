@@ -11,6 +11,7 @@ const ContentTypeCollapse = ({
   label,
   index,
   isActive,
+  isFormDisabled,
   onClickToggleCollapse,
   pathToData,
   properties,
@@ -31,6 +32,7 @@ const ContentTypeCollapse = ({
         availableActions={availableActions}
         isActive={isActive}
         isGrey={index % 2 === 0}
+        isFormDisabled={isFormDisabled}
         label={label}
         onClickToggle={handleClickToggleCollapse}
         pathToData={pathToData}
@@ -41,6 +43,7 @@ const ContentTypeCollapse = ({
             <CollapsePropertyMatrix
               availableActions={availableActions}
               childrenForm={childrenForm}
+              isFormDisabled={isFormDisabled}
               label={label}
               pathToData={pathToData}
               propertyName={value}
@@ -59,6 +62,7 @@ ContentTypeCollapse.propTypes = {
   contentTypeName: PropTypes.string.isRequired,
   index: PropTypes.number.isRequired,
   isActive: PropTypes.bool.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   onClickToggleCollapse: PropTypes.func.isRequired,
   pathToData: PropTypes.string.isRequired,

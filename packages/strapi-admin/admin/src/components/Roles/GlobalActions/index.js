@@ -8,7 +8,7 @@ import CheckboxWithCondition from '../CheckboxWithCondition';
 import { findDisplayedActions, getCheckboxesState } from './utils';
 import Wrapper from './Wrapper';
 
-const GlobalActions = ({ actions, kind }) => {
+const GlobalActions = ({ actions, isFormDisabled, kind }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox } = usePermissionsDataManager();
 
@@ -27,12 +27,14 @@ const GlobalActions = ({ actions, kind }) => {
           return (
             <CheckboxWithCondition
               key={actionId}
+              disabled={isFormDisabled}
               message={formatMessage({
                 id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
                 defaultMessage: label,
               })}
-              onChange={({ target: { value } }) =>
-                onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value)}
+              onChange={({ target: { value } }) => {
+                onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
+              }}
               name={actionId}
               value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
               someChecked={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}
@@ -56,6 +58,7 @@ GlobalActions.propTypes = {
       subjects: PropTypes.array.isRequired,
     })
   ),
+  isFormDisabled: PropTypes.bool.isRequired,
   kind: PropTypes.string.isRequired,
 };
 

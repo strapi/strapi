@@ -33,6 +33,7 @@ const EditPage = () => {
     isLoading: isRoleLoading,
     onSubmitSucceeded,
   } = useFetchRole(id);
+  console.log({ role });
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -129,6 +130,8 @@ const EditPage = () => {
     }
   };
 
+  const isFormDisabled = role.code === 'strapi-super-admin';
+
   return (
     <>
       <PageTitle name="Roles" />
@@ -162,7 +165,7 @@ const EditPage = () => {
               <BaselineAlignment top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
-                disabled={role.code === 'strapi-super-admin'}
+                disabled={isFormDisabled}
                 errors={errors}
                 values={values}
                 onChange={handleChange}
@@ -175,6 +178,7 @@ const EditPage = () => {
                     // // permissionsLayout={permissionsLayout}
                     // // rolePermissions={rolePermissions}
                     // role={role}
+                    isFormDisabled={isFormDisabled}
                     ref={permissionsRef}
                   />
                 </Padded>

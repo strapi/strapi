@@ -4,7 +4,7 @@ import { Padded } from '@buffetjs/core';
 import ListWrapper from './ListWrapper';
 import PermissionRow from './Row';
 
-const PluginsAndSettingsPermissions = ({ kind, layout }) => {
+const PluginsAndSettingsPermissions = ({ isFormDisabled, kind, layout }) => {
   const [openedCategory, setOpenedCategory] = useState(null);
 
   const handleOpenCategory = categoryName => {
@@ -20,6 +20,7 @@ const PluginsAndSettingsPermissions = ({ kind, layout }) => {
               key={category}
               childrenForm={childrenForm}
               kind={kind}
+              isFormDisabled={isFormDisabled}
               isOpen={openedCategory === category}
               isWhite={index % 2 === 1}
               name={category}
@@ -34,6 +35,7 @@ const PluginsAndSettingsPermissions = ({ kind, layout }) => {
 };
 
 PluginsAndSettingsPermissions.propTypes = {
+  isFormDisabled: PropTypes.bool.isRequired,
   kind: PropTypes.string.isRequired,
   layout: PropTypes.arrayOf(
     PropTypes.shape({

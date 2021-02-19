@@ -8,6 +8,7 @@ import Wrapper from './Wrapper';
 
 const ActionRow = ({
   arrayOfOptionsGroupedByCategory,
+  isFormDisabled,
   isGrey,
   label,
   name,
@@ -62,6 +63,7 @@ const ActionRow = ({
       <ConditionsSelect
         arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
         name={name}
+        isFormDisabled={isFormDisabled}
         onCategoryChange={onCategoryChange}
         onChange={onChange}
         value={value}
@@ -72,6 +74,7 @@ const ActionRow = ({
 
 ActionRow.propTypes = {
   arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,

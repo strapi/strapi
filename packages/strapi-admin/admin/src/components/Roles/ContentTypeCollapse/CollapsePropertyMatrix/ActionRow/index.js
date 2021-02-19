@@ -16,6 +16,7 @@ import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 const ActionRow = ({
   childrenForm,
   label,
+  isFormDisabled,
   name,
   required,
   pathToData,
@@ -72,6 +73,7 @@ const ActionRow = ({
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
+            isFormDisabled={isFormDisabled}
             label={label}
             someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
@@ -93,6 +95,7 @@ const ActionRow = ({
                 return (
                   <CheckboxWithCondition
                     key={actionId}
+                    disabled={isFormDisabled}
                     name={checkboxName.join('..')}
                     onChange={onChangeSimpleCheckbox}
                     value={checkboxValue}
@@ -107,6 +110,7 @@ const ActionRow = ({
               return (
                 <CheckboxWithCondition
                   key={label}
+                  disabled={isFormDisabled}
                   name={checkboxName.join('..')}
                   onChange={onChangeParentCheckbox}
                   value={hasAllActionsSelected}
@@ -120,6 +124,7 @@ const ActionRow = ({
       {isActive && (
         <SubActionRow
           childrenForm={recursiveChildren}
+          isFormDisabled={isFormDisabled}
           parentName={name}
           pathToDataFromActionRow={pathToData}
           propertyName={propertyName}
@@ -139,6 +144,7 @@ ActionRow.defaultProps = {
 ActionRow.propTypes = {
   childrenForm: PropTypes.array,
   label: PropTypes.string.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   pathToData: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,

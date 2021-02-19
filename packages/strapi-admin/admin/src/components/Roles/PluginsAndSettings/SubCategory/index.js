@@ -21,7 +21,7 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => {
+const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, pathToData }) => {
   const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
   const {
     modifiedData,
@@ -75,7 +75,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
               name={pathToData.join('..')}
               message={formatMessage({ id: 'app.utils.select-all' })}
               // TODO
-              disabled={false}
+              disabled={isFormDisabled}
               onChange={onChangeParentCheckbox}
               someChecked={hasSomeActionsSelected}
               value={hasAllActionsSelected}
@@ -89,14 +89,14 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
               return (
                 <CheckboxWrapper
                   // TODO
-                  disabled={false}
+                  disabled={isFormDisabled}
                   hasConditions={hasConditions}
                   key={action}
                 >
                   <Checkbox
                     name={checkboxName}
                     // TODO
-                    disabled={false}
+                    disabled={isFormDisabled}
                     message={displayName}
                     onChange={onChangeSimpleCheckbox}
                     value={value}
@@ -105,7 +105,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
               );
             })}
           </Flex>
-          <ConditionsButtonWrapper disabled={false} hasConditions={false}>
+          <ConditionsButtonWrapper disabled={isFormDisabled} hasConditions={doesButtonHasCondition}>
             <ConditionsButton
               hasConditions={doesButtonHasCondition}
               onClick={handleToggleModalIsOpen}
@@ -118,6 +118,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
           headerBreadCrumbs={[categoryName, subCategoryName]}
           actions={formattedActions}
           isOpen={modalState.isOpen}
+          isFormDisabled={isFormDisabled}
           onClosed={handleModalClose}
           onToggle={handleToggleModalIsOpen}
         />
@@ -129,6 +130,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
 SubCategory.propTypes = {
   actions: PropTypes.array.isRequired,
   categoryName: PropTypes.string.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   subCategoryName: PropTypes.string.isRequired,
   pathToData: PropTypes.array.isRequired,
 };

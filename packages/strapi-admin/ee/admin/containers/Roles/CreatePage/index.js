@@ -200,6 +200,7 @@ const CreatePage = () => {
                 <Padded top bottom size="md">
                   <Permissions
                     // permissionsLayout={permissionsLayout}
+                    isFormDisabled={false}
                     ref={permissionsRef}
                     // rolePermissions={rolePermissions}
                     // role={role}
