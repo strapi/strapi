@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
 import styled from 'styled-components';
+import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../hooks';
 import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
@@ -115,7 +116,7 @@ const SubActionRow = ({
                       return (
                         <CheckboxWithCondition
                           key={label}
-                          disabled={isFormDisabled}
+                          disabled={isFormDisabled || IS_DISABLED}
                           name={checkboxName.join('..')}
                           onChange={onChangeSimpleCheckbox}
                           value={checkboxValue}
@@ -130,7 +131,7 @@ const SubActionRow = ({
                     return (
                       <CheckboxWithCondition
                         key={label}
-                        disabled={isFormDisabled}
+                        disabled={isFormDisabled || IS_DISABLED}
                         name={checkboxName.join('..')}
                         onChange={onChangeParentCheckbox}
                         value={hasAllActionsSelected}

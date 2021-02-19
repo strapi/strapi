@@ -2,6 +2,7 @@ import React, { memo, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Padded, Flex } from '@buffetjs/core';
+import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../hooks';
 import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
@@ -95,7 +96,7 @@ const ActionRow = ({
                 return (
                   <CheckboxWithCondition
                     key={actionId}
-                    disabled={isFormDisabled}
+                    disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName.join('..')}
                     onChange={onChangeSimpleCheckbox}
                     value={checkboxValue}
@@ -110,7 +111,7 @@ const ActionRow = ({
               return (
                 <CheckboxWithCondition
                   key={label}
-                  disabled={isFormDisabled}
+                  disabled={isFormDisabled || IS_DISABLED}
                   name={checkboxName.join('..')}
                   onChange={onChangeParentCheckbox}
                   value={hasAllActionsSelected}
