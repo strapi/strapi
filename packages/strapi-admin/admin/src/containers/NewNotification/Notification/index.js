@@ -91,7 +91,11 @@ const Notification = ({ notification }) => {
                 <a
                   href={link.url}
                   target={link.target || '_blank'}
-                  rel={link.target === '_blank' ? 'noopener noreferrer' : ''}
+                  rel={
+                    !link.target || link.target === '_blank'
+                      ? 'noopener noreferrer'
+                      : ''
+                  }
                 >
                   <Padded right left size="xs">
                     <Flex alignItems="center">
