@@ -88,7 +88,11 @@ const Notification = ({ notification }) => {
                 <Text title={formattedMessage(message)}>{formattedMessage(message)}</Text>
               )}
               {link && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={link.url}
+                  target={link.target || '_blank'}
+                  rel={link.target === '_blank' ? 'noopener noreferrer' : ''}
+                >
                   <Padded right left size="xs">
                     <Flex alignItems="center">
                       <Text
@@ -152,6 +156,7 @@ Notification.propTypes = {
       }),
     ]),
     link: PropTypes.shape({
+      target: PropTypes.string,
       url: PropTypes.string.isRequired,
       label: PropTypes.oneOfType([
         PropTypes.string,
