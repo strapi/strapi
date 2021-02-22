@@ -17541,20 +17541,15 @@ side-channel@^1.0.2:
     es-abstract "^1.18.0-next.0"
     object-inspect "^1.8.0"
 
-sift@13.1.10:
-  version "13.1.10"
-  resolved "https://registry.yarnpkg.com/sift/-/sift-13.1.10.tgz#53cd1052c0214dc5d28a931e154191cce5cba942"
-  integrity sha512-Z+7ZMTbnmbuVCwER+8jNerXpuJNYsxFSZf1er8VUqF/qYdgTrG5o5TQ7C6nWDycQY/TA1pczVCj58y5RvrUtrA==
+sift@13.5.0, sift@^13.0.0:
+  version "13.5.0"
+  resolved "https://registry.yarnpkg.com/sift/-/sift-13.5.0.tgz#0f46fd0b2432bd516307d2c32bff3b142a8ab530"
+  integrity sha512-YoS8hmXbmJcf1Gde5bR7+pq69+Nvfv5eHTyv4B00YxJAejTEfzvamG8LHzb0jAFFciMkY05K7GG3P7n/gm0+gg==
 
 sift@7.0.1:
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/sift/-/sift-7.0.1.tgz#47d62c50b159d316f1372f8b53f9c10cd21a4b08"
   integrity sha512-oqD7PMJ+uO6jV9EQCl0LrRw1OwsiPsiFQR5AR30heR+4Dl7jBBbDLnNvWiak20tzZlSE1H7RB30SX/1j/YYT7g==
-
-sift@^13.0.0:
-  version "13.3.5"
-  resolved "https://registry.yarnpkg.com/sift/-/sift-13.3.5.tgz#de08275e1427731e1fe25192f88786e38bbfa89e"
-  integrity sha512-apSwBXO0Xpl7zGb26xwq7KGre9/WwyzMxUv0zmI6mLpDJQGOX+CynBgKDaSrn+AXuAuiS4orQo1ty6bU+OEN/Q==
 
 sigmund@^1.0.1, sigmund@~1.0.0:
   version "1.0.1"
