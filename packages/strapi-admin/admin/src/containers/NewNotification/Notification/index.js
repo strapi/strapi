@@ -109,9 +109,9 @@ const Notification = ({ notification }) => {
                         {formattedMessage(link.label)}
                       </Text>
                       {link.target === "_blank" && (
-                          <Padded left size="xs">
-                            <LinkArrow />
-                          </Padded>
+                        <Padded left size="xs">
+                          <LinkArrow />
+                        </Padded>
                       )}
                     </Flex>
                   </Padded>
