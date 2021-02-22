@@ -25,11 +25,30 @@ describe('UPLOAD | utils | getFileModelTimestamps', () => {
     expect(getFileModelTimestamps(plugins)).toEqual(expected);
   });
 
-  it('should return the default timestamps', () => {
+  it('should throw an error on empty model configuration', () => {
     const plugins = null;
+    expect(getFileModelTimestamps(plugins)).toThrowError();
+  });
 
-    const expected = ['created_at', 'updated_at'];
+  it('should throw an error on invalid timestamp configuration', () => {
+    const plugins = {
+      ctb: {
+        ok: true,
+      },
+      upload: {
+        ok: true,
+        fileModel: {
+          uid: 'plugins::upload.file',
+          schema: {
+            attributes: {},
+            options: {
+              timestamps: true,
+            },
+          },
+        },
+      },
+    };
 
-    expect(getFileModelTimestamps(plugins)).toEqual(expected);
+    expect(getFileModelTimestamps(plugins)).toThrowError();
   });
 });
