@@ -25,7 +25,7 @@ describe('UPLOAD | utils | getFileModelTimestamps', () => {
 
   it('should throw an error on empty model configuration', () => {
     const plugins = null;
-    expect(getFileModelTimestamps(plugins)).toThrowError();
+    expect(() => getFileModelTimestamps(plugins)).toThrowError();
   });
 
   it('should throw an error on invalid timestamp configuration', () => {
@@ -45,6 +45,6 @@ describe('UPLOAD | utils | getFileModelTimestamps', () => {
       },
     };
 
-    expect(getFileModelTimestamps(plugins)).toThrowError();
+    expect(() => getFileModelTimestamps(plugins)).toThrowError();
   });
 });
