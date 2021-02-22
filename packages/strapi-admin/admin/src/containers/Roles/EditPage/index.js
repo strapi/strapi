@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { get, has, isEmpty } from 'lodash';
-import { BaselineAlignment, useGlobalContext, request, difference } from 'strapi-helper-plugin';
+import { get, isEmpty } from 'lodash';
+import { BaselineAlignment, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -10,7 +10,6 @@ import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
-import { formatPermissionsToApi } from '../../../utils';
 import schema from './utils/schema';
 
 const EditPage = () => {
@@ -22,7 +21,11 @@ const EditPage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
 
-  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
+  const {
+    isLoading: isLayoutLoading,
+    // TODO
+    // data: permissionsLayout,
+  } = useFetchPermissionsLayout(id);
   const {
     role,
     permissions: rolePermissions,
@@ -67,22 +70,7 @@ const EditPage = () => {
       strapi.lockAppWithOverlay();
       setIsSubmiting(true);
 
-      const permissionsToSend = permissionsRef.current.getPermissions();
-
-      const checkConditionsDiff = () => {
-        const diff = difference(
-          get(permissionsToSend, 'contentTypesPermissions', {}),
-          get(rolePermissions, 'contentTypesPermissions', {})
-        );
-
-        if (isEmpty(diff)) {
-          return false;
-        }
-
-        return Object.keys(diff).some(key => {
-          return has(diff, [key, 'conditions']);
-        });
-      };
+      const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();
 
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
@@ -93,11 +81,11 @@ const EditPage = () => {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
           body: {
-            permissions: formatPermissionsToApi(permissionsToSend),
+            permissions: permissionsToSend,
           },
         });
 
-        if (checkConditionsDiff()) {
+        if (didUpdateConditions) {
           emitEvent('didUpdateConditions');
         }
       }
@@ -122,6 +110,8 @@ const EditPage = () => {
       strapi.unlockApp();
     }
   };
+
+  const isFormDisabled = role.code === 'strapi-super-admin';
 
   return (
     <>
@@ -156,7 +146,7 @@ const EditPage = () => {
               <BaselineAlignment top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
-                disabled={role.code === 'strapi-super-admin'}
+                disabled={isFormDisabled}
                 errors={errors}
                 values={values}
                 onChange={handleChange}
@@ -166,9 +156,8 @@ const EditPage = () => {
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
                   <Permissions
-                    permissionsLayout={permissionsLayout}
-                    rolePermissions={rolePermissions}
-                    role={role}
+                    isFormDisabled={isFormDisabled}
+                    permissions={rolePermissions}
                     ref={permissionsRef}
                   />
                 </Padded>
