@@ -20,7 +20,7 @@ const conditions = [
 
 describe('ADMIN | COMPONENTS | Permissions | utils', () => {
   describe('createConditionForm', () => {
-    it('should return an object with all the values set to false', () => {
+    it('should return an object with all the leafs set to false', () => {
       const expected = {
         'admin::is-creator': false,
         'admin::has-same-role-as-creator': false,
@@ -28,10 +28,21 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
 
       expect(createDefaultConditionsForm(conditions)).toEqual(expected);
     });
+
+    it('should return an object with the leafs set to true when the initial conditions contains the condition', () => {
+      const expected = {
+        'admin::is-creator': false,
+        'admin::has-same-role-as-creator': true,
+      };
+
+      expect(
+        createDefaultConditionsForm(conditions, ['test', 'admin::has-same-role-as-creator'])
+      ).toEqual(expected);
+    });
   });
 
   describe('createDefaultPropertyForms,', () => {
-    it('should return an object with keys corresponding to the property value and all the values set to false', () => {
+    it('should return an object with keys corresponding to the property value and all the leafs set to false', () => {
       const data = {
         children: [
           {
@@ -47,10 +58,10 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         bar: false,
       };
 
-      expect(createDefaultPropertyForms(data)).toEqual(expected);
+      expect(createDefaultPropertyForms(data, [])).toEqual(expected);
     });
 
-    it('should create the default form for a complex object', () => {
+    it('should create the default form for a complex object when the second argument is not an empty array', () => {
       const data = {
         children: [
           {
@@ -74,17 +85,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           },
         ],
       };
+      const propertyValues = ['foo', 'bar.foo.bar'];
       const expected = {
-        foo: false,
+        foo: true,
         bar: {
           name: false,
           foo: {
-            bar: false,
+            bar: true,
           },
         },
       };
 
-      expect(createDefaultPropertyForms(data)).toEqual(expected);
+      expect(createDefaultPropertyForms(data, propertyValues)).toEqual(expected);
     });
   });
 
@@ -286,6 +298,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           ],
         },
       ];
+
       const actions = [
         {
           label: 'Create',
@@ -312,12 +325,12 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             fields: {
               postal_coder: false,
               categories: false,
-              cover: false,
+              cover: true,
               images: false,
               city: false,
             },
             conditions: {
-              'admin::is-creator': false,
+              'admin::is-creator': true,
               'admin::has-same-role-as-creator': false,
             },
           },
@@ -336,10 +349,10 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
               f2: false,
               services: { name: false, media: false, closing: { name: { test: false } } },
               dz: false,
-              relation: false,
+              relation: true,
             },
             locales: {
-              en: false,
+              en: true,
               fr: false,
             },
             conditions: {
@@ -360,7 +373,25 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
       };
 
-      expect(createDefaultCTFormFromLayout({ subjects }, actions, conditions)).toEqual(expected);
+      const permissions = [
+        {
+          action: 'content-manager.explorer.create',
+          subject: 'restaurant',
+          fields: ['relation'],
+          locales: ['en'],
+        },
+        {
+          action: 'content-manager.explorer.create',
+          subject: 'address',
+          fields: ['cover'],
+          locales: ['fr'],
+          conditions: ['admin::is-creator'],
+        },
+      ];
+
+      expect(createDefaultCTFormFromLayout({ subjects }, actions, conditions, permissions)).toEqual(
+        expected
+      );
     });
   });
 

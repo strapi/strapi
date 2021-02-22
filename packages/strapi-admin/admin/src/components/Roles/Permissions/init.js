@@ -2,7 +2,7 @@ import createDefaultCTFormFromLayout from './utils/createDefaultCTFormFromLayout
 import createDefaultPluginsFormFromLayout from './utils/createDefaultPluginsFormFromLayout';
 import formatLayoutForSettingsAndPlugins from './utils/formatLayoutForSettingsAndPlugins';
 
-const init = layout => {
+const init = (layout, permissions) => {
   const {
     conditions,
     sections: { collectionTypes, singleTypes, plugins, settings },
@@ -17,11 +17,17 @@ const init = layout => {
     collectionTypes: createDefaultCTFormFromLayout(
       collectionTypes,
       collectionTypes.actions || [],
-      conditions
+      conditions,
+      permissions
     ),
-    singleTypes: createDefaultCTFormFromLayout(singleTypes, singleTypes.actions || [], conditions),
-    plugins: createDefaultPluginsFormFromLayout(layouts.plugins, conditions),
-    settings: createDefaultPluginsFormFromLayout(layouts.settings, conditions),
+    singleTypes: createDefaultCTFormFromLayout(
+      singleTypes,
+      singleTypes.actions || [],
+      conditions,
+      permissions
+    ),
+    plugins: createDefaultPluginsFormFromLayout(layouts.plugins, conditions, permissions),
+    settings: createDefaultPluginsFormFromLayout(layouts.settings, conditions, permissions),
   };
 
   return {

@@ -159,6 +159,14 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'RESET_FORM': {
+        draftState.modifiedData = state.initialData;
+        break;
+      }
+      case 'SET_FORM_AFTER_SUBMIT': {
+        draftState.initialData = state.modifiedData;
+        break;
+      }
       default:
         return draftState;
     }

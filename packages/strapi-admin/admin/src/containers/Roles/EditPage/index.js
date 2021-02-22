@@ -36,7 +36,6 @@ const EditPage = () => {
     isLoading: isRoleLoading,
     onSubmitSucceeded,
   } = useFetchRole(id);
-  console.log({ rolePermissions });
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -177,7 +176,11 @@ const EditPage = () => {
               />
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
-                  <Permissions isFormDisabled={isFormDisabled} ref={permissionsRef} />
+                  <Permissions
+                    isFormDisabled={isFormDisabled}
+                    permissions={rolePermissions}
+                    ref={permissionsRef}
+                  />
                 </Padded>
               )}
             </ContainerFluid>
