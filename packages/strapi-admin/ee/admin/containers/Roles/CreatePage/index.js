@@ -33,13 +33,10 @@ const CreatePage = () => {
   const id = get(params, 'params.id', null);
   const {
     isLoading: isLayoutLoading,
+    // TODO
     // data: permissionsLayout
   } = useFetchPermissionsLayout();
-  const {
-    // role, permissions: rolePermissions,
-    isLoading: isRoleLoading,
-  } = useFetchRole(id);
-  // console.log({ role, rolePermissions });
+  const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -83,7 +80,7 @@ const CreatePage = () => {
       })
     )
       .then(async res => {
-        const permissionsToSend = permissionsRef.current.getPermissions();
+        const { permissionsToSend } = permissionsRef.current.getPermissions();
 
         if (id) {
           emitEvent('didDuplicateRole');
@@ -197,7 +194,11 @@ const CreatePage = () => {
               </FormCard>
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
-                  <Permissions isFormDisabled={false} ref={permissionsRef} />
+                  <Permissions
+                    isFormDisabled={false}
+                    ref={permissionsRef}
+                    permissions={rolePermissions}
+                  />
                 </Padded>
               )}
             </ContainerFluid>
