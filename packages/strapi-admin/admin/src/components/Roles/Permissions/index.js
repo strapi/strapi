@@ -1,5 +1,7 @@
 import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
 import PropTypes from 'prop-types';
+import { difference } from 'strapi-helper-plugin';
+import { has, isEmpty } from 'lodash';
 import Tabs from '../Tabs';
 import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
 import ContentTypes from '../ContentTypes';
@@ -11,14 +13,34 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) => {
-  const [{ layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
+  const [{ initialData, layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
     init(layout, permissions)
   );
 
   useImperativeHandle(ref, () => {
     return {
       getPermissions: () => {
-        return formatPermissionsToAPI(modifiedData);
+        const collectionTypesDiff = difference(
+          initialData.collectionTypes,
+          modifiedData.collectionTypes
+        );
+        const singleTypesDiff = difference(initialData.singleTypes, modifiedData.singleTypes);
+
+        const contentTypesDiff = { ...collectionTypesDiff, ...singleTypesDiff };
+
+        let didUpdateConditions;
+
+        if (isEmpty(contentTypesDiff)) {
+          didUpdateConditions = false;
+        } else {
+          didUpdateConditions = Object.values(contentTypesDiff).some(permission => {
+            return Object.values(permission).some(permissionValue =>
+              has(permissionValue, 'conditions')
+            );
+          });
+        }
+
+        return { permissionsToSend: formatPermissionsToAPI(modifiedData), didUpdateConditions };
       },
       resetForm: () => {
         dispatch({ type: 'RESET_FORM' });

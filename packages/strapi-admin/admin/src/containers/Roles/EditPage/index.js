@@ -14,11 +14,7 @@ import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const {
-    // TODO
-    // emitEvent,
-    settingsBaseURL,
-  } = useGlobalContext();
+  const { emitEvent, settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
@@ -74,23 +70,7 @@ const EditPage = () => {
       strapi.lockAppWithOverlay();
       setIsSubmiting(true);
 
-      const permissionsToSend = permissionsRef.current.getPermissions();
-
-      // TODO
-      // const checkConditionsDiff = () => {
-      //   const diff = difference(
-      //     get(permissionsToSend, 'contentTypesPermissions', {}),
-      //     get(rolePermissions, 'contentTypesPermissions', {})
-      //   );
-
-      //   if (isEmpty(diff)) {
-      //     return false;
-      //   }
-
-      //   return Object.keys(diff).some(key => {
-      //     return has(diff, [key, 'conditions']);
-      //   });
-      // };
+      const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();
 
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
@@ -105,10 +85,9 @@ const EditPage = () => {
           },
         });
 
-        // TODO
-        // if (checkConditionsDiff()) {
-        //   emitEvent('didUpdateConditions');
-        // }
+        if (didUpdateConditions) {
+          emitEvent('didUpdateConditions');
+        }
       }
 
       permissionsRef.current.setFormAfterSubmit();
