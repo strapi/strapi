@@ -12,6 +12,7 @@ const PermissionRow = ({
   kind,
   name,
   isOpen,
+  isFormDisabled,
   isWhite,
   onOpenCategory,
   pathToData,
@@ -51,10 +52,11 @@ const PermissionRow = ({
         <PermissionsWrapper isWhite={isWhite}>
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
-              categoryName={categoryName}
-              subCategoryName={subCategoryName}
               key={subCategoryName}
               actions={actions}
+              categoryName={categoryName}
+              isFormDisabled={isFormDisabled}
+              subCategoryName={subCategoryName}
               pathToData={[...pathToData, subCategoryId]}
             />
           ))}
@@ -69,6 +71,7 @@ PermissionRow.defaultProps = {};
 PermissionRow.propTypes = {
   childrenForm: PropTypes.array.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   isWhite: PropTypes.bool.isRequired,
   kind: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,

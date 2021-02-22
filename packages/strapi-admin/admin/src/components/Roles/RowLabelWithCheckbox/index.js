@@ -7,6 +7,7 @@ import Wrapper from './Wrapper';
 const RowLabelWithCheckbox = ({
   children,
   isCollapsable,
+  isFormDisabled,
   label,
   onChange,
   onClick,
@@ -17,8 +18,14 @@ const RowLabelWithCheckbox = ({
   width,
 }) => {
   return (
-    <Wrapper width={width}>
-      <Checkbox name={checkboxName} onChange={onChange} someChecked={someChecked} value={value} />
+    <Wrapper width={width} disabled={isFormDisabled}>
+      <Checkbox
+        name={checkboxName}
+        disabled={isFormDisabled}
+        onChange={onChange}
+        someChecked={someChecked}
+        value={value}
+      />
       <CollapseLabel
         title={label}
         alignItems="center"
@@ -57,6 +64,7 @@ RowLabelWithCheckbox.propTypes = {
   children: PropTypes.node,
   label: PropTypes.string.isRequired,
   isCollapsable: PropTypes.bool,
+  isFormDisabled: PropTypes.bool.isRequired,
   onChange: PropTypes.func,
   onClick: PropTypes.func.isRequired,
   someChecked: PropTypes.bool,

@@ -9,7 +9,7 @@ import TAB_LABELS from './utils/tabLabels';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const Permissions = forwardRef(({ layout }, ref) => {
+const Permissions = forwardRef(({ layout, isFormDisabled }, ref) => {
   const [{ layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
     init(layout)
   );
@@ -82,10 +82,26 @@ const Permissions = forwardRef(({ layout }, ref) => {
       }}
     >
       <Tabs tabsLabel={TAB_LABELS}>
-        <ContentTypes layout={layouts.collectionTypes} kind="collectionTypes" />
-        <ContentTypes layout={layouts.singleTypes} kind="singleTypes" />
-        <PluginsAndSettings layout={layouts.plugins} kind="plugins" />
-        <PluginsAndSettings layout={layouts.settings} kind="settings" />
+        <ContentTypes
+          layout={layouts.collectionTypes}
+          kind="collectionTypes"
+          isFormDisabled={isFormDisabled}
+        />
+        <ContentTypes
+          layout={layouts.singleTypes}
+          kind="singleTypes"
+          isFormDisabled={isFormDisabled}
+        />
+        <PluginsAndSettings
+          layout={layouts.plugins}
+          kind="plugins"
+          isFormDisabled={isFormDisabled}
+        />
+        <PluginsAndSettings
+          layout={layouts.settings}
+          kind="settings"
+          isFormDisabled={isFormDisabled}
+        />
       </Tabs>
     </PermissionsDataManagerProvider>
   );
@@ -95,8 +111,8 @@ Permissions.defaultProps = {
   layout,
 };
 Permissions.propTypes = {
-  // Todo
   layout: PropTypes.object,
+  isFormDisabled: PropTypes.bool.isRequired,
 };
 
 export default memo(Permissions);

@@ -5,6 +5,7 @@ import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { BaselineAlignment } from 'strapi-helper-plugin';
 import { get } from 'lodash';
+import IS_DISABLED from 'ee_else_ce/components/Roles/PluginsAndSettings/SubCategory/utils/constants';
 import { usePermissionsDataManager } from '../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
@@ -21,7 +22,7 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => {
+const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, pathToData }) => {
   const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
   const {
     modifiedData,
@@ -74,8 +75,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
             <Checkbox
               name={pathToData.join('..')}
               message={formatMessage({ id: 'app.utils.select-all' })}
-              // TODO
-              disabled={false}
+              disabled={isFormDisabled || IS_DISABLED}
               onChange={onChangeParentCheckbox}
               someChecked={hasSomeActionsSelected}
               value={hasAllActionsSelected}
@@ -88,15 +88,13 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
                 <CheckboxWrapper
-                  // TODO
-                  disabled={false}
+                  disabled={isFormDisabled || IS_DISABLED}
                   hasConditions={hasConditions}
                   key={action}
                 >
                   <Checkbox
                     name={checkboxName}
-                    // TODO
-                    disabled={false}
+                    disabled={isFormDisabled || IS_DISABLED}
                     message={displayName}
                     onChange={onChangeSimpleCheckbox}
                     value={value}
@@ -105,7 +103,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
               );
             })}
           </Flex>
-          <ConditionsButtonWrapper disabled={false} hasConditions={false}>
+          <ConditionsButtonWrapper disabled={isFormDisabled} hasConditions={doesButtonHasCondition}>
             <ConditionsButton
               hasConditions={doesButtonHasCondition}
               onClick={handleToggleModalIsOpen}
@@ -118,6 +116,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
           headerBreadCrumbs={[categoryName, subCategoryName]}
           actions={formattedActions}
           isOpen={modalState.isOpen}
+          isFormDisabled={isFormDisabled}
           onClosed={handleModalClose}
           onToggle={handleToggleModalIsOpen}
         />
@@ -129,6 +128,7 @@ const SubCategory = ({ categoryName, subCategoryName, actions, pathToData }) => 
 SubCategory.propTypes = {
   actions: PropTypes.array.isRequired,
   categoryName: PropTypes.string.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   subCategoryName: PropTypes.string.isRequired,
   pathToData: PropTypes.array.isRequired,
 };

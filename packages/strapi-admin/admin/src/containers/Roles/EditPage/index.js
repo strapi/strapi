@@ -129,6 +129,8 @@ const EditPage = () => {
     }
   };
 
+  const isFormDisabled = role.code === 'strapi-super-admin';
+
   return (
     <>
       <PageTitle name="Roles" />
@@ -162,7 +164,7 @@ const EditPage = () => {
               <BaselineAlignment top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
-                disabled={role.code === 'strapi-super-admin'}
+                disabled={isFormDisabled}
                 errors={errors}
                 values={values}
                 onChange={handleChange}
@@ -171,12 +173,7 @@ const EditPage = () => {
               />
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
-                  <Permissions
-                    // // permissionsLayout={permissionsLayout}
-                    // // rolePermissions={rolePermissions}
-                    // role={role}
-                    ref={permissionsRef}
-                  />
+                  <Permissions isFormDisabled={isFormDisabled} ref={permissionsRef} />
                 </Padded>
               )}
             </ContainerFluid>

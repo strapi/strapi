@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
 import styled from 'styled-components';
+import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../hooks';
 import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
@@ -21,6 +22,7 @@ const SubLevelWrapper = styled.div`
 
 const SubActionRow = ({
   childrenForm,
+  isFormDisabled,
   recursiveLevel,
   pathToDataFromActionRow,
   propertyActions,
@@ -114,6 +116,7 @@ const SubActionRow = ({
                       return (
                         <CheckboxWithCondition
                           key={label}
+                          disabled={isFormDisabled || IS_DISABLED}
                           name={checkboxName.join('..')}
                           onChange={onChangeSimpleCheckbox}
                           value={checkboxValue}
@@ -128,6 +131,7 @@ const SubActionRow = ({
                     return (
                       <CheckboxWithCondition
                         key={label}
+                        disabled={isFormDisabled || IS_DISABLED}
                         name={checkboxName.join('..')}
                         onChange={onChangeParentCheckbox}
                         value={hasAllActionsSelected}
@@ -141,6 +145,7 @@ const SubActionRow = ({
             {displayedRecursiveChildren && isActive && (
               <SubLevelWrapper>
                 <SubActionRow
+                  isFormDisabled={isFormDisabled}
                   parentName={`${parentName}..${value}`}
                   pathToDataFromActionRow={pathToDataFromActionRow}
                   propertyActions={propertyActions}
@@ -159,6 +164,7 @@ const SubActionRow = ({
 
 SubActionRow.propTypes = {
   childrenForm: PropTypes.array.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   parentName: PropTypes.string.isRequired,
   pathToDataFromActionRow: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,

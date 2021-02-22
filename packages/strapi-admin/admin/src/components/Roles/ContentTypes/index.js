@@ -5,18 +5,24 @@ import ContentTypeCollapses from '../ContentTypeCollapses';
 import GlobalActions from '../GlobalActions';
 import Wrapper from './Wrapper';
 
-const ContentTypes = ({ kind, layout: { actions, subjects } }) => {
+const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) => {
   return (
     <Wrapper>
       <Padded left right bottom size="md">
-        <GlobalActions actions={actions} kind={kind} />
-        <ContentTypeCollapses pathToData={kind} subjects={subjects} actions={actions} />
+        <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
+        <ContentTypeCollapses
+          actions={actions}
+          isFormDisabled={isFormDisabled}
+          pathToData={kind}
+          subjects={subjects}
+        />
       </Padded>
     </Wrapper>
   );
 };
 
 ContentTypes.propTypes = {
+  isFormDisabled: PropTypes.bool.isRequired,
   kind: PropTypes.string.isRequired,
   layout: PropTypes.shape({
     actions: PropTypes.array,

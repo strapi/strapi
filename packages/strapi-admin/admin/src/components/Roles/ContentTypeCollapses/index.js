@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import ContentTypeCollapse from '../ContentTypeCollapse';
 
-const ContentTypeCollapses = ({ actions, pathToData, subjects }) => {
+const ContentTypeCollapses = ({ actions, isFormDisabled, pathToData, subjects }) => {
   const [collapseToOpen, setCollapseToOpen] = useState(null);
 
   const handleClickToggleCollapse = collapseName => {
@@ -19,6 +19,7 @@ const ContentTypeCollapses = ({ actions, pathToData, subjects }) => {
         contentTypeName={uid}
         label={label}
         isActive={collapseToOpen === uid}
+        isFormDisabled={isFormDisabled}
         index={index}
         onClickToggleCollapse={handleClickToggleCollapse}
         pathToData={`${pathToData}..${uid}`}
@@ -35,6 +36,7 @@ ContentTypeCollapses.defaultProps = {
 
 ContentTypeCollapses.propTypes = {
   actions: PropTypes.array.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   pathToData: PropTypes.string.isRequired,
   subjects: PropTypes.arrayOf(
     PropTypes.shape({

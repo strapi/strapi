@@ -10,7 +10,14 @@ import ActionRow from './ActionRow';
 import Separator from './Separator';
 import updateValues from '../Permissions/utils/updateValues';
 
-const ConditionsModal = ({ actions, headerBreadCrumbs, isOpen, onClosed, onToggle }) => {
+const ConditionsModal = ({
+  actions,
+  headerBreadCrumbs,
+  isOpen,
+  isFormDisabled,
+  onClosed,
+  onToggle,
+}) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
 
@@ -95,6 +102,7 @@ const ConditionsModal = ({ actions, headerBreadCrumbs, isOpen, onClosed, onToggl
               key={actionId}
               arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
               label={label}
+              isFormDisabled={isFormDisabled}
               isGrey={index % 2 === 0}
               name={name}
               onCategoryChange={handleCategoryChange}
@@ -134,6 +142,7 @@ ConditionsModal.propTypes = {
   ).isRequired,
   headerBreadCrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
   isOpen: PropTypes.bool.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   onClosed: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
 };

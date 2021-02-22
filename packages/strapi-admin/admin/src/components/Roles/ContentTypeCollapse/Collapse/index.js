@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex, Padded } from '@buffetjs/core';
+import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/Collapse/utils/constants';
 import { usePermissionsDataManager } from '../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import CheckboxWithCondition from '../../CheckboxWithCondition';
@@ -13,7 +14,15 @@ import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import Wrapper from './Wrapper';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
 
-const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pathToData }) => {
+const Collapse = ({
+  availableActions,
+  isActive,
+  isGrey,
+  isFormDisabled,
+  label,
+  onClickToggle,
+  pathToData,
+}) => {
   const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
   const {
     modifiedData,
@@ -60,6 +69,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
         <Padded left size="sm" />
         <RowLabelWithCheckbox
           isCollapsable
+          isFormDisabled={isFormDisabled}
           label={label}
           checkboxName={pathToData}
           onChange={onChangeParentCheckbox}
@@ -89,6 +99,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
                 return (
                   <CheckboxWithCondition
                     key={actionId}
+                    disabled={isFormDisabled || IS_DISABLED}
                     hasConditions={hasConditions}
                     name={checkboxName}
                     onChange={onChangeParentCheckbox}
@@ -101,6 +112,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
               return (
                 <CheckboxWithCondition
                   key={actionId}
+                  disabled={isFormDisabled || IS_DISABLED}
                   hasConditions={hasConditions}
                   name={checkboxName}
                   onChange={onChangeSimpleCheckbox}
@@ -121,6 +133,7 @@ const Collapse = ({ availableActions, isActive, isGrey, label, onClickToggle, pa
           headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
           actions={checkboxesActions}
           isOpen={modalState.isOpen}
+          isFormDisabled={isFormDisabled}
           onClosed={handleModalClose}
           onToggle={handleToggleModalIsOpen}
         />
@@ -133,6 +146,7 @@ Collapse.propTypes = {
   availableActions: PropTypes.array.isRequired,
   isActive: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   onClickToggle: PropTypes.func.isRequired,
   pathToData: PropTypes.string.isRequired,

@@ -18,6 +18,7 @@ const Wrapper = styled.div`
 
 const ConditionsSelect = ({
   arrayOfOptionsGroupedByCategory,
+  isFormDisabled,
   name,
   onCategoryChange,
   onChange,
@@ -28,7 +29,7 @@ const ConditionsSelect = ({
   return (
     <Wrapper
       // TODO
-      disabled={false}
+      disabled={isFormDisabled}
     >
       <Select
         components={{
@@ -39,8 +40,7 @@ const ConditionsSelect = ({
           MenuList,
         }}
         arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-        // TODO
-        isDisabled={false}
+        isDisabled={isFormDisabled}
         name={name}
         onChange={onChange}
         isClearable={false}
@@ -60,6 +60,7 @@ const ConditionsSelect = ({
 
 ConditionsSelect.propTypes = {
   arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   onCategoryChange: PropTypes.func.isRequired,
   onChange: PropTypes.func.isRequired,

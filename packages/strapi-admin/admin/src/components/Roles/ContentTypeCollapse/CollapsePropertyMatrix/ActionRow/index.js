@@ -2,6 +2,7 @@ import React, { memo, useState, useMemo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Padded, Flex } from '@buffetjs/core';
+import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../hooks';
 import { getCheckboxState } from '../../../utils';
 import CheckboxWithCondition from '../../../CheckboxWithCondition';
@@ -16,6 +17,7 @@ import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 const ActionRow = ({
   childrenForm,
   label,
+  isFormDisabled,
   name,
   required,
   pathToData,
@@ -72,6 +74,7 @@ const ActionRow = ({
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
+            isFormDisabled={isFormDisabled}
             label={label}
             someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
@@ -93,6 +96,7 @@ const ActionRow = ({
                 return (
                   <CheckboxWithCondition
                     key={actionId}
+                    disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName.join('..')}
                     onChange={onChangeSimpleCheckbox}
                     value={checkboxValue}
@@ -107,6 +111,7 @@ const ActionRow = ({
               return (
                 <CheckboxWithCondition
                   key={label}
+                  disabled={isFormDisabled || IS_DISABLED}
                   name={checkboxName.join('..')}
                   onChange={onChangeParentCheckbox}
                   value={hasAllActionsSelected}
@@ -120,6 +125,7 @@ const ActionRow = ({
       {isActive && (
         <SubActionRow
           childrenForm={recursiveChildren}
+          isFormDisabled={isFormDisabled}
           parentName={name}
           pathToDataFromActionRow={pathToData}
           propertyName={propertyName}
@@ -139,6 +145,7 @@ ActionRow.defaultProps = {
 ActionRow.propTypes = {
   childrenForm: PropTypes.array,
   label: PropTypes.string.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   pathToData: PropTypes.string.isRequired,
   propertyActions: PropTypes.array.isRequired,
