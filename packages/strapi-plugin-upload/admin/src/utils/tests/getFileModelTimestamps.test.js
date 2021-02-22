@@ -10,11 +10,9 @@ describe('UPLOAD | utils | getFileModelTimestamps', () => {
         ok: true,
         fileModel: {
           uid: 'plugins::upload.file',
-          schema: {
-            attributes: {},
-            options: {
-              timestamps: ['createdAt', 'updatedAt'],
-            },
+          attributes: {},
+          options: {
+            timestamps: ['createdAt', 'updatedAt'],
           },
         },
       },
@@ -39,11 +37,9 @@ describe('UPLOAD | utils | getFileModelTimestamps', () => {
         ok: true,
         fileModel: {
           uid: 'plugins::upload.file',
-          schema: {
-            attributes: {},
-            options: {
-              timestamps: true,
-            },
+          attributes: {},
+          options: {
+            timestamps: true,
           },
         },
       },
