@@ -20,7 +20,6 @@ import FormCard from '../../../../../admin/src/components/FormBloc';
 import { ButtonWithNumber } from '../../../../../admin/src/components/Roles';
 import SizedInput from '../../../../../admin/src/components/SizedInput';
 import Permissions from '../../../../../admin/src/components/Roles/Permissions';
-import { formatPermissionsToApi } from '../../../../../admin/src/utils';
 
 import schema from './utils/schema';
 
@@ -95,7 +94,7 @@ const CreatePage = () => {
         if (res.data.id && !isEmpty(permissionsToSend)) {
           await request(`/admin/roles/${res.data.id}/permissions`, {
             method: 'PUT',
-            body: { permissions: formatPermissionsToApi(permissionsToSend) },
+            body: { permissions: permissionsToSend },
           });
         }
 

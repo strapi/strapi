@@ -6,6 +6,7 @@ import ContentTypes from '../ContentTypes';
 import PluginsAndSettings from '../PluginsAndSettings';
 import layout from '../temp/fakeData';
 import TAB_LABELS from './utils/tabLabels';
+import formatPermissionsToAPI from './utils/formatPermissionsToAPI';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -17,9 +18,12 @@ const Permissions = forwardRef(({ layout, isFormDisabled }, ref) => {
   useImperativeHandle(ref, () => {
     return {
       getPermissions: () => {
-        console.log('todo');
+        return formatPermissionsToAPI(modifiedData);
       },
       resetForm: () => {
+        console.log('todo');
+      },
+      setFormAfterSubmit: () => {
         console.log('todo');
       },
     };

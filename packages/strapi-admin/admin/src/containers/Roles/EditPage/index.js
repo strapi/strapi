@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { get, has, isEmpty } from 'lodash';
-import { BaselineAlignment, useGlobalContext, request, difference } from 'strapi-helper-plugin';
+import { get, isEmpty } from 'lodash';
+import { BaselineAlignment, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -10,12 +10,15 @@ import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
-import { formatPermissionsToApi } from '../../../utils';
 import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const { emitEvent, settingsBaseURL } = useGlobalContext();
+  const {
+    // TODO
+    // emitEvent,
+    settingsBaseURL,
+  } = useGlobalContext();
   const {
     params: { id },
   } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
@@ -33,6 +36,7 @@ const EditPage = () => {
     isLoading: isRoleLoading,
     onSubmitSucceeded,
   } = useFetchRole(id);
+  console.log({ rolePermissions });
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -73,20 +77,21 @@ const EditPage = () => {
 
       const permissionsToSend = permissionsRef.current.getPermissions();
 
-      const checkConditionsDiff = () => {
-        const diff = difference(
-          get(permissionsToSend, 'contentTypesPermissions', {}),
-          get(rolePermissions, 'contentTypesPermissions', {})
-        );
+      // TODO
+      // const checkConditionsDiff = () => {
+      //   const diff = difference(
+      //     get(permissionsToSend, 'contentTypesPermissions', {}),
+      //     get(rolePermissions, 'contentTypesPermissions', {})
+      //   );
 
-        if (isEmpty(diff)) {
-          return false;
-        }
+      //   if (isEmpty(diff)) {
+      //     return false;
+      //   }
 
-        return Object.keys(diff).some(key => {
-          return has(diff, [key, 'conditions']);
-        });
-      };
+      //   return Object.keys(diff).some(key => {
+      //     return has(diff, [key, 'conditions']);
+      //   });
+      // };
 
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
@@ -97,15 +102,14 @@ const EditPage = () => {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
           body: {
-            // TODO
-            permissions: formatPermissionsToApi(permissionsToSend),
+            permissions: permissionsToSend,
           },
         });
 
         // TODO
-        if (checkConditionsDiff()) {
-          emitEvent('didUpdateConditions');
-        }
+        // if (checkConditionsDiff()) {
+        //   emitEvent('didUpdateConditions');
+        // }
       }
 
       permissionsRef.current.setFormAfterSubmit();
