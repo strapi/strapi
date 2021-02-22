@@ -192,9 +192,10 @@ module.exports = ({
         ENABLED_EE_FEATURES: JSON.stringify(options.features),
       }),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
-        const splitPath = resource.context.split(`${path.sep}src${path.sep}`);
-
-        let wantedPath = path.join(splitPath[0], 'src');
+        let wantedPath = path.join(
+          resource.context.substr(0, resource.context.lastIndexOf(`${path.sep}src${path.sep}`)),
+          'src'
+        );
 
         if (useEE) {
           resource.request = resource.request.replace(
