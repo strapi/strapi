@@ -103,7 +103,7 @@
     "style-loader": "^0.23.1",
     "styled-components": "^5.0.0",
     "terser-webpack-plugin": "^1.2.3",
-    "url-loader": "^1.1.2",
+    "url-loader": "^4.1.1",
     "video-react": "^0.13.2",
     "webpack": "^4.40.1",
     "webpack-cli": "^3.3.12",
