@@ -11,28 +11,32 @@ import SizedInput from '../../components/SizedInput';
 import { Header } from '../../components/Settings';
 import { useSettingsForm } from '../../hooks';
 import { form, schema } from './utils';
-import useLanguages from '../LanguageProvider/hooks/useLanguages';
+import useChangeLanguage from '../LanguageProvider/hooks/useChangeLanguage';
 import { languages, languageNativeNames } from '../../i18n';
 import { Title, ProfilePageLabel } from './components';
 import Bloc from '../../components/Bloc';
 
 const ProfilePage = () => {
   const { goBack } = useHistory();
-  const { currentLanguage, selectLanguage } = useLanguages();
+  const changeLanguage = useChangeLanguage();
   const { formatMessage } = useIntl();
 
-  const onSubmitSuccessCb = data => auth.setUserInfo(data);
+  const onSubmitSuccessCb = data => {
+    changeLanguage(data.preferedLanguage);
+    auth.setUserInfo(data);
+  };
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader, showHeaderButtonLoader },
     // eslint-disable-next-line no-unused-vars
     _,
-    { handleCancel, handleChange, handleSubmit },
+    { handleCancel, handleChange, handleSubmit, setField },
   ] = useSettingsForm('/admin/users/me', schema, onSubmitSuccessCb, [
     'email',
     'firstname',
     'lastname',
     'username',
+    'preferedLanguage',
   ]);
 
   const headerLabel = useMemo(() => {
@@ -46,150 +50,148 @@ const ProfilePage = () => {
   }, [modifiedData]);
 
   return (
-    <>
+    <form onSubmit={handleSubmit}>
       <PageTitle title="User profile" />
       <BackHeader onClick={goBack} />
 
       <BaselineAlignment top size="2px" />
 
-      <form onSubmit={handleSubmit}>
-        <ContainerFluid padding="18px 30px 0 30px">
-          <Header
-            isLoading={showHeaderLoader}
-            initialData={initialData}
-            label={headerLabel}
-            modifiedData={modifiedData}
-            onCancel={handleCancel}
-            showHeaderButtonLoader={showHeaderButtonLoader}
-          />
-        </ContainerFluid>
+      <ContainerFluid padding="18px 30px 0 30px">
+        <Header
+          isLoading={showHeaderLoader}
+          initialData={initialData}
+          label={headerLabel}
+          modifiedData={modifiedData}
+          onCancel={handleCancel}
+          showHeaderButtonLoader={showHeaderButtonLoader}
+        />
+      </ContainerFluid>
 
-        <BaselineAlignment top size="5px" />
+      <BaselineAlignment top size="5px" />
 
-        {/* Experience block */}
-        <Padded size="md" left right bottom>
-          <Bloc isLoading={isLoading}>
-            <Padded size="sm" top left right bottom>
-              <Col>
-                <Padded size="sm" top bottom>
-                  <Title>
-                    {formatMessage({ id: 'Settings.profile.form.section.profile.title' })}
-                  </Title>
-                </Padded>
-              </Col>
+      {/* Experience block */}
+      <Padded size="md" left right bottom>
+        <Bloc isLoading={isLoading}>
+          <Padded size="sm" top left right bottom>
+            <Col>
+              <Padded size="sm" top bottom>
+                <Title>
+                  {formatMessage({ id: 'Settings.profile.form.section.profile.title' })}
+                </Title>
+              </Padded>
+            </Col>
 
-              <BaselineAlignment top size="9px" />
+            <BaselineAlignment top size="9px" />
 
-              <Row>
-                {Object.keys(form).map(key => (
-                  <SizedInput
-                    {...form[key]}
-                    key={key}
-                    error={formErrors[key]}
-                    name={key}
-                    onChange={handleChange}
-                    value={get(modifiedData, key, '')}
-                  />
-                ))}
-              </Row>
-            </Padded>
-          </Bloc>
-        </Padded>
-
-        <BaselineAlignment top size="13px" />
-
-        {/* Password block */}
-        <Padded size="md" left right bottom>
-          <Bloc>
-            <Padded size="sm" top left right bottom>
-              <Col>
-                <Padded size="sm" top bottom>
-                  <Title>
-                    {formatMessage({ id: 'Settings.profile.form.section.password.title' })}
-                  </Title>
-                </Padded>
-              </Col>
-
-              <BaselineAlignment top size="9px" />
-
-              <Row>
+            <Row>
+              {Object.keys(form).map(key => (
                 <SizedInput
-                  label="Auth.form.password.label"
-                  type="password"
-                  autoComplete="new-password"
-                  validations={{}}
-                  error={formErrors.password}
-                  name="password"
+                  {...form[key]}
+                  key={key}
+                  error={formErrors[key]}
+                  name={key}
                   onChange={handleChange}
-                  value={get(modifiedData, 'password', '')}
+                  value={get(modifiedData, key, '')}
                 />
+              ))}
+            </Row>
+          </Padded>
+        </Bloc>
+      </Padded>
 
-                <SizedInput
-                  label="Auth.form.confirmPassword.label"
-                  type="password"
-                  validations={{}}
-                  error={formErrors.confirmPassword}
-                  name="confirmPassword"
-                  onChange={handleChange}
-                  value={get(modifiedData, 'confirmPassword', '')}
-                />
-              </Row>
-            </Padded>
-          </Bloc>
-        </Padded>
+      <BaselineAlignment top size="13px" />
 
-        <BaselineAlignment top size="13px" />
+      {/* Password block */}
+      <Padded size="md" left right bottom>
+        <Bloc>
+          <Padded size="sm" top left right bottom>
+            <Col>
+              <Padded size="sm" top bottom>
+                <Title>
+                  {formatMessage({ id: 'Settings.profile.form.section.password.title' })}
+                </Title>
+              </Padded>
+            </Col>
 
-        {/* Interface block */}
-        <Padded size="md" left right bottom>
-          <Bloc>
-            <Padded size="sm" top left right bottom>
-              <Col>
-                <Padded size="sm" top bottom>
-                  <Title>
-                    {formatMessage({ id: 'Settings.profile.form.section.experience.title' })}
-                  </Title>
-                </Padded>
-              </Col>
+            <BaselineAlignment top size="9px" />
 
-              <BaselineAlignment top size="7px" />
+            <Row>
+              <SizedInput
+                label="Auth.form.password.label"
+                type="password"
+                autoComplete="new-password"
+                validations={{}}
+                error={formErrors.password}
+                name="password"
+                onChange={handleChange}
+                value={get(modifiedData, 'password', '')}
+              />
 
-              <div className="col-6">
-                <ProfilePageLabel htmlFor="">
+              <SizedInput
+                label="Auth.form.confirmPassword.label"
+                type="password"
+                validations={{}}
+                error={formErrors.confirmPassword}
+                name="confirmPassword"
+                onChange={handleChange}
+                value={get(modifiedData, 'confirmPassword', '')}
+              />
+            </Row>
+          </Padded>
+        </Bloc>
+      </Padded>
+
+      <BaselineAlignment top size="13px" />
+
+      {/* Interface block */}
+      <Padded size="md" left right bottom>
+        <Bloc>
+          <Padded size="sm" top left right bottom>
+            <Col>
+              <Padded size="sm" top bottom>
+                <Title>
+                  {formatMessage({ id: 'Settings.profile.form.section.experience.title' })}
+                </Title>
+              </Padded>
+            </Col>
+
+            <BaselineAlignment top size="7px" />
+
+            <div className="col-6">
+              <ProfilePageLabel htmlFor="">
+                {formatMessage({
+                  id: 'Settings.profile.form.section.experience.interfaceLanguage',
+                })}
+              </ProfilePageLabel>
+
+              <Select
+                aria-labelledby="interface-language"
+                selectedValue={get(modifiedData, 'preferedLanguage')}
+                onChange={nextLocaleCode => setField('preferedLanguage', nextLocaleCode)}
+              >
+                {languages.map(language => {
+                  const langName = languageNativeNames[language];
+
+                  return (
+                    <Option value={language} key={language}>
+                      {langName}
+                    </Option>
+                  );
+                })}
+              </Select>
+
+              <Padded size="sm" top bottom>
+                <Text color="grey">
                   {formatMessage({
-                    id: 'Settings.profile.form.section.experience.interfaceLanguage',
+                    id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
                   })}
-                </ProfilePageLabel>
-
-                <Select
-                  aria-labelledby="interface-language"
-                  selectedValue={currentLanguage}
-                  onChange={selectLanguage}
-                >
-                  {languages.map(language => {
-                    const langName = languageNativeNames[language];
-
-                    return (
-                      <Option value={language} key={language}>
-                        {langName}
-                      </Option>
-                    );
-                  })}
-                </Select>
-
-                <Padded size="sm" top bottom>
-                  <Text color="grey">
-                    {formatMessage({
-                      id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
-                    })}
-                  </Text>
-                </Padded>
-              </div>
-            </Padded>
-          </Bloc>
-        </Padded>
-      </form>
-    </>
+                </Text>
+              </Padded>
+            </div>
+          </Padded>
+        </Bloc>
+      </Padded>
+    </form>
   );
 };
 
