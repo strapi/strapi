@@ -62,6 +62,7 @@
     "invariant": "^2.2.1",
     "lodash": "4.17.20",
     "moment": "^2.29.1",
+    "parse-domain": "3.0.3",
     "react": "^16.13.1",
     "react-dom": "^16.9.0",
     "react-helmet": "^6.1.0",

@@ -1,4 +1,6 @@
 import { includes, mapKeys, reject } from 'lodash';
+import { parseDomain, ParseResultType } from 'parse-domain';
+
 /**
  * [validateInput description]
  * @param  {String || Number} value  Input's value
@@ -10,6 +12,7 @@ import { includes, mapKeys, reject } from 'lodash';
 /* eslint-disable no-useless-escape */
 const validateInput = (value, inputValidations = {}, type = 'text') => {
   let errors = [];
+  let parseDomainResult = '';
 
   const emailRegex = new RegExp(
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -63,7 +66,15 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
     }
   });
 
-  if (type === 'email' && !emailRegex.test(value)) {
+  if (type === 'email') {
+    parseDomainResult = parseDomain(value);
+  }
+
+  if (
+    type === 'email' &&
+    !emailRegex.test(value) &&
+    !(parseDomainResult.type === ParseResultType.Listed)
+  ) {
     errors.push({ id: 'components.Input.error.validation.email' });
   }
 
