@@ -16,7 +16,7 @@ import Wrapper from './Wrapper';
 const CTHackSpan = styled.span`
   margin-left: -1rem;
   margin-right: 1rem;
-  margin-top: -1.3rem;
+  margin-top: -0.5rem;
 `;
 const STHackSpan = styled.span`
   margin-left: -1rem;
@@ -59,7 +59,7 @@ const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value })
               key={option.value}
               htmlFor={option.value.toString()}
             >
-              <Flex>
+              <Flex style={{ marginRight: '20px' }}>
                 {isST && (
                   <STHackSpan>
                     <STIcon selected={value === 'singleType'} />

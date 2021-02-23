@@ -2,7 +2,7 @@
 import React from 'react';
 
 const CTUnSelected = props => (
-  <svg width="79px" height="86px" viewBox="0 0 79 86" {...props}>
+  <svg width="60px" height="67px" viewBox="0 0 79 86" {...props}>
     <defs>
       <filter
         x="-1.7%"
