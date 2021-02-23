@@ -21,7 +21,7 @@ const CTHackSpan = styled.span`
 const STHackSpan = styled.span`
   margin-left: -1rem;
   margin-right: 1rem;
-  margin-top: -0.5rem;
+  margin-top: -0.4rem;
 `;
 
 const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value }) => {
