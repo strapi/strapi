@@ -1,10 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const { flatMap, filter } = require('lodash/fp');
+const { flatMap, reject, isNil, isArray, xor, uniq, map, difference, flow } = require('lodash/fp');
 const pmap = require('p-map');
 const { getBoundActionsBySubject, BOUND_ACTIONS_FOR_FIELDS } = require('../domain/role');
-const { createPermission } = require('../domain/permission');
+const { Permission, createPermission, toPermission } = require('../domain/permission');
+const { getService } = require('../utils');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
@@ -15,22 +16,29 @@ const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
 
 /**
- * Removes unwanted fields from a permission
- * @param perm
- * @returns {*}
+ * Removes unwanted attributes from a permission and remove invalid items
+ * @param {object|Permission} permission
+ * @return {object}
  */
-const sanitizePermission = perm => ({
-  ..._.pick(perm, ['id', 'action', 'subject', 'fields']),
-  conditions: strapi.admin.services.condition.removeUnkownConditionIds(perm.conditions),
-});
+const sanitizePermission = permission => {
+  if (permission instanceof Permission) {
+    return permission.sanitizedRaw;
+  }
+
+  return createPermission(permission).sanitizedRaw;
+};
 
 /**
  * Delete permissions of roles in database
  * @param rolesIds ids of roles
  * @returns {Promise<array>}
  */
-const deleteByRolesIds = rolesIds => {
-  return strapi.query('permission', 'admin').delete({ role_in: rolesIds });
+const deleteByRolesIds = async rolesIds => {
+  const deletedPermissions = await strapi
+    .query('permission', 'admin')
+    .delete({ role_in: rolesIds });
+
+  return toPermission(deletedPermissions);
 };
 
 /**
@@ -38,8 +46,10 @@ const deleteByRolesIds = rolesIds => {
  * @param ids ids of permissions
  * @returns {Promise<array>}
  */
-const deleteByIds = ids => {
-  return strapi.query('permission', 'admin').delete({ id_in: ids });
+const deleteByIds = async ids => {
+  const deletedPermissions = await strapi.query('permission', 'admin').delete({ id_in: ids });
+
+  return toPermission(deletedPermissions);
 };
 
 /**
@@ -48,7 +58,9 @@ const deleteByIds = ids => {
  * @returns {Promise<*[]|*>}
  */
 const createMany = async permissions => {
-  return strapi.query('permission', 'admin').createMany(permissions);
+  const createdPermissions = await strapi.query('permission', 'admin').createMany(permissions);
+
+  return toPermission(createdPermissions);
 };
 
 /**
@@ -58,31 +70,33 @@ const createMany = async permissions => {
  * @param attributes
  */
 const update = async (params, attributes) => {
-  return strapi.query('permission', 'admin').update(params, attributes);
+  const updatedPermissions = await strapi.query('permission', 'admin').update(params, attributes);
+
+  return toPermission(updatedPermissions);
 };
 
 /**
  * Find assigned permissions in the database
  * @param params query params to find the permissions
- * @returns {Promise<array<Object>>}
+ * @returns {Promise<Permission[]>}
  */
-const find = (params = {}) => {
-  return strapi.query('permission', 'admin').find(params, []);
+const find = async (params = {}) => {
+  const rawPermissions = await strapi.query('permission', 'admin').find(params, []);
+
+  return toPermission(rawPermissions);
 };
 
 /**
  * Find all permissions for a user
  * @param roles
- * @returns {Promise<*[]|*>}
+ * @returns {Promise<Permission[]>}
  */
 const findUserPermissions = async ({ roles }) => {
   if (!_.isArray(roles)) {
     return [];
   }
 
-  return strapi
-    .query('permission', 'admin')
-    .find({ role_in: roles.map(_.property('id')), _limit: -1 });
+  return find({ role_in: roles.map(_.property('id')), _limit: -1 });
 };
 
 /**
@@ -91,48 +105,56 @@ const findUserPermissions = async ({ roles }) => {
  */
 const cleanPermissionInDatabase = async () => {
   const pageSize = 200;
-  let page = 0;
   let total = 1;
 
-  while (page * pageSize < total) {
-    // First, delete permission that don't exist anymore
-    page += 1;
-    const res = await strapi.query('permission', 'admin').findPage({ page, pageSize }, []);
-    total = res.pagination.total;
+  for (let page = 1; page * pageSize < total; page++) {
+    // 1. Find invalid permissions and collect their ID to delete them later
+    const { pagination, results } = await strapi
+      .query('permission', 'admin')
+      .findPage({ page, pageSize }, []);
 
-    const dbPermissions = res.results;
-    const allActionsMap = actionProvider.getAllByMap();
-    const permissionsToRemoveIds = dbPermissions.reduce((idsToDelete, perm) => {
-      if (
-        !allActionsMap.has(perm.action) ||
-        (Array.isArray(allActionsMap.get(perm.action).subjects) &&
-          !allActionsMap.get(perm.action).subjects.includes(perm.subject))
-      ) {
-        idsToDelete.push(perm.id);
+    total = pagination.total;
+
+    const permissions = toPermission(results);
+    const actionsMap = actionProvider.getAllByMap();
+
+    const permissionsIdToRemove = permissions.reduce((ids, permission) => {
+      const isRegisteredAction = actionsMap.has(permission.action);
+
+      const { subjects } = actionsMap.get(permission.action) || {};
+      const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject);
+
+      // If the permission has an invalid action or an invalid subject, then add it to the toBeRemoved collection
+      if (!isRegisteredAction || isInvalidSubject) {
+        ids.push(permission.raw.id);
       }
-      return idsToDelete;
+
+      return ids;
     }, []);
 
-    const deletePromise = deleteByIds(permissionsToRemoveIds);
-
-    // Second, clean fields of permissions (add required ones, remove the non-existing anymore ones)
-    const permissionsInDb = dbPermissions.filter(perm => !permissionsToRemoveIds.includes(perm.id));
-    const permissionsWithCleanFields = strapi.admin.services['content-type'].cleanPermissionFields(
-      permissionsInDb
+    // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
+    const remainingPermissions = permissions.filter(
+      permission => !permissionsIdToRemove.includes(permission.raw.id)
+    );
+    const permissionsWithCleanFields = getService('content-type').cleanPermissionFields(
+      remainingPermissions
     );
 
     // Update only the ones that need to be updated
     const permissionsNeedingToBeUpdated = _.differenceWith(
       permissionsWithCleanFields,
-      permissionsInDb,
-      (a, b) => a.id === b.id && _.xor(a.fields, b.fields).length === 0
+      remainingPermissions,
+      (a, b) => {
+        return a.raw.id === b.raw.id && xor(a.properties.fields, b.properties.fields).length === 0;
+      }
     );
-    const promiseProvider = perm => update({ id: perm.id }, perm);
 
-    //Update the database
+    const updatePromiseProvider = permission => update({ id: permission.raw.id }, permission.raw);
+
+    // Execute all the queries, update the database
     await Promise.all([
-      deletePromise,
-      pmap(permissionsNeedingToBeUpdated, promiseProvider, {
+      deleteByIds(permissionsIdToRemove),
+      pmap(permissionsNeedingToBeUpdated, updatePromiseProvider, {
         concurrency: 100,
         stopOnError: true,
       }),
@@ -148,40 +170,37 @@ const ensureBoundPermissionsInDatabase = async () => {
   const contentTypes = Object.values(strapi.contentTypes);
   const editorRole = await strapi.query('role', 'admin').findOne({ code: EDITOR_CODE }, []);
 
-  if (_.isNil(editorRole)) {
+  if (isNil(editorRole)) {
     return;
   }
 
   for (const contentType of contentTypes) {
     const boundActions = getBoundActionsBySubject(editorRole, contentType.uid);
-    const permissions = await strapi.query('permission', 'admin').find(
-      {
-        subject: contentType.uid,
-        action_in: boundActions,
-        role: editorRole.id,
-      },
-      []
-    );
+
+    const permissions = await find({
+      subject: contentType.uid,
+      action_in: boundActions,
+      role: editorRole.id,
+    });
 
     if (permissions.length === 0) {
       return;
     }
 
-    const fields = _.flow(flatMap('fields'), filter(_.negate(_.isNil)), _.uniq)(permissions);
+    const fields = flow(flatMap('properties.fields'), reject(isNil), uniq)(permissions);
 
     // Handle the scenario where permissions are missing
-
-    const missingActions = _.difference(boundActions, _.map(permissions, 'action'));
+    const missingActions = difference(map('action', permissions), boundActions);
 
     if (missingActions.length > 0) {
-      const permissions = missingActions.map(action =>
-        createPermission({
-          action,
-          subject: contentType.uid,
-          role: editorRole.id,
+      const permissions = missingActions.map(action => ({
+        action,
+        subject: contentType.uid,
+        properties: {
           fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
-        })
-      );
+        },
+        role: editorRole.id,
+      }));
 
       await createMany(permissions);
     }

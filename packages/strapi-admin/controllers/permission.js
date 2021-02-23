@@ -1,6 +1,7 @@
 'use strict';
 
 const { validateCheckPermissionsInput } = require('../validation/permission');
+const { getService } = require('../utils');
 const { formatActionsBySections, formatConditions } = require('./formatters');
 
 module.exports = {
@@ -10,6 +11,7 @@ module.exports = {
    */
   async check(ctx) {
     const { body: input } = ctx.request;
+    const { userAbility } = ctx.state;
 
     try {
       await validateCheckPermissionsInput(input);
@@ -17,12 +19,12 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const checkPermissions = strapi.admin.services.permission.engine.checkMany(
-      ctx.state.userAbility
-    );
+    const { engine } = getService('permission');
+
+    const checkPermissionsFn = engine.checkMany(userAbility);
 
     ctx.body = {
-      data: checkPermissions(input.permissions),
+      data: checkPermissionsFn(input.permissions),
     };
   },
 
@@ -31,8 +33,8 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async getAll(ctx) {
-    const allActions = strapi.admin.services.permission.actionProvider.getAll();
-    const conditions = strapi.admin.services.permission.conditionProvider.getAll();
+    const allActions = getService('permission').actionProvider.getAll();
+    const conditions = getService('permission').conditionProvider.getAll();
 
     ctx.body = {
       data: {

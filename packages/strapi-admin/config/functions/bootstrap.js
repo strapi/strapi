@@ -41,6 +41,7 @@ const syncAuthSettings = async () => {
 module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
+
   await strapi.admin.services.permission.cleanPermissionInDatabase();
   await strapi.admin.services.permission.ensureBoundPermissionsInDatabase();
   await strapi.admin.services.user.migrateUsers();

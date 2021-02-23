@@ -28,11 +28,11 @@
       "configurable": false,
       "required": false
     },
-    "fields": {
+    "properties": {
       "type": "json",
       "configurable": false,
       "required": false,
-      "default": []
+      "default": {}
     },
     "conditions": {
       "type": "json",
