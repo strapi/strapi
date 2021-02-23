@@ -7,6 +7,7 @@ const getSubstitute = arr => arr.map(() => '??').join(', ');
 
 const before = () => {};
 
+// Migration when i18n is disabled on a field of a content-type that have i18n enabled
 const after = async ({ model, definition, previousDefinition, ORM }) => {
   const ctService = getService('content-types');
   const localeService = getService('locales');
@@ -90,9 +91,50 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
       trx.commit();
     } catch (e) {
       trx.rollback();
+      throw e;
     }
   } else if (model.orm === 'mongoose') {
-    // to do
+    for (const locale of locales) {
+      const batchSize = 1000;
+      let batchCount = 1000;
+      let lastId;
+      while (batchCount === batchSize) {
+        const findParams = { locale: locale.code };
+        if (lastId) {
+          findParams._id = { $gt: lastId };
+        }
+
+        const batch = await model
+          .find(findParams, [...attributesToMigrate, 'locale', 'localizations'])
+          .sort({ _id: 1 })
+          .limit(batchSize);
+
+        if (batch.length > 0) {
+          lastId = batch[batch.length - 1]._id;
+        }
+        batchCount = batch.length;
+
+        const entriesToProcess = batch.filter(
+          entry =>
+            entry.localizations.length > 1 &&
+            intersection(entry.localizations.map(prop('locale')), processedLocaleCodes).length === 0
+        );
+
+        const updates = entriesToProcess.reduce((entries, entry) => {
+          const attributesValues = pick(attributesToMigrate, entry);
+          const entriesIdsToUpdate = entry.localizations
+            .filter(related => related.locale !== locale.code)
+            .map(prop('id'));
+
+          return entries.concat({
+            updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
+          });
+        }, []);
+
+        await model.bulkWrite(updates);
+      }
+      processedLocaleCodes.push(locale.code);
+    }
   }
 };
 
