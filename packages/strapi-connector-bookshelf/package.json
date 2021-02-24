@@ -26,7 +26,7 @@
     "strapi-utils": "3.5.1"
   },
   "peerDependencies": {
-    "knex": "^0.20.0"
+    "knex": "0.21.18"
   },
   "strapi": {
     "dependencies": [
