@@ -68,14 +68,9 @@ const validateInput = (value, inputValidations = {}, type = 'text') => {
 
   if (type === 'email') {
     parseDomainResult = parseDomain(value);
-  }
-
-  if (
-    type === 'email' &&
-    !emailRegex.test(value) &&
-    !(parseDomainResult.type === ParseResultType.Listed)
-  ) {
-    errors.push({ id: 'components.Input.error.validation.email' });
+    if (!emailRegex.test(value) && !(parseDomainResult.type === ParseResultType.Listed)) {
+      errors.push({ id: 'components.Input.error.validation.email' });
+    }
   }
 
   if (includes(errors, requiredError)) {
