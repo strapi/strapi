@@ -12,11 +12,11 @@
     "strapi": "strapi"
   },
   "dependencies": {
-    "knex": "^0.21.14",
+    "knex": "0.21.18",
     "lodash": "4.17.19",
-    "mysql": "^2.17.1",
+    "mysql": "2.18.1",
     "pg": "8.5.1",
-    "sqlite3": "^5.0.1",
+    "sqlite3": "5.0.0",
     "strapi": "3.5.1",
     "strapi-admin": "3.5.1",
     "strapi-connector-bookshelf": "3.5.1",
