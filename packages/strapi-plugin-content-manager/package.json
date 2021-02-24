@@ -47,7 +47,7 @@
     "sanitize-html": "2.1.1",
     "strapi-helper-plugin": "3.5.1",
     "strapi-utils": "3.5.1",
-    "yup": "^0.27.0"
+    "yup": "^0.32.9"
   },
   "author": {
     "name": "Strapi team",
