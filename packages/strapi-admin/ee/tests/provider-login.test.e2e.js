@@ -58,7 +58,7 @@ describe('Provider Login', () => {
   let hasSSO;
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance({ logLevel: 'debug' });
+    strapi = await createStrapiInstance();
     utils = createUtils(strapi);
     // eslint-disable-next-line node/no-extraneous-require
     hasSSO = require('strapi/lib/utils/ee').features.isEnabled('sso');
