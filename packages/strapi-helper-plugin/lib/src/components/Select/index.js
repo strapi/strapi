@@ -57,3 +57,5 @@ Select.propTypes = {
   onChange: PropTypes.func.isRequired,
   selectedValue: PropTypes.string,
 };
+
+export const selectStyles = getStyles;

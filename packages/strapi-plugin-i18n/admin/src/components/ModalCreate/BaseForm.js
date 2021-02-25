@@ -5,13 +5,17 @@ import { Inputs } from '@buffetjs/custom';
 import Select from 'react-select';
 import { Col, Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { useTheme } from 'styled-components';
+import { BaselineAlignment, selectStyles } from 'strapi-helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
 
 const BaseForm = ({ options, defaultOption }) => {
+  const theme = useTheme();
   const { formatMessage } = useIntl();
   const { values, handleChange, setFieldValue } = useFormikContext();
+
+  const styles = selectStyles(theme);
 
   return (
     <Row>
@@ -35,7 +39,13 @@ const BaseForm = ({ options, defaultOption }) => {
             setFieldValue('code', selection.label);
           }}
           styles={{
-            control: base => ({ ...base, height: '34px', minHeight: 'unset' }),
+            ...styles,
+            control: (base, state) => ({ ...base, ...styles.control(base, state), height: '34px' }),
+            indicatorsContainer: (base, state) => ({
+              ...base,
+              ...styles.indicatorsContainer(base, state),
+              height: '32px',
+            }),
           }}
         />
       </Col>
