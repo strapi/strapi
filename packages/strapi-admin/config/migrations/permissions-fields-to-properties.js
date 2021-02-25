@@ -33,7 +33,6 @@ module.exports = {
     const { permissionsFieldsToProperties = {} } = context;
     const { permissions = [] } = permissionsFieldsToProperties;
 
-    console.log(permissions);
     return shouldRunMigration(definition, previousDefinition) && permissions.length > 0;
   },
 
