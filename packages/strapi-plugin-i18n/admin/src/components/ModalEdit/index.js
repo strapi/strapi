@@ -8,6 +8,7 @@ import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
 import BaseForm from './BaseForm';
+import AdvancedForm from './AdvancedForm';
 import SettingsModal from '../SettingsModal';
 
 const ModalEdit = ({ localeToEdit, onClose, locales }) => {
@@ -15,11 +16,11 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   const { formatMessage } = useIntl();
   const isOpened = Boolean(localeToEdit);
 
-  const handleSubmit = ({ displayName }) => {
+  const handleSubmit = ({ displayName, isDefault }) => {
     const id = localeToEdit.id;
     const name = displayName || localeToEdit.code;
 
-    return editLocale(id, name).then(onClose);
+    return editLocale(id, { name, isDefault }).then(onClose);
   };
 
   let options = [];
@@ -33,7 +34,10 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   return (
     <Modal isOpen={isOpened} onToggle={onClose}>
       <Formik
-        initialValues={{ displayName: localeToEdit ? localeToEdit.name : '' }}
+        initialValues={{
+          displayName: localeToEdit ? localeToEdit.name : '',
+          isDefault: localeToEdit ? localeToEdit.isDefault : false,
+        }}
         onSubmit={handleSubmit}
         validationSchema={localeFormSchema}
       >
@@ -52,7 +56,9 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
               <TabPanel>
                 <BaseForm options={options} defaultOption={defaultOption} />
               </TabPanel>
-              <TabPanel>advanced</TabPanel>
+              <TabPanel>
+                <AdvancedForm isDefaultLocale={localeToEdit && localeToEdit.isDefault} />
+              </TabPanel>
             </SettingsModal>
 
             <ModalFooter>
@@ -87,13 +93,14 @@ ModalEdit.propTypes = {
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     code: PropTypes.string.isRequired,
+    isDefault: PropTypes.bool.isRequired,
   }),
   onClose: PropTypes.func.isRequired,
   locales: PropTypes.arrayOf(
     PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      name: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
+      id: PropTypes.number,
+      name: PropTypes.string,
+      code: PropTypes.string,
     })
   ),
 };

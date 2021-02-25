@@ -358,7 +358,7 @@ describe('i18n settings page', () => {
 
       expect(request).toBeCalledWith('/i18n/locales/2', {
         method: 'PUT',
-        body: { name: 'English' },
+        body: { name: 'English', isDefault: true },
       });
     });
 
@@ -417,7 +417,7 @@ describe('i18n settings page', () => {
 
       expect(request).toBeCalledWith('/i18n/locales/2', {
         method: 'PUT',
-        body: { name: 'en-US' },
+        body: { name: 'en-US', isDefault: true },
       });
     });
   });
