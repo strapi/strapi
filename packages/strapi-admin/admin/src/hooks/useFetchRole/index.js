@@ -12,7 +12,7 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         role: {},
-        permissions: {},
+        permissions: [],
       });
     }
 
