@@ -5,15 +5,13 @@ import { getTrad } from '../../utils';
 const useEditLocale = () => {
   const [isEditing, setIsEditing] = useState(false);
 
-  const editLocale = async (id, name) => {
+  const editLocale = async (id, payload) => {
     try {
       setIsEditing(true);
 
       await request(`/i18n/locales/${id}`, {
         method: 'PUT',
-        body: {
-          name,
-        },
+        body: payload,
       });
 
       setIsEditing(false);
