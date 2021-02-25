@@ -25,7 +25,7 @@
     "moment": "^2.29.1",
     "path-to-regexp": "^3.1.0",
     "react": "^16.13.1",
-    "react-copy-to-clipboard": "^5.0.1",
+    "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
     "react-redux": "^7.0.3",
