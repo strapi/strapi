@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Text, Checkbox, Padded } from '@buffetjs/core';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
 
 const AdvancedForm = ({ isDefaultLocale }) => {
@@ -11,6 +12,7 @@ const AdvancedForm = ({ isDefaultLocale }) => {
 
   return (
     <div>
+      <BaselineAlignment top size="2px" />
       <Padded bottom size="sm">
         <Text color="grey" textTransform="uppercase">
           {formatMessage({
@@ -19,6 +21,7 @@ const AdvancedForm = ({ isDefaultLocale }) => {
         </Text>
       </Padded>
 
+      <BaselineAlignment top size="10px" />
       <Checkbox
         id="default-checkbox"
         name="default-checkbox"
