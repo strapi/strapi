@@ -5,6 +5,7 @@ import { Inputs } from '@buffetjs/custom';
 import Select from 'react-select';
 import { Col, Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
 
@@ -23,6 +24,8 @@ const BaseForm = ({ options, defaultOption }) => {
           </Label>
         </span>
 
+        <BaselineAlignment top size="5px" />
+
         <Select
           aria-labelledby="locale-code"
           options={options}
@@ -31,10 +34,15 @@ const BaseForm = ({ options, defaultOption }) => {
             setFieldValue('displayName', selection.value);
             setFieldValue('code', selection.label);
           }}
+          styles={{
+            control: base => ({ ...base, height: '34px', minHeight: 'unset' }),
+          }}
         />
       </Col>
 
       <Col>
+        <BaselineAlignment top size="2px" />
+
         <Inputs
           label={formatMessage({
             id: getTrad('Settings.locales.modal.locales.displayName'),
