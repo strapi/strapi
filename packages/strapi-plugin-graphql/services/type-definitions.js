@@ -120,9 +120,7 @@ const generateDynamicZoneDefinitions = (attributes, globalId, schema) => {
 
       if (components.length === 0) {
         // Create dummy type because graphql doesn't support empty ones
-
         schema.definition += `type ${typeName} { _:Boolean}`;
-        schema.definition += `\nscalar EmptyQuery\n`;
       } else {
         const componentsTypeNames = components.map(componentUID => {
           const compo = strapi.components[componentUID];
@@ -202,6 +200,11 @@ const buildAssocResolvers = model => {
         }
         default: {
           resolver[alias] = async (obj, options) => {
+            // force component relations to be refetched
+            if (model.modelType === 'component') {
+              obj[alias] = _.get(obj[alias], targetModel.primaryKey, obj[alias]);
+            }
+
             const loader = strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid];
 
             const localId = obj[model.primaryKey];
@@ -311,6 +314,8 @@ const buildModels = models => {
 const buildModelDefinition = (model, globalType = {}) => {
   const { globalId, primaryKey } = model;
 
+  const typeDefObj = buildTypeDefObj(model);
+
   const schema = {
     definition: '',
     query: {},
@@ -323,9 +328,8 @@ const buildModelDefinition = (model, globalType = {}) => {
         ...buildAssocResolvers(model),
       },
     },
+    typeDefObj,
   };
-
-  const typeDefObj = buildTypeDefObj(model);
 
   schema.definition += generateEnumDefinitions(model.attributes, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, schema);
@@ -397,7 +401,7 @@ const buildSingleType = model => {
 };
 
 const buildCollectionType = model => {
-  const { globalId, plugin, modelName, uid } = model;
+  const { plugin, modelName, uid } = model;
 
   const singularName = toSingular(modelName);
   const pluralName = toPlural(modelName);
@@ -406,31 +410,8 @@ const buildCollectionType = model => {
 
   const globalType = _.get(_schema, `type.${model.globalId}`, {});
 
-  const localSchema = {
-    definition: '',
-    query: {},
-    mutation: {},
-    resolvers: {
-      Query: {},
-      Mutation: {},
-      // define default resolver for this model
-      [globalId]: {
-        id: parent => parent[model.primaryKey] || parent.id,
-        ...buildAssocResolvers(model),
-      },
-    },
-  };
-
-  const typeDefObj = buildTypeDefObj(model);
-
-  localSchema.definition += generateEnumDefinitions(model.attributes, globalId);
-  generateDynamicZoneDefinitions(model.attributes, globalId, localSchema);
-
-  const description = getTypeDescription(globalType, model);
-  const fields = toSDL(typeDefObj, globalType, model);
-  const typeDef = `${description}type ${globalId} {${fields}}\n`;
-
-  localSchema.definition += typeDef;
+  const localSchema = buildModelDefinition(model, globalType);
+  const { typeDefObj } = localSchema;
 
   // Add definition to the schema but this type won't be "queriable" or "mutable".
   if (globalType === false) {
