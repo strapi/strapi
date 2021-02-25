@@ -57,7 +57,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
                 <BaseForm options={options} defaultOption={defaultOption} />
               </TabPanel>
               <TabPanel>
-                <AdvancedForm isDefaultLocale={localeToEdit && localeToEdit.isDefault} />
+                <AdvancedForm isDefaultLocale={Boolean(localeToEdit && localeToEdit.isDefault)} />
               </TabPanel>
             </SettingsModal>
 

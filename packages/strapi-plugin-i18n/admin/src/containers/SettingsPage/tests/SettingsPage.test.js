@@ -52,6 +52,7 @@ jest.mock('strapi-helper-plugin', () => ({
   TabPanel: ({ children }) => <div>{children}</div>,
   useUserPermissions: jest.fn(),
   request: jest.fn(),
+  selectStyles: () => ({ control: () => ({}), indicatorsContainer: () => ({}) }),
 }));
 
 jest.mock('../../../utils', () => ({

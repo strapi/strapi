@@ -10,6 +10,7 @@ import SettingsModal from '../SettingsModal';
 import useDefaultLocales from '../../hooks/useDefaultLocales';
 import useAddLocale from '../../hooks/useAddLocale';
 import BaseForm from './BaseForm';
+import AdvancedForm from './AdvancedForm';
 
 const ModalCreate = ({ onClose, isOpened }) => {
   const { defaultLocales, isLoading } = useDefaultLocales();
@@ -38,9 +39,17 @@ const ModalCreate = ({ onClose, isOpened }) => {
   return (
     <Modal isOpen={isOpened} onToggle={onClose}>
       <Formik
-        initialValues={{ code: defaultOption.label, displayName: defaultOption.value }}
+        initialValues={{
+          code: defaultOption.label,
+          displayName: defaultOption.value,
+          isDefault: false,
+        }}
         onSubmit={values =>
-          addLocale({ code: values.code, name: values.displayName, isDefault: false }).then(onClose)}
+          addLocale({
+            code: values.code,
+            name: values.displayName,
+            isDefault: values.isDefault,
+          }).then(onClose)}
         validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
@@ -58,7 +67,9 @@ const ModalCreate = ({ onClose, isOpened }) => {
               <TabPanel>
                 <BaseForm options={options} defaultOption={defaultOption} />
               </TabPanel>
-              <TabPanel>advanced</TabPanel>
+              <TabPanel>
+                <AdvancedForm />
+              </TabPanel>
             </SettingsModal>
 
             <ModalFooter>

@@ -40,6 +40,7 @@
   "Settings.locales.modal.create.confirmation": "Add locale",
   "Settings.locales.modal.create.success": "Locale successfully added",
   "Settings.locales.modal.locales.label": "Locales",
+  "Settings.locales.modal.edit.locales.label": "Locales",
   "Settings.locales.modal.locales.displayName": "Locale display name",
   "Settings.locales.modal.locales.displayName.error": "The locale display name can only be less than 50 characters.",
   "Settings.locales.modal.locales.displayName.description":"Locale will be displayed under that name in the administration panel",
