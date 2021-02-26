@@ -106,7 +106,7 @@ const createSectionsBuilder = () => {
 
   builder.addSection('settings', {
     handlers: [settingsHandler],
-    matchers: [createSectionPropMatcher('plugins')],
+    matchers: [createSectionPropMatcher('settings')],
   });
 
   builder.addSection('singleTypes', {
