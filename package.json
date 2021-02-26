@@ -1,6 +1,8 @@
 {
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "redux-saga": "1.1.3"
+  },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@swc-node/jest": "^1.1.0",

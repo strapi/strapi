@@ -7,6 +7,7 @@ import { useContentTypeLayout } from '../../hooks';
 import NonRepeatableWrapper from '../NonRepeatableWrapper';
 import Inputs from '../Inputs';
 import FieldComponent from '../FieldComponent';
+import DynamicZone from '../DynamicZone';
 
 const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
@@ -23,6 +24,7 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, name }) => {
           <div className="row" key={key}>
             {fieldRow.map(({ name: fieldName, size, metadatas, fieldSchema, queryInfos }) => {
               const isComponent = fieldSchema.type === 'component';
+              const isDynamicZone = fieldSchema.type === 'dynamiczone';
               const keys = `${name}.${fieldName}`;
 
               if (isComponent) {
@@ -41,16 +43,25 @@ const NonRepeatableComponent = ({ componentUid, isFromDynamicZone, name }) => {
                 );
               }
 
-              return (
-                <div key={fieldName} className={`col-${size}`}>
-                  <Inputs
-                    keys={keys}
-                    fieldSchema={fieldSchema}
-                    metadatas={metadatas}
-                    componentUid={componentUid}
-                    queryInfos={queryInfos}
-                  />
-                </div>
+              // DynamicZone is now available inside the Component
+              if (isDynamicZone) {
+                return (
+                  <div key={fieldName} className={`col-${size}`}>
+                    <DynamicZone name={keys} fieldSchema={fieldSchema} metadatas={metadatas} />
+                  </div>
+                );
+              }
+              
+return (
+  <div key={fieldName} className={`col-${size}`}>
+    <Inputs
+      keys={keys}
+      fieldSchema={fieldSchema}
+      metadatas={metadatas}
+      componentUid={componentUid}
+      queryInfos={queryInfos}
+    />
+  </div>
               );
             })}
           </div>

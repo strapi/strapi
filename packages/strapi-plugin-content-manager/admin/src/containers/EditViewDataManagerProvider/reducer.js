@@ -53,7 +53,7 @@ const reducer = (state, action) => {
 
           return fromJS([defaultDataStructure]);
         })
-        .update('modifiedDZName', () => action.keys[0])
+        .update('modifiedDZName', () => action.keys.join('.')) // When DZ is in component the name is like a json-path
         .update('shouldCheckErrors', v => {
           if (action.shouldCheckErrors === true) {
             return !v;
@@ -92,8 +92,11 @@ const reducer = (state, action) => {
             state.getIn(['modifiedData', ...action.pathToComponent, action.dragIndex])
           );
       });
-    case 'MOVE_COMPONENT_UP':
-      return state
+    case 'MOVE_COMPONENT_UP': {
+      // The name is a path, hence should be treated as an array
+      const path = action.dynamicZoneName.split('.');
+      
+return state
         .update('shouldCheckErrors', v => {
           if (action.shouldCheckErrors) {
             return !v;
@@ -101,16 +104,20 @@ const reducer = (state, action) => {
 
           return v;
         })
-        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+        .updateIn(['modifiedData', ...path], list => {
           return list
             .delete(action.currentIndex)
             .insert(
               action.currentIndex - 1,
-              state.getIn(['modifiedData', action.dynamicZoneName, action.currentIndex])
+              state.getIn(['modifiedData', ...path, action.currentIndex])
             );
         });
-    case 'MOVE_COMPONENT_DOWN':
-      return state
+    }
+    case 'MOVE_COMPONENT_DOWN': {
+      // The name is a path, hence should be treated as an array
+      const path = action.dynamicZoneName.split('.');
+      
+return state
         .update('shouldCheckErrors', v => {
           if (action.shouldCheckErrors) {
             return !v;
@@ -118,14 +125,15 @@ const reducer = (state, action) => {
 
           return v;
         })
-        .updateIn(['modifiedData', action.dynamicZoneName], list => {
+        .updateIn(['modifiedData', ...path], list => {
           return list
             .delete(action.currentIndex)
             .insert(
               action.currentIndex + 1,
-              state.getIn(['modifiedData', action.dynamicZoneName, action.currentIndex])
+              state.getIn(['modifiedData', ...path, action.currentIndex])
             );
         });
+    }
     case 'MOVE_FIELD':
       return state.updateIn(['modifiedData', ...action.keys], list => {
         return list.delete(action.dragIndex).insert(action.overIndex, list.get(action.dragIndex));
@@ -155,8 +163,11 @@ const reducer = (state, action) => {
         return action.value;
       });
     }
-    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
-      return state
+    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE': {
+      // The name is a path, hence should be treated as an array
+      const path = action.dynamicZoneName.split('.');
+      
+return state
         .update('shouldCheckErrors', v => {
           if (action.shouldCheckErrors) {
             return !v;
@@ -164,7 +175,8 @@ const reducer = (state, action) => {
 
           return v;
         })
-        .deleteIn(['modifiedData', action.dynamicZoneName, action.index]);
+        .deleteIn(['modifiedData', ...path, action.index]);
+    }
     case 'REMOVE_COMPONENT_FROM_FIELD': {
       const componentPathToRemove = ['modifiedData', ...action.keys];
 

@@ -10,6 +10,7 @@ import FieldComponent from '../../FieldComponent';
 import Banner from '../Banner';
 import FormWrapper from '../FormWrapper';
 import { connect, select } from './utils';
+import DynamicZone from '../../DynamicZone';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -169,6 +170,7 @@ const DraggedItem = ({
                   <div className="row" key={key}>
                     {fieldRow.map(({ name, fieldSchema, metadatas, queryInfos, size }) => {
                       const isComponent = fieldSchema.type === 'component';
+                      const isDynamicZone = fieldSchema.type === 'dynamiczone';
                       const keys = `${componentFieldName}.${name}`;
 
                       if (isComponent) {
@@ -185,6 +187,18 @@ const DraggedItem = ({
                             max={fieldSchema.max}
                             min={fieldSchema.min}
                           />
+                        );
+                      }
+
+                      if (isDynamicZone) {
+                        return (
+                          <div key={name} className={`col-${size}`}>
+                            <DynamicZone
+                              name={keys}
+                              fieldSchema={fieldSchema}
+                              metadatas={metadatas}
+                            />
+                          </div>
                         );
                       }
 
