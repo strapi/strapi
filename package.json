@@ -1,8 +1,5 @@
 {
   "private": true,
-  "dependencies": {
-    "redux-saga": "1.1.3"
-  },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@swc-node/jest": "^1.1.0",
@@ -42,6 +39,7 @@
     "prettier": "^1.18.2",
     "qs": "6.9.4",
     "react-test-renderer": "^17.0.1",
+    "redux-saga": "1.1.3",
     "request": "^2.87.0",
     "request-promise-native": "^1.0.9",
     "rimraf": "3.0.2",
