@@ -27,6 +27,7 @@
   "input.label-bold": "Glissez & déposez",
   "input.label-normal": "pour importer ou",
   "input.placeholder": "Cliquez pour sélectionner un média ou glissez & déposez un fichier dans cette zone",
+  "input.placeholder.icon": "Lacher le fichier dans cette zone",
   "input.url.description": "Séparez vos URLs par un retour à la ligne.",
   "input.url.label": "URL",
   "list.assets-empty.subtitle": "Ajoutez-en un à la liste.",

@@ -26,6 +26,7 @@ describe('Role', () => {
       expect(createdRole).toStrictEqual(input);
     });
   });
+
   describe('findOne', () => {
     test('Finds a role', async () => {
       const role = {
@@ -44,6 +45,7 @@ describe('Role', () => {
       expect(dbFindOne).toHaveBeenCalledWith({ id: role.id }, []);
       expect(foundRole).toStrictEqual(role);
     });
+
     test('Finds a role with usersCount', async () => {
       const role = {
         id: 1,
@@ -66,6 +68,7 @@ describe('Role', () => {
       expect(foundRole).toStrictEqual(role);
     });
   });
+
   describe('find', () => {
     test('Finds roles', async () => {
       const roles = [
@@ -87,6 +90,7 @@ describe('Role', () => {
       expect(foundRoles).toStrictEqual(roles);
     });
   });
+
   describe('findAll', () => {
     test('Finds all roles', async () => {
       const roles = [
@@ -112,6 +116,7 @@ describe('Role', () => {
       expect(foundRoles).toStrictEqual(roles);
     });
   });
+
   describe('update', () => {
     test('Updates a role', async () => {
       const role = {
@@ -152,6 +157,7 @@ describe('Role', () => {
       );
       expect(updatedRole).toStrictEqual(expectedUpdatedRole);
     });
+
     test('Cannot update code of super admin role', async () => {
       const dbUpdate = jest.fn();
       const dbFind = jest.fn(() => [{ id: '1' }]);
@@ -183,6 +189,7 @@ describe('Role', () => {
       expect(usersCount).toEqual(0);
     });
   });
+
   describe('delete', () => {
     test('Delete a role', async () => {
       const role = {
@@ -198,6 +205,13 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ delete: dbDelete, count: dbCount, findOne: dbFindOne }),
+        store: () => ({
+          get: () => ({
+            providers: {
+              defaultRole: null,
+            },
+          }),
+        }),
         admin: {
           services: {
             permission: { deleteByRolesIds: dbDeleteByRolesIds },
@@ -212,6 +226,7 @@ describe('Role', () => {
       expect(dbDelete).toHaveBeenCalledWith({ id_in: [role.id] });
       expect(deletedRoles).toStrictEqual([role]);
     });
+
     test('Delete two roles', async () => {
       const roles = [
         {
@@ -236,6 +251,13 @@ describe('Role', () => {
 
       global.strapi = {
         query: () => ({ delete: dbDelete, count: dbCount, findOne: dbFindOne }),
+        store: () => ({
+          get: () => ({
+            providers: {
+              defaultRole: null,
+            },
+          }),
+        }),
         admin: {
           services: {
             permission: { deleteByRolesIds: dbDeleteByRolesIds },
@@ -253,28 +275,73 @@ describe('Role', () => {
       expect(dbDelete).toHaveBeenCalledWith({ id_in: rolesIds });
       expect(deletedRoles).toStrictEqual(roles);
     });
+
     test('Cannot delete super admin role', async () => {
       const dbFind = jest.fn(() => [{ id: '1' }]);
       const dbFindOne = jest.fn(() => ({ id: '1', code: SUPER_ADMIN_CODE }));
-      const badRequest = jest.fn(() => {});
 
       global.strapi = {
         query: () => ({ find: dbFind, findOne: dbFindOne }),
+        store: () => ({
+          get: () => ({
+            providers: {
+              defaultRole: null,
+            },
+          }),
+        }),
         admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
-        errors: { badRequest },
       };
 
-      try {
-        await roleService.deleteByIds([1]);
-      } catch (e) {
-        // nothing
-      }
+      expect(() => roleService.deleteByIds([1])).rejects.toThrowError(
+        'You cannot delete the super admin role'
+      );
+    });
 
-      expect(badRequest).toHaveBeenCalledWith('ValidationError', {
-        ids: ['You cannot delete the super admin role'],
-      });
+    test('Cannot delete a role used as the default role for new SSO users', async () => {
+      const dbFind = jest.fn(() => []);
+      const dbFindOne = jest.fn(() => ({}));
+      const dbCount = jest.fn(() => 0);
+
+      global.strapi = {
+        query: () => ({ find: dbFind, findOne: dbFindOne, count: dbCount }),
+        store: () => ({
+          get: () => ({
+            providers: {
+              defaultRole: 1,
+            },
+          }),
+        }),
+        admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
+      };
+
+      expect(() => roleService.deleteByIds([1])).rejects.toThrowError(
+        'This role is used as the default SSO role. Make sure to change this configuration before deleting the role'
+      );
+    });
+
+    test('Cannot delete a role attached to some user', async () => {
+      const dbFind = jest.fn(() => []);
+      const dbFindOne = jest.fn(() => ({}));
+      const dbCount = jest.fn(() => 2);
+
+      global.strapi = {
+        query: () => ({ find: dbFind, findOne: dbFindOne, count: dbCount }),
+        store: () => ({
+          get: () => ({
+            providers: {
+              defaultRole: null,
+            },
+          }),
+        }),
+        admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
+      };
+
+      expect(() => roleService.deleteByIds([1])).rejects.toThrowError(
+        'Some roles are still assigned to some users'
+      );
     });
   });
+
   describe('Count roles', () => {
     test('Count roles without params', async () => {
       const count = jest.fn(() => Promise.resolve(2));

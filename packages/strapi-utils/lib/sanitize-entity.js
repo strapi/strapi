@@ -69,11 +69,16 @@ const sanitizeEntity = (dataSource, options) => {
 
       let sanitizeFn;
       if (relation === '*') {
-        sanitizeFn = entity =>
-          sanitizeEntity(entity, {
+        sanitizeFn = entity => {
+          if (_.isNil(entity) || !_.has(entity, '__contentType')) {
+            return entity;
+          }
+
+          return sanitizeEntity(entity, {
             model: strapi.db.getModelByGlobalId(entity.__contentType),
             ...baseOptions,
           });
+        };
       } else {
         sanitizeFn = entity =>
           sanitizeEntity(entity, {

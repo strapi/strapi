@@ -4,6 +4,7 @@ import { Button } from '@buffetjs/core';
 import { List, Header } from '@buffetjs/custom';
 import { Plus } from '@buffetjs/icons';
 import matchSorter from 'match-sorter';
+import { get } from 'lodash';
 import {
   useGlobalContext,
   useQuery,
@@ -108,11 +109,20 @@ const RoleListPage = () => {
       }
     } catch (err) {
       console.error(err);
+      const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
 
-      strapi.notification.toggle({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
+      if (errorIds && Array.isArray(errorIds)) {
+        const errorsMsg = errorIds.join('\n');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: errorsMsg,
+        });
+      } else {
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
     } finally {
       handleToggleModal();
     }

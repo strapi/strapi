@@ -208,7 +208,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(3);
-      expect(res.body).toMatchObject([data.bed[0], data.bed[1], data.bed[4]]);
+      expect(res.body).toEqual(expect.arrayContaining([data.bed[0], data.bed[1], data.bed[4]]));
     });
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
@@ -222,7 +222,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject([data.bed[0], data.bed[4]]);
+      expect(res.body).toEqual(expect.arrayContaining([data.bed[0], data.bed[4]]));
     });
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
@@ -232,7 +232,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
-      expect(res.body).toMatchObject(data.bed.slice(0, 2));
+      expect(res.body).toEqual(expect.arrayContaining(data.bed.slice(0, 2)));
     });
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
@@ -246,7 +246,7 @@ describe('Search query', () => {
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
-      expect(res.body).toMatchObject([data.bed[0]]);
+      expect(res.body[0]).toMatchObject(data.bed[0]);
     });
   });
 });
