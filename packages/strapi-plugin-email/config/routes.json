@@ -20,7 +20,7 @@
       "config": {
         "policies": [
           "admin::isAuthenticatedAdmin",
-          ["admin::hasPermissions", ["plugins::email.settings.test"]]
+          ["admin::hasPermissions", ["plugins::email.settings.read"]]
         ],
         "description": "Send an test email",
         "tag": {
