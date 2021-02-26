@@ -105,7 +105,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
       }
     }
 
-    async function del(params = {}) {
+    async function deleteFn(params = {}) {
       const { key, environment = defaultEnv, type, name, tag = '' } = Object.assign(
         {},
         source,
@@ -126,7 +126,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
     return {
       get,
       set,
-      del,
+      delete: deleteFn,
     };
   };
 };
