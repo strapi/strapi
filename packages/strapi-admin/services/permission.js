@@ -9,11 +9,13 @@ const { getService } = require('../utils');
 const createPermissionsManager = require('./permission/permissions-manager');
 const createConditionProvider = require('./permission/condition-provider');
 const createPermissionEngine = require('./permission/engine');
+const createSectionsBuilder = require('./permission/sections-builder');
 const actionProvider = require('./permission/action-provider');
 const { EDITOR_CODE } = require('./constants');
 
 const conditionProvider = createConditionProvider();
 const engine = createPermissionEngine(conditionProvider);
+const sectionsBuilder = createSectionsBuilder();
 
 /**
  * Removes unwanted attributes from a permission and remove invalid items
@@ -218,6 +220,7 @@ module.exports = {
   createPermissionsManager,
   engine,
   conditionProvider,
+  sectionsBuilder,
   cleanPermissionInDatabase,
   ensureBoundPermissionsInDatabase,
 };

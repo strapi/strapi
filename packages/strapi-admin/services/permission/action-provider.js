@@ -1,11 +1,21 @@
 'use strict';
 
 const { yup } = require('strapi-utils');
+const { isFunction } = require('lodash/fp');
 const { validateRegisterProviderAction } = require('../../validation/action-provider');
 const { getActionId, createAction } = require('../../domain/action');
 
+const EVENTS = ['actionRegistered', 'actionsCleared'];
+
 const createActionProvider = () => {
   const actions = new Map();
+  const eventsCallbacks = new Map(EVENTS.map(event => [event, []]));
+
+  const emit = (event, data) => {
+    eventsCallbacks.get(event).forEach(callback => {
+      callback(data);
+    });
+  };
 
   return {
     /**
@@ -52,7 +62,9 @@ const createActionProvider = () => {
       if (strapi.isLoaded) {
         throw new Error(`You can't register new actions outside of the bootstrap function.`);
       }
+
       validateRegisterProviderAction(newActions);
+
       newActions.forEach(newAction => {
         const actionId = getActionId(newAction);
         if (actions.has(actionId)) {
@@ -61,17 +73,55 @@ const createActionProvider = () => {
           );
         }
 
-        actions.set(actionId, createAction(newAction));
+        const action = createAction(newAction);
 
-        return this;
+        actions.set(actionId, action);
+        emit('actionRegistered', action);
       });
+
+      return this;
     },
 
     /**
      * Clear the actions map
      */
     clear() {
-      return actions.clear();
+      actions.clear();
+
+      emit('actionsCleared');
+
+      return this;
+    },
+
+    /**
+     * Adds a callback which will be called when `event` is emitted
+     */
+    addEventListener(event, callback) {
+      if (!EVENTS.includes(event) || !isFunction(callback)) {
+        return;
+      }
+
+      eventsCallbacks.get(event).push(callback);
+
+      return this;
+    },
+
+    /**
+     * Removes a callback from event's store
+     */
+    removeEventListener(event, callbackToRemove) {
+      if (!EVENTS.includes(event) || !isFunction(callbackToRemove)) {
+        return;
+      }
+
+      const callbacks = eventsCallbacks.get(event);
+
+      eventsCallbacks.set(
+        event,
+        callbacks.filter(cb => cb !== callbackToRemove)
+      );
+
+      return this;
     },
   };
 };

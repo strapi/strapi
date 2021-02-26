@@ -29,6 +29,9 @@ module.exports = {
         uid: 'explorer.create',
         pluginName: 'content-manager',
         subjects: contentTypesUids,
+        options: {
+          applyToProperties: ['fields'],
+        },
       },
       {
         section: 'contentTypes',
@@ -36,6 +39,9 @@ module.exports = {
         uid: 'explorer.read',
         pluginName: 'content-manager',
         subjects: contentTypesUids,
+        options: {
+          applyToProperties: ['fields'],
+        },
       },
       {
         section: 'contentTypes',
@@ -43,6 +49,9 @@ module.exports = {
         uid: 'explorer.update',
         pluginName: 'content-manager',
         subjects: contentTypesUids,
+        options: {
+          applyToProperties: ['fields'],
+        },
       },
       {
         section: 'contentTypes',
@@ -50,9 +59,6 @@ module.exports = {
         uid: 'explorer.delete',
         pluginName: 'content-manager',
         subjects: contentTypesUids,
-        options: {
-          fieldsRestriction: false,
-        },
       },
       {
         section: 'contentTypes',
@@ -60,9 +66,6 @@ module.exports = {
         uid: 'explorer.publish',
         pluginName: 'content-manager',
         subjects: draftAndPublishContentTypesUids,
-        options: {
-          fieldsRestriction: false,
-        },
       },
       {
         section: 'plugins',

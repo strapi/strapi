@@ -128,7 +128,7 @@ const getPermissionsWithNestedFields = (
 
     // Create a Permission for each subject (content-type uid) within the action
     for (const subject of validSubjects) {
-      const fields = actionDomain.hasFieldsRestriction(action)
+      const fields = actionDomain.appliesToProperty('fields', action)
         ? getNestedFields(strapi.contentTypes[subject], {
             components: strapi.components,
             nestingLevel,
@@ -158,7 +158,7 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) =>
     } = permission;
     const action = getService('permission').actionProvider.getByActionId(actionId);
 
-    if (!actionDomain.hasFieldsRestriction(action)) {
+    if (!actionDomain.appliesToProperty('fields', action)) {
       return permission.setProperty('fields', null);
     }
 

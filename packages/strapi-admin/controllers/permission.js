@@ -2,7 +2,7 @@
 
 const { validateCheckPermissionsInput } = require('../validation/permission');
 const { getService } = require('../utils');
-const { formatActionsBySections, formatConditions } = require('./formatters');
+const { formatConditions } = require('./formatters');
 
 module.exports = {
   /**
@@ -33,13 +33,17 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async getAll(ctx) {
-    const allActions = getService('permission').actionProvider.getAll();
-    const conditions = getService('permission').conditionProvider.getAll();
+    const { sectionsBuilder, actionProvider, conditionProvider } = getService('permission');
+
+    const allActions = actionProvider.getAll();
+    const conditions = conditionProvider.getAll();
+
+    const sections = await sectionsBuilder.build(allActions);
 
     ctx.body = {
       data: {
         conditions: formatConditions(conditions),
-        sections: formatActionsBySections(allActions),
+        sections,
       },
     };
   },
