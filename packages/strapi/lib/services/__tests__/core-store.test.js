@@ -5,6 +5,7 @@ const data = {
   key: 'testKey',
   value: 'testValue',
 };
+
 const queryRes = {
   id: 1,
   key: 'testKey',
