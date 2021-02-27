@@ -16,7 +16,9 @@ const BOOLEAN_OPERATORS = ['or'];
 const buildQuery = ({ model, filters }) => qb => {
   const joinsTree = buildJoinsAndFilter(qb, model, filters);
 
-  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0) {
+
+  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0 &&
+      !(filters.limit && filters.limit == 1) && joinsTree.joins && Object.keys(joinsTree.joins).length) {
     qb.distinct();
   }
 
@@ -26,9 +28,13 @@ const buildQuery = ({ model, filters }) => qb => {
     const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
     const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
-    qb.distinct()
-      .column(columns)
-      .orderBy(orderBy);
+    if (joinsTree.joins && Object.keys(joinsTree.joins).length) { 
+      qb.distinct()
+        .column(columns)
+        .orderBy(orderBy);
+    } else {
+      qb.column(columns).orderBy(orderBy);
+    }
   }
 
   if (_.has(filters, 'start')) {
