@@ -28,7 +28,7 @@ const buildQuery = ({ model, filters }) => qb => {
     const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
     const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
-    if (joinsTree.joins && Object.keys(joinsTree.joins).length) { 
+    if (joinsTree.joins && Object.keys(joinsTree.joins).length && !(filters.limit && filters.limit == 1)) { 
       qb.distinct()
         .column(columns)
         .orderBy(orderBy);
