@@ -13,6 +13,7 @@ function SelectOne({
   onChange,
   onInputChange,
   onMenuClose,
+  onMenuOpen,
   onMenuScrollToBottom,
   options,
   placeholder,
@@ -31,6 +32,7 @@ function SelectOne({
       onChange={onChange}
       onInputChange={onInputChange}
       onMenuClose={onMenuClose}
+      onMenuOpen={onMenuOpen}
       onMenuScrollToBottom={onMenuScrollToBottom}
       placeholder={placeholder}
       styles={styles}
@@ -58,6 +60,7 @@ SelectOne.propTypes = {
   onChange: PropTypes.func.isRequired,
   onInputChange: PropTypes.func.isRequired,
   onMenuClose: PropTypes.func.isRequired,
+  onMenuOpen: PropTypes.func.isRequired,
   onMenuScrollToBottom: PropTypes.func.isRequired,
   options: PropTypes.array.isRequired,
   placeholder: PropTypes.node.isRequired,

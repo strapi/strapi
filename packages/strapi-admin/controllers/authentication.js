@@ -16,14 +16,22 @@ module.exports = {
     (ctx, next) => {
       return passport.authenticate('local', { session: false }, (err, user, info) => {
         if (err) {
+          strapi.eventHub.emit('admin.auth.error', { error: err, provider: 'local' });
           return ctx.badImplementation();
         }
 
         if (!user) {
+          strapi.eventHub.emit('admin.auth.error', {
+            error: new Error(info.message),
+            provider: 'local',
+          });
           return ctx.badRequest(info.message);
         }
 
         ctx.state.user = user;
+
+        strapi.eventHub.emit('admin.auth.success', { user, provider: 'local' });
+
         return next();
       })(ctx, next);
     },

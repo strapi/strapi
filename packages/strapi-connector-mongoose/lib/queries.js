@@ -12,8 +12,8 @@ const mongoose = require('mongoose');
 const populateQueries = require('./utils/populate-queries');
 
 const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
-
 const { findComponentByGlobalId } = require('./utils/helpers');
+const { handleDatabaseError } = require('./utils/errors');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
@@ -58,6 +58,15 @@ module.exports = ({ model, strapi }) => {
   const omitExernalValues = values => {
     return _.omit(values, excludedKeys);
   };
+
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
+
   async function createComponents(entry, values, { isDraft, session = null } = {}) {
     if (componentKeys.length === 0) return;
 
@@ -594,8 +603,8 @@ module.exports = ({ model, strapi }) => {
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,

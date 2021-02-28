@@ -14,7 +14,7 @@ describe('Permissions Manager', () => {
         model: 'foo',
       });
 
-      expect(pm.query).toStrictEqual({});
+      expect(pm.getQuery()).toStrictEqual({});
     });
 
     test('It should returns a valid query from the ability', () => {
@@ -27,7 +27,17 @@ describe('Permissions Manager', () => {
 
       const expected = { _or: [{ kai: 'doe' }] };
 
-      expect(pm.query).toStrictEqual(expected);
+      expect(pm.getQuery()).toStrictEqual(expected);
+    });
+
+    test('It should throw if no action is defined', () => {
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
+      const pm = createPermissionsManager({
+        ability,
+        model: 'foo',
+      });
+
+      expect(() => pm.getQuery()).toThrowError();
     });
   });
 

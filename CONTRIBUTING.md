@@ -152,7 +152,7 @@ $ node test/e2e.js --db=mysql
 
 ### Repository Organization
 
-We chose to to use a monorepo design that exploits [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows the community to easily maintain the whole ecosystem, keep it up-to-date and consistent.
+We chose to use a monorepo design that exploits [Yarn Workspaces](https://yarnpkg.com/en/docs/workspaces) in the way [React](https://github.com/facebook/react/tree/master/packages) or [Babel](https://github.com/babel/babel/tree/master/packages) does. This allows the community to easily maintain the whole ecosystem, keep it up-to-date and consistent.
 
 We do our best to keep the master branch as clean as possible, with tests passing at all times. However, it may happen that the master branch moves faster than the release cycle. Therefore check the [releases on npm](https://www.npmjs.com/package/strapi) so that you're always up-to-date with the latest stable version.
 
@@ -163,7 +163,7 @@ Before submitting an issue you need to make sure:
 - You are experiencing a concrete technical issue with Strapi.
 - You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it from your post).
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
-  - Refer to [the official Strapi documentation](http://strapi.io).
+  - Refer to [the official Strapi documentation](https://strapi.io).
   - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
   - Ask a question on [our community forum](https://forum.strapi.io).
 - Your issue title is concise, on-topic and polite.

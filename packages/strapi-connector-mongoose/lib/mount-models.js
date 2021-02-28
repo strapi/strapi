@@ -311,7 +311,7 @@ module.exports = async ({ models, target }, ctx) => {
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
-    const { publicationState } = this.getOptions();
+    const { publicationState, _populateComponents = true } = this.getOptions();
 
     const getMatchQuery = assoc => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
@@ -334,13 +334,21 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
         this.populate({ path: alias, match: matchQuery, options: { publicationState } });
       } else if (populatedPaths.includes(alias)) {
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
-        _.set(this._mongooseOptions.populate, [alias, 'options'], { publicationState });
+        _.set(this._mongooseOptions.populate, [alias, 'options'], {
+          publicationState,
+        });
 
         if (matchQuery !== undefined) {
           _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
         }
       }
     });
+
+    if (_populateComponents) {
+      componentAttributes.forEach(key => {
+        this.populate({ path: `${key}.ref`, options: { publicationState } });
+      });
+    }
 
     if (definition.modelType === 'component') {
       definition.associations
@@ -350,14 +358,10 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
           this.populate({
             path: ast.alias,
             match: getMatchQuery(ast),
-            options: { publicationState },
+            options: { publicationState, _populateComponents: false },
           });
         });
     }
-
-    componentAttributes.forEach(key => {
-      this.populate({ path: `${key}.ref`, options: { publicationState } });
-    });
   };
 };
 

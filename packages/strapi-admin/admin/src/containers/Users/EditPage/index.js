@@ -2,16 +2,16 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import { BaselineAlignment, useGlobalContext, auth } from 'strapi-helper-plugin';
+import { BaselineAlignment, useGlobalContext, SizedInput, auth } from 'strapi-helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
-import SizedInput from '../../../components/SizedInput';
-import { Header, MagicLink, SelectRoles } from '../../../components/Users';
-import { useUsersForm } from '../../../hooks';
+import { Header } from '../../../components/Settings';
+import { MagicLink, SelectRoles } from '../../../components/Users';
+import { useSettingsForm } from '../../../hooks';
 import { editValidation } from '../../../validations/users';
 import form from './utils/form';
 
@@ -35,7 +35,7 @@ const EditPage = ({ canUpdate }) => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useUsersForm(`/admin/users/${id}`, editValidation, cbSuccess, [
+  ] = useSettingsForm(`/admin/users/${id}`, editValidation, cbSuccess, [
     'email',
     'firstname',
     'lastname',

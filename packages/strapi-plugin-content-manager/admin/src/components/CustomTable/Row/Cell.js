@@ -1,10 +1,10 @@
 import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
+import { Tooltip } from '@buffetjs/styles';
 import MediaPreviewList from '../../MediaPreviewList';
 import RelationPreviewList from '../../RelationPreviewList';
 import Truncate from '../../Truncate';
 import Truncated from '../../Truncated';
-import Tooltip from '../../Tooltip';
 
 const Cell = ({ options }) => {
   const [tooltipIsDisplayed, setDisplayTooltip] = useState(false);
