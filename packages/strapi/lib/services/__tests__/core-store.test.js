@@ -22,7 +22,7 @@ const where = {
 };
 
 describe('Core Store', () => {
-  test.only('Set key in empty store', async () => {
+  test('Set key in empty store', async () => {
     const fakeEmptyDBQuery = {
       findOne: jest.fn(() => Promise.resolve()),
       update: jest.fn(() => Promise.resolve(queryRes)),
@@ -52,7 +52,7 @@ describe('Core Store', () => {
     expect(rest).toEqual(undefined);
   });
 
-  test.only('Set key in not empty store', async () => {
+  test('Set key in not empty store', async () => {
     const fakeNotEmptyDBQuery = {
       findOne: jest.fn(() => Promise.resolve(queryRes)),
       update: jest.fn(() => Promise.resolve(queryRes)),
@@ -84,7 +84,7 @@ describe('Core Store', () => {
     expect(rest).toEqual(undefined);
   });
 
-  test.only('Delete key from empty store', async () => {
+  test('Delete key from empty store', async () => {
     const fakeEmptyDBQuery = {
       findOne: jest.fn(() => Promise.resolve()),
       update: jest.fn(() => Promise.resolve(queryRes)),
@@ -109,7 +109,7 @@ describe('Core Store', () => {
     expect(rest).toEqual(undefined);
   });
 
-  test.only('Delete key from not empty store', async () => {
+  test('Delete key from not empty store', async () => {
     const fakeNotEmptyDBQuery = {
       findOne: jest.fn(() => Promise.resolve(queryRes)),
       update: jest.fn(() => Promise.resolve(queryRes)),
