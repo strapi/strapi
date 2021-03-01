@@ -5,14 +5,36 @@ const { getService } = require('../../../utils');
 
 const BATCH_SIZE = 1000;
 
-const shouldBeProceed = processedLocaleCodes => entry =>
-  entry.localizations.length > 1 &&
-  intersection(entry.localizations.map(prop('locale')), processedLocaleCodes).length === 0;
+const shouldBeProcesseed = processedLocaleCodes => entry => {
+  return (
+    entry.localizations.length > 1 &&
+    intersection(entry.localizations.map(prop('locale')), processedLocaleCodes).length === 0
+  );
+};
+
+const getUpdates = ({ entriesToProcess, formatUpdate, locale, attributesToMigrate }) => {
+  return entriesToProcess.reduce((updates, entry) => {
+    const attributesValues = pick(attributesToMigrate, entry);
+    const entriesIdsToUpdate = entry.localizations
+      .filter(related => related.locale !== locale.code)
+      .map(prop('id'));
+
+    return updates.concat(formatUpdate(entriesIdsToUpdate, attributesValues));
+  }, []);
+};
+
+const formatMongooseUpdate = (entriesIdsToUpdate, attributesValues) => ({
+  updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
+});
+
+const formatBookshelfUpdate = (entriesIdsToUpdate, attributesValues) =>
+  entriesIdsToUpdate.map(id => ({ id, ...attributesValues }));
 
 const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales }) => {
-  // Create tmp table with all updates to make (faster than make updates one by one)
+  // Create tmp table with all updates to make (faster than making updates one by one)
   const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
   const columnsToCopy = ['id', ...attributesToMigrate];
+
   await ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
   await ORM.knex.raw(`CREATE TABLE ?? AS ??`, [
     TMP_TABLE_NAME,
@@ -25,23 +47,21 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
   // Transaction is started after DDL because of MySQL (https://dev.mysql.com/doc/refman/8.0/en/implicit-commit.html)
   const trx = await ORM.knex.transaction();
 
-  // bulk insert updates in tmp table
   try {
     const processedLocaleCodes = [];
     for (const locale of locales) {
-      const batchSize = BATCH_SIZE;
       let offset = 0;
       let batchCount = BATCH_SIZE;
-      while (batchCount === batchSize) {
+      while (batchCount === BATCH_SIZE) {
         const batch = await trx
           .select([...attributesToMigrate, 'locale', 'localizations'])
           .from(model.collectionName)
           .where('locale', locale.code)
           .orderBy('id')
           .offset(offset)
-          .limit(batchSize);
+          .limit(BATCH_SIZE);
 
-        // postgres automatically parses JSON, but not slite nor mysql
+        // postgres automatically parses JSON, but not sqlite nor mysql
         batch.forEach(entry => {
           if (typeof entry.localizations === 'string') {
             entry.localizations = JSON.parse(entry.localizations);
@@ -49,35 +69,33 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
         });
 
         batchCount = batch.length;
-        const entriesToProcess = batch.filter(shouldBeProceed(processedLocaleCodes));
+        const entriesToProcess = batch.filter(shouldBeProcesseed(processedLocaleCodes));
 
-        const tempEntries = entriesToProcess.reduce((entries, entry) => {
-          const attributesValues = pick(attributesToMigrate, entry);
-          const entriesIdsToUpdate = entry.localizations
-            .filter(related => related.locale !== locale.code)
-            .map(prop('id'));
+        const tmpEntries = getUpdates({
+          entriesToProcess,
+          formatUpdate: formatBookshelfUpdate,
+          locale,
+          attributesToMigrate,
+        });
 
-          return entries.concat(entriesIdsToUpdate.map(id => ({ id, ...attributesValues })));
-        }, []);
+        await trx.batchInsert(TMP_TABLE_NAME, tmpEntries, 100);
 
-        console.log('tempEntries', tempEntries);
-
-        await trx.batchInsert(TMP_TABLE_NAME, tempEntries, 100);
-
-        offset += batchSize;
+        offset += BATCH_SIZE;
       }
       processedLocaleCodes.push(locale.code);
     }
 
-    const getSubquery = cl =>
+    const getSubquery = columnName =>
       trx
-        .select(cl)
+        .select(columnName)
         .from(TMP_TABLE_NAME)
         .where(`${TMP_TABLE_NAME}.id`, trx.raw('??', [`${model.collectionName}.id`]));
+
     const updates = attributesToMigrate.reduce(
-      (updates, cl) => ({ ...updates, [cl]: getSubquery(cl) }),
+      (updates, columnName) => ({ ...updates, [columnName]: getSubquery(columnName) }),
       {}
     );
+
     await trx
       .from(model.collectionName)
       .update(updates)
@@ -96,10 +114,9 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
 const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
   const processedLocaleCodes = [];
   for (const locale of locales) {
-    const batchSize = BATCH_SIZE;
     let batchCount = BATCH_SIZE;
     let lastId;
-    while (batchCount === batchSize) {
+    while (batchCount === BATCH_SIZE) {
       const findParams = { locale: locale.code };
       if (lastId) {
         findParams._id = { $gt: lastId };
@@ -108,25 +125,21 @@ const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
       const batch = await model
         .find(findParams, [...attributesToMigrate, 'locale', 'localizations'])
         .sort({ _id: 1 })
-        .limit(batchSize);
+        .limit(BATCH_SIZE);
 
       if (batch.length > 0) {
         lastId = batch[batch.length - 1]._id;
       }
       batchCount = batch.length;
 
-      const entriesToProcess = batch.filter(shouldBeProceed);
+      const entriesToProcess = batch.filter(shouldBeProcesseed);
 
-      const updates = entriesToProcess.reduce((entries, entry) => {
-        const attributesValues = pick(attributesToMigrate, entry);
-        const entriesIdsToUpdate = entry.localizations
-          .filter(related => related.locale !== locale.code)
-          .map(prop('id'));
-
-        return entries.concat({
-          updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
-        });
-      }, []);
+      const updates = getUpdates({
+        entriesToProcess,
+        formatUpdate: formatMongooseUpdate,
+        locale,
+        attributesToMigrate,
+      });
 
       await model.bulkWrite(updates);
     }
