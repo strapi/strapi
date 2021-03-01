@@ -101,7 +101,7 @@
     "strapi-helper-plugin": "3.5.1",
     "strapi-utils": "3.5.1",
     "style-loader": "^0.23.1",
-    "styled-components": "^5.0.0",
+    "styled-components": "^5.2.1",
     "terser-webpack-plugin": "^1.2.3",
     "url-loader": "^1.1.2",
     "video-react": "^0.13.2",
