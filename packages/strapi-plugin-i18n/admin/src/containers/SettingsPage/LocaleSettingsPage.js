@@ -6,7 +6,6 @@ import { Header } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { getTrad } from '../../utils';
 import LocaleList from '../../components/LocaleList';
-import ModalCreate from '../../components/ModalCreate';
 
 const LocaleSettingsPage = ({
   canReadLocale,
@@ -53,10 +52,9 @@ const LocaleSettingsPage = ({
           canUpdateLocale={canUpdateLocale}
           canDeleteLocale={canDeleteLocale}
           onToggleCreateModal={handleToggleModalCreate}
+          isCreating={isOpenedCreateModal}
         />
       ) : null}
-
-      <ModalCreate isOpened={isOpenedCreateModal} onClose={handleToggleModalCreate} />
     </>
   );
 };

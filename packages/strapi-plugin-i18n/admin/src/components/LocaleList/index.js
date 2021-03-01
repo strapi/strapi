@@ -10,8 +10,9 @@ import LocaleRow from '../LocaleRow';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
 import ModalDelete from '../ModalDelete';
+import ModalCreate from '../ModalCreate';
 
-const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal }) => {
+const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isCreating }) => {
   const [localeToDelete, setLocaleToDelete] = useState();
   const [localeToEdit, setLocaleToEdit] = useState();
   const { locales, isLoading, refetch } = useLocales();
@@ -51,6 +52,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal }) =
           )}
         />
 
+        <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} onSuccess={refetch} />
         <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
         <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
       </>
@@ -75,6 +77,8 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal }) =
           />
         </ListButton>
       )}
+
+      <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} onSuccess={refetch} />
     </>
   );
 };
@@ -87,6 +91,7 @@ LocaleList.propTypes = {
   canUpdateLocale: PropTypes.bool.isRequired,
   canDeleteLocale: PropTypes.bool.isRequired,
   onToggleCreateModal: PropTypes.func,
+  isCreating: PropTypes.bool.isRequired,
 };
 
 export default LocaleList;
