@@ -15,8 +15,8 @@ const handleReject = error => Promise.reject(formatYupErrors(error));
 // validatedUpdatePermissionsInput
 
 const actionFieldsAreEqual = (a, b) => {
-  const aFields = a.fields || [];
-  const bFields = b.fields || [];
+  const aFields = a.properties.fields || [];
+  const bFields = b.properties.fields || [];
 
   return _.isEqual(aFields.sort(), bFields.sort());
 };

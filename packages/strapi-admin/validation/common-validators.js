@@ -2,11 +2,17 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
+const { xor, isEmpty, has, isNil, isArray } = require('lodash/fp');
+const { getService } = require('../utils');
 const actionDomain = require('../domain/action');
 const {
   checkFieldsAreCorrectlyNested,
   checkFieldsDontHaveDuplicates,
 } = require('./common-functions');
+
+const getActionFromProvider = actionName => {
+  return getService('permission').actionProvider.getByActionId(actionName);
+};
 
 const email = yup
   .string()
@@ -55,17 +61,36 @@ const checkNoDuplicatedPermissions = permissions =>
     permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
   );
 
-const checkNilFields = function(fields) {
-  // If the parent has no action field, then we ignore this test
-  if (_.isNil(this.parent.action)) {
-    return true;
-  }
+const checkNilFields = action =>
+  function(fields) {
+    // If the parent has no action field, then we ignore this test
+    if (isNil(action)) {
+      return true;
+    }
 
-  const { actionProvider } = strapi.admin.services.permission;
-  const action = actionProvider.getByActionId(this.parent.action);
+    return actionDomain.appliesToProperty('fields', action) || isNil(fields);
+  };
 
-  return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
-};
+const fieldsPropertyValidation = action =>
+  yup
+    .array()
+    .of(yup.string())
+    .nullable()
+    .test(
+      'field-nested',
+      'Fields format are incorrect (bad nesting).',
+      checkFieldsAreCorrectlyNested
+    )
+    .test(
+      'field-nested',
+      'Fields format are incorrect (duplicates).',
+      checkFieldsDontHaveDuplicates
+    )
+    .test(
+      'fields-restriction',
+      'The permission at ${path} must have fields set to null or undefined',
+      checkNilFields(action)
+    );
 
 const updatePermissions = yup
   .object()
@@ -78,26 +103,47 @@ const updatePermissions = yup
           .object()
           .shape({
             action: yup.string().required(),
-            subject: yup.string().nullable(),
-            fields: yup
-              .array()
-              .of(yup.string())
+            subject: yup
+              .string()
               .nullable()
-              .test(
-                'field-nested',
-                'Fields format are incorrect (bad nesting).',
-                checkFieldsAreCorrectlyNested
-              )
-              .test(
-                'field-nested',
-                'Fields format are incorrect (duplicates).',
-                checkFieldsDontHaveDuplicates
-              )
-              .test(
-                'fields-restriction',
-                'The permission at ${path} must have fields set to null or undefined',
-                checkNilFields
-              ),
+              .test('subject-validity', 'Invalid subject submitted', function(subject) {
+                const action = getActionFromProvider(this.options.parent.action);
+
+                if (isNil(action.subjects)) {
+                  return isNil(subject);
+                }
+
+                if (isArray(action.subjects)) {
+                  return action.subjects.includes(subject);
+                }
+
+                return false;
+              }),
+            properties: yup
+              .object()
+              .test('properties-structure', 'Invalid property submitted', function(properties) {
+                const action = getActionFromProvider(this.options.parent.action);
+
+                if (!has('options.applyToProperties', action)) {
+                  return isEmpty(properties);
+                }
+
+                return xor(Object.keys(properties), action.options.applyToProperties).length === 0;
+              })
+              .test('fields-property', 'Invalid fields property', async function(properties = {}) {
+                const action = getActionFromProvider(this.options.parent.action);
+
+                if (!actionDomain.appliesToProperty('fields', action)) {
+                  return true;
+                }
+
+                try {
+                  await fieldsPropertyValidation(action).validate(properties.fields);
+                  return true;
+                } catch (e) {
+                  return false;
+                }
+              }),
             conditions: yup.array().of(yup.string()),
           })
           .noUnknown()
