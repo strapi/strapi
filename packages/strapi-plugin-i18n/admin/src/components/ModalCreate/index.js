@@ -12,7 +12,7 @@ import useAddLocale from '../../hooks/useAddLocale';
 import BaseForm from './BaseForm';
 import AdvancedForm from './AdvancedForm';
 
-const ModalCreate = ({ onClose, isOpened }) => {
+const ModalCreate = ({ onClose, isOpened, onSuccess }) => {
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
@@ -37,7 +37,7 @@ const ModalCreate = ({ onClose, isOpened }) => {
   const defaultOption = options[0];
 
   return (
-    <Modal isOpen={isOpened} onToggle={onClose}>
+    <Modal isOpen={isOpened} onToggle={onClose} withoverflow="true">
       <Formik
         initialValues={{
           code: defaultOption.label,
@@ -49,7 +49,10 @@ const ModalCreate = ({ onClose, isOpened }) => {
             code: values.code,
             name: values.displayName,
             isDefault: values.isDefault,
-          }).then(onClose)}
+          }).then(() => {
+            onSuccess();
+            onClose();
+          })}
         validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
@@ -97,6 +100,7 @@ const ModalCreate = ({ onClose, isOpened }) => {
 ModalCreate.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool.isRequired,
+  onSuccess: PropTypes.func.isRequired,
 };
 
 export default ModalCreate;
