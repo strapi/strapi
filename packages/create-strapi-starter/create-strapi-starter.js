@@ -28,5 +28,11 @@ program
     const projectArgs = { projectName: directory, starterUrl };
 
     buildStarter(projectArgs, program);
-  })
-  .parse(process.argv);
+  });
+
+// Show help if not enough arguments are present
+if (process.argv.length < 4) {
+  program.help();
+}
+
+program.parse(process.argv);
