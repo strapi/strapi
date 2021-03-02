@@ -4,19 +4,18 @@ const { execSync } = require('child_process');
 const execa = require('execa');
 const hasYarn = require('./has-yarn');
 
-const installArguments = ['install', '--production', '--no-optional'];
 /**
  * @param  {string} path Path to directory (frontend, backend)
  */
 function runInstall(path) {
   if (hasYarn) {
-    return execa('yarn', installArguments, {
+    return execa('yarn', ['install'], {
       cwd: path,
       stdin: 'ignore',
     });
   }
 
-  return execa('npm', installArguments, { cwd: path, stdin: 'ignore' });
+  return execa('npm', ['install'], { cwd: path, stdin: 'ignore' });
 }
 
 function runApp(rootPath) {
