@@ -1,36 +1,44 @@
 import { useState } from 'react';
 import { request } from 'strapi-helper-plugin';
+import { useDispatch } from 'react-redux';
 import { getTrad } from '../../utils';
+import { UPDATE_LOCALE } from '../../constants';
+
+const editLocale = async (id, payload) => {
+  try {
+    const data = await request(`/i18n/locales/${id}`, {
+      method: 'PUT',
+      body: payload,
+    });
+
+    strapi.notification.toggle({
+      type: 'success',
+      message: { id: getTrad('Settings.locales.modal.edit.success') },
+    });
+
+    return data
+  } catch {
+    strapi.notification.toggle({
+      type: 'warning',
+      message: { id: 'notification.error' },
+    });
+  }
+};
 
 const useEditLocale = () => {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  const editLocale = async (id, payload) => {
-    try {
-      setIsEditing(true);
+  const modifyLocale = async (id, payload) => {
+    setLoading(true);
+    
+    const editedLocale = await editLocale(id, payload);
 
-      await request(`/i18n/locales/${id}`, {
-        method: 'PUT',
-        body: payload,
-      });
-
-      setIsEditing(false);
-
-      strapi.notification.toggle({
-        type: 'success',
-        message: { id: getTrad('Settings.locales.modal.edit.success') },
-      });
-    } catch {
-      strapi.notification.toggle({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-
-      setIsEditing(false);
-    }
+    dispatch({ type: UPDATE_LOCALE, editedLocale });
+    setLoading(false);
   };
 
-  return { isEditing, editLocale };
+  return { isEditing: isLoading, editLocale: modifyLocale };
 };
 
 export default useEditLocale;

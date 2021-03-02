@@ -15,8 +15,6 @@ const Initializer = ({ updatePlugin }) => {
 
   ref.current = updatePlugin;
 
-  console.log('test', locales);
-
   useEffect(() => {
     if (!isLoading && locales.length > 0) {
       ref.current(pluginId, 'isReady', true);

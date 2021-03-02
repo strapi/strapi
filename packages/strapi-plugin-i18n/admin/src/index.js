@@ -26,7 +26,7 @@ export default strapi => {
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    isReady: true,
+    isReady: false,
     isRequired: pluginPkg.strapi.required || false,
     mainComponent: null,
     name: pluginPkg.strapi.name,

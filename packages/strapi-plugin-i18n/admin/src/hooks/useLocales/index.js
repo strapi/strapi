@@ -30,7 +30,7 @@ const useLocales = () => {
     fetchLocalesList().then(locales => dispatch({ type: RESOLVE_LOCALES, locales }));
   }, [dispatch]);
 
-  return { locales, isLoading, refetch: fetchLocalesList };
+  return { locales, isLoading };
 };
 
 export default useLocales;
