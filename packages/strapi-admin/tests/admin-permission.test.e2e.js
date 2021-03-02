@@ -41,6 +41,11 @@ describe('Role CRUD End to End', () => {
           "conditions": Array [
             Object {
               "category": "default",
+              "displayName": "Has Locale Access",
+              "id": "plugins::i18n.has-locale-access",
+            },
+            Object {
+              "category": "default",
               "displayName": "Is creator",
               "id": "admin::is-creator",
             },
@@ -51,278 +56,372 @@ describe('Role CRUD End to End', () => {
             },
           ],
           "sections": Object {
-            "contentTypes": Array [
-              Object {
-                "action": "plugins::content-manager.explorer.create",
-                "displayName": "Create",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.delete",
-                "displayName": "Delete",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.publish",
-                "displayName": "Publish",
-                "subjects": Array [],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.read",
-                "displayName": "Read",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.update",
-                "displayName": "Update",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
+            "collectionTypes": Array [
+              Array [
+                Object {
+                  "actionId": "plugins::content-manager.explorer.create",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Create",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.read",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Read",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.update",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Update",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.delete",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Delete",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.publish",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Publish",
+                  "subjects": Array [],
+                },
+              ],
+              Array [
+                Object {
+                  "label": "user",
+                  "properties": Array [
+                    Object {
+                      "children": Array [],
+                      "label": "Fields",
+                      "value": "fields",
+                    },
+                    Object {
+                      "children": Array [],
+                      "label": "Locales",
+                      "value": "locales",
+                    },
+                  ],
+                  "uid": "plugins::users-permissions.user",
+                },
+              ],
             ],
             "plugins": Array [
-              Object {
-                "action": "plugins::content-manager.collection-types.configure-view",
-                "displayName": "Configure view",
-                "plugin": "plugin::content-manager",
-                "subCategory": "collection types",
-              },
-              Object {
-                "action": "plugins::content-manager.components.configure-layout",
-                "displayName": "Configure Layout",
-                "plugin": "plugin::content-manager",
-                "subCategory": "components",
-              },
-              Object {
-                "action": "plugins::content-manager.single-types.configure-view",
-                "displayName": "Configure view",
-                "plugin": "plugin::content-manager",
-                "subCategory": "single types",
-              },
-              Object {
-                "action": "plugins::content-type-builder.read",
-                "displayName": "Read",
-                "plugin": "plugin::content-type-builder",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "plugins::documentation.read",
-                "displayName": "Access the Documentation",
-                "plugin": "plugin::documentation",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "plugins::documentation.settings.regenerate",
-                "displayName": "Regenerate",
-                "plugin": "plugin::documentation",
-                "subCategory": "settings",
-              },
-              Object {
-                "action": "plugins::documentation.settings.update",
-                "displayName": "Update and delete",
-                "plugin": "plugin::documentation",
-                "subCategory": "settings",
-              },
-              Object {
-                "action": "plugins::upload.assets.copy-link",
-                "displayName": "Copy link",
-                "plugin": "plugin::upload",
-                "subCategory": "assets",
-              },
-              Object {
-                "action": "plugins::upload.assets.create",
-                "displayName": "Create (upload)",
-                "plugin": "plugin::upload",
-                "subCategory": "assets",
-              },
-              Object {
-                "action": "plugins::upload.assets.download",
-                "displayName": "Download",
-                "plugin": "plugin::upload",
-                "subCategory": "assets",
-              },
-              Object {
-                "action": "plugins::upload.assets.update",
-                "displayName": "Update (crop, details, replace) + delete",
-                "plugin": "plugin::upload",
-                "subCategory": "assets",
-              },
-              Object {
-                "action": "plugins::upload.read",
-                "displayName": "Access the Media Library",
-                "plugin": "plugin::upload",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "plugins::users-permissions.advanced-settings.read",
-                "displayName": "Read",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "advancedSettings",
-              },
-              Object {
-                "action": "plugins::users-permissions.advanced-settings.update",
-                "displayName": "Edit",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "advancedSettings",
-              },
-              Object {
-                "action": "plugins::users-permissions.email-templates.read",
-                "displayName": "Read",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "emailTemplates",
-              },
-              Object {
-                "action": "plugins::users-permissions.email-templates.update",
-                "displayName": "Edit",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "emailTemplates",
-              },
-              Object {
-                "action": "plugins::users-permissions.providers.read",
-                "displayName": "Read",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "providers",
-              },
-              Object {
-                "action": "plugins::users-permissions.providers.update",
-                "displayName": "Edit",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "providers",
-              },
-              Object {
-                "action": "plugins::users-permissions.roles.create",
-                "displayName": "Create",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "plugins::users-permissions.roles.delete",
-                "displayName": "Delete",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "plugins::users-permissions.roles.read",
-                "displayName": "Read",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "plugins::users-permissions.roles.update",
-                "displayName": "Update",
-                "plugin": "plugin::users-permissions",
-                "subCategory": "roles",
-              },
+              Array [
+                Object {
+                  "actionId": "plugins::content-type-builder.read",
+                  "label": "Read",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "plugins::upload.read",
+                  "label": "Access the Media Library",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "plugins::upload.assets.create",
+                  "label": "Create (upload)",
+                  "subCategory": "assets",
+                },
+                Object {
+                  "actionId": "plugins::upload.assets.update",
+                  "label": "Update (crop, details, replace) + delete",
+                  "subCategory": "assets",
+                },
+                Object {
+                  "actionId": "plugins::upload.assets.download",
+                  "label": "Download",
+                  "subCategory": "assets",
+                },
+                Object {
+                  "actionId": "plugins::upload.assets.copy-link",
+                  "label": "Copy link",
+                  "subCategory": "assets",
+                },
+                Object {
+                  "actionId": "plugins::documentation.read",
+                  "label": "Access the Documentation",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "plugins::documentation.settings.update",
+                  "label": "Update and delete",
+                  "subCategory": "settings",
+                },
+                Object {
+                  "actionId": "plugins::documentation.settings.regenerate",
+                  "label": "Regenerate",
+                  "subCategory": "settings",
+                },
+                Object {
+                  "actionId": "plugins::content-manager.single-types.configure-view",
+                  "label": "Configure view",
+                  "subCategory": "single types",
+                },
+                Object {
+                  "actionId": "plugins::content-manager.collection-types.configure-view",
+                  "label": "Configure view",
+                  "subCategory": "collection types",
+                },
+                Object {
+                  "actionId": "plugins::content-manager.components.configure-layout",
+                  "label": "Configure Layout",
+                  "subCategory": "components",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.roles.create",
+                  "label": "Create",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.roles.read",
+                  "label": "Read",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.roles.update",
+                  "label": "Update",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.roles.delete",
+                  "label": "Delete",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.providers.read",
+                  "label": "Read",
+                  "subCategory": "providers",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.providers.update",
+                  "label": "Edit",
+                  "subCategory": "providers",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.email-templates.read",
+                  "label": "Read",
+                  "subCategory": "emailTemplates",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.email-templates.update",
+                  "label": "Edit",
+                  "subCategory": "emailTemplates",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.advanced-settings.read",
+                  "label": "Read",
+                  "subCategory": "advancedSettings",
+                },
+                Object {
+                  "actionId": "plugins::users-permissions.advanced-settings.update",
+                  "label": "Edit",
+                  "subCategory": "advancedSettings",
+                },
+              ],
             ],
             "settings": Array [
-              Object {
-                "action": "admin::marketplace.plugins.install",
-                "category": "plugins and marketplace",
-                "displayName": "Install (only for dev env)",
-                "subCategory": "plugins",
-              },
-              Object {
-                "action": "admin::marketplace.plugins.uninstall",
-                "category": "plugins and marketplace",
-                "displayName": "Uninstall (only for dev env)",
-                "subCategory": "plugins",
-              },
-              Object {
-                "action": "admin::marketplace.read",
-                "category": "plugins and marketplace",
-                "displayName": "Access the marketplace",
-                "subCategory": "marketplace",
-              },
-              Object {
-                "action": "admin::roles.create",
-                "category": "users and roles",
-                "displayName": "Create",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "admin::roles.delete",
-                "category": "users and roles",
-                "displayName": "Delete",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "admin::roles.read",
-                "category": "users and roles",
-                "displayName": "Read",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "admin::roles.update",
-                "category": "users and roles",
-                "displayName": "Update",
-                "subCategory": "roles",
-              },
-              Object {
-                "action": "admin::users.create",
-                "category": "users and roles",
-                "displayName": "Create (invite)",
-                "subCategory": "users",
-              },
-              Object {
-                "action": "admin::users.delete",
-                "category": "users and roles",
-                "displayName": "Delete",
-                "subCategory": "users",
-              },
-              Object {
-                "action": "admin::users.read",
-                "category": "users and roles",
-                "displayName": "Read",
-                "subCategory": "users",
-              },
-              Object {
-                "action": "admin::users.update",
-                "category": "users and roles",
-                "displayName": "Update",
-                "subCategory": "users",
-              },
-              Object {
-                "action": "admin::webhooks.create",
-                "category": "webhooks",
-                "displayName": "Create",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "admin::webhooks.delete",
-                "category": "webhooks",
-                "displayName": "Delete",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "admin::webhooks.read",
-                "category": "webhooks",
-                "displayName": "Read",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "admin::webhooks.update",
-                "category": "webhooks",
-                "displayName": "Update",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "plugins::email.settings.read",
-                "category": "email",
-                "displayName": "Access the Email Settings page",
-                "subCategory": "general",
-              },
-              Object {
-                "action": "plugins::upload.settings.read",
-                "category": "media library",
-                "displayName": "Access the Media Library settings page",
-                "subCategory": "general",
-              },
+              Array [
+                Object {
+                  "actionId": "plugins::upload.settings.read",
+                  "category": "media library",
+                  "label": "Access the Media Library settings page",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "plugins::i18n.locale.create",
+                  "category": "Internationalization",
+                  "label": "Create",
+                  "subCategory": "Locales",
+                },
+                Object {
+                  "actionId": "plugins::i18n.locale.read",
+                  "category": "Internationalization",
+                  "label": "Read",
+                  "subCategory": "Locales",
+                },
+                Object {
+                  "actionId": "plugins::i18n.locale.update",
+                  "category": "Internationalization",
+                  "label": "Update",
+                  "subCategory": "Locales",
+                },
+                Object {
+                  "actionId": "plugins::i18n.locale.delete",
+                  "category": "Internationalization",
+                  "label": "Delete",
+                  "subCategory": "Locales",
+                },
+                Object {
+                  "actionId": "admin::marketplace.read",
+                  "category": "plugins and marketplace",
+                  "label": "Access the marketplace",
+                  "subCategory": "marketplace",
+                },
+                Object {
+                  "actionId": "admin::marketplace.plugins.install",
+                  "category": "plugins and marketplace",
+                  "label": "Install (only for dev env)",
+                  "subCategory": "plugins",
+                },
+                Object {
+                  "actionId": "admin::marketplace.plugins.uninstall",
+                  "category": "plugins and marketplace",
+                  "label": "Uninstall (only for dev env)",
+                  "subCategory": "plugins",
+                },
+                Object {
+                  "actionId": "admin::webhooks.create",
+                  "category": "webhooks",
+                  "label": "Create",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "admin::webhooks.read",
+                  "category": "webhooks",
+                  "label": "Read",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "admin::webhooks.update",
+                  "category": "webhooks",
+                  "label": "Update",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "admin::webhooks.delete",
+                  "category": "webhooks",
+                  "label": "Delete",
+                  "subCategory": "general",
+                },
+                Object {
+                  "actionId": "admin::users.create",
+                  "category": "users and roles",
+                  "label": "Create (invite)",
+                  "subCategory": "users",
+                },
+                Object {
+                  "actionId": "admin::users.read",
+                  "category": "users and roles",
+                  "label": "Read",
+                  "subCategory": "users",
+                },
+                Object {
+                  "actionId": "admin::users.update",
+                  "category": "users and roles",
+                  "label": "Update",
+                  "subCategory": "users",
+                },
+                Object {
+                  "actionId": "admin::users.delete",
+                  "category": "users and roles",
+                  "label": "Delete",
+                  "subCategory": "users",
+                },
+                Object {
+                  "actionId": "admin::roles.create",
+                  "category": "users and roles",
+                  "label": "Create",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "admin::roles.read",
+                  "category": "users and roles",
+                  "label": "Read",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "admin::roles.update",
+                  "category": "users and roles",
+                  "label": "Update",
+                  "subCategory": "roles",
+                },
+                Object {
+                  "actionId": "admin::roles.delete",
+                  "category": "users and roles",
+                  "label": "Delete",
+                  "subCategory": "roles",
+                },
+              ],
+            ],
+            "singleTypes": Array [
+              Array [
+                Object {
+                  "actionId": "plugins::content-manager.explorer.create",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Create",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.read",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Read",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.update",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Update",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.delete",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Delete",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.publish",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Publish",
+                  "subjects": Array [],
+                },
+              ],
+              Array [],
             ],
           },
         }

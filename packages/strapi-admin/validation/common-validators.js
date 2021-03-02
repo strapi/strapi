@@ -102,12 +102,28 @@ const updatePermissions = yup
         yup
           .object()
           .shape({
-            action: yup.string().required(),
+            action: yup
+              .string()
+              .required()
+              .test('action-validity', 'Invalid action ID submitted at ${path}', function(
+                actionId
+              ) {
+                // If the action field is Nil, ignore the test and let the required check handle the error
+                if (isNil(actionId)) {
+                  return true;
+                }
+
+                return !!getActionFromProvider(actionId);
+              }),
             subject: yup
               .string()
               .nullable()
               .test('subject-validity', 'Invalid subject submitted', function(subject) {
                 const action = getActionFromProvider(this.options.parent.action);
+
+                if (!action) {
+                  return true;
+                }
 
                 if (isNil(action.subjects)) {
                   return isNil(subject);
@@ -121,7 +137,9 @@ const updatePermissions = yup
               }),
             properties: yup
               .object()
-              .test('properties-structure', 'Invalid property submitted', function(properties) {
+              .test('properties-structure', 'Invalid property set at ${path}', function(
+                properties
+              ) {
                 const action = getActionFromProvider(this.options.parent.action);
 
                 if (!has('options.applyToProperties', action)) {
@@ -130,18 +148,31 @@ const updatePermissions = yup
 
                 return xor(Object.keys(properties), action.options.applyToProperties).length === 0;
               })
-              .test('fields-property', 'Invalid fields property', async function(properties = {}) {
+              .test('fields-property', 'Invalid fields property at ${path}', async function(
+                properties = {}
+              ) {
                 const action = getActionFromProvider(this.options.parent.action);
+
+                if (!action) {
+                  return true;
+                }
 
                 if (!actionDomain.appliesToProperty('fields', action)) {
                   return true;
                 }
 
                 try {
-                  await fieldsPropertyValidation(action).validate(properties.fields);
+                  await fieldsPropertyValidation(action).validate(properties.fields, {
+                    strict: true,
+                    abortEarly: false,
+                  });
                   return true;
                 } catch (e) {
-                  return false;
+                  // Propagate fieldsPropertyValidation error with updated path
+                  throw this.createError({
+                    message: e.message,
+                    path: `${this.path}.fields`,
+                  });
                 }
               }),
             conditions: yup.array().of(yup.string()),

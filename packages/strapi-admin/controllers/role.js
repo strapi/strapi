@@ -44,7 +44,7 @@ module.exports = {
     const { id } = ctx.params;
     const { body } = ctx.request;
 
-    const { role: roleService } = getService('role');
+    const roleService = getService('role');
 
     try {
       await validateRoleUpdateInput(ctx.request.body);
@@ -141,7 +141,7 @@ module.exports = {
     const permissions = await roleService.assignPermissions(role.id, permissionsToAssign);
 
     ctx.body = {
-      data: permissions,
+      data: permissions.map(permissionService.sanitizePermission),
     };
   },
 };

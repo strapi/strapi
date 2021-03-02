@@ -21,7 +21,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const { user: userService } = getService('user');
+    const userService = getService('user');
 
     const updatedUser = await userService.updateById(ctx.state.user.id, input);
 

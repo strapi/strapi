@@ -127,7 +127,10 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: { findOne },
-            permission: { conditionProvider: { getAll: jest.fn(() => []) } },
+            permission: {
+              actionProvider: { getByActionId: jest.fn() },
+              conditionProvider: { getAll: jest.fn(() => []) },
+            },
           },
         },
       };
@@ -152,7 +155,7 @@ describe('Role controller', () => {
         {
           action: 'test',
           subject: 'model1',
-          fields: ['title'],
+          properties: { fields: ['title'] },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -173,13 +176,18 @@ describe('Role controller', () => {
               getSuperAdmin: jest.fn(() => undefined),
             },
             permission: {
+              sanitizePermission: jest.fn(permissions => permissions),
               conditionProvider: {
                 getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
               actionProvider: {
                 getAll: jest.fn(() => [{ actionId: 'test', subjects: ['model1'] }]),
                 getAllByMap: jest.fn(),
-                getByActionId: jest.fn(() => ({ options: { fieldsRestriction: true } })),
+                getByActionId: jest.fn(() => ({
+                  actionId: 'test',
+                  subjects: ['model1'],
+                  options: { applyToProperties: ['fields'] },
+                })),
               },
             },
           },

@@ -184,7 +184,7 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) =>
       field => !badNestedFields.some(startsWith(`${field}.`))
     );
 
-    return permission.setProperty('field', newFields);
+    return permission.setProperty('fields', newFields);
   }, []);
 
 module.exports = {

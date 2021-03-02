@@ -107,7 +107,7 @@ const findUserPermissions = async ({ roles }) => {
  */
 const cleanPermissionInDatabase = async () => {
   const pageSize = 200;
-  let total = 1;
+  let total = Infinity;
 
   for (let page = 1; page * pageSize < total; page++) {
     // 1. Find invalid permissions and collect their ID to delete them later

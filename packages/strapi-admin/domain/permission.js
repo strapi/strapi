@@ -1,6 +1,6 @@
 'use strict';
 
-const { omit, cloneDeep, set, pick, map } = require('lodash/fp');
+const { omit, cloneDeep, set, pick, map, isArray, isNil } = require('lodash/fp');
 const { getService } = require('../utils');
 
 /**
@@ -12,6 +12,10 @@ function createPermission(attributes) {
 }
 
 function toPermission(permission) {
+  if (isNil(permission)) {
+    return null;
+  }
+
   if (Array.isArray(permission)) {
     return map(Permission.from, permission);
   }
@@ -36,7 +40,7 @@ class Permission {
     this._actionId = action;
     this._subject = subject || null;
     this._properties = properties || {};
-    this._conditions = (conditions || []).filter(isValidCondition);
+    this._conditions = (isArray(conditions) ? conditions : []).filter(isValidCondition);
     this._rest = rest;
 
     // Define getters for every other attributes passed in the options
