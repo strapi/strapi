@@ -22,6 +22,8 @@ const editLocale = async (id, payload) => {
       type: 'warning',
       message: { id: 'notification.error' },
     });
+
+    return null
   }
 };
 
