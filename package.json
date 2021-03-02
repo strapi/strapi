@@ -44,7 +44,7 @@
     "request-promise-native": "^1.0.9",
     "rimraf": "3.0.2",
     "snyk": "^1.448.0",
-    "stylelint": "10.1.0",
+    "stylelint": "13.11.0",
     "stylelint-config-recommended": "3.0.0",
     "stylelint-config-styled-components": "0.1.1",
     "stylelint-processor-styled-components": "1.10.0",

@@ -60,7 +60,7 @@ describe('VideoPreview', () => {
       </ThemeProvider>
     );
 
-    expect(container.querySelector('video')).toBeVisible();
+    expect(container.querySelector('video')).toBeInTheDocument();
   });
 
   it('shows a fallback message when the video is in error', () => {
