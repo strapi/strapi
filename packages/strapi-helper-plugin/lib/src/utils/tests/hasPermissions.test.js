@@ -28,13 +28,13 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
         {
           action: 'admin::marketplace.read',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: [],
         },
         {
           action: 'admin::marketplace.plugins.uninstall',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: ['customCondition'],
         },
       ]);
@@ -47,13 +47,15 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
         {
           action: 'admin::marketplace.read',
           subject: null,
-          fields: ['test'],
+          properties: {
+            fields: ['test'],
+          },
           conditions: [],
         },
         {
           action: 'admin::marketplace.plugins.uninstall',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: ['customCondition'],
         },
       ];
@@ -111,7 +113,7 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
         {
           action: 'admin::marketplace.read',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: [],
         },
       ];
@@ -124,19 +126,19 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
         {
           action: 'admin::marketplace.read',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: [],
         },
         {
           action: 'admin::marketplace.plugins.uninstall',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: ['customCondition'],
         },
         {
           action: 'admin::marketplace.plugins.install',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: null,
         },
       ];
@@ -149,19 +151,19 @@ describe('STRAPI-HELPER_PLUGIN | utils ', () => {
         {
           action: 'admin::marketplace.read',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: ['test'],
         },
         {
           action: 'admin::marketplace.plugins.uninstall',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: ['customCondition'],
         },
         {
           action: 'admin::marketplace.plugins.install',
           subject: null,
-          fields: null,
+          properties: {},
           conditions: ['test'],
         },
       ];

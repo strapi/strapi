@@ -104,6 +104,7 @@ function ListView({
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions);
+
   const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
   const initParams = useMemo(() => ({ page: 1, pageSize: defaultPageSize, _sort: defaultSort }), [
     defaultPageSize,
