@@ -1,32 +1,8 @@
 'use strict';
 
-const { difference, pick, orderBy, prop, intersection } = require('lodash/fp');
-const { getService } = require('../../../utils');
+const { shouldBeProcesseed, getUpdatesInfo } = require('./utils');
 
 const BATCH_SIZE = 1000;
-
-// Common functions
-
-const shouldBeProcesseed = processedLocaleCodes => entry => {
-  return (
-    entry.localizations.length > 1 &&
-    intersection(entry.localizations.map(prop('locale')), processedLocaleCodes).length === 0
-  );
-};
-
-const getUpdatesInfo = ({ entriesToProcess, locale, attributesToMigrate }) => {
-  const updates = [];
-  for (const entry of entriesToProcess) {
-    const attributesValues = pick(attributesToMigrate, entry);
-    const entriesIdsToUpdate = entry.localizations
-      .filter(related => related.locale !== locale.code)
-      .map(prop('id'));
-    updates.push({ entriesIdsToUpdate, attributesValues });
-  }
-  return updates;
-};
-
-// Bookshelf
 
 const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
 
@@ -146,75 +122,4 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
   }
 };
 
-// Mongoose
-
-const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
-  const processedLocaleCodes = [];
-  for (const locale of locales) {
-    let batchCount = BATCH_SIZE;
-    let lastId;
-    while (batchCount === BATCH_SIZE) {
-      const findParams = { locale: locale.code };
-      if (lastId) {
-        findParams._id = { $gt: lastId };
-      }
-
-      const batch = await model
-        .find(findParams, [...attributesToMigrate, 'locale', 'localizations'])
-        .sort({ _id: 1 })
-        .limit(BATCH_SIZE);
-
-      if (batch.length > 0) {
-        lastId = batch[batch.length - 1]._id;
-      }
-      batchCount = batch.length;
-
-      const entriesToProcess = batch.filter(shouldBeProcesseed);
-
-      const updatesInfo = getUpdatesInfo({ entriesToProcess, locale, attributesToMigrate });
-      const updates = updatesInfo.map(({ entriesIdsToUpdate, attributesValues }) => ({
-        updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
-      }));
-
-      await model.bulkWrite(updates);
-    }
-    processedLocaleCodes.push(locale.code);
-  }
-};
-
-// Migration when i18n is disabled on a field of a content-type that have i18n enabled
-const after = async ({ model, definition, previousDefinition, ORM }) => {
-  const ctService = getService('content-types');
-  const localeService = getService('locales');
-
-  if (!ctService.isLocalized(model)) {
-    return;
-  }
-
-  const localizedAttributes = ctService.getLocalizedAttributes(definition);
-  const prevLocalizedAttributes = ctService.getLocalizedAttributes(previousDefinition);
-  const attributesDisabled = difference(prevLocalizedAttributes, localizedAttributes);
-  const attributesToMigrate = intersection(Object.keys(definition.attributes), attributesDisabled);
-
-  if (attributesToMigrate.length === 0) {
-    return;
-  }
-
-  let locales = await localeService.find();
-  locales = await localeService.setIsDefault(locales);
-  locales = orderBy(['isDefault', 'code'], ['desc', 'asc'])(locales); // Put default locale first
-
-  if (model.orm === 'bookshelf') {
-    await migrateForBookshelf({ ORM, model, attributesToMigrate, locales });
-  } else if (model.orm === 'mongoose') {
-    await migrateForMongoose({ model, attributesToMigrate, locales });
-  }
-  throw new Error('Done');
-};
-
-const before = () => {};
-
-module.exports = {
-  before,
-  after,
-};
+module.exports = migrateForBookshelf;
