@@ -41,13 +41,16 @@
     "react-router": "^5.0.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "redux": "^4.0.1",
+    
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "sanitize-html": "2.1.1",
     "strapi-helper-plugin": "3.5.0",
     "strapi-utils": "3.5.0",
     "yup": "^0.27.0"
+  },
+  "peerDependencies": {
+    "redux": "^4.0.1"
   },
   "author": {
     "name": "Strapi team",
