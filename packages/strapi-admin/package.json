@@ -36,7 +36,7 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
     "@fortawesome/free-solid-svg-icons": "^5.15.2",
     "@fortawesome/react-fontawesome": "^0.1.12",
-    "autoprefixer": "^9.8.6",
+    "autoprefixer": "^10.2.4",
     "axios": "^0.21.1",
     "babel-loader": "^8.1.0",
     "bcryptjs": "^2.4.3",
