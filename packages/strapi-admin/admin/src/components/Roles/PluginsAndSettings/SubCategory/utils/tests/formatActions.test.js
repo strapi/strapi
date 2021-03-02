@@ -12,8 +12,8 @@ describe('ADMIN | COMPONENTS | Permissions | PluginsAndSettings | SubCategories
     const modifiedData = {
       plugins: {
         doc: {
-          general: { test: { enabled: false, conditions: { creator: false } } },
-          settings: { test: { enabled: true, conditions: { creator: true } } },
+          general: { test: { properties: { enabled: false }, conditions: { creator: false } } },
+          settings: { test: { properties: { enabled: true }, conditions: { creator: true } } },
         },
         ctb: {},
       },
@@ -25,7 +25,7 @@ describe('ADMIN | COMPONENTS | Permissions | PluginsAndSettings | SubCategories
         displayName: 'test',
         action: 'test',
         isDisplayed: false,
-        checkboxName: 'plugins..doc..general..test..enabled',
+        checkboxName: 'plugins..doc..general..test..properties..enabled',
         hasSomeActionsSelected: false,
         hasConditions: false,
         label: 'test',
@@ -40,7 +40,7 @@ describe('ADMIN | COMPONENTS | Permissions | PluginsAndSettings | SubCategories
         displayName: 'test',
         action: 'test',
         isDisplayed: true,
-        checkboxName: 'plugins..doc..settings..test..enabled',
+        checkboxName: 'plugins..doc..settings..test..properties..enabled',
         hasSomeActionsSelected: true,
         hasConditions: true,
         value: true,

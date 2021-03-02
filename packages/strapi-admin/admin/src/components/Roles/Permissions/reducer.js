@@ -53,11 +53,12 @@ const reducer = (state, action) =>
           // When a ct has multiple properties (ex: locales, field)
           // We need to make sure that we add any new property to the modifiedData
           // object.
-          if (has(objToUpdate[actionId], propertyName)) {
-            const objValue = get(objToUpdate, [actionId, propertyName, rowName]);
+          if (has(objToUpdate[actionId], `properties.${propertyName}`)) {
+            const objValue = get(objToUpdate, [actionId, 'properties', propertyName, rowName]);
             const pathToDataToSet = [
               ...pathToModifiedDataCollectionType,
               actionId,
+              'properties',
               propertyName,
               rowName,
             ];

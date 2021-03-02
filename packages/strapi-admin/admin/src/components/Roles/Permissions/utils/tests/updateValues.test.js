@@ -3,11 +3,15 @@ import updateValues from '../updateValues';
 describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
   it('should not the conditions values of given object', () => {
     const simpleObject = {
-      enabled: true,
+      properties: {
+        enabled: true,
+      },
       conditions: 'test',
     };
     const expected = {
-      enabled: false,
+      properties: {
+        enabled: false,
+      },
       conditions: 'test',
     };
 
@@ -16,29 +20,33 @@ describe('ADMIN | COMPONENTS | Permissions | utils | updateValues', () => {
 
   it('set the leafs of an object with the second argument passed to the function', () => {
     const complexeObject = {
-      enabled: true,
       conditions: 'test',
-      f1: {
+      properties: {
         enabled: true,
         f1: {
-          conditions: 'test',
-          enabled: false,
-          f2: {
-            enabled: true,
+          enabled: true,
+          f1: {
+            conditions: 'test',
+            enabled: false,
+            f2: {
+              enabled: true,
+            },
           },
         },
       },
     };
     const expected = {
-      enabled: false,
       conditions: 'test',
-      f1: {
+      properties: {
         enabled: false,
         f1: {
-          conditions: 'test',
           enabled: false,
-          f2: {
+          f1: {
+            conditions: 'test',
             enabled: false,
+            f2: {
+              enabled: false,
+            },
           },
         },
       },

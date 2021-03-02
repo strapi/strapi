@@ -54,21 +54,28 @@ const createDefaultPropertyForms = ({ children }, propertyValues, prefix = '') =
  * @returns {object} In this case it will return { fields: { name: false } }
  */
 const createDefaultPropertiesForm = (propertiesArray, ctLayout, matchingPermission) => {
-  return propertiesArray.reduce((acc, currentPropertyName) => {
-    const foundProperty = ctLayout.properties.find(({ value }) => value === currentPropertyName);
+  return propertiesArray.reduce(
+    (acc, currentPropertyName) => {
+      const foundProperty = ctLayout.properties.find(({ value }) => value === currentPropertyName);
 
-    if (foundProperty) {
-      const matchingPermissionPropertyValues = get(matchingPermission, foundProperty.value, []);
-      const propertyForm = createDefaultPropertyForms(
-        foundProperty,
-        matchingPermissionPropertyValues
-      );
+      if (foundProperty) {
+        const matchingPermissionPropertyValues = get(
+          matchingPermission,
+          ['properties', foundProperty.value],
+          []
+        );
+        const propertyForm = createDefaultPropertyForms(
+          foundProperty,
+          matchingPermissionPropertyValues
+        );
 
-      acc[currentPropertyName] = propertyForm;
-    }
+        acc.properties[currentPropertyName] = propertyForm;
+      }
 
-    return acc;
-  }, {});
+      return acc;
+    },
+    { properties: {} }
+  );
 };
 
 /**
@@ -133,7 +140,9 @@ const createDefaultCTFormFromLayout = (
 
       if (isEmpty(applyToProperties)) {
         set(acc, [currentCTUID, actionId], {
-          enabled: matchingPermission !== undefined,
+          properties: {
+            enabled: matchingPermission !== undefined,
+          },
           conditions: conditionsForm,
         });
 

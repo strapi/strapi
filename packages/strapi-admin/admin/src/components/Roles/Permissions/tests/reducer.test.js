@@ -16,36 +16,42 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
                 },
               },
               'content-manager.explorer.update': {
-                fields: {
-                  f1: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
                 },
               },
             },
             restaurant: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: true,
-                  f2: true,
-                  services: {
-                    name: true,
-                    media: true,
-                    closing: {
-                      name: {
-                        test: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                    services: {
+                      name: true,
+                      media: true,
+                      closing: {
+                        name: {
+                          test: true,
+                        },
                       },
                     },
+                    dz: true,
+                    relation: true,
                   },
-                  dz: true,
-                  relation: true,
-                },
-                locales: {
-                  fr: true,
-                  en: true,
+                  locales: {
+                    fr: true,
+                    en: true,
+                  },
                 },
                 conditions: {
                   test: true,
@@ -57,7 +63,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         singleTypes: {
           test: {
             'content-manager.explorer.create': {
-              fields: { f1: true },
+              properties: {
+                fields: { f1: true },
+              },
             },
           },
         },
@@ -68,36 +76,42 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                  },
                 },
               },
               'content-manager.explorer.update': {
-                fields: {
-                  f1: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
                 },
               },
             },
             restaurant: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: false,
-                  f2: false,
-                  services: {
-                    name: false,
-                    media: false,
-                    closing: {
-                      name: {
-                        test: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                    services: {
+                      name: false,
+                      media: false,
+                      closing: {
+                        name: {
+                          test: false,
+                        },
                       },
                     },
+                    dz: false,
+                    relation: false,
                   },
-                  dz: false,
-                  relation: false,
-                },
-                locales: {
-                  fr: false,
-                  en: false,
+                  locales: {
+                    fr: false,
+                    en: false,
+                  },
                 },
                 conditions: {
                   test: false,
@@ -109,7 +123,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         singleTypes: {
           test: {
             'content-manager.explorer.create': {
-              fields: { f1: true },
+              properties: {
+                fields: { f1: true },
+              },
             },
           },
         },
@@ -130,8 +146,10 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -139,20 +157,24 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               'content-manager.explorer.update': {
-                fields: {
-                  f1: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
                 },
               },
             },
             restaurant: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: true,
-                  f2: true,
-                },
-                locales: {
-                  fr: false,
-                  en: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                  locales: {
+                    fr: false,
+                    en: false,
+                  },
                 },
                 conditions: {
                   test: true,
@@ -164,7 +186,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         singleTypes: {
           test: {
             'content-manager.explorer.create': {
-              fields: { f1: false },
+              properties: {
+                fields: { f1: false },
+              },
             },
           },
         },
@@ -175,8 +199,10 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -184,20 +210,24 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               'content-manager.explorer.update': {
-                fields: {
-                  f1: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
                 },
               },
             },
             restaurant: {
               'content-manager.explorer.create': {
-                fields: {
-                  f1: true,
-                  f2: true,
-                },
-                locales: {
-                  fr: true,
-                  en: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                  locales: {
+                    fr: true,
+                    en: true,
+                  },
                 },
                 conditions: {
                   test: true,
@@ -209,7 +239,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         singleTypes: {
           test: {
             'content-manager.explorer.create': {
-              fields: { f1: false },
+              properties: {
+                fields: { f1: false },
+              },
             },
           },
         },
@@ -240,9 +272,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               create: {
-                fields: {
-                  f1: true,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -250,9 +284,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               read: {
-                fields: {
-                  f1: false,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -262,7 +298,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             },
             restaurant: {
               delete: {
-                enabled: true,
+                properties: {
+                  enabled: true,
+                },
                 conditions: {
                   creator: false,
                   roles: true,
@@ -280,9 +318,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               create: {
-                fields: {
-                  f1: true,
-                  f2: true,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -290,9 +330,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               read: {
-                fields: {
-                  f1: false,
-                  f2: true,
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: true,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -302,7 +344,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             },
             restaurant: {
               delete: {
-                enabled: true,
+                properties: {
+                  enabled: true,
+                },
                 conditions: {
                   creator: false,
                   roles: true,
@@ -331,9 +375,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               create: {
-                fields: {
-                  f1: true,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -341,9 +387,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               read: {
-                fields: {
-                  f1: false,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -353,7 +401,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             },
             restaurant: {
               delete: {
-                enabled: true,
+                properties: {
+                  enabled: true,
+                },
                 conditions: {
                   creator: false,
                   roles: true,
@@ -371,9 +421,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               create: {
-                fields: {
-                  f1: false,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -381,9 +433,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               read: {
-                fields: {
-                  f1: false,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -393,7 +447,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             },
             restaurant: {
               delete: {
-                enabled: true,
+                properties: {
+                  enabled: true,
+                },
                 conditions: {
                   creator: false,
                   roles: true,
@@ -418,9 +474,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               create: {
-                fields: {
-                  f1: true,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -428,9 +486,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               read: {
-                fields: {
-                  f1: true,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: true,
@@ -443,7 +503,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             ctb: {
               general: {
                 read: {
-                  enabled: false,
+                  properties: {
+                    enabled: false,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
@@ -454,7 +516,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             doc: {
               general: {
                 read: {
-                  enabled: true,
+                  properties: {
+                    enabled: true,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
@@ -463,14 +527,18 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
               },
               settings: {
                 read: {
-                  enabled: false,
+                  properties: {
+                    enabled: false,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
                   },
                 },
                 updated: {
-                  enabled: true,
+                  properties: {
+                    enabled: true,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
@@ -504,9 +572,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
           collectionTypes: {
             address: {
               create: {
-                fields: {
-                  f1: true,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: true,
@@ -514,9 +584,11 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
                 },
               },
               read: {
-                fields: {
-                  f1: true,
-                  f2: false,
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
                 },
                 conditions: {
                   creator: false,
@@ -529,7 +601,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             ctb: {
               general: {
                 read: {
-                  enabled: false,
+                  properties: {
+                    enabled: false,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
@@ -540,7 +614,9 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
             doc: {
               general: {
                 read: {
-                  enabled: true,
+                  properties: {
+                    enabled: true,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
@@ -549,14 +625,18 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
               },
               settings: {
                 read: {
-                  enabled: false,
+                  properties: {
+                    enabled: false,
+                  },
                   conditions: {
                     creator: false,
                     roles: false,
                   },
                 },
                 updated: {
-                  enabled: true,
+                  properties: {
+                    enabled: true,
+                  },
                   conditions: {
                     creator: true,
                     roles: true,
@@ -578,17 +658,25 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
     it('should set the modifiedData.test.enabled to false when the value is falsy and remove the applied conditions', () => {
       const action = {
         type: 'ON_CHANGE_SIMPLE_CHECKBOX',
-        keys: 'test..enabled',
+        keys: 'test..properties..enabled',
         value: false,
       };
 
       const initialState = {
-        initialData: { test: { enabled: true, conditions: { creator: true, roles: true } } },
-        modifiedData: { test: { enabled: true, conditions: { creator: true, roles: true } } },
+        initialData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
       };
       const expected = {
-        initialData: { test: { enabled: true, conditions: { creator: true, roles: true } } },
-        modifiedData: { test: { enabled: false, conditions: { creator: false, roles: false } } },
+        initialData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: false }, conditions: { creator: false, roles: false } },
+        },
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
@@ -597,17 +685,25 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
     it('should set the modifiedData.test.enabled to true when the value is truthy and not remove the applied conditions', () => {
       const action = {
         type: 'ON_CHANGE_SIMPLE_CHECKBOX',
-        keys: 'test..enabled',
+        keys: 'test..properties..enabled',
         value: true,
       };
 
       const initialState = {
-        initialData: { test: { enabled: false, conditions: { creator: true, roles: true } } },
-        modifiedData: { test: { enabled: false, conditions: { creator: true, roles: true } } },
+        initialData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
+        },
       };
       const expected = {
-        initialData: { test: { enabled: false, conditions: { creator: true, roles: true } } },
-        modifiedData: { test: { enabled: true, conditions: { creator: true, roles: true } } },
+        initialData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
       };
 
       expect(reducer(initialState, action)).toEqual(expected);
@@ -627,14 +723,18 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         modifiedData: {
           restaurant: {
             create: {
-              fields: { f1: false, f2: { f1: false } },
-              locales: { en: false },
+              properties: {
+                fields: { f1: false, f2: { f1: false } },
+                locales: { en: false },
+              },
               conditions: {
                 test: 'test',
               },
             },
             update: {
-              test: true,
+              properties: {
+                test: true,
+              },
             },
           },
         },
@@ -645,14 +745,18 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         modifiedData: {
           restaurant: {
             create: {
-              fields: { f1: true, f2: { f1: true } },
-              locales: { en: true },
+              properties: {
+                fields: { f1: true, f2: { f1: true } },
+                locales: { en: true },
+              },
               conditions: {
                 test: 'test',
               },
             },
             update: {
-              test: true,
+              properties: {
+                test: true,
+              },
             },
           },
         },
@@ -673,14 +777,18 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         modifiedData: {
           restaurant: {
             create: {
-              fields: { f1: true, f2: { f1: false } },
-              locales: { en: false },
+              properties: {
+                fields: { f1: true, f2: { f1: false } },
+                locales: { en: false },
+              },
               conditions: {
                 test: true,
               },
             },
             update: {
-              test: true,
+              properties: {
+                test: true,
+              },
             },
           },
         },
@@ -691,14 +799,18 @@ describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
         modifiedData: {
           restaurant: {
             create: {
-              fields: { f1: false, f2: { f1: false } },
-              locales: { en: false },
+              properties: {
+                fields: { f1: false, f2: { f1: false } },
+                locales: { en: false },
+              },
               conditions: {
                 test: false,
               },
             },
             update: {
-              test: true,
+              properties: {
+                test: true,
+              },
             },
           },
         },

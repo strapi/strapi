@@ -47,21 +47,29 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
       const permissions = {
         address: {
           create: {
-            enabled: true,
+            properties: {
+              enabled: true,
+            },
             conditions: { creator: false, role: true },
           },
           read: {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: { creator: false, role: false },
           },
         },
         restaurant: {
           create: {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: { creator: false, role: false },
           },
           read: {
-            enabled: true,
+            properties: {
+              enabled: true,
+            },
             conditions: { creator: true, role: false },
           },
         },
@@ -72,11 +80,13 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
           action: 'create',
           subject: 'address',
           conditions: ['role'],
+          properties: {},
         },
         {
           action: 'read',
           subject: 'restaurant',
           conditions: ['creator'],
+          properties: {},
         },
       ];
 
@@ -87,10 +97,12 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
       const permissions = {
         address: {
           create: {
-            fields: {
-              f1: true,
-              f2: false,
-              f3: true,
+            properties: {
+              fields: {
+                f1: true,
+                f2: false,
+                f3: true,
+              },
             },
             conditions: { creator: false, role: true },
           },
@@ -101,17 +113,21 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
         },
         restaurant: {
           create: {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: { creator: false, role: false },
           },
           read: {
-            fields: {
-              ff1: false,
-              ff2: false,
-            },
-            locales: {
-              en: true,
-              fr: false,
+            properties: {
+              fields: {
+                ff1: false,
+                ff2: false,
+              },
+              locales: {
+                en: true,
+                fr: false,
+              },
             },
             conditions: { creator: true, role: false },
           },
@@ -122,14 +138,18 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
         {
           action: 'create',
           subject: 'address',
-          fields: ['f1', 'f3'],
+          properties: {
+            fields: ['f1', 'f3'],
+          },
           conditions: ['role'],
         },
         {
           action: 'read',
           subject: 'restaurant',
-          fields: [],
-          locales: ['en'],
+          properties: {
+            fields: [],
+            locales: ['en'],
+          },
           conditions: ['creator'],
         },
       ];

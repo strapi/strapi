@@ -54,6 +54,8 @@ const SubActionRow = ({
     return childrenForm.find(({ value }) => value === rowToOpen);
   }, [rowToOpen, childrenForm]);
 
+  console.log({ pathToDataFromActionRow });
+
   return (
     <Wrapper>
       <TopTimeline />
@@ -105,6 +107,7 @@ const SubActionRow = ({
                     const checkboxName = [
                       ...pathToDataFromActionRow.split('..'),
                       actionId,
+                      'properties',
                       propertyName,
                       ...parentName.split('..'),
                       value,

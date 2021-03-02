@@ -19,7 +19,7 @@ const conditions = [
 ];
 
 describe('ADMIN | COMPONENTS | Permissions | utils', () => {
-  describe('createConditionForm', () => {
+  describe('createDefaultConditionForm', () => {
     it('should return an object with all the leafs set to false', () => {
       const expected = {
         'admin::is-creator': false,
@@ -166,12 +166,14 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       const expected = {
         address: {
           'content-manager.explorer.create': {
-            fields: {
-              postal_coder: false,
-              categories: false,
-              cover: false,
-              images: false,
-              city: false,
+            properties: {
+              fields: {
+                postal_coder: false,
+                categories: false,
+                cover: false,
+                images: false,
+                city: false,
+              },
             },
             conditions: {
               'admin::is-creator': false,
@@ -179,7 +181,9 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             },
           },
           'content-manager.explorer.read': {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: {
               'admin::is-creator': false,
               'admin::has-same-role-as-creator': false,
@@ -322,12 +326,14 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       const expected = {
         address: {
           'content-manager.explorer.create': {
-            fields: {
-              postal_coder: false,
-              categories: false,
-              cover: true,
-              images: false,
-              city: false,
+            properties: {
+              fields: {
+                postal_coder: false,
+                categories: false,
+                cover: true,
+                images: false,
+                city: false,
+              },
             },
             conditions: {
               'admin::is-creator': true,
@@ -335,7 +341,9 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             },
           },
           'content-manager.explorer.read': {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: {
               'admin::is-creator': false,
               'admin::has-same-role-as-creator': false,
@@ -344,16 +352,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
         restaurant: {
           'content-manager.explorer.create': {
-            fields: {
-              f1: false,
-              f2: false,
-              services: { name: false, media: false, closing: { name: { test: false } } },
-              dz: false,
-              relation: true,
-            },
-            locales: {
-              en: true,
-              fr: false,
+            properties: {
+              fields: {
+                f1: false,
+                f2: false,
+                services: { name: false, media: false, closing: { name: { test: false } } },
+                dz: false,
+                relation: true,
+              },
+              locales: {
+                en: true,
+                fr: false,
+              },
             },
             conditions: {
               'admin::is-creator': false,
@@ -361,9 +371,11 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             },
           },
           'content-manager.explorer.delete': {
-            locales: {
-              en: false,
-              fr: false,
+            properties: {
+              locales: {
+                en: false,
+                fr: false,
+              },
             },
             conditions: {
               'admin::is-creator': false,
@@ -377,14 +389,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         {
           action: 'content-manager.explorer.create',
           subject: 'restaurant',
-          fields: ['relation'],
-          locales: ['en'],
+          properties: {
+            fields: ['relation'],
+            locales: ['en'],
+          },
         },
         {
           action: 'content-manager.explorer.create',
           subject: 'address',
-          fields: ['cover'],
-          locales: ['fr'],
+          properties: {
+            fields: ['cover'],
+            locales: ['fr'],
+          },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -406,8 +422,10 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       };
 
       const expected = {
-        fields: {
-          name: false,
+        properties: {
+          fields: {
+            name: false,
+          },
         },
       };
 
