@@ -14,7 +14,7 @@ const ciEnv = require('ci-info');
 
 const hasYarn = require('./has-yarn');
 
-const { runInstall, runApp, initGit, createInitialGitCommit } = require('./child-process');
+const { runInstall, runApp, initGit } = require('./child-process');
 
 /**
  * @param  {} repo The path to repo
@@ -210,7 +210,6 @@ module.exports = async function buildStarter(projectArgs, program) {
 
   if (!ciEnv.isCI) {
     await initGit(rootPath);
-    await createInitialGitCommit(rootPath);
   }
 
   console.log(chalk.green('Starting the app'));

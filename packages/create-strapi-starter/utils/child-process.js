@@ -33,16 +33,14 @@ function runApp(rootPath) {
   }
 }
 
-function initGit(rootPath) {
-  return execa('git', ['init'], {
-    cwd: rootPath,
-  });
-}
-
-async function createInitialGitCommit(rootPath) {
-  await execa(`git`, [`add`, `-A`], { cwd: rootPath });
-
+async function initGit(rootPath) {
   try {
+    await execa('git', ['init'], {
+      cwd: rootPath,
+    });
+
+    await execa(`git`, [`add`, `-A`], { cwd: rootPath });
+
     execSync(`git commit -m "Create Strapi starter project"`, {
       cwd: rootPath,
     });
@@ -55,5 +53,4 @@ module.exports = {
   runInstall,
   runApp,
   initGit,
-  createInitialGitCommit,
 };
