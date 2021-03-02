@@ -75,20 +75,26 @@ function readStarterJson(filePath) {
 function initPackageJson(rootPath, projectName) {
   const packageManager = hasYarn ? 'yarn' : 'npm run';
 
-  fse.writeJson(join(rootPath, 'package.json'), {
-    name: projectName,
-    private: true,
-    version: '0.0.0',
-    scripts: {
-      'dev:backend': `cd backend && ${packageManager} develop`,
-      'dev:frontend': `wait-on http://localhost:1337/admin && cd frontend && ${packageManager} develop --open`,
-      develop: `concurrently "${packageManager} dev:backend" "${packageManager} dev:frontend"`,
+  fse.writeJson(
+    join(rootPath, 'package.json'),
+    {
+      name: projectName,
+      private: true,
+      version: '0.0.0',
+      scripts: {
+        'dev:backend': `cd backend && ${packageManager} develop`,
+        'dev:frontend': `wait-on http://localhost:1337/admin && cd frontend && ${packageManager} develop --open`,
+        develop: `concurrently "${packageManager} dev:backend" "${packageManager} dev:frontend"`,
+      },
+      dependencies: {
+        concurrently: '6.0.0',
+        'wait-on': '5.2.1',
+      },
     },
-    dependencies: {
-      concurrently: '6.0.0',
-      'wait-on': '5.2.1',
-    },
-  });
+    {
+      spaces: 2,
+    }
+  );
 }
 
 /**
