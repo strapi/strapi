@@ -5,6 +5,8 @@ const { getService } = require('../../../utils');
 
 const BATCH_SIZE = 1000;
 
+// Common functions
+
 const shouldBeProcesseed = processedLocaleCodes => entry => {
   return (
     entry.localizations.length > 1 &&
@@ -12,29 +14,63 @@ const shouldBeProcesseed = processedLocaleCodes => entry => {
   );
 };
 
-const getUpdates = ({ entriesToProcess, formatUpdate, locale, attributesToMigrate }) => {
-  return entriesToProcess.reduce((updates, entry) => {
+const getUpdatesInfo = ({ entriesToProcess, locale, attributesToMigrate }) => {
+  const updates = [];
+  for (const entry of entriesToProcess) {
     const attributesValues = pick(attributesToMigrate, entry);
     const entriesIdsToUpdate = entry.localizations
       .filter(related => related.locale !== locale.code)
       .map(prop('id'));
-
-    return updates.concat(formatUpdate(entriesIdsToUpdate, attributesValues));
-  }, []);
+    updates.push({ entriesIdsToUpdate, attributesValues });
+  }
+  return updates;
 };
 
-const formatMongooseUpdate = (entriesIdsToUpdate, attributesValues) => ({
-  updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
-});
+// Bookshelf
 
-const formatBookshelfUpdate = (entriesIdsToUpdate, attributesValues) =>
-  entriesIdsToUpdate.map(id => ({ id, ...attributesValues }));
+const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
 
-const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales }) => {
-  // Create tmp table with all updates to make (faster than making updates one by one)
-  const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
+const batchInsertInTmpTable = async (updatesInfo, trx) => {
+  const tmpEntries = [];
+  updatesInfo.forEach(({ entriesIdsToUpdate, attributesValues }) => {
+    entriesIdsToUpdate.forEach(id => {
+      tmpEntries.push({ id, ...attributesValues });
+    });
+  });
+  await trx.batchInsert(TMP_TABLE_NAME, tmpEntries, 100);
+};
+
+const batchUpdate = async (updatesInfo, trx, model) => {
+  const promises = updatesInfo.map(({ entriesIdsToUpdate, attributesValues }) =>
+    trx
+      .from(model.collectionName)
+      .update(attributesValues)
+      .whereIn('id', entriesIdsToUpdate)
+  );
+  await Promise.all(promises);
+};
+
+const updateFromTmpTable = async ({ model, trx, attributesToMigrate }) => {
+  const collectionName = model.collectionName;
+  let bindings = [];
+  if (model.client === 'pg') {
+    const substitutes = attributesToMigrate.map(() => '?? = ??.??').join(',');
+    bindings.push(collectionName);
+    attributesToMigrate.forEach(attr => bindings.push(attr, TMP_TABLE_NAME, attr));
+    bindings.push(TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
+
+    await trx.raw(`UPDATE ?? SET ${substitutes} FROM ?? WHERE ??.id = ??.id;`, bindings);
+  } else if (model.client === 'mysql') {
+    const substitutes = attributesToMigrate.map(() => '??.?? = ??.??').join(',');
+    bindings.push(collectionName, TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
+    attributesToMigrate.forEach(attr => bindings.push(collectionName, attr, TMP_TABLE_NAME, attr));
+
+    await trx.raw(`UPDATE ?? JOIN ?? ON ??.id = ??.id SET ${substitutes};`, bindings);
+  }
+};
+
+const createTmpTable = async ({ ORM, attributesToMigrate, model }) => {
   const columnsToCopy = ['id', ...attributesToMigrate];
-
   await ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
   await ORM.knex.raw(`CREATE TABLE ?? AS ??`, [
     TMP_TABLE_NAME,
@@ -43,16 +79,25 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
       .from(model.collectionName)
       .whereRaw('?', 0),
   ]);
+};
 
-  // Transaction is started after DDL because of MySQL (https://dev.mysql.com/doc/refman/8.0/en/implicit-commit.html)
+const deleteTmpTable = ({ ORM }) => ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
+
+const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales }) => {
+  // The migration is custom for pg and mysql for better perfomance
+  const isPgOrMysql = ['pg', 'mysql'].includes(model.client);
+
+  if (isPgOrMysql) {
+    await createTmpTable({ ORM, attributesToMigrate, model });
+  }
+
   const trx = await ORM.knex.transaction();
-
   try {
     const processedLocaleCodes = [];
     for (const locale of locales) {
       let offset = 0;
-      let batchCount = BATCH_SIZE;
-      while (batchCount === BATCH_SIZE) {
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
         const batch = await trx
           .select([...attributesToMigrate, 'locale', 'localizations'])
           .from(model.collectionName)
@@ -61,6 +106,8 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
           .offset(offset)
           .limit(BATCH_SIZE);
 
+        offset += BATCH_SIZE;
+
         // postgres automatically parses JSON, but not sqlite nor mysql
         batch.forEach(entry => {
           if (typeof entry.localizations === 'string') {
@@ -68,48 +115,38 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
           }
         });
 
-        batchCount = batch.length;
         const entriesToProcess = batch.filter(shouldBeProcesseed(processedLocaleCodes));
+        const updatesInfo = getUpdatesInfo({ entriesToProcess, locale, attributesToMigrate });
 
-        const tmpEntries = getUpdates({
-          entriesToProcess,
-          formatUpdate: formatBookshelfUpdate,
-          locale,
-          attributesToMigrate,
-        });
+        if (isPgOrMysql) {
+          await batchInsertInTmpTable(updatesInfo, trx);
+        } else {
+          await batchUpdate(updatesInfo, trx, model);
+        }
 
-        await trx.batchInsert(TMP_TABLE_NAME, tmpEntries, 100);
-
-        offset += BATCH_SIZE;
+        if (batch.length < BATCH_SIZE) {
+          break;
+        }
       }
       processedLocaleCodes.push(locale.code);
     }
 
-    const getSubquery = columnName =>
-      trx
-        .select(columnName)
-        .from(TMP_TABLE_NAME)
-        .where(`${TMP_TABLE_NAME}.id`, trx.raw('??', [`${model.collectionName}.id`]));
+    if (isPgOrMysql) {
+      await updateFromTmpTable({ model, trx, attributesToMigrate });
+    }
 
-    const updates = attributesToMigrate.reduce(
-      (updates, columnName) => ({ ...updates, [columnName]: getSubquery(columnName) }),
-      {}
-    );
-
-    await trx
-      .from(model.collectionName)
-      .update(updates)
-      .whereIn('id', qb => qb.select(['id']).from(TMP_TABLE_NAME));
-
-    // Transaction is ended before DDL
     await trx.commit();
 
-    await ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
+    if (isPgOrMysql) {
+      await deleteTmpTable({ ORM });
+    }
   } catch (e) {
     await trx.rollback();
     throw e;
   }
 };
+
+// Mongoose
 
 const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
   const processedLocaleCodes = [];
@@ -134,12 +171,10 @@ const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
 
       const entriesToProcess = batch.filter(shouldBeProcesseed);
 
-      const updates = getUpdates({
-        entriesToProcess,
-        formatUpdate: formatMongooseUpdate,
-        locale,
-        attributesToMigrate,
-      });
+      const updatesInfo = getUpdatesInfo({ entriesToProcess, locale, attributesToMigrate });
+      const updates = updatesInfo.map(({ entriesIdsToUpdate, attributesValues }) => ({
+        updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
+      }));
 
       await model.bulkWrite(updates);
     }
@@ -174,6 +209,7 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
   } else if (model.orm === 'mongoose') {
     await migrateForMongoose({ model, attributesToMigrate, locales });
   }
+  throw new Error('Done');
 };
 
 const before = () => {};
