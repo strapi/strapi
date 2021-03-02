@@ -8,7 +8,7 @@ const chalk = require('chalk');
 const tar = require('tar');
 
 const generateNewApp = require('strapi-generate-new');
-const GitUrlParse = require('git-url-parse');
+const parseGitUrl = require('git-url-parse');
 const ora = require('ora');
 const ciEnv = require('ci-info');
 
@@ -17,26 +17,48 @@ const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit, createInitialGitCommit } = require('./child-process');
 
 /**
+ * @param  {} repo The path to repo
+ */
+async function getDefaultBranch(repo) {
+  console.log(repo);
+  try {
+    const response = await fetch(`https://api.github.com/repos/${repo}`);
+
+    if (!response.ok) {
+      throw Error(`Could not fetch the default branch`);
+    }
+
+    const { default_branch } = await response.json();
+
+    return default_branch;
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+/**
  * @param  {string} starterUrl Github url to starter project
  */
-async function getRepoInfo(starterUrl) {
-  const repoInfo = GitUrlParse(starterUrl);
-  const { name, full_name, ref } = repoInfo;
+async function getRepoInfo(starter) {
+  try {
+    const repoInfo = await parseGitUrl(starter);
+    const { name, full_name, ref, protocols } = repoInfo;
 
-  const response = await fetch(`https://api.github.com/repos/${full_name}`);
+    if (protocols.length === 0) {
+      throw Error('Could not detect an acceptable URL');
+    }
 
-  if (!response.ok) {
-    throw Error(`Could not fetch the default branch`);
+    return {
+      name,
+      full_name,
+      ref,
+    };
+  } catch (err) {
+    // If it's not a GitHub URL, then assume it's a shorthand for an official template
+    return {
+      full_name: `strapi/strapi-starter-${starter}`,
+    };
   }
-
-  const { default_branch } = await response.json();
-
-  return {
-    name,
-    full_name,
-    ref,
-    default_branch,
-  };
 }
 
 /**
@@ -44,7 +66,8 @@ async function getRepoInfo(starterUrl) {
  * @param  {string} tmpDir Path to temporary directory
  */
 async function downloadGithubRepo(starterUrl, tmpDir) {
-  const { name, full_name, ref, default_branch } = await getRepoInfo(starterUrl);
+  const { name, full_name, ref } = await getRepoInfo(starterUrl);
+  const default_branch = await getDefaultBranch(full_name);
 
   const branch = ref ? ref : default_branch;
 
