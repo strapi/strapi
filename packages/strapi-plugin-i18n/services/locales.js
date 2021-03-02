@@ -1,6 +1,7 @@
 'use strict';
 
 const { isNil } = require('lodash/fp');
+const { DEFAULT_LOCALE } = require('../constants');
 
 const { getCoreStore } = require('../utils');
 
@@ -35,6 +36,14 @@ const setIsDefault = async locales => {
   }
 };
 
+const initDefaultLocale = async () => {
+  const existingLocalesNb = await strapi.query('locale', 'i18n').count();
+  if (existingLocalesNb === 0) {
+    await create(DEFAULT_LOCALE);
+    await setDefaultLocale({ code: DEFAULT_LOCALE.code });
+  }
+};
+
 module.exports = {
   find,
   findById,
@@ -45,4 +54,5 @@ module.exports = {
   getDefaultLocale,
   setIsDefault,
   delete: deleteFn,
+  initDefaultLocale,
 };

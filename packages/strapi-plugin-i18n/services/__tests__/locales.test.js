@@ -131,4 +131,51 @@ describe('Locales', () => {
       expect(deletedLocale).toMatchObject(locale);
     });
   });
+
+  describe('initDefaultLocale', () => {
+    test('create default local if none exists', async () => {
+      const count = jest.fn(() => Promise.resolve(0));
+      const create = jest.fn(() => Promise.resolve());
+      const set = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query: () => ({
+          count,
+          create,
+        }),
+        store: () => ({
+          set,
+        }),
+      };
+
+      await localesService.initDefaultLocale();
+      expect(count).toHaveBeenCalledWith();
+      expect(create).toHaveBeenCalledWith({
+        name: 'English',
+        code: 'en',
+      });
+      expect(set).toHaveBeenCalledWith({ key: 'default_locale', value: 'en' });
+    });
+
+    test('does not create default local if one already exists', async () => {
+      const count = jest.fn(() => Promise.resolve(1));
+      const create = jest.fn(() => Promise.resolve());
+      const set = jest.fn(() => Promise.resolve());
+
+      global.strapi = {
+        query: () => ({
+          count,
+          create,
+        }),
+        store: () => ({
+          set,
+        }),
+      };
+
+      await localesService.initDefaultLocale();
+      expect(count).toHaveBeenCalledWith();
+      expect(create).not.toHaveBeenCalled();
+      expect(set).not.toHaveBeenCalled();
+    });
+  });
 });
