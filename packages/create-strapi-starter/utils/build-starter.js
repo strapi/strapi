@@ -1,6 +1,6 @@
 'use strict';
 
-const { resolve, join } = require('path');
+const { resolve, join, basename } = require('path');
 const os = require('os');
 const fse = require('fs-extra');
 const fetch = require('node-fetch');
@@ -144,6 +144,7 @@ module.exports = async function buildStarter(projectArgs, program) {
 
   // Project directory
   const rootPath = resolve(projectName);
+  const projectBasename = basename(rootPath);
 
   // Copy the downloaded frontend folder to the project folder
   await fse.copy(join(tmpDir, 'frontend'), join(rootPath, 'frontend'), {
@@ -169,10 +170,10 @@ module.exports = async function buildStarter(projectArgs, program) {
   };
 
   // Create strapi app using the template
-  await generateNewApp(join(projectName, 'backend'), generateStrapiAppOptions);
+  await generateNewApp(join(rootPath, 'backend'), generateStrapiAppOptions);
 
   // Setup monorepo
-  initPackageJson(rootPath, projectName);
+  initPackageJson(rootPath, projectBasename);
 
   // Add gitignore
   try {
