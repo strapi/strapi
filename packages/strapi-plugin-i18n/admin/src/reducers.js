@@ -7,9 +7,8 @@ import {
   UPDATE_LOCALE,
 } from './constants';
 
-const initialState = {
+export const initialState = {
   isLoading: false,
-  isAdding: false,
   locales: [],
 };
 

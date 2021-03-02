@@ -37,7 +37,7 @@ const useAddLocale = () => {
 
   const persistLocale = async locale => {
     setLoading(true);
-    
+
     const newLocale = await addLocale(locale);
 
     dispatch({ type: ADD_LOCALE, newLocale });
