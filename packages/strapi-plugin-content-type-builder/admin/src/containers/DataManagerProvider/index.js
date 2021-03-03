@@ -33,14 +33,7 @@ import {
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const {
-    autoReload,
-    currentEnvironment,
-    emitEvent,
-    fetchUserPermissions,
-    formatMessage,
-    menu,
-  } = useGlobalContext();
+  const { autoReload, emitEvent, fetchUserPermissions, formatMessage, menu } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -59,7 +52,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
-  const isInDevelopmentMode = currentEnvironment === 'development' && autoReload;
+  const isInDevelopmentMode = autoReload;
 
   const isInContentTypeView = contentTypeMatch !== null;
   const firstKeyToMainSchema = isInContentTypeView ? 'contentType' : 'component';
@@ -124,13 +117,13 @@ const DataManagerProvider = ({ allIcons, children }) => {
   }, [isLoading, pathname, currentUid]);
 
   useEffect(() => {
-    if (currentEnvironment === 'development' && !autoReload) {
+    if (!autoReload) {
       strapi.notification.toggle({
         type: 'info',
         message: { id: getTrad('notification.info.autoreaload-disable') },
       });
     }
-  }, [autoReload, currentEnvironment]);
+  }, [autoReload]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
