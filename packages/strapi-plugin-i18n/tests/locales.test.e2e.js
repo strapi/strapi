@@ -26,6 +26,20 @@ describe('CRUD locales', () => {
     await strapi.destroy();
   });
 
+  describe('Default locale', () => {
+    test('Default locale is already created', async () => {
+      let res = await rq({
+        url: '/i18n/locales',
+        method: 'GET',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toHaveLength(1);
+      expect(res.body[0].isDefault).toBe(true);
+      data.locales.push(res.body[0]);
+    });
+  });
+
   describe('Creation', () => {
     test('Can create a locale', async () => {
       const locale = {
@@ -113,11 +127,12 @@ describe('CRUD locales', () => {
       let res = await rq({
         url: '/i18n/locales',
         method: 'POST',
-        body: { code: 'en', name: 'random', isDefault: true },
+        body: { code: 'bas', name: 'random', isDefault: true },
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body.isDefault).toBe(true);
+      data.locales[0].isDefault = false;
 
       res = await rq({
         url: '/i18n/locales',
@@ -133,7 +148,7 @@ describe('CRUD locales', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      const enLocale = res.body.find(locale => locale.code === 'en');
+      const enLocale = res.body.find(locale => locale.code === 'bas');
       const enUsLocale = res.body.find(locale => locale.code === 'en-US');
       expect(enLocale.isDefault).toBe(false);
       expect(enUsLocale.isDefault).toBe(true);
