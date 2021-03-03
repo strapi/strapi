@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { request } from 'strapi-helper-plugin';
 import { useDispatch } from 'react-redux';
 import { getTrad } from '../../utils';
-import { UPDATE_LOCALE } from '../../constants';
+import { UPDATE_LOCALE } from '../constants';
 
 const editLocale = async (id, payload) => {
   try {
@@ -16,14 +16,14 @@ const editLocale = async (id, payload) => {
       message: { id: getTrad('Settings.locales.modal.edit.success') },
     });
 
-    return data
+    return data;
   } catch {
     strapi.notification.toggle({
       type: 'warning',
       message: { id: 'notification.error' },
     });
 
-    return null
+    return null;
   }
 };
 
@@ -33,7 +33,7 @@ const useEditLocale = () => {
 
   const modifyLocale = async (id, payload) => {
     setLoading(true);
-    
+
     const editedLocale = await editLocale(id, payload);
 
     dispatch({ type: UPDATE_LOCALE, editedLocale });

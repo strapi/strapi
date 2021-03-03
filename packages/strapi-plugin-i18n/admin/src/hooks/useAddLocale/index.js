@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { request } from 'strapi-helper-plugin';
 import { useDispatch } from 'react-redux';
 import { getTrad } from '../../utils';
-import { ADD_LOCALE } from '../../constants';
+import { ADD_LOCALE } from '../constants';
 
 const addLocale = async ({ code, name, isDefault }) => {
   try {

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { request } from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
-import { LOAD_LOCALES, RESOLVE_LOCALES } from '../../constants';
+import { RESOLVE_LOCALES } from '../constants';
 
 const fetchLocalesList = async () => {
   try {
@@ -26,7 +26,6 @@ const useLocales = () => {
   const isLoading = useSelector(state => state.get('i18n_locales').isLoading);
 
   useEffect(() => {
-    dispatch({ type: LOAD_LOCALES });
     fetchLocalesList().then(locales => dispatch({ type: RESOLVE_LOCALES, locales }));
   }, [dispatch]);
 

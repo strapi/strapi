@@ -12,7 +12,7 @@ import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import LocaleSettingsPage from '..';
 import themes from '../../../../../../strapi-admin/admin/src/themes';
-import i18nReducers, { initialState } from '../../../reducers';
+import i18nReducers, { initialState } from '../../../hooks/reducers';
 
 const TestWrapper = ({ children }) => {
   const queryClient = new QueryClient();

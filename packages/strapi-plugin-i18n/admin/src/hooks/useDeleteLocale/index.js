@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { request } from 'strapi-helper-plugin';
 import { useDispatch } from 'react-redux';
 import { getTrad } from '../../utils';
-import { DELETE_LOCALE } from '../../constants';
+import { DELETE_LOCALE } from '../constants';
 
 const deleteLocale = async id => {
   try {
@@ -32,7 +32,7 @@ const useDeleteLocale = () => {
 
   const removeLocale = async id => {
     setLoading(true);
-    
+
     await deleteLocale(id);
 
     dispatch({ type: DELETE_LOCALE, id });
