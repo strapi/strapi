@@ -12,6 +12,8 @@ import CheckboxConfirmation from './components/CheckboxConfirmation';
 import SettingsPage from './containers/SettingsPage';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
+import Initializer from './containers/Initializer';
+import i18nReducers from './hooks/reducers';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -24,7 +26,7 @@ export default strapi => {
     description: pluginDescription,
     icon: pluginPkg.strapi.icon,
     id: pluginId,
-    isReady: true,
+    isReady: false,
     isRequired: pluginPkg.strapi.required || false,
     mainComponent: null,
     name: pluginPkg.strapi.name,
@@ -47,6 +49,7 @@ export default strapi => {
       },
     },
     trads,
+    reducers: i18nReducers,
     boot(app) {
       const ctbPlugin = app.getPlugin('content-type-builder');
 
@@ -122,6 +125,7 @@ export default strapi => {
         });
       }
     },
+    initializer: Initializer,
   };
 
   return strapi.registerPlugin(plugin);

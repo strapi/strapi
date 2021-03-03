@@ -1,5 +1,7 @@
-import { useQuery } from 'react-query';
+import { useEffect } from 'react';
 import { request } from 'strapi-helper-plugin';
+import { useSelector, useDispatch } from 'react-redux';
+import { RESOLVE_LOCALES } from '../constants';
 
 const fetchLocalesList = async () => {
   try {
@@ -19,9 +21,15 @@ const fetchLocalesList = async () => {
 };
 
 const useLocales = () => {
-  const { isLoading, data, refetch } = useQuery('locales', fetchLocalesList);
+  const dispatch = useDispatch();
+  const locales = useSelector(state => state.get('i18n_locales').locales);
+  const isLoading = useSelector(state => state.get('i18n_locales').isLoading);
 
-  return { locales: data, isLoading, refetch };
+  useEffect(() => {
+    fetchLocalesList().then(locales => dispatch({ type: RESOLVE_LOCALES, locales }));
+  }, [dispatch]);
+
+  return { locales, isLoading };
 };
 
 export default useLocales;

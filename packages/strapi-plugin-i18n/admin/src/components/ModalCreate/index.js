@@ -12,7 +12,7 @@ import useAddLocale from '../../hooks/useAddLocale';
 import BaseForm from './BaseForm';
 import AdvancedForm from './AdvancedForm';
 
-const ModalCreate = ({ onClose, isOpened, onSuccess }) => {
+const ModalCreate = ({ onClose, isOpened }) => {
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
@@ -50,7 +50,6 @@ const ModalCreate = ({ onClose, isOpened, onSuccess }) => {
             name: values.displayName,
             isDefault: values.isDefault,
           }).then(() => {
-            onSuccess();
             onClose();
           })}
         validationSchema={localeFormSchema}
@@ -100,7 +99,6 @@ const ModalCreate = ({ onClose, isOpened, onSuccess }) => {
 ModalCreate.propTypes = {
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool.isRequired,
-  onSuccess: PropTypes.func.isRequired,
 };
 
 export default ModalCreate;
