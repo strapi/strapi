@@ -1,6 +1,6 @@
 {
   "name": "create-strapi-starter",
-  "version": "3.4.6",
+  "version": "3.5.3",
   "description": "Generate a new Strapi application.",
   "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://strapi.io",
@@ -15,10 +15,6 @@
   "bin": {
     "create-strapi-starter": "./index.js"
   },
-  "files": [
-    "create-strapi-starter.js",
-    "index.js"
-  ],
   "dependencies": {
     "chalk": "4.1.0",
     "ci-info": "3.1.1",

@@ -1,4 +1,4 @@
-# Create strapi app
+# Create strapi starter
 
 This package includes the `create-strapi-starter` CLI to simplify creating a Strapi project using starters and templates
 
