@@ -111,16 +111,16 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         source,
         params
       );
+
       const prefix = `${type}${name ? `_${name}` : ''}`;
+
       const where = {
         key: `${prefix}_${key}`,
         environment,
         tag,
       };
-      const data = await db.query('core_store').findOne(where);
-      if (data) {
-        await db.query('core_store').delete({ id: data.id });
-      }
+
+      await db.query('core_store').delete(where);
     }
 
     return {

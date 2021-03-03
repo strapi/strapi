@@ -105,7 +105,7 @@ describe('Core Store', () => {
     });
     const rest = await store.delete(data);
     expect(fakeEmptyDB.query).toHaveBeenCalledTimes(1);
-    expect(fakeEmptyDBQuery.findOne).toHaveBeenCalledWith(where);
+    expect(fakeEmptyDBQuery.delete).toHaveBeenCalledWith(where);
     expect(rest).toEqual(undefined);
   });
 
@@ -129,9 +129,8 @@ describe('Core Store', () => {
       name: 'testName',
     });
     const rest = await store.delete(data);
-    expect(fakeNotEmptyDB.query).toHaveBeenCalledTimes(2);
-    expect(fakeNotEmptyDBQuery.findOne).toHaveBeenCalledWith(where);
-    expect(fakeNotEmptyDBQuery.delete).toHaveBeenCalledWith({ id: queryRes.id });
+    expect(fakeNotEmptyDB.query).toHaveBeenCalledTimes(1);
+    expect(fakeNotEmptyDBQuery.delete).toHaveBeenCalledWith(where);
     expect(rest).toEqual(undefined);
   });
 });
