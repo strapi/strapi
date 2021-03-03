@@ -10,10 +10,10 @@ const schema = {
     .email(translatedErrors.email)
     .lowercase()
     .required(translatedErrors.required)
-    .test('topLevelDomainValidation', translatedErrors.email, function(value) {
-      let parseDomainResult = parseDomain(value);
-      
-return parseDomainResult.type === ParseResultType.Listed;
+    .test('topLevelDomainValidation', 'Settings.users.validations.email-domain', function(value) {
+      let parseDomainResult = parseDomain(value.split('@')[1]);
+
+      return parseDomainResult.type === ParseResultType.Listed;
     }),
   username: yup.string().nullable(),
   password: yup

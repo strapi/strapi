@@ -163,6 +163,7 @@
   "Settings.webhooks.trigger.test": "Test-trigger",
   "Settings.webhooks.trigger.title": "Save before Trigger",
   "Settings.webhooks.value": "Value",
+  "Settings.users.validations.email-domain": "The email domain is not valid",
   "Username": "Username",
   "Users": "Users",
   "Users & Permissions": "Users & Permissions",
