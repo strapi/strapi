@@ -42,9 +42,18 @@ async function getRepoInfo(starter) {
       ref,
     };
   } catch (err) {
-    // If it's not a GitHub URL, then assume it's a shorthand for an official template
+    // If it's not a GitHub URL, then assume it's a shorthand
+    let full_name;
+    // Determine if it is another organization
+    if (starter.includes('/')) {
+      const [org, project] = starter.split('/');
+      full_name = `${org}/strapi-starter-${project}`;
+    } else {
+      full_name = `strapi/strapi-starter-${starter}`;
+    }
+
     return {
-      full_name: `strapi/strapi-starter-${starter}`,
+      full_name,
     };
   }
 }
