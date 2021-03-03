@@ -12,6 +12,7 @@ describe('i18n reducer', () => {
 
     expect(actual).toEqual(expected);
   });
+
   it('resolves a list of locales when triggering RESOLVE_LOCALES', () => {
     const action = {
       type: RESOLVE_LOCALES,
