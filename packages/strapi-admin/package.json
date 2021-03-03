@@ -70,7 +70,6 @@
     "mini-css-extract-plugin": "^0.6.0",
     "moment": "^2.29.1",
     "p-map": "4.0.0",
-    "parse-domain": "3.0.3",
     "passport-local": "1.0.0",
     "prop-types": "^15.7.2",
     "qs": "6.9.4",
