@@ -2862,7 +2862,7 @@
     "@sentry/types" "6.2.0"
     tslib "^1.9.3"
 
-"@sentry/node@6.2.0", "@sentry/node@^6.0.3":
+"@sentry/node@6.2.0":
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/@sentry/node/-/node-6.2.0.tgz#4c1860822a4a73d24242e5254124bd3bf9028d52"
   integrity sha512-02lXk+56tPA3lWTvNLMGorp77wUVti8wOs+TlYARkJ+N+16dwqEBSBTy3hCDxlxriB+qHchSIS+ovPGi6WNiYA==
@@ -9931,13 +9931,6 @@ homedir-polyfill@^1.0.1:
   integrity sha512-eSmmWE5bZTK2Nou4g0AI3zZ9rswp7GRKoKXS1BLUkvPviOqs4YTN1djQIqrXy9k5gEtdLPy86JjRwsNM9tnDcA==
   dependencies:
     parse-passwd "^1.0.0"
-
-hosted-git-info@3.0.7:
-  version "3.0.7"
-  resolved "https://registry.yarnpkg.com/hosted-git-info/-/hosted-git-info-3.0.7.tgz#a30727385ea85acfcee94e0aad9e368c792e036c"
-  integrity sha512-fWqc0IcuXs+BmE9orLDyVykAG9GJtGLGuZAAqgcckPgv5xad4AcXGIv8galtQvlwutxSlaMcdw7BUtq2EIvqCQ==
-  dependencies:
-    lru-cache "^6.0.0"
 
 hosted-git-info@3.0.8, hosted-git-info@^3.0.4, hosted-git-info@^3.0.6, hosted-git-info@^3.0.7:
   version "3.0.8"
@@ -18635,24 +18628,6 @@ stealthy-require@^1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/stealthy-require/-/stealthy-require-1.1.1.tgz#35b09875b4ff49f26a777e509b3090a3226bf24b"
   integrity sha1-NbCYdbT/SfJqd35QmzCQoyJr8ks=
-
-strapi-generate-new@3.4.6:
-  version "3.4.6"
-  resolved "https://registry.yarnpkg.com/strapi-generate-new/-/strapi-generate-new-3.4.6.tgz#e341a8728cad9ef1a4218c1a2354ce9c5a717b5f"
-  integrity sha512-/1Pm294YEfmAGGD3/lf8vBCkSQTZql20yND3qwICX7ayrXHS7v+ihdms+3eL1yVyvZLRpRWuTC9a+/UpJkEHsg==
-  dependencies:
-    "@sentry/node" "^6.0.3"
-    chalk "^2.4.2"
-    execa "^1.0.0"
-    fs-extra "^9.0.1"
-    hosted-git-info "3.0.7"
-    inquirer "^6.3.1"
-    lodash "4.17.20"
-    node-fetch "^2.6.1"
-    node-machine-id "^1.1.10"
-    ora "^3.4.0"
-    tar "6.1.0"
-    uuid "^3.3.2"
 
 stream-browserify@^2.0.1:
   version "2.0.2"
