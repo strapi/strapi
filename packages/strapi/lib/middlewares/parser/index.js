@@ -51,7 +51,7 @@ module.exports = strapi => {
           })(ctx, next);
           return res;
         } catch (e) {
-          if (e.message.includes('maxFileSize exceeded')) {
+          if ((e || {}).message && e.message.includes('maxFileSize exceeded')) {
             throw strapi.errors.entityTooLarge('FileTooBig', {
               errors: [
                 {
