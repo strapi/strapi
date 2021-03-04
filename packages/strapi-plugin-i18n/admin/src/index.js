@@ -14,6 +14,7 @@ import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import Initializer from './containers/Initializer';
 import i18nReducers from './hooks/reducers';
+import LocalePicker from './components/LocalePicker'
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -52,6 +53,14 @@ export default strapi => {
     reducers: i18nReducers,
     boot(app) {
       const ctbPlugin = app.getPlugin('content-type-builder');
+      const cmPlugin = app.getPlugin('content-manager');
+
+      if (cmPlugin) {
+        cmPlugin.injectComponent('listView', 'actions', {
+          name: 'i18n-locale-filter',
+          Component: LocalePicker,
+        });
+      }
 
       if (ctbPlugin) {
         const ctbFormsAPI = ctbPlugin.apis.forms;
