@@ -1,5 +1,6 @@
 'use strict';
 
+const chalk = require('chalk');
 const commander = require('commander');
 const packageJson = require('./package.json');
 const buildStarter = require('./utils/build-starter');
@@ -23,15 +24,36 @@ program
   .option('--dbauth <dbauth>', 'Authentication Database')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
-  .description('create a new strapi starter application')
+  .description('Create a new strapi starter application')
   .action((directory, starterUrl, program) => {
     const projectArgs = { projectName: directory, starterUrl };
 
     buildStarter(projectArgs, program);
   });
 
-// Show help if not enough arguments are present
-if (process.argv.length < 4) {
+// Get all possible options
+const options = [];
+program.options.forEach(option => {
+  options.push(option.long);
+  if (option.short) {
+    options.push(option.short);
+  }
+});
+
+// Filter options out of argument check
+const args = process.argv.slice(2);
+const filteredArgs = args.filter(arg => !options.includes(arg));
+
+// Check correct number of arguments
+if (filteredArgs.length !== 2) {
+  console.log('---');
+  console.log(`${chalk.red('error')}: You provided ${chalk.red(filteredArgs.length)} argument(s)`);
+  console.log(`A starter requires ${chalk.green('2')} arguments:`);
+  console.log(`1. ${chalk.yellow('The directory name for your project (i.e. my-project)')}`);
+  console.log(
+    `2. ${chalk.yellow('The GitHub url or shortcut (i.e. gatsby-corporate) for the starter')}`
+  );
+  console.log('---');
   program.help();
 }
 
