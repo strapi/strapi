@@ -117,7 +117,7 @@ describe('i18n | utils ', () => {
         attributes: {
           cover: {
             type: 'media',
-            pluginOptions: { pluginA: { ok: true } },
+            pluginOptions: { pluginA: { ok: true }, i18n: { localized: true } },
           },
           name: {
             type: 'text',
