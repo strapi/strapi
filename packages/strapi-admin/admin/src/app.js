@@ -240,8 +240,3 @@ if (NODE_ENV !== 'test') {
 
 // @Pierre Burgy exporting dispatch for the notifications...
 export { dispatch };
-
-// TODO remove this for the new Cypress tests
-if (window.Cypress) {
-  window.__store__ = Object.assign(window.__store__ || {}, { store });
-}

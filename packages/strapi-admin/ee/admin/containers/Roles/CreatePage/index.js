@@ -31,11 +31,7 @@ const CreatePage = () => {
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
   const id = get(params, 'params.id', null);
-  const {
-    isLoading: isLayoutLoading,
-    // TODO
-    // data: permissionsLayout
-  } = useFetchPermissionsLayout();
+  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
   const headerActions = (handleSubmit, handleReset) => [
@@ -198,6 +194,7 @@ const CreatePage = () => {
                     isFormDisabled={false}
                     ref={permissionsRef}
                     permissions={rolePermissions}
+                    layout={permissionsLayout}
                   />
                 </Padded>
               )}
