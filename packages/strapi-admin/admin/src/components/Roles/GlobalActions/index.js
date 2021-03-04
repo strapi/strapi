@@ -22,7 +22,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
   }, [modifiedData, displayedActions, kind]);
 
   return (
-    <Wrapper>
+    <Wrapper disabled={isFormDisabled}>
       <Flex>
         {displayedActions.map(({ label, actionId }) => {
           return (
