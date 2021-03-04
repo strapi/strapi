@@ -105,7 +105,7 @@ const updatePermissions = yup
             action: yup
               .string()
               .required()
-              .test('action-validity', 'Invalid action ID submitted at ${path}', function(
+              .test('action-validity', 'action is not an existing permission action', function(
                 actionId
               ) {
                 // If the action field is Nil, ignore the test and let the required check handle the error
@@ -141,19 +141,30 @@ const updatePermissions = yup
                 properties
               ) {
                 const action = getActionFromProvider(this.options.parent.action);
+                const hasNoProperties = isEmpty(properties) || isNil(properties);
 
                 if (!has('options.applyToProperties', action)) {
-                  return isEmpty(properties);
+                  return hasNoProperties;
                 }
 
-                return xor(Object.keys(properties), action.options.applyToProperties).length === 0;
+                const { applyToProperties } = action.options;
+
+                if (!isArray(applyToProperties)) {
+                  return hasNoProperties;
+                }
+
+                if (hasNoProperties) {
+                  return applyToProperties.length === 0;
+                }
+
+                return xor(Object.keys(properties), applyToProperties).length === 0;
               })
               .test('fields-property', 'Invalid fields property at ${path}', async function(
                 properties = {}
               ) {
                 const action = getActionFromProvider(this.options.parent.action);
 
-                if (!action) {
+                if (!action || !properties) {
                   return true;
                 }
 

@@ -16,8 +16,7 @@ const actionFields = [
 
 const defaultAction = {
   options: {
-    fieldsRestriction: true,
-    applyToProperties: undefined,
+    applyToProperties: null,
   },
 };
 

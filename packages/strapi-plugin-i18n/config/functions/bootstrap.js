@@ -1,6 +1,6 @@
 'use strict';
 
-const { capitalize } = require('lodash/fp');
+const { capitalize, isArray } = require('lodash/fp');
 const { getService } = require('../../utils');
 
 module.exports = async () => {
@@ -96,8 +96,12 @@ const registerModelsHooks = () => {
 const addLocalesPropertyIfNeeded = action => {
   const {
     section,
-    options: { applyToProperties = [] },
+    options: { applyToProperties },
   } = action;
+
+  if (!isArray(applyToProperties)) {
+    return;
+  }
 
   if (section === 'contentTypes' && !applyToProperties.includes('locales')) {
     action.options.applyToProperties = applyToProperties.concat('locales');
