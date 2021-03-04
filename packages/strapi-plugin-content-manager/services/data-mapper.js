@@ -13,6 +13,7 @@ const dtoFields = [
   'info',
   'options',
   'attributes',
+  'pluginOptions',
 ];
 
 module.exports = {
