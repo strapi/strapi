@@ -6,6 +6,7 @@ import { get, isEmpty } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
+import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
@@ -14,6 +15,7 @@ import {
   CheckPermissions,
   useGlobalContext,
   useUserPermissions,
+  InjectionZone,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
@@ -54,7 +56,6 @@ import makeSelectListView from './selectors';
 import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
 
 /* eslint-disable react/no-array-index-key */
-
 function ListView({
   didDeleteData,
   entriesToDelete,
@@ -392,7 +393,7 @@ function ListView({
           {canRead && (
             <Wrapper>
               <div className="row" style={{ marginBottom: '5px' }}>
-                <div className="col-10">
+                <div className="col-9">
                   <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
                     {isFilterable && (
                       <>
@@ -419,16 +420,23 @@ function ListView({
                     )}
                   </div>
                 </div>
-                <div className="col-2">
-                  <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-                    <FieldPicker
-                      displayedHeaders={displayedHeaders}
-                      items={allAllowedHeaders}
-                      onChange={handleChangeListLabels}
-                      onClickReset={onResetListHeaders}
-                      slug={slug}
-                    />
-                  </CheckPermissions>
+
+                <div className="col-3">
+                  <Flex justifyContent="flex-end">
+                    <Padded right size="sm">
+                      <InjectionZone area={`${pluginId}.listView.actions`} />
+                    </Padded>
+
+                    <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+                      <FieldPicker
+                        displayedHeaders={displayedHeaders}
+                        items={allAllowedHeaders}
+                        onChange={handleChangeListLabels}
+                        onClickReset={onResetListHeaders}
+                        slug={slug}
+                      />
+                    </CheckPermissions>
+                  </Flex>
                 </div>
               </div>
               <div className="row" style={{ paddingTop: '12px' }}>
