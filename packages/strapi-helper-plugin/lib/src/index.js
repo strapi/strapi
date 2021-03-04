@@ -53,6 +53,7 @@ export { default as InputToggle } from './components/InputToggle';
 export { default as InputToggleWithErrors } from './components/InputToggleWithErrors';
 
 export { default as Label } from './components/Label';
+export { default as LabelIconWrapper } from './components/LabelIconWrapper';
 export { default as LeftMenu } from './components/LeftMenu';
 export { default as LeftMenuList } from './components/LeftMenuList';
 export { default as LiLink } from './components/LiLink';

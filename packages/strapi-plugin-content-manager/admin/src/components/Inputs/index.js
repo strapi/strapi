@@ -4,6 +4,7 @@ import { get, omit, take } from 'lodash';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
+import { Globe } from '@buffetjs/icons';
 import { NotAllowedInput, useStrapi } from 'strapi-helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
@@ -206,6 +207,7 @@ function Inputs({
       disabled={shouldDisableField}
       error={errorMessage}
       inputDescription={description}
+      labelIcon={{ title: 'Localized', icon: <Globe title="toto" /> }}
       description={description}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
