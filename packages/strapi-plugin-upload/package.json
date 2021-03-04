@@ -19,7 +19,7 @@
     "@buffetjs/styles": "3.3.4",
     "@buffetjs/utils": "3.3.4",
     "byte-size": "^7.0.0",
-    "cropperjs": "^1.5.6",
+    "cropperjs": "^1.5.11",
     "immer": "^8.0.1",
     "immutable": "^3.8.2",
     "is-valid-domain": "0.0.17",
