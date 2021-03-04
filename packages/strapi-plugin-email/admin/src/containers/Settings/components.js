@@ -3,7 +3,7 @@ import { Button, Text as TextBase } from '@buffetjs/core';
 
 const Text = styled(TextBase)`
   width: 100%;
-  padding: 0 15px 13px 15px;
+  padding: 0 15px 17px 15px;
 `;
 
 const AlignedButton = styled(Button)`

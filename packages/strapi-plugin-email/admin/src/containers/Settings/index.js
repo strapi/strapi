@@ -3,6 +3,7 @@ import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import { Header } from '@buffetjs/custom';
 import { Envelope } from '@buffetjs/icons';
+import { colors } from '@buffetjs/styles';
 import {
   FormBloc,
   request,
@@ -159,6 +160,7 @@ const SettingsPage = () => {
                 value={`strapi-provider-email-${config.provider}`}
               />
             </FormBloc>
+            <BaselineAlignment top size="32px" />
             <FormBloc
               title={formatMessage({ id: getTrad('Settings.form.title.test') })}
               isLoading={showLoader}
@@ -176,7 +178,12 @@ const SettingsPage = () => {
               <AlignedButton
                 color="success"
                 disabled={testSuccess}
-                icon={<Envelope style={{ verticalAlign: 'middle', marginRight: '10px' }} />}
+                icon={(
+                  <Envelope
+                    fill={testSuccess ? colors.button.disabled.color : null}
+                    style={{ verticalAlign: 'middle', marginRight: '10px' }}
+                  />
+                )}
                 isLoading={isTestButtonLoading}
                 style={{ fontWeight: 600 }}
                 type="submit"
