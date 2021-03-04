@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret } from 'strapi-helper-plugin';
@@ -29,7 +29,7 @@ const EllipsisParagraph = styled(Text)`
 
 const LocalePicker = () => {
   const locales = useSelector(state => state.get('i18n_locales').locales);
-  const [selected, setSelected] = React.useState(locales && locales[0]);
+  const [selected, setSelected] = useState(locales && locales[0]);
 
   if (!locales || locales.length === 0) {
     return null;

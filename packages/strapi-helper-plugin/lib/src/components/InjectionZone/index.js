@@ -4,10 +4,14 @@ import useStrapi from '../../hooks/useStrapi';
 
 const InjectionZone = ({ area, ...props }) => {
   const { strapi: globalStrapi } = useStrapi();
-
   const [plugin, page, position] = area.split('.');
-  const cmPlugin = globalStrapi.getPlugin(plugin);
-  const compos = cmPlugin.getInjectedComponents(page, position);
+  const plugin = globalStrapi.getPlugin(plugin);
+
+  if (!plugin) {
+    return null;
+  }
+
+  const compos = plugin.getInjectedComponents(page, position);
 
   return compos.map(compo => <compo.Component key={compo.name} {...props} />);
 };
