@@ -39,7 +39,7 @@ function initPackageJson(rootPath, projectName) {
       scripts: {
         'develop:backend': `${packageManager} backend develop`,
         'develop:frontend': `wait-on http://localhost:1337/admin && ${packageManager} frontend develop --open`,
-        develop: 'npm-run-all -p develop:*',
+        develop: 'FORCE_COLOR=1 npm-run-all -l -p develop:*',
       },
       devDependencies: {
         'npm-run-all': '4.1.5',
