@@ -12,6 +12,7 @@ const dtoFields = [
   'category',
   'info',
   'options',
+  'pluginOptions',
   'attributes',
 ];
 
