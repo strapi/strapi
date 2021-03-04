@@ -14,7 +14,7 @@ import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import Initializer from './containers/Initializer';
 import i18nReducers from './hooks/reducers';
-import LocalePicker from './components/LocalePicker'
+import LocalePicker from './components/LocalePicker';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;

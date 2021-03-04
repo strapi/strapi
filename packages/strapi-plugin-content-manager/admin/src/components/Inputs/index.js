@@ -189,6 +189,7 @@ function Inputs({
         <SelectWrapper
           {...metadatas}
           {...fieldSchema}
+          labelIcon={{ title: 'Localized', icon: <Globe title="toto" /> }}
           isUserAllowedToEditField={isUserAllowedToEditField}
           isUserAllowedToReadField={isUserAllowedToReadField}
           name={keys}
