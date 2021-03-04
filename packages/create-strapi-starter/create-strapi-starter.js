@@ -2,6 +2,10 @@
 
 const chalk = require('chalk');
 const commander = require('commander');
+const PrettyError = require('pretty-error');
+
+const pe = new PrettyError();
+
 const packageJson = require('./package.json');
 const buildStarter = require('./utils/build-starter');
 
@@ -46,14 +50,25 @@ const filteredArgs = args.filter(arg => !options.includes(arg));
 
 // Check correct number of arguments
 if (filteredArgs.length !== 2) {
-  console.log('---');
-  console.log(`${chalk.red('error')}: You provided ${chalk.red(filteredArgs.length)} argument(s)`);
-  console.log(`A starter requires ${chalk.green('2')} arguments:`);
-  console.log(`1. ${chalk.yellow('The directory name for your project (i.e. my-project)')}`);
+  console.log();
   console.log(
-    `2. ${chalk.yellow('The GitHub url or shortcut (i.e. gatsby-corporate) for the starter')}`
+    pe.render(`You provided ${chalk.red(filteredArgs.length)} ${chalk.white('argument(s)')}`)
   );
-  console.log('---');
+  console.log(
+    `\t ${chalk.white('A starter requires')} ${chalk.green('2')} ${chalk.white('arguments')}`
+  );
+  console.log(
+    `\t ${chalk.white('1.')} ${chalk.yellow(
+      'The directory name for your project (i.e. my-project)'
+    )}`
+  );
+  console.log(
+    `\t ${chalk.white('2.')} ${chalk.yellow(
+      'The GitHub url or shortcut (i.e. gatsby-corporate) for the starter'
+    )}`
+  );
+  console.log();
+
   program.help();
 }
 

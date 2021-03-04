@@ -24,6 +24,7 @@
     "git-url-parse": "11.4.4",
     "node-fetch": "2.6.1",
     "ora": "5.3.0",
+    "pretty-error": "3.0.3",
     "strapi-generate-new": "3.5.2",
     "tar": "6.1.0"
   },

@@ -2,6 +2,10 @@
 
 const { execSync } = require('child_process');
 const execa = require('execa');
+const PrettyError = require('pretty-error');
+
+const pe = new PrettyError();
+
 const hasYarn = require('./has-yarn');
 
 /**
@@ -44,7 +48,7 @@ async function initGit(rootPath) {
       cwd: rootPath,
     });
   } catch (err) {
-    console.error(err);
+    console.log(pe.render(err));
   }
 }
 

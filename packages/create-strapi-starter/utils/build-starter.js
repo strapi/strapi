@@ -4,14 +4,16 @@ const { resolve, join, basename } = require('path');
 const os = require('os');
 const fse = require('fs-extra');
 
-const chalk = require('chalk');
-const generateNewApp = require('strapi-generate-new');
-
 const ora = require('ora');
 const ciEnv = require('ci-info');
+const chalk = require('chalk');
+const PrettyError = require('pretty-error');
+
+const pe = new PrettyError();
+
+const generateNewApp = require('strapi-generate-new');
 
 const hasYarn = require('./has-yarn');
-
 const { runInstall, runApp, initGit } = require('./child-process');
 const { getRepoInfo, downloadGithubRepo } = require('./fetch-github');
 
@@ -19,8 +21,13 @@ const { getRepoInfo, downloadGithubRepo } = require('./fetch-github');
  * @param  {string} filePath Path to starter.json file
  */
 function readStarterJson(filePath) {
-  const data = fse.readFileSync(filePath);
-  return JSON.parse(data);
+  try {
+    const data = fse.readFileSync(filePath);
+    return JSON.parse(data);
+  } catch (err) {
+    console.log(pe.render(err));
+    process.exit(1);
+  }
 }
 
 /**
@@ -87,14 +94,10 @@ module.exports = async function buildStarter(projectArgs, program) {
 
   // Fetch repo info
   const { full_name } = await getRepoInfo(starterUrl);
-  // Download repo inside tmp dir
-  try {
-    await downloadGithubRepo(starterUrl, tmpDir);
-  } catch (err) {
-    throw Error(`Could not download ${chalk.yellow(`${full_name}`)} repository.`);
-  }
 
-  // Read starter package json for template url
+  // Download repo inside tmp dir
+  await downloadGithubRepo(starterUrl, tmpDir);
+
   const starterJson = readStarterJson(join(tmpDir, 'starter.json'));
 
   // Project directory
@@ -102,10 +105,15 @@ module.exports = async function buildStarter(projectArgs, program) {
   const projectBasename = basename(rootPath);
 
   // Copy the downloaded frontend folder to the project folder
-  await fse.copy(join(tmpDir, 'frontend'), join(rootPath, 'frontend'), {
-    overwrite: true,
-    recursive: true,
-  });
+  try {
+    await fse.copy(join(tmpDir, 'frontend'), join(rootPath, 'frontend'), {
+      overwrite: true,
+      recursive: true,
+    });
+  } catch (err) {
+    console.log(pe.render(err));
+    process.exit(1);
+  }
 
   // Delete temporary directory
   await fse.remove(tmpDir);
@@ -135,7 +143,7 @@ module.exports = async function buildStarter(projectArgs, program) {
     const gitignore = join(__dirname, '..', 'resources', 'gitignore');
     await fse.copy(gitignore, join(rootPath, '.gitignore'));
   } catch (err) {
-    console.error(err);
+    console.log(pe.render(err));
   }
 
   await installWithLogs(rootPath);
