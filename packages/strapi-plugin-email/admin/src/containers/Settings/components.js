@@ -2,6 +2,7 @@ import styled from 'styled-components';
 import { Button, Text as TextBase } from '@buffetjs/core';
 
 const Text = styled(TextBase)`
+  width: 100%;
   padding: 0 15px 13px 15px;
 `;
 
