@@ -1437,6 +1437,13 @@
     unique-filename "^1.1.1"
     which "^1.3.1"
 
+"@fingerprintjs/fingerprintjs@3.0.5":
+  version "3.0.5"
+  resolved "https://registry.yarnpkg.com/@fingerprintjs/fingerprintjs/-/fingerprintjs-3.0.5.tgz#c7a35e57c6c50b493c4db9f69106d5a3f4850c7f"
+  integrity sha512-VCC7S3ExuScyIfRS8X5pmHj8Nb+GCKssD7DqXjMwgQdlijVKHG8Yo/tvShwdjwz3L7yL2iWF/bq7z6mEwQ8vQQ==
+  dependencies:
+    tslib "^2.0.1"
+
 "@formatjs/ecma402-abstract@^1.2.2":
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/@formatjs/ecma402-abstract/-/ecma402-abstract-1.2.2.tgz#4810bdbd696d3805c535fd0620b7c8f45ab3164f"
