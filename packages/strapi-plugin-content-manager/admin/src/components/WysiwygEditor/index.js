@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Editor } from 'draft-js';
+import 'draft-js/dist/Draft.css';
 import PropTypes from 'prop-types';
 
 class WysiwygEditor extends React.Component {
