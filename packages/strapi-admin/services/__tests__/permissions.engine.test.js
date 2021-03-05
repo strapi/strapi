@@ -38,13 +38,13 @@ describe('Permissions Engine', () => {
           {
             action: 'read',
             subject: 'article',
-            fields: ['**'],
+            properties: { fields: ['**'] },
             conditions: ['plugins::test.isBob'],
           },
           {
             action: 'read',
             subject: 'user',
-            fields: ['title'],
+            properties: { fields: ['title'] },
             conditions: ['plugins::test.isAdmin'],
           },
         ],
@@ -54,7 +54,7 @@ describe('Permissions Engine', () => {
           {
             action: 'post',
             subject: 'article',
-            fields: ['*'],
+            properties: { fields: ['*'] },
             conditions: ['plugins::test.isBob'],
           },
         ],
@@ -64,7 +64,7 @@ describe('Permissions Engine', () => {
           {
             action: 'read',
             subject: 'user',
-            fields: ['title'],
+            properties: { fields: ['title'] },
             conditions: ['plugins::test.isContainedIn'],
           },
         ],
@@ -74,7 +74,7 @@ describe('Permissions Engine', () => {
           {
             action: 'read',
             subject: 'user',
-            fields: [],
+            properties: { fields: [] },
           },
         ],
       },
@@ -115,6 +115,11 @@ describe('Permissions Engine', () => {
       admin: {
         services: {
           permission: {
+            actionProvider: {
+              getByActionId() {
+                return { applyToProperties: undefined };
+              },
+            },
             findUserPermissions: jest.fn(({ roles }) =>
               _.reduce(
                 localTestData.roles,
@@ -136,7 +141,7 @@ describe('Permissions Engine', () => {
 
     engine = createPermissionsEngine(conditionProvider);
 
-    jest.spyOn(engine, 'evaluatePermission');
+    jest.spyOn(engine, 'evaluate');
     jest.spyOn(engine, 'createRegisterFunction');
     jest.spyOn(engine, 'generateAbilityCreatorFor');
   });
@@ -262,31 +267,36 @@ describe('Permissions Engine', () => {
     });
   });
 
-  describe('Evaluate Permission', () => {
+  describe('Evaluate', () => {
     test('It should register the permission (no conditions / true result)', async () => {
-      const permission = { action: 'read', subject: 'article', fields: ['title'] };
+      const permission = { action: 'read', subject: 'article', properties: { fields: ['title'] } };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
-      expect(registerFn).toHaveBeenCalledWith({ ...permission, condition: true });
+      expect(registerFn).toHaveBeenCalledWith({
+        ..._.pick(permission, ['action', 'subject']),
+        fields: permission.properties.fields,
+        condition: true,
+      });
     });
 
     test('It should register the permission (conditions / true result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
-        fields: ['title'],
+        properties: { fields: ['title'] },
         conditions: ['plugins::test.isAdmin'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
       const expected = {
-        ..._.omit(permission, 'conditions'),
+        ..._.omit(permission, ['conditions', 'properties']),
+        fields: permission.properties.fields,
         condition: true,
       };
 
@@ -297,13 +307,13 @@ describe('Permissions Engine', () => {
       const permission = {
         action: 'read',
         subject: 'article',
-        fields: ['title'],
+        properties: { fields: ['title'] },
         conditions: ['plugins::test.isBob'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
       expect(registerFn).not.toHaveBeenCalled();
     });
@@ -312,16 +322,17 @@ describe('Permissions Engine', () => {
       const permission = {
         action: 'read',
         subject: 'article',
-        fields: ['title'],
+        properties: { fields: ['title'] },
         conditions: ['plugins::test.isCreatedBy'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
 
-      await engine.evaluatePermission({ permission, user, registerFn });
+      await engine.evaluate({ permission, user, registerFn });
 
       const expected = {
-        ..._.omit(permission, 'conditions'),
+        ..._.omit(permission, ['conditions', 'properties']),
+        fields: permission.properties.fields,
         condition: { created_by: user.firstname },
       };
 

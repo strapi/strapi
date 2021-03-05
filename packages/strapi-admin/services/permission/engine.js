@@ -99,8 +99,10 @@ module.exports = conditionProvider => {
         return null;
       }
 
+      const properties = permission.properties || {};
+
       // Only keep the properties allowed by the action (action.applyToProperties)
-      const propertiesName = Object.keys(permission.properties);
+      const propertiesName = Object.keys(properties);
       const invalidProperties = difference(
         propertiesName,
         action.applyToProperties || propertiesName
@@ -109,7 +111,7 @@ module.exports = conditionProvider => {
       invalidProperties.forEach(property => permission.deleteProperty(property));
 
       // If the `fields` property is an empty array, then ignore the permission
-      const { fields } = permission.properties;
+      const { fields } = properties;
 
       if (isArray(fields) && isEmpty(fields)) {
         return null;
@@ -151,7 +153,7 @@ module.exports = conditionProvider => {
       await this.applyPermissionProcessors(permission);
 
       // Extract the up-to-date components from the permission
-      const { action, subject = 'all', properties, conditions } = permission;
+      const { action, subject = 'all', properties = {}, conditions } = permission;
 
       // Register the permission if there is no condition
       if (isEmpty(conditions)) {
