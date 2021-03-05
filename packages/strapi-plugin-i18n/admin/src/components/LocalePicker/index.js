@@ -11,8 +11,14 @@ const List = styled.ul`
 `;
 
 const ListItem = styled.li`
-  padding: ${props => props.theme.main.sizes.paddings.xs};
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: -10px;
+  margin-right: -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 36px;
+  line-height: 36px;
 
   &:hover {
     background: ${props => props.theme.main.colors.lightGrey};
