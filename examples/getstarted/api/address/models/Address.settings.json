@@ -14,13 +14,23 @@
     ],
     "comment": ""
   },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "postal_coder": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "categories": {
-      "via": "addresses",
       "collection": "category",
+      "via": "addresses",
       "dominant": true
     },
     "cover": {
@@ -46,7 +56,12 @@
     "city": {
       "type": "string",
       "required": true,
-      "maxLength": 200
+      "maxLength": 200,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "likes": {
       "collection": "like",
