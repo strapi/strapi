@@ -46,7 +46,7 @@ program.options.forEach(option => {
 
 // Filter options out of argument check
 const args = process.argv.slice(2);
-const filteredArgs = args.filter(arg => !options.includes(arg));
+const filteredArgs = args.filter(arg => !options.includes(arg) && !arg.startsWith('-'));
 
 // Check correct number of arguments
 if (filteredArgs.length !== 2) {
@@ -58,18 +58,28 @@ if (filteredArgs.length !== 2) {
     `\t ${chalk.white('A starter requires')} ${chalk.green('2')} ${chalk.white('arguments')}`
   );
   console.log(
-    `\t ${chalk.white('1.')} ${chalk.yellow(
-      'The directory name for your project (i.e. my-project)'
+    `\t ${chalk.white('1. The')} ${chalk.yellow('directory')} ${chalk.white(
+      'name for your project (i.e. my-project)'
     )}`
   );
   console.log(
-    `\t ${chalk.white('2.')} ${chalk.yellow(
-      'The GitHub url or shortcut (i.e. gatsby-corporate) for the starter'
-    )}`
+    `\t ${chalk.white('2. The')} ${chalk.yellow(
+      'GitHub url or shortcut (i.e. gatsby-corporate)'
+    )} ${chalk.white('for the starter')}`
   );
   console.log();
-
-  program.help();
 }
 
-program.parse(process.argv);
+program.configureOutput({
+  // Highlight errors in color.
+  outputError: (str, write) => write(pe.render(str)),
+});
+
+program.exitOverride();
+
+try {
+  program.parse(process.argv);
+} catch (err) {
+  console.log();
+  program.outputHelp();
+}
