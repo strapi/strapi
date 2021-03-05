@@ -6,7 +6,7 @@ import Select from 'react-select';
 import { Col, Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
-import { BaselineAlignment, selectStyles } from 'strapi-helper-plugin';
+import { BaselineAlignment, selectStyles, DropdownIndicator } from 'strapi-helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
 
@@ -38,6 +38,7 @@ const BaseForm = ({ options, defaultOption }) => {
             setFieldValue('displayName', selection.value);
             setFieldValue('code', selection.label);
           }}
+          components={{ DropdownIndicator }}
           styles={{
             ...styles,
             control: (base, state) => ({ ...base, ...styles.control(base, state), height: '34px' }),
