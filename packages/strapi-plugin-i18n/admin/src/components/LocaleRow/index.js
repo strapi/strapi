@@ -43,7 +43,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
         <Text>{locale.code}</Text>
       </td>
       <td>
-        <Text fontWeight="semiBold">{locale.name}</Text>
+        <Text fontWeight="regular">{locale.name}</Text>
       </td>
       <td>
         <Text>
