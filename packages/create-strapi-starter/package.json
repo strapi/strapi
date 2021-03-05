@@ -18,7 +18,7 @@
   "dependencies": {
     "chalk": "4.1.0",
     "ci-info": "3.1.1",
-    "commander": "6.1.0",
+    "commander": "7.1.0",
     "execa": "5.0.0",
     "fs-extra": "9.1.0",
     "git-url-parse": "11.4.4",
