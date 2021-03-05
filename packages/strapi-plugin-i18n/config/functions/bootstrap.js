@@ -172,6 +172,7 @@ const i18nPermissionHandler = permission => {
 const localesPropertyHandler = async (action, section) => {
   const { subjects = [] } = action;
 
+  const { isLocalized } = getService('content-types');
   const locales = await getService('locales').find();
 
   section.subjects
@@ -179,6 +180,8 @@ const localesPropertyHandler = async (action, section) => {
     .filter(subject => subjects.includes(subject.uid))
     // Only keep subjects that don't have the locales property yet
     .filter(subject => !subject.properties.find(property => property.value === 'locales'))
+    // Only add the locale property to the localized subjects
+    .filter(subject => isLocalized(strapi.getModel(subject.uid)))
     // Add the locale property
     .forEach(subject => {
       subject.properties.push({
