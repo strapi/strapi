@@ -112,9 +112,28 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
       }
     }
 
+    async function deleteFn(params = {}) {
+      const { key, environment = defaultEnv, type, name, tag = '' } = Object.assign(
+        {},
+        source,
+        params
+      );
+
+      const prefix = `${type}${name ? `_${name}` : ''}`;
+
+      const where = {
+        key: `${prefix}_${key}`,
+        environment,
+        tag,
+      };
+
+      await db.query('core_store').delete(where);
+    }
+
     return {
       get,
       set,
+      delete: deleteFn,
     };
   };
 };

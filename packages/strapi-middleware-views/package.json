@@ -1,6 +1,6 @@
 {
   "name": "strapi-middleware-views",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "Views middleware to enable server-side rendering for the Strapi framework",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "consolidate": "^0.15.1",
+    "consolidate": "^0.16.0",
     "koa-views": "^6.3.0",
     "lodash": "4.17.20"
   },

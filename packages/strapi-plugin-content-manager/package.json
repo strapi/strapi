@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-manager",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -17,7 +17,7 @@
     "@buffetjs/utils": "3.3.4",
     "@sindresorhus/slugify": "1.1.0",
     "classnames": "^2.2.6",
-    "codemirror": "^5.59.0",
+    "codemirror": "^5.59.4",
     "draft-js": "^0.11.5",
     "highlight.js": "^10.1.1",
     "immutable": "^3.8.2",
@@ -37,16 +37,16 @@
     "react-dom": "^16.9.0",
     "react-fast-compare": "^3.2.0",
     "react-intl": "4.5.0",
-    "react-redux": "^7.0.2",
-    "react-router": "^5.0.0",
+    "react-redux": "^7.2.2",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "sanitize-html": "2.1.1",
-    "strapi-helper-plugin": "3.5.0",
-    "strapi-utils": "3.5.0",
+    "strapi-helper-plugin": "3.5.2",
+    "strapi-utils": "3.5.2",
     "yup": "^0.27.0"
   },
   "author": {

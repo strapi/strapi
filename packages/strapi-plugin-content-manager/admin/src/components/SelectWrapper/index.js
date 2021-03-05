@@ -183,7 +183,9 @@ function SelectWrapper({
   };
 
   const handleAddRelation = value => {
-    addRelation({ target: { name, value } });
+    if (!isEmpty(value)) {
+      addRelation({ target: { name, value } });
+    }
   };
 
   const handleMenuOpen = () => {

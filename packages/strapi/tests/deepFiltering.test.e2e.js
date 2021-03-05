@@ -143,7 +143,7 @@ describe('Deep Filtering API', () => {
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body).toMatchObject(data.collector.slice(1, 3));
+        expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
     });
   });
@@ -162,7 +162,7 @@ describe('Deep Filtering API', () => {
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body).toMatchObject(data.collector.slice(0, 2));
+        expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(0, 2)));
       });
 
       test('cards.name + _q=25', async () => {
@@ -177,7 +177,7 @@ describe('Deep Filtering API', () => {
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(1);
-        expect(res.body).toMatchObject([data.collector[0]]);
+        expect(res.body[0]).toMatchObject(data.collector[0]);
       });
     });
 
@@ -194,7 +194,7 @@ describe('Deep Filtering API', () => {
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(2);
-        expect(res.body).toMatchObject(data.collector.slice(1, 3));
+        expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
       test('collector_friends.name + search isa', async () => {
         const res = await rq({
@@ -208,7 +208,7 @@ describe('Deep Filtering API', () => {
 
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(1);
-        expect(res.body).toMatchObject([data.collector[1]]);
+        expect(res.body[0]).toMatchObject(data.collector[1]);
       });
     });
   });

@@ -69,7 +69,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
             });
           }
         } catch (err) {
-          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
+          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
 
           strapi.notification.toggle({
             type: 'warning',

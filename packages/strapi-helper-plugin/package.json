@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -34,7 +34,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/preset-env": "^7.9.5",
+    "@babel/preset-env": "^7.13.8",
     "@babel/preset-react": "^7.9.4",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.15.6",
@@ -66,11 +66,11 @@
     "react-dom": "^16.9.0",
     "react-helmet": "^6.1.0",
     "react-intl": "4.5.0",
-    "react-router": "^5.0.0",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "styled-components": "^5.0.0",
-    "whatwg-fetch": "^3.5.0"
+    "styled-components": "^5.2.1",
+    "whatwg-fetch": "^3.6.2"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }
