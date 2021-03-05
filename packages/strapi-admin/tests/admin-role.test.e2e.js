@@ -195,6 +195,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
+          properties: { locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
