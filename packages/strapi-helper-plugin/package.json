@@ -70,7 +70,7 @@
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "styled-components": "^5.2.1",
-    "whatwg-fetch": "^3.5.0"
+    "whatwg-fetch": "^3.6.2"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }
