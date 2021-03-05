@@ -11,7 +11,7 @@ const {
 
 const sectionPropMatcher = targetValue => action => action.section === targetValue;
 
-const createContentTypesSchema = () => ({
+const createContentTypesInitialState = () => ({
   actions: [],
   subjects: [],
 });
@@ -19,10 +19,11 @@ const createContentTypesSchema = () => ({
 const createSectionsTemplate = sections => {
   const sectionsEntries = Array.from(sections.entries());
 
-  return sectionsEntries.reduce(
-    (acc, [sectionName, options]) => ({ ...acc, [sectionName]: options.schema }),
-    {}
-  );
+  return sectionsEntries.reduce((acc, [sectionName, options]) => {
+    const { initialStateFactory } = options;
+
+    return { ...acc, [sectionName]: isFunction(initialStateFactory) ? initialStateFactory() : {} };
+  }, {});
 };
 
 class SectionsBuilder {
@@ -31,9 +32,9 @@ class SectionsBuilder {
   }
 
   addSection(sectionName, options = {}) {
-    const { schema = {}, handlers = [], matchers = [] } = options;
+    const { initialStateFactory, handlers = [], matchers = [] } = options;
 
-    this._sections.set(sectionName, { schema, handlers, matchers });
+    this._sections.set(sectionName, { initialStateFactory, handlers, matchers });
 
     return this;
   }
@@ -99,25 +100,25 @@ const createSectionsBuilder = () => {
   const builder = new SectionsBuilder();
 
   builder.addSection('plugins', {
-    schema: [],
+    initialStateFactory: () => [],
     handlers: [pluginsHandler],
     matchers: [sectionPropMatcher('plugins')],
   });
 
   builder.addSection('settings', {
-    schema: [],
+    initialStateFactory: () => [],
     handlers: [settingsHandler],
     matchers: [sectionPropMatcher('settings')],
   });
 
   builder.addSection('singleTypes', {
-    schema: createContentTypesSchema(),
+    initialStateFactory: createContentTypesInitialState,
     handlers: [contentTypesBase, subjectsHandlerFor('singleType'), fieldsProperty],
     matchers: [sectionPropMatcher('contentTypes')],
   });
 
   builder.addSection('collectionTypes', {
-    schema: createContentTypesSchema(),
+    initialStateFactory: createContentTypesInitialState,
     handlers: [contentTypesBase, subjectsHandlerFor('collectionType'), fieldsProperty],
     matchers: [sectionPropMatcher('contentTypes')],
   });
