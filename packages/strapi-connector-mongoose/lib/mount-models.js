@@ -319,38 +319,42 @@ const migrateSchema = () => {};
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
-    const { publicationState, _populateComponents = true } = this.getOptions();
+    const {
+      publicationState,
+      _populateComponents = true,
+      _populateMorphRelations = true,
+    } = this.getOptions();
 
     const getMatchQuery = assoc => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
 
-      if (
-        contentTypesUtils.hasDraftAndPublish(assocModel) &&
-        DP_PUB_STATES.includes(publicationState)
-      ) {
+      const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(assocModel);
+      if (hasDraftAndPublish && DP_PUB_STATES.includes(publicationState)) {
         return populateQueries.publicationState[publicationState];
       }
 
       return undefined;
     };
 
-    morphAssociations.forEach(association => {
-      const matchQuery = getMatchQuery(association);
-      const { alias, nature } = association;
+    if (_populateMorphRelations) {
+      morphAssociations.forEach(association => {
+        const matchQuery = getMatchQuery(association);
+        const { alias, nature } = association;
 
-      if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate({ path: alias, match: matchQuery, options: { publicationState } });
-      } else if (populatedPaths.includes(alias)) {
-        _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
-        _.set(this._mongooseOptions.populate, [alias, 'options'], {
-          publicationState,
-        });
+        if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
+          this.populate({ path: alias, match: matchQuery, options: { publicationState } });
+        } else if (populatedPaths.includes(alias)) {
+          _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
+          _.set(this._mongooseOptions.populate, [alias, 'options'], {
+            publicationState,
+          });
 
-        if (matchQuery !== undefined) {
-          _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          if (matchQuery !== undefined) {
+            _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          }
         }
-      }
-    });
+      });
+    }
 
     if (_populateComponents) {
       componentAttributes.forEach(key => {

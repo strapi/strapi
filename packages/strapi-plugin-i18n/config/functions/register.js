@@ -10,7 +10,8 @@ module.exports = () => {
         writable: false,
         private: false,
         configurable: false,
-        type: 'json',
+        collection: model.modelName,
+        populate: ['id', 'locale', 'published_at'],
       });
 
       _.set(model.attributes, 'locale', {
