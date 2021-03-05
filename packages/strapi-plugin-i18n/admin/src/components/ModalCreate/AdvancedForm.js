@@ -33,7 +33,7 @@ const AdvancedForm = () => {
         htmlFor="default-checkbox"
       />
 
-      <Text color="grey">
+      <Text color="grey" fontSize="sm">
         {formatMessage({
           id: getTrad('Settings.locales.modal.advanced.setAsDefault.hint'),
         })}
