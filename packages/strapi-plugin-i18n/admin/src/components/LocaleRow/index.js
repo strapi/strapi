@@ -15,7 +15,10 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   if (onEdit) {
     links.push({
       icon: (
-        <span aria-label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}>
+        <span
+          aria-label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}
+          style={locale.isDefault ? { marginRight: '-16px' } : undefined}
+        >
           <Pencil fill="#0e1622" />
         </span>
       ),
