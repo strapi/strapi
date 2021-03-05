@@ -68,7 +68,7 @@ const DataManagerProvider = ({
   } = useStrapi();
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { autoReload, currentEnvironment, emitEvent, formatMessage, menu } = useGlobalContext();
+  const { autoReload, currentEnvironment, emitEvent, formatMessage } = useGlobalContext();
   const { fetchUserPermissions } = useUser();
 
   const { pathname } = useLocation();
@@ -304,8 +304,6 @@ const DataManagerProvider = ({
         // Refetch the permissions
         await updatePermissions();
 
-        // Update the app menu
-        await updateAppMenu();
         // Refetch all the data
         getDataRef.current();
       }
@@ -474,9 +472,6 @@ const DataManagerProvider = ({
 
       await updatePermissions();
 
-      // Update the app menu
-      await updateAppMenu();
-
       // Submit ct tracking success
       if (isInContentTypeView) {
         emitEvent('didSaveContentType');
@@ -513,13 +508,6 @@ const DataManagerProvider = ({
   // Open the modal warning cancel changes
   const toggleModalCancel = () => {
     toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
-  };
-
-  // Update the menu using the internal API
-  const updateAppMenu = async () => {
-    if (menu.getModels) {
-      await menu.getModels();
-    }
   };
 
   const updatePermissions = async () => {
