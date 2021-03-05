@@ -13,7 +13,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "cloudinary": "^1.23.0",
+    "cloudinary": "^1.25.0",
     "into-stream": "^5.1.0"
   },
   "peerDependencies": {
