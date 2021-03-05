@@ -1,6 +1,6 @@
 'use strict';
 
-const { capitalize, isArray } = require('lodash/fp');
+const { capitalize, isArray, isEmpty } = require('lodash/fp');
 const { getService } = require('../../utils');
 
 module.exports = async () => {
@@ -174,6 +174,11 @@ const localesPropertyHandler = async (action, section) => {
 
   const { isLocalized } = getService('content-types');
   const locales = await getService('locales').find();
+
+  // Do not add the locales property if there is none registered
+  if (isEmpty(locales)) {
+    return;
+  }
 
   section.subjects
     // Keep section's subjects included into the action's subjects
