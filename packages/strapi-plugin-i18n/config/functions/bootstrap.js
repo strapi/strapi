@@ -99,13 +99,20 @@ const addLocalesPropertyIfNeeded = action => {
     options: { applyToProperties },
   } = action;
 
-  if (!isArray(applyToProperties)) {
+  // Only add the locales property to contentTypes' actions
+  if (section !== 'contentTypes') {
     return;
   }
 
-  if (section === 'contentTypes' && !applyToProperties.includes('locales')) {
-    action.options.applyToProperties = applyToProperties.concat('locales');
+  // If the 'locales' property is already declared within the applyToProperties array, then ignore the next steps
+  if (isArray(applyToProperties) && applyToProperties.includes('locales')) {
+    return;
   }
+
+  // Add the 'locales' property to the applyToProperties array (create it if necessary)
+  action.options.applyToProperties = isArray(applyToProperties)
+    ? applyToProperties.concat('locales')
+    : ['locales'];
 };
 
 // Other
