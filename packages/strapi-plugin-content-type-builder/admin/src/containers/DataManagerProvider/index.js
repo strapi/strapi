@@ -7,6 +7,7 @@ import {
   useGlobalContext,
   PopUpWarning,
   useStrapi,
+  useUser,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
@@ -67,14 +68,9 @@ const DataManagerProvider = ({
   } = useStrapi();
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const {
-    autoReload,
-    currentEnvironment,
-    emitEvent,
-    fetchUserPermissions,
-    formatMessage,
-    menu,
-  } = useGlobalContext();
+  const { autoReload, currentEnvironment, emitEvent, formatMessage, menu } = useGlobalContext();
+  const { fetchUserPermissions } = useUser();
+
   const { pathname } = useLocation();
   const { push } = useHistory();
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);

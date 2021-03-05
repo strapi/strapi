@@ -110,6 +110,7 @@ function ListView({
     defaultPageSize,
     defaultSort,
   ]);
+
   const [{ query, rawQuery }, setQuery] = useQueryParams(initParams);
 
   const { pathname } = useLocation();

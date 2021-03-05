@@ -8,7 +8,8 @@ import LoadingIndicatorPage from '../LoadingIndicatorPage';
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
+
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
 
