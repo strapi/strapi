@@ -9,21 +9,20 @@ const {
   settings: settingsHandler,
 } = require('./handlers');
 
-const createSectionPropMatcher = targetValue => action => action.section === targetValue;
+const sectionPropMatcher = targetValue => action => action.section === targetValue;
+
+const createContentTypesSchema = () => ({
+  actions: [],
+  subjects: [],
+});
 
 const createSectionsTemplate = sections => {
   const sectionsEntries = Array.from(sections.entries());
 
-  return sectionsEntries.reduce((acc, [sectionName, options]) => {
-    const { withSubjects } = options;
-    const section = { actions: [] };
-
-    if (withSubjects) {
-      Object.assign(section, { subjects: [] });
-    }
-
-    return { ...acc, [sectionName]: section };
-  }, {});
+  return sectionsEntries.reduce(
+    (acc, [sectionName, options]) => ({ ...acc, [sectionName]: options.schema }),
+    {}
+  );
 };
 
 class SectionsBuilder {
@@ -32,9 +31,9 @@ class SectionsBuilder {
   }
 
   addSection(sectionName, options = {}) {
-    const { withSubjects = false, handlers = [], matchers = [] } = options;
+    const { schema = {}, handlers = [], matchers = [] } = options;
 
-    this._sections.set(sectionName, { withSubjects, handlers, matchers });
+    this._sections.set(sectionName, { schema, handlers, matchers });
 
     return this;
   }
@@ -100,25 +99,27 @@ const createSectionsBuilder = () => {
   const builder = new SectionsBuilder();
 
   builder.addSection('plugins', {
+    schema: [],
     handlers: [pluginsHandler],
-    matchers: [createSectionPropMatcher('plugins')],
+    matchers: [sectionPropMatcher('plugins')],
   });
 
   builder.addSection('settings', {
+    schema: [],
     handlers: [settingsHandler],
-    matchers: [createSectionPropMatcher('settings')],
+    matchers: [sectionPropMatcher('settings')],
   });
 
   builder.addSection('singleTypes', {
-    withSubjects: true,
+    schema: createContentTypesSchema(),
     handlers: [contentTypesBase, subjectsHandlerFor('singleType'), fieldsProperty],
-    matchers: [createSectionPropMatcher('contentTypes')],
+    matchers: [sectionPropMatcher('contentTypes')],
   });
 
   builder.addSection('collectionTypes', {
-    withSubjects: true,
+    schema: createContentTypesSchema(),
     handlers: [contentTypesBase, subjectsHandlerFor('collectionType'), fieldsProperty],
-    matchers: [createSectionPropMatcher('contentTypes')],
+    matchers: [sectionPropMatcher('contentTypes')],
   });
 
   return builder;

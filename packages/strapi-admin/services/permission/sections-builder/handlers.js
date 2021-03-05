@@ -13,34 +13,32 @@ const utils = {
 };
 
 /**
- * Transforms & adds the given action to the section's actions field
+ * Transforms & adds the given  setting action to the section
  * Note: The action is transformed to a setting specific format
  */
 const settings = (action, section) => {
-  const { category, subCategory, displayName, actionId, options } = action;
+  const { category, subCategory, displayName, actionId } = action;
 
-  section.actions.push({
-    label: displayName,
+  section.push({
+    displayName,
     category,
     subCategory,
-    actionId,
-    ...utils.getValidOptions(options),
+    action: actionId,
   });
 };
 
 /**
- * Transforms & adds the given action to the section's actions field
+ * Transforms & adds the given plugin action to the section
  * Note: The action is transformed to a plugin specific format
  */
 const plugins = (action, section) => {
-  const { plugin, subCategory, displayName, actionId, options } = action;
+  const { pluginName, subCategory, displayName, actionId } = action;
 
-  section.actions.push({
-    label: displayName,
-    plugin,
+  section.push({
+    displayName,
+    plugin: pluginName,
     subCategory,
-    actionId,
-    ...utils.getValidOptions(options),
+    action: actionId,
   });
 };
 
