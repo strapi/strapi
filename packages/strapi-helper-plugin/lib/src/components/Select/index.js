@@ -1,11 +1,11 @@
 import React from 'react';
 import ReactSelect, { components } from 'react-select';
 import PropTypes from 'prop-types';
-import { Carret } from '@buffetjs/icons';
+import Carret from '../Carret';
 import { useTheme } from 'styled-components';
 import getStyles from './styles';
 
-const DropdownIndicator = props => {
+export const DropdownIndicator = props => {
   const theme = useTheme();
 
   return (
