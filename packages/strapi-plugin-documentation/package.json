@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.5.1",
+  "version": "3.5.2",
   "description": "Automatically generates documentation for your api.",
   "strapi": {
     "name": "Documentation",
@@ -28,14 +28,14 @@
     "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
-    "react-redux": "^7.0.3",
-    "react-router": "^5.0.0",
+    "react-redux": "^7.2.2",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.5.1",
+    "strapi-helper-plugin": "3.5.2",
     "swagger-ui-dist": "3.43.0"
   },
   "author": {

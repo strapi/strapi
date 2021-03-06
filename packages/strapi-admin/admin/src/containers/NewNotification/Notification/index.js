@@ -88,7 +88,15 @@ const Notification = ({ notification }) => {
                 <Text title={formattedMessage(message)}>{formattedMessage(message)}</Text>
               )}
               {link && (
-                <a href={link.url} target="_blank" rel="noopener noreferrer">
+                <a
+                  href={link.url}
+                  target={link.target || '_blank'}
+                  rel={
+                    !link.target || link.target === '_blank'
+                      ? 'noopener noreferrer'
+                      : ''
+                  }
+                >
                   <Padded right left size="xs">
                     <Flex alignItems="center">
                       <Text
@@ -100,8 +108,11 @@ const Notification = ({ notification }) => {
                       >
                         {formattedMessage(link.label)}
                       </Text>
-                      <Padded left size="xs" />
-                      <LinkArrow />
+                      {link.target === "_blank" && (
+                        <Padded left size="xs">
+                          <LinkArrow />
+                        </Padded>
+                      )}
                     </Flex>
                   </Padded>
                 </a>
@@ -152,6 +163,7 @@ Notification.propTypes = {
       }),
     ]),
     link: PropTypes.shape({
+      target: PropTypes.string,
       url: PropTypes.string.isRequired,
       label: PropTypes.oneOfType([
         PropTypes.string,

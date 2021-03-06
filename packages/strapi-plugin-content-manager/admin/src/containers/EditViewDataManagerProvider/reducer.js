@@ -63,7 +63,7 @@ const reducer = (state, action) => {
         });
     case 'ADD_RELATION':
       return state.updateIn(['modifiedData', ...action.keys], list => {
-        if (!action.value) {
+        if (!Array.isArray(action.value) || !action.value.length) {
           return list;
         }
 
