@@ -3,11 +3,20 @@
 const bootstrap = require('../bootstrap');
 
 describe('Bootstrap', () => {
-  test('Calls actionProvider with consistent permissions', () => {
+  test('Calls actionProvider with consistent permissions', async () => {
     const registerFn = jest.fn();
 
     global.strapi = {
       models: {},
+      plugins: {
+        i18n: {
+          services: {
+            locales: {
+              initDefaultLocale: jest.fn(),
+            },
+          },
+        },
+      },
       admin: {
         services: {
           permission: {
@@ -19,7 +28,7 @@ describe('Bootstrap', () => {
       },
     };
 
-    bootstrap();
+    await bootstrap();
 
     expect(registerFn.mock.calls).toMatchInlineSnapshot(`
       Array [
