@@ -43,11 +43,24 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   uploadFiles,
 
   /**
-   * Promise to fetch all records
-   *
-   * @return {Promise}
+   * Returns default opt
+   * it is async so decorators can do async processing
+   * @param {object} params - query params to extend
+   * @returns {object} wra
    */
-  async find({ params, populate }, { model }) {
+  async wrapOptions(options = {} /*, ctx */) {
+    return options;
+  },
+
+  /**
+   * Returns a list of entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async find(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
+
     const { kind } = db.getModel(model);
 
     // return first element and ignore filters
@@ -59,41 +72,63 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     return db.query(model).find(params, populate);
   },
 
-  findPage({ params, populate }, { model }) {
+  /**
+   * Returns a paginated list of entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async findPage(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
+
     return db.query(model).findPage(params, populate);
   },
 
-  findWithRelationCounts({ params, populate }, { model }) {
+  /**
+   * Returns a list of entries with relation counters
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async findWithRelationCounts(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
+
     return db.query(model).findWithRelationCounts(params, populate);
   },
 
   /**
-   * Promise to fetch record
-   *
-   * @return {Promise}
+   * Returns one entry
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async findOne(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
 
-  findOne({ params, populate }, { model }) {
     return db.query(model).findOne(params, populate);
   },
 
   /**
-   * Promise to count record
-   *
-   * @return {Promise}
+   * Returns a count of entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async count(opts, { model }) {
+    const { params } = await this.wrapOptions(opts, { model });
 
-  count({ params }, { model }) {
     return db.query(model).count(params);
   },
 
   /**
-   * Promise to add record
-   *
-   * @return {Promise}
+   * Creates & returns a new entry
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async create(opts, { model }) {
+    const { data, files } = await this.wrapOptions(opts, { model });
 
-  async create({ data, files }, { model }) {
     const modelDef = db.getModel(model);
 
     if (modelDef.kind === 'singleType') {
@@ -124,12 +159,14 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   },
 
   /**
-   * Promise to edit record
-   *
-   * @return {Promise}
+   * Updates & returns an existing entry
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async update(opts, { model }) {
+    const { params, data, files } = await this.wrapOptions(opts, { model });
 
-  async update({ params, data, files }, { model }) {
     const modelDef = db.getModel(model);
     const existingEntry = await db.query(model).findOne(params);
 
@@ -155,12 +192,14 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   },
 
   /**
-   * Promise to delete a record
-   *
-   * @return {Promise}
+   * Deletes & returns the entry that was deleted
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async delete(opts, { model }) {
+    const { params } = await this.wrapOptions(opts, { model });
 
-  async delete({ params }, { model }) {
     const entry = await db.query(model).delete(params);
 
     const modelDef = db.getModel(model);
@@ -173,29 +212,50 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   },
 
   /**
-   * Promise to search records
-   *
-   * @return {Promise}
+   * Returns a list of matching entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async search(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
 
-  search({ params, populate }, { model }) {
     return db.query(model).search(params, populate);
   },
 
-  searchWithRelationCounts({ params, populate }, { model }) {
+  /**
+   * Returns a list of matching entries with relations counters
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async searchWithRelationCounts(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
+
     return db.query(model).searchWithRelationCounts(params, populate);
   },
 
-  searchPage({ params, populate }, { model }) {
+  /**
+   * Returns a paginated list of matching entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async searchPage(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model });
+
     return db.query(model).searchPage(params, populate);
   },
 
   /**
    * Promise to count searched records
-   *
-   * @return {Promise}
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
-  countSearch({ params }, { model }) {
+  async countSearch(opts, { model }) {
+    const { params } = await this.wrapOptions(opts, { model });
+
     return db.query(model).countSearch(params);
   },
 });

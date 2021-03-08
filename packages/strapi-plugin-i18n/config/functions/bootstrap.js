@@ -16,7 +16,8 @@ module.exports = async () => {
   const { actionProvider } = strapi.admin.services.permission;
   actionProvider.register(actions);
 
-  getService('entity-service-decorator').decorate();
+  const { decorator } = getService('entity-service-decorator');
+  strapi.entityService.decorate(decorator);
 
   await getService('locales').initDefaultLocale();
 

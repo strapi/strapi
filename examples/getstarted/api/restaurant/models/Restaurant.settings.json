@@ -8,10 +8,7 @@
   "options": {
     "draftAndPublish": true,
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "pluginOptions": {
@@ -41,13 +38,7 @@
       }
     },
     "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
       "type": "enumeration",
       "pluginOptions": {
         "i18n": {
@@ -169,15 +160,6 @@
           "localized": true
         }
       }
-    },
-    "parent": {
-      "collection": "restaurant",
-      "via": "children",
-      "dominant": true
-    },
-    "children": {
-      "collection": "restaurant",
-      "via": "parent"
     }
   }
 }
