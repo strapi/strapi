@@ -17,6 +17,15 @@ describe('Bootstrap', () => {
           },
         },
       },
+      plugins: {
+        i18n: {
+          services: {
+            locales: {
+              initDefaultLocale() {},
+            },
+          },
+        },
+      },
     };
 
     bootstrap();
