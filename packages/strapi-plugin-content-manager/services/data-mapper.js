@@ -14,6 +14,7 @@ const dtoFields = [
   'options',
   'pluginOptions',
   'attributes',
+  'pluginOptions',
 ];
 
 module.exports = {

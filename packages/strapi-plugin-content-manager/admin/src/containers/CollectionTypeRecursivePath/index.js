@@ -9,7 +9,7 @@ import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
 import EditView from '../EditView';
 import EditSettingsView from '../EditSettingsView';
-import ListView from '../ListView';
+import ListViewLayout from '../ListView/ListViewLayout';
 import ListSettingsView from '../ListSettingsView';
 
 const CollectionTypeRecursivePath = ({
@@ -75,7 +75,7 @@ const CollectionTypeRecursivePath = ({
   const routes = [
     { path: ':id/clone/:origin', comp: EditView },
     { path: ':id', comp: EditView },
-    { path: '', comp: ListView },
+    { path: '', comp: ListViewLayout },
   ].map(({ path, comp }) => (
     <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
   ));

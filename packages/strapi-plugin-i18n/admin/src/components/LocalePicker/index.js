@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret } from 'strapi-helper-plugin';
 import styled from 'styled-components';
+import get from 'lodash/get';
 
 const List = styled.ul`
   list-style-type: none;
@@ -33,9 +34,21 @@ const EllipsisParagraph = styled(Text)`
   text-align: left;
 `;
 
+const selectContentManagerListViewPluginOptions = state =>
+  state.get('content-manager_listView').contentType.pluginOptions;
+
+const selectI18NLocales = state => state.get('i18n_locales').locales;
+
 const LocalePicker = () => {
-  const locales = useSelector(state => state.get('i18n_locales').locales);
+  const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
+  const locales = useSelector(selectI18NLocales);
   const [selected, setSelected] = useState(locales && locales[0]);
+
+  const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
+
+  if (!isFieldLocalized) {
+    return null;
+  }
 
   if (!locales || locales.length === 0) {
     return null;
