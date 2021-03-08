@@ -50,7 +50,7 @@
     "stylelint-processor-styled-components": "1.10.0",
     "supertest": "5.0.0",
     "wait-on": "^3.2.0",
-    "yargs": "^13.2.2"
+    "yargs": "^16.2.0"
   },
   "scripts": {
     "setup": "yarn && yarn build",
