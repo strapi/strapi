@@ -5,10 +5,12 @@
  *
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
-
+const { filterSchema } = require('@graphql-tools/utils');
+const { buildFederatedSchema } = require('@apollo/federation');
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
+const PublicationState = require('../types/publication-state');
 const Types = require('./type-builder');
 const { buildModels } = require('./type-definitions');
 const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
@@ -22,6 +24,7 @@ const { buildQuery, buildMutation } = require('./resolvers-builder');
  */
 
 const generateSchema = () => {
+  const isFederated = _.get(strapi.plugins.graphql.config, 'federation', false);
   const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
 
   // Generate type definition and query/mutation for models.
@@ -51,9 +54,12 @@ const generateSchema = () => {
   const mutationFields =
     shadowCRUD.mutation && toSDL(shadowCRUD.mutation, resolver.Mutation, null, 'mutation');
 
+  Object.assign(resolvers, PublicationState.resolver);
+
   const scalars = Types.getScalars();
 
   Object.assign(resolvers, scalars);
+
   const scalarDef = Object.keys(scalars)
     .map(key => `scalar ${key}`)
     .join('\n');
@@ -63,61 +69,66 @@ const generateSchema = () => {
       ${definition}
       ${shadowCRUD.definition}
       ${polymorphicSchema.definition}
-
       ${Types.addInput()}
-
+      
+      ${PublicationState.definition}
       type AdminUser {
         id: ID!
         username: String
+        firstname: String!
+        lastname: String!
       }
-
       type Query {
         ${queryFields}
         ${query}
       }
-
       type Mutation {
         ${mutationFields}
         ${mutation}
       }
-
       ${scalarDef}
     `;
 
-  // // Build schema.
-  if (strapi.config.environment !== 'production') {
-    // Write schema.
-    const schema = makeExecutableSchema({
-      typeDefs,
-      resolvers,
-    });
-
-    writeGenerateSchema(graphql.printSchema(schema));
-  }
-
-  // Remove custom scalar (like Upload), if not using Federation
-  // Federation requires scalar Upload defined in typeDefs to use
-  // buildFederatedSchema()
-  // (https://www.apollographql.com/docs/apollo-server/federation/implementing-services/)
-  const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
-  if (!isFederated) {
-    typeDefs = Types.removeCustomScalar(typeDefs, resolvers);
-  }
-
-  return {
-    typeDefs: gql(typeDefs),
+  // Build schema.
+  const schema = makeExecutableSchema({
+    typeDefs,
     resolvers,
-  };
+  });
+
+  const generatedSchema = filterDisabledResolvers(schema, extraResolvers);
+
+  if (strapi.config.environment !== 'production') {
+    writeGenerateSchema(generatedSchema);
+  }
+
+  return isFederated ? getFederatedSchema(generatedSchema, resolvers) : generatedSchema;
 };
+
+const getFederatedSchema = (schema, resolvers) =>
+  buildFederatedSchema([{ typeDefs: gql(graphql.printSchema(schema)), resolvers }]);
+
+const filterDisabledResolvers = (schema, extraResolvers) =>
+  filterSchema({
+    schema,
+    rootFieldFilter: (operationName, fieldName) => {
+      const resolver = _.get(extraResolvers[operationName], fieldName, true);
+
+      // resolvers set to false are filtered from the schema
+      if (resolver === false) {
+        return false;
+      }
+      return true;
+    },
+  });
 
 /**
  * Save into a file the readable GraphQL schema.
  *
  * @return void
  */
-
 const writeGenerateSchema = schema => {
-  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
+  const printSchema = graphql.printSchema(schema);
+  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', printSchema);
 };
 
 const buildModelsShadowCRUD = () => {

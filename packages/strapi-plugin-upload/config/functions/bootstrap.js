@@ -1,9 +1,6 @@
 'use strict';
-/**
- * Upload plugin bootstrap.
- *
- * It initializes the provider and sets the default settings in db.
- */
+
+const { convertToStrapiError } = require('../../errors');
 
 module.exports = async () => {
   // set plugin store
@@ -31,11 +28,27 @@ module.exports = async () => {
   registerPermissionActions();
 };
 
-const createProvider = ({ provider, providerOptions }) => {
+const wrapFunctionForErrors = fn => async (...args) => {
+  try {
+    return await fn(...args);
+  } catch (err) {
+    throw convertToStrapiError(err);
+  }
+};
+
+const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   try {
     const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
 
-    return Object.assign(Object.create(baseProvider), providerInstance);
+    return Object.assign(Object.create(baseProvider), {
+      ...providerInstance,
+      upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
+        return providerInstance.upload(file, options);
+      }),
+      delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
+        return providerInstance.delete(file, options);
+      }),
+    });
   } catch (err) {
     strapi.log.error(err);
     throw new Error(

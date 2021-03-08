@@ -7,8 +7,8 @@
 // Public node modules.
 const _ = require('lodash');
 const { ApolloServer } = require('apollo-server-koa');
-const { buildFederatedSchema } = require('@apollo/federation');
 const depthLimit = require('graphql-depth-limit');
+const { graphqlUploadKoa } = require('graphql-upload');
 const loadConfigs = require('./load-config');
 
 const attachMetadataToResolvers = (schema, { api, plugin }) => {
@@ -75,28 +75,34 @@ module.exports = strapi => {
     },
 
     initialize() {
-      const { typeDefs, resolvers } = strapi.plugins.graphql.services[
-        'schema-generator'
-      ].generateSchema();
+      const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
 
-      if (_.isEmpty(typeDefs)) {
+      if (_.isEmpty(schema)) {
         strapi.log.warn('The GraphQL schema has not been generated because it is empty');
 
         return;
       }
 
-      // Get federation config
-      const isFederated = _.get(strapi.plugins.graphql, 'config.federation', false);
-      const schemaDef = {};
-      if (isFederated) {
-        schemaDef.schema = buildFederatedSchema([{ typeDefs, resolvers }]);
-      } else {
-        schemaDef.typeDefs = typeDefs;
-        schemaDef.resolvers = resolvers;
+      const config = _.get(strapi.plugins.graphql, 'config', {});
+
+      // TODO: Remove these deprecated options in favor of `apolloServer` in the next major version
+      const deprecatedApolloServerConfig = {
+        tracing: _.get(config, 'tracing', false),
+        introspection: _.get(config, 'introspection', true),
+        engine: _.get(config, 'engine', false),
+      };
+
+      if (['tracing', 'introspection', 'engine'].some(key => _.has(config, key))) {
+        strapi.log.warn(
+          'The `tracing`, `introspection` and `engine` options are deprecated in favor of the `apolloServer` object and they will be removed in the next major version.'
+        );
       }
 
+      const apolloServerConfig = _.get(config, 'apolloServer', {});
+
       const serverParams = {
-        ...schemaDef,
+        schema,
+        uploads: false,
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
           // TODO: set loaders in the context not globally
@@ -108,36 +114,45 @@ module.exports = strapi => {
           };
         },
         formatError: err => {
-          const formatError = _.get(strapi.plugins.graphql, 'config.formatError', null);
+          const formatError = _.get(config, 'formatError', null);
 
           return typeof formatError === 'function' ? formatError(err) : err;
         },
-        validationRules: [depthLimit(strapi.plugins.graphql.config.depthLimit)],
-        tracing: _.get(strapi.plugins.graphql, 'config.tracing', false),
+        validationRules: [depthLimit(config.depthLimit)],
         playground: false,
         cors: false,
         bodyParserConfig: true,
-        introspection: _.get(strapi.plugins.graphql, 'config.introspection', true),
-        engine: _.get(strapi.plugins.graphql, 'config.engine', false),
+        // TODO: Remove these deprecated options in favor of `apolloServerConfig` in the next major version
+        ...deprecatedApolloServerConfig,
+        ...apolloServerConfig,
       };
 
       // Disable GraphQL Playground in production environment.
-      if (
-        strapi.config.environment !== 'production' ||
-        strapi.plugins.graphql.config.playgroundAlways
-      ) {
+      if (strapi.config.environment !== 'production' || config.playgroundAlways) {
         serverParams.playground = {
-          endpoint: `${strapi.config.server.url}${strapi.plugins.graphql.config.endpoint}`,
-          shareEnabled: strapi.plugins.graphql.config.shareEnabled,
+          endpoint: `${strapi.config.server.url}${config.endpoint}`,
+          shareEnabled: config.shareEnabled,
         };
       }
 
       const server = new ApolloServer(serverParams);
 
+      const uploadMiddleware = graphqlUploadKoa();
+      strapi.app.use((ctx, next) => {
+        if (ctx.path === config.endpoint) {
+          return uploadMiddleware(ctx, next);
+        }
+
+        return next();
+      });
       server.applyMiddleware({
         app: strapi.app,
-        path: strapi.plugins.graphql.config.endpoint,
+        path: config.endpoint,
       });
+
+      strapi.plugins.graphql.destroy = async () => {
+        await server.stop();
+      };
     },
   };
 };

@@ -40,6 +40,10 @@ class DatabaseManager {
     return this;
   }
 
+  async destroy() {
+    await Promise.all(this.connectors.getAll().map(connector => connector.destroy()));
+  }
+
   initializeModelsMap() {
     Object.keys(this.strapi.models).forEach(modelKey => {
       const model = this.strapi.models[modelKey];
@@ -122,6 +126,20 @@ class DatabaseManager {
     return Array.from(this.models.values()).find(model => {
       return model.globalId === globalId;
     });
+  }
+
+  getModelsByAttribute(attr) {
+    if (attr.type === 'component') {
+      return [this.getModel(attr.component)];
+    }
+    if (attr.type === 'dynamiczone') {
+      return attr.components.map(compoName => this.getModel(compoName));
+    }
+    if (attr.model || attr.collection) {
+      return [this.getModelByAssoc(attr)];
+    }
+
+    return [];
   }
 
   getModelsByPluginName(pluginName) {

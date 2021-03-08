@@ -1,6 +1,14 @@
 'use strict';
 
 const _ = require('lodash');
+const { constants, isPrivateAttribute } = require('./content-types');
+
+const {
+  ID_ATTRIBUTE,
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = constants;
 
 const sanitizeEntity = (dataSource, options) => {
   const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
@@ -20,7 +28,11 @@ const sanitizeEntity = (dataSource, options) => {
   }
 
   if (_.isNil(model)) {
-    return null;
+    if (isOutput) {
+      return null;
+    } else {
+      return data;
+    }
   }
 
   const { attributes } = model;
@@ -30,7 +42,7 @@ const sanitizeEntity = (dataSource, options) => {
     const attribute = attributes[key];
     const allowedFieldsHasKey = allowedFields.includes(key);
 
-    if (shouldRemoveAttribute(attribute, { withPrivate, isOutput })) {
+    if (shouldRemoveAttribute(model, key, attribute, { withPrivate, isOutput })) {
       return acc;
     }
 
@@ -49,16 +61,33 @@ const sanitizeEntity = (dataSource, options) => {
         return acc;
       }
 
-      const nextOptions = {
-        model: strapi.getModel(relation, attribute.plugin),
+      const baseOptions = {
         withPrivate,
         isOutput,
         includeFields: nextFields,
       };
 
-      const nextVal = Array.isArray(value)
-        ? value.map(elem => sanitizeEntity(elem, nextOptions))
-        : sanitizeEntity(value, nextOptions);
+      let sanitizeFn;
+      if (relation === '*') {
+        sanitizeFn = entity => {
+          if (_.isNil(entity) || !_.has(entity, '__contentType')) {
+            return entity;
+          }
+
+          return sanitizeEntity(entity, {
+            model: strapi.db.getModelByGlobalId(entity.__contentType),
+            ...baseOptions,
+          });
+        };
+      } else {
+        sanitizeFn = entity =>
+          sanitizeEntity(entity, {
+            model: strapi.getModel(relation, attribute.plugin),
+            ...baseOptions,
+          });
+      }
+
+      const nextVal = Array.isArray(value) ? value.map(sanitizeFn) : sanitizeFn(value);
 
       return { ...acc, [key]: nextVal };
     }
@@ -90,9 +119,8 @@ const sanitizeEntity = (dataSource, options) => {
 
 const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
-const CREATOR_FIELDS = ['created_by', 'updated_by'];
 const COMPONENT_FIELDS = ['__component'];
-const STATIC_FIELDS = ['id', '__v'];
+const STATIC_FIELDS = [ID_ATTRIBUTE, '__v'];
 
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
   const { options, primaryKey } = model;
@@ -102,7 +130,15 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
   return _.concat(
     includeFields || [],
     ...(isOutput
-      ? [primaryKey, timestamps, STATIC_FIELDS, COMPONENT_FIELDS, CREATOR_FIELDS]
+      ? [
+          primaryKey,
+          timestamps,
+          STATIC_FIELDS,
+          COMPONENT_FIELDS,
+          CREATED_BY_ATTRIBUTE,
+          UPDATED_BY_ATTRIBUTE,
+          PUBLISHED_AT_ATTRIBUTE,
+        ]
       : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
   );
 };
@@ -120,13 +156,9 @@ const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
   return [nextFields, isAllowed];
 };
 
-const shouldRemoveAttribute = (attribute, { withPrivate, isOutput }) => {
-  if (_.isNil(attribute)) {
-    return false;
-  }
-
+const shouldRemoveAttribute = (model, key, attribute = {}, { withPrivate, isOutput }) => {
   const isPassword = attribute.type === 'password';
-  const isPrivate = attribute.private === true;
+  const isPrivate = isPrivateAttribute(model, key);
 
   const shouldRemovePassword = isOutput;
   const shouldRemovePrivate = !withPrivate && isOutput;

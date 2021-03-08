@@ -1,3 +1,5 @@
+'use strict';
+
 const { convertRestQueryParams } = require('../convert-rest-query-params');
 
 describe('convertRestQueryParams', () => {
@@ -147,6 +149,26 @@ describe('convertRestQueryParams', () => {
       expect(convertRestQueryParams({ _start: input })).toMatchObject({
         start: expected,
       });
+    });
+  });
+
+  describe('Publication State param', () => {
+    test.each([
+      { _publicationState: 'foobar' },
+      { _publicationState: undefined },
+      { _publicationState: null },
+    ])('Throws on invalid params (%#)', params => {
+      expect(() => convertRestQueryParams(params)).toThrow();
+    });
+
+    test.each([
+      ['Live Mode', { _publicationState: 'live' }],
+      ['Preview Mode', { _publicationState: 'preview' }, []],
+    ])('%s', (name, params) => {
+      const result = convertRestQueryParams(params);
+
+      expect(result._publicationState).toBeUndefined();
+      expect(result.publicationState).toBe(params._publicationState);
     });
   });
 

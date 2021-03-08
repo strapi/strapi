@@ -2,7 +2,7 @@ import React, { useCallback, useReducer, useRef, useState, useEffect } from 'rea
 import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
-import { Button } from '@buffetjs/core';
+import { Button, Padded } from '@buffetjs/core';
 import {
   PopUpWarning,
   useGlobalContext,
@@ -14,7 +14,6 @@ import {
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
-import Padded from '../../components/Padded';
 import { useAppContext } from '../../hooks';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
@@ -92,7 +91,10 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
     }
 
@@ -112,7 +114,10 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
     }
 
@@ -227,7 +232,10 @@ const HomePage = () => {
         type: 'ON_DELETE_MEDIAS_SUCCEEDED',
       });
     } catch (err) {
-      strapi.notification.error(err);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: err,
+      });
 
       dispatch({
         type: 'ON_DELETE_MEDIAS_ERROR',

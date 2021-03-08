@@ -8,3 +8,5 @@ export { default as sortLinks } from './sortLinks';
 export { default as formatPermissionsFromApi } from './formatPermissionsFromApi';
 export { default as formatPermissionsToApi } from './formatPermissionsToApi';
 export { default as getExistingActions } from './getExistingActions';
+export { default as checkLatestStrapiVersion } from './checkLatestStrapiVersion';
+export { default as getRequestUrl } from './getRequestUrl';

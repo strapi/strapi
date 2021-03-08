@@ -1,14 +1,15 @@
+'use strict';
 /* eslint-disable no-useless-escape */
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
 const webpack = require('webpack');
-const getWebpackConfig = require('./webpack.config.js');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
 // eslint-disable-next-line node/no-extraneous-require
 const hasEE = require('strapi/lib/utils/ee');
+const getWebpackConfig = require('./webpack.config.js');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
@@ -233,7 +234,7 @@ async function createCacheDir(dir) {
   );
 }
 
-async function watchAdmin({ dir, host, port, options }) {
+async function watchAdmin({ dir, host, port, browser, options }) {
   // Create the cache dir containing the front-end files.
   await createCacheDir(dir);
 
@@ -251,12 +252,12 @@ async function watchAdmin({ dir, host, port, options }) {
 
   const opts = {
     clientLogLevel: 'silent',
-    hot: true,
     quiet: true,
-    open: true,
+    open: browser === 'true' ? true : browser,
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,
+      disableDotRule: true,
     },
   };
 

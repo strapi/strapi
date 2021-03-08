@@ -13,6 +13,7 @@ const initialState = {
       destination: '/list-plugins',
       isDisplayed: false,
       permissions: adminPermissions.marketplace.main,
+      notificationsCount: 0,
     },
     {
       icon: 'shopping-basket',
@@ -20,6 +21,7 @@ const initialState = {
       destination: '/marketplace',
       isDisplayed: false,
       permissions: adminPermissions.marketplace.main,
+      notificationsCount: 0,
     },
     {
       icon: 'cog',
@@ -29,6 +31,7 @@ const initialState = {
       // Permissions of this link are retrieved in the init phase
       // using the settings menu
       permissions: [],
+      notificationsCount: 0,
     },
   ],
   singleTypesSectionLinks: [],

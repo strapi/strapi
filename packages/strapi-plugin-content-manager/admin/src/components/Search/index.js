@@ -8,13 +8,15 @@ import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { HeaderSearch } from 'strapi-helper-plugin';
+import { HeaderSearch, GlobalContext } from 'strapi-helper-plugin';
 import getTrad from '../../utils/getTrad';
 
 const WAIT = 400;
 
 class Search extends React.Component {
-  state = { value: this.props.initValue };
+  static contextType = GlobalContext;
+
+  state = { didType: false, value: this.props.initValue };
 
   timer = null;
 
@@ -29,23 +31,26 @@ class Search extends React.Component {
   resetState = () => this.setState({ value: '' });
 
   handleChange = ({ target }) => {
+    if (!this.state.didType) {
+      this.context.emitEvent('didSearch');
+    }
+
     clearTimeout(this.timer);
-    this.setState({ value: target.value });
+    this.setState({ value: target.value, didType: !!target.value });
     this.timer = setTimeout(() => this.triggerChange(target.value), WAIT);
   };
 
   handleClick = () => {
-    this.setState({ value: '' });
+    this.setState({ value: '', didType: false });
     this.triggerChange('');
   };
 
-  triggerChange = value =>
-    this.props.changeParams({
-      target: {
-        name: '_q',
-        value,
-      },
-    });
+  triggerChange = value => {
+    const method = value ? 'push' : 'remove';
+    const params = method === 'push' ? { _q: value, page: 1 } : { _q: '' };
+
+    this.props.changeParams(params, method);
+  };
 
   render() {
     const { model } = this.props;

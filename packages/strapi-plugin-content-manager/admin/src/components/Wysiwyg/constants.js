@@ -82,7 +82,7 @@ export const CONTROLS = [
       className: 'link',
       hideLabel: true,
       handler: 'addContent',
-      text: '[text](textToReplace)',
+      text: '[textToReplace](link)',
     },
     {
       label: 'quotes',

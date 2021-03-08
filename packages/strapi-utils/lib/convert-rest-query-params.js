@@ -1,9 +1,17 @@
+'use strict';
+
 /**
  * Converts the standard Strapi REST query params to a moe usable format for querying
- * You can read more here: https://strapi.io/documentation/3.0.0-beta.x/guides/filters.html
+ * You can read more here: https://strapi.io/documentation/developer-docs/latest/content-api/parameters.html#filters
  */
 
 const _ = require('lodash');
+const {
+  constants: { DP_PUB_STATES },
+} = require('./content-types');
+
+const BOOLEAN_OPERATORS = ['or'];
+const QUERY_OPERATORS = ['_where', '_or'];
 
 /**
  * Global converter
@@ -35,7 +43,11 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     Object.assign(finalParams, convertLimitQueryParams(params._limit));
   }
 
-  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where']);
+  if (_.has(params, '_publicationState')) {
+    Object.assign(finalParams, convertPublicationStateParams(params._publicationState));
+  }
+
+  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState']);
   const whereClauses = [];
 
   if (_.keys(whereParams).length > 0) {
@@ -114,6 +126,22 @@ const convertLimitQueryParams = limitQuery => {
   };
 };
 
+/**
+ * publicationState query parser
+ * @param {string} publicationState - eg: 'live', 'preview'
+ */
+const convertPublicationStateParams = publicationState => {
+  if (!DP_PUB_STATES.includes(publicationState)) {
+    throw new Error(
+      `convertPublicationStateParams expected a value from: ${DP_PUB_STATES.join(
+        ', '
+      )}. Got ${publicationState} instead`
+    );
+  }
+
+  return { publicationState };
+};
+
 // List of all the possible filters
 const VALID_REST_OPERATORS = [
   'eq',
@@ -130,8 +158,6 @@ const VALID_REST_OPERATORS = [
   'gte',
   'null',
 ];
-
-const BOOLEAN_OPERATORS = ['or'];
 
 /**
  * Parse where params
@@ -193,4 +219,5 @@ const convertWhereClause = (whereClause, value) => {
 module.exports = {
   convertRestQueryParams,
   VALID_REST_OPERATORS,
+  QUERY_OPERATORS,
 };

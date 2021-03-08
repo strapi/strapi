@@ -6,6 +6,7 @@
     "description": ""
   },
   "options": {
+    "draftAndPublish": false,
     "increments": true,
     "timestamps": [
       "created_at",
@@ -14,16 +15,12 @@
     "comment": ""
   },
   "attributes": {
-    "city": {
-      "type": "string",
-      "required": true
-    },
     "postal_coder": {
       "type": "string"
     },
     "categories": {
-      "collection": "category",
       "via": "addresses",
+      "collection": "category",
       "dominant": true
     },
     "cover": {
@@ -45,6 +42,15 @@
       ],
       "plugin": "upload",
       "required": false
+    },
+    "city": {
+      "type": "string",
+      "required": true,
+      "maxLength": 200
+    },
+    "likes": {
+      "collection": "like",
+      "via": "address"
     }
   }
 }

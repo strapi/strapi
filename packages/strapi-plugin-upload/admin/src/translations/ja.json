@@ -56,14 +56,13 @@
   "modal.upload-list.sub-header.button": "別のアセットを追加する",
   "plugin.description.long": "メディアファイルの管理",
   "plugin.description.short": "メディアファイルの管理",
-  "notification.link-copied": "クリップボードにリンクをコピーしました。",
   "plugin.name": "メディアライブラリ",
   "search.placeholder": "アセットの検索...",
+  "settings.form.autoOrientation.description": "EXIF情報に従って画像を自動的に回転させます。",
+  "settings.form.autoOrientation.label": "画像の自動方向補正機能を有効にする",
   "settings.form.responsiveDimensions.description": "アップロードされたアセットから複数のサイズ（大、中、小）を自動的に生成します。",
   "settings.form.responsiveDimensions.label": "レスポンシブに最適化するアップロードを有効にする",
   "settings.form.sizeOptimization.label": "サイズの最適化を有効にする (品質は落とさない)",
-  "settings.form.autoOrientation.label": "画像の自動方向補正機能を有効にする",
-  "settings.form.autoOrientation.description": "EXIF情報に従って画像を自動的に回転させます。",
   "settings.form.videoPreview.description": "動画（GIF）の6秒プレビューを生成します。",
   "settings.form.videoPreview.label": "プレビュー",
   "settings.header.label": "メディアライブラリ - 設定",
@@ -77,6 +76,6 @@
   "sort.name_desc": "アルファベット逆順（Z〜A",
   "sort.updated_at_asc": "アップデートが古い順",
   "sort.updated_at_desc": "アップデートが新しい順",
-  "window.confirm.close-modal.files": "まだアップロードされていないファイルがありますが、いいですか？",
-  "window.confirm.close-modal.file": "保存されていない変更がありますが、いいですか？。"
+  "window.confirm.close-modal.file": "保存されていない変更がありますが、いいですか？。",
+  "window.confirm.close-modal.files": "まだアップロードされていないファイルがありますが、いいですか？"
 }

@@ -32,7 +32,7 @@ const registerProviderActionSchema = yup
           then: yup
             .array()
             .of(yup.string())
-            .required(),
+            .requiredAllowEmpty(),
           otherwise: yup
             .mixed()
             .oneOf([undefined], 'subjects should only be defined for the "contentTypes" section'),
@@ -61,6 +61,9 @@ const registerProviderActionSchema = yup
                 return subCat === undefined;
               }
             ),
+        }),
+        options: yup.object({
+          fieldsRestriction: yup.boolean(),
         }),
       })
       .noUnknown()

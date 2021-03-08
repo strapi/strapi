@@ -1,13 +1,14 @@
 'use strict';
 
 const _ = require('lodash');
+const { getService } = require('../../../utils');
 const {
   isSortable,
   isSearchable,
   isVisible,
   isRelation,
+  getDefaultMainField,
 } = require('./attributes');
-const { formatContentTypeSchema } = require('../../ContentTypes');
 
 function createDefaultMetadatas(schema) {
   return {
@@ -26,18 +27,6 @@ function createDefaultMetadatas(schema) {
   };
 }
 
-function createDefaultMainField(schema) {
-  if (!schema) return 'id';
-
-  const mainField = Object.keys(schema.attributes).find(
-    key =>
-      schema.attributes[key].type === 'string' &&
-      !['id', schema.primaryKey].includes(key)
-  );
-
-  return mainField || 'id';
-}
-
 function createDefaultMetadata(schema, name) {
   const edit = {
     label: _.upperFirst(name),
@@ -48,9 +37,13 @@ function createDefaultMetadata(schema, name) {
   };
 
   if (isRelation(schema.attributes[name])) {
-    const { targetModel, plugin } = schema.attributes[name];
-    const targetSchema = getTargetSchema(targetModel, plugin);
-    edit.mainField = createDefaultMainField(targetSchema);
+    const { targetModel } = schema.attributes[name];
+
+    const targetSchema = getTargetSchema(targetModel);
+
+    if (targetSchema) {
+      edit.mainField = getDefaultMainField(targetSchema);
+    }
   }
 
   _.assign(
@@ -83,20 +76,15 @@ function createDefaultMetadata(schema, name) {
 
 async function syncMetadatas(configuration, schema) {
   // clear all keys that do not exist anymore
-  if (_.isEmpty(configuration.metadatas)) return createDefaultMetadatas(schema);
+  if (_.isEmpty(configuration.metadatas)) {
+    return createDefaultMetadatas(schema);
+  }
 
   // remove old keys
-  const metasWithValidKeys = _.pick(
-    configuration.metadatas,
-    Object.keys(schema.attributes)
-  );
+  const metasWithValidKeys = _.pick(configuration.metadatas, Object.keys(schema.attributes));
 
   // add new keys and missing fields
-  const metasWithDefaults = _.merge(
-    {},
-    createDefaultMetadatas(schema),
-    metasWithValidKeys
-  );
+  const metasWithDefaults = _.merge({}, createDefaultMetadatas(schema), metasWithValidKeys);
 
   // clear the invalid mainFields
   const updatedMetas = Object.keys(metasWithDefaults).reduce((acc, key) => {
@@ -128,16 +116,12 @@ async function syncMetadatas(configuration, schema) {
     if (edit.mainField === 'id') return acc;
 
     // check the mainField in the targetModel
-    const targetSchema = getTargetSchema(attr.targetModel, attr.plugin);
+    const targetSchema = getTargetSchema(attr.targetModel);
 
     if (!targetSchema) return acc;
 
     if (!isSortable(targetSchema, edit.mainField)) {
-      _.set(
-        updatedMeta,
-        ['edit', 'mainField'],
-        createDefaultMainField(targetSchema)
-      );
+      _.set(updatedMeta, ['edit', 'mainField'], getDefaultMainField(targetSchema));
       _.set(acc, [key], updatedMeta);
       return acc;
     }
@@ -148,14 +132,8 @@ async function syncMetadatas(configuration, schema) {
   return _.assign(metasWithDefaults, updatedMetas);
 }
 
-const getTargetSchema = (name, plugin) => {
-  const model = strapi.getModel(name, plugin);
-  if (!model) return null;
-
-  return {
-    ...formatContentTypeSchema(model),
-    primaryKey: model.primaryKey,
-  };
+const getTargetSchema = targetModel => {
+  return getService('content-types').findContentType(targetModel);
 };
 
 module.exports = {

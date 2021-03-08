@@ -3,7 +3,7 @@ import { intersectionWith } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
-
+import { useIntl } from 'react-intl';
 import { usePermissionsContext } from '../../../../../../../../admin/src/hooks';
 import CheckboxWrapper from '../../../../../../../../admin/src/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/CheckboxWrapper';
 import BaselineAlignment from '../../../../../../../../admin/src/components/Roles/Permissions/PluginsAndSettingsPermissions/PermissionRow/BaselineAlignment';
@@ -19,15 +19,10 @@ const Border = styled.div`
   padding: 0px 10px;
 `;
 
-const SubCategory = ({ subCategory }) => {
+const SubCategory = ({ categoryName, subCategory }) => {
+  const { formatMessage } = useIntl();
   const [modal, setModal] = useState({ isOpen: false, isMounted: false });
-  const {
-    isSuperAdmin,
-    pluginsAndSettingsPermissions,
-    onPluginSettingPermission,
-    onPluginSettingSubCategoryPermission,
-    onPluginSettingConditionsSelect,
-  } = usePermissionsContext();
+  const { isSuperAdmin, pluginsAndSettingsPermissions, dispatch } = usePermissionsContext();
 
   const checkPermission = useCallback(
     action => {
@@ -39,7 +34,10 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const handlePermission = action => {
-    onPluginSettingPermission(action);
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_ACTION',
+      action,
+    });
   };
 
   const currentPermissions = useMemo(() => {
@@ -71,10 +69,11 @@ const SubCategory = ({ subCategory }) => {
     return Object.values(categoryConditions).flat().length > 0;
   }, [categoryConditions]);
 
-  const handleSubCategoryPermissions = () => {
-    onPluginSettingSubCategoryPermission({
+  const handleSubCategoryPermissions = ({ target: { value } }) => {
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_SUB_CATEGORY_ACTIONS',
       actions: subCategory.actions,
-      shouldEnable: !hasAllCategoryActions,
+      shouldEnable: value,
     });
   };
 
@@ -111,7 +110,10 @@ const SubCategory = ({ subCategory }) => {
   );
 
   const handleConditionsSubmit = conditions => {
-    onPluginSettingConditionsSelect(conditions);
+    dispatch({
+      type: 'ON_PLUGIN_SETTING_CONDITIONS_SELECT',
+      conditions,
+    });
   };
 
   return (
@@ -134,7 +136,7 @@ const SubCategory = ({ subCategory }) => {
             <BaselineAlignment />
             <Checkbox
               name={`select-all-${subCategory.subCategory}`}
-              message="Select all"
+              message={formatMessage({ id: 'app.utils.select-all' })}
               disabled={isSuperAdmin}
               onChange={handleSubCategoryPermissions}
               someChecked={hasSomeCategoryActions}
@@ -174,6 +176,7 @@ const SubCategory = ({ subCategory }) => {
           onToggle={handleToggleModal}
           isOpen={modal.isOpen}
           onClosed={handleClosed}
+          headerBreadCrumbs={[categoryName, subCategory.subCategory]}
         />
       )}
     </>
@@ -181,6 +184,7 @@ const SubCategory = ({ subCategory }) => {
 };
 
 SubCategory.propTypes = {
+  categoryName: PropTypes.string.isRequired,
   subCategory: PropTypes.object.isRequired,
 };
 

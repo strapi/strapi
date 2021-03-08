@@ -3,6 +3,9 @@
     "name": "test",
     "description": ""
   },
+  "options": {
+    "draftAndPublish": false
+  },
   "attributes": {
     "type": {
       "type": "string",

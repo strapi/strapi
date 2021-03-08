@@ -6,6 +6,7 @@
     "description": ""
   },
   "options": {
+    "draftAndPublish": true,
     "increments": true,
     "timestamps": true,
     "comment": ""
@@ -15,8 +16,8 @@
       "type": "string"
     },
     "addresses": {
-      "via": "categories",
-      "collection": "address"
+      "collection": "address",
+      "via": "categories"
     }
   }
 }

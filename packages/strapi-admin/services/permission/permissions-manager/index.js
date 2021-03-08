@@ -3,17 +3,16 @@
 const _ = require('lodash');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
-const { sanitizeEntity } = require('strapi-utils');
+const {
+  sanitizeEntity,
+  contentTypes: { constants },
+} = require('strapi-utils');
 const { buildStrapiQuery, buildCaslQuery } = require('./query-builers');
 
-module.exports = (ability, action, model) => ({
+module.exports = ({ ability, action, model }) => ({
   ability,
   action,
   model,
-
-  get query() {
-    return buildStrapiQuery(buildCaslQuery(ability, action, model));
-  },
 
   get isAllowed() {
     return this.ability.can(action, model);
@@ -27,10 +26,19 @@ module.exports = (ability, action, model) => ({
     return this.sanitize(data, { ...options, isOutput: false });
   },
 
-  queryFrom(query) {
+  getQuery(queryAction = action) {
+    if (_.isUndefined(queryAction)) {
+      throw new Error('Action must be defined to build a permission query');
+    }
+
+    return buildStrapiQuery(buildCaslQuery(ability, queryAction, model));
+  },
+
+  queryFrom(query = {}, action) {
+    const permissionQuery = this.getQuery(action);
     return {
       ...query,
-      _where: query._where ? _.concat(this.query, query._where) : [this.query],
+      _where: query._where ? _.concat(permissionQuery, query._where) : [permissionQuery],
     };
   },
 
@@ -43,7 +51,7 @@ module.exports = (ability, action, model) => ({
     } = options;
 
     if (_.isArray(data)) {
-      return data.map(this.sanitize.bind(this));
+      return data.map(entity => this.sanitize(entity, { action, withPrivate, isOutput }));
     }
 
     const permittedFields = permittedFieldsOf(ability, actionOverride, subject);
@@ -52,11 +60,16 @@ module.exports = (ability, action, model) => ({
     );
     const shouldIncludeAllFields = _.isEmpty(permittedFields) && !hasAtLeastOneRegisteredField;
 
-    return sanitizeEntity(data, {
+    const sanitizedEntity = sanitizeEntity(data, {
       model: strapi.getModel(model),
       includeFields: shouldIncludeAllFields ? null : permittedFields,
       withPrivate,
       isOutput,
     });
+
+    return _.omit(sanitizedEntity, [
+      `${constants.CREATED_BY_ATTRIBUTE}.roles`,
+      `${constants.UPDATED_BY_ATTRIBUTE}.roles`,
+    ]);
   },
 });

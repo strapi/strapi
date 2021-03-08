@@ -1,13 +1,11 @@
 'use strict';
-
-// required first because it loads env files.
-const loadConfiguration = require('../core/app-configuration');
-
 const { green } = require('chalk');
 
 // eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('strapi-admin');
 const { getConfigUrls } = require('strapi-utils');
+const loadConfiguration = require('../core/app-configuration');
+const ee = require('../utils/ee');
 
 const addSlash = require('../utils/addSlash');
 /**
@@ -25,6 +23,8 @@ module.exports = async ({ clean, optimization }) => {
     await strapiAdmin.clean({ dir });
   }
 
+  ee({ dir });
+
   return strapiAdmin
     .build({
       dir,
@@ -34,6 +34,7 @@ module.exports = async ({ clean, optimization }) => {
       options: {
         backend: serverUrl,
         publicPath: addSlash(adminPath),
+        features: ee.isEE ? ee.features.getEnabled() : [],
       },
     })
     .then(() => {

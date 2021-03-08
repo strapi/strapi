@@ -32,7 +32,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   content: '\\f00c';
   font-family: 'FontAwesome';
   position: absolute;
-  left: 0px;
+  left: 0;
   top: 55%;
   margin-top: calc(-14px / 2);
   width: 14px;
@@ -93,7 +93,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
   content: '\\f00c';
   font-family: 'FontAwesome';
   position: absolute;
-  left: 0px;
+  left: 0;
   top: 55%;
   margin-top: calc(-14px / 2);
   width: 14px;
@@ -289,7 +289,7 @@ exports[`<Inputs /> should match the snapshot if type is events 1`] = `
           </td>
           <td>
             <span>
-              Edit
+              Update
             </span>
           </td>
           <td>
@@ -871,7 +871,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    className="css-6q0nyr-Svg"
+                    className="css-tj5bde-Svg"
                     focusable="false"
                     height={20}
                     viewBox="0 0 20 20"
@@ -893,7 +893,7 @@ exports[`<Inputs /> should match the snapshot if type is headers 1`] = `
                 >
                   <svg
                     aria-hidden="true"
-                    className="css-6q0nyr-Svg"
+                    className="css-tj5bde-Svg"
                     focusable="false"
                     height={20}
                     viewBox="0 0 20 20"

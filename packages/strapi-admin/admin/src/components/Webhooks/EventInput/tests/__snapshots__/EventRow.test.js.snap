@@ -32,7 +32,7 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   content: '\\f00c';
   font-family: 'FontAwesome';
   position: absolute;
-  left: 0px;
+  left: 0;
   top: 55%;
   margin-top: calc(-14px / 2);
   width: 14px;
@@ -100,7 +100,7 @@ exports[`<EventRow /> should match the snapshot 1`] = `
   content: '\\f00c';
   font-family: 'FontAwesome';
   position: absolute;
-  left: 0px;
+  left: 0;
   top: 55%;
   margin-top: calc(-14px / 2);
   width: 14px;

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
@@ -6,6 +6,7 @@ import { useIntl } from 'react-intl';
 import { usePermissionsContext } from '../../../../../../../admin/src/hooks';
 import PermissionCheckbox from '../../../../../../../admin/src/components/Roles/Permissions/ContentTypes/PermissionCheckbox';
 import {
+  getPermissionsCountByAction,
   getContentTypesActionsSize,
   isAttributeAction,
 } from '../../../../../../../admin/src/components/Roles/Permissions/utils';
@@ -14,69 +15,120 @@ import Wrapper from '../../../../../../../admin/src/components/Roles/Permissions
 const PermissionsHeader = ({ allAttributes, contentTypes }) => {
   const { formatMessage } = useIntl();
   const {
-    onSetAttributesPermissions,
-    onGlobalPermissionsActionSelect,
+    dispatch,
     permissionsLayout,
     contentTypesPermissions,
     isSuperAdmin,
   } = usePermissionsContext();
 
-  const handleCheck = action => {
+  const handleCheck = (action, value) => {
+    const splitAction = action.split('.');
+    const isPublishAction = splitAction[splitAction.length - 1] === 'publish';
+
     // If the action is present in the actions of the attributes
     // Then we set all the attributes contentTypesPermissions otherwise,
     // we only set the global content type actions
+    // Create Read or Update
     if (isAttributeAction(action)) {
-      onSetAttributesPermissions({
+      dispatch({
+        type: 'SET_ATTRIBUTES_PERMISSIONS',
         attributes: allAttributes,
         action,
-        shouldEnable: !hasAllActions(action),
+        shouldEnable: !value,
         hasContentTypeAction: true,
       });
+    } else if (isPublishAction) {
+      dispatch({
+        type: 'ON_GLOBAL_PUBLISH_ACTION_SELECT',
+        contentTypes,
+        value: !value,
+      });
+      // Delete action
     } else {
-      onGlobalPermissionsActionSelect({
+      dispatch({
+        type: 'GLOBAL_PERMISSIONS_SELECT',
         action,
         contentTypes,
-        shouldEnable: !hasAllActions(action),
+        shouldEnable: !value,
       });
     }
   };
 
-  // Get the count of content type contentTypesPermissions by action.
-  const countContentTypesActionPermissions = useCallback(
-    action => {
-      return getContentTypesActionsSize(contentTypes, contentTypesPermissions, action);
-    },
-    [contentTypes, contentTypesPermissions]
+  const hasSomeActions = (action, subjects) => {
+    if (!isAttributeAction(action)) {
+      const numberOfContentTypesPermissions = getContentTypesActionsSize(
+        filteredContentTypes(subjects),
+        contentTypesPermissions,
+        action
+      );
+
+      return (
+        numberOfContentTypesPermissions > 0 &&
+        numberOfContentTypesPermissions < filteredContentTypes(subjects).length
+      );
+    }
+
+    const numberOfPermissions = getPermissionsCountByAction(
+      contentTypes,
+      contentTypesPermissions,
+      action
+    );
+
+    return numberOfPermissions > 0 && numberOfPermissions < allAttributes.length;
+  };
+
+  const hasAllActions = (action, subjects) => {
+    if (!isAttributeAction(action)) {
+      const numberOfContentTypesPermissions = getContentTypesActionsSize(
+        filteredContentTypes(subjects),
+        contentTypesPermissions,
+        action
+      );
+
+      return numberOfContentTypesPermissions === filteredContentTypes(subjects).length;
+    }
+
+    const numberOfPermissions = getPermissionsCountByAction(
+      contentTypes,
+      contentTypesPermissions,
+      action
+    );
+
+    return numberOfPermissions === allAttributes.length;
+  };
+
+  const filteredContentTypes = useCallback(
+    subjects => contentTypes.filter(contentType => subjects.includes(contentType.uid)),
+    [contentTypes]
   );
 
-  const hasSomeActions = action => {
-    return (
-      countContentTypesActionPermissions(action) > 0 &&
-      countContentTypesActionPermissions(action) < contentTypes.length
+  const permissionsToDisplay = useMemo(() => {
+    return permissionsLayout.sections.contentTypes.filter(
+      permission => filteredContentTypes(permission.subjects).length > 0
     );
-  };
-
-  const hasAllActions = action => {
-    return countContentTypesActionPermissions(action) === contentTypes.length;
-  };
+  }, [filteredContentTypes, permissionsLayout.sections.contentTypes]);
 
   return (
     <Wrapper disabled={isSuperAdmin}>
       <Flex>
-        {permissionsLayout.sections.contentTypes.map(permissionLayout => (
-          <PermissionCheckbox
-            key={permissionLayout.action}
-            name={permissionLayout.action}
-            disabled={isSuperAdmin}
-            value={hasAllActions(permissionLayout.action)}
-            someChecked={hasSomeActions(permissionLayout.action)}
-            message={formatMessage({
-              id: `Settings.roles.form.permissions.${permissionLayout.displayName.toLowerCase()}`,
-              defaultMessage: permissionLayout.displayName,
-            })}
-            onChange={() => handleCheck(permissionLayout.action)}
-          />
-        ))}
+        {permissionsToDisplay.map(({ action, displayName, subjects }) => {
+          const value = hasAllActions(action, subjects);
+
+          return (
+            <PermissionCheckbox
+              key={action}
+              name={action}
+              disabled={isSuperAdmin}
+              value={value}
+              someChecked={hasSomeActions(action, subjects)}
+              message={formatMessage({
+                id: `Settings.roles.form.permissions.${displayName.toLowerCase()}`,
+                defaultMessage: displayName,
+              })}
+              onChange={() => handleCheck(action, value)}
+            />
+          );
+        })}
       </Flex>
     </Wrapper>
   );

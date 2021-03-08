@@ -8,14 +8,19 @@ const Wrapper = styled.div`
 
 const Header = styled.div`
   margin-bottom: 1.1rem;
-  padding-top: 2.8rem;
+  padding-top: 1.1rem;
   font-size: 18px;
   font-weight: ${({ theme }) => theme.main.fontWeights.bold};
   line-height: 3.6rem;
+`;
+
+const Sticky = styled.div`
+  position: sticky;
+  top: 70px;
 `;
 
 Header.propTypes = {
   ...themePropTypes,
 };
 
-export { Header, Wrapper };
+export { Header, Wrapper, Sticky };

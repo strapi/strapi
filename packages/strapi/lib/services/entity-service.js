@@ -1,7 +1,15 @@
 'use strict';
 
 const _ = require('lodash');
+const {
+  sanitizeEntity,
+  webhook: webhookUtils,
+  contentTypes: contentTypesUtils,
+} = require('strapi-utils');
 const uploadFiles = require('./utils/upload-files');
+
+// TODO: those should be strapi events used by the webhooks not the other way arround
+const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
 module.exports = ({ db, eventHub, entityValidator }) => ({
   /**
@@ -18,11 +26,19 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
 
     // return first element and ignore filters
     if (kind === 'singleType') {
-      const results = await db.query(model).find({ _limit: 1 }, populate);
+      const results = await db.query(model).find({ ...params, _limit: 1 }, populate);
       return _.first(results) || null;
     }
 
     return db.query(model).find(params, populate);
+  },
+
+  findPage({ params, populate }, { model }) {
+    return db.query(model).findPage(params, populate);
+  },
+
+  findWithRelationCounts({ params, populate }, { model }) {
+    return db.query(model).findWithRelationCounts(params, populate);
   },
 
   /**
@@ -52,9 +68,9 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    */
 
   async create({ data, files }, { model }) {
-    const { kind } = db.getModel(model);
+    const modelDef = db.getModel(model);
 
-    if (kind === 'singleType') {
+    if (modelDef.kind === 'singleType') {
       // check if there is already one entry and throw
       const count = await db.query(model).count();
       if (count >= 1) {
@@ -62,18 +78,20 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
       }
     }
 
-    const validData = await entityValidator.validateEntity(db.getModel(model), data);
+    const isDraft = contentTypesUtils.isDraft(data, modelDef);
+
+    const validData = await entityValidator.validateEntityCreation(modelDef, data, { isDraft });
 
     let entry = await db.query(model).create(validData);
 
-    if (files) {
+    if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
 
-    eventHub.emit('entry.create', {
-      model: db.getModel(model).modelName,
-      entry,
+    eventHub.emit(ENTRY_CREATE, {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(entry, { model: modelDef }),
     });
 
     return entry;
@@ -86,18 +104,25 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    */
 
   async update({ params, data, files }, { model }) {
-    const validData = await entityValidator.validateEntityUpdate(db.getModel(model), data);
+    const modelDef = db.getModel(model);
+    const existingEntry = await db.query(model).findOne(params);
+
+    const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
+
+    const validData = await entityValidator.validateEntityUpdate(modelDef, data, {
+      isDraft,
+    });
 
     let entry = await db.query(model).update(params, validData);
 
-    if (files) {
+    if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(entry, files, { model });
       entry = await this.findOne({ params: { id: entry.id } }, { model });
     }
 
-    eventHub.emit('entry.update', {
-      model: db.getModel(model).modelName,
-      entry,
+    eventHub.emit(ENTRY_UPDATE, {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(entry, { model: modelDef }),
     });
 
     return entry;
@@ -112,9 +137,10 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
   async delete({ params }, { model }) {
     const entry = await db.query(model).delete(params);
 
-    eventHub.emit('entry.delete', {
-      model: db.getModel(model).modelName,
-      entry,
+    const modelDef = db.getModel(model);
+    eventHub.emit(ENTRY_DELETE, {
+      model: modelDef.modelName,
+      entry: sanitizeEntity(entry, { model: modelDef }),
     });
 
     return entry;
@@ -126,8 +152,16 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
    * @return {Promise}
    */
 
-  search({ params }, { model }) {
-    return db.query(model).search(params);
+  search({ params, populate }, { model }) {
+    return db.query(model).search(params, populate);
+  },
+
+  searchWithRelationCounts({ params, populate }, { model }) {
+    return db.query(model).searchWithRelationCounts(params, populate);
+  },
+
+  searchPage({ params, populate }, { model }) {
+    return db.query(model).searchPage(params, populate);
   },
 
   /**

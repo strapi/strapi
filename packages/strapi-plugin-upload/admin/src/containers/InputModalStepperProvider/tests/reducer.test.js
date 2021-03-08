@@ -2046,6 +2046,7 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       const state = {
         currentStep: 'test',
         fileToEdit: null,
+        selectedFiles: [],
         files: [
           {
             id: 13252341,
@@ -2060,7 +2061,63 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
       };
       const expected = {
         currentStep: 'test',
+        selectedFiles: [],
         files: [
+          {
+            id: 13252341,
+            alternativeText: 'My first picture',
+            caption: null,
+            name: 'picture1',
+            updated_at: '2020-03-30T10:48:26+02:00',
+            created_at: '2020-03-30T10:48:26+02:00',
+          },
+          { id: 5564723, alternativeText: 'My second picture', caption: '', name: '' },
+        ],
+        fileToEdit: {
+          id: 13252341,
+          abortController: new AbortController(),
+          file: {
+            name: 'picture1',
+            created_at: '2020-03-30T10:48:26+02:00',
+          },
+          fileInfo: {
+            alternativeText: 'My first picture',
+            caption: null,
+            name: 'picture1',
+          },
+          hasError: false,
+          errorMessage: null,
+          isUploading: false,
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+    it('should add a selected file to edit', () => {
+      const action = {
+        type: 'SET_FILE_TO_EDIT',
+        fileId: 13252341,
+      };
+      const state = {
+        currentStep: 'test',
+        fileToEdit: null,
+        files: [],
+        selectedFiles: [
+          {
+            id: 13252341,
+            alternativeText: 'My first picture',
+            caption: null,
+            name: 'picture1',
+            updated_at: '2020-03-30T10:48:26+02:00',
+            created_at: '2020-03-30T10:48:26+02:00',
+          },
+          { id: 5564723, alternativeText: 'My second picture', caption: '', name: '' },
+        ],
+      };
+      const expected = {
+        currentStep: 'test',
+        files: [],
+        selectedFiles: [
           {
             id: 13252341,
             alternativeText: 'My first picture',
@@ -2190,6 +2247,71 @@ describe('UPLOAD | containers | ModalStepper | reducer', () => {
         },
       };
 
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_SUBMIT_EDIT_NEW_FILE', () => {
+    it('should update file info after edit', () => {
+      const action = {
+        type: 'ON_SUBMIT_EDIT_NEW_FILE',
+      };
+      const state = {
+        currentStep: 'edit-new',
+        fileToEdit: {
+          abortController: new AbortController(),
+          file: { name: 'test1', ok: true },
+          fileInfo: {
+            alternativeText: 'test1 alternativeText',
+            caption: 'test1 caption',
+            name: 'test1 name',
+          },
+          originalName: 'test1',
+          hasError: false,
+          errorMessage: null,
+          isUploading: false,
+          originalIndex: 0,
+          tempId: null,
+        },
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: '',
+              caption: '',
+              name: 'test1',
+            },
+            originalName: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+        ],
+      };
+      const expected = {
+        currentStep: 'edit-new',
+        fileToEdit: null,
+        filesToUpload: [
+          {
+            abortController: new AbortController(),
+            file: { name: 'test1', ok: true },
+            fileInfo: {
+              alternativeText: 'test1 alternativeText',
+              caption: 'test1 caption',
+              name: 'test1 name',
+            },
+            originalName: 'test1',
+            hasError: false,
+            errorMessage: null,
+            isUploading: false,
+            originalIndex: 0,
+            tempId: null,
+          },
+        ],
+      };
       expect(reducer(state, action)).toEqual(expected);
     });
   });

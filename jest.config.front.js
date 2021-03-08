@@ -44,6 +44,7 @@ module.exports = {
     PUBLIC_PATH: '/admin',
     REMOTE_URL: '/',
     NODE_ENV: 'test',
+    ENABLED_EE_FEATURES: [],
   },
   moduleDirectories: [
     'node_modules',
@@ -58,6 +59,7 @@ module.exports = {
     '<rootDir>/examples/getstarted/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '/OLD/',
+    '__tests__',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/test/config/front/enzyme-setup.js',
@@ -65,7 +67,7 @@ module.exports = {
   ],
   testRegex: 'tests/.*\\.test\\.js$',
   transform: {
-    '^.+\\.js$': 'babel-jest',
+    '^.+\\.js$': ['@swc-node/jest', { jsx: true, dynamicImport: true }],
     '\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
       '<rootDir>/fileTransformer.js',
   },

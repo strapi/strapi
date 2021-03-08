@@ -5,12 +5,14 @@
     "name": "Homepage"
   },
   "options": {
+    "draftAndPublish": true,
     "increments": true,
     "timestamps": true
   },
   "attributes": {
     "title": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "slug": {
       "type": "uid",
@@ -20,21 +22,14 @@
     "single": {
       "model": "file",
       "via": "related",
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ],
+      "allowedTypes": ["images", "files", "videos"],
       "plugin": "upload",
       "required": false
     },
     "multiple": {
       "collection": "file",
       "via": "related",
-      "allowedTypes": [
-        "images",
-        "videos"
-      ],
+      "allowedTypes": ["images", "videos"],
       "plugin": "upload",
       "required": false
     }

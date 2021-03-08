@@ -7,6 +7,7 @@ const schema = {
   email: yup
     .string()
     .email(translatedErrors.email)
+    .lowercase()
     .required(translatedErrors.required),
   username: yup.string().nullable(),
   password: yup

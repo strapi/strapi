@@ -1,14 +1,12 @@
-import React from 'react';
-import { BackHeader, auth } from 'strapi-helper-plugin';
+import React, { useMemo } from 'react';
+import { BackHeader, BaselineAlignment, auth } from 'strapi-helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-
-import BaselineAlignement from '../../components/BaselineAlignement';
 import ContainerFluid from '../../components/ContainerFluid';
 import FormBloc from '../../components/FormBloc';
 import SizedInput from '../../components/SizedInput';
-import { Header } from '../../components/Users';
-import { useUsersForm } from '../../hooks';
+import { Header } from '../../components/Settings';
+import { useSettingsForm } from '../../hooks';
 import { form, schema } from './utils';
 
 const ProfilePage = () => {
@@ -20,14 +18,22 @@ const ProfilePage = () => {
     // eslint-disable-next-line no-unused-vars
     dispatch,
     { handleCancel, handleChange, handleSubmit },
-  ] = useUsersForm('/admin/users/me', schema, onSubmitSuccessCb, [
+  ] = useSettingsForm('/admin/users/me', schema, onSubmitSuccessCb, [
     'email',
     'firstname',
     'lastname',
     'username',
   ]);
-  const userInfos = auth.getUserInfo();
-  const headerLabel = userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
+
+  const headerLabel = useMemo(() => {
+    const userInfos = auth.getUserInfo();
+
+    if (modifiedData) {
+      return modifiedData.username || `${modifiedData.firstname} ${modifiedData.lastname}`;
+    }
+
+    return userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
+  }, [modifiedData]);
 
   return (
     <>
@@ -42,7 +48,7 @@ const ProfilePage = () => {
             onCancel={handleCancel}
             showHeaderButtonLoader={showHeaderButtonLoader}
           />
-          <BaselineAlignement top size="3px" />
+          <BaselineAlignment top size="3px" />
           <FormBloc isLoading={isLoading}>
             {Object.keys(form).map(key => {
               return (

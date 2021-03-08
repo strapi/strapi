@@ -1,10 +1,9 @@
 'use strict';
 const _ = require('lodash');
+const domain = require('../../domain/action');
 const actionProviderService = require('../permission/action-provider');
 
 describe('Action Provider Service', () => {
-  const createdActions = [];
-
   beforeEach(() => {
     global.strapi = {
       plugins: { aPlugin: {} },
@@ -37,8 +36,6 @@ describe('Action Provider Service', () => {
         ..._.omit(readAction, ['uid']),
         actionId: 'admin::marketplace.read',
       });
-
-      createdActions.push(createdAction);
     });
 
     test('Can register a settings action without subCategory', async () => {
@@ -50,7 +47,6 @@ describe('Action Provider Service', () => {
         actionId: 'admin::marketplace.create',
         subCategory: 'general',
       });
-      createdActions.push(createdAction);
     });
 
     test('Can get all registered entries (array)', () => {
@@ -59,6 +55,12 @@ describe('Action Provider Service', () => {
 
     test('Can get all registered entries (map)', () => {
       expect(actionProviderService.getAllByMap().size).toBe(2);
+    });
+
+    test('Can get an action by its actionId', () => {
+      const actionId = 'admin::marketplace.create';
+      const expected = domain.createAction(createAction);
+      expect(actionProviderService.getByActionId(actionId)).toStrictEqual(expected);
     });
 
     test('Can register a settings action with a pluginName other than "admin"', async () => {

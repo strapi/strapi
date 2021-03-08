@@ -10,7 +10,6 @@ import CardControlWrapper from './CardControlWrapper';
 import CardPreviewWrapper from './CardPreviewWrapper';
 import EmptyInputMedia from './EmptyInputMedia';
 import EmptyText from './EmptyText';
-import IconUpload from './IconUpload';
 import InputFilePreview from './InputFilePreview';
 import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
@@ -94,7 +93,10 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
   };
 
   const handleCopy = () => {
-    strapi.notification.info(getTrad('notification.link-copied'));
+    strapi.notification.toggle({
+      type: 'info',
+      message: { id: 'notification.link-copied' },
+    });
   };
 
   const handleAllowDrop = e => e.preventDefault();
@@ -156,7 +158,6 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
         </CardControlWrapper>
         {hasNoValue ? (
           <EmptyInputMedia onClick={handleClickToggleModal} disabled={disabled}>
-            <IconUpload />
             <EmptyText id={getTrad('input.placeholder')} />
           </EmptyInputMedia>
         ) : (

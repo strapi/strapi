@@ -166,7 +166,9 @@ function List({
       ? formatMessage({
           id: !isSub
             ? `${pluginId}.form.button.add.field.to.${
-                modifiedData.contentType ? modifiedData.contentType.schema.kind : editTarget
+                modifiedData.contentType
+                  ? modifiedData.contentType.schema.kind
+                  : editTarget || 'collectionType'
               }`
             : `${pluginId}.form.button.add.field.to.component`,
           defaultMessage: 'Add another field',

@@ -5,5 +5,5 @@ export { default as useFetchRole } from './useFetchRole';
 export { default as useRolesList } from './useRolesList';
 export { default as useSettingsHeaderSearchContext } from './useSettingsHeaderSearchContext';
 export { default as useSettingsMenu } from './useSettingsMenu';
-export { default as useUsersForm } from './useUsersForm';
+export { default as useSettingsForm } from './useSettingsForm';
 export { default as usePermissionsContext } from './usePermissionsContext';

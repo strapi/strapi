@@ -10,6 +10,7 @@ function useSelect(keys) {
     modifiedData,
     onChange,
     readActionAllowedFields,
+    shouldNotRunValidations,
     updateActionAllowedFields,
   } = useDataManager();
 
@@ -29,6 +30,7 @@ function useSelect(keys) {
     isCreatingEntry,
     onChange,
     readableFields,
+    shouldNotRunValidations,
     value,
   };
 }

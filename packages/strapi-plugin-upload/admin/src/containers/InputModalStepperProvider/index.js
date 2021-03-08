@@ -1,7 +1,8 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { auth, request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
+import { request, generateSearchFromFilters, useGlobalContext } from 'strapi-helper-plugin';
 import { clone, get, isEmpty, set } from 'lodash';
+import { useIntl } from 'react-intl';
 import axios from 'axios';
 import pluginId from '../../pluginId';
 import {
@@ -37,6 +38,7 @@ const InputModalStepperProvider = ({
 }) => {
   const [formErrors, setFormErrors] = useState(null);
 
+  const { formatMessage } = useIntl();
   const { emitEvent, plugins } = useGlobalContext();
   const [, updated_at] = getFileModelTimestamps(plugins);
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
@@ -83,8 +85,7 @@ const InputModalStepperProvider = ({
           const { source } = file;
 
           return axios
-            .get(`${strapi.backendURL}/${pluginId}/proxy?url=${file.fileURL}`, {
-              headers: { Authorization: `Bearer ${auth.getToken()}` },
+            .get(file.fileURL, {
               responseType: 'blob',
               cancelToken: source.token,
               timeout: 60000,
@@ -180,6 +181,12 @@ const InputModalStepperProvider = ({
   const toggleModalWarning = () => {
     dispatch({
       type: 'TOGGLE_MODAL_WARNING',
+    });
+  };
+
+  const submitEditNewFile = () => {
+    dispatch({
+      type: 'ON_SUBMIT_EDIT_NEW_FILE',
     });
   };
 
@@ -331,7 +338,10 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
       return 0;
     }
@@ -358,7 +368,10 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
 
       return [];
     }
@@ -436,11 +449,16 @@ const InputModalStepperProvider = ({
         } catch (err) {
           const status = get(err, 'response.status', get(err, 'status', null));
           const statusText = get(err, 'response.statusText', get(err, 'statusText', null));
-          const errorMessage = get(
+          let errorMessage = get(
             err,
             ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
             get(err, ['response', 'payload', 'message'], statusText)
           );
+
+          // TODO fix errors globally when the back-end sends readable one
+          if (status === 413) {
+            errorMessage = formatMessage({ id: 'app.utils.errors.file-too-big.message' });
+          }
 
           if (status) {
             dispatch({
@@ -491,6 +509,7 @@ const InputModalStepperProvider = ({
         onInputMediaChange,
         removeFilter,
         setParam,
+        submitEditNewFile,
         submitEditExistingFile,
         toggleModalWarning,
       }}

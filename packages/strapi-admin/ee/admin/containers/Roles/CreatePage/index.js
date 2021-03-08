@@ -5,11 +5,15 @@ import moment from 'moment';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
-import { CheckPagePermissions, request, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  BaselineAlignment,
+  CheckPagePermissions,
+  request,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
-import BaselineAlignement from '../../../../../admin/src/components/BaselineAlignement';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormCard from '../../../../../admin/src/components/FormBloc';
@@ -22,7 +26,7 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { goBack } = useHistory();
+  const { replace } = useHistory();
   const permissionsRef = useRef();
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
@@ -36,7 +40,10 @@ const CreatePage = () => {
         id: 'app.components.Button.reset',
         defaultMessage: 'Reset',
       }),
-      onClick: handleReset,
+      onClick: () => {
+        handleReset();
+        permissionsRef.current.resetForm();
+      },
       color: 'cancel',
       type: 'button',
     },
@@ -68,7 +75,7 @@ const CreatePage = () => {
         body: data,
       })
     )
-      .then(res => {
+      .then(async res => {
         const permissionsToSend = permissionsRef.current.getPermissions();
 
         if (id) {
@@ -78,7 +85,7 @@ const CreatePage = () => {
         }
 
         if (res.data.id && !isEmpty(permissionsToSend)) {
-          return request(`/admin/roles/${res.data.id}/permissions`, {
+          await request(`/admin/roles/${res.data.id}/permissions`, {
             method: 'PUT',
             body: { permissions: formatPermissionsToApi(permissionsToSend) },
           });
@@ -86,16 +93,23 @@ const CreatePage = () => {
 
         return res;
       })
-      .then(() => {
-        strapi.notification.success('Settings.roles.created');
-        goBack();
+      .then(res => {
+        setIsSubmiting(false);
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: 'Settings.roles.created' },
+        });
+        replace(`${settingsBaseURL}/roles/${res.data.id}`);
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.error('notification.error');
+        setIsSubmiting(false);
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       })
       .finally(() => {
-        setIsSubmiting(false);
         strapi.unlockApp();
       });
   };
@@ -139,7 +153,7 @@ const CreatePage = () => {
                 actions={headerActions(handleSubmit, handleReset)}
                 isLoading={isLayoutLoading}
               />
-              <BaselineAlignement top size="3px" />
+              <BaselineAlignment top size="3px" />
               <FormCard
                 actions={actions}
                 title={formatMessage({

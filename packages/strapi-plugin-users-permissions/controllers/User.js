@@ -7,9 +7,9 @@
  */
 
 const _ = require('lodash');
+const { sanitizeEntity } = require('strapi-utils');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
-const { sanitizeEntity } = require('strapi-utils');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
@@ -79,7 +79,7 @@ module.exports = {
    * @return {Number}
    */
   async count(ctx) {
-    if (ctx.query._q) {
+    if (_.has(ctx.query, '_q')) {
       return await strapi.plugins['users-permissions'].services.user.countSearch(ctx.query);
     }
     ctx.body = await strapi.plugins['users-permissions'].services.user.count(ctx.query);

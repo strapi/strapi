@@ -1,10 +1,20 @@
+'use strict';
+
 const _ = require('lodash');
 const { streamToBuffer } = require('../utils/file');
 
 module.exports = {
+  definition: `
+    input FileInfoInput {
+      name: String
+      alternativeText: String
+      caption: String
+    }
+  `,
   mutation: `
-    upload(refId: ID, ref: String, field: String, source: String, file: Upload!): UploadFile!
+    upload(refId: ID, ref: String, field: String, source: String, info: FileInfoInput, file: Upload!): UploadFile!
     multipleUpload(refId: ID, ref: String, field: String, source: String, files: [Upload]!): [UploadFile]!
+    updateFileInfo(id: ID!, info: FileInfoInput!): UploadFile!
   `,
   resolver: {
     Query: {
@@ -16,12 +26,11 @@ module.exports = {
     Mutation: {
       createFile: false,
       updateFile: false,
-      deleteFile: false,
       upload: {
         description: 'Upload one file',
         resolverOf: 'plugins::upload.upload.upload',
-        resolver: async (obj, { file: upload, ...fields }) => {
-          const file = await formatFile(upload, fields);
+        resolver: async (obj, { file: upload, info, ...fields }) => {
+          const file = await formatFile(upload, info, fields);
 
           const uploadedFiles = await strapi.plugins.upload.services.upload.uploadFileAndPersist(
             file
@@ -35,18 +44,36 @@ module.exports = {
         description: 'Upload one file',
         resolverOf: 'plugins::upload.upload.upload',
         resolver: async (obj, { files: uploads, ...fields }) => {
-          const files = await Promise.all(uploads.map(upload => formatFile(upload, fields)));
+          const files = await Promise.all(uploads.map(upload => formatFile(upload, {}, fields)));
 
           const uploadService = strapi.plugins.upload.services.upload;
 
           return Promise.all(files.map(file => uploadService.uploadFileAndPersist(file)));
         },
       },
+      updateFileInfo: {
+        description: 'Update file information',
+        resolverOf: 'plugins::upload.upload.upload',
+        resolver: async (obj, { id, info }) => {
+          return await strapi.plugins.upload.services.upload.updateFileInfo(id, info);
+        },
+      },
+      deleteFile: {
+        description: 'Delete one file',
+        resolverOf: 'plugins::upload.upload.destroy',
+        resolver: async (obj, options, { context }) => {
+          const file = await strapi.plugins.upload.services.upload.fetch({ id: context.params.id });
+          if (file) {
+            const fileResult = await strapi.plugins.upload.services.upload.remove(file);
+            return { file: fileResult };
+          }
+        },
+      },
     },
   },
 };
 
-const formatFile = async (upload, metas) => {
+const formatFile = async (upload, extraInfo, metas) => {
   const { filename, mimetype, createReadStream } = await upload;
 
   const { optimize } = strapi.plugins.upload.services['image-manipulation'];
@@ -61,7 +88,7 @@ const formatFile = async (upload, metas) => {
       type: mimetype,
       size: buffer.length,
     },
-    {},
+    extraInfo || {},
     metas
   );
 

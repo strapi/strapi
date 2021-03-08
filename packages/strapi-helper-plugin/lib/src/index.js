@@ -7,9 +7,11 @@ export { default as routerPropTypes } from './commonPropTypes/router';
 export { default as themePropTypes } from './commonPropTypes/themeShape';
 // Components
 export { default as BackHeader } from './components/BackHeader';
+export { default as BaselineAlignment } from './components/BaselineAlignment';
 export { default as BlockerComponent } from './components/BlockerComponent';
 export { default as Button } from './components/Button';
 export { default as ButtonModal } from './components/ButtonModal';
+export { default as Carret } from './components/Carret';
 export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
@@ -62,12 +64,14 @@ export { default as LoadingBar } from './components/LoadingBar';
 export { default as LoadingIndicator } from './components/LoadingIndicator';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 
+export { default as ModalConfirm } from './components/ModalConfirm';
 export { default as Modal } from './components/Modal';
 export { default as ModalBody } from './components/BodyModal';
 export { default as ModalHeader } from './components/ModalHeader';
 export { default as ModalFooter } from './components/FooterModal';
 export { default as ModalForm } from './components/FormModal';
 export { default as ModalSection } from './components/ModalSection';
+export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
@@ -81,6 +85,18 @@ export { default as UserProvider } from './components/UserProvider';
 export { default as ViewContainer } from './components/ViewContainer';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
+export { default as SettingsPageTitle } from './components/SettingsPageTitle';
+export { default as FormBloc } from './components/FormBloc';
+export { default as IntlInput } from './components/IntlInput';
+export { default as SizedInput } from './components/SizedInput';
+export * from './components/Permissions';
+
+// PopUpWarning
+export { default as PopUpWarningBody } from './components/PopUpWarning/Body';
+export { default as PopUpWarningFooter } from './components/PopUpWarning/StyledFooter';
+export { default as PopUpWarningHeader } from './components/PopUpWarning/Header';
+export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
+export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
@@ -124,5 +140,6 @@ export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWit
 export { default as LayoutIcon } from './svgs/Layout';
 export { default as ClearIcon } from './svgs/Clear';
 export { default as Close } from './svgs/Close';
+export { default as EyeSlashed } from './svgs/EyeSlashed';
 export { default as FilterIcon } from './svgs/Filter';
 export { default as SearchIcon } from './svgs/Search';

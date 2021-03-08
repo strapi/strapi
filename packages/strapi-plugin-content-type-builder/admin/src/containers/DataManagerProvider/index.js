@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useReducer, useState, useRef } from 'react';
+import React, { memo, useEffect, useMemo, useReducer, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, groupBy, set, size } from 'lodash';
 import {
@@ -33,14 +33,7 @@ import {
 const DataManagerProvider = ({ allIcons, children }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const {
-    autoReload,
-    currentEnvironment,
-    emitEvent,
-    fetchUserPermissions,
-    formatMessage,
-    menu,
-  } = useGlobalContext();
+  const { autoReload, emitEvent, fetchUserPermissions, formatMessage, menu } = useGlobalContext();
   const {
     components,
     contentTypes,
@@ -59,7 +52,7 @@ const DataManagerProvider = ({ allIcons, children }) => {
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
-  const isInDevelopmentMode = currentEnvironment === 'development' && autoReload;
+  const isInDevelopmentMode = autoReload;
 
   const isInContentTypeView = contentTypeMatch !== null;
   const firstKeyToMainSchema = isInContentTypeView ? 'contentType' : 'component';
@@ -103,7 +96,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       });
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -121,14 +117,13 @@ const DataManagerProvider = ({ allIcons, children }) => {
   }, [isLoading, pathname, currentUid]);
 
   useEffect(() => {
-    if (currentEnvironment === 'development' && !autoReload) {
-      strapi.notification.info(
-        formatMessageRef.current({
-          id: getTrad('notification.info.autoreaload-disable'),
-        })
-      );
+    if (!autoReload) {
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('notification.info.autoreaload-disable') },
+      });
     }
-  }, [autoReload, currentEnvironment]);
+  }, [autoReload]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
@@ -235,7 +230,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -285,7 +283,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -312,7 +313,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
@@ -382,16 +386,22 @@ const DataManagerProvider = ({ allIcons, children }) => {
     });
   };
 
-  const shouldRedirect = () => {
+  const shouldRedirect = useMemo(() => {
     const dataSet = isInContentTypeView ? contentTypes : components;
 
     return !Object.keys(dataSet).includes(currentUid) && !isLoading;
-  };
+  }, [components, contentTypes, currentUid, isInContentTypeView, isLoading]);
 
-  if (shouldRedirect()) {
-    const firstCTUid = Object.keys(contentTypes).sort()[0];
+  const redirectEndpoint = useMemo(() => {
+    const allowedEndpoints = Object.keys(contentTypes)
+      .filter(uid => get(contentTypes, [uid, 'schema', 'editable'], true))
+      .sort();
 
-    return <Redirect to={`/plugins/${pluginId}/content-types/${firstCTUid}`} />;
+    return get(allowedEndpoints, '0', '');
+  }, [contentTypes]);
+
+  if (shouldRedirect) {
+    return <Redirect to={`/plugins/${pluginId}/content-types/${redirectEndpoint}`} />;
   }
 
   const submitData = async additionalContentTypeData => {
@@ -458,7 +468,10 @@ const DataManagerProvider = ({ allIcons, children }) => {
       }
 
       console.error({ err: err.response });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     } finally {
       strapi.unlockApp();
     }
