@@ -8,8 +8,7 @@ import { useQueryParams } from '../../hooks';
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const initialParams = useSelector(state => state.get('content-manager_listView').initialParams);
-  // eslint-disable-next-line no-unused-vars
-  const [_, setQuery] = useQueryParams(initialParams);
+  const [, setQuery] = useQueryParams(initialParams);
 
   useEffect(() => {
     dispatch(setLayout(layout.contentType));
