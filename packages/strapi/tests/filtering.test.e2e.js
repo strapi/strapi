@@ -185,7 +185,6 @@ describe('Filtering API', () => {
         res.body.sort((a, b) => (a.id > b.id ? 1 : -1));
         expect(Array.isArray(res.body)).toBe(true);
         expect(res.body.length).toBe(matching.length);
-        expect(res.body).toMatchObject(matching);
         expect(res.body).toEqual(expect.arrayContaining(matching));
       });
 
@@ -1091,6 +1090,7 @@ describe('Filtering API', () => {
         url: '/products',
         qs: {
           _limit: 1,
+          _sort: 'rank:asc',
         },
       });
 
@@ -1116,6 +1116,7 @@ describe('Filtering API', () => {
         url: '/products',
         qs: {
           _start: 1,
+          _sort: 'rank:asc',
         },
       });
 
@@ -1129,6 +1130,7 @@ describe('Filtering API', () => {
         qs: {
           _limit: 1,
           _start: 1,
+          _sort: 'rank:asc',
         },
       });
 

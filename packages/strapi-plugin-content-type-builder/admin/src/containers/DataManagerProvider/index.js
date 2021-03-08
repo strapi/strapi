@@ -68,7 +68,7 @@ const DataManagerProvider = ({
   } = useStrapi();
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { autoReload, currentEnvironment, emitEvent, formatMessage } = useGlobalContext();
+  const { autoReload, emitEvent, formatMessage } = useGlobalContext();
   const { fetchUserPermissions } = useUser();
 
   const { pathname } = useLocation();
@@ -80,7 +80,7 @@ const DataManagerProvider = ({
 
   const formatMessageRef = useRef();
   formatMessageRef.current = formatMessage;
-  const isInDevelopmentMode = currentEnvironment === 'development' && autoReload;
+  const isInDevelopmentMode = autoReload;
 
   const isInContentTypeView = contentTypeMatch !== null;
   const firstKeyToMainSchema = isInContentTypeView ? 'contentType' : 'component';
@@ -145,13 +145,13 @@ const DataManagerProvider = ({
   }, [isLoading, pathname, currentUid]);
 
   useEffect(() => {
-    if (currentEnvironment === 'development' && !autoReload) {
+    if (!autoReload) {
       strapi.notification.toggle({
         type: 'info',
         message: { id: getTrad('notification.info.autoreaload-disable') },
       });
     }
-  }, [autoReload, currentEnvironment]);
+  }, [autoReload]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
@@ -400,7 +400,6 @@ const DataManagerProvider = ({
 
     const dataShape = orderAllDataAttributesWithImmutable(newSchemaToSet, isInContentTypeView);
 
-    // This prevents from losing the created content type or component when clicking on the link from the left menu
     const hasJustCreatedSchema =
       get(schemaToSet, 'isTemporary', false) &&
       size(get(schemaToSet, 'schema.attributes', {})) === 0;
