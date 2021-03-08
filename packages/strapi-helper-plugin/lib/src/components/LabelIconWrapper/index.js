@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const LabelIconWrapper = styled.span`
-  margin-left: 5px;
+  padding-left: 5px;
   cursor: pointer;
 `;
 
