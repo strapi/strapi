@@ -12,6 +12,7 @@ import {
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
+import { Globe } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
@@ -215,6 +216,8 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                                 {...fieldSchema}
                                 {...metadatas}
                                 queryInfos={queryInfos}
+                                // TODO
+                                labelIcon={{ title: 'Localized', icon: <Globe title="toto" /> }}
                                 key={name}
                                 name={name}
                                 relationsType={fieldSchema.relationType}

@@ -28,6 +28,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
       contentType: {},
       initialDisplayedHeaders: [],
       displayedHeaders: [],
+      initialParams: null,
       pagination: {
         total: 0,
       },
