@@ -24,8 +24,13 @@ describe('permissionsManagerReducer', () => {
   });
 
   it('should handle the getUserPermissions action correctly', () => {
+    state.userPermissions = ['test'];
+    state.collectionTypesRelatedPermissions = null;
+
     const expected = produce(state, draft => {
       draft.isLoading = true;
+      draft.userPermissions = [];
+      draft.collectionTypesRelatedPermissions = {};
     });
 
     expect(permissionsManagerReducer(state, getUserPermissions())).toEqual(expected);

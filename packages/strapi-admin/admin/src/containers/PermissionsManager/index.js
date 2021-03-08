@@ -1,36 +1,30 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { bindActionCreators, compose } from 'redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { LoadingIndicatorPage, UserProvider, request } from 'strapi-helper-plugin';
 import {
   getUserPermissions,
   getUserPermissionsError,
   getUserPermissionsSucceeded,
 } from './actions';
-import makeSelectPermissionsManager from './selectors';
 
-const PermissionsManager = ({
-  children,
-  isLoading,
-  getUserPermissions,
-  getUserPermissionsError,
-  getUserPermissionsSucceeded,
-  userPermissions,
-}) => {
+const PermissionsManager = ({ children }) => {
+  const { isLoading, userPermissions } = useSelector(state => state.get('permissionsManager'));
+
+  const dispatch = useDispatch();
   const fetchUserPermissions = async (resetState = false) => {
     if (resetState) {
       // Show a loader
-      getUserPermissions();
+      dispatch(getUserPermissions());
     }
 
     try {
       const { data } = await request('/admin/users/me/permissions', { method: 'GET' });
 
-      getUserPermissionsSucceeded(data);
+      dispatch(getUserPermissionsSucceeded(data));
     } catch (err) {
       console.error(err);
-      getUserPermissionsError(err);
+      dispatch(getUserPermissionsError(err));
     }
   };
 
@@ -50,26 +44,6 @@ PermissionsManager.defaultProps = {};
 
 PermissionsManager.propTypes = {
   children: PropTypes.node.isRequired,
-  getUserPermissions: PropTypes.func.isRequired,
-  getUserPermissionsError: PropTypes.func.isRequired,
-  getUserPermissionsSucceeded: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool.isRequired,
-  userPermissions: PropTypes.array.isRequired,
 };
 
-const mapStateToProps = makeSelectPermissionsManager();
-
-const mapDispatchToProps = dispatch => {
-  return bindActionCreators(
-    {
-      getUserPermissions,
-      getUserPermissionsError,
-      getUserPermissionsSucceeded,
-    },
-    dispatch
-  );
-};
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-export default compose(withConnect)(PermissionsManager);
+export default PermissionsManager;
