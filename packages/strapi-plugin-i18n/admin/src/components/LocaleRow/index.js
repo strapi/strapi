@@ -15,10 +15,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
   if (onEdit) {
     links.push({
       icon: (
-        <span
-          aria-label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}
-          style={locale.isDefault ? { marginRight: '-16px' } : undefined}
-        >
+        <span aria-label={formatMessage({ id: getTrad('Settings.list.actions.edit') })}>
           <Pencil fill="#0e1622" />
         </span>
       ),
@@ -26,7 +23,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
     });
   }
 
-  if (onDelete) {
+  if (onDelete && !locale.isDefault) {
     links.push({
       icon: !locale.isDefault ? (
         <span aria-label={formatMessage({ id: getTrad('Settings.list.actions.delete') })}>
