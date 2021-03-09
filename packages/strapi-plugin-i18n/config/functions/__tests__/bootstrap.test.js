@@ -20,7 +20,19 @@ describe('Bootstrap', () => {
       admin: {
         services: {
           permission: {
+            deleteByRolesIdForDeletion: jest.fn(),
+            engine: {
+              registerPermissionsHandler: jest.fn(),
+            },
+            sectionsBuilder: {
+              addHandler: jest.fn(),
+            },
+            conditionProvider: {
+              registerMany: jest.fn(),
+            },
             actionProvider: {
+              addEventListener: jest.fn(),
+              getAll: jest.fn(() => []),
               register: registerFn,
             },
           },
