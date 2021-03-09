@@ -112,6 +112,7 @@ export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
+export { default as useQueryParams } from './hooks/useQueryParams';
 
 // Providers
 export { default as StrapiProvider } from './providers/StrapiProvider';
