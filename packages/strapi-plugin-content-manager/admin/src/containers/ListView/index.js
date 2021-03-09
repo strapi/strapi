@@ -51,7 +51,6 @@ import {
   onResetListHeaders,
 } from './actions';
 import makeSelectListView from './selectors';
-
 import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from './utils';
 
 /* eslint-disable react/no-array-index-key */
@@ -81,6 +80,7 @@ function ListView({
   resetProps,
   slug,
   initialParams,
+  permissions,
 }) {
   const {
     contentType: {
@@ -96,7 +96,7 @@ function ListView({
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useUserPermissions(viewPermissions);
+  } = useUserPermissions(viewPermissions, permissions);
 
   const [{ query }, setQuery] = useQueryParams(initialParams);
   const params = buildQueryString(query);
@@ -473,6 +473,10 @@ function ListView({
   );
 }
 
+ListView.defaultProps = {
+  permissions: [],
+};
+
 ListView.propTypes = {
   displayedHeaders: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
@@ -513,6 +517,14 @@ ListView.propTypes = {
   toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
   initialParams: PropTypes.shape({}).isRequired,
+  permissions: PropTypes.arrayOf(
+    PropTypes.shape({
+      action: PropTypes.string.isRequired,
+      subject: PropTypes.string.isRequired,
+      properties: PropTypes.object,
+      conditions: PropTypes.arrayOf(PropTypes.string),
+    })
+  ),
 };
 
 const mapStateToProps = makeSelectListView();

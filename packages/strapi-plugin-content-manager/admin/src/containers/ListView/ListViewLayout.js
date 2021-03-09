@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useQueryParams } from 'strapi-helper-plugin';
+import RBACManager from '../RBACManager';
 import { setLayout } from './actions';
-import ListView from '.';
+import ListView from './index';
 
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
@@ -25,7 +26,11 @@ const ListViewLayout = ({ layout, ...props }) => {
     return null;
   }
 
-  return <ListView {...props} layout={layout} />;
+  return (
+    <RBACManager {...props}>
+      <ListView {...props} layout={layout} />
+    </RBACManager>
+  );
 };
 
 ListViewLayout.propTypes = {
