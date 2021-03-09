@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick, isNil } = require('lodash/fp');
+const { pick, prop, isNil } = require('lodash/fp');
 
 const { getService } = require('../utils');
 const { getNonLocalizedFields } = require('./content-types');
@@ -23,11 +23,10 @@ const assignDefaultLocale = async data => {
  */
 const syncLocalizations = async (entry, { model }) => {
   if (Array.isArray(entry.localizations)) {
-    const newLocalizations = entry.localizations.concat({ id: entry.id });
+    const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
+
     const updateLocalization = id => {
-      const localizations = newLocalizations
-        .filter(localization => localization.id != id)
-        .map(({ id }) => id);
+      const localizations = newLocalizations.filter(localizationId => localizationId !== id);
 
       return strapi.query(model.uid).update({ id }, { localizations });
     };

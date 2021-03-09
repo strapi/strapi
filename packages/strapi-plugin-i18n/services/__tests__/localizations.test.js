@@ -102,8 +102,8 @@ describe('localizations service', () => {
       await syncLocalizations(entry, { model });
 
       expect(update).toHaveBeenCalledTimes(localizations.length);
-      expect(update).toHaveBeenNthCalledWith(1, { id: 2 }, { localizations: [3, 1] });
-      expect(update).toHaveBeenNthCalledWith(2, { id: 3 }, { localizations: [2, 1] });
+      expect(update).toHaveBeenNthCalledWith(1, { id: 2 }, { localizations: [1, 3] });
+      expect(update).toHaveBeenNthCalledWith(2, { id: 3 }, { localizations: [1, 2] });
     });
   });
 
