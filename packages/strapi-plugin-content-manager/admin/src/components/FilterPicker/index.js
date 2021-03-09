@@ -34,7 +34,7 @@ function FilterPicker({
 }) {
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
       {

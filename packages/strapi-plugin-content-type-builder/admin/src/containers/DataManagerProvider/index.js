@@ -7,6 +7,7 @@ import {
   useGlobalContext,
   PopUpWarning,
   useStrapi,
+  useUser,
 } from 'strapi-helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
@@ -67,7 +68,9 @@ const DataManagerProvider = ({
   } = useStrapi();
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { autoReload, emitEvent, fetchUserPermissions, formatMessage, menu } = useGlobalContext();
+  const { autoReload, emitEvent, formatMessage } = useGlobalContext();
+  const { fetchUserPermissions } = useUser();
+
   const { pathname } = useLocation();
   const { push } = useHistory();
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/content-types/:uid`);
@@ -301,8 +304,6 @@ const DataManagerProvider = ({
         // Refetch the permissions
         await updatePermissions();
 
-        // Update the app menu
-        await updateAppMenu();
         // Refetch all the data
         getDataRef.current();
       }
@@ -399,7 +400,6 @@ const DataManagerProvider = ({
 
     const dataShape = orderAllDataAttributesWithImmutable(newSchemaToSet, isInContentTypeView);
 
-    // This prevents from losing the created content type or component when clicking on the link from the left menu
     const hasJustCreatedSchema =
       get(schemaToSet, 'isTemporary', false) &&
       size(get(schemaToSet, 'schema.attributes', {})) === 0;
@@ -471,9 +471,6 @@ const DataManagerProvider = ({
 
       await updatePermissions();
 
-      // Update the app menu
-      await updateAppMenu();
-
       // Submit ct tracking success
       if (isInContentTypeView) {
         emitEvent('didSaveContentType');
@@ -510,13 +507,6 @@ const DataManagerProvider = ({
   // Open the modal warning cancel changes
   const toggleModalCancel = () => {
     toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
-  };
-
-  // Update the menu using the internal API
-  const updateAppMenu = async () => {
-    if (menu.getModels) {
-      await menu.getModels();
-    }
   };
 
   const updatePermissions = async () => {
