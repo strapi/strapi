@@ -23,7 +23,7 @@ const LocaleSettingsPage = ({ locale, onDelete, onEdit }) => {
     });
   }
 
-  if (onDelete) {
+  if (onDelete && !locale.isDefault) {
     links.push({
       icon: !locale.isDefault ? (
         <span aria-label={formatMessage({ id: getTrad('Settings.list.actions.delete') })}>

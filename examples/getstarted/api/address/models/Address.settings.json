@@ -19,8 +19,8 @@
       "type": "string"
     },
     "categories": {
-      "via": "addresses",
       "collection": "category",
+      "via": "addresses",
       "dominant": true
     },
     "cover": {
@@ -51,6 +51,12 @@
     "likes": {
       "collection": "like",
       "via": "address"
+    },
+    "json": {
+      "type": "json"
+    },
+    "slug": {
+      "type": "uid"
     }
   }
 }

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
-import { Carret } from 'strapi-helper-plugin';
+import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import styled from 'styled-components';
+import get from 'lodash/get';
 
 const List = styled.ul`
   list-style-type: none;
@@ -11,8 +12,14 @@ const List = styled.ul`
 `;
 
 const ListItem = styled.li`
-  padding: ${props => props.theme.main.sizes.paddings.xs};
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: -10px;
+  margin-right: -10px;
+  padding-left: 10px;
+  padding-right: 10px;
+  height: 36px;
+  line-height: 36px;
 
   &:hover {
     background: ${props => props.theme.main.colors.lightGrey};
@@ -27,9 +34,21 @@ const EllipsisParagraph = styled(Text)`
   text-align: left;
 `;
 
+const selectContentManagerListViewPluginOptions = state =>
+  state.get('content-manager_listView').contentType.pluginOptions;
+
+const selectI18NLocales = state => state.get('i18n_locales').locales;
+
 const LocalePicker = () => {
-  const locales = useSelector(state => state.get('i18n_locales').locales);
+  const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
+  const locales = useSelector(selectI18NLocales);
   const [selected, setSelected] = useState(locales && locales[0]);
+  const [query, setQuery] = useQueryParams();
+  const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
+
+  if (!isFieldLocalized) {
+    return null;
+  }
 
   if (!locales || locales.length === 0) {
     return null;
@@ -50,6 +69,7 @@ const LocalePicker = () => {
       renderSectionContent={onToggle => {
         const handleClick = locale => {
           setSelected(locale);
+          setQuery({ pluginOptions: { ...query.pluginOptions, locale: locale.code } });
           onToggle();
         };
 

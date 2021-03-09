@@ -8,7 +8,6 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
-import { stringify } from 'qs';
 import {
   PopUpWarning,
   request,
@@ -16,10 +15,10 @@ import {
   useGlobalContext,
   useUserPermissions,
   InjectionZone,
+  useQueryParams,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import { useQueryParams } from '../../hooks';
 import {
   formatFiltersFromQuery,
   generatePermissionsObject,
@@ -53,7 +52,7 @@ import {
 } from './actions';
 import makeSelectListView from './selectors';
 
-import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
+import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from './utils';
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
@@ -80,21 +79,14 @@ function ListView({
   onResetListHeaders,
   pagination: { total },
   resetProps,
-  setLayout,
   slug,
+  initialParams,
 }) {
   const {
     contentType: {
       attributes,
       metadatas,
-      settings: {
-        defaultSortBy,
-        defaultSortOrder,
-        bulkable: isBulkable,
-        filterable: isFilterable,
-        searchable: isSearchable,
-        pageSize: defaultPageSize,
-      },
+      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
   } = layout;
 
@@ -105,12 +97,9 @@ function ListView({
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions);
-  const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
-  const initParams = useMemo(() => ({ page: 1, pageSize: defaultPageSize, _sort: defaultSort }), [
-    defaultPageSize,
-    defaultSort,
-  ]);
-  const [{ query, rawQuery }, setQuery] = useQueryParams(initParams);
+
+  const [{ query }, setQuery] = useQueryParams(initialParams);
+  const params = buildQueryString(query);
 
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -131,22 +120,17 @@ function ListView({
 
   const label = contentType.info.label;
 
-  const params = useMemo(() => {
-    return rawQuery || `?${stringify(initParams, { encode: false })}`;
-  }, [initParams, rawQuery]);
-
   const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
     displayedHeaders,
   ]);
 
   useEffect(() => {
-    setLayout(layout);
     setFilterPickerState(false);
 
     return () => {
       resetProps();
     };
-  }, [layout, setLayout, resetProps]);
+  }, [resetProps]);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
@@ -528,6 +512,7 @@ ListView.propTypes = {
   toggleModalDelete: PropTypes.func.isRequired,
   toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
+  initialParams: PropTypes.shape({}).isRequired,
 };
 
 const mapStateToProps = makeSelectListView();

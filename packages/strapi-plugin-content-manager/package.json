@@ -9,12 +9,12 @@
     "required": true
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.4",
-    "@buffetjs/custom": "3.3.4",
-    "@buffetjs/hooks": "3.3.4",
-    "@buffetjs/icons": "3.3.4",
-    "@buffetjs/styles": "3.3.4",
-    "@buffetjs/utils": "3.3.4",
+    "@buffetjs/core": "3.3.5-next.1",
+    "@buffetjs/custom": "3.3.5-next.1",
+    "@buffetjs/hooks": "3.3.5-next.1",
+    "@buffetjs/icons": "3.3.5-next.1",
+    "@buffetjs/styles": "3.3.5-next.1",
+    "@buffetjs/utils": "3.3.5-next.1",
     "@sindresorhus/slugify": "1.1.0",
     "classnames": "^2.2.6",
     "codemirror": "^5.59.4",

@@ -2,7 +2,11 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { get, isEmpty } from 'lodash';
-import { CheckPermissions, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import {
+  CheckPermissions,
+  LabelIconWrapper,
+  prefixFileUrlWithBackendUrl,
+} from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';
@@ -17,7 +21,18 @@ import Wrapper from './Wrapper';
 import Input from '../Input';
 import ErrorMessage from './ErrorMessage';
 
-const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, id, error }) => {
+const InputMedia = ({
+  disabled,
+  label,
+  onChange,
+  name,
+  attribute,
+  value,
+  type,
+  id,
+  error,
+  labelIcon,
+}) => {
   const [modal, setModal] = useState({
     isOpen: false,
     step: 'list',
@@ -117,7 +132,10 @@ const InputMedia = ({ disabled, label, onChange, name, attribute, value, type, i
 
   return (
     <Wrapper hasError={!isEmpty(error)}>
-      <Name htmlFor={name}>{`${label}${displaySlidePagination}`}</Name>
+      <Name htmlFor={name}>
+        <span>{`${label}${displaySlidePagination}`}</span>
+        {labelIcon && <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>}
+      </Name>
 
       <CardPreviewWrapper onDragOver={handleAllowDrop} onDrop={handleDrop}>
         <CardControlWrapper>
@@ -199,6 +217,10 @@ InputMedia.propTypes = {
   error: PropTypes.string,
   id: PropTypes.string,
   label: PropTypes.string,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.any,
+    title: PropTypes.string,
+  }),
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   type: PropTypes.string.isRequired,
@@ -209,6 +231,7 @@ InputMedia.defaultProps = {
   id: null,
   error: null,
   label: '',
+  labelIcon: null,
   value: null,
 };
 
