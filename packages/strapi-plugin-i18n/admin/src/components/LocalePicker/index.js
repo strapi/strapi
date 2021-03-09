@@ -4,6 +4,7 @@ import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret } from 'strapi-helper-plugin';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import useChangeInitialParams from './useChangeInitialParams';
 
 const List = styled.ul`
   list-style-type: none;
@@ -43,6 +44,7 @@ const LocalePicker = () => {
   const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
   const [selected, setSelected] = useState(locales && locales[0]);
+  const changeInitialParams = useChangeInitialParams();
 
   const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
 
@@ -69,6 +71,7 @@ const LocalePicker = () => {
       renderSectionContent={onToggle => {
         const handleClick = locale => {
           setSelected(locale);
+          changeInitialParams(locale.code);
           onToggle();
         };
 

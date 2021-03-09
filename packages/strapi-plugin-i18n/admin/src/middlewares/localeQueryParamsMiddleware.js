@@ -11,12 +11,18 @@ const localeQueryParamsMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  if (action.initialParams.pluginOptions) {
-    action.initialParams.pluginOptions.locale = 'en';
-  } else {
+  if (!action.initialParams.pluginOptions) {
     action.initialParams.pluginOptions = {
       locale: 'en',
     };
+
+    return next(action);
+  }
+
+  if (!action.initialParams.pluginOptions.locale) {
+    action.initialParams.pluginOptions.locale = 'en';
+
+    return next(action);
   }
 
   return next(action);
