@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
-import { Carret } from 'strapi-helper-plugin';
+import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import styled from 'styled-components';
 import get from 'lodash/get';
 
@@ -43,7 +43,7 @@ const LocalePicker = () => {
   const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
   const [selected, setSelected] = useState(locales && locales[0]);
-
+  const [query, setQuery] = useQueryParams();
   const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
 
   if (!isFieldLocalized) {
@@ -69,6 +69,7 @@ const LocalePicker = () => {
       renderSectionContent={onToggle => {
         const handleClick = locale => {
           setSelected(locale);
+          setQuery({ pluginOptions: { ...query.pluginOptions, locale: locale.code } });
           onToggle();
         };
 

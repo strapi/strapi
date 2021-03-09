@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
+import { useQueryParams } from 'strapi-helper-plugin';
 import { setLayout } from './actions';
 import ListView from '.';
-import { useQueryParams } from '../../hooks';
 
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
@@ -18,7 +18,8 @@ const ListViewLayout = ({ layout, ...props }) => {
     if (initialParams) {
       setQuery(initialParams);
     }
-  }, [initialParams, setQuery]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialParams]);
 
   if (!initialParams) {
     return null;
