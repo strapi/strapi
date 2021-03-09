@@ -2,13 +2,17 @@
 
 const {
   assignDefaultLocale,
-  addLocalizations,
+  syncLocalizations,
   updateNonLocalizedFields,
-  removeEntryFromRelatedLocalizations,
 } = require('../localizations');
 
 const model = {
   uid: 'test-model',
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
   attributes: {
     title: {
       type: 'string',
@@ -20,6 +24,33 @@ const model = {
     },
     stars: {
       type: 'integer',
+    },
+  },
+};
+
+const allLocalizedModel = {
+  uid: 'test-model',
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    title: {
+      type: 'string',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
+    },
+    stars: {
+      type: 'integer',
+      pluginOptions: {
+        i18n: {
+          localized: true,
+        },
+      },
     },
   },
 };
@@ -56,15 +87,8 @@ describe('localizations service', () => {
     });
   });
 
-  describe('addLocalizations', () => {
-    test('Does nothing if entry already as a localizations array', async () => {
-      const entry = { localizations: [] };
-      await addLocalizations(entry, { model });
-
-      expect(entry).toStrictEqual({ localizations: [] });
-    });
-
-    test('Updates entry in db', async () => {
+  describe('syncLocalizations', () => {
+    test('Updates every other localizations with correct ids', async () => {
       const update = jest.fn();
       global.strapi = {
         query() {
@@ -72,38 +96,14 @@ describe('localizations service', () => {
         },
       };
 
-      const entry = { id: 1, locale: 'test' };
+      const localizations = [{ id: 2 }, { id: 3 }];
+      const entry = { id: 1, locale: 'test', localizations };
 
-      await addLocalizations(entry, { model });
+      await syncLocalizations(entry, { model });
 
-      expect(update).toHaveBeenCalledWith(
-        { id: entry.id },
-        { localizations: [{ id: entry.id, locale: entry.locale }] }
-      );
-    });
-
-    test('Sets localizations property on entry', async () => {
-      const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
-      };
-
-      const entry = { id: 1, locale: 'test' };
-
-      await addLocalizations(entry, { model });
-
-      expect(entry).toStrictEqual({
-        id: entry.id,
-        locale: entry.locale,
-        localizations: [
-          {
-            id: entry.id,
-            locale: entry.locale,
-          },
-        ],
-      });
+      expect(update).toHaveBeenCalledTimes(localizations.length);
+      expect(update).toHaveBeenNthCalledWith(1, { id: 2 }, { localizations: [1, 3] });
+      expect(update).toHaveBeenNthCalledWith(2, { id: 3 }, { localizations: [1, 2] });
     });
   });
 
@@ -131,9 +131,24 @@ describe('localizations service', () => {
         },
       };
 
-      const entry = { id: 1, locale: 'test', localizations: [{ id: 1, locale: 'test' }] };
+      const entry = { id: 1, locale: 'test', localizations: [] };
 
       await updateNonLocalizedFields(entry, { model });
+
+      expect(update).not.toHaveBeenCalled();
+    });
+
+    test('Does not update if all the fields are localized', async () => {
+      const update = jest.fn();
+      global.strapi = {
+        query() {
+          return { update };
+        },
+      };
+
+      const entry = { id: 1, locale: 'test', localizations: [] };
+
+      await updateNonLocalizedFields(entry, { model: allLocalizedModel });
 
       expect(update).not.toHaveBeenCalled();
     });
@@ -151,59 +166,13 @@ describe('localizations service', () => {
         locale: 'test',
         title: 'Localized',
         stars: 1,
-        localizations: [
-          { id: 1, locale: 'test' },
-          { id: 2, locale: 'fr' },
-        ],
+        localizations: [{ id: 2, locale: 'fr' }],
       };
 
       await updateNonLocalizedFields(entry, { model });
 
       expect(update).toHaveBeenCalledTimes(1);
       expect(update).toHaveBeenCalledWith({ id: 2 }, { stars: 1 });
-    });
-  });
-
-  describe('removeEntryFromRelatedLocalizations', () => {
-    test('Does nothing if no localizations set', async () => {
-      const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
-      };
-
-      const entry = { id: 1, locale: 'test' };
-
-      await removeEntryFromRelatedLocalizations(entry, { model });
-
-      expect(update).not.toHaveBeenCalled();
-    });
-
-    test('Removes entry from localizations', async () => {
-      const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
-      };
-
-      const entry = {
-        id: 1,
-        locale: 'mainLocale',
-        localizations: [
-          { id: 1, locale: 'mainLocale' },
-          { id: 2, locale: 'otherLocale' },
-        ],
-      };
-
-      await removeEntryFromRelatedLocalizations(entry, { model });
-
-      expect(update).toHaveBeenCalledTimes(1);
-      expect(update).toHaveBeenCalledWith(
-        { id: 2 },
-        { localizations: [{ id: 2, locale: 'otherLocale' }] }
-      );
     });
   });
 });

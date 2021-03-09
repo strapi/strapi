@@ -14,6 +14,36 @@ describe('Entity service', () => {
     },
   };
 
+  describe('Decorator', () => {
+    test.each([
+      'create',
+      'update',
+      'find',
+      'findOne',
+      'delete',
+      'search',
+      'count',
+      'findPage',
+      'searchPage',
+    ])('Can decorate', async method => {
+      const instance = createEntityService({
+        db: {},
+        eventHub: new EventEmitter(),
+      });
+
+      const methodFn = jest.fn();
+      const decorator = () => ({
+        [method]: methodFn,
+      });
+
+      instance.decorate(decorator);
+
+      const args = [{}, {}];
+      await instance[method](...args);
+      expect(methodFn).toHaveBeenCalled();
+    });
+  });
+
   describe('Find', () => {
     test('Returns first element for single types', async () => {
       const data = {

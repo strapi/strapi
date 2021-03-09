@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+const delegate = require('delegates');
+
 const {
   sanitizeEntity,
   webhook: webhookUtils,
@@ -11,11 +13,35 @@ const uploadFiles = require('./utils/upload-files');
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
-module.exports = ({ db, eventHub, entityValidator }) => ({
+module.exports = ctx => {
+  const implementation = createDefaultImplementation(ctx);
+
+  const service = {
+    implementation,
+    decorate(decorator) {
+      if (typeof decorator !== 'function') {
+        throw new Error(`Decorator must be a function, received ${typeof decorator}`);
+      }
+
+      this.implementation = Object.assign({}, this.implementation, decorator(this.implementation));
+      return this;
+    },
+  };
+
+  const delegator = delegate(service, 'implementation');
+
+  // delegate every method in implementation
+  Object.keys(service.implementation).forEach(key => delegator.method(key));
+
+  return service;
+};
+
+const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   /**
    * expose some utils so the end users can use them
    */
   uploadFiles,
+
   /**
    * Promise to fetch all records
    *
