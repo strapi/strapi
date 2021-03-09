@@ -13,10 +13,8 @@ const createLocaleSchema = yup
   .shape({
     name: yup
       .string()
-      .min(1)
       .max(50)
-      .nullable()
-      .required(),
+      .nullable(),
     code: yup
       .string()
       .oneOf(allowedLocaleCodes)

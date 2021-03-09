@@ -24,7 +24,7 @@ const { buildQuery, buildMutation } = require('./resolvers-builder');
  */
 
 const generateSchema = () => {
-  const isFederated = _.get(strapi.plugins.graphql.config, 'isFederated', false);
+  const isFederated = _.get(strapi.plugins.graphql.config, 'federation', false);
   const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
 
   // Generate type definition and query/mutation for models.

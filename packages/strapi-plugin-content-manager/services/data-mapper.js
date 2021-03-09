@@ -12,7 +12,9 @@ const dtoFields = [
   'category',
   'info',
   'options',
+  'pluginOptions',
   'attributes',
+  'pluginOptions',
 ];
 
 module.exports = {

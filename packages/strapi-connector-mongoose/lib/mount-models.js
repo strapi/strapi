@@ -319,9 +319,7 @@ const migrateSchema = () => {};
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
-    const { publicationState, _depth = 0 } = this.getOptions();
-
-    if (_depth > 2) return;
+    const { publicationState, _populateComponents = true } = this.getOptions();
 
     const getMatchQuery = assoc => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
@@ -346,7 +344,6 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
         _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
         _.set(this._mongooseOptions.populate, [alias, 'options'], {
           publicationState,
-          _depth: _depth + 1,
         });
 
         if (matchQuery !== undefined) {
@@ -354,6 +351,12 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
         }
       }
     });
+
+    if (_populateComponents) {
+      componentAttributes.forEach(key => {
+        this.populate({ path: `${key}.ref`, options: { publicationState } });
+      });
+    }
 
     if (definition.modelType === 'component') {
       definition.associations
@@ -363,14 +366,10 @@ const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, defin
           this.populate({
             path: ast.alias,
             match: getMatchQuery(ast),
-            options: { publicationState, _depth: _depth + 1 },
+            options: { publicationState, _populateComponents: false },
           });
         });
     }
-
-    componentAttributes.forEach(key => {
-      this.populate({ path: `${key}.ref`, options: { publicationState, _depth: _depth + 1 } });
-    });
   };
 };
 

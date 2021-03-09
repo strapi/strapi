@@ -4,6 +4,7 @@ const LOCALIZED_FIELDS = [
   'richtext',
   'email',
   'password',
+  'media',
   'number',
   'date',
   'json',

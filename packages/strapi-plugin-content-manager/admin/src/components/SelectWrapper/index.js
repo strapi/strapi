@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { findIndex, get, isArray, isEmpty } from 'lodash';
-import { NotAllowedInput, request } from 'strapi-helper-plugin';
+import { LabelIconWrapper, NotAllowedInput, request } from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
@@ -25,6 +25,7 @@ function SelectWrapper({
   description,
   editable,
   label,
+  labelIcon,
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
@@ -183,7 +184,9 @@ function SelectWrapper({
   };
 
   const handleAddRelation = value => {
-    addRelation({ target: { name, value } });
+    if (!isEmpty(value)) {
+      addRelation({ target: { name, value } });
+    }
   };
 
   const handleMenuOpen = () => {
@@ -238,8 +241,13 @@ function SelectWrapper({
       <BaselineAlignment />
       <Flex justifyContent="space-between">
         <Text fontWeight="semiBold">
-          {label}
-          {!isSingle && ` (${associationsLength})`}
+          <span>
+            {label}
+            {!isSingle && ` (${associationsLength})`}
+          </span>
+          {labelIcon && (
+            <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>
+          )}
         </Text>
         {isSingle && link}
       </Flex>
@@ -293,6 +301,7 @@ SelectWrapper.defaultProps = {
   editable: true,
   description: '',
   label: '',
+  labelIcon: null,
   isFieldAllowed: true,
   placeholder: '',
 };
@@ -301,6 +310,10 @@ SelectWrapper.propTypes = {
   editable: PropTypes.bool,
   description: PropTypes.string,
   label: PropTypes.string,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.any,
+    title: PropTypes.string,
+  }),
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,
   isFieldReadable: PropTypes.bool.isRequired,

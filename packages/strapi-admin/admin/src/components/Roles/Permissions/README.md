@@ -1,8 +1,15 @@
 # Technical documentation
 
-Here we will cover how the `<Permissions />` component works.
-This component is in charge of managing the permissions of the admin panel, it has 4 children one child for each tab.
-The collection types & single types tabs uses the same component: `<ContentTypes>` similarly, the settings & plugins tab uses the `<Plugins>` component.
+This documentation covers how the `<Permissions />` component works.
+This component is in charge of managing the permissions of the admin panel, it has 4 children, one child for each tab.
+The displayed tabs are:
+
+- Collection Types: this tab allows to set permissions of the CRUD actions for the application's collection types.
+- Single Types: similarly, this tab allows to set permissions for the single types.
+- Plugins: this tabs allows to define permissions for the installed plugins of the application.
+- Settings: this tabs allows to define permissions for the plugins settings. The settings are found in the settings view which is accessible by clicking on the link from the main left menu.
+
+The collection types & single types tabs uses the same component: `<ContentTypes>` similarly, the Plugins & Settings tabs use the `<Plugins>` component.
 
 The UI uses the layout received from the back-end in order to build the UI.
 
@@ -27,7 +34,7 @@ const layout = {
             {
               label: 'string', // Property label ex: Fields. By default a collection type always has the fields property, depending on the installed plugins a property can also be Locales.
               value: 'string', // Value of the property ex: fields. (Checkout the examples below.)
-              children: [ // This corresponds to the fields that we will display
+              children: [ // This corresponds to the fields that will be displayed
                 {
                   label: 'string',
                   value: 'string',
@@ -58,7 +65,7 @@ const layout = {
 
 - Checkbox: has only 1 `checked=true` or `checked=false`.
 
-- Parent checkbox: A **parent checkbox** is a checkbox which the state value depends on the state of its children ones. It means that we cannot directly access its value from the `modifiedData` object.
+- Parent checkbox: A **parent checkbox** is a checkbox which the state value depends on the state of its children ones. It means that the value cannot directly be accessed from the `modifiedData` object.
   Such checkbox has 2 props in order to indicate the user if all the children checkboxes are checked or some of them are checked:
   - someChecked: `true` or `false`,
   - checked: `true` of `false`
@@ -81,7 +88,7 @@ const modifiedData = {
 }
 ```
 
-From the `modifiedData` object we can identify 4 parent checkboxes:
+From the `modifiedData` object, 4 parent checkboxes can be identified:
 
 1. `address` which value depends on the values of `address.create` & `address.update` here the state will be: `someChecked=true`
 2. `create` which value depends on the values of `address.create.fields` & `address.create.locales` here the state will be: `someChecked=true, checked=true`
@@ -94,7 +101,7 @@ From the `modifiedData` object we can identify 4 parent checkboxes:
 
 ## Components architecture
 
-### `<Permissions />` archictecture
+### `<Permissions />` architecture
 
 ```js
 <PermissionsDataManagerProvider>
@@ -131,7 +138,7 @@ Below, is the architecture of the `<Permissions />` component:
           <SubActionRow /> // Recursive component if a property has a children key, the component
           will return itself
         </ActionRow>
-      </CollapsePropetyMatrix>
+      </CollapsePropertyMatrix>
     </ContentTypeCollapse>
   </ContentTypeCollapses>
 </ContentTypes>
@@ -142,6 +149,8 @@ Below, is the architecture of the `<Permissions />` component:
 In order to build the layout, the components use the `sections.collectionTypes.subjects` value received from the API.
 
 #### Retrieving the actions to display in the `<GlobalActions />`
+
+This section covers the logic defined in order to display a global checkbox like the `create` one. Each global action, is considered as a parent checkbox since their purpose is to check or uncheck all the checkboxes that are located below them.
 
 Pratical example:
 
@@ -173,11 +182,11 @@ const actions = [
 ]
 ```
 
-Here we will display only 3 actions: `create`, `read` and `delete` since they are the only actions that can be applied to a `subject`. The `publish` action is not displayed as it is not applied to any subject since the `subjects` array is empty. In the ui, we only display the CRUD actions that can be applied on a `subject` (content type).
+The UI only displays CRUD actions that can be applied to a subject (a content type). The `subjects` array of the `Publish` action is empty, so this action is not applied to any subject. Consequently, the UI only displays the `create`, `read` and `delete` actions.
 
 #### Building the content type's matrix
 
-We will use the actions defined above and the following data:
+Using the actions defined above and the following data:
 
 ```js
 // layout.sections.collectionTypes.subjects
@@ -249,7 +258,7 @@ With this layout the ui will look like the following: (`[]` represents a checkbo
 
 #### Shape of the `modifiedData.collectionTypes` object:
 
-In order to easily know the state of a checkbox, we build the `modifiedData` using the `layout.sections.collectionTypes` to generate the following shape:
+In order to easily know the state of a checkbox, the `modifiedData` is built using the `layout.sections.collectionTypes` to generate the following shape:
 
 ```js
 const conditions = [
@@ -348,7 +357,7 @@ const objectToRetrieveTheStateOfTheCreateCheckbox = {
 };
 ```
 
-Now we need to know, if all the properties are `false` or if some of them are `true`, since we are only dealing with `Boolean` values we can create the following array using the object:
+In order to know is all the properties are `false` or if some of them are `true`, an array of `Boolean` values could be created from the object.
 
 ```js
 const arrayOfPermissionLeafsBooleanValues = [

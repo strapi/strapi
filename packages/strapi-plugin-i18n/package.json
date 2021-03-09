@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-i18n",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "This plugin enables to create, to read and to update content in different languages, both from the Admin Panel and from the API",
   "strapi": {
     "name": "Internationalisation",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "lodash": "4.17.20",
-    "strapi-utils": "3.5.0"
+    "strapi-utils": "3.5.2"
   },
   "author": {
     "name": "A Strapi developer",

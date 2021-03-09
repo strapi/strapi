@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { request } from 'strapi-helper-plugin';
-import { useMutation, useQueryClient } from 'react-query';
+import { useDispatch } from 'react-redux';
 import { getTrad } from '../../utils';
+import { DELETE_LOCALE } from '../constants';
 
 const deleteLocale = async id => {
   try {
@@ -25,16 +27,19 @@ const deleteLocale = async id => {
 };
 
 const useDeleteLocale = () => {
-  const queryClient = useQueryClient();
+  const [isLoading, setLoading] = useState(false);
+  const dispatch = useDispatch();
 
-  const { isLoading, mutateAsync } = useMutation(deleteLocale, {
-    onSuccess: (_, id) =>
-      queryClient.setQueryData('locales', oldLocales =>
-        oldLocales.filter(locale => locale.id !== id)
-      ),
-  });
+  const removeLocale = async id => {
+    setLoading(true);
 
-  return { isDeleting: isLoading, deleteLocale: mutateAsync };
+    await deleteLocale(id);
+
+    dispatch({ type: DELETE_LOCALE, id });
+    setLoading(false);
+  };
+
+  return { isDeleting: isLoading, deleteLocale: removeLocale };
 };
 
 export default useDeleteLocale;

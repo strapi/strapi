@@ -1,4 +1,5 @@
 {
+  "page.title": "Settings - Roles",
   "BoundRoute.title": "Bound route to",
   "EditForm.inputSelect.description.role": "It will attach the new authenticated user to the selected role.",
   "EditForm.inputSelect.label.role": "Default role for authenticated users",
@@ -15,7 +16,7 @@
   "Email.template.email_confirmation": "Email address confirmation",
   "Email.template.reset_password": "Reset password",
   "HeaderNav.link.advancedSettings": "Advanced settings",
-  "HeaderNav.link.emailTemplates": "Email templates",
+  "HeaderNav.link.emailTemplates": "Email Templates",
   "HeaderNav.link.providers": "Providers",
   "HeaderNav.link.roles": "Roles",
   "List.title.emailTemplates.plural": "{number} email templates are available",

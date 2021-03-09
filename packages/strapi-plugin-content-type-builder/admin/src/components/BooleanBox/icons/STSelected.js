@@ -2,7 +2,7 @@
 import React from 'react';
 
 const STSelected = props => (
-  <svg width="61px" height="68px" viewBox="0 0 61 68" {...props}>
+  <svg width="53px" height="60px" viewBox="0 0 61 68" {...props}>
     <defs>
       <filter
         x="-1.7%"

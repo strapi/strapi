@@ -15,7 +15,7 @@ import ModalCreate from '../ModalCreate';
 const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isCreating }) => {
   const [localeToDelete, setLocaleToDelete] = useState();
   const [localeToEdit, setLocaleToEdit] = useState();
-  const { locales, isLoading, refetch } = useLocales();
+  const { locales, isLoading } = useLocales();
   const { formatMessage } = useIntl();
 
   // Delete actions
@@ -24,7 +24,6 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
 
   // Edit actions
   const closeModalToEdit = () => {
-    refetch();
     setLocaleToEdit(undefined);
   };
   const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
@@ -52,7 +51,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
           )}
         />
 
-        <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} onSuccess={refetch} />
+        <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} />
         <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
         <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
       </>
@@ -78,7 +77,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
         </ListButton>
       )}
 
-      <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} onSuccess={refetch} />
+      <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} />
     </>
   );
 };

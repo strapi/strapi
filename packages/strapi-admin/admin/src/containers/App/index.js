@@ -26,6 +26,7 @@ import NotFoundPage from '../NotFoundPage';
 // eslint-disable-next-line import/no-cycle
 import NotificationProvider from '../NotificationProvider';
 import Theme from '../Theme';
+import { getUID } from './utils';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
 import NewNotification from '../NewNotification';
@@ -79,11 +80,14 @@ function App(props) {
 
         if (uuid) {
           try {
+            const deviceId = await getUID();
+
             fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
                 event: 'didInitializeAdministration',
                 uuid,
+                deviceId,
               }),
               headers: {
                 'Content-Type': 'application/json',

@@ -1,20 +1,32 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
+import { createStore } from 'redux';
+import { combineReducers } from 'redux-immutable';
+import { fromJS } from 'immutable';
+
+import { Provider } from 'react-redux';
 import { request, useUserPermissions } from 'strapi-helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import LocaleSettingsPage from '..';
 import themes from '../../../../../../strapi-admin/admin/src/themes';
+import i18nReducers, { initialState } from '../../../hooks/reducers';
 
 const TestWrapper = ({ children }) => {
   const queryClient = new QueryClient();
 
+  const initialStoreState = fromJS(initialState);
+  const rootReducer = combineReducers(i18nReducers);
+  const store = createStore(rootReducer, initialStoreState);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={themes}>{children}</ThemeProvider>
-    </QueryClientProvider>
+    <Provider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={themes}>{children}</ThemeProvider>
+      </QueryClientProvider>
+    </Provider>
   );
 };
 

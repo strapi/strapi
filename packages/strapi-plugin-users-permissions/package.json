@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-users-permissions",
-  "version": "3.5.0",
+  "version": "3.5.2",
   "description": "Protect your API with a full-authentication process based on JWT",
   "strapi": {
     "name": "Roles & Permissions",
@@ -12,12 +12,12 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.4",
-    "@buffetjs/custom": "3.3.4",
-    "@buffetjs/hooks": "3.3.4",
-    "@buffetjs/icons": "3.3.4",
-    "@buffetjs/styles": "3.3.4",
-    "@buffetjs/utils": "3.3.4",
+    "@buffetjs/core": "3.3.5-next.1",
+    "@buffetjs/custom": "3.3.5-next.1",
+    "@buffetjs/hooks": "3.3.5-next.1",
+    "@buffetjs/icons": "3.3.5-next.1",
+    "@buffetjs/styles": "3.3.5-next.1",
+    "@buffetjs/utils": "3.3.5-next.1",
     "@purest/providers": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "grant-koa": "5.4.8",
@@ -29,14 +29,14 @@
     "react": "^16.13.1",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
-    "react-redux": "^7.0.2",
-    "react-router": "^5.0.0",
+    "react-redux": "^7.2.2",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "redux-saga": "^0.16.0",
     "request": "^2.83.0",
-    "strapi-helper-plugin": "3.5.0",
-    "strapi-utils": "3.5.0",
+    "strapi-helper-plugin": "3.5.2",
+    "strapi-utils": "3.5.2",
     "uuid": "^3.1.0"
   },
   "devDependencies": {

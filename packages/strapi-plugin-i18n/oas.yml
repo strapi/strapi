@@ -81,7 +81,6 @@ components:
     localeInputCreate:
       type: object
       required:
-        - name
         - code
         - isDefault
       properties:

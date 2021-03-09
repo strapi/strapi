@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { Header, Inputs } from '@buffetjs/custom';
+import { Helmet } from 'react-helmet';
 import { Text } from '@buffetjs/core';
 import { isEqual } from 'lodash';
 import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
@@ -111,6 +112,8 @@ const SettingsPage = () => {
 
   return (
     <>
+      <Helmet title={formatMessage({ id: getTrad('page.title') })} />
+
       <Header {...headerProps} />
       <Wrapper>
         <div className="container-fluid">

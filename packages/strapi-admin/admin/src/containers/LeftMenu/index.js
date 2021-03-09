@@ -32,7 +32,7 @@ import Wrapper from './Wrapper';
 
 const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
   const location = useLocation();
-  const permissions = useContext(UserContext);
+  const { userPermissions: permissions } = useContext(UserContext);
   const { menu: settingsMenu } = useSettingsMenu(true);
 
   // TODO: this needs to be added to the settings API in the v4

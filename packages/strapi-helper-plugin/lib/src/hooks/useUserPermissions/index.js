@@ -14,7 +14,7 @@ const useUserPermissions = pluginPermissions => {
   const permissionNames = useMemo(() => {
     return Object.keys(pluginPermissions);
   }, [pluginPermissions]);
-  const currentUserPermissions = useUser();
+  const { userPermissions: currentUserPermissions } = useUser();
   const [state, dispatch] = useReducer(reducer, {}, () => init(permissionNames));
   const checkPermissionsRef = useRef();
   const generateArrayOfPromisesRef = useRef();

@@ -12,6 +12,7 @@ import {
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
+import { Globe } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
@@ -38,7 +39,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
   const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
     viewPermissions
   );
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
 
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
@@ -215,6 +216,8 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                                 {...fieldSchema}
                                 {...metadatas}
                                 queryInfos={queryInfos}
+                                // TODO
+                                labelIcon={{ title: 'Localized', icon: <Globe title="toto" /> }}
                                 key={name}
                                 name={name}
                                 relationsType={fieldSchema.relationType}
