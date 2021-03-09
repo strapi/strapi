@@ -1,13 +1,17 @@
 {
+  "kind": "collectionType",
   "collectionName": "restaurants",
   "info": {
     "name": "restaurant",
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
+    "draftAndPublish": true,
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": [
+      "created_at",
+      "updated_at"
+    ],
     "comment": ""
   },
   "pluginOptions": {
@@ -20,22 +24,53 @@
       "maxLength": 50,
       "required": true,
       "minLength": 5,
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "uid",
-      "targetField": "name"
+      "targetField": "name",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "price_range": {
-      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
-      "type": "enumeration"
+      "enum": [
+        "very_cheap",
+        "cheap",
+        "average",
+        "expensive",
+        "very_expensive"
+      ],
+      "type": "enumeration",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "closing_period": {
       "component": "default.closingperiod",
-      "type": "component"
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "contact_email": {
-      "type": "email"
+      "type": "email",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "stars": {
       "required": true,
@@ -67,10 +102,20 @@
       "required": false
     },
     "short_description": {
-      "type": "text"
+      "type": "text",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "since": {
-      "type": "date"
+      "type": "date",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "categories": {
       "collection": "category"
@@ -78,12 +123,22 @@
     "description": {
       "type": "richtext",
       "required": true,
-      "minLength": 10
+      "minLength": 10,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "services": {
       "component": "default.restaurantservice",
       "repeatable": true,
-      "type": "component"
+      "type": "component",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "menu": {
       "model": "menu",
@@ -94,7 +149,12 @@
       "type": "component",
       "repeatable": true,
       "min": 1,
-      "max": 10
+      "max": 10,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "dz": {
       "type": "dynamiczone",
@@ -103,7 +163,21 @@
         "default.restaurantservice",
         "default.closingperiod",
         "default.dish"
-      ]
+      ],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "parent": {
+      "collection": "restaurant",
+      "via": "children",
+      "dominant": true
+    },
+    "children": {
+      "collection": "restaurant",
+      "via": "parent"
     }
   }
 }
