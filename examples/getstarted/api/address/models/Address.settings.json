@@ -14,19 +14,9 @@
     ],
     "comment": ""
   },
-  "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  },
   "attributes": {
     "postal_coder": {
-      "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "string"
     },
     "categories": {
       "collection": "category",
@@ -56,32 +46,17 @@
     "city": {
       "type": "string",
       "required": true,
-      "maxLength": 200,
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "maxLength": 200
     },
     "likes": {
       "collection": "like",
       "via": "address"
     },
     "json": {
-      "type": "json",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "json"
     },
     "slug": {
-      "type": "uid",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "type": "uid"
     }
   }
 }
