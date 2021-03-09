@@ -15,10 +15,10 @@ import {
   useGlobalContext,
   useUserPermissions,
   InjectionZone,
+  useQueryParams,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import { useQueryParams } from '../../hooks';
 import {
   formatFiltersFromQuery,
   generatePermissionsObject,

@@ -27,7 +27,7 @@ export { default as InputAddon } from './components/InputAddon';
 export { default as EmptyState } from './components/EmptyState';
 export * from './components/Tabs';
 export * from './components/Select';
-export {default as InjectionZone} from './components/InjectionZone';
+export { default as InjectionZone } from './components/InjectionZone';
 
 export { default as InputAddonWithErrors } from './components/InputAddonWithErrors';
 export { default as InputCheckbox } from './components/InputCheckbox';
@@ -112,6 +112,7 @@ export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
+export { default as useQueryParams } from './hooks/useQueryParams';
 
 // Providers
 export { default as StrapiProvider } from './providers/StrapiProvider';
