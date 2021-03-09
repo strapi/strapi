@@ -18,7 +18,7 @@
   "dependencies": {
     "bookshelf": "^1.0.1",
     "date-fns": "^2.8.1",
-    "inquirer": "^6.3.1",
+    "inquirer": "^8.0.0",
     "lodash": "4.17.20",
     "p-map": "4.0.0",
     "pluralize": "^8.0.0",
