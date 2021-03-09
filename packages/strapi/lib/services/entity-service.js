@@ -46,9 +46,10 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * Returns default opt
    * it is async so decorators can do async processing
    * @param {object} params - query params to extend
-   * @returns {object} wra
+   * @param {object=} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
-  async wrapOptions(options = {} /*, ctx */) {
+  async wrapOptions(options = {}) {
     return options;
   },
 
