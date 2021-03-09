@@ -2,10 +2,7 @@
 
 const { execSync } = require('child_process');
 const execa = require('execa');
-const PrettyError = require('pretty-error');
-
-const pe = new PrettyError();
-
+const chalk = require('chalk');
 const hasYarn = require('./has-yarn');
 
 /**
@@ -41,14 +38,18 @@ async function initGit(rootPath) {
     await execa('git', ['init'], {
       cwd: rootPath,
     });
+  } catch (err) {
+    console.log(`${chalk.yellow('warning')} Could not initialize a git repository`);
+  }
 
+  try {
     await execa(`git`, [`add`, `-A`], { cwd: rootPath });
 
     execSync(`git commit -m "Create Strapi starter project"`, {
       cwd: rootPath,
     });
   } catch (err) {
-    console.log(pe.render(err));
+    console.log(`${chalk.yellow('warning')} Could not create initial git commit`);
   }
 }
 

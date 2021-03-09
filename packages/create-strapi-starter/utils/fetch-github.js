@@ -4,9 +4,7 @@ const tar = require('tar');
 const fetch = require('node-fetch');
 const parseGitUrl = require('git-url-parse');
 const chalk = require('chalk');
-const PrettyError = require('pretty-error');
-
-const pe = new PrettyError();
+const stopProcess = require('./stop-process');
 
 function getShortcut(starter) {
   let full_name;
@@ -31,14 +29,16 @@ async function getDefaultBranch(repo) {
     const response = await fetch(`https://api.github.com/repos/${repo}`);
 
     if (!response.ok) {
-      throw Error(`Could not fetch the default branch for: ${chalk.yellow(repo)}`);
+      throw Error(
+        `${chalk.red('error')} Could not fetch the default branch for: ${chalk.yellow(repo)}`
+      );
     }
 
     const { default_branch } = await response.json();
 
     return default_branch;
   } catch (err) {
-    console.log(pe.render(err));
+    console.log(err);
   }
 }
 
@@ -60,7 +60,7 @@ async function getRepoInfo(starter) {
       ref,
     };
   } catch (err) {
-    console.log(pe.render(err));
+    console.log(err);
   }
 }
 
@@ -81,15 +81,18 @@ async function downloadGithubRepo(starterUrl, tmpDir) {
     const response = await fetch(codeload);
     if (!response.ok) {
       const message = usedShortcut ? `using the shortcut` : `using the url`;
-      throw Error(`Could not download the repository ${message}: ${chalk.yellow(`${starterUrl}`)}`);
+      throw Error(
+        `${chalk.red('error')} Could not download the repository ${message}: ${chalk.yellow(
+          `${starterUrl}`
+        )}`
+      );
     }
 
     await new Promise(resolve => {
       response.body.pipe(tar.extract({ strip: 1, cwd: tmpDir })).on('close', resolve);
     });
   } catch (err) {
-    console.log(pe.render(err));
-    process.exit(1);
+    stopProcess(err);
   }
 }
 

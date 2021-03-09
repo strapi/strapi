@@ -36,6 +36,5 @@ program.exitOverride();
 try {
   program.parse(process.argv);
 } catch (err) {
-  console.log();
   program.outputHelp();
 }

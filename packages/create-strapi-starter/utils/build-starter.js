@@ -7,26 +7,27 @@ const fse = require('fs-extra');
 const ora = require('ora');
 const ciEnv = require('ci-info');
 const chalk = require('chalk');
-const PrettyError = require('pretty-error');
-
-const pe = new PrettyError();
 
 const generateNewApp = require('strapi-generate-new');
 
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');
 const { getRepoInfo, downloadGithubRepo } = require('./fetch-github');
+const stopProcess = require('./stop-process');
 
 /**
  * @param  {string} filePath Path to starter.json file
  */
-function readStarterJson(filePath) {
+function readStarterJson(filePath, starterUrl) {
   try {
     const data = fse.readFileSync(filePath);
     return JSON.parse(data);
   } catch (err) {
-    console.log(pe.render(err));
-    process.exit(1);
+    stopProcess(
+      `${chalk.red('error')} Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(
+        starterUrl
+      )}`
+    );
   }
 }
 
@@ -34,29 +35,37 @@ function readStarterJson(filePath) {
  * @param  {string} rootPath Path to the project directory
  * @param  {string} projectName Name of the project
  */
-function initPackageJson(rootPath, projectName) {
+async function initPackageJson(rootPath, projectName) {
   const packageManager = hasYarn ? 'yarn --cwd' : 'npm run --prefix';
 
-  fse.writeJson(
-    join(rootPath, 'package.json'),
-    {
-      name: projectName,
-      private: true,
-      version: '0.0.0',
-      scripts: {
-        'develop:backend': `${packageManager} backend develop`,
-        'develop:frontend': `wait-on http://localhost:1337/admin && ${packageManager} frontend develop --open`,
-        develop: 'FORCE_COLOR=1 npm-run-all -l -p develop:*',
+  try {
+    await fse.writeJson(
+      join(rootPath, 'package.json'),
+      {
+        name: projectName,
+        private: true,
+        version: '0.0.0',
+        scripts: {
+          'develop:backend': `${packageManager} backend develop`,
+          'develop:frontend': `wait-on http://localhost:1337/admin && ${packageManager} frontend develop --open`,
+          develop: 'FORCE_COLOR=1 npm-run-all -l -p develop:*',
+        },
+        devDependencies: {
+          'npm-run-all': '4.1.5',
+          'wait-on': '5.2.1',
+        },
       },
-      devDependencies: {
-        'npm-run-all': '4.1.5',
-        'wait-on': '5.2.1',
-      },
-    },
-    {
-      spaces: 2,
-    }
-  );
+      {
+        spaces: 2,
+      }
+    );
+  } catch (err) {
+    stopProcess(
+      `\n${chalk.red('error')} Failed to create ${chalk.yellow(`package.json`)} in ${chalk.yellow(
+        rootPath
+      )}`
+    );
+  }
 }
 
 /**
@@ -98,21 +107,23 @@ module.exports = async function buildStarter(projectArgs, program) {
   // Download repo inside tmp dir
   await downloadGithubRepo(starterUrl, tmpDir);
 
-  const starterJson = readStarterJson(join(tmpDir, 'starter.json'));
+  const starterJson = readStarterJson(join(tmpDir, 'starter.json'), starterUrl);
 
   // Project directory
   const rootPath = resolve(projectName);
   const projectBasename = basename(rootPath);
 
   // Copy the downloaded frontend folder to the project folder
+
   try {
     await fse.copy(join(tmpDir, 'frontend'), join(rootPath, 'frontend'), {
       overwrite: true,
       recursive: true,
     });
   } catch (err) {
-    console.log(pe.render(err));
-    process.exit(1);
+    stopProcess(
+      `${chalk.red('error')} Failed to create ${chalk.yellow(`${projectName}/frontend`)}`
+    );
   }
 
   // Delete temporary directory
@@ -143,7 +154,9 @@ module.exports = async function buildStarter(projectArgs, program) {
     const gitignore = join(__dirname, '..', 'resources', 'gitignore');
     await fse.copy(gitignore, join(rootPath, '.gitignore'));
   } catch (err) {
-    console.log(pe.render(err));
+    console.log(
+      `\n${chalk.yellow('warning')} Failed to create file: ${chalk.yellow('.gitignore')}`
+    );
   }
 
   await installWithLogs(rootPath);
