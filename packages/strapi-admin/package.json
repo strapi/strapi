@@ -77,7 +77,7 @@
     "react": "^16.13.1",
     "react-copy-to-clipboard": "^5.0.3",
     "react-dnd": "^10.0.2",
-    "react-dnd-html5-backend": "^10.0.2",
+    "react-dnd-html5-backend": "^14.0.0",
     "react-dom": "^16.9.0",
     "react-fast-compare": "^3.2.0",
     "react-helmet": "^6.1.0",
