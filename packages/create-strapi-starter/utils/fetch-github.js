@@ -25,21 +25,17 @@ function getShortcut(starter) {
  * @param  {string} repo The path to repo
  */
 async function getDefaultBranch(repo) {
-  try {
-    const response = await fetch(`https://api.github.com/repos/${repo}`);
+  const response = await fetch(`https://api.github.com/repos/${repo}`);
 
-    if (!response.ok) {
-      throw Error(
-        `${chalk.red('error')} Could not fetch the default branch for: ${chalk.yellow(repo)}`
-      );
-    }
-
-    const { default_branch } = await response.json();
-
-    return default_branch;
-  } catch (err) {
-    console.log(err);
+  if (!response.ok) {
+    console.log(
+      `${chalk.red('error')} Could not fetch the default branch for: ${chalk.yellow(repo)}`
+    );
   }
+
+  const { default_branch } = await response.json();
+
+  return default_branch;
 }
 
 /**
@@ -77,23 +73,19 @@ async function downloadGithubRepo(starterUrl, tmpDir) {
   // Download from GitHub
   const codeload = `https://codeload.github.com/${full_name}/tar.gz/${branch}`;
 
-  try {
-    const response = await fetch(codeload);
-    if (!response.ok) {
-      const message = usedShortcut ? `using the shortcut` : `using the url`;
-      throw Error(
-        `${chalk.red('error')} Could not download the repository ${message}: ${chalk.yellow(
-          `${starterUrl}`
-        )}`
-      );
-    }
-
-    await new Promise(resolve => {
-      response.body.pipe(tar.extract({ strip: 1, cwd: tmpDir })).on('close', resolve);
-    });
-  } catch (err) {
-    stopProcess(err);
+  const response = await fetch(codeload);
+  if (!response.ok) {
+    const message = usedShortcut ? `using the shortcut` : `using the url`;
+    stopProcess(
+      `${chalk.red('error')} Could not download the repository ${message}: ${chalk.yellow(
+        `${starterUrl}`
+      )}`
+    );
   }
+
+  await new Promise(resolve => {
+    response.body.pipe(tar.extract({ strip: 1, cwd: tmpDir })).on('close', resolve);
+  });
 }
 
 module.exports = { getRepoInfo, downloadGithubRepo };
