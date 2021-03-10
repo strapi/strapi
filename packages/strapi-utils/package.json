@@ -15,7 +15,7 @@
   "main": "./lib",
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "date-fns": "^2.8.1",
+    "date-fns": "^2.19.0",
     "lodash": "4.17.20",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
