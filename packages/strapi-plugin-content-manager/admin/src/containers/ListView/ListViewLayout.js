@@ -9,7 +9,7 @@ import ListView from './index';
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const initialParams = useSelector(state => state.get('content-manager_listView').initialParams);
-  const [, setQuery] = useQueryParams(initialParams);
+  const [{ query }, setQuery] = useQueryParams(initialParams);
 
   useEffect(() => {
     dispatch(setLayout(layout.contentType));
@@ -22,12 +22,14 @@ const ListViewLayout = ({ layout, ...props }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialParams]);
 
+  
+
   if (!initialParams) {
     return null;
   }
 
   return (
-    <RBACManager {...props}>
+    <RBACManager {...props} query={query}>
       <ListView {...props} layout={layout} />
     </RBACManager>
   );

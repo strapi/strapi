@@ -98,6 +98,7 @@ function ListView({
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions, permissions);
 
+
   const [{ query }, setQuery] = useQueryParams(initialParams);
   const params = buildQueryString(query);
 
