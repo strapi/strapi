@@ -44,6 +44,7 @@ module.exports = async function createProject(scope, { client, connection, depen
         strapiVersion: scope.strapiVersion,
         projectName: _.kebabCase(scope.name),
         uuid: scope.uuid,
+        starter: scope.starter,
       }),
       {
         spaces: 2,

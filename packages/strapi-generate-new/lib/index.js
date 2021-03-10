@@ -37,6 +37,7 @@ module.exports = (projectDirectory, cliArguments) => {
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
     template: cliArguments.template,
+    starter: cliArguments.starter,
     docker: process.env.DOCKER === 'true',
     uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
     deviceId: machineIdSync(),
