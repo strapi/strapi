@@ -23,6 +23,8 @@ const useSyncRbac = (query, collectionTypeUID = 'listView') => {
         dispatch(resetPermissions());
       };
     }
+
+    return () => {};
   }, [relatedPermissions, dispatch, query]);
 
   return permissions;
