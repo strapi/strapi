@@ -2,7 +2,7 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
-const { xor, isEmpty, has, isNil, isArray } = require('lodash/fp');
+const { isEmpty, has, isNil, isArray } = require('lodash/fp');
 const { getService } = require('../utils');
 const actionDomain = require('../domain/action');
 const {
@@ -157,7 +157,9 @@ const updatePermissions = yup
                   return applyToProperties.length === 0;
                 }
 
-                return xor(Object.keys(properties), applyToProperties).length === 0;
+                return Object.keys(properties).every(property =>
+                  applyToProperties.includes(property)
+                );
               })
               .test('fields-property', 'Invalid fields property at ${path}', async function(
                 properties = {}

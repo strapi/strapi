@@ -135,7 +135,7 @@ const conditions = [
       const { locales = [] } = options.properties || {};
 
       return {
-        'locale.code': {
+        locale: {
           $in: locales,
         },
       };
