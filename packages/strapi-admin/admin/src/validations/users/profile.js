@@ -1,6 +1,5 @@
 import * as yup from 'yup';
 import { translatedErrors } from 'strapi-helper-plugin';
-import { parseDomain, ParseResultType } from 'parse-domain';
 
 const schema = {
   firstname: yup.mixed().required(translatedErrors.required),
@@ -9,12 +8,7 @@ const schema = {
     .string()
     .email(translatedErrors.email)
     .lowercase()
-    .required(translatedErrors.required)
-    .test('topLevelDomainValidation', translatedErrors.email, function(value) {
-      let parseDomainResult = parseDomain(value);
-      
-return parseDomainResult.type === ParseResultType.Listed;
-    }),
+    .required(translatedErrors.required),
   username: yup.string().nullable(),
   password: yup
     .string()

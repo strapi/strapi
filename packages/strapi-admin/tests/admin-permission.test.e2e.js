@@ -312,6 +312,12 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
               Object {
+                "action": "plugins::email.settings.read",
+                "category": "email",
+                "displayName": "Access the Email Settings page",
+                "subCategory": "general",
+              },
+              Object {
                 "action": "plugins::upload.settings.read",
                 "category": "media library",
                 "displayName": "Access the Media Library settings page",
@@ -615,6 +621,12 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "general",
                 },
                 Object {
+                  "action": "plugins::email.settings.read",
+                  "category": "email",
+                  "displayName": "Access the Email Settings page",
+                  "subCategory": "general",
+                },
+                Object {
                   "action": "plugins::upload.settings.read",
                   "category": "media library",
                   "displayName": "Access the Media Library settings page",
@@ -898,6 +910,12 @@ describe('Role CRUD End to End', () => {
                   "action": "admin::webhooks.update",
                   "category": "webhooks",
                   "displayName": "Update",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "plugins::email.settings.read",
+                  "category": "email",
+                  "displayName": "Access the Email Settings page",
                   "subCategory": "general",
                 },
                 Object {
