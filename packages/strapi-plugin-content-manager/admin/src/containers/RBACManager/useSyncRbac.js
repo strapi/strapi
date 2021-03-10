@@ -1,8 +1,5 @@
-import React, { cloneElement, Children, useEffect } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
-import PropTypes from 'prop-types';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import { resetPermissions, setPermissions } from './actions';
 
@@ -11,16 +8,15 @@ const selectPermissions = state => state.get(`${pluginId}_rbacManager`).permissi
 const selectCollectionTypePermissions = state =>
   state.get('permissionsManager').collectionTypesRelatedPermissions;
 
-const RBACManager = ({ query, ...props }) => {
+const useSyncRbac = (query, collectionTypeUID = 'listView') => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);
   const permissions = useSelector(selectPermissions);
   const dispatch = useDispatch();
-  const collectionTypeUID = props.slug;
 
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
   useEffect(() => {
-    if (query.pluginOptions && relatedPermissions) {
+    if (query && query.pluginOptions && relatedPermissions) {
       dispatch(setPermissions(relatedPermissions, query.pluginOptions, 'listView'));
 
       return () => {
@@ -29,17 +25,7 @@ const RBACManager = ({ query, ...props }) => {
     }
   }, [relatedPermissions, dispatch, query]);
 
-  if (!permissions) {
-    return <LoadingIndicatorPage />;
-  }
-
-  return Children.toArray(props.children).map(child => {
-    return cloneElement(child, { ...child.props, permissions }, null);
-  });
+  return permissions;
 };
 
-RBACManager.propTypes = {
-  slug: PropTypes.string.isRequired,
-};
-
-export default RBACManager;
+export default useSyncRbac;

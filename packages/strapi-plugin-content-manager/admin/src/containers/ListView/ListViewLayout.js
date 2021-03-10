@@ -2,14 +2,15 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useQueryParams } from 'strapi-helper-plugin';
-import RBACManager from '../RBACManager';
-import { setLayout } from './actions';
+import { resetProps, setLayout } from './actions';
 import ListView from './index';
+import useSyncRbac from '../RBACManager/useSyncRbac';
 
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const initialParams = useSelector(state => state.get('content-manager_listView').initialParams);
   const [{ query }, setQuery] = useQueryParams(initialParams);
+  const permissions = useSyncRbac(query, props.slug);
 
   useEffect(() => {
     dispatch(setLayout(layout.contentType));
@@ -19,20 +20,21 @@ const ListViewLayout = ({ layout, ...props }) => {
     if (initialParams) {
       setQuery(initialParams);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialParams]);
 
-  
+  useEffect(() => {
+    return () => {
+      dispatch(resetProps());
+    };
+  }, [dispatch]);
 
-  if (!initialParams) {
+  if (!permissions || !initialParams) {
     return null;
   }
 
-  return (
-    <RBACManager {...props} query={query}>
-      <ListView {...props} layout={layout} />
-    </RBACManager>
-  );
+  return <ListView {...props} layout={layout} permissions={permissions} />;
 };
 
 ListViewLayout.propTypes = {
@@ -51,6 +53,7 @@ ListViewLayout.propTypes = {
       pluginOptions: PropTypes.object,
     }).isRequired,
   }).isRequired,
+  slug: PropTypes.string.isRequired,
 };
 
 export default ListViewLayout;

@@ -42,7 +42,6 @@ import {
   onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
-  resetProps,
   setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
@@ -77,7 +76,6 @@ function ListView({
   onChangeListHeaders,
   onResetListHeaders,
   pagination: { total },
-  resetProps,
   slug,
   initialParams,
   permissions,
@@ -97,7 +95,6 @@ function ListView({
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(viewPermissions, permissions);
-
 
   const [{ query }, setQuery] = useQueryParams(initialParams);
   const params = buildQueryString(query);
@@ -127,11 +124,7 @@ function ListView({
 
   useEffect(() => {
     setFilterPickerState(false);
-
-    return () => {
-      resetProps();
-    };
-  }, [resetProps]);
+  }, []);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
@@ -508,7 +501,6 @@ ListView.propTypes = {
   onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
-  resetProps: PropTypes.func.isRequired,
   setModalLoadingState: PropTypes.func.isRequired,
   showModalConfirmButtonLoading: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
@@ -542,7 +534,6 @@ export function mapDispatchToProps(dispatch) {
       onDeleteDataSucceeded,
       onDeleteSeveralDataSucceeded,
       onResetListHeaders,
-      resetProps,
       setModalLoadingState,
       toggleModalDelete,
       toggleModalDeleteAll,

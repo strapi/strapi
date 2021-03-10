@@ -169,6 +169,7 @@ const listViewReducer = (state = initialState, action) =>
       }
       case SET_LIST_LAYOUT: {
         const { contentType, displayedHeaders, initialParams } = action;
+        console.log('xx', action)
 
         drafState.contentType = contentType;
         drafState.displayedHeaders = displayedHeaders;
