@@ -54,13 +54,11 @@ const formatContentTypeLabel = contentType => {
 };
 
 const formatAttributes = model => {
-  const { CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
+  const { getWritableAttributes } = contentTypesUtils;
 
-  return Object.keys(model.attributes).reduce((acc, key) => {
-    if ([CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE].includes(key)) {
-      return acc;
-    }
+  const pickWritableAttributes = pick(getWritableAttributes(model));
 
+  return Object.keys(pickWritableAttributes(model.attributes)).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});
