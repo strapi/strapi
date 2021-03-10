@@ -2,14 +2,12 @@
 # yarn lockfile v1
 
 
-"@apollo/federation@^0.20.7":
-  version "0.20.7"
-  resolved "https://registry.yarnpkg.com/@apollo/federation/-/federation-0.20.7.tgz#0d26dcc3bbc92c168dc40d4f407f56d26338ef7a"
-  integrity sha512-URIayksqBaJ+xlcJmyGCf+OqHP60lX2CYGv9fDWQ1KM48sEN1ABHGXkEa0vwgWMH0XUVo94lYDVY11BAJUsuCw==
+"@apollo/federation@^0.21.2":
+  version "0.21.2"
+  resolved "https://registry.yarnpkg.com/@apollo/federation/-/federation-0.21.2.tgz#2ced655254c704d248d9ffb581137e363b5d9e27"
+  integrity sha512-ZQ2TcRv7QO/84+SKFQrhppg+s0EcwBfSPT27DcoLYfEj8tsNjbUmsyxiH5CE2NJtG0F8y520nIM8tQ9wUrePsg==
   dependencies:
     apollo-graphql "^0.6.0"
-    apollo-server-env "^2.4.5"
-    core-js "^3.4.0"
     lodash.xorby "^4.7.0"
 
 "@apollo/protobufjs@^1.0.3":
@@ -6442,7 +6440,7 @@ core-js-pure@^3.0.0:
   resolved "https://registry.yarnpkg.com/core-js-pure/-/core-js-pure-3.6.5.tgz#c79e75f5e38dbc85a662d91eea52b8256d53b813"
   integrity sha512-lacdXOimsiD0QyNf9BC/mxivNJ/ybBGJXQFKzRekp1WTHoVUWsUHEn+2T8GJAzzIhyOuXA+gOxCVN3l+5PLPUA==
 
-core-js@3.6.5, core-js@^3.0.1, core-js@^3.4.0, core-js@^3.6.4:
+core-js@3.6.5, core-js@^3.0.1, core-js@^3.6.4:
   version "3.6.5"
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.6.5.tgz#7395dc273af37fb2e50e9bd3d9fe841285231d1a"
   integrity sha512-vZVEEwZoIsI+vPEuoF9Iqf5H7/M3eeQqWlQnYa8FSKKePuYTf5MWnxb5SDAzCa60b3JBRS5g9b+Dq7b1y/RCrA==
