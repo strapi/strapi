@@ -34,17 +34,31 @@ const EllipsisParagraph = styled(Text)`
   text-align: left;
 `;
 
+const getInitialLocale = (query, locales = []) => {
+  const localeFromQuery = get(query, 'query.pluginOptions.locale', undefined);
+
+  if (localeFromQuery) {
+    return locales.find(locale => locale.code === localeFromQuery);
+  }
+
+  return locales[0];
+};
+
 const selectContentManagerListViewPluginOptions = state =>
   state.get('content-manager_listView').contentType.pluginOptions;
 
 const selectI18NLocales = state => state.get('i18n_locales').locales;
 
 const LocalePicker = () => {
+  console.log('lol');
   const dispatch = useDispatch();
   const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
-  const [selected, setSelected] = useState(locales && locales[0]);
   const [query, setQuery] = useQueryParams();
+
+  const initialLocale = getInitialLocale(query, locales);
+  const [selected, setSelected] = useState(initialLocale);
+
   const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
 
   if (!isFieldLocalized) {
