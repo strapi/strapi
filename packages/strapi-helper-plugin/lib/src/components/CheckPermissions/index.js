@@ -8,7 +8,7 @@ import hasPermissions from '../../utils/hasPermissions';
 // except that it does not handle redirections nor loading state
 
 const CheckPermissions = ({ permissions, children }) => {
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
   const abortController = new AbortController();

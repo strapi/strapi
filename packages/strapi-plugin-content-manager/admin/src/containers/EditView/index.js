@@ -39,7 +39,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
   const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
     viewPermissions
   );
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
 
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
