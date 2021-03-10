@@ -50,7 +50,6 @@ const selectContentManagerListViewPluginOptions = state =>
 const selectI18NLocales = state => state.get('i18n_locales').locales;
 
 const LocalePicker = () => {
-  console.log('lol');
   const dispatch = useDispatch();
   const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
