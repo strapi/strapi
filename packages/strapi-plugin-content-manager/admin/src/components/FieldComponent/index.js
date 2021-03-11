@@ -5,7 +5,7 @@ import { size } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEqual from 'react-fast-compare';
-import { NotAllowedInput } from 'strapi-helper-plugin';
+import { NotAllowedInput, LabelIconWrapper } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
@@ -26,6 +26,7 @@ const FieldComponent = ({
   isRepeatable,
   isNested,
   label,
+  labelIcon,
   max,
   min,
   name,
@@ -70,8 +71,11 @@ const FieldComponent = ({
         </ComponentIcon>
       )}
       <Label>
-        {label}&nbsp;
-        {isRepeatable && `(${componentValueLength})`}
+        <span>
+          {label}&nbsp;
+          {isRepeatable && `(${componentValueLength})`}
+        </span>
+        {labelIcon && <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>}
       </Label>
       {showResetComponent && (
         <Reset
@@ -122,6 +126,7 @@ FieldComponent.defaultProps = {
   isReadOnly: false,
   isRepeatable: false,
   isNested: false,
+  labelIcon: null,
   max: Infinity,
   min: -Infinity,
 };
@@ -139,6 +144,10 @@ FieldComponent.propTypes = {
   isRepeatable: PropTypes.bool,
   isNested: PropTypes.bool,
   label: PropTypes.string.isRequired,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.any,
+    title: PropTypes.string,
+  }),
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,
