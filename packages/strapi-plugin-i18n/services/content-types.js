@@ -9,10 +9,12 @@ const isLocalized = modelOrAttribute => {
 };
 
 const getNonLocalizedFields = model => {
-  return Object.keys(model.attributes).filter(attributeName => {
-    const attribute = model.attributes[attributeName];
-    return !isLocalized(attribute) && !isRelationalAttribute(attribute);
-  });
+  return Object.keys(model.attributes)
+    .filter(attributeName => !['locale', 'localizations'].includes(attributeName))
+    .filter(attributeName => {
+      const attribute = model.attributes[attributeName];
+      return !isLocalized(attribute) && !isRelationalAttribute(attribute);
+    });
 };
 
 const addLocale = async (entity, locale) => {
@@ -31,29 +33,40 @@ const addLocale = async (entity, locale) => {
   entity.locale = locale;
 };
 
-const addLocalizations = async (entity, { relatedEntityId, model, locale }) => {
-  if (relatedEntityId) {
-    const relatedEntity = await strapi.query(model).findOne({ id: relatedEntityId });
+const getNewLocalizationsFor = async ({ relatedEntityId, model, locale }) => {
+  const { kind } = strapi.getModel(model);
+  let relatedEntity;
+
+  if (kind === 'singleType') {
+    relatedEntity = await strapi.query(model).findOne({});
+    if (!relatedEntity) {
+      return [];
+    }
+  } else {
+    if (!relatedEntityId) {
+      return [];
+    }
+
+    relatedEntity = await strapi.query(model).findOne({ id: relatedEntityId });
 
     if (!relatedEntity) {
       throw new Error("The related entity doesn't exist");
     }
-    if (
-      relatedEntity.locale === locale ||
-      relatedEntity.localizations.map(prop('locale')).includes(locale)
-    ) {
-      throw new Error('The entity already exists in this locale');
-    }
-
-    entity.localizations = [relatedEntityId, ...relatedEntity.localizations.map(prop('id'))];
-  } else {
-    entity.localizations = [];
   }
+
+  if (
+    relatedEntity.locale === locale ||
+    relatedEntity.localizations.map(prop('locale')).includes(locale)
+  ) {
+    throw new Error('The entity already exists in this locale');
+  }
+
+  return [relatedEntity.id, ...relatedEntity.localizations.map(prop('id'))];
 };
 
 module.exports = {
   isLocalized,
   getNonLocalizedFields,
   addLocale,
-  addLocalizations,
+  getNewLocalizationsFor,
 };

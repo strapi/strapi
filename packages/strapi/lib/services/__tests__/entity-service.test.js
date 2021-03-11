@@ -79,33 +79,33 @@ describe('Entity service', () => {
   });
 
   describe('Create', () => {
-    test('Throws when trying to create a new single type entry if there is already one', async () => {
-      const fakeQuery = {
-        count: jest.fn(() => Promise.resolve(1)),
-      };
-
-      const fakeDB = {
-        getModel: jest.fn(() => {
-          return { kind: 'singleType', privateAttributes: [] };
-        }),
-        query: jest.fn(() => fakeQuery),
-      };
-
-      const instance = createEntityService({
-        db: fakeDB,
-        eventHub: new EventEmitter(),
-      });
-
-      await expect(instance.create({ data: {} }, { model: 'test-model' })).rejects.toThrow(
-        'Single type entry can only be created once'
-      );
-
-      expect(fakeDB.getModel).toHaveBeenCalledTimes(1);
-      expect(fakeDB.getModel).toHaveBeenCalledWith('test-model');
-
-      expect(fakeDB.query).toHaveBeenCalledWith('test-model');
-      expect(fakeQuery.count).toHaveBeenCalled();
-    });
+    // test('Throws when trying to create a new single type entry if there is already one', async () => {
+    //   const fakeQuery = {
+    //     count: jest.fn(() => Promise.resolve(1)),
+    //   };
+    //
+    //   const fakeDB = {
+    //     getModel: jest.fn(() => {
+    //       return { kind: 'singleType', privateAttributes: [] };
+    //     }),
+    //     query: jest.fn(() => fakeQuery),
+    //   };
+    //
+    //   const instance = createEntityService({
+    //     db: fakeDB,
+    //     eventHub: new EventEmitter(),
+    //   });
+    //
+    //   await expect(instance.create({ data: {} }, { model: 'test-model' })).rejects.toThrow(
+    //     'Single type entry can only be created once'
+    //   );
+    //
+    //   expect(fakeDB.getModel).toHaveBeenCalledTimes(1);
+    //   expect(fakeDB.getModel).toHaveBeenCalledWith('test-model');
+    //
+    //   expect(fakeDB.query).toHaveBeenCalledWith('test-model');
+    //   expect(fakeQuery.count).toHaveBeenCalled();
+    // });
 
     describe('assign default values', () => {
       let instance;

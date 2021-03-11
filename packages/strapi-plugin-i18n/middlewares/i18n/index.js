@@ -1,6 +1,6 @@
 'use strict';
 
-const { get } = require('lodash/fp');
+const { get, isMatch } = require('lodash/fp');
 
 module.exports = strapi => {
   return {
@@ -10,11 +10,15 @@ module.exports = strapi => {
 
     initialize() {
       const routes = get('plugins.content-manager.config.routes', strapi);
-
-      const createRoute = routes.find(
-        route => route.method === 'POST' && route.path === '/collection-types/:model'
+      const routesToAddPolicyTo = routes.filter(
+        route =>
+          isMatch({ method: 'POST', path: '/collection-types/:model' }, route) ||
+          isMatch({ method: 'PUT', path: '/single-types/:model' }, route)
       );
-      createRoute.config.policies.push('plugins::i18n.validateLocaleCreation');
+
+      routesToAddPolicyTo.forEach(route => {
+        route.config.policies.push('plugins::i18n.validateLocaleCreation');
+      });
     },
   };
 };

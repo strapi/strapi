@@ -132,13 +132,13 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
 
     const modelDef = db.getModel(model);
 
-    if (modelDef.kind === 'singleType') {
-      // check if there is already one entry and throw
-      const count = await db.query(model).count();
-      if (count >= 1) {
-        throw new Error('Single type entry can only be created once');
-      }
-    }
+    // if (modelDef.kind === 'singleType') {
+    //   // check if there is already one entry and throw
+    //   const count = await db.query(model).count();
+    //   if (count >= 1) {
+    //     throw new Error('Single type entry can only be created once');
+    //   }
+    // }
 
     const isDraft = contentTypesUtils.isDraft(data, modelDef);
 
