@@ -14,7 +14,7 @@
   },
   "main": "index.js",
   "dependencies": {
-    "@babel/core": "^7.12.3",
+    "@babel/core": "^7.13.10",
     "@babel/plugin-proposal-async-generator-functions": "^7.12.12",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-syntax-dynamic-import": "^7.2.0",
