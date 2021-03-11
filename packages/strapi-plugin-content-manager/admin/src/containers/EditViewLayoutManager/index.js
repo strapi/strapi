@@ -10,6 +10,8 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
   const currentLayout = useSelector(selectLayout);
   const dispatch = useDispatch();
 
+  console.log({ layout });
+
   useEffect(() => {
     dispatch(setLayout(layout));
 

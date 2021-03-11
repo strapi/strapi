@@ -1,11 +1,15 @@
 import React from 'react';
 import get from 'lodash/get';
 import { Globe, GlobeCrossed } from '@buffetjs/icons';
+import { getTrad } from '../utils';
 
 const enhanceRelationLayout = layout =>
   layout.reduce((acc, current) => {
     const labelIcon = {
-      title: 'localized',
+      title: {
+        id: getTrad('Field.localized'),
+        defaultMessage: 'This value is unique for the selected locale',
+      },
       icon: <Globe />,
     };
     acc.push({ ...current, labelIcon });
@@ -23,7 +27,12 @@ const enhanceEditLayout = layout =>
       );
 
       const labelIcon = {
-        title: hasI18nEnabled ? 'localized' : 'common to all locales',
+        title: {
+          id: hasI18nEnabled ? getTrad('Field.localized') : getTrad('Field.not-localized'),
+          defaultMessage: hasI18nEnabled
+            ? 'This value is unique for the selected locale'
+            : 'This value is common to all locales',
+        },
         icon: hasI18nEnabled ? <Globe /> : <GlobeCrossed />,
       };
 

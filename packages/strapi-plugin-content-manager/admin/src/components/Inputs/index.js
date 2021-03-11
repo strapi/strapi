@@ -42,6 +42,10 @@ function Inputs({
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
   const { formatMessage } = useIntl();
 
+  const labelIconformatted = labelIcon
+    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
+    : labelIcon;
+
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = fieldSchema.type;
 
@@ -180,7 +184,7 @@ function Inputs({
   }
 
   if (!shouldDisplayNotAllowedInput) {
-    return <NotAllowedInput label={metadatas.label} />;
+    return <NotAllowedInput label={metadatas.label} labelIcon={labelIconformatted} />;
   }
 
   if (type === 'relation') {
@@ -208,7 +212,7 @@ function Inputs({
       disabled={shouldDisableField}
       error={errorMessage}
       inputDescription={description}
-      labelIcon={labelIcon}
+      labelIcon={labelIconformatted}
       description={description}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
@@ -250,7 +254,10 @@ Inputs.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   labelIcon: PropTypes.shape({
     icon: PropTypes.node.isRequired,
-    title: PropTypes.string,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }).isRequired,
   }),
   metadatas: PropTypes.object.isRequired,
   onBlur: PropTypes.func,

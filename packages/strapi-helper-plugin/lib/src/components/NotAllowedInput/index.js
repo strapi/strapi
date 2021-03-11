@@ -4,9 +4,10 @@ import { Flex, Padded, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import EyeSlashed from '../../svgs/EyeSlashed';
 import BaselineAlignment from '../BaselineAlignment';
+import LabelIconWrapper from '../LabelIconWrapper';
 import Field from './Field';
 
-const NotAllowedInput = ({ label, description, error, spacerHeight }) => {
+const NotAllowedInput = ({ label, labelIcon, description, error, spacerHeight }) => {
   const { formatMessage } = useIntl();
   const formatMessageRef = useRef(formatMessage);
   const text = useMemo(
@@ -17,7 +18,8 @@ const NotAllowedInput = ({ label, description, error, spacerHeight }) => {
   return (
     <BaselineAlignment bottom size="18px">
       <Text fontWeight="semiBold" lineHeight="18px">
-        {label}
+        <span>{label}</span>
+        {labelIcon && <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>}
       </Text>
       <Field error={error}>
         <Padded left right size="sm">
@@ -60,6 +62,10 @@ NotAllowedInput.defaultProps = {
 NotAllowedInput.propTypes = {
   description: PropTypes.string,
   label: PropTypes.string,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.any,
+    title: PropTypes.string,
+  }),
 };
 
 export default memo(NotAllowedInput);

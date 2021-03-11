@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
+import { FormattedMessage } from 'react-intl';
 import { LabelIconWrapper } from 'strapi-helper-plugin';
 import { Description, ErrorMessage, Label } from '@buffetjs/styles';
 import { Error } from '@buffetjs/core';
@@ -56,7 +57,9 @@ class InputJSONWithErrors extends React.Component {
               <Label htmlFor={name}>
                 <span>{label}</span>
                 {labelIcon && (
-                  <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>
+                  <FormattedMessage {...labelIcon.title}>
+                    {msg => <LabelIconWrapper title={msg}>{labelIcon.icon}</LabelIconWrapper>}
+                  </FormattedMessage>
                 )}
               </Label>
               <InputJSON
@@ -145,8 +148,11 @@ InputJSONWithErrors.propTypes = {
   ]),
   labelClassName: PropTypes.string,
   labelIcon: PropTypes.shape({
-    icon: PropTypes.any,
-    title: PropTypes.string,
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }).isRequired,
   }),
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,
