@@ -28,9 +28,7 @@ async function getDefaultBranch(repo) {
   const response = await fetch(`https://api.github.com/repos/${repo}`);
 
   if (!response.ok) {
-    console.log(
-      `${chalk.red('error')} Could not fetch the default branch for: ${chalk.yellow(repo)}`
-    );
+    stopProcess(`Could not fetch the default branch for: ${chalk.yellow(repo)}`);
   }
 
   const { default_branch } = await response.json();
@@ -42,22 +40,22 @@ async function getDefaultBranch(repo) {
  * @param {string} starterUrl Github url to starter project
  */
 async function getRepoInfo(starter) {
-  try {
-    const repoInfo = await parseGitUrl(starter);
-    const { name, full_name, ref, protocols } = repoInfo;
+  const repoInfo = await parseGitUrl(starter);
+  const { name, full_name, ref, protocols, source } = repoInfo;
 
-    if (protocols.length === 0) {
-      return getShortcut(starter);
-    }
-
-    return {
-      name,
-      full_name,
-      ref,
-    };
-  } catch (err) {
-    console.log(err);
+  if (protocols.length === 0) {
+    return getShortcut(starter);
   }
+
+  if (source !== 'github.com') {
+    stopProcess(`Github URL not found for: ${chalk.yellow(starter)}`);
+  }
+
+  return {
+    name,
+    full_name,
+    ref,
+  };
 }
 
 /**
@@ -76,11 +74,7 @@ async function downloadGithubRepo(starterUrl, tmpDir) {
   const response = await fetch(codeload);
   if (!response.ok) {
     const message = usedShortcut ? `using the shortcut` : `using the url`;
-    stopProcess(
-      `${chalk.red('error')} Could not download the repository ${message}: ${chalk.yellow(
-        `${starterUrl}`
-      )}`
-    );
+    stopProcess(`Could not download the repository ${message}: ${chalk.yellow(`${starterUrl}`)}`);
   }
 
   await new Promise(resolve => {

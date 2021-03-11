@@ -2,8 +2,8 @@
 
 const { execSync } = require('child_process');
 const execa = require('execa');
-const chalk = require('chalk');
 const hasYarn = require('./has-yarn');
+const logger = require('./logger');
 
 /**
  * @param  {string} path Path to directory (frontend, backend)
@@ -39,7 +39,7 @@ async function initGit(rootPath) {
       cwd: rootPath,
     });
   } catch (err) {
-    console.log(`${chalk.yellow('warning')} Could not initialize a git repository`);
+    logger.warn(`Could not initialize a git repository`);
   }
 
   try {
@@ -49,7 +49,7 @@ async function initGit(rootPath) {
       cwd: rootPath,
     });
   } catch (err) {
-    console.log(`${chalk.yellow('warning')} Could not create initial git commit`);
+    logger.warn(`Could not create initial git commit`);
   }
 }
 

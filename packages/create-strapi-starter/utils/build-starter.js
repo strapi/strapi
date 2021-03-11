@@ -13,6 +13,7 @@ const generateNewApp = require('strapi-generate-new');
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');
 const { getRepoInfo, downloadGithubRepo } = require('./fetch-github');
+const logger = require('./logger');
 const stopProcess = require('./stop-process');
 
 /**
@@ -23,11 +24,7 @@ function readStarterJson(filePath, starterUrl) {
     const data = fse.readFileSync(filePath);
     return JSON.parse(data);
   } catch (err) {
-    stopProcess(
-      `${chalk.red('error')} Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(
-        starterUrl
-      )}`
-    );
+    stopProcess(`Could not find ${chalk.yellow('starter.json')} in ${chalk.yellow(starterUrl)}`);
   }
 }
 
@@ -60,11 +57,7 @@ async function initPackageJson(rootPath, projectName) {
       }
     );
   } catch (err) {
-    stopProcess(
-      `\n${chalk.red('error')} Failed to create ${chalk.yellow(`package.json`)} in ${chalk.yellow(
-        rootPath
-      )}`
-    );
+    stopProcess(`Failed to create ${chalk.yellow(`package.json`)} in ${chalk.yellow(rootPath)}`);
   }
 }
 
@@ -121,9 +114,7 @@ module.exports = async function buildStarter(projectArgs, program) {
       recursive: true,
     });
   } catch (err) {
-    stopProcess(
-      `${chalk.red('error')} Failed to create ${chalk.yellow(`${projectName}/frontend`)}`
-    );
+    stopProcess(`Failed to create ${chalk.yellow(`${projectName}/frontend`)}`);
   }
 
   // Delete temporary directory
@@ -154,9 +145,7 @@ module.exports = async function buildStarter(projectArgs, program) {
     const gitignore = join(__dirname, '..', 'resources', 'gitignore');
     await fse.copy(gitignore, join(rootPath, '.gitignore'));
   } catch (err) {
-    console.log(
-      `\n${chalk.yellow('warning')} Failed to create file: ${chalk.yellow('.gitignore')}`
-    );
+    logger.warn(`Failed to create file: ${chalk.yellow('.gitignore')}`);
   }
 
   await installWithLogs(rootPath);
