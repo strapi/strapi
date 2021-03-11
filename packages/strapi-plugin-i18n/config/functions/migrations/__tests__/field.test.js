@@ -1,10 +1,9 @@
 'use strict';
 
-const { cloneDeep } = require('lodash/fp');
-const { before } = require('../field');
+const { after } = require('../field');
 
 describe('i18n - Migration - disable localization on a field', () => {
-  describe('before', () => {
+  describe('after', () => {
     describe('Should not migrate', () => {
       test("Doesn't migrate if model isn't localized", async () => {
         const find = jest.fn();
@@ -12,133 +11,144 @@ describe('i18n - Migration - disable localization on a field', () => {
           query: () => {
             find;
           },
-        };
-
-        const model = {
-          collectionName: 'dogs',
-          info: { name: 'dog' },
-          attributes: {
-            name: { type: 'string' },
-            code: { type: 'string' },
+          plugins: {
+            i18n: {
+              services: {
+                'content-types': {
+                  isLocalized: () => false,
+                },
+              },
+            },
           },
         };
 
-        const previousDefinition = {
-          collectionName: 'dogs',
-          info: { name: 'dog' },
-          attributes: {
-            name: { type: 'string' },
-          },
-        };
+        const model = {};
+        const previousDefinition = {};
 
-        await before({ model, definition: model, previousDefinition });
+        await after({ model, definition: model, previousDefinition });
         expect(find).not.toHaveBeenCalled();
       });
 
       test("Doesn't migrate if no attribute changed (without i18n)", async () => {
         const find = jest.fn();
+        const getLocalizedFields = jest
+          .fn()
+          .mockReturnValueOnce([])
+          .mockReturnValueOnce([]);
+
         global.strapi = {
           query: () => {
             find;
           },
-        };
-
-        const model = {
-          collectionName: 'dogs',
-          info: { name: 'dog' },
-          attributes: {
-            name: { type: 'string' },
-            code: { type: 'string' },
+          plugins: {
+            i18n: {
+              services: {
+                'content-types': {
+                  isLocalized: () => true,
+                  getLocalizedFields,
+                },
+              },
+            },
           },
         };
 
-        const previousDefinition = model;
+        const model = { attributes: { name: {} } };
+        const previousDefinition = { attributes: { name: {} } };
 
-        await before({ model, definition: model, previousDefinition });
+        await after({ model, definition: model, previousDefinition });
+        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
       test("Doesn't migrate if no attribute changed (with i18n)", async () => {
         const find = jest.fn();
+        const getLocalizedFields = jest
+          .fn()
+          .mockReturnValueOnce(['name'])
+          .mockReturnValueOnce(['name']);
         global.strapi = {
           query: () => {
             find;
           },
-        };
-
-        const model = {
-          collectionName: 'dogs',
-          info: { name: 'dog' },
-          pluginOptions: { i18n: { localized: true } },
-          attributes: {
-            name: {
-              type: 'string',
-              pluginOptions: { i18n: { localized: true } },
-            },
-            code: {
-              type: 'string',
-              pluginOptions: { i18n: { localized: false } },
+          plugins: {
+            i18n: {
+              services: {
+                'content-types': {
+                  isLocalized: () => true,
+                  getLocalizedFields,
+                },
+              },
             },
           },
         };
 
-        const previousDefinition = model;
+        const model = { attributes: { name: {} } };
+        const previousDefinition = { attributes: { name: {} } };
 
-        await before({ model, definition: model, previousDefinition });
+        await after({ model, definition: model, previousDefinition });
+        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
-      test("Doesn't migrate if field not localized and pluginOptions removed", async () => {
+      test("Doesn't migrate if field become localized", async () => {
         const find = jest.fn();
+        const getLocalizedFields = jest
+          .fn()
+          .mockReturnValueOnce(['name'])
+          .mockReturnValueOnce([]);
+
         global.strapi = {
           query: () => {
             find;
           },
-        };
-
-        const model = {
-          collectionName: 'dogs',
-          info: { name: 'dog' },
-          pluginOptions: { i18n: { localized: true } },
-          attributes: {
-            name: {
-              type: 'string',
-              pluginOptions: { i18n: { localized: false } },
+          plugins: {
+            i18n: {
+              services: {
+                'content-types': {
+                  isLocalized: () => true,
+                  getLocalizedFields,
+                },
+              },
             },
           },
         };
 
-        const previousDefinition = cloneDeep(model);
-        delete previousDefinition.attributes.name.pluginOptions;
+        const model = { attributes: { name: {} } };
+        const previousDefinition = { attributes: { name: {} } };
 
-        await before({ model, definition: model, previousDefinition });
+        await after({ model, definition: model, previousDefinition });
+        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
-      test("Doesn't migrate if field becomes localized", async () => {
+      test("Doesn't migrate if field is deleted", async () => {
         const find = jest.fn();
+        const getLocalizedFields = jest
+          .fn()
+          .mockReturnValueOnce([])
+          .mockReturnValueOnce(['name']);
+
         global.strapi = {
           query: () => {
             find;
           },
-        };
-
-        const model = {
-          collectionName: 'dogs',
-          info: { name: 'dog' },
-          pluginOptions: { i18n: { localized: true } },
-          attributes: {
-            name: {
-              type: 'string',
-              pluginOptions: { i18n: { localized: true } },
+          plugins: {
+            i18n: {
+              services: {
+                'content-types': {
+                  isLocalized: () => true,
+                  getLocalizedFields,
+                },
+              },
             },
           },
         };
 
-        const previousDefinition = cloneDeep(model);
-        previousDefinition.attributes.name.pluginOptions.i18n.localized = false;
+        const model = { attributes: {} };
+        const previousDefinition = { attributes: { name: {} } };
 
-        await before({ model, definition: model, previousDefinition });
+        await after({ model, definition: model, previousDefinition });
+        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
     });

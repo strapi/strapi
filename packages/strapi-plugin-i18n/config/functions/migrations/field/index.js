@@ -32,6 +32,7 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
   } else if (model.orm === 'mongoose') {
     await migrateForMongoose({ model, attributesToMigrate, locales });
   }
+  throw new Error('pouet');
 };
 
 const before = () => {};

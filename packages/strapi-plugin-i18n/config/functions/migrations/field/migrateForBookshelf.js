@@ -1,6 +1,8 @@
 'use strict';
 
-const { shouldBeProcesseed, getUpdatesInfo } = require('./utils');
+const { singular } = require('pluralize');
+const { has, omit, pick } = require('lodash/fp');
+const { shouldBeProcessed, getUpdatesInfo } = require('./utils');
 
 const BATCH_SIZE = 1000;
 
@@ -28,17 +30,16 @@ const batchUpdate = async (updatesInfo, trx, model) => {
 
 const updateFromTmpTable = async ({ model, trx, attributesToMigrate }) => {
   const collectionName = model.collectionName;
-  let bindings = [];
   if (model.client === 'pg') {
     const substitutes = attributesToMigrate.map(() => '?? = ??.??').join(',');
-    bindings.push(collectionName);
+    const bindings = [collectionName];
     attributesToMigrate.forEach(attr => bindings.push(attr, TMP_TABLE_NAME, attr));
     bindings.push(TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
 
     await trx.raw(`UPDATE ?? SET ${substitutes} FROM ?? WHERE ??.id = ??.id;`, bindings);
   } else if (model.client === 'mysql') {
     const substitutes = attributesToMigrate.map(() => '??.?? = ??.??').join(',');
-    bindings.push(collectionName, TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
+    const bindings = [collectionName, TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME];
     attributesToMigrate.forEach(attr => bindings.push(collectionName, attr, TMP_TABLE_NAME, attr));
 
     await trx.raw(`UPDATE ?? JOIN ?? ON ??.id = ??.id SET ${substitutes};`, bindings);
@@ -60,6 +61,9 @@ const createTmpTable = async ({ ORM, attributesToMigrate, model }) => {
 const deleteTmpTable = ({ ORM }) => ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
 
 const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales }) => {
+  const localizationAssoc = model.associations.find(a => a.alias === 'localizations');
+  const localizationTableName = localizationAssoc.tableCollectionName;
+
   // The migration is custom for pg and mysql for better perfomance
   const isPgOrMysql = ['pg', 'mysql'].includes(model.client);
 
@@ -68,31 +72,61 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
   }
 
   const trx = await ORM.knex.transaction();
+
+  const locsAttr = model.attributes.localizations;
+  const foreignKey = `${singular(model.collectionName)}_${model.primaryKey}`;
+  const relatedKey = `${locsAttr.attribute}_${locsAttr.column}`;
   try {
     const processedLocaleCodes = [];
     for (const locale of locales) {
       let offset = 0;
       // eslint-disable-next-line no-constant-condition
       while (true) {
-        const batch = await trx
-          .select([...attributesToMigrate, 'locale', 'localizations'])
-          .from(model.collectionName)
-          .where('locale', locale.code)
-          .orderBy('id')
-          .offset(offset)
-          .limit(BATCH_SIZE);
+        let batch = await trx
+          .select([
+            ...attributesToMigrate.map(attr => `model.${attr}`),
+            'model.id as __strapi_rootId',
+            'relModel.id as id',
+            'relModel.locale',
+          ])
+          .join(
+            `${localizationTableName} as loc`,
+            `model.${model.primaryKey}`,
+            '=',
+            `loc.${foreignKey}`
+          )
+          .join(
+            `${model.collectionName} as relModel`,
+            `loc.${relatedKey}`,
+            '=',
+            `relModel.${model.primaryKey}`
+          )
+          .from(
+            trx
+              .select('*')
+              .from(`${model.collectionName} as subModel`)
+              .orderBy(`subModel.${model.primaryKey}`)
+              .where(`subModel.locale`, locale.code)
+              .offset(offset)
+              .limit(BATCH_SIZE)
+              .as('model')
+          );
+        let entries = batch.reduce((entries, entry) => {
+          if (has(entry.__strapi_rootId, entries)) {
+            entries[entry.__strapi_rootId].localizations.push(pick(['id', 'locale'], entry));
+          } else {
+            entries[entry.__strapi_rootId] = omit(['id', 'locale', '__strapi_rootId'], entry);
+            entries[entry.__strapi_rootId].localizations = [pick(['id', 'locale'], entry)];
+          }
+
+          return entries;
+        }, {});
+        entries = Object.values(entries);
 
         offset += BATCH_SIZE;
 
-        // postgres automatically parses JSON, but not sqlite nor mysql
-        batch.forEach(entry => {
-          if (typeof entry.localizations === 'string') {
-            entry.localizations = JSON.parse(entry.localizations);
-          }
-        });
-
-        const entriesToProcess = batch.filter(shouldBeProcesseed(processedLocaleCodes));
-        const updatesInfo = getUpdatesInfo({ entriesToProcess, locale, attributesToMigrate });
+        const entriesToProcess = batch.filter(shouldBeProcessed(processedLocaleCodes));
+        const updatesInfo = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
 
         if (isPgOrMysql) {
           await batchInsertInTmpTable(updatesInfo, trx);
@@ -100,7 +134,7 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
           await batchUpdate(updatesInfo, trx, model);
         }
 
-        if (batch.length < BATCH_SIZE) {
+        if (entries.length < BATCH_SIZE) {
           break;
         }
       }

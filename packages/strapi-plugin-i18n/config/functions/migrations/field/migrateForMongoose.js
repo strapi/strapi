@@ -1,6 +1,6 @@
 'use strict';
 
-const { shouldBeProcesseed, getUpdatesInfo } = require('./utils');
+const { shouldBeProcessed, getUpdatesInfo } = require('./utils');
 
 const BATCH_SIZE = 1000;
 
@@ -17,6 +17,7 @@ const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
 
       const batch = await model
         .find(findParams, [...attributesToMigrate, 'locale', 'localizations'])
+        .populate('localizations', 'locale id')
         .sort({ _id: 1 })
         .limit(BATCH_SIZE);
 
@@ -25,9 +26,9 @@ const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
       }
       batchCount = batch.length;
 
-      const entriesToProcess = batch.filter(shouldBeProcesseed);
+      const entriesToProcess = batch.filter(shouldBeProcessed(processedLocaleCodes));
 
-      const updatesInfo = getUpdatesInfo({ entriesToProcess, locale, attributesToMigrate });
+      const updatesInfo = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
       const updates = updatesInfo.map(({ entriesIdsToUpdate, attributesValues }) => ({
         updateMany: { filter: { _id: { $in: entriesIdsToUpdate } }, update: attributesValues },
       }));
