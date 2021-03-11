@@ -207,9 +207,9 @@ class Wysiwyg extends React.Component {
         () => {
           this.focus();
           // Update the parent reducer
-          this.sendData(newEditorState);
         }
       );
+      this.sendData(newEditorState);
       return;
     }
 
@@ -220,10 +220,9 @@ class Wysiwyg extends React.Component {
       },
       () => {
         this.focus();
-        // Update the parent reducer
-        this.sendData(newEditorState);
       }
     );
+    this.sendData(newEditorState);
     return;
   };
 
