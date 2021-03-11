@@ -7,7 +7,7 @@ import pluginPermissions from '../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
-import EditView from '../EditView';
+import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
 import ListViewLayout from '../ListView/ListViewLayout';
 import ListSettingsView from '../ListSettingsView';
@@ -73,8 +73,8 @@ const CollectionTypeRecursivePath = ({
   };
 
   const routes = [
-    { path: ':id/clone/:origin', comp: EditView },
-    { path: ':id', comp: EditView },
+    { path: ':id/clone/:origin', comp: EditViewLayoutManager },
+    { path: ':id', comp: EditViewLayoutManager },
     { path: '', comp: ListViewLayout },
   ].map(({ path, comp }) => (
     <Route key={path} path={`${url}/${path}`} render={props => renderRoute(props, comp)} />
