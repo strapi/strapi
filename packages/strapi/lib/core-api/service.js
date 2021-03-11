@@ -65,7 +65,16 @@ const createUtils = ({ model }) => {
   const { getNonWritableAttributes } = utils.contentTypes;
 
   return {
-    sanitizeInput: data => _.omit(data, getNonWritableAttributes(model)),
+    sanitizeInput: data => {
+      const nonWritableAttributes = getNonWritableAttributes(model);
+
+      const attributesToOmit = _.difference(
+        nonWritableAttributes,
+        _.get(model, 'coreApi.writableAttributes', [])
+      );
+
+      return _.omit(data, attributesToOmit);
+    },
   };
 };
 

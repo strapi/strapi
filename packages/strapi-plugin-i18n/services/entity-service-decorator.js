@@ -59,6 +59,7 @@ const decorator = service => ({
    */
   async create(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
+
     const entry = await service.create(opts, ctx);
 
     if (isLocalized(model)) {
@@ -76,7 +77,16 @@ const decorator = service => ({
    */
   async update(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
-    const entry = await service.update(opts, ctx);
+
+    const { data, ...restOptions } = opts;
+
+    const entry = await service.update(
+      {
+        data: omit('locale', data),
+        ...restOptions,
+      },
+      ctx
+    );
 
     if (isLocalized(model)) {
       await updateNonLocalizedFields(entry, { model });

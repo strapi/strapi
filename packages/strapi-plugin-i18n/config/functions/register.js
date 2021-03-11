@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { getService } = require('../../utils');
 
 module.exports = () => {
-  Object.values(strapi.models).forEach(model => {
+  Object.values(strapi.contentTypes).forEach(model => {
     if (getService('content-types').isLocalized(model)) {
       _.set(model.attributes, 'localizations', {
         writable: false,
@@ -20,6 +20,9 @@ module.exports = () => {
         configurable: false,
         type: 'string',
       });
+
+      const writableFields = _.get(model, 'coreApi.writableAttributes', []);
+      _.set(model, 'coreApi.writableAttributes', writableFields.concat('locale'));
     }
   });
 
