@@ -2,6 +2,7 @@
 
 const { prop, assoc } = require('lodash/fp');
 const { MANY_RELATIONS } = require('strapi-utils').relations.constants;
+const { isWritableAttribute } = require('strapi-utils').contentTypes;
 
 const createRelationsCountsQuery = ({ model, fn, connectorQuery }) => {
   // fetch counter map
@@ -11,24 +12,24 @@ const createRelationsCountsQuery = ({ model, fn, connectorQuery }) => {
   };
 
   return async function(params, populate) {
-    const xManyAssocs = [];
-    const xToOnePopulate = [];
+    const toCount = [];
+    const toPopulate = [];
 
     model.associations
       .filter(assoc => !populate || populate.includes(assoc.alias))
       .forEach(assoc => {
-        if (MANY_RELATIONS.includes(assoc.nature)) {
-          xManyAssocs.push(assoc);
-        } else {
-          xToOnePopulate.push(assoc.alias);
+        if (MANY_RELATIONS.includes(assoc.nature) && isWritableAttribute(model, assoc.alias)) {
+          return toCount.push(assoc);
         }
+
+        toPopulate.push(assoc.alias);
       });
 
-    const { results, pagination } = await fn(params, xToOnePopulate);
+    const { results, pagination } = await fn(params, toPopulate);
     const resultsIds = results.map(prop('id'));
 
     const counters = await Promise.all(
-      xManyAssocs.map(async ({ alias }) => ({
+      toCount.map(async ({ alias }) => ({
         field: alias,
         counts: await fetchCounters(alias, resultsIds),
       }))

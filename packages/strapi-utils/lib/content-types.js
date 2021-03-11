@@ -66,6 +66,10 @@ const getWritableAttributes = (model = {}) => {
   return _.difference(Object.keys(model.attributes), getNonWritableAttributes(model));
 };
 
+const isWritableAttribute = (model, attributeName) => {
+  return getWritableAttributes(model).includes(attributeName);
+};
+
 const getNonVisibleAttributes = model => {
   return _.uniq([
     model.primaryKey,
@@ -191,6 +195,7 @@ module.exports = {
   constants,
   getNonWritableAttributes,
   getWritableAttributes,
+  isWritableAttribute,
   getNonVisibleAttributes,
   getVisibleAttributes,
   hasDraftAndPublish,
