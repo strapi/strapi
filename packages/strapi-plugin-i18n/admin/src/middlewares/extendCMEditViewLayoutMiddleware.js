@@ -83,7 +83,6 @@ const extendCMEditViewLayoutMiddleware = () => () => next => action => {
       },
     },
   };
-  // set(action, editRelationsPath, nextEditRelationLayout);
 
   return next(enhancedAction);
 };
