@@ -131,6 +131,11 @@ const createDefaultCTFormFromLayout = (
     // The object has the following shape: { [ctUID]: { [actionId]: { [property]: { enabled: false } } } }
     const contentTypesActions = Object.keys(subjectLayouts).reduce((acc, currentCTUID) => {
       const { actionId, applyToProperties } = current;
+      const currentSubjectLayout = subjectLayouts[currentCTUID];
+      const properties = currentSubjectLayout.properties.map(({ value }) => value);
+      const doesNothaveProperty = properties.every(
+        property => (applyToProperties || []).indexOf(property) === -1
+      );
 
       const matchingPermission = findMatchingPermission(initialPermissions, actionId, currentCTUID);
       const conditionsForm = createDefaultConditionsForm(
@@ -138,7 +143,7 @@ const createDefaultCTFormFromLayout = (
         get(matchingPermission, 'conditions', [])
       );
 
-      if (isEmpty(applyToProperties)) {
+      if (isEmpty(applyToProperties) || doesNothaveProperty) {
         set(acc, [currentCTUID, actionId], {
           properties: {
             enabled: matchingPermission !== undefined,
