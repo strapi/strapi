@@ -72,8 +72,7 @@ function trackError({ scope, error }) {
         nodeVersion: process.version,
         docker: scope.docker,
         useYarn: scope.useYarn,
-        template: scope.template || '',
-        starter: scope.starter || '',
+        packageJsonStrapi: scope.packageJsonStrapi,
       },
     });
   } catch (err) {
@@ -97,8 +96,7 @@ function trackUsage({ event, scope, error }) {
         docker: scope.docker,
         useYarn: scope.useYarn.toString(),
         noRun: (scope.runQuickstartApp !== true).toString(),
-        template: scope.template || null,
-        starter: scope.starter || null,
+        packageJsonStrapi: scope.packageJsonStrapi,
       },
     });
   } catch (err) {

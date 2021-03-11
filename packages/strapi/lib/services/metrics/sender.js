@@ -21,7 +21,7 @@ const ANALYTICS_URI = 'https://analytics.strapi.io';
  * @returns {Function} (event, payload) -> Promise{boolean}
  */
 module.exports = strapi => {
-  const { uuid, template, starter } = strapi.config;
+  const { uuid, packageJsonStrapi } = strapi.config;
   const deviceId = machineIdSync();
   const isEE = strapi.EE === true && ee.isEE === true;
 
@@ -36,8 +36,7 @@ module.exports = strapi => {
     version: strapi.config.info.strapi,
     strapiVersion: strapi.config.info.strapi,
     projectType: isEE ? 'Enterprise' : 'Community',
-    template,
-    starter,
+    packageJsonStrapi,
   };
 
   return async (event, payload = {}, opts = {}) => {

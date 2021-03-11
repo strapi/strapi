@@ -44,7 +44,7 @@ module.exports = async function createProject(scope, { client, connection, depen
         strapiVersion: scope.strapiVersion,
         projectName: _.kebabCase(scope.name),
         uuid: scope.uuid,
-        starter: scope.starter,
+        packageJsonStrapi: scope.packageJsonStrapi,
       }),
       {
         spaces: 2,
@@ -70,7 +70,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
-    const hasTemplate = Boolean(scope.template);
+    const hasTemplate = Boolean(scope.packageJsonStrapi.template);
     if (hasTemplate) {
       try {
         await mergeTemplate(scope, rootPath);

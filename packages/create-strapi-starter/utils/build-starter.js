@@ -121,8 +121,8 @@ module.exports = async function buildStarter(projectArgs, program) {
   // Set command options for Strapi app
   const generateStrapiAppOptions = {
     ...program,
-    template: starterJson.template,
     starter: fullUrl,
+    template: starterJson.template,
     run: false,
   };
 
