@@ -19,7 +19,6 @@ import {
   GlobalContextProvider,
   LoadingIndicatorPage,
   OverlayBlocker,
-  UserProvider,
   CheckPagePermissions,
   request,
 } from 'strapi-helper-plugin';
@@ -31,14 +30,14 @@ import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../LeftMenu';
 import InstalledPluginsPage from '../InstalledPluginsPage';
-
 import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../Onboarding';
-import SettingsPage from '../SettingsPage';
+import PermissionsManager from '../PermissionsManager';
 import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
+import SettingsPage from '../SettingsPage';
 import Logout from './Logout';
 import {
   disableGlobalOverlayBlocker,
@@ -47,13 +46,7 @@ import {
   updatePlugin,
 } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-import {
-  getStrapiLatestReleaseSucceeded,
-  getUserPermissions,
-  getUserPermissionsError,
-  getUserPermissionsSucceeded,
-  setAppError,
-} from './actions';
+import { getStrapiLatestReleaseSucceeded, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
 import Wrapper from './Wrapper';
 import Content from './Content';
@@ -165,24 +158,6 @@ export class Admin extends React.Component {
     }
   };
 
-  fetchUserPermissions = async (resetState = false) => {
-    const { getUserPermissions, getUserPermissionsError, getUserPermissionsSucceeded } = this.props;
-
-    if (resetState) {
-      // Show a loader
-      getUserPermissions();
-    }
-
-    try {
-      const { data } = await request('/admin/users/me/permissions', { method: 'GET' });
-
-      getUserPermissionsSucceeded(data);
-    } catch (err) {
-      console.error(err);
-      getUserPermissionsError(err);
-    }
-  };
-
   hasApluginNotReady = props => {
     const {
       global: { plugins },
@@ -194,7 +169,6 @@ export class Admin extends React.Component {
   initApp = async () => {
     await this.fetchAppInfo();
     await this.fetchStrapiLatestRelease();
-    await this.fetchUserPermissions(true);
   };
 
   /**
@@ -233,7 +207,7 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: { isLoading, shouldUpdateStrapi, userPermissions },
+      admin: { shouldUpdateStrapi },
       global: {
         autoReload,
         blockApp,
@@ -259,29 +233,23 @@ export class Admin extends React.Component {
       );
     }
 
-    // Show a loader while permissions are being fetched
-    if (isLoading) {
-      return <LoadingIndicatorPage />;
-    }
-
     return (
-      <GlobalContextProvider
-        autoReload={autoReload}
-        emitEvent={this.emitEvent}
-        currentEnvironment={currentEnvironment}
-        currentLocale={locale}
-        disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
-        enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
-        fetchUserPermissions={this.fetchUserPermissions}
-        formatMessage={formatMessage}
-        shouldUpdateStrapi={shouldUpdateStrapi}
-        menu={this.menuRef.current}
-        plugins={plugins}
-        settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
-        strapiVersion={strapiVersion}
-        updatePlugin={updatePlugin}
-      >
-        <UserProvider value={userPermissions}>
+      <PermissionsManager>
+        <GlobalContextProvider
+          autoReload={autoReload}
+          emitEvent={this.emitEvent}
+          currentEnvironment={currentEnvironment}
+          currentLocale={locale}
+          disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
+          enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+          formatMessage={formatMessage}
+          shouldUpdateStrapi={shouldUpdateStrapi}
+          menu={this.menuRef.current}
+          plugins={plugins}
+          settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
+          strapiVersion={strapiVersion}
+          updatePlugin={updatePlugin}
+        >
           <Wrapper>
             <LeftMenu
               shouldUpdateStrapi={shouldUpdateStrapi}
@@ -327,8 +295,8 @@ export class Admin extends React.Component {
             />
             {SHOW_TUTORIALS && <OnboardingVideos />}
           </Wrapper>
-        </UserProvider>
-      </GlobalContextProvider>
+        </GlobalContextProvider>
+      </PermissionsManager>
     );
   }
 }
@@ -343,17 +311,12 @@ Admin.defaultProps = {
 Admin.propTypes = {
   admin: PropTypes.shape({
     appError: PropTypes.bool,
-    isLoading: PropTypes.bool,
     shouldUpdateStrapi: PropTypes.bool.isRequired,
-    userPermissions: PropTypes.array,
   }).isRequired,
   disableGlobalOverlayBlocker: PropTypes.func.isRequired,
   enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getInfosDataSucceeded: PropTypes.func.isRequired,
   getStrapiLatestReleaseSucceeded: PropTypes.func.isRequired,
-  getUserPermissions: PropTypes.func.isRequired,
-  getUserPermissionsError: PropTypes.func.isRequired,
-  getUserPermissionsSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
     autoReload: PropTypes.bool,
     blockApp: PropTypes.bool,
@@ -385,9 +348,6 @@ export function mapDispatchToProps(dispatch) {
       enableGlobalOverlayBlocker,
       getInfosDataSucceeded,
       getStrapiLatestReleaseSucceeded,
-      getUserPermissions,
-      getUserPermissionsError,
-      getUserPermissionsSucceeded,
       setAppError,
       updatePlugin,
     },
