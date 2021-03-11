@@ -436,4 +436,7 @@ module.exports = {
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,
+  constants: {
+    superAdminCode: SUPER_ADMIN_CODE,
+  },
 };

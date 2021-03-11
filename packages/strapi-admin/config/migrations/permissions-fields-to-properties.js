@@ -21,6 +21,20 @@ const shouldRunMigration = (definition, previousDefinition) => {
   return isAdminPermissionModel && targetedFieldsHaveChanged;
 };
 
+const permissionsFinderByORM = {
+  bookshelf: async model => {
+    const permissions = await model.fetchAll();
+
+    return permissions.toJSON().map(permission => ({
+      ...permission,
+      fields: JSON.parse(permission.fields),
+    }));
+  },
+  mongoose: async model => {
+    return model.find().lean();
+  },
+};
+
 module.exports = {
   shouldRunBefore(options) {
     const { definition, previousDefinition } = options;
@@ -39,20 +53,8 @@ module.exports = {
   // Here we make a backup of the permission objects in the database, then we store it into the migration context
   async before(options, context) {
     const { model } = options;
-    let permissions = [];
 
-    switch (model.orm) {
-      case 'bookshelf':
-        permissions = await model.fetchAll();
-        permissions = permissions.toJSON().map(permission => ({
-          ...permission,
-          fields: JSON.parse(permission.fields),
-        }));
-        break;
-      case 'mongoose':
-        permissions = await model.find().lean();
-        break;
-    }
+    const permissions = await permissionsFinderByORM[model.ORM]();
 
     Object.assign(context, { permissionsFieldsToProperties: { permissions } });
   },
