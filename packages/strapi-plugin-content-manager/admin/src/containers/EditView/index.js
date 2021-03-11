@@ -33,6 +33,7 @@ import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => {
+  console.log({ layout });
   const { currentEnvironment, plugins } = useGlobalContext();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);

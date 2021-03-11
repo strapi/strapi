@@ -317,7 +317,7 @@ CollectionTypeFormWrapper.defaultProps = {
 CollectionTypeFormWrapper.propTypes = {
   allLayoutData: PropTypes.exact({
     components: PropTypes.object.isRequired,
-    contentType: PropTypes.exact({
+    contentType: PropTypes.shape({
       apiID: PropTypes.string.isRequired,
       attributes: PropTypes.object.isRequired,
       info: PropTypes.object.isRequired,
@@ -326,6 +326,7 @@ CollectionTypeFormWrapper.propTypes = {
       layouts: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
       options: PropTypes.object.isRequired,
+      pluginOptions: PropTypes.object,
       settings: PropTypes.object.isRequired,
       uid: PropTypes.string.isRequired,
     }).isRequired,
