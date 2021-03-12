@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useQueryParams } from 'strapi-helper-plugin';
 import EditView from '../EditView';
 import { resetProps, setLayout } from './actions';
 import selectLayout from './selectors';
@@ -9,16 +9,15 @@ import selectLayout from './selectors';
 const EditViewLayoutManager = ({ layout, ...rest }) => {
   const currentLayout = useSelector(selectLayout);
   const dispatch = useDispatch();
-
-  console.log({ layout });
+  const [{ query }] = useQueryParams();
 
   useEffect(() => {
-    dispatch(setLayout(layout));
+    dispatch(setLayout(layout, query));
 
     return () => {
       dispatch(resetProps());
     };
-  }, [layout, dispatch]);
+  }, [layout, dispatch, query]);
 
   if (!currentLayout) {
     return <LoadingIndicatorPage />;
