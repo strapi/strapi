@@ -46,5 +46,6 @@
   "Settings.locales.modal.locales.displayName": "Locale display name",
   "Settings.locales.modal.locales.displayName.error": "The locale display name can only be less than 50 characters.",
   "Settings.locales.modal.locales.displayName.description":"Locale will be displayed under that name in the administration panel",
-  "Settings.locales.modal.create.tab.label":"Navigating between the I18N base settings and advanced settings"
+  "Settings.locales.modal.create.tab.label":"Navigating between the I18N base settings and advanced settings",
+  "components.Select.locales.not-available": "No content available"
 }

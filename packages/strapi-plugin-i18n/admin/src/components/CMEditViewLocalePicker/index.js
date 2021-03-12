@@ -1,6 +1,7 @@
 import React from 'react';
+import { Label, Text, Padded } from '@buffetjs/core';
 import get from 'lodash/get';
-import Select from 'react-select';
+import Select, { components } from 'react-select';
 import { useSelector } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
@@ -11,9 +12,28 @@ import {
   useContentManagerEditViewDataManager,
   useQueryParams,
 } from 'strapi-helper-plugin';
-import { Label, Text, Padded } from '@buffetjs/core';
 import { getTrad } from '../../utils';
+import {
+  addStatusColorToLocale,
+  checkIfDataHasDraftAndPublish,
+  createLocalesOption,
+} from './utils';
+import OptionComponent from './Option';
 import Wrapper from './Wrapper';
+
+// TODO temp until the API is ready
+const localizations = [
+  {
+    locale: 'en',
+    id: 2,
+    published_at: 'TODO', // only if d&p is enabled
+  },
+  {
+    locale: 'fr-FR',
+    id: 3,
+    published_at: null, // only if d&p is enabled
+  },
+];
 
 // TODO use the selector from the LocalePicker/selectors.js when PR merged
 const selectI18NLocales = state => state.get('i18n_locales').locales;
@@ -25,15 +45,18 @@ const CMEditViewLocalePicker = () => {
   const locales = useSelector(selectI18NLocales);
   const theme = useTheme();
   const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
+  const hasDraftAndPublish = checkIfDataHasDraftAndPublish(localizations);
 
   if (!hasI18nEnabled) {
     return null;
   }
 
+  const Option = hasDraftAndPublish ? OptionComponent : components.Option;
+
   const styles = selectStyles(theme);
 
   // TODO use localizations + RBAC when ready
-  const options = locales.map(locale => ({ value: locale.code, label: locale.name }));
+  const options = addStatusColorToLocale(createLocalesOption(locales, localizations), theme);
   const currentLocale = query.locale;
   const value = options.find(({ value }) => {
     return value === currentLocale;
@@ -55,12 +78,12 @@ const CMEditViewLocalePicker = () => {
         <BaselineAlignment top size="3px" />
         <Select
           aria-labelledby="select-locale"
-          options={options}
+          components={{ DropdownIndicator, Option }}
+          isSearchable={false}
           onChange={({ value }) => {
             setQuery({ locale: value });
           }}
-          isSearchable={false}
-          components={{ DropdownIndicator }}
+          options={options}
           styles={{
             ...styles,
             control: (base, state) => ({ ...base, ...styles.control(base, state), height: '34px' }),
@@ -71,7 +94,7 @@ const CMEditViewLocalePicker = () => {
             }),
             valueContainer: base => ({
               ...base,
-              padding: '2px 0px 4px 5px',
+              padding: '2px 0px 4px 10px',
               lineHeight: '18px',
             }),
           }}

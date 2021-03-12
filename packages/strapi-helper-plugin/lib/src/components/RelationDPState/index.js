@@ -13,12 +13,19 @@ const RelationDPState = styled.div`
     margin-bottom: ${({ marginBottom }) => marginBottom};
     margin-right: ${({ marginRight }) => marginRight};
     border-radius: 50%;
-    background-color: ${({ theme, isDraft }) =>
-      isDraft ? theme.main.colors.mediumBlue : theme.main.colors.green};
-  }
+    background-color: ${({ theme, isDraft, backgroundColor }) => {
+      if (backgroundColor) {
+        return backgroundColor;
+      }
+
+      return isDraft ? theme.main.colors.mediumBlue : theme.main.colors.green;
+    }};
+    border: ${({ border }) => border};
 `;
 
 RelationDPState.defaultProps = {
+  border: 0,
+  color: null,
   marginLeft: '10px',
   marginRight: '0',
   marginTop: '0',
