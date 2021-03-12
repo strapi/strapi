@@ -5360,10 +5360,10 @@ byte-size@^5.0.1:
   resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-5.0.1.tgz#4b651039a5ecd96767e71a3d7ed380e48bed4191"
   integrity sha512-/XuKeqWocKsYa/cBY1YbSJSWWqTi4cFgr9S6OyM7PBaPbr9zvNGwWP33vt0uqGhwDdN+y3yhbXVILEUpnwEWGw==
 
-byte-size@^7.0.0:
-  version "7.0.0"
-  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-7.0.0.tgz#36528cd1ca87d39bd9abd51f5715dc93b6ceb032"
-  integrity sha512-NNiBxKgxybMBtWdmvx7ZITJi4ZG+CYUgwOSZTfqB1qogkRHrhbQE/R2r5Fh94X+InN5MCYz6SvB/ejHMj/HbsQ==
+byte-size@^7.0.1:
+  version "7.0.1"
+  resolved "https://registry.yarnpkg.com/byte-size/-/byte-size-7.0.1.tgz#b1daf3386de7ab9d706b941a748dbfc71130dee3"
+  integrity sha512-crQdqyCwhokxwV1UyDzLZanhkugAgft7vt0qbbdt60C6Zf3CAiGmtUCylbtYwrU6loOUw3euGrNtW1J651ot1A==
 
 bytes@3.0.0:
   version "3.0.0"
