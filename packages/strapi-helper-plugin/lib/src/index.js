@@ -106,8 +106,10 @@ export { default as PopUpWarningModal } from './components/PopUpWarning/StyledMo
 // Contexts
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as UserContext } from './contexts/UserContext';
+export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
 
 // Hooks
+export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useStrapi } from './hooks/useStrapi';
 export { default as useUser } from './hooks/useUser';

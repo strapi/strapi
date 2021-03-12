@@ -2,8 +2,13 @@ import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'reac
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { Prompt, Redirect } from 'react-router-dom';
-import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
-import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
+import {
+  LoadingIndicatorPage,
+  useGlobalContext,
+  OverlayBlocker,
+  ContentManagerEditViewDataManagerContext,
+} from 'strapi-helper-plugin';
+// import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
@@ -453,7 +458,7 @@ const EditViewDataManagerProvider = ({
   }
 
   return (
-    <EditViewDataManagerContext.Provider
+    <ContentManagerEditViewDataManagerContext.Provider
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
@@ -507,7 +512,7 @@ const EditViewDataManagerProvider = ({
           </>
         )}
       </>
-    </EditViewDataManagerContext.Provider>
+    </ContentManagerEditViewDataManagerContext.Provider>
   );
 };
 
