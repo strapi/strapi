@@ -122,7 +122,7 @@ const SettingsPage = () => {
                     file: <code>./config/plugins.js</code>,
                     link: (
                       <a
-                        href="https://strapi.io/documentation/developer-docs/latest/plugins/email.html#configure-the-plugin"
+                        href="https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html#configure-the-plugin"
                         target="_blank"
                         rel="noopener noreferrer"
                       >
