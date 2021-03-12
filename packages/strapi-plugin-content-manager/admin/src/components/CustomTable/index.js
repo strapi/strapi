@@ -4,6 +4,7 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { upperFirst, isEmpty } from 'lodash';
 import { LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
+import { parse, stringify } from 'qs';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';
 import State from '../State';
@@ -26,8 +27,13 @@ const CustomTable = ({
   const { entriesToDelete, label, filters, _q } = useListView();
   const { emitEvent } = useGlobalContext();
 
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
+  const query = search ? parse(search.substring(1)) : {};
   const { push } = useHistory();
+  const searchToPersist = query.pluginOptions
+    ? stringify(query.pluginOptions, { encode: false })
+    : '';
+
   const headers = useMemo(() => {
     if (hasDraftAndPublish) {
       return [
@@ -62,6 +68,7 @@ const CustomTable = ({
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
+      search: searchToPersist,
     });
   };
   const handleEditGoTo = id => {
@@ -69,6 +76,7 @@ const CustomTable = ({
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
+      search: searchToPersist,
     });
   };
 
