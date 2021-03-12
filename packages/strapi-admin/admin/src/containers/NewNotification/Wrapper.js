@@ -13,6 +13,7 @@ const Wrapper = styled(TransitionGroup)`
   list-style: none;
   width: 100%;
   overflow-y: hidden;
+  pointer-events: none;
 `;
 
 export default Wrapper;
