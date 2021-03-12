@@ -1,9 +1,15 @@
 'use strict';
 
 const _ = require('lodash');
-const { constants, isPrivateAttribute, getNonWritableAttributes } = require('./content-types');
+const {
+  constants,
+  isPrivateAttribute,
+  getNonWritableAttributes,
+  getNonVisibleAttributes,
+  getWritableAttributes,
+} = require('./content-types');
 
-const { ID_ATTRIBUTE, PUBLISHED_AT_ATTRIBUTE } = constants;
+const { ID_ATTRIBUTE } = constants;
 
 const sanitizeEntity = (dataSource, options) => {
   const { model, withPrivate = false, isOutput = true, includeFields = null } = options;
@@ -120,6 +126,11 @@ const STATIC_FIELDS = [ID_ATTRIBUTE, '__v'];
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
   const { options, primaryKey } = model;
   const nonWritableAttributes = getNonWritableAttributes(model);
+  const nonVisibleAttributes = getNonVisibleAttributes(model);
+
+  const writableAttributes = getWritableAttributes(model);
+
+  const nonVisibleWritableAttributes = _.intersection(writableAttributes, nonVisibleAttributes);
 
   const timestamps = options.timestamps || [];
 
@@ -131,10 +142,10 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
           timestamps,
           STATIC_FIELDS,
           COMPONENT_FIELDS,
-          PUBLISHED_AT_ATTRIBUTE,
           ...nonWritableAttributes,
+          ...nonVisibleAttributes,
         ]
-      : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS])
+      : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
   );
 };
 
