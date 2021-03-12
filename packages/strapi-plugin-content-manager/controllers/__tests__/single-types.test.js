@@ -175,7 +175,8 @@ describe('Single Types', () => {
         created_by: 1,
         updated_by: 1,
       }),
-      modelUid
+      modelUid,
+      { params: {} }
     );
 
     expect(sendTelemetry).toHaveBeenCalledWith('didCreateFirstContentTypeEntry', {

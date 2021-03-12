@@ -38,7 +38,7 @@ const decorator = service => ({
    * @param {object} ctx.model - Model that is being used
    */
   async wrapOptions(opts = {}, ctx) {
-    const wrappedOptions = await service.wrapOptions(opts, ctx);
+    const wrappedOptions = await service.wrapOptions.apply(this, [opts, ctx]);
     const model = strapi.db.getModel(ctx.model);
 
     if (!isLocalized(model)) {
@@ -59,8 +59,7 @@ const decorator = service => ({
    */
   async create(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
-
-    const entry = await service.create(opts, ctx);
+    const entry = await service.create.apply(this, [opts, ctx]);
 
     if (isLocalized(model)) {
       await syncLocalizations(entry, { model });
@@ -80,13 +79,13 @@ const decorator = service => ({
 
     const { data, ...restOptions } = opts;
 
-    const entry = await service.update(
+    const entry = await service.update.apply(this, [
       {
         data: omit('locale', data),
         ...restOptions,
       },
-      ctx
-    );
+      ctx,
+    ]);
 
     if (isLocalized(model)) {
       await updateNonLocalizedFields(entry, { model });

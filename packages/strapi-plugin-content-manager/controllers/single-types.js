@@ -1,6 +1,6 @@
 'use strict';
 
-const { pipe, has } = require('lodash/fp');
+const { pipe, omit } = require('lodash/fp');
 const { setCreatorFields } = require('strapi-utils');
 
 const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
@@ -15,7 +15,7 @@ module.exports = {
   async find(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { _q, ...query } = ctx.request.query; // eslint-disable-line no-unused-vars
+    const { query = {} } = ctx.request;
 
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -47,7 +47,7 @@ module.exports = {
     const { user, userAbility } = ctx.state;
     const { model } = ctx.params;
     const { body } = ctx.request;
-    const { plugins, ...query } = ctx.request; // eslint-disable-line no-unused-vars
+    const query = omit('plugins', ctx.request.query);
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -56,15 +56,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    let entity;
-
-    if (!has('id', ctx.query)) {
-      const permissionQuery = permissionChecker.buildReadQuery({});
-      entity = await findEntity(permissionQuery, model);
-    } else if (ctx.query.id) {
-      const permissionQuery = permissionChecker.buildReadQuery(query);
-      entity = await findEntity(permissionQuery, model);
-    }
+    const entity = await findEntity(query, model);
 
     const pickWritables = pickWritableAttributes({ model });
 
@@ -80,7 +72,7 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       if (!entity) {
-        const newEntity = await entityManager.create(sanitizeFn(body), model);
+        const newEntity = await entityManager.create(sanitizeFn(body), model, { params: query });
         ctx.body = permissionChecker.sanitizeOutput(newEntity);
 
         await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
@@ -91,7 +83,7 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
+      const updatedEntity = await entityManager.update(query, sanitizeFn(body), model);
       ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
     })();
   },
@@ -99,7 +91,7 @@ module.exports = {
   async delete(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { _q, ...query } = ctx.request.query; // eslint-disable-line no-unused-vars
+    const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -108,9 +100,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
-
-    const entity = await findEntity(permissionQuery, model);
+    const entity = await findEntity(query, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -128,7 +118,7 @@ module.exports = {
   async publish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { _q, ...query } = ctx.request.query; // eslint-disable-line no-unused-vars
+    const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -137,9 +127,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
-
-    const entity = await findEntity(permissionQuery, model);
+    const entity = await findEntity(query, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -157,7 +145,7 @@ module.exports = {
   async unpublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { _q, ...query } = ctx.request.query; // eslint-disable-line no-unused-vars
+    const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -166,9 +154,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildReadQuery(query);
-
-    const entity = await findEntity(permissionQuery, model);
+    const entity = await findEntity(query, model);
 
     if (!entity) {
       return ctx.notFound();

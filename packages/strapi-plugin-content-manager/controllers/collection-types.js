@@ -111,7 +111,7 @@ module.exports = {
     const sanitizeFn = pipe([pickWritables, pickPermittedFields, setCreator]);
 
     await wrapBadRequest(async () => {
-      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
+      const updatedEntity = await entityManager.update({ id: entity.id }, sanitizeFn(body), model);
 
       ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
     })();

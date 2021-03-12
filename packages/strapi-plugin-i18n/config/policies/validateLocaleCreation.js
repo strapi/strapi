@@ -7,13 +7,14 @@ const validateLocaleCreation = async (ctx, next) => {
   const { model } = ctx.params;
   const { query, body } = ctx.request;
 
+  const locale = get('plugins.i18n.locale', query);
+  const relatedEntityId = get('plugins.i18n.relatedEntityId', query);
+  ctx.request.query = pick(ctx.request.query, 'plugins');
+
   const { addLocale, getNewLocalizationsFor, isLocalized } = getService('content-types');
   const modelDef = strapi.getModel(model);
 
   if (isLocalized(modelDef)) {
-    const locale = get('plugins.i18n.locale', query);
-    const relatedEntityId = get('plugins.i18n.relatedEntityId', query);
-
     try {
       await addLocale(body, locale);
     } catch (e) {
@@ -25,9 +26,7 @@ const validateLocaleCreation = async (ctx, next) => {
         { params: { _locale: body.locale } },
         { model }
       );
-      ctx.request.query = pick(ctx.request.query, 'plugins');
-      ctx.request.query.id = get('id', entity);
-      ctx.request.query._locale = get('locale', entity);
+      ctx.request.query._locale = body.locale;
 
       if (entity) {
         return next();
