@@ -4,8 +4,9 @@ import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { InjectionZone, useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 import { SubWrapper, StatusWrapper } from './components';
+import pluginId from '../../pluginId';
 import { getTrad } from '../../utils';
 
 const BaselineAlignment = styled.div`
@@ -63,6 +64,7 @@ const InformationCard = () => {
             </Flex>
           </Padded>
         </Padded>
+        <InjectionZone area={`${pluginId}.editView.informations`} />
       </SubWrapper>
       <Padded top size="sm" />
       {hasDraftAndPublish && (

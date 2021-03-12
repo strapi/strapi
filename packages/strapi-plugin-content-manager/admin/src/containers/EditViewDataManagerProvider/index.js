@@ -8,7 +8,6 @@ import {
   OverlayBlocker,
   ContentManagerEditViewDataManagerContext,
 } from 'strapi-helper-plugin';
-// import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
