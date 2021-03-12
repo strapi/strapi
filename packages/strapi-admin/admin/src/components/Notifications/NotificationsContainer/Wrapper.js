@@ -11,6 +11,7 @@ const Wrapper = styled(TransitionGroup)`
   width: 300px;
   margin: 0 auto;
   overflow-y: hidden;
+  pointer-events: none;
 `;
 
 export default Wrapper;
