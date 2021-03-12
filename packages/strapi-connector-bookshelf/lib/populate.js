@@ -72,52 +72,29 @@ const populateBareAssociations = (definition, options = {}) => {
     .reduce((acc, val) => acc.concat(val), []);
 };
 
-const hasCustomPopulate = assoc => _.isArray(assoc.populate);
-
 const formatAssociationPopulate = ({ assoc }, options = {}) => {
   const { prefix = '', ...queryOptions } = options;
 
   const path = `${prefix}${assoc.alias}`;
   const assocModel = strapi.db.getModelByAssoc(assoc);
 
-  const polyAssocs = hasCustomPopulate(assoc)
-    ? []
-    : assocModel.associations
-        .filter(polyAssoc => isPolymorphic({ assoc: polyAssoc }))
-        .map(polyAssoc => {
-          return formatPolymorphicPopulate(
-            { assoc: polyAssoc },
-            { prefix: `${path}.`, ...queryOptions }
-          );
-        });
+  const polyAssocs = assocModel.associations
+    .filter(polyAssoc => isPolymorphic({ assoc: polyAssoc }))
+    .map(polyAssoc => {
+      return formatPolymorphicPopulate(
+        { assoc: polyAssoc },
+        { prefix: `${path}.`, ...queryOptions }
+      );
+    });
 
-  const components = hasCustomPopulate(assoc)
-    ? []
-    : populateComponents(assocModel, { prefix: `${path}.`, ...queryOptions });
+  const components = populateComponents(assocModel, { prefix: `${path}.`, ...queryOptions });
 
   const populateOpts = bindPopulateQueries(
     [path],
     queryOptionsToQueryMap(queryOptions, { model: assocModel })
   );
 
-  return [selectPopulateFields({ assoc, assocModel }, populateOpts), ...polyAssocs, ...components];
-};
-
-const selectPopulateFields = ({ assoc, assocModel }, populateOpts) => {
-  if (!hasCustomPopulate(assoc)) return populateOpts;
-
-  const columns = assoc.populate
-    .filter(name => _.has(assocModel.attributes, name))
-    .concat('id')
-    .map(name => `${assocModel.collectionName}.${name}`);
-
-  return Object.keys(populateOpts).reduce((opts, key) => {
-    opts[key] = qb => {
-      qb.column(columns);
-      populateOpts[key](qb);
-    };
-    return opts;
-  }, {});
+  return [populateOpts, ...polyAssocs, ...components];
 };
 
 const populateComponents = (definition, options = {}) => {

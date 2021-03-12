@@ -43,7 +43,6 @@ module.exports = ({ model, strapi }) => {
         const populate = {
           path: ast.alias,
           options: populateOptions,
-          select: _.isArray(ast.populate) ? ast.populate.join(' ') : null,
         };
 
         if (

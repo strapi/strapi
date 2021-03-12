@@ -192,6 +192,10 @@ module.exports = async ({ models, target }, ctx) => {
       };
     };
 
+    const associations = definition.associations.filter(
+      association => !isPolymorphicAssoc(association)
+    );
+
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
       transform: function(doc, returned) {
@@ -252,6 +256,24 @@ module.exports = async ({ models, target }, ctx) => {
                     ...el.ref,
                   };
                 });
+            }
+          }
+        });
+
+        associations.forEach(association => {
+          const relation = returned[association.alias];
+
+          if (relation) {
+            // Extract raw JSON data.
+            returned[association.alias] = relation.toJSON ? relation.toJSON() : relation;
+
+            if (_.isArray(association.populate)) {
+              const { alias, populate } = association;
+              const pickPopulate = entry => _.pick(entry, populate);
+
+              returned[alias] = _.isArray(returned[alias])
+                ? _.map(returned[alias], pickPopulate)
+                : pickPopulate(returned[alias]);
             }
           }
         });
