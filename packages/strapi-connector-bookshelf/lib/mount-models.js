@@ -69,6 +69,8 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
+          writable: true,
+          visible: false,
         };
       }
 
@@ -79,6 +81,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
 
@@ -87,6 +90,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
     }

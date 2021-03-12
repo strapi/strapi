@@ -2,7 +2,7 @@
 
 const { prop, assoc } = require('lodash/fp');
 const { MANY_RELATIONS } = require('strapi-utils').relations.constants;
-const { isWritableAttribute } = require('strapi-utils').contentTypes;
+const { isVisibleAttribute } = require('strapi-utils').contentTypes;
 
 const createRelationsCountsQuery = ({ model, fn, connectorQuery }) => {
   // fetch counter map
@@ -18,7 +18,7 @@ const createRelationsCountsQuery = ({ model, fn, connectorQuery }) => {
     model.associations
       .filter(assoc => !populate || populate.includes(assoc.alias))
       .forEach(assoc => {
-        if (MANY_RELATIONS.includes(assoc.nature) && isWritableAttribute(model, assoc.alias)) {
+        if (MANY_RELATIONS.includes(assoc.nature) && isVisibleAttribute(model, assoc.alias)) {
           return toCount.push(assoc);
         }
 

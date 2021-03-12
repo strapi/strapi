@@ -54,11 +54,10 @@ const formatContentTypeLabel = contentType => {
 };
 
 const formatAttributes = model => {
-  const { getWritableAttributes } = contentTypesUtils;
+  const { getVisibleAttributes } = contentTypesUtils;
 
-  const pickWritableAttributes = pick(getWritableAttributes(model));
-
-  return Object.keys(pickWritableAttributes(model.attributes)).reduce((acc, key) => {
+  // only get attributes that can be seen in the auto generated Edit view or List view
+  return getVisibleAttributes(model).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});
