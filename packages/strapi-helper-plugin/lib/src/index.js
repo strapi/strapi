@@ -81,6 +81,7 @@ export { default as NotFound } from './components/NotFound';
 export { default as OverlayBlocker } from './components/OverlayBlocker';
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
+export { default as RelationDPState } from './components/RelationDPState';
 export { default as PopUpWarning } from './components/PopUpWarning';
 export { default as Row } from './components/Row';
 export { default as SearchInfo } from './components/SearchInfo';
