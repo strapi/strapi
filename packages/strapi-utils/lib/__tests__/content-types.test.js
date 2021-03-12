@@ -56,14 +56,14 @@ describe('Content types utils', () => {
           title: {
             type: 'string',
           },
-          [constants.CREATED_BY_ATTRIBUTE]: {
+          non_writable_field: {
             type: 'string',
             writable: false,
           },
         },
       });
 
-      expect(getNonWritableAttributes(model)).toEqual(['id', constants.CREATED_BY_ATTRIBUTE]);
+      expect(getNonWritableAttributes(model)).toEqual(['id', 'non_writable_field']);
     });
 
     test('Includes primaryKey', () => {
@@ -104,7 +104,7 @@ describe('Content types utils', () => {
           title: {
             type: 'string',
           },
-          [constants.PUBLISHED_AT_ATTRIBUTE]: {
+          invisible_field: {
             type: 'datetime',
             visible: false,
           },
