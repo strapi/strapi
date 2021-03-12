@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.5.2",
+  "version": "3.5.3",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -56,7 +56,7 @@
     "@buffetjs/icons": "3.3.5-next.1",
     "@buffetjs/styles": "3.3.5-next.1",
     "@buffetjs/utils": "3.3.5-next.1",
-    "bootstrap": "^4.5.3",
+    "bootstrap": "^4.6.0",
     "classnames": "^2.2.5",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
