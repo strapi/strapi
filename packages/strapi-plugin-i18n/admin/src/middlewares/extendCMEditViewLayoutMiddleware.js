@@ -119,12 +119,8 @@ const extendCMEditViewLayoutMiddleware = () => () => next => action => {
 
   // This might break the cm, has the user might be redirected to the homepage
   if (!currentLocale) {
-    console.error('The locale must be defined');
-
     return next(action);
   }
-
-  console.log(action.layout);
 
   const editLayoutPath = getPathToContentType(['layouts', 'edit']);
   const editRelationsPath = getPathToContentType(['layouts', 'editRelations']);
@@ -158,4 +154,9 @@ const extendCMEditViewLayoutMiddleware = () => () => next => action => {
 const getPathToContentType = pathArray => ['layout', 'contentType', ...pathArray];
 
 export default extendCMEditViewLayoutMiddleware;
-export { enhanceEditLayout, enhanceRelationLayout };
+export {
+  enhanceComponentLayoutForRelations,
+  enhanceComponentsLayout,
+  enhanceEditLayout,
+  enhanceRelationLayout,
+};
