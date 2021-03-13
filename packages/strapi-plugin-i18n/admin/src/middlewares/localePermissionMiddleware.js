@@ -8,7 +8,7 @@ const localePermissionMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  if (action.__meta__.containerName !== 'listView') {
+  if (!['editView', 'listView'].includes(action.__meta__.containerName)) {
     return next(action);
   }
 
