@@ -2,9 +2,10 @@
 
 const {
   isLocalized,
-  getNonLocalizedFields,
-  addLocale,
+  getValidLocale,
   getNewLocalizationsFor,
+  getNonLocalizedAttributes,
+  copyNonLocalizedAttributes,
 } = require('../content-types');
 
 describe('content-types service', () => {
@@ -21,10 +22,10 @@ describe('content-types service', () => {
     });
   });
 
-  describe('getNonLocalizedFields', () => {
+  describe('getNonLocalizedAttributes', () => {
     test('Uses the pluginOptions to detect non localized fields', () => {
       expect(
-        getNonLocalizedFields({
+        getNonLocalizedAttributes({
           uid: 'test-model',
           attributes: {
             title: {
@@ -48,7 +49,7 @@ describe('content-types service', () => {
 
     test('Consider relations to be always localized', () => {
       expect(
-        getNonLocalizedFields({
+        getNonLocalizedAttributes({
           uid: 'test-model',
           attributes: {
             title: {
@@ -77,7 +78,7 @@ describe('content-types service', () => {
     });
   });
 
-  describe('addLocale', () => {
+  describe('getValidLocale', () => {
     test('set default locale if the provided one is nil', async () => {
       const getDefaultLocale = jest.fn(() => Promise.resolve('en'));
       global.strapi = {
@@ -91,10 +92,9 @@ describe('content-types service', () => {
           },
         },
       };
-      const entity = {};
-      await addLocale(entity, null);
+      const locale = await getValidLocale(null);
 
-      expect(entity.locale).toBe('en');
+      expect(locale).toBe('en');
     });
 
     test('set locale to the provided one if it exists', async () => {
@@ -110,10 +110,9 @@ describe('content-types service', () => {
           },
         },
       };
-      const entity = {};
-      await addLocale(entity, 'en');
+      const locale = await getValidLocale('en');
 
-      expect(entity.locale).toBe('en');
+      expect(locale).toBe('en');
     });
 
     test("throw if provided locale doesn't exist", async () => {
@@ -129,9 +128,8 @@ describe('content-types service', () => {
           },
         },
       };
-      const entity = {};
       try {
-        await addLocale(entity, 'en');
+        await getValidLocale('en');
       } catch (e) {
         expect(e.message).toBe('Locale not found');
       }
@@ -327,6 +325,86 @@ describe('content-types service', () => {
       });
 
       expect(localizations).toEqual([]);
+    });
+  });
+
+  describe('copyNonLocalizedAttributes', () => {
+    test('picks only non localized attributes', () => {
+      const model = {
+        attributes: {
+          title: {
+            type: 'string',
+            pluginOptions: {
+              i18n: { localized: true },
+            },
+          },
+          price: {
+            type: 'integer',
+          },
+          relation: {
+            model: 'user',
+          },
+          description: {
+            type: 'string',
+          },
+        },
+      };
+
+      const input = {
+        id: 1,
+        title: 'My custom title',
+        price: 25,
+        relation: 1,
+        description: 'My super description',
+      };
+
+      const result = copyNonLocalizedAttributes(model, input);
+      expect(result).toStrictEqual({
+        price: input.price,
+        description: input.description,
+      });
+    });
+
+    test('Removes ids', () => {
+      const model = {
+        attributes: {
+          title: {
+            type: 'string',
+            pluginOptions: {
+              i18n: { localized: true },
+            },
+          },
+          price: {
+            type: 'integer',
+          },
+          relation: {
+            model: 'user',
+          },
+          component: {
+            type: 'component',
+            component: 'compo',
+          },
+        },
+      };
+
+      const input = {
+        id: 1,
+        title: 'My custom title',
+        price: 25,
+        relation: 1,
+        component: {
+          id: 2,
+          name: 'Hello',
+        },
+      };
+
+      const result = copyNonLocalizedAttributes(model, input);
+      expect(result).toEqual({
+        price: 25,
+        component: {
+          name: 'Hello',
+        },
+      });
     });
   });
 });

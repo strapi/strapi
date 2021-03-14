@@ -3,7 +3,7 @@
 const {
   assignDefaultLocale,
   syncLocalizations,
-  updateNonLocalizedFields,
+  syncNonLocalizedAttributes,
 } = require('../localizations');
 
 const model = {
@@ -107,7 +107,7 @@ describe('localizations service', () => {
     });
   });
 
-  describe('updateNonLocalizedFields', () => {
+  describe('syncNonLocalizedAttributes', () => {
     test('Does nothing if no localizations set', async () => {
       const update = jest.fn();
       global.strapi = {
@@ -118,7 +118,7 @@ describe('localizations service', () => {
 
       const entry = { id: 1, locale: 'test' };
 
-      await updateNonLocalizedFields(entry, { model });
+      await syncNonLocalizedAttributes(entry, { model });
 
       expect(update).not.toHaveBeenCalled();
     });
@@ -133,7 +133,7 @@ describe('localizations service', () => {
 
       const entry = { id: 1, locale: 'test', localizations: [] };
 
-      await updateNonLocalizedFields(entry, { model });
+      await syncNonLocalizedAttributes(entry, { model });
 
       expect(update).not.toHaveBeenCalled();
     });
@@ -148,7 +148,7 @@ describe('localizations service', () => {
 
       const entry = { id: 1, locale: 'test', localizations: [] };
 
-      await updateNonLocalizedFields(entry, { model: allLocalizedModel });
+      await syncNonLocalizedAttributes(entry, { model: allLocalizedModel });
 
       expect(update).not.toHaveBeenCalled();
     });
@@ -169,7 +169,7 @@ describe('localizations service', () => {
         localizations: [{ id: 2, locale: 'fr' }],
       };
 
-      await updateNonLocalizedFields(entry, { model });
+      await syncNonLocalizedAttributes(entry, { model });
 
       expect(update).toHaveBeenCalledTimes(1);
       expect(update).toHaveBeenCalledWith({ id: 2 }, { stars: 1 });

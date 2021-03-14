@@ -3,12 +3,12 @@
 jest.mock('../localizations', () => {
   return {
     syncLocalizations: jest.fn(async () => {}),
-    updateNonLocalizedFields: jest.fn(async () => {}),
+    syncNonLocalizedAttributes: jest.fn(async () => {}),
   };
 });
 
 const { decorator } = require('../entity-service-decorator');
-const { syncLocalizations, updateNonLocalizedFields } = require('../localizations');
+const { syncLocalizations, syncNonLocalizedAttributes } = require('../localizations');
 
 const model = {
   pluginOptions: {
@@ -51,7 +51,7 @@ describe('Entity service decorator', () => {
 
   beforeEach(() => {
     syncLocalizations.mockClear();
-    updateNonLocalizedFields.mockClear();
+    syncNonLocalizedAttributes.mockClear();
   });
 
   describe('wrapOptions', () => {
@@ -198,7 +198,7 @@ describe('Entity service decorator', () => {
       expect(defaultService.update).toHaveBeenCalledWith(input, { model: 'test-model' });
     });
 
-    test('Calls updateNonLocalizedFields if model is localized', async () => {
+    test('Calls syncNonLocalizedAttributes if model is localized', async () => {
       const entry = {
         id: 1,
         localizations: [{ id: 2 }],
@@ -214,7 +214,7 @@ describe('Entity service decorator', () => {
       const output = await service.update(input, { model: 'test-model' });
 
       expect(defaultService.update).toHaveBeenCalledWith(input, { model: 'test-model' });
-      expect(updateNonLocalizedFields).toHaveBeenCalledWith(entry, { model });
+      expect(syncNonLocalizedAttributes).toHaveBeenCalledWith(entry, { model });
       expect(output).toStrictEqual(entry);
     });
 
@@ -234,7 +234,7 @@ describe('Entity service decorator', () => {
       await service.update(input, { model: 'non-localized-model' });
 
       expect(defaultService.update).toHaveBeenCalledWith(input, { model: 'non-localized-model' });
-      expect(updateNonLocalizedFields).not.toHaveBeenCalled();
+      expect(syncNonLocalizedAttributes).not.toHaveBeenCalled();
     });
   });
 });
