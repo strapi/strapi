@@ -7,17 +7,24 @@ const { isLocalized } = require('./content-types');
 const { syncLocalizations, updateNonLocalizedFields } = require('./localizations');
 
 const LOCALE_QUERY_FILTER = '_locale';
+const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 
 /**
  * Adds default locale or replaces _locale by locale in query params
  * @param {object} params - query params
  */
-const wrapParams = async (params = {}) => {
-  if (params.id) {
+const wrapParams = async (params = {}, ctx = {}) => {
+  const { action } = ctx;
+
+  if (has('id', params) && SINGLE_ENTRY_ACTIONS.includes(action)) {
     return params;
   }
 
   if (has(LOCALE_QUERY_FILTER, params)) {
+    if (params[LOCALE_QUERY_FILTER] === 'all') {
+      return omit(LOCALE_QUERY_FILTER, params);
+    }
+
     return {
       ...omit(LOCALE_QUERY_FILTER, params),
       locale: params[LOCALE_QUERY_FILTER],
@@ -41,8 +48,10 @@ const decorator = service => ({
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-  async wrapOptions(opts = {}, ctx) {
-    const wrappedOptions = await service.wrapOptions.apply(this, [opts, ctx]);
+
+  async wrapOptions(opts = {}, ctx = {}) {
+    const wrappedOptions = await service.wrapOptions.call(this, opts, ctx);
+
     const model = strapi.db.getModel(ctx.model);
 
     if (!isLocalized(model)) {
@@ -51,7 +60,7 @@ const decorator = service => ({
 
     return {
       ...wrappedOptions,
-      params: await wrapParams(wrappedOptions.params),
+      params: await wrapParams(wrappedOptions.params, ctx),
     };
   },
 
@@ -63,7 +72,7 @@ const decorator = service => ({
    */
   async create(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
-    const entry = await service.create.apply(this, [opts, ctx]);
+    const entry = await service.create.call(this, opts, ctx);
 
     if (isLocalized(model)) {
       await syncLocalizations(entry, { model });
@@ -83,13 +92,14 @@ const decorator = service => ({
 
     const { data, ...restOptions } = opts;
 
-    const entry = await service.update.apply(this, [
+    const entry = await service.update.call(
+      this,
       {
-        data: omit('locale', data),
+        data: omit(['locale', 'localizations'], data),
         ...restOptions,
       },
-      ctx,
-    ]);
+      ctx
+    );
 
     if (isLocalized(model)) {
       await updateNonLocalizedFields(entry, { model });

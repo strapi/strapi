@@ -60,7 +60,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async find(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'find' });
 
     const { kind } = db.getModel(model);
 
@@ -80,7 +80,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async findPage(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'findPage' });
 
     return db.query(model).findPage(params, populate);
   },
@@ -92,7 +92,10 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async findWithRelationCounts(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, {
+      model,
+      action: 'findWithRelationCounts',
+    });
 
     return db.query(model).findWithRelationCounts(params, populate);
   },
@@ -104,7 +107,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async findOne(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'findOne' });
 
     return db.query(model).findOne(params, populate);
   },
@@ -116,7 +119,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async count(opts, { model }) {
-    const { params } = await this.wrapOptions(opts, { model });
+    const { params } = await this.wrapOptions(opts, { model, action: 'count' });
 
     return db.query(model).count(params);
   },
@@ -128,7 +131,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async create(opts, { model }) {
-    const { data, files } = await this.wrapOptions(opts, { model });
+    const { data, files } = await this.wrapOptions(opts, { model, action: 'create' });
 
     const modelDef = db.getModel(model);
 
@@ -158,7 +161,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async update(opts, { model }) {
-    const { params, data, files } = await this.wrapOptions(opts, { model });
+    const { params, data, files } = await this.wrapOptions(opts, { model, action: 'update' });
 
     const modelDef = db.getModel(model);
     const existingEntry = await db.query(model).findOne(params);
@@ -191,7 +194,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async delete(opts, { model }) {
-    const { params } = await this.wrapOptions(opts, { model });
+    const { params } = await this.wrapOptions(opts, { model, action: 'delete' });
 
     const entry = await db.query(model).delete(params);
 
@@ -211,7 +214,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async search(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'search' });
 
     return db.query(model).search(params, populate);
   },
@@ -223,7 +226,10 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async searchWithRelationCounts(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, {
+      model,
+      action: 'searchWithRelationCounts',
+    });
 
     return db.query(model).searchWithRelationCounts(params, populate);
   },
@@ -235,7 +241,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async searchPage(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model });
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'searchPage' });
 
     return db.query(model).searchPage(params, populate);
   },
@@ -247,7 +253,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
    * @param {object} ctx.model - Model that is being used
    */
   async countSearch(opts, { model }) {
-    const { params } = await this.wrapOptions(opts, { model });
+    const { params } = await this.wrapOptions(opts, { model, action: 'countSearch' });
 
     return db.query(model).countSearch(params);
   },
