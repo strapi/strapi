@@ -4,6 +4,7 @@ import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import getInitialLocale from '../../utils/getInitialLocale';
 
 const List = styled.ul`
   list-style-type: none;
@@ -33,16 +34,6 @@ const EllipsisParagraph = styled(Text)`
   white-space: nowrap;
   text-align: left;
 `;
-
-const getInitialLocale = (query, locales = []) => {
-  const localeFromQuery = get(query, 'query.pluginOptions.locale', undefined);
-
-  if (localeFromQuery) {
-    return locales.find(locale => locale.code === localeFromQuery);
-  }
-
-  return locales[0];
-};
 
 const selectContentManagerListViewPluginOptions = state =>
   state.get('content-manager_listView').contentType.pluginOptions;
