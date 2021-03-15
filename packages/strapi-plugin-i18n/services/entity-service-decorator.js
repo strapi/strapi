@@ -13,6 +13,10 @@ const LOCALE_QUERY_FILTER = '_locale';
  * @param {object} params - query params
  */
 const wrapParams = async (params = {}) => {
+  if (params.id) {
+    return params;
+  }
+
   if (has(LOCALE_QUERY_FILTER, params)) {
     return {
       ...omit(LOCALE_QUERY_FILTER, params),

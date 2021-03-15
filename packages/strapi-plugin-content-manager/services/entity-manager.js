@@ -86,7 +86,7 @@ module.exports = {
     return this.assocCreatorRoles(entity);
   },
 
-  async create(body, model, { params } = {}) {
+  async create(body, model) {
     const modelDef = strapi.getModel(model);
     const publishData = { ...body };
 
@@ -94,10 +94,11 @@ module.exports = {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    return strapi.entityService.create({ data: publishData, params }, { model });
+    return strapi.entityService.create({ data: publishData }, { model });
   },
 
-  update(params, body, model) {
+  update(entity, body, model) {
+    const params = { id: entity.id };
     const publishData = omitPublishedAtField(body);
 
     return strapi.entityService.update({ params, data: publishData }, { model });

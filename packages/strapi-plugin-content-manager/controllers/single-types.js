@@ -83,7 +83,7 @@ module.exports = {
         return ctx.forbidden();
       }
 
-      const updatedEntity = await entityManager.update(query, sanitizeFn(body), model);
+      const updatedEntity = await entityManager.update(entity, sanitizeFn(body), model);
       ctx.body = permissionChecker.sanitizeOutput(updatedEntity);
     })();
   },

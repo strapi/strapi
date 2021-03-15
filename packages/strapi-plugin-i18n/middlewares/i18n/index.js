@@ -1,6 +1,7 @@
 'use strict';
 
-const { getOr, get, set, isMatch } = require('lodash/fp');
+const { getOr, get, isMatch } = require('lodash/fp');
+const _ = require('lodash');
 
 module.exports = strapi => {
   return {
@@ -17,10 +18,10 @@ module.exports = strapi => {
       );
 
       routesToAddPolicyTo.forEach(route => {
-        const policies = getOr([], 'config.policies', route).push(
+        const policies = getOr([], 'config.policies', route).concat(
           'plugins::i18n.validateLocaleCreation'
         );
-        set('config.policies', policies, route);
+        _.set(route, 'config.policies', policies);
       });
     },
   };
