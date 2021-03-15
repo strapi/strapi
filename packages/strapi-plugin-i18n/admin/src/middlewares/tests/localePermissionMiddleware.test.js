@@ -1,0 +1,136 @@
+import localePermissionMiddleware from '../localePermissionMiddleware';
+
+describe('localePermissionMiddleware', () => {
+  it('does not modify the action when the type is not "ContentManager/RBACManager/SET_PERMISSIONS"', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'UNKNOWN_TYPE',
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toBe(action);
+  });
+
+  it('does not modify the action when it the __meta__ key is not set', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: undefined,
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toBe(action);
+  });
+
+  it('does not modify the action when it the __meta__.containerName is not "listView"', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: { containerName: undefined },
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toBe(action);
+  });
+
+  it('does not modify the action when it the __meta__.pluginOptions is not set', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: { containerName: 'listView' },
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toBe(action);
+  });
+
+  it('does not modify the action when it the __meta__.pluginOptions.locale is not set', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: {
+        containerName: 'listView',
+        pluginOptions: {},
+      },
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toBe(action);
+  });
+
+  it('creates an empty permissions object from an empty array', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: {
+        containerName: 'listView',
+        pluginOptions: {
+          locale: 'en',
+        },
+      },
+      permissions: {},
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toEqual({
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: { containerName: 'listView', pluginOptions: { locale: 'en' } },
+      permissions: {},
+    });
+  });
+
+  it('creates a valid permissions object from a filled array', () => {
+    const nextFn = jest.fn(x => x);
+    const action = {
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: {
+        containerName: 'listView',
+        pluginOptions: {
+          locale: 'en',
+        },
+      },
+      permissions: {
+        'plugins::content-manager.explorer.create': [
+          {
+            id: 459,
+            action: 'plugins::content-manager.explorer.create',
+            subject: 'application::article.article',
+            properties: {
+              fields: ['Name'],
+              locales: ['en'],
+            },
+            conditions: [],
+          },
+        ],
+      },
+    };
+
+    const nextAction = localePermissionMiddleware()()(nextFn)(action);
+
+    expect(nextAction).toEqual({
+      type: 'ContentManager/RBACManager/SET_PERMISSIONS',
+      __meta__: { containerName: 'listView', pluginOptions: { locale: 'en' } },
+      permissions: {
+        'plugins::content-manager.explorer.create': [
+          {
+            id: 459,
+            action: 'plugins::content-manager.explorer.create',
+            subject: 'application::article.article',
+            properties: {
+              fields: ['Name'],
+              locales: ['en'],
+            },
+
+            conditions: [],
+          },
+        ],
+      },
+    });
+  });
+});

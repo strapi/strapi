@@ -8,15 +8,18 @@ const localePermissionMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  if (!['editView', 'listView'].includes(action.__meta__.containerName)) {
+  const containerName = get(action, '__meta__.containerName', null);
+
+  if (!['editView', 'listView'].includes(containerName)) {
     return next(action);
   }
 
-  if (!get(action, '__meta__.pluginOptions.locale', false)) {
+  const locale = get(action, '__meta__.pluginOptions.locale', null);
+
+  if (!locale) {
     return next(action);
   }
 
-  const locale = action.__meta__.pluginOptions.locale;
   const permissions = action.permissions;
 
   const nextPermissions = Object.keys(permissions).reduce((acc, key) => {

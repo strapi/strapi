@@ -4,7 +4,7 @@ import { Globe, GlobeCrossed } from '@buffetjs/icons';
 import { getTrad } from '../utils';
 
 const enhanceRelationLayout = (layout, locale) =>
-  layout.reduce((acc, current) => {
+  layout.map(current => {
     const labelIcon = {
       title: {
         id: getTrad('Field.localized'),
@@ -21,13 +21,11 @@ const enhanceRelationLayout = (layout, locale) =>
       };
     }
 
-    acc.push({ ...current, labelIcon, queryInfos });
-
-    return acc;
-  }, []);
+    return { ...current, labelIcon, queryInfos };
+  });
 
 const enhanceEditLayout = layout =>
-  layout.reduce((rows, row) => {
+  layout.map(row => {
     const enhancedRow = row.reduce((acc, field) => {
       const hasI18nEnabled = get(
         field,
@@ -50,10 +48,8 @@ const enhanceEditLayout = layout =>
       return acc;
     }, []);
 
-    rows.push(enhancedRow);
-
-    return rows;
-  }, []);
+    return enhancedRow;
+  });
 
 const enhanceComponentsLayout = (components, locale) => {
   return Object.keys(components).reduce((acc, current) => {
@@ -74,7 +70,7 @@ const enhanceComponentsLayout = (components, locale) => {
 };
 
 const enhanceComponentLayoutForRelations = (layout, locale) =>
-  layout.reduce((rows, row) => {
+  layout.map(row => {
     const enhancedRow = row.reduce((acc, field) => {
       if (
         get(field, ['fieldSchema', 'type']) === 'relation' &&
@@ -95,10 +91,8 @@ const enhanceComponentLayoutForRelations = (layout, locale) =>
       return acc;
     }, []);
 
-    rows.push(enhancedRow);
-
-    return rows;
-  }, []);
+    return enhancedRow;
+  });
 
 const extendCMEditViewLayoutMiddleware = () => () => next => action => {
   if (action.type !== 'ContentManager/EditViewLayoutManager/SET_LAYOUT') {
