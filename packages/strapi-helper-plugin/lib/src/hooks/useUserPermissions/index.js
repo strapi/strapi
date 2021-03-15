@@ -68,7 +68,7 @@ const useUserPermissions = (pluginPermissions, permissions) => {
     return () => {
       abortController.abort();
     };
-  }, [permissionNames, currentUserPermissions]);
+  }, [permissionNames]);
 
   // This function is used to synchronise the hook when used in dynamic components
   const setIsLoading = useCallback(() => {
