@@ -18,7 +18,7 @@
     "@buffetjs/styles": "3.3.4",
     "@buffetjs/utils": "3.3.4",
     "cheerio": "^1.0.0-rc.5",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
     "koa-static": "^5.0.0",
     "lodash": "4.17.20",

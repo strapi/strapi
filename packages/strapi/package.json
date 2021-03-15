@@ -27,7 +27,7 @@
     "delegates": "^1.0.0",
     "dotenv": "8.2.0",
     "execa": "^1.0.0",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "glob": "^7.1.2",
     "inquirer": "^6.2.1",
     "is-docker": "2.1.1",
