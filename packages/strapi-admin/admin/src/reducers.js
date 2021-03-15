@@ -10,6 +10,7 @@ import languageProviderReducer from './containers/LanguageProvider/reducer';
 import notificationProviderReducer from './containers/NotificationProvider/reducer';
 import newNotificationReducer from './containers/NewNotification/reducer';
 import permissionsManagerReducer from './containers/PermissionsManager/reducer';
+import menuReducer from './containers/LeftMenu/reducer';
 /**
  * Creates the main reducer with the dynamically injected ones
  */
@@ -21,6 +22,7 @@ export default function createReducer(injectedReducers) {
     notification: notificationProviderReducer,
     newNotification: newNotificationReducer,
     permissionsManager: permissionsManagerReducer,
+    menu: menuReducer,
     ...injectedReducers,
   });
 }
