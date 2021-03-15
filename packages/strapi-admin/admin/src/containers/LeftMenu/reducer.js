@@ -3,6 +3,7 @@ import produce from 'immer';
 import { set } from 'lodash';
 import { SETTINGS_BASE_URL } from '../../config';
 import adminPermissions from '../../permissions';
+import { GET_MODELS_SUCCEEDED, SET_LINK_PERMISSIONS, TOGGLE_IS_LOADING } from './constants';
 
 const initialState = {
   collectionTypesSectionLinks: [],
@@ -42,13 +43,13 @@ const initialState = {
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'GET_MODELS_SUCCEEDED': {
+      case GET_MODELS_SUCCEEDED: {
         Object.keys(action.data).forEach(modelType => {
           set(draftState, [modelType], action.data[modelType]);
         });
         break;
       }
-      case 'SET_LINK_PERMISSIONS': {
+      case SET_LINK_PERMISSIONS: {
         Object.keys(action.data).forEach(sectionName => {
           const sectionData = action.data[sectionName];
 
@@ -58,7 +59,7 @@ const reducer = (state = initialState, action) =>
         });
         break;
       }
-      case 'TOGGLE_IS_LOADING': {
+      case TOGGLE_IS_LOADING: {
         draftState.isLoading = false;
         break;
       }

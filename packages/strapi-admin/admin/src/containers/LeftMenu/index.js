@@ -27,6 +27,7 @@ import { generateModelsLinks, filterLinks } from './utils';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
 import useMenuLinks from './hooks/useMenuLinks';
+import { getModelsSucceeded, setLinkPermissions, toggleIsLoading } from './actions';
 
 const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
   const location = useLocation();
@@ -89,18 +90,14 @@ const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
       );
       const singleTypesSectionResults = await Promise.all(singleTypesSectionLinksArrayOfPromises);
 
-      dispatch({
-        type: 'GET_MODELS_SUCCEEDED',
-        data: formattedData,
-      });
+      dispatch(getModelsSucceeded(formattedData));
 
-      dispatch({
-        type: 'SET_LINK_PERMISSIONS',
-        data: {
+      dispatch(
+        setLinkPermissions({
           collectionTypesSectionLinks: collectionTypesSectionResults,
           singleTypesSectionLinks: singleTypesSectionResults,
-        },
-      });
+        })
+      );
     } catch (err) {
       console.error(err);
       strapi.notification.toggle({
@@ -127,17 +124,14 @@ const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
       const generalSectionResults = await Promise.all(generalSectionLinksArrayOfPromises);
       const pluginsSectionResults = await Promise.all(pluginsSectionLinksArrayOfPromises);
 
-      dispatch({
-        type: 'SET_LINK_PERMISSIONS',
-        data: {
+      dispatch(
+        setLinkPermissions({
           generalSectionLinks: generalSectionResults,
           pluginsSectionLinks: pluginsSectionResults,
-        },
-      });
+        })
+      );
 
-      dispatch({
-        type: 'TOGGLE_IS_LOADING',
-      });
+      dispatch(toggleIsLoading());
     };
 
     getLinksPermissions();
