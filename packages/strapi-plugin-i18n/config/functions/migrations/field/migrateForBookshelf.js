@@ -1,7 +1,7 @@
 'use strict';
 
 const { singular } = require('pluralize');
-const { has, omit, pick } = require('lodash/fp');
+const { has, omit, pick, orderBy } = require('lodash/fp');
 const { shouldBeProcessed, getUpdatesInfo } = require('./utils');
 
 const BATCH_SIZE = 1000;
@@ -60,7 +60,30 @@ const createTmpTable = async ({ ORM, attributesToMigrate, model }) => {
 
 const deleteTmpTable = ({ ORM }) => ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
 
-const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales }) => {
+const getSortedLocales = async ORM => {
+  let defaultLocale;
+  try {
+    const defaultLocaleRow = await ORM.knex('core_store')
+      .select('value')
+      .where({ key: 'plugin_i18n_default_locale' });
+    defaultLocale = defaultLocaleRow[0].value;
+  } catch (e) {
+    throw new Error("Could not migrate because the default locale doesn't exist");
+  }
+
+  let locales;
+  try {
+    locales = await ORM.knex(strapi.plugins.i18n.models.locale.collectionName).select('code');
+  } catch (e) {
+    throw new Error('Could not migrate because no locale exist');
+  }
+
+  locales.forEach(locale => (locale.isDefault = locale.code === defaultLocale));
+  return orderBy(['isDefault', 'code'], ['desc', 'asc'])(locales); // Put default locale first
+};
+
+const migrateForBookshelf = async ({ ORM, model, attributesToMigrate }) => {
+  const locales = await getSortedLocales(ORM);
   const localizationAssoc = model.associations.find(a => a.alias === 'localizations');
   const localizationTableName = localizationAssoc.tableCollectionName;
 
@@ -125,7 +148,7 @@ const migrateForBookshelf = async ({ ORM, model, attributesToMigrate, locales })
 
         offset += BATCH_SIZE;
 
-        const entriesToProcess = batch.filter(shouldBeProcessed(processedLocaleCodes));
+        const entriesToProcess = entries.filter(shouldBeProcessed(processedLocaleCodes));
         const updatesInfo = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
 
         if (isPgOrMysql) {

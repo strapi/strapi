@@ -1,10 +1,35 @@
 'use strict';
 
+const { orderBy } = require('lodash/fp');
 const { shouldBeProcessed, getUpdatesInfo } = require('./utils');
 
 const BATCH_SIZE = 1000;
 
-const migrateForMongoose = async ({ model, attributesToMigrate, locales }) => {
+const getSortedLocales = async () => {
+  let defaultLocale;
+  try {
+    const defaultLocaleRow = await strapi.models['core_store'].findOne({
+      key: 'plugin_i18n_default_locale',
+    });
+    defaultLocale = JSON.parse(defaultLocaleRow.value);
+  } catch (e) {
+    throw new Error("Could not migrate because the default locale doesn't exist");
+  }
+
+  let locales;
+  try {
+    strapi.models;
+    locales = await strapi.plugins.i18n.models.locale.find();
+  } catch (e) {
+    throw new Error('Could not migrate because no locale exist');
+  }
+
+  locales.forEach(locale => (locale.isDefault = locale.code === defaultLocale));
+  return orderBy(['isDefault', 'code'], ['desc', 'asc'])(locales); // Put default locale first
+};
+
+const migrateForMongoose = async ({ model, attributesToMigrate }) => {
+  const locales = await getSortedLocales();
   const processedLocaleCodes = [];
   for (const locale of locales) {
     let batchCount = BATCH_SIZE;

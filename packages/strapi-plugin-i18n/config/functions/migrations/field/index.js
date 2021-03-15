@@ -1,6 +1,6 @@
 'use strict';
 
-const { difference, orderBy, intersection } = require('lodash/fp');
+const { difference, intersection } = require('lodash/fp');
 const { getService } = require('../../../../utils');
 const migrateForMongoose = require('./migrateForMongoose');
 const migrateForBookshelf = require('./migrateForBookshelf');
@@ -8,9 +8,8 @@ const migrateForBookshelf = require('./migrateForBookshelf');
 // Migration when i18n is disabled on a field of a content-type that have i18n enabled
 const after = async ({ model, definition, previousDefinition, ORM }) => {
   const ctService = getService('content-types');
-  const localeService = getService('locales');
 
-  if (!ctService.isLocalized(model)) {
+  if (!ctService.isLocalized(model) || !previousDefinition) {
     return;
   }
 
@@ -23,16 +22,11 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
     return;
   }
 
-  let locales = await localeService.find();
-  locales = await localeService.setIsDefault(locales);
-  locales = orderBy(['isDefault', 'code'], ['desc', 'asc'])(locales); // Put default locale first
-
   if (model.orm === 'bookshelf') {
-    await migrateForBookshelf({ ORM, model, attributesToMigrate, locales });
+    await migrateForBookshelf({ ORM, model, attributesToMigrate });
   } else if (model.orm === 'mongoose') {
-    await migrateForMongoose({ model, attributesToMigrate, locales });
+    await migrateForMongoose({ model, attributesToMigrate });
   }
-  throw new Error('pouet');
 };
 
 const before = () => {};
