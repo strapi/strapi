@@ -8,6 +8,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
+import { stringify } from 'qs';
 import {
   PopUpWarning,
   request,
@@ -296,6 +297,7 @@ function ListView({
           emitEventRef.current('willCreateEntry', trackerProperty);
           push({
             pathname: `${pathname}/create`,
+            search: query.pluginOptions ? stringify(query.pluginOptions, { encode: false }) : '',
           });
         },
         color: 'primary',
@@ -308,7 +310,7 @@ function ListView({
         },
       },
     ];
-  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push]);
+  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push, query]);
 
   const headerProps = useMemo(() => {
     /* eslint-disable indent */
