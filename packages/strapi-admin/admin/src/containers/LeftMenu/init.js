@@ -11,6 +11,7 @@ const init = (initialState, plugins = {}, settingsMenu = [], settingsLinkNotific
 
     return [...acc, ...pluginsSectionLinks];
   }, []);
+
   const sortedLinks = sortLinks(pluginsLinks).map(link => {
     return { ...omit(link, 'name'), isDisplayed: false };
   });
