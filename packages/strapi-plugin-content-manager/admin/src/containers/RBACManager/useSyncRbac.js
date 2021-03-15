@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { resetPermissions, setPermissions } from './actions';
 import { selectPermissions, selectCollectionTypePermissions } from '../../selectors';
 
-const useSyncRbac = (query, collectionTypeUID) => {
+const useSyncRbac = (query, collectionTypeUID, containerName = 'listView') => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);
   const permissions = useSelector(selectPermissions);
   const dispatch = useDispatch();
@@ -12,7 +12,7 @@ const useSyncRbac = (query, collectionTypeUID) => {
 
   useEffect(() => {
     if (query && relatedPermissions) {
-      dispatch(setPermissions(relatedPermissions, query.pluginOptions, 'listView'));
+      dispatch(setPermissions(relatedPermissions, query.pluginOptions, containerName));
 
       return () => {
         dispatch(resetPermissions());
@@ -20,7 +20,7 @@ const useSyncRbac = (query, collectionTypeUID) => {
     }
 
     return () => {};
-  }, [relatedPermissions, dispatch, query]);
+  }, [relatedPermissions, dispatch, query, containerName]);
 
   return permissions;
 };

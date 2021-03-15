@@ -52,10 +52,6 @@ describe('ADMIN | LeftMenu | utils', () => {
               action: 'plugins::content-manager.explorer.read',
               subject: 'application::address.address',
             },
-            {
-              action: 'plugins::content-manager.explorer.update',
-              subject: 'application::address.address',
-            },
           ],
         },
         {
@@ -72,15 +68,11 @@ describe('ADMIN | LeftMenu | utils', () => {
               action: 'plugins::content-manager.explorer.read',
               subject: 'application::test1.test1',
             },
-            {
-              action: 'plugins::content-manager.explorer.update',
-              subject: 'application::test1.test1',
-            },
           ],
         },
       ];
 
-      expect(generateLinks(data)).toEqual(expected);
+      expect(generateLinks(data, 'collectionTypes')).toEqual(expected);
     });
   });
 
@@ -131,10 +123,6 @@ describe('ADMIN | LeftMenu | utils', () => {
                 action: 'plugins::content-manager.explorer.read',
                 subject: 'application::address.address',
               },
-              {
-                action: 'plugins::content-manager.explorer.update',
-                subject: 'application::address.address',
-              },
             ],
           },
         ],
@@ -146,15 +134,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             label: 'Test 1',
             permissions: [
               {
-                action: 'plugins::content-manager.explorer.create',
-                subject: 'application::test1.test1',
-              },
-              {
                 action: 'plugins::content-manager.explorer.read',
-                subject: 'application::test1.test1',
-              },
-              {
-                action: 'plugins::content-manager.explorer.update',
                 subject: 'application::test1.test1',
               },
             ],

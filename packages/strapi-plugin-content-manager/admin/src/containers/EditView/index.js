@@ -7,7 +7,6 @@ import {
   LiLink,
   LoadingIndicatorPage,
   CheckPermissions,
-  useUser,
   useUserPermissions,
   useGlobalContext,
 } from 'strapi-helper-plugin';
@@ -31,14 +30,14 @@ import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => {
+const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin, userPermissions }) => {
   const { currentEnvironment, plugins } = useGlobalContext();
   // Permissions
   const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
   const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
-    viewPermissions
+    viewPermissions,
+    userPermissions
   );
-  const { userPermissions } = useUser();
 
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
@@ -274,6 +273,7 @@ EditView.defaultProps = {
   isSingleType: false,
   origin: null,
   state: {},
+  userPermissions: [],
 };
 
 EditView.propTypes = {
@@ -293,6 +293,7 @@ EditView.propTypes = {
   origin: PropTypes.string,
   state: PropTypes.object,
   slug: PropTypes.string.isRequired,
+  userPermissions: PropTypes.array,
 };
 
 export { EditView };

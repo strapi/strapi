@@ -10,7 +10,7 @@ const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const initialParams = useSelector(state => state.get('content-manager_listView').initialParams);
   const [{ query }, setQuery] = useQueryParams(initialParams);
-  const permissions = useSyncRbac(query, props.slug);
+  const permissions = useSyncRbac(query, props.slug, 'listView');
 
   useEffect(() => {
     dispatch(setLayout(layout.contentType));
