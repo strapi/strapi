@@ -26,7 +26,7 @@ import {
 import { generateModelsLinks, filterLinks } from './utils';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
-import useMenuLinks from './useMenuLinks';
+import useMenuLinks from './hooks/useMenuLinks';
 
 const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
   const location = useLocation();

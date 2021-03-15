@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import init from './init';
-import { initialState } from './reducer';
-import { useSettingsMenu } from '../../hooks';
+import init from '../init';
+import { initialState } from '../reducer';
+import { useSettingsMenu } from '../../../hooks';
 
 const useMenuLinks = (plugins, shouldUpdateStrapi) => {
   const {
