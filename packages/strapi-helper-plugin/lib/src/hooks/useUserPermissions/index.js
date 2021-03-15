@@ -6,7 +6,7 @@ import generateResultsObject from './utils/generateResultsObject';
 import reducer from './reducer';
 import init from './init';
 
-const useUserPermissions = pluginPermissions => {
+const useUserPermissions = (pluginPermissions, permissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
 
@@ -14,7 +14,8 @@ const useUserPermissions = pluginPermissions => {
   const permissionNames = useMemo(() => {
     return Object.keys(pluginPermissions);
   }, [pluginPermissions]);
-  const { userPermissions: currentUserPermissions } = useUser();
+  const { userPermissions } = useUser();
+  const currentUserPermissions = permissions || userPermissions;
   const [state, dispatch] = useReducer(reducer, {}, () => init(permissionNames));
   const checkPermissionsRef = useRef();
   const generateArrayOfPromisesRef = useRef();

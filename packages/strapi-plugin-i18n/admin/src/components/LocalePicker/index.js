@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import getInitialLocale from '../../utils/getInitialLocale';
 
 const List = styled.ul`
   list-style-type: none;
@@ -40,10 +41,14 @@ const selectContentManagerListViewPluginOptions = state =>
 const selectI18NLocales = state => state.get('i18n_locales').locales;
 
 const LocalePicker = () => {
+  const dispatch = useDispatch();
   const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
-  const [selected, setSelected] = useState(locales && locales[0]);
   const [query, setQuery] = useQueryParams();
+
+  const initialLocale = getInitialLocale(query, locales);
+  const [selected, setSelected] = useState(initialLocale);
+
   const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
 
   if (!isFieldLocalized) {
@@ -68,6 +73,7 @@ const LocalePicker = () => {
       )}
       renderSectionContent={onToggle => {
         const handleClick = locale => {
+          dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
           setSelected(locale);
           setQuery({ pluginOptions: { ...query.pluginOptions, locale: locale.code } });
           onToggle();
