@@ -8,7 +8,7 @@ const selectPermissions = state => state.get(`${pluginId}_rbacManager`).permissi
 const selectCollectionTypePermissions = state =>
   state.get('permissionsManager').collectionTypesRelatedPermissions;
 
-const useSyncRbac = (query, collectionTypeUID = 'listView') => {
+const useSyncRbac = (query, collectionTypeUID) => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);
   const permissions = useSelector(selectPermissions);
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ const useSyncRbac = (query, collectionTypeUID = 'listView') => {
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
   useEffect(() => {
-    if (query && query.pluginOptions && relatedPermissions) {
+    if (query && relatedPermissions) {
       dispatch(setPermissions(relatedPermissions, query.pluginOptions, 'listView'));
 
       return () => {
