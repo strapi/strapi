@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect, useMemo, memo } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { findIndex, get, isArray, isEmpty } from 'lodash';
 import { LabelIconWrapper, NotAllowedInput, request } from 'strapi-helper-plugin';
@@ -36,6 +36,7 @@ function SelectWrapper({
   placeholder,
   queryInfos,
 }) {
+  const { formatMessage } = useIntl();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
   const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
@@ -228,12 +229,16 @@ function SelectWrapper({
     return !editable;
   }, [isMorph, isCreatingEntry, editable, isFieldAllowed, isFieldReadable]);
 
+  const labelIconformatted = labelIcon
+    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
+    : labelIcon;
+
   if (!isFieldAllowed && isCreatingEntry) {
-    return <NotAllowedInput label={label} />;
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
   }
 
   if (!isCreatingEntry && !isFieldAllowed && !isFieldReadable) {
-    return <NotAllowedInput label={label} />;
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} />;
   }
 
   return (
@@ -245,8 +250,11 @@ function SelectWrapper({
             {label}
             {!isSingle && ` (${associationsLength})`}
           </span>
-          {labelIcon && (
-            <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>
+
+          {labelIconformatted && (
+            <LabelIconWrapper title={labelIconformatted.title}>
+              {labelIconformatted.icon}
+            </LabelIconWrapper>
           )}
         </Text>
         {isSingle && link}
@@ -311,8 +319,11 @@ SelectWrapper.propTypes = {
   description: PropTypes.string,
   label: PropTypes.string,
   labelIcon: PropTypes.shape({
-    icon: PropTypes.any,
-    title: PropTypes.string,
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string,
+    }),
   }),
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool,

@@ -119,6 +119,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           label: 'Read',
           actionId: 'content-manager.explorer.read',
           subjects: ['address'],
+          applyToProperties: ['locales'],
         },
         {
           label: 'Delete',

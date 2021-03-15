@@ -14,6 +14,8 @@
   "CheckboxConfirmation.Modal.content": "Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).",
   "CheckboxConfirmation.Modal.body": "Do you want to disable it?",
   "CheckboxConfirmation.Modal.button-confirm": "Yes, disable",
+  "Field.localized": "This value is unique for the selected locale",
+  "Field.not-localized": "This value is common to all locales",
   "Settings.list.description": "Configure the settings for the internationalization plugin",
   "Settings.list.empty.title": "There are no locales.",
   "Settings.list.empty.description": "This is not a usual behavior, meaning that you have eventually modified the database manually. Make sure to have at least one locale saved in your database in order to be able to use Strapi correctly.",

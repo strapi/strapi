@@ -304,7 +304,7 @@ InputUID.propTypes = {
   error: PropTypes.string,
   label: PropTypes.string.isRequired,
   labelIcon: PropTypes.shape({
-    icon: PropTypes.any,
+    icon: PropTypes.node.isRequired,
     title: PropTypes.string,
   }),
   name: PropTypes.string.isRequired,

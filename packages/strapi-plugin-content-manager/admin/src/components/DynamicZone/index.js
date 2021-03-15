@@ -2,8 +2,8 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { NotAllowedInput } from 'strapi-helper-plugin';
+import { FormattedMessage, useIntl } from 'react-intl';
+import { LabelIconWrapper, NotAllowedInput } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import connect from './utils/connect';
 import select from './utils/select';
@@ -26,6 +26,7 @@ const DynamicZone = ({
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
+  labelIcon,
   moveComponentUp,
   moveComponentDown,
   removeComponentFromDynamicZone,
@@ -34,6 +35,7 @@ const DynamicZone = ({
   metadatas,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { formatMessage } = useIntl();
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = fieldSchema;
   const dynamicZoneErrors = useMemo(() => {
@@ -72,10 +74,18 @@ const DynamicZone = ({
     }
   };
 
+  const formattedLabelIcon = labelIcon
+    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
+    : null;
+
   if (!isFieldAllowed && isCreatingEntry) {
     return (
       <BaselineAlignement>
-        <NotAllowedInput label={metadatas.label} spacerHeight="5px" />
+        <NotAllowedInput
+          label={metadatas.label}
+          spacerHeight="5px"
+          labelIcon={formattedLabelIcon}
+        />
       </BaselineAlignement>
     );
   }
@@ -83,7 +93,11 @@ const DynamicZone = ({
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
       <BaselineAlignement>
-        <NotAllowedInput label={metadatas.label} spacerHeight="5px" />
+        <NotAllowedInput
+          label={metadatas.label}
+          spacerHeight="5px"
+          labelIcon={formattedLabelIcon}
+        />
       </BaselineAlignement>
     );
   }
@@ -92,7 +106,14 @@ const DynamicZone = ({
     <DynamicZoneWrapper>
       {dynamicDisplayedComponentsLength > 0 && (
         <Label>
-          <p>{metadatas.label}</p>
+          <p>
+            <span>{metadatas.label}</span>
+            {formattedLabelIcon && (
+              <LabelIconWrapper title={formattedLabelIcon.title}>
+                {formattedLabelIcon.icon}
+              </LabelIconWrapper>
+            )}
+          </p>
           <p>{metadatas.description}</p>
         </Label>
       )}
@@ -175,6 +196,7 @@ DynamicZone.defaultProps = {
     max: Infinity,
     min: -Infinity,
   },
+  labelIcon: null,
 };
 
 DynamicZone.propTypes = {
@@ -189,6 +211,13 @@ DynamicZone.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isFieldReadable: PropTypes.bool.isRequired,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }).isRequired,
+  }),
   metadatas: PropTypes.shape({
     description: PropTypes.string,
     label: PropTypes.string,

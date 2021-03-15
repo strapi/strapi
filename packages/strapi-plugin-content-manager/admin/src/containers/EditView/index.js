@@ -12,7 +12,6 @@ import {
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
-import { Globe } from '@buffetjs/icons';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
@@ -138,7 +137,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                     if (isDynamicZone(block)) {
                       const {
                         0: {
-                          0: { name, fieldSchema, metadatas },
+                          0: { name, fieldSchema, metadatas, labelIcon },
                         },
                       } = block;
                       const baselineAlignementSize = blockIndex === 0 ? '3px' : '0';
@@ -148,6 +147,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                           <DynamicZone
                             name={name}
                             fieldSchema={fieldSchema}
+                            labelIcon={labelIcon}
                             metadatas={metadatas}
                           />
                         </BaselineAlignment>
@@ -160,7 +160,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                           return (
                             <div className="row" key={fieldsBlockIndex}>
                               {fieldsBlock.map(
-                                ({ name, size, fieldSchema, metadatas }, fieldIndex) => {
+                                ({ name, size, fieldSchema, labelIcon, metadatas }, fieldIndex) => {
                                   const isComponent = fieldSchema.type === 'component';
 
                                   if (isComponent) {
@@ -171,6 +171,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                                       <FieldComponent
                                         key={componentUid}
                                         componentUid={component}
+                                        labelIcon={labelIcon}
                                         isRepeatable={repeatable}
                                         label={metadatas.label}
                                         max={max}
@@ -190,6 +191,7 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                                         }
                                         fieldSchema={fieldSchema}
                                         keys={name}
+                                        labelIcon={labelIcon}
                                         metadatas={metadatas}
                                       />
                                     </div>
@@ -210,17 +212,16 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin }) => 
                     <SubWrapper style={{ padding: '0 20px 1px', marginBottom: '25px' }}>
                       <div style={{ paddingTop: '22px' }}>
                         {currentContentTypeLayoutData.layouts.editRelations.map(
-                          ({ name, fieldSchema, metadatas, queryInfos }) => {
+                          ({ name, fieldSchema, labelIcon, metadatas, queryInfos }) => {
                             return (
                               <SelectWrapper
                                 {...fieldSchema}
                                 {...metadatas}
-                                queryInfos={queryInfos}
-                                // TODO
-                                labelIcon={{ title: 'Localized', icon: <Globe title="toto" /> }}
                                 key={name}
+                                labelIcon={labelIcon}
                                 name={name}
                                 relationsType={fieldSchema.relationType}
+                                queryInfos={queryInfos}
                               />
                             );
                           }
