@@ -7,7 +7,7 @@
   "Auth.form.button.login": "Login",
   "Auth.form.button.register": "LOS GEHT'S",
   "Auth.form.button.reset-password": "Passwort ändern",
-  "Auth.form.confirmPassword.label": "Password bestätigen",
+  "Auth.form.confirmPassword.label": "Passwort bestätigen",
   "Auth.form.email.label": "E-Mail",
   "Auth.form.email.placeholder": "max.mustermann@gmail.com",
   "Auth.form.error.blocked": "Dein Account wurde vom Administrator blockiert.",
