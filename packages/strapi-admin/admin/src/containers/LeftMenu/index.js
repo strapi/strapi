@@ -11,10 +11,10 @@ import React, {
   useEffect,
   useImperativeHandle,
   useMemo,
-  useReducer,
 } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import { UserContext, hasPermissions, request } from 'strapi-helper-plugin';
 import {
@@ -23,38 +23,24 @@ import {
   LeftMenuHeader,
   LinksContainer,
 } from '../../components/LeftMenu';
-import { useSettingsMenu } from '../../hooks';
 import { generateModelsLinks, filterLinks } from './utils';
-import init from './init';
-import reducer, { initialState } from './reducer';
 import Loader from './Loader';
 import Wrapper from './Wrapper';
+import useMenuLinks from './useMenuLinks';
 
 const LeftMenu = forwardRef(({ shouldUpdateStrapi, version, plugins }, ref) => {
   const location = useLocation();
   const { userPermissions: permissions } = useContext(UserContext);
-  const { menu: settingsMenu } = useSettingsMenu(true);
+  const dispatch = useDispatch();
 
-  // TODO: this needs to be added to the settings API in the v4
-  const settingsLinkNotificationCount = useMemo(() => {
-    if (shouldUpdateStrapi) {
-      return 1;
-    }
+  const {
+    collectionTypesSectionLinks,
+    generalSectionLinks,
+    isLoading,
+    pluginsSectionLinks,
+    singleTypesSectionLinks,
+  } = useMenuLinks(plugins, shouldUpdateStrapi);
 
-    return 0;
-  }, [shouldUpdateStrapi]);
-  const [
-    {
-      collectionTypesSectionLinks,
-      generalSectionLinks,
-      isLoading,
-      pluginsSectionLinks,
-      singleTypesSectionLinks,
-    },
-    dispatch,
-  ] = useReducer(reducer, initialState, () =>
-    init(initialState, plugins, settingsMenu, settingsLinkNotificationCount)
-  );
   const generalSectionLinksFiltered = useMemo(() => filterLinks(generalSectionLinks), [
     generalSectionLinks,
   ]);

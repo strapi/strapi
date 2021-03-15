@@ -39,7 +39,7 @@ const initialState = {
   isLoading: true,
 };
 
-const reducer = (state, action) =>
+const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'GET_MODELS_SUCCEEDED': {
