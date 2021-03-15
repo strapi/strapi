@@ -59,8 +59,6 @@ const LocalePicker = () => {
     return null;
   }
 
-  console.log('lol', locales);
-
   return (
     <Picker
       position="right"
