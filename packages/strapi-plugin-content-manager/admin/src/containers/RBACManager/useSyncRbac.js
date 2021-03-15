@@ -1,12 +1,7 @@
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import pluginId from '../../pluginId';
 import { resetPermissions, setPermissions } from './actions';
-
-const selectPermissions = state => state.get(`${pluginId}_rbacManager`).permissions;
-
-const selectCollectionTypePermissions = state =>
-  state.get('permissionsManager').collectionTypesRelatedPermissions;
+import { selectPermissions, selectCollectionTypePermissions } from '../../selectors';
 
 const useSyncRbac = (query, collectionTypeUID) => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypePermissions);
