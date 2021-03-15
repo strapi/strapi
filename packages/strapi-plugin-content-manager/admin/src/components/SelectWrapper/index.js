@@ -3,10 +3,14 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { findIndex, get, isArray, isEmpty } from 'lodash';
-import { LabelIconWrapper, NotAllowedInput, request } from 'strapi-helper-plugin';
+import {
+  LabelIconWrapper,
+  NotAllowedInput,
+  request,
+  useContentManagerEditViewDataManager,
+} from 'strapi-helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
-import useDataManager from '../../hooks/useDataManager';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import ClearIndicator from './ClearIndicator';
@@ -39,7 +43,13 @@ function SelectWrapper({
   const { formatMessage } = useIntl();
   // Disable the input in case of a polymorphic relation
   const isMorph = useMemo(() => relationType.toLowerCase().includes('morph'), [relationType]);
-  const { addRelation, modifiedData, moveRelation, onChange, onRemoveRelation } = useDataManager();
+  const {
+    addRelation,
+    modifiedData,
+    moveRelation,
+    onChange,
+    onRemoveRelation,
+  } = useContentManagerEditViewDataManager();
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);

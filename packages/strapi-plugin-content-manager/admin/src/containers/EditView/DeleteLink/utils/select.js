@@ -1,8 +1,8 @@
 import { isEmpty } from 'lodash';
-import useDataManager from '../../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 
 function useSelect() {
-  const { hasDraftAndPublish, modifiedData } = useDataManager();
+  const { hasDraftAndPublish, modifiedData } = useContentManagerEditViewDataManager();
 
   let trackerProperty = {};
 

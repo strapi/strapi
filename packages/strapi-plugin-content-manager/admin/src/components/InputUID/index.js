@@ -10,13 +10,13 @@ import {
   LabelIconWrapper,
   LoadingIndicator,
   useGlobalContext,
+  useContentManagerEditViewDataManager,
 } from 'strapi-helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
 import getTrad from '../../utils/getTrad';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
-import useDataManager from '../../hooks/useDataManager';
 import RightLabel from './RightLabel';
 import Options from './Options';
 import RegenerateButton from './RegenerateButton';
@@ -55,7 +55,7 @@ const InputUID = ({
   editable,
   ...inputProps
 }) => {
-  const { modifiedData, initialData, layout } = useDataManager();
+  const { modifiedData, initialData, layout } = useContentManagerEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);

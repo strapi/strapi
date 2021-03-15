@@ -2,19 +2,20 @@ import React from 'react';
 import { get } from 'lodash';
 import * as yup from 'yup';
 import pluginPkg from '../../package.json';
-import middlewares from './middlewares';
-import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
+import CheckboxConfirmation from './components/CheckboxConfirmation';
+import CMEditViewLocalePicker from './components/CMEditViewLocalePicker';
+import Initializer from './containers/Initializer';
+import SettingsPage from './containers/SettingsPage';
+import LocalePicker from './components/LocalePicker';
+import middlewares from './middlewares';
+import pluginPermissions from './permissions';
+import pluginId from './pluginId';
 import trads from './translations';
 import { getTrad } from './utils';
-import pluginPermissions from './permissions';
-import CheckboxConfirmation from './components/CheckboxConfirmation';
-import SettingsPage from './containers/SettingsPage';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
-import Initializer from './containers/Initializer';
 import i18nReducers from './hooks/reducers';
-import LocalePicker from './components/LocalePicker';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -56,6 +57,10 @@ export default strapi => {
       const cmPlugin = app.getPlugin('content-manager');
 
       if (cmPlugin) {
+        cmPlugin.injectComponent('editView', 'informations', {
+          name: 'i18n-locale-filter-edit-view',
+          Component: CMEditViewLocalePicker,
+        });
         cmPlugin.injectComponent('listView', 'actions', {
           name: 'i18n-locale-filter',
           Component: LocalePicker,

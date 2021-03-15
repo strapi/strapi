@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
+import { RelationDPState } from 'strapi-helper-plugin';
 import { getDisplayedValue, getTrad } from '../../utils';
 import IconRemove from '../../assets/images/icon_remove.svg';
-import RelationDPState from '../RelationDPState';
 import { Span } from './components';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
