@@ -7,6 +7,16 @@ import produce from 'immer';
 // require us to add the dispatch to the array wich is not wanted. This refacto does not require us to
 // to do any of this.
 
+import {
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
+  INIT_FORM,
+  RESET_PROPS,
+  SET_DATA_STRUCTURES,
+  SET_STATUS,
+  SUBMIT_SUCCEEDED,
+} from './constants';
+
 const crudInitialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
@@ -15,34 +25,37 @@ const crudInitialState = {
   status: 'resolved',
 };
 
-const crudReducer = (state, action) =>
+const crudReducer = (state = crudInitialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case 'GET_DATA': {
+      case GET_DATA: {
         draftState.isLoading = true;
         draftState.data = {};
         break;
       }
-      case 'GET_DATA_SUCCEEDED': {
+      case GET_DATA_SUCCEEDED: {
         draftState.isLoading = false;
         draftState.data = action.data;
         break;
       }
-      case 'INIT_FORM': {
+      case INIT_FORM: {
         draftState.isLoading = false;
         draftState.data = state.contentTypeDataStructure;
         break;
       }
-      case 'SET_DATA_STRUCTURES': {
+      case RESET_PROPS: {
+        return crudInitialState;
+      }
+      case SET_DATA_STRUCTURES: {
         draftState.componentsDataStructure = action.componentsDataStructure;
         draftState.contentTypeDataStructure = action.contentTypeDataStructure;
         break;
       }
-      case 'SET_STATUS': {
+      case SET_STATUS: {
         draftState.status = action.status;
         break;
       }
-      case 'SUBMIT_SUCCEEDED': {
+      case SUBMIT_SUCCEEDED: {
         draftState.data = action.data;
         break;
       }

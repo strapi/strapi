@@ -1,5 +1,5 @@
 import produce from 'immer';
-import crudReducer from '../crudReducer';
+import crudReducer from '../reducer';
 
 describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
   let state;
