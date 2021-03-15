@@ -8,7 +8,9 @@ const localePermissionMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  if (action.__meta__.containerName !== 'listView') {
+  const containerName = get(action, '__meta__.containerName', null);
+
+  if (containerName !== 'listView') {
     return next(action);
   }
 
