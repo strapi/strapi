@@ -61,20 +61,20 @@ describe('getInitialLocale', () => {
 
     const locales = [
       {
-        id: 1,
-        name: 'English',
-        code: 'en',
-        created_at: '2021-03-09T14:57:03.016Z',
-        updated_at: '2021-03-09T14:57:03.016Z',
-        isDefault: true,
-      },
-      {
         id: 2,
         name: 'French (France) (fr-FR)',
         code: 'fr-FR',
         created_at: '2021-03-09T15:03:06.992Z',
         updated_at: '2021-03-09T15:03:06.996Z',
         isDefault: false,
+      },
+      {
+        id: 1,
+        name: 'English',
+        code: 'en',
+        created_at: '2021-03-09T14:57:03.016Z',
+        updated_at: '2021-03-09T14:57:03.016Z',
+        isDefault: true,
       },
     ];
 

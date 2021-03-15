@@ -7,7 +7,8 @@ const getInitialLocale = (query, locales = []) => {
     return locales.find(locale => locale.code === localeFromQuery);
   }
 
-  return locales[0];
+  // Returns the default locale when nothing is in the query
+  return locales.find(locale => locale.isDefault);
 };
 
 export default getInitialLocale;
