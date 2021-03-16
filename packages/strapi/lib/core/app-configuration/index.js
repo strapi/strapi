@@ -74,7 +74,8 @@ module.exports = (dir, initialConfig = {}) => {
     serveAdminPanel,
     autoReload,
     environment: process.env.NODE_ENV,
-    project: _.get(pkgJSON, 'strapi'),
+    uuid: _.get(pkgJSON, 'strapi.uuid'),
+    packageJsonStrapi: _.get(pkgJSON, 'strapi'),
     info: {
       ...pkgJSON,
       strapi: strapiVersion,
