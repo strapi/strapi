@@ -1,5 +1,13 @@
 import produce from 'immer';
-import crudReducer from '../crudReducer';
+import {
+  GET_DATA,
+  GET_DATA_SUCCEEDED,
+  INIT_FORM,
+  SET_DATA_STRUCTURES,
+  SET_STATUS,
+  SUBMIT_SUCCEEDED,
+} from '../constants';
+import crudReducer from '../reducer';
 
 describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
   let state;
@@ -23,7 +31,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
     state.data = null;
     state.componentsDataStructure = null;
 
-    const action = { type: 'GET_DATA' };
+    const action = { type: GET_DATA };
 
     const expected = produce(state, draft => {
       draft.isLoading = true;
@@ -35,7 +43,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
 
   it('should handle the GET_DATA_SUCCEEDED action correctly', () => {
     const action = {
-      type: 'GET_DATA_SUCCEEDED',
+      type: GET_DATA_SUCCEEDED,
       data: 'test',
     };
 
@@ -49,7 +57,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
 
   it('should handle the INIT_FORM action correctly', () => {
     const action = {
-      type: 'INIT_FORM',
+      type: INIT_FORM,
     };
     state.contentTypeDataStructure = { foo: 'bar' };
 
@@ -63,7 +71,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
 
   it('should handle the SET_DATA_STRUCTURES action correctly', () => {
     const action = {
-      type: 'SET_DATA_STRUCTURES',
+      type: SET_DATA_STRUCTURES,
       componentsDataStructure: { test: 'test' },
       contentTypeDataStructure: { foo: 'bar' },
     };
@@ -77,7 +85,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
   });
 
   it('should handle the SET_STATUS action correctly', () => {
-    const action = { type: 'SET_STATUS', status: 'pending' };
+    const action = { type: SET_STATUS, status: 'pending' };
 
     const expected = produce(state, draft => {
       draft.status = 'pending';
@@ -87,7 +95,7 @@ describe('CONTENT MANAGER | sharedReducers | crudReducer', () => {
   });
 
   it('should handle the SUBMIt_SUCCEEDED action correctly', () => {
-    const action = { type: 'SUBMIT_SUCCEEDED', data: 'test' };
+    const action = { type: SUBMIT_SUCCEEDED, data: 'test' };
 
     const expected = produce(state, draft => {
       draft.data = 'test';
