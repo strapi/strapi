@@ -36,6 +36,7 @@ module.exports = (projectDirectory, cliArguments) => {
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
+    template: cliArguments.template,
     packageJsonStrapi: {
       template: cliArguments.template,
       starter: cliArguments.starter,

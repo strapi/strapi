@@ -70,7 +70,7 @@ module.exports = async function createProject(scope, { client, connection, depen
     await trackUsage({ event: 'didCopyConfigurationFiles', scope });
 
     // merge template files if a template is specified
-    const hasTemplate = Boolean(scope.packageJsonStrapi.template);
+    const hasTemplate = Boolean(scope.template);
     if (hasTemplate) {
       try {
         await mergeTemplate(scope, rootPath);

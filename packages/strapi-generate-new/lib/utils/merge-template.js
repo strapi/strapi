@@ -32,7 +32,7 @@ const allowedTemplateContents = {
  */
 module.exports = async function mergeTemplate(scope, rootPath) {
   // Parse template info
-  const repoInfo = getRepoInfo(scope.packageJsonStrapi.template);
+  const repoInfo = getRepoInfo(scope.template);
   const { user, project } = repoInfo;
   console.log(`Installing ${chalk.yellow(`${user}/${project}`)} template.`);
 
