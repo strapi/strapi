@@ -18,14 +18,14 @@ describe('buildQueryString', () => {
       page: '1',
       pageSize: '10',
       _sort: 'name:ASC',
-      pluginOptions: {
+      plugins: {
         i18n: { locale: 'en' },
       },
     };
 
     const queryString = buildQueryString(queryParams);
 
-    expect(queryString).toBe('?page=1&pageSize=10&_sort=name:ASC&_where[0][i18n][locale]=en');
+    expect(queryString).toBe('?page=1&pageSize=10&_sort=name:ASC&_locale=en');
   });
 
   it('creates a valid query string with a _where clause', () => {
@@ -47,7 +47,7 @@ describe('buildQueryString', () => {
       pageSize: '10',
       _sort: 'name:ASC',
       _where: [{ name: 'hello world' }],
-      pluginOptions: {
+      plugins: {
         i18n: { locale: 'en' },
       },
     };
@@ -55,7 +55,7 @@ describe('buildQueryString', () => {
     const queryString = buildQueryString(queryParams);
 
     expect(queryString).toBe(
-      '?page=1&pageSize=10&_sort=name:ASC&_where[0][name]=hello world&_where[1][i18n][locale]=en'
+      '?page=1&pageSize=10&_sort=name:ASC&_where[0][name]=hello world&_locale=en'
     );
   });
 });
