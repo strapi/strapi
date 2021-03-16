@@ -21,7 +21,7 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
     };
   }, [layout, dispatch, query]);
 
-  if (!currentLayout) {
+  if (!currentLayout || !permissions) {
     return <LoadingIndicatorPage />;
   }
 

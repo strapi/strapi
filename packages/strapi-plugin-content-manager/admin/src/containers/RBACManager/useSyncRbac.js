@@ -11,8 +11,8 @@ const useSyncRbac = (query, collectionTypeUID, containerName = 'listView') => {
   const relatedPermissions = collectionTypesRelatedPermissions[collectionTypeUID];
 
   useEffect(() => {
-    if (query && relatedPermissions) {
-      dispatch(setPermissions(relatedPermissions, query.plugins, containerName));
+    if (relatedPermissions) {
+      dispatch(setPermissions(relatedPermissions, query ? query.plugins : null, containerName));
 
       return () => {
         dispatch(resetPermissions());
