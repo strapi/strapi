@@ -359,6 +359,7 @@ const FormModal = () => {
 
   const checkFormValidity = async () => {
     let schema;
+
     const dataToValidate =
       isCreatingComponentFromAView && state.step === '1'
         ? get(modifiedData, 'componentToCreate', {})
@@ -820,6 +821,7 @@ const FormModal = () => {
           // Here we are in step 2
           // The step 2 is also use to edit an attribute that is a component
         }
+
         addAttribute(
           modifiedData,
           state.forTarget,
@@ -1283,6 +1285,18 @@ const FormModal = () => {
                             // for the moment that's why we don't want them be passed to buffet
                             // like the other created inputs
                             if (input.type === 'addon') {
+                              return (
+                                <InputsIndex
+                                  key={input.name}
+                                  {...input}
+                                  type="string"
+                                  onChange={handleChange}
+                                  value={value}
+                                />
+                              );
+                            }
+
+                            if (input.type === 'sorter') {
                               return (
                                 <InputsIndex
                                   key={input.name}

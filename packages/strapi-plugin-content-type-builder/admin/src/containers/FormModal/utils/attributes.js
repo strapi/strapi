@@ -12,6 +12,7 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
       'boolean',
       'json',
       'relation',
+      'sorter',
     ],
   ];
 
