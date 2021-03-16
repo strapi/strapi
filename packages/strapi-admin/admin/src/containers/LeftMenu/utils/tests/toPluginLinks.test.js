@@ -38,7 +38,6 @@ describe('toPluginLinks', () => {
       {
         destination: '/plugins/content-type-builder',
         icon: 'paint-brush',
-        isDisplayed: false,
         label: {
           id: 'content-type-builder.plugin.name',
           defaultMessage: 'Content-Types Builder',

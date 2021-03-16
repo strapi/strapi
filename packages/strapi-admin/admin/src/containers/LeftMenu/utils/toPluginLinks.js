@@ -10,7 +10,7 @@ const toPluginLinks = plugins => {
   }, []);
 
   const sortedLinks = sortLinks(pluginsLinks).map(link => {
-    return { ...omit(link, 'name'), isDisplayed: false };
+    return { ...omit(link, 'name') };
   });
 
   return sortedLinks;
