@@ -4,7 +4,7 @@
  *
  */
 
-import React, { createRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { connect } from 'react-redux';
@@ -53,9 +53,6 @@ import Content from './Content';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
-
-  // Ref to access the menu API
-  menuRef = createRef();
 
   helpers = {
     updatePlugin: this.props.updatePlugin,
@@ -244,7 +241,6 @@ export class Admin extends React.Component {
           enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
           formatMessage={formatMessage}
           shouldUpdateStrapi={shouldUpdateStrapi}
-          menu={this.menuRef.current}
           plugins={plugins}
           settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
           strapiVersion={strapiVersion}
@@ -255,7 +251,6 @@ export class Admin extends React.Component {
               shouldUpdateStrapi={shouldUpdateStrapi}
               version={strapiVersion}
               plugins={plugins}
-              ref={this.menuRef}
             />
             <NavTopRightWrapper>
               {/* Injection zone not ready yet */}
