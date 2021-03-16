@@ -9,6 +9,8 @@ jest.mock('../localizations', () => {
 
 const { decorator } = require('../entity-service-decorator');
 const { syncLocalizations, syncNonLocalizedAttributes } = require('../localizations');
+const locales = require('../locales');
+const contentTypes = require('../content-types');
 
 const model = {
   pluginOptions: {
@@ -34,6 +36,14 @@ const models = {
 describe('Entity service decorator', () => {
   beforeAll(() => {
     global.strapi = {
+      plugins: {
+        i18n: {
+          services: {
+            locales,
+            ['content-types']: contentTypes,
+          },
+        },
+      },
       query() {
         return {
           create() {},

@@ -6,6 +6,9 @@ const {
   syncNonLocalizedAttributes,
 } = require('../localizations');
 
+const locales = require('../locales');
+const contentTypes = require('../content-types');
+
 const model = {
   uid: 'test-model',
   pluginOptions: {
@@ -55,9 +58,23 @@ const allLocalizedModel = {
   },
 };
 
+const setGlobalStrapi = () => {
+  global.strapi = {
+    plugins: {
+      i18n: {
+        services: {
+          locales,
+          ['content-types']: contentTypes,
+        },
+      },
+    },
+  };
+};
+
 describe('localizations service', () => {
   describe('assignDefaultLocale', () => {
     test('Does not change the input if locale is already defined', async () => {
+      setGlobalStrapi();
       const input = { locale: 'myLocale' };
       await assignDefaultLocale(input);
 
@@ -65,19 +82,11 @@ describe('localizations service', () => {
     });
 
     test('Use default locale to set the locale on the input data', async () => {
+      setGlobalStrapi();
+
       const getDefaultLocaleMock = jest.fn(() => 'defaultLocale');
 
-      global.strapi = {
-        plugins: {
-          i18n: {
-            services: {
-              locales: {
-                getDefaultLocale: getDefaultLocaleMock,
-              },
-            },
-          },
-        },
-      };
+      global.strapi.plugins.i18n.services.locales.getDefaultLocale = getDefaultLocaleMock;
 
       const input = {};
       await assignDefaultLocale(input);
@@ -89,11 +98,11 @@ describe('localizations service', () => {
 
   describe('syncLocalizations', () => {
     test('Updates every other localizations with correct ids', async () => {
+      setGlobalStrapi();
+
       const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
+      global.strapi.query = () => {
+        return { update };
       };
 
       const localizations = [{ id: 2 }, { id: 3 }];
@@ -109,11 +118,11 @@ describe('localizations service', () => {
 
   describe('syncNonLocalizedAttributes', () => {
     test('Does nothing if no localizations set', async () => {
+      setGlobalStrapi();
+
       const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
+      global.strapi.query = () => {
+        return { update };
       };
 
       const entry = { id: 1, locale: 'test' };
@@ -124,11 +133,11 @@ describe('localizations service', () => {
     });
 
     test('Does not update the current locale', async () => {
+      setGlobalStrapi();
+
       const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
+      global.strapi.query = () => {
+        return { update };
       };
 
       const entry = { id: 1, locale: 'test', localizations: [] };
@@ -139,11 +148,11 @@ describe('localizations service', () => {
     });
 
     test('Does not update if all the fields are localized', async () => {
+      setGlobalStrapi();
+
       const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
+      global.strapi.query = () => {
+        return { update };
       };
 
       const entry = { id: 1, locale: 'test', localizations: [] };
@@ -154,11 +163,11 @@ describe('localizations service', () => {
     });
 
     test('Updates locales with non localized fields only', async () => {
+      setGlobalStrapi();
+
       const update = jest.fn();
-      global.strapi = {
-        query() {
-          return { update };
-        },
+      global.strapi.query = () => {
+        return { update };
       };
 
       const entry = {

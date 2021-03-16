@@ -52,13 +52,13 @@ const createLocalizationHandler = contentType => {
 
     const { findByCode } = getService('locales');
 
+    if (!has('locale', data)) {
+      return ctx.badRequest('locale.missing');
+    }
+
     const matchingLocale = await findByCode(data.locale);
     if (!matchingLocale) {
       return ctx.badRequest("This locale doesn't exist");
-    }
-
-    if (!has('locale', data)) {
-      return ctx.badRequest('locale.missing');
     }
 
     const usedLocales = getAllLocales(entry);
