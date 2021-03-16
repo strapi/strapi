@@ -329,6 +329,48 @@ describe('content-types service', () => {
   });
 
   describe('copyNonLocalizedAttributes', () => {
+    test('Does not copy locale & localizations', () => {
+      const model = {
+        attributes: {
+          title: {
+            type: 'string',
+            pluginOptions: {
+              i18n: { localized: true },
+            },
+          },
+          price: {
+            type: 'integer',
+          },
+          relation: {
+            model: 'user',
+          },
+          description: {
+            type: 'string',
+          },
+          locale: {
+            type: 'string',
+          },
+          localizations: {
+            collection: 'test-model',
+          },
+        },
+      };
+
+      const input = {
+        id: 1,
+        title: 'My custom title',
+        price: 25,
+        relation: 1,
+        description: 'My super description',
+      };
+
+      const result = copyNonLocalizedAttributes(model, input);
+      expect(result).toStrictEqual({
+        price: input.price,
+        description: input.description,
+      });
+    });
+
     test('picks only non localized attributes', () => {
       const model = {
         attributes: {

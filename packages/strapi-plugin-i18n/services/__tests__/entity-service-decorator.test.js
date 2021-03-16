@@ -40,7 +40,7 @@ describe('Entity service decorator', () => {
         i18n: {
           services: {
             locales,
-            ['content-types']: contentTypes,
+            'content-types': contentTypes,
           },
         },
       },

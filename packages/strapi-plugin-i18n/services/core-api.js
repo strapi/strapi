@@ -27,13 +27,10 @@ const parseRequest = ctx => {
  * @returns {(object) => void}
  */
 const createLocalizationHandler = contentType => {
-  const { getNonLocalizedAttributes, copyNonLocalizedAttributes } = getService('content-types');
+  const { copyNonLocalizedAttributes } = getService('content-types');
 
   const sanitizeInput = data => {
-    return pipe(
-      pick(getWritableAttributes(contentType)),
-      omit(getNonLocalizedAttributes(contentType))
-    )(data);
+    return pipe(omit(['locale', 'localizations']), pick(getWritableAttributes(contentType)))(data);
   };
 
   const getAllLocales = entry => {

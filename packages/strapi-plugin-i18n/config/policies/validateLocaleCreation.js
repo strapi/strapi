@@ -7,13 +7,13 @@ const validateLocaleCreation = async (ctx, next) => {
   const { model } = ctx.params;
   const { query, body } = ctx.request;
 
+  const { getValidLocale, getNewLocalizationsFor, isLocalized } = getService('content-types');
+
   const modelDef = strapi.getModel(model);
 
   if (!isLocalized(modelDef)) {
     return next();
   }
-
-  const { getValidLocale, getNewLocalizationsFor, isLocalized } = getService('content-types');
 
   const locale = get('plugins.i18n.locale', query);
   const relatedEntityId = get('plugins.i18n.relatedEntityId', query);

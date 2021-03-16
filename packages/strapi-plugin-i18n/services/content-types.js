@@ -13,7 +13,7 @@ const getValidLocale = async locale => {
   const localesService = getService('locales');
 
   if (isNil(locale)) {
-    return await localesService.getDefaultLocale();
+    return localesService.getDefaultLocale();
   }
 
   const foundLocale = await localesService.findByCode(locale);
