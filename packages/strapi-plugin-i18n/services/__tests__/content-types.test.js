@@ -362,6 +362,8 @@ describe('content-types service', () => {
         price: 25,
         relation: 1,
         description: 'My super description',
+        locale: 'en',
+        localizations: [1, 2, 3],
       };
 
       const result = copyNonLocalizedAttributes(model, input);
