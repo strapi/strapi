@@ -38,7 +38,7 @@ const mutateCTBContentTypeSchema = (nextSchema, prevSchema) => {
   }
 
   const isNextSchemaLocalized = get(nextSchema, localizedPath, false);
-  const isPrevSchemaLocalized = get(prevSchema, localizedPath, false);
+  const isPrevSchemaLocalized = get(prevSchema, ['schema', ...localizedPath], false);
 
   // No need to perform modification on the schema, if the i18n feature was not changed
   // at the ct level
