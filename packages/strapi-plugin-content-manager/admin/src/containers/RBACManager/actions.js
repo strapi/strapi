@@ -1,11 +1,11 @@
 import { RESET_PERMISSIONS, SET_PERMISSIONS } from './constants';
 
-export const setPermissions = (permissions, pluginOptions, containerName) => {
+export const setPermissions = (permissions, plugins, containerName) => {
   return {
     type: SET_PERMISSIONS,
     permissions,
     __meta__: {
-      pluginOptions,
+      plugins,
       containerName,
     },
   };

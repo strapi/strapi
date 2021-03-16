@@ -34,7 +34,7 @@ describe('localeQueryParamsMiddleware', () => {
     });
   });
 
-  it('creates a pluginOptions key with a locale when initialParams does not have a pluginOptions key and the field is localized', () => {
+  it('creates a plugins key with a locale when initialParams does not have a plugins key and the field is localized', () => {
     const middleware = localeQueryParamsMiddleware()();
     const nextFn = jest.fn();
     const action = {
@@ -52,12 +52,12 @@ describe('localeQueryParamsMiddleware', () => {
     expect(nextFn).toBeCalledWith(action);
     expect(action).toEqual({
       contentType: { pluginOptions: { i18n: { localized: true } } },
-      initialParams: { pluginOptions: { locale: 'en' } },
+      initialParams: { plugins: { i18n: { locale: 'en' } } },
       type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
     });
   });
 
-  it('adds a key to pluginOptions with a locale when initialParams has a pluginOptions key and the field is localized', () => {
+  it('adds a key to plugins with a locale when initialParams has a plugins key and the field is localized', () => {
     const middleware = localeQueryParamsMiddleware()();
     const nextFn = jest.fn();
     const action = {
@@ -68,7 +68,7 @@ describe('localeQueryParamsMiddleware', () => {
         },
       },
       initialParams: {
-        pluginOptions: {
+        plugins: {
           hello: 'world',
         },
       },
@@ -79,7 +79,7 @@ describe('localeQueryParamsMiddleware', () => {
     expect(nextFn).toBeCalledWith(action);
     expect(action).toEqual({
       contentType: { pluginOptions: { i18n: { localized: true } } },
-      initialParams: { pluginOptions: { locale: 'en', hello: 'world' } },
+      initialParams: { plugins: { i18n: { locale: 'en' }, hello: 'world' } },
       type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
     });
   });

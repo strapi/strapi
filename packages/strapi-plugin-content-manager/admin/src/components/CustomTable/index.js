@@ -26,12 +26,11 @@ const CustomTable = ({
   const { formatMessage } = useIntl();
   const { entriesToDelete, label, filters, _q } = useListView();
   const { emitEvent } = useGlobalContext();
-
   const { pathname, search } = useLocation();
   const query = search ? parse(search.substring(1)) : {};
   const { push } = useHistory();
-  const searchToPersist = query.pluginOptions
-    ? stringify(query.pluginOptions, { encode: false })
+  const searchToPersist = query.plugins
+    ? stringify({ plugins: query.plugins }, { encode: false })
     : '';
 
   const headers = useMemo(() => {
