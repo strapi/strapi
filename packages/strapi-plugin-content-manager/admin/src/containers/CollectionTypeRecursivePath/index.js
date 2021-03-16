@@ -9,7 +9,7 @@ import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
 import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
-import ListViewLayout from '../ListView/ListViewLayout';
+import ListViewLayout from '../ListViewLayoutManager';
 import ListSettingsView from '../ListSettingsView';
 
 const CollectionTypeRecursivePath = ({
