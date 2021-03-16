@@ -48,6 +48,8 @@ module.exports = async ({ models, target }, ctx) => {
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
+          writable: true,
+          visible: false,
         };
       }
 
@@ -58,6 +60,7 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
 
@@ -66,6 +69,7 @@ module.exports = async ({ models, target }, ctx) => {
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
     }
@@ -192,6 +196,26 @@ module.exports = async ({ models, target }, ctx) => {
       };
     };
 
+    const parseComponentRef = el => {
+      if (el.ref instanceof mongoose.Types.ObjectId) {
+        return el.ref.toString();
+      } else {
+        return el.ref;
+      }
+    };
+
+    const parseDynamicZoneRef = el => {
+      if (el.ref instanceof mongoose.Types.ObjectId) {
+        return { id: el.ref.toString() };
+      } else {
+        return el.ref;
+      }
+    };
+
+    const associations = definition.associations.filter(
+      association => !isPolymorphicAssoc(association)
+    );
+
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
       transform: function(doc, returned) {
@@ -235,7 +259,7 @@ module.exports = async ({ models, target }, ctx) => {
 
           if (type === 'component') {
             if (Array.isArray(returned[name])) {
-              const components = returned[name].map(el => el.ref);
+              const components = returned[name].map(parseComponentRef);
               // Reformat data by bypassing the many-to-many relationship.
               returned[name] =
                 attribute.repeatable === true ? components : _.first(components) || null;
@@ -249,9 +273,27 @@ module.exports = async ({ models, target }, ctx) => {
                 .map(el => {
                   return {
                     __component: findComponentByGlobalId(el.kind).uid,
-                    ...el.ref,
+                    ...parseDynamicZoneRef(el),
                   };
                 });
+            }
+          }
+        });
+
+        associations.forEach(association => {
+          const relation = returned[association.alias];
+
+          if (relation) {
+            // Extract raw JSON data.
+            returned[association.alias] = relation.toJSON ? relation.toJSON() : relation;
+
+            if (_.isArray(association.populate)) {
+              const { alias, populate } = association;
+              const pickPopulate = entry => _.pick(entry, populate);
+
+              returned[alias] = _.isArray(returned[alias])
+                ? _.map(returned[alias], pickPopulate)
+                : pickPopulate(returned[alias]);
             }
           }
         });
@@ -327,38 +369,42 @@ const migrateSchema = () => {};
 const createOnFetchPopulateFn = ({ morphAssociations, componentAttributes, definition }) => {
   return function() {
     const populatedPaths = this.getPopulatedPaths();
-    const { publicationState, _populateComponents = true } = this.getOptions();
+    const {
+      publicationState,
+      _populateComponents = true,
+      _populateMorphRelations = true,
+    } = this.getOptions();
 
     const getMatchQuery = assoc => {
       const assocModel = strapi.db.getModelByAssoc(assoc);
 
-      if (
-        contentTypesUtils.hasDraftAndPublish(assocModel) &&
-        DP_PUB_STATES.includes(publicationState)
-      ) {
+      const hasDraftAndPublish = contentTypesUtils.hasDraftAndPublish(assocModel);
+      if (hasDraftAndPublish && DP_PUB_STATES.includes(publicationState)) {
         return populateQueries.publicationState[publicationState];
       }
 
       return undefined;
     };
 
-    morphAssociations.forEach(association => {
-      const matchQuery = getMatchQuery(association);
-      const { alias, nature } = association;
+    if (_populateMorphRelations) {
+      morphAssociations.forEach(association => {
+        const matchQuery = getMatchQuery(association);
+        const { alias, nature } = association;
 
-      if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
-        this.populate({ path: alias, match: matchQuery, options: { publicationState } });
-      } else if (populatedPaths.includes(alias)) {
-        _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
-        _.set(this._mongooseOptions.populate, [alias, 'options'], {
-          publicationState,
-        });
+        if (['oneToManyMorph', 'manyToManyMorph'].includes(nature)) {
+          this.populate({ path: alias, match: matchQuery, options: { publicationState } });
+        } else if (populatedPaths.includes(alias)) {
+          _.set(this._mongooseOptions.populate, [alias, 'path'], `${alias}.ref`);
+          _.set(this._mongooseOptions.populate, [alias, 'options'], {
+            publicationState,
+          });
 
-        if (matchQuery !== undefined) {
-          _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          if (matchQuery !== undefined) {
+            _.set(this._mongooseOptions.populate, [alias, 'match'], matchQuery);
+          }
         }
-      }
-    });
+      });
+    }
 
     if (_populateComponents) {
       componentAttributes.forEach(key => {

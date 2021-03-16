@@ -4,6 +4,9 @@ const { capitalize, isArray, isEmpty } = require('lodash/fp');
 const { getService } = require('../../utils');
 
 module.exports = async () => {
+  // Entity Service
+  decorateEntityService();
+
   // Data
   await ensureDefaultLocale();
 
@@ -25,6 +28,12 @@ module.exports = async () => {
 };
 
 // Steps
+
+const decorateEntityService = () => {
+  const { decorator } = getService('entity-service-decorator');
+
+  strapi.entityService.decorate(decorator);
+};
 
 const registerSectionsBuilderHandlers = () => {
   const { sectionsBuilder } = strapi.admin.services.permission;
@@ -77,15 +86,6 @@ const registerModelsHooks = () => {
         model: model.uid,
         async beforeCreate(data) {
           await getService('localizations').assignDefaultLocale(data);
-        },
-        async afterCreate(entry) {
-          await getService('localizations').addLocalizations(entry, { model });
-        },
-        async afterUpdate(entry) {
-          await getService('localizations').updateNonLocalizedFields(entry, { model });
-        },
-        async afterDelete(entry) {
-          await getService('localizations').removeEntryFromRelatedLocalizations(entry, { model });
         },
       });
     });

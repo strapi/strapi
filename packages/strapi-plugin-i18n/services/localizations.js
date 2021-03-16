@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick, isNil } = require('lodash/fp');
+const { pick, prop, isNil } = require('lodash/fp');
 
 const { getService } = require('../utils');
 const { getNonLocalizedFields } = require('./content-types');
@@ -16,17 +16,22 @@ const assignDefaultLocale = async data => {
 };
 
 /**
- * Create default localizations for an entry if it isn't defined yet
+ * Syncronize related localizations from a root one
  * @param {Object} entry entry to update
  * @param {Object} options
  * @param {Object} options.model corresponding model
  */
-const addLocalizations = async (entry, { model }) => {
-  if (isNil(entry.localizations)) {
-    const localizations = [{ locale: entry.locale, id: entry.id }];
-    await strapi.query(model.uid).update({ id: entry.id }, { localizations });
+const syncLocalizations = async (entry, { model }) => {
+  if (Array.isArray(entry.localizations)) {
+    const newLocalizations = [entry.id, ...entry.localizations.map(prop('id'))];
 
-    Object.assign(entry, { localizations });
+    const updateLocalization = id => {
+      const localizations = newLocalizations.filter(localizationId => localizationId !== id);
+
+      return strapi.query(model.uid).update({ id }, { localizations });
+    };
+
+    await Promise.all(entry.localizations.map(({ id }) => updateLocalization(id)));
   }
 };
 
@@ -38,38 +43,21 @@ const addLocalizations = async (entry, { model }) => {
  */
 const updateNonLocalizedFields = async (entry, { model }) => {
   if (Array.isArray(entry.localizations)) {
-    const fieldsToUpdate = pick(getNonLocalizedFields(model), entry);
+    const nonLocalizedFields = getNonLocalizedFields(model);
 
-    const updateQueries = entry.localizations
-      .filter(({ id }) => id != entry.id)
-      .map(({ id }) => strapi.query(model.uid).update({ id }, fieldsToUpdate));
+    if (nonLocalizedFields.length === 0) {
+      return;
+    }
 
-    await Promise.all(updateQueries);
-  }
-};
+    const fieldsToUpdate = pick(nonLocalizedFields, entry);
+    const updateLocalization = id => strapi.query(model.uid).update({ id }, fieldsToUpdate);
 
-/**
- * Remove entry from localizations & udpate related localizations
- * This method should be used only after an entry is deleted
- * @param {Object} entry entry to remove from localizations
- * @param {Object} options
- * @param {Object} options.model corresponding model
- */
-const removeEntryFromRelatedLocalizations = async (entry, { model }) => {
-  if (Array.isArray(entry.localizations)) {
-    const newLocalizations = entry.localizations.filter(({ id }) => id != entry.id);
-
-    const updateQueries = newLocalizations.map(({ id }) => {
-      return strapi.query(model.uid).update({ id }, { localizations: newLocalizations });
-    });
-
-    await Promise.all(updateQueries);
+    await Promise.all(entry.localizations.map(({ id }) => updateLocalization(id)));
   }
 };
 
 module.exports = {
   assignDefaultLocale,
-  addLocalizations,
+  syncLocalizations,
   updateNonLocalizedFields,
-  removeEntryFromRelatedLocalizations,
 };

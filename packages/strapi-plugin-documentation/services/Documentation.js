@@ -1306,7 +1306,7 @@ module.exports = {
 
     if (verb === 'get' && controllerMethod === 'find') {
       // parametersOptions corresponds to this section
-      // of the documentation https://strapi.io/documentation/guides/filters.html
+      // of the documentation https://strapi.io/documentation/developer-docs/latest/developer-resources/content-api/content-api.html#filters
       return [...params, ...parametersOptions];
     }
 

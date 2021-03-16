@@ -777,6 +777,12 @@ describe('Role CRUD End to End', () => {
                   "subCategory": "general",
                 },
                 Object {
+                  "action": "plugins::email.settings.read",
+                  "category": "email",
+                  "displayName": "Access the Email Settings page",
+                  "subCategory": "general",
+                },
+                Object {
                   "action": "plugins::i18n.locale.create",
                   "category": "Internationalization",
                   "displayName": "Create",
@@ -1140,6 +1146,12 @@ describe('Role CRUD End to End', () => {
                   "action": "admin::webhooks.update",
                   "category": "webhooks",
                   "displayName": "Update",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "plugins::email.settings.read",
+                  "category": "email",
+                  "displayName": "Access the Email Settings page",
                   "subCategory": "general",
                 },
                 Object {

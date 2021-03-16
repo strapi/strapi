@@ -23,12 +23,13 @@ const optionsMap = {
   },
 };
 
-const availableOptions = Object.keys(optionsMap);
-const isValidOption = option => availableOptions.includes(option);
-const validate = (option, params) => {
-  const opt = _.get(optionsMap, option, {});
+const isValidOption = optionName => _.has(optionsMap, optionName);
+
+const validate = (optionName, params) => {
+  const opt = _.get(optionsMap, optionName, {});
   return !_.isFunction(opt.validate) || opt.validate(params);
 };
+
 const resolveQuery = (option, params) => optionsMap[option].queries[params.query](params);
 
 /**
@@ -37,19 +38,17 @@ const resolveQuery = (option, params) => optionsMap[option].queries[params.query
  * @returns Array<Function>
  */
 const toQueries = options => {
-  return _.reduce(
-    options,
-    (acc, params, key) => {
-      if (isValidOption(key) && validate(key, params)) {
-        const query = resolveQuery(key, params);
-        if (_.isFunction(query)) {
-          return [...acc, query];
-        }
+  return Object.keys(options).reduce((acc, key) => {
+    const params = options[key];
+
+    if (isValidOption(key) && validate(key, params)) {
+      const query = resolveQuery(key, params);
+      if (_.isFunction(query)) {
+        return [...acc, query];
       }
-      return acc;
-    },
-    []
-  );
+    }
+    return acc;
+  }, []);
 };
 
 /**
@@ -91,9 +90,26 @@ const extendWithPopulateQueries = (fns, options) => {
   };
 };
 
+/**
+ * Transforms queryOptions (e.g { publicationState: 'live' })
+ * into query map
+ * {
+ *   publicationState: { query: 'live', ...context }
+ * }
+ * @param {{ [key: string]: string }} queryOptions
+ * @param {object} context
+ */
+const queryOptionsToQueryMap = (queryOptions, context) => {
+  return Object.keys(queryOptions).reduce((acc, key) => {
+    acc[key] = { query: queryOptions[key], ...context };
+    return acc;
+  }, {});
+};
+
 module.exports = {
   toQueries,
   runPopulateQueries,
   bindPopulateQueries,
   extendWithPopulateQueries,
+  queryOptionsToQueryMap,
 };
