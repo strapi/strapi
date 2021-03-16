@@ -1,6 +1,6 @@
 'use strict';
 
-const { pipe, omit } = require('lodash/fp');
+const { pipe } = require('lodash/fp');
 const { setCreatorFields } = require('strapi-utils');
 
 const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
@@ -46,8 +46,7 @@ module.exports = {
   async createOrUpdate(ctx) {
     const { user, userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { body } = ctx.request;
-    const query = omit('plugins', ctx.request.query);
+    const { body, query } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const pluralize = require('pluralize');
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
@@ -190,6 +191,17 @@ const getGlobalId = (model, modelName, prefix) => {
 const isRelationalAttribute = attribute =>
   _.has(attribute, 'model') || _.has(attribute, 'collection');
 
+/**
+ *  Returns a route prefix for a contentType
+ * @param {object} contentType
+ * @returns {string}
+ */
+const getContentTypeRoutePrefix = contentType => {
+  return isSingleType(contentType)
+    ? _.kebabCase(contentType.modelName)
+    : _.kebabCase(pluralize(contentType.modelName));
+};
+
 module.exports = {
   isScalarAttribute,
   isMediaAttribute,
@@ -211,4 +223,5 @@ module.exports = {
   isKind,
   createContentType,
   getGlobalId,
+  getContentTypeRoutePrefix,
 };
