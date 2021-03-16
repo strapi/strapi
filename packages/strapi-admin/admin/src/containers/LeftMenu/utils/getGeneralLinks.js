@@ -28,8 +28,6 @@ const getGeneralLinks = async (
   const hasPermission = settingsLinkPermissions.every(Boolean);
 
   if (!hasPermission) {
-    console.log('passing here');
-
     return [];
   }
 
