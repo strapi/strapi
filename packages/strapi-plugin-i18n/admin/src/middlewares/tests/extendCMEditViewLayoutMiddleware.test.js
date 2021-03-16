@@ -120,7 +120,7 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
       const action = {
         type: 'ContentManager/EditViewLayoutManager/SET_LAYOUT',
         layout,
-        query: { locale: 'en' },
+        query: { plugins: { i18n: { locale: 'en' } } },
       };
       const middleware = extendCMEditViewLayoutMiddleware();
 

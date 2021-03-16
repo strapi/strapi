@@ -109,7 +109,7 @@ const extendCMEditViewLayoutMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  const currentLocale = get(action, ['query', 'locale'], null);
+  const currentLocale = get(action, ['query', 'plugins', 'i18n', 'locale'], null);
 
   // This might break the cm, has the user might be redirected to the homepage
   if (!currentLocale) {

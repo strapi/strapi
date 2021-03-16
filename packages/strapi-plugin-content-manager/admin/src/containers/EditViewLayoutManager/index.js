@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoadingIndicatorPage, useQueryParams } from 'strapi-helper-plugin';
@@ -11,8 +11,7 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
   const currentLayout = useSelector(selectLayout);
   const dispatch = useDispatch();
   const [{ query }] = useQueryParams();
-  const queryWithPluginOptions = useMemo(() => ({ pluginOptions: { ...query } }), [query]);
-  const permissions = useSyncRbac(queryWithPluginOptions, rest.slug, 'editView');
+  const permissions = useSyncRbac(query, rest.slug, 'editView');
 
   useEffect(() => {
     dispatch(setLayout(layout, query));

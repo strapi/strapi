@@ -46,21 +46,36 @@ const CMEditViewLocalePicker = () => {
   const theme = useTheme();
   const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
   const hasDraftAndPublish = checkIfDataHasDraftAndPublish(localizations);
+  const currentLocale = get(query, 'plugins.i18n.locale', false);
 
   if (!hasI18nEnabled) {
     return null;
   }
 
-  const Option = hasDraftAndPublish ? OptionComponent : components.Option;
+  if (!currentLocale) {
+    return null;
+  }
+
+  const handleChange = ({ value }) => {
+    setQuery({
+      plugins: {
+        ...query.plugins,
+        i18n: {
+          ...query.plugins.i18n,
+          locale: value,
+        },
+      },
+    });
+  };
 
   const styles = selectStyles(theme);
-
   // TODO use localizations + RBAC when ready
   const options = addStatusColorToLocale(createLocalesOption(locales, localizations), theme);
-  const currentLocale = query.locale;
   const value = options.find(({ value }) => {
     return value === currentLocale;
   });
+
+  const Option = hasDraftAndPublish ? OptionComponent : components.Option;
 
   return (
     <Wrapper>
@@ -80,9 +95,7 @@ const CMEditViewLocalePicker = () => {
           aria-labelledby="select-locale"
           components={{ DropdownIndicator, Option }}
           isSearchable={false}
-          onChange={({ value }) => {
-            setQuery({ locale: value });
-          }}
+          onChange={handleChange}
           options={options}
           styles={{
             ...styles,
