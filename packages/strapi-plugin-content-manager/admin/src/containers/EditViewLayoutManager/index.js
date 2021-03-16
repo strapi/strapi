@@ -2,10 +2,10 @@ import React, { useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoadingIndicatorPage, useQueryParams } from 'strapi-helper-plugin';
-import EditView from '../EditView';
 import useSyncRbac from '../RBACManager/useSyncRbac';
 import { resetProps, setLayout } from './actions';
 import selectLayout from './selectors';
+import Permissions from './Permissions';
 
 const EditViewLayoutManager = ({ layout, ...rest }) => {
   const currentLayout = useSelector(selectLayout);
@@ -26,7 +26,7 @@ const EditViewLayoutManager = ({ layout, ...rest }) => {
     return <LoadingIndicatorPage />;
   }
 
-  return <EditView {...rest} layout={currentLayout} userPermissions={permissions} />;
+  return <Permissions {...rest} layout={currentLayout} userPermissions={permissions} />;
 };
 
 EditViewLayoutManager.propTypes = {

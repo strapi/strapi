@@ -14,18 +14,12 @@ import {
   request,
   CheckPermissions,
   useGlobalContext,
-  useUserPermissions,
   InjectionZone,
   useQueryParams,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import {
-  formatFiltersFromQuery,
-  generatePermissionsObject,
-  getRequestUrl,
-  getTrad,
-} from '../../utils';
+import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
@@ -55,6 +49,10 @@ import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from '
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
+  canCreate,
+  canDelete,
+  canRead,
+  canUpdate,
   didDeleteData,
   entriesToDelete,
   onChangeBulk,
@@ -79,7 +77,6 @@ function ListView({
   pagination: { total },
   slug,
   initialParams,
-  permissions,
 }) {
   const {
     contentType: {
@@ -91,11 +88,6 @@ function ListView({
 
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useUserPermissions(viewPermissions, permissions);
 
   const [{ query }, setQuery] = useQueryParams(initialParams);
   const params = buildQueryString(query);
@@ -240,7 +232,7 @@ function ListView({
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const shouldSendRequest = !isLoadingForPermissions && canRead;
+    const shouldSendRequest = canRead;
     const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
@@ -251,7 +243,7 @@ function ListView({
       requestUrlRef.current = slug;
       abortController.abort();
     };
-  }, [isLoadingForPermissions, canRead, getData, slug, params, getDataSucceeded, fetchData]);
+  }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const handleClickDelete = id => {
     setIdToDelete(id);
@@ -474,6 +466,10 @@ ListView.defaultProps = {
 };
 
 ListView.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
+  canDelete: PropTypes.bool.isRequired,
+  canRead: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   displayedHeaders: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
   didDeleteData: PropTypes.bool.isRequired,

@@ -2,9 +2,9 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useQueryParams } from 'strapi-helper-plugin';
-import { resetProps, setLayout } from './actions';
-import ListView from './index';
+import { resetProps, setLayout } from '../ListView/actions';
 import useSyncRbac from '../RBACManager/useSyncRbac';
+import Permissions from './Permissions';
 
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
@@ -34,7 +34,7 @@ const ListViewLayout = ({ layout, ...props }) => {
     return null;
   }
 
-  return <ListView {...props} layout={layout} permissions={permissions} />;
+  return <Permissions {...props} layout={layout} permissions={permissions} />;
 };
 
 ListViewLayout.propTypes = {

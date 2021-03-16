@@ -39,6 +39,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
   const emitEventRef = useRef(emitEvent);
 
+  const allLayoutDataRef = useRef(allLayoutData);
+  // We need to keep the first location from which the user is coming from
+  const fromRef = useRef(from);
+
   const isCreatingEntry = id === 'create';
 
   const requestURL = useMemo(() => {
@@ -57,27 +61,28 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
       const cleaned = removeFieldsFromClonedData(
         data,
-        allLayoutData.contentType,
-        allLayoutData.components
+        allLayoutDataRef.current.contentType,
+        allLayoutDataRef.current.components
       );
 
       return cleaned;
     },
-    [allLayoutData, origin]
+    [origin]
   );
 
-  const cleanReceivedData = useCallback(
-    data => {
-      const cleaned = removePasswordFieldsFromData(
-        data,
-        allLayoutData.contentType,
-        allLayoutData.components
-      );
+  const cleanReceivedData = useCallback(data => {
+    const cleaned = removePasswordFieldsFromData(
+      data,
+      allLayoutDataRef.current.contentType,
+      allLayoutDataRef.current.components
+    );
 
-      return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
-    },
-    [allLayoutData]
-  );
+    return formatComponentData(
+      cleaned,
+      allLayoutDataRef.current.contentType,
+      allLayoutDataRef.current.components
+    );
+  }, []);
 
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
@@ -137,7 +142,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
-          push(from);
+          push(fromRef.current);
 
           return;
         }
@@ -146,7 +151,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         if (resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
-          push(from);
+          push(fromRef.current);
         }
       }
     };
@@ -160,7 +165,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     return () => {
       abortController.abort();
     };
-  }, [requestURL, push, from, cleanReceivedData, cleanClonedData, dispatch]);
+  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
