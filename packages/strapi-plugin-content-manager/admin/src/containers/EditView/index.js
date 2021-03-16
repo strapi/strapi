@@ -5,9 +5,7 @@ import {
   BackHeader,
   BaselineAlignment,
   LiLink,
-  LoadingIndicatorPage,
   CheckPermissions,
-  useUserPermissions,
   useGlobalContext,
 } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
@@ -19,7 +17,7 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
-import { generatePermissionsObject, getInjectedComponents } from '../../utils';
+import { getInjectedComponents } from '../../utils';
 import CollectionTypeFormWrapper from '../CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../SingleTypeFormWrapper';
@@ -30,14 +28,18 @@ import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 
 /* eslint-disable  react/no-array-index-key */
-const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin, userPermissions }) => {
+const EditView = ({
+  allowedActions,
+  isSingleType,
+  goBack,
+  layout,
+  slug,
+  state,
+  id,
+  origin,
+  userPermissions,
+}) => {
   const { currentEnvironment, plugins } = useGlobalContext();
-  // Permissions
-  const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-  const { allowedActions, isLoading: isLoadingForPermissions } = useUserPermissions(
-    viewPermissions,
-    userPermissions
-  );
 
   // Here in case of a 403 response when fetching data we will either redirect to the previous page
   // Or to the homepage if there's no state in the history stack
@@ -84,11 +86,6 @@ const EditView = ({ isSingleType, goBack, layout, slug, state, id, origin, userP
     );
   }, [currentContentTypeLayoutData]);
 
-  if (isLoadingForPermissions) {
-    return <LoadingIndicatorPage />;
-  }
-
-  // TODO: create a hook to handle/provide the permissions this should be done for the i18n feature
   return (
     <DataManagementWrapper allLayoutData={layout} from={from} slug={slug} id={id} origin={origin}>
       {({
@@ -277,6 +274,12 @@ EditView.defaultProps = {
 };
 
 EditView.propTypes = {
+  allowedActions: PropTypes.shape({
+    canRead: PropTypes.bool.isRequired,
+    canUpdate: PropTypes.bool.isRequired,
+    canCreate: PropTypes.bool.isRequired,
+    canDelete: PropTypes.bool.isRequired,
+  }).isRequired,
   layout: PropTypes.shape({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({

@@ -20,9 +20,9 @@ const useUserPermissions = (pluginPermissions, permissions) => {
   const checkPermissionsRef = useRef();
   const generateArrayOfPromisesRef = useRef();
 
-  checkPermissionsRef.current = async permissionName => {
+  checkPermissionsRef.current = async (permissionName, permissions) => {
     const hasPermission = await hasPermissions(
-      currentUserPermissions,
+      permissions,
       pluginPermissions[permissionName],
       signal
     );
@@ -30,8 +30,8 @@ const useUserPermissions = (pluginPermissions, permissions) => {
     return { permissionName, hasPermission };
   };
 
-  generateArrayOfPromisesRef.current = array =>
-    array.map(permissionName => checkPermissionsRef.current(permissionName));
+  generateArrayOfPromisesRef.current = (array, permissions) =>
+    array.map(permissionName => checkPermissionsRef.current(permissionName, permissions));
 
   useEffect(() => {
     isMounted.current = true;
@@ -48,7 +48,11 @@ const useUserPermissions = (pluginPermissions, permissions) => {
           type: 'GET_DATA',
           permissionNames,
         });
-        const arrayOfPromises = generateArrayOfPromisesRef.current(permissionNames);
+
+        const arrayOfPromises = generateArrayOfPromisesRef.current(
+          permissionNames,
+          currentUserPermissions
+        );
         const results = await Promise.all(arrayOfPromises);
         const data = generateResultsObject(results);
 
@@ -68,7 +72,7 @@ const useUserPermissions = (pluginPermissions, permissions) => {
     return () => {
       abortController.abort();
     };
-  }, [permissionNames]);
+  }, [permissionNames, currentUserPermissions]);
 
   // This function is used to synchronise the hook when used in dynamic components
   const setIsLoading = useCallback(() => {
