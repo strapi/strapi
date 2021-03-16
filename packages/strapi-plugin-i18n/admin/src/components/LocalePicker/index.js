@@ -44,7 +44,7 @@ const LocalePicker = () => {
   const dispatch = useDispatch();
   const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
-  const [query, setQuery] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams();
 
   const initialLocale = getInitialLocale(query, locales);
   const [selected, setSelected] = useState(initialLocale);
@@ -75,7 +75,10 @@ const LocalePicker = () => {
         const handleClick = locale => {
           dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
           setSelected(locale);
-          setQuery({ pluginOptions: { ...query.pluginOptions, locale: locale.code } });
+
+          setQuery({
+            plugins: { ...query.plugins, i18n: { locale: locale.code } },
+          });
           onToggle();
         };
 

@@ -1,17 +1,14 @@
 import getInitialLocale from '../getInitialLocale';
 
 describe('getInitialLocale', () => {
-  it('gives "fr-FR" when the query.pluginOptions.locale is "fr-FR"', () => {
+  it('gives "fr-FR" when the query.plugins.locale is "fr-FR"', () => {
     const query = {
-      query: {
-        page: '1',
-        pageSize: '10',
-        _sort: 'Name:ASC',
-        pluginOptions: {
-          locale: 'fr-FR',
-        },
+      page: '1',
+      pageSize: '10',
+      _sort: 'Name:ASC',
+      plugins: {
+        i18n: { locale: 'fr-FR' },
       },
-      rawQuery: '?page=1&pageSize=10&_sort=Name:ASC&pluginOptions[locale]=fr-FR',
     };
 
     const locales = [
@@ -48,15 +45,12 @@ describe('getInitialLocale', () => {
 
   it('gives the default locale ("en") when there s no locale in the query', () => {
     const query = {
-      query: {
-        page: '1',
-        pageSize: '10',
-        _sort: 'Name:ASC',
-        pluginOptions: {
-          something: 'great',
-        },
+      page: '1',
+      pageSize: '10',
+      _sort: 'Name:ASC',
+      plugins: {
+        something: 'great',
       },
-      rawQuery: '?page=1&pageSize=10&_sort=Name:ASC&pluginOptions[something]=great',
     };
 
     const locales = [
@@ -94,15 +88,12 @@ describe('getInitialLocale', () => {
 
   it('gives "undefined" when theres no locale. IMPORTANT: such case should not exist since at least one locale is created on the backend when plug-in i18n', () => {
     const query = {
-      query: {
-        page: '1',
-        pageSize: '10',
-        _sort: 'Name:ASC',
-        pluginOptions: {
-          something: 'great',
-        },
+      page: '1',
+      pageSize: '10',
+      _sort: 'Name:ASC',
+      plugins: {
+        something: 'great',
       },
-      rawQuery: '?page=1&pageSize=10&_sort=Name:ASC&pluginOptions[something]=great',
     };
 
     const locales = [];

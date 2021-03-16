@@ -1,5 +1,5 @@
 import { stringify } from 'qs';
-import arrayOfPluginOptions from './arrayOfPluginOptions';
+import createPluginsFilter from './createPluginsFilter';
 
 /**
  * Creates a valid query string from an object of queryParams
@@ -8,16 +8,17 @@ import arrayOfPluginOptions from './arrayOfPluginOptions';
  * - plugin options
  */
 const buildQueryString = (queryParams = {}) => {
-  const pluginOptionArray = arrayOfPluginOptions(queryParams.pluginOptions);
+  // const pluginOptionArray = arrayOfPluginOptions(queryParams.pluginOptions);
   const _where = queryParams._where || [];
 
   /**
    * Extracting pluginOptions from the query since we don't want them to be part
    * of the url
    */
-  const { pluginOptions: _, ...otherQueryParams } = {
+  const { plugins: _, ...otherQueryParams } = {
     ...queryParams,
-    _where: _where.concat(pluginOptionArray),
+    _where,
+    ...createPluginsFilter(queryParams.plugins),
   };
 
   return `?${stringify(otherQueryParams, { encode: false })}`;

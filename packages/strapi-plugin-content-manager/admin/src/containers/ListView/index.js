@@ -289,7 +289,7 @@ function ListView({
           emitEventRef.current('willCreateEntry', trackerProperty);
           push({
             pathname: `${pathname}/create`,
-            search: query.pluginOptions ? stringify(query.pluginOptions, { encode: false }) : '',
+            search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
           });
         },
         color: 'primary',

@@ -14,7 +14,7 @@ const localePermissionMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  const locale = get(action, '__meta__.pluginOptions.locale', null);
+  const locale = get(action, '__meta__.plugins.i18n.locale', null);
 
   if (!locale) {
     return next(action);

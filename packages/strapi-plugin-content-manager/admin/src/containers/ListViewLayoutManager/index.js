@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useQueryParams } from 'strapi-helper-plugin';
@@ -9,20 +9,20 @@ import Permissions from './Permissions';
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
   const initialParams = useSelector(state => state.get('content-manager_listView').initialParams);
-  const [{ query }, setQuery] = useQueryParams(initialParams);
+  const [{ query, rawQuery }, setQuery] = useQueryParams(initialParams);
   const permissions = useSyncRbac(query, props.slug, 'listView');
+  const setQueryRef = useRef(setQuery);
 
   useEffect(() => {
     dispatch(setLayout(layout.contentType));
   }, [dispatch, layout]);
 
   useEffect(() => {
-    if (initialParams) {
-      setQuery(initialParams);
+    // We need to keep the search when reloading the page
+    if (initialParams && !rawQuery) {
+      setQueryRef.current(initialParams);
     }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [initialParams]);
+  }, [initialParams, rawQuery]);
 
   useEffect(() => {
     return () => {

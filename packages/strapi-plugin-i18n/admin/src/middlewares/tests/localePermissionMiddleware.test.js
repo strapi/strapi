@@ -36,7 +36,7 @@ describe('localePermissionMiddleware', () => {
     expect(nextAction).toBe(action);
   });
 
-  it('does not modify the action when it the __meta__.pluginOptions is not set', () => {
+  it('does not modify the action when it the __meta__.plugins is not set', () => {
     const nextFn = jest.fn(x => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
@@ -48,13 +48,13 @@ describe('localePermissionMiddleware', () => {
     expect(nextAction).toBe(action);
   });
 
-  it('does not modify the action when it the __meta__.pluginOptions.locale is not set', () => {
+  it('does not modify the action when it the __meta__.plugins.i18n.locale is not set', () => {
     const nextFn = jest.fn(x => x);
     const action = {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: {
         containerName: 'listView',
-        pluginOptions: {},
+        plugins: {},
       },
     };
 
@@ -69,8 +69,10 @@ describe('localePermissionMiddleware', () => {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: {
         containerName: 'listView',
-        pluginOptions: {
-          locale: 'en',
+        plugins: {
+          i18n: {
+            locale: 'en',
+          },
         },
       },
       permissions: {},
@@ -80,7 +82,7 @@ describe('localePermissionMiddleware', () => {
 
     expect(nextAction).toEqual({
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
-      __meta__: { containerName: 'listView', pluginOptions: { locale: 'en' } },
+      __meta__: { containerName: 'listView', plugins: { i18n: { locale: 'en' } } },
       permissions: {},
     });
   });
@@ -91,8 +93,10 @@ describe('localePermissionMiddleware', () => {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: {
         containerName: 'listView',
-        pluginOptions: {
-          locale: 'en',
+        plugins: {
+          i18n: {
+            locale: 'en',
+          },
         },
       },
       permissions: {
@@ -107,6 +111,16 @@ describe('localePermissionMiddleware', () => {
             },
             conditions: [],
           },
+          {
+            id: 459,
+            action: 'plugins::content-manager.explorer.create',
+            subject: 'application::article.article',
+            properties: {
+              fields: ['test'],
+              locales: ['it'],
+            },
+            conditions: [],
+          },
         ],
       },
     };
@@ -115,7 +129,7 @@ describe('localePermissionMiddleware', () => {
 
     expect(nextAction).toEqual({
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
-      __meta__: { containerName: 'listView', pluginOptions: { locale: 'en' } },
+      __meta__: { containerName: 'listView', plugins: { i18n: { locale: 'en' } } },
       permissions: {
         'plugins::content-manager.explorer.create': [
           {
