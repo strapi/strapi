@@ -89,10 +89,12 @@ describe('i18n | utils ', () => {
 
       expect(
         mutateSchema(ctSchema, {
-          pluginOptions: {
-            pluginA: { foo: 'bar' },
-            i18n: { localized: true },
-            pluginB: { foo: 'bar' },
+          schema: {
+            pluginOptions: {
+              pluginA: { foo: 'bar' },
+              i18n: { localized: true },
+              pluginB: { foo: 'bar' },
+            },
           },
         })
       ).toEqual(ctSchema);
