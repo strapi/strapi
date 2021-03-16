@@ -13,9 +13,6 @@ const DP_PUB_STATE_LIVE = 'live';
 const DP_PUB_STATE_PREVIEW = 'preview';
 const DP_PUB_STATES = [DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW];
 
-const NON_WRITABLE_ATTRIBUTES = [ID_ATTRIBUTE, CREATED_BY_ATTRIBUTE, UPDATED_BY_ATTRIBUTE];
-const NON_VISIBLE_ATTRIBUTES = [...NON_WRITABLE_ATTRIBUTES, PUBLISHED_AT_ATTRIBUTE];
-
 const constants = {
   ID_ATTRIBUTE,
   PUBLISHED_AT_ATTRIBUTE,
@@ -57,26 +54,38 @@ const getNonWritableAttributes = (model = {}) => {
     []
   );
 
-  return _.uniq(
-    NON_WRITABLE_ATTRIBUTES.concat(model.primaryKey, getTimestamps(model), nonWritableAttributes)
-  );
+  return _.uniq([
+    ID_ATTRIBUTE,
+    model.primaryKey,
+    ...getTimestamps(model),
+    ...nonWritableAttributes,
+  ]);
 };
 
 const getWritableAttributes = (model = {}) => {
   return _.difference(Object.keys(model.attributes), getNonWritableAttributes(model));
 };
 
+const isWritableAttribute = (model, attributeName) => {
+  return getWritableAttributes(model).includes(attributeName);
+};
+
 const getNonVisibleAttributes = model => {
-  return _.uniq([
-    model.primaryKey,
-    ...NON_VISIBLE_ATTRIBUTES,
-    ...getTimestamps(model),
-    ...getNonWritableAttributes(model),
-  ]);
+  const nonVisibleAttributes = _.reduce(
+    model.attributes,
+    (acc, attr, attrName) => (attr.visible === false ? acc.concat(attrName) : acc),
+    []
+  );
+
+  return _.uniq([ID_ATTRIBUTE, model.primaryKey, ...getTimestamps(model), ...nonVisibleAttributes]);
 };
 
 const getVisibleAttributes = model => {
   return _.difference(_.keys(model.attributes), getNonVisibleAttributes(model));
+};
+
+const isVisibleAttribute = (model, attributeName) => {
+  return getVisibleAttributes(model).includes(attributeName);
 };
 
 const hasDraftAndPublish = model => _.get(model, 'options.draftAndPublish', false) === true;
@@ -191,8 +200,10 @@ module.exports = {
   constants,
   getNonWritableAttributes,
   getWritableAttributes,
+  isWritableAttribute,
   getNonVisibleAttributes,
   getVisibleAttributes,
+  isVisibleAttribute,
   hasDraftAndPublish,
   isDraft,
   isSingleType,

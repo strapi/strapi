@@ -16,6 +16,9 @@ module.exports = async () => {
   const { actionProvider } = strapi.admin.services.permission;
   actionProvider.register(actions);
 
+  const { decorator } = getService('entity-service-decorator');
+  strapi.entityService.decorate(decorator);
+
   await getService('locales').initDefaultLocale();
 
   Object.values(strapi.models)
@@ -25,15 +28,6 @@ module.exports = async () => {
         model: model.uid,
         async beforeCreate(data) {
           await getService('localizations').assignDefaultLocale(data);
-        },
-        async afterCreate(entry) {
-          await getService('localizations').addLocalizations(entry, { model });
-        },
-        async afterUpdate(entry) {
-          await getService('localizations').updateNonLocalizedFields(entry, { model });
-        },
-        async afterDelete(entry) {
-          await getService('localizations').removeEntryFromRelatedLocalizations(entry, { model });
         },
       });
     });

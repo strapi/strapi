@@ -41,6 +41,7 @@ const isRelation = attribute =>
 const formatAttributes = model => {
   const { getVisibleAttributes } = utils.contentTypes;
 
+  // only get attributes that can be seen in the CTB
   return getVisibleAttributes(model).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;

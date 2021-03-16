@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+const delegate = require('delegates');
+
 const {
   sanitizeEntity,
   webhook: webhookUtils,
@@ -11,17 +13,55 @@ const uploadFiles = require('./utils/upload-files');
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
-module.exports = ({ db, eventHub, entityValidator }) => ({
+module.exports = ctx => {
+  const implementation = createDefaultImplementation(ctx);
+
+  const service = {
+    implementation,
+    decorate(decorator) {
+      if (typeof decorator !== 'function') {
+        throw new Error(`Decorator must be a function, received ${typeof decorator}`);
+      }
+
+      this.implementation = Object.assign({}, this.implementation, decorator(this.implementation));
+      return this;
+    },
+  };
+
+  const delegator = delegate(service, 'implementation');
+
+  // delegate every method in implementation
+  Object.keys(service.implementation).forEach(key => delegator.method(key));
+
+  return service;
+};
+
+const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   /**
    * expose some utils so the end users can use them
    */
   uploadFiles,
+
   /**
-   * Promise to fetch all records
-   *
-   * @return {Promise}
+   * Returns default opt
+   * it is async so decorators can do async processing
+   * @param {object} params - query params to extend
+   * @param {object=} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
-  async find({ params, populate }, { model }) {
+  async wrapOptions(options = {}) {
+    return options;
+  },
+
+  /**
+   * Returns a list of entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async find(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'find' });
+
     const { kind } = db.getModel(model);
 
     // return first element and ignore filters
@@ -33,50 +73,67 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
     return db.query(model).find(params, populate);
   },
 
-  findPage({ params, populate }, { model }) {
+  /**
+   * Returns a paginated list of entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async findPage(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'findPage' });
+
     return db.query(model).findPage(params, populate);
   },
 
-  findWithRelationCounts({ params, populate }, { model }) {
+  /**
+   * Returns a list of entries with relation counters
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async findWithRelationCounts(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, {
+      model,
+      action: 'findWithRelationCounts',
+    });
+
     return db.query(model).findWithRelationCounts(params, populate);
   },
 
   /**
-   * Promise to fetch record
-   *
-   * @return {Promise}
+   * Returns one entry
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async findOne(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'findOne' });
 
-  findOne({ params, populate }, { model }) {
     return db.query(model).findOne(params, populate);
   },
 
   /**
-   * Promise to count record
-   *
-   * @return {Promise}
+   * Returns a count of entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async count(opts, { model }) {
+    const { params } = await this.wrapOptions(opts, { model, action: 'count' });
 
-  count({ params }, { model }) {
     return db.query(model).count(params);
   },
 
   /**
-   * Promise to add record
-   *
-   * @return {Promise}
+   * Creates & returns a new entry
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async create(opts, { model }) {
+    const { data, files } = await this.wrapOptions(opts, { model, action: 'create' });
 
-  async create({ data, files }, { model }) {
     const modelDef = db.getModel(model);
-
-    if (modelDef.kind === 'singleType') {
-      // check if there is already one entry and throw
-      const count = await db.query(model).count();
-      if (count >= 1) {
-        throw new Error('Single type entry can only be created once');
-      }
-    }
 
     const isDraft = contentTypesUtils.isDraft(data, modelDef);
 
@@ -98,12 +155,14 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
   },
 
   /**
-   * Promise to edit record
-   *
-   * @return {Promise}
+   * Updates & returns an existing entry
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async update(opts, { model }) {
+    const { params, data, files } = await this.wrapOptions(opts, { model, action: 'update' });
 
-  async update({ params, data, files }, { model }) {
     const modelDef = db.getModel(model);
     const existingEntry = await db.query(model).findOne(params);
 
@@ -129,12 +188,14 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
   },
 
   /**
-   * Promise to delete a record
-   *
-   * @return {Promise}
+   * Deletes & returns the entry that was deleted
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async delete(opts, { model }) {
+    const { params } = await this.wrapOptions(opts, { model, action: 'delete' });
 
-  async delete({ params }, { model }) {
     const entry = await db.query(model).delete(params);
 
     const modelDef = db.getModel(model);
@@ -147,29 +208,53 @@ module.exports = ({ db, eventHub, entityValidator }) => ({
   },
 
   /**
-   * Promise to search records
-   *
-   * @return {Promise}
+   * Returns a list of matching entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
+  async search(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'search' });
 
-  search({ params, populate }, { model }) {
     return db.query(model).search(params, populate);
   },
 
-  searchWithRelationCounts({ params, populate }, { model }) {
+  /**
+   * Returns a list of matching entries with relations counters
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async searchWithRelationCounts(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, {
+      model,
+      action: 'searchWithRelationCounts',
+    });
+
     return db.query(model).searchWithRelationCounts(params, populate);
   },
 
-  searchPage({ params, populate }, { model }) {
+  /**
+   * Returns a paginated list of matching entries
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
+   */
+  async searchPage(opts, { model }) {
+    const { params, populate } = await this.wrapOptions(opts, { model, action: 'searchPage' });
+
     return db.query(model).searchPage(params, populate);
   },
 
   /**
    * Promise to count searched records
-   *
-   * @return {Promise}
+   * @param {object} opts - Query options object (params, data, files, populate)
+   * @param {object} ctx - Query context
+   * @param {object} ctx.model - Model that is being used
    */
-  countSearch({ params }, { model }) {
+  async countSearch(opts, { model }) {
+    const { params } = await this.wrapOptions(opts, { model, action: 'countSearch' });
+
     return db.query(model).countSearch(params);
   },
 });
