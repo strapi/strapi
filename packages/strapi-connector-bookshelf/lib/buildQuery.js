@@ -15,10 +15,12 @@ const BOOLEAN_OPERATORS = ['or'];
  */
 const buildQuery = ({ model, filters }) => qb => {
   const joinsTree = buildJoinsAndFilter(qb, model, filters);
-
-
-  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0 &&
-      !(filters.limit && filters.limit == 1) && joinsTree.joins && Object.keys(joinsTree.joins).length) {
+  
+  const singleFilter = _.has(filters, 'limit') && filters.limit === 1;
+  const someJoins = _.has(joinsTree, 'joins') && keys(joinsTree.joins).length;
+  const isDistinctJoin = !singleFilter && someJoins;
+  
+  if (_.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0 &&  && isDistinctJoin) {
     qb.distinct();
   }
 
@@ -28,7 +30,7 @@ const buildQuery = ({ model, filters }) => qb => {
     const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
     const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
-    if (joinsTree.joins && Object.keys(joinsTree.joins).length && !(filters.limit && filters.limit == 1)) { 
+    if (isDistinctJoin) { 
       qb.distinct()
         .column(columns)
         .orderBy(orderBy);
