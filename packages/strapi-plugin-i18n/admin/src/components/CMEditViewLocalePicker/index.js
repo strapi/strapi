@@ -16,10 +16,12 @@ import Wrapper from './Wrapper';
 
 const CMEditViewLocalePicker = ({
   appLocales,
+  createPermissions,
+  currentEntityId,
   hasDraftAndPublishEnabled,
   localizations,
   query,
-  currentEntityId,
+  readPermissions,
   slug,
 }) => {
   const { formatMessage } = useIntl();
@@ -58,7 +60,18 @@ const CMEditViewLocalePicker = ({
 
   const styles = selectStyles(theme);
   // TODO use localizations + RBAC when ready
-  const options = addStatusColorToLocale(createLocalesOption(appLocales, localizations), theme);
+  const options = addStatusColorToLocale(
+    createLocalesOption(appLocales, localizations),
+    theme
+  ).filter(({ status, value }) => {
+    if (status === 'did-not-create-locale') {
+      return createPermissions.find(({ properties }) =>
+        get(properties, 'locales', []).includes(value)
+      );
+    }
+
+    return readPermissions.find(({ properties }) => get(properties, 'locales', []).includes(value));
+  });
   const filteredOptions = options.filter(({ value }) => value !== currentLocale);
   const value = options.find(({ value }) => {
     return value === currentLocale;
@@ -109,6 +122,7 @@ const CMEditViewLocalePicker = ({
           appLocales={appLocales}
           currentLocale={currentLocale}
           localizations={localizations}
+          readPermissions={readPermissions}
         />
       </Padded>
     </Wrapper>
@@ -116,17 +130,21 @@ const CMEditViewLocalePicker = ({
 };
 
 CMEditViewLocalePicker.defaultProps = {
+  createPermissions: [],
   currentEntityId: null,
   localizations: [],
   query: {},
+  readPermissions: [],
 };
 
 CMEditViewLocalePicker.propTypes = {
   appLocales: PropTypes.array.isRequired,
+  createPermissions: PropTypes.array,
   currentEntityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   hasDraftAndPublishEnabled: PropTypes.bool.isRequired,
   localizations: PropTypes.array,
   query: PropTypes.object,
+  readPermissions: PropTypes.array,
   slug: PropTypes.string.isRequired,
 };
 

@@ -12,34 +12,16 @@ import {
   selectStyles,
   DropdownIndicator,
   useContentManagerEditViewDataManager,
-  formatComponentData,
-  contentManagementUtilRemoveFieldsFromData,
   request,
 } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
-import removePasswordAndRelationsFieldFromData from './utils/removePasswordAndRelationsFieldFromData';
+import { cleanData, generateOptions } from './utils';
 
-const cleanData = (data, { contentType, components }) => {
-  const dataWithoutPasswordsAndRelations = removePasswordAndRelationsFieldFromData(
-    data,
-    contentType,
-    components
-  );
-
-  const cleanedClonedData = contentManagementUtilRemoveFieldsFromData(
-    dataWithoutPasswordsAndRelations,
-    contentType,
-    components
-  );
-
-  return formatComponentData(cleanedClonedData, contentType, components);
-};
-
-const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
+const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPermissions }) => {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { allLayoutData, slug } = useContentManagerEditViewDataManager();
-
+  const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(null);
   const theme = useTheme();
@@ -54,14 +36,32 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
     const requestURL = `/content-manager/collection-types/${slug}/${value.value}`;
 
     try {
+      setIsLoading(true);
       const response = await request(requestURL, { method: 'GET' });
-      const cleanedData = cleanData(response, allLayoutData);
+      const cleanedData = cleanData(response, allLayoutData, localizations);
 
       dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
 
-      handleToggle();
+      strapi.notification.toggle({
+        type: 'success',
+        message: {
+          id: getTrad('CMEditViewCopyLocale.copy-success'),
+          defaultMessage: 'Locale copied!',
+        },
+      });
     } catch (err) {
-      console.log(err);
+      console.error(err);
+
+      strapi.notification.toggle({
+        type: 'warning',
+        message: {
+          id: getTrad('CMEditViewCopyLocale.copy-failure'),
+          defaultMessage: 'Could not copy locale',
+        },
+      });
+    } finally {
+      setIsLoading(false);
+      handleToggle();
     }
   };
 
@@ -77,18 +77,7 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
     return null;
   }
 
-  const options = appLocales
-    .filter(({ code }) => {
-      return (
-        code !== currentLocale && localizations.findIndex(({ locale }) => locale === code) !== -1
-      );
-    })
-    .map(locale => {
-      return {
-        label: locale.name,
-        value: localizations.find(loc => locale.code === loc.locale).id,
-      };
-    });
+  const options = generateOptions(appLocales, currentLocale, localizations, readPermissions);
 
   const styles = selectStyles(theme);
 
@@ -110,6 +99,7 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
         })}
       </Text>
       <ModalConfirm
+        showButtonLoader={isLoading}
         confirmButtonLabel={{
           id: 'form.button.finish',
         }}
@@ -174,6 +164,7 @@ CMEditViewCopyLocale.propTypes = {
   ).isRequired,
   currentLocale: PropTypes.string.isRequired,
   localizations: PropTypes.array.isRequired,
+  readPermissions: PropTypes.array.isRequired,
 };
 
 export default CMEditViewCopyLocale;
