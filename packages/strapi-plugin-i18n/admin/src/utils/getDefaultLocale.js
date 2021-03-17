@@ -12,10 +12,10 @@ const hasLocalePermission = (permission, localeCode) => {
 
 const getFirstLocale = permission => {
   if (permission) {
-    const firstAuthorizedForReadNonDefaultLocale = permission.properties.locales[0];
+    const firstAuthorizedNonDefaultLocale = permission.properties.locales[0];
 
-    if (firstAuthorizedForReadNonDefaultLocale) {
-      return firstAuthorizedForReadNonDefaultLocale;
+    if (firstAuthorizedNonDefaultLocale) {
+      return firstAuthorizedNonDefaultLocale;
     }
   }
 
