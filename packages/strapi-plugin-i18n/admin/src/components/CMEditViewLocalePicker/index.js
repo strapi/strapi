@@ -12,6 +12,7 @@ import {
   checkIfDataHasDraftAndPublish,
   createLocalesOption,
 } from './utils';
+import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
 import OptionComponent from './Option';
 import Wrapper from './Wrapper';
 
@@ -43,10 +44,12 @@ const CMEditViewLocalePicker = ({ appLocales, localizations, query, setQuery }) 
   const Option = hasDraftAndPublish ? OptionComponent : components.Option;
 
   return (
-    <Wrapper>
+    <Wrapper canCopy={localizations.length > 0}>
       <BaselineAlignment top size="18px" />
-      <Padded left right bottom size="smd">
-        <Text fontWeight="bold">Internationalization</Text>
+      <Padded left right size="smd">
+        <Text fontWeight="bold">
+          {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
+        </Text>
         <BaselineAlignment top size="18px" />
         <span id="select-locale">
           <Label htmlFor="">
@@ -78,6 +81,7 @@ const CMEditViewLocalePicker = ({ appLocales, localizations, query, setQuery }) 
           }}
           value={value}
         />
+        <CMEditViewCopyLocale localizations={localizations} />
       </Padded>
     </Wrapper>
   );
