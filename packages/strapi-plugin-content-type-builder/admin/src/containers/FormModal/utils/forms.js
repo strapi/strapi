@@ -827,10 +827,10 @@ const forms = {
                   disabled: false,
                   type: 'sorter',
                   label: {
-                    id: 'Default field sort name',
+                    id: getTrad('modalForm.attributes.sorter'),
                   },
                   inputDescription: {
-                    id: 'Default sort field to be sorted by if not specified otherwise',
+                    id: getTrad('modalForm.attributes.sorter.description'),
                   },
                   validations: {
                     required: true,

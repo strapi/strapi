@@ -1,4 +1,4 @@
-const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
+const getAttributes = (dataTarget = '', targetUid, nestedComponents, attributes) => {
   const defaultAttributes = [
     [
       'text',
@@ -12,9 +12,11 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
       'boolean',
       'json',
       'relation',
-      'sorter',
     ],
   ];
+  const hasSorterInCollection = Object.values(attributes || {}).find(
+    ({ type }) => type === 'sorter'
+  );
 
   const isPickingAttributeForAContentType = dataTarget === 'contentType';
   const isNestedInAnotherComponent = nestedComponents.includes(targetUid);
@@ -24,7 +26,14 @@ const getAttributes = (dataTarget = '', targetUid, nestedComponents) => {
 
   if (isPickingAttributeForAContentType) {
     items[0].push('uid');
-    items.push(['component', 'dynamiczone']);
+
+    const advancedComponents = ['component', 'dynamiczone'];
+
+    if (!hasSorterInCollection) {
+      advancedComponents.push('sorter');
+    }
+
+    items.push(advancedComponents);
   }
 
   if (canAddComponentInAnotherComponent) {

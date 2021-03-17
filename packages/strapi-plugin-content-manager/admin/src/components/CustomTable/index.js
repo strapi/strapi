@@ -5,7 +5,6 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { upperFirst, isEmpty } from 'lodash';
 import { LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
 import { useDrop } from 'react-dnd';
-import update from 'immutability-helper';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';
 import State from '../State';
@@ -111,12 +110,9 @@ const CustomTable = ({
       const { row, index } = findRow(id);
 
       if (row) {
-        const newOrder = update(rows, {
-          $splice: [
-            [index, 1],
-            [atIndex, 0, row],
-          ],
-        });
+        const newOrder = [...rows];
+        newOrder.splice(index, 1);
+        newOrder.splice(atIndex, 0, row);
 
         setRows(newOrder);
 

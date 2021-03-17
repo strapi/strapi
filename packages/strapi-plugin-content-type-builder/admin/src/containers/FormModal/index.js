@@ -1066,7 +1066,8 @@ const FormModal = () => {
     state.forTarget,
     state.targetUid,
     // We need the nested components so we know when to remove the component option
-    nestedComponents
+    nestedComponents,
+    attributes
   );
 
   // Styles
@@ -1296,22 +1297,17 @@ const FormModal = () => {
                               );
                             }
 
+                            let type = input.type;
+
                             if (input.type === 'sorter') {
-                              return (
-                                <InputsIndex
-                                  key={input.name}
-                                  {...input}
-                                  type="string"
-                                  onChange={handleChange}
-                                  value={value}
-                                />
-                              );
+                              type = 'text';
                             }
 
                             return (
                               <div className={`col-${input.size || 6}`} key={input.name}>
                                 <Inputs
                                   {...input}
+                                  type={type}
                                   modifiedData={modifiedData}
                                   addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
                                   changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
