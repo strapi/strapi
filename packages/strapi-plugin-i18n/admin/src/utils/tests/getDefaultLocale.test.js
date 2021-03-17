@@ -21,47 +21,44 @@ describe('getDefaultLocale', () => {
       },
     ];
 
-    const userPermissions = [
-      {
-        id: 1324,
-        action: 'plugins::i18n.locale.read',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-      {
-        id: 1325,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::address.address',
-        properties: {
-          fields: [
-            'postal_coder',
-            'categories',
-            'cover',
-            'images',
-            'city',
-            'likes',
-            'json',
-            'slug',
-          ],
-          locales: [],
+    const ctPermissions = {
+      'plugins::content-manager.explorer.create': [
+        {
+          id: 1325,
+          action: 'plugins::content-manager.explorer.create',
+          subject: 'application::address.address',
+          properties: {
+            fields: [
+              'postal_coder',
+              'categories',
+              'cover',
+              'images',
+              'city',
+              'likes',
+              'json',
+              'slug',
+            ],
+            locales: [],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-      {
-        id: 1326,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::address.address',
-        properties: {
-          fields: [],
-          locales: ['en', 'fr-FR'],
+      ],
+      'plugins::content-manager.explorer.read': [
+        {
+          id: 1326,
+          action: 'plugins::content-manager.explorer.read',
+          subject: 'application::address.address',
+          properties: {
+            fields: [],
+            locales: ['en', 'fr-FR'],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-    ];
+      ],
+    };
 
     const expected = 'fr-FR';
-    const actual = getDefaultLocale('application::address.address', userPermissions, locales);
+    const actual = getDefaultLocale(ctPermissions, locales);
 
     expect(actual).toEqual(expected);
   });
@@ -86,47 +83,44 @@ describe('getDefaultLocale', () => {
       },
     ];
 
-    const userPermissions = [
-      {
-        id: 1324,
-        action: 'plugins::i18n.locale.read',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-      {
-        id: 1325,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::address.address',
-        properties: {
-          fields: [
-            'postal_coder',
-            'categories',
-            'cover',
-            'images',
-            'city',
-            'likes',
-            'json',
-            'slug',
-          ],
-          locales: ['fr-FR'],
+    const ctPermissions = {
+      'plugins::content-manager.explorer.create': [
+        {
+          id: 1325,
+          action: 'plugins::content-manager.explorer.create',
+          subject: 'application::address.address',
+          properties: {
+            fields: [
+              'postal_coder',
+              'categories',
+              'cover',
+              'images',
+              'city',
+              'likes',
+              'json',
+              'slug',
+            ],
+            locales: ['fr-FR'],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-      {
-        id: 1326,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::address.address',
-        properties: {
-          fields: [],
-          locales: ['en'],
+      ],
+      'plugins::content-manager.explorer.read': [
+        {
+          id: 1326,
+          action: 'plugins::content-manager.explorer.read',
+          subject: 'application::address.address',
+          properties: {
+            fields: [],
+            locales: ['en'],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-    ];
+      ],
+    };
 
     const expected = 'fr-FR';
-    const actual = getDefaultLocale('application::address.address', userPermissions, locales);
+    const actual = getDefaultLocale(ctPermissions, locales);
 
     expect(actual).toEqual(expected);
   });
@@ -159,47 +153,44 @@ describe('getDefaultLocale', () => {
       },
     ];
 
-    const userPermissions = [
-      {
-        id: 1324,
-        action: 'plugins::i18n.locale.read',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-      {
-        id: 1325,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::address.address',
-        properties: {
-          fields: [
-            'postal_coder',
-            'categories',
-            'cover',
-            'images',
-            'city',
-            'likes',
-            'json',
-            'slug',
-          ],
-          locales: [],
+    const ctPermissions = {
+      'plugins::content-manager.explorer.create': [
+        {
+          id: 1325,
+          action: 'plugins::content-manager.explorer.create',
+          subject: 'application::address.address',
+          properties: {
+            fields: [
+              'postal_coder',
+              'categories',
+              'cover',
+              'images',
+              'city',
+              'likes',
+              'json',
+              'slug',
+            ],
+            locales: [],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-      {
-        id: 1326,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::address.address',
-        properties: {
-          fields: [],
-          locales: ['en', 'de'],
+      ],
+      'plugins::content-manager.explorer.read': [
+        {
+          id: 1326,
+          action: 'plugins::content-manager.explorer.read',
+          subject: 'application::address.address',
+          properties: {
+            fields: [],
+            locales: ['en', 'de'],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-    ];
+      ],
+    };
 
     const expected = 'en';
-    const actual = getDefaultLocale('application::address.address', userPermissions, locales);
+    const actual = getDefaultLocale(ctPermissions, locales);
 
     expect(actual).toEqual(expected);
   });
@@ -232,47 +223,44 @@ describe('getDefaultLocale', () => {
       },
     ];
 
-    const userPermissions = [
-      {
-        id: 1324,
-        action: 'plugins::i18n.locale.read',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-      {
-        id: 1325,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::address.address',
-        properties: {
-          fields: [
-            'postal_coder',
-            'categories',
-            'cover',
-            'images',
-            'city',
-            'likes',
-            'json',
-            'slug',
-          ],
-          locales: ['en', 'de'],
+    const ctPermissions = {
+      'plugins::content-manager.explorer.create': [
+        {
+          id: 1325,
+          action: 'plugins::content-manager.explorer.create',
+          subject: 'application::address.address',
+          properties: {
+            fields: [
+              'postal_coder',
+              'categories',
+              'cover',
+              'images',
+              'city',
+              'likes',
+              'json',
+              'slug',
+            ],
+            locales: ['en', 'de'],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-      {
-        id: 1326,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::address.address',
-        properties: {
-          fields: [],
-          locales: [],
+      ],
+      'plugins::content-manager.explorer.read': [
+        {
+          id: 1326,
+          action: 'plugins::content-manager.explorer.read',
+          subject: 'application::address.address',
+          properties: {
+            fields: [],
+            locales: [],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-    ];
+      ],
+    };
 
     const expected = 'en';
-    const actual = getDefaultLocale('application::address.address', userPermissions, locales);
+    const actual = getDefaultLocale(ctPermissions, locales);
 
     expect(actual).toEqual(expected);
   });
@@ -305,47 +293,44 @@ describe('getDefaultLocale', () => {
       },
     ];
 
-    const userPermissions = [
-      {
-        id: 1324,
-        action: 'plugins::i18n.locale.read',
-        subject: null,
-        properties: {},
-        conditions: [],
-      },
-      {
-        id: 1325,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::address.address',
-        properties: {
-          fields: [
-            'postal_coder',
-            'categories',
-            'cover',
-            'images',
-            'city',
-            'likes',
-            'json',
-            'slug',
-          ],
-          locales: [],
+    const ctPermissions = {
+      'plugins::content-manager.explorer.create': [
+        {
+          id: 1325,
+          action: 'plugins::content-manager.explorer.create',
+          subject: 'application::address.address',
+          properties: {
+            fields: [
+              'postal_coder',
+              'categories',
+              'cover',
+              'images',
+              'city',
+              'likes',
+              'json',
+              'slug',
+            ],
+            locales: [],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-      {
-        id: 1326,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::address.address',
-        properties: {
-          fields: [],
-          locales: [],
+      ],
+      'plugins::content-manager.explorer.read': [
+        {
+          id: 1326,
+          action: 'plugins::content-manager.explorer.read',
+          subject: 'application::address.address',
+          properties: {
+            fields: [],
+            locales: [],
+          },
+          conditions: [],
         },
-        conditions: [],
-      },
-    ];
+      ],
+    };
 
     const expected = null;
-    const actual = getDefaultLocale('application::address.address', userPermissions, locales);
+    const actual = getDefaultLocale(ctPermissions, locales);
 
     expect(actual).toEqual(expected);
   });

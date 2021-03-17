@@ -1,6 +1,8 @@
-const hasLocalePermission = (permission, localeCode) => {
-  if (permission) {
-    const hasPermission = permission.properties.locales.includes(localeCode);
+const hasLocalePermission = (permissions, localeCode) => {
+  if (permissions) {
+    const hasPermission = permissions.some(permission =>
+      permission.properties.locales.includes(localeCode)
+    );
 
     if (hasPermission) {
       return true;
@@ -10,9 +12,9 @@ const hasLocalePermission = (permission, localeCode) => {
   return false;
 };
 
-const getFirstLocale = permission => {
-  if (permission) {
-    const firstAuthorizedNonDefaultLocale = permission.properties.locales[0];
+const getFirstLocale = permissions => {
+  if (permissions.length > 0) {
+    const firstAuthorizedNonDefaultLocale = permissions[0].properties.locales[0];
 
     if (firstAuthorizedNonDefaultLocale) {
       return firstAuthorizedNonDefaultLocale;
@@ -25,34 +27,32 @@ const getFirstLocale = permission => {
 /**
  * Entry point of the module
  */
-const getDefaultLocale = (contentType, userPermissions, locales = []) => {
+const getDefaultLocale = (ctPermissions, locales = []) => {
   const defaultLocale = locales.find(locale => locale.isDefault);
 
   if (!defaultLocale) {
     return null;
   }
 
-  const ctPermissions = userPermissions.filter(permission => permission.subject === contentType);
+  const readPermissions = ctPermissions['plugins::content-manager.explorer.read'];
+  const createPermissions = ctPermissions['plugins::content-manager.explorer.create'];
 
-  const readPermission = ctPermissions.find(permission => permission.action.includes('.read'));
-  const createPermission = ctPermissions.find(permission => permission.action.includes('.create'));
-
-  if (hasLocalePermission(readPermission, defaultLocale.code)) {
+  if (hasLocalePermission(readPermissions, defaultLocale.code)) {
     return defaultLocale.code;
   }
 
-  if (hasLocalePermission(createPermission, defaultLocale.code)) {
+  if (hasLocalePermission(createPermissions, defaultLocale.code)) {
     return defaultLocale.code;
   }
 
   // When the default locale is not authorized, we return the first authorized locale
-  const firstAuthorizedForReadNonDefaultLocale = getFirstLocale(readPermission);
+  const firstAuthorizedForReadNonDefaultLocale = getFirstLocale(readPermissions);
 
   if (firstAuthorizedForReadNonDefaultLocale) {
     return firstAuthorizedForReadNonDefaultLocale;
   }
 
-  return getFirstLocale(createPermission);
+  return getFirstLocale(createPermissions);
 };
 
 export default getDefaultLocale;

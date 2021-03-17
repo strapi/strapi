@@ -14,9 +14,10 @@ const localeQueryParamsMiddleware = () => ({ getState }) => next => action => {
 
   const store = getState();
   const { locales } = store.get('i18n_locales');
-  const { userPermissions } = store.get('permissionsManager');
+  const { collectionTypesRelatedPermissions } = store.get('permissionsManager');
+  const ctPermissions = collectionTypesRelatedPermissions[action.contentType.uid];
 
-  const defaultLocale = getDefaultLocale(action.contentType.uid, userPermissions, locales);
+  const defaultLocale = getDefaultLocale(ctPermissions, locales);
 
   if (!action.initialParams.plugins) {
     action.initialParams.plugins = {
