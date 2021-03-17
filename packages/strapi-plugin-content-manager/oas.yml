@@ -28,6 +28,23 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/contentType'
+  /content-manager/content-types-settings:
+    get:
+      tags:
+        - ContentTypes
+      description: List content types settings
+      responses:
+        200:
+          description: A list of content types settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/contentTypeSettings'
   /content-manager/content-types/{uid}/configuration:
     get:
       tags:
@@ -525,6 +542,15 @@ components:
       additionalProperties:
         type: any
 
+    contentTypeSettings:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Model uid
+        settings:
+          $ref: '#/components/schemas/configurationSettings'
+
     contentType:
       type: object
       properties:
@@ -608,26 +634,29 @@ components:
             - manyToOne
             - manyToMany
 
+    configurationSettings:
+      type: object
+      properties:
+        searchable:
+          type: boolean
+        bulkable:
+          type: boolean
+        filterable:
+          type: boolean
+        pageSize:
+          type: integer
+        mainField:
+          type: string
+        defaultSortBy:
+          type: string
+        defaultSortOrder:
+          type: string
+
     configuration:
       type: object
       properties:
         settings:
-          type: object
-          properties:
-            searchable:
-              type: boolean
-            bulkable:
-              type: boolean
-            filterable:
-              type: boolean
-            pageSize:
-              type: integer
-            mainField:
-              type: string
-            defaultSortBy:
-              type: string
-            defaultSortOrder:
-              type: string
+          $ref: '#/components/schemas/configurationSettings'
         metadatas:
           type: object
         layouts:

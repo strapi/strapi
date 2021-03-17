@@ -1,10 +1,9 @@
 'use strict';
 
 const { has, omit } = require('lodash/fp');
+const { getService } = require('../utils');
 
-const { getDefaultLocale } = require('./locales');
-const { isLocalized } = require('./content-types');
-const { syncLocalizations, updateNonLocalizedFields } = require('./localizations');
+const { syncLocalizations, syncNonLocalizedAttributes } = require('./localizations');
 
 const LOCALE_QUERY_FILTER = '_locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
@@ -31,10 +30,26 @@ const wrapParams = async (params = {}, ctx = {}) => {
     };
   }
 
+  const { getDefaultLocale } = getService('locales');
+
   return {
     ...params,
     locale: await getDefaultLocale(),
   };
+};
+
+/**
+ * Assigns a valid locale or the default one if not define
+ * @param {object} data
+ */
+const assignValidLocale = async data => {
+  const { getValidLocale } = getService('content-types');
+
+  try {
+    data.locale = await getValidLocale(data.locale);
+  } catch (e) {
+    throw strapi.errors.badRequest("This locale doesn't exist");
+  }
 };
 
 /**
@@ -54,6 +69,8 @@ const decorator = service => ({
 
     const model = strapi.db.getModel(ctx.model);
 
+    const { isLocalized } = getService('content-types');
+
     if (!isLocalized(model)) {
       return wrappedOptions;
     }
@@ -72,12 +89,20 @@ const decorator = service => ({
    */
   async create(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
-    const entry = await service.create.call(this, opts, ctx);
 
-    if (isLocalized(model)) {
-      await syncLocalizations(entry, { model });
+    const { isLocalized } = getService('content-types');
+
+    if (!isLocalized(model)) {
+      return service.create.call(this, opts, ctx);
     }
 
+    const { data } = opts;
+    await assignValidLocale(data);
+
+    const entry = await service.create.call(this, opts, ctx);
+
+    await syncLocalizations(entry, { model });
+    await syncNonLocalizedAttributes(entry, { model });
     return entry;
   },
 
@@ -90,6 +115,12 @@ const decorator = service => ({
   async update(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
 
+    const { isLocalized } = getService('content-types');
+
+    if (!isLocalized(model)) {
+      return service.update.call(this, opts, ctx);
+    }
+
     const { data, ...restOptions } = opts;
 
     const entry = await service.update.call(
@@ -101,10 +132,7 @@ const decorator = service => ({
       ctx
     );
 
-    if (isLocalized(model)) {
-      await updateNonLocalizedFields(entry, { model });
-    }
-
+    await syncNonLocalizedAttributes(entry, { model });
     return entry;
   },
 });

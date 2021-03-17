@@ -1,6 +1,7 @@
 'use strict';
 
-const { prop, isNil } = require('lodash/fp');
+const { has, prop, isNil } = require('lodash/fp');
+const { cloneDeepWith, pick, pipe } = require('lodash/fp');
 const { isRelationalAttribute } = require('strapi-utils').contentTypes;
 const { getService } = require('../utils');
 
@@ -8,21 +9,11 @@ const isLocalized = modelOrAttribute => {
   return prop('pluginOptions.i18n.localized', modelOrAttribute) === true;
 };
 
-const getNonLocalizedFields = model => {
-  return Object.keys(model.attributes)
-    .filter(attributeName => !['locale', 'localizations'].includes(attributeName))
-    .filter(attributeName => {
-      const attribute = model.attributes[attributeName];
-      return !isLocalized(attribute) && !isRelationalAttribute(attribute);
-    });
-};
-
-const addLocale = async (entity, locale) => {
+const getValidLocale = async locale => {
   const localesService = getService('locales');
 
   if (isNil(locale)) {
-    entity.locale = await localesService.getDefaultLocale();
-    return;
+    return localesService.getDefaultLocale();
   }
 
   const foundLocale = await localesService.findByCode(locale);
@@ -30,7 +21,7 @@ const addLocale = async (entity, locale) => {
     throw new Error('Locale not found');
   }
 
-  entity.locale = locale;
+  return locale;
 };
 
 const getNewLocalizationsFor = async ({ relatedEntityId, model, locale }) => {
@@ -64,9 +55,50 @@ const getNewLocalizationsFor = async ({ relatedEntityId, model, locale }) => {
   return [relatedEntity.id, ...relatedEntity.localizations.map(prop('id'))];
 };
 
+/**
+ * Returns whether an attribute is localized or not
+ * @param {*} attribute
+ * @returns
+ */
+const isLocalizedAttribute = (model, attributeName) => {
+  const attribute = model.attributes[attributeName];
+
+  return isLocalized(attribute) || isRelationalAttribute(attribute);
+};
+
+/**
+ * Returns the list of attribute names that are not localized
+ * @param {object} model
+ * @returns {string[]}
+ */
+const getNonLocalizedAttributes = model => {
+  return Object.keys(model.attributes)
+    .filter(attributeName => !['locale', 'localizations'].includes(attributeName))
+    .filter(attributeName => !isLocalizedAttribute(model, attributeName));
+};
+
+const removeIds = cloneDeepWith(value => {
+  if (typeof value === 'object' && has('id', value)) {
+    delete value.id;
+  }
+});
+
+/**
+ * Returns a copy of an entry picking only its non localized attributes
+ * @param {object} model
+ * @param {object} entry
+ * @returns {object}
+ */
+const copyNonLocalizedAttributes = (model, entry) => {
+  const nonLocalizedAttributes = getNonLocalizedAttributes(model);
+
+  return pipe(pick(nonLocalizedAttributes), removeIds)(entry);
+};
+
 module.exports = {
   isLocalized,
-  getNonLocalizedFields,
-  addLocale,
+  getValidLocale,
   getNewLocalizationsFor,
+  getNonLocalizedAttributes,
+  copyNonLocalizedAttributes,
 };
