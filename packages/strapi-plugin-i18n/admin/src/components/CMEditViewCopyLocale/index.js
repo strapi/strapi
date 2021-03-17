@@ -12,14 +12,34 @@ import {
   selectStyles,
   DropdownIndicator,
   useContentManagerEditViewDataManager,
+  formatComponentData,
+  removeFieldsFromClonedData,
   request,
 } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
+import removePasswordAndRelationsFieldFromData from './utils/removePasswordAndRelationsFieldFromData';
+
+const cleanData = (data, { contentType, components }) => {
+  const dataWithoutPasswordsAndRelations = removePasswordAndRelationsFieldFromData(
+    data,
+    contentType,
+    components
+  );
+
+  const cleanedClonedData = removeFieldsFromClonedData(
+    dataWithoutPasswordsAndRelations,
+    contentType,
+    components
+  );
+
+  return formatComponentData(cleanedClonedData, contentType, components);
+};
 
 const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { slug } = useContentManagerEditViewDataManager();
+  const { allLayoutData, slug } = useContentManagerEditViewDataManager();
+
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(null);
   const theme = useTheme();
@@ -35,7 +55,11 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
 
     try {
       const response = await request(requestURL, { method: 'GET' });
-      console.log({ response });
+      const cleanedData = cleanData(response, allLayoutData);
+
+      dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
+
+      handleToggle();
     } catch (err) {
       console.log(err);
     }
