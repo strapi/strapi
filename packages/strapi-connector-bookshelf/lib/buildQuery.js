@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { each, prop, isEmpty } = require('lodash/fp');
+const { keys, each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
