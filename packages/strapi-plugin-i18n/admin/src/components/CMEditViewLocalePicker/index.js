@@ -1,17 +1,11 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Label, Text, Padded } from '@buffetjs/core';
 import get from 'lodash/get';
 import Select, { components } from 'react-select';
-import { useSelector } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
-import {
-  BaselineAlignment,
-  selectStyles,
-  DropdownIndicator,
-  useContentManagerEditViewDataManager,
-  useQueryParams,
-} from 'strapi-helper-plugin';
+import { BaselineAlignment, selectStyles, DropdownIndicator } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
 import {
   addStatusColorToLocale,
@@ -21,40 +15,11 @@ import {
 import OptionComponent from './Option';
 import Wrapper from './Wrapper';
 
-// TODO temp until the API is ready
-const localizations = [
-  {
-    locale: 'en',
-    id: 2,
-    published_at: 'TODO', // only if d&p is enabled
-  },
-  {
-    locale: 'fr-FR',
-    id: 3,
-    published_at: null, // only if d&p is enabled
-  },
-];
-
-// TODO use the selector from the LocalePicker/selectors.js when PR merged
-const selectI18NLocales = state => state.get('i18n_locales').locales;
-
-const CMEditViewLocalePicker = () => {
-  const { layout } = useContentManagerEditViewDataManager();
+const CMEditViewLocalePicker = ({ appLocales, localizations, query, setQuery }) => {
   const { formatMessage } = useIntl();
-  const [{ query }, setQuery] = useQueryParams();
-  const locales = useSelector(selectI18NLocales);
   const theme = useTheme();
-  const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
   const hasDraftAndPublish = checkIfDataHasDraftAndPublish(localizations);
   const currentLocale = get(query, 'plugins.i18n.locale', false);
-
-  if (!hasI18nEnabled) {
-    return null;
-  }
-
-  if (!currentLocale) {
-    return null;
-  }
 
   const handleChange = ({ value }) => {
     setQuery({
@@ -70,7 +35,7 @@ const CMEditViewLocalePicker = () => {
 
   const styles = selectStyles(theme);
   // TODO use localizations + RBAC when ready
-  const options = addStatusColorToLocale(createLocalesOption(locales, localizations), theme);
+  const options = addStatusColorToLocale(createLocalesOption(appLocales, localizations), theme);
   const value = options.find(({ value }) => {
     return value === currentLocale;
   });
@@ -116,6 +81,18 @@ const CMEditViewLocalePicker = () => {
       </Padded>
     </Wrapper>
   );
+};
+
+CMEditViewLocalePicker.defaultProps = {
+  localizations: [],
+  query: {},
+};
+
+CMEditViewLocalePicker.propTypes = {
+  appLocales: PropTypes.array.isRequired,
+  localizations: PropTypes.array,
+  query: PropTypes.object,
+  setQuery: PropTypes.func.isRequired,
 };
 
 export default CMEditViewLocalePicker;

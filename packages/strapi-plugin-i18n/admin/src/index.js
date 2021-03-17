@@ -4,7 +4,7 @@ import * as yup from 'yup';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
-import CMEditViewLocalePicker from './components/CMEditViewLocalePicker';
+import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
 import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import LocalePicker from './components/LocalePicker';
@@ -59,7 +59,7 @@ export default strapi => {
       if (cmPlugin) {
         cmPlugin.injectComponent('editView', 'informations', {
           name: 'i18n-locale-filter-edit-view',
-          Component: CMEditViewLocalePicker,
+          Component: CMEditViewInjectedComponents,
         });
         cmPlugin.injectComponent('listView', 'actions', {
           name: 'i18n-locale-filter',

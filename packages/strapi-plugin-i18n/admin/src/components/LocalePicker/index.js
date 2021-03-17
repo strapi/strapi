@@ -4,6 +4,7 @@ import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
 
 const List = styled.ul`
@@ -37,8 +38,6 @@ const EllipsisParagraph = styled(Text)`
 
 const selectContentManagerListViewPluginOptions = state =>
   state.get('content-manager_listView').contentType.pluginOptions;
-
-const selectI18NLocales = state => state.get('i18n_locales').locales;
 
 const LocalePicker = () => {
   const dispatch = useDispatch();
