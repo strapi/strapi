@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext, useQueryParams } from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import {
@@ -28,6 +28,7 @@ import { getRequestUrl } from './utils';
 const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
+  const [{ rawQuery }] = useQueryParams();
   const dispatch = useDispatch();
   const {
     componentsDataStructure,
@@ -212,7 +213,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(slug);
+      const endPoint = `${getRequestUrl(slug)}${rawQuery}`;
 
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
@@ -230,14 +231,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
-        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
+        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}${rawQuery}`);
       } catch (err) {
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, replace, slug, dispatch]
+    [cleanReceivedData, displayErrors, replace, slug, dispatch, rawQuery]
   );
 
   const onPublish = useCallback(async () => {
