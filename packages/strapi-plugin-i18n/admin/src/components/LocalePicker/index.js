@@ -85,13 +85,19 @@ const LocalePicker = () => {
         return (
           <Padded top left right bottom>
             <List>
-              {locales.map(locale => (
-                <ListItem key={locale.id}>
-                  <button onClick={() => handleClick(locale)} type="button">
-                    <EllipsisParagraph width="200px">{locale.name}</EllipsisParagraph>
-                  </button>
-                </ListItem>
-              ))}
+              {locales.map(locale => {
+                if (locale.id === selected.id) {
+                  return null;
+                }
+
+                return (
+                  <ListItem key={locale.id}>
+                    <button onClick={() => handleClick(locale)} type="button">
+                      <EllipsisParagraph width="200px">{locale.name}</EllipsisParagraph>
+                    </button>
+                  </ListItem>
+                );
+              })}
             </List>
           </Padded>
         );
