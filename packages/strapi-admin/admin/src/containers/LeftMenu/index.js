@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import {
@@ -22,6 +22,11 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
     pluginsSectionLinks,
   } = useMenuSections(plugins, shouldUpdateStrapi);
 
+  const filteredSingleTypeLinks = useMemo(
+    () => singleTypesSectionLinks.filter(({ isDisplayed }) => isDisplayed),
+    [singleTypesSectionLinks]
+  );
+
   return (
     <Wrapper>
       <Loader show={isLoading} />
@@ -36,11 +41,11 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
             searchable
           />
         )}
-        {singleTypesSectionLinks.length > 0 && (
+        {filteredSingleTypeLinks.length > 0 && (
           <LeftMenuLinksSection
             section="singleType"
             name="singleType"
-            links={singleTypesSectionLinks}
+            links={filteredSingleTypeLinks}
             location={location}
             searchable
           />

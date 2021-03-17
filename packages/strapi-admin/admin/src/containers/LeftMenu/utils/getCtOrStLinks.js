@@ -26,7 +26,7 @@ const getCtOrStLinks = async userPermissions => {
       (_, index) => stLinksPermissions[index]
     );
 
-    return { authorizedCtLinks, authorizedStLinks };
+    return { authorizedCtLinks, authorizedStLinks, contentTypes: data };
   } catch (err) {
     console.error(err);
     strapi.notification.toggle({
@@ -34,7 +34,7 @@ const getCtOrStLinks = async userPermissions => {
       message: { id: 'notification.error' },
     });
 
-    return { authorizedCtLinks: [], authorizedStLinks: [] };
+    return { authorizedCtLinks: [], authorizedStLinks: [], contentTypes: [] };
   }
 };
 

@@ -76,7 +76,7 @@ describe('checkPermissions', () => {
         {
           destination: '/plugins/content-manager/collectionType/application::address.address',
           icon: 'circle',
-          isDisplayed: false,
+          isDisplayed: true,
           label: 'address',
           permissions: [
             {
@@ -92,7 +92,7 @@ describe('checkPermissions', () => {
         {
           destination: '/plugins/content-manager/collectionType/application::article.article',
           icon: 'circle',
-          isDisplayed: false,
+          isDisplayed: true,
           label: 'article',
           permissions: [
             {
@@ -107,6 +107,7 @@ describe('checkPermissions', () => {
         },
       ],
       authorizedStLinks: [],
+      contentTypes: data,
     };
     const actual = await getCtOrStLinks(userPermissions);
 

@@ -41,7 +41,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           icon: 'circle',
           destination: '/plugins/content-manager/collectionType/application::address.address',
-          isDisplayed: false,
+          isDisplayed: true,
           label: 'Addresses',
           permissions: [
             {
@@ -57,7 +57,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           icon: 'circle',
           destination: '/plugins/content-manager/singleType/application::test1.test1',
-          isDisplayed: false,
+          isDisplayed: true,
           label: 'Test 1',
           permissions: [
             {
@@ -112,7 +112,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           {
             icon: 'circle',
             destination: '/plugins/content-manager/collectionType/application::address.address',
-            isDisplayed: false,
+            isDisplayed: true,
             label: 'Addresses',
             permissions: [
               {
@@ -130,7 +130,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           {
             icon: 'circle',
             destination: '/plugins/content-manager/singleType/application::test1.test1',
-            isDisplayed: false,
+            isDisplayed: true,
             label: 'Test 1',
             permissions: [
               {
