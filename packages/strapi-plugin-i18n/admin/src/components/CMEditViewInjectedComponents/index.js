@@ -10,14 +10,14 @@ const CMEditViewInjectedComponents = () => {
   const { layout, modifiedData, slug } = useContentManagerEditViewDataManager();
   const locales = useSelector(selectI18NLocales);
   const params = useParams();
+  const [{ query }] = useQueryParams();
+
   const id = get(params, 'id', null);
   const currentEntityId = id === 'create' ? null : id;
-  const [{ query }] = useQueryParams();
-  const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
-
-  const hasDraftAndPublishEnabled = get(layout, ['options', 'draftAndPublish'], false);
   const currentLocale = get(query, 'plugins.i18n.locale', false);
-  const localizations = get(modifiedData, 'localizations', []);
+
+  const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
+  const hasDraftAndPublishEnabled = get(layout, ['options', 'draftAndPublish'], false);
 
   if (!hasI18nEnabled) {
     return null;
@@ -26,6 +26,8 @@ const CMEditViewInjectedComponents = () => {
   if (!currentLocale) {
     return null;
   }
+
+  const localizations = get(modifiedData, 'localizations', []);
 
   return (
     <CMEditViewLocalePicker

@@ -13,7 +13,7 @@ import {
   DropdownIndicator,
   useContentManagerEditViewDataManager,
   formatComponentData,
-  removeFieldsFromClonedData,
+  contentManagementUtilRemoveFieldsFromData,
   request,
 } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
@@ -26,7 +26,7 @@ const cleanData = (data, { contentType, components }) => {
     components
   );
 
-  const cleanedClonedData = removeFieldsFromClonedData(
+  const cleanedClonedData = contentManagementUtilRemoveFieldsFromData(
     dataWithoutPasswordsAndRelations,
     contentType,
     components

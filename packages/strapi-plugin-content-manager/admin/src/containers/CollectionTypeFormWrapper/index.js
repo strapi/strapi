@@ -6,7 +6,7 @@ import {
   useGlobalContext,
   useQueryParams,
   formatComponentData,
-  removeFieldsFromClonedData,
+  contentManagementUtilRemoveFieldsFromData,
 } from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -60,7 +60,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         return data;
       }
 
-      const cleaned = removeFieldsFromClonedData(
+      const cleaned = contentManagementUtilRemoveFieldsFromData(
         data,
         allLayoutDataRef.current.contentType,
         allLayoutDataRef.current.components

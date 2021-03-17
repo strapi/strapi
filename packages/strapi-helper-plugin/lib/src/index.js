@@ -125,6 +125,7 @@ export { default as StrapiProvider } from './providers/StrapiProvider';
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
 export { default as difference } from './utils/difference';
+export { default as contentManagementUtilRemoveFieldsFromData } from './utils/contentManagementUtilRemoveFieldsFromData';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
 export { default as formatComponentData } from './utils/formatComponentData';
@@ -148,7 +149,6 @@ export { default as generateFiltersFromSearch } from './utils/generateFiltersFro
 export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';
 export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
 export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
-export { default as removeFieldsFromClonedData } from './utils/removeFieldsFromClonedData';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';

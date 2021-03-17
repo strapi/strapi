@@ -65,9 +65,10 @@ const CMEditViewLocalePicker = ({
   });
 
   const Option = hasDraftAndPublishEnabled ? OptionComponent : components.Option;
+  const paddingBottom = localizations.length ? '19px' : '29px';
 
   return (
-    <Wrapper canCopy={localizations.length > 0}>
+    <Wrapper paddingBottom={paddingBottom}>
       <BaselineAlignment top size="18px" />
       <Padded left right size="smd">
         <Text fontWeight="bold">
