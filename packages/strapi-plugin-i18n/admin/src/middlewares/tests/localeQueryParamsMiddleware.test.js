@@ -8,6 +8,12 @@ describe('localeQueryParamsMiddleware', () => {
 
     store.set('i18n_locales', { locales: [] });
     store.set('permissionsManager', { userPermissions: [] });
+    store.set('permissionsManager', {
+      collectionTypesRelatedPermissions: {
+        'plugins::content-manager.explorer.read': [],
+        'plugins::content-manager.explorer.create': [],
+      },
+    });
 
     getState = () => store;
   });
