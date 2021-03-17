@@ -42,8 +42,6 @@ class InputJSONWithErrors extends React.Component {
       ...rest
     } = this.props;
 
-    console.log({ labelIcon });
-
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
 
     return (
