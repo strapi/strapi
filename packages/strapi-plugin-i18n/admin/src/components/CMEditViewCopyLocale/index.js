@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Duplicate } from '@buffetjs/icons';
 import { Label, Padded, Text } from '@buffetjs/core';
 import Select from 'react-select';
+import { useDispatch } from 'react-redux';
 import { useTheme } from 'styled-components';
 import { useIntl } from 'react-intl';
 import {
@@ -10,14 +11,35 @@ import {
   ModalConfirm,
   selectStyles,
   DropdownIndicator,
+  useContentManagerEditViewDataManager,
+  request,
 } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
 
 const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
   const { formatMessage } = useIntl();
+  const dispatch = useDispatch();
+  const { slug } = useContentManagerEditViewDataManager();
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(null);
   const theme = useTheme();
+
+  const handleConfirmCopyLocale = async () => {
+    if (!value) {
+      handleToggle();
+
+      return;
+    }
+
+    const requestURL = `/content-manager/collection-types/${slug}/${value.value}`;
+
+    try {
+      const response = await request(requestURL, { method: 'GET' });
+      console.log({ response });
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   const handleChange = value => {
     setValue(value);
@@ -73,6 +95,7 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations }) => {
             'Your current content will be erased and filled by the content of the selected locale:',
         }}
         isOpen={isOpen}
+        onConfirm={handleConfirmCopyLocale}
         title={{ id: 'CMEditViewCopyLocale.ModalConfirm.title', defaultMessage: 'Select Locale' }}
         toggle={handleToggle}
         type="success"

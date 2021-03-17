@@ -1,3 +1,4 @@
+import { getType, getOtherInfos } from './utils/getAttributeInfos';
 // Assets
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
@@ -126,6 +127,7 @@ export { default as cleanData } from './utils/cleanData';
 export { default as difference } from './utils/difference';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
+export { default as formatComponentData } from './utils/formatComponentData';
 export { default as hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
@@ -139,11 +141,14 @@ export { default as Manager } from './utils/Manager';
 export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
+export { getType };
+export { getOtherInfos };
 export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
 export { default as generateFiltersFromSearch } from './utils/generateFiltersFromSearch';
 export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';
 export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
 export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
+export { default as removeFieldsFromClonedData } from './utils/removeFieldsFromClonedData';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';

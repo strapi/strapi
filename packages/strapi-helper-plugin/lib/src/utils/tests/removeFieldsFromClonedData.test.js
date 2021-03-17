@@ -1,7 +1,7 @@
-import { testData } from '../../testUtils';
+import testData from '../../testUtils/testData';
 import removeFieldsFromClonedData from '../removeFieldsFromClonedData';
 
-describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
+describe('STRAPI_HELPER_PLUGIN | utils', () => {
   describe('removeFieldsFromClonedData', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;

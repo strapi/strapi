@@ -1,9 +1,9 @@
-import { testData } from '../../testUtils';
+import testData from '../../testUtils/testData';
 import formatComponentData from '../formatComponentData';
 
 const { contentType, components, modifiedData } = testData;
 
-describe('CONTENT MANAGER | utils | formatComponentData', () => {
+describe('STRAPI_HELPER_PLUGIN | utils | formatComponentData', () => {
   it('should add the __temp_key__ property to each repeatable component object', () => {
     const expected = {
       created_at: '2020-04-28T13:22:13.033Z',
