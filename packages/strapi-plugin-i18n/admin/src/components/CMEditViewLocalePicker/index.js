@@ -81,7 +81,11 @@ const CMEditViewLocalePicker = ({ appLocales, localizations, query, setQuery }) 
           }}
           value={value}
         />
-        <CMEditViewCopyLocale localizations={localizations} />
+        <CMEditViewCopyLocale
+          appLocales={appLocales}
+          currentLocale={currentLocale}
+          localizations={localizations}
+        />
       </Padded>
     </Wrapper>
   );
