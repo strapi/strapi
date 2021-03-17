@@ -16,7 +16,7 @@
   "main": "./lib",
   "dependencies": {
     "consolidate": "^0.16.0",
-    "koa-views": "^6.3.0",
+    "koa-views": "^7.0.1",
     "lodash": "4.17.20"
   },
   "author": {
