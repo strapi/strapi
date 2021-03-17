@@ -24,15 +24,6 @@ module.exports = async () => {
       enabled: true,
       icon: 'envelope',
     },
-    cas: {
-      enabled: false,
-      icon: 'book',
-      key: '',
-      secret: '',
-      callback: `${strapi.config.server.url}/auth/cas/callback`,
-      scope: ['openid email'], // scopes should be space delimited
-      subdomain: 'my.subdomain.com/cas',
-    },
     discord: {
       enabled: false,
       icon: 'discord',
@@ -138,6 +129,15 @@ module.exports = async () => {
       subdomain: 'my-tenant.eu',
       callback: `${strapi.config.server.url}/auth/auth0/callback`,
       scope: ['openid', 'email', 'profile'],
+    },
+    cas: {
+      enabled: false,
+      icon: 'book',
+      key: '',
+      secret: '',
+      callback: `${strapi.config.server.url}/auth/cas/callback`,
+      scope: ['openid email'], // scopes should be space delimited
+      subdomain: 'my.subdomain.com/cas',
     },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
