@@ -417,10 +417,9 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
             qb.where(qb => {
               for (const modelAndFields of morphModelsAndFields) {
                 qb.orWhere(qb => {
-                  qb.where({ related_type: modelAndFields.collectionName }).whereIn(
-                    'field',
-                    modelAndFields.relatedFields
-                  );
+                  qb.where({
+                    [`${morphAttrInfo.name}_type`]: modelAndFields.collectionName,
+                  }).whereIn('field', modelAndFields.relatedFields);
                 });
               }
             });

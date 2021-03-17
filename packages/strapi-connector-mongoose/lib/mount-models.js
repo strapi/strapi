@@ -189,6 +189,22 @@ module.exports = async ({ models, target }, ctx) => {
       };
     };
 
+    const parseComponentRef = el => {
+      if (el.ref instanceof mongoose.Types.ObjectId) {
+        return el.ref.toString();
+      } else {
+        return el.ref;
+      }
+    };
+
+    const parseDynamicZoneRef = el => {
+      if (el.ref instanceof mongoose.Types.ObjectId) {
+        return { id: el.ref.toString() };
+      } else {
+        return el.ref;
+      }
+    };
+
     schema.options.toObject = schema.options.toJSON = {
       virtuals: true,
       transform: function(doc, returned) {
@@ -232,7 +248,7 @@ module.exports = async ({ models, target }, ctx) => {
 
           if (type === 'component') {
             if (Array.isArray(returned[name])) {
-              const components = returned[name].map(el => el.ref);
+              const components = returned[name].map(parseComponentRef);
               // Reformat data by bypassing the many-to-many relationship.
               returned[name] =
                 attribute.repeatable === true ? components : _.first(components) || null;
@@ -246,7 +262,7 @@ module.exports = async ({ models, target }, ctx) => {
                 .map(el => {
                   return {
                     __component: findComponentByGlobalId(el.kind).uid,
-                    ...el.ref,
+                    ...parseDynamicZoneRef(el),
                   };
                 });
             }

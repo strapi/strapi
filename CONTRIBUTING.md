@@ -71,7 +71,7 @@ _For users running on Apple Silicon M1, you may encounter errors thrown by `shar
 
 To facilitate the contribution, we have drastically reduced the amount of commands necessary to install the entire development environment.
 
-First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/installation/cli.html#step-1-make-sure-requirements-are-met).
+First of all, you need to check if you're using the [required versions of Node.js and npm](https://strapi.io/documentation/developer-docs/latest/setup-deployment-guides/deployment.html#recommended-requirements).
 
 Then, please follow the instructions below:
 

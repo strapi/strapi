@@ -2,7 +2,7 @@
 
 /**
  * Converts the standard Strapi REST query params to a moe usable format for querying
- * You can read more here: https://strapi.io/documentation/developer-docs/latest/content-api/parameters.html#filters
+ * You can read more here: https://strapi.io/documentation/developer-docs/latest/developer-resources/content-api/content-api.html#filters
  */
 
 const _ = require('lodash');
