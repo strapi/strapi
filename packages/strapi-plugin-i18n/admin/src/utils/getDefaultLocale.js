@@ -1,7 +1,9 @@
+import get from 'lodash/get';
+
 const hasLocalePermission = (permissions, localeCode) => {
   if (permissions) {
     const hasPermission = permissions.some(permission =>
-      permission.properties.locales.includes(localeCode)
+      get(permission, 'properties.locales', []).includes(localeCode)
     );
 
     if (hasPermission) {

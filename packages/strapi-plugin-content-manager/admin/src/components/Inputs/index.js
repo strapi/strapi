@@ -184,7 +184,13 @@ function Inputs({
   }
 
   if (!shouldDisplayNotAllowedInput) {
-    return <NotAllowedInput label={metadatas.label} labelIcon={labelIconformatted} />;
+    return (
+      <NotAllowedInput
+        label={metadatas.label}
+        labelIcon={labelIconformatted}
+        error={errorMessage}
+      />
+    );
   }
 
   if (type === 'relation') {

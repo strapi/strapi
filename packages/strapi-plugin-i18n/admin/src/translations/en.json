@@ -14,6 +14,8 @@
   "CheckboxConfirmation.Modal.content": "Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).",
   "CheckboxConfirmation.Modal.body": "Do you want to disable it?",
   "CheckboxConfirmation.Modal.button-confirm": "Yes, disable",
+  "CMEditViewCopyLocale.copy-success": "Locale copied",
+  "CMEditViewCopyLocale.copy-failure": "Failed to copy locale",
   "CMEditViewCopyLocale.copy-text": "Fill in from another locale",
   "Field.localized": "This value is unique for the selected locale",
   "Field.not-localized": "This value is common to all locales",
