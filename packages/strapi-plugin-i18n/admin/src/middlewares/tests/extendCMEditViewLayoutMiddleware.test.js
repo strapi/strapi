@@ -107,6 +107,7 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
                 queryInfos: {
                   test: true,
                   defaultParams: {},
+                  paramsToKeep: ['plugins.i18n.locale'],
                 },
                 size: 6,
                 targetModelPluginOptions: {},
@@ -143,6 +144,7 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
                   queryInfos: {
                     test: true,
                     defaultParams: {},
+                    paramsToKeep: ['plugins.i18n.locale'],
                   },
                   size: 6,
                   targetModelPluginOptions: {},
@@ -305,6 +307,7 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
                   targetModelPluginOptions: { i18n: { localized: true } },
                   queryInfos: {
                     defaultParams: { test: true, _locale: 'en' },
+                    paramsToKeep: ['plugins.i18n.locale'],
                   },
                 },
                 {
@@ -326,6 +329,7 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
                   targetModelPluginOptions: { i18n: { localized: true } },
                   queryInfos: {
                     defaultParams: { test: true, _locale: 'en' },
+                    paramsToKeep: ['plugins.i18n.locale'],
                   },
                 },
                 {
@@ -515,6 +519,7 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
               test: true,
               _locale: 'en',
             },
+            paramsToKeep: ['plugins.i18n.locale'],
           },
           size: 6,
           targetModelPluginOptions: {

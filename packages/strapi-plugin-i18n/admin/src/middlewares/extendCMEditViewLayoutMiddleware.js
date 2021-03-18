@@ -18,6 +18,7 @@ const enhanceRelationLayout = (layout, locale) =>
       queryInfos = {
         ...queryInfos,
         defaultParams: { ...queryInfos.defaultParams, _locale: locale },
+        paramsToKeep: ['plugins.i18n.locale'],
       };
     }
 
@@ -79,6 +80,7 @@ const enhanceComponentLayoutForRelations = (layout, locale) =>
         const queryInfos = {
           ...field.queryInfos,
           defaultParams: { ...field.queryInfos.defaultParams, _locale: locale },
+          paramsToKeep: ['plugins.i18n.locale'],
         };
 
         acc.push({ ...field, queryInfos });
