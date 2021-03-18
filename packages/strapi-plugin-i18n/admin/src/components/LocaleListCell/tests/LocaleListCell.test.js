@@ -2,6 +2,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import LocaleListCell from '../LocaleListCell';
 
+jest.mock('@buffetjs/styles', () => ({
+  Tooltip: () => null,
+}));
+
 describe('LocaleListCell', () => {
   it('returns the default locale first, then the others sorted alphabetically', () => {
     const locales = [
@@ -34,7 +38,9 @@ describe('LocaleListCell', () => {
     const locale = 'en';
     const localizations = [{ locale: 'fr-FR' }, { locale: 'ar' }];
 
-    render(<LocaleListCell locales={locales} locale={locale} localizations={localizations} />);
+    render(
+      <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+    );
 
     expect(screen.getByText('French (default), Arabic')).toBeVisible();
   });
@@ -70,7 +76,9 @@ describe('LocaleListCell', () => {
     const locale = 'en';
     const localizations = [{ locale: 'ar' }];
 
-    render(<LocaleListCell locales={locales} locale={locale} localizations={localizations} />);
+    render(
+      <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+    );
 
     expect(screen.getByText('Arabic')).toBeVisible();
   });
@@ -106,7 +114,9 @@ describe('LocaleListCell', () => {
     const locale = 'fr-FR';
     const localizations = [{ locale: 'en' }, { locale: 'ar' }];
 
-    render(<LocaleListCell locales={locales} locale={locale} localizations={localizations} />);
+    render(
+      <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+    );
 
     expect(screen.getByText('Arabic, English')).toBeVisible();
   });
