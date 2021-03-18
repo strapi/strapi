@@ -69,6 +69,8 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         definition.attributes[PUBLISHED_AT_ATTRIBUTE] = {
           type: 'datetime',
           configurable: false,
+          writable: true,
+          visible: false,
         };
       }
 
@@ -79,6 +81,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
 
@@ -87,6 +90,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
         plugin: 'admin',
         configurable: false,
         writable: false,
+        visible: false,
         private: isPrivate,
       };
     }
@@ -587,6 +591,15 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
           if (relation) {
             // Extract raw JSON data.
             attrs[association.alias] = relation.toJSON ? relation.toJSON(options) : relation;
+
+            if (_.isArray(association.populate)) {
+              const { alias, populate } = association;
+              const pickPopulate = entry => _.pick(entry, populate);
+
+              attrs[alias] = _.isArray(attrs[alias])
+                ? _.map(attrs[alias], pickPopulate)
+                : pickPopulate(attrs[alias]);
+            }
           }
         });
 

@@ -5,10 +5,9 @@ const { setCreatorFields } = require('strapi-utils');
 
 const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
 
-const findEntity = async model => {
+const findEntity = async (query, model) => {
   const entityManager = getService('entity-manager');
-
-  const entity = await entityManager.find({}, model);
+  const entity = await entityManager.find(query, model);
   return entityManager.assocCreatorRoles(entity);
 };
 
@@ -16,6 +15,7 @@ module.exports = {
   async find(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
+    const { query = {} } = ctx.request;
 
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -23,7 +23,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(model);
+    const permissionQuery = permissionChecker.buildReadQuery(query);
+
+    const entity = await findEntity(permissionQuery, model);
 
     // allow user with create permission to know a single type is not created
     if (!entity) {
@@ -44,7 +46,7 @@ module.exports = {
   async createOrUpdate(ctx) {
     const { user, userAbility } = ctx.state;
     const { model } = ctx.params;
-    const { body } = ctx.request;
+    const { body, query } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -53,7 +55,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(model);
+    const entity = await findEntity(query, model);
 
     const pickWritables = pickWritableAttributes({ model });
 
@@ -69,7 +71,7 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       if (!entity) {
-        const newEntity = await entityManager.create(sanitizeFn(body), model);
+        const newEntity = await entityManager.create(sanitizeFn(body), model, { params: query });
         ctx.body = permissionChecker.sanitizeOutput(newEntity);
 
         await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
@@ -88,6 +90,7 @@ module.exports = {
   async delete(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
+    const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -96,7 +99,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(model);
+    const entity = await findEntity(query, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -114,6 +117,7 @@ module.exports = {
   async publish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
+    const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -122,7 +126,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(model);
+    const entity = await findEntity(query, model);
 
     if (!entity) {
       return ctx.notFound();
@@ -140,6 +144,7 @@ module.exports = {
   async unpublish(ctx) {
     const { userAbility } = ctx.state;
     const { model } = ctx.params;
+    const { query = {} } = ctx.request;
 
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
@@ -148,7 +153,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const entity = await findEntity(model);
+    const entity = await findEntity(query, model);
 
     if (!entity) {
       return ctx.notFound();

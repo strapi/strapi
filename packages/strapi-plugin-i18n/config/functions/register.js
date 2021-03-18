@@ -1,24 +1,35 @@
 'use strict';
 
 const _ = require('lodash');
+
 const { getService } = require('../../utils');
 
 module.exports = () => {
-  Object.values(strapi.models).forEach(model => {
-    if (getService('content-types').isLocalized(model)) {
-      _.set(model.attributes, 'localizations', {
-        writable: false,
+  const contentTypeService = getService('content-types');
+  const coreApiService = getService('core-api');
+
+  Object.values(strapi.contentTypes).forEach(contentType => {
+    if (contentTypeService.isLocalized(contentType)) {
+      const { attributes, modelName } = contentType;
+
+      _.set(attributes, 'localizations', {
+        writable: true,
         private: false,
         configurable: false,
-        type: 'json',
+        visible: false,
+        collection: modelName,
+        populate: ['id', 'locale', 'published_at'],
       });
 
-      _.set(model.attributes, 'locale', {
-        writable: false,
+      _.set(attributes, 'locale', {
+        writable: true,
         private: false,
         configurable: false,
+        visible: false,
         type: 'string',
       });
+
+      coreApiService.addCreateLocalizationAction(contentType);
     }
   });
 

@@ -50,20 +50,20 @@ describe('Content types utils', () => {
   });
 
   describe('getNonWritableAttributes', () => {
-    test('Includes default fields', () => {
+    test('Includes non writable fields', () => {
       const model = createModel({
         attributes: {
           title: {
             type: 'string',
           },
+          non_writable_field: {
+            type: 'string',
+            writable: false,
+          },
         },
       });
 
-      expect(getNonWritableAttributes(model)).toEqual([
-        'id',
-        constants.CREATED_BY_ATTRIBUTE,
-        constants.UPDATED_BY_ATTRIBUTE,
-      ]);
+      expect(getNonWritableAttributes(model)).toEqual(['id', 'non_writable_field']);
     });
 
     test('Includes primaryKey', () => {
@@ -98,34 +98,15 @@ describe('Content types utils', () => {
   });
 
   describe('getVisibleAttributes', () => {
-    test('Excludes published_at', () => {
+    test('Excludes non visible fields', () => {
       const model = createModel({
         attributes: {
           title: {
             type: 'string',
           },
-          [constants.PUBLISHED_AT_ATTRIBUTE]: {
+          invisible_field: {
             type: 'datetime',
-          },
-        },
-      });
-
-      expect(getVisibleAttributes(model)).toEqual(['title']);
-    });
-
-    test('Excludes creator attributes', () => {
-      const model = createModel({
-        attributes: {
-          title: {
-            type: 'string',
-          },
-          [constants.CREATED_BY_ATTRIBUTE]: {
-            model: 'user',
-            plugin: 'admin',
-          },
-          [constants.UPDATED_BY_ATTRIBUTE]: {
-            model: 'user',
-            plugin: 'admin',
+            visible: false,
           },
         },
       });
