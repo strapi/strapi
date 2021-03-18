@@ -1,6 +1,7 @@
 import React from 'react';
 import get from 'lodash/get';
 import getDefaultLocale from '../utils/getDefaultLocale';
+import LocaleListCell from '../components/LocaleListCell/LocaleListCell';
 
 const localeQueryParamsMiddleware = () => ({ getState }) => next => action => {
   if (action.type !== 'ContentManager/ListView/SET_LIST_LAYOUT ') {
@@ -19,18 +20,14 @@ const localeQueryParamsMiddleware = () => ({ getState }) => next => action => {
   const ctPermissions = collectionTypesRelatedPermissions[action.contentType.uid];
   const defaultLocale = getDefaultLocale(ctPermissions, locales);
 
+  console.log('xxx', locales)
+
   const locale = {
     key: '__locale_key__',
     fieldSchema: { type: 'string' },
     metadatas: { label: 'Content available in', searchable: false, sortable: false },
     name: 'locales',
-    cellFormatter: props => {
-      const actualLocale = locales.find(({ code }) => code === props.locale);
-
-      console.log('lol', actualLocale)
-
-      return <div>TODO when backend is {actualLocale.name}</div>;
-    },
+    cellFormatter: props => <LocaleListCell {...props} locales={locales} />,
   };
 
   action.displayedHeaders = [...action.displayedHeaders, locale];
