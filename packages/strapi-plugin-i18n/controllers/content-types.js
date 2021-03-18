@@ -1,6 +1,6 @@
 'use strict';
 
-const { prop, pipe, pick, mergeAll, map } = require('lodash/fp');
+const { pick, uniq } = require('lodash/fp');
 const { getService } = require('../utils');
 
 module.exports = {
@@ -9,12 +9,8 @@ module.exports = {
     const { model, id } = ctx.request.body;
 
     const modelDef = strapi.getModel(model);
-
-    const { getNonLocalizedAttributes } = getService('content-types');
-    const nonLocalizedFieldsList = getNonLocalizedAttributes(modelDef);
-
-    const permCheckerService = strapi.plugins['content-manager'].services['permission-checker'];
-    const permissionChecker = permCheckerService.create({ userAbility, model });
+    const { copyNonLocalizedAttributes } = getService('content-types');
+    const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
     const entity = await strapi.entityService.findOne({ params: { id } }, { model });
 
@@ -22,23 +18,20 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const relatedEntities = await strapi.entityService.find(
-      {
-        params: { id_in: entity.localizations.map(prop('id')), _locale: 'all' },
-      },
-      { model }
-    );
+    const pm = strapi.admin.services.permission.createPermissionsManager({
+      ability: userAbility,
+      model,
+    });
 
-    const allEntities = [...relatedEntities, entity].filter(entity =>
-      permissionChecker.can.read(entity)
-    );
+    const permittedReadFields = pm.permittedFieldsOf(READ_ACTION);
+    const permittedCreateFields = pm.permittedFieldsOf(CREATE_ACTION);
+    const permittedFields = uniq([...permittedReadFields, ...permittedCreateFields]);
 
-    const sanitizedEntities = allEntities.map(entity => permissionChecker.sanitizeOutput(entity));
-
-    const nonLocalizedFields = pipe(map(pick(nonLocalizedFieldsList)), mergeAll)(sanitizedEntities);
+    const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
+    const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
 
     ctx.body = {
-      nonLocalizedFields,
+      nonLocalizedFields: sanitizedNonLocalizedFields,
       localizations: entity.localizations.concat(pick(['id', 'locale'], entity)),
     };
   },
