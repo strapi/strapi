@@ -2,22 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip } from '@buffetjs/styles';
 
-const propTypes = {
-  id: PropTypes.number.isRequired,
-  localizations: PropTypes.arrayOf(
-    PropTypes.shape({
-      locale: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  locales: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-      isDefault: PropTypes.bool,
-    })
-  ).isRequired,
-};
-
 const mapToLocaleName = (locales, localeCode) =>
   locales.find(({ code }) => code === localeCode).name;
 
@@ -63,5 +47,20 @@ const LocaleListCell = ({ locales, localizations, id }) => {
   );
 };
 
-LocaleListCell.propTypes = propTypes;
+LocaleListCell.propTypes = {
+  id: PropTypes.number.isRequired,
+  localizations: PropTypes.arrayOf(
+    PropTypes.shape({
+      locale: PropTypes.string.isRequired,
+    })
+  ).isRequired,
+  locales: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      code: PropTypes.string.isRequired,
+      isDefault: PropTypes.bool,
+    })
+  ).isRequired,
+};
+
 export default LocaleListCell;
