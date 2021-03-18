@@ -16,7 +16,7 @@ const hasLocalePermission = (permissions, localeCode) => {
 
 const getFirstLocale = permissions => {
   if (permissions.length > 0) {
-    const firstAuthorizedNonDefaultLocale = permissions[0].properties.locales[0];
+    const firstAuthorizedNonDefaultLocale = get(permissions, [0, 'properties', 'locales', 0], null);
 
     if (firstAuthorizedNonDefaultLocale) {
       return firstAuthorizedNonDefaultLocale;

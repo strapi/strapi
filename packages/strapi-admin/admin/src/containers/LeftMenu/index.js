@@ -22,6 +22,8 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
     pluginsSectionLinks,
   } = useMenuSections(plugins, shouldUpdateStrapi);
 
+  const filteredSingleTypeLinks = singleTypesSectionLinks.filter(({ isDisplayed }) => isDisplayed);
+
   return (
     <Wrapper>
       <Loader show={isLoading} />
@@ -36,11 +38,11 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
             searchable
           />
         )}
-        {singleTypesSectionLinks.length > 0 && (
+        {filteredSingleTypeLinks.length > 0 && (
           <LeftMenuLinksSection
             section="singleType"
             name="singleType"
-            links={singleTypesSectionLinks}
+            links={filteredSingleTypeLinks}
             location={location}
             searchable
           />
