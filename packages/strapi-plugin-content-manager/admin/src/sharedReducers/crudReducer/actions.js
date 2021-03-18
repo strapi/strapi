@@ -19,9 +19,10 @@ export const getDataSucceeded = data => ({
   data,
 });
 
-export const initForm = rawQuery => ({
+export const initForm = (rawQuery, isSingleType = false) => ({
   type: INIT_FORM,
   rawQuery,
+  isSingleType,
 });
 
 export const resetProps = () => ({ type: RESET_PROPS });

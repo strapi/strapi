@@ -8,11 +8,11 @@ import CMEditViewLocalePicker from '../CMEditViewLocalePicker';
 import selectCollectionTypesRelatedPermissions from './selectors';
 
 const CMEditViewInjectedComponents = () => {
-  const { layout, modifiedData, slug } = useContentManagerEditViewDataManager();
+  const { layout, modifiedData, slug, isSingleType } = useContentManagerEditViewDataManager();
   const colllectionTypesRelatedPermissions = useSelector(selectCollectionTypesRelatedPermissions);
   const locales = useSelector(selectI18NLocales);
   const params = useParams();
-  const [{ query }] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams();
 
   const id = get(params, 'id', null);
   const currentEntityId = id === 'create' ? null : id;
@@ -50,8 +50,10 @@ const CMEditViewInjectedComponents = () => {
       createPermissions={createPermissions}
       hasDraftAndPublishEnabled={hasDraftAndPublishEnabled}
       localizations={localizations}
+      isSingleType={isSingleType}
       query={defaultQuery}
       readPermissions={readPermissions}
+      setQuery={setQuery}
       slug={slug}
     />
   );

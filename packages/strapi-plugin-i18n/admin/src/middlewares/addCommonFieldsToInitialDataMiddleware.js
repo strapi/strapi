@@ -21,8 +21,9 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
   const search = action.rawQuery.substring(1);
   const query = parse(search);
   const relatedEntityId = get(query, 'plugins.i18n.relatedEntityId', null);
+  const isSingleType = action.isSingleType;
 
-  if (!relatedEntityId) {
+  if (!relatedEntityId && !isSingleType) {
     return next(action);
   }
 
