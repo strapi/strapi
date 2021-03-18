@@ -1,5 +1,5 @@
 import get from 'lodash/get';
-import { stringify } from 'qs';
+import { stringify, parse } from 'qs';
 import getDefaultLocale from '../utils/getDefaultLocale';
 
 const addLocaleToSingleTypesMiddleware = () => ({ getState }) => next => action => {
@@ -44,8 +44,11 @@ const addLocaleToSingleTypesMiddleware = () => ({ getState }) => next => action 
       if (!defaultLocale) {
         return { ...link, isDisplayed: false };
       }
-      const params = link.params
-        ? { ...link.params, plugins: { ...link.params.plugins, i18n: { locale: defaultLocale } } }
+
+      const linkParams = link.search ? parse(link.search) : {};
+
+      const params = linkParams
+        ? { ...linkParams, plugins: { ...linkParams.plugins, i18n: { locale: defaultLocale } } }
         : { plugins: { i18n: { locale: defaultLocale } } };
 
       const search = stringify(params, { encode: false });
