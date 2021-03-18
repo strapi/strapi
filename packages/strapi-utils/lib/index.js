@@ -34,6 +34,8 @@ const webhook = require('./webhook');
 const env = require('./env-helper');
 const relations = require('./relations');
 const setCreatorFields = require('./set-creator-fields');
+const hooks = require('./hooks');
+const providerFactory = require('./provider-factory');
 
 module.exports = {
   yup,
@@ -67,4 +69,6 @@ module.exports = {
   env,
   relations,
   setCreatorFields,
+  hooks,
+  providerFactory,
 };
