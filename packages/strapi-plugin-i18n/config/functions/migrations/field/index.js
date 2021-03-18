@@ -13,8 +13,8 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
     return;
   }
 
-  const localizedAttributes = ctService.getLocalizedFields(definition);
-  const prevLocalizedAttributes = ctService.getLocalizedFields(previousDefinition);
+  const localizedAttributes = ctService.getLocalizedAttributes(definition);
+  const prevLocalizedAttributes = ctService.getLocalizedAttributes(previousDefinition);
   const attributesDisabled = difference(prevLocalizedAttributes, localizedAttributes);
   const attributesToMigrate = intersection(Object.keys(definition.attributes), attributesDisabled);
 

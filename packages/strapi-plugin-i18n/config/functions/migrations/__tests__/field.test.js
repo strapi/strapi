@@ -31,7 +31,7 @@ describe('i18n - Migration - disable localization on a field', () => {
 
       test("Doesn't migrate if no attribute changed (without i18n)", async () => {
         const find = jest.fn();
-        const getLocalizedFields = jest
+        const getLocalizedAttributes = jest
           .fn()
           .mockReturnValueOnce([])
           .mockReturnValueOnce([]);
@@ -45,7 +45,7 @@ describe('i18n - Migration - disable localization on a field', () => {
               services: {
                 'content-types': {
                   isLocalized: () => true,
-                  getLocalizedFields,
+                  getLocalizedAttributes,
                 },
               },
             },
@@ -56,13 +56,13 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
+        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
       test("Doesn't migrate if no attribute changed (with i18n)", async () => {
         const find = jest.fn();
-        const getLocalizedFields = jest
+        const getLocalizedAttributes = jest
           .fn()
           .mockReturnValueOnce(['name'])
           .mockReturnValueOnce(['name']);
@@ -75,7 +75,7 @@ describe('i18n - Migration - disable localization on a field', () => {
               services: {
                 'content-types': {
                   isLocalized: () => true,
-                  getLocalizedFields,
+                  getLocalizedAttributes,
                 },
               },
             },
@@ -86,13 +86,13 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
+        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
       test("Doesn't migrate if field become localized", async () => {
         const find = jest.fn();
-        const getLocalizedFields = jest
+        const getLocalizedAttributes = jest
           .fn()
           .mockReturnValueOnce(['name'])
           .mockReturnValueOnce([]);
@@ -106,7 +106,7 @@ describe('i18n - Migration - disable localization on a field', () => {
               services: {
                 'content-types': {
                   isLocalized: () => true,
-                  getLocalizedFields,
+                  getLocalizedAttributes,
                 },
               },
             },
@@ -117,13 +117,13 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
+        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
 
       test("Doesn't migrate if field is deleted", async () => {
         const find = jest.fn();
-        const getLocalizedFields = jest
+        const getLocalizedAttributes = jest
           .fn()
           .mockReturnValueOnce([])
           .mockReturnValueOnce(['name']);
@@ -137,7 +137,7 @@ describe('i18n - Migration - disable localization on a field', () => {
               services: {
                 'content-types': {
                   isLocalized: () => true,
-                  getLocalizedFields,
+                  getLocalizedAttributes,
                 },
               },
             },
@@ -148,7 +148,7 @@ describe('i18n - Migration - disable localization on a field', () => {
         const previousDefinition = { attributes: { name: {} } };
 
         await after({ model, definition: model, previousDefinition });
-        expect(getLocalizedFields).toHaveBeenCalledTimes(2);
+        expect(getLocalizedAttributes).toHaveBeenCalledTimes(2);
         expect(find).not.toHaveBeenCalled();
       });
     });
