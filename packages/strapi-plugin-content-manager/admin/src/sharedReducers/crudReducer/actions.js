@@ -19,8 +19,9 @@ export const getDataSucceeded = data => ({
   data,
 });
 
-export const initForm = () => ({
+export const initForm = rawQuery => ({
   type: INIT_FORM,
+  rawQuery,
 });
 
 export const resetProps = () => ({ type: RESET_PROPS });
