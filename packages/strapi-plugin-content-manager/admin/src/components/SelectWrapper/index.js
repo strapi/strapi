@@ -231,11 +231,7 @@ function SelectWrapper({
 
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
 
-  const searchToPersist = useMemo(() => {
-    const params = buildParams(query, paramsToKeep);
-
-    return stringify(params, { encode: false });
-  }, [query, paramsToKeep]);
+  const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
 
   const link = useMemo(() => {
     if (!value) {
