@@ -28,6 +28,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
   const { currentLayout } = cmLayoutStore;
 
   const getData = async () => {
+    // Show a loader
     dispatch({ type: 'ContentManager/CrudReducer/GET_DATA' });
     const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
