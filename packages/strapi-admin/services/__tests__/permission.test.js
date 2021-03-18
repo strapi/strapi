@@ -74,7 +74,7 @@ describe('Permission Service', () => {
         action: 'read',
         subject: 'article',
         properties: { fields: ['*'] },
-        conditions: ['cond', 'unknown-cond'],
+        conditions: ['cond'],
         foo: 'bar',
       };
 
@@ -83,7 +83,6 @@ describe('Permission Service', () => {
       expect(sanitizedPermission.foo).toBeUndefined();
       expect(sanitizedPermission).toMatchObject({
         ..._.omit(permission, 'foo'),
-        conditions: ['cond'],
       });
     });
   });
@@ -146,13 +145,20 @@ describe('Permission Service', () => {
       const registeredPerms = new Map();
       registeredPerms.set('action-1', {});
       registeredPerms.set('action-3', { subjects: ['country'] });
-      const getAllByMap = jest.fn(() => registeredPerms);
-      const prevGetAllByMap = permissionService.actionProvider.getAllByMap;
-      permissionService.actionProvider.getAllByMap = getAllByMap;
 
       global.strapi = merge(global.strapi, {
         query: () => ({ findPage, delete: dbDelete, update }),
-        admin: { services: { 'content-type': { cleanPermissionFields } } },
+        admin: {
+          services: {
+            'content-type': { cleanPermissionFields },
+            permission: {
+              actionProvider: {
+                has: jest.fn(id => registeredPerms.has(id)),
+                get: jest.fn(id => registeredPerms.get(id)),
+              },
+            },
+          },
+        },
       });
 
       await permissionService.cleanPermissionInDatabase();
@@ -160,11 +166,7 @@ describe('Permission Service', () => {
       expect(findPage).toHaveBeenCalledWith({ page: 1, pageSize: 200 }, []);
       expect(update).toHaveBeenNthCalledWith(1, { id: permsInDb[4].id }, permsWithCleanFields[2]);
       expect(update).toHaveBeenNthCalledWith(2, { id: permsInDb[5].id }, permsWithCleanFields[3]);
-      expect(getAllByMap).toHaveBeenCalledWith();
       expect(dbDelete).toHaveBeenCalledWith({ id_in: [2, 4] });
-
-      // restauring actionProvider
-      permissionService.actionProvider.getAllByMap = prevGetAllByMap;
     });
   });
 });

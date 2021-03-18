@@ -3,9 +3,9 @@
 const _ = require('lodash');
 const { uniq, startsWith, intersection } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const actionDomain = require('../domain/action');
-const { Permission } = require('../domain/permission');
 const { getService } = require('../utils');
+const actionDomain = require('../domain/action');
+const permissionDomain = require('../domain/permission');
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
@@ -135,7 +135,13 @@ const getPermissionsWithNestedFields = (
           })
         : null;
 
-      permissions.push(new Permission(action.actionId, { subject, properties: { fields } }));
+      const permission = permissionDomain.create({
+        action: action.actionId,
+        subject,
+        properties: { fields },
+      });
+
+      permissions.push(permission);
     }
 
     return permissions;
@@ -149,17 +155,24 @@ const getPermissionsWithNestedFields = (
  * @param {number} options.nestingLevel level of nesting
  * @returns {Permission[]}
  */
-const cleanPermissionFields = (permissions, { nestingLevel } = {}) =>
-  permissions.map(permission => {
+const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
+  const { actionProvider } = getService('permission');
+
+  return permissions.map(permission => {
     const {
       action: actionId,
       subject,
       properties: { fields },
     } = permission;
-    const action = getService('permission').actionProvider.getByActionId(actionId);
+    const setPermissionFieldsProperty = value => {
+      return permissionDomain.setProperty('fields', value, permission);
+    };
 
+    const action = actionProvider.get(actionId);
+
+    // todo see if it's possible to check property on action + subject (async)
     if (!actionDomain.appliesToProperty('fields', action)) {
-      return permission.setProperty('fields', null);
+      return setPermissionFieldsProperty(null);
     }
 
     if (!subject || !strapi.contentTypes[subject]) {
@@ -184,8 +197,9 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) =>
       field => !badNestedFields.some(startsWith(`${field}.`))
     );
 
-    return permission.setProperty('fields', newFields);
+    return setPermissionFieldsProperty(newFields);
   }, []);
+};
 
 module.exports = {
   getNestedFields,

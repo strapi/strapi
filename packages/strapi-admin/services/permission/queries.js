@@ -133,14 +133,16 @@ const cleanPermissionInDatabase = async () => {
 
     // Update only the ones that need to be updated
     const permissionsNeedingToBeUpdated = differenceWith(
-      remainingPermissions,
-      permissionsWithCleanFields,
       (a, b) => {
         return a.id === b.id && xor(a.properties.fields, b.properties.fields).length === 0;
-      }
+      },
+      permissionsWithCleanFields,
+      remainingPermissions
     );
 
-    const updatePromiseProvider = permission => update({ id: permission.id }, permission);
+    const updatePromiseProvider = permission => {
+      return update({ id: permission.id }, permission);
+    };
 
     // Execute all the queries, update the database
     await Promise.all([

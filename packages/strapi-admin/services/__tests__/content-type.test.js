@@ -229,7 +229,7 @@ describe('Content-Type', () => {
         { actionId: 'action-1', subjects: ['country'], options: { applyToProperties: ['fields'] } },
       ]);
 
-      expect(resultLevel1.map(p => p.raw)).toEqual([
+      expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
@@ -250,7 +250,7 @@ describe('Content-Type', () => {
         ],
         { nestingLevel: 1 }
       );
-      expect(resultLevel1.map(p => p.raw)).toEqual([
+      expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
@@ -277,7 +277,7 @@ describe('Content-Type', () => {
         ],
         { nestingLevel: 2 }
       );
-      expect(resultLevel1.map(p => p.raw)).toEqual([
+      expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
@@ -309,7 +309,7 @@ describe('Content-Type', () => {
           options: { applyToProperties: ['fields'] },
         },
       ]);
-      expect(resultLevel1.map(p => p.raw)).toEqual([
+      expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
@@ -344,7 +344,7 @@ describe('Content-Type', () => {
           services: {
             permission: {
               actionProvider: {
-                getByActionId: () => ({ options: { applyToProperties: ['fields'] } }),
+                get: () => ({ options: { applyToProperties: ['fields'] } }),
               },
             },
           },
@@ -378,19 +378,17 @@ describe('Content-Type', () => {
             action: 'foo',
             subject: 'user',
             properties: { fields },
-            options: { applyToProperties: ['fields'] },
           },
         ]),
         {
           requiredOnly: true,
         }
       );
-      expect(res.map(p => p.raw)).toEqual([
+      expect(res).toEqual([
         {
           action: 'foo',
           subject: 'user',
           properties: { fields: expectedFields },
-          options: { applyToProperties: ['fields'] },
           conditions: [],
         },
       ]);

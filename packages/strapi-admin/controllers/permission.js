@@ -35,8 +35,8 @@ module.exports = {
   async getAll(ctx) {
     const { sectionsBuilder, actionProvider, conditionProvider } = getService('permission');
 
-    const allActions = actionProvider.getAll();
-    const conditions = conditionProvider.getAll();
+    const allActions = actionProvider.values();
+    const conditions = conditionProvider.values();
 
     const sections = await sectionsBuilder.build(allActions);
 

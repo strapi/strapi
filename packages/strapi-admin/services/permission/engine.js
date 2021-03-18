@@ -13,9 +13,12 @@ const {
   merge,
   pick,
   difference,
+  cloneDeep,
 } = require('lodash/fp');
 const { AbilityBuilder, Ability } = require('@casl/ability');
 const sift = require('sift');
+const { hooks } = require('strapi-utils');
+const permissionDomain = require('../../domain/permission/index');
 const { getService } = require('../../utils');
 
 const allowedOperations = [
@@ -37,21 +40,22 @@ const conditionsMatcher = conditions => {
   return sift.createQueryTester(conditions, { operations });
 };
 
+const hookAbstractDomainFactory = permission => ({
+  addCondition(condition) {
+    Object.assign(permission, permissionDomain.addCondition(condition, permission));
+    return this;
+  },
+});
+
 module.exports = conditionProvider => {
-  const permissionsHandlers = [];
+  const state = {
+    hooks: {
+      willEvaluatePermission: hooks.createAsyncSeriesHook(),
+    },
+  };
 
   return {
-    registerPermissionsHandler(handler) {
-      if (isFunction(handler)) {
-        permissionsHandlers.push(handler);
-      }
-    },
-
-    registerPermissionsHandlers(handlers) {
-      for (const handler of handlers) {
-        this.registerPermissionsHandler(handler);
-      }
-    },
+    hooks: state.hooks,
 
     /**
      * Generate an ability based on the given user (using associated roles & permissions)
@@ -92,7 +96,7 @@ module.exports = conditionProvider => {
     formatPermission(permission) {
       const { actionProvider } = getService('permission');
 
-      const action = actionProvider.getByActionId(permission.action);
+      const action = actionProvider.get(permission.action);
 
       // If the action isn't registered into the action provider, then ignore the permission
       if (!action) {
@@ -108,7 +112,10 @@ module.exports = conditionProvider => {
         action.applyToProperties || propertiesName
       );
 
-      invalidProperties.forEach(property => permission.deleteProperty(property));
+      const permissionWithSanitizedProperties = invalidProperties.reduce(
+        property => permissionDomain.deleteProperty(property, permission),
+        permission
+      );
 
       // If the `fields` property is an empty array, then ignore the permission
       const { fields } = properties;
@@ -117,7 +124,7 @@ module.exports = conditionProvider => {
         return null;
       }
 
-      return permission;
+      return permissionWithSanitizedProperties;
     },
 
     /**
@@ -126,8 +133,13 @@ module.exports = conditionProvider => {
      * @returns {Promise<void>}
      */
     async applyPermissionProcessors(permission) {
-      // 1. Evaluate every registered permissions handler
-      await Promise.all(permissionsHandlers.map(handler => handler(permission)));
+      const context = permissionDomain.createBoundAbstractDomain(
+        hookAbstractDomainFactory,
+        permission
+      );
+
+      // 1. Trigger willEvaluatePermission hook and await transformation operated on the permission
+      await state.hooks.willEvaluatePermission.call(context);
     },
 
     /**
@@ -163,7 +175,7 @@ module.exports = conditionProvider => {
       /** Set of functions used to resolve + evaluate conditions & register the permission if allowed */
 
       // 1. Replace each condition name by its associated value
-      const resolveConditions = map(conditionProvider.getById);
+      const resolveConditions = map(conditionProvider.get);
 
       // 2. Only keep the handler of each condition
       const pickHandlers = map(prop('handler'));
@@ -175,7 +187,9 @@ module.exports = conditionProvider => {
       const evaluateConditions = conditions => {
         return Promise.all(
           conditions.map(cond =>
-            isFunction(cond) ? cond(user, merge(conditionOptions, permission.json)) : cond
+            isFunction(cond)
+              ? cond(user, merge(conditionOptions, { permission: cloneDeep(permission) }))
+              : cond
           )
         );
       };

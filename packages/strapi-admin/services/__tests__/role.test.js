@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const roleService = require('../role');
 const { SUPER_ADMIN_CODE } = require('../constants');
-const { createPermission, toPermission } = require('../../domain/permission');
+const { create: createPermission, toPermission } = require('../../domain/permission');
 
 describe('Role', () => {
   describe('create', () => {
@@ -437,7 +437,7 @@ describe('Role', () => {
       const count = jest.fn(() => Promise.resolve(0));
       let id = 1;
       const create = jest.fn(role => ({ ...role, id: id++ }));
-      const getAll = jest.fn(() => actions);
+      const values = jest.fn(() => actions);
       const createMany = jest.fn();
       const assignARoleToAll = jest.fn();
       const getPermissionsWithNestedFields = jest.fn(() => permissions.map(createPermission)); // cloned, otherwise it is modified inside createRolesIfNoneExist()
@@ -446,7 +446,7 @@ describe('Role', () => {
         query: () => ({ count, create }),
         admin: {
           services: {
-            permission: { actionProvider: { getAll }, createMany },
+            permission: { actionProvider: { values }, createMany },
             condition: { isValidCondition: () => true },
             'content-type': { getPermissionsWithNestedFields },
             user: { assignARoleToAll },
@@ -619,7 +619,7 @@ describe('Role', () => {
           conditions: [],
         },
       ];
-      const getAll = jest.fn(() => actions);
+      const values = jest.fn(() => actions);
       const getAllConditions = jest.fn(() => []);
       const find = jest.fn(() => [{ action: 'action-2', id: 2 }]);
       const getPermissionsWithNestedFields = jest.fn(() => [
@@ -638,7 +638,7 @@ describe('Role', () => {
             permission: {
               createMany,
               find,
-              actionProvider: { getAll },
+              actionProvider: { values },
               conditionProvider: { getAll: getAllConditions },
               deleteByIds,
             },
@@ -670,13 +670,13 @@ describe('Role', () => {
       const sendDidUpdateRolePermissions = jest.fn();
       const find = jest.fn(() => Promise.resolve([{ id: 3 }]));
       const deleteByIds = jest.fn();
-      const getAll = jest.fn(() => []);
+      const values = jest.fn(() => []);
 
       global.strapi = {
         admin: {
           services: {
             metrics: { sendDidUpdateRolePermissions },
-            permission: { find, createMany, actionProvider: { getAll }, deleteByIds },
+            permission: { find, createMany, actionProvider: { values }, deleteByIds },
             role: { getSuperAdmin },
           },
         },
@@ -696,7 +696,7 @@ describe('Role', () => {
       const getSuperAdmin = jest.fn(() => Promise.resolve({ id: 0 }));
       const sendDidUpdateRolePermissions = jest.fn();
       const find = jest.fn(() => Promise.resolve([]));
-      const getAll = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
+      const values = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
       const isValidCondition = jest.fn(cond => cond === 'cond');
 
       global.strapi = {
@@ -707,9 +707,9 @@ describe('Role', () => {
             permission: {
               find,
               createMany,
-              actionProvider: { getAll },
+              actionProvider: { values },
               conditionProvider: {
-                getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
+                values: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
             },
             condition: {
@@ -722,7 +722,7 @@ describe('Role', () => {
       const permissionsToAssign = [...permissions];
       permissionsToAssign[4] = {
         ...permissions[4],
-        conditions: ['cond', 'unknown-cond'],
+        conditions: ['cond'],
       };
 
       await roleService.assignPermissions(1, permissionsToAssign);

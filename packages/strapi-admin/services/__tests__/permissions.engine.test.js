@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { subject } = require('@casl/ability');
-const createConditionProvider = require('../permission/condition-provider');
+const createConditionProvider = require('../../domain/condition/provider');
 const createPermissionsEngine = require('../permission/engine');
 
 describe('Permissions Engine', () => {
@@ -109,14 +109,14 @@ describe('Permissions Engine', () => {
 
   const getUser = name => localTestData.users[name];
 
-  beforeEach(() => {
+  beforeEach(async () => {
     global.strapi = {
       isLoaded: false,
       admin: {
         services: {
           permission: {
             actionProvider: {
-              getByActionId() {
+              get() {
                 return { applyToProperties: undefined };
               },
             },
@@ -137,7 +137,7 @@ describe('Permissions Engine', () => {
     };
 
     conditionProvider = createConditionProvider();
-    conditionProvider.registerMany(localTestData.conditions);
+    await conditionProvider.registerMany(localTestData.conditions);
 
     engine = createPermissionsEngine(conditionProvider);
 
@@ -325,6 +325,11 @@ describe('Permissions Engine', () => {
         properties: { fields: ['title'] },
         conditions: ['plugins::test.isCreatedBy'],
       };
+
+      global.strapi.admin.services.permission.actionProvider.get = () => ({
+        applyToProperties: ['fields'],
+      });
+
       const user = getUser('alice');
       const registerFn = jest.fn();
 

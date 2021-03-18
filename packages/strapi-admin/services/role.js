@@ -13,7 +13,7 @@ const {
   differenceBy,
 } = require('lodash/fp');
 const { generateTimestampCode, stringIncludes } = require('strapi-utils');
-const { createPermission } = require('../domain/permission');
+const permissionDomain = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const { getService } = require('../utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
@@ -242,7 +242,9 @@ const createRolesIfNoneExist = async () => {
     return;
   }
 
-  const allActions = getService('permission').actionProvider.getAll();
+  const { actionProvider } = getService('permission');
+
+  const allActions = actionProvider.values();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
   // create 3 roles
@@ -276,7 +278,9 @@ const createRolesIfNoneExist = async () => {
 
   const authorPermissions = editorPermissions
     .filter(({ action }) => action !== ACTIONS.publish)
-    .map(({ raw }) => createPermission({ ...raw, conditions: ['admin::is-creator'] }));
+    .map(permission =>
+      permissionDomain.create({ ...permission, conditions: ['admin::is-creator'] })
+    );
 
   editorPermissions.push(...getDefaultPluginPermissions());
   authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));
@@ -287,7 +291,7 @@ const createRolesIfNoneExist = async () => {
 };
 
 const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
-  const conditions = isAuthor ? ['admin::is-creator'] : null;
+  const conditions = isAuthor ? ['admin::is-creator'] : [];
 
   // add plugin permissions for each role
   return [
@@ -296,7 +300,7 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
     { action: 'plugins::upload.assets.update', conditions },
     { action: 'plugins::upload.assets.download' },
     { action: 'plugins::upload.assets.copy-link' },
-  ].map(createPermission);
+  ].map(permissionDomain.create);
 };
 
 /** Display a warning if the role superAdmin doesn't exist
@@ -331,10 +335,10 @@ const assignPermissions = async (roleId, permissions = []) => {
   const assignRole = set('role', roleId);
 
   const permissionsWithRole = permissions
-    // Add the role attribute to every raw permission
+    // Add the role attribute to every permission
     .map(assignRole)
-    // Transform each raw permission into a Permission instance
-    .map(createPermission);
+    // Transform each permission into a Permission instance
+    .map(permissionDomain.create);
 
   const existingPermissions = await getService('permission').find({
     role: roleId,
@@ -370,11 +374,7 @@ const assignPermissions = async (roleId, permissions = []) => {
 };
 
 const addPermissions = async (roleId, permissions) => {
-  const permissionsWithRole = permissions
-    // Get the raw representation of the permission
-    .map(prop('raw'))
-    // Add the role attribute
-    .map(set('role', roleId));
+  const permissionsWithRole = permissions.map(set('role', roleId));
 
   return getService('permission').createMany(permissionsWithRole);
 };
@@ -389,7 +389,7 @@ const resetSuperAdminPermissions = async () => {
     return;
   }
 
-  const allActions = getService('permission').actionProvider.getAll();
+  const allActions = getService('permission').actionProvider.values();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
   const otherActions = allActions.filter(a => a.section !== 'contentTypes');
 
@@ -403,9 +403,9 @@ const resetSuperAdminPermissions = async () => {
     const { actionId, subjects } = action;
 
     if (isArray(subjects)) {
-      acc.push(...subjects.map(subject => createPermission({ action: actionId, subject })));
+      acc.push(...subjects.map(subject => permissionDomain.create({ action: actionId, subject })));
     } else {
-      acc.push(createPermission({ action: actionId }));
+      acc.push(permissionDomain.create({ action: actionId }));
     }
 
     return acc;

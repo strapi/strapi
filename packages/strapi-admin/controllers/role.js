@@ -98,12 +98,13 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async updatePermissions(ctx) {
-    const [roleService, permissionService] = getServices('role', 'permission');
+    const { findOne, assignPermissions } = getService('role');
+    const { sanitizePermission, actionProvider } = getService('permission');
 
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
-    const role = await roleService.findOne({ id });
+    const role = await findOne({ id });
 
     if (!role) {
       return ctx.notFound('role.notFound');
@@ -119,12 +120,11 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const actionsMap = permissionService.actionProvider.getAllByMap();
     let permissionsToAssign;
 
     if ([EDITOR_CODE, AUTHOR_CODE].includes(role.code)) {
       permissionsToAssign = input.permissions.map(permission => {
-        const action = actionsMap.get(permission.action);
+        const action = actionProvider.get(permission.action);
 
         if (action.section !== 'contentTypes') {
           return permission;
@@ -138,10 +138,10 @@ module.exports = {
       permissionsToAssign = input.permissions;
     }
 
-    const permissions = await roleService.assignPermissions(role.id, permissionsToAssign);
+    const permissions = await assignPermissions(role.id, permissionsToAssign);
 
     ctx.body = {
-      data: permissions.map(permissionService.sanitizePermission),
+      data: permissions.map(sanitizePermission),
     };
   },
 };
