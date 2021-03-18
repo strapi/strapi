@@ -18,6 +18,10 @@ module.exports = ({ ability, action, model }) => ({
     return this.ability.can(action, model);
   },
 
+  permittedFieldsOf(actionOverride = action) {
+    return permittedFieldsOf(ability, actionOverride, model);
+  },
+
   toSubject(target, subjectType = model) {
     return asSubject(subjectType, target);
   },
