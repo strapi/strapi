@@ -56,7 +56,7 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPe
         type: 'warning',
         message: {
           id: getTrad('CMEditViewCopyLocale.copy-failure'),
-          defaultMessage: 'Could not copy locale',
+          defaultMessage: 'Failed to copy locale',
         },
       });
     } finally {
