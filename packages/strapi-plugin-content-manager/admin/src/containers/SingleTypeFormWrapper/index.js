@@ -1,7 +1,12 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-import { request, useGlobalContext, formatComponentData } from 'strapi-helper-plugin';
+import {
+  request,
+  useGlobalContext,
+  formatComponentData,
+  useQueryParams,
+} from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
@@ -16,6 +21,7 @@ import {
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { getRequestUrl } from './utils';
+import buildQueryString from '../ListView/utils/buildQueryString';
 
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
@@ -23,6 +29,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
   const { push } = useHistory();
   const emitEventRef = useRef(emitEvent);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
+  const [{ query, rawQuery }] = useQueryParams();
+  const searchToSend = buildQueryString(query);
 
   const dispatch = useDispatch();
   const {
@@ -93,7 +101,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
       setIsCreatingEntry(true);
 
       try {
-        const data = await request(getRequestUrl(slug), { method: 'GET', signal });
+        const data = await request(getRequestUrl(`${slug}${searchToSend}`), {
+          method: 'GET',
+          signal,
+        });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
 
@@ -107,7 +118,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
 
         // Creating a single type
         if (responseStatus === 404) {
-          dispatch(initForm());
+          dispatch(initForm(rawQuery, true));
         }
 
         if (responseStatus === 403) {
@@ -121,7 +132,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
     fetchData(signal);
 
     return () => abortController.abort();
-  }, [cleanReceivedData, from, push, slug, dispatch]);
+  }, [cleanReceivedData, from, push, slug, dispatch, searchToSend, rawQuery]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -170,7 +181,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(slug);
+      const endPoint = getRequestUrl(`${slug}${rawQuery}`);
 
       try {
         dispatch(setStatus('submit-pending'));
@@ -195,7 +206,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery]
   );
   const onPublish = useCallback(async () => {
     try {

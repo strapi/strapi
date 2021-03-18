@@ -19,9 +19,11 @@ const CMEditViewLocalePicker = ({
   createPermissions,
   currentEntityId,
   hasDraftAndPublishEnabled,
+  isSingleType,
   localizations,
   query,
   readPermissions,
+  setQuery,
   slug,
 }) => {
   const { formatMessage } = useIntl();
@@ -41,6 +43,12 @@ const CMEditViewLocalePicker = ({
       defaultParams.plugins.i18n.relatedEntityId = currentEntityId;
     }
 
+    if (isSingleType) {
+      setQuery(defaultParams);
+
+      return;
+    }
+
     if (status === 'did-not-create-locale') {
       push({
         pathname: `/plugins/content-manager/collectionType/${slug}/create`,
@@ -50,8 +58,6 @@ const CMEditViewLocalePicker = ({
       return;
     }
 
-    // TODO common field when switching from created => not created => created
-
     push({
       pathname: `/plugins/content-manager/collectionType/${slug}/${id}`,
       search: stringify(defaultParams, { encode: false }),
@@ -59,7 +65,7 @@ const CMEditViewLocalePicker = ({
   };
 
   const styles = selectStyles(theme);
-  // TODO use localizations + RBAC when ready
+
   const options = addStatusColorToLocale(
     createLocalesOption(appLocales, localizations),
     theme
@@ -132,6 +138,7 @@ const CMEditViewLocalePicker = ({
 CMEditViewLocalePicker.defaultProps = {
   createPermissions: [],
   currentEntityId: null,
+  isSingleType: false,
   localizations: [],
   query: {},
   readPermissions: [],
@@ -142,9 +149,11 @@ CMEditViewLocalePicker.propTypes = {
   createPermissions: PropTypes.array,
   currentEntityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   hasDraftAndPublishEnabled: PropTypes.bool.isRequired,
+  isSingleType: PropTypes.bool,
   localizations: PropTypes.array,
   query: PropTypes.object,
   readPermissions: PropTypes.array,
+  setQuery: PropTypes.func.isRequired,
   slug: PropTypes.string.isRequired,
 };
 
