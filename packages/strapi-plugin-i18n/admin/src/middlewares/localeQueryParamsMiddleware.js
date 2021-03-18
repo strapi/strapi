@@ -1,3 +1,4 @@
+import React from 'react';
 import get from 'lodash/get';
 import getDefaultLocale from '../utils/getDefaultLocale';
 
@@ -16,8 +17,23 @@ const localeQueryParamsMiddleware = () => ({ getState }) => next => action => {
   const { locales } = store.get('i18n_locales');
   const { collectionTypesRelatedPermissions } = store.get('permissionsManager');
   const ctPermissions = collectionTypesRelatedPermissions[action.contentType.uid];
-
   const defaultLocale = getDefaultLocale(ctPermissions, locales);
+
+  const locale = {
+    key: '__locale_key__',
+    fieldSchema: { type: 'string' },
+    metadatas: { label: 'Content available in', searchable: false, sortable: false },
+    name: 'locales',
+    cellFormatter: props => {
+      const actualLocale = locales.find(({ code }) => code === props.locale);
+
+      console.log('lol', actualLocale)
+
+      return <div>TODO when backend is {actualLocale.name}</div>;
+    },
+  };
+
+  action.displayedHeaders = [...action.displayedHeaders, locale];
 
   if (!action.initialParams.plugins) {
     action.initialParams.plugins = {
