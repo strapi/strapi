@@ -176,8 +176,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
   const onDeleteSucceeded = useCallback(() => {
     setIsCreatingEntry(true);
 
-    dispatch(initForm());
-  }, [dispatch]);
+    dispatch(initForm(rawQuery, true));
+  }, [dispatch, rawQuery]);
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
