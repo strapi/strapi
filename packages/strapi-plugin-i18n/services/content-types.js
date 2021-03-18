@@ -2,7 +2,7 @@
 
 const { has, prop, isNil } = require('lodash/fp');
 const { cloneDeepWith, pick, pipe } = require('lodash/fp');
-const { isRelationalAttribute } = require('strapi-utils').contentTypes;
+const { isRelationalAttribute, getVisibleAttributes } = require('strapi-utils').contentTypes;
 const { getService } = require('../utils');
 
 const isLocalized = modelOrAttribute => {
@@ -72,9 +72,9 @@ const isLocalizedAttribute = (model, attributeName) => {
  * @returns {string[]}
  */
 const getNonLocalizedAttributes = model => {
-  return Object.keys(model.attributes)
-    .filter(attributeName => !['locale', 'localizations'].includes(attributeName))
-    .filter(attributeName => !isLocalizedAttribute(model, attributeName));
+  return getVisibleAttributes(model).filter(
+    attributeName => !isLocalizedAttribute(model, attributeName)
+  );
 };
 
 const removeIds = cloneDeepWith(value => {
