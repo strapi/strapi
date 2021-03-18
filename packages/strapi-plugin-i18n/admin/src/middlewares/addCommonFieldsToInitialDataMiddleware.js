@@ -2,7 +2,11 @@ import get from 'lodash/get';
 import merge from 'lodash/merge';
 import cloneDeep from 'lodash/cloneDeep';
 import { parse } from 'qs';
-import { request, formatComponentData } from 'strapi-helper-plugin';
+import {
+  request,
+  formatComponentData,
+  contentManagementUtilRemoveFieldsFromData,
+} from 'strapi-helper-plugin';
 import pluginId from '../pluginId';
 
 const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) => next => action => {
@@ -41,10 +45,25 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
       const { nonLocalizedFields, localizations } = data;
 
       const merged = merge(defaultDataStructure, nonLocalizedFields);
-      merged.localizations = localizations;
+      const fieldsToRemove = [
+        'created_by',
+        'updated_by',
+        'published_at',
+        'id',
+        '_id',
+        'updated_at',
+        'created_at',
+      ];
+      const cleanedMerged = contentManagementUtilRemoveFieldsFromData(
+        merged,
+        currentLayout.contentType,
+        currentLayout.components,
+        fieldsToRemove
+      );
+      cleanedMerged.localizations = localizations;
 
       action.data = formatComponentData(
-        merged,
+        cleanedMerged,
         currentLayout.contentType,
         currentLayout.components
       );

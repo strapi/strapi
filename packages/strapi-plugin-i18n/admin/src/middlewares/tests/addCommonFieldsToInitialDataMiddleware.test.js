@@ -5,6 +5,7 @@ jest.mock('strapi-helper-plugin', () => ({
     data: { nonLocalizedFields: { common: 'test' }, localizations: ['test'] },
   }),
   formatComponentData: data => data,
+  contentManagementUtilRemoveFieldsFromData: data => data,
 }));
 
 describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
