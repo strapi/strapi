@@ -30,6 +30,5 @@ module.exports = async () => {
     },
   ];
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

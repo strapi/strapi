@@ -11,17 +11,22 @@ describe('Bootstrap', () => {
       plugins: {
         i18n: {
           services: {
+            'entity-service-decorator': {
+              decorator: {},
+            },
             locales: {
               initDefaultLocale: jest.fn(),
             },
           },
         },
       },
+      entityService: { decorate: jest.fn() },
       admin: {
         services: {
           permission: {
             deleteByRolesIdForDeletion: jest.fn(),
             engine: {
+              hooks: { willEvaluatePermission: { register: jest.fn() } },
               registerPermissionsHandler: jest.fn(),
             },
             sectionsBuilder: {
@@ -31,9 +36,13 @@ describe('Bootstrap', () => {
               registerMany: jest.fn(),
             },
             actionProvider: {
-              addEventListener: jest.fn(),
-              getAll: jest.fn(() => []),
-              register: registerFn,
+              hooks: {
+                appliesPropertyToSubject: { register: jest.fn() },
+                willRegister: { register: jest.fn() },
+              },
+              appliesPropertyToSubject: jest.fn(),
+              values: jest.fn(() => []),
+              registerMany: registerFn,
             },
           },
         },

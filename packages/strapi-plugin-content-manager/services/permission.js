@@ -13,7 +13,7 @@ module.exports = {
     return userAbility.can(action);
   },
 
-  registerPermissions() {
+  async registerPermissions() {
     const displayedContentTypes = getService('content-types').findDisplayedContentTypes();
 
     const contentTypesUids = displayedContentTypes.map(prop('uid'));
@@ -90,6 +90,6 @@ module.exports = {
       },
     ];
 
-    strapi.admin.services.permission.actionProvider.register(actions);
+    await strapi.admin.services.permission.actionProvider.registerMany(actions);
   },
 };

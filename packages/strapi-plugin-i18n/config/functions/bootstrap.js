@@ -14,7 +14,8 @@ module.exports = async () => {
   registerSectionsBuilderHandlers();
 
   // Actions
-  registerActions();
+  await registerActions();
+  registerActionsHooks();
   updateActionsProperties();
 
   // Conditions
@@ -49,10 +50,16 @@ const ensureDefaultLocale = async () => {
   await initDefaultLocale();
 };
 
-const registerActions = () => {
+const registerActions = async () => {
   const { actionProvider } = strapi.admin.services.permission;
 
-  actionProvider.register(actions);
+  await actionProvider.registerMany(actions);
+};
+
+const registerActionsHooks = () => {
+  const { actionProvider } = strapi.admin.services.permission;
+
+  actionProvider.hooks.appliesPropertyToSubject.register(appliesPropertyToSubjectHook);
 };
 
 const registerConditions = () => {
@@ -63,19 +70,18 @@ const registerConditions = () => {
 
 const updateActionsProperties = () => {
   const { actionProvider } = strapi.admin.services.permission;
-  const actions = actionProvider.getAll();
-
-  // Handle already registered actions
-  actions.forEach(addLocalesPropertyIfNeeded);
 
   // Register the transformation for every new action
-  actionProvider.addEventListener('actionRegistered', addLocalesPropertyIfNeeded);
+  actionProvider.hooks.willRegister.register(addLocalesPropertyIfNeeded);
+
+  // Handle already registered actions
+  actionProvider.values().forEach(action => addLocalesPropertyIfNeeded({ value: action }));
 };
 
 const registerPermissionsHandlers = () => {
   const { engine } = strapi.admin.services.permission;
 
-  engine.registerPermissionsHandler(i18nPermissionHandler);
+  engine.hooks.willEvaluatePermission.register(willEvaluatePermissionHandler);
 };
 
 const registerModelsHooks = () => {
@@ -93,7 +99,7 @@ const registerModelsHooks = () => {
 
 // Utils
 
-const addLocalesPropertyIfNeeded = action => {
+const addLocalesPropertyIfNeeded = ({ value: action }) => {
   const {
     section,
     options: { applyToProperties },
@@ -115,6 +121,19 @@ const addLocalesPropertyIfNeeded = action => {
     : ['locales'];
 };
 
+// Hooks
+
+const appliesPropertyToSubjectHook = ({ property, subject }) => {
+  if (property === 'locales') {
+    console.log('checking locales property', subject);
+    const model = strapi.getModel(subject);
+
+    return getService('content-types').isLocalized(model);
+  }
+
+  return true;
+};
+
 // Other
 
 const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
@@ -132,7 +151,7 @@ const conditions = [
     name: 'has-locale-access',
     plugin: 'i18n',
     handler: (user, options) => {
-      const { locales = [] } = options.properties || {};
+      const { locales } = options.permission.properties || {};
       const { superAdminCode } = strapi.admin.services.role.constants;
 
       const isSuperAdmin = user.roles.some(role => role.code === superAdminCode);
@@ -143,7 +162,7 @@ const conditions = [
 
       return {
         locale: {
-          $in: locales,
+          $in: locales || [],
         },
       };
     },
@@ -154,15 +173,16 @@ const conditions = [
  * Locales property handler for the permission engine
  * Add the has-locale-access condition if the locales property is defined
  * @param {Permission} permission
+ * @param {function(string)} addCondition
  */
-const i18nPermissionHandler = permission => {
-  const { subject, properties } = permission.raw;
-  const { locales = [] } = properties || {};
+const willEvaluatePermissionHandler = ({ permission, addCondition }) => {
+  const { subject, properties } = permission;
+  const { locales } = properties || {};
 
   const { isLocalized } = getService('content-types');
 
-  // If there is no subject defined or if the locales property is empty, ignore the permission
-  if (!subject || locales.length === 0) {
+  // If there is no subject defined, ignore the permission
+  if (!subject) {
     return;
   }
 
@@ -173,7 +193,12 @@ const i18nPermissionHandler = permission => {
     return;
   }
 
-  permission.addCondition('plugins::i18n.has-locale-access');
+  // If the subject is localized but the locales property is null (access to all locales), ignore the permission
+  if (locales === null) {
+    return;
+  }
+
+  addCondition('plugins::i18n.has-locale-access');
 };
 
 /**
@@ -184,9 +209,8 @@ const i18nPermissionHandler = permission => {
  * @return {Promise<void>}
  */
 const localesPropertyHandler = async (action, section) => {
-  const { subjects = [] } = action;
+  const { actionProvider } = strapi.admin.services.permission;
 
-  const { isLocalized } = getService('content-types');
   const locales = await getService('locales').find();
 
   // Do not add the locales property if there is none registered
@@ -194,19 +218,16 @@ const localesPropertyHandler = async (action, section) => {
     return;
   }
 
-  section.subjects
-    // Keep section's subjects included into the action's subjects
-    .filter(subject => subjects.includes(subject.uid))
-    // Only keep subjects that don't have the locales property yet
-    .filter(subject => !subject.properties.find(property => property.value === 'locales'))
-    // Only add the locale property to the localized subjects
-    .filter(subject => isLocalized(strapi.getModel(subject.uid)))
-    // Add the locale property
-    .forEach(subject => {
+  for (const subject of section.subjects) {
+    const applies = await actionProvider.appliesToProperty('locales', action.actionId, subject.uid);
+    const hasLocalesProperty = subject.properties.find(property => property.value === 'locales');
+
+    if (applies && !hasLocalesProperty) {
       subject.properties.push({
         label: 'Locales',
         value: 'locales',
         children: locales.map(({ name, code }) => ({ label: name || code, value: code })),
       });
-    });
+    }
+  }
 };

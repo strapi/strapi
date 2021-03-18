@@ -10,8 +10,8 @@ const {
   checkFieldsDontHaveDuplicates,
 } = require('./common-functions');
 
-const getActionFromProvider = actionName => {
-  return getService('permission').actionProvider.getByActionId(actionName);
+const getActionFromProvider = actionId => {
+  return getService('permission').actionProvider.get(actionId);
 };
 
 const email = yup
@@ -46,7 +46,7 @@ const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
-    const ids = strapi.admin.services.permission.conditionProvider.getAll().map(c => c.id);
+    const ids = strapi.admin.services.permission.conditionProvider.keys();
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
@@ -147,14 +147,14 @@ const updatePermissions = yup
                   return hasNoProperties;
                 }
 
+                if (hasNoProperties) {
+                  return true;
+                }
+
                 const { applyToProperties } = action.options;
 
                 if (!isArray(applyToProperties)) {
-                  return hasNoProperties;
-                }
-
-                if (hasNoProperties) {
-                  return applyToProperties.length === 0;
+                  return false;
                 }
 
                 return Object.keys(properties).every(property =>
