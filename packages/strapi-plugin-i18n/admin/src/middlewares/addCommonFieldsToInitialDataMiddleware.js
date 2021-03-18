@@ -37,14 +37,15 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
     const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
     try {
-      const requestURL = `${pluginId}/content-manager/actions/get-non-localized-fields`;
+      const requestURL = `/${pluginId}/content-manager/actions/get-non-localized-fields`;
       const body = { model: currentLayout.contentType.uid, id: relatedEntityId };
 
-      const { data } = await request(requestURL, { method: 'POST', body });
+      const data = await request(requestURL, { method: 'POST', body });
 
       const { nonLocalizedFields, localizations } = data;
 
       const merged = merge(defaultDataStructure, nonLocalizedFields);
+
       const fieldsToRemove = [
         'created_by',
         'updated_by',
