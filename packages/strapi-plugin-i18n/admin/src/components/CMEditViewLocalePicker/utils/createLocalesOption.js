@@ -9,6 +9,7 @@ const createLocalesOption = (localesToDisplay, localesFromData) => {
     }
 
     return {
+      id: matchingLocaleInData ? matchingLocaleInData.id : null,
       label: name,
       value: code,
       status,

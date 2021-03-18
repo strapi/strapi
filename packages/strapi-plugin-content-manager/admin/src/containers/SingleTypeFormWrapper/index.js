@@ -1,15 +1,10 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext, formatComponentData } from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import {
-  createDefaultForm,
-  formatComponentData,
-  getTrad,
-  removePasswordFieldsFromData,
-} from '../../utils';
+import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import {
   getData,
   getDataSucceeded,

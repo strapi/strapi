@@ -1,7 +1,7 @@
 // NOTE: this function is for adding a __temp_key__ key to each object of a repeatable component
 // in order to have a unique identifier for the DnD
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { getType, getOtherInfos } from './getAttributeInfos';
 
 const formatComponentData = (data, ct, composSchema) => {

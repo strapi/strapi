@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { getType, getOtherInfos } from 'strapi-helper-plugin';
 
-const removePasswordFieldsFromData = (data, contentTypeSchema, componentSchema) => {
+const removePasswordAndRelationsFieldFromData = (data, contentTypeSchema, componentSchema) => {
   const recursiveCleanData = (data, schema) => {
     return Object.keys(data).reduce((acc, current) => {
       const attrType = getType(schema, current);
@@ -40,7 +40,7 @@ const removePasswordFieldsFromData = (data, contentTypeSchema, componentSchema) 
         return acc;
       }
 
-      if (attrType !== 'password') {
+      if (attrType !== 'password' && attrType !== 'relation') {
         acc[current] = value;
       }
 
@@ -51,4 +51,4 @@ const removePasswordFieldsFromData = (data, contentTypeSchema, componentSchema) 
   return recursiveCleanData(data, contentTypeSchema);
 };
 
-export default removePasswordFieldsFromData;
+export default removePasswordAndRelationsFieldFromData;

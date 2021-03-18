@@ -1,19 +1,21 @@
-import { testData } from '../../testUtils';
-import removeFieldsFromClonedData from '../removeFieldsFromClonedData';
+import testData from '../../testUtils/testData';
+import contentManagementUtilRemoveFieldsFromData from '../contentManagementUtilRemoveFieldsFromData';
 
-describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
-  describe('removeFieldsFromClonedData', () => {
+describe('STRAPI_HELPER_PLUGIN | utils', () => {
+  describe('contentManagementUtilRemoveFieldsFromData', () => {
     it('should return an empty object', () => {
       const { components, contentType } = testData;
 
-      expect(removeFieldsFromClonedData({}, contentType, components)).toEqual({});
+      expect(contentManagementUtilRemoveFieldsFromData({}, contentType, components)).toEqual({});
     });
 
     it('should return the initial data if there is no field with the specified key', () => {
       const { components, contentType } = testData;
 
       expect(
-        removeFieldsFromClonedData({ name: 'test' }, contentType, components, ['_id'])
+        contentManagementUtilRemoveFieldsFromData({ name: 'test' }, contentType, components, [
+          '_id',
+        ])
       ).toEqual({
         name: 'test',
       });
@@ -24,7 +26,9 @@ describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
       const data = { _id: 'test', name: 'test' };
       const expected = { name: 'test' };
 
-      expect(removeFieldsFromClonedData(data, contentType, components, ['_id'])).toEqual(expected);
+      expect(
+        contentManagementUtilRemoveFieldsFromData(data, contentType, components, ['_id'])
+      ).toEqual(expected);
     });
 
     it('should remove all the default fields', () => {
@@ -50,9 +54,9 @@ describe('CONTENT MANAGER | containers | EditViewDataManager | utils', () => {
         },
       };
 
-      expect(removeFieldsFromClonedData(modifiedData, contentType, components)).toEqual(
-        expectedNoFieldsModifiedData
-      );
+      expect(
+        contentManagementUtilRemoveFieldsFromData(modifiedData, contentType, components)
+      ).toEqual(expectedNoFieldsModifiedData);
     });
   });
 });

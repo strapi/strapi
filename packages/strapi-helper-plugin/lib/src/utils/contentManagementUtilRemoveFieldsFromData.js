@@ -3,7 +3,7 @@ import { getType, getOtherInfos } from './getAttributeInfos';
 
 const defaultFields = ['created_by', 'updated_by', 'published_at', 'id', '_id'];
 
-const removeFieldsFromClonedData = (
+const contentManagementUtilRemoveFieldsFromData = (
   data,
   contentTypeSchema,
   componentSchema,
@@ -65,4 +65,4 @@ const removeFieldsFromClonedData = (
   return recursiveCleanData(data, contentTypeSchema);
 };
 
-export default removeFieldsFromClonedData;
+export default contentManagementUtilRemoveFieldsFromData;

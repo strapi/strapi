@@ -1,16 +1,16 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-import { request, useGlobalContext, useQueryParams } from 'strapi-helper-plugin';
+import {
+  request,
+  useGlobalContext,
+  useQueryParams,
+  formatComponentData,
+  contentManagementUtilRemoveFieldsFromData,
+} from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
-import {
-  createDefaultForm,
-  formatComponentData,
-  getTrad,
-  removePasswordFieldsFromData,
-  removeFieldsFromClonedData,
-} from '../../utils';
+import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
 import {
   getData,
@@ -60,7 +60,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         return data;
       }
 
-      const cleaned = removeFieldsFromClonedData(
+      const cleaned = contentManagementUtilRemoveFieldsFromData(
         data,
         allLayoutDataRef.current.contentType,
         allLayoutDataRef.current.components
