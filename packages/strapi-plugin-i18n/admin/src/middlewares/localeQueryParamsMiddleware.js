@@ -20,8 +20,6 @@ const localeQueryParamsMiddleware = () => ({ getState }) => next => action => {
   const ctPermissions = collectionTypesRelatedPermissions[action.contentType.uid];
   const defaultLocale = getDefaultLocale(ctPermissions, locales);
 
-  console.log('xxx', locales)
-
   const locale = {
     key: '__locale_key__',
     fieldSchema: { type: 'string' },

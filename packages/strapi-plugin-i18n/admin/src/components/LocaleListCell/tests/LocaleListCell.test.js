@@ -32,11 +32,11 @@ describe('LocaleListCell', () => {
     ];
 
     const locale = 'en';
-    const localizations = ['fr-FR', 'ar'];
+    const localizations = [{ locale: 'fr-FR' }, { locale: 'ar' }];
 
     render(<LocaleListCell locales={locales} locale={locale} localizations={localizations} />);
 
-    expect(screen.getByText('French (default), Arabic')).toBeVisible()
+    expect(screen.getByText('French (default), Arabic')).toBeVisible();
   });
 
   it('returns the "ar" when there s 2 locales available', () => {
@@ -68,11 +68,11 @@ describe('LocaleListCell', () => {
     ];
 
     const locale = 'en';
-    const localizations = ['ar'];
+    const localizations = [{ locale: 'ar' }];
 
     render(<LocaleListCell locales={locales} locale={locale} localizations={localizations} />);
 
-    expect(screen.getByText('Arabic')).toBeVisible()
+    expect(screen.getByText('Arabic')).toBeVisible();
   });
 
   it('returns the "ar" and "en" locales  alphabetically sorted', () => {
@@ -104,10 +104,10 @@ describe('LocaleListCell', () => {
     ];
 
     const locale = 'fr-FR';
-    const localizations = ['en', 'ar'];
+    const localizations = [{ locale: 'en' }, { locale: 'ar' }];
 
     render(<LocaleListCell locales={locales} locale={locale} localizations={localizations} />);
 
-    expect(screen.getByText('Arabic, English')).toBeVisible()
+    expect(screen.getByText('Arabic, English')).toBeVisible();
   });
 });
