@@ -10,6 +10,7 @@ import {
 } from 'strapi-helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
+import isEqual from 'react-fast-compare';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
 import {
@@ -160,13 +161,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     if (requestURL) {
       fetchData(signal);
     } else {
-      dispatch(initForm());
+      dispatch(initForm(rawQuery));
     }
 
     return () => {
       abortController.abort();
     };
-  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch]);
+  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -361,4 +362,4 @@ CollectionTypeFormWrapper.propTypes = {
   slug: PropTypes.string.isRequired,
 };
 
-export default memo(CollectionTypeFormWrapper);
+export default memo(CollectionTypeFormWrapper, isEqual);

@@ -39,6 +39,13 @@ const crudReducer = (state = crudInitialState, action) =>
         break;
       }
       case INIT_FORM: {
+        if (action.data) {
+          draftState.isLoading = false;
+          draftState.data = action.data;
+
+          break;
+        }
+
         draftState.isLoading = false;
         draftState.data = state.contentTypeDataStructure;
         break;
