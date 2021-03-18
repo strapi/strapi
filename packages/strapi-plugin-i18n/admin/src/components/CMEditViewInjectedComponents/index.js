@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import get from 'lodash/get';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
@@ -16,10 +16,18 @@ const CMEditViewInjectedComponents = () => {
 
   const id = get(params, 'id', null);
   const currentEntityId = id === 'create' ? null : id;
-  const currentLocale = get(query, 'plugins.i18n.locale', false);
-
+  const defaultLocale = locales.find(loc => loc.isDefault);
+  const currentLocale = get(query, 'plugins.i18n.locale', defaultLocale.code);
   const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);
   const hasDraftAndPublishEnabled = get(layout, ['options', 'draftAndPublish'], false);
+
+  const defaultQuery = useMemo(() => {
+    if (!query) {
+      return { plugins: { i18n: { locale: currentLocale } } };
+    }
+
+    return query;
+  }, [query, currentLocale]);
 
   if (!hasI18nEnabled) {
     return null;
@@ -42,7 +50,7 @@ const CMEditViewInjectedComponents = () => {
       createPermissions={createPermissions}
       hasDraftAndPublishEnabled={hasDraftAndPublishEnabled}
       localizations={localizations}
-      query={query}
+      query={defaultQuery}
       readPermissions={readPermissions}
       slug={slug}
     />

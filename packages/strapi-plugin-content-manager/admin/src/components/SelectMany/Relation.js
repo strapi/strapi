@@ -19,6 +19,7 @@ const Relation = ({
   isDragging,
   mainField,
   onRemove,
+  searchToPersist,
   to,
 }) => {
   const { formatMessage } = useIntl();
@@ -61,7 +62,10 @@ const Relation = ({
           </div>
         )}
         {displayNavigationLink ? (
-          <Link to={{ pathname: to, state: { from: pathname } }} title={title}>
+          <Link
+            to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}
+            title={title}
+          >
             <Span>{formattedValue}&nbsp;</Span>
           </Link>
         ) : (
@@ -78,6 +82,7 @@ const Relation = ({
 Relation.defaultProps = {
   isDragging: false,
   onRemove: () => {},
+  searchToPersist: null,
   to: '',
 };
 
@@ -94,6 +99,7 @@ Relation.propTypes = {
     }).isRequired,
   }).isRequired,
   onRemove: PropTypes.func,
+  searchToPersist: PropTypes.string,
   to: PropTypes.string,
 };
 
