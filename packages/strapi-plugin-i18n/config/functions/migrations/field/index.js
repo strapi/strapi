@@ -2,8 +2,8 @@
 
 const { difference, intersection } = require('lodash/fp');
 const { getService } = require('../../../../utils');
-const migrateForMongoose = require('./migrateForMongoose');
-const migrateForBookshelf = require('./migrateForBookshelf');
+const migrateForMongoose = require('./migrate-for-mongoose');
+const migrateForBookshelf = require('./migrate-for-bookshelf');
 
 // Migration when i18n is disabled on a field of a content-type that have i18n enabled
 const after = async ({ model, definition, previousDefinition, ORM }) => {

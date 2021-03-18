@@ -32,9 +32,9 @@ const migrateForMongoose = async ({ model, attributesToMigrate }) => {
   const locales = await getSortedLocales();
   const processedLocaleCodes = [];
   for (const locale of locales) {
-    let batchCount = BATCH_SIZE;
     let lastId;
-    while (batchCount === BATCH_SIZE) {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
       const findParams = { locale: locale.code };
       if (lastId) {
         findParams._id = { $gt: lastId };
@@ -49,8 +49,6 @@ const migrateForMongoose = async ({ model, attributesToMigrate }) => {
       if (batch.length > 0) {
         lastId = batch[batch.length - 1]._id;
       }
-      batchCount = batch.length;
-
       const entriesToProcess = batch.filter(shouldBeProcessed(processedLocaleCodes));
 
       const updatesInfo = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
@@ -59,6 +57,10 @@ const migrateForMongoose = async ({ model, attributesToMigrate }) => {
       }));
 
       await model.bulkWrite(updates);
+
+      if (batch.length < BATCH_SIZE) {
+        break;
+      }
     }
     processedLocaleCodes.push(locale.code);
   }
