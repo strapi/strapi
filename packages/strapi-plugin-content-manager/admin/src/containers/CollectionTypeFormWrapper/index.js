@@ -38,7 +38,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     isLoading,
     status,
   } = useSelector(selectCrudReducer);
-
+  const isMounted = useRef(true);
   const emitEventRef = useRef(emitEvent);
 
   const allLayoutDataRef = useRef(allLayoutData);
@@ -158,6 +158,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       }
     };
 
+    if (!isMounted.current) {
+      return () => {};
+    }
+
     if (requestURL) {
       fetchData(signal);
     } else {
@@ -165,6 +169,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     }
 
     return () => {
+      isMounted.current = false;
       abortController.abort();
     };
   }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery]);

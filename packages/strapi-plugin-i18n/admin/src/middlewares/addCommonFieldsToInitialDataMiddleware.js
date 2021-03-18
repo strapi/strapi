@@ -29,6 +29,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
 
   const getData = async () => {
     dispatch({ type: 'ContentManager/CrudReducer/GET_DATA' });
+    const defaultDataStructure = cloneDeep(contentTypeDataStructure);
 
     try {
       const requestURL = `${pluginId}/content-manager/actions/get-non-localized-fields`;
@@ -38,7 +39,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
 
       const { nonLocalizedFields, localizations } = data;
 
-      const merged = merge(cloneDeep(contentTypeDataStructure, nonLocalizedFields));
+      const merged = merge(defaultDataStructure, nonLocalizedFields);
       merged.localizations = localizations;
 
       action.data = formatComponentData(
