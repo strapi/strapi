@@ -446,7 +446,11 @@ describe('Role', () => {
         query: () => ({ count, create }),
         admin: {
           services: {
-            permission: { actionProvider: { values }, createMany },
+            permission: {
+              actionProvider: { values },
+              createMany,
+              conditionProvider: { has: () => true },
+            },
             condition: { isValidCondition: () => true },
             'content-type': { getPermissionsWithNestedFields },
             user: { assignARoleToAll },
@@ -697,7 +701,7 @@ describe('Role', () => {
       const sendDidUpdateRolePermissions = jest.fn();
       const find = jest.fn(() => Promise.resolve([]));
       const values = jest.fn(() => permissions.map(perm => ({ actionId: perm.action })));
-      const isValidCondition = jest.fn(cond => cond === 'cond');
+      const conditionProviderHas = jest.fn(cond => cond === 'cond');
 
       global.strapi = {
         admin: {
@@ -709,11 +713,9 @@ describe('Role', () => {
               createMany,
               actionProvider: { values },
               conditionProvider: {
+                has: conditionProviderHas,
                 values: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
-            },
-            condition: {
-              isValidCondition,
             },
           },
         },

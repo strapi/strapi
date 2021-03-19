@@ -25,7 +25,7 @@ describe('Role CRUD End to End', () => {
   let strapi;
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance();
+    strapi = await createStrapiInstance({ logLevel: 'debug' });
     rq = await createAuthRequest({ strapi });
   }, 60000);
 

@@ -372,9 +372,14 @@ const assignPermissions = async (roleId, permissions = []) => {
 };
 
 const addPermissions = async (roleId, permissions) => {
-  const permissionsWithRole = permissions.map(set('role', roleId));
+  const { conditionProvider, createMany } = getService('permission');
+  const { sanitizeConditions } = permissionDomain;
 
-  return getService('permission').createMany(permissionsWithRole);
+  const permissionsWithRole = permissions
+    .map(set('role', roleId))
+    .map(sanitizeConditions(conditionProvider));
+
+  return createMany(permissionsWithRole);
 };
 
 /**

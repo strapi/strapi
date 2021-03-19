@@ -95,11 +95,11 @@ describe('Permission Domain', () => {
     });
   });
 
-  describe('getSanitizedPermissionFields', () => {
+  describe('sanitizePermissionFields', () => {
     test('Returns a new permission without the invalid fields', () => {
       const invalidPermission = { action: 'foo', subject: 'bar', properties: {}, foo: 'bar' };
 
-      const permission = domain.getSanitizedPermissionFields(invalidPermission);
+      const permission = domain.sanitizePermissionFields(invalidPermission);
 
       expect(permission).not.toHaveProperty('foo');
     });
@@ -202,6 +202,104 @@ describe('Permission Domain', () => {
       const newPermissions = domain.toPermission(permissions);
 
       newPermissions.forEach(p => expect(p).not.toHaveProperty('foo'));
+    });
+  });
+
+  describe('getProperty', () => {
+    test('Can get a property if it exists', () => {
+      const permission = { properties: { foo: 'bar' } };
+
+      const property = domain.getProperty('foo', permission);
+
+      expect(property).toBe('bar');
+    });
+
+    test('Can get a deep property if it exists', () => {
+      const permission = { properties: { foo: { bar: 'foobar' } } };
+
+      const property = domain.getProperty('foo.bar', permission);
+
+      expect(property).toBe('foobar');
+    });
+
+    test(`Trying to get a property that doesn't exist returns undefined`, () => {
+      const permission = { properties: { foo: 'bar' } };
+
+      const property = domain.getProperty('bar', permission);
+
+      expect(property).toBeUndefined();
+    });
+
+    test('getProperty should allow currying', () => {
+      const permissions = [{ properties: { foo: 'bar' } }, { properties: { foo: 'foobar' } }];
+
+      const getFooProperty = domain.getProperty('foo');
+
+      permissions.forEach(permission => {
+        const fooProperty = getFooProperty(permission);
+
+        expect(fooProperty).toBe(permission.properties.foo);
+      });
+    });
+
+    test(`Trying to access property if permission.properties isn't defined should return undefined`, () => {
+      const permission = {};
+
+      const property = domain.getProperty('foo', permission);
+
+      expect(property).toBeUndefined();
+    });
+  });
+
+  describe('sanitizeConditions', () => {
+    const conditions = ['foo', 'bar'];
+    const conditionProvider = { has: condition => conditions.includes(condition) };
+
+    test(`No conditions should be removed if they're valid`, () => {
+      const permission = { conditions: ['foo', 'bar'] };
+
+      const permissionWithSanitizedConditions = domain.sanitizeConditions(
+        conditionProvider,
+        permission
+      );
+
+      expect(permissionWithSanitizedConditions).toHaveProperty('conditions', ['foo', 'bar']);
+    });
+
+    test('Non existing permissions should be removed from the conditions property', () => {
+      const permission = { conditions: ['foo', 'foobar'] };
+
+      const permissionWithSanitizedConditions = domain.sanitizeConditions(
+        conditionProvider,
+        permission
+      );
+
+      expect(permissionWithSanitizedConditions).toHaveProperty('conditions', ['foo']);
+    });
+
+    test('Do nothing when permission.conditions is not defined', () => {
+      const permission = {};
+
+      const permissionWithSanitizedConditions = domain.sanitizeConditions(
+        conditionProvider,
+        permission
+      );
+
+      expect(permissionWithSanitizedConditions).not.toHaveProperty('conditions');
+    });
+
+    test.each([
+      [{ conditions: [] }, []],
+      [{ conditions: ['foo'] }, ['foo']],
+      [{ conditions: ['foo', 'foobar'] }, ['foo']],
+      [{ conditions: ['foobar'] }, []],
+      [{}, undefined],
+    ])('Should allow currying (arity 2)', (permission, expected) => {
+      const sanitizeConditionsWithProvider = domain.sanitizeConditions(conditionProvider);
+
+      const permissionWithSanitizedConditions = sanitizeConditionsWithProvider(permission);
+
+      expect(permissionWithSanitizedConditions).toHaveProperty('conditions', expected);
     });
   });
 });

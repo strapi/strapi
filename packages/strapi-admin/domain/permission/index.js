@@ -17,9 +17,9 @@ const {
 } = require('lodash/fp');
 
 const permissionFields = ['id', 'action', 'subject', 'properties', 'conditions', 'role'];
-const getSanitizedPermissionFields = () => ['id', 'action', 'subject', 'properties', 'conditions'];
+const sanitizedPermissionFields = ['id', 'action', 'subject', 'properties', 'conditions'];
 
-const sanitizePermissionFields = pick(getSanitizedPermissionFields());
+const sanitizePermissionFields = pick(sanitizedPermissionFields);
 
 const getDefaultPermission = () => ({
   conditions: [],
@@ -52,6 +52,16 @@ const create = attributes => {
   return pipe(pick(permissionFields), merge(getDefaultPermission()))(attributes);
 };
 
+const sanitizeConditions = curry((provider, permission) => {
+  if (!isArray(permission.conditions)) {
+    return permission;
+  }
+
+  return permission.conditions
+    .filter(condition => !provider.has(condition))
+    .reduce((perm, condition) => removeCondition(condition, perm), permission);
+});
+
 const toPermission = payload => (isArray(payload) ? map(create, payload) : create(payload));
 
 const createBoundAbstractDomain = (abstractDomainFactory, permission) => {
@@ -74,7 +84,8 @@ module.exports = {
   deleteProperty,
   permissionFields,
   getProperty,
-  getSanitizedPermissionFields,
+  sanitizedPermissionFields,
+  sanitizeConditions,
   sanitizePermissionFields,
   setProperty,
   toPermission,
