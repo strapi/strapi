@@ -1,6 +1,7 @@
 'use strict';
 
-const { isFunction, eq, propEq } = require('lodash/fp');
+const { propEq } = require('lodash/fp');
+const createSectionBuilder = require('./builder');
 const {
   subjectsHandlerFor,
   contentTypesBase,
@@ -16,86 +17,8 @@ const createContentTypesInitialState = () => ({
   subjects: [],
 });
 
-const createSectionsTemplate = sections => {
-  const sectionsEntries = Array.from(sections.entries());
-
-  return sectionsEntries.reduce((acc, [sectionName, options]) => {
-    const { initialStateFactory } = options;
-
-    return { ...acc, [sectionName]: isFunction(initialStateFactory) ? initialStateFactory() : {} };
-  }, {});
-};
-
-class SectionsBuilder {
-  constructor() {
-    this._sections = new Map();
-  }
-
-  addSection(sectionName, options = {}) {
-    const { initialStateFactory, handlers = [], matchers = [] } = options;
-
-    this._sections.set(sectionName, { initialStateFactory, handlers, matchers });
-
-    return this;
-  }
-
-  deleteSection(sectionName) {
-    this._sections.delete(sectionName);
-
-    return this;
-  }
-
-  addHandler(sectionName, handler) {
-    if (this._sections.has(sectionName) && isFunction(handler)) {
-      this._sections.get(sectionName).handlers.push(handler);
-    }
-
-    return this;
-  }
-
-  addMatcher(sectionName, matcher) {
-    if (this._sections.has(sectionName) && isFunction(matcher)) {
-      this._sections.get(sectionName).matchers.push(matcher);
-    }
-
-    return this;
-  }
-
-  getValidSectionsForAction(action) {
-    return Array.from(this._sections.entries())
-      .filter(([, { matchers }]) => matchers.map(matcher => matcher(action)).some(eq(true)))
-      .map(([section]) => section);
-  }
-
-  async build(actions = []) {
-    const sections = createSectionsTemplate(this._sections);
-
-    for (const action of actions) {
-      const matchedSectionsForAction = this.getValidSectionsForAction(action);
-
-      for (const sectionName of matchedSectionsForAction) {
-        await this.processAction(sectionName, action, sections[sectionName]);
-      }
-    }
-
-    return sections;
-  }
-
-  async processAction(sectionName, action, target) {
-    if (!this._sections.has(sectionName)) {
-      return null;
-    }
-
-    const { handlers } = this._sections.get(sectionName);
-
-    for (const handler of handlers) {
-      await handler(action, target);
-    }
-  }
-}
-
-const createSectionsBuilder = () => {
-  const builder = new SectionsBuilder();
+const createDefaultSectionBuilder = () => {
+  const builder = createSectionBuilder();
 
   builder.addSection('plugins', {
     initialStateFactory: () => [],
@@ -124,4 +47,4 @@ const createSectionsBuilder = () => {
   return builder;
 };
 
-module.exports = createSectionsBuilder;
+module.exports = createDefaultSectionBuilder;

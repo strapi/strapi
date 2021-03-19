@@ -207,7 +207,7 @@ const willEvaluatePermissionHandler = ({ permission, addCondition }) => {
  * @param section
  * @return {Promise<void>}
  */
-const localesPropertyHandler = async (action, section) => {
+const localesPropertyHandler = async ({ action, section }) => {
   const { actionProvider } = strapi.admin.services.permission;
 
   const locales = await getService('locales').find();

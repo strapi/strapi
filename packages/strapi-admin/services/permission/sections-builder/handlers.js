@@ -17,7 +17,7 @@ const utils = {
  * Transforms & adds the given  setting action to the section
  * Note: The action is transformed to a setting specific format
  */
-const settings = (action, section) => {
+const settings = ({ action, section }) => {
   const { category, subCategory, displayName, actionId } = action;
 
   section.push({
@@ -32,7 +32,7 @@ const settings = (action, section) => {
  * Transforms & adds the given plugin action to the section
  * Note: The action is transformed to a plugin specific format
  */
-const plugins = (action, section) => {
+const plugins = ({ action, section }) => {
   const { pluginName, subCategory, displayName, actionId } = action;
 
   section.push({
@@ -47,7 +47,7 @@ const plugins = (action, section) => {
  * Transforms & adds the given action to the section's actions field
  * Note: The action is transformed to a content-type specific format
  */
-const contentTypesBase = (action, section) => {
+const contentTypesBase = ({ action, section }) => {
   const { displayName, actionId, subjects, options } = action;
 
   section.actions.push({
@@ -61,7 +61,7 @@ const contentTypesBase = (action, section) => {
 /**
  * Initialize the subjects array of a section based on the action's subjects
  */
-const subjectsHandlerFor = kind => (action, section) => {
+const subjectsHandlerFor = kind => ({ action, section }) => {
   const { subjects } = action;
 
   const newSubjects = subjects
@@ -105,7 +105,7 @@ const buildDeepAttributesCollection = attributes => {
 /**
  * Create and populate the fields property for section's subjects based on the action's subjects list
  */
-const fieldsProperty = (action, section) => {
+const fieldsProperty = ({ action, section }) => {
   const { subjects } = action;
 
   section.subjects
