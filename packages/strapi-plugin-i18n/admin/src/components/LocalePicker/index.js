@@ -7,7 +7,7 @@ import get from 'lodash/get';
 
 const List = styled.ul`
   list-style-type: none;
-  padding: 0;
+  padding: 3px 0;
   margin: 0;
 `;
 
@@ -19,10 +19,11 @@ const ListItem = styled.li`
   padding-left: 10px;
   padding-right: 10px;
   height: 36px;
-  line-height: 36px;
+  display: flex;
+  justify-content: center;
 
   &:hover {
-    background: ${props => props.theme.main.colors.lightGrey};
+    background: ${props => props.theme.main.colors.mediumGrey};
   }
 `;
 
@@ -74,7 +75,7 @@ const LocalePicker = () => {
         };
 
         return (
-          <Padded top left right bottom>
+          <Padded left right>
             <List>
               {locales.map(locale => (
                 <ListItem key={locale.id}>
