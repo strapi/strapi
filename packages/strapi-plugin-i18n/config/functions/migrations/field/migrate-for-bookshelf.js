@@ -48,7 +48,7 @@ const updateFromTmpTable = async ({ model, trx, attributesToMigrate }) => {
 
 const createTmpTable = async ({ ORM, attributesToMigrate, model }) => {
   const columnsToCopy = ['id', ...attributesToMigrate];
-  await ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
+  await deleteTmpTable({ ORM });
   await ORM.knex.raw(`CREATE TABLE ?? AS ??`, [
     TMP_TABLE_NAME,
     ORM.knex
@@ -65,8 +65,9 @@ const getSortedLocales = async trx => {
   try {
     const defaultLocaleRow = await trx('core_store')
       .select('value')
-      .where({ key: 'plugin_i18n_default_locale' });
-    defaultLocale = defaultLocaleRow[0].value;
+      .where({ key: 'plugin_i18n_default_locale' })
+      .first();
+    defaultLocale = JSON.parse(defaultLocaleRow.value);
   } catch (e) {
     throw new Error("Could not migrate because the default locale doesn't exist");
   }

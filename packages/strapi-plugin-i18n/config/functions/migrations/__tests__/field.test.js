@@ -31,10 +31,7 @@ describe('i18n - Migration - disable localization on a field', () => {
 
       test("Doesn't migrate if no attribute changed (without i18n)", async () => {
         const find = jest.fn();
-        const getLocalizedAttributes = jest
-          .fn()
-          .mockReturnValueOnce([])
-          .mockReturnValueOnce([]);
+        const getLocalizedAttributes = jest.fn(() => []);
 
         global.strapi = {
           query: () => {
@@ -62,10 +59,7 @@ describe('i18n - Migration - disable localization on a field', () => {
 
       test("Doesn't migrate if no attribute changed (with i18n)", async () => {
         const find = jest.fn();
-        const getLocalizedAttributes = jest
-          .fn()
-          .mockReturnValueOnce(['name'])
-          .mockReturnValueOnce(['name']);
+        const getLocalizedAttributes = jest.fn(() => ['name']);
         global.strapi = {
           query: () => {
             find;
