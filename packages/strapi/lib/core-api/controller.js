@@ -56,8 +56,8 @@ const createSingleTypeController = ({ model, service }) => {
       return sanitize(entity);
     },
 
-    async delete() {
-      const entity = await service.delete();
+    async delete(ctx) {
+      const entity = await service.delete(ctx.query);
       return sanitize(entity);
     },
   };
