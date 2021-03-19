@@ -27,7 +27,7 @@ const addLocale = async ({ code, name, isDefault }) => {
       message: { id: 'notification.error' },
     });
 
-    return e;
+    throw e;
   }
 };
 
