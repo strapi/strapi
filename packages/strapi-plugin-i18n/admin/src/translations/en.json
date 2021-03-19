@@ -39,6 +39,7 @@
   "Settings.locales.modal.create.defaultLocales.loading": "Loading the available locales...",
   "Settings.locales.modal.create.confirmation": "Add locale",
   "Settings.locales.modal.create.success": "Locale successfully added",
+  "Settings.locales.modal.create.alreadyExist": "This locale already exists",
   "Settings.locales.modal.locales.label": "Locales",
   "Settings.locales.modal.edit.locales.label": "Locales",
   "Settings.locales.modal.locales.displayName": "Locale display name",

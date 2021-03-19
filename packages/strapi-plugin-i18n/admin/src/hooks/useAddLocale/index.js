@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { request } from 'strapi-helper-plugin';
 import { useDispatch } from 'react-redux';
+import get from 'lodash/get';
 import { getTrad } from '../../utils';
 import { ADD_LOCALE } from '../constants';
 
@@ -22,12 +23,21 @@ const addLocale = async ({ code, name, isDefault }) => {
 
     return data;
   } catch (e) {
-    strapi.notification.toggle({
-      type: 'warning',
-      message: { id: 'notification.error' },
-    });
+    const message = get(e, 'response.payload.message', null);
 
-    return e;
+    if (message && message.includes('already exists')) {
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: getTrad('Settings.locales.modal.create.alreadyExist') },
+      });
+    } else {
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    }
+
+    throw e;
   }
 };
 
