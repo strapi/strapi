@@ -9,7 +9,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
 
   return {
     /**
-     * Returns single type content
+     * Returns singleType content
      *
      * @return {Promise}
      */
@@ -21,7 +21,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
     },
 
     /**
-     * Creates or update the single- type content
+     * Creates or updates a singleType content
      *
      * @return {Promise}
      */
@@ -51,7 +51,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
     },
 
     /**
-     * Deletes the single type content
+     * Deletes the singleType content
      *
      * @return {Promise}
      */

@@ -69,7 +69,7 @@ const getFetchParams = (params = {}) => {
  */
 const createUtils = ({ model }) => {
   return {
-    // make sure too keep the call to getNonWritableAttributes dynamic
+    // make sure to keep the call to getNonWritableAttributes dynamic
     sanitizeInput: data => _.omit(data, getNonWritableAttributes(model)),
     getFetchParams,
   };
