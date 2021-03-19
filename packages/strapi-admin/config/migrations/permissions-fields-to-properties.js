@@ -36,18 +36,20 @@ const permissionsFinderByORM = {
 };
 
 module.exports = {
-  shouldRunBefore(options) {
-    const { definition, previousDefinition } = options;
+  shouldRun: {
+    before(options) {
+      const { definition, previousDefinition } = options;
 
-    return shouldRunMigration(definition, previousDefinition);
-  },
+      return shouldRunMigration(definition, previousDefinition);
+    },
 
-  shouldRunAfter(options, context) {
-    const { definition, previousDefinition } = options;
-    const { permissionsFieldsToProperties = {} } = context;
-    const { permissions = [] } = permissionsFieldsToProperties;
+    after(options, context) {
+      const { definition, previousDefinition } = options;
+      const { permissionsFieldsToProperties = {} } = context;
+      const { permissions = [] } = permissionsFieldsToProperties;
 
-    return shouldRunMigration(definition, previousDefinition) && permissions.length > 0;
+      return shouldRunMigration(definition, previousDefinition) && permissions.length > 0;
+    },
   },
 
   // Here we make a backup of the permission objects in the database, then we store it into the migration context
