@@ -153,6 +153,7 @@ const processEntriesWith = async (processFn, { trx, model, attributesToMigrate }
 
 const migrateForBookshelf = async ({ ORM, model, attributesToMigrate }) => {
   if (['pg', 'mysql'].includes(model.client)) {
+    // create table outside of the transaction because mysql doesn't accept the creation inside
     await createTmpTable({ ORM, attributesToMigrate, model });
     await ORM.knex.transaction(async trx => {
       await processEntriesWith(batchInsertInTmpTable, { ORM, trx, model, attributesToMigrate });
