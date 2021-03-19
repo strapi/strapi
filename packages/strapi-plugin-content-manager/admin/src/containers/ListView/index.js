@@ -362,6 +362,15 @@ function ListView({
           {isSearchable && canRead && (
             <Search changeParams={setQuery} initValue={_q} model={label} value={_q} />
           )}
+
+          {!canRead && (
+            <Flex justifyContent="flex-end">
+              <Padded right size="sm">
+                <InjectionZone area={`${pluginId}.listView.actions`} />
+              </Padded>
+            </Flex>
+          )}
+
           {canRead && (
             <Wrapper>
               <div className="row" style={{ marginBottom: '5px' }}>
