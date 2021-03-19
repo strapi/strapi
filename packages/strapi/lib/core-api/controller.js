@@ -43,12 +43,14 @@ const createSingleTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async update(ctx) {
+      const { body, query } = ctx.request;
+
       let entity;
       if (ctx.is('multipart')) {
         const { data, files } = parseMultipartData(ctx);
-        entity = await service.createOrUpdate(data, { files });
+        entity = await service.createOrUpdate(data, { files, query });
       } else {
-        entity = await service.createOrUpdate(ctx.request.body);
+        entity = await service.createOrUpdate(body, { query });
       }
 
       return sanitize(entity);
