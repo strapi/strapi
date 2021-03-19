@@ -59,7 +59,7 @@ const createSanitizer = contentType => {
   };
 
   /**
-   * Sanitizes uplaoded files to keep only writable ones
+   * Sanitizes uploaded files to keep only writable ones
    * @param {object} files - input files to sanitize
    * @returns {object}
    */
@@ -80,7 +80,7 @@ const createSanitizer = contentType => {
   };
 
   /**
-   * Sanitizes uplaoded files to keep only writable ones
+   * Sanitizes input data to keep only writable attributes
    * @param {object} data - input data to sanitize
    * @returns {object}
    */
