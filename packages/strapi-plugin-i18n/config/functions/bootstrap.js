@@ -125,7 +125,6 @@ const addLocalesPropertyIfNeeded = ({ value: action }) => {
 
 const appliesPropertyToSubjectHook = ({ property, subject }) => {
   if (property === 'locales') {
-    console.log('checking locales property', subject);
     const model = strapi.getModel(subject);
 
     return getService('content-types').isLocalized(model);
