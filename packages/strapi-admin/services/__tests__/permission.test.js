@@ -87,7 +87,7 @@ describe('Permission Service', () => {
     });
   });
 
-  describe('cleanPermissionInDatabase', () => {
+  describe('cleanPermissionsInDatabase', () => {
     test('Remove permission that dont exist + clean fields', async () => {
       const permsInDb = [
         {
@@ -161,7 +161,7 @@ describe('Permission Service', () => {
         },
       });
 
-      await permissionService.cleanPermissionInDatabase();
+      await permissionService.cleanPermissionsInDatabase();
 
       expect(findPage).toHaveBeenCalledWith({ page: 1, pageSize: 200 }, []);
       expect(update).toHaveBeenNthCalledWith(1, { id: permsInDb[4].id }, permsWithCleanFields[2]);

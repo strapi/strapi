@@ -45,7 +45,7 @@ module.exports = async () => {
   const userService = getService('user');
   const roleService = getService('role');
 
-  await permissionService.cleanPermissionInDatabase();
+  await permissionService.cleanPermissionsInDatabase();
   await permissionService.ensureBoundPermissionsInDatabase();
 
   await userService.migrateUsers();

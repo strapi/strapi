@@ -6,7 +6,7 @@ const {
   validateRoleDeleteInput,
   validateRolesDeleteInput,
 } = require('../validation/role');
-const { getService, getServices } = require('../../utils');
+const { getService } = require('../../utils');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 const { SUPER_ADMIN_CODE } = require('../../services/constants');
 
@@ -83,7 +83,8 @@ module.exports = {
     const { id } = ctx.params;
     const { body: input } = ctx.request;
 
-    const [roleService, permissionService] = getServices('role', 'permission');
+    const roleService = getService('role');
+    const permissionService = getService('permission');
 
     const role = await roleService.findOne({ id });
 

@@ -9,6 +9,7 @@ const {
   prop,
   isArray,
   isObject,
+  mapValues,
   differenceWith,
   differenceBy,
 } = require('lodash/fp');
@@ -32,10 +33,7 @@ const sortDeep = data => {
   }
 
   if (isObject(data)) {
-    return Object.entries(data).reduce(
-      (acc, [key, value]) => ({ ...acc, [key]: sortDeep(value) }),
-      {}
-    );
+    return mapValues(sortDeep, data);
   }
 
   return data;

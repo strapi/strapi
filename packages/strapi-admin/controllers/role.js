@@ -4,7 +4,7 @@ const { yup, formatYupErrors } = require('strapi-utils');
 const { validateRoleUpdateInput } = require('../validation/role');
 const { validatedUpdatePermissionsInput } = require('../validation/permission');
 const { EDITOR_CODE, AUTHOR_CODE, SUPER_ADMIN_CODE } = require('../services/constants');
-const { getService, getServices } = require('../utils');
+const { getService } = require('../utils');
 
 module.exports = {
   /**
@@ -47,7 +47,7 @@ module.exports = {
     const roleService = getService('role');
 
     try {
-      await validateRoleUpdateInput(ctx.request.body);
+      await validateRoleUpdateInput(body);
     } catch (err) {
       return ctx.badRequest('ValidationError', err);
     }
@@ -77,7 +77,8 @@ module.exports = {
   async getPermissions(ctx) {
     const { id } = ctx.params;
 
-    const [roleService, permissionService] = getServices('role', 'permission');
+    const roleService = getService('role');
+    const permissionService = getService('permission');
 
     const role = await roleService.findOne({ id });
 

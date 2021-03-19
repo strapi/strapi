@@ -10,13 +10,14 @@ const hasPropertiesAttribute = hasAttribute('properties');
 
 const shouldRunMigration = (definition, previousDefinition) => {
   const isAdminPermissionModel = definition.uid === permissionModelUID;
-  const targetedFieldsHaveChanged =
-    // If the previous definition has fields attr but don't have properties attr
-    hasFieldsAttribute(previousDefinition) &&
-    !hasPropertiesAttribute(previousDefinition) &&
-    // And if the current definition has properties attr but don't have fields attr
-    !hasFieldsAttribute(definition) &&
-    hasPropertiesAttribute(definition);
+
+  const hadFieldsButNotProperties =
+    hasFieldsAttribute(previousDefinition) && !hasPropertiesAttribute(previousDefinition);
+
+  const hasPropertiesButNotFields =
+    !hasFieldsAttribute(definition) && hasPropertiesAttribute(definition);
+
+  const targetedFieldsHaveChanged = hadFieldsButNotProperties && hasPropertiesButNotFields;
 
   return isAdminPermissionModel && targetedFieldsHaveChanged;
 };

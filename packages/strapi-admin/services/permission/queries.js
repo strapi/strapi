@@ -94,7 +94,7 @@ const findUserPermissions = async ({ roles }) => {
  * Removes permissions in database that don't exist anymore
  * @returns {Promise<>}
  */
-const cleanPermissionInDatabase = async () => {
+const cleanPermissionsInDatabase = async () => {
   const { actionProvider } = getService('permission');
   const pageSize = 200;
   let total = Infinity;
@@ -180,7 +180,11 @@ const ensureBoundPermissionsInDatabase = async () => {
       return;
     }
 
-    const fields = pipe(flatMap('properties.fields'), reject(isNil), uniq)(permissions);
+    const fields = pipe(
+      flatMap(permissionDomain.getProperty('fields')),
+      reject(isNil),
+      uniq
+    )(permissions);
 
     // Handle the scenario where permissions are missing
     const missingActions = difference(map('action', permissions), boundActions);
@@ -206,6 +210,6 @@ module.exports = {
   deleteByRolesIds,
   deleteByIds,
   findUserPermissions,
-  cleanPermissionInDatabase,
+  cleanPermissionsInDatabase,
   ensureBoundPermissionsInDatabase,
 };

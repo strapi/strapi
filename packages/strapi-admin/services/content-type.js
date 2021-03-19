@@ -164,15 +164,12 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
       subject,
       properties: { fields },
     } = permission;
-    const setPermissionFieldsProperty = value => {
-      return permissionDomain.setProperty('fields', value, permission);
-    };
 
     const action = actionProvider.get(actionId);
 
     // todo see if it's possible to check property on action + subject (async)
     if (!actionDomain.appliesToProperty('fields', action)) {
-      return setPermissionFieldsProperty(null);
+      return permissionDomain.deleteProperty('fields', permission);
     }
 
     if (!subject || !strapi.contentTypes[subject]) {
@@ -197,7 +194,7 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
       field => !badNestedFields.some(startsWith(`${field}.`))
     );
 
-    return setPermissionFieldsProperty(newFields);
+    return permissionDomain.setProperty('fields', newFields, permission);
   }, []);
 };
 

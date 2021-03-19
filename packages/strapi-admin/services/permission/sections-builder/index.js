@@ -1,6 +1,6 @@
 'use strict';
 
-const { isFunction, eq } = require('lodash/fp');
+const { isFunction, eq, propEq } = require('lodash/fp');
 const {
   subjectsHandlerFor,
   contentTypesBase,
@@ -9,7 +9,7 @@ const {
   settings: settingsHandler,
 } = require('./handlers');
 
-const sectionPropMatcher = targetValue => action => action.section === targetValue;
+const sectionPropMatcher = propEq('section');
 
 const createContentTypesInitialState = () => ({
   actions: [],
@@ -40,9 +40,7 @@ class SectionsBuilder {
   }
 
   deleteSection(sectionName) {
-    if (this._sections.has(sectionName)) {
-      this._sections.delete(sectionName);
-    }
+    this._sections.delete(sectionName);
 
     return this;
   }

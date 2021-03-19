@@ -10,6 +10,7 @@ const utils = {
     return !!subject.properties.find(prop => prop.value === property);
   }),
   getValidOptions: pick(['applyToProperties']),
+  toSubjectTemplate: ct => ({ uid: ct.uid, label: ct.info.name, properties: [] }),
 };
 
 /**
@@ -63,8 +64,6 @@ const contentTypesBase = (action, section) => {
 const subjectsHandlerFor = kind => (action, section) => {
   const { subjects } = action;
 
-  const toSubjectTemplate = ct => ({ uid: ct.uid, label: ct.info.name, properties: [] });
-
   const newSubjects = subjects
     // Ignore already added subjects
     .filter(utils.isNotInSubjects(section.subjects))
@@ -73,31 +72,31 @@ const subjectsHandlerFor = kind => (action, section) => {
     // Only keep specific kind of content-types
     .filter(utils.isOfKind(kind))
     // Transform the content-types into section's subjects
-    .map(toSubjectTemplate);
+    .map(utils.toSubjectTemplate);
 
   section.subjects.push(...newSubjects);
 };
 
+const buildNode = ([attributeName, attribute]) => {
+  if (attribute.configurable === false) {
+    return null;
+  }
+
+  const node = { label: attributeName, value: attributeName };
+
+  if (attribute.required) {
+    Object.assign(node, { required: true });
+  }
+
+  if (attribute.type === 'component') {
+    const component = strapi.components[attribute.component];
+    return { ...node, children: buildDeepAttributesCollection(component.attributes) };
+  }
+
+  return node;
+};
+
 const buildDeepAttributesCollection = attributes => {
-  const buildNode = ([attributeName, options]) => {
-    if (options.configurable === false) {
-      return null;
-    }
-
-    const node = { label: attributeName, value: attributeName };
-
-    if (options.required) {
-      Object.assign(node, { required: true });
-    }
-
-    if (options.type === 'component') {
-      const component = strapi.components[options.component];
-      return { ...node, children: buildDeepAttributesCollection(component.attributes) };
-    }
-
-    return node;
-  };
-
   return Object.entries(attributes)
     .map(buildNode)
     .filter(node => node !== null);

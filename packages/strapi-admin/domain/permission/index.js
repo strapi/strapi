@@ -7,6 +7,7 @@ const {
   eq,
   omit,
   remove,
+  get,
   uniq,
   isArray,
   map,
@@ -39,6 +40,8 @@ const removeCondition = curry((condition, permission) => {
   return set('conditions', remove(eq(condition), permission.conditions), permission);
 });
 
+const getProperty = curry((property, permission) => get(`properties.${property}`, permission));
+
 const setProperty = (property, value, permission) => {
   return set(`properties.${property}`, value, permission);
 };
@@ -70,6 +73,7 @@ module.exports = {
   createBoundAbstractDomain,
   deleteProperty,
   permissionFields,
+  getProperty,
   getSanitizedPermissionFields,
   sanitizePermissionFields,
   setProperty,
