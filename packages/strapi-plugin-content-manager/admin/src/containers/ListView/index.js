@@ -467,7 +467,9 @@ function ListView({
           onConfirm={handleConfirmDeleteAllData}
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
       </ListViewProvider>
     </>
   );
