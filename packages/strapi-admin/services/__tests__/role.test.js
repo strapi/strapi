@@ -297,28 +297,6 @@ describe('Role', () => {
       );
     });
 
-    test('Cannot delete a role used as the default role for new SSO users', async () => {
-      const dbFind = jest.fn(() => []);
-      const dbFindOne = jest.fn(() => ({}));
-      const dbCount = jest.fn(() => 0);
-
-      global.strapi = {
-        query: () => ({ find: dbFind, findOne: dbFindOne, count: dbCount }),
-        store: () => ({
-          get: () => ({
-            providers: {
-              defaultRole: 1,
-            },
-          }),
-        }),
-        admin: { config: { superAdminCode: SUPER_ADMIN_CODE } },
-      };
-
-      expect(() => roleService.deleteByIds([1])).rejects.toThrowError(
-        'This role is used as the default SSO role. Make sure to change this configuration before deleting the role'
-      );
-    });
-
     test('Cannot delete a role attached to some user', async () => {
       const dbFind = jest.fn(() => []);
       const dbFindOne = jest.fn(() => ({}));
