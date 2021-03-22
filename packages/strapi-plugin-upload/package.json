@@ -18,7 +18,7 @@
     "@buffetjs/icons": "3.3.5-next.1",
     "@buffetjs/styles": "3.3.5-next.1",
     "@buffetjs/utils": "3.3.5-next.1",
-    "byte-size": "^7.0.0",
+    "byte-size": "^7.0.1",
     "cropperjs": "^1.5.11",
     "immer": "^8.0.1",
     "immutable": "^3.8.2",

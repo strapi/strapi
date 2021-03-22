@@ -15,7 +15,7 @@
     "@buffetjs/styles": "3.3.5-next.1",
     "@buffetjs/utils": "3.3.5-next.1",
     "@sindresorhus/slugify": "1.1.0",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
     "lodash": "4.17.20",
     "pluralize": "^8.0.0",
