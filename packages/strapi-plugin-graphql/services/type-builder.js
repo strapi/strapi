@@ -19,7 +19,6 @@ const { toSingular, toInputName } = require('./naming');
 
 const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
 
-// RALPH HERE
 const isNotPrivate = _.curry((model, attributeName) => {
   return !contentTypes.isPrivateAttribute(model, attributeName);
 });
