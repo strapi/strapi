@@ -1,16 +1,23 @@
 'use strict';
 
-const { pick, uniq } = require('lodash/fp');
+const { pick, uniq, prop, getOr, flatten, pipe } = require('lodash/fp');
 const { getService } = require('../utils');
+
+const getLocalesProperty = getOr([], 'properties.locales');
+const getFieldsProperty = prop('properties.fields');
 
 module.exports = {
   async getNonLocalizedAttributes(ctx) {
-    const { userAbility } = ctx.state;
-    const { model, id } = ctx.request.body;
+    const { user } = ctx.state;
+    const { model, id, locale } = ctx.request.body;
 
     const modelDef = strapi.getModel(model);
-    const { copyNonLocalizedAttributes } = getService('content-types');
+    const { copyNonLocalizedAttributes, isLocalized } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
+
+    if (!isLocalized(modelDef)) {
+      return ctx.badRequest('model.not.localized');
+    }
 
     const entity = await strapi.entityService.findOne({ params: { id } }, { model });
 
@@ -18,14 +25,16 @@ module.exports = {
       return ctx.notFound();
     }
 
-    const pm = strapi.admin.services.permission.createPermissionsManager({
-      ability: userAbility,
-      model,
+    const permissions = await strapi.admin.services.permission.find({
+      action_in: [READ_ACTION, CREATE_ACTION],
+      subject: model,
+      role_in: user.roles.map(prop('id')),
     });
 
-    const permittedReadFields = pm.permittedFieldsOf(READ_ACTION);
-    const permittedCreateFields = pm.permittedFieldsOf(CREATE_ACTION);
-    const permittedFields = uniq([...permittedReadFields, ...permittedCreateFields]);
+    const localePermissions = permissions
+      .filter(perm => getLocalesProperty(perm).includes(locale))
+      .map(getFieldsProperty);
+    const permittedFields = pipe(flatten, uniq)(localePermissions);
 
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);
