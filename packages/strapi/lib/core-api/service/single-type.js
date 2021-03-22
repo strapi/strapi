@@ -55,8 +55,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async delete() {
-      const entity = await this.find();
+    async delete(params) {
+      const entity = await this.find(params);
 
       if (!entity) return;
 
