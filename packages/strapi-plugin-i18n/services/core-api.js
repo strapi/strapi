@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, prop, pick, omit, pipe, map } = require('lodash/fp');
+const { has, prop, pick, reduce, map, keys, toPath } = require('lodash/fp');
 const { contentTypes, parseMultipartData, sanitizeEntity } = require('strapi-utils');
 
 const { getService } = require('../utils');
@@ -22,6 +22,76 @@ const parseRequest = ctx => {
 };
 
 /**
+ * Returns all locales for an entry
+ * @param {object} entry
+ * @returns {string[]}
+ */
+const getAllLocales = entry => {
+  return [entry.locale, ...map(prop('locale'), entry.localizations)];
+};
+
+/**
+ * Returns all localizations ids for an entry
+ * @param {object} entry
+ * @returns {any[]}
+ */
+const getAllLocalizationsIds = entry => {
+  return [entry.id, ...map(prop('id'), entry.localizations)];
+};
+
+/**
+ * Returns a sanitizer object with a data & a file sanitizer for a content type
+ * @param {object} contentType
+ * @returns {{
+ *    sanitizeInput(data: object): object,
+ *    sanitizeInputFiles(files: object): object
+ * }}
+ */
+const createSanitizer = contentType => {
+  /**
+   * Returns the writable attributes of a content type in the localization routes
+   * @returns {string[]}
+   */
+  const getAllowedAttributes = () => {
+    return getWritableAttributes(contentType).filter(
+      attributeName => !['locale', 'localizations'].includes(attributeName)
+    );
+  };
+
+  /**
+   * Sanitizes uploaded files to keep only writable ones
+   * @param {object} files - input files to sanitize
+   * @returns {object}
+   */
+  const sanitizeInputFiles = files => {
+    const allowedFields = getAllowedAttributes();
+    return reduce(
+      (acc, keyPath) => {
+        const [rootKey] = toPath(keyPath);
+        if (allowedFields.includes(rootKey)) {
+          acc[keyPath] = files[keyPath];
+        }
+
+        return acc;
+      },
+      {},
+      keys(files)
+    );
+  };
+
+  /**
+   * Sanitizes input data to keep only writable attributes
+   * @param {object} data - input data to sanitize
+   * @returns {object}
+   */
+  const sanitizeInput = data => {
+    return pick(getAllowedAttributes(), data);
+  };
+
+  return { sanitizeInput, sanitizeInputFiles };
+};
+
+/**
  * Returns a handler to handle localizations creation in the core api
  * @param {object} contentType
  * @returns {(object) => void}
@@ -29,17 +99,7 @@ const parseRequest = ctx => {
 const createLocalizationHandler = contentType => {
   const { copyNonLocalizedAttributes } = getService('content-types');
 
-  const sanitizeInput = data => {
-    return pipe(omit(['locale', 'localizations']), pick(getWritableAttributes(contentType)))(data);
-  };
-
-  const getAllLocales = entry => {
-    return [entry.locale, ...map(prop('locale'), entry.localizations)];
-  };
-
-  const getAllLocalizations = entry => {
-    return [entry.id, ...map(prop('id'), entry.localizations)];
-  };
+  const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
 
   /**
    * Create localized entry from another one
@@ -55,7 +115,7 @@ const createLocalizationHandler = contentType => {
 
     const matchingLocale = await findByCode(data.locale);
     if (!matchingLocale) {
-      return ctx.badRequest("This locale doesn't exist");
+      return ctx.badRequest('locale.invalid');
     }
 
     const usedLocales = getAllLocales(entry);
@@ -67,10 +127,10 @@ const createLocalizationHandler = contentType => {
       ...copyNonLocalizedAttributes(contentType, entry),
       ...sanitizeInput(data),
       locale: data.locale,
-      localizations: getAllLocalizations(entry),
+      localizations: getAllLocalizationsIds(entry),
     };
 
-    const sanitizedFiles = sanitizeInput(files);
+    const sanitizedFiles = sanitizeInputFiles(files);
 
     const newEntry = await strapi.entityService.create(
       { data: sanitizedData, files: sanitizedFiles },
@@ -147,4 +207,5 @@ const addCreateLocalizationAction = contentType => {
 
 module.exports = {
   addCreateLocalizationAction,
+  createSanitizer,
 };

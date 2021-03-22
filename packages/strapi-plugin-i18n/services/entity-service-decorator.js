@@ -15,10 +15,6 @@ const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
-  if (has('id', params) && SINGLE_ENTRY_ACTIONS.includes(action)) {
-    return params;
-  }
-
   if (has(LOCALE_QUERY_FILTER, params)) {
     if (params[LOCALE_QUERY_FILTER] === 'all') {
       return omit(LOCALE_QUERY_FILTER, params);
@@ -28,6 +24,10 @@ const wrapParams = async (params = {}, ctx = {}) => {
       ...omit(LOCALE_QUERY_FILTER, params),
       locale: params[LOCALE_QUERY_FILTER],
     };
+  }
+
+  if (has('id', params) && SINGLE_ENTRY_ACTIONS.includes(action)) {
+    return params;
   }
 
   const { getDefaultLocale } = getService('locales');
