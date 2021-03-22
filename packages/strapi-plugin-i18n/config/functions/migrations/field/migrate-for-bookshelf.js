@@ -1,0 +1,171 @@
+'use strict';
+
+const { singular } = require('pluralize');
+const { has, omit, pick, orderBy } = require('lodash/fp');
+const { shouldBeProcessed, getUpdatesInfo } = require('./utils');
+
+const BATCH_SIZE = 1000;
+
+const TMP_TABLE_NAME = '__tmp__i18n_field_migration';
+
+const batchInsertInTmpTable = async (updatesInfo, trx) => {
+  const tmpEntries = [];
+  updatesInfo.forEach(({ entriesIdsToUpdate, attributesValues }) => {
+    entriesIdsToUpdate.forEach(id => {
+      tmpEntries.push({ id, ...attributesValues });
+    });
+  });
+  await trx.batchInsert(TMP_TABLE_NAME, tmpEntries, 100);
+};
+
+const batchUpdate = async (updatesInfo, trx, model) => {
+  const promises = updatesInfo.map(({ entriesIdsToUpdate, attributesValues }) =>
+    trx
+      .from(model.collectionName)
+      .update(attributesValues)
+      .whereIn('id', entriesIdsToUpdate)
+  );
+  await Promise.all(promises);
+};
+
+const updateFromTmpTable = async ({ model, trx, attributesToMigrate }) => {
+  const collectionName = model.collectionName;
+  if (model.client === 'pg') {
+    const substitutes = attributesToMigrate.map(() => '?? = ??.??').join(',');
+    const bindings = [collectionName];
+    attributesToMigrate.forEach(attr => bindings.push(attr, TMP_TABLE_NAME, attr));
+    bindings.push(TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME);
+
+    await trx.raw(`UPDATE ?? SET ${substitutes} FROM ?? WHERE ??.id = ??.id;`, bindings);
+  } else if (model.client === 'mysql') {
+    const substitutes = attributesToMigrate.map(() => '??.?? = ??.??').join(',');
+    const bindings = [collectionName, TMP_TABLE_NAME, collectionName, TMP_TABLE_NAME];
+    attributesToMigrate.forEach(attr => bindings.push(collectionName, attr, TMP_TABLE_NAME, attr));
+
+    await trx.raw(`UPDATE ?? JOIN ?? ON ??.id = ??.id SET ${substitutes};`, bindings);
+  }
+};
+
+const createTmpTable = async ({ ORM, attributesToMigrate, model }) => {
+  const columnsToCopy = ['id', ...attributesToMigrate];
+  await deleteTmpTable({ ORM });
+  await ORM.knex.raw(`CREATE TABLE ?? AS ??`, [
+    TMP_TABLE_NAME,
+    ORM.knex
+      .select(columnsToCopy)
+      .from(model.collectionName)
+      .whereRaw('?', 0),
+  ]);
+};
+
+const deleteTmpTable = ({ ORM }) => ORM.knex.schema.dropTableIfExists(TMP_TABLE_NAME);
+
+const getSortedLocales = async trx => {
+  let defaultLocale;
+  try {
+    const defaultLocaleRow = await trx('core_store')
+      .select('value')
+      .where({ key: 'plugin_i18n_default_locale' })
+      .first();
+    defaultLocale = JSON.parse(defaultLocaleRow.value);
+  } catch (e) {
+    throw new Error("Could not migrate because the default locale doesn't exist");
+  }
+
+  let locales;
+  try {
+    locales = await trx(strapi.plugins.i18n.models.locale.collectionName).select('code');
+  } catch (e) {
+    throw new Error('Could not migrate because no locale exist');
+  }
+
+  locales.forEach(locale => (locale.isDefault = locale.code === defaultLocale));
+  return orderBy(['isDefault', 'code'], ['desc', 'asc'])(locales); // Put default locale first
+};
+
+const processEntriesWith = async (processFn, { trx, model, attributesToMigrate }) => {
+  const locales = await getSortedLocales(trx);
+  const localizationAssoc = model.associations.find(a => a.alias === 'localizations');
+  const localizationTableName = localizationAssoc.tableCollectionName;
+
+  const locsAttr = model.attributes.localizations;
+  const foreignKey = `${singular(model.collectionName)}_${model.primaryKey}`;
+  const relatedKey = `${locsAttr.attribute}_${locsAttr.column}`;
+  const processedLocaleCodes = [];
+  for (const locale of locales) {
+    let offset = 0;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      let batch = await trx
+        .select([
+          ...attributesToMigrate.map(attr => `model.${attr}`),
+          'model.id as __strapi_rootId',
+          'relModel.id as id',
+          'relModel.locale',
+        ])
+        .join(
+          `${localizationTableName} as loc`,
+          `model.${model.primaryKey}`,
+          '=',
+          `loc.${foreignKey}`
+        )
+        .join(
+          `${model.collectionName} as relModel`,
+          `loc.${relatedKey}`,
+          '=',
+          `relModel.${model.primaryKey}`
+        )
+        .from(
+          trx
+            .select('*')
+            .from(`${model.collectionName} as subModel`)
+            .orderBy(`subModel.${model.primaryKey}`)
+            .where(`subModel.locale`, locale.code)
+            .offset(offset)
+            .limit(BATCH_SIZE)
+            .as('model')
+        );
+      let entries = batch.reduce((entries, entry) => {
+        if (has(entry.__strapi_rootId, entries)) {
+          entries[entry.__strapi_rootId].localizations.push(pick(['id', 'locale'], entry));
+        } else {
+          entries[entry.__strapi_rootId] = omit(['id', 'locale', '__strapi_rootId'], entry);
+          entries[entry.__strapi_rootId].localizations = [pick(['id', 'locale'], entry)];
+        }
+
+        return entries;
+      }, {});
+      entries = Object.values(entries);
+
+      offset += BATCH_SIZE;
+
+      const entriesToProcess = entries.filter(shouldBeProcessed(processedLocaleCodes));
+      const updatesInfo = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
+
+      await processFn(updatesInfo, trx, model);
+
+      if (entries.length < BATCH_SIZE) {
+        break;
+      }
+    }
+    processedLocaleCodes.push(locale.code);
+  }
+};
+
+const migrateForBookshelf = async ({ ORM, model, attributesToMigrate }) => {
+  if (['pg', 'mysql'].includes(model.client)) {
+    // create table outside of the transaction because mysql doesn't accept the creation inside
+    await createTmpTable({ ORM, attributesToMigrate, model });
+    await ORM.knex.transaction(async trx => {
+      await processEntriesWith(batchInsertInTmpTable, { ORM, trx, model, attributesToMigrate });
+      await updateFromTmpTable({ model, trx, attributesToMigrate });
+    });
+    await deleteTmpTable({ ORM });
+  } else {
+    await ORM.knex.transaction(async trx => {
+      await processEntriesWith(batchUpdate, { ORM, trx, model, attributesToMigrate });
+    });
+  }
+};
+
+module.exports = migrateForBookshelf;
