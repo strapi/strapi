@@ -12,11 +12,17 @@ const graphql = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLDate, GraphQLDateTime } = require('graphql-iso-date');
 const GraphQLLong = require('graphql-type-long');
+const { contentTypes } = require('strapi-utils');
 
 const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
 
 const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
+
+// RALPH HERE
+const isNotPrivate = _.curry((model, attributeName) => {
+  return !contentTypes.isPrivateAttribute(model, attributeName);
+});
 
 module.exports = {
   /**
@@ -216,7 +222,9 @@ module.exports = {
     const globalId = model.globalId;
     const inputName = `${_.upperFirst(toSingular(name))}Input`;
 
-    if (_.isEmpty(model.attributes)) {
+    if (_.isEmpty(model.attributes) ||
+      Object.keys(model.attributes).filter(attributeName => isNotPrivate(model, attributeName)).length === 0
+    ) {
       return `
       input ${inputName} {
         _: String
@@ -232,6 +240,7 @@ module.exports = {
       input ${inputName} {
 
         ${Object.keys(model.attributes)
+          .filter(attributeName => isNotPrivate(model, attributeName))
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
               attribute: model.attributes[attributeName],
@@ -246,6 +255,7 @@ module.exports = {
       input edit${inputName} {
         ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
+          .filter(attributeName => isNotPrivate(model, attributeName))
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
               attribute: model.attributes[attributeName],

@@ -72,7 +72,7 @@ const buildTypeDefObj = model => {
   }
 
   Object.keys(attributes)
-    .filter(isNotPrivate(model))
+    .filter(attributeName => isNotPrivate(model, attributeName))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -99,7 +99,7 @@ const buildTypeDefObj = model => {
 
 const generateEnumDefinitions = (attributes, globalId) => {
   return Object.keys(attributes)
-    .filter(attribute => attributes[attribute].type === 'enumeration')
+    .filter(attribute => attributes[attribute].type === 'enumeration' && !attributes[attribute].private)
     .map(attribute => {
       const definition = attributes[attribute];
 
