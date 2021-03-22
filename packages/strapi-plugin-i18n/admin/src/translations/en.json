@@ -25,6 +25,7 @@
   "Settings.list.actions.add": "Add a locale",
   "Settings.list.actions.edit": "Edit a locale",
   "Settings.list.actions.delete": "Delete a locale",
+  "Settings.list.actions.deleteAdditionalInfos": "This will delete the active locale versions <em>(from Internationalization)</em>",
   "Settings.locales.list.title.singular": "{number} Locale",
   "Settings.locales.list.title.plural": "{number} Locales",
   "Settings.locales.row.default-locale": "Default locale",

@@ -34,7 +34,7 @@ export default strapi => {
     ],
     injectionZones: {
       editView: { informations: [] },
-      listView: { actions: [] },
+      listView: { actions: [], deleteModalAdditionalInfos: [] },
     },
     isReady: true,
     isRequired: pluginPkg.strapi.required || false,

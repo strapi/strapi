@@ -16,6 +16,7 @@ import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import i18nReducers from './hooks/reducers';
+import DeleteModalAdditionalInfos from './components/DeleteModalAdditionalInfos';
 
 export default strapi => {
   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -64,6 +65,11 @@ export default strapi => {
         cmPlugin.injectComponent('listView', 'actions', {
           name: 'i18n-locale-filter',
           Component: LocalePicker,
+        });
+
+        cmPlugin.injectComponent('listView', 'deleteModalAdditionalInfos', {
+          name: 'i18n-delete-bullets-in-modal',
+          Component: DeleteModalAdditionalInfos,
         });
       }
 

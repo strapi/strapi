@@ -15,6 +15,7 @@ import {
   CheckPermissions,
   useGlobalContext,
   InjectionZone,
+  InjectionZoneList,
   useQueryParams,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
@@ -449,7 +450,9 @@ function ListView({
           popUpWarningType="danger"
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
         <PopUpWarning
           isOpen={showWarningDeleteAll}
           toggleModal={toggleModalDeleteAll}
@@ -464,7 +467,9 @@ function ListView({
           onConfirm={handleConfirmDeleteAllData}
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
       </ListViewProvider>
     </>
   );
