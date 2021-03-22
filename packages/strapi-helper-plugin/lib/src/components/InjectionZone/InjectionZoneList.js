@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import useInjectionZone from './useInjectionZone';
 
-const List = styled.ul``;
-
 const ListItem = styled.li`
   font-size: ${p => p.theme.main.sizes.fonts.md};
 
@@ -21,13 +19,13 @@ const InjectionZoneList = ({ area, ...props }) => {
   }
 
   return (
-    <List>
+    <ul>
       {compos.map(compo => (
         <ListItem key={compo.name}>
           <compo.Component {...props} />
         </ListItem>
       ))}
-    </List>
+    </ul>
   );
 };
 
