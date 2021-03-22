@@ -3,7 +3,13 @@
 const { eq } = require('lodash/fp');
 const { hooks } = require('strapi-utils');
 
-const createSection = ({ initialStateFactory, handlers = [], matchers = [] }) => {
+const emptyObjectFactory = () => ({});
+
+const createSection = ({
+  initialStateFactory = emptyObjectFactory,
+  handlers = [],
+  matchers = [],
+} = {}) => {
   const state = {
     hooks: {
       handlers: hooks.createAsyncSeriesHook(),

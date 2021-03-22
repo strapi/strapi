@@ -5,7 +5,7 @@ const { curry, pipe, merge, set, pick, omit, includes, isArray, prop } = require
 /**
  * Domain representation of an Action (RBAC)
  * @typedef {Object} Action
- * @property {string} actionId - The identifier of the action
+ * @property {string} actionId - The unique identifier of the action
  * @property {string} section - The section linked to the action
  * @property {string} displayName - The human readable name of an action
  * @property {string} category - The main category of an action
