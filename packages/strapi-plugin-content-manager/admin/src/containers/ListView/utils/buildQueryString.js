@@ -8,7 +8,6 @@ import createPluginsFilter from './createPluginsFilter';
  * - plugin options
  */
 const buildQueryString = (queryParams = {}) => {
-  // const pluginOptionArray = arrayOfPluginOptions(queryParams.pluginOptions);
   const _where = queryParams._where || [];
 
   /**

@@ -1,4 +1,4 @@
-import { getType, getOtherInfos } from './utils/getAttributeInfos';
+import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfos';
 // Assets
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
@@ -125,10 +125,10 @@ export { default as StrapiProvider } from './providers/StrapiProvider';
 export { default as auth } from './utils/auth';
 export { default as cleanData } from './utils/cleanData';
 export { default as difference } from './utils/difference';
-export { default as contentManagementUtilRemoveFieldsFromData } from './utils/contentManagementUtilRemoveFieldsFromData';
+export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as dateFormats } from './utils/dateFormats';
 export { default as dateToUtcTime } from './utils/dateToUtcTime';
-export { default as formatComponentData } from './utils/formatComponentData';
+export { default as formatComponentData } from './content-manager/utils/formatComponentData';
 export { default as hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
