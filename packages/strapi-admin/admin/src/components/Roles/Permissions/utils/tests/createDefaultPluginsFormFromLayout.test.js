@@ -36,14 +36,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
 
       const expected = {
         'plugins::documentation.settings.update': {
-          enabled: false,
+          properties: {
+            enabled: false,
+          },
           conditions: {
             'admin::is-creator': false,
             'admin::has-same-role-as-creator': false,
           },
         },
         'plugins::documentation.settings.regenerate': {
-          enabled: false,
+          properties: {
+            enabled: false,
+          },
           conditions: {
             'admin::is-creator': false,
             'admin::has-same-role-as-creator': false,
@@ -80,14 +84,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
 
       const expected = {
         'plugins::documentation.settings.update': {
-          enabled: true,
+          properties: {
+            enabled: true,
+          },
           conditions: {
             'admin::is-creator': false,
             'admin::has-same-role-as-creator': true,
           },
         },
         'plugins::documentation.settings.regenerate': {
-          enabled: false,
+          properties: {
+            enabled: false,
+          },
           conditions: {
             'admin::is-creator': false,
             'admin::has-same-role-as-creator': false,
@@ -136,7 +144,9 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       const expected = {
         general: {
           'plugins::documentation.read': {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: {
               'admin::is-creator': false,
               'admin::has-same-role-as-creator': false,
@@ -145,14 +155,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
         settings: {
           'plugins::documentation.settings.update': {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: {
               'admin::is-creator': false,
               'admin::has-same-role-as-creator': false,
             },
           },
           'plugins::documentation.settings.regenerate': {
-            enabled: false,
+            properties: {
+              enabled: false,
+            },
             conditions: {
               'admin::is-creator': false,
               'admin::has-same-role-as-creator': false,
@@ -228,7 +242,9 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         'plugin::content-type-builder': {
           general: {
             'plugins::content-type-builder.read': {
-              enabled: false,
+              properties: {
+                enabled: false,
+              },
               conditions: {
                 'admin::is-creator': false,
                 'admin::has-same-role-as-creator': false,
@@ -239,7 +255,9 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         'plugin::documentation': {
           general: {
             'plugins::documentation.read': {
-              enabled: false,
+              properties: {
+                enabled: false,
+              },
               conditions: {
                 'admin::is-creator': false,
                 'admin::has-same-role-as-creator': false,
@@ -248,14 +266,18 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           },
           settings: {
             'plugins::documentation.settings.update': {
-              enabled: false,
+              properties: {
+                enabled: false,
+              },
               conditions: {
                 'admin::is-creator': false,
                 'admin::has-same-role-as-creator': false,
               },
             },
             'plugins::documentation.settings.regenerate': {
-              enabled: false,
+              properties: {
+                enabled: false,
+              },
               conditions: {
                 'admin::is-creator': false,
                 'admin::has-same-role-as-creator': false,

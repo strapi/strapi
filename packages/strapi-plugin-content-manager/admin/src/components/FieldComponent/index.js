@@ -2,10 +2,10 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { size } from 'lodash';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEqual from 'react-fast-compare';
-import { NotAllowedInput } from 'strapi-helper-plugin';
+import { NotAllowedInput, LabelIconWrapper } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
@@ -26,6 +26,7 @@ const FieldComponent = ({
   isRepeatable,
   isNested,
   label,
+  labelIcon,
   max,
   min,
   name,
@@ -36,15 +37,20 @@ const FieldComponent = ({
   componentValue,
   removeComponentFromField,
 }) => {
+  const { formatMessage } = useIntl();
   const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
 
+  const formattedLabelIcon = labelIcon
+    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
+    : null;
+
   if (!hasChildrenAllowedFields && isCreatingEntry) {
     return (
       <div className="col-12">
-        <NotAllowedInput label={label} />
+        <NotAllowedInput label={label} labelIcon={formattedLabelIcon} />
       </div>
     );
   }
@@ -52,7 +58,7 @@ const FieldComponent = ({
   if (!hasChildrenAllowedFields && !isCreatingEntry && !hasChildrenReadableFields) {
     return (
       <div className="col-12">
-        <NotAllowedInput label={label} />
+        <NotAllowedInput label={label} labelIcon={formattedLabelIcon} />
       </div>
     );
   }
@@ -70,8 +76,15 @@ const FieldComponent = ({
         </ComponentIcon>
       )}
       <Label>
-        {label}&nbsp;
-        {isRepeatable && `(${componentValueLength})`}
+        <span>
+          {label}&nbsp;
+          {isRepeatable && `(${componentValueLength})`}
+        </span>
+        {formattedLabelIcon && (
+          <LabelIconWrapper title={formattedLabelIcon.title}>
+            {formattedLabelIcon.icon}
+          </LabelIconWrapper>
+        )}
       </Label>
       {showResetComponent && (
         <Reset
@@ -122,6 +135,7 @@ FieldComponent.defaultProps = {
   isReadOnly: false,
   isRepeatable: false,
   isNested: false,
+  labelIcon: null,
   max: Infinity,
   min: -Infinity,
 };
@@ -139,6 +153,13 @@ FieldComponent.propTypes = {
   isRepeatable: PropTypes.bool,
   isNested: PropTypes.bool,
   label: PropTypes.string.isRequired,
+  labelIcon: PropTypes.shape({
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      defaultMessage: PropTypes.string.isRequired,
+    }),
+  }),
   max: PropTypes.number,
   min: PropTypes.number,
   name: PropTypes.string.isRequired,

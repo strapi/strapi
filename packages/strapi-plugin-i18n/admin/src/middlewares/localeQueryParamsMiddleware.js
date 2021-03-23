@@ -1,6 +1,9 @@
+import React from 'react';
 import get from 'lodash/get';
+import getDefaultLocale from '../utils/getDefaultLocale';
+import LocaleListCell from '../components/LocaleListCell/LocaleListCell';
 
-const localeQueryParamsMiddleware = () => () => next => action => {
+const localeQueryParamsMiddleware = () => ({ getState }) => next => action => {
   if (action.type !== 'ContentManager/ListView/SET_LIST_LAYOUT ') {
     return next(action);
   }
@@ -11,16 +14,32 @@ const localeQueryParamsMiddleware = () => () => next => action => {
     return next(action);
   }
 
-  if (!action.initialParams.pluginOptions) {
-    action.initialParams.pluginOptions = {
-      locale: 'en',
+  const store = getState();
+  const { locales } = store.get('i18n_locales');
+  const { collectionTypesRelatedPermissions } = store.get('permissionsManager');
+  const ctPermissions = collectionTypesRelatedPermissions[action.contentType.uid];
+  const defaultLocale = getDefaultLocale(ctPermissions, locales);
+
+  const locale = {
+    key: '__locale_key__',
+    fieldSchema: { type: 'string' },
+    metadatas: { label: 'Content available in', searchable: false, sortable: false },
+    name: 'locales',
+    cellFormatter: props => <LocaleListCell {...props} locales={locales} />,
+  };
+
+  action.displayedHeaders = [...action.displayedHeaders, locale];
+
+  if (!action.initialParams.plugins) {
+    action.initialParams.plugins = {
+      i18n: { locale: defaultLocale },
     };
 
     return next(action);
   }
 
-  if (!action.initialParams.pluginOptions.locale) {
-    action.initialParams.pluginOptions.locale = 'en';
+  if (!get(action, 'initialParams.plugins.i18n.locale')) {
+    action.initialParams.plugins.i18n = { locale: defaultLocale };
 
     return next(action);
   }

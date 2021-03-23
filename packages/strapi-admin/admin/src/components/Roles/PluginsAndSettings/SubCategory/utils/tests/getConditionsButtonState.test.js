@@ -4,7 +4,9 @@ describe('ADMIN | COMPONENTS | Permissions | PluginsAndSettings | SubCategories
   it('should return false when all conditions leafs are falsy', () => {
     const data = {
       test: {
-        enabled: true,
+        properties: {
+          enabled: true,
+        },
         conditions: { foo: false, bar: false },
       },
     };
@@ -15,7 +17,9 @@ describe('ADMIN | COMPONENTS | Permissions | PluginsAndSettings | SubCategories
   it('should return true when one condition leaf is truthy', () => {
     const data = {
       test: {
-        enabled: true,
+        properties: {
+          enabled: true,
+        },
         conditions: { foo: true, bar: false },
       },
     };

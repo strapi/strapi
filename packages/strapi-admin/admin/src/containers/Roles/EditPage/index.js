@@ -21,11 +21,7 @@ const EditPage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
 
-  const {
-    isLoading: isLayoutLoading,
-    // TODO
-    // data: permissionsLayout,
-  } = useFetchPermissionsLayout(id);
+  const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const {
     role,
     permissions: rolePermissions,
@@ -159,6 +155,7 @@ const EditPage = () => {
                     isFormDisabled={isFormDisabled}
                     permissions={rolePermissions}
                     ref={permissionsRef}
+                    layout={permissionsLayout}
                   />
                 </Padded>
               )}

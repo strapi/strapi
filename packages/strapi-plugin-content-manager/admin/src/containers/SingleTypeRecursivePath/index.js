@@ -6,7 +6,7 @@ import pluginPermissions from '../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
-import EditView from '../EditView';
+import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
 
 const SingleTypeRecursivePath = ({
@@ -58,7 +58,13 @@ const SingleTypeRecursivePath = ({
           path={url}
           render={({ location: { state }, history: { goBack } }) => {
             return (
-              <EditView layout={layout} slug={slug} isSingleType state={state} goBack={goBack} />
+              <EditViewLayoutManager
+                layout={layout}
+                slug={slug}
+                isSingleType
+                state={state}
+                goBack={goBack}
+              />
             );
           }}
         />

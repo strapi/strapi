@@ -8,23 +8,19 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
+import { stringify } from 'qs';
 import {
   PopUpWarning,
   request,
   CheckPermissions,
   useGlobalContext,
-  useUserPermissions,
   InjectionZone,
+  InjectionZoneList,
   useQueryParams,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import {
-  formatFiltersFromQuery,
-  generatePermissionsObject,
-  getRequestUrl,
-  getTrad,
-} from '../../utils';
+import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
@@ -42,7 +38,6 @@ import {
   onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
-  resetProps,
   setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
@@ -51,11 +46,14 @@ import {
   onResetListHeaders,
 } from './actions';
 import makeSelectListView from './selectors';
-
 import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from './utils';
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
+  canCreate,
+  canDelete,
+  canRead,
+  canUpdate,
   didDeleteData,
   entriesToDelete,
   onChangeBulk,
@@ -78,7 +76,6 @@ function ListView({
   onChangeListHeaders,
   onResetListHeaders,
   pagination: { total },
-  resetProps,
   slug,
   initialParams,
 }) {
@@ -92,11 +89,6 @@ function ListView({
 
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useUserPermissions(viewPermissions);
 
   const [{ query }, setQuery] = useQueryParams(initialParams);
   const params = buildQueryString(query);
@@ -126,11 +118,7 @@ function ListView({
 
   useEffect(() => {
     setFilterPickerState(false);
-
-    return () => {
-      resetProps();
-    };
-  }, [resetProps]);
+  }, []);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
@@ -245,7 +233,7 @@ function ListView({
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const shouldSendRequest = !isLoadingForPermissions && canRead;
+    const shouldSendRequest = canRead;
     const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
@@ -256,7 +244,7 @@ function ListView({
       requestUrlRef.current = slug;
       abortController.abort();
     };
-  }, [isLoadingForPermissions, canRead, getData, slug, params, getDataSucceeded, fetchData]);
+  }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const handleClickDelete = id => {
     setIdToDelete(id);
@@ -302,6 +290,7 @@ function ListView({
           emitEventRef.current('willCreateEntry', trackerProperty);
           push({
             pathname: `${pathname}/create`,
+            search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
           });
         },
         color: 'primary',
@@ -314,7 +303,7 @@ function ListView({
         },
       },
     ];
-  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push]);
+  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push, query]);
 
   const headerProps = useMemo(() => {
     /* eslint-disable indent */
@@ -374,6 +363,15 @@ function ListView({
           {isSearchable && canRead && (
             <Search changeParams={setQuery} initValue={_q} model={label} value={_q} />
           )}
+
+          {!canRead && (
+            <Flex justifyContent="flex-end">
+              <Padded right size="sm">
+                <InjectionZone area={`${pluginId}.listView.actions`} />
+              </Padded>
+            </Flex>
+          )}
+
           {canRead && (
             <Wrapper>
               <div className="row" style={{ marginBottom: '5px' }}>
@@ -452,7 +450,9 @@ function ListView({
           popUpWarningType="danger"
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
         <PopUpWarning
           isOpen={showWarningDeleteAll}
           toggleModal={toggleModalDeleteAll}
@@ -467,13 +467,23 @@ function ListView({
           onConfirm={handleConfirmDeleteAllData}
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
       </ListViewProvider>
     </>
   );
 }
 
+ListView.defaultProps = {
+  permissions: [],
+};
+
 ListView.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
+  canDelete: PropTypes.bool.isRequired,
+  canRead: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   displayedHeaders: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
   didDeleteData: PropTypes.bool.isRequired,
@@ -503,7 +513,6 @@ ListView.propTypes = {
   onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
-  resetProps: PropTypes.func.isRequired,
   setModalLoadingState: PropTypes.func.isRequired,
   showModalConfirmButtonLoading: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
@@ -513,6 +522,14 @@ ListView.propTypes = {
   toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
   initialParams: PropTypes.shape({}).isRequired,
+  permissions: PropTypes.arrayOf(
+    PropTypes.shape({
+      action: PropTypes.string.isRequired,
+      subject: PropTypes.string.isRequired,
+      properties: PropTypes.object,
+      conditions: PropTypes.arrayOf(PropTypes.string),
+    })
+  ),
 };
 
 const mapStateToProps = makeSelectListView();
@@ -529,7 +546,6 @@ export function mapDispatchToProps(dispatch) {
       onDeleteDataSucceeded,
       onDeleteSeveralDataSucceeded,
       onResetListHeaders,
-      resetProps,
       setModalLoadingState,
       toggleModalDelete,
       toggleModalDeleteAll,

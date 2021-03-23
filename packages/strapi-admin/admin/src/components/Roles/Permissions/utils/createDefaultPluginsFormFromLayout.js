@@ -7,7 +7,9 @@ const createSubCategoryForm = (actions, conditions, permissions) => {
     const foundMatchingPermission = findMatchingPermission(permissions, current.action, null);
 
     acc[current.action] = {
-      enabled: foundMatchingPermission !== undefined,
+      properties: {
+        enabled: foundMatchingPermission !== undefined,
+      },
       conditions: createDefaultConditionsForm(
         conditions,
         get(foundMatchingPermission, 'conditions', [])

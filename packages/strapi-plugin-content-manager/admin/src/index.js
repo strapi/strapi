@@ -32,7 +32,10 @@ export default strapi => {
         key: 'content-manager.link',
       },
     ],
-    injectionZones: { listView: { actions: [] } },
+    injectionZones: {
+      editView: { informations: [] },
+      listView: { actions: [], deleteModalAdditionalInfos: [] },
+    },
     isReady: true,
     isRequired: pluginPkg.strapi.required || false,
     layout: null,

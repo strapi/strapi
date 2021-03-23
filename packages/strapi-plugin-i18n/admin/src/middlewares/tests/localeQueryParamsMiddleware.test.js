@@ -1,8 +1,25 @@
 import localeQueryParamsMiddleware from '../localeQueryParamsMiddleware';
 
 describe('localeQueryParamsMiddleware', () => {
+  let getState;
+
+  beforeEach(() => {
+    const store = new Map();
+
+    store.set('i18n_locales', { locales: [] });
+    store.set('permissionsManager', { userPermissions: [] });
+    store.set('permissionsManager', {
+      collectionTypesRelatedPermissions: {
+        'plugins::content-manager.explorer.read': [],
+        'plugins::content-manager.explorer.create': [],
+      },
+    });
+
+    getState = () => store;
+  });
+
   it('does nothing on unknown actions', () => {
-    const middleware = localeQueryParamsMiddleware()();
+    const middleware = localeQueryParamsMiddleware()({ getState });
     const nextFn = jest.fn();
     const action = { type: 'UNKNOWN' };
 
@@ -15,7 +32,7 @@ describe('localeQueryParamsMiddleware', () => {
   });
 
   it('does nothing when there s no i18n.localized key in the action', () => {
-    const middleware = localeQueryParamsMiddleware()();
+    const middleware = localeQueryParamsMiddleware()({ getState });
     const nextFn = jest.fn();
     const action = {
       type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
@@ -34,11 +51,12 @@ describe('localeQueryParamsMiddleware', () => {
     });
   });
 
-  it('creates a pluginOptions key with a locale when initialParams does not have a pluginOptions key and the field is localized', () => {
-    const middleware = localeQueryParamsMiddleware()();
+  it('creates a plugins key with a locale when initialParams does not have a plugins key and the field is localized', () => {
+    const middleware = localeQueryParamsMiddleware()({ getState });
     const nextFn = jest.fn();
     const action = {
       type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
+      displayedHeaders: [],
       contentType: {
         pluginOptions: {
           i18n: { localized: true },
@@ -50,25 +68,28 @@ describe('localeQueryParamsMiddleware', () => {
     middleware(nextFn)(action);
 
     expect(nextFn).toBeCalledWith(action);
-    expect(action).toEqual({
-      contentType: { pluginOptions: { i18n: { localized: true } } },
-      initialParams: { pluginOptions: { locale: 'en' } },
-      type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
-    });
+    // The anonymous function of cellFormatter creates problem, because it's anonymous
+    // In our scenario, it's even more tricky because we use a closure in order to pass
+    // the locales.
+    // Stringifying the action allows us to have a name inside the expectation for the "cellFormatter" key
+    expect(JSON.stringify(action)).toBe(
+      '{"type":"ContentManager/ListView/SET_LIST_LAYOUT ","displayedHeaders":[{"key":"__locale_key__","fieldSchema":{"type":"string"},"metadatas":{"label":"Content available in","searchable":false,"sortable":false},"name":"locales"}],"contentType":{"pluginOptions":{"i18n":{"localized":true}}},"initialParams":{"plugins":{"i18n":{"locale":null}}}}'
+    );
   });
 
-  it('adds a key to pluginOptions with a locale when initialParams has a pluginOptions key and the field is localized', () => {
-    const middleware = localeQueryParamsMiddleware()();
+  it('adds a key to plugins with a locale when initialParams has a plugins key and the field is localized', () => {
+    const middleware = localeQueryParamsMiddleware()({ getState });
     const nextFn = jest.fn();
     const action = {
       type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
+      displayedHeaders: [],
       contentType: {
         pluginOptions: {
           i18n: { localized: true },
         },
       },
       initialParams: {
-        pluginOptions: {
+        plugins: {
           hello: 'world',
         },
       },
@@ -77,10 +98,8 @@ describe('localeQueryParamsMiddleware', () => {
     middleware(nextFn)(action);
 
     expect(nextFn).toBeCalledWith(action);
-    expect(action).toEqual({
-      contentType: { pluginOptions: { i18n: { localized: true } } },
-      initialParams: { pluginOptions: { locale: 'en', hello: 'world' } },
-      type: 'ContentManager/ListView/SET_LIST_LAYOUT ',
-    });
+    expect(JSON.stringify(action)).toBe(
+      '{"type":"ContentManager/ListView/SET_LIST_LAYOUT ","displayedHeaders":[{"key":"__locale_key__","fieldSchema":{"type":"string"},"metadatas":{"label":"Content available in","searchable":false,"sortable":false},"name":"locales"}],"contentType":{"pluginOptions":{"i18n":{"localized":true}}},"initialParams":{"plugins":{"hello":"world","i18n":{"locale":null}}}}'
+    );
   });
 });

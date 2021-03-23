@@ -47,14 +47,18 @@ describe('ADMIN | COMPONENTS | Roles | ConditionsModale | utils ', () => {
         collectionTypes: {
           address: {
             'content-manager.explorer.create': {
-              fields: { f1: true },
+              properties: {
+                fields: { f1: true },
+              },
               conditions: {
                 'is-creator': false,
                 'has-role': true,
               },
             },
             'content-manager.explorer.read': {
-              fields: { f1: true },
+              properties: {
+                fields: { f1: true },
+              },
               conditions: {
                 'is-creator': true,
                 'has-role': true,
@@ -63,7 +67,9 @@ describe('ADMIN | COMPONENTS | Roles | ConditionsModale | utils ', () => {
           },
           restaurant: {
             'content-manager.explorer.create': {
-              fields: { f1: false },
+              properties: {
+                fields: { f1: false },
+              },
               conditions: { 'is-creator': 'test', 'has-role': 'nok' },
             },
           },

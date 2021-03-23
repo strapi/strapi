@@ -14,12 +14,18 @@
   "CheckboxConfirmation.Modal.content": "Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).",
   "CheckboxConfirmation.Modal.body": "Do you want to disable it?",
   "CheckboxConfirmation.Modal.button-confirm": "Yes, disable",
+  "CMEditViewCopyLocale.copy-success": "Locale copied",
+  "CMEditViewCopyLocale.copy-failure": "Failed to copy locale",
+  "CMEditViewCopyLocale.copy-text": "Fill in from another locale",
+  "Field.localized": "This value is unique for the selected locale",
+  "Field.not-localized": "This value is common to all locales",
   "Settings.list.description": "Configure the settings for the internationalization plugin",
   "Settings.list.empty.title": "There are no locales.",
   "Settings.list.empty.description": "This is not a usual behavior, meaning that you have eventually modified the database manually. Make sure to have at least one locale saved in your database in order to be able to use Strapi correctly.",
   "Settings.list.actions.add": "Add a locale",
   "Settings.list.actions.edit": "Edit a locale",
   "Settings.list.actions.delete": "Delete a locale",
+  "Settings.list.actions.deleteAdditionalInfos": "This will delete the active locale versions <em>(from Internationalization)</em>",
   "Settings.locales.list.title.singular": "{number} Locale",
   "Settings.locales.list.title.plural": "{number} Locales",
   "Settings.locales.row.default-locale": "Default locale",
@@ -45,5 +51,6 @@
   "Settings.locales.modal.locales.displayName": "Locale display name",
   "Settings.locales.modal.locales.displayName.error": "The locale display name can only be less than 50 characters.",
   "Settings.locales.modal.locales.displayName.description":"Locale will be displayed under that name in the administration panel",
-  "Settings.locales.modal.create.tab.label":"Navigating between the I18N base settings and advanced settings"
+  "Settings.locales.modal.create.tab.label":"Navigating between the I18N base settings and advanced settings",
+  "components.Select.locales.not-available": "No content available"
 }

@@ -9,7 +9,7 @@ const generateCheckboxesActions = (availableActions, modifiedData, pathToData) =
 
     const baseCheckboxNameArray = [...pathToData.split('..'), actionId];
     const checkboxNameArray = isEmpty(applyToProperties)
-      ? [...baseCheckboxNameArray, 'enabled']
+      ? [...baseCheckboxNameArray, 'properties', 'enabled']
       : baseCheckboxNameArray;
     const checkboxName = checkboxNameArray.join('..');
     const conditionsValue = get(modifiedData, [...baseCheckboxNameArray, 'conditions'], null);

@@ -35,12 +35,14 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
       const data = {
         address: {
           'content-manager.explorer.create': {
-            fields: {
-              postal_coder: true,
-              categories: true,
-              cover: true,
-              images: true,
-              city: true,
+            properties: {
+              fields: {
+                postal_coder: true,
+                categories: true,
+                cover: true,
+                images: true,
+                city: true,
+              },
             },
             conditions: {
               'admin::is-creator': false,
@@ -48,12 +50,14 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
             },
           },
           'content-manager.explorer.read': {
-            fields: {
-              postal_coder: true,
-              categories: false,
-              cover: true,
-              images: true,
-              city: true,
+            properties: {
+              fields: {
+                postal_coder: true,
+                categories: false,
+                cover: true,
+                images: true,
+                city: true,
+              },
             },
             conditions: {
               'admin::is-creator': false,
@@ -63,45 +67,49 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
         },
         restaurant: {
           'content-manager.explorer.create': {
-            fields: {
-              f1: true,
-              f2: true,
-              services: {
-                name: true,
-                media: true,
-                closing: {
-                  name: {
-                    test: true,
+            properties: {
+              fields: {
+                f1: true,
+                f2: true,
+                services: {
+                  name: true,
+                  media: true,
+                  closing: {
+                    name: {
+                      test: true,
+                    },
                   },
                 },
+                dz: true,
+                relation: true,
               },
-              dz: true,
-              relation: true,
-            },
-            locales: {
-              fr: true,
-              en: true,
+              locales: {
+                fr: true,
+                en: true,
+              },
             },
           },
           'content-manager.explorer.read': {
-            fields: {
-              f1: true,
-              f2: true,
-              services: {
-                name: true,
-                media: true,
-                closing: {
-                  name: {
-                    test: true,
+            properties: {
+              fields: {
+                f1: true,
+                f2: true,
+                services: {
+                  name: true,
+                  media: true,
+                  closing: {
+                    name: {
+                      test: true,
+                    },
                   },
                 },
+                dz: true,
+                relation: true,
               },
-              dz: true,
-              relation: true,
-            },
-            locales: {
-              fr: true,
-              en: true,
+              locales: {
+                fr: true,
+                en: true,
+              },
             },
           },
         },
@@ -129,7 +137,9 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
         const data = {
           address: {
             'content-manager.explorer.read': {
-              enabled: true,
+              properties: {
+                enabled: true,
+              },
               conditions: {
                 'admin::is-creator': false,
                 'admin::has-same-role-as-creator': false,
@@ -138,11 +148,15 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
           },
           restaurant: {
             'content-manager.explorer.create': {
-              enabled: false,
+              properties: {
+                enabled: false,
+              },
               conditions: 'test',
             },
             'content-manager.explorer.read': {
-              enabled: true,
+              properties: {
+                enabled: true,
+              },
               conditions: 'test',
             },
           },
@@ -152,15 +166,21 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | GlobalActions | utils', () => {
           'content-manager.explorer.create': {
             address: {},
             restaurant: {
-              enabled: false,
+              properties: {
+                enabled: false,
+              },
             },
           },
           'content-manager.explorer.read': {
             address: {
-              enabled: true,
+              properties: {
+                enabled: true,
+              },
             },
             restaurant: {
-              enabled: true,
+              properties: {
+                enabled: true,
+              },
             },
           },
         };

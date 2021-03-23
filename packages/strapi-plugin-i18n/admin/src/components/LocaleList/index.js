@@ -24,7 +24,6 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
 
   // Edit actions
   const closeModalToEdit = () => {
-
     setLocaleToEdit(undefined);
   };
   const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
@@ -52,7 +51,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
           )}
         />
 
-        <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal}  />
+        <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} />
         <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
         <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
       </>

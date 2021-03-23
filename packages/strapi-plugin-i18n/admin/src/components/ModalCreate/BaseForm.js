@@ -2,13 +2,19 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Label } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
-import Select from 'react-select';
+import Select, { createFilter } from 'react-select';
 import { Col, Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
 import { BaselineAlignment, selectStyles, DropdownIndicator } from 'strapi-helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
+
+const reactSelectLocaleFilter = createFilter({
+  ignoreCase: true,
+  ignoreAccents: true,
+  matchFrom: 'start',
+});
 
 const BaseForm = ({ options, defaultOption }) => {
   const theme = useTheme();
@@ -34,6 +40,7 @@ const BaseForm = ({ options, defaultOption }) => {
           aria-labelledby="locale-code"
           options={options}
           defaultValue={defaultOption}
+          filterOption={reactSelectLocaleFilter}
           onChange={selection => {
             setFieldValue('displayName', selection.value);
             setFieldValue('code', selection.label);

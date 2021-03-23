@@ -6,7 +6,6 @@ import Tabs from '../Tabs';
 import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
 import ContentTypes from '../ContentTypes';
 import PluginsAndSettings from '../PluginsAndSettings';
-import layout from '../temp/fakeData';
 import TAB_LABELS from './utils/tabLabels';
 import formatPermissionsToAPI from './utils/formatPermissionsToAPI';
 import init from './init';
@@ -135,7 +134,17 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
 
 Permissions.defaultProps = {
   permissions: [],
-  layout,
+  layout: {
+    conditions: [],
+    sections: {
+      collectionTypes: {},
+      singleTypes: {
+        actions: [],
+      },
+      settings: [],
+      plugins: [],
+    },
+  },
 };
 Permissions.propTypes = {
   layout: PropTypes.object,

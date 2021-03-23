@@ -42,7 +42,9 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | CollapsePrope
         collectionTypes: {
           address: {
             read: {
-              enabled: true,
+              properties: {
+                enabled: true,
+              },
               conditions: {
                 'admin::is-creator': false,
                 'admin::has-same-role-as-creator': false,
@@ -51,20 +53,24 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | CollapsePrope
           },
           restaurant: {
             create: {
-              fields: {
-                f1: true,
-              },
-              locales: {
-                en: true,
+              properties: {
+                fields: {
+                  f1: true,
+                },
+                locales: {
+                  en: true,
+                },
               },
               conditions: false,
             },
             read: {
-              fields: {
-                f1: false,
-              },
-              locales: {
-                en: false,
+              properties: {
+                fields: {
+                  f1: false,
+                },
+                locales: {
+                  en: false,
+                },
               },
               conditions: false,
             },

@@ -38,7 +38,13 @@ const getRowLabelCheckboxeState = (
   const actionIds = getActionIdsFromPropertyActions(propertyActions);
 
   const data = actionIds.reduce((acc, current) => {
-    const pathToData = [...pathToContentType.split('..'), current, propertyToCheck, targetKey];
+    const pathToData = [
+      ...pathToContentType.split('..'),
+      current,
+      'properties',
+      propertyToCheck,
+      targetKey,
+    ];
     const mainData = get(modifiedData, pathToData, false);
 
     acc[current] = mainData;
