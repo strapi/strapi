@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 
+const getKeyForDefinition = definition => `model_def_${definition.uid}`;
+
 const formatDefinitionToStore = definition =>
   JSON.stringify(
     _.pick(definition, ['uid', 'collectionName', 'kind', 'info', 'options', 'attributes'])
@@ -12,7 +14,7 @@ const formatDefinitionToStore = definition =>
 const getDefinitionFromStore = async (definition, ORM) => {
   const rawDefinition = await ORM.connection.db
     .collection('core_store')
-    .findOne({ key: `model_def_${definition.uid}` });
+    .findOne({ key: getKeyForDefinition(definition) });
 
   return JSON.parse(_.get(rawDefinition, 'value', null));
 };
@@ -24,11 +26,11 @@ const storeDefinition = async (definition, ORM) => {
 
   await ORM.connection.db.collection('core_store').updateOne(
     {
-      key: `model_def_${definition.uid}`,
+      key: getKeyForDefinition(definition),
     },
     {
       $set: {
-        key: `model_def_${definition.uid}`,
+        key: getKeyForDefinition(definition),
         type: 'object',
         value: defToStore,
         environment: '',
