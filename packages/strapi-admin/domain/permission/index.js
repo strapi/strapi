@@ -12,7 +12,6 @@ const {
   isArray,
   map,
   curry,
-  cloneDeep,
   merge,
 } = require('lodash/fp');
 
@@ -126,29 +125,10 @@ const sanitizeConditions = curry((provider, permission) => {
  */
 const toPermission = payload => (isArray(payload) ? map(create, payload) : create(payload));
 
-/**
- * Create a new abstract permission domain with a bound immutable permission and using the methods exposed by the given abstract domain factory
- * @param {function(Permission):object} abstractDomainFactory - A factory that takes the initial permission as only parameter and can mutate it
- * @param {Permission} permission - The permission that will be bound to the domain. It can only be mutated from the factory
- * @return {{ permission: Permission} & object}
- */
-const createBoundAbstractDomain = (abstractDomainFactory, permission) => {
-  const instance = {
-    get permission() {
-      return cloneDeep(permission);
-    },
-  };
-
-  Object.assign(instance, abstractDomainFactory(permission));
-
-  return instance;
-};
-
 module.exports = {
   addCondition,
   removeCondition,
   create,
-  createBoundAbstractDomain,
   deleteProperty,
   permissionFields,
   getProperty,

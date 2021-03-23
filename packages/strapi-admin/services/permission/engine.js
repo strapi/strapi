@@ -40,9 +40,14 @@ const conditionsMatcher = conditions => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-const hookAbstractDomainFactory = permission => ({
+const createBoundAbstractPermissionDomain = permission => ({
+  get permission() {
+    return cloneDeep(permission);
+  },
+
   addCondition(condition) {
     Object.assign(permission, permissionDomain.addCondition(condition, permission));
+
     return this;
   },
 });
@@ -133,10 +138,7 @@ module.exports = conditionProvider => {
      * @returns {Promise<void>}
      */
     async applyPermissionProcessors(permission) {
-      const context = permissionDomain.createBoundAbstractDomain(
-        hookAbstractDomainFactory,
-        permission
-      );
+      const context = createBoundAbstractPermissionDomain(permission);
 
       // 1. Trigger willEvaluatePermission hook and await transformation operated on the permission
       await state.hooks.willEvaluatePermission.call(context);

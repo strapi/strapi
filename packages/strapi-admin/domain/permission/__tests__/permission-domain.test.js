@@ -69,32 +69,6 @@ describe('Permission Domain', () => {
     });
   });
 
-  describe('createBoundAbstractDomain', () => {
-    test('Create a bound abstract domain that prevent direct mutation on bound permission', () => {
-      const permission = { action: 'foo', subject: 'bar', properties: {} };
-      const domainFactory = perm => ({
-        addCondition(condition) {
-          Object.assign(perm, domain.addCondition(condition, perm));
-          return this;
-        },
-      });
-
-      const abstractDomain = domain.createBoundAbstractDomain(domainFactory, permission);
-
-      abstractDomain.permission.action = 'bar';
-
-      expect(abstractDomain.permission).toHaveProperty('action', 'foo');
-      expect(permission).toHaveProperty('action', 'foo');
-
-      abstractDomain.addCondition('foobar');
-
-      abstractDomain.permission.conditions = null;
-
-      expect(abstractDomain.permission).toHaveProperty('conditions', ['foobar']);
-      expect(permission).toHaveProperty('conditions', ['foobar']);
-    });
-  });
-
   describe('sanitizePermissionFields', () => {
     test('Returns a new permission without the invalid fields', () => {
       const invalidPermission = { action: 'foo', subject: 'bar', properties: {}, foo: 'bar' };
