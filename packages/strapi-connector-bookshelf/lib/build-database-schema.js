@@ -401,8 +401,7 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
 };
 
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
-  const previousDefinitionRow = await getDefinitionFromStore(definition, ORM);
-  const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
+  const previousDefinition = await getDefinitionFromStore(definition, ORM);
 
   // run migrations
   await strapi.db.migrations.run(migrateSchemas, {

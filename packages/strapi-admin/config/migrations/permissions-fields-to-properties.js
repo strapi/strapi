@@ -1,6 +1,6 @@
 'use strict';
 
-const { has } = require('lodash/fp');
+const { has, isObject } = require('lodash/fp');
 
 const permissionModelUID = 'strapi::permission';
 
@@ -23,15 +23,20 @@ const shouldRunMigration = (definition, previousDefinition) => {
 };
 
 const permissionsFinderByORM = {
-  bookshelf: async model => {
+  async bookshelf(model) {
     const permissions = await model.fetchAll();
 
-    return permissions.toJSON().map(permission => ({
-      ...permission,
-      fields: JSON.parse(permission.fields),
-    }));
+    return permissions.toJSON().map(permission => {
+      const fields = permission.fields;
+
+      return {
+        ...permission,
+        fields: isObject(fields) ? fields : JSON.parse(fields),
+      };
+    });
   },
-  mongoose: async model => {
+
+  async mongoose(model) {
     return model.find().lean();
   },
 };
@@ -57,7 +62,7 @@ module.exports = {
   async before(options, context) {
     const { model } = options;
 
-    const permissions = await permissionsFinderByORM[model.ORM]();
+    const permissions = await permissionsFinderByORM[model.orm](model);
 
     Object.assign(context, { permissionsFieldsToProperties: { permissions } });
   },

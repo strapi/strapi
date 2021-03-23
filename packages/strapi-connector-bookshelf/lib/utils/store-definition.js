@@ -18,7 +18,7 @@ const getDefinitionFromStore = async (definition, ORM) => {
     .forge({ key: `model_def_${definition.uid}` })
     .fetch();
 
-  return def ? def.toJSON() : undefined;
+  return def ? JSON.parse(_.get(def.toJSON(), 'value', null)) : undefined;
 };
 
 const storeDefinition = async (definition, ORM) => {
@@ -39,8 +39,7 @@ const storeDefinition = async (definition, ORM) => {
 };
 
 const getColumnsWhereDefinitionChanged = async (columnsName, definition, ORM) => {
-  const previousDefinitionRow = await getDefinitionFromStore(definition, ORM);
-  const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
+  const previousDefinition = await getDefinitionFromStore(definition, ORM);
 
   return columnsName.filter(columnName => {
     const previousAttribute = _.get(previousDefinition, ['attributes', columnName], null);
