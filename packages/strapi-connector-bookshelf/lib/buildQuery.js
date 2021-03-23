@@ -24,7 +24,7 @@ const buildQuery = ({ model, filters }) => qb => {
   const hasWhereFilters =
     _.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0;
 
-  const isDistinctQuery = (hasWhereFilters && isDistinctJoin) || (isSortQuery && isDistinctJoin);
+  const isDistinctQuery = isDistinctJoin && (isSortQuery || hasWhereFilters);
   if (isDistinctQuery) {
     qb.distinct();
   }
