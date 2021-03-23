@@ -7,7 +7,13 @@ const validateLocaleCreation = async (ctx, next) => {
   const { model } = ctx.params;
   const { query, body } = ctx.request;
 
-  const { getValidLocale, getNewLocalizationsFor, isLocalized } = getService('content-types');
+  const {
+    getValidLocale,
+    getNewLocalizationsFrom,
+    isLocalized,
+    getAndValidateRelatedEntity,
+    fillNonLocalizedAttributes,
+  } = getService('content-types');
 
   const modelDef = strapi.getModel(model);
 
@@ -43,18 +49,18 @@ const validateLocaleCreation = async (ctx, next) => {
     }
   }
 
+  let relatedEntity;
   try {
-    const localizations = await getNewLocalizationsFor({
-      relatedEntityId,
-      model,
-      locale: body.locale,
-    });
-    body.localizations = localizations;
+    relatedEntity = await getAndValidateRelatedEntity(relatedEntityId, model, locale);
   } catch (e) {
     return ctx.badRequest(
       "The related entity doesn't exist or the entity already exists in this locale"
     );
   }
+
+  fillNonLocalizedAttributes(body, relatedEntity, { model });
+  const localizations = await getNewLocalizationsFrom(relatedEntity);
+  body.localizations = localizations;
 
   return next();
 };
