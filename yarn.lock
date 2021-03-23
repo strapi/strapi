@@ -2927,10 +2927,10 @@
     js-yaml "^3.13.1"
     tslib "^1.10.0"
 
-"@snyk/code-client@3.1.4":
-  version "3.1.4"
-  resolved "https://registry.yarnpkg.com/@snyk/code-client/-/code-client-3.1.4.tgz#54081833fc21fb4771beb6cef6683aac7e706287"
-  integrity sha512-ZZWPWAaKgNii/HYtyO9guFDVpi5T/SoCWQIo/B/RbLbXLrdZ5VIHsn0E4ztY7Y69GjQCyrus5pu7adlYrwQtEQ==
+"@snyk/code-client@3.1.5":
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/@snyk/code-client/-/code-client-3.1.5.tgz#019ef3b4d2f53f02f890d2df933fc7c2cf5cf4a5"
+  integrity sha512-bJb00zZ7956MzIjW/4DPaMolk2/r7eox+5Bvq0bpcu1NFUFYYQPZeEPsPgh5YzK4te2v6W5hZBtjUUNIY+AQYg==
   dependencies:
     "@deepcode/dcignore" "^1.0.2"
     "@snyk/fast-glob" "^3.2.6-patch"
@@ -7370,10 +7370,10 @@ docker-modem@2.1.3:
     split-ca "^1.0.1"
     ssh2 "^0.8.7"
 
-dockerfile-ast@0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/dockerfile-ast/-/dockerfile-ast-0.1.0.tgz#29d611517b6fa207430ac99e9f59db1636a25b1f"
-  integrity sha512-qKftHMVoMliYBaYLkgttm+NXhRISVNkIMfAL4ecmXjiWRElfdfY+xNgITiehG0LpUEDbFUa/UDCByYq/2UZIpQ==
+dockerfile-ast@0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/dockerfile-ast/-/dockerfile-ast-0.2.0.tgz#13cc4a6fe3aea30a4104622b30f49a0fe3a5c038"
+  integrity sha512-iQyp12k1A4tF3sEfLAq2wfFPKdpoiGTJeuiu2Y1bdEqIZu0DfSSL2zm0fk7a/UHeQkngnYaRRGuON+C+2LO1Fw==
   dependencies:
     vscode-languageserver-types "^3.16.0"
 
@@ -17934,10 +17934,10 @@ snyk-cpp-plugin@2.2.1:
     hosted-git-info "^3.0.7"
     tslib "^2.0.0"
 
-snyk-docker-plugin@4.17.3:
-  version "4.17.3"
-  resolved "https://registry.yarnpkg.com/snyk-docker-plugin/-/snyk-docker-plugin-4.17.3.tgz#669f5705b52e9754a1777ac3d4b75628cb0ca8ac"
-  integrity sha512-Egqkad3YTP41Dlu19/3A2gQfqf4nxa7C36USQGSXIC5JodPvptObiSLmyQssjxVJ7iCRpw6IxytZVf412KKJCg==
+snyk-docker-plugin@4.19.3:
+  version "4.19.3"
+  resolved "https://registry.yarnpkg.com/snyk-docker-plugin/-/snyk-docker-plugin-4.19.3.tgz#14569f25c52a3fc71a20f80f5beac4ccdc326c11"
+  integrity sha512-5WkXyT7uY5NrTOvEqxeMqb6dDcskT3c/gbHUTOyPuvE6tMut+OOYK8RRXbwZFeLzpS8asq4e1R7U7syYG3VXwg==
   dependencies:
     "@snyk/dep-graph" "^1.21.0"
     "@snyk/rpm-parser" "^2.0.0"
@@ -17945,12 +17945,12 @@ snyk-docker-plugin@4.17.3:
     chalk "^2.4.2"
     debug "^4.1.1"
     docker-modem "2.1.3"
-    dockerfile-ast "0.1.0"
+    dockerfile-ast "0.2.0"
     elfy "^1.0.0"
     event-loop-spinner "^2.0.0"
     gunzip-maybe "^1.4.2"
     mkdirp "^1.0.4"
-    semver "^6.1.0"
+    semver "^7.3.4"
     snyk-nodejs-lockfile-parser "1.30.2"
     tar-stream "^2.1.0"
     tmp "^0.2.1"
@@ -18182,14 +18182,14 @@ snyk-try-require@^2.0.0:
     lodash.clonedeep "^4.3.0"
     lru-cache "^5.1.1"
 
-snyk@^1.500.0:
-  version "1.500.0"
-  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.500.0.tgz#e03b0a7b7b7bb097a4f2e545fac99a7c17fba93b"
-  integrity sha512-Vay1yOafOeaI6i1Z+Kb39jEzBW7HhLxD2ZYacC+UVzhC454QoiUjBFmmH31JBMiehOyHEbPsxWd8tMbACl/Vbg==
+snyk@^1.505.0:
+  version "1.505.0"
+  resolved "https://registry.yarnpkg.com/snyk/-/snyk-1.505.0.tgz#2f59336782ad779f75132290e6fc16490d77bfce"
+  integrity sha512-TNsaTdq2ap3HtAi/M7hId3WE5m+7O8tBecqGEm/a2dBrn8c0RbbnIodK0ItIEuZJ4Hd/vMmhrV7Wo/ZOEXbLvw==
   dependencies:
     "@open-policy-agent/opa-wasm" "^1.2.0"
     "@snyk/cli-interface" "2.11.0"
-    "@snyk/code-client" "3.1.4"
+    "@snyk/code-client" "3.1.5"
     "@snyk/dep-graph" "^1.27.1"
     "@snyk/gemfile" "1.2.0"
     "@snyk/graphlib" "^2.1.9-patch.3"
@@ -18230,7 +18230,7 @@ snyk@^1.500.0:
     semver "^6.0.0"
     snyk-config "4.0.0"
     snyk-cpp-plugin "2.2.1"
-    snyk-docker-plugin "4.17.3"
+    snyk-docker-plugin "4.19.3"
     snyk-go-plugin "1.17.0"
     snyk-gradle-plugin "3.13.2"
     snyk-module "3.1.0"
