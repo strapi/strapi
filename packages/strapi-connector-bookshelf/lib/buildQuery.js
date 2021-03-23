@@ -16,32 +16,26 @@ const BOOLEAN_OPERATORS = ['or'];
 const buildQuery = ({ model, filters }) => qb => {
   const joinsTree = buildJoinsAndFilter(qb, model, filters);
 
-  const singleFilter = _.has(filters, 'limit') && filters.limit === 1;
-  const someJoins = _.has(joinsTree, 'joins') && keys(joinsTree.joins).length;
-  const isDistinctJoin = !singleFilter && someJoins;
+  const isSortQuery = _.has(filters, 'sort');
 
-  if (
-    _.has(filters, 'where') &&
-    Array.isArray(filters.where) &&
-    filters.where.length > 0 &&
-    isDistinctJoin
-  ) {
+  const isSingleResult = _.has(filters, 'limit') && filters.limit === 1;
+  const hasJoins = _.has(joinsTree, 'joins') && keys(joinsTree.joins).length;
+  const isDistinctJoin = !isSingleResult && hasJoins;
+  const hasWhereFilters =
+    _.has(filters, 'where') && Array.isArray(filters.where) && filters.where.length > 0;
+
+  const isDistinctQuery = (hasWhereFilters && isDistinctJoin) || (isSortQuery && isDistinctJoin);
+  if (isDistinctQuery) {
     qb.distinct();
   }
 
-  if (_.has(filters, 'sort')) {
+  if (isSortQuery) {
     const clauses = filters.sort.map(buildSortClauseFromTree(joinsTree)).filter(c => !isEmpty(c));
     const orderBy = clauses.map(({ order, alias }) => ({ order, column: alias }));
     const orderColumns = clauses.map(({ alias, column }) => ({ [alias]: column }));
     const columns = [`${joinsTree.alias}.*`, ...orderColumns];
 
-    if (isDistinctJoin) {
-      qb.distinct()
-        .column(columns)
-        .orderBy(orderBy);
-    } else {
-      qb.column(columns).orderBy(orderBy);
-    }
+    qb.column(columns).orderBy(orderBy);
   }
 
   if (_.has(filters, 'start')) {
