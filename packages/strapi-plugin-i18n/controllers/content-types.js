@@ -2,6 +2,7 @@
 
 const { pick, uniq, prop, getOr, flatten, pipe } = require('lodash/fp');
 const { getService } = require('../utils');
+const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
 
 const getLocalesProperty = getOr([], 'properties.locales');
 const getFieldsProperty = prop('properties.fields');
@@ -10,6 +11,12 @@ module.exports = {
   async getNonLocalizedAttributes(ctx) {
     const { user } = ctx.state;
     const { model, id, locale } = ctx.request.body;
+
+    try {
+      await validateGetNonLocalizedAttributesInput({ model, id, locale });
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
 
     const modelDef = strapi.getModel(model);
     const { copyNonLocalizedAttributes, isLocalized } = getService('content-types');
