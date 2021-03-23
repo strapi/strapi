@@ -18,13 +18,19 @@ const createPermission = array => {
     action: actionName,
     subject: null,
     conditions: createConditionsArray(conditions),
+    properties: {},
   };
 };
 
 const createPermissionsArrayFromCategory = categoryPermissions => {
   return Object.values(categoryPermissions).reduce((acc, current) => {
     const permissions = Object.entries(current).reduce((acc1, current1) => {
-      const [, { enabled }] = current1;
+      const [
+        ,
+        {
+          properties: { enabled },
+        },
+      ] = current1;
 
       if (!enabled) {
         return acc1;

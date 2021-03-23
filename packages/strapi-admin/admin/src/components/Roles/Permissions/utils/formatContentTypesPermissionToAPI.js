@@ -33,16 +33,16 @@ const createPropertyArray = (propertyValue, prefix = '') => {
  * @config {object} the name of the properties array we need to fill
  * @returns {object}
  */
-const createPermissionWithProperties = (action, subject, { conditions, ...properties }) => {
+const createPermissionWithProperties = (action, subject, { conditions, properties }) => {
   return Object.entries(properties).reduce(
     (acc, current) => {
       const [propertyName, propertyValue] = current;
 
-      acc[propertyName] = createPropertyArray(propertyValue);
+      acc.properties[propertyName] = createPropertyArray(propertyValue);
 
       return acc;
     },
-    { action, subject, conditions: createConditionsArray(conditions) }
+    { action, subject, conditions: createConditionsArray(conditions), properties: {} }
   );
 };
 
@@ -57,6 +57,7 @@ const createPermissionWithoutProperties = (action, subject, { conditions }) => {
   return {
     action,
     subject,
+    properties: {},
     conditions: createConditionsArray(conditions),
   };
 };
@@ -76,7 +77,7 @@ const createSubjectPermissions = (subject, actions) => {
       return acc;
     }
 
-    if (!has(permissions, 'enabled')) {
+    if (!has(permissions, 'properties.enabled')) {
       const createdPermissionsArray = createPermissionWithProperties(
         actionName,
         subject,
@@ -86,7 +87,7 @@ const createSubjectPermissions = (subject, actions) => {
       return [...acc, createdPermissionsArray];
     }
 
-    if (!permissions.enabled) {
+    if (!permissions.properties.enabled) {
       return acc;
     }
 

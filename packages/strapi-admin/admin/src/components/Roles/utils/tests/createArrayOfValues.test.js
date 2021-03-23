@@ -15,30 +15,34 @@ describe('ADMIN | COMPONENTS | PERMISSIONS | ContentTypeCollapse | utils', () =>
       collectionTypes: {
         address: {
           'content-manager.explorer.create': {
-            fields: {
-              postal_coder: 'un',
-              categories: 'deux',
-              cover: 'trois',
+            properties: {
+              fields: {
+                postal_coder: 'un',
+                categories: 'deux',
+                cover: 'trois',
+              },
             },
           },
         },
         restaurant: {
           'content-manager.explorer.create': {
-            fields: {
-              services: {
-                name: 'quatre',
-                media: 'cinq',
-                closing: {
-                  name: {
-                    test: 'six',
+            properties: {
+              fields: {
+                services: {
+                  name: 'quatre',
+                  media: 'cinq',
+                  closing: {
+                    name: {
+                      test: 'six',
+                    },
                   },
                 },
+                dz: 'sept',
               },
-              dz: 'sept',
-            },
-            locales: {
-              fr: 'huit',
-              en: 'neuf',
+              locales: {
+                fr: 'huit',
+                en: 'neuf',
+              },
             },
           },
         },

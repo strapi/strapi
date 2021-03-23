@@ -88,7 +88,13 @@ const ActionRow = ({
                 return <HiddenAction key={label} />;
               }
 
-              const checkboxName = [...pathToData.split('..'), actionId, propertyName, name];
+              const checkboxName = [
+                ...pathToData.split('..'),
+                actionId,
+                'properties',
+                propertyName,
+                name,
+              ];
 
               if (!isCollapsable) {
                 const checkboxValue = get(modifiedData, checkboxName, false);

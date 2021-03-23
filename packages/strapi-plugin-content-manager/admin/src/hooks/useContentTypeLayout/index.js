@@ -1,18 +1,19 @@
-import { useCallback, useContext } from 'react';
+import { useCallback } from 'react';
 import { get } from 'lodash';
-import { ContentTypeLayoutContext } from '../../contexts';
+import { useSelector } from 'react-redux';
+import selectLayout from '../../containers/EditViewLayoutManager/selectors';
 
 const useContentTypeLayout = () => {
-  const layout = useContext(ContentTypeLayoutContext);
+  const currentLayout = useSelector(selectLayout);
 
   const getComponentLayout = useCallback(
     componentUid => {
-      return get(layout, ['components', componentUid], {});
+      return get(currentLayout, ['components', componentUid], {});
     },
-    [layout]
+    [currentLayout]
   );
 
-  return { ...layout, getComponentLayout };
+  return { ...currentLayout, getComponentLayout };
 };
 
 export default useContentTypeLayout;

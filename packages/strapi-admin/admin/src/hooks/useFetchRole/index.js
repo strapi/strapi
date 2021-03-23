@@ -30,9 +30,7 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         role,
-        // TODO
         permissions,
-        // permissions: formatPermissionsFromApi(permissions),
       });
     } catch (err) {
       console.error(err);

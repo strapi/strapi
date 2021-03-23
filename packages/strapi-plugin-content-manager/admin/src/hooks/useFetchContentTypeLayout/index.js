@@ -33,6 +33,10 @@ const useFetchContentTypeLayout = contentTypeUID => {
           data: formatLayouts(data, schemas),
         });
       } catch (error) {
+        if (isMounted.current) {
+          console.error(error);
+        }
+
         if (isMounted.current && error.name !== 'AbortError') {
           dispatch({ type: 'GET_DATA_ERROR', error });
         }

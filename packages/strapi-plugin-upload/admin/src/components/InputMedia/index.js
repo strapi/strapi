@@ -218,7 +218,7 @@ InputMedia.propTypes = {
   id: PropTypes.string,
   label: PropTypes.string,
   labelIcon: PropTypes.shape({
-    icon: PropTypes.any,
+    icon: PropTypes.node.isRequired,
     title: PropTypes.string,
   }),
   name: PropTypes.string.isRequired,

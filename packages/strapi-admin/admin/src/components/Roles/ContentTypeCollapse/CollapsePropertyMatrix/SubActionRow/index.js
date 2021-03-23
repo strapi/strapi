@@ -105,6 +105,7 @@ const SubActionRow = ({
                     const checkboxName = [
                       ...pathToDataFromActionRow.split('..'),
                       actionId,
+                      'properties',
                       propertyName,
                       ...parentName.split('..'),
                       value,

@@ -145,8 +145,8 @@ InputJSONWithErrors.propTypes = {
   ]),
   labelClassName: PropTypes.string,
   labelIcon: PropTypes.shape({
-    icon: PropTypes.any,
-    title: PropTypes.string,
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.string.isRequired,
   }),
   labelStyle: PropTypes.object,
   name: PropTypes.string.isRequired,

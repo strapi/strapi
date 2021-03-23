@@ -27,7 +27,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | ContentTypeCollapse
         address: {
           test: {},
           'content-manager.explorer.delete': {
-            enabled: true,
+            properties: {
+              enabled: true,
+            },
             conditions: {
               'is-creator': true,
               'has-roles': false,
@@ -41,7 +43,8 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | ContentTypeCollapse
       {
         actionId: 'content-manager.explorer.delete',
         isDisplayed: true,
-        checkboxName: 'collectionTypes..address..content-manager.explorer.delete..enabled',
+        checkboxName:
+          'collectionTypes..address..content-manager.explorer.delete..properties..enabled',
         hasAllActionsSelected: true,
         hasSomeActionsSelected: true,
         hasConditions: true,
@@ -72,9 +75,11 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | ContentTypeCollapse
       collectionTypes: {
         address: {
           'content-manager.explorer.create': {
-            fields: {
-              f1: true,
-              f2: false,
+            properties: {
+              fields: {
+                f1: true,
+                f2: false,
+              },
             },
             conditions: {
               'is-creator': true,
@@ -82,7 +87,9 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | ContentTypeCollapse
             },
           },
           'content-manager.explorer.delete': {
-            enabled: true,
+            properties: {
+              enabled: true,
+            },
             conditions: {
               'is-creator': false,
               'has-roles': false,
@@ -107,7 +114,8 @@ describe('ADMIN | COMPONENTS | Permissions | ContentTypes | ContentTypeCollapse
       {
         actionId: 'content-manager.explorer.delete',
         isDisplayed: true,
-        checkboxName: 'collectionTypes..address..content-manager.explorer.delete..enabled',
+        checkboxName:
+          'collectionTypes..address..content-manager.explorer.delete..properties..enabled',
         hasAllActionsSelected: true,
         hasSomeActionsSelected: true,
         hasConditions: false,

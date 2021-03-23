@@ -1,29 +1,49 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
-import PropTypes from 'prop-types';
 import {
-  createDefaultForm,
+  request,
+  useGlobalContext,
+  useQueryParams,
   formatComponentData,
-  getTrad,
-  removePasswordFieldsFromData,
-  removeFieldsFromClonedData,
-} from '../../utils';
+  contentManagementUtilRemoveFieldsFromData,
+} from 'strapi-helper-plugin';
+import { useSelector, useDispatch } from 'react-redux';
+import PropTypes from 'prop-types';
+import isEqual from 'react-fast-compare';
+import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
-import { crudInitialState, crudReducer } from '../../sharedReducers';
+import {
+  getData,
+  getDataSucceeded,
+  initForm,
+  resetProps,
+  setDataStructures,
+  setStatus,
+  submitSucceeded,
+} from '../../sharedReducers/crudReducer/actions';
+import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
 import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
-
-  const [
-    { componentsDataStructure, contentTypeDataStructure, data, isLoading, status },
-    dispatch,
-  ] = useReducer(crudReducer, crudInitialState);
+  const [{ rawQuery }] = useQueryParams();
+  const dispatch = useDispatch();
+  const {
+    componentsDataStructure,
+    contentTypeDataStructure,
+    data,
+    isLoading,
+    status,
+  } = useSelector(selectCrudReducer);
+  const isMounted = useRef(true);
   const emitEventRef = useRef(emitEvent);
+
+  const allLayoutDataRef = useRef(allLayoutData);
+  // We need to keep the first location from which the user is coming from
+  const fromRef = useRef(from);
 
   const isCreatingEntry = id === 'create';
 
@@ -41,29 +61,30 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         return data;
       }
 
-      const cleaned = removeFieldsFromClonedData(
+      const cleaned = contentManagementUtilRemoveFieldsFromData(
         data,
-        allLayoutData.contentType,
-        allLayoutData.components
+        allLayoutDataRef.current.contentType,
+        allLayoutDataRef.current.components
       );
 
       return cleaned;
     },
-    [allLayoutData, origin]
+    [origin]
   );
 
-  const cleanReceivedData = useCallback(
-    data => {
-      const cleaned = removePasswordFieldsFromData(
-        data,
-        allLayoutData.contentType,
-        allLayoutData.components
-      );
+  const cleanReceivedData = useCallback(data => {
+    const cleaned = removePasswordFieldsFromData(
+      data,
+      allLayoutDataRef.current.contentType,
+      allLayoutDataRef.current.components
+    );
 
-      return formatComponentData(cleaned, allLayoutData.contentType, allLayoutData.components);
-    },
-    [allLayoutData]
-  );
+    return formatComponentData(
+      cleaned,
+      allLayoutDataRef.current.contentType,
+      allLayoutDataRef.current.components
+    );
+  }, []);
 
   // SET THE DEFAULT LAYOUT the effect is applied when the slug changes
   useEffect(() => {
@@ -87,31 +108,32 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       allLayoutData.components
     );
 
-    dispatch({
-      type: 'SET_DATA_STRUCTURES',
-      componentsDataStructure,
-      contentTypeDataStructure: formatComponentData(
-        contentTypeDataStructure,
-        allLayoutData.contentType,
-        allLayoutData.components
-      ),
-    });
-  }, [allLayoutData]);
+    const contentTypeDataStructureFormatted = formatComponentData(
+      contentTypeDataStructure,
+      allLayoutData.contentType,
+      allLayoutData.components
+    );
+
+    dispatch(setDataStructures(componentsDataStructure, contentTypeDataStructureFormatted));
+  }, [allLayoutData, dispatch]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(resetProps());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const getData = async signal => {
-      dispatch({ type: 'GET_DATA' });
+    const fetchData = async signal => {
+      dispatch(getData());
 
       try {
         const data = await request(requestURL, { method: 'GET', signal });
 
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data: cleanReceivedData(cleanClonedData(data)),
-        });
+        dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
       } catch (err) {
         if (err.name === 'AbortError') {
           return;
@@ -122,7 +144,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
-          push(from);
+          push(fromRef.current);
 
           return;
         }
@@ -131,21 +153,26 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         if (resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
-          push(from);
+          push(fromRef.current);
         }
       }
     };
 
+    if (!isMounted.current) {
+      return () => {};
+    }
+
     if (requestURL) {
-      getData(signal);
+      fetchData(signal);
     } else {
-      dispatch({ type: 'INIT_FORM' });
+      dispatch(initForm(rawQuery));
     }
 
     return () => {
+      isMounted.current = false;
       abortController.abort();
     };
-  }, [requestURL, push, from, cleanReceivedData, cleanClonedData]);
+  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -192,11 +219,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(slug);
+      const endPoint = `${getRequestUrl(slug)}${rawQuery}`;
 
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
-        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
+        dispatch(setStatus('submit-pending'));
 
         const response = await request(endPoint, { method: 'POST', body });
 
@@ -206,18 +233,18 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
           message: { id: getTrad('success.record.save') },
         });
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
+        dispatch(submitSucceeded(cleanReceivedData(response)));
         // Enable navigation and remove loaders
-        dispatch({ type: 'SET_STATUS', status: 'resolved' });
+        dispatch(setStatus('resolved'));
 
-        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}`);
+        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}${rawQuery}`);
       } catch (err) {
         emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);
-        dispatch({ type: 'SET_STATUS', status: 'resolved' });
+        dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, replace, slug]
+    [cleanReceivedData, displayErrors, replace, slug, dispatch, rawQuery]
   );
 
   const onPublish = useCallback(async () => {
@@ -225,14 +252,14 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       emitEventRef.current('willPublishEntry');
       const endPoint = getRequestUrl(`${slug}/${id}/actions/publish`);
 
-      dispatch({ type: 'SET_STATUS', status: 'publish-pending' });
+      dispatch(setStatus('publish-pending'));
 
       const data = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didPublishEntry');
 
-      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(data) });
-      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+      dispatch(submitSucceeded(cleanReceivedData(data)));
+      dispatch(setStatus('resolved'));
 
       strapi.notification.toggle({
         type: 'success',
@@ -240,9 +267,9 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       });
     } catch (err) {
       displayErrors(err);
-      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+      dispatch(setStatus('resolved'));
     }
-  }, [cleanReceivedData, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, id, slug, dispatch]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
@@ -251,7 +278,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       try {
         emitEventRef.current('willEditEntry', trackerProperty);
 
-        dispatch({ type: 'SET_STATUS', status: 'submit-pending' });
+        dispatch(setStatus('submit-pending'));
 
         const response = await request(endPoint, { method: 'PUT', body });
 
@@ -261,21 +288,23 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
           message: { id: getTrad('success.record.save') },
         });
 
-        dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
-        dispatch({ type: 'SET_STATUS', status: 'resolved' });
+        dispatch(submitSucceeded(cleanReceivedData(response)));
+
+        dispatch(setStatus('resolved'));
       } catch (err) {
         emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
         displayErrors(err);
-        dispatch({ type: 'SET_STATUS', status: 'resolved' });
+
+        dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, id]
+    [cleanReceivedData, displayErrors, slug, id, dispatch]
   );
 
   const onUnpublish = useCallback(async () => {
     const endPoint = getRequestUrl(`${slug}/${id}/actions/unpublish`);
 
-    dispatch({ type: 'SET_STATUS', status: 'unpublish-pending' });
+    dispatch(setStatus('unpublish-pending'));
 
     try {
       emitEventRef.current('willUnpublishEntry');
@@ -285,13 +314,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       emitEventRef.current('didUnpublishEntry');
       strapi.notification.success(getTrad('success.record.unpublish'));
 
-      dispatch({ type: 'SUBMIT_SUCCEEDED', data: cleanReceivedData(response) });
-      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+      dispatch(submitSucceeded(cleanReceivedData(response)));
+      dispatch(setStatus('resolved'));
     } catch (err) {
-      dispatch({ type: 'SET_STATUS', status: 'resolved' });
+      dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, id, slug]);
+  }, [cleanReceivedData, displayErrors, id, slug, dispatch]);
 
   return children({
     componentsDataStructure,
@@ -317,7 +346,7 @@ CollectionTypeFormWrapper.defaultProps = {
 CollectionTypeFormWrapper.propTypes = {
   allLayoutData: PropTypes.exact({
     components: PropTypes.object.isRequired,
-    contentType: PropTypes.exact({
+    contentType: PropTypes.shape({
       apiID: PropTypes.string.isRequired,
       attributes: PropTypes.object.isRequired,
       info: PropTypes.object.isRequired,
@@ -326,6 +355,7 @@ CollectionTypeFormWrapper.propTypes = {
       layouts: PropTypes.object.isRequired,
       metadatas: PropTypes.object.isRequired,
       options: PropTypes.object.isRequired,
+      pluginOptions: PropTypes.object,
       settings: PropTypes.object.isRequired,
       uid: PropTypes.string.isRequired,
     }).isRequired,
@@ -337,4 +367,4 @@ CollectionTypeFormWrapper.propTypes = {
   slug: PropTypes.string.isRequired,
 };
 
-export default memo(CollectionTypeFormWrapper);
+export default memo(CollectionTypeFormWrapper, isEqual);

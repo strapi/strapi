@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import PropTypes from 'prop-types';
 import { Flex, Padded } from '@buffetjs/core';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/Collapse/utils/constants';
 import { usePermissionsDataManager } from '../../../../hooks';
-import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
+import { getCheckboxState } from '../../utils';
 import CheckboxWithCondition from '../../CheckboxWithCondition';
 import Chevron from '../../Chevron';
 import ConditionsButton from '../../ConditionsButton';
@@ -39,17 +39,18 @@ const Collapse = ({
   };
 
   // This corresponds to the data related to the CT left checkbox
-  // modifiedData: { collectionTypes: { [ctuid]: {create: {fields: {f1: true}, update: {}, ... } } } }
+  // modifiedData: { collectionTypes: { [ctuid]: {create: {properties: { fields: {f1: true} }, update: {}, ... } } } }
   const mainData = get(modifiedData, pathToData.split('..'), {});
   // The utils we are using: getCheckboxState, retrieves all the boolean leafs of an object in order
   // to return the state of checkbox. Since the conditions are not related to the property we need to remove the key from the object.
   const dataWithoutCondition = useMemo(() => {
     return Object.keys(mainData).reduce((acc, current) => {
-      acc[current] = removeConditionKeyFromData(mainData[current]);
+      acc[current] = omit(mainData[current], 'conditions');
 
       return acc;
     }, {});
   }, [mainData]);
+
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
   // Here we create an array of <checkbox>, since the state of each one of them is used in

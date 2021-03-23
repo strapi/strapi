@@ -4,9 +4,9 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
+import { RelationDPState } from 'strapi-helper-plugin';
 import { getDisplayedValue, getTrad } from '../../utils';
 import IconRemove from '../../assets/images/icon_remove.svg';
-import RelationDPState from '../RelationDPState';
 import { Span } from './components';
 
 /* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
@@ -19,6 +19,7 @@ const Relation = ({
   isDragging,
   mainField,
   onRemove,
+  searchToPersist,
   to,
 }) => {
   const { formatMessage } = useIntl();
@@ -61,7 +62,10 @@ const Relation = ({
           </div>
         )}
         {displayNavigationLink ? (
-          <Link to={{ pathname: to, state: { from: pathname } }} title={title}>
+          <Link
+            to={{ pathname: to, state: { from: pathname }, search: searchToPersist }}
+            title={title}
+          >
             <Span>{formattedValue}&nbsp;</Span>
           </Link>
         ) : (
@@ -78,6 +82,7 @@ const Relation = ({
 Relation.defaultProps = {
   isDragging: false,
   onRemove: () => {},
+  searchToPersist: null,
   to: '',
 };
 
@@ -94,6 +99,7 @@ Relation.propTypes = {
     }).isRequired,
   }).isRequired,
   onRemove: PropTypes.func,
+  searchToPersist: PropTypes.string,
   to: PropTypes.string,
 };
 

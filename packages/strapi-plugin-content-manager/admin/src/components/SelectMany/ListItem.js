@@ -18,6 +18,7 @@ function ListItem({
   mainField,
   moveRelation,
   onRemove,
+  searchToPersist,
   targetModel,
 }) {
   const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
@@ -72,6 +73,7 @@ function ListItem({
         data={data}
         to={to}
         isDisabled={isDisabled}
+        searchToPersist={searchToPersist}
       />
     </Li>
   );
@@ -81,6 +83,7 @@ ListItem.defaultProps = {
   findRelation: () => {},
   moveRelation: () => {},
   onRemove: () => {},
+  searchToPersist: null,
   targetModel: '',
 };
 
@@ -97,6 +100,7 @@ ListItem.propTypes = {
   }).isRequired,
   moveRelation: PropTypes.func,
   onRemove: PropTypes.func,
+  searchToPersist: PropTypes.string,
   targetModel: PropTypes.string,
 };
 

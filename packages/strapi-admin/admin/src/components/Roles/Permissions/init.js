@@ -7,6 +7,7 @@ const init = (layout, permissions) => {
     conditions,
     sections: { collectionTypes, singleTypes, plugins, settings },
   } = layout;
+
   const layouts = {
     collectionTypes,
     singleTypes,
