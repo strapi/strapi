@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-documentation",
-  "version": "3.5.2",
+  "version": "3.5.3",
   "description": "Automatically generates documentation for your api.",
   "strapi": {
     "name": "Documentation",
@@ -18,7 +18,7 @@
     "@buffetjs/styles": "3.3.4",
     "@buffetjs/utils": "3.3.4",
     "cheerio": "^1.0.0-rc.5",
-    "fs-extra": "^9.0.1",
+    "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
     "koa-static": "^5.0.0",
     "lodash": "4.17.20",
@@ -35,8 +35,8 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-helper-plugin": "3.5.2",
-    "swagger-ui-dist": "3.44.1"
+    "strapi-helper-plugin": "3.5.3",
+    "swagger-ui-dist": "3.45.1"
   },
   "author": {
     "name": "soupette",
