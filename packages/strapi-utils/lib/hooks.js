@@ -3,114 +3,88 @@
 const { eq, remove, cloneDeep } = require('lodash/fp');
 
 /**
- * A store containing a list of handler that will be executed in a specific manner upon activation
  * @typedef Hook
- * @property {function(function(object))} register - Adds a new handler that will be execute upon hook's call
- * @property {function(object): Promise} call - Triggers the hook, call every handler in a specific manner following its implementation
+ * @property {Array<Function>} _handlers - A registry of handler used by the hook
+ * @property {function(Function):Hook} register - Register a new handler into the hook's registry
+ * @property {function(Function):Hook} delete- Delete the given handler from the hook's registry
+ * @property {Function} call - Not implemented by default, can be replaced by any implementation.
  */
 
 /**
- * Create a handler registry and returns its associated helper functions
- */
-const createHandlerRegistry = () => {
-  const state = {
-    registry: [],
-  };
-
-  /**
-   * Get a copy of the registry values
-   * @return {function[]}
-   */
-  const get = () => Array.from(state.registry);
-
-  /**
-   * Add a new handler to the registry
-   * @param {function} handler
-   */
-  const register = handler => {
-    state.registry.push(handler);
-  };
-
-  /**
-   * Delete a handler from the registry
-   * It performs an equality check on each registered handler
-   * @param {function} handler
-   */
-  const del = handler => {
-    state.registry = remove(eq(handler), state.registry);
-  };
-
-  return { get, register, del };
-};
-
-/**
- * A generic {@link Hook} factory with customizable {@link Hook.call} action
- * @param {function(object): function} createCallStrategy
+ * Create a default Strapi hook
  * @return {Hook}
  */
-const hookFactory = createCallStrategy => {
-  const registry = createHandlerRegistry();
-  const callStrategy = createCallStrategy(registry);
+const createHook = () => ({
+  _handlers: [],
 
-  return {
-    register(handler) {
-      registry.register(handler);
-      return this;
-    },
+  register(handler) {
+    this._handlers.push(handler);
+    return this;
+  },
 
-    call: callStrategy,
-  };
-};
+  delete(handler) {
+    this._handlers = remove(eq(handler), this._handlers);
+    return this;
+  },
+
+  call() {
+    throw new Error('Method not implemented');
+  },
+});
 
 /**
  * Create an async series hook.
  * Upon execution, it will execute every handler in order with the same context
  * @return {Hook}
  */
-const createAsyncSeriesHook = () =>
-  hookFactory(({ get }) => async context => {
-    const handlers = get();
+const createAsyncSeriesHook = () => ({
+  ...createHook(),
 
-    for (const handler of handlers) {
+  async call(context) {
+    for (const handler of this._handlers) {
       await handler(context);
     }
-  });
+  },
+});
 
 /**
  * Create an async series waterfall hook.
  * Upon execution, it will execute every handler in order and pass the return value of the last handler to the next one
  * @return {Hook}
  */
-const createAsyncSeriesWaterfallHook = () =>
-  hookFactory(({ get }) => async param => {
-    const handlers = get();
+const createAsyncSeriesWaterfallHook = () => ({
+  ...createHook(),
+
+  async call(param) {
     let res = param;
 
-    for (const handler of handlers) {
+    for (const handler of this._handlers) {
       res = await handler(res);
     }
 
     return res;
-  });
+  },
+});
 
 /**
  * Create an async parallel hook.
  * Upon execution, it will execute every registered handler in band.
  * @return {Hook}
  */
-const createAsyncParallelHook = () =>
-  hookFactory(({ get }) => context => {
-    const handlers = get();
-    const promises = handlers.map(handler => handler(cloneDeep(context)));
+const createAsyncParallelHook = () => ({
+  ...createHook(),
+
+  call(context) {
+    const promises = this._handlers.map(handler => handler(cloneDeep(context)));
 
     return Promise.all(promises);
-  });
+  },
+});
 
 module.exports = {
   // Internal utils
   internals: {
-    hookFactory,
-    createHandlerRegistry,
+    createHook,
   },
   // Hooks
   createAsyncSeriesHook,

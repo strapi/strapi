@@ -8,7 +8,7 @@ const createSectionBuilder = () => {
   };
 
   return {
-    addSection(sectionName, options) {
+    createSection(sectionName, options) {
       const section = createSection(options);
 
       state.sections.set(sectionName, section);

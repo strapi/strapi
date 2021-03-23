@@ -1,5 +1,6 @@
 'use strict';
 
+const { cloneDeep } = require('lodash/fp');
 const { createAsyncSeriesHook, createAsyncParallelHook } = require('./hooks');
 
 /**
@@ -64,7 +65,7 @@ const providerFactory = (options = {}) => {
 
       state.registry.set(key, item);
 
-      await state.hooks.didRegister.call({ key, value: item });
+      await state.hooks.didRegister.call({ key, value: cloneDeep(item) });
 
       return this;
     },
@@ -73,11 +74,11 @@ const providerFactory = (options = {}) => {
       if (this.has(key)) {
         const item = this.get(key);
 
-        await state.hooks.willDelete.call({ key, value: item });
+        await state.hooks.willDelete.call({ key, value: cloneDeep(item) });
 
         state.registry.delete(key);
 
-        await state.hooks.didDelete.call({ key, value: item });
+        await state.hooks.didDelete.call({ key, value: cloneDeep(item) });
       }
 
       return this;

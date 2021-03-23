@@ -34,13 +34,13 @@ describe('Action Domain', () => {
   });
 
   describe('appliesToSubject', () => {
-    test('Should return true when action.subjects is not an array', () => {
+    test('Should return false when action.subjects is not an array (applies to no subjects)', () => {
       const action = {};
       const subject = 'foo';
 
       const result = domain.appliesToSubject(subject, action);
 
-      expect(result).toBe(true);
+      expect(result).toBe(false);
     });
 
     test('Should return true when action.subjects contains the subject', () => {

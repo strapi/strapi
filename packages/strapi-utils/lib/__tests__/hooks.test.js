@@ -4,40 +4,23 @@ const hooks = require('../hooks');
 
 describe('Hooks Module', () => {
   describe('Internals', () => {
-    describe('Hook Factory', () => {
-      let registry;
+    describe('createHook', () => {
+      test(`It's possible to create a hook that has all the needed methods`, () => {
+        const hook = hooks.internals.createHook();
 
-      beforeEach(() => {
-        registry = hooks.internals.createHandlerRegistry();
+        expect(hook).toHaveProperty('_handlers', expect.any(Array));
+        expect(hook).toHaveProperty('register', expect.any(Function));
+        expect(hook).toHaveProperty('delete', expect.any(Function));
+        expect(hook).toHaveProperty('call', expect.any(Function));
       });
 
-      test('Register adds a new entry to the registry', () => {
-        const handler = () => ({ foo: 'bar' });
+      test('Call is not implemented by default', async () => {
+        const hook = hooks.internals.createHook();
+        const doCall = () => hook.call('foo');
 
-        registry.register(handler);
-
-        const handlers = registry.get();
-
-        expect(handlers).toHaveLength(1);
-        expect(handlers).toContain(handler);
-      });
-
-      test('Del removes entries that match the given handler', () => {
-        const handlers = [console.log, () => ({ foo: 'bar' }), console.log];
-
-        handlers.forEach(registry.register);
-
-        expect(registry.get()).toHaveLength(3);
-        expect(registry.get()).toStrictEqual(handlers);
-
-        registry.del(console.log);
-
-        expect(registry.get()).toHaveLength(1);
-        expect(registry.get()).toContain(handlers[1]);
+        expect(doCall).toThrowError('Method not implemented');
       });
     });
-
-    describe('Create Handler Registry', () => {});
   });
 
   describe('Hooks', () => {
@@ -82,7 +65,7 @@ describe('Hooks Module', () => {
         ];
         const hook = hooks.createAsyncSeriesHook();
 
-        handlers.forEach(hook.register);
+        handlers.forEach(handler => hook.register(handler));
 
         await hook.call(ctx);
 
@@ -127,7 +110,7 @@ describe('Hooks Module', () => {
         const handlers = [jest.fn(param => `${param}.bar`), jest.fn(param => `${param}.foobar`)];
         const hook = hooks.createAsyncSeriesWaterfallHook();
 
-        handlers.forEach(hook.register);
+        handlers.forEach(handler => hook.register(handler));
 
         const result = await hook.call(param);
 
@@ -172,7 +155,7 @@ describe('Hooks Module', () => {
         const handlers = [jest.fn(param => `${param}.foo`), jest.fn(param => `${param}.bar`)];
         const hook = hooks.createAsyncParallelHook();
 
-        handlers.forEach(hook.register);
+        handlers.forEach(handler => hook.register(handler));
 
         const result = await hook.call(param);
 

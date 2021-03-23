@@ -1,21 +1,30 @@
 'use strict';
 
-const { curry, matchesProperty, pick } = require('lodash/fp');
+const {
+  toSubjectTemplate,
+  getValidOptions,
+  hasProperty,
+  isNotInSubjects,
+  resolveContentType,
+  isOfKind,
+} = require('./utils');
 
-const utils = {
-  isOfKind: kind => matchesProperty('kind', kind),
-  resolveContentType: uid => strapi.contentTypes[uid],
-  isNotInSubjects: subjects => uid => !subjects.find(subject => subject.uid === uid),
-  hasProperty: curry((property, subject) => {
-    return !!subject.properties.find(prop => prop.value === property);
-  }),
-  getValidOptions: pick(['applyToProperties']),
-  toSubjectTemplate: ct => ({ uid: ct.uid, label: ct.info.name, properties: [] }),
-};
+/**
+ * @typedef ContentTypesSection
+ * @property {Array<Action>} actions
+ * @property {Array<Object>} subjects
+ */
+
+/**
+ * @typedef {Array<Action>} ActionArraySection
+ */
 
 /**
  * Transforms & adds the given  setting action to the section
  * Note: The action is transformed to a setting specific format
+ * @param {object} options
+ * @param {Action} options.action
+ * @param {ActionArraySection} section
  */
 const settings = ({ action, section }) => {
   const { category, subCategory, displayName, actionId } = action;
@@ -31,6 +40,9 @@ const settings = ({ action, section }) => {
 /**
  * Transforms & adds the given plugin action to the section
  * Note: The action is transformed to a plugin specific format
+ * @param {object} options
+ * @param {Action} options.action
+ * @param {ActionArraySection} section
  */
 const plugins = ({ action, section }) => {
   const { pluginName, subCategory, displayName, actionId } = action;
@@ -46,6 +58,9 @@ const plugins = ({ action, section }) => {
 /**
  * Transforms & adds the given action to the section's actions field
  * Note: The action is transformed to a content-type specific format
+ * @param {object} options
+ * @param {Action} options.action
+ * @param {ContentTypesSection} section
  */
 const contentTypesBase = ({ action, section }) => {
   const { displayName, actionId, subjects, options } = action;
@@ -54,27 +69,27 @@ const contentTypesBase = ({ action, section }) => {
     label: displayName,
     actionId,
     subjects,
-    ...utils.getValidOptions(options),
+    ...getValidOptions(options),
   });
 };
 
 /**
  * Initialize the subjects array of a section based on the action's subjects
  */
-const subjectsHandlerFor = kind => ({ action, section }) => {
+const subjectsHandlerFor = kind => ({ action, section: contentTypesSection }) => {
   const { subjects } = action;
 
   const newSubjects = subjects
     // Ignore already added subjects
-    .filter(utils.isNotInSubjects(section.subjects))
+    .filter(isNotInSubjects(contentTypesSection.subjects))
     // Transform UIDs into content-types
-    .map(utils.resolveContentType)
+    .map(resolveContentType)
     // Only keep specific kind of content-types
-    .filter(utils.isOfKind(kind))
+    .filter(isOfKind(kind))
     // Transform the content-types into section's subjects
-    .map(utils.toSubjectTemplate);
+    .map(toSubjectTemplate);
 
-  section.subjects.push(...newSubjects);
+  contentTypesSection.subjects.push(...newSubjects);
 };
 
 const buildNode = ([attributeName, attribute]) => {
@@ -104,6 +119,9 @@ const buildDeepAttributesCollection = attributes => {
 
 /**
  * Create and populate the fields property for section's subjects based on the action's subjects list
+ * @param {object} options
+ * @param {Action} options.action
+ * @param {ContentTypesSection} section
  */
 const fieldsProperty = ({ action, section }) => {
   const { subjects } = action;
@@ -112,9 +130,9 @@ const fieldsProperty = ({ action, section }) => {
     .filter(subject => subjects.includes(subject.uid))
     .forEach(subject => {
       const { uid } = subject;
-      const contentType = utils.resolveContentType(uid);
+      const contentType = resolveContentType(uid);
 
-      if (utils.hasProperty('fields', subject)) {
+      if (hasProperty('fields', subject)) {
         return;
       }
 

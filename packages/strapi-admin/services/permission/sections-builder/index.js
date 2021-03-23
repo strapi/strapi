@@ -20,25 +20,25 @@ const createContentTypesInitialState = () => ({
 const createDefaultSectionBuilder = () => {
   const builder = createSectionBuilder();
 
-  builder.addSection('plugins', {
+  builder.createSection('plugins', {
     initialStateFactory: () => [],
     handlers: [pluginsHandler],
     matchers: [sectionPropMatcher('plugins')],
   });
 
-  builder.addSection('settings', {
+  builder.createSection('settings', {
     initialStateFactory: () => [],
     handlers: [settingsHandler],
     matchers: [sectionPropMatcher('settings')],
   });
 
-  builder.addSection('singleTypes', {
+  builder.createSection('singleTypes', {
     initialStateFactory: createContentTypesInitialState,
     handlers: [contentTypesBase, subjectsHandlerFor('singleType'), fieldsProperty],
     matchers: [sectionPropMatcher('contentTypes')],
   });
 
-  builder.addSection('collectionTypes', {
+  builder.createSection('collectionTypes', {
     initialStateFactory: createContentTypesInitialState,
     handlers: [contentTypesBase, subjectsHandlerFor('collectionType'), fieldsProperty],
     matchers: [sectionPropMatcher('contentTypes')],

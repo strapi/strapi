@@ -99,11 +99,11 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async updatePermissions(ctx) {
-    const { findOne, assignPermissions } = getService('role');
-    const { sanitizePermission, actionProvider } = getService('permission');
-
     const { id } = ctx.params;
     const { body: input } = ctx.request;
+
+    const { findOne, assignPermissions } = getService('role');
+    const { sanitizePermission, actionProvider } = getService('permission');
 
     const role = await findOne({ id });
 

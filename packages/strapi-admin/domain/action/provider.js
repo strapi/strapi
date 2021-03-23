@@ -2,7 +2,7 @@
 
 const { providerFactory, hooks } = require('strapi-utils');
 const { validateRegisterProviderAction } = require('../../validation/action-provider');
-const domain = require('.');
+const domain = require('./index');
 
 /**
  * @typedef ActionProviderOverride

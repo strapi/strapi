@@ -108,7 +108,7 @@ const appliesToProperty = curry((property, action) => {
  * @return {boolean}
  */
 const appliesToSubject = curry((subject, action) => {
-  return !isArray(action.subjects) || includes(subject, action.subjects);
+  return isArray(action.subjects) && includes(subject, action.subjects);
 });
 
 /**
