@@ -1,8 +1,10 @@
 'use strict';
 
 const _ = require('lodash');
+const { PUBLISHED_AT_ATTRIBUTE } = require('strapi-utils').contentTypes.constants;
 
 const { getService } = require('../../utils');
+const fieldMigration = require('./migrations/field');
 
 module.exports = () => {
   const contentTypeService = getService('content-types');
@@ -18,7 +20,7 @@ module.exports = () => {
         configurable: false,
         visible: false,
         collection: modelName,
-        populate: ['id', 'locale', 'published_at'],
+        populate: ['id', 'locale', PUBLISHED_AT_ATTRIBUTE],
       });
 
       _.set(attributes, 'locale', {
@@ -33,8 +35,5 @@ module.exports = () => {
     }
   });
 
-  strapi.db.migrations.register({
-    before() {},
-    after() {},
-  });
+  strapi.db.migrations.register(fieldMigration);
 };

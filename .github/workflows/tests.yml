@@ -183,7 +183,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
     name: '[EE] E2E (postgres, node: ${{ matrix.node }})'
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -223,7 +223,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
     name: '[EE] E2E (mysql, node: ${{ matrix.node }})'
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -262,7 +262,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
     name: '[EE] E2E (sqlite, node: ${{ matrix.node }})'
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
@@ -284,7 +284,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [lint, unit_back, unit_front]
     name: '[EE] E2E (mongo, node: ${{ matrix.node }})'
-    if: github.event.pull_request.head.repo.full_name == github.repository
+    if: github.event.pull_request.head.repo.full_name == github.repository && !(github.actor == 'dependabot[bot]' || github.actor == 'dependabot-preview[bot]')
     env:
       STRAPI_LICENSE: ${{ secrets.strapiLicense }}
     strategy:
