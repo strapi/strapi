@@ -23,7 +23,7 @@
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-env": "^7.13.8",
     "@babel/preset-react": "^7.12.13",
-    "@babel/runtime": "^7.12.13",
+    "@babel/runtime": "^7.13.10",
     "@buffetjs/core": "3.3.4",
     "@buffetjs/custom": "3.3.4",
     "@buffetjs/hooks": "3.3.4",
