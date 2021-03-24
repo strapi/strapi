@@ -14,23 +14,29 @@ const { eq, remove, cloneDeep } = require('lodash/fp');
  * Create a default Strapi hook
  * @return {Hook}
  */
-const createHook = () => ({
-  _handlers: [],
+const createHook = () => {
+  const state = {
+    handlers: [],
+  };
 
-  register(handler) {
-    this._handlers.push(handler);
-    return this;
-  },
+  return {
+    get handlers() {
+      return state.handlers;
+    },
 
-  delete(handler) {
-    this._handlers = remove(eq(handler), this._handlers);
-    return this;
-  },
+    register: handler => {
+      state.handlers.push(handler);
+    },
 
-  call() {
-    throw new Error('Method not implemented');
-  },
-});
+    delete: handler => {
+      state.handlers = remove(eq(handler), state.handlers);
+    },
+
+    call() {
+      throw new Error('Method not implemented');
+    },
+  };
+};
 
 /**
  * Create an async series hook.
@@ -41,7 +47,7 @@ const createAsyncSeriesHook = () => ({
   ...createHook(),
 
   async call(context) {
-    for (const handler of this._handlers) {
+    for (const handler of this.handlers) {
       await handler(context);
     }
   },
@@ -58,7 +64,7 @@ const createAsyncSeriesWaterfallHook = () => ({
   async call(param) {
     let res = param;
 
-    for (const handler of this._handlers) {
+    for (const handler of this.handlers) {
       res = await handler(res);
     }
 
@@ -75,7 +81,7 @@ const createAsyncParallelHook = () => ({
   ...createHook(),
 
   call(context) {
-    const promises = this._handlers.map(handler => handler(cloneDeep(context)));
+    const promises = this.handlers.map(handler => handler(cloneDeep(context)));
 
     return Promise.all(promises);
   },

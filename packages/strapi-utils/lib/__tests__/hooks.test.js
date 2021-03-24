@@ -8,7 +8,7 @@ describe('Hooks Module', () => {
       test(`It's possible to create a hook that has all the needed methods`, () => {
         const hook = hooks.internals.createHook();
 
-        expect(hook).toHaveProperty('_handlers', expect.any(Array));
+        expect(hook).toHaveProperty('handlers', expect.any(Array));
         expect(hook).toHaveProperty('register', expect.any(Function));
         expect(hook).toHaveProperty('delete', expect.any(Function));
         expect(hook).toHaveProperty('call', expect.any(Function));
