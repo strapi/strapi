@@ -19,7 +19,7 @@
     "classnames": "^2.2.6",
     "codemirror": "^5.59.4",
     "draft-js": "^0.11.5",
-    "highlight.js": "^10.1.1",
+    "highlight.js": "^10.4.1",
     "immutable": "^3.8.2",
     "lodash": "4.17.20",
     "markdown-it": "^12.0.4",
@@ -44,7 +44,7 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "sanitize-html": "2.3.2",
+    "sanitize-html": "2.3.3",
     "strapi-helper-plugin": "3.5.3",
     "strapi-utils": "3.5.3",
     "yup": "^0.27.0"

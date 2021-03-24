@@ -36,7 +36,7 @@
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "strapi-helper-plugin": "3.5.3",
-    "swagger-ui-dist": "3.45.0"
+    "swagger-ui-dist": "3.45.1"
   },
   "author": {
     "name": "soupette",
