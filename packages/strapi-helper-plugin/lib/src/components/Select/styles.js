@@ -88,6 +88,9 @@ const getStyles = theme => {
       color: colors.black,
       fontWeight: state.isFocused ? fontWeights.bold : fontWeights.regular,
       cursor: 'pointer',
+      overflow: 'hidden',
+      'text-overflow': 'ellipsis',
+      'white-space': 'nowrap',
     }),
     placeholder: base => ({
       ...base,
