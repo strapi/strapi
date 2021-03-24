@@ -40,6 +40,10 @@ const initDefaultLocale = async () => {
   const existingLocalesNb = await strapi.query('locale', 'i18n').count();
   if (existingLocalesNb === 0) {
     await create(DEFAULT_LOCALE);
+  }
+
+  const defaultLocale = await getDefaultLocale();
+  if (!defaultLocale) {
     await setDefaultLocale({ code: DEFAULT_LOCALE.code });
   }
 };
