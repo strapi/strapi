@@ -3,16 +3,23 @@
 const { getService } = require('../../../../utils');
 const { DEFAULT_LOCALE } = require('../../../../constants');
 
-const getDefaultLocaleRows = (model, ORM) => {
+const getDefaultLocale = async (model, ORM) => {
+  let defaultLocaleRows;
   if (model.orm === 'bookshelf') {
-    return ORM.knex('core_store')
+    defaultLocaleRows = await ORM.knex('core_store')
       .select('value')
       .where({ key: 'plugin_i18n_default_locale' });
+  } else if (model.orm === 'mongoose') {
+    defaultLocaleRows = await strapi.models['core_store'].find({
+      key: 'plugin_i18n_default_locale',
+    });
   }
 
-  if (model.orm === 'mongoose') {
-    return strapi.models['core_store'].find({ key: 'plugin_i18n_default_locale' });
+  if (defaultLocaleRows.length > 0) {
+    return JSON.parse(defaultLocaleRows[0].value);
   }
+
+  return DEFAULT_LOCALE.code;
 };
 
 const updateLocale = (model, ORM, locale) => {
@@ -38,14 +45,7 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
     return;
   }
 
-  let defaultLocale;
-  const defaultLocaleRows = await getDefaultLocaleRows(model, ORM);
-
-  if (defaultLocaleRows.length > 0) {
-    defaultLocale = JSON.parse(defaultLocaleRows[0].value);
-  } else {
-    defaultLocale = DEFAULT_LOCALE.code;
-  }
+  const defaultLocale = await getDefaultLocale(model, ORM);
 
   await updateLocale(model, ORM, defaultLocale);
 };
