@@ -5,6 +5,7 @@ const { PUBLISHED_AT_ATTRIBUTE } = require('strapi-utils').contentTypes.constant
 
 const { getService } = require('../../utils');
 const fieldMigration = require('./migrations/field');
+const ctMigration = require('./migrations/content-type');
 
 module.exports = () => {
   const contentTypeService = getService('content-types');
@@ -36,4 +37,5 @@ module.exports = () => {
   });
 
   strapi.db.migrations.register(fieldMigration);
+  strapi.db.migrations.register(ctMigration);
 };

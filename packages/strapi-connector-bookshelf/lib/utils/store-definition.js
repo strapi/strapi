@@ -4,7 +4,15 @@ const _ = require('lodash');
 
 const formatDefinitionToStore = definition =>
   JSON.stringify(
-    _.pick(definition, ['uid', 'collectionName', 'kind', 'info', 'options', 'attributes'])
+    _.pick(definition, [
+      'uid',
+      'collectionName',
+      'kind',
+      'info',
+      'options',
+      'pluginOptions',
+      'attributes',
+    ])
   );
 
 const getDefinitionFromStore = async (definition, ORM) => {
