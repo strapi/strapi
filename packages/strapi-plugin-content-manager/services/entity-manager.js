@@ -72,11 +72,10 @@ module.exports = {
     return strapi.entityService.count({ params }, { model });
   },
 
-  async findOne(id, model, populate) {
-    if (!populate) {
-      const { associations } = strapi.query(model);
-      populate = associations.map(association => association.alias);
-    }
+  async findOne(id, model, _populate) {
+    const populate = _populate
+      ? _populate
+      : strapi.getModel(model).associations.map(association => association.alias);
 
     return strapi.entityService.findOne({ params: { id }, populate }, { model });
   },
