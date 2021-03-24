@@ -26,7 +26,9 @@ module.exports = {
       return ctx.badRequest('model.not.localized');
     }
 
-    const entity = await strapi.entityService.findOne({ params: { id } }, { model });
+    let params = modelDef.kind === 'singleType' ? {} : { id };
+
+    const entity = await strapi.entityService.findOne({ params }, { model });
 
     if (!entity) {
       return ctx.notFound();

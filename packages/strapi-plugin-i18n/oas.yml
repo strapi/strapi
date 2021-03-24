@@ -96,9 +96,7 @@ paths:
                       type: object
                       properties:
                         id:
-                          oneOf:
-                            - type: string
-                            - type: integer
+                          $ref: '#/components/schemas/id'
                           description: Id of this related entity
                         locale:
                           type: string
