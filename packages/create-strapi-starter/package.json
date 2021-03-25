@@ -1,30 +1,31 @@
 {
-  "name": "strapi-generate-new",
+  "name": "create-strapi-starter",
   "version": "3.5.4",
   "description": "Generate a new Strapi application.",
+  "license": "SEE LICENSE IN LICENSE",
   "homepage": "https://strapi.io",
   "keywords": [
+    "create-strapi-starter",
+    "create",
+    "new",
     "generate",
-    "generator",
     "strapi"
   ],
-  "main": "./lib/index.js",
-  "directories": {
-    "lib": "./lib"
+  "main": "./index.js",
+  "bin": {
+    "create-strapi-starter": "./index.js"
   },
   "dependencies": {
-    "@sentry/node": "6.2.3",
-    "chalk": "^2.4.2",
-    "execa": "^1.0.0",
-    "fs-extra": "^9.1.0",
-    "hosted-git-info": "3.0.8",
-    "inquirer": "^6.3.1",
-    "lodash": "4.17.20",
-    "node-fetch": "^2.6.1",
-    "node-machine-id": "^1.1.10",
-    "ora": "^3.4.0",
-    "tar": "6.1.0",
-    "uuid": "^3.3.2"
+    "chalk": "4.1.0",
+    "ci-info": "3.1.1",
+    "commander": "7.1.0",
+    "execa": "5.0.0",
+    "fs-extra": "9.1.0",
+    "git-url-parse": "11.4.4",
+    "node-fetch": "2.6.1",
+    "ora": "5.3.0",
+    "strapi-generate-new": "3.5.4",
+    "tar": "6.1.0"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -34,13 +35,6 @@
     "name": "Strapi team",
     "url": "https://strapi.io"
   },
-  "maintainers": [
-    {
-      "name": "Strapi team",
-      "email": "hi@strapi.io",
-      "url": "https://strapi.io"
-    }
-  ],
   "repository": {
     "type": "git",
     "url": "git://github.com/strapi/strapi.git"
@@ -52,6 +46,5 @@
     "node": ">=10.16.0 <=14.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }
