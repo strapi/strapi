@@ -26,10 +26,11 @@ const SettingsViewWrapper = ({
   isEditSettings,
   isLoading,
   modifiedData,
+  name,
   onChange,
   onConfirmReset,
   onConfirmSubmit,
-  name,
+  onModalConfirmClosed,
 }) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const [showWarningCancel, setWarningCancel] = useState(false);
@@ -214,6 +215,11 @@ const SettingsViewWrapper = ({
               await onConfirmSubmit();
               toggleWarningSubmit();
             }}
+            onClosed={() => {
+              if (onModalConfirmClosed) {
+                onModalConfirmClosed();
+              }
+            }}
           />
         </form>
       </Container>
@@ -230,6 +236,7 @@ SettingsViewWrapper.defaultProps = {
   name: '',
   onConfirmReset: () => {},
   onConfirmSubmit: async () => {},
+  onModalConfirmClosed: null,
   onSubmit: () => {},
   pluginHeaderProps: {
     actions: [],
@@ -258,6 +265,7 @@ SettingsViewWrapper.propTypes = {
   onChange: PropTypes.func.isRequired,
   onConfirmReset: PropTypes.func,
   onConfirmSubmit: PropTypes.func,
+  onModalConfirmClosed: PropTypes.func,
   onSubmit: PropTypes.func,
   pluginHeaderProps: PropTypes.shape({
     actions: PropTypes.array,

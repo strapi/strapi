@@ -6,8 +6,15 @@ const getCtOrStLinks = async userPermissions => {
   const requestURL = '/content-manager/content-types';
 
   try {
+    const {
+      data: contentTypeConfigurations,
+    } = await request('/content-manager/content-types-settings', { method: 'GET' });
+
     const { data } = await request(requestURL, { method: 'GET' });
-    const { collectionTypesSectionLinks, singleTypesSectionLinks } = generateModelsLinks(data);
+    const { collectionTypesSectionLinks, singleTypesSectionLinks } = generateModelsLinks(
+      data,
+      contentTypeConfigurations
+    );
 
     // Content Types verifications
     const ctLinksPermissionsPromises = checkPermissions(
@@ -29,6 +36,7 @@ const getCtOrStLinks = async userPermissions => {
     return { authorizedCtLinks, authorizedStLinks, contentTypes: data };
   } catch (err) {
     console.error(err);
+
     strapi.notification.toggle({
       type: 'warning',
       message: { id: 'notification.error' },

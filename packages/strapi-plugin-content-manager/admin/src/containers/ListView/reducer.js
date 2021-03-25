@@ -35,7 +35,6 @@ export const initialState = {
   pagination: {
     total: 0,
   },
-  initialParams: null,
 };
 
 const listViewReducer = (state = initialState, action) =>
@@ -48,7 +47,6 @@ const listViewReducer = (state = initialState, action) =>
           contentType: state.contentType,
           initialDisplayedHeaders: state.initialDisplayedHeaders,
           displayedHeaders: state.displayedHeaders,
-          initialParams: state.initialParams,
         };
       }
 
@@ -168,12 +166,11 @@ const listViewReducer = (state = initialState, action) =>
         break;
       }
       case SET_LIST_LAYOUT: {
-        const { contentType, displayedHeaders, initialParams } = action;
+        const { contentType, displayedHeaders } = action;
 
         drafState.contentType = contentType;
         drafState.displayedHeaders = displayedHeaders;
         drafState.initialDisplayedHeaders = displayedHeaders;
-        drafState.initialParams = initialParams;
 
         break;
       }

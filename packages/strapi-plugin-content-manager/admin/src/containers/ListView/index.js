@@ -77,7 +77,6 @@ function ListView({
   onResetListHeaders,
   pagination: { total },
   slug,
-  initialParams,
 }) {
   const {
     contentType: {
@@ -90,7 +89,7 @@ function ListView({
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
 
-  const [{ query }, setQuery] = useQueryParams(initialParams);
+  const [{ query }, setQuery] = useQueryParams();
   const params = buildQueryString(query);
 
   const { pathname } = useLocation();
@@ -521,7 +520,6 @@ ListView.propTypes = {
   toggleModalDelete: PropTypes.func.isRequired,
   toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
-  initialParams: PropTypes.shape({}).isRequired,
   permissions: PropTypes.arrayOf(
     PropTypes.shape({
       action: PropTypes.string.isRequired,

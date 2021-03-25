@@ -54,6 +54,9 @@ import Content from './Content';
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
 
+  // This state is really temporary until we create a menu API
+  state = { updateMenu: null };
+
   helpers = {
     updatePlugin: this.props.updatePlugin,
   };
@@ -63,8 +66,8 @@ export class Admin extends React.Component {
     this.initApp();
   }
 
-  shouldComponentUpdate(prevProps) {
-    return !isEmpty(difference(prevProps, this.props));
+  shouldComponentUpdate(prevProps, prevState) {
+    return !isEmpty(difference(prevProps, this.props)) || !isEmpty(prevState, this.state);
   }
 
   /* istanbul ignore next */
@@ -202,6 +205,10 @@ export class Admin extends React.Component {
 
   renderRoute = (props, Component) => <Component {...this.props} {...props} />;
 
+  setUpdateMenu = updateMenuFn => {
+    this.setState({ updateMenu: updateMenuFn });
+  };
+
   render() {
     const {
       admin: { shouldUpdateStrapi },
@@ -245,12 +252,14 @@ export class Admin extends React.Component {
           settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
           strapiVersion={strapiVersion}
           updatePlugin={updatePlugin}
+          updateMenu={this.state.updateMenu}
         >
           <Wrapper>
             <LeftMenu
               shouldUpdateStrapi={shouldUpdateStrapi}
               version={strapiVersion}
               plugins={plugins}
+              setUpdateMenu={this.setUpdateMenu}
             />
             <NavTopRightWrapper>
               {/* Injection zone not ready yet */}

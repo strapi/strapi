@@ -45,7 +45,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
   // We need to keep the first location from which the user is coming from
   const fromRef = useRef(from);
 
-  const isCreatingEntry = id === 'create';
+  const isCreatingEntry = id === null;
 
   const requestURL = useMemo(() => {
     if (isCreatingEntry && !origin) {
@@ -158,6 +158,12 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
       }
     };
 
+    // This is needed in order to reset the form when the query changes
+    const init = async () => {
+      await dispatch(getData());
+      await dispatch(initForm(rawQuery));
+    };
+
     if (!isMounted.current) {
       return () => {};
     }
@@ -165,11 +171,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     if (requestURL) {
       fetchData(signal);
     } else {
-      dispatch(initForm(rawQuery));
+      init();
     }
 
     return () => {
-      isMounted.current = false;
       abortController.abort();
     };
   }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery]);
@@ -340,6 +345,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
 
 CollectionTypeFormWrapper.defaultProps = {
   from: '/',
+  id: null,
   origin: null,
 };
 
@@ -362,7 +368,7 @@ CollectionTypeFormWrapper.propTypes = {
   }).isRequired,
   children: PropTypes.func.isRequired,
   from: PropTypes.string,
-  id: PropTypes.string.isRequired,
+  id: PropTypes.string,
   origin: PropTypes.string,
   slug: PropTypes.string.isRequired,
 };
