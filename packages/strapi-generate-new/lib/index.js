@@ -37,8 +37,12 @@ module.exports = (projectDirectory, cliArguments) => {
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
     template: cliArguments.template,
-    docker: process.env.DOCKER === 'true',
+    packageJsonStrapi: {
+      template: cliArguments.template,
+      starter: cliArguments.starter,
+    },
     uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
+    docker: process.env.DOCKER === 'true',
     deviceId: machineIdSync(),
     tmpPath,
     // use yarn if available and --use-npm isn't true
