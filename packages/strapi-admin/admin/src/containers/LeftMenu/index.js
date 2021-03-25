@@ -22,6 +22,9 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
     pluginsSectionLinks,
   } = useMenuSections(plugins, shouldUpdateStrapi);
 
+  const filteredCollectionTypeLinks = collectionTypesSectionLinks.filter(
+    ({ isDisplayed }) => isDisplayed
+  );
   const filteredSingleTypeLinks = singleTypesSectionLinks.filter(({ isDisplayed }) => isDisplayed);
 
   return (
@@ -29,11 +32,11 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
       <Loader show={isLoading} />
       <LeftMenuHeader />
       <LinksContainer>
-        {collectionTypesSectionLinks.length > 0 && (
+        {filteredCollectionTypeLinks.length > 0 && (
           <LeftMenuLinksSection
             section="collectionType"
             name="collectionType"
-            links={collectionTypesSectionLinks}
+            links={filteredCollectionTypeLinks}
             location={location}
             searchable
           />

@@ -69,7 +69,24 @@ describe('checkPermissions', () => {
       },
     ];
 
-    request.mockImplementation(() => Promise.resolve({ data }));
+    request.mockImplementation(url => {
+      if (url === '/content-manager/content-types') {
+        return Promise.resolve({ data });
+      }
+
+      return Promise.resolve({
+        data: [
+          {
+            uid: 'application::address.address',
+            settings: {
+              pageSize: 10,
+              defaultSortBy: 'name',
+              defaultSortOrder: 'ASC',
+            },
+          },
+        ],
+      });
+    });
 
     const expected = {
       authorizedCtLinks: [
@@ -88,12 +105,14 @@ describe('checkPermissions', () => {
               subject: 'application::address.address',
             },
           ],
+          search: 'page=1&pageSize=10&_sort=name:ASC',
         },
         {
           destination: '/plugins/content-manager/collectionType/application::article.article',
           icon: 'circle',
           isDisplayed: true,
           label: 'article',
+          search: null,
           permissions: [
             {
               action: 'plugins::content-manager.explorer.create',
