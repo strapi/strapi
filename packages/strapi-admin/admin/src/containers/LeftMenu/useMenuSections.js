@@ -25,34 +25,38 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
   // so it's definitely ok to use a ref here
   const pluginsRef = useRef(plugins);
 
+  const toggleLoading = () => dispatch(toggleIsLoading());
+
+  const resolvePermissions = async () => {
+    const pluginsSectionLinks = toPluginLinks(pluginsRef.current);
+    const { authorizedCtLinks, authorizedStLinks, contentTypes } = await getCtOrStLinks(
+      userPermissions
+    );
+
+    const authorizedPluginSectionLinks = await getPluginSectionLinks(
+      userPermissions,
+      pluginsSectionLinks
+    );
+
+    const authorizedGeneralSectionLinks = await getGeneralLinks(
+      userPermissions,
+      generalSectionLinksRef.current,
+      settingsMenuRef.current,
+      shouldUpdateStrapiRef.current
+    );
+
+    dispatch(setCtOrStLinks(authorizedCtLinks, authorizedStLinks, contentTypes));
+    dispatch(setSectionLinks(authorizedGeneralSectionLinks, authorizedPluginSectionLinks));
+    toggleLoading();
+  };
+
+  const resolvePermissionsRef = useRef(resolvePermissions);
+
   useEffect(() => {
-    const resolvePermissions = async () => {
-      const pluginsSectionLinks = toPluginLinks(pluginsRef.current);
-      const { authorizedCtLinks, authorizedStLinks, contentTypes } = await getCtOrStLinks(
-        userPermissions
-      );
-
-      const authorizedPluginSectionLinks = await getPluginSectionLinks(
-        userPermissions,
-        pluginsSectionLinks
-      );
-
-      const authorizedGeneralSectionLinks = await getGeneralLinks(
-        userPermissions,
-        generalSectionLinksRef.current,
-        settingsMenuRef.current,
-        shouldUpdateStrapiRef.current
-      );
-
-      dispatch(setCtOrStLinks(authorizedCtLinks, authorizedStLinks, contentTypes));
-      dispatch(setSectionLinks(authorizedGeneralSectionLinks, authorizedPluginSectionLinks));
-      dispatch(toggleIsLoading());
-    };
-
-    resolvePermissions();
+    resolvePermissionsRef.current();
   }, [userPermissions, dispatch]);
 
-  return state;
+  return { state, generateMenu: resolvePermissionsRef.current, toggleLoading };
 };
 
 export default useMenuSections;

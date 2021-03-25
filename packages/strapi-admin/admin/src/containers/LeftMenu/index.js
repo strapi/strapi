@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
 import {
@@ -11,21 +11,36 @@ import Loader from './Loader';
 import Wrapper from './Wrapper';
 import useMenuSections from './useMenuSections';
 
-const LeftMenu = ({ shouldUpdateStrapi, version, plugins }) => {
+const LeftMenu = ({ shouldUpdateStrapi, version, plugins, setUpdateMenu }) => {
   const location = useLocation();
 
   const {
-    isLoading,
-    collectionTypesSectionLinks,
-    singleTypesSectionLinks,
-    generalSectionLinks,
-    pluginsSectionLinks,
+    state: {
+      isLoading,
+      collectionTypesSectionLinks,
+      singleTypesSectionLinks,
+      generalSectionLinks,
+      pluginsSectionLinks,
+    },
+    toggleLoading,
+    generateMenu,
   } = useMenuSections(plugins, shouldUpdateStrapi);
 
   const filteredCollectionTypeLinks = collectionTypesSectionLinks.filter(
     ({ isDisplayed }) => isDisplayed
   );
   const filteredSingleTypeLinks = singleTypesSectionLinks.filter(({ isDisplayed }) => isDisplayed);
+
+  // This effect is really temporary until we create the menu api
+  // We need this because we need to regenerate the links when the settings are being changed
+  // in the content manager configurations list
+  useEffect(() => {
+    setUpdateMenu(() => {
+      toggleLoading();
+      generateMenu();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <Wrapper>
@@ -80,6 +95,7 @@ LeftMenu.propTypes = {
   shouldUpdateStrapi: PropTypes.bool.isRequired,
   version: PropTypes.string.isRequired,
   plugins: PropTypes.object.isRequired,
+  setUpdateMenu: PropTypes.func.isRequired,
 };
 
 export default memo(LeftMenu);
