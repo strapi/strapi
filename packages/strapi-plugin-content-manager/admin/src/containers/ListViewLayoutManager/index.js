@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import { useQueryParams } from 'strapi-helper-plugin';
 import { resetProps, setLayout } from '../ListView/actions';
@@ -8,21 +8,12 @@ import Permissions from './Permissions';
 
 const ListViewLayout = ({ layout, ...props }) => {
   const dispatch = useDispatch();
-  const initialParams = useSelector(state => state.get('content-manager_listView').initialParams);
-  const [{ query, rawQuery }, setQuery] = useQueryParams(initialParams);
+  const [{ query }] = useQueryParams();
   const permissions = useSyncRbac(query, props.slug, 'listView');
-  const setQueryRef = useRef(setQuery);
 
   useEffect(() => {
     dispatch(setLayout(layout.contentType));
   }, [dispatch, layout]);
-
-  useEffect(() => {
-    // We need to keep the search when reloading the page
-    if (initialParams && !rawQuery) {
-      setQueryRef.current(initialParams);
-    }
-  }, [initialParams, rawQuery]);
 
   useEffect(() => {
     return () => {
@@ -30,7 +21,7 @@ const ListViewLayout = ({ layout, ...props }) => {
     };
   }, [dispatch]);
 
-  if (!permissions || !initialParams) {
+  if (!permissions) {
     return null;
   }
 

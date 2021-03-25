@@ -6,7 +6,15 @@ const getKeyForDefinition = definition => `model_def_${definition.uid}`;
 
 const formatDefinitionToStore = definition =>
   JSON.stringify(
-    _.pick(definition, ['uid', 'collectionName', 'kind', 'info', 'options', 'attributes'])
+    _.pick(definition, [
+      'uid',
+      'collectionName',
+      'kind',
+      'info',
+      'options',
+      'pluginOptions',
+      'attributes',
+    ])
   );
 
 const getDefinitionFromStore = async (definition, ORM) => {

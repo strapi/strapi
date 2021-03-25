@@ -7,6 +7,16 @@ describe('ADMIN | LeftMenu | utils', () => {
     });
 
     it('should return an array filtered and formatted with the correct data', () => {
+      const modelsConfigurations = [
+        {
+          uid: 'application::address.address',
+          settings: {
+            pageSize: 2,
+            defaultSortBy: 'name',
+            defaultSortOrder: 'ASC',
+          },
+        },
+      ];
       const data = [
         {
           isDisplayed: true,
@@ -19,7 +29,6 @@ describe('ADMIN | LeftMenu | utils', () => {
         },
         {
           isDisplayed: false,
-
           kind: 'collectionType',
           uid: 'application::test.test',
           info: {
@@ -28,7 +37,6 @@ describe('ADMIN | LeftMenu | utils', () => {
         },
         {
           isDisplayed: true,
-
           kind: 'singleType',
           uid: 'application::test1.test1',
           info: {
@@ -43,6 +51,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           destination: '/plugins/content-manager/collectionType/application::address.address',
           isDisplayed: true,
           label: 'Addresses',
+          search: `page=1&pageSize=2&_sort=name:ASC`,
           permissions: [
             {
               action: 'plugins::content-manager.explorer.create',
@@ -59,6 +68,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           destination: '/plugins/content-manager/singleType/application::test1.test1',
           isDisplayed: true,
           label: 'Test 1',
+          search: null,
           permissions: [
             {
               action: 'plugins::content-manager.explorer.create',
@@ -72,7 +82,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         },
       ];
 
-      expect(generateLinks(data, 'collectionTypes')).toEqual(expected);
+      expect(generateLinks(data, 'collectionTypes', modelsConfigurations)).toEqual(expected);
     });
   });
 
@@ -89,7 +99,6 @@ describe('ADMIN | LeftMenu | utils', () => {
         },
         {
           isDisplayed: false,
-
           kind: 'collectionType',
           uid: 'application::test.test',
           info: {
@@ -98,7 +107,6 @@ describe('ADMIN | LeftMenu | utils', () => {
         },
         {
           isDisplayed: true,
-
           kind: 'singleType',
           uid: 'application::test1.test1',
           info: {
@@ -114,6 +122,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             destination: '/plugins/content-manager/collectionType/application::address.address',
             isDisplayed: true,
             label: 'Addresses',
+            search: null,
             permissions: [
               {
                 action: 'plugins::content-manager.explorer.create',
@@ -132,6 +141,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             destination: '/plugins/content-manager/singleType/application::test1.test1',
             isDisplayed: true,
             label: 'Test 1',
+            search: null,
             permissions: [
               {
                 action: 'plugins::content-manager.explorer.read',

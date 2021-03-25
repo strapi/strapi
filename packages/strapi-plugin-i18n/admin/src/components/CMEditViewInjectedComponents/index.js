@@ -15,7 +15,7 @@ const CMEditViewInjectedComponents = () => {
   const [{ query }, setQuery] = useQueryParams();
 
   const id = get(params, 'id', null);
-  const currentEntityId = id === 'create' ? null : id;
+  const currentEntityId = id;
   const defaultLocale = locales.find(loc => loc.isDefault);
   const currentLocale = get(query, 'plugins.i18n.locale', defaultLocale.code);
   const hasI18nEnabled = get(layout, ['pluginOptions', 'i18n', 'localized'], false);

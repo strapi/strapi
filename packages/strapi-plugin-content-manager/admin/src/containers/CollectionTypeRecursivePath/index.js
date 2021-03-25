@@ -73,7 +73,8 @@ const CollectionTypeRecursivePath = ({
   };
 
   const routes = [
-    { path: ':id/clone/:origin', comp: EditViewLayoutManager },
+    { path: 'create/clone/:origin', comp: EditViewLayoutManager },
+    { path: 'create', comp: EditViewLayoutManager },
     { path: ':id', comp: EditViewLayoutManager },
     { path: '', comp: ListViewLayout },
   ].map(({ path, comp }) => (
