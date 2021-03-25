@@ -70,6 +70,37 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/locale'
+  /i18n/content-manager/actions/get-non-localized-fields:
+    post:
+      tags:
+        - Content-Manager
+      description: Return the non localized fields of a related entity in order to pre-fill the creation form of a related entity.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getNonLocalizedFieldsInput'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nonLocalizedFields:
+                    type: object
+                  localizations:
+                    description: All related entities id and locale
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          $ref: '#/components/schemas/id'
+                          description: Id of this related entity
+                        locale:
+                          type: string
+                          description: Code of the locale of this related entity
 
 components:
   schemas:
@@ -103,6 +134,23 @@ components:
         isDefault:
           type: boolean
           description: Set default locale (ignored if set to false)
+
+    getNonLocalizedFieldsInput:
+      type: object
+      required:
+        - model
+        - id
+        - locale
+      properties:
+        model:
+          type: string
+          description: Model of the entity
+        id:
+          $ref: '#/components/schemas/id'
+          description: Id of an entity related to the one that will be created
+        locale:
+          type: string
+          description: The locale of the entity that will be pre-filled with the non localized fields this route returns
 
     locale:
       type: object

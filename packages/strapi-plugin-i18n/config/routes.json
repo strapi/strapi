@@ -51,6 +51,14 @@
           ["plugins::content-manager.hasPermissions", ["plugins::i18n.locale.delete"]]
         ]
       }
+    },
+    {
+      "method": "POST",
+      "path": "/content-manager/actions/get-non-localized-fields",
+      "handler": "content-types.getNonLocalizedAttributes",
+      "config": {
+        "policies": ["admin::isAuthenticatedAdmin"]
+      }
     }
   ]
 }
