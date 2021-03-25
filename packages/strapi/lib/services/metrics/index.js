@@ -23,7 +23,7 @@ const LIMITED_EVENTS = [
 ];
 
 const createTelemetryInstance = strapi => {
-  const uuid = strapi.config.uuid;
+  const { uuid } = strapi.config;
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
   const sender = createSender(strapi);
