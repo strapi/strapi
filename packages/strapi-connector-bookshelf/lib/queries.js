@@ -437,7 +437,6 @@ module.exports = function createQueryBuilder({ model, strapi }) {
         }
       }
     }
-    return;
   }
 
   async function deleteDynamicZoneOldComponents(entry, values, { key, joinModel, transacting }) {

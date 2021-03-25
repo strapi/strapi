@@ -1,26 +1,37 @@
 'use strict';
 
-const { capitalize } = require('lodash/fp');
 const { getService } = require('../../utils');
 
-const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
-  section: 'settings',
-  category: 'Internationalization',
-  subCategory: 'Locales',
-  pluginName: 'i18n',
-  displayName: capitalize(uid),
-  uid: `locale.${uid}`,
-}));
-
 module.exports = async () => {
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
-
   const { decorator } = getService('entity-service-decorator');
+  const { initDefaultLocale } = getService('locales');
+  const { sectionsBuilder, actions, conditions, engine } = getService('permissions');
+
+  // Entity Service
   strapi.entityService.decorate(decorator);
 
-  await getService('locales').initDefaultLocale();
+  // Data
+  await initDefaultLocale();
 
+  // Sections Builder
+  sectionsBuilder.registerLocalesPropertyHandler();
+
+  // Actions
+  await actions.registerI18nActions();
+  actions.registerI18nActionsHooks();
+  actions.updateActionsProperties();
+
+  // Conditions
+  await conditions.registerI18nConditions();
+
+  // Engine/Permissions
+  engine.registerI18nPermissionsHandlers();
+
+  // Hooks & Models
+  registerModelsHooks();
+};
+
+const registerModelsHooks = () => {
   Object.values(strapi.models)
     .filter(model => getService('content-types').isLocalized(model))
     .forEach(model => {

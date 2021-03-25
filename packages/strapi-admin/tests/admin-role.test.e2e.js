@@ -31,7 +31,7 @@ describe('Role CRUD End to End', () => {
 
   afterAll(async () => {
     await strapi.destroy();
-  });
+  }, 60000);
 
   describe('Default roles', () => {
     test('Default roles are created', async () => {
@@ -115,7 +115,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -133,12 +133,14 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining([
             expect.objectContaining({
               action: 'plugins::users-permissions.roles.update',
+              properties: {},
               conditions: [],
+              subject: null,
             }),
             expect.objectContaining({
               action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
-              fields: ['username'],
+              properties: { fields: ['username'], locales: [] },
               conditions: ['admin::is-creator'],
             }),
           ]),
@@ -156,12 +158,14 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining([
             expect.objectContaining({
               action: 'plugins::users-permissions.roles.update',
+              properties: {},
               conditions: [],
+              subject: null,
             }),
             expect.objectContaining({
               action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
-              fields: ['username'],
+              properties: { fields: ['username'], locales: [] },
               conditions: ['admin::is-creator'],
             }),
           ]),
@@ -179,25 +183,25 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.update',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
-          fields: null,
+          properties: { locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.read',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -614,7 +618,7 @@ describe('Role CRUD End to End', () => {
               {
                 action: 'plugins::content-manager.explorer.create',
                 subject: 'plugins::users-permissions.user',
-                fields: ['username'],
+                properties: { fields: ['username'], locales: [] },
                 conditions: ['admin::is-creator'],
               },
             ],
@@ -647,7 +651,7 @@ describe('Role CRUD End to End', () => {
           {
             action: 'plugins::content-manager.explorer.create',
             subject: 'plugins::users-permissions.user',
-            fields: ['username'],
+            properties: { fields: ['username'], locales: [] },
             conditions: ['admin::is-creator'],
           },
         ];
@@ -669,7 +673,12 @@ describe('Role CRUD End to End', () => {
         expect(res.body.data.length > 0).toBe(true);
         expect(sortPermissionArray(res.body.data)).toMatchObject(
           sortPermissionArray(
-            permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
+            permissions.map(perm => ({
+              subject: null,
+              properties: {},
+              conditions: [],
+              ...perm,
+            }))
           )
         );
       });
@@ -692,7 +701,7 @@ describe('Role CRUD End to End', () => {
           statusCode: 400,
           error: 'Bad Request',
           message: 'ValidationError',
-          data: { permissions: ['[0] is not an existing permission action'] },
+          data: { 'permissions[0].action': ['action is not an existing permission action'] },
         });
       });
 

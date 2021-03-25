@@ -41,6 +41,11 @@ describe('Role CRUD End to End', () => {
           "conditions": Array [
             Object {
               "category": "default",
+              "displayName": "Has Locale Access",
+              "id": "plugins::i18n.has-locale-access",
+            },
+            Object {
+              "category": "default",
               "displayName": "Is creator",
               "id": "admin::is-creator",
             },
@@ -51,172 +56,205 @@ describe('Role CRUD End to End', () => {
             },
           ],
           "sections": Object {
-            "contentTypes": Array [
-              Object {
-                "action": "plugins::content-manager.explorer.create",
-                "displayName": "Create",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.delete",
-                "displayName": "Delete",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.publish",
-                "displayName": "Publish",
-                "subjects": Array [],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.read",
-                "displayName": "Read",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
-              Object {
-                "action": "plugins::content-manager.explorer.update",
-                "displayName": "Update",
-                "subjects": Array [
-                  "plugins::users-permissions.user",
-                ],
-              },
+            "collectionTypes": Array [
+              Array [
+                Object {
+                  "actionId": "plugins::content-manager.explorer.create",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Create",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.read",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Read",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.update",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Update",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.delete",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Delete",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.publish",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Publish",
+                  "subjects": Array [],
+                },
+              ],
+              Array [
+                Object {
+                  "label": "user",
+                  "properties": Array [
+                    Object {
+                      "children": Array [],
+                      "label": "Fields",
+                      "value": "fields",
+                    },
+                  ],
+                  "uid": "plugins::users-permissions.user",
+                },
+              ],
             ],
             "plugins": Array [
               Object {
                 "action": "plugins::content-manager.collection-types.configure-view",
                 "displayName": "Configure view",
-                "plugin": "plugin::content-manager",
+                "plugin": "content-manager",
                 "subCategory": "collection types",
               },
               Object {
                 "action": "plugins::content-manager.components.configure-layout",
                 "displayName": "Configure Layout",
-                "plugin": "plugin::content-manager",
+                "plugin": "content-manager",
                 "subCategory": "components",
               },
               Object {
                 "action": "plugins::content-manager.single-types.configure-view",
                 "displayName": "Configure view",
-                "plugin": "plugin::content-manager",
+                "plugin": "content-manager",
                 "subCategory": "single types",
               },
               Object {
                 "action": "plugins::content-type-builder.read",
                 "displayName": "Read",
-                "plugin": "plugin::content-type-builder",
+                "plugin": "content-type-builder",
                 "subCategory": "general",
               },
               Object {
                 "action": "plugins::documentation.read",
                 "displayName": "Access the Documentation",
-                "plugin": "plugin::documentation",
+                "plugin": "documentation",
                 "subCategory": "general",
               },
               Object {
                 "action": "plugins::documentation.settings.regenerate",
                 "displayName": "Regenerate",
-                "plugin": "plugin::documentation",
+                "plugin": "documentation",
                 "subCategory": "settings",
               },
               Object {
                 "action": "plugins::documentation.settings.update",
                 "displayName": "Update and delete",
-                "plugin": "plugin::documentation",
+                "plugin": "documentation",
                 "subCategory": "settings",
               },
               Object {
                 "action": "plugins::upload.assets.copy-link",
                 "displayName": "Copy link",
-                "plugin": "plugin::upload",
+                "plugin": "upload",
                 "subCategory": "assets",
               },
               Object {
                 "action": "plugins::upload.assets.create",
                 "displayName": "Create (upload)",
-                "plugin": "plugin::upload",
+                "plugin": "upload",
                 "subCategory": "assets",
               },
               Object {
                 "action": "plugins::upload.assets.download",
                 "displayName": "Download",
-                "plugin": "plugin::upload",
+                "plugin": "upload",
                 "subCategory": "assets",
               },
               Object {
                 "action": "plugins::upload.assets.update",
                 "displayName": "Update (crop, details, replace) + delete",
-                "plugin": "plugin::upload",
+                "plugin": "upload",
                 "subCategory": "assets",
               },
               Object {
                 "action": "plugins::upload.read",
                 "displayName": "Access the Media Library",
-                "plugin": "plugin::upload",
+                "plugin": "upload",
                 "subCategory": "general",
               },
               Object {
                 "action": "plugins::users-permissions.advanced-settings.read",
                 "displayName": "Read",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "advancedSettings",
               },
               Object {
                 "action": "plugins::users-permissions.advanced-settings.update",
                 "displayName": "Edit",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "advancedSettings",
               },
               Object {
                 "action": "plugins::users-permissions.email-templates.read",
                 "displayName": "Read",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "emailTemplates",
               },
               Object {
                 "action": "plugins::users-permissions.email-templates.update",
                 "displayName": "Edit",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "emailTemplates",
               },
               Object {
                 "action": "plugins::users-permissions.providers.read",
                 "displayName": "Read",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "providers",
               },
               Object {
                 "action": "plugins::users-permissions.providers.update",
                 "displayName": "Edit",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "providers",
               },
               Object {
                 "action": "plugins::users-permissions.roles.create",
                 "displayName": "Create",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "roles",
               },
               Object {
                 "action": "plugins::users-permissions.roles.delete",
                 "displayName": "Delete",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "roles",
               },
               Object {
                 "action": "plugins::users-permissions.roles.read",
                 "displayName": "Read",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "roles",
               },
               Object {
                 "action": "plugins::users-permissions.roles.update",
                 "displayName": "Update",
-                "plugin": "plugin::users-permissions",
+                "plugin": "users-permissions",
                 "subCategory": "roles",
               },
             ],
@@ -348,6 +386,62 @@ describe('Role CRUD End to End', () => {
                 "subCategory": "general",
               },
             ],
+            "singleTypes": Array [
+              Array [
+                Object {
+                  "actionId": "plugins::content-manager.explorer.create",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Create",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.read",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Read",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.update",
+                  "applyToProperties": Array [
+                    "fields",
+                    "locales",
+                  ],
+                  "label": "Update",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.delete",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Delete",
+                  "subjects": Array [
+                    "plugins::users-permissions.user",
+                  ],
+                },
+                Object {
+                  "actionId": "plugins::content-manager.explorer.publish",
+                  "applyToProperties": Array [
+                    "locales",
+                  ],
+                  "label": "Publish",
+                  "subjects": Array [],
+                },
+              ],
+              Array [],
+            ],
           },
         }
       `);
@@ -362,6 +456,11 @@ describe('Role CRUD End to End', () => {
             "conditions": Array [
               Object {
                 "category": "default",
+                "displayName": "Has Locale Access",
+                "id": "plugins::i18n.has-locale-access",
+              },
+              Object {
+                "category": "default",
                 "displayName": "Is creator",
                 "id": "admin::is-creator",
               },
@@ -372,172 +471,205 @@ describe('Role CRUD End to End', () => {
               },
             ],
             "sections": Object {
-              "contentTypes": Array [
-                Object {
-                  "action": "plugins::content-manager.explorer.create",
-                  "displayName": "Create",
-                  "subjects": Array [
-                    "plugins::users-permissions.user",
-                  ],
-                },
-                Object {
-                  "action": "plugins::content-manager.explorer.delete",
-                  "displayName": "Delete",
-                  "subjects": Array [
-                    "plugins::users-permissions.user",
-                  ],
-                },
-                Object {
-                  "action": "plugins::content-manager.explorer.publish",
-                  "displayName": "Publish",
-                  "subjects": Array [],
-                },
-                Object {
-                  "action": "plugins::content-manager.explorer.read",
-                  "displayName": "Read",
-                  "subjects": Array [
-                    "plugins::users-permissions.user",
-                  ],
-                },
-                Object {
-                  "action": "plugins::content-manager.explorer.update",
-                  "displayName": "Update",
-                  "subjects": Array [
-                    "plugins::users-permissions.user",
-                  ],
-                },
+              "collectionTypes": Array [
+                Array [
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.create",
+                    "applyToProperties": Array [
+                      "fields",
+                      "locales",
+                    ],
+                    "label": "Create",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.read",
+                    "applyToProperties": Array [
+                      "fields",
+                      "locales",
+                    ],
+                    "label": "Read",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.update",
+                    "applyToProperties": Array [
+                      "fields",
+                      "locales",
+                    ],
+                    "label": "Update",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.delete",
+                    "applyToProperties": Array [
+                      "locales",
+                    ],
+                    "label": "Delete",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.publish",
+                    "applyToProperties": Array [
+                      "locales",
+                    ],
+                    "label": "Publish",
+                    "subjects": Array [],
+                  },
+                ],
+                Array [
+                  Object {
+                    "label": "user",
+                    "properties": Array [
+                      Object {
+                        "children": Array [],
+                        "label": "Fields",
+                        "value": "fields",
+                      },
+                    ],
+                    "uid": "plugins::users-permissions.user",
+                  },
+                ],
               ],
               "plugins": Array [
                 Object {
                   "action": "plugins::content-manager.collection-types.configure-view",
                   "displayName": "Configure view",
-                  "plugin": "plugin::content-manager",
+                  "plugin": "content-manager",
                   "subCategory": "collection types",
                 },
                 Object {
                   "action": "plugins::content-manager.components.configure-layout",
                   "displayName": "Configure Layout",
-                  "plugin": "plugin::content-manager",
+                  "plugin": "content-manager",
                   "subCategory": "components",
                 },
                 Object {
                   "action": "plugins::content-manager.single-types.configure-view",
                   "displayName": "Configure view",
-                  "plugin": "plugin::content-manager",
+                  "plugin": "content-manager",
                   "subCategory": "single types",
                 },
                 Object {
                   "action": "plugins::content-type-builder.read",
                   "displayName": "Read",
-                  "plugin": "plugin::content-type-builder",
+                  "plugin": "content-type-builder",
                   "subCategory": "general",
                 },
                 Object {
                   "action": "plugins::documentation.read",
                   "displayName": "Access the Documentation",
-                  "plugin": "plugin::documentation",
+                  "plugin": "documentation",
                   "subCategory": "general",
                 },
                 Object {
                   "action": "plugins::documentation.settings.regenerate",
                   "displayName": "Regenerate",
-                  "plugin": "plugin::documentation",
+                  "plugin": "documentation",
                   "subCategory": "settings",
                 },
                 Object {
                   "action": "plugins::documentation.settings.update",
                   "displayName": "Update and delete",
-                  "plugin": "plugin::documentation",
+                  "plugin": "documentation",
                   "subCategory": "settings",
                 },
                 Object {
                   "action": "plugins::upload.assets.copy-link",
                   "displayName": "Copy link",
-                  "plugin": "plugin::upload",
+                  "plugin": "upload",
                   "subCategory": "assets",
                 },
                 Object {
                   "action": "plugins::upload.assets.create",
                   "displayName": "Create (upload)",
-                  "plugin": "plugin::upload",
+                  "plugin": "upload",
                   "subCategory": "assets",
                 },
                 Object {
                   "action": "plugins::upload.assets.download",
                   "displayName": "Download",
-                  "plugin": "plugin::upload",
+                  "plugin": "upload",
                   "subCategory": "assets",
                 },
                 Object {
                   "action": "plugins::upload.assets.update",
                   "displayName": "Update (crop, details, replace) + delete",
-                  "plugin": "plugin::upload",
+                  "plugin": "upload",
                   "subCategory": "assets",
                 },
                 Object {
                   "action": "plugins::upload.read",
                   "displayName": "Access the Media Library",
-                  "plugin": "plugin::upload",
+                  "plugin": "upload",
                   "subCategory": "general",
                 },
                 Object {
                   "action": "plugins::users-permissions.advanced-settings.read",
                   "displayName": "Read",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "advancedSettings",
                 },
                 Object {
                   "action": "plugins::users-permissions.advanced-settings.update",
                   "displayName": "Edit",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "advancedSettings",
                 },
                 Object {
                   "action": "plugins::users-permissions.email-templates.read",
                   "displayName": "Read",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "emailTemplates",
                 },
                 Object {
                   "action": "plugins::users-permissions.email-templates.update",
                   "displayName": "Edit",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "emailTemplates",
                 },
                 Object {
                   "action": "plugins::users-permissions.providers.read",
                   "displayName": "Read",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "providers",
                 },
                 Object {
                   "action": "plugins::users-permissions.providers.update",
                   "displayName": "Edit",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "providers",
                 },
                 Object {
                   "action": "plugins::users-permissions.roles.create",
                   "displayName": "Create",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "roles",
                 },
                 Object {
                   "action": "plugins::users-permissions.roles.delete",
                   "displayName": "Delete",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "roles",
                 },
                 Object {
                   "action": "plugins::users-permissions.roles.read",
                   "displayName": "Read",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "roles",
                 },
                 Object {
                   "action": "plugins::users-permissions.roles.update",
                   "displayName": "Update",
-                  "plugin": "plugin::users-permissions",
+                  "plugin": "users-permissions",
                   "subCategory": "roles",
                 },
               ],
@@ -680,6 +812,62 @@ describe('Role CRUD End to End', () => {
                   "displayName": "Access the Media Library settings page",
                   "subCategory": "general",
                 },
+              ],
+              "singleTypes": Array [
+                Array [
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.create",
+                    "applyToProperties": Array [
+                      "fields",
+                      "locales",
+                    ],
+                    "label": "Create",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.read",
+                    "applyToProperties": Array [
+                      "fields",
+                      "locales",
+                    ],
+                    "label": "Read",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.update",
+                    "applyToProperties": Array [
+                      "fields",
+                      "locales",
+                    ],
+                    "label": "Update",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.delete",
+                    "applyToProperties": Array [
+                      "locales",
+                    ],
+                    "label": "Delete",
+                    "subjects": Array [
+                      "plugins::users-permissions.user",
+                    ],
+                  },
+                  Object {
+                    "actionId": "plugins::content-manager.explorer.publish",
+                    "applyToProperties": Array [
+                      "locales",
+                    ],
+                    "label": "Publish",
+                    "subjects": Array [],
+                  },
+                ],
+                Array [],
               ],
             },
           }

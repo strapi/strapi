@@ -1,6 +1,6 @@
 'use strict';
 const debug = require('debug')('strapi-database:migration');
-const { isFunction } = require('lodash/fp');
+const { isFunction, get } = require('lodash/fp');
 
 class MigrationManager {
   constructor(db) {
@@ -21,11 +21,28 @@ class MigrationManager {
     await this.runAfter(options, context);
   }
 
+  async shouldRun({ migration, step, options, context }) {
+    const method = migration[step];
+    const shouldRunMethod = get(`shouldRun.${step}`, migration, null);
+
+    if (!isFunction(method)) {
+      return false;
+    }
+
+    if (!isFunction(shouldRunMethod)) {
+      return true;
+    }
+
+    return shouldRunMethod(options, context);
+  }
+
   async runBefore(options, context) {
     debug('Run before migrations');
 
     for (const migration of this.migrations) {
-      if (isFunction(migration.before)) {
+      const willRunStep = await this.shouldRun({ migration, step: 'before', options, context });
+
+      if (willRunStep) {
         await migration.before(options, context);
       }
     }
@@ -35,7 +52,9 @@ class MigrationManager {
     debug('Run after migrations');
 
     for (const migration of this.migrations.slice(0).reverse()) {
-      if (isFunction(migration.after)) {
+      const willRunStep = await this.shouldRun({ migration, step: 'after', options, context });
+
+      if (willRunStep) {
         await migration.after(options, context);
       }
     }

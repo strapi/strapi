@@ -337,7 +337,7 @@ module.exports = async ({ models, target }, ctx) => {
     target[model].privateAttributes = contentTypesUtils.getPrivateAttributes(target[model]);
   }
 
-  // Instanciate every models
+  // Instantiate every models
   Object.keys(models).forEach(mountModel);
 
   // Migrations + storing schema
@@ -346,8 +346,7 @@ module.exports = async ({ models, target }, ctx) => {
     const modelInstance = target[model];
     const definitionDidChange = await didDefinitionChange(definition, instance);
 
-    const previousDefinitionRow = await getDefinitionFromStore(definition, instance);
-    const previousDefinition = JSON.parse(_.get(previousDefinitionRow, 'value', null));
+    const previousDefinition = await getDefinitionFromStore(definition, instance);
 
     // run migrations
     await strapi.db.migrations.run(migrateSchema, {

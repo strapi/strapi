@@ -1,6 +1,7 @@
 'use strict';
 
 const { merge } = require('lodash/fp');
+const { getService } = require('../../utils');
 const adminActions = require('../admin-actions');
 const adminConditions = require('../admin-conditions');
 
@@ -12,13 +13,11 @@ const defaultAdminAuthSettings = {
 };
 
 const registerPermissionActions = () => {
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(adminActions.actions);
+  getService('permission').actionProvider.registerMany(adminActions.actions);
 };
 
 const registerAdminConditions = () => {
-  const { conditionProvider } = strapi.admin.services.permission;
-  conditionProvider.registerMany(adminConditions.conditions);
+  getService('permission').conditionProvider.registerMany(adminConditions.conditions);
 };
 
 const syncAuthSettings = async () => {
@@ -41,18 +40,28 @@ const syncAuthSettings = async () => {
 module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
-  await strapi.admin.services.permission.cleanPermissionInDatabase();
-  await strapi.admin.services.permission.ensureBoundPermissionsInDatabase();
-  await strapi.admin.services.user.migrateUsers();
-  await strapi.admin.services.role.createRolesIfNoneExist();
-  await strapi.admin.services.role.resetSuperAdminPermissions();
-  await strapi.admin.services.role.displayWarningIfNoSuperAdmin();
-  await strapi.admin.services.user.displayWarningIfUsersDontHaveRole();
+
+  const permissionService = getService('permission');
+  const userService = getService('user');
+  const roleService = getService('role');
+
+  await permissionService.cleanPermissionsInDatabase();
+  await permissionService.ensureBoundPermissionsInDatabase();
+
+  await userService.migrateUsers();
+
+  await roleService.createRolesIfNoneExist();
+  await roleService.resetSuperAdminPermissions();
+  await roleService.displayWarningIfNoSuperAdmin();
+
+  await userService.displayWarningIfUsersDontHaveRole();
 
   await syncAuthSettings();
 
-  strapi.admin.destroy = () => {
-    strapi.admin.services.permission.conditionProvider.clear();
-    strapi.admin.services.permission.actionProvider.clear();
+  strapi.admin.destroy = async () => {
+    const { conditionProvider, actionProvider } = getService('permission');
+
+    await conditionProvider.clear();
+    await actionProvider.clear();
   };
 };

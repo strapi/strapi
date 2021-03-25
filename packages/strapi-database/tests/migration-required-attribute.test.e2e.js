@@ -57,7 +57,7 @@ describe('Migration - required attribute', () => {
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  });
+  }, 60000);
 
   describe('Required: false -> true', () => {
     test('Can be null before migration', async () => {
