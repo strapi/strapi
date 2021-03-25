@@ -13,11 +13,19 @@ const {
   differenceWith,
   differenceBy,
 } = require('lodash/fp');
-const { generateTimestampCode, stringIncludes } = require('strapi-utils');
+const {
+  generateTimestampCode,
+  stringIncludes,
+  hooks: { createAsyncSeriesWaterfallHook },
+} = require('strapi-utils');
 const permissionDomain = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const { getService } = require('../utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
+
+const hooks = {
+  willResetSuperAdminPermission: createAsyncSeriesWaterfallHook(),
+};
 
 const ACTIONS = {
   publish: 'plugins::content-manager.explorer.publish',
@@ -416,10 +424,13 @@ const resetSuperAdminPermissions = async () => {
 
   permissions.push(...otherPermissions);
 
-  await assignPermissions(superAdminRole.id, permissions);
+  const transformedPermissions = await hooks.willResetSuperAdminPermission.call(permissions);
+
+  await assignPermissions(superAdminRole.id, transformedPermissions);
 };
 
 module.exports = {
+  hooks,
   sanitizeRole,
   create,
   findOne,

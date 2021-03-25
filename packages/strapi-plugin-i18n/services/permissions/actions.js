@@ -1,6 +1,6 @@
 'use strict';
 
-const { capitalize, isArray } = require('lodash/fp');
+const { capitalize, isArray, getOr, prop } = require('lodash/fp');
 const { getService } = require('../../utils');
 
 const actions = ['create', 'read', 'update', 'delete'].map(uid => ({
@@ -44,6 +44,48 @@ const shouldApplyLocalesPropertyToSubject = ({ property, subject }) => {
   return true;
 };
 
+const addAllLocalesToPermissions = async permissions => {
+  const { actionProvider } = strapi.admin.services.permission;
+  const { find: findAllLocales } = getService('locales');
+
+  const allLocales = await findAllLocales();
+  const allLocalesCode = allLocales.map(prop('code'));
+
+  return Promise.all(
+    permissions.map(async permission => {
+      const { action, subject } = permission;
+
+      const appliesToLocalesProperty = await actionProvider.appliesToProperty(
+        'locales',
+        action,
+        subject
+      );
+
+      if (!appliesToLocalesProperty) {
+        return permission;
+      }
+
+      const oldPermissionProperties = getOr({}, 'properties', permission);
+
+      return { ...permission, properties: { ...oldPermissionProperties, locales: allLocalesCode } };
+    })
+  );
+};
+
+const syncSuperAdminPermissionsWithLocales = async () => {
+  const roleService = strapi.admin.services.role;
+  const permissionService = strapi.admin.services.permission;
+
+  const superAdminRole = await roleService.getSuperAdmin();
+  const superAdminPermissions = await permissionService.findUserPermissions({
+    roles: [superAdminRole],
+  });
+
+  const newSuperAdminPermissions = await addAllLocalesToPermissions(superAdminPermissions);
+
+  await roleService.assignPermissions(superAdminRole.id, newSuperAdminPermissions);
+};
+
 const registerI18nActions = async () => {
   const { actionProvider } = strapi.admin.services.permission;
 
@@ -52,8 +94,10 @@ const registerI18nActions = async () => {
 
 const registerI18nActionsHooks = () => {
   const { actionProvider } = strapi.admin.services.permission;
+  const { hooks } = strapi.admin.services.role;
 
   actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
+  hooks.willResetSuperAdminPermission.register(addAllLocalesToPermissions);
 };
 
 const updateActionsProperties = () => {
@@ -71,4 +115,5 @@ module.exports = {
   registerI18nActions,
   registerI18nActionsHooks,
   updateActionsProperties,
+  syncSuperAdminPermissionsWithLocales,
 };
