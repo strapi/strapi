@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import getCtOrStLinks from './utils/getCtOrStLinks';
 import getPluginSectionLinks from './utils/getPluginSectionLinks';
 import getGeneralLinks from './utils/getGeneralLinks';
-import { setCtOrStLinks, setSectionLinks, toggleIsLoading } from './actions';
+import { setCtOrStLinks, setSectionLinks, toggleIsLoading, unsetIsLoading } from './actions';
 import useSettingsMenu from '../../hooks/useSettingsMenu';
 import toPluginLinks from './utils/toPluginLinks';
 import selectMenuLinks from './selectors';
@@ -47,7 +47,7 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
 
     dispatch(setCtOrStLinks(authorizedCtLinks, authorizedStLinks, contentTypes));
     dispatch(setSectionLinks(authorizedGeneralSectionLinks, authorizedPluginSectionLinks));
-    toggleLoading();
+    dispatch(unsetIsLoading());
   };
 
   const resolvePermissionsRef = useRef(resolvePermissions);

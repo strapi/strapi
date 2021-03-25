@@ -2,7 +2,12 @@
 import produce from 'immer';
 import { SETTINGS_BASE_URL } from '../../config';
 import adminPermissions from '../../permissions';
-import { SET_CT_OR_ST_LINKS, SET_SECTION_LINKS, TOGGLE_IS_LOADING } from './constants';
+import {
+  SET_CT_OR_ST_LINKS,
+  SET_SECTION_LINKS,
+  TOGGLE_IS_LOADING,
+  UNSET_IS_LOADING,
+} from './constants';
 
 const initialState = {
   collectionTypesSectionLinks: [],
@@ -58,6 +63,10 @@ const reducer = (state = initialState, action) =>
 
       case TOGGLE_IS_LOADING: {
         draftState.isLoading = !state.isLoading;
+        break;
+      }
+      case UNSET_IS_LOADING: {
+        draftState.isLoading = false;
         break;
       }
 
