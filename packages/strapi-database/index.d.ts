@@ -13,7 +13,7 @@ export class DatabaseManager {
   getModelByAssoc(assoc: object): Model;
 }
 
-class Model {}
+export class Model {}
 
 export class Repository {
   model: Model;
