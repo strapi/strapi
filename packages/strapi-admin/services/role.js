@@ -48,9 +48,10 @@ const sortDeep = data => {
 };
 
 const sortPermissionProperties = permission => {
-  Object.entries(permission.properties).forEach(([property, value]) => {
-    permission.setProperty(property, sortDeep(value));
-  });
+  return Object.entries(permission.properties).reduce(
+    (acc, [name, value]) => permissionDomain.setProperty(name, sortDeep(value), acc),
+    permission
+  );
 };
 
 const arePermissionsEqual = (p1, p2) => {
@@ -352,16 +353,16 @@ const assignPermissions = async (roleId, permissions = []) => {
   });
 
   const permissionsToAdd = differenceWith(
-    existingPermissions,
+    arePermissionsEqual,
     permissionsWithRole,
-    arePermissionsEqual
+    existingPermissions
   );
   const permissionsToDelete = differenceWith(
-    permissionsWithRole,
+    arePermissionsEqual,
     existingPermissions,
-    arePermissionsEqual
+    permissionsWithRole
   );
-  const permissionsToReturn = differenceBy(permissionsToDelete, existingPermissions, 'id');
+  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
 
   if (permissionsToDelete.length > 0) {
     await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
