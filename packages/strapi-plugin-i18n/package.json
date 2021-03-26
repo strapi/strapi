@@ -11,6 +11,7 @@
   "dependencies": {
     "lodash": "4.17.20",
     "pluralize": "8.0.0",
+    "p-map": "4.0.0",
     "strapi-utils": "3.5.4"
   },
   "author": {
