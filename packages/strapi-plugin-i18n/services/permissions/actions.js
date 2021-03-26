@@ -97,7 +97,7 @@ const registerI18nActionsHooks = () => {
   const { hooks } = strapi.admin.services.role;
 
   actionProvider.hooks.appliesPropertyToSubject.register(shouldApplyLocalesPropertyToSubject);
-  hooks.willResetSuperAdminPermission.register(addAllLocalesToPermissions);
+  hooks.willResetSuperAdminPermissions.register(addAllLocalesToPermissions);
 };
 
 const updateActionsProperties = () => {

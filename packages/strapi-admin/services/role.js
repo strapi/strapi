@@ -24,7 +24,7 @@ const { getService } = require('../utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
 
 const hooks = {
-  willResetSuperAdminPermission: createAsyncSeriesWaterfallHook(),
+  willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
 };
 
 const ACTIONS = {
@@ -425,7 +425,7 @@ const resetSuperAdminPermissions = async () => {
 
   permissions.push(...otherPermissions);
 
-  const transformedPermissions = await hooks.willResetSuperAdminPermission.call(permissions);
+  const transformedPermissions = await hooks.willResetSuperAdminPermissions.call(permissions);
 
   await assignPermissions(superAdminRole.id, transformedPermissions);
 };
