@@ -10,6 +10,8 @@ const filePattern = `*${fileExtension}`;
 
 const defaultPaths = ['packages/'];
 
+const defaultJestTimeout = 60000;
+
 /**
  * `STRAPI_TEST_PATHS` is an env variable used internally to filter which test are going to be run.
  * The expected format is a string containing a space separated list of file or directory.
@@ -33,6 +35,8 @@ const filesPath = paths.filter(isE2eTestFile);
 
 const files = uniq(filesPath.concat(filesFromPaths(directoriesPath)));
 const len = files.length;
+
+jest.setTimeout(defaultJestTimeout);
 
 // Iterate over each file path and create a test suite by requiring it.
 let it = 0;
