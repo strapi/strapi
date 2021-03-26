@@ -66,7 +66,7 @@ describe('Admin User CRUD (e2e)', () => {
 
     testData.firstSuperAdminUser = rq.getLoggedUser();
     testData.superAdminRole = await utils.getSuperAdminRole();
-  }, 60000);
+  });
 
   // Cleanup actions
   afterAll(async () => {
@@ -74,7 +74,7 @@ describe('Admin User CRUD (e2e)', () => {
       await utils.deleteRolesById([testData.role.id]);
     }
     await strapi.destroy();
-  }, 60000);
+  });
 
   test('1. Creates a user (wrong body)', async () => {
     const body = {

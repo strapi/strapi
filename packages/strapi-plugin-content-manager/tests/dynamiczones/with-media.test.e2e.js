@@ -87,12 +87,12 @@ describe.each([
 
     rq = await createAuthRequest({ strapi });
     rq.setURLPrefix(path);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  }, 600000);
 
   describe('Contains components with medias', () => {
     test('The medias are correctly related to the components on creation', async () => {

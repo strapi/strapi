@@ -27,11 +27,11 @@ describe('Role CRUD End to End', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
-  }, 60000);
+  });
 
   describe('Default roles', () => {
     test('Default roles are created', async () => {

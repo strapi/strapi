@@ -16,7 +16,7 @@ const superAdminLoginInfo = _.pick(superAdminCredentials, ['email', 'password'])
 
 const TEST_APP_URL = path.resolve(__dirname, '../../testApp');
 
-const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'fatal' } = {}) => {
+const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'debug' } = {}) => {
   const options = { dir: TEST_APP_URL };
   const instance = strapi(options);
 

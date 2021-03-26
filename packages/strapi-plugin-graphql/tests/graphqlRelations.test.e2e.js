@@ -122,12 +122,12 @@ describe('Test Graphql Relations API End to End', () => {
         body,
       });
     };
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Test relations features', () => {
     let data = {

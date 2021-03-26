@@ -29,7 +29,7 @@ describe('Admin Auth End to End', () => {
     } else {
       internals.role = await utils.getSuperAdminRole();
     }
-  }, 60000);
+  });
 
   afterAll(async () => {
     if (edition === 'EE') {
@@ -37,7 +37,7 @@ describe('Admin Auth End to End', () => {
     }
 
     await strapi.destroy();
-  }, 60000);
+  });
 
   describe('Login', () => {
     test('Can connect successfully', async () => {

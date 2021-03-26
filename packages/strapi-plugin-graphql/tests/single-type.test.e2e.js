@@ -54,12 +54,12 @@ describe('Single type Graphql support', () => {
         body,
       });
     };
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Queries', () => {
     test('No list available', async () => {
