@@ -6,7 +6,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
+    "draftAndPublish": true,
     "increments": true,
     "timestamps": [
       "created_at",
@@ -14,9 +14,19 @@
     ],
     "comment": ""
   },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "postal_coder": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "categories": {
       "collection": "category",
@@ -46,17 +56,32 @@
     "city": {
       "type": "string",
       "required": true,
-      "maxLength": 200
+      "maxLength": 200,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "likes": {
       "collection": "like",
       "via": "address"
     },
     "json": {
-      "type": "json"
+      "type": "json",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
-      "type": "uid"
+      "type": "uid",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }

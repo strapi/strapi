@@ -23,8 +23,8 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
-import { getRequestUrl } from './utils';
-
+import { getDeleteRedirectionLink, getRequestUrl } from './utils';
+import selectMenuLinks from './selectors';
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
@@ -38,6 +38,9 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     isLoading,
     status,
   } = useSelector(selectCrudReducer);
+  const collectionTypesMenuLinks = useSelector(selectMenuLinks);
+  const deleteRedirectionLink = getDeleteRedirectionLink(collectionTypesMenuLinks, slug, rawQuery);
+
   const isMounted = useRef(true);
   const emitEventRef = useRef(emitEvent);
 
@@ -219,8 +222,12 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
   );
 
   const onDeleteSucceeded = useCallback(() => {
-    replace(from);
-  }, [from, replace]);
+    const { destination, search } = deleteRedirectionLink;
+
+    const link = `${destination}?${search}`;
+
+    replace(link);
+  }, [deleteRedirectionLink, replace]);
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
