@@ -92,7 +92,7 @@ describe.each([
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 600000);
+  });
 
   describe('Contains components with medias', () => {
     test('The medias are correctly related to the components on creation', async () => {

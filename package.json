@@ -1,6 +1,5 @@
 {
   "private": true,
-  "dependencies": {},
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@swc-node/jest": "^1.1.0",
@@ -31,6 +30,7 @@
     "husky": "^3.0.0",
     "istanbul": "~0.4.2",
     "jest": "^26.6.3",
+    "jest-circus": "26.6.3",
     "jest-cli": "^26.0.1",
     "jest-styled-components": "^7.0.2",
     "lerna": "^3.13.1",
@@ -75,7 +75,7 @@
     "test:front:update:ce": "cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --u",
     "test:snyk": "snyk test",
     "test:unit": "jest --verbose",
-    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --forceExit --detectOpenHandles --logHeapUsage --runInBand test/all.test.e2e.js",
+    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner",
     "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
