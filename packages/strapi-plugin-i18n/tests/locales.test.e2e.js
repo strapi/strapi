@@ -44,6 +44,12 @@ describe('CRUD locales', () => {
   });
 
   afterAll(async () => {
+    // set default locale back to 'en'
+    await rq({
+      url: `/i18n/locales/${data.locales[0].id}`,
+      method: 'PUT',
+      body: { isDefault: true },
+    });
     await strapi.destroy();
     await builder.cleanup();
   });
