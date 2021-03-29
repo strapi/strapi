@@ -77,6 +77,7 @@ describe('metrics', () => {
     const { send } = metrics({
       config: {
         uuid: false,
+        packageJsonStrapi: {},
         environment: 'dev',
         info: {
           strapi: '0.0.0',

@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-graphql",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "description": "Adds GraphQL endpoint with default API methods.",
   "strapi": {
     "name": "graphql",
@@ -27,7 +27,7 @@
     "koa-compose": "^4.1.0",
     "lodash": "4.17.20",
     "pluralize": "^8.0.0",
-    "strapi-utils": "3.5.3"
+    "strapi-utils": "3.5.4"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
