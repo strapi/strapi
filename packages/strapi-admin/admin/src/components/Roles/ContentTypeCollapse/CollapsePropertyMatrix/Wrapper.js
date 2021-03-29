@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding-top: ${({ withPadding }) => (withPadding ? '9px' : '0px')};
+  padding-top: 18px;
   border: 1px solid ${({ theme }) => theme.main.colors.darkBlue};
   border-top: none;
   border-bottom: ${({ isLast, theme }) => {
