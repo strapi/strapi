@@ -74,7 +74,7 @@
     "passport-local": "1.0.0",
     "prop-types": "^15.7.2",
     "qs": "6.10.1",
-    "react": "^16.13.1",
+    "react": "^16.14.0",
     "react-copy-to-clipboard": "^5.0.3",
     "react-dnd": "^10.0.2",
     "react-dnd-html5-backend": "^10.0.2",
