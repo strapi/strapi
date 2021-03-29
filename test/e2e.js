@@ -38,14 +38,8 @@ const databases = {
   },
 };
 
-const runAllTests = async (update, args) => {
-  const cmdArgs = args.split(' ');
-
-  if (update) {
-    cmdArgs.push('-u');
-  }
-
-  return execa('yarn', ['-s', 'test:e2e', ...cmdArgs], {
+const runAllTests = async args => {
+  return execa('yarn', ['-s', 'test:e2e', ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
@@ -54,12 +48,12 @@ const runAllTests = async (update, args) => {
   });
 };
 
-const main = async (database, update, args) => {
+const main = async (database, args) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
 
-    await runAllTests(update, args).catch(() => {
+    await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
@@ -84,18 +78,11 @@ yargs
         choices: Object.keys(databases),
         default: 'sqlite',
       });
-
-      yargs.option('update', {
-        alias: 'u',
-        describe: 'update the snapshots',
-        type: 'boolean',
-        default: false,
-      });
     },
     argv => {
-      const { database, update, _: args } = argv;
+      const { database, _: args } = argv;
 
-      main(databases[database], update, args.join(' '));
+      main(databases[database], args);
     }
   )
   .help().argv;
