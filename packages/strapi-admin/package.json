@@ -91,7 +91,7 @@
     "react-tooltip": "4.2.15",
     "react-transition-group": "4.4.1",
     "react-virtualized": "^9.22.3",
-    "reactstrap": "8.4.1",
+    "reactstrap": "8.9.0",
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "redux-saga": "^0.16.0",

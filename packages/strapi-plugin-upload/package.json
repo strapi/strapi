@@ -34,7 +34,7 @@
     "react-redux": "^7.2.2",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
-    "reactstrap": "8.4.1",
+    "reactstrap": "8.9.0",
     "sharp": "0.27.2",
     "strapi-helper-plugin": "3.5.4",
     "strapi-provider-upload-local": "3.5.4",
