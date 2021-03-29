@@ -32,6 +32,8 @@ const Tabs = ({ children, isLoading, tabsLabel }) => {
                 isActive={index === selectedTabIndex}
                 key={tab.id}
                 onClick={() => handleSelectedTab(index)}
+                isFirst={index === 0}
+                isLast={index === tabsLabel.length - 1}
               >
                 <Text fontWeight={index === selectedTabIndex ? 'bold' : 'semiBold'}>
                   {formatMessage({ id: tab.labelId, defaultMessage: tab.defaultMessage })}
