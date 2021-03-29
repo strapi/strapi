@@ -2,6 +2,22 @@ import getDeleteRedirectionLink, { mergeParams } from '../getDeleteRedirectionLi
 
 describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', () => {
   describe('getDeleteRedirectionLink', () => {
+    it('should return an when no links is matching the slug', () => {
+      const links = [
+        {
+          destination: '/cm/foo',
+          search: 'page=1&pageSize=10',
+        },
+        {
+          destination: '/cm/bar',
+          search: 'page=1&pageSize=10',
+        },
+      ];
+      const slug = 'create';
+      const result = getDeleteRedirectionLink(links, slug, '');
+
+      expect(result).toEqual({ destination: '/', search: '' });
+    });
     it('should not mutate the link when the rawQuery is empty', () => {
       const links = [
         {

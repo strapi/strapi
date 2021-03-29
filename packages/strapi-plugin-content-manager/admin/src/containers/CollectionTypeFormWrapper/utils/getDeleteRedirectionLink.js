@@ -19,6 +19,11 @@ const mergeParams = (refParams, params) => {
 
 const getDeleteRedirectionLink = (links, slug, rawQuery) => {
   const matchingLink = links.find(({ destination }) => destination.includes(slug));
+
+  if (!matchingLink) {
+    return { destination: '/', search: '' };
+  }
+
   const { search } = matchingLink;
   const searchQueryParams = parse(search);
   const currentQueryParams = parse(rawQuery.substring(1));
