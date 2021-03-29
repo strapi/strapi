@@ -45,11 +45,12 @@ async function initPackageJson(rootPath, projectName) {
         scripts: {
           'develop:backend': `${packageManager} backend develop`,
           'develop:frontend': `wait-on http://localhost:1337/admin && ${packageManager} frontend develop`,
-          develop: 'FORCE_COLOR=1 npm-run-all -l -p develop:*',
+          develop: 'cross-env FORCE_COLOR=1 npm-run-all -l -p develop:*',
         },
         devDependencies: {
           'npm-run-all': '4.1.5',
           'wait-on': '5.2.1',
+          'cross-env': '7.0.3',
         },
       },
       {
