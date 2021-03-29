@@ -52,10 +52,7 @@ const migrateForBookshelf = async (
     });
   }
 
-  const tableExists = await ORM.knex.schema.hasTable(localizationsTable);
-  if (tableExists) {
-    await ORM.knex.schema.dropTable(localizationsTable);
-  }
+  await ORM.knex.schema.dropTableIfExists(localizationsTable);
 };
 
 module.exports = migrateForBookshelf;

@@ -145,8 +145,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           const definition = { client: 'pg' };
           const defaultLocaleRows = [{ value: '"fr"' }];
           const deleteRelations = jest.fn();
-          const hasTable = jest.fn(() => Promise.resolve(true));
-          const dropTable = jest.fn();
+          const dropTableIfExists = jest.fn();
           const table = jest.fn();
           const model = { orm: 'bookshelf', deleteRelations };
           const where = jest.fn(() => Promise.resolve(defaultLocaleRows));
@@ -162,7 +161,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           trx.offset = jest.fn(() => trx);
           trx.limit = jest.fn(() => Promise.resolve([{ id: 1 }, { id: 2 }]));
           const transaction = jest.fn(() => Promise.resolve(trx));
-          const knex = { where, transaction, schema: { hasTable, dropTable, table } };
+          const knex = { where, transaction, schema: { dropTableIfExists, table } };
           knex.select = jest.fn(() => knex);
           knex.from = jest.fn(() => knex);
           const ORM = { knex };
@@ -177,7 +176,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           expect(transaction).toHaveBeenCalled();
           expect(trx.commit).toHaveBeenCalled();
           expect(table).toHaveBeenCalled();
-          expect(dropTable).toHaveBeenCalledWith('countries__localizations');
+          expect(dropTableIfExists).toHaveBeenCalledWith('countries__localizations');
         });
         test('i18n => non i18n - sqlite', async () => {
           const previousDefinition = {
@@ -187,8 +186,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           const definition = { client: 'sqlite3' };
           const defaultLocaleRows = [{ value: '"fr"' }];
           const deleteRelations = jest.fn();
-          const hasTable = jest.fn(() => Promise.resolve(true));
-          const dropTable = jest.fn();
+          const dropTableIfExists = jest.fn();
           const table = jest.fn();
           const model = { orm: 'bookshelf', deleteRelations };
           const where = jest.fn(() => Promise.resolve(defaultLocaleRows));
@@ -204,7 +202,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           trx.offset = jest.fn(() => trx);
           trx.limit = jest.fn(() => Promise.resolve([{ id: 1 }, { id: 2 }]));
           const transaction = jest.fn(() => Promise.resolve(trx));
-          const knex = { where, transaction, schema: { hasTable, dropTable, table } };
+          const knex = { where, transaction, schema: { dropTableIfExists, table } };
           knex.select = jest.fn(() => knex);
           knex.from = jest.fn(() => knex);
           const ORM = { knex };
@@ -221,7 +219,7 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
           expect(trx.commit).toHaveBeenCalled();
           expect(table).not.toHaveBeenCalled();
           expect(context).toEqual({ recreateSqliteTable: true });
-          expect(dropTable).toHaveBeenCalledWith('countries__localizations');
+          expect(dropTableIfExists).toHaveBeenCalledWith('countries__localizations');
         });
       });
       describe('mongoose', () => {
