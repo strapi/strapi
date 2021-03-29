@@ -16,7 +16,7 @@ describe('Content Type Builder - Components', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
@@ -82,7 +82,7 @@ describe('Content Type Builder - Components', () => {
       });
 
       await restart();
-    }, 60000);
+    });
 
     test('Errors on already existing components', async () => {
       const res = await rq({
@@ -269,7 +269,7 @@ describe('Content Type Builder - Components', () => {
           },
         },
       });
-    }, 60000);
+    });
   });
 
   describe('DELETE /components/:uid', () => {
@@ -309,6 +309,6 @@ describe('Content Type Builder - Components', () => {
       expect(tryGet.body).toEqual({
         error: 'component.notFound',
       });
-    }, 60000);
+    });
   });
 });

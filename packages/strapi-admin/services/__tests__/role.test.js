@@ -603,7 +603,7 @@ describe('Role', () => {
       ];
       const values = jest.fn(() => actions);
       const getAllConditions = jest.fn(() => []);
-      const find = jest.fn(() => [{ action: 'action-2', id: 2 }]);
+      const find = jest.fn(() => [{ action: 'action-2', id: 2, properties: {} }]);
       const getPermissionsWithNestedFields = jest.fn(() => [
         {
           ...permissions[0],

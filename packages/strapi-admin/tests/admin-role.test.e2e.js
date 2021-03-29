@@ -6,7 +6,6 @@ const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-const sortPermissionArray = arr => _.sortBy(arr, ['action', 'subject']);
 
 const data = {
   rolesWithUsers: [],
@@ -27,11 +26,11 @@ describe('Role CRUD End to End', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
-  }, 60000);
+  });
 
   describe('Default roles', () => {
     test('Default roles are created', async () => {
@@ -670,17 +669,8 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data.length > 0).toBe(true);
-        expect(sortPermissionArray(res.body.data)).toMatchObject(
-          sortPermissionArray(
-            permissions.map(perm => ({
-              subject: null,
-              properties: {},
-              conditions: [],
-              ...perm,
-            }))
-          )
-        );
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0]).toMatchObject(permissions[1]);
       });
 
       test("can't assign non-existing permissions on role", async () => {

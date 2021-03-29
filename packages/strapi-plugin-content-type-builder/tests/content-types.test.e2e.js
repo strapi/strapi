@@ -20,11 +20,11 @@ describe('Content Type Builder - Content types', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterEach(async () => {
     await restart();
-  }, 60000);
+  });
 
   afterAll(async () => {
     const modelsName = [
@@ -38,7 +38,7 @@ describe('Content Type Builder - Content types', () => {
     await modelsUtils.deleteContentTypes(modelsName, { strapi });
 
     await strapi.destroy();
-  }, 60000);
+  });
 
   describe('Collection Types', () => {
     const testCollectionTypeUID = 'application::test-collection-type.test-collection-type';
@@ -255,7 +255,7 @@ describe('Content Type Builder - Content types', () => {
 
       expect(updateRes.statusCode).toBe(400);
       expect(updateRes.body.error).toMatch('multiple entries in DB');
-    }, 60000);
+    });
   });
 
   describe('Private relation field', () => {

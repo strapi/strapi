@@ -42,12 +42,12 @@ describe('Test Graphql API End to End', () => {
         body,
       });
     };
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Test CRUD', () => {
     const postsPayload = [

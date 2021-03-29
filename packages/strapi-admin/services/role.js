@@ -13,11 +13,19 @@ const {
   differenceWith,
   differenceBy,
 } = require('lodash/fp');
-const { generateTimestampCode, stringIncludes } = require('strapi-utils');
+const {
+  generateTimestampCode,
+  stringIncludes,
+  hooks: { createAsyncSeriesWaterfallHook },
+} = require('strapi-utils');
 const permissionDomain = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const { getService } = require('../utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
+
+const hooks = {
+  willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
+};
 
 const ACTIONS = {
   publish: 'plugins::content-manager.explorer.publish',
@@ -40,9 +48,10 @@ const sortDeep = data => {
 };
 
 const sortPermissionProperties = permission => {
-  Object.entries(permission.properties).forEach(([property, value]) => {
-    permission.setProperty(property, sortDeep(value));
-  });
+  return Object.entries(permission.properties).reduce(
+    (acc, [name, value]) => permissionDomain.setProperty(name, sortDeep(value), acc),
+    permission
+  );
 };
 
 const arePermissionsEqual = (p1, p2) => {
@@ -344,16 +353,16 @@ const assignPermissions = async (roleId, permissions = []) => {
   });
 
   const permissionsToAdd = differenceWith(
-    existingPermissions,
+    arePermissionsEqual,
     permissionsWithRole,
-    arePermissionsEqual
+    existingPermissions
   );
   const permissionsToDelete = differenceWith(
-    permissionsWithRole,
+    arePermissionsEqual,
     existingPermissions,
-    arePermissionsEqual
+    permissionsWithRole
   );
-  const permissionsToReturn = differenceBy(permissionsToDelete, existingPermissions, 'id');
+  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
 
   if (permissionsToDelete.length > 0) {
     await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
@@ -416,10 +425,13 @@ const resetSuperAdminPermissions = async () => {
 
   permissions.push(...otherPermissions);
 
-  await assignPermissions(superAdminRole.id, permissions);
+  const transformedPermissions = await hooks.willResetSuperAdminPermissions.call(permissions);
+
+  await assignPermissions(superAdminRole.id, transformedPermissions);
 };
 
 module.exports = {
+  hooks,
   sanitizeRole,
   create,
   findOne,

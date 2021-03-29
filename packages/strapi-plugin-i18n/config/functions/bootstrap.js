@@ -42,4 +42,16 @@ const registerModelsHooks = () => {
         },
       });
     });
+
+  strapi.db.lifecycles.register({
+    model: 'plugins::i18n.locale',
+
+    async afterCreate() {
+      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+    },
+
+    async afterDelete() {
+      await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();
+    },
+  });
 };
