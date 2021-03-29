@@ -35,7 +35,7 @@ const before = async ({ definition, previousDefinition, ORM }, context) => {
         .where(PUBLISHED_AT_ATTRIBUTE, null);
 
       if (definition.client === 'sqlite3') {
-        // Bug when droping column with sqlite3 https://github.com/knex/knex/issues/631
+        // Bug when dropping column with sqlite3 https://github.com/knex/knex/issues/631
         // Need to recreate the table
         context.recreateSqliteTable = true;
       } else {
