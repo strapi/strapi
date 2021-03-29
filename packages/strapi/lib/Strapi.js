@@ -207,7 +207,7 @@ class Strapi {
 
   async destroy() {
     if (_.has(this, 'server.destroy')) {
-      this.server.destroy();
+      await new Promise(res => this.server.destroy(res));
     }
 
     await Promise.all(
@@ -227,6 +227,8 @@ class Strapi {
     if (_.has(this, 'db')) {
       await this.db.destroy();
     }
+
+    this.telemetry.destroy();
 
     delete global.strapi;
   }
@@ -304,7 +306,7 @@ class Strapi {
       process.send('stop');
     }
 
-    // Kill process.
+    // Kill process
     process.exit(exitCode);
   }
 
@@ -372,7 +374,6 @@ class Strapi {
     await this.freeze();
 
     this.isLoaded = true;
-
     return this;
   }
 

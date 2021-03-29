@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`content-types.test.e2e Content Type Builder - Content types Collection Types Get collection type returns full schema and information 1`] = `
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and information 1`] = `
 Object {
   "data": Object {
     "apiID": "test-collection-type",
@@ -34,7 +34,7 @@ Object {
 }
 `;
 
-exports[`content-types.test.e2e Content Type Builder - Content types Collection Types Get collection type returns full schema and informations with draftAndPublish 1`] = `
+exports[`Content Type Builder - Content types Collection Types Get collection type returns full schema and informations with draftAndPublish 1`] = `
 Object {
   "data": Object {
     "apiID": "ct-with-dp",
@@ -58,7 +58,7 @@ Object {
 }
 `;
 
-exports[`content-types.test.e2e Content Type Builder - Content types Single Types Get single type returns full schema and information 1`] = `
+exports[`Content Type Builder - Content types Single Types Get single type returns full schema and information 1`] = `
 Object {
   "data": Object {
     "apiID": "test-single-type",
