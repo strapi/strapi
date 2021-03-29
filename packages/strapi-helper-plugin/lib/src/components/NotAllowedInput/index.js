@@ -17,10 +17,12 @@ const NotAllowedInput = ({ label, labelIcon, description, error, spacerHeight })
 
   return (
     <BaselineAlignment bottom size="18px">
-      <Text fontWeight="semiBold" lineHeight="18px">
-        <span>{label}</span>
+      <Flex style={{ lineHeight: '18px' }}>
+        <Text fontWeight="semiBold" lineHeight="18px">
+          <span>{label}</span>
+        </Text>
         {labelIcon && <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>}
-      </Text>
+      </Flex>
       <Field error={error}>
         <Padded left right size="sm">
           <Flex>
