@@ -10,11 +10,11 @@ import {
   BaselineAlignment,
   ModalConfirm,
   selectStyles,
-  DropdownIndicator,
   useContentManagerEditViewDataManager,
   request,
 } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
+import DropdownIndicator from '../DropdownIndicator';
 import { cleanData, generateOptions } from './utils';
 
 const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPermissions }) => {
