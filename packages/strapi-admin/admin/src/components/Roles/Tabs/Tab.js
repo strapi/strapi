@@ -5,9 +5,7 @@ const Tab = styled.div`
   flex: 1;
   padding: 1rem;
   text-align: center;
-  border-top-left-radius: ${({ isFirst, theme }) =>
-    isFirst ? theme.main.sizes.borderRadius : '0'};
-  border-top-right-radius: ${({ isLast, theme }) => (isLast ? theme.main.sizes.borderRadius : '0')};
+
   ${({ isActive, theme }) =>
     isActive
       ? {
