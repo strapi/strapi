@@ -95,7 +95,9 @@ const EditPage = () => {
       });
     } catch (err) {
       console.error(err.response);
-      const message = get(err, 'response.payload.message', 'An error occured');
+
+      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+      const message = get(err, 'response.payload.data.permissions[0]', errorMessage);
 
       strapi.notification.toggle({
         type: 'warning',

@@ -7,6 +7,7 @@ const {
   isArray,
   prop,
   xor,
+  eq,
   uniq,
   map,
   difference,
@@ -90,12 +91,45 @@ const findUserPermissions = async ({ roles }) => {
   return find({ role_in: roles.map(prop('id')), _limit: -1 });
 };
 
+const filterPermissionsToRemove = async permissions => {
+  const { actionProvider } = getService('permission');
+
+  const permissionsToRemove = [];
+
+  for (const permission of permissions) {
+    const { subjects, options = {} } = actionProvider.get(permission.action) || {};
+    const { applyToProperties } = options;
+
+    const invalidProperties = await Promise.all(
+      (applyToProperties || []).map(async property => {
+        const applies = await actionProvider.appliesToProperty(
+          property,
+          permission.action,
+          permission.subject
+        );
+
+        return applies && isNil(permissionDomain.getProperty(property, permission));
+      })
+    );
+
+    const isRegisteredAction = actionProvider.has(permission.action);
+    const hasInvalidProperties = isArray(applyToProperties) && invalidProperties.every(eq(true));
+    const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject);
+
+    // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
+    if (!isRegisteredAction || isInvalidSubject || hasInvalidProperties) {
+      permissionsToRemove.push(permission);
+    }
+  }
+
+  return permissionsToRemove;
+};
+
 /**
  * Removes permissions in database that don't exist anymore
  * @returns {Promise<>}
  */
 const cleanPermissionsInDatabase = async () => {
-  const { actionProvider } = getService('permission');
   const pageSize = 200;
   let total = Infinity;
 
@@ -108,20 +142,8 @@ const cleanPermissionsInDatabase = async () => {
     total = pagination.total;
 
     const permissions = permissionDomain.toPermission(results);
-
-    const permissionsIdToRemove = permissions.reduce((ids, permission) => {
-      const isRegisteredAction = actionProvider.has(permission.action);
-
-      const { subjects } = actionProvider.get(permission.action) || {};
-      const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject);
-
-      // If the permission has an invalid action or an invalid subject, then add it to the toBeRemoved collection
-      if (!isRegisteredAction || isInvalidSubject) {
-        ids.push(permission.id);
-      }
-
-      return ids;
-    }, []);
+    const permissionsToRemove = await filterPermissionsToRemove(permissions);
+    const permissionsIdToRemove = map(prop('id'), permissionsToRemove);
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(
@@ -190,14 +212,18 @@ const ensureBoundPermissionsInDatabase = async () => {
     const missingActions = difference(map('action', permissions), boundActions);
 
     if (missingActions.length > 0) {
-      const permissions = missingActions.map(action => ({
-        action,
-        subject: contentType.uid,
-        properties: {
-          fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
-        },
-        role: editorRole.id,
-      }));
+      const permissions = pipe(
+        // Create a permission skeleton from the action id
+        map(action => ({ action, subject: contentType.uid, role: editorRole.id })),
+        // Use the permission domain to create a clean permission from the given object
+        map(permissionDomain.create),
+        // Adds the fields property if the permission action is eligible
+        map(permission =>
+          BOUND_ACTIONS_FOR_FIELDS.includes(permission.action)
+            ? permissionDomain.setProperty('fields', fields, permission)
+            : permission
+        )
+      )(missingActions);
 
       await createMany(permissions);
     }
