@@ -5,12 +5,18 @@ import { List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import useLocales from '../../hooks/useLocales';
 import LocaleRow from '../LocaleRow';
 import { getTrad } from '../../utils';
 import ModalEdit from '../ModalEdit';
 import ModalDelete from '../ModalDelete';
 import ModalCreate from '../ModalCreate';
+
+const LocaleListWrapper = styled.div`
+  border-radius: 2px;
+  overflow: hidden;
+`;
 
 const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isCreating }) => {
   const [localeToDelete, setLocaleToDelete] = useState();
@@ -41,7 +47,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
         );
 
     return (
-      <>
+      <LocaleListWrapper>
         <List
           title={listTitle}
           items={locales}
@@ -54,7 +60,7 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
         <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} />
         <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
         <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
-      </>
+      </LocaleListWrapper>
     );
   }
 
