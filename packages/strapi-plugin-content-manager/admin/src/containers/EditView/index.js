@@ -34,16 +34,11 @@ const EditView = ({
   goBack,
   layout,
   slug,
-  state,
   id,
   origin,
   userPermissions,
 }) => {
   const { currentEnvironment, plugins } = useGlobalContext();
-
-  // Here in case of a 403 response when fetching data we will either redirect to the previous page
-  // Or to the homepage if there's no state in the history stack
-  const from = get(state, 'from', '/');
 
   const {
     createActionAllowedFields,
@@ -87,7 +82,7 @@ const EditView = ({
   }, [currentContentTypeLayoutData]);
 
   return (
-    <DataManagementWrapper allLayoutData={layout} from={from} slug={slug} id={id} origin={origin}>
+    <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
       {({
         componentsDataStructure,
         contentTypeDataStructure,
@@ -100,6 +95,7 @@ const EditView = ({
         onPublish,
         onPut,
         onUnpublish,
+        redirectionLink,
         status,
       }) => {
         return (
@@ -109,7 +105,7 @@ const EditView = ({
             createActionAllowedFields={createActionAllowedFields}
             componentsDataStructure={componentsDataStructure}
             contentTypeDataStructure={contentTypeDataStructure}
-            from={from}
+            from={redirectionLink}
             initialValues={data}
             isCreatingEntry={isCreatingEntry}
             isLoadingForData={isLoadingForData}
@@ -269,7 +265,6 @@ EditView.defaultProps = {
   id: null,
   isSingleType: false,
   origin: null,
-  state: {},
   userPermissions: [],
 };
 
@@ -294,7 +289,6 @@ EditView.propTypes = {
   isSingleType: PropTypes.bool,
   goBack: PropTypes.func.isRequired,
   origin: PropTypes.string,
-  state: PropTypes.object,
   slug: PropTypes.string.isRequired,
   userPermissions: PropTypes.array,
 };

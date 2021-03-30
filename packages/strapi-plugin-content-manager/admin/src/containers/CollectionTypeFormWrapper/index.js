@@ -23,10 +23,10 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
-import { getRequestUrl } from './utils';
-
+import { getRedirectionLink, getRequestUrl } from './utils';
+import selectMenuLinks from './selectors';
 // This container is used to handle the CRUD
-const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, origin }) => {
+const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
   const [{ rawQuery }] = useQueryParams();
@@ -38,12 +38,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     isLoading,
     status,
   } = useSelector(selectCrudReducer);
+  const collectionTypesMenuLinks = useSelector(selectMenuLinks);
+  const redirectionLink = getRedirectionLink(collectionTypesMenuLinks, slug, rawQuery);
+
   const isMounted = useRef(true);
   const emitEventRef = useRef(emitEvent);
 
   const allLayoutDataRef = useRef(allLayoutData);
-  // We need to keep the first location from which the user is coming from
-  const fromRef = useRef(from);
 
   const isCreatingEntry = id === null;
 
@@ -144,7 +145,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         const resStatus = get(err, 'response.status', null);
 
         if (resStatus === 404) {
-          push(fromRef.current);
+          push(redirectionLink);
 
           return;
         }
@@ -153,7 +154,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
         if (resStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
-          push(fromRef.current);
+          push(redirectionLink);
         }
       }
     };
@@ -177,7 +178,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     return () => {
       abortController.abort();
     };
-  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery]);
+  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery, redirectionLink]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -219,8 +220,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
   );
 
   const onDeleteSucceeded = useCallback(() => {
-    replace(from);
-  }, [from, replace]);
+    replace(redirectionLink);
+  }, [redirectionLink, replace]);
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
@@ -340,11 +341,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, from, slug, id, or
     onPut,
     onUnpublish,
     status,
+    redirectionLink,
   });
 };
 
 CollectionTypeFormWrapper.defaultProps = {
-  from: '/',
   id: null,
   origin: null,
 };
@@ -367,7 +368,6 @@ CollectionTypeFormWrapper.propTypes = {
     }).isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
-  from: PropTypes.string,
   id: PropTypes.string,
   origin: PropTypes.string,
   slug: PropTypes.string.isRequired,
