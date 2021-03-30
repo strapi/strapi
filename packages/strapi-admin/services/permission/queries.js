@@ -7,6 +7,7 @@ const {
   isArray,
   prop,
   xor,
+  eq,
   uniq,
   map,
   difference,
@@ -109,19 +110,34 @@ const cleanPermissionsInDatabase = async () => {
 
     const permissions = permissionDomain.toPermission(results);
 
-    const permissionsIdToRemove = permissions.reduce((ids, permission) => {
+    const permissionsIdToRemove = [];
+
+    for (const permission of permissions) {
       const isRegisteredAction = actionProvider.has(permission.action);
 
-      const { subjects } = actionProvider.get(permission.action) || {};
+      const { subjects, options = {} } = actionProvider.get(permission.action) || {};
+      const { applyToProperties } = options;
+
+      const invalidProperties = await Promise.all(
+        (applyToProperties || []).map(async property => {
+          const applies = await actionProvider.appliesToProperty(
+            property,
+            permission.action,
+            permission.subject
+          );
+
+          return applies && isNil(permissionDomain.getProperty(property, permission));
+        })
+      );
+
+      const hasInvalidProperties = isArray(applyToProperties) && invalidProperties.every(eq(true));
       const isInvalidSubject = isArray(subjects) && !subjects.includes(permission.subject);
 
-      // If the permission has an invalid action or an invalid subject, then add it to the toBeRemoved collection
-      if (!isRegisteredAction || isInvalidSubject) {
-        ids.push(permission.id);
+      // If the permission has an invalid action, an invalid subject or invalid properties, then add it to the toBeRemoved collection
+      if (!isRegisteredAction || isInvalidSubject || hasInvalidProperties) {
+        permissionsIdToRemove.push(permission.id);
       }
-
-      return ids;
-    }, []);
+    }
 
     // 2. Clean permissions' fields (add required ones, remove the non-existing ones)
     const remainingPermissions = permissions.filter(
@@ -190,14 +206,18 @@ const ensureBoundPermissionsInDatabase = async () => {
     const missingActions = difference(map('action', permissions), boundActions);
 
     if (missingActions.length > 0) {
-      const permissions = missingActions.map(action => ({
-        action,
-        subject: contentType.uid,
-        properties: {
-          fields: BOUND_ACTIONS_FOR_FIELDS.includes(action) ? fields : null,
-        },
-        role: editorRole.id,
-      }));
+      const permissions = pipe(
+        // Create a permission skeleton from the action id
+        map(action => ({ action, subject: contentType.uid, role: editorRole.id })),
+        // Use the permission domain to create a clean permission from the given object
+        map(permissionDomain.create),
+        // Adds the fields property if the permission action is eligible
+        map(permission =>
+          BOUND_ACTIONS_FOR_FIELDS.includes(permission.action)
+            ? permissionDomain.setProperty('fields', fields, permission)
+            : permission
+        )
+      )(missingActions);
 
       await createMany(permissions);
     }

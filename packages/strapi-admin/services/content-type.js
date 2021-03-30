@@ -133,7 +133,7 @@ const getPermissionsWithNestedFields = (
             components: strapi.components,
             nestingLevel,
           })
-        : null;
+        : undefined;
 
       const permission = permissionDomain.create({
         action: action.actionId,
