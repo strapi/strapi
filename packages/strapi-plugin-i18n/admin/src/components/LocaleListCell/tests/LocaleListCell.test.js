@@ -42,7 +42,7 @@ describe('LocaleListCell', () => {
       <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
     );
 
-    expect(screen.getByText('French (default), Arabic')).toBeVisible();
+    expect(screen.getByText('French (default), Arabic, English')).toBeVisible();
   });
 
   it('returns the "ar" when there s 2 locales available', () => {
@@ -80,7 +80,7 @@ describe('LocaleListCell', () => {
       <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
     );
 
-    expect(screen.getByText('Arabic')).toBeVisible();
+    expect(screen.getByText('Arabic, English')).toBeVisible();
   });
 
   it('returns the "ar" and "en" locales  alphabetically sorted', () => {
@@ -118,6 +118,6 @@ describe('LocaleListCell', () => {
       <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
     );
 
-    expect(screen.getByText('Arabic, English')).toBeVisible();
+    expect(screen.getByText('French (default), Arabic, English')).toBeVisible();
   });
 });

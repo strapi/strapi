@@ -5,8 +5,9 @@ import { Tooltip } from '@buffetjs/styles';
 const mapToLocaleName = (locales, localeCode) =>
   locales.find(({ code }) => code === localeCode).name;
 
-const LocaleListCell = ({ locales, localizations, id }) => {
-  const localizationNames = localizations.map(locale => locale.locale);
+const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id }) => {
+  const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
+  const localizationNames = allLocalizations.map(locale => locale.locale);
   const defaultLocale = locales.find(locale => locale.isDefault);
   const hasDefaultLocale = localizationNames.includes(defaultLocale.code);
 
@@ -61,6 +62,7 @@ LocaleListCell.propTypes = {
       isDefault: PropTypes.bool,
     })
   ).isRequired,
+  locale: PropTypes.string.isRequired,
 };
 
 export default LocaleListCell;
