@@ -101,7 +101,8 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPe
       <ModalConfirm
         showButtonLoader={isLoading}
         confirmButtonLabel={{
-          id: 'form.button.finish',
+          id: getTrad('CMEditViewCopyLocale.submit-text'),
+          defaultMessage: 'Yes, fill in',
         }}
         content={{
           id: 'CMEditViewCopyLocale.ModalConfirm.content',

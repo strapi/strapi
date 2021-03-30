@@ -17,6 +17,7 @@
   "CMEditViewCopyLocale.copy-success": "Locale copied",
   "CMEditViewCopyLocale.copy-failure": "Failed to copy locale",
   "CMEditViewCopyLocale.copy-text": "Fill in from another locale",
+  "CMEditViewCopyLocale.submit-text": "Yes, fill in",
   "Field.localized": "This value is unique for the selected locale",
   "Field.not-localized": "This value is common to all locales",
   "Settings.list.description": "Configure the settings for the internationalization plugin",

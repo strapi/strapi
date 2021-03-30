@@ -7,6 +7,7 @@ import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
   LoadingIndicatorPage,
+  ModalConfirm,
   PopUpWarning,
   // contexts
   useGlobalContext,
@@ -204,13 +205,13 @@ const SettingsViewWrapper = ({
               toggleWarningCancel();
             }}
           />
-          <PopUpWarning
+          <ModalConfirm
             isOpen={showWarningSubmit}
-            toggleModal={toggleWarningSubmit}
+            toggle={toggleWarningSubmit}
             content={{
-              message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+              id: `${pluginId}.popUpWarning.warning.updateAllSettings`,
             }}
-            popUpWarningType="danger"
+            type="success"
             onConfirm={async () => {
               await onConfirmSubmit();
               toggleWarningSubmit();
