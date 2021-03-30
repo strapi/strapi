@@ -10,7 +10,6 @@ const CollapsePropertyMatrix = ({
   availableActions,
   childrenForm,
   isLast,
-  isOdd,
   isFormDisabled,
   label,
   pathToData,
@@ -22,7 +21,7 @@ const CollapsePropertyMatrix = ({
   );
 
   return (
-    <Wrapper withPadding={isOdd} isLast={isLast}>
+    <Wrapper isLast={isLast}>
       <Header label={label} headers={propertyActions} />
       <Padded left size="md">
         {childrenForm.map(({ children: childrenForm, label, value, required }) => (
@@ -46,7 +45,6 @@ const CollapsePropertyMatrix = ({
 CollapsePropertyMatrix.propTypes = {
   childrenForm: PropTypes.array.isRequired,
   availableActions: PropTypes.array.isRequired,
-  isOdd: PropTypes.bool.isRequired,
   isLast: PropTypes.bool.isRequired,
   isFormDisabled: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
