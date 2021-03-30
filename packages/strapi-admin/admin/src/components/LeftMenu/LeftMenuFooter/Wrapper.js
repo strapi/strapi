@@ -22,6 +22,13 @@ const Wrapper = styled.div`
   }
 `;
 
+const A = styled.a`
+  &:hover {
+    color: #007bff;
+    text-decoration: none;
+  }
+`;
+
 Wrapper.defaultProps = {
   theme: {
     main: {
@@ -41,3 +48,4 @@ Wrapper.propTypes = {
 };
 
 export default Wrapper;
+export { A };

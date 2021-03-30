@@ -3,6 +3,7 @@ import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { Flex } from '@buffetjs/core';
 import { LabelIconWrapper, NotAllowedInput } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import connect from './utils/connect';
@@ -106,14 +107,16 @@ const DynamicZone = ({
     <DynamicZoneWrapper>
       {dynamicDisplayedComponentsLength > 0 && (
         <Label>
-          <p>
-            <span>{metadatas.label}</span>
+          <Flex>
+            <p>
+              <span>{metadatas.label}</span>
+            </p>
             {formattedLabelIcon && (
               <LabelIconWrapper title={formattedLabelIcon.title}>
                 {formattedLabelIcon.icon}
               </LabelIconWrapper>
             )}
-          </p>
+          </Flex>
           <p>{metadatas.description}</p>
         </Label>
       )}

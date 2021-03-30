@@ -282,18 +282,21 @@ function SelectWrapper({
     <Padded>
       <BaselineAlignment />
       <Flex justifyContent="space-between">
-        <Text fontWeight="semiBold">
-          <span>
-            {label}
-            {!isSingle && ` (${associationsLength})`}
-          </span>
-
+        <Flex>
+          <Text fontWeight="semiBold">
+            <span>
+              {label}
+              {!isSingle && ` (${associationsLength})`}
+            </span>
+          </Text>
           {labelIconformatted && (
-            <LabelIconWrapper title={labelIconformatted.title}>
-              {labelIconformatted.icon}
-            </LabelIconWrapper>
+            <div style={{ lineHeight: '13px' }}>
+              <LabelIconWrapper title={labelIconformatted.title}>
+                {labelIconformatted.icon}
+              </LabelIconWrapper>
+            </div>
           )}
-        </Text>
+        </Flex>
         {isSingle && link}
       </Flex>
       {!isEmpty(description) && (
