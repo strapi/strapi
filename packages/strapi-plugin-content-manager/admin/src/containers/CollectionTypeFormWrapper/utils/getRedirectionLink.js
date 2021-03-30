@@ -2,13 +2,19 @@ import { stringify, parse } from 'qs';
 import get from 'lodash/get';
 import isObject from 'lodash/isObject';
 
-const mergeParams = (refParams, params) => {
-  return Object.keys(refParams).reduce((acc, current) => {
-    const refValue = refParams[current];
-    const nextValue = get(params, [current], refValue);
+/**
+ * Updates the leafs of the first argument
+ * @param {object} initialParams
+ * @param {object} params
+ * @returns string
+ */
+const mergeParams = (initialParams, params) => {
+  return Object.keys(initialParams).reduce((acc, current) => {
+    const intialValue = initialParams[current];
+    const nextValue = get(params, [current], intialValue);
 
-    if (isObject(refValue)) {
-      return { ...acc, [current]: mergeParams(refValue, nextValue) };
+    if (isObject(intialValue)) {
+      return { ...acc, [current]: mergeParams(intialValue, nextValue) };
     }
 
     acc[current] = nextValue;
