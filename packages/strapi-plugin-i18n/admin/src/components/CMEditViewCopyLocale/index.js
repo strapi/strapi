@@ -8,13 +8,13 @@ import { useTheme } from 'styled-components';
 import { useIntl } from 'react-intl';
 import {
   BaselineAlignment,
+  DropdownIndicator,
   ModalConfirm,
   selectStyles,
   useContentManagerEditViewDataManager,
   request,
 } from 'strapi-helper-plugin';
 import { getTrad } from '../../utils';
-import DropdownIndicator from '../DropdownIndicator';
 import { cleanData, generateOptions } from './utils';
 
 const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPermissions }) => {

@@ -3,17 +3,18 @@ import ReactSelect, { components } from 'react-select';
 import PropTypes from 'prop-types';
 import Carret from '../Carret';
 import { useTheme } from 'styled-components';
+import DropdownIndicator from './DropdownIndicator';
 import getStyles from './styles';
 
-export const DropdownIndicator = props => {
-  const theme = useTheme();
+// export const DropdownIndicator = props => {
+//   const theme = useTheme();
 
-  return (
-    <components.DropdownIndicator {...props}>
-      <Carret fill={theme.main.colors.grey} />
-    </components.DropdownIndicator>
-  );
-};
+//   return (
+//     <components.DropdownIndicator {...props}>
+//       <Carret fill={theme.main.colors.grey} />
+//     </components.DropdownIndicator>
+//   );
+// };
 
 export const Select = ({ children, onChange, selectedValue, ...props }) => {
   const theme = useTheme();
