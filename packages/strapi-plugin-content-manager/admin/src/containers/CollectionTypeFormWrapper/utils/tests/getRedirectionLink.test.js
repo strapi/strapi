@@ -1,7 +1,7 @@
-import getDeleteRedirectionLink, { mergeParams } from '../getDeleteRedirectionLink';
+import getRedirectionLink, { mergeParams } from '../getRedirectionLink';
 
 describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', () => {
-  describe('getDeleteRedirectionLink', () => {
+  describe('getRedirectionLink', () => {
     it('should return an when no links is matching the slug', () => {
       const links = [
         {
@@ -14,9 +14,9 @@ describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', ()
         },
       ];
       const slug = 'create';
-      const result = getDeleteRedirectionLink(links, slug, '');
+      const result = getRedirectionLink(links, slug, '');
 
-      expect(result).toEqual({ destination: '/', search: '' });
+      expect(result).toEqual('/');
     });
     it('should not mutate the link when the rawQuery is empty', () => {
       const links = [
@@ -30,9 +30,9 @@ describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', ()
         },
       ];
       const slug = 'foo';
-      const result = getDeleteRedirectionLink(links, slug, '');
+      const result = getRedirectionLink(links, slug, '');
 
-      expect(result).toEqual(links[0]);
+      expect(result).toEqual('/cm/foo?page=1&pageSize=10');
     });
 
     it('should merge the current search with the link original one', () => {
@@ -48,11 +48,8 @@ describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', ()
       ];
       const slug = 'bar';
       const currentSearch = '?plugins[i18n][locale]=fr&plugins[i18n][relatedEntity]=1';
-      const result = getDeleteRedirectionLink(links, slug, currentSearch);
-      const expected = {
-        destination: '/cm/bar',
-        search: 'page=1&pageSize=10&plugins[i18n][locale]=fr',
-      };
+      const result = getRedirectionLink(links, slug, currentSearch);
+      const expected = '/cm/bar?page=1&pageSize=10&plugins[i18n][locale]=fr';
 
       expect(result).toEqual(expected);
     });

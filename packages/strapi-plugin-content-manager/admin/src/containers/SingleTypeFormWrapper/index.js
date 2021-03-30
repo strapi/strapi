@@ -24,7 +24,7 @@ import { getRequestUrl } from './utils';
 import buildQueryString from '../ListView/utils/buildQueryString';
 
 // This container is used to handle the CRUD
-const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
+const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const { emitEvent } = useGlobalContext();
   const { push } = useHistory();
   const emitEventRef = useRef(emitEvent);
@@ -124,7 +124,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
         if (responseStatus === 403) {
           strapi.notification.info(getTrad('permissions.not-allowed.update'));
 
-          push(from);
+          push('/');
         }
       }
     };
@@ -132,7 +132,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
     fetchData(signal);
 
     return () => abortController.abort();
-  }, [cleanReceivedData, from, push, slug, dispatch, searchToSend, rawQuery]);
+  }, [cleanReceivedData, push, slug, dispatch, searchToSend, rawQuery]);
 
   const displayErrors = useCallback(err => {
     const errorPayload = err.response.payload;
@@ -300,12 +300,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, from, slug }) => {
     onPublish,
     onPut,
     onUnpublish,
+    redirectionLink: '/',
     status,
   });
-};
-
-SingleTypeFormWrapper.defaultProps = {
-  from: '/',
 };
 
 SingleTypeFormWrapper.propTypes = {
@@ -314,7 +311,6 @@ SingleTypeFormWrapper.propTypes = {
     contentType: PropTypes.object.isRequired,
   }).isRequired,
   children: PropTypes.func.isRequired,
-  from: PropTypes.string,
   slug: PropTypes.string.isRequired,
 };
 

@@ -21,19 +21,18 @@ const getDeleteRedirectionLink = (links, slug, rawQuery) => {
   const matchingLink = links.find(({ destination }) => destination.includes(slug));
 
   if (!matchingLink) {
-    return { destination: '/', search: '' };
+    return '/';
   }
 
-  const { search } = matchingLink;
+  const { destination, search } = matchingLink;
   const searchQueryParams = parse(search);
   const currentQueryParams = parse(rawQuery.substring(1));
 
   const mergedParams = mergeParams(searchQueryParams, currentQueryParams);
 
-  return {
-    ...matchingLink,
-    search: stringify(mergedParams, { encode: false }),
-  };
+  const link = `${destination}?${stringify(mergedParams, { encode: false })}`;
+
+  return link;
 };
 
 export default getDeleteRedirectionLink;
