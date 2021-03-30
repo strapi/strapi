@@ -93,7 +93,9 @@ const LocalePicker = () => {
                 return (
                   <ListItem key={locale.id}>
                     <button onClick={() => handleClick(locale)} type="button">
-                      <EllipsisParagraph width="200px">{locale.name}</EllipsisParagraph>
+                      <EllipsisParagraph width="200px">
+                        {locale.name || locale.code}
+                      </EllipsisParagraph>
                     </button>
                   </ListItem>
                 );
