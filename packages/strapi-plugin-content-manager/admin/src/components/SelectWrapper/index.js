@@ -4,6 +4,7 @@ import { FormattedMessage, useIntl } from 'react-intl';
 import { Link, useLocation } from 'react-router-dom';
 import { findIndex, get, isArray, isEmpty, set } from 'lodash';
 import {
+  DropdownIndicator,
   LabelIconWrapper,
   NotAllowedInput,
   request,
@@ -16,7 +17,6 @@ import pluginId from '../../pluginId';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import ClearIndicator from './ClearIndicator';
-import DropdownIndicator from './DropdownIndicator';
 import IndicatorSeparator from './IndicatorSeparator';
 import Option from './Option';
 import { A, BaselineAlignment } from './components';

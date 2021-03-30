@@ -8,9 +8,9 @@ import { useTheme } from 'styled-components';
 import { useIntl } from 'react-intl';
 import {
   BaselineAlignment,
+  DropdownIndicator,
   ModalConfirm,
   selectStyles,
-  DropdownIndicator,
   useContentManagerEditViewDataManager,
   request,
 } from 'strapi-helper-plugin';

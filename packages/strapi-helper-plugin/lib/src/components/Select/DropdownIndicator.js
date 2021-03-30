@@ -7,6 +7,7 @@ import PropTypes from 'prop-types';
 const Wrapper = styled(Flex)`
   height: 100%;
   width: 32px;
+  justify-content: space-around;
   background: #fafafb;
   > svg {
     align-self: center;

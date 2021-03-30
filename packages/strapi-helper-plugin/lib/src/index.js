@@ -28,6 +28,8 @@ export { default as InputAddon } from './components/InputAddon';
 export { default as EmptyState } from './components/EmptyState';
 export * from './components/Tabs';
 export * from './components/Select';
+
+export { default as DropdownIndicator } from './components/Select/DropdownIndicator';
 export * from './components/InjectionZone';
 
 export { default as InputAddonWithErrors } from './components/InputAddonWithErrors';
