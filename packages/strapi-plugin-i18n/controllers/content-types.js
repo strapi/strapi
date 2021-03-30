@@ -1,8 +1,11 @@
 'use strict';
 
 const { pick, uniq, prop, getOr, flatten, pipe } = require('lodash/fp');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { getService } = require('../utils');
 const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
+
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const getLocalesProperty = getOr([], 'properties.locales');
 const getFieldsProperty = prop('properties.fields');
@@ -50,7 +53,9 @@ module.exports = {
 
     ctx.body = {
       nonLocalizedFields: sanitizedNonLocalizedFields,
-      localizations: entity.localizations.concat(pick(['id', 'locale'], entity)),
+      localizations: entity.localizations.concat(
+        pick(['id', 'locale', PUBLISHED_AT_ATTRIBUTE], entity)
+      ),
     };
   },
 };
