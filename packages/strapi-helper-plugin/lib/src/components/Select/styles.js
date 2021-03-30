@@ -99,7 +99,7 @@ const getStyles = theme => {
     }),
     valueContainer: base => ({
       ...base,
-      padding: '2px 4px 4px 4px', // These value don't exist in the theme
+      padding: '2px 10px 4px 10px', // These value don't exist in the theme
       fontSize: sizes.fonts.md,
     }),
     indicatorsContainer: base => ({
