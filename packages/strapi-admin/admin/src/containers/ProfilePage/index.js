@@ -191,6 +191,8 @@ const ProfilePage = () => {
           </Padded>
         </Bloc>
       </Padded>
+
+      <BaselineAlignment top size="80px" />
     </form>
   );
 };
