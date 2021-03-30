@@ -6,39 +6,21 @@ import { getTrad } from '../../utils';
 import { ADD_LOCALE } from '../constants';
 
 const addLocale = async ({ code, name, isDefault }) => {
-  try {
-    const data = await request(`/i18n/locales`, {
-      method: 'POST',
-      body: {
-        name,
-        code,
-        isDefault,
-      },
-    });
+  const data = await request(`/i18n/locales`, {
+    method: 'POST',
+    body: {
+      name,
+      code,
+      isDefault,
+    },
+  });
 
-    strapi.notification.toggle({
-      type: 'success',
-      message: { id: getTrad('Settings.locales.modal.create.success') },
-    });
+  strapi.notification.toggle({
+    type: 'success',
+    message: { id: getTrad('Settings.locales.modal.create.success') },
+  });
 
-    return data;
-  } catch (e) {
-    const message = get(e, 'response.payload.message', null);
-
-    if (message && message.includes('already exists')) {
-      strapi.notification.toggle({
-        type: 'warning',
-        message: { id: getTrad('Settings.locales.modal.create.alreadyExist') },
-      });
-    } else {
-      strapi.notification.toggle({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-
-    throw e;
-  }
+  return data;
 };
 
 const useAddLocale = () => {
@@ -48,10 +30,28 @@ const useAddLocale = () => {
   const persistLocale = async locale => {
     setLoading(true);
 
-    const newLocale = await addLocale(locale);
+    try {
+      const newLocale = await addLocale(locale);
+      dispatch({ type: ADD_LOCALE, newLocale });
+    } catch (e) {
+      const message = get(e, 'response.payload.message', null);
 
-    dispatch({ type: ADD_LOCALE, newLocale });
-    setLoading(false);
+      if (message && message.includes('already exists')) {
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: getTrad('Settings.locales.modal.create.alreadyExist') },
+        });
+      } else {
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
+
+      throw e;
+    } finally {
+      setLoading(false);
+    }
   };
 
   return { isAdding: isLoading, addLocale: persistLocale };
