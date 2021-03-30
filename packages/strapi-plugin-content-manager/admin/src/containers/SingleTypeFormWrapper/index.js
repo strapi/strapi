@@ -211,7 +211,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const onPublish = useCallback(async () => {
     try {
       emitEventRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/actions/publish`);
+      const endPoint = getRequestUrl(`${slug}/actions/publish${searchToSend}`);
 
       dispatch(setStatus('publish-pending'));
 
@@ -231,7 +231,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       dispatch(setStatus('resolved'));
     }
-  }, [cleanReceivedData, displayErrors, slug, dispatch]);
+  }, [cleanReceivedData, displayErrors, slug, searchToSend, dispatch]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
@@ -267,7 +267,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/actions/unpublish`);
+    const endPoint = getRequestUrl(`${slug}/actions/unpublish${searchToSend}`);
 
     dispatch(setStatus('unpublish-pending'));
 
@@ -286,7 +286,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, slug, dispatch]);
+  }, [cleanReceivedData, displayErrors, slug, dispatch, searchToSend]);
 
   return children({
     componentsDataStructure,
