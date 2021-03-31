@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalFooter, TabPanel, useUser } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
@@ -16,8 +16,9 @@ const ModalCreate = ({ onClose, isOpened }) => {
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
-  const [shouldUpdateMenu, setShouldUpdateMenu] = useState(false);
+
   const { fetchUserPermissions } = useUser();
+  const shouldUpdatePermissions = useRef(false);
 
   if (isLoading) {
     return (
@@ -30,11 +31,11 @@ const ModalCreate = ({ onClose, isOpened }) => {
   }
 
   const handleClosed = async () => {
-    if (shouldUpdateMenu) {
+    if (shouldUpdatePermissions.current) {
       await fetchUserPermissions();
     }
 
-    setShouldUpdateMenu(false);
+    shouldUpdatePermissions.current = true;
   };
 
   const options = (defaultLocales || []).map(locale => ({
@@ -62,7 +63,9 @@ const ModalCreate = ({ onClose, isOpened }) => {
             name: values.displayName,
             isDefault: values.isDefault,
           })
-            .then(() => setShouldUpdateMenu(true))
+            .then(() => {
+              shouldUpdatePermissions.current = true;
+            })
             .then(() => {
               onClose();
             })}

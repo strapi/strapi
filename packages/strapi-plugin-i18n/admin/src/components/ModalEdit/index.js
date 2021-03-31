@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Modal, ModalFooter, TabPanel, useGlobalContext } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
@@ -13,7 +13,7 @@ import SettingsModal from '../SettingsModal';
 
 const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   const { isEditing, editLocale } = useEditLocale();
-  const [shouldUpdateMenu, setShouldUpdateMenu] = useState(false);
+  const shouldUpdateMenu = useRef(false);
   const { updateMenu } = useGlobalContext();
   const { formatMessage } = useIntl();
   const isOpened = Boolean(localeToEdit);
@@ -24,7 +24,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
 
     return editLocale(id, { name, isDefault })
       .then(() => {
-        setShouldUpdateMenu(true);
+        shouldUpdateMenu.current = true;
       })
       .then(onClose);
   };
@@ -34,7 +34,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
       updateMenu();
     }
 
-    setShouldUpdateMenu(false);
+    shouldUpdateMenu.current = false;
   };
 
   let options = [];
