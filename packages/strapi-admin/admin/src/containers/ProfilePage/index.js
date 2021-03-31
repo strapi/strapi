@@ -152,6 +152,7 @@ const ProfilePage = () => {
           )}
         </ContainerFluid>
       </form>
+      <BaselineAlignment bottom size="80px" />
     </>
   );
 };

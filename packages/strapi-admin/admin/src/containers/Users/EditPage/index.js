@@ -125,6 +125,7 @@ const EditPage = ({ canUpdate }) => {
         </ContainerFluid>
         <Padded bottom size="md" />
       </form>
+      <BaselineAlignment bottom size="80px" />
     </>
   );
 };
