@@ -16,9 +16,9 @@ const FieldPicker = ({ displayedHeaders, items, onChange, onClickReset, slug }) 
         renderButtonContent={isOpen => (
           <Flex>
             <div>
-              <FontAwesomeIcon icon="cog" />
+              <FontAwesomeIcon icon="cog" style={{ marginRight: 5 }} />
             </div>
-            <Padded left size="sm">
+            <Padded>
               <Carret fill={isOpen ? '#007eff' : '#292b2c'} isUp={isOpen} />
             </Padded>
           </Flex>
