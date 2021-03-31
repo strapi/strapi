@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Padded, Text } from '@buffetjs/core';
 import { Tooltip } from '@buffetjs/styles';
 import get from 'lodash/get';
 
@@ -16,7 +17,7 @@ const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id 
   const defaultLocale = locales.find(locale => locale.isDefault);
   const hasDefaultLocale = localizationNames.includes(defaultLocale.code);
 
-  let localesNames;
+  let localesArray = [];
 
   if (hasDefaultLocale) {
     const ctLocalesWithoutDefault = localizationNames.filter(
@@ -33,22 +34,31 @@ const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id 
       ...ctLocalesNamesWithoutDefault,
     ];
 
-    localesNames = ctLocalesNamesWithDefault.join(', ');
+    localesArray = ctLocalesNamesWithDefault;
   } else {
     const ctLocales = localizationNames.map(locale => mapToLocaleName(locales, locale));
     ctLocales.sort();
 
-    localesNames = ctLocales.join(', ');
+    localesArray = ctLocales;
   }
 
   const elId = `entry-${id}__locale`;
+  const localesNames = localesArray.join(', ');
 
   return (
     <div>
       <span data-for={elId} data-tip={localesNames}>
         {localesNames}
       </span>
-      <Tooltip id={elId} place="top" delay={0} />
+      <Tooltip id={elId} place="bottom" delay={0}>
+        {localesArray.map(name => (
+          <Padded key={name} top bottom size="xs">
+            <Text ellipsis color="white">
+              {name}
+            </Text>
+          </Padded>
+        ))}
+      </Tooltip>
     </div>
   );
 };
