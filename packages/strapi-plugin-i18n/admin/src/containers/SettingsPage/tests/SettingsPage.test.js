@@ -65,6 +65,8 @@ jest.mock('strapi-helper-plugin', () => ({
   useUserPermissions: jest.fn(),
   request: jest.fn(),
   selectStyles: () => ({ control: () => ({}), indicatorsContainer: () => ({}) }),
+  useGlobalContext: () => ({ updateMenu: jest.fn() }),
+  useUser: () => ({ fetchUserPermissions: jest.fn() }),
 }));
 
 jest.mock('../../../utils', () => ({

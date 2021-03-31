@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, TabPanel } from 'strapi-helper-plugin';
+import { Modal, ModalFooter, TabPanel, useUser } from 'strapi-helper-plugin';
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -17,7 +17,8 @@ const ModalCreate = ({ onClose, isOpened }) => {
   const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
 
-  if (!isOpened) return null;
+  const { fetchUserPermissions } = useUser();
+  const shouldUpdatePermissions = useRef(false);
 
   if (isLoading) {
     return (
@@ -29,6 +30,14 @@ const ModalCreate = ({ onClose, isOpened }) => {
     );
   }
 
+  const handleClosed = async () => {
+    if (shouldUpdatePermissions.current) {
+      await fetchUserPermissions();
+    }
+
+    shouldUpdatePermissions.current = true;
+  };
+
   const options = (defaultLocales || []).map(locale => ({
     label: locale.code,
     value: locale.name,
@@ -36,8 +45,12 @@ const ModalCreate = ({ onClose, isOpened }) => {
 
   const defaultOption = options[0];
 
+  if (!defaultOption) {
+    return null;
+  }
+
   return (
-    <Modal isOpen={isOpened} onToggle={onClose} withoverflow="true">
+    <Modal isOpen={isOpened} onToggle={onClose} withoverflow="true" onClosed={handleClosed}>
       <Formik
         initialValues={{
           code: defaultOption.label,
@@ -49,9 +62,13 @@ const ModalCreate = ({ onClose, isOpened }) => {
             code: values.code,
             name: values.displayName,
             isDefault: values.isDefault,
-          }).then(() => {
-            onClose();
-          })}
+          })
+            .then(() => {
+              shouldUpdatePermissions.current = true;
+            })
+            .then(() => {
+              onClose();
+            })}
         validationSchema={localeFormSchema}
       >
         {({ handleSubmit, errors }) => (
