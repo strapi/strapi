@@ -52,7 +52,11 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
           )}
         />
 
-        <ModalCreate isOpened={isCreating} onClose={onToggleCreateModal} />
+        <ModalCreate
+          isOpened={isCreating}
+          onClose={onToggleCreateModal}
+          alreadyUsedLocales={locales}
+        />
         <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
         <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
       </>
