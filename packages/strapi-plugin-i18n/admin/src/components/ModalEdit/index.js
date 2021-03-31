@@ -24,7 +24,6 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
 
     return editLocale(id, { name, isDefault })
       .then(() => {
-        console.log('ici');
         setShouldUpdateMenu(true);
       })
       .then(onClose);

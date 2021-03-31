@@ -14,7 +14,7 @@ const fetchDefaultLocalesList = async () => {
       message: { id: 'notification.error' },
     });
 
-    return e;
+    return [];
   }
 };
 

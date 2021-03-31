@@ -44,6 +44,10 @@ const ModalCreate = ({ onClose, isOpened }) => {
 
   const defaultOption = options[0];
 
+  if (!defaultOption) {
+    return null;
+  }
+
   return (
     <Modal isOpen={isOpened} onToggle={onClose} withoverflow="true" onClosed={handleClosed}>
       <Formik
