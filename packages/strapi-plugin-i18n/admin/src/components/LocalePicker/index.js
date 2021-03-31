@@ -5,8 +5,9 @@ import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import useGetContentTypePermissions from '../../hooks/useGetContentTypePermissions';
+import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
-import selectCollectionTypesRelatedPermissions from '../../selectors/selectCollectionTypesRelatedPermissions';
 import getInitialLocale from '../../utils/getInitialLocale';
 
 const List = styled.ul`
@@ -39,26 +40,18 @@ const EllipsisParagraph = styled(Text)`
   text-align: left;
 `;
 
-const selectContentManagerListViewPluginOptions = state =>
-  state.get('content-manager_listView').contentType.pluginOptions;
-
 const LocalePicker = () => {
   const dispatch = useDispatch();
-  const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
-  const colllectionTypesRelatedPermissions = useSelector(selectCollectionTypesRelatedPermissions);
   const [{ query }, setQuery] = useQueryParams();
   const {
     params: { slug },
   } = useRouteMatch('/plugins/content-manager/collectionType/:slug');
-  const currentCTRelatedPermissions = colllectionTypesRelatedPermissions[slug];
-  const readPermissions = currentCTRelatedPermissions['plugins::content-manager.explorer.read'];
-  const createPermissions = currentCTRelatedPermissions['plugins::content-manager.explorer.create'];
+  const isFieldLocalized = useHasI18n();
+  const { createPermissions, readPermissions } = useGetContentTypePermissions(slug);
 
   const initialLocale = getInitialLocale(query, locales);
   const [selected, setSelected] = useState(initialLocale);
-
-  const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
 
   if (!isFieldLocalized) {
     return null;

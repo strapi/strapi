@@ -4,12 +4,12 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useContentManagerEditViewDataManager, useQueryParams } from 'strapi-helper-plugin';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
-import selectCollectionTypesRelatedPermissions from '../../selectors/selectCollectionTypesRelatedPermissions';
+import useGetContentTypePermissions from '../../hooks/useGetContentTypePermissions';
 import CMEditViewLocalePicker from '../CMEditViewLocalePicker';
 
 const CMEditViewInjectedComponents = () => {
   const { layout, modifiedData, slug, isSingleType } = useContentManagerEditViewDataManager();
-  const colllectionTypesRelatedPermissions = useSelector(selectCollectionTypesRelatedPermissions);
+  const { createPermissions, readPermissions } = useGetContentTypePermissions(slug);
   const locales = useSelector(selectI18NLocales);
   const params = useParams();
   const [{ query }, setQuery] = useQueryParams();
@@ -36,10 +36,6 @@ const CMEditViewInjectedComponents = () => {
   if (!currentLocale) {
     return null;
   }
-
-  const currentCTRelatedPermissions = colllectionTypesRelatedPermissions[slug];
-  const readPermissions = currentCTRelatedPermissions['plugins::content-manager.explorer.read'];
-  const createPermissions = currentCTRelatedPermissions['plugins::content-manager.explorer.create'];
 
   const localizations = get(modifiedData, 'localizations', []);
 
