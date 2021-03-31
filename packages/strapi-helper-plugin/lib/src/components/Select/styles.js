@@ -101,6 +101,7 @@ const getStyles = theme => {
       ...base,
       padding: '2px 10px 4px 10px', // These value don't exist in the theme
       fontSize: sizes.fonts.md,
+      lineHeight: '18px',
     }),
     indicatorsContainer: base => ({
       ...base,
