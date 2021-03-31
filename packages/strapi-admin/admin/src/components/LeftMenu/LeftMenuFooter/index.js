@@ -16,9 +16,9 @@ function LeftMenuFooter({ version }) {
   return (
     <Wrapper>
       <div className="poweredBy">
-        <a key="website" href="https://strapi.io" target="_blank" rel="noopener noreferrer">
+        <A key="website" href="https://strapi.io" target="_blank" rel="noopener noreferrer">
           Strapi
-        </a>
+        </A>
         &nbsp;
         <A
           href={`https://github.com/strapi/strapi/releases/tag/v${version}`}
