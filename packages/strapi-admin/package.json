@@ -88,7 +88,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "react-select": "^4.0.2",
-    "react-tooltip": "4.2.15",
+    "react-tooltip": "4.2.17",
     "react-transition-group": "4.4.1",
     "react-virtualized": "^9.22.3",
     "reactstrap": "8.4.1",
