@@ -27,19 +27,19 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
 
   const toggleLoading = () => dispatch(toggleIsLoading());
 
-  const resolvePermissions = async () => {
+  const resolvePermissions = async (permissions = userPermissions) => {
     const pluginsSectionLinks = toPluginLinks(pluginsRef.current);
     const { authorizedCtLinks, authorizedStLinks, contentTypes } = await getCtOrStLinks(
-      userPermissions
+      permissions
     );
 
     const authorizedPluginSectionLinks = await getPluginSectionLinks(
-      userPermissions,
+      permissions,
       pluginsSectionLinks
     );
 
     const authorizedGeneralSectionLinks = await getGeneralLinks(
-      userPermissions,
+      permissions,
       generalSectionLinksRef.current,
       settingsMenuRef.current,
       shouldUpdateStrapiRef.current
@@ -53,7 +53,8 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
   const resolvePermissionsRef = useRef(resolvePermissions);
 
   useEffect(() => {
-    resolvePermissionsRef.current();
+    console.log({ userPermissions });
+    resolvePermissionsRef.current(userPermissions);
   }, [userPermissions, dispatch]);
 
   return { state, generateMenu: resolvePermissionsRef.current, toggleLoading };
