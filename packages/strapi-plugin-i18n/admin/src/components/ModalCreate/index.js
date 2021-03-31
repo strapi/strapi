@@ -12,7 +12,7 @@ import useAddLocale from '../../hooks/useAddLocale';
 import BaseForm from './BaseForm';
 import AdvancedForm from './AdvancedForm';
 
-const ModalCreate = ({ onClose, isOpened }) => {
+const ModalCreate = ({ alreadyUsedLocales, onClose, isOpened }) => {
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
@@ -38,10 +38,16 @@ const ModalCreate = ({ onClose, isOpened }) => {
     shouldUpdatePermissions.current = true;
   };
 
-  const options = (defaultLocales || []).map(locale => ({
-    label: locale.code,
-    value: locale.name,
-  }));
+  const options = (defaultLocales || [])
+    .map(locale => ({
+      label: locale.code,
+      value: locale.name,
+    }))
+    .filter(({ label }) => {
+      const foundLocale = alreadyUsedLocales.find(({ code }) => code === label);
+
+      return !foundLocale;
+    });
 
   const defaultOption = options[0];
 
@@ -84,7 +90,11 @@ const ModalCreate = ({ onClose, isOpened }) => {
               tabsId="i18n-settings-tabs-create"
             >
               <TabPanel>
-                <BaseForm options={options} defaultOption={defaultOption} />
+                <BaseForm
+                  options={options}
+                  defaultOption={defaultOption}
+                  alreadyUsedLocales={alreadyUsedLocales}
+                />
               </TabPanel>
               <TabPanel>
                 <AdvancedForm />
@@ -113,7 +123,12 @@ const ModalCreate = ({ onClose, isOpened }) => {
   );
 };
 
+ModalCreate.defaultProps = {
+  alreadyUsedLocales: [],
+};
+
 ModalCreate.propTypes = {
+  alreadyUsedLocales: PropTypes.array,
   onClose: PropTypes.func.isRequired,
   isOpened: PropTypes.bool.isRequired,
 };
