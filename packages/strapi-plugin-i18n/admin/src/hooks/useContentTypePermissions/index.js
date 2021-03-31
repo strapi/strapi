@@ -1,7 +1,7 @@
 import { useSelector } from 'react-redux';
 import selectCollectionTypesRelatedPermissions from '../../selectors/selectCollectionTypesRelatedPermissions';
 
-const useGetContentTypePermissions = slug => {
+const useContentTypePermissions = slug => {
   const collectionTypesRelatedPermissions = useSelector(selectCollectionTypesRelatedPermissions);
 
   const currentCTRelatedPermissions = collectionTypesRelatedPermissions[slug];
@@ -11,4 +11,4 @@ const useGetContentTypePermissions = slug => {
   return { createPermissions, readPermissions };
 };
 
-export default useGetContentTypePermissions;
+export default useContentTypePermissions;

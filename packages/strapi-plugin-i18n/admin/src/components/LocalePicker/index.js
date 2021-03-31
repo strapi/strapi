@@ -5,7 +5,7 @@ import { Carret, useQueryParams } from 'strapi-helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import get from 'lodash/get';
-import useGetContentTypePermissions from '../../hooks/useGetContentTypePermissions';
+import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
@@ -48,7 +48,7 @@ const LocalePicker = () => {
     params: { slug },
   } = useRouteMatch('/plugins/content-manager/collectionType/:slug');
   const isFieldLocalized = useHasI18n();
-  const { createPermissions, readPermissions } = useGetContentTypePermissions(slug);
+  const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 
   const initialLocale = getInitialLocale(query, locales);
   const [selected, setSelected] = useState(initialLocale);
