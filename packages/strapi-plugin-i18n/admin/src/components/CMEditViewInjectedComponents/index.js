@@ -4,8 +4,8 @@ import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { useContentManagerEditViewDataManager, useQueryParams } from 'strapi-helper-plugin';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
+import selectCollectionTypesRelatedPermissions from '../../selectors/selectCollectionTypesRelatedPermissions';
 import CMEditViewLocalePicker from '../CMEditViewLocalePicker';
-import selectCollectionTypesRelatedPermissions from './selectors';
 
 const CMEditViewInjectedComponents = () => {
   const { layout, modifiedData, slug, isSingleType } = useContentManagerEditViewDataManager();
