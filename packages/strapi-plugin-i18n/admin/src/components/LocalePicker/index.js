@@ -82,7 +82,9 @@ const LocalePicker = () => {
           onToggle();
         };
 
-        return (
+        const hasMultipleLocales = locales.length > 1;
+
+        return hasMultipleLocales ? (
           <Padded left right>
             <List>
               {locales.map(locale => {
@@ -102,7 +104,7 @@ const LocalePicker = () => {
               })}
             </List>
           </Padded>
-        );
+        ) : null;
       }}
     />
   );
