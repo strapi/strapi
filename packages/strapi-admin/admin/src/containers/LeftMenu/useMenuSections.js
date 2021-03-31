@@ -53,7 +53,6 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
   const resolvePermissionsRef = useRef(resolvePermissions);
 
   useEffect(() => {
-    console.log({ userPermissions });
     resolvePermissionsRef.current(userPermissions);
   }, [userPermissions, dispatch]);
 
