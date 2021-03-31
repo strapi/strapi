@@ -17,6 +17,7 @@ import {
   InjectionZone,
   InjectionZoneList,
   useQueryParams,
+  useUser,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
@@ -87,7 +88,9 @@ function ListView({
   } = layout;
 
   const { emitEvent } = useGlobalContext();
+  const { fetchUserPermissions } = useUser();
   const emitEventRef = useRef(emitEvent);
+  const fetchPermissionsRef = useRef(fetchUserPermissions);
 
   const [{ query }, setQuery] = useQueryParams();
   const params = buildQueryString(query);
@@ -133,13 +136,26 @@ function ListView({
 
         getDataSucceeded(pagination, results);
       } catch (err) {
+        const resStatus = get(err, 'response.status', null);
+        console.log(err);
+
+        if (resStatus === 403) {
+          await fetchPermissionsRef.current();
+
+          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+
+          push('/');
+
+          return;
+        }
+
         if (err.name !== 'AbortError') {
           console.error(err);
           strapi.notification.error(getTrad('error.model.fetch'));
         }
       }
     },
-    [getData, getDataSucceeded]
+    [getData, getDataSucceeded, push]
   );
 
   const handleChangeListLabels = useCallback(

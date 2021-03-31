@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { get, isEmpty } from 'lodash';
+import get from 'lodash/get';
 import { BaselineAlignment, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
@@ -73,7 +73,7 @@ const EditPage = () => {
         body: data,
       });
 
-      if (role.code !== 'strapi-super-admin' && !isEmpty(permissionsToSend)) {
+      if (role.code !== 'strapi-super-admin') {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
           body: {
