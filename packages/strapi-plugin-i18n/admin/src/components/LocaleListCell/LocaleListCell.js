@@ -1,9 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Tooltip } from '@buffetjs/styles';
+import get from 'lodash/get';
 
 const mapToLocaleName = (locales, localeCode) =>
-  locales.find(({ code }) => code === localeCode).name;
+  get(
+    locales.find(({ code }) => code === localeCode),
+    'name',
+    localeCode
+  );
 
 const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id }) => {
   const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];

@@ -33,11 +33,19 @@ const InjectionZoneList = ({ area, ...props }) => {
 
   return (
     <List>
-      {compos.map(compo => (
-        <ListItem key={compo.name}>
-          <compo.Component {...props} />
-        </ListItem>
-      ))}
+      {compos.map(compo => {
+        const component = compo.Component(props);
+
+        if (component) {
+          return (
+            <ListItem key={compo.name}>
+              <compo.Component {...props} />
+            </ListItem>
+          );
+        }
+
+        return null;
+      })}
     </List>
   );
 };

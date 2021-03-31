@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
 import { Carret, useQueryParams } from 'strapi-helper-plugin';
+import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import get from 'lodash/get';
+import useContentTypePermissions from '../../hooks/useContentTypePermissions';
+import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
 
@@ -37,19 +40,18 @@ const EllipsisParagraph = styled(Text)`
   text-align: left;
 `;
 
-const selectContentManagerListViewPluginOptions = state =>
-  state.get('content-manager_listView').contentType.pluginOptions;
-
 const LocalePicker = () => {
   const dispatch = useDispatch();
-  const pluginOptions = useSelector(selectContentManagerListViewPluginOptions);
   const locales = useSelector(selectI18NLocales);
   const [{ query }, setQuery] = useQueryParams();
+  const {
+    params: { slug },
+  } = useRouteMatch('/plugins/content-manager/collectionType/:slug');
+  const isFieldLocalized = useHasI18n();
+  const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 
   const initialLocale = getInitialLocale(query, locales);
   const [selected, setSelected] = useState(initialLocale);
-
-  const isFieldLocalized = get(pluginOptions, 'i18n.localized', false);
 
   if (!isFieldLocalized) {
     return null;
@@ -58,6 +60,17 @@ const LocalePicker = () => {
   if (!locales || locales.length === 0) {
     return null;
   }
+
+  const displayedLocales = locales.filter(locale => {
+    const canCreate = createPermissions.find(({ properties }) => {
+      return get(properties, 'locales', []).includes(locale.code);
+    });
+    const canRead = readPermissions.find(({ properties }) =>
+      get(properties, 'locales', []).includes(locale.code)
+    );
+
+    return canCreate || canRead;
+  });
 
   return (
     <Picker
@@ -82,12 +95,12 @@ const LocalePicker = () => {
           onToggle();
         };
 
-        const hasMultipleLocales = locales.length > 1;
+        const hasMultipleLocales = displayedLocales.length > 1;
 
         return hasMultipleLocales ? (
           <Padded left right>
             <List>
-              {locales.map(locale => {
+              {displayedLocales.map(locale => {
                 if (locale.id === selected.id) {
                   return null;
                 }
