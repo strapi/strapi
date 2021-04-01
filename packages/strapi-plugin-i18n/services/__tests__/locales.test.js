@@ -122,13 +122,34 @@ describe('Locales', () => {
     test('delete', async () => {
       const locale = { name: 'French', code: 'fr' };
       const deleteFn = jest.fn(() => locale);
-      const query = jest.fn(() => ({ delete: deleteFn }));
-      global.strapi = { query };
+      const findOne = jest.fn(() => locale);
+      const isLocalized = jest.fn(() => true);
+      const query = jest.fn(() => ({ delete: deleteFn, findOne }));
+      global.strapi = {
+        query,
+        plugins: { i18n: { services: { 'content-types': { isLocalized } } } },
+        contentTypes: { 'application::country.country': {} },
+      };
 
       const deletedLocale = await localesService.delete({ id: 1 });
       expect(query).toHaveBeenCalledWith('locale', 'i18n');
       expect(deleteFn).toHaveBeenCalledWith({ id: 1 });
       expect(deletedLocale).toMatchObject(locale);
+    });
+
+    test('delete - not found', async () => {
+      const locale = { name: 'French', code: 'fr' };
+      const deleteFn = jest.fn(() => locale);
+      const findOne = jest.fn(() => undefined);
+      const query = jest.fn(() => ({ delete: deleteFn, findOne }));
+      global.strapi = {
+        query,
+      };
+
+      const deletedLocale = await localesService.delete({ id: 1 });
+      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(deleteFn).not.toHaveBeenCalled();
+      expect(deletedLocale).toBeUndefined();
     });
   });
 
