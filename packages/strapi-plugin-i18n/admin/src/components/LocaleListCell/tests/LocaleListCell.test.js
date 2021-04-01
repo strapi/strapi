@@ -6,6 +6,11 @@ jest.mock('@buffetjs/styles', () => ({
   Tooltip: () => null,
 }));
 
+jest.mock('@buffetjs/core', () => ({
+  Padded: props => <div {...props} />,
+  Text: props => <p {...props} />,
+}));
+
 describe('LocaleListCell', () => {
   it('returns the default locale first, then the others sorted alphabetically', () => {
     const locales = [
