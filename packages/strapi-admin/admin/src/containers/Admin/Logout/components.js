@@ -65,7 +65,7 @@ const Wrapper = styled.div`
     z-index: 8;
     top: -3px !important;
     left: auto !important;
-    min-width: 100% !important;
+    min-width: 190px;
     margin: 0 !important;
     padding: 0;
     line-height: 1.8rem;
