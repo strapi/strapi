@@ -1,8 +1,12 @@
 'use strict';
 
-const { has, prop, isNil } = require('lodash/fp');
-const { cloneDeepWith, pick, pipe } = require('lodash/fp');
-const { isRelationalAttribute, getVisibleAttributes } = require('strapi-utils').contentTypes;
+const _ = require('lodash');
+const { pick, pipe, has, prop, isNil, cloneDeepWith } = require('lodash/fp');
+const {
+  isRelationalAttribute,
+  getVisibleAttributes,
+  isMediaAttribute,
+} = require('strapi-utils').contentTypes;
 const { getService } = require('../utils');
 
 const isLocalized = modelOrAttribute => {
@@ -77,7 +81,9 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
 const isLocalizedAttribute = (model, attributeName) => {
   const attribute = model.attributes[attributeName];
 
-  return isLocalized(attribute) || isRelationalAttribute(attribute);
+  return (
+    isLocalized(attribute) || (isRelationalAttribute(attribute) && !isMediaAttribute(attribute))
+  );
 };
 
 /**
@@ -91,11 +97,26 @@ const getNonLocalizedAttributes = model => {
   );
 };
 
-const removeIds = cloneDeepWith(value => {
-  if (typeof value === 'object' && has('id', value)) {
-    delete value.id;
+const cleanIds = (model, { output = true }) => entry => {
+  // remove ids
+  const processedEntry = cloneDeepWith(value => {
+    if (typeof value === 'object' && has('id', value)) {
+      delete value.id;
+    }
+  }, entry);
+
+  // set media ids back
+  if (!output) {
+    _.forIn(entry, (value, attrName) => {
+      const attr = model.attributes[attrName];
+      if (isMediaAttribute(attr) && value) {
+        processedEntry[attrName] = has('collection', attr) ? value : value.id;
+      }
+    });
   }
-});
+
+  return processedEntry;
+};
 
 /**
  * Returns a copy of an entry picking only its non localized attributes
@@ -103,10 +124,10 @@ const removeIds = cloneDeepWith(value => {
  * @param {object} entry
  * @returns {object}
  */
-const copyNonLocalizedAttributes = (model, entry) => {
+const copyNonLocalizedAttributes = (model, entry, { output = true } = {}) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  return pipe(pick(nonLocalizedAttributes), removeIds)(entry);
+  return pipe(pick(nonLocalizedAttributes), cleanIds(model, { output }))(entry);
 };
 
 /**
@@ -133,11 +154,11 @@ const fillNonLocalizedAttributes = (entry, relatedEntry, { model }) => {
   }
 
   const modelDef = strapi.getModel(model);
-  const nonLocalizedFields = getNonLocalizedAttributes(modelDef);
+  const relatedEntryCopy = copyNonLocalizedAttributes(modelDef, relatedEntry, { output: false });
 
-  nonLocalizedFields.forEach(field => {
+  _.forEach(relatedEntryCopy, (value, field) => {
     if (isNil(entry[field])) {
-      entry[field] = relatedEntry[field];
+      entry[field] = value;
     }
   });
 };
