@@ -17,6 +17,7 @@ export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
 export { default as ExtendComponent } from './components/ExtendComponent';
+export { default as ErrorFallback } from './components/ErrorFallback';
 export { default as FilterButton } from './components/FilterButton';
 export { default as GlobalPagination } from './components/GlobalPagination';
 export { default as HeaderNav } from './components/HeaderNav';
