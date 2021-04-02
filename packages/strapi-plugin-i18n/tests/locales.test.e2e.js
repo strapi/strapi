@@ -45,6 +45,7 @@ describe('CRUD locales', () => {
 
   afterAll(async () => {
     await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('Default locale', () => {
@@ -328,7 +329,7 @@ describe('CRUD locales', () => {
       expect(res.body.message).toBe('Cannot delete the default locale');
     });
 
-    test('Can delete a locale - simple', async () => {
+    test('Simply delete a locale', async () => {
       const res = await rq({
         url: `/i18n/locales/${data.locales[1].id}`,
         method: 'DELETE',
@@ -340,7 +341,7 @@ describe('CRUD locales', () => {
       data.locales.splice(1, 1);
     });
 
-    test('Can delete a locale - with related entities', async () => {
+    test('Delete a locale and entities in this locale', async () => {
       const { body: frenchProduct } = await rq({
         url: '/content-manager/collection-types/application::product.product',
         method: 'POST',
