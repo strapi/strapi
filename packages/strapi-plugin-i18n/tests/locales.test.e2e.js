@@ -328,11 +328,23 @@ describe('CRUD locales', () => {
       expect(res.body.message).toBe('Cannot delete the default locale');
     });
 
-    test('Can delete a locale', async () => {
+    test('Can delete a locale - simple', async () => {
+      const res = await rq({
+        url: `/i18n/locales/${data.locales[1].id}`,
+        method: 'DELETE',
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
+      data.deletedLocales.push(res.body);
+      data.locales.splice(1, 1);
+    });
+
+    test('Can delete a locale - with related entities', async () => {
       const { body: frenchProduct } = await rq({
         url: '/content-manager/collection-types/application::product.product',
         method: 'POST',
-        qs: { plugins: { i18n: { locale: 'fr' } } },
+        qs: { plugins: { i18n: { locale: 'fr-FR' } } },
         body: { name: 'product name' },
       });
 
@@ -348,7 +360,7 @@ describe('CRUD locales', () => {
       } = await rq({
         url: '/content-manager/collection-types/application::product.product',
         method: 'GET',
-        qs: { _locale: 'fr' },
+        qs: { _locale: 'fr-FR' },
       });
 
       expect(createdProducts).toHaveLength(1);
@@ -364,7 +376,7 @@ describe('CRUD locales', () => {
       } = await rq({
         url: '/content-manager/collection-types/application::product.product',
         method: 'GET',
-        qs: { _locale: 'fr' },
+        qs: { _locale: 'fr-FR' },
       });
       expect(frenchProducts).toHaveLength(0);
 

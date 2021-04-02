@@ -17,11 +17,11 @@ const create = locale => strapi.query('locale', 'i18n').create(locale);
 const update = (params, updates) => strapi.query('locale', 'i18n').update(params, updates);
 
 const deleteFn = async ({ id }) => {
-  let localeToDelete = await strapi.query('locale', 'i18n').findOne({ id });
+  const localeToDelete = await strapi.query('locale', 'i18n').findOne({ id });
 
   if (localeToDelete) {
     await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
-    localeToDelete = await strapi.query('locale', 'i18n').delete({ id });
+    return strapi.query('locale', 'i18n').delete({ id });
   }
   return localeToDelete;
 };
