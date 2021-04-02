@@ -2,6 +2,7 @@
 
 const { omit } = require('lodash/fp');
 
+const { createTestBuilder } = require('../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
@@ -13,17 +14,38 @@ const data = {
 const omitTimestamps = omit(['updatedAt', 'createdAt', 'updated_at', 'created_at']);
 const compareLocales = (a, b) => (a.code < b.code ? -1 : 1);
 
+const productModel = {
+  pluginOptions: {
+    i18n: {
+      localized: true,
+    },
+  },
+  attributes: {
+    name: {
+      type: 'string',
+    },
+  },
+  connection: 'default',
+  name: 'product',
+  description: '',
+  collectionName: '',
+};
+
 describe('CRUD locales', () => {
   let rq;
   let strapi;
+  const builder = createTestBuilder();
 
   beforeAll(async () => {
+    await builder.addContentType(productModel).build();
+
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
   });
 
   afterAll(async () => {
     await strapi.destroy();
+    await builder.cleanup();
   });
 
   describe('Default locale', () => {
@@ -167,7 +189,9 @@ describe('CRUD locales', () => {
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toHaveLength(data.locales.length);
-      expect(res.body.sort(compareLocales)).toMatchObject(data.locales.sort(compareLocales));
+      expect(res.body.sort(compareLocales)).toMatchObject(
+        data.locales.slice().sort(compareLocales)
+      );
     });
   });
 
@@ -179,17 +203,17 @@ describe('CRUD locales', () => {
       };
 
       let res = await rq({
-        url: `/i18n/locales/${data.locales[0].id}`,
+        url: `/i18n/locales/${data.locales[1].id}`,
         method: 'PUT',
         body: localeUpdate,
       });
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
-        ...omitTimestamps(data.locales[0]),
+        ...omitTimestamps(data.locales[1]),
         ...localeUpdate,
       });
-      data.locales[0] = res.body;
+      data.locales[1] = res.body;
     });
 
     test('Cannot update the code of a locale (without name)', async () => {
@@ -305,11 +329,66 @@ describe('CRUD locales', () => {
       expect(res.body.message).toBe('Cannot delete the default locale');
     });
 
-    test('Can delete a locale', async () => {
+    test('Simply delete a locale', async () => {
       const res = await rq({
         url: `/i18n/locales/${data.locales[1].id}`,
         method: 'DELETE',
       });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
+      data.deletedLocales.push(res.body);
+      data.locales.splice(1, 1);
+    });
+
+    test('Delete a locale and entities in this locale', async () => {
+      const { body: frenchProduct } = await rq({
+        url: '/content-manager/collection-types/application::product.product',
+        method: 'POST',
+        qs: { plugins: { i18n: { locale: 'fr-FR' } } },
+        body: { name: 'product name' },
+      });
+
+      await rq({
+        url: '/content-manager/collection-types/application::product.product',
+        method: 'POST',
+        qs: { plugins: { i18n: { locale: 'en', relatedEntityId: frenchProduct.id } } },
+        body: { name: 'product name' },
+      });
+
+      const {
+        body: { results: createdProducts },
+      } = await rq({
+        url: '/content-manager/collection-types/application::product.product',
+        method: 'GET',
+        qs: { _locale: 'fr-FR' },
+      });
+
+      expect(createdProducts).toHaveLength(1);
+      expect(createdProducts[0].localizations[0].locale).toBe('en');
+
+      const res = await rq({
+        url: `/i18n/locales/${data.locales[1].id}`,
+        method: 'DELETE',
+      });
+
+      const {
+        body: { results: frenchProducts },
+      } = await rq({
+        url: '/content-manager/collection-types/application::product.product',
+        method: 'GET',
+        qs: { _locale: 'fr-FR' },
+      });
+      expect(frenchProducts).toHaveLength(0);
+
+      const {
+        body: { results: englishProducts },
+      } = await rq({
+        url: '/content-manager/collection-types/application::product.product',
+        method: 'GET',
+        qs: { _locale: 'en' },
+      });
+      expect(englishProducts).toHaveLength(1);
 
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject(omitTimestamps(data.locales[1]));
