@@ -143,8 +143,7 @@ const removeIdsMut = (model, entry) => {
 const copyNonLocalizedAttributes = (model, entry) => {
   const nonLocalizedAttributes = getNonLocalizedAttributes(model);
 
-  const res = pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
-  return res;
+  return pipe(pick(nonLocalizedAttributes), removeIds(model))(entry);
 };
 
 /**
