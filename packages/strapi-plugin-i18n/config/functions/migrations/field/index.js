@@ -9,7 +9,7 @@ const migrateForBookshelf = require('./migrate-for-bookshelf');
 const after = async ({ model, definition, previousDefinition, ORM }) => {
   const ctService = getService('content-types');
 
-  if (!ctService.isLocalized(model) || !previousDefinition) {
+  if (!ctService.isLocalized(model) || !ctService.isLocalized(previousDefinition)) {
     return;
   }
 
