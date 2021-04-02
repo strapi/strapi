@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const utils = require('strapi-utils');
+const { isMediaAttribute } = require('strapi-utils').contentTypes;
 
 const toUID = (name, plugin) => {
   const modelUID = Object.keys(strapi.contentTypes).find(key => {
@@ -63,13 +64,14 @@ const formatAttribute = (key, attribute, { model }) => {
   const { plugin, configurable } = attribute;
   let targetEntity = attribute.model || attribute.collection;
 
-  if (plugin === 'upload' && targetEntity === 'file') {
+  if (isMediaAttribute(attribute)) {
     return {
       type: 'media',
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
       configurable: configurable === false ? false : undefined,
       allowedTypes: attribute.allowedTypes,
+      pluginOptions: attribute.pluginOptions,
     };
   } else {
     return {
@@ -88,6 +90,7 @@ const formatAttribute = (key, attribute, { model }) => {
       private: attribute.private ? true : false,
       unique: attribute.unique ? true : false,
       autoPopulate: attribute.autoPopulate,
+      pluginOptions: attribute.pluginOptions,
     };
   }
 };

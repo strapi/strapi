@@ -411,6 +411,18 @@ describe('content-types service', () => {
     });
 
     test('Removes ids', () => {
+      const compoModel = {
+        attributes: {
+          name: { type: 'string' },
+        },
+      };
+
+      global.strapi = {
+        db: {
+          getModelsByAttribute: jest.fn(() => [compoModel]),
+        },
+      };
+
       const model = {
         attributes: {
           title: {

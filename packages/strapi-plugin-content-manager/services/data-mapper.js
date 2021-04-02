@@ -3,6 +3,7 @@
 const { upperFirst, has, prop, pick, getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { isMediaAttribute } = require('strapi-utils').contentTypes;
 
 const dtoFields = [
   'uid',
@@ -66,8 +67,7 @@ const formatAttributes = model => {
 const formatAttribute = (key, attribute, { model }) => {
   if (has('type', attribute)) return attribute;
 
-  let targetEntity = attribute.model || attribute.collection;
-  if (attribute.plugin === 'upload' && targetEntity === 'file') {
+  if (isMediaAttribute(attribute)) {
     return toMedia(attribute);
   }
 
@@ -81,6 +81,7 @@ const toMedia = attribute => {
     multiple: attribute.collection ? true : false,
     required: attribute.required ? true : false,
     allowedTypes: attribute.allowedTypes,
+    pluginOptions: attribute.pluginOptions,
   };
 };
 
@@ -90,6 +91,7 @@ const toRelation = (attribute, relation) => {
     type: 'relation',
     targetModel: relation.targetUid,
     relationType: relation.nature,
+    pluginOptions: attribute.pluginOptions,
   };
 };
 
