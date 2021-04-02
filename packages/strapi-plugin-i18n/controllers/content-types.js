@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick, uniq, prop, getOr, flatten, pipe } = require('lodash/fp');
+const { pick, uniq, prop, getOr, flatten, pipe, map } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const { getService } = require('../utils');
 const { validateGetNonLocalizedAttributesInput } = require('../validation/content-types');
@@ -9,6 +9,8 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 const getLocalesProperty = getOr([], 'properties.locales');
 const getFieldsProperty = prop('properties.fields');
+
+const getFirstLevelPath = map(path => path.split('.')[0]);
 
 module.exports = {
   async getNonLocalizedAttributes(ctx) {
@@ -46,7 +48,8 @@ module.exports = {
     const localePermissions = permissions
       .filter(perm => getLocalesProperty(perm).includes(locale))
       .map(getFieldsProperty);
-    const permittedFields = pipe(flatten, uniq)(localePermissions);
+
+    const permittedFields = pipe(flatten, getFirstLevelPath, uniq)(localePermissions);
 
     const nonLocalizedFields = copyNonLocalizedAttributes(modelDef, entity);
     const sanitizedNonLocalizedFields = pick(permittedFields, nonLocalizedFields);

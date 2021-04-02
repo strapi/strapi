@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick, prop, isNil } = require('lodash/fp');
+const { prop, isNil, isEmpty } = require('lodash/fp');
 
 const { getService } = require('../utils');
 
@@ -43,17 +43,16 @@ const syncLocalizations = async (entry, { model }) => {
  * @param {Object} options.model corresponding model
  */
 const syncNonLocalizedAttributes = async (entry, { model }) => {
-  const { getNonLocalizedAttributes } = getService('content-types');
+  const { copyNonLocalizedAttributes } = getService('content-types');
 
   if (Array.isArray(entry.localizations)) {
-    const nonLocalizedFields = getNonLocalizedAttributes(model);
+    const nonLocalizedAttributes = copyNonLocalizedAttributes(model, entry);
 
-    if (nonLocalizedFields.length === 0) {
+    if (isEmpty(nonLocalizedAttributes)) {
       return;
     }
 
-    const fieldsToUpdate = pick(nonLocalizedFields, entry);
-    const updateLocalization = id => strapi.query(model.uid).update({ id }, fieldsToUpdate);
+    const updateLocalization = id => strapi.query(model.uid).update({ id }, nonLocalizedAttributes);
 
     await Promise.all(entry.localizations.map(({ id }) => updateLocalization(id)));
   }
