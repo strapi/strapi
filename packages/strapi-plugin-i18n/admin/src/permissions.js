@@ -1,8 +1,5 @@
 const i18nPermissions = {
-  accessMain: [
-    { action: 'plugins::i18n.locale.read', subject: null },
-    { action: 'plugins::i18n.locale.create', subject: null },
-  ],
+  accessMain: [{ action: 'plugins::i18n.locale.read', subject: null }],
   create: [{ action: 'plugins::i18n.locale.create', subject: null }],
   delete: [{ action: 'plugins::i18n.locale.delete', subject: null }],
   update: [{ action: 'plugins::i18n.locale.update', subject: null }],
