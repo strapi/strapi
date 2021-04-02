@@ -15,7 +15,7 @@ const VALID_REST_OPERATORS = [
   'null',
 ];
 
-// from strapi-utims/convert-rest-query-params
+// from strapi-utils/convert-rest-query-params
 const findAppliedFilter = whereClause => {
   // Useful to remove the mainField of relation fields.
   const formattedWhereClause = whereClause.split('.')[0];
