@@ -171,7 +171,7 @@ module.exports = async () => {
         icon: 'check-square',
         options: {
           from: {
-            name: 'Administration Panel1',
+            name: 'Administration Panel',
             email: 'no-reply@strapi.io',
           },
           response_email: '',
