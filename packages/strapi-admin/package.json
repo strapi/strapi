@@ -68,7 +68,7 @@
     "koa-passport": "4.1.4",
     "lodash": "4.17.20",
     "match-sorter": "^4.0.2",
-    "mini-css-extract-plugin": "^0.6.0",
+    "mini-css-extract-plugin": "^1.4.0",
     "moment": "^2.29.1",
     "p-map": "4.0.0",
     "passport-local": "1.0.0",
