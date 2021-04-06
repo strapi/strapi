@@ -193,8 +193,8 @@ const isRelationalAttribute = attribute =>
 
 /**
  * Checks if an attribute is of type `type`
- * @param {*} attribute
- * @param {*} type
+ * @param {object} attribute
+ * @param {string} type
  */
 const isTypedAttribute = (attribute, type) => {
   return _.has(attribute, 'type') && attribute.type === type;
