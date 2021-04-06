@@ -13,6 +13,7 @@ import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
+import { useFindRedirectionLink } from '../../hooks';
 import {
   getData,
   getDataSucceeded,
@@ -23,8 +24,8 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
-import { getRedirectionLink, getRequestUrl } from './utils';
-import selectMenuLinks from './selectors';
+import { getRequestUrl } from './utils';
+
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
   const { emitEvent } = useGlobalContext();
@@ -38,8 +39,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     isLoading,
     status,
   } = useSelector(selectCrudReducer);
-  const collectionTypesMenuLinks = useSelector(selectMenuLinks);
-  const redirectionLink = getRedirectionLink(collectionTypesMenuLinks, slug, rawQuery);
+  const redirectionLink = useFindRedirectionLink(slug);
 
   const isMounted = useRef(true);
   const emitEventRef = useRef(emitEvent);

@@ -10,14 +10,14 @@ import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
-  PopUpWarning,
-  request,
   CheckPermissions,
-  useGlobalContext,
   InjectionZone,
   InjectionZoneList,
+  PopUpWarning,
+  useGlobalContext,
   useQueryParams,
   useUser,
+  request,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';

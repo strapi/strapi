@@ -1,8 +1,9 @@
 import React, { memo, useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
+import { ErrorBoundary } from 'react-error-boundary';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
+import { ErrorFallback, LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
 import pluginPermissions from '../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
@@ -82,31 +83,33 @@ const CollectionTypeRecursivePath = ({
   ));
 
   return (
-    <ContentTypeLayoutContext.Provider value={layout}>
-      <Switch>
-        <Route path={`${url}/configurations/list`}>
-          <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-            <ListSettingsView
-              layout={rawContentTypeLayout}
-              slug={slug}
-              updateLayout={updateLayout}
-            />
-          </CheckPagePermissions>
-        </Route>
-        <Route path={`${url}/configurations/edit`}>
-          <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-            <EditSettingsView
-              components={rawComponentsLayouts}
-              isContentTypeView
-              mainLayout={rawContentTypeLayout}
-              slug={slug}
-              updateLayout={updateLayout}
-            />
-          </CheckPagePermissions>
-        </Route>
-        {routes}
-      </Switch>
-    </ContentTypeLayoutContext.Provider>
+    <ErrorBoundary FallbackComponent={ErrorFallback}>
+      <ContentTypeLayoutContext.Provider value={layout}>
+        <Switch>
+          <Route path={`${url}/configurations/list`}>
+            <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+              <ListSettingsView
+                layout={rawContentTypeLayout}
+                slug={slug}
+                updateLayout={updateLayout}
+              />
+            </CheckPagePermissions>
+          </Route>
+          <Route path={`${url}/configurations/edit`}>
+            <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+              <EditSettingsView
+                components={rawComponentsLayouts}
+                isContentTypeView
+                mainLayout={rawContentTypeLayout}
+                slug={slug}
+                updateLayout={updateLayout}
+              />
+            </CheckPagePermissions>
+          </Route>
+          {routes}
+        </Switch>
+      </ContentTypeLayoutContext.Provider>
+    </ErrorBoundary>
   );
 };
 
