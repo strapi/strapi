@@ -11,6 +11,7 @@
   "plugin.schema.i18n.localized.description-content-type": "Allow you to have content in different locales",
   "plugin.schema.i18n.localized.label-field": "Enable localization for this field",
   "plugin.schema.i18n.localized.description-field": "The field can have different values in each locale",
+  "plugin.schema.i18n.ensure-unique-localization": "Unique fields must be localized",
   "CheckboxConfirmation.Modal.content": "Disabling localization will engender the deletion of all your content but the one associated to your default locale (if existing).",
   "CheckboxConfirmation.Modal.body": "Do you want to disable it?",
   "CheckboxConfirmation.Modal.button-confirm": "Yes, disable",
