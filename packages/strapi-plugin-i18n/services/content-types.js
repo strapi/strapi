@@ -6,6 +6,7 @@ const {
   isRelationalAttribute,
   getVisibleAttributes,
   isMediaAttribute,
+  isTypedAttribute,
 } = require('strapi-utils').contentTypes;
 const { getService } = require('../utils');
 
@@ -82,7 +83,9 @@ const isLocalizedAttribute = (model, attributeName) => {
   const attribute = model.attributes[attributeName];
 
   return (
-    isLocalized(attribute) || (isRelationalAttribute(attribute) && !isMediaAttribute(attribute))
+    isLocalized(attribute) ||
+    (isRelationalAttribute(attribute) && !isMediaAttribute(attribute)) ||
+    isTypedAttribute(attribute, 'uid')
   );
 };
 
