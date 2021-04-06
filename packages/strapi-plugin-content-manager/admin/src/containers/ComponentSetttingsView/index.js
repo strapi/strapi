@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useMemo, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, request } from 'strapi-helper-plugin';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
 import pluginPermissions from '../../permissions';
@@ -12,7 +12,7 @@ import EditSettingsView from '../EditSettingsView';
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), []);
+  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
   const { uid } = useParams();
 
   useEffect(() => {
