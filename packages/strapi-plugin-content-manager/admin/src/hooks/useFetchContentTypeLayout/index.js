@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import { request } from 'strapi-helper-plugin';
 import formatLayouts from './utils/formatLayouts';
 import reducer, { initialState } from './reducer';
@@ -8,7 +8,7 @@ import { makeSelectModelAndComponentSchemas } from '../../containers/Main/select
 const useFetchContentTypeLayout = contentTypeUID => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), []);
+  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
   const isMounted = useRef(true);
 
   const getData = useCallback(

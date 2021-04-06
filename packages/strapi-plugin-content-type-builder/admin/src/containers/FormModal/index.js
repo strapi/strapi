@@ -18,7 +18,7 @@ import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
@@ -68,7 +68,7 @@ const FormModal = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
-  const reducerState = useSelector(state => formModalSelector(state), []);
+  const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();

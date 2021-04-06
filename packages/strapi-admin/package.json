@@ -86,7 +86,7 @@
     "react-is": "^16.12.0",
     "react-loadable": "^5.5.0",
     "react-query": "3.8.3",
-    "react-redux": "7.2.2",
+    "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "react-select": "^4.0.2",
