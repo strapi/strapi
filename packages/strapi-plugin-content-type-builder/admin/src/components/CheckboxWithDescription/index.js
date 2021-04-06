@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Checkbox, Text } from '@buffetjs/core';
 import Wrapper from './Wrapper';
 
-const CheckboxWithDescription = ({ description, label, value, ...rest }) => {
+const CheckboxWithDescription = ({ description, error, label, value, ...rest }) => {
   return (
     <>
       <Wrapper>
@@ -13,6 +13,11 @@ const CheckboxWithDescription = ({ description, label, value, ...rest }) => {
             {description}
           </Text>
         )}
+        {error && (
+          <Text color="lightOrange" lineHeight="18px">
+            {error}
+          </Text>
+        )}
       </Wrapper>
     </>
   );
@@ -20,12 +25,14 @@ const CheckboxWithDescription = ({ description, label, value, ...rest }) => {
 
 CheckboxWithDescription.defaultProps = {
   description: null,
+  error: null,
   label: null,
   value: false,
 };
 
 CheckboxWithDescription.propTypes = {
   description: PropTypes.string,
+  error: PropTypes.string,
   label: PropTypes.string,
   value: PropTypes.bool,
 };

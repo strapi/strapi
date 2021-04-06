@@ -1,5 +1,5 @@
 import React from 'react';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import * as yup from 'yup';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
@@ -103,9 +103,26 @@ export default strapi => {
         });
 
         ctbFormsAPI.extendFields(LOCALIZED_FIELDS, {
-          validator: () => ({
+          validator: args => ({
             i18n: yup.object().shape({
-              localized: yup.bool(),
+              localized: yup.bool().test({
+                name: 'ensure-unique-localization',
+                message: getTrad('plugin.schema.i18n.ensure-unique-localization'),
+                test(value) {
+                  if (value === undefined || value) {
+                    return true;
+                  }
+
+                  const unique = get(args, ['3', 'modifiedData', 'unique'], null);
+
+                  // Unique fields must be localized
+                  if (unique && !value) {
+                    return false;
+                  }
+
+                  return true;
+                },
+              }),
             }),
           }),
           form: {

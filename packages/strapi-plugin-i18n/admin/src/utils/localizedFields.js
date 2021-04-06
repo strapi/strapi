@@ -18,7 +18,6 @@ const LOCALIZED_FIELDS = [
   'string',
   'text',
   'time',
-  'uid',
 ];
 
 export default LOCALIZED_FIELDS;
