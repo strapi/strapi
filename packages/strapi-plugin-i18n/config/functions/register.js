@@ -12,6 +12,8 @@ module.exports = () => {
   const contentTypeService = getService('content-types');
   const coreApiService = getService('core-api');
 
+  _.set(strapi.plugins.i18n.config, 'schema.graphql', {});
+
   Object.values(strapi.contentTypes).forEach(contentType => {
     if (contentTypeService.isLocalized(contentType)) {
       const { attributes, modelName } = contentType;
@@ -34,6 +36,7 @@ module.exports = () => {
       });
 
       coreApiService.addCreateLocalizationAction(contentType);
+      coreApiService.addGraphqlLocalizationAction(contentType);
     }
   });
 

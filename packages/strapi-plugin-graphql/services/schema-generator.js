@@ -73,6 +73,7 @@ const generateSchema = () => {
       ${Types.addInput()}
 
       ${PublicationState.definition}
+      
       type AdminUser {
         id: ID!
         username: String
