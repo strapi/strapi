@@ -12,7 +12,10 @@ const after = () => {};
 const before = async ({ model, definition, previousDefinition, ORM }, context) => {
   const ctService = getService('content-types');
 
-  if (ctService.isLocalized(definition) || !ctService.isLocalized(previousDefinition)) {
+  if (
+    ctService.isLocalizedContentType(definition) ||
+    !ctService.isLocalizedContentType(previousDefinition)
+  ) {
     return;
   }
 

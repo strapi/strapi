@@ -23,7 +23,10 @@ const updateLocale = (model, ORM, locale) => {
 const after = async ({ model, definition, previousDefinition, ORM }) => {
   const ctService = getService('content-types');
 
-  if (!ctService.isLocalized(definition) || ctService.isLocalized(previousDefinition)) {
+  if (
+    !ctService.isLocalizedContentType(definition) ||
+    ctService.isLocalizedContentType(previousDefinition)
+  ) {
     return;
   }
 

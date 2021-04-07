@@ -24,10 +24,10 @@ module.exports = {
     }
 
     const modelDef = strapi.getModel(model);
-    const { copyNonLocalizedAttributes, isLocalized } = getService('content-types');
+    const { copyNonLocalizedAttributes, isLocalizedContentType } = getService('content-types');
     const { READ_ACTION, CREATE_ACTION } = strapi.admin.services.constants;
 
-    if (!isLocalized(modelDef)) {
+    if (!isLocalizedContentType(modelDef)) {
       return ctx.badRequest('model.not.localized');
     }
 

@@ -123,11 +123,11 @@ describe('Locales', () => {
       const locale = { name: 'French', code: 'fr' };
       const deleteFn = jest.fn(() => locale);
       const findOne = jest.fn(() => locale);
-      const isLocalized = jest.fn(() => true);
+      const isLocalizedContentType = jest.fn(() => true);
       const query = jest.fn(() => ({ delete: deleteFn, findOne }));
       global.strapi = {
         query,
-        plugins: { i18n: { services: { 'content-types': { isLocalized } } } },
+        plugins: { i18n: { services: { 'content-types': { isLocalizedContentType } } } },
         contentTypes: { 'application::country.country': {} },
       };
 
