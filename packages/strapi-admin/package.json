@@ -44,7 +44,7 @@
     "bootstrap": "^4.6.0",
     "chalk": "^2.4.2",
     "chokidar": "^3.5.1",
-    "classnames": "^2.2.6",
+    "classnames": "^2.3.1",
     "cross-env": "^7.0.3",
     "css-loader": "^2.1.1",
     "duplicate-package-checker-webpack-plugin": "^3.0.0",
