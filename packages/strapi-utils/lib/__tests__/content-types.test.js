@@ -2,6 +2,7 @@
 
 const {
   isPrivateAttribute,
+  isTypedAttribute,
   getPrivateAttributes,
   getVisibleAttributes,
   getNonWritableAttributes,
@@ -256,5 +257,19 @@ describe('Content types utils', () => {
         expect(result).toBe(expectedResult);
       }
     );
+  });
+
+  describe('isTypedAttribute', () => {
+    test('Returns false if attribute does not have a type', () => {
+      expect(isTypedAttribute({})).toBe(false);
+    });
+
+    test('Returns true if attribute type matches passed type', () => {
+      expect(isTypedAttribute({ type: 'test' }, 'test')).toBe(true);
+    });
+
+    test('Returns false if type do not match', () => {
+      expect(isTypedAttribute({ type: 'test' }, 'other-type')).toBe(false);
+    });
   });
 });

@@ -192,6 +192,15 @@ const isRelationalAttribute = attribute =>
   _.has(attribute, 'model') || _.has(attribute, 'collection');
 
 /**
+ * Checks if an attribute is of type `type`
+ * @param {object} attribute
+ * @param {string} type
+ */
+const isTypedAttribute = (attribute, type) => {
+  return _.has(attribute, 'type') && attribute.type === type;
+};
+
+/**
  *  Returns a route prefix for a contentType
  * @param {object} contentType
  * @returns {string}
@@ -206,6 +215,7 @@ module.exports = {
   isScalarAttribute,
   isMediaAttribute,
   isRelationalAttribute,
+  isTypedAttribute,
   getPrivateAttributes,
   getTimestampsAttributes,
   isPrivateAttribute,

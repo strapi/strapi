@@ -114,6 +114,21 @@ describe('content-types service', () => {
         })
       ).toEqual(['stars', 'price']);
     });
+
+    test('Consider uid to always be localized', () => {
+      expect(
+        getNonLocalizedAttributes({
+          attributes: {
+            price: {
+              type: 'integer',
+            },
+            slug: {
+              type: 'uid',
+            },
+          },
+        })
+      ).toEqual(['price']);
+    });
   });
 
   describe('getValidLocale', () => {
