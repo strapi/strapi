@@ -111,16 +111,16 @@ const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
 
 const normalizeWhereClauses = (whereClauses, { model }) => {
   return whereClauses
-    .filter(({ value }) => !_.isNull(value))
-    .map(({ field, operator, value }) => {
-      if (_.isUndefined(value)) {
-        const err = new Error(
-          `The value of field: '${field}', in your where filter, is undefined.`
-        );
-        err.status = 400;
-        throw err;
+    .filter(({ field, value }) => {
+      if (_.isNull(value)) {
+        return false;
+      } else if (_.isUndefined(value)) {
+        strapi.log.warn(`The value of field: '${field}', in your where filter, is undefined.`);
+        return false;
       }
-
+      return true;
+    })
+    .map(({ field, operator, value }) => {
       if (BOOLEAN_OPERATORS.includes(operator)) {
         return {
           field,
