@@ -28,10 +28,11 @@ const enhanceRelationLayout = (layout, locale) =>
 const enhanceEditLayout = layout =>
   layout.map(row => {
     const enhancedRow = row.reduce((acc, field) => {
+      const type = get(field, ['fieldSchema', 'type'], null);
       const hasI18nEnabled = get(
         field,
         ['fieldSchema', 'pluginOptions', 'i18n', 'localized'],
-        false
+        type === 'uid'
       );
 
       const labelIcon = {

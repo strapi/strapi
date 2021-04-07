@@ -368,6 +368,13 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
               type: 'string',
             },
           },
+          {
+            name: 'slug',
+            size: 6,
+            fieldSchema: {
+              type: 'uid',
+            },
+          },
         ],
       ];
       const expected = [
@@ -392,6 +399,17 @@ describe('i18n | Middlewares | extendCMEditViewLayoutMiddleware', () => {
             fieldSchema: {
               pluginOptions: { i18n: { localized: true } },
               type: 'string',
+            },
+            labelIcon: {
+              title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
+              icon: <Globe />,
+            },
+          },
+          {
+            name: 'slug',
+            size: 6,
+            fieldSchema: {
+              type: 'uid',
             },
             labelIcon: {
               title: { id: localizedTrad, defaultMessage: localizedTradDefaultMessage },
