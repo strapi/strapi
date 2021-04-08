@@ -54,7 +54,7 @@
     "qs": "^6.10.1",
     "resolve-cwd": "^3.0.0",
     "rimraf": "^3.0.2",
-    "semver": "7.3.4",
+    "semver": "7.3.5",
     "strapi-database": "3.5.4",
     "strapi-generate": "3.5.4",
     "strapi-generate-api": "3.5.4",
