@@ -47,7 +47,10 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     Object.assign(finalParams, convertPublicationStateParams(params._publicationState));
   }
 
-  const whereParams = _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState']);
+  const whereParams = convertExtraRootParams(
+    _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState'])
+  );
+
   const whereClauses = [];
 
   if (_.keys(whereParams).length > 0) {
@@ -61,6 +64,24 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
   Object.assign(finalParams, { where: whereClauses });
 
   return finalParams;
+};
+
+/**
+ * Convert params prefixed with _ by removing the prefix after we have handle the internal params
+ * NOTE: This is only a temporary patch for v3 to handle extra params coming from plugins
+ * @param {object} params
+ * @returns {object}
+ */
+const convertExtraRootParams = params => {
+  return Object.entries(params).reduce((acc, [key, value]) => {
+    if (_.startsWith(key, '_')) {
+      acc[key.slice(1)] = value;
+    } else {
+      acc[key] = value;
+    }
+
+    return acc;
+  }, {});
 };
 
 /**
