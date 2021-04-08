@@ -66,7 +66,7 @@
     "jsonwebtoken": "8.5.1",
     "koa-compose": "4.1.0",
     "koa-passport": "4.1.4",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "match-sorter": "^4.0.2",
     "mini-css-extract-plugin": "^1.4.0",
     "moment": "^2.29.1",

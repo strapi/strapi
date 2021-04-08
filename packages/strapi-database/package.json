@@ -28,7 +28,7 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "p-map": "4.0.0",
     "strapi-utils": "3.5.4",
     "verror": "^1.10.0"
