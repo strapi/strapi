@@ -224,7 +224,7 @@ const addGraphqlSchema = schema => {
  * @param {object} contentType
  */
 const addGraphqlLocalizationAction = contentType => {
-  const { modelName } = contentType;
+  const { globalId, modelName } = contentType;
 
   if (!strapi.plugins.graphql) {
     return;
@@ -270,7 +270,7 @@ const addGraphqlLocalizationAction = contentType => {
   }
 
   // add new mutation to create a localization
-  const typeName = _.capitalize(modelName);
+  const typeName = globalId;
   const mutationName = `create${typeName}Localization`;
   const mutationDef = `${mutationName}(input: update${typeName}Input!): ${typeName}!`;
   const actionName = `${contentType.uid}.createLocalization`;
