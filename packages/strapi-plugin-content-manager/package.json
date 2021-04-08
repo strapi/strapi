@@ -21,7 +21,7 @@
     "draft-js": "^0.11.5",
     "highlight.js": "^10.4.1",
     "immutable": "^3.8.2",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "markdown-it": "^12.0.4",
     "markdown-it-abbr": "^1.0.4",
     "markdown-it-container": "^3.0.0",
