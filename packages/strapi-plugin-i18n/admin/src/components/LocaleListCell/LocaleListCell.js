@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Padded, Text } from '@buffetjs/core';
 import { Tooltip } from '@buffetjs/styles';
 import get from 'lodash/get';
+import styled from 'styled-components';
 
 const mapToLocaleName = (locales, localeCode) =>
   get(
@@ -10,6 +11,12 @@ const mapToLocaleName = (locales, localeCode) =>
     'name',
     localeCode
   );
+
+const LocaleName = styled.div`
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+`;
 
 const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id }) => {
   const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
@@ -47,9 +54,9 @@ const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id 
 
   return (
     <div>
-      <span data-for={elId} data-tip={localesNames}>
+      <LocaleName data-for={elId} data-tip={localesNames}>
         {localesNames}
-      </span>
+      </LocaleName>
       <Tooltip id={elId} place="bottom" delay={0}>
         {localesArray.map(name => (
           <Padded key={name} top bottom size="xs">
