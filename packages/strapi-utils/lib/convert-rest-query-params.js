@@ -74,7 +74,7 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
  */
 const convertExtraRootParams = params => {
   return Object.entries(params).reduce((acc, [key, value]) => {
-    if (_.startsWith(key, '_')) {
+    if (_.startsWith(key, '_') && !QUERY_OPERATORS.includes(key)) {
       acc[key.slice(1)] = value;
     } else {
       acc[key] = value;
