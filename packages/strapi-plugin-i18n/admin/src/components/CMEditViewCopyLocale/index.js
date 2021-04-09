@@ -17,13 +17,23 @@ import {
 import { getTrad } from '../../utils';
 import { cleanData, generateOptions } from './utils';
 
-const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPermissions }) => {
+const CMEditViewCopyLocale = props => {
+  if (!props.localizations.length) {
+    return null;
+  }
+
+  return <Content {...props} />;
+};
+
+const Content = ({ appLocales, currentLocale, localizations, readPermissions }) => {
+  const options = generateOptions(appLocales, currentLocale, localizations, readPermissions);
+
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { allLayoutData, slug } = useContentManagerEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useState(null);
+  const [value, setValue] = useState(options[0]);
   const theme = useTheme();
 
   const handleConfirmCopyLocale = async () => {
@@ -73,12 +83,6 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPe
     setIsOpen(prev => !prev);
   };
 
-  if (!localizations.length) {
-    return null;
-  }
-
-  const options = generateOptions(appLocales, currentLocale, localizations, readPermissions);
-
   const styles = selectStyles(theme);
 
   return (
@@ -127,8 +131,8 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPe
               aria-labelledby="select-locale"
               components={{ DropdownIndicator }}
               isSearchable={false}
+              defaultValue={options[0]}
               onChange={handleChange}
-              options={options}
               styles={{
                 ...styles,
                 control: (base, state) => ({
@@ -157,6 +161,10 @@ const CMEditViewCopyLocale = ({ appLocales, currentLocale, localizations, readPe
 };
 
 CMEditViewCopyLocale.propTypes = {
+  localizations: PropTypes.array.isRequired,
+};
+
+Content.propTypes = {
   appLocales: PropTypes.arrayOf(
     PropTypes.shape({
       code: PropTypes.string.isRequired,
