@@ -33,12 +33,13 @@ module.exports = {
    * @param {KoaContext} ctx - koa context
    */
   async getAll(ctx) {
-    const { sectionsBuilder, actionProvider, conditionProvider } = getService('permission');
+    const { role: roleId } = ctx.query;
 
-    const allActions = actionProvider.values();
+    const { sectionsBuilder, conditionProvider } = getService('permission');
+
+    const actions = await getService('action').getAllowedActionsForRole(roleId);
     const conditions = conditionProvider.values();
-
-    const sections = await sectionsBuilder.build(allActions);
+    const sections = await sectionsBuilder.build(actions);
 
     ctx.body = {
       data: {
