@@ -19,10 +19,6 @@ const { toSingular, toInputName } = require('./naming');
 
 const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
 
-const isNotPrivate = _.curry((model, attributeName) => {
-  return !contentTypes.isPrivateAttribute(model, attributeName);
-});
-
 module.exports = {
   /**
    * Convert Strapi type to GraphQL type.
@@ -220,10 +216,9 @@ module.exports = {
   generateInputModel(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.upperFirst(toSingular(name))}Input`;
+    const hasOnlyPrivateAttributes = Object.keys(model.attributes).filter(attributeName => !contentTypes.isPrivateAttribute(model, attributeName)).length === 0
 
-    if (_.isEmpty(model.attributes) ||
-      Object.keys(model.attributes).filter(attributeName => isNotPrivate(model, attributeName)).length === 0
-    ) {
+    if (_.isEmpty(model.attributes) || hasOnlyPrivateAttributes) {
       return `
       input ${inputName} {
         _: String
@@ -239,7 +234,7 @@ module.exports = {
       input ${inputName} {
 
         ${Object.keys(model.attributes)
-          .filter(attributeName => isNotPrivate(model, attributeName))
+          .filter(attributeName => !contentTypes.isPrivateAttribute(model, attributeName))
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
               attribute: model.attributes[attributeName],
@@ -254,7 +249,7 @@ module.exports = {
       input edit${inputName} {
         ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
-          .filter(attributeName => isNotPrivate(model, attributeName))
+          .filter(attributeName => !contentTypes.isPrivateAttribute(model, attributeName))
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
               attribute: model.attributes[attributeName],
