@@ -30,7 +30,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   };
 
   const handleClose = () => {
-    if (shouldUpdateMenu) {
+    if (shouldUpdateMenu.current) {
       updateMenu();
     }
 
