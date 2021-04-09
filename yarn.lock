@@ -1216,12 +1216,12 @@
     lodash "4.17.20"
     yup "^0.27.0"
 
-"@casl/ability@^4.1.5":
-  version "4.1.6"
-  resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-4.1.6.tgz#89f263903adfc9316cedff329ad615564662448a"
-  integrity sha512-ZI30fRacHKCCrWJn1pmxx/+IKUkoycVNz+Mge9EeIH+esDT7nydgWbitVPnlBAbxQXz5eybPAvfPSg3WOa2izw==
+"@casl/ability@^5.2.2":
+  version "5.2.2"
+  resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-5.2.2.tgz#8582aaff347dbbf22935d5b7518f3d2a334a45c6"
+  integrity sha512-A0GTDWojP72Z4HSgS0pfbtGnhQWbquhn9luAr4Uc/HnqWWib0NvmpXC4//7gsiMUiVYCoFozQ+nG1oeZuhT7Jg==
   dependencies:
-    sift "^13.0.0"
+    "@ucast/mongo2js" "^1.3.0"
 
 "@cnakazawa/watch@^1.0.3":
   version "1.0.4"
@@ -3887,6 +3887,34 @@
   integrity sha512-Gf4u3EjaPNcC9cTu4/j2oN14nSVhr8PQ+BvBcBQHAhDZfl0bVIiLgvnRXv/dn58XhTm9UXvBpvJpDlwV65QxOA==
   dependencies:
     "@types/yargs-parser" "*"
+
+"@ucast/core@^1.0.0", "@ucast/core@^1.4.1", "@ucast/core@^1.6.1":
+  version "1.10.0"
+  resolved "https://registry.yarnpkg.com/@ucast/core/-/core-1.10.0.tgz#a9c3a1fd3ce6197698c2e64e7c58246b721f5aa1"
+  integrity sha512-utMIzLxgsj1VkPTN9Yzt9EaCPWYdF33Pe6fxhsK/jEiMf8M0w/cM4K3Ywc3tZSBn/Cc2YQsx7pVYe8I2NWrBRg==
+
+"@ucast/js@^3.0.0":
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/@ucast/js/-/js-3.0.1.tgz#679e4d17771c55cfa4b342abe33a4e5ded32c530"
+  integrity sha512-sabiuYsM5VUg4EaCwlDxnqcrHPFvbZcXvBu+P/o4pqK2q046RLTdo0bM7iVCn5Ro4HpCiRv3QzxtW8epcluY1g==
+  dependencies:
+    "@ucast/core" "^1.0.0"
+
+"@ucast/mongo2js@^1.3.0":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@ucast/mongo2js/-/mongo2js-1.3.2.tgz#e2d4f1e2f7b181aa58ff8830c20e799c6997a1b1"
+  integrity sha512-KNOEs61wxo4VJkVGqwP2a03TKuLx9fLMQgW5HD8Th/mrcuP1SspS4W+kUQD+wB1AA5pOn65hzlHUw5wZBwme0Q==
+  dependencies:
+    "@ucast/core" "^1.6.1"
+    "@ucast/js" "^3.0.0"
+    "@ucast/mongo" "^2.4.0"
+
+"@ucast/mongo@^2.4.0":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@ucast/mongo/-/mongo-2.4.1.tgz#da18b9dc962128313f399b3a77e81af7dfc2c3c3"
+  integrity sha512-l/hc3TxjWO9inBrgM5iMCAcsIeV2DToppRlabQa5xB/6uHYtCXfm3TPaJgr8TU1OFxqPlaXEnNQhaV0sVHGsoQ==
+  dependencies:
+    "@ucast/core" "^1.4.1"
 
 "@webassemblyjs/ast@1.9.0":
   version "1.9.0"
@@ -17889,7 +17917,7 @@ side-channel@^1.0.2, side-channel@^1.0.4:
     get-intrinsic "^1.0.2"
     object-inspect "^1.9.0"
 
-sift@13.5.0, sift@^13.0.0:
+sift@13.5.0:
   version "13.5.0"
   resolved "https://registry.yarnpkg.com/sift/-/sift-13.5.0.tgz#0f46fd0b2432bd516307d2c32bff3b142a8ab530"
   integrity sha512-YoS8hmXbmJcf1Gde5bR7+pq69+Nvfv5eHTyv4B00YxJAejTEfzvamG8LHzb0jAFFciMkY05K7GG3P7n/gm0+gg==
