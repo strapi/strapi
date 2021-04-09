@@ -11,10 +11,10 @@ const shouldBeProcessed = processedLocaleCodes => entry => {
   );
 };
 
-const getUpdatesInfo = ({ entriesToProcess, attrsToMigrate }) => {
+const getUpdatesInfo = ({ entriesToProcess, attributesToMigrate }) => {
   const updates = [];
   for (const entry of entriesToProcess) {
-    const attributesValues = pick(attrsToMigrate, entry);
+    const attributesValues = pick(attributesToMigrate, entry);
     const entriesIdsToUpdate = entry.localizations.map(prop('id'));
     updates.push({ entriesIdsToUpdate, attributesValues });
   }
@@ -47,12 +47,12 @@ const getSortedLocales = async ({ transacting } = {}) => {
   )(locales);
 };
 
-const areScalarAttrsOnly = ({ model, attributes }) =>
+const areScalarAttributesOnly = ({ model, attributes }) =>
   pipe(pick(attributes), every(isScalarAttribute))(model.attributes);
 
 module.exports = {
   shouldBeProcessed,
   getUpdatesInfo,
   getSortedLocales,
-  areScalarAttrsOnly,
+  areScalarAttributesOnly,
 };

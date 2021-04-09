@@ -44,8 +44,8 @@ describe('i18n - migration utils', () => {
       ],
     ];
 
-    test.each(testData)('%j', (entriesToProcess, attrsToMigrate, expectedResult) => {
-      const result = getUpdatesInfo({ entriesToProcess, attrsToMigrate });
+    test.each(testData)('%j', (entriesToProcess, attributesToMigrate, expectedResult) => {
+      const result = getUpdatesInfo({ entriesToProcess, attributesToMigrate });
 
       expect(result).toEqual(expectedResult);
     });

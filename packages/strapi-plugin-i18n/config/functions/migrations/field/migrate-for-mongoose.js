@@ -1,7 +1,7 @@
 'use strict';
 
 const { migrate } = require('./migrate');
-const { areScalarAttrsOnly } = require('./utils');
+const { areScalarAttributesOnly } = require('./utils');
 
 const batchUpdate = async ({ updatesInfo, model }) => {
   const updates = updatesInfo.map(({ entriesIdsToUpdate, attributesValues }) => ({
@@ -11,13 +11,13 @@ const batchUpdate = async ({ updatesInfo, model }) => {
   await model.bulkWrite(updates);
 };
 
-const migrateForMongoose = async ({ model, attrsToMigrate }) => {
-  const onlyScalarAttrs = areScalarAttrsOnly({ model, attributes: attrsToMigrate });
+const migrateForMongoose = async ({ model, attributesToMigrate }) => {
+  const onlyScalarAttrs = areScalarAttributesOnly({ model, attributes: attributesToMigrate });
 
   if (onlyScalarAttrs) {
-    await migrate({ model, attrsToMigrate }, { migrateFn: batchUpdate });
+    await migrate({ model, attributesToMigrate }, { migrateFn: batchUpdate });
   } else {
-    await migrate({ model, attrsToMigrate });
+    await migrate({ model, attributesToMigrate });
   }
 };
 

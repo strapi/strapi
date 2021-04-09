@@ -16,16 +16,16 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
   const localizedAttributes = ctService.getLocalizedAttributes(definition);
   const prevLocalizedAttributes = ctService.getLocalizedAttributes(previousDefinition);
   const attributesDisabled = difference(prevLocalizedAttributes, localizedAttributes);
-  const attrsToMigrate = intersection(keys(definition.attributes), attributesDisabled);
+  const attributesToMigrate = intersection(keys(definition.attributes), attributesDisabled);
 
-  if (isEmpty(attrsToMigrate)) {
+  if (isEmpty(attributesToMigrate)) {
     return;
   }
 
   if (model.orm === 'bookshelf') {
-    await migrateForBookshelf({ ORM, model, attrsToMigrate });
+    await migrateForBookshelf({ ORM, model, attributesToMigrate });
   } else if (model.orm === 'mongoose') {
-    await migrateForMongoose({ model, attrsToMigrate });
+    await migrateForMongoose({ model, attributesToMigrate });
   }
 };
 
