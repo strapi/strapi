@@ -51,7 +51,7 @@
     "execa": "^1.0.0",
     "file-loader": "^6.2.0",
     "font-awesome": "^4.7.0",
-    "formik": "^2.2.5",
+    "formik": "^2.2.6",
     "friendly-errors-webpack-plugin": "^1.7.0",
     "fs-extra": "^9.1.0",
     "history": "^4.9.0",
