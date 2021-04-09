@@ -92,11 +92,7 @@ const getPrivateAttributes = (model = {}) => {
 };
 
 const isPrivateAttribute = (model = {}, attributeName) => {
-  if (model && model.attributes && model.attributes[attributeName] && model.attributes[attributeName].private) {
-    return true;
-  } else {
-    return model && model.privateAttributes && model.privateAttributes.includes(attributeName);
-  }
+  return model && model.privateAttributes && model.privateAttributes.includes(attributeName);
 };
 
 const isScalarAttribute = attribute => {
