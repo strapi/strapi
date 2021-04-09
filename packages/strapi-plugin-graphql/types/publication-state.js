@@ -2,10 +2,10 @@
 
 module.exports = {
   definition: `
-  enum PublicationState {
-    LIVE
-    PREVIEW
-  }
+    enum PublicationState {
+      LIVE
+      PREVIEW
+    }
   `,
   resolver: {
     PublicationState: {

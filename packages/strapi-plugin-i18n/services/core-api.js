@@ -110,17 +110,17 @@ const createLocalizationHandler = contentType => {
     const { findByCode } = getService('locales');
 
     if (!has('locale', data)) {
-      return ctx.badRequest('locale.missing');
+      throw strapi.errors.badRequest('locale.missing');
     }
 
     const matchingLocale = await findByCode(data.locale);
     if (!matchingLocale) {
-      return ctx.badRequest('locale.invalid');
+      throw strapi.errors.badRequest('locale.invalid');
     }
 
     const usedLocales = getAllLocales(entry);
     if (usedLocales.includes(data.locale)) {
-      return ctx.badRequest('locale.already.used');
+      throw strapi.errors.badRequest('locale.already.used');
     }
 
     const sanitizedData = {
@@ -145,7 +145,7 @@ const createLocalizationHandler = contentType => {
       const entry = await strapi.query(contentType.uid).findOne();
 
       if (!entry) {
-        return ctx.notFound('Invalid baseEntityId');
+        throw strapi.errors.notFound('baseEntryId.invalid');
       }
 
       await createFromBaseEntry(ctx, entry);
@@ -158,7 +158,7 @@ const createLocalizationHandler = contentType => {
     const entry = await strapi.query(contentType.uid).findOne({ id: baseEntryId });
 
     if (!entry) {
-      return ctx.notFound('baseEntryId.invalid');
+      throw strapi.errors.notFound('baseEntryId.invalid');
     }
 
     await createFromBaseEntry(ctx, entry);
@@ -205,7 +205,90 @@ const addCreateLocalizationAction = contentType => {
   _.set(strapi, coreApiControllerPath, handler);
 };
 
+const mergeCustomizer = (dest, src) => {
+  if (typeof dest === 'string') {
+    return `${dest}\n${src}`;
+  }
+};
+
+/**
+ * Add a graphql schema to the plugin's global graphl schema to be processed
+ * @param {object} schema
+ */
+const addGraphqlSchema = schema => {
+  _.mergeWith(strapi.plugins.i18n.config.schema.graphql, schema, mergeCustomizer);
+};
+
+/**
+ * Add localization mutation & filters to use with the graphql plugin
+ * @param {object} contentType
+ */
+const addGraphqlLocalizationAction = contentType => {
+  const { globalId, modelName } = contentType;
+
+  if (!strapi.plugins.graphql) {
+    return;
+  }
+
+  const { toSingular, toPlural } = strapi.plugins.graphql.services.naming;
+
+  // We use a string instead of an enum as the locales can be changed in the admin
+  // NOTE: We could use a custom scalar so the validation becomes dynamic
+  const localeArgs = {
+    args: {
+      locale: 'String',
+    },
+  };
+
+  // add locale arguments in the existing queries
+  if (isSingleType(contentType)) {
+    const queryName = toSingular(modelName);
+    const mutationSuffix = _.upperFirst(queryName);
+
+    addGraphqlSchema({
+      resolver: {
+        Query: {
+          [queryName]: localeArgs,
+        },
+        Mutation: {
+          [`update${mutationSuffix}`]: localeArgs,
+          [`delete${mutationSuffix}`]: localeArgs,
+        },
+      },
+    });
+  } else {
+    const queryName = toPlural(modelName);
+
+    addGraphqlSchema({
+      resolver: {
+        Query: {
+          [queryName]: localeArgs,
+          [`${queryName}Connection`]: localeArgs,
+        },
+      },
+    });
+  }
+
+  // add new mutation to create a localization
+  const typeName = globalId;
+  const mutationName = `create${typeName}Localization`;
+  const mutationDef = `${mutationName}(input: update${typeName}Input!): ${typeName}!`;
+  const actionName = `${contentType.uid}.createLocalization`;
+
+  addGraphqlSchema({
+    mutation: mutationDef,
+    resolver: {
+      Mutation: {
+        [mutationName]: {
+          resolver: actionName,
+        },
+      },
+    },
+  });
+};
+
 module.exports = {
   addCreateLocalizationAction,
+  addGraphqlLocalizationAction,
   createSanitizer,
 };

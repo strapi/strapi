@@ -75,6 +75,11 @@ const buildMutationContext = ({ options, graphqlContext }) => {
     ctx.request.body = options;
   }
 
+  // pass extra args as ctx.query
+  if (options.input) {
+    ctx.query = convertToParams(_.omit(options, 'input'));
+  }
+
   return ctx;
 };
 
