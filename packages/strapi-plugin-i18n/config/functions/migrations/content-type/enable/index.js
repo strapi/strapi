@@ -21,12 +21,9 @@ const updateLocale = (model, ORM, locale) => {
 
 // Enable i18n on CT -> Add default locale to all existing entities
 const after = async ({ model, definition, previousDefinition, ORM }) => {
-  const ctService = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types');
 
-  if (
-    !ctService.isLocalizedContentType(definition) ||
-    ctService.isLocalizedContentType(previousDefinition)
-  ) {
+  if (!isLocalizedContentType(definition) || isLocalizedContentType(previousDefinition)) {
     return;
   }
 
