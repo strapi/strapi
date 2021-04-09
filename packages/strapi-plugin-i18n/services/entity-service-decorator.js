@@ -1,12 +1,21 @@
 'use strict';
 
-const { has, omit } = require('lodash/fp');
+const { has, omit, isArray } = require('lodash/fp');
 const { getService } = require('../utils');
 
 const { syncLocalizations, syncNonLocalizedAttributes } = require('./localizations');
 
 const LOCALE_QUERY_FILTER = '_locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
+const BULK_ACTIONS = ['delete'];
+
+const paramsContain = (key, params) => {
+  return (
+    has(key, params) ||
+    has(key, params._where) ||
+    (isArray(params._where) && params._where.some(clause => has(key, clause)))
+  );
+};
 
 /**
  * Adds default locale or replaces _locale by locale in query params
@@ -26,7 +35,10 @@ const wrapParams = async (params = {}, ctx = {}) => {
     };
   }
 
-  if (has('id', params) && SINGLE_ENTRY_ACTIONS.includes(action)) {
+  if (
+    (paramsContain('id', params) && SINGLE_ENTRY_ACTIONS.includes(action)) ||
+    (paramsContain('id_in', params) && BULK_ACTIONS.includes(action))
+  ) {
     return params;
   }
 
