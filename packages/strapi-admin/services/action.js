@@ -8,10 +8,10 @@ const { AUTHOR_CODE, PUBLISH_ACTION } = require('./constants');
 
 /**
  * Returns actions available for a role.
- * @param {object} roleId
+ * @param {string|number} roleId
  * @returns {object[]}
  */
-const getActionsByRoleId = async roleId => {
+const getAllowedActionsForRole = async roleId => {
   const { actionProvider } = getService('permission');
 
   if (!isNil(roleId)) {
@@ -22,13 +22,7 @@ const getActionsByRoleId = async roleId => {
     }
 
     if (role.code === AUTHOR_CODE) {
-      return actionProvider.values().filter(action => {
-        if (action.actionId !== PUBLISH_ACTION) {
-          return true;
-        }
-
-        return false;
-      });
+      return actionProvider.values().filter(({ actionId }) => actionId !== PUBLISH_ACTION);
     }
   }
 
@@ -36,5 +30,5 @@ const getActionsByRoleId = async roleId => {
 };
 
 module.exports = {
-  getActionsByRoleId,
+  getAllowedActionsForRole,
 };

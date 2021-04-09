@@ -37,7 +37,7 @@ module.exports = {
 
     const { sectionsBuilder, conditionProvider } = getService('permission');
 
-    const actions = await getService('action').getActionsByRoleId(roleId);
+    const actions = await getService('action').getAllowedActionsForRole(roleId);
     const conditions = conditionProvider.values();
     const sections = await sectionsBuilder.build(actions);
 

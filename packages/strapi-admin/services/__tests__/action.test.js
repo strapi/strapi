@@ -1,6 +1,6 @@
 'use strict';
 
-const { getActionsByRoleId } = require('../action');
+const { getAllowedActionsForRole } = require('../action');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../constants');
 
 const fixtures = [
@@ -16,7 +16,7 @@ const fixtures = [
 ];
 
 describe('Action', () => {
-  describe('getActionByRoleId', () => {
+  describe('getAllowedActionsForRole', () => {
     test('returns every action if role is not provided', async () => {
       global.strapi = {
         admin: {
@@ -32,7 +32,7 @@ describe('Action', () => {
         },
       };
 
-      const actions = await getActionsByRoleId();
+      const actions = await getAllowedActionsForRole();
       expect(actions.length).toBe(fixtures.length);
       expect(actions).toEqual(expect.arrayContaining(fixtures));
     });
@@ -58,7 +58,7 @@ describe('Action', () => {
         },
       };
 
-      const actions = await getActionsByRoleId(roleId);
+      const actions = await getAllowedActionsForRole(roleId);
 
       expect(findOneRoleMock).toHaveBeenCalledWith({ id: roleId });
       expect(actions.length).toBe(fixtures.length);
@@ -86,7 +86,7 @@ describe('Action', () => {
         },
       };
 
-      const actions = await getActionsByRoleId(roleId);
+      const actions = await getAllowedActionsForRole(roleId);
 
       expect(findOneRoleMock).toHaveBeenCalledWith({ id: roleId });
       expect(actions.length).toBe(fixtures.length - 1);
