@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+'use strict';
 
 const queries = require('../queries');
 
