@@ -331,7 +331,7 @@ const buildModels = (models, ctx) => {
     const { kind, modelType } = model;
 
     if (modelType === 'component') {
-      return buildComponent(model, ctx);
+      return buildComponent(model);
     }
 
     switch (kind) {
