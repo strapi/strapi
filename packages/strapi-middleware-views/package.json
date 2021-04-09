@@ -17,7 +17,7 @@
   "dependencies": {
     "consolidate": "^0.16.0",
     "koa-views": "^6.3.0",
-    "lodash": "4.17.20"
+    "lodash": "4.17.21"
   },
   "author": {
     "email": "hi@strapi.io",
