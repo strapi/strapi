@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -17,9 +17,9 @@
     "@sindresorhus/slugify": "1.1.0",
     "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "pluralize": "^8.0.0",
-    "react": "^16.13.1",
+    "react": "^16.14.0",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
     "react-redux": "7.2.2",
@@ -29,10 +29,10 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-generate": "3.5.3",
-    "strapi-generate-api": "3.5.3",
-    "strapi-helper-plugin": "3.5.3",
-    "strapi-utils": "3.5.3",
+    "strapi-generate": "3.5.4",
+    "strapi-generate-api": "3.5.4",
+    "strapi-helper-plugin": "3.5.4",
+    "strapi-utils": "3.5.4",
     "yup": "^0.27.0"
   },
   "author": {
