@@ -4,7 +4,8 @@ const generateOptions = (appLocales, currentLocale, localizations, permissions) 
   return appLocales
     .filter(({ code }) => {
       return (
-        code !== currentLocale && localizations.findIndex(({ locale }) => locale === code) !== -1
+        code !== currentLocale &&
+        (localizations || []).findIndex(({ locale }) => locale === code) !== -1
       );
     })
     .filter(({ code }) => {
