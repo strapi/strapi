@@ -38,9 +38,9 @@ class DatabaseManager {
 
     validateModelSchemas({ strapi: this.strapi, manager: this });
 
-    await this.connectors.initialize();
-
     this.initializeModelsMap();
+
+    await this.connectors.initialize();
 
     return this;
   }
@@ -73,12 +73,7 @@ class DatabaseManager {
       throw new Error(`argument entity is required`);
     }
 
-    const normalizedName = entity.toLowerCase();
-
-    // get by uid or name / plugin
-    const model = this.models.has(entity)
-      ? this.models.get(entity)
-      : this.getModel(normalizedName, plugin);
+    const model = this.getModel(entity, plugin);
 
     if (!model) {
       throw new Error(`The model ${entity} can't be found.`);
@@ -101,11 +96,8 @@ class DatabaseManager {
     return query;
   }
 
-  getModel(name, plugin) {
+  getModelFromStrapi(name, plugin) {
     const key = _.toLower(name);
-
-    if (this.models.has(key)) return this.models.get(key);
-
     if (plugin === 'admin') {
       return _.get(strapi.admin, ['models', key]);
     }
@@ -115,6 +107,17 @@ class DatabaseManager {
     }
 
     return _.get(strapi, ['models', key]) || _.get(strapi, ['components', key]);
+  }
+
+  getModel(name, plugin) {
+    const key = _.toLower(name);
+
+    if (this.models.has(key)) {
+      const { modelName, plugin: pluginName } = this.models.get(key);
+      return this.getModelFromStrapi(modelName, pluginName);
+    } else {
+      return this.getModelFromStrapi(key, plugin);
+    }
   }
 
   getModelByAssoc(assoc) {

@@ -1,6 +1,6 @@
 'use strict';
 
-const { difference, intersection } = require('lodash/fp');
+const { difference, keys, intersection, isEmpty } = require('lodash/fp');
 const { getService } = require('../../../../utils');
 const migrateForMongoose = require('./migrate-for-mongoose');
 const migrateForBookshelf = require('./migrate-for-bookshelf');
@@ -16,9 +16,9 @@ const after = async ({ model, definition, previousDefinition, ORM }) => {
   const localizedAttributes = getLocalizedAttributes(definition);
   const prevLocalizedAttributes = getLocalizedAttributes(previousDefinition);
   const attributesDisabled = difference(prevLocalizedAttributes, localizedAttributes);
-  const attributesToMigrate = intersection(Object.keys(definition.attributes), attributesDisabled);
+  const attributesToMigrate = intersection(keys(definition.attributes), attributesDisabled);
 
-  if (attributesToMigrate.length === 0) {
+  if (isEmpty(attributesToMigrate)) {
     return;
   }
 

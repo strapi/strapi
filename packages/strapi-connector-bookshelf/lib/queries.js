@@ -89,12 +89,12 @@ module.exports = function createQueryBuilder({ model, strapi }) {
   /**
    * Count entries based on filters
    */
-  function count(params = {}) {
+  function count(params = {}, { transacting } = {}) {
     const filters = pickCountFilters(convertRestQueryParams(params));
 
     return model
       .query(buildQuery({ model, filters }))
-      .count()
+      .count({ transacting })
       .then(Number);
   }
 
