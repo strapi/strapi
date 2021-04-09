@@ -45,10 +45,6 @@ const isMutationEnabled = (schema, name) => {
   return _.get(schema, `resolver.Mutation.${name}`) !== false;
 };
 
-const isNotPrivate = _.curry((model, attributeName) => {
-  return !contentTypes.isPrivateAttribute(model, attributeName);
-});
-
 const wrapPublicationStateResolver = query => async (parent, args, ctx, ast) => {
   const results = await query(parent, args, ctx, ast);
 
@@ -72,7 +68,7 @@ const buildTypeDefObj = model => {
   }
 
   Object.keys(attributes)
-    .filter(attributeName => isNotPrivate(model, attributeName))
+    .filter(attributeName => !contentTypes.isPrivateAttribute(model, attributeName))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -86,7 +82,7 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => isNotPrivate(model, association.alias))
+    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
@@ -97,9 +93,10 @@ const buildTypeDefObj = model => {
   return typeDef;
 };
 
-const generateEnumDefinitions = (attributes, globalId) => {
+const generateEnumDefinitions = (model, globalId) => {
+  const { attributes } = model
   return Object.keys(attributes)
-    .filter(attribute => attributes[attribute].type === 'enumeration' && !attributes[attribute].private)
+    .filter(attribute => attributes[attribute].type === 'enumeration' && !contentTypes.isPrivateAttribute(model, attribute))
     .map(attribute => {
       const definition = attributes[attribute];
 
@@ -170,7 +167,7 @@ const buildAssocResolvers = model => {
   const { primaryKey, associations = [] } = model;
 
   return associations
-    .filter(association => isNotPrivate(model, association.alias))
+    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
@@ -331,7 +328,7 @@ const buildModelDefinition = (model, globalType = {}) => {
     typeDefObj,
   };
 
-  schema.definition += generateEnumDefinitions(model.attributes, globalId);
+  schema.definition += generateEnumDefinitions(model, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, schema);
 
   const description = getTypeDescription(globalType, model);
