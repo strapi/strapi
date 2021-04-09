@@ -69,9 +69,9 @@ const decorator = service => ({
 
     const model = strapi.db.getModel(ctx.model);
 
-    const { isLocalized } = getService('content-types');
+    const { isLocalizedContentType } = getService('content-types');
 
-    if (!isLocalized(model)) {
+    if (!isLocalizedContentType(model)) {
       return wrappedOptions;
     }
 
@@ -90,9 +90,9 @@ const decorator = service => ({
   async create(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
 
-    const { isLocalized } = getService('content-types');
+    const { isLocalizedContentType } = getService('content-types');
 
-    if (!isLocalized(model)) {
+    if (!isLocalizedContentType(model)) {
       return service.create.call(this, opts, ctx);
     }
 
@@ -115,9 +115,9 @@ const decorator = service => ({
   async update(opts, ctx) {
     const model = strapi.db.getModel(ctx.model);
 
-    const { isLocalized } = getService('content-types');
+    const { isLocalizedContentType } = getService('content-types');
 
-    if (!isLocalized(model)) {
+    if (!isLocalizedContentType(model)) {
       return service.update.call(this, opts, ctx);
     }
 

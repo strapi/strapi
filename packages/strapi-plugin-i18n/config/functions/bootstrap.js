@@ -33,7 +33,7 @@ module.exports = async () => {
 
 const registerModelsHooks = () => {
   Object.values(strapi.models)
-    .filter(model => getService('content-types').isLocalized(model))
+    .filter(model => getService('content-types').isLocalizedContentType(model))
     .forEach(model => {
       strapi.db.lifecycles.register({
         model: model.uid,

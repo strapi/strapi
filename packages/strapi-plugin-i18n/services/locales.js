@@ -54,9 +54,9 @@ const initDefaultLocale = async () => {
 };
 
 const deleteAllLocalizedEntriesFor = async ({ locale }) => {
-  const { isLocalized } = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types');
 
-  const localizedModels = Object.values(strapi.contentTypes).filter(isLocalized);
+  const localizedModels = Object.values(strapi.contentTypes).filter(isLocalizedContentType);
 
   for (const model of localizedModels) {
     await strapi.query(model.uid).delete({ locale }, { returning: false });

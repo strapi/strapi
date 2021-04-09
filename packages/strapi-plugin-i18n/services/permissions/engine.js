@@ -12,7 +12,7 @@ const willEvaluatePermissionHandler = ({ permission, addCondition }) => {
   const { subject, properties } = permission;
   const { locales } = properties || {};
 
-  const { isLocalized } = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types');
 
   // If there is no subject defined, ignore the permission
   if (!subject) {
@@ -22,7 +22,7 @@ const willEvaluatePermissionHandler = ({ permission, addCondition }) => {
   const ct = strapi.contentTypes[subject];
 
   // If the subject exists but isn't localized, ignore the permission
-  if (!isLocalized(ct)) {
+  if (!isLocalizedContentType(ct)) {
     return;
   }
 

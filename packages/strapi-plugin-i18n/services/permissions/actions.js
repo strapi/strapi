@@ -38,7 +38,7 @@ const shouldApplyLocalesPropertyToSubject = ({ property, subject }) => {
   if (property === 'locales') {
     const model = strapi.getModel(subject);
 
-    return getService('content-types').isLocalized(model);
+    return getService('content-types').isLocalizedContentType(model);
   }
 
   return true;

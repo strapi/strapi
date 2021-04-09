@@ -13,7 +13,7 @@ module.exports = () => {
   const coreApiService = getService('core-api');
 
   Object.values(strapi.contentTypes).forEach(contentType => {
-    if (contentTypeService.isLocalized(contentType)) {
+    if (contentTypeService.isLocalizedContentType(contentType)) {
       const { attributes, modelName } = contentType;
 
       _.set(attributes, 'localizations', {

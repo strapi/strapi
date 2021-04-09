@@ -15,7 +15,7 @@ describe('i18n - Migration - disable localization on a field', () => {
             i18n: {
               services: {
                 'content-types': {
-                  isLocalized: () => false,
+                  isLocalizedContentType: () => false,
                 },
               },
             },
@@ -41,7 +41,7 @@ describe('i18n - Migration - disable localization on a field', () => {
             i18n: {
               services: {
                 'content-types': {
-                  isLocalized: () => true,
+                  isLocalizedContentType: () => true,
                   getLocalizedAttributes,
                 },
               },
@@ -68,7 +68,7 @@ describe('i18n - Migration - disable localization on a field', () => {
             i18n: {
               services: {
                 'content-types': {
-                  isLocalized: () => true,
+                  isLocalizedContentType: () => true,
                   getLocalizedAttributes,
                 },
               },
@@ -99,7 +99,7 @@ describe('i18n - Migration - disable localization on a field', () => {
             i18n: {
               services: {
                 'content-types': {
-                  isLocalized: () => true,
+                  isLocalizedContentType: () => true,
                   getLocalizedAttributes,
                 },
               },
@@ -130,7 +130,7 @@ describe('i18n - Migration - disable localization on a field', () => {
             i18n: {
               services: {
                 'content-types': {
-                  isLocalized: () => true,
+                  isLocalizedContentType: () => true,
                   getLocalizedAttributes,
                 },
               },

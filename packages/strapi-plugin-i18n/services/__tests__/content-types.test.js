@@ -1,7 +1,7 @@
 'use strict';
 
 const {
-  isLocalized,
+  isLocalizedContentType,
   getValidLocale,
   getNewLocalizationsFrom,
   getAndValidateRelatedEntity,
@@ -11,16 +11,16 @@ const {
 } = require('../content-types');
 
 describe('content-types service', () => {
-  describe('isLocalized', () => {
+  describe('isLocalizedContentType', () => {
     test('Checks for the i18N option', () => {
-      expect(isLocalized({ pluginOptions: { i18n: { localized: false } } })).toBe(false);
-      expect(isLocalized({ pluginOptions: { i18n: { localized: true } } })).toBe(true);
+      expect(isLocalizedContentType({ pluginOptions: { i18n: { localized: false } } })).toBe(false);
+      expect(isLocalizedContentType({ pluginOptions: { i18n: { localized: true } } })).toBe(true);
     });
 
     test('Defaults to false', () => {
-      expect(isLocalized({})).toBe(false);
-      expect(isLocalized({ pluginOptions: {} })).toBe(false);
-      expect(isLocalized({ pluginOptions: { i18n: {} } })).toBe(false);
+      expect(isLocalizedContentType({})).toBe(false);
+      expect(isLocalizedContentType({ pluginOptions: {} })).toBe(false);
+      expect(isLocalizedContentType({ pluginOptions: { i18n: {} } })).toBe(false);
     });
   });
 

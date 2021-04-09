@@ -10,9 +10,9 @@ const after = () => {};
 
 // Disable i18n on CT -> Delete all entities that are not in the default locale
 const before = async ({ model, definition, previousDefinition, ORM }, context) => {
-  const ctService = getService('content-types');
+  const { isLocalizedContentType } = getService('content-types');
 
-  if (ctService.isLocalized(definition) || !ctService.isLocalized(previousDefinition)) {
+  if (isLocalizedContentType(definition) || !isLocalizedContentType(previousDefinition)) {
     return;
   }
 

@@ -10,14 +10,14 @@ const validateLocaleCreation = async (ctx, next) => {
   const {
     getValidLocale,
     getNewLocalizationsFrom,
-    isLocalized,
+    isLocalizedContentType,
     getAndValidateRelatedEntity,
     fillNonLocalizedAttributes,
   } = getService('content-types');
 
   const modelDef = strapi.getModel(model);
 
-  if (!isLocalized(modelDef)) {
+  if (!isLocalizedContentType(modelDef)) {
     return next();
   }
 
