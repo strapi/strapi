@@ -7,7 +7,7 @@ import { FooterWrapper, SelectWrapper, Label } from './components';
 
 function Footer({ count, onChange, params }) {
   const { emitEvent } = useGlobalContext();
-  const _limit = parseInt(params.pageSize, 10);
+  const _limit = parseInt(params.pageSize, 20);
   const _page = parseInt(params.page, 10);
 
   const handleChangePage = ({ target: { value } }) => {
