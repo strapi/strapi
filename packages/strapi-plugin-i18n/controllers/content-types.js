@@ -33,7 +33,7 @@ module.exports = {
 
     let params = modelDef.kind === 'singleType' ? {} : { id };
 
-    const entity = await strapi.entityService.findOne({ params }, { model });
+    const entity = await strapi.query(model).findOne(params);
 
     if (!entity) {
       return ctx.notFound();
