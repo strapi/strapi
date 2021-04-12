@@ -35,15 +35,20 @@ describe('CRUD locales', () => {
   let rq;
   let strapi;
   const builder = createTestBuilder();
+  let localeService;
 
   beforeAll(async () => {
     await builder.addContentType(productModel).build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
+
+    localeService = strapi.plugins.i18n.services.locales;
   });
 
   afterAll(async () => {
+    await localeService.setDefaultLocale({ code: 'en' });
+
     await strapi.destroy();
     await builder.cleanup();
   });
