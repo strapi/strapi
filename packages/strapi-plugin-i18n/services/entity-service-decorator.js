@@ -35,10 +35,10 @@ const wrapParams = async (params = {}, ctx = {}) => {
     };
   }
 
-  if (
-    (paramsContain('id', params) && SINGLE_ENTRY_ACTIONS.includes(action)) ||
-    (paramsContain('id_in', params) && BULK_ACTIONS.includes(action))
-  ) {
+  const entityDefinedById = paramsContain('id', params) && SINGLE_ENTRY_ACTIONS.includes(action);
+  const entitiesDefinedByIds = paramsContain('id_in', params) && BULK_ACTIONS.includes(action);
+
+  if (entityDefinedById || entitiesDefinedByIds) {
     return params;
   }
 
