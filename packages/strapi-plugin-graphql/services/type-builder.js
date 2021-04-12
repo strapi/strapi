@@ -213,7 +213,7 @@ module.exports = {
     `;
   },
 
-  generateInputModel(model, name, { allowIds = true } = {}) {
+  generateInputModel(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.upperFirst(toSingular(name))}Input`;
     const hasOnlyPrivateAttributes = Object.keys(model.attributes).filter(attributeName => !contentTypes.isPrivateAttribute(model, attributeName)).length === 0
