@@ -63,8 +63,12 @@ const buildTypeDefObj = model => {
   // Add timestamps attributes.
   if (_.isArray(_.get(model, 'options.timestamps'))) {
     const [createdAtKey, updatedAtKey] = model.options.timestamps;
-    typeDef[createdAtKey] = 'DateTime!';
-    typeDef[updatedAtKey] = 'DateTime!';
+    if (!contentTypes.isPrivateAttribute(model, createdAtKey)) {
+      typeDef[createdAtKey] = 'DateTime!';
+    }
+    if (!contentTypes.isPrivateAttribute(model, updatedAtKey)) {
+      typeDef[updatedAtKey] = 'DateTime!';
+    }
   }
 
   Object.keys(attributes)
