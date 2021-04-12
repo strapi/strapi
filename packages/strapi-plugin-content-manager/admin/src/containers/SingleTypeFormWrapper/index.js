@@ -235,7 +235,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}`);
+      const endPoint = getRequestUrl(`${slug}${rawQuery}`);
 
       try {
         emitEventRef.current('willEditEntry', trackerProperty);
@@ -262,7 +262,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
