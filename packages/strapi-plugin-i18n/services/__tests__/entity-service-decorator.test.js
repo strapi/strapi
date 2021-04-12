@@ -114,6 +114,36 @@ describe('Entity service decorator', () => {
       expect(output).toMatchObject({ params: { locale: 'en' } });
     });
 
+    const testData = [
+      ['findOne', { id: 1 }],
+      ['update', { id: 1 }],
+      ['delete', { id: 1 }],
+      ['delete', { id_in: [1] }],
+      ['findOne', { _where: { id: 1 } }],
+      ['update', { _where: { id: 1 } }],
+      ['delete', { _where: { id: 1 } }],
+      ['delete', { _where: { id_in: [1] } }],
+      ['findOne', { _where: [{ id: 1 }] }],
+      ['update', { _where: [{ id: 1 }] }],
+      ['delete', { _where: [{ id: 1 }] }],
+      ['delete', { _where: [{ id_in: [1] }] }],
+    ];
+
+    test.each(testData)(
+      "Doesn't add locale param when the params contain id or id_in - %s",
+      async (action, params) => {
+        const defaultService = {
+          wrapOptions: jest.fn(opts => Promise.resolve(opts)),
+        };
+        const service = decorator(defaultService);
+
+        const input = Object.assign({ populate: ['test'], params });
+        const output = await service.wrapOptions(input, { model: 'test-model', action });
+
+        expect(output).toEqual({ populate: ['test'], params });
+      }
+    );
+
     test('Replaces _locale param', async () => {
       const defaultService = {
         wrapOptions: jest.fn(opts => Promise.resolve(opts)),
