@@ -21,13 +21,13 @@ module.exports = async (ctx, next) => {
   return lazyRateLimit.RateLimit.middleware(
     Object.assign(
       {},
+      strapi.plugins['users-permissions'].config.ratelimit,
       {
         interval: 1 * 60 * 1000,
         max: 5,
         prefixKey: `${ctx.request.path}:${ctx.request.ip}`,
         message,
-      },
-      strapi.plugins['users-permissions'].config.ratelimit
+      }
     )
   )(ctx, next);
 };
