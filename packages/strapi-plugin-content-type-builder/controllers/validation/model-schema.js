@@ -16,7 +16,6 @@ const createSchema = (types, relations, { modelType } = {}) => {
       .required('name.required'),
     description: yup.string(),
     draftAndPublish: yup.boolean(),
-    pluginOptions: yup.object(),
     connection: yup.string(),
     collectionName: yup
       .string()
