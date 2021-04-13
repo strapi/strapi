@@ -1,6 +1,6 @@
 'use strict';
 
-const { isValid, format, formatISO } = require('date-fns');
+const { isValid, format, formatISO, parseISO } = require('date-fns');
 const { has } = require('lodash');
 
 const createFormatter = client => ({ type }, value) => {
@@ -38,7 +38,7 @@ const defaultFormatter = {
     }
   },
   date: value => {
-    const cast = new Date(value);
+    const cast = parseISO(value);
     return isValid(cast) ? formatISO(cast, { representation: 'date' }) : null;
   },
   datetime: value => {
