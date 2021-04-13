@@ -19,7 +19,7 @@
     "classnames": "^2.3.1",
     "codemirror": "^5.60.0",
     "draft-js": "^0.11.5",
-    "highlight.js": "^10.4.1",
+    "highlight.js": "^10.7.2",
     "immutable": "^3.8.2",
     "lodash": "4.17.21",
     "markdown-it": "^12.0.4",
