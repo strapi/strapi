@@ -37,7 +37,7 @@ describe('i18n - Controller - content-types', () => {
       const findOne = jest.fn(() => Promise.resolve(undefined));
       const getModel = jest.fn(() => ({ pluginOptions: { i18n: { localized: true } } }));
 
-      global.strapi.entityService = { findOne };
+      global.strapi.query = () => ({ findOne });
       global.strapi.getModel = getModel;
       const ctx = {
         state: { user: {} },
@@ -82,7 +82,7 @@ describe('i18n - Controller - content-types', () => {
       const find = jest.fn(() => Promise.resolve(permissions));
       const getModel = jest.fn(() => model);
 
-      global.strapi.entityService = { findOne };
+      global.strapi.query = () => ({ findOne });
       global.strapi.getModel = getModel;
       global.strapi.admin.services.permission = { find };
       const ctx = {
