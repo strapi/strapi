@@ -45,6 +45,8 @@ const isMutationEnabled = (schema, name) => {
   return _.get(schema, `resolver.Mutation.${name}`) !== false;
 };
 
+const isTypeAttributeEnabled = (model, attr) => _.get(strapi.plugins.graphql, `config._schema.graphql.type.${model.globalId}.${attr}`) !== false
+
 const wrapPublicationStateResolver = query => async (parent, args, ctx, ast) => {
   const results = await query(parent, args, ctx, ast);
 
@@ -63,16 +65,12 @@ const buildTypeDefObj = model => {
   // Add timestamps attributes.
   if (_.isArray(_.get(model, 'options.timestamps'))) {
     const [createdAtKey, updatedAtKey] = model.options.timestamps;
-    if (!contentTypes.isPrivateAttribute(model, createdAtKey)) {
-      typeDef[createdAtKey] = 'DateTime!';
-    }
-    if (!contentTypes.isPrivateAttribute(model, updatedAtKey)) {
-      typeDef[updatedAtKey] = 'DateTime!';
-    }
+    typeDef[createdAtKey] = 'DateTime!';
+    typeDef[updatedAtKey] = 'DateTime!';
   }
 
   Object.keys(attributes)
-    .filter(attributeName => !contentTypes.isPrivateAttribute(model, attributeName))
+    .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -100,7 +98,8 @@ const buildTypeDefObj = model => {
 const generateEnumDefinitions = (model, globalId) => {
   const { attributes } = model
   return Object.keys(attributes)
-    .filter(attribute => attributes[attribute].type === 'enumeration' && !contentTypes.isPrivateAttribute(model, attribute))
+    .filter(attribute => isTypeAttributeEnabled(model, attribute))
+    .filter(attribute => attributes[attribute].type === 'enumeration')
     .map(attribute => {
       const definition = attributes[attribute];
 
