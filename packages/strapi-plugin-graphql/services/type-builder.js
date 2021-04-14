@@ -12,7 +12,6 @@ const graphql = require('graphql');
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLDate, GraphQLDateTime } = require('graphql-iso-date');
 const GraphQLLong = require('graphql-type-long');
-const { contentTypes } = require('strapi-utils');
 
 const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
