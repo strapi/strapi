@@ -552,6 +552,7 @@ const buildMutationTypeDef = ({ model, action }, ctx) => {
     resolver: `${model.uid}.${action}`,
     transformOutput: result => ({ [toSingular(model.modelName)]: result }),
     ...getMutationInfo(ctx.schema, mutationName),
+    isShadowCrud: true,
   };
 
   if (!actionExists(resolverOpts)) {
