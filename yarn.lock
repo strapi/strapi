@@ -11181,10 +11181,12 @@ is-utf8@^0.2.0:
   resolved "https://registry.yarnpkg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
   integrity sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=
 
-is-valid-domain@0.0.17:
-  version "0.0.17"
-  resolved "https://registry.yarnpkg.com/is-valid-domain/-/is-valid-domain-0.0.17.tgz#2cc19d576b4feebcf4ce5edd99dc8f0280e9d058"
-  integrity sha512-w0UWEXyrgPeWWwj9FVT14y4/dSIqWgjDkzxbsGDFpT+QRbyS9HTwwNvGus2IOR/03GzCpeChzSWK9Bo9WlStDA==
+is-valid-domain@0.0.19:
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/is-valid-domain/-/is-valid-domain-0.0.19.tgz#50ce5ff3ab1cbe85bcb5b155b0fba61f4b9ea668"
+  integrity sha512-NxuZbJABXdGlFNEVphG9bT0YOQE0B75Bv+emGsEjmRnAs9aMUVbdKUafj//yTxApThjqQqRKBd9MJDlnqx8Pmg==
+  dependencies:
+    punycode "^1.4.1"
 
 is-whitespace@^0.3.0:
   version "0.3.0"
@@ -16089,7 +16091,7 @@ punycode@1.3.2:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.3.2.tgz#9653a036fb7c1ee42342f2325cceefea3926c48d"
   integrity sha1-llOgNvt8HuQjQvIyXM7v6jkmxI0=
 
-punycode@^1.2.4:
+punycode@^1.2.4, punycode@^1.4.1:
   version "1.4.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-1.4.1.tgz#c0d5a63b2718800ad8e1eb0fa5269c84dd41845e"
   integrity sha1-wNWmOycYgArY4esPpSachN1BhF4=
