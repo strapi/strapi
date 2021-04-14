@@ -51,6 +51,8 @@
 
 <br>
 
+# Hello intro git
+
 Strapi is a free and open-source headless CMS delivering your content anywhere you need.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
