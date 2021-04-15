@@ -84,7 +84,7 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
+    .filter(association => isTypeAttributeEnabled(model, association.alias))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
@@ -170,7 +170,7 @@ const buildAssocResolvers = model => {
   const { primaryKey, associations = [] } = model;
 
   return associations
-    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
+    .filter(association => isTypeAttributeEnabled(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
