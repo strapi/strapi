@@ -14,7 +14,7 @@
   "main": "./lib",
   "dependencies": {
     "cloudinary": "^1.25.1",
-    "into-stream": "^5.1.0"
+    "into-stream": "^7.0.0"
   },
   "peerDependencies": {
     "strapi-plugin-upload": "^3.1.6"
