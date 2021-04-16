@@ -46,6 +46,9 @@ const isMutationEnabled = (schema, name) => {
 };
 
 const isTypeAttributeEnabled = (model, attr) => _.get(strapi.plugins.graphql, `config._schema.graphql.type.${model.globalId}.${attr}`) !== false
+const isNotPrivate = _.curry((model, attributeName) => {
+  return !contentTypes.isPrivateAttribute(model, attributeName);
+});
 
 const wrapPublicationStateResolver = query => async (parent, args, ctx, ast) => {
   const results = await query(parent, args, ctx, ast);
@@ -70,6 +73,7 @@ const buildTypeDefObj = model => {
   }
 
   Object.keys(attributes)
+    .filter(isNotPrivate(model))
     .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
@@ -84,8 +88,8 @@ const buildTypeDefObj = model => {
   // Change field definition for collection relations
   associations
     .filter(association => association.type === 'collection')
-    .filter(association => isTypeAttributeEnabled(model, association.alias))
-    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
+    .filter(association => isNotPrivate(model, association.alias))
+    .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
@@ -171,8 +175,8 @@ const buildAssocResolvers = model => {
   const { primaryKey, associations = [] } = model;
 
   return associations
+    .filter(association => isNotPrivate(model, association.alias))
     .filter(association => isTypeAttributeEnabled(model, association.alias))
-    .filter(association => !contentTypes.isPrivateAttribute(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
