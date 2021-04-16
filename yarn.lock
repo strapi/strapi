@@ -10737,21 +10737,21 @@ invariant@^2.2.1, invariant@^2.2.4:
   dependencies:
     loose-envify "^1.0.0"
 
-ioredis@^4.19.4:
-  version "4.19.4"
-  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.19.4.tgz#11112005f87ad3acac247ada3b22eb31b947f7c7"
-  integrity sha512-3haQWw9dpEjcfVcRktXlayVNrrqvvc2io7Q/uiV2UsYw8/HC2YwwJr78Wql7zu5bzwci0x9bZYA69U7KkevAvw==
+ioredis@^4.26.0:
+  version "4.26.0"
+  resolved "https://registry.yarnpkg.com/ioredis/-/ioredis-4.26.0.tgz#dbbfb5e5da085fc2b1de8174db50fa42f9fed66a"
+  integrity sha512-nh39okWezWWZ35/RxXXzHksMFt4WCaev8SNO2kozRDeVdEAJj16EarqPP3JeHz8IEjEXN5CiVtbWMk62Z0eveQ==
   dependencies:
     cluster-key-slot "^1.1.0"
-    debug "^4.1.1"
+    debug "^4.3.1"
     denque "^1.1.0"
     lodash.defaults "^4.2.0"
     lodash.flatten "^4.4.0"
     p-map "^2.1.0"
-    redis-commands "1.6.0"
+    redis-commands "1.7.0"
     redis-errors "^1.2.0"
     redis-parser "^3.0.0"
-    standard-as-callback "^2.0.1"
+    standard-as-callback "^2.1.0"
 
 ip-regex@^2.1.0:
   version "2.1.0"
@@ -16924,10 +16924,10 @@ redent@^3.0.0:
     indent-string "^4.0.0"
     strip-indent "^3.0.0"
 
-redis-commands@*, redis-commands@1.6.0, redis-commands@^1.5.0:
-  version "1.6.0"
-  resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.6.0.tgz#36d4ca42ae9ed29815cdb30ad9f97982eba1ce23"
-  integrity sha512-2jnZ0IkjZxvguITjFTrGiLyzQZcTvaw8DAaCXxZq/dsHXz7KfMQ3OUJy7Tz9vnRtZRVz6VRCPDvruvU8Ts44wQ==
+redis-commands@*, redis-commands@1.7.0, redis-commands@^1.5.0:
+  version "1.7.0"
+  resolved "https://registry.yarnpkg.com/redis-commands/-/redis-commands-1.7.0.tgz#15a6fea2d58281e27b1cd1acfb4b293e278c3a89"
+  integrity sha512-nJWqw3bTFy21hX/CPKHth6sfhZbdiHP6bTawSgQBlKOVRG7EZkfHbbHwQJnrE4vsQf0CMNE+3gJ4Fmm16vdVlQ==
 
 redis-errors@^1.0.0, redis-errors@^1.2.0:
   version "1.2.0"
@@ -18767,10 +18767,10 @@ stackframe@^1.1.1:
   resolved "https://registry.yarnpkg.com/stackframe/-/stackframe-1.2.0.tgz#52429492d63c62eb989804c11552e3d22e779303"
   integrity sha512-GrdeshiRmS1YLMYgzF16olf2jJ/IzxXY9lhKOskuVziubpTYcYqyOwYeJKzQkwy7uN0fYSsbsC4RQaXf9LCrYA==
 
-standard-as-callback@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/standard-as-callback/-/standard-as-callback-2.0.1.tgz#ed8bb25648e15831759b6023bdb87e6b60b38126"
-  integrity sha512-NQOxSeB8gOI5WjSaxjBgog2QFw55FV8TkS6Y07BiB3VJ8xNTvUYm0wl0s8ObgQ5NhdpnNfigMIKjgPESzgr4tg==
+standard-as-callback@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/standard-as-callback/-/standard-as-callback-2.1.0.tgz#8953fc05359868a77b5b9739a665c5977bb7df45"
+  integrity sha512-qoRRSyROncaz1z0mvYqIE4lCd9p2R90i6GxW3uZv5ucSu8tU7B5HXUP1gG8pVZsYNVaXjk8ClXHPttLyxAL48A==
 
 static-extend@^0.1.1:
   version "0.1.2"
