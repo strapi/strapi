@@ -57,6 +57,7 @@ module.exports = (projectDirectory, cliArguments) => {
       'strapi-plugin-users-permissions',
       'strapi-plugin-email',
       'strapi-plugin-upload',
+      'strapi-plugin-i18n',
     ],
     additionalsDependencies: {},
   };
