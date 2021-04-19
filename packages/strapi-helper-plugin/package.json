@@ -34,7 +34,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/preset-env": "^7.13.12",
+    "@babel/preset-env": "^7.13.15",
     "@babel/preset-react": "^7.13.13",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.15.6",
@@ -74,7 +74,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "styled-components": "^5.2.1",
+    "styled-components": "^5.2.3",
     "whatwg-fetch": "^3.6.2"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
