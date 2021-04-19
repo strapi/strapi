@@ -24,7 +24,7 @@
     "@babel/preset-env": "^7.13.15",
     "@babel/preset-react": "^7.13.13",
     "@babel/runtime": "^7.13.10",
-    "@buffetjs/core": "3.3.4",
+    "@buffetjs/core": "3.3.5",
     "@buffetjs/custom": "3.3.4",
     "@buffetjs/hooks": "3.3.4",
     "@buffetjs/icons": "3.3.4",
