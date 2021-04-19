@@ -255,6 +255,7 @@ const reducer = (state = initialState, action) => {
           allowedTypes: ['images', 'files', 'videos'],
           type: 'media',
           multiple: true,
+          ...options,
         };
       } else if (attributeType === 'enumeration') {
         dataToSet = { ...options, type: 'enumeration', enum: [] };

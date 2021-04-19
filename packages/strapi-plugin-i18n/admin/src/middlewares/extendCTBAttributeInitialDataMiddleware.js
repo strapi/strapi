@@ -36,10 +36,9 @@ const extendCTBAttributeInitialDataMiddleware = () => {
     if (
       action.type === 'ContentTypeBuilder/FormModal/SET_ATTRIBUTE_DATA_SCHEMA' &&
       action.forTarget === 'contentType' &&
-      !['relation', 'media', 'component'].includes(action.attributeType) &&
+      !['relation', 'component'].includes(action.attributeType) &&
       !action.isEditing
     ) {
-      // We need to make sure the plugin is installed
       return enhanceAction();
     }
 
