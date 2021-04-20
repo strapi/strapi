@@ -14,7 +14,7 @@ const getInitLocale = () => {
 
     if (!matchingLocale) {
       throw new Error(
-        'Unknown locale code provided in the envrionment variable STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE'
+        'Unknown locale code provided in the environment variable STRAPI_PLUGIN_I18N_INIT_LOCALE_CODE'
       );
     }
 
