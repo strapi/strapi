@@ -14,7 +14,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "@sindresorhus/slugify": "1.1.0",
+    "@sindresorhus/slugify": "2.0.0",
     "date-fns": "^2.19.0",
     "lodash": "4.17.21",
     "pino": "^4.7.1",

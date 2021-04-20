@@ -15,7 +15,7 @@
     "@buffetjs/icons": "3.3.4",
     "@buffetjs/styles": "3.3.4",
     "@buffetjs/utils": "3.3.4",
-    "@sindresorhus/slugify": "1.1.0",
+    "@sindresorhus/slugify": "2.0.0",
     "classnames": "^2.3.1",
     "codemirror": "^5.60.0",
     "draft-js": "^0.11.5",
