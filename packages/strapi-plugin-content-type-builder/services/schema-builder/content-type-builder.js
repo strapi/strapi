@@ -224,6 +224,7 @@ const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute =
     plugin,
     columnName: attribute.targetColumnName || undefined,
     autoPopulate: targetAttribute.autoPopulate,
+    private: targetAttribute.private || undefined,
   };
 
   switch (attribute.nature) {
