@@ -26,7 +26,7 @@
     "@babel/runtime": "^7.13.10",
     "@buffetjs/core": "3.3.4",
     "@buffetjs/custom": "3.3.4",
-    "@buffetjs/hooks": "3.3.4",
+    "@buffetjs/hooks": "3.3.5",
     "@buffetjs/icons": "3.3.4",
     "@buffetjs/styles": "3.3.4",
     "@buffetjs/utils": "3.3.4",

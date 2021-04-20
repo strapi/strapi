@@ -1180,6 +1180,11 @@
   resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.3.4.tgz#2fd7622673a0a28177e910ad85ba9f1386e9c47f"
   integrity sha512-HUdnzBFovEXWnIVgzts6DtPSEJEn55Ivbu6Xd8AXyZoz5xYTwhD5iCtif0CS5uEtqsXGOoc320kcbPrRn6wEgw==
 
+"@buffetjs/hooks@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@buffetjs/hooks/-/hooks-3.3.5.tgz#31630c695c924f81ab29ba4fc36679834095e04f"
+  integrity sha512-OsO9fQtE0FxhR1AVaWQaSoNZeDlJ53DdHZvO4pn+DUfsyiNgdm3Gcy65Ek4Koj3P5iSeMJdQ/QAonp5gmP2v+g==
+
 "@buffetjs/icons@3.3.4":
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/@buffetjs/icons/-/icons-3.3.4.tgz#21b46eea90db7a88b2b929bfed63099275ef068a"
