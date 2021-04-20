@@ -1,6 +1,6 @@
 {
   "name": "strapi-helper-plugin",
-  "version": "3.5.3",
+  "version": "3.5.4",
   "description": "Helper for Strapi plugins development",
   "files": [
     "dist"
@@ -34,8 +34,8 @@
   "devDependencies": {
     "@babel/core": "^7.12.3",
     "@babel/plugin-proposal-class-properties": "^7.12.1",
-    "@babel/preset-env": "^7.13.8",
-    "@babel/preset-react": "^7.9.4",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/preset-react": "^7.13.13",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "rimraf": "3.0.2",
@@ -57,19 +57,19 @@
     "@buffetjs/styles": "3.3.4",
     "@buffetjs/utils": "3.3.4",
     "bootstrap": "^4.6.0",
-    "classnames": "^2.2.5",
+    "classnames": "^2.3.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.1",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "moment": "^2.29.1",
-    "react": "^16.13.1",
+    "react": "^16.14.0",
     "react-dom": "^16.9.0",
     "react-helmet": "^6.1.0",
     "react-intl": "4.5.0",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
-    "styled-components": "^5.2.1",
+    "styled-components": "^5.2.3",
     "whatwg-fetch": "^3.6.2"
   },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
