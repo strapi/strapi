@@ -172,7 +172,7 @@ describe('Locales', () => {
       await localesService.initDefaultLocale();
       expect(count).toHaveBeenCalledWith();
       expect(create).toHaveBeenCalledWith({
-        name: 'English',
+        name: 'English (en)',
         code: 'en',
       });
       expect(set).toHaveBeenCalledWith({ key: 'default_locale', value: 'en' });
