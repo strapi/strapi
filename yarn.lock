@@ -1209,6 +1209,14 @@
     lodash "4.17.20"
     yup "^0.27.0"
 
+"@buffetjs/utils@3.3.5":
+  version "3.3.5"
+  resolved "https://registry.yarnpkg.com/@buffetjs/utils/-/utils-3.3.5.tgz#ad46ac0ab7eb87bb124ba66e2ecdadfe89137e75"
+  integrity sha512-ZkfsgMrLrV9RkDWRDALe4m3BppTulMIpsK+6xnRV/v7J8PEhwPqHHTQBh0CbWC/SXiQhfSj1dKKw6dmun/xFIQ==
+  dependencies:
+    lodash "4.17.20"
+    yup "^0.27.0"
+
 "@casl/ability@^4.1.5":
   version "4.1.6"
   resolved "https://registry.yarnpkg.com/@casl/ability/-/ability-4.1.6.tgz#89f263903adfc9316cedff329ad615564662448a"

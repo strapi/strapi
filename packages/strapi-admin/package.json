@@ -29,7 +29,7 @@
     "@buffetjs/hooks": "3.3.4",
     "@buffetjs/icons": "3.3.4",
     "@buffetjs/styles": "3.3.4",
-    "@buffetjs/utils": "3.3.4",
+    "@buffetjs/utils": "3.3.5",
     "@casl/ability": "^4.1.5",
     "@fingerprintjs/fingerprintjs": "3.0.7",
     "@fortawesome/fontawesome-free": "^5.15.3",

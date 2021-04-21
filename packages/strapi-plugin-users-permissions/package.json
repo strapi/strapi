@@ -17,7 +17,7 @@
     "@buffetjs/hooks": "3.3.4",
     "@buffetjs/icons": "3.3.4",
     "@buffetjs/styles": "3.3.4",
-    "@buffetjs/utils": "3.3.4",
+    "@buffetjs/utils": "3.3.5",
     "@purest/providers": "^1.0.2",
     "bcryptjs": "^2.4.3",
     "grant-koa": "5.4.8",
