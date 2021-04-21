@@ -271,8 +271,10 @@ const addGraphqlLocalizationAction = contentType => {
 
   // add new mutation to create a localization
   const typeName = globalId;
-  const mutationName = `create${typeName}Localization`;
-  const mutationDef = `${mutationName}(input: update${typeName}Input!): ${typeName}!`;
+
+  const capitalizedName = _.upperFirst(toSingular(modelName));
+  const mutationName = `create${capitalizedName}Localization`;
+  const mutationDef = `${mutationName}(input: update${capitalizedName}Input!): ${typeName}!`;
   const actionName = `${contentType.uid}.createLocalization`;
 
   addGraphqlSchema({
