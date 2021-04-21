@@ -19,6 +19,7 @@
     "mongoose": "5.10.8",
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.3.2",
+    "p-map": "4.0.0",
     "pluralize": "^8.0.0",
     "semver": "^7.3.5",
     "strapi-utils": "3.5.4"

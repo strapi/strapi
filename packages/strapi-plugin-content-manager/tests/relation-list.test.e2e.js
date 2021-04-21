@@ -101,12 +101,12 @@ describe('Relation-list route', () => {
 
       data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
       data.products = builder.sanitizedFixturesFor(productModel.name, strapi);
-    }, 60000);
+    });
 
     afterAll(async () => {
       await strapi.destroy();
       await builder.cleanup();
-    }, 60000);
+    });
 
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
@@ -149,12 +149,12 @@ describe('Relation-list route', () => {
 
       data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
       data.products = builder.sanitizedFixturesFor(productWithDPModel.name, strapi);
-    }, 60000);
+    });
 
     afterAll(async () => {
       await strapi.destroy();
       await builder.cleanup();
-    }, 60000);
+    });
 
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({

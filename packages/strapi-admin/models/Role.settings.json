@@ -7,6 +7,14 @@
   "options": {
     "timestamps": true
   },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
   "attributes": {
     "name": {
       "type": "string",

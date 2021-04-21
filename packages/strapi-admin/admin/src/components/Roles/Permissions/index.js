@@ -1,91 +1,155 @@
-import React, { memo, useReducer, forwardRef, useMemo, useImperativeHandle } from 'react';
+import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import init from 'ee_else_ce/components/Roles/Permissions/init';
-import reducer, { initialState } from 'ee_else_ce/components/Roles/Permissions/reducer';
-
+import { difference } from 'strapi-helper-plugin';
+import { has, isEmpty } from 'lodash';
 import Tabs from '../Tabs';
-import ContentTypes from './ContentTypes';
-import PluginsAndSettingsPermissions from './PluginsAndSettingsPermissions';
-import { roleTabsLabel } from '../../../utils';
-import { useModels } from '../../../hooks';
-import PermissionsProvider from './PermissionsProvider';
-import { getAllAttributes, formatPermissionsLayout } from './utils';
+import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
+import ContentTypes from '../ContentTypes';
+import PluginsAndSettings from '../PluginsAndSettings';
+import TAB_LABELS from './utils/tabLabels';
+import formatPermissionsToAPI from './utils/formatPermissionsToAPI';
+import init from './init';
+import reducer, { initialState } from './reducer';
 
-const Permissions = forwardRef(({ role, permissionsLayout, rolePermissions }, ref) => {
-  const { singleTypes, collectionTypes, components } = useModels();
-  const [state, dispatch] = useReducer(reducer, initialState, state =>
-    init(state, permissionsLayout, rolePermissions, role)
+const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) => {
+  const [{ initialData, layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
+    init(layout, permissions)
   );
 
-  useImperativeHandle(ref, () => ({
-    getPermissions: () => {
-      return {
-        contentTypesPermissions: state.contentTypesPermissions,
-        pluginsAndSettingsPermissions: state.pluginsAndSettingsPermissions,
-      };
-    },
-    resetForm: () => {
-      dispatch({ type: 'ON_RESET', initialPermissions: rolePermissions });
-    },
-    setFormAfterSubmit: () => {
-      dispatch({ type: 'ON_SUBMIT_SUCCEEDED' });
-    },
-  }));
+  useImperativeHandle(ref, () => {
+    return {
+      getPermissions: () => {
+        const collectionTypesDiff = difference(
+          initialData.collectionTypes,
+          modifiedData.collectionTypes
+        );
+        const singleTypesDiff = difference(initialData.singleTypes, modifiedData.singleTypes);
 
-  const allSingleTypesAttributes = useMemo(() => {
-    return getAllAttributes(singleTypes, components);
-  }, [components, singleTypes]);
+        const contentTypesDiff = { ...collectionTypesDiff, ...singleTypesDiff };
 
-  const allCollectionTypesAttributes = useMemo(() => {
-    return getAllAttributes(collectionTypes, components);
-  }, [components, collectionTypes]);
+        let didUpdateConditions;
 
-  const pluginsPermissionsLayout = useMemo(() => {
-    return formatPermissionsLayout(permissionsLayout.sections.plugins, 'plugin');
-  }, [permissionsLayout]);
+        if (isEmpty(contentTypesDiff)) {
+          didUpdateConditions = false;
+        } else {
+          didUpdateConditions = Object.values(contentTypesDiff).some(permission => {
+            return Object.values(permission).some(permissionValue =>
+              has(permissionValue, 'conditions')
+            );
+          });
+        }
 
-  const settingsPermissionsLayout = useMemo(() => {
-    return formatPermissionsLayout(permissionsLayout.sections.settings, 'category');
-  }, [permissionsLayout]);
+        return { permissionsToSend: formatPermissionsToAPI(modifiedData), didUpdateConditions };
+      },
+      resetForm: () => {
+        dispatch({ type: 'RESET_FORM' });
+      },
+      setFormAfterSubmit: () => {
+        dispatch({ type: 'SET_FORM_AFTER_SUBMIT' });
+      },
+    };
+  });
 
-  const providerValues = {
-    ...state,
-    dispatch,
-    components,
+  const handleChangeCollectionTypeLeftActionRowCheckbox = (
+    pathToCollectionType,
+    propertyName,
+    rowName,
+    value
+  ) => {
+    dispatch({
+      type: 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX',
+      pathToCollectionType,
+      propertyName,
+      rowName,
+      value,
+    });
   };
 
+  const handleChangeCollectionTypeGlobalActionCheckbox = (collectionTypeKind, actionId, value) => {
+    dispatch({
+      type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
+      collectionTypeKind,
+      actionId,
+      value,
+    });
+  };
+
+  const handleChangeConditions = conditions => {
+    dispatch({ type: 'ON_CHANGE_CONDITIONS', conditions });
+  };
+
+  const handleChangeSimpleCheckbox = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_SIMPLE_CHECKBOX',
+      keys: name,
+      value,
+    });
+  }, []);
+
+  const handleChangeParentCheckbox = useCallback(({ target: { name, value } }) => {
+    dispatch({
+      type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
+      keys: name,
+      value,
+    });
+  }, []);
+
   return (
-    <PermissionsProvider value={providerValues}>
-      <Tabs tabsLabel={roleTabsLabel}>
+    <PermissionsDataManagerProvider
+      value={{
+        availableConditions: layout.conditions,
+        modifiedData,
+        onChangeConditions: handleChangeConditions,
+        onChangeSimpleCheckbox: handleChangeSimpleCheckbox,
+        onChangeParentCheckbox: handleChangeParentCheckbox,
+        onChangeCollectionTypeLeftActionRowCheckbox: handleChangeCollectionTypeLeftActionRowCheckbox,
+        onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
+      }}
+    >
+      <Tabs tabsLabel={TAB_LABELS}>
         <ContentTypes
-          allContentTypesAttributes={allCollectionTypesAttributes}
-          contentTypes={collectionTypes}
+          layout={layouts.collectionTypes}
+          kind="collectionTypes"
+          isFormDisabled={isFormDisabled}
         />
         <ContentTypes
-          allContentTypesAttributes={allSingleTypesAttributes}
-          contentTypes={singleTypes}
+          layout={layouts.singleTypes}
+          kind="singleTypes"
+          isFormDisabled={isFormDisabled}
         />
-        <PluginsAndSettingsPermissions
-          permissionType="plugin"
-          pluginsPermissionsLayout={pluginsPermissionsLayout}
+        <PluginsAndSettings
+          layout={layouts.plugins}
+          kind="plugins"
+          isFormDisabled={isFormDisabled}
         />
-        <PluginsAndSettingsPermissions
-          permissionType="settings"
-          pluginsPermissionsLayout={settingsPermissionsLayout}
+        <PluginsAndSettings
+          layout={layouts.settings}
+          kind="settings"
+          isFormDisabled={isFormDisabled}
         />
       </Tabs>
-    </PermissionsProvider>
+    </PermissionsDataManagerProvider>
   );
 });
 
 Permissions.defaultProps = {
-  role: null,
-  rolePermissions: {},
+  permissions: [],
+  layout: {
+    conditions: [],
+    sections: {
+      collectionTypes: {},
+      singleTypes: {
+        actions: [],
+      },
+      settings: [],
+      plugins: [],
+    },
+  },
 };
 Permissions.propTypes = {
-  permissionsLayout: PropTypes.object.isRequired,
-  rolePermissions: PropTypes.object,
-  role: PropTypes.object,
+  layout: PropTypes.object,
+  isFormDisabled: PropTypes.bool.isRequired,
+  permissions: PropTypes.array,
 };
 
 export default memo(Permissions);

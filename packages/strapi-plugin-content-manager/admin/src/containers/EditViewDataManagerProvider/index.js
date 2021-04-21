@@ -2,15 +2,19 @@ import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'reac
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { Prompt, Redirect } from 'react-router-dom';
-import { LoadingIndicatorPage, useGlobalContext, OverlayBlocker } from 'strapi-helper-plugin';
-import EditViewDataManagerContext from '../../contexts/EditViewDataManager';
+import {
+  LoadingIndicatorPage,
+  useGlobalContext,
+  OverlayBlocker,
+  ContentManagerEditViewDataManagerContext,
+} from 'strapi-helper-plugin';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';
 
 const EditViewDataManagerProvider = ({
   allLayoutData,
-  allowedActions: { canCreate, canRead, canUpdate },
+  allowedActions: { canRead, canUpdate },
   children,
   componentsDataStructure,
   contentTypeDataStructure,
@@ -53,22 +57,6 @@ const EditViewDataManagerProvider = ({
   const { emitEvent, formatMessage } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
 
-  const shouldRedirectToHomepageWhenCreatingEntry = useMemo(() => {
-    if (isLoadingForData) {
-      return false;
-    }
-
-    if (!isCreatingEntry) {
-      return false;
-    }
-
-    if (canCreate === false) {
-      return true;
-    }
-
-    return false;
-  }, [isCreatingEntry, canCreate, isLoadingForData]);
-
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
     if (isLoadingForData) {
       return false;
@@ -98,12 +86,6 @@ const EditViewDataManagerProvider = ({
       strapi.notification.info(getTrad('permissions.not-allowed.update'));
     }
   }, [shouldRedirectToHomepageWhenEditingEntry]);
-
-  useEffect(() => {
-    if (shouldRedirectToHomepageWhenCreatingEntry) {
-      strapi.notification.info(getTrad('permissions.not-allowed.create'));
-    }
-  }, [shouldRedirectToHomepageWhenCreatingEntry]);
 
   useEffect(() => {
     dispatch({
@@ -442,18 +424,13 @@ const EditViewDataManagerProvider = ({
     []
   );
 
-  // Redirect the user to the homepage if he is not allowed to create a document
-  if (shouldRedirectToHomepageWhenCreatingEntry) {
-    return <Redirect to="/" />;
-  }
-
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
     return <Redirect to={from} />;
   }
 
   return (
-    <EditViewDataManagerContext.Provider
+    <ContentManagerEditViewDataManagerContext.Provider
       value={{
         addComponentToDynamicZone,
         addNonRepeatableComponentToField,
@@ -507,7 +484,7 @@ const EditViewDataManagerProvider = ({
           </>
         )}
       </>
-    </EditViewDataManagerContext.Provider>
+    </ContentManagerEditViewDataManagerContext.Provider>
   );
 };
 

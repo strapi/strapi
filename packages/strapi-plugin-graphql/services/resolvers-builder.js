@@ -18,7 +18,7 @@ const {
 } = require('./utils');
 
 const buildMutation = (mutationName, config) => {
-  const { resolver, resolverOf, transformOutput = _.identity } = config;
+  const { resolver, resolverOf, transformOutput = _.identity, isShadowCrud = false } = config;
 
   if (_.isFunction(resolver) && !isResolvablePath(resolverOf)) {
     throw new Error(
@@ -31,7 +31,7 @@ const buildMutation = (mutationName, config) => {
   // custom resolvers
   if (_.isFunction(resolver)) {
     return async (root, options = {}, graphqlContext, info) => {
-      const ctx = buildMutationContext({ options, graphqlContext });
+      const ctx = buildMutationContext({ options, graphqlContext, isShadowCrud });
 
       await policiesMiddleware(ctx);
       graphqlContext.context = ctx;
@@ -43,7 +43,7 @@ const buildMutation = (mutationName, config) => {
   const action = getAction(resolver);
 
   return async (root, options = {}, graphqlContext) => {
-    const ctx = buildMutationContext({ options, graphqlContext });
+    const ctx = buildMutationContext({ options, graphqlContext, isShadowCrud });
 
     await policiesMiddleware(ctx);
 
@@ -58,7 +58,7 @@ const buildMutation = (mutationName, config) => {
   };
 };
 
-const buildMutationContext = ({ options, graphqlContext }) => {
+const buildMutationContext = ({ options, graphqlContext, isShadowCrud }) => {
   const { context } = graphqlContext;
 
   const ctx = cloneKoaContext(context);
@@ -73,6 +73,10 @@ const buildMutationContext = ({ options, graphqlContext }) => {
     ctx.request.body = options.input.data || {};
   } else {
     ctx.request.body = options;
+  }
+
+  if (isShadowCrud) {
+    ctx.query = convertToParams(_.omit(options, 'input'));
   }
 
   return ctx;

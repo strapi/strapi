@@ -24,6 +24,7 @@ const formatComponent = component => {
       description: _.get(info, 'description', ''),
       connection,
       collectionName,
+      pluginOptions: component.pluginOptions,
       attributes: formatAttributes(component),
     },
   };

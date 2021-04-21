@@ -16,6 +16,8 @@ const HeaderWrapper = styled.div`
   padding-top: 17px;
   padding-bottom: 22px;
   background-color: ${props => props.theme.main.colors.lightGrey};
+  border-top-left-radius: ${({ theme }) => theme.main.sizes.borderRadius};
+  border-top-right-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   border: 0;
 `;
 
@@ -41,6 +43,8 @@ const Footer = styled.div`
   justify-content: space-between;
   background-color: ${props => props.theme.main.colors.strapi['gray-light']};
   padding: 15px 30px 17px 30px;
+  border-bottom-left-radius: ${({ theme }) => theme.main.sizes.borderRadius};
+  border-bottom-right-radius: ${({ theme }) => theme.main.sizes.borderRadius};
   > button {
     padding: 0 30px;
   }

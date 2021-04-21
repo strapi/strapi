@@ -86,6 +86,7 @@ module.exports = function createComponentBuilder() {
           timestamps: true,
           draftAndPublish: infos.draftAndPublish || false,
         })
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
@@ -188,6 +189,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
         .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;

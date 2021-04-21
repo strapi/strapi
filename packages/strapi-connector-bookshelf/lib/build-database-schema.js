@@ -4,10 +4,12 @@ const _ = require('lodash');
 const { singular } = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 
-const { storeDefinition, getColumnsWhereDefinitionChanged } = require('./utils/store-definition');
+const {
+  getDefinitionFromStore,
+  storeDefinition,
+  getColumnsWhereDefinitionChanged,
+} = require('./utils/store-definition');
 const { getManyRelations } = require('./utils/associations');
-const createMigrationRunner = require('./migrations/create-migration-runner');
-const draftPublishMigration = require('./migrations/draft-publish-migration');
 
 const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model }, context) => {
   // Add created_at and updated_at field if timestamp option is true
@@ -96,7 +98,7 @@ const migrateSchemas = async ({ ORM, loadedModel, definition, connection, model 
     }
   }
 
-  // Remove from attributes (auto handled by bookshlef and not displayed on ctb)
+  // Remove from attributes (auto handled by bookshelf and not displayed on ctb)
   if (loadedModel.hasTimestamps) {
     delete definition.attributes[loadedModel.hasTimestamps[0]];
     delete definition.attributes[loadedModel.hasTimestamps[1]];
@@ -398,13 +400,18 @@ const createOrUpdateTable = async ({ table, attributes, definition, ORM, model }
   }
 };
 
-const migrationRunner = createMigrationRunner(migrateSchemas, {
-  hooks: [draftPublishMigration],
-});
-
 module.exports = async ({ ORM, loadedModel, definition, connection, model }) => {
+  const previousDefinition = await getDefinitionFromStore(definition, ORM);
+
   // run migrations
-  await migrationRunner.run({ ORM, loadedModel, definition, connection, model });
+  await strapi.db.migrations.run(migrateSchemas, {
+    ORM,
+    loadedModel,
+    previousDefinition,
+    definition,
+    connection,
+    model,
+  });
 
   // store new definitions
   await storeDefinition(definition, ORM);

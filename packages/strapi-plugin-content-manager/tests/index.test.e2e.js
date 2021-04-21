@@ -49,12 +49,12 @@ describe('Content Manager End to End', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Content Types api', () => {
     test('Label is pluralized', async () => {
