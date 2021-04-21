@@ -7,6 +7,7 @@ const { machineIdSync } = require('node-machine-id');
 const fetch = require('node-fetch');
 const ciEnv = require('ci-info');
 const ee = require('../../utils/ee');
+const stringifyDeep = require('./stringify-deep');
 
 const defaultQueryOpts = {
   timeout: 1000,
@@ -57,8 +58,10 @@ module.exports = strapi => {
         event,
         uuid,
         deviceId,
-        // every property must be a string
-        properties: _.mapValues({ ...payload, ...anonymous_metadata }, _.toString),
+        properties: stringifyDeep({
+          ...payload,
+          ...anonymous_metadata,
+        }),
       }),
       ..._.merge({}, defaultQueryOpts, opts),
     };
