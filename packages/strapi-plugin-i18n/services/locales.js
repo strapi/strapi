@@ -12,17 +12,36 @@ const findById = id => strapi.query('locale', 'i18n').findOne({ id });
 
 const findByCode = code => strapi.query('locale', 'i18n').findOne({ code });
 
-const create = locale => strapi.query('locale', 'i18n').create(locale);
+const count = params => strapi.query('locale', 'i18n').count(params);
 
-const update = (params, updates) => strapi.query('locale', 'i18n').update(params, updates);
+const create = async locale => {
+  const result = await strapi.query('locale', 'i18n').create(locale);
+
+  getService('metrics').sendDidUpdateI18nLocalesEvent();
+
+  return result;
+};
+
+const update = async (params, updates) => {
+  const result = await strapi.query('locale', 'i18n').update(params, updates);
+
+  getService('metrics').sendDidUpdateI18nLocalesEvent();
+
+  return result;
+};
 
 const deleteFn = async ({ id }) => {
   const localeToDelete = await strapi.query('locale', 'i18n').findOne({ id });
 
   if (localeToDelete) {
     await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
-    return strapi.query('locale', 'i18n').delete({ id });
+    const result = await strapi.query('locale', 'i18n').delete({ id });
+
+    getService('metrics').sendDidUpdateI18nLocalesEvent();
+
+    return result;
   }
+
   return localeToDelete;
 };
 
@@ -69,6 +88,7 @@ module.exports = {
   findByCode,
   create,
   update,
+  count,
   setDefaultLocale,
   getDefaultLocale,
   setIsDefault,

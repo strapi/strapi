@@ -3,6 +3,7 @@
 const { getService } = require('../../utils');
 
 module.exports = async () => {
+  const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');
   const { sectionsBuilder, actions, conditions, engine } = getService('permissions');
@@ -29,6 +30,8 @@ module.exports = async () => {
 
   // Hooks & Models
   registerModelsHooks();
+
+  sendDidInitializeEvent();
 };
 
 const registerModelsHooks = () => {

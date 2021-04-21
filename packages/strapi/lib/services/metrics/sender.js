@@ -57,10 +57,8 @@ module.exports = strapi => {
         event,
         uuid,
         deviceId,
-        properties: {
-          ...payload,
-          ...anonymous_metadata,
-        },
+        // every property must be a string
+        properties: _.mapValues({ ...payload, ...anonymous_metadata }, _.toString),
       }),
       ..._.merge({}, defaultQueryOpts, opts),
     };
