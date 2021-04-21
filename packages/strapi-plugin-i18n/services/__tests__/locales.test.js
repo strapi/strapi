@@ -2,6 +2,11 @@
 
 const localesService = require('../locales');
 
+const fakeMetricsService = {
+  sendDidInitializeEvent() {},
+  sendDidUpdateI18nLocalesEvent() {},
+};
+
 describe('Locales', () => {
   describe('setIsDefault', () => {
     test('Set isDefault to false', async () => {
@@ -99,7 +104,14 @@ describe('Locales', () => {
       const locale = { name: 'French', code: 'fr' };
       const create = jest.fn(() => locale);
       const query = jest.fn(() => ({ create }));
-      global.strapi = { query };
+      global.strapi = {
+        query,
+        plugins: {
+          i18n: {
+            services: { metrics: fakeMetricsService },
+          },
+        },
+      };
 
       const createdLocale = await localesService.create(locale);
       expect(query).toHaveBeenCalledWith('locale', 'i18n');
@@ -111,7 +123,14 @@ describe('Locales', () => {
       const locale = { name: 'French', code: 'fr' };
       const update = jest.fn(() => locale);
       const query = jest.fn(() => ({ update }));
-      global.strapi = { query };
+      global.strapi = {
+        query,
+        plugins: {
+          i18n: {
+            services: { metrics: fakeMetricsService },
+          },
+        },
+      };
 
       const updatedLocale = await localesService.update({ code: 'fr' }, { name: 'French' });
       expect(query).toHaveBeenCalledWith('locale', 'i18n');
@@ -127,7 +146,11 @@ describe('Locales', () => {
       const query = jest.fn(() => ({ delete: deleteFn, findOne }));
       global.strapi = {
         query,
-        plugins: { i18n: { services: { 'content-types': { isLocalizedContentType } } } },
+        plugins: {
+          i18n: {
+            services: { metrics: fakeMetricsService, 'content-types': { isLocalizedContentType } },
+          },
+        },
         contentTypes: { 'application::country.country': {} },
       };
 
@@ -144,6 +167,11 @@ describe('Locales', () => {
       const query = jest.fn(() => ({ delete: deleteFn, findOne }));
       global.strapi = {
         query,
+        plugins: {
+          i18n: {
+            services: { metrics: fakeMetricsService },
+          },
+        },
       };
 
       const deletedLocale = await localesService.delete({ id: 1 });
@@ -167,6 +195,13 @@ describe('Locales', () => {
         store: () => ({
           set,
         }),
+        plugins: {
+          i18n: {
+            services: {
+              metrics: fakeMetricsService,
+            },
+          },
+        },
       };
 
       await localesService.initDefaultLocale();
