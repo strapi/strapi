@@ -256,9 +256,15 @@ class Strapi {
         }
       }
 
-      // Emit started event.
+      // Get database clients
       const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
-      await this.telemetry.send('didStartServer', { database: databaseClients });
+
+      // Emit started event.
+      await this.telemetry.send('didStartServer', {
+        database: databaseClients,
+        plugins: this.config.installedPlugins,
+        providers: this.config.installedProviders,
+      });
 
       if (cb && typeof cb === 'function') {
         cb();

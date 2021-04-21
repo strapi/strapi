@@ -83,6 +83,7 @@ module.exports = (dir, initialConfig = {}) => {
     installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
     installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
     installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
+    installedProviders: getPrefixedDeps('strapi-provider', pkgJSON),
   };
 
   const baseConfig = {
