@@ -8,7 +8,7 @@
     "description": "sentry.plugin.description"
   },
   "dependencies": {
-    "@sentry/node": "6.2.5"
+    "@sentry/node": "6.3.0"
   },
   "author": {
     "name": "Strapi team",
