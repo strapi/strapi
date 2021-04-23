@@ -14,7 +14,7 @@
   },
   "main": "./lib",
   "dependencies": {
-    "aws-sdk": "2.890.0",
+    "aws-sdk": "2.891.0",
     "lodash": "4.17.21"
   },
   "strapi": {
