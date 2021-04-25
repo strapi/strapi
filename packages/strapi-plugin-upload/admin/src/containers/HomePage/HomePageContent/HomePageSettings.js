@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDebounce } from '@buffetjs/hooks';
+import { Padded } from '@buffetjs/core';
 import { HeaderSearch, useGlobalContext, useQuery, LoadingIndicator } from 'strapi-helper-plugin';
+
 import { useAppContext } from '../../../hooks';
 import { getTrad, getFileModelTimestamps } from '../../../utils';
-
 import ControlsWrapper from '../../../components/ControlsWrapper';
 import Filters from '../../../components/Filters';
-import Padded from '../../../components/Padded';
 import SelectAll from '../../../components/SelectAll';
 import SortPicker from '../../../components/SortPicker';
 

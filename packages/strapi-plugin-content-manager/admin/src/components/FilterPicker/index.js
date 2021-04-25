@@ -34,7 +34,7 @@ function FilterPicker({
 }) {
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(userPermissions, [
       {
@@ -43,7 +43,7 @@ function FilterPicker({
       },
     ]);
 
-    return get(matchingPermissions, ['0', 'fields'], []);
+    return get(matchingPermissions, ['0', 'properties', 'fields'], []);
   }, [userPermissions, slug]);
 
   let timestamps = get(contentType, ['options', 'timestamps']);
@@ -165,9 +165,10 @@ function FilterPicker({
     e => {
       e.preventDefault();
       const nextFilters = formatFiltersToQuery(modifiedData, metadatas);
+      const useRelation = nextFilters._where.some(obj => Object.keys(obj)[0].includes('.'));
 
-      emitEventRef.current('didFilterEntries');
-      setQuery(nextFilters);
+      emitEventRef.current('didFilterEntries', { useRelation });
+      setQuery({ ...nextFilters, page: 1 });
       toggleFilterPickerState();
     },
     [modifiedData, setQuery, toggleFilterPickerState, metadatas]

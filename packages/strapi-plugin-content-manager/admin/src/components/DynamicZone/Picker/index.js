@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
@@ -11,6 +11,28 @@ import Wrapper from './Wrapper';
 const Picker = ({ components, isOpen, onClickAddComponent }) => {
   const { getComponentLayout } = useContentTypeLayout();
   const [categoryToOpen, setCategoryToOpen] = useState('');
+
+  const dynamicComponentCategories = useMemo(() => {
+    const componentsWithInfo = components.map(componentUid => {
+      const { category, info } = getComponentLayout(componentUid);
+
+      return { componentUid, category, info };
+    });
+
+    const categories = groupBy(componentsWithInfo, 'category');
+
+    return Object.keys(categories).reduce((acc, current) => {
+      acc.push({ category: current, components: categories[current] });
+
+      return acc;
+    }, []);
+  }, [components, getComponentLayout]);
+
+  useEffect(() => {
+    if (isOpen && dynamicComponentCategories.length) {
+      setCategoryToOpen(dynamicComponentCategories[0].category);
+    }
+  }, [isOpen, dynamicComponentCategories]);
 
   const handleAddComponentToDz = useCallback(
     componentUid => {
@@ -28,22 +50,6 @@ const Picker = ({ components, isOpen, onClickAddComponent }) => {
     },
     [categoryToOpen]
   );
-
-  const dynamicComponentCategories = useMemo(() => {
-    const componentsWithInfo = components.map(componentUid => {
-      const { category, info } = getComponentLayout(componentUid);
-
-      return { componentUid, category, info };
-    });
-
-    const categories = groupBy(componentsWithInfo, 'category');
-
-    return Object.keys(categories).reduce((acc, current) => {
-      acc.push({ category: current, components: categories[current] });
-
-      return acc;
-    }, []);
-  }, [components, getComponentLayout]);
 
   return (
     <Collapse isOpen={isOpen}>

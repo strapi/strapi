@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import Flex from '../../Flex';
+import { Flex } from '@buffetjs/core';
 
 const Wrapper = styled(Flex)`
   width: 1.4rem;

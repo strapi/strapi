@@ -69,24 +69,31 @@ const optimize = async buffer => {
   }
 
   const sharpInstance = autoOrientation ? sharp(buffer).rotate() : sharp(buffer);
+
   return sharpInstance
     .toBuffer({ resolveWithObject: true })
-    .then(({ data, info }) => ({
-      buffer: data,
-      info: {
-        width: info.width,
-        height: info.height,
-        size: bytesToKbytes(info.size),
-      },
-    }))
+    .then(({ data, info }) => {
+      const output = buffer.length < data.length ? buffer : data;
+
+      return {
+        buffer: output,
+        info: {
+          width: info.width,
+          height: info.height,
+          size: bytesToKbytes(output.length),
+        },
+      };
+    })
     .catch(() => ({ buffer }));
 };
 
-const BREAKPOINTS = {
+const DEFAULT_BREAKPOINTS = {
   large: 1000,
   medium: 750,
   small: 500,
 };
+
+const getBreakpoints = () => strapi.config.get('plugins.upload.breakpoints', DEFAULT_BREAKPOINTS);
 
 const generateResponsiveFormats = async file => {
   const {
@@ -101,9 +108,10 @@ const generateResponsiveFormats = async file => {
 
   const originalDimensions = await getDimensions(file.buffer);
 
+  const breakpoints = getBreakpoints();
   return Promise.all(
-    Object.keys(BREAKPOINTS).map(key => {
-      const breakpoint = BREAKPOINTS[key];
+    Object.keys(breakpoints).map(key => {
+      const breakpoint = breakpoints[key];
 
       if (breakpointSmallerThan(breakpoint, originalDimensions)) {
         return generateBreakpoint(key, { file, breakpoint, originalDimensions });

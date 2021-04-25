@@ -28,6 +28,23 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/contentType'
+  /content-manager/content-types-settings:
+    get:
+      tags:
+        - ContentTypes
+      description: List content types settings
+      responses:
+        200:
+          description: A list of content types settings
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/contentTypeSettings'
   /content-manager/content-types/{uid}/configuration:
     get:
       tags:
@@ -210,7 +227,7 @@ paths:
                     description: Suggestion if request value is not available
   # Relationships
   /content-manager/relations/{model}/{targetField}:
-    get:
+    post:
       tags:
         - Relational fields
       description: Fetch list of possible related content
@@ -221,12 +238,22 @@ paths:
           schema:
             type: string
           required: true
-          description: name of the field in the model that holds the relation
+          description: Name of the field in the model that holds the relation
         - in: query
           name: _component
           schema:
             type: string
           description: Component uid if the targetField is in a component
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                idsToOmit:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/id'
       responses:
         200:
           description: Returns a list of sanitized entries based of the relational attribute info
@@ -245,7 +272,7 @@ paths:
                         - type: integer
                     '[mainField]':
                       type: string
-                      description: value of the mainField of the entry
+                      description: Value of the mainField of the entry
                     published_at:
                       type: date
   # Collection type
@@ -515,6 +542,15 @@ components:
       additionalProperties:
         type: any
 
+    contentTypeSettings:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: Model uid
+        settings:
+          $ref: '#/components/schemas/configurationSettings'
+
     contentType:
       type: object
       properties:
@@ -598,26 +634,29 @@ components:
             - manyToOne
             - manyToMany
 
+    configurationSettings:
+      type: object
+      properties:
+        searchable:
+          type: boolean
+        bulkable:
+          type: boolean
+        filterable:
+          type: boolean
+        pageSize:
+          type: integer
+        mainField:
+          type: string
+        defaultSortBy:
+          type: string
+        defaultSortOrder:
+          type: string
+
     configuration:
       type: object
       properties:
         settings:
-          type: object
-          properties:
-            searchable:
-              type: boolean
-            bulkable:
-              type: boolean
-            filterable:
-              type: boolean
-            pageSize:
-              type: integer
-            mainField:
-              type: string
-            defaultSortBy:
-              type: string
-            defaultSortOrder:
-              type: string
+          $ref: '#/components/schemas/configurationSettings'
         metadatas:
           type: object
         layouts:

@@ -23,7 +23,14 @@ const LinkLabel = styled.span`
 `;
 
 // TODO: refacto this file
-const LeftMenuLinkContent = ({ destination, iconName, label, location, notificationsCount }) => {
+const LeftMenuLinkContent = ({
+  destination,
+  iconName,
+  label,
+  location,
+  notificationsCount,
+  search,
+}) => {
   const isLinkActive = startsWith(
     location.pathname.replace('/admin', '').concat('/'),
     destination.concat('/')
@@ -63,6 +70,7 @@ const LeftMenuLinkContent = ({ destination, iconName, label, location, notificat
       className={isLinkActive ? 'linkActive' : ''}
       to={{
         pathname: destination,
+        search,
       }}
     >
       <LeftMenuIcon icon={iconName} />
@@ -72,6 +80,9 @@ const LeftMenuLinkContent = ({ destination, iconName, label, location, notificat
   );
 };
 
+LeftMenuLinkContent.defaultProps = {
+  search: null,
+};
 LeftMenuLinkContent.propTypes = {
   destination: PropTypes.string.isRequired,
   iconName: PropTypes.string.isRequired,
@@ -80,6 +91,7 @@ LeftMenuLinkContent.propTypes = {
     pathname: PropTypes.string,
   }).isRequired,
   notificationsCount: PropTypes.number.isRequired,
+  search: PropTypes.string,
 };
 
 export default withRouter(LeftMenuLinkContent);

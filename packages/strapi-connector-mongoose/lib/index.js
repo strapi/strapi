@@ -19,6 +19,7 @@ const buildQuery = require('./buildQuery');
 const getQueryParams = require('./get-query-params');
 const mountModels = require('./mount-models');
 const queries = require('./queries');
+const registerCoreMigrations = require('./migrations');
 
 /**
  * Mongoose hook
@@ -47,110 +48,113 @@ const createConnectionURL = opts => {
 };
 
 module.exports = function(strapi) {
+  const { connections } = strapi.config;
+  const mongooseConnections = Object.keys(connections).filter(key =>
+    isMongooseConnection(connections[key])
+  );
+
   function initialize() {
-    const { connections } = strapi.config;
+    registerCoreMigrations();
 
-    const connectionsPromises = Object.keys(connections)
-      .filter(key => isMongooseConnection(connections[key]))
-      .map(async connectionName => {
-        const connection = connections[connectionName];
-        const instance = new Mongoose();
+    const connectionsPromises = mongooseConnections.map(async connectionName => {
+      const connection = connections[connectionName];
+      const instance = new Mongoose();
 
-        _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
+      _.defaults(connection.settings, strapi.config.hook.settings.mongoose);
 
-        const {
-          uri,
+      const {
+        uri,
+        host,
+        port,
+        username,
+        password,
+        database,
+        srv,
+        useUnifiedTopology,
+      } = connection.settings;
+
+      // eslint-disable-next-line node/no-deprecated-api
+      const uriOptions = uri ? url.parse(uri, true).query : {};
+      const { authenticationDatabase, ssl, debug } = _.defaults(
+        connection.options,
+        uriOptions,
+        strapi.config.hook.settings.mongoose
+      );
+      const isSrv = srv === true || srv === 'true';
+
+      // Connect to mongo database
+      const connectOptions = {};
+
+      if (!_.isEmpty(username)) {
+        connectOptions.user = username;
+
+        if (!_.isEmpty(password)) {
+          connectOptions.pass = password;
+        }
+      }
+
+      if (!_.isEmpty(authenticationDatabase)) {
+        connectOptions.authSource = authenticationDatabase;
+      }
+
+      connectOptions.ssl = ssl === true || ssl === 'true';
+      connectOptions.useNewUrlParser = true;
+      connectOptions.dbName = database;
+      connectOptions.useCreateIndex = true;
+      connectOptions.useUnifiedTopology = useUnifiedTopology || true;
+
+      try {
+        const connectionURL = createConnectionURL({
+          protocol: `mongodb${isSrv ? '+srv' : ''}`,
+          port: isSrv ? '' : `:${port}`,
           host,
-          port,
-          username,
-          password,
-          database,
-          srv,
-          useUnifiedTopology,
-        } = connection.settings;
+          auth: username ? `${username}:${encodeURIComponent(password)}@` : '',
+        });
 
-        // eslint-disable-next-line node/no-deprecated-api
-        const uriOptions = uri ? url.parse(uri, true).query : {};
-        const { authenticationDatabase, ssl, debug } = _.defaults(
-          connection.options,
-          uriOptions,
-          strapi.config.hook.settings.mongoose
-        );
-        const isSrv = srv === true || srv === 'true';
+        const connectionString = uri || connectionURL.toString();
 
-        // Connect to mongo database
-        const connectOptions = {};
+        await instance.connect(connectionString, connectOptions);
+      } catch (error) {
+        const err = new Error(`Error connecting to the Mongo database. ${error.message}`);
+        delete err.stack;
+        throw err;
+      }
 
-        if (!_.isEmpty(username)) {
-          connectOptions.user = username;
+      try {
+        const { version } = await instance.connection.db.admin().serverInfo();
+        instance.mongoDBVersion = version;
+      } catch {
+        instance.mongoDBVersion = null;
+      }
 
-          if (!_.isEmpty(password)) {
-            connectOptions.pass = password;
-          }
-        }
+      const initFunctionPath = path.resolve(
+        strapi.config.appPath,
+        'config',
+        'functions',
+        'mongoose.js'
+      );
 
-        if (!_.isEmpty(authenticationDatabase)) {
-          connectOptions.authSource = authenticationDatabase;
-        }
+      if (fs.existsSync(initFunctionPath)) {
+        require(initFunctionPath)(instance, connection);
+      }
 
-        connectOptions.ssl = ssl === true || ssl === 'true';
-        connectOptions.useNewUrlParser = true;
-        connectOptions.dbName = database;
-        connectOptions.useCreateIndex = true;
-        connectOptions.useUnifiedTopology = useUnifiedTopology || true;
+      instance.set('debug', debug === true || debug === 'true');
+      instance.set('useFindAndModify', false);
 
-        try {
-          const connectionURL = createConnectionURL({
-            protocol: `mongodb${isSrv ? '+srv' : ''}`,
-            port: isSrv ? '' : `:${port}`,
-            host,
-            auth: username ? `${username}:${encodeURIComponent(password)}@` : '',
-          });
+      const ctx = {
+        instance,
+        connection,
+      };
 
-          const connectionString = uri || connectionURL.toString();
+      _.set(strapi, `connections.${connectionName}`, instance);
 
-          await instance.connect(connectionString, connectOptions);
-        } catch (error) {
-          const err = new Error(`Error connecting to the Mongo database. ${error.message}`);
-          delete err.stack;
-          throw err;
-        }
-
-        try {
-          const { version } = await instance.connection.db.admin().serverInfo();
-          instance.mongoDBVersion = version;
-        } catch {
-          instance.mongoDBVersion = null;
-        }
-
-        const initFunctionPath = path.resolve(
-          strapi.config.appPath,
-          'config',
-          'functions',
-          'mongoose.js'
-        );
-
-        if (fs.existsSync(initFunctionPath)) {
-          require(initFunctionPath)(instance, connection);
-        }
-
-        instance.set('debug', debug === true || debug === 'true');
-        instance.set('useFindAndModify', false);
-
-        const ctx = {
-          instance,
-          connection,
-        };
-
-        _.set(strapi, `connections.${connectionName}`, instance);
-
-        return Promise.all([
-          mountComponents(connectionName, ctx),
-          mountApis(connectionName, ctx),
-          mountAdmin(connectionName, ctx),
-          mountPlugins(connectionName, ctx),
-        ]);
-      });
+      return Promise.all([
+        mountComponents(connectionName, ctx),
+        mountApis(connectionName, ctx),
+        mountAdmin(connectionName, ctx),
+        mountPlugins(connectionName, ctx),
+      ]);
+    });
 
     return Promise.all(connectionsPromises);
   }
@@ -197,10 +201,26 @@ module.exports = function(strapi) {
     );
   }
 
+  async function destroy() {
+    await Promise.all(
+      mongooseConnections.map(connName => {
+        const mongooseConnection = strapi.connections[connName];
+
+        if (
+          mongooseConnection instanceof Mongoose &&
+          mongooseConnection.connection.readyState === 1
+        ) {
+          mongooseConnection.disconnect();
+        }
+      })
+    );
+  }
+
   return {
     defaults,
     initialize,
     getQueryParams,
+    destroy,
     buildQuery,
     queries,
     ...relations,

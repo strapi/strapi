@@ -23,6 +23,7 @@ module.exports = async ({ connection }) => {
   connectOptions.ssl = ssl ? true : false;
   connectOptions.useNewUrlParser = true;
   connectOptions.dbName = connection.settings.database;
+  connectOptions.useUnifiedTopology = true;
 
   return Mongoose.connect(
     `mongodb${srv ? '+srv' : ''}://${connection.settings.host}${

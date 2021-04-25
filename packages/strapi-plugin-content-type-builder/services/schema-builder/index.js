@@ -95,6 +95,7 @@ function createSchemaBuilder({ components, contentTypes }) {
               plugin: 'upload',
               required: !!attribute.required,
               configurable: configurable === false ? false : undefined,
+              pluginOptions: attribute.pluginOptions || {},
             };
           } else {
             acc[key] = {

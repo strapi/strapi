@@ -1,15 +1,11 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 import { set } from 'lodash';
+import formDataModel from 'ee_else_ce/components/Users/ModalCreateBody/utils/formDataModel';
 
 const initialState = {
   formErrors: {},
-  modifiedData: {
-    firstname: '',
-    lastname: '',
-    email: '',
-    roles: [],
-  },
+  modifiedData: formDataModel,
 };
 
 const reducer = (state, action) =>

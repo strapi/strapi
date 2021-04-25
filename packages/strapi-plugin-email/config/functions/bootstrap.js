@@ -18,4 +18,17 @@ const createProvider = emailConfig => {
 module.exports = async () => {
   const emailConfig = _.get(strapi.plugins, 'email.config', {});
   strapi.plugins.email.provider = createProvider(emailConfig);
+
+  // Add permissions
+  const actions = [
+    {
+      section: 'settings',
+      category: 'email',
+      displayName: 'Access the Email Settings page',
+      uid: 'settings.read',
+      pluginName: 'email',
+    },
+  ];
+
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

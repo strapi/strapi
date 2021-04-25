@@ -14,20 +14,30 @@ describe('Permissions Manager', () => {
         model: 'foo',
       });
 
-      expect(pm.query).toStrictEqual({});
+      expect(pm.getQuery()).toStrictEqual({});
     });
 
     test('It should returns a valid query from the ability', () => {
-      const ability = defineAbility(can => can('read', 'foo', ['bar'], { john: 'doe' }));
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
       const pm = createPermissionsManager({
         ability,
         action: 'read',
         model: 'foo',
       });
 
-      const expected = { _or: [{ john: 'doe' }] };
+      const expected = { _or: [{ kai: 'doe' }] };
 
-      expect(pm.query).toStrictEqual(expected);
+      expect(pm.getQuery()).toStrictEqual(expected);
+    });
+
+    test('It should throw if no action is defined', () => {
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
+      const pm = createPermissionsManager({
+        ability,
+        model: 'foo',
+      });
+
+      expect(() => pm.getQuery()).toThrowError();
     });
   });
 
@@ -87,7 +97,7 @@ describe('Permissions Manager', () => {
   describe('pickPermittedFieldsOf', () => {
     const ability = defineAbility(can => {
       can('read', 'article', ['title'], { title: 'foo' });
-      can('edit', 'article', ['title'], { title: { $in: ['john', 'doe'] } });
+      can('edit', 'article', ['title'], { title: { $in: ['kai', 'doe'] } });
     });
     const pm = createPermissionsManager({
       ability,
@@ -129,7 +139,7 @@ describe('Permissions Manager', () => {
     });
 
     test('Sanitize an array of objects', () => {
-      const input = [{ title: 'foo' }, { title: 'john' }];
+      const input = [{ title: 'foo' }, { title: 'kai' }];
       const expected = [{ title: 'foo' }, {}];
 
       const res = pm.pickPermittedFieldsOf(input);

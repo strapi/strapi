@@ -237,6 +237,12 @@ exports[`Admin | components | HeadersInput should render properly should match t
           <div
             class=" css-2b097c-container"
           >
+            <span
+              aria-atomic="false"
+              aria-live="polite"
+              aria-relevant="additions text"
+              class="css-1f43avz-a11yText-A11yText"
+            />
             <div
               class=" css-1w9ejix-control"
             >
@@ -280,7 +286,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
                 >
                   <svg
                     aria-hidden="true"
-                    class="css-6q0nyr-Svg"
+                    class="css-tj5bde-Svg"
                     focusable="false"
                     height="20"
                     viewBox="0 0 20 20"
@@ -300,7 +306,7 @@ exports[`Admin | components | HeadersInput should render properly should match t
                 >
                   <svg
                     aria-hidden="true"
-                    class="css-6q0nyr-Svg"
+                    class="css-tj5bde-Svg"
                     focusable="false"
                     height="20"
                     viewBox="0 0 20 20"

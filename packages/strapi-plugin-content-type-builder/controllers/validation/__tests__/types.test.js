@@ -3,6 +3,46 @@
 const getTypeValidator = require('../types');
 
 describe('Type validators', () => {
+  describe.each(['collectionType', 'singleType'])('mixed type', kind => {
+    test('pluginOptions can be used', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          pluginOptions: {
+            i18n: {
+              localized: false,
+            },
+          },
+        },
+      };
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        modelType: kind,
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+
+    test('can use custom keys', () => {
+      const attributes = {
+        title: {
+          type: 'string',
+          myCustomKey: true,
+        },
+      };
+
+      const validator = getTypeValidator(attributes.title, {
+        types: ['string'],
+        modelType: kind,
+        attributes,
+      });
+
+      expect(validator.isValidSync(attributes.title)).toBe(true);
+    });
+  });
+
   describe('UID type validator', () => {
     test('Target field can be null', () => {
       const attributes = {

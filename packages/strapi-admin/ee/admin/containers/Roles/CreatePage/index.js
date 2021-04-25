@@ -5,17 +5,21 @@ import moment from 'moment';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
-import { CheckPagePermissions, request, useGlobalContext } from 'strapi-helper-plugin';
+import {
+  BaselineAlignment,
+  CheckPagePermissions,
+  request,
+  useGlobalContext,
+} from 'strapi-helper-plugin';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
-import BaselineAlignement from '../../../../../admin/src/components/BaselineAlignement';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormCard from '../../../../../admin/src/components/FormBloc';
-import { ButtonWithNumber, Permissions } from '../../../../../admin/src/components/Roles';
+import { ButtonWithNumber } from '../../../../../admin/src/components/Roles';
 import SizedInput from '../../../../../admin/src/components/SizedInput';
-import { formatPermissionsToApi } from '../../../../../admin/src/utils';
+import Permissions from '../../../../../admin/src/components/Roles/Permissions';
 
 import schema from './utils/schema';
 
@@ -28,7 +32,7 @@ const CreatePage = () => {
   const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
-  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
+  const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
 
   const headerActions = (handleSubmit, handleReset) => [
     {
@@ -36,7 +40,10 @@ const CreatePage = () => {
         id: 'app.components.Button.reset',
         defaultMessage: 'Reset',
       }),
-      onClick: handleReset,
+      onClick: () => {
+        handleReset();
+        permissionsRef.current.resetForm();
+      },
       color: 'cancel',
       type: 'button',
     },
@@ -69,7 +76,7 @@ const CreatePage = () => {
       })
     )
       .then(async res => {
-        const permissionsToSend = permissionsRef.current.getPermissions();
+        const { permissionsToSend } = permissionsRef.current.getPermissions();
 
         if (id) {
           emitEvent('didDuplicateRole');
@@ -80,7 +87,7 @@ const CreatePage = () => {
         if (res.data.id && !isEmpty(permissionsToSend)) {
           await request(`/admin/roles/${res.data.id}/permissions`, {
             method: 'PUT',
-            body: { permissions: formatPermissionsToApi(permissionsToSend) },
+            body: { permissions: permissionsToSend },
           });
         }
 
@@ -146,7 +153,7 @@ const CreatePage = () => {
                 actions={headerActions(handleSubmit, handleReset)}
                 isLoading={isLayoutLoading}
               />
-              <BaselineAlignement top size="3px" />
+              <BaselineAlignment top size="3px" />
               <FormCard
                 actions={actions}
                 title={formatMessage({
@@ -184,10 +191,10 @@ const CreatePage = () => {
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
                   <Permissions
-                    permissionsLayout={permissionsLayout}
+                    isFormDisabled={false}
                     ref={permissionsRef}
-                    rolePermissions={rolePermissions}
-                    role={role}
+                    permissions={rolePermissions}
+                    layout={permissionsLayout}
                   />
                 </Padded>
               )}

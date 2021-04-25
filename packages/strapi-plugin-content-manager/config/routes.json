@@ -10,6 +10,14 @@
     },
     {
       "method": "GET",
+      "path": "/content-types-settings",
+      "handler": "content-types.findContentTypesSettings",
+      "config": {
+        "policies": []
+      }
+    },
+    {
+      "method": "GET",
       "path": "/content-types/:uid/configuration",
       "handler": "content-types.findContentTypeConfiguration",
       "config": {
@@ -67,7 +75,7 @@
       }
     },
     {
-      "method": "GET",
+      "method": "POST",
       "path": "/relations/:model/:targetField",
       "handler": "relations.find",
       "config": {

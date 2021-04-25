@@ -31,6 +31,10 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
       }
     },
 
+    getAll() {
+      return Array.from(_connectors.values());
+    },
+
     get(key) {
       return _connectors.get(key);
     },
@@ -47,7 +51,7 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
 
     getByConnection(connection) {
       if (!_.has(connections, connection)) {
-        throw new Error('Trying to access a connector for an unknow connection');
+        throw new Error('Trying to access a connector for an unknown connection');
       }
 
       const connectorKey = connections[connection].connector;

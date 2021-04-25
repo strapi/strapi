@@ -75,7 +75,7 @@ module.exports = (dir, initialConfig = {}) => {
     autoReload,
     environment: process.env.NODE_ENV,
     uuid: _.get(pkgJSON, 'strapi.uuid'),
-    template: _.get(pkgJSON, 'strapi.template'),
+    packageJsonStrapi: _.omit(_.get(pkgJSON, 'strapi', {}), 'uuid'),
     info: {
       ...pkgJSON,
       strapi: strapiVersion,
@@ -83,6 +83,7 @@ module.exports = (dir, initialConfig = {}) => {
     installedPlugins: getPrefixedDeps('strapi-plugin', pkgJSON),
     installedMiddlewares: getPrefixedDeps('strapi-middleware', pkgJSON),
     installedHooks: getPrefixedDeps('strapi-hook', pkgJSON),
+    installedProviders: getPrefixedDeps('strapi-provider', pkgJSON),
   };
 
   const baseConfig = {
