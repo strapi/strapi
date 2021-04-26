@@ -31,7 +31,7 @@ const graphqlContext = {
 
 describe('Resolvers builder', () => {
   describe('buildMutation', () => {
-    it("Returns ctx.body if it's not falsy and the resolver is a string", async () => {
+    test("Returns ctx.body if it's not falsy and the resolver is a string", async () => {
       expect.assertions(1);
 
       strapi.api['my-api'].controllers['my-controller'].myAction = async ctx => {
@@ -46,7 +46,7 @@ describe('Resolvers builder', () => {
       expect(result).toBe(1);
     });
 
-    it("Returns ctx.body if it's not undefined and the resolver is a string", async () => {
+    test("Returns ctx.body if it's not undefined and the resolver is a string", async () => {
       expect.assertions(1);
 
       strapi.api['my-api'].controllers['my-controller'].myAction = async ctx => {
@@ -61,7 +61,7 @@ describe('Resolvers builder', () => {
       expect(result).toBe(0);
     });
 
-    it('Returns the action result if ctx.body is undefined and the resolver is a string', async () => {
+    test('Returns the action result if ctx.body is undefined and the resolver is a string', async () => {
       expect.assertions(1);
 
       strapi.api['my-api'].controllers['my-controller'].myAction = async () => 'result';
@@ -76,7 +76,7 @@ describe('Resolvers builder', () => {
   });
 
   describe('buildQuery', () => {
-    it("Returns ctx.body if it's not falsy and the resolver is a string", async () => {
+    test("Returns ctx.body if it's not falsy and the resolver is a string", async () => {
       expect.assertions(1);
 
       strapi.api['my-api'].controllers['my-controller'].myAction = async ctx => {
@@ -91,7 +91,7 @@ describe('Resolvers builder', () => {
       expect(result).toBe(1);
     });
 
-    it("Returns ctx.body if it's not undefined and the resolver is a string", async () => {
+    test("Returns ctx.body if it's not undefined and the resolver is a string", async () => {
       expect.assertions(1);
 
       strapi.api['my-api'].controllers['my-controller'].myAction = async ctx => {
@@ -106,7 +106,7 @@ describe('Resolvers builder', () => {
       expect(result).toBe(0);
     });
 
-    it('Returns the action result if ctx.body is undefined and the resolver is a string', async () => {
+    test('Returns the action result if ctx.body is undefined and the resolver is a string', async () => {
       expect.assertions(1);
 
       strapi.api['my-api'].controllers['my-controller'].myAction = async () => 'result';
