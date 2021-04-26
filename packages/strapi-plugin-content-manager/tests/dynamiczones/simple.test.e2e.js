@@ -92,12 +92,12 @@ describe.each([
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     rq.setURLPrefix(path);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Creation', () => {
     test('Can create an entry with a dynamic zone and a nested compo', async () => {

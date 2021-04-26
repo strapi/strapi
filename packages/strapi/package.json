@@ -1,6 +1,6 @@
 {
   "name": "strapi",
-  "version": "3.5.4",
+  "version": "3.6.0",
   "description": "An open source headless CMS solution to create and manage your own API. It provides a powerful dashboard and features to make your life easier. Databases supported: MongoDB, MySQL, MariaDB, PostgreSQL, SQLite",
   "homepage": "https://strapi.io",
   "directories": {
@@ -16,7 +16,7 @@
     "async": "^2.1.2",
     "boom": "^7.3.0",
     "boxen": "4.2.0",
-    "chalk": "^2.4.1",
+    "chalk": "^4.1.1",
     "chokidar": "3.5.1",
     "ci-info": "3.1.1",
     "cli-table3": "^0.6.0",
@@ -30,7 +30,7 @@
     "fs-extra": "^9.1.0",
     "glob": "^7.1.2",
     "inquirer": "^6.2.1",
-    "is-docker": "2.2.0",
+    "is-docker": "2.2.1",
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
     "koa-compose": "^4.1.0",
@@ -55,16 +55,16 @@
     "resolve-cwd": "^3.0.0",
     "rimraf": "^3.0.2",
     "semver": "7.3.5",
-    "strapi-database": "3.5.4",
-    "strapi-generate": "3.5.4",
-    "strapi-generate-api": "3.5.4",
-    "strapi-generate-controller": "3.5.4",
-    "strapi-generate-model": "3.5.4",
-    "strapi-generate-new": "3.5.4",
-    "strapi-generate-plugin": "3.5.4",
-    "strapi-generate-policy": "3.5.4",
-    "strapi-generate-service": "3.5.4",
-    "strapi-utils": "3.5.4"
+    "strapi-database": "3.6.0",
+    "strapi-generate": "3.6.0",
+    "strapi-generate-api": "3.6.0",
+    "strapi-generate-controller": "3.6.0",
+    "strapi-generate-model": "3.6.0",
+    "strapi-generate-new": "3.6.0",
+    "strapi-generate-plugin": "3.6.0",
+    "strapi-generate-policy": "3.6.0",
+    "strapi-generate-service": "3.6.0",
+    "strapi-utils": "3.6.0"
   },
   "scripts": {
     "postinstall": "node lib/utils/success.js"

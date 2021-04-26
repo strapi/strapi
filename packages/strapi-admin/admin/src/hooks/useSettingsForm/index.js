@@ -51,8 +51,17 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     });
   };
 
+  const setField = (fieldName, value) => {
+    dispatch({
+      type: 'ON_CHANGE',
+      keys: fieldName,
+      value,
+    });
+  };
+
   const handleSubmit = async e => {
     e.preventDefault();
+
     const errors = await checkFormValidity(modifiedData, schema);
 
     dispatch({
@@ -120,7 +129,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
   return [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     dispatch,
-    { handleCancel, handleChange, handleSubmit },
+    { handleCancel, handleChange, handleSubmit, setField },
   ];
 };
 

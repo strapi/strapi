@@ -7,6 +7,14 @@
   "options": {
     "timestamps": true
   },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    },
+    "content-type-builder": {
+      "visible": false
+    }
+  },
   "attributes": {
     "action": {
       "type": "string",
@@ -20,11 +28,11 @@
       "configurable": false,
       "required": false
     },
-    "fields": {
+    "properties": {
       "type": "json",
       "configurable": false,
       "required": false,
-      "default": []
+      "default": {}
     },
     "conditions": {
       "type": "json",

@@ -113,7 +113,7 @@ function LeftMenu({ wait }) {
 
   const displayedContentTypes = useMemo(() => {
     return sortedContentTypesList
-      .filter(obj => obj.editable)
+      .filter(obj => obj.visible)
       .map(obj => {
         if (obj.plugin) {
           return {

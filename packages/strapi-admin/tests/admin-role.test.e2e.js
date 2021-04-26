@@ -6,7 +6,6 @@ const { createStrapiInstance } = require('../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../test/helpers/request');
 
 const edition = process.env.STRAPI_DISABLE_EE === 'true' ? 'CE' : 'EE';
-const sortPermissionArray = arr => _.sortBy(arr, ['action', 'subject']);
 
 const data = {
   rolesWithUsers: [],
@@ -27,7 +26,7 @@ describe('Role CRUD End to End', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
@@ -115,7 +114,7 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -133,12 +132,14 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining([
             expect.objectContaining({
               action: 'plugins::users-permissions.roles.update',
+              properties: {},
               conditions: [],
+              subject: null,
             }),
             expect.objectContaining({
               action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
-              fields: ['username'],
+              properties: { fields: ['username'], locales: [] },
               conditions: ['admin::is-creator'],
             }),
           ]),
@@ -156,12 +157,14 @@ describe('Role CRUD End to End', () => {
           data: expect.arrayContaining([
             expect.objectContaining({
               action: 'plugins::users-permissions.roles.update',
+              properties: {},
               conditions: [],
+              subject: null,
             }),
             expect.objectContaining({
               action: 'plugins::content-manager.explorer.create',
               subject: 'plugins::users-permissions.user',
-              fields: ['username'],
+              properties: { fields: ['username'], locales: [] },
               conditions: ['admin::is-creator'],
             }),
           ]),
@@ -179,25 +182,25 @@ describe('Role CRUD End to End', () => {
         {
           action: 'plugins::content-manager.explorer.create',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.update',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.delete',
           subject: 'plugins::users-permissions.user',
-          fields: null,
+          properties: { locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
           action: 'plugins::content-manager.explorer.read',
           subject: 'plugins::users-permissions.user',
-          fields: ['username'],
+          properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -614,7 +617,7 @@ describe('Role CRUD End to End', () => {
               {
                 action: 'plugins::content-manager.explorer.create',
                 subject: 'plugins::users-permissions.user',
-                fields: ['username'],
+                properties: { fields: ['username'], locales: [] },
                 conditions: ['admin::is-creator'],
               },
             ],
@@ -647,7 +650,7 @@ describe('Role CRUD End to End', () => {
           {
             action: 'plugins::content-manager.explorer.create',
             subject: 'plugins::users-permissions.user',
-            fields: ['username'],
+            properties: { fields: ['username'], locales: [] },
             conditions: ['admin::is-creator'],
           },
         ];
@@ -666,12 +669,8 @@ describe('Role CRUD End to End', () => {
         });
 
         expect(res.statusCode).toBe(200);
-        expect(res.body.data.length > 0).toBe(true);
-        expect(sortPermissionArray(res.body.data)).toMatchObject(
-          sortPermissionArray(
-            permissions.map(perm => ({ subject: null, fields: null, conditions: [], ...perm }))
-          )
-        );
+        expect(res.body.data).toHaveLength(1);
+        expect(res.body.data[0]).toMatchObject(permissions[1]);
       });
 
       test("can't assign non-existing permissions on role", async () => {
@@ -692,7 +691,7 @@ describe('Role CRUD End to End', () => {
           statusCode: 400,
           error: 'Bad Request',
           message: 'ValidationError',
-          data: { permissions: ['[0] is not an existing permission action'] },
+          data: { 'permissions[0].action': ['action is not an existing permission action'] },
         });
       });
 

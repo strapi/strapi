@@ -50,9 +50,7 @@ module.exports = strapi => {
       });
       _.merge(strapi, { api, plugins });
 
-      /*
-       * Create a merge of all the GraphQL configuration.
-       */
+      // Create a merge of all the GraphQL configuration.
       const apisSchemas = Object.keys(strapi.api || {}).map(key => {
         const schema = _.get(strapi.api[key], 'config.schema.graphql', {});
         return attachMetadataToResolvers(schema, { api: key });
@@ -68,10 +66,10 @@ module.exports = strapi => {
         return attachMetadataToResolvers(schema, { plugin: key });
       });
 
-      const baseSchema = mergeSchemas([...apisSchemas, ...pluginsSchemas, ...extensionsSchemas]);
+      const baseSchema = mergeSchemas([...pluginsSchemas, ...extensionsSchemas, ...apisSchemas]);
 
       // save the final schema in the plugin's config
-      _.set(strapi, ['plugins', 'graphql', 'config', '_schema', 'graphql'], baseSchema);
+      _.set(strapi.plugins.graphql, 'config._schema.graphql', baseSchema);
     },
 
     initialize() {

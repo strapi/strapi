@@ -1,42 +1,40 @@
 import React, { memo, useEffect, useMemo, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, request } from 'strapi-helper-plugin';
-import { useSelector } from 'react-redux';
+import { useSelector, shallowEqual } from 'react-redux';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
 import pluginPermissions from '../../permissions';
-import { crudInitialState, crudReducer } from '../../sharedReducers';
+import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
+import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
 import EditSettingsView from '../EditSettingsView';
 
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
-  const { schemas } = useSelector(state => schemasSelector(state), []);
+  const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
   const { uid } = useParams();
 
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const getData = async signal => {
+    const fetchData = async signal => {
       try {
-        dispatch({ type: 'GET_DATA' });
+        dispatch(getData());
 
         const { data } = await request(getRequestUrl(`components/${uid}/configuration`), {
           method: 'GET',
           signal,
         });
 
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data: mergeMetasWithSchema(data, schemas, 'component'),
-        });
+        dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
       } catch (err) {
         console.error(err);
       }
     };
 
-    getData(signal);
+    fetchData(signal);
 
     return () => {
       abortController.abort();

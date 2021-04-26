@@ -1,20 +1,9 @@
 'use strict';
 
 const _ = require('lodash');
-const { getConfigUrls } = require('strapi-utils');
+const { getConfigUrls, contentTypes: contentTypesUtils } = require('strapi-utils');
 
 const { createCoreApi } = require('../core-api');
-
-const getKind = obj => obj.kind || 'collectionType';
-
-const pickSchema = model => {
-  const schema = _.cloneDeep(
-    _.pick(model, ['connection', 'collectionName', 'info', 'options', 'attributes'])
-  );
-
-  schema.kind = getKind(model);
-  return schema;
-};
 
 module.exports = function(strapi) {
   // Set connections.
@@ -34,17 +23,8 @@ module.exports = function(strapi) {
     for (let modelName in api.models) {
       let model = strapi.api[apiName].models[modelName];
 
-      Object.assign(model, {
-        __schema__: pickSchema(model),
-        kind: getKind(model),
-        modelType: 'contentType',
-        uid: `application::${apiName}.${modelName}`,
-        apiName,
-        modelName,
-        globalId: model.globalId || _.upperFirst(_.camelCase(modelName)),
-        collectionName: model.collectionName || `${modelName}`.toLocaleLowerCase(),
-        connection: model.connection || defaultConnection,
-      });
+      // mutate model
+      contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { apiName });
 
       strapi.contentTypes[model.uid] = model;
 
@@ -97,20 +77,11 @@ module.exports = function(strapi) {
   });
 
   // Init admin models.
-  Object.keys(strapi.admin.models || []).forEach(key => {
-    let model = strapi.admin.models[key];
+  Object.keys(strapi.admin.models || []).forEach(modelName => {
+    let model = strapi.admin.models[modelName];
 
-    Object.assign(model, {
-      __schema__: pickSchema(model),
-      modelType: 'contentType',
-      kind: getKind(model),
-      uid: `strapi::${key}`,
-      plugin: 'admin',
-      modelName: key,
-      identity: model.identity || _.upperFirst(key),
-      globalId: model.globalId || _.upperFirst(_.camelCase(`admin-${key}`)),
-      connection: model.connection || defaultConnection,
-    });
+    // mutate model
+    contentTypesUtils.createContentType(model, { modelName, defaultConnection });
 
     strapi.contentTypes[model.uid] = model;
   });
@@ -131,20 +102,11 @@ module.exports = function(strapi) {
       });
     });
 
-    Object.keys(plugin.models || []).forEach(key => {
-      let model = plugin.models[key];
+    Object.keys(plugin.models || []).forEach(modelName => {
+      let model = plugin.models[modelName];
 
-      Object.assign(model, {
-        __schema__: pickSchema(model),
-        modelType: 'contentType',
-        kind: getKind(model),
-        modelName: key,
-        uid: `plugins::${pluginName}.${key}`,
-        plugin: pluginName,
-        collectionName: model.collectionName || `${pluginName}_${key}`.toLowerCase(),
-        globalId: model.globalId || _.upperFirst(_.camelCase(`${pluginName}-${key}`)),
-        connection: model.connection || defaultConnection,
-      });
+      // mutate model
+      contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { pluginName });
 
       strapi.contentTypes[model.uid] = model;
     });
