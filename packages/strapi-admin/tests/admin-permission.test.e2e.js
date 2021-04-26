@@ -115,7 +115,46 @@ describe('Role CRUD End to End', () => {
                   "label": "user",
                   "properties": Array [
                     Object {
-                      "children": Array [],
+                      "children": Array [
+                        Object {
+                          "label": "username",
+                          "required": true,
+                          "value": "username",
+                        },
+                        Object {
+                          "label": "email",
+                          "required": true,
+                          "value": "email",
+                        },
+                        Object {
+                          "label": "provider",
+                          "value": "provider",
+                        },
+                        Object {
+                          "label": "password",
+                          "value": "password",
+                        },
+                        Object {
+                          "label": "resetPasswordToken",
+                          "value": "resetPasswordToken",
+                        },
+                        Object {
+                          "label": "confirmationToken",
+                          "value": "confirmationToken",
+                        },
+                        Object {
+                          "label": "confirmed",
+                          "value": "confirmed",
+                        },
+                        Object {
+                          "label": "blocked",
+                          "value": "blocked",
+                        },
+                        Object {
+                          "label": "role",
+                          "value": "role",
+                        },
+                      ],
                       "label": "Fields",
                       "value": "fields",
                     },
@@ -530,7 +569,46 @@ describe('Role CRUD End to End', () => {
                     "label": "user",
                     "properties": Array [
                       Object {
-                        "children": Array [],
+                        "children": Array [
+                          Object {
+                            "label": "username",
+                            "required": true,
+                            "value": "username",
+                          },
+                          Object {
+                            "label": "email",
+                            "required": true,
+                            "value": "email",
+                          },
+                          Object {
+                            "label": "provider",
+                            "value": "provider",
+                          },
+                          Object {
+                            "label": "password",
+                            "value": "password",
+                          },
+                          Object {
+                            "label": "resetPasswordToken",
+                            "value": "resetPasswordToken",
+                          },
+                          Object {
+                            "label": "confirmationToken",
+                            "value": "confirmationToken",
+                          },
+                          Object {
+                            "label": "confirmed",
+                            "value": "confirmed",
+                          },
+                          Object {
+                            "label": "blocked",
+                            "value": "blocked",
+                          },
+                          Object {
+                            "label": "role",
+                            "value": "role",
+                          },
+                        ],
                         "label": "Fields",
                         "value": "fields",
                       },

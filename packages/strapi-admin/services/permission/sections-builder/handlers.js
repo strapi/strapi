@@ -1,5 +1,7 @@
 'use strict';
 
+const { isVisibleAttribute } = require('strapi-utils').contentTypes;
+
 const {
   toSubjectTemplate,
   getValidOptions,
@@ -92,8 +94,8 @@ const subjectsHandlerFor = kind => ({ action, section: contentTypesSection }) =>
   contentTypesSection.subjects.push(...newSubjects);
 };
 
-const buildNode = ([attributeName, attribute]) => {
-  if (attribute.configurable === false) {
+const buildNode = (model, attributeName, attribute) => {
+  if (!isVisibleAttribute(model, attributeName)) {
     return null;
   }
 
@@ -105,15 +107,15 @@ const buildNode = ([attributeName, attribute]) => {
 
   if (attribute.type === 'component') {
     const component = strapi.components[attribute.component];
-    return { ...node, children: buildDeepAttributesCollection(component.attributes) };
+    return { ...node, children: buildDeepAttributesCollection(component) };
   }
 
   return node;
 };
 
-const buildDeepAttributesCollection = attributes => {
-  return Object.entries(attributes)
-    .map(buildNode)
+const buildDeepAttributesCollection = model => {
+  return Object.entries(model.attributes)
+    .map(([attributeName, attribute]) => buildNode(model, attributeName, attribute))
     .filter(node => node !== null);
 };
 
@@ -136,7 +138,7 @@ const fieldsProperty = ({ action, section }) => {
         return;
       }
 
-      const fields = buildDeepAttributesCollection(contentType.attributes);
+      const fields = buildDeepAttributesCollection(contentType);
       const fieldsProp = { label: 'Fields', value: 'fields', children: fields };
 
       subject.properties.push(fieldsProp);
