@@ -9,7 +9,6 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import axios from 'axios';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Row } from 'reactstrap';
@@ -200,21 +199,7 @@ const EditForm = forwardRef(
     };
 
     const handleClickDownload = () => {
-      axios
-        .get(prefixedFileURL, {
-          responseType: 'blob',
-        })
-        .then(({ data }) => {
-          const blobUrl = URL.createObjectURL(data);
-
-          aRef.current.download = downloadFileName;
-          aRef.current.href = blobUrl;
-
-          aRef.current.click();
-        })
-        .catch(err => {
-          console.error(err);
-        });
+      aRef.current.click();
     };
 
     const handleSubmit = e => {
@@ -256,9 +241,13 @@ const EditForm = forwardRef(
                                   />
                                 )}
                                 <a
+                                  dowload={downloadFileName}
                                   title={fileToEdit.fileInfo.name}
                                   style={{ display: 'none' }}
                                   ref={aRef}
+                                  href={prefixedFileURL}
+                                  target="_blank"
+                                  rel="noreferrer"
                                 >
                                   hidden
                                 </a>
