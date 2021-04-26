@@ -21,6 +21,7 @@ describe('<Inputs />', () => {
     value: ['media.create, media.delete'],
     onChange: jest.fn(),
     type: 'events',
+    shouldShowDPEvents: false,
   };
 
   it('should not crash', () => {

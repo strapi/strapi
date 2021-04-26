@@ -1,5 +1,8 @@
+'use strict';
+
 module.exports = {
   name: 'Unit test',
-  testMatch: ['**/packages/**/__tests__/?(*.)+(spec|test).js'],
+  testMatch: ['<rootDir>/packages/**/__tests__/?(*.)+(spec|test).js'],
+  modulePathIgnorePatterns: ['.cache'],
   transform: {},
 };

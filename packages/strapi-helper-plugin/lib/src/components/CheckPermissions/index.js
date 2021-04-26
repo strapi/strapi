@@ -8,7 +8,7 @@ import hasPermissions from '../../utils/hasPermissions';
 // except that it does not handle redirections nor loading state
 
 const CheckPermissions = ({ permissions, children }) => {
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
   const abortController = new AbortController();
@@ -27,7 +27,10 @@ const CheckPermissions = ({ permissions, children }) => {
       } catch (err) {
         if (isMounted.current) {
           console.error(err);
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
 
           setState({ isLoading: false });
         }

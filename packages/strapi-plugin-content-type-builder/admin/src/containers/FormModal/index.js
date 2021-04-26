@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import {
   HeaderModal,
   HeaderModalTitle,
@@ -6,21 +6,25 @@ import {
   ModalBody,
   ModalFooter,
   ModalForm,
+  PopUpWarning,
   getYupInnerErrors,
   useGlobalContext,
   useQuery,
+  useStrapi,
   InputsIndex,
 } from 'strapi-helper-plugin';
-import { Button, Label } from '@buffetjs/core';
+import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
+import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import AttributeOption from '../../components/AttributeOption';
 import BooleanBox from '../../components/BooleanBox';
 import ComponentIconPicker from '../../components/ComponentIconPicker';
+import CheckboxWithDescription from '../../components/CheckboxWithDescription';
 import CustomCheckbox from '../../components/CustomCheckbox';
 import ModalHeader from '../../components/ModalHeader';
 import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
@@ -29,28 +33,52 @@ import HeaderNavLink from '../../components/HeaderNavLink';
 import WrapperSelect from '../../components/WrapperSelect';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-import getAttributes from './utils/attributes';
-import forms from './utils/forms';
-import createHeadersArray from './utils/createHeadersArray';
-import createHeadersObjectFromArray from './utils/createHeadersObjectFromArray';
+import {
+  canEditContentType,
+  createHeadersArray,
+  createHeadersObjectFromArray,
+  getAttributesToDisplay,
+  getModalTitleSubHeader,
+  getNextSearch,
+} from './utils';
+import forms from './forms';
 import { createComponentUid, createUid } from './utils/createUid';
-import getModalTitleSubHeader from './utils/getModalTitleSubHeader';
-import getNextSearch from './utils/getNextSearch';
 import { NAVLINKS, INITIAL_STATE_DATA } from './utils/staticData';
-import init from './init';
-import reducer, { initialState } from './reducer';
 import CustomButton from './CustomButton';
-import canEditContentType from './utils/canEditContentType';
+import makeSelectFormModal from './selectors';
+import {
+  SET_DATA_TO_EDIT,
+  SET_DYNAMIC_ZONE_DATA_SCHEMA,
+  SET_ATTRIBUTE_DATA_SCHEMA,
+  ADD_COMPONENTS_TO_DYNAMIC_ZONE,
+  ON_CHANGE_ALLOWED_TYPE,
+  SET_ERRORS,
+  ON_CHANGE,
+  RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
+  RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+  RESET_PROPS_AND_SAVE_CURRENT_DATA,
+  RESET_PROPS,
+} from './constants';
 
 /* eslint-disable indent */
 /* eslint-disable react/no-array-index-key */
 
 const FormModal = () => {
   const [state, setState] = useState(INITIAL_STATE_DATA);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const formModalSelector = useMemo(makeSelectFormModal, []);
+  const dispatch = useDispatch();
+  const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
+  const {
+    strapi: { getPlugin },
+  } = useStrapi();
+  const ctbPlugin = getPlugin(pluginId);
+  const ctbFormsAPI = ctbPlugin.apis.forms;
+  const inputsFromPlugins = ctbFormsAPI.components.inputs;
+
   const query = useQuery();
   const attributeOptionRef = useRef();
 
@@ -73,6 +101,7 @@ const FormModal = () => {
     updateSchema,
     reservedNames,
   } = useDataManager();
+
   const {
     componentToCreate,
     formErrors,
@@ -165,6 +194,10 @@ const FormModal = () => {
         headerId,
       });
 
+      const collectionTypesForRelation = sortedContentTypesList.filter(
+        ({ kind }) => kind === 'collectionType'
+      );
+
       // Reset all the modification when opening the edit category modal
       if (modalType === 'editCategory') {
         setModifiedData();
@@ -198,10 +231,29 @@ const FormModal = () => {
       // Edit category
       if (modalType === 'editCategory' && actionType === 'edit') {
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          modalType,
+          actionType,
           data: {
             name: query.get('categoryName'),
           },
+        });
+      }
+
+      // Create content type we need to add the default option draftAndPublish
+      if (
+        modalType === 'contentType' &&
+        state.modalType !== 'contentType' && // Prevent setting the data structure when navigating from one tab to another
+        actionType === 'create'
+      ) {
+        dispatch({
+          type: SET_DATA_TO_EDIT,
+          modalType,
+          actionType,
+          data: {
+            draftAndPublish: true,
+          },
+          pluginOptions: {},
         });
       }
 
@@ -211,17 +263,26 @@ const FormModal = () => {
         state.modalType !== 'contentType' &&
         actionType === 'edit'
       ) {
-        const { name, collectionName, kind } = get(allDataSchema, [...pathToSchema, 'schema'], {
-          name: null,
-          collectionName: null,
-        });
+        const { name, collectionName, draftAndPublish, kind, pluginOptions } = get(
+          allDataSchema,
+          [...pathToSchema, 'schema'],
+          {
+            name: null,
+            collectionName: null,
+            pluginOptions: {},
+          }
+        );
 
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          actionType,
+          modalType,
           data: {
             name,
             collectionName,
+            draftAndPublish,
             kind,
+            pluginOptions,
           },
         });
       }
@@ -231,7 +292,9 @@ const FormModal = () => {
         const data = get(allDataSchema, pathToSchema, {});
 
         dispatch({
-          type: 'SET_DATA_TO_EDIT',
+          type: SET_DATA_TO_EDIT,
+          actionType,
+          modalType,
           data: {
             name: data.schema.name,
             category: data.category,
@@ -263,7 +326,7 @@ const FormModal = () => {
         };
 
         dispatch({
-          type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
+          type: SET_DYNAMIC_ZONE_DATA_SCHEMA,
           attributeToEdit,
         });
       }
@@ -298,13 +361,14 @@ const FormModal = () => {
         }
 
         dispatch({
-          type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+          type: SET_ATTRIBUTE_DATA_SCHEMA,
           attributeType,
-          nameToSetForRelation: get(sortedContentTypesList, ['0', 'title'], 'error'),
-          targetUid: get(sortedContentTypesList, ['0', 'uid'], 'error'),
+          nameToSetForRelation: get(collectionTypesForRelation, ['0', 'title'], 'error'),
+          targetUid: get(collectionTypesForRelation, ['0', 'uid'], 'error'),
           isEditing: actionType === 'edit',
           modifiedDataToSetForEditing: attributeToEdit,
           step,
+          forTarget,
         });
       }
     }
@@ -314,6 +378,7 @@ const FormModal = () => {
   const form = get(forms, [state.modalType, 'form', state.settingType], () => ({
     items: [],
   }));
+
   const headers = createHeadersArray(state);
 
   const isCreatingContentType = state.modalType === 'contentType';
@@ -345,7 +410,8 @@ const FormModal = () => {
         state.actionType === 'edit',
         // currentUID
         get(allDataSchema, [...state.pathToSchema, 'uid'], null),
-        reservedNames
+        reservedNames,
+        ctbFormsAPI
       );
 
       // Check form validity for component
@@ -356,7 +422,8 @@ const FormModal = () => {
         modifiedData.category || '',
         reservedNames,
         state.actionType === 'edit',
-        get(allDataSchema, [...state.pathToSchema, 'uid'], null)
+        get(allDataSchema, [...state.pathToSchema, 'uid'], null),
+        ctbFormsAPI
       );
 
       // Check for validity for creating a component
@@ -367,7 +434,8 @@ const FormModal = () => {
       schema = forms.component.schema(
         Object.keys(components),
         get(modifiedData, 'componentToCreate.category', ''),
-        reservedNames
+        reservedNames,
+        ctbFormsAPI
       );
 
       // Check form validity for creating a 'common attribute'
@@ -400,18 +468,16 @@ const FormModal = () => {
           }
         );
       }
-      schema = forms[state.modalType].schema(
+      schema = forms.attribute.schema(
         get(allDataSchema, state.pathToSchema, {}),
         type,
-        modifiedData,
-        state.actionType === 'edit',
-        state.attributeName,
-        initialData,
+        reservedNames,
         alreadyTakenTargetContentTypeAttributes,
-        reservedNames
+        { modifiedData, initialData },
+        ctbFormsAPI
       );
     } else if (isEditingCategory) {
-      schema = forms.editCategory.schema(allComponentsCategories, initialData);
+      schema = forms.editCategory.schema(allComponentsCategories, initialData, ctbFormsAPI);
     } else {
       // The user is either in the addComponentToDynamicZone modal or
       // in step 1 of the add component (modalType=attribute&attributeType=component) but not creating a component
@@ -421,7 +487,8 @@ const FormModal = () => {
         schema = forms.component.schema(
           Object.keys(components),
           get(modifiedData, 'componentToCreate.category', ''),
-          reservedNames
+          reservedNames,
+          ctbFormsAPI
         );
       } else {
         // The form is valid
@@ -495,7 +562,7 @@ const FormModal = () => {
     target: { name, components, shouldAddComponents },
   }) => {
     dispatch({
-      type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+      type: ADD_COMPONENTS_TO_DYNAMIC_ZONE,
       name,
       components,
       shouldAddComponents,
@@ -504,80 +571,104 @@ const FormModal = () => {
 
   const handleChangeMediaAllowedTypes = ({ target: { name, value } }) => {
     dispatch({
-      type: 'ON_CHANGE_ALLOWED_TYPE',
+      type: ON_CHANGE_ALLOWED_TYPE,
       name,
       value,
     });
   };
 
-  const handleChange = ({ target: { name, value, type, ...rest } }) => {
-    const namesThatCanResetToNullValue = [
-      'enumName',
-      'max',
-      'min',
-      'maxLength',
-      'minLength',
-      'regex',
-    ];
-    let val;
+  const toggleConfirmModal = useCallback(() => setShowConfirmModal(prev => !prev), []);
 
-    if (['default', ...namesThatCanResetToNullValue].includes(name) && value === '') {
-      val = null;
-    } else if (
-      type === 'radio' &&
-      (name === 'multiple' ||
-        name === 'single' ||
-        name === 'createComponent' ||
-        name === 'repeatable')
-    ) {
-      // eslint-disable-next-line no-unneeded-ternary
-      val = value === 'false' ? false : true;
+  const handleChange = useCallback(
+    ({ target: { name, value, type, ...rest } }) => {
+      const namesThatCanResetToNullValue = [
+        'enumName',
+        'max',
+        'min',
+        'maxLength',
+        'minLength',
+        'regex',
+      ];
 
-      // The boolean default accepts 3 different values
-      // This check has been added to allow a reset to null for the bool
-    } else if (type === 'radio' && name === 'default') {
-      if (value === 'false') {
-        val = false;
-      } else if (value === 'true') {
-        val = true;
-      } else {
-        val = null;
+      // When toggling the draftAndPublish from true to false
+      // We need to display a confirmation box
+      if (name === 'draftAndPublish' && state.actionType === 'edit' && value === false) {
+        toggleConfirmModal();
+
+        return;
       }
 
-      // We store an array for the enum
-    } else if (name === 'enum') {
-      val = value.split('\n');
-    } else {
-      val = value;
-    }
+      let val;
 
-    const clonedErrors = Object.assign({}, formErrors);
+      if (['default', ...namesThatCanResetToNullValue].includes(name) && value === '') {
+        val = null;
+      } else if (
+        type === 'radio' &&
+        (name === 'multiple' ||
+          name === 'single' ||
+          name === 'createComponent' ||
+          name === 'repeatable')
+      ) {
+        // eslint-disable-next-line no-unneeded-ternary
+        val = value === 'false' ? false : true;
 
-    // Reset min error when modifying the max
-    if (name === 'max') {
-      delete clonedErrors.min;
-    }
+        // The boolean default accepts 3 different values
+        // This check has been added to allow a reset to null for the bool
+      } else if (type === 'radio' && name === 'default') {
+        if (value === 'false') {
+          val = false;
+        } else if (value === 'true') {
+          val = true;
+        } else {
+          val = null;
+        }
 
-    // Same here
-    if (name === 'maxLength') {
-      delete clonedErrors.minLength;
-    }
+        // We store an array for the enum
+      } else if (name === 'enum') {
+        val = value.split('\n');
+      } else {
+        val = value;
+      }
 
-    // Since the onBlur is deactivated we remove the errors directly when changing an input
-    delete clonedErrors[name];
+      const clonedErrors = Object.assign({}, formErrors);
 
+      // Reset min error when modifying the max
+      if (name === 'max') {
+        delete clonedErrors.min;
+      }
+
+      // Same here
+      if (name === 'maxLength') {
+        delete clonedErrors.minLength;
+      }
+
+      // Since the onBlur is deactivated we remove the errors directly when changing an input
+      delete clonedErrors[name];
+
+      dispatch({
+        type: SET_ERRORS,
+        errors: clonedErrors,
+      });
+
+      dispatch({
+        type: ON_CHANGE,
+        keys: name.split('.'),
+        value: val,
+        ...rest,
+      });
+    },
+    [dispatch, formErrors, state.actionType, toggleConfirmModal]
+  );
+
+  const handleConfirmDisableDraftAndPublish = useCallback(() => {
     dispatch({
-      type: 'SET_ERRORS',
-      errors: clonedErrors,
+      type: ON_CHANGE,
+      keys: ['draftAndPublish'],
+      value: false,
     });
 
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name.split('.'),
-      value: val,
-      ...rest,
-    });
-  };
+    toggleConfirmModal();
+  }, [dispatch, toggleConfirmModal]);
 
   const handleSubmit = async (e, shouldContinue = isCreating) => {
     e.preventDefault();
@@ -615,7 +706,10 @@ const FormModal = () => {
             push({ search: '' });
             submitData(modifiedData);
           } else {
-            strapi.notification.error('notification.contentType.relations.conflict');
+            strapi.notification.toggle({
+              type: 'warning',
+              message: { id: 'notification.contentType.relations.conflict' },
+            });
           }
 
           return;
@@ -719,7 +813,7 @@ const FormModal = () => {
           if (isDynamicZoneAttribute) {
             // Step 1 of adding a component to a DZ, the user has the option to create a component
             dispatch({
-              type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
+              type: RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
             });
 
             push({ search: isCreating ? nextSearch : '' });
@@ -758,7 +852,8 @@ const FormModal = () => {
           // The first step is either needed to create a component or just to navigate
           // To the modal for adding a "common field"
           dispatch({
-            type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+            type: RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
+            forTarget: state.forTarget,
           });
 
           // We don't want all the props to be reset
@@ -826,7 +921,8 @@ const FormModal = () => {
           // Here we clear the reducer state but we also keep the created component
           // If we were to create the component before
           dispatch({
-            type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA',
+            type: RESET_PROPS_AND_SAVE_CURRENT_DATA,
+            forTarget: state.forTarget,
           });
 
           // Terminate because we don't want the reducer to be entirely reset
@@ -857,7 +953,7 @@ const FormModal = () => {
         // Add the field to the schema
         addAttribute(modifiedData, state.forTarget, state.targetUid, false);
 
-        dispatch({ type: 'RESET_PROPS' });
+        dispatch({ type: RESET_PROPS });
 
         // Open modal attribute for adding attr to component
 
@@ -944,13 +1040,14 @@ const FormModal = () => {
       }
 
       dispatch({
-        type: 'RESET_PROPS',
+        type: RESET_PROPS,
       });
     } catch (err) {
       const errors = getYupInnerErrors(err);
+      console.log({ err, errors });
 
       dispatch({
-        type: 'SET_ERRORS',
+        type: SET_ERRORS,
         errors,
       });
     }
@@ -962,7 +1059,7 @@ const FormModal = () => {
   const onClosed = () => {
     setState(INITIAL_STATE_DATA);
     dispatch({
-      type: 'RESET_PROPS',
+      type: RESET_PROPS,
     });
   };
   const onOpened = () => {
@@ -1007,7 +1104,7 @@ const FormModal = () => {
   };
 
   // Display data for the attributes picker modal
-  const displayedAttributes = getAttributes(
+  const displayedAttributes = getAttributesToDisplay(
     state.forTarget,
     state.targetUid,
     // We need the nested components so we know when to remove the component option
@@ -1018,397 +1115,437 @@ const FormModal = () => {
   const modalBodyStyle = isPickingAttribute ? { paddingTop: '0.5rem', paddingBottom: '3rem' } : {};
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpened={onOpened}
-      onClosed={onClosed}
-      onToggle={handleToggle}
-      withoverflow={toString(
-        state.modalType === 'addComponentToDynamicZone' ||
-          (state.modalType === 'attribute' && state.attributeType === 'media')
-      )}
-    >
-      <HeaderModal>
-        <ModalHeader headerId={state.headerId} headers={headers} />
-        <section>
-          <HeaderModalTitle>
-            <FormattedMessage
-              id={getModalTitleSubHeader(state)}
-              values={{
-                type: upperFirst(
-                  formatMessage({
-                    id: getTrad(`attribute.${state.attributeType}`),
-                  })
-                ),
-                name: upperFirst(state.attributeName),
-                step: state.step,
-              }}
-            >
-              {msg => <span>{upperFirst(msg)}</span>}
-            </FormattedMessage>
+    <>
+      <Modal
+        isOpen={isOpen}
+        onOpened={onOpened}
+        onClosed={onClosed}
+        onToggle={handleToggle}
+        withoverflow={toString(
+          state.modalType === 'addComponentToDynamicZone' ||
+            (state.modalType === 'attribute' && state.attributeType === 'media')
+        )}
+      >
+        <HeaderModal>
+          <ModalHeader headerId={state.headerId} headers={headers} />
+          <section>
+            <HeaderModalTitle>
+              <FormattedMessage
+                id={getModalTitleSubHeader(state)}
+                values={{
+                  type: upperFirst(
+                    formatMessage({
+                      id: getTrad(`attribute.${state.attributeType}`),
+                    })
+                  ),
+                  name: upperFirst(state.attributeName),
+                  step: state.step,
+                }}
+              >
+                {msg => <span>{upperFirst(msg)}</span>}
+              </FormattedMessage>
 
-            {!isPickingAttribute && (
-              <>
-                <div className="settings-tabs">
-                  <HeaderModalNavContainer>
-                    {NAVLINKS.map((link, index) => {
-                      return (
-                        <HeaderNavLink
-                          // The advanced tab is disabled when adding an existing component
-                          // step 1
-                          isDisabled={index === 1 && shouldDisableAdvancedTab()}
-                          isActive={state.settingType === link.id}
-                          key={link.id}
-                          {...link}
-                          onClick={() => {
-                            setState(prev => ({
-                              ...prev,
-                              settingType: link.id,
-                            }));
-                            sendAdvancedTabEvent(link.id);
-                            push({ search: getNextSearch(link.id, state) });
-                          }}
-                          nextTab={index === NAVLINKS.length - 1 ? 0 : index + 1}
-                        />
-                      );
-                    })}
-                  </HeaderModalNavContainer>
-                </div>
-                <hr />
-              </>
-            )}
-          </HeaderModalTitle>
-        </section>
-      </HeaderModal>
-      <form onSubmit={handleSubmit}>
-        <ModalForm>
-          <ModalBody style={modalBodyStyle}>
-            <div className="container-fluid">
-              {isPickingAttribute
-                ? displayedAttributes.map((row, i) => {
-                    return (
-                      <div key={i} className="row">
-                        {i === 1 && (
-                          <hr
-                            style={{
-                              width: 'calc(100% - 30px)',
-                              marginBottom: 16,
-                              marginTop: 19,
-                              borderColor: '#F0F3F8',
+              {!isPickingAttribute && (
+                <>
+                  <div className="settings-tabs">
+                    <HeaderModalNavContainer>
+                      {NAVLINKS.map((link, index) => {
+                        return (
+                          <HeaderNavLink
+                            // The advanced tab is disabled when adding an existing component
+                            // step 1
+                            isDisabled={index === 1 && shouldDisableAdvancedTab()}
+                            isActive={state.settingType === link.id}
+                            key={link.id}
+                            {...link}
+                            onClick={() => {
+                              setState(prev => ({
+                                ...prev,
+                                settingType: link.id,
+                              }));
+                              sendAdvancedTabEvent(link.id);
+                              push({ search: getNextSearch(link.id, state) });
                             }}
+                            nextTab={index === NAVLINKS.length - 1 ? 0 : index + 1}
                           />
-                        )}
-                        {row.map((attr, index) => {
-                          const tabIndex = i === 0 ? index : displayedAttributes[0].length + index;
-
-                          return (
-                            <AttributeOption
-                              key={attr}
-                              tabIndex={tabIndex}
-                              isDisplayed
-                              onClick={() => {}}
-                              ref={i === 0 && index === 0 ? attributeOptionRef : null}
-                              type={attr}
+                        );
+                      })}
+                    </HeaderModalNavContainer>
+                  </div>
+                  <hr />
+                </>
+              )}
+            </HeaderModalTitle>
+          </section>
+        </HeaderModal>
+        <form onSubmit={handleSubmit}>
+          <ModalForm>
+            <ModalBody style={modalBodyStyle}>
+              <div className="container-fluid">
+                {isPickingAttribute
+                  ? displayedAttributes.map((row, i) => {
+                      return (
+                        <div key={i} className="row">
+                          {i === 1 && (
+                            <hr
+                              style={{
+                                width: 'calc(100% - 30px)',
+                                marginBottom: 16,
+                                marginTop: 19,
+                                borderColor: '#F0F3F8',
+                              }}
                             />
-                          );
-                        })}
-                      </div>
-                    );
-                  })
-                : form(
-                    modifiedData,
-                    state.attributeType,
-                    state.step,
-                    state.actionType,
-                    attributes
-                  ).items.map((row, index) => {
-                    return (
-                      <div className="row" key={index}>
-                        {row.map((input, i) => {
-                          // The divider type is used mainly the advanced tab
-                          // It is the one responsible for displaying the settings label
-                          if (input.type === 'divider') {
+                          )}
+                          {row.map((attr, index) => {
+                            const tabIndex =
+                              i === 0 ? index : displayedAttributes[0].length + index;
+
                             return (
-                              <div
-                                className="col-12"
-                                style={{
-                                  marginBottom: '1.4rem',
-                                  lineHeight: 'normal',
-                                  fontWeight: 500,
-                                }}
-                                key="divider"
-                              >
-                                <Label htmlFor="divider-no-for">
-                                  <FormattedMessage
-                                    id={getTrad('form.attribute.item.settings.name')}
-                                  />
-                                </Label>
+                              <AttributeOption
+                                key={attr}
+                                tabIndex={tabIndex}
+                                isDisplayed
+                                onClick={() => {}}
+                                ref={i === 0 && index === 0 ? attributeOptionRef : null}
+                                type={attr}
+                              />
+                            );
+                          })}
+                        </div>
+                      );
+                    })
+                  : form({
+                      data: modifiedData,
+                      type: state.attributeType,
+                      step: state.step,
+                      actionType: state.actionType,
+                      attributes,
+                      extensions: ctbFormsAPI,
+                      forTarget: state.forTarget,
+                      contentTypeSchema: allDataSchema.contentType || {},
+                    }).items.map((row, index) => {
+                      return (
+                        <div className="row" key={index}>
+                          {row.map((input, i) => {
+                            // The divider type is used mainly the advanced tab
+                            // It is the one responsible for displaying the settings label
+                            if (input.type === 'divider' || input.type === 'dividerDraftPublish') {
+                              const tradId =
+                                input.type === 'divider'
+                                  ? 'form.attribute.item.settings.name'
+                                  : 'form.contentType.divider.draft-publish';
+
+                              return (
+                                <div className="col-12" key="divider">
+                                  <Padded bottom size="smd">
+                                    <div style={{ paddingTop: 3 }} />
+                                    <Text
+                                      fontSize="xs"
+                                      color="grey"
+                                      fontWeight="bold"
+                                      textTransform="uppercase"
+                                    >
+                                      <FormattedMessage id={getTrad(tradId)}>
+                                        {txt => txt}
+                                      </FormattedMessage>
+                                    </Text>
+                                  </Padded>
+                                </div>
+                              );
+                            }
+
+                            // The spacer type is used mainly to align the icon picker...
+                            if (input.type === 'spacer') {
+                              return <div key="spacer" style={{ height: 8 }} />;
+                            }
+
+                            // The spacer type is used mainly to align the icon picker...
+                            if (input.type === 'spacer-small') {
+                              return <div key={`${index}.${i}`} style={{ height: 4 }} />;
+                            }
+
+                            if (input.type === 'spacer-medium') {
+                              return <div key={`${index}.${i}`} style={{ height: 8 }} />;
+                            }
+
+                            // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
+                            // It pushes select the components to the right
+                            if (input.type === 'pushRight') {
+                              return <div key={`${index}.${i}`} className={`col-${input.size}`} />;
+                            }
+
+                            if (input.type === 'relation') {
+                              return (
+                                <RelationForm
+                                  key="relation"
+                                  mainBoxHeader={get(headers, [0, 'label'], '')}
+                                  modifiedData={modifiedData}
+                                  naturePickerType={state.forTarget}
+                                  onChange={handleChange}
+                                  errors={formErrors}
+                                />
+                              );
+                            }
+
+                            // When extending the yup schema of an existing field (like in https://github.com/strapi/strapi/blob/293ff3b8f9559236609d123a2774e3be05ce8274/packages/strapi-plugin-i18n/admin/src/index.js#L52)
+                            // and triggering a yup validation error in the UI (missing a required field for example)
+                            // We got an object that looks like: formErrors = { "pluginOptions.i18n.localized": {...} }
+                            // In order to deal with this error, we can't rely on lodash.get to resolve this key
+                            // - lodash will try to access {pluginOptions: {i18n: {localized: true}}})
+                            // - and we just want to access { "pluginOptions.i18n.localized": {...} }
+                            // NOTE: this is a hack
+                            const pluginOptionError = Object.keys(formErrors).find(
+                              key => key === input.name
+                            );
+
+                            // Retrieve the error for a specific input
+                            const errorId = pluginOptionError
+                              ? formErrors[pluginOptionError].id
+                              : get(
+                                  formErrors,
+                                  [
+                                    ...input.name
+                                      .split('.')
+                                      // The filter here is used when creating a component
+                                      // in the component step 1 modal
+                                      // Since the component info is stored in the
+                                      // componentToCreate object we can access the error
+                                      // By removing the key
+                                      .filter(key => key !== 'componentToCreate'),
+                                    'id',
+                                  ],
+                                  null
+                                );
+
+                            const retrievedValue = get(modifiedData, input.name, '');
+
+                            let value;
+
+                            // Condition for the boolean default value
+                            // The radio input doesn't accept false, true or null as value
+                            // So we pass them as string
+                            // This way the data stays accurate and we don't have to operate
+                            // any data mutation
+                            if (input.name === 'default' && state.attributeType === 'boolean') {
+                              value = toString(retrievedValue);
+                              // Same here for the enum
+                            } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
+                              value = retrievedValue.join('\n');
+                            } else if (input.name === 'uid') {
+                              value = input.value;
+                            } else if (input.name === 'allowedTypes' && retrievedValue === '') {
+                              value = null;
+                            } else if (input.type === 'checkbox' && !retrievedValue) {
+                              value = false;
+                            } else {
+                              value = retrievedValue;
+                            }
+
+                            // The addon input is not present in @buffetjs so we are using the old lib
+                            // for the moment that's why we don't want them be passed to buffet
+                            // like the other created inputs
+                            if (input.type === 'addon') {
+                              return (
+                                <InputsIndex
+                                  key={input.name}
+                                  {...input}
+                                  type="string"
+                                  onChange={handleChange}
+                                  value={value}
+                                />
+                              );
+                            }
+
+                            return (
+                              <div className={`col-${input.size || 6}`} key={input.name}>
+                                <Inputs
+                                  {...input}
+                                  modifiedData={modifiedData}
+                                  addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
+                                  changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
+                                  customInputs={{
+                                    allowedTypesSelect: WrapperSelect,
+                                    checkbox: CheckboxWithDescription,
+                                    componentIconPicker: ComponentIconPicker,
+                                    componentSelect: WrapperSelect,
+                                    creatableSelect: WrapperSelect,
+                                    customCheckboxWithChildren: CustomCheckbox,
+                                    booleanBox: BooleanBox,
+                                    ...inputsFromPlugins,
+                                  }}
+                                  isCreating={isCreating}
+                                  // Props for the componentSelect
+                                  isCreatingComponentWhileAddingAField={
+                                    isCreatingComponentWhileAddingAField
+                                  }
+                                  // Props for the componentSelect
+                                  // Since the component is created after adding it to a type
+                                  // its name and category can't be retrieved from the data manager
+                                  componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
+                                    componentToCreate,
+                                    'category',
+                                    null
+                                  )}
+                                  // Props for the componentSelect same explanation
+                                  componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
+                                    componentToCreate,
+                                    'name',
+                                    null
+                                  )}
+                                  isAddingAComponentToAnotherComponent={
+                                    state.forTarget === 'components' ||
+                                    state.forTarget === 'component'
+                                  }
+                                  value={value}
+                                  error={isEmpty(errorId) ? null : formatMessage({ id: errorId })}
+                                  onChange={handleChange}
+                                  onBlur={() => {}}
+                                  description={
+                                    get(input, 'description.id', null)
+                                      ? formatMessage(input.description)
+                                      : input.description
+                                  }
+                                  placeholder={
+                                    get(input, 'placeholder.id', null)
+                                      ? formatMessage(input.placeholder)
+                                      : input.placeholder
+                                  }
+                                  label={
+                                    get(input, 'label.id', null)
+                                      ? formatMessage(input.label)
+                                      : input.label
+                                  }
+                                />
                               </div>
                             );
-                          }
-
-                          // The spacer type is used mainly to align the icon picker...
-                          if (input.type === 'spacer') {
-                            return <div key="spacer" style={{ height: 8 }} />;
-                          }
-
-                          // The spacer type is used mainly to align the icon picker...
-                          if (input.type === 'spacer-small') {
-                            return <div key={`${index}.${i}`} style={{ height: 4 }} />;
-                          }
-
-                          if (input.type === 'spacer-medium') {
-                            return <div key={`${index}.${i}`} style={{ height: 8 }} />;
-                          }
-
-                          // This type is used in the addComponentToDynamicZone modal when selecting the option add an existing component
-                          // It pushes select the components to the right
-                          if (input.type === 'pushRight') {
-                            return <div key={`${index}.${i}`} className={`col-${input.size}`} />;
-                          }
-
-                          if (input.type === 'relation') {
-                            return (
-                              <RelationForm
-                                key="relation"
-                                mainBoxHeader={get(headers, [0, 'label'], '')}
-                                modifiedData={modifiedData}
-                                naturePickerType={state.forTarget}
-                                onChange={handleChange}
-                                errors={formErrors}
-                              />
-                            );
-                          }
-
-                          // Retrieve the error for a specific input
-                          const errorId = get(
-                            formErrors,
-                            [
-                              ...input.name
-                                .split('.')
-                                // The filter here is used when creating a component
-                                // in the component step 1 modal
-                                // Since the component info is stored in the
-                                // componentToCreate object we can access the error
-                                // By removing the key
-                                .filter(key => key !== 'componentToCreate'),
-                              'id',
-                            ],
-                            null
-                          );
-
-                          const retrievedValue = get(modifiedData, input.name, '');
-
-                          let value;
-
-                          // Condition for the boolean default value
-                          // The radio input doesn't accept false, true or null as value
-                          // So we pass them as string
-                          // This way the data stays accurate and we don't have to operate
-                          // any data mutation
-                          if (input.name === 'default' && state.attributeType === 'boolean') {
-                            value = toString(retrievedValue);
-                            // Same here for the enum
-                          } else if (input.name === 'enum' && Array.isArray(retrievedValue)) {
-                            value = retrievedValue.join('\n');
-                          } else if (input.name === 'uid') {
-                            value = input.value;
-                          } else if (input.name === 'allowedTypes' && retrievedValue === '') {
-                            value = null;
-                          } else {
-                            value = retrievedValue;
-                          }
-
-                          // The addon input is not present in @buffetjs so we are using the old lib
-                          // for the moment that's why we don't want them be passed to buffet
-                          // like the other created inputs
-                          if (input.type === 'addon') {
-                            return (
-                              <InputsIndex
-                                key={input.name}
-                                {...input}
-                                type="string"
-                                onChange={handleChange}
-                                value={value}
-                              />
-                            );
-                          }
-
-                          return (
-                            <div className={`col-${input.size || 6}`} key={input.name}>
-                              <Inputs
-                                {...input}
-                                modifiedData={modifiedData}
-                                addComponentsToDynamicZone={handleClickAddComponentsToDynamicZone}
-                                changeMediaAllowedTypes={handleChangeMediaAllowedTypes}
-                                customInputs={{
-                                  allowedTypesSelect: WrapperSelect,
-                                  componentIconPicker: ComponentIconPicker,
-                                  componentSelect: WrapperSelect,
-                                  creatableSelect: WrapperSelect,
-                                  customCheckboxWithChildren: CustomCheckbox,
-                                  booleanBox: BooleanBox,
-                                }}
-                                isCreating={isCreating}
-                                // Props for the componentSelect
-                                isCreatingComponentWhileAddingAField={
-                                  isCreatingComponentWhileAddingAField
-                                }
-                                // Props for the componentSelect
-                                // Since the component is created after adding it to a type
-                                // its name and category can't be retrieved from the data manager
-                                componentCategoryNeededForAddingAfieldWhileCreatingAComponent={get(
-                                  componentToCreate,
-                                  'category',
-                                  null
-                                )}
-                                // Props for the componentSelect same explanation
-                                componentNameNeededForAddingAfieldWhileCreatingAComponent={get(
-                                  componentToCreate,
-                                  'name',
-                                  null
-                                )}
-                                isAddingAComponentToAnotherComponent={
-                                  state.forTarget === 'components' ||
-                                  state.forTarget === 'component'
-                                }
-                                value={value}
-                                error={isEmpty(errorId) ? null : formatMessage({ id: errorId })}
-                                onChange={handleChange}
-                                onBlur={() => {}}
-                                description={
-                                  get(input, 'description.id', null)
-                                    ? formatMessage(input.description)
-                                    : input.description
-                                }
-                                placeholder={
-                                  get(input, 'placeholder.id', null)
-                                    ? formatMessage(input.placeholder)
-                                    : input.placeholder
-                                }
-                                label={
-                                  get(input, 'label.id', null)
-                                    ? formatMessage(input.label)
-                                    : input.label
-                                }
-                              />
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-            </div>
-          </ModalBody>
-        </ModalForm>
-        {!isPickingAttribute && (
-          <ModalFooter>
-            <section style={{ alignItems: 'center' }}>
-              <Button type="button" color="cancel" onClick={handleToggle}>
-                {formatMessage({
-                  id: 'components.popUpWarning.button.cancel',
-                })}
-              </Button>
-              <div>
-                {isCreatingAttribute && !isInFirstComponentStep && (
-                  <Button
-                    type={isCreating ? 'button' : 'submit'}
-                    color="success"
-                    onClick={e => {
-                      handleSubmit(e, false);
-                    }}
-                    style={{ marginRight: '10px' }}
-                  >
-                    {formatMessage({ id: 'form.button.finish' })}
-                  </Button>
-                )}
-                {(isCreatingContentType || isCreatingComponent) && !isCreating && (
-                  <Button
-                    type="button"
-                    color="delete"
-                    onClick={e => {
-                      e.preventDefault();
-                      deleteData();
-                    }}
-                    style={{ marginRight: '10px' }}
-                  >
-                    {formatMessage({ id: getTrad('form.button.delete') })}
-                  </Button>
-                )}
-                {isEditingCategory && (
-                  <Button
-                    type="button"
-                    color="delete"
-                    onClick={e => {
-                      e.preventDefault();
-
-                      deleteCategory(initialData.name);
-                    }}
-                    style={{ marginRight: '10px' }}
-                  >
-                    {formatMessage({ id: getTrad('form.button.delete') })}
-                  </Button>
-                )}
-                {isCreating && state.attributeType === 'dynamiczone' && (
-                  <CustomButton
-                    type={isCreating ? 'submit' : 'button'}
-                    color={
-                      (isCreatingContentType ||
-                        isCreatingComponent ||
-                        isEditingCategory ||
-                        (state.modalType === 'addComponentToDynamicZone' &&
-                          state.step === '1' &&
-                          !isCreatingComponentFromAView)) &&
-                      !isCreating
-                        ? 'success'
-                        : 'primary'
-                    }
-                    onClick={e => handleSubmit(e, true)}
-                    icon={
-                      (isCreatingAttribute &&
-                        !isCreatingComponentFromAView &&
-                        state.step !== '1') ||
-                      (state.modalType === 'addComponentToDynamicZone' &&
-                        isCreatingComponentFromAView) ||
-                      (isCreatingComponentFromAView && state.step === '2')
-                    }
-                  >
-                    {getButtonSubmitMessage()}
-                  </CustomButton>
-                )}
-                {state.attributeType !== 'dynamiczone' && (
-                  <CustomButton
-                    type={isCreating ? 'submit' : 'button'}
-                    color={
-                      (isCreatingContentType ||
-                        isCreatingComponent ||
-                        isEditingCategory ||
-                        (state.modalType === 'addComponentToDynamicZone' &&
-                          state.step === '1' &&
-                          !isCreatingComponentFromAView)) &&
-                      !isCreating
-                        ? 'success'
-                        : 'primary'
-                    }
-                    onClick={e => handleSubmit(e, true)}
-                    icon={
-                      (isCreatingAttribute &&
-                        !isCreatingComponentFromAView &&
-                        state.step !== '1') ||
-                      (state.modalType === 'addComponentToDynamicZone' &&
-                        isCreatingComponentFromAView) ||
-                      (isCreatingComponentFromAView && state.step === '2')
-                    }
-                  >
-                    {getButtonSubmitMessage()}
-                  </CustomButton>
-                )}
+                          })}
+                        </div>
+                      );
+                    })}
               </div>
-            </section>
-          </ModalFooter>
-        )}
-      </form>
-    </Modal>
+            </ModalBody>
+          </ModalForm>
+          {!isPickingAttribute && (
+            <ModalFooter>
+              <section style={{ alignItems: 'center' }}>
+                <Button type="button" color="cancel" onClick={handleToggle}>
+                  {formatMessage({
+                    id: 'app.components.Button.cancel',
+                  })}
+                </Button>
+                <div>
+                  {isCreatingAttribute && !isInFirstComponentStep && (
+                    <Button
+                      type={isCreating ? 'button' : 'submit'}
+                      color="success"
+                      onClick={e => {
+                        handleSubmit(e, false);
+                      }}
+                      style={{ marginRight: '10px' }}
+                    >
+                      {formatMessage({ id: 'form.button.finish' })}
+                    </Button>
+                  )}
+                  {(isCreatingContentType || isCreatingComponent) && !isCreating && (
+                    <Button
+                      type="button"
+                      color="delete"
+                      onClick={e => {
+                        e.preventDefault();
+                        deleteData();
+                      }}
+                      style={{ marginRight: '10px' }}
+                    >
+                      {formatMessage({ id: getTrad('form.button.delete') })}
+                    </Button>
+                  )}
+                  {isEditingCategory && (
+                    <Button
+                      type="button"
+                      color="delete"
+                      onClick={e => {
+                        e.preventDefault();
+
+                        deleteCategory(initialData.name);
+                      }}
+                      style={{ marginRight: '10px' }}
+                    >
+                      {formatMessage({ id: getTrad('form.button.delete') })}
+                    </Button>
+                  )}
+                  {isCreating && state.attributeType === 'dynamiczone' && (
+                    <CustomButton
+                      type={isCreating ? 'submit' : 'button'}
+                      color={
+                        (isCreatingContentType ||
+                          isCreatingComponent ||
+                          isEditingCategory ||
+                          (state.modalType === 'addComponentToDynamicZone' &&
+                            state.step === '1' &&
+                            !isCreatingComponentFromAView)) &&
+                        !isCreating
+                          ? 'success'
+                          : 'primary'
+                      }
+                      onClick={e => handleSubmit(e, true)}
+                      icon={
+                        (isCreatingAttribute &&
+                          !isCreatingComponentFromAView &&
+                          state.step !== '1') ||
+                        (state.modalType === 'addComponentToDynamicZone' &&
+                          isCreatingComponentFromAView) ||
+                        (isCreatingComponentFromAView && state.step === '2')
+                      }
+                    >
+                      {getButtonSubmitMessage()}
+                    </CustomButton>
+                  )}
+                  {state.attributeType !== 'dynamiczone' && (
+                    <CustomButton
+                      type={isCreating ? 'submit' : 'button'}
+                      color={
+                        (isCreatingContentType ||
+                          isCreatingComponent ||
+                          isEditingCategory ||
+                          (state.modalType === 'addComponentToDynamicZone' &&
+                            state.step === '1' &&
+                            !isCreatingComponentFromAView)) &&
+                        !isCreating
+                          ? 'success'
+                          : 'primary'
+                      }
+                      onClick={e => handleSubmit(e, true)}
+                      icon={
+                        (isCreatingAttribute &&
+                          !isCreatingComponentFromAView &&
+                          state.step !== '1') ||
+                        (state.modalType === 'addComponentToDynamicZone' &&
+                          isCreatingComponentFromAView) ||
+                        (isCreatingComponentFromAView && state.step === '2')
+                      }
+                    >
+                      {getButtonSubmitMessage()}
+                    </CustomButton>
+                  )}
+                </div>
+              </section>
+            </ModalFooter>
+          )}
+        </form>
+      </Modal>
+      {/* CONFIRM MODAL FOR DRAFT AND PUBLISH */}
+      <PopUpWarning
+        isOpen={showConfirmModal}
+        onConfirm={handleConfirmDisableDraftAndPublish}
+        toggleModal={toggleConfirmModal}
+        popUpWarningType="danger"
+        content={{
+          message: getTrad('popUpWarning.draft-publish.message'),
+          secondMessage: getTrad('popUpWarning.draft-publish.second-message'),
+          confirm: getTrad('popUpWarning.draft-publish.button.confirm'),
+        }}
+      />
+    </>
   );
 };
 

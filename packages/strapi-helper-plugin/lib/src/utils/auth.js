@@ -23,10 +23,15 @@ const auth = {
     if (localStorage) {
       const videos = auth.get('videos');
       const onboarding = auth.get('onboarding');
+      const strapiUpdateNotification = auth.get('STRAPI_UPDATE_NOTIF');
+      const localeLang = localStorage.getItem('strapi-admin-language');
 
       localStorage.clear();
+
       localStorage.setItem('videos', JSON.stringify(videos));
       localStorage.setItem('onboarding', onboarding);
+      localStorage.setItem('STRAPI_UPDATE_NOTIF', strapiUpdateNotification);
+      localStorage.setItem('strapi-admin-language', localeLang);
     }
 
     if (sessionStorage) {

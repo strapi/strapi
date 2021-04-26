@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 
+const { hasDraftAndPublish } = require('strapi-utils').contentTypes;
+
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -21,16 +23,7 @@ module.exports = {
     const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
 
     const contentTypes = Object.keys(strapi.contentTypes)
-      .filter(uid => {
-        if (uid.startsWith('strapi::')) return false;
-        if (uid === 'plugins::upload.file') return false; // TODO: add a flag in the content type instead
-
-        if (kind && _.get(strapi.contentTypes[uid], 'kind', 'collectionType') !== kind) {
-          return false;
-        }
-
-        return true;
-      })
+      .filter(uid => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
       .map(uid => contentTypeService.formatContentType(strapi.contentTypes[uid]));
 
     ctx.send({
@@ -71,10 +64,15 @@ module.exports = {
         components: body.components,
       });
 
+      const metricsProperties = {
+        kind: contentType.kind,
+        hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
+      };
+
       if (_.isEmpty(strapi.api)) {
-        await strapi.telemetry.send('didCreateFirstContentType', { kind: contentType.kind });
+        await strapi.telemetry.send('didCreateFirstContentType', metricsProperties);
       } else {
-        await strapi.telemetry.send('didCreateContentType', { kind: contentType.kind });
+        await strapi.telemetry.send('didCreateContentType', metricsProperties);
       }
 
       setImmediate(() => strapi.reload());

@@ -2,7 +2,7 @@ import React from 'react';
 import { Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../../../components/BaselineAlignement';
+import { BaselineAlignment } from 'strapi-helper-plugin';
 import Section from '../Section';
 import Link from './Link';
 import Wrapper from './Wrapper';

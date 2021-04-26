@@ -10,10 +10,10 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
-
 import en from '../../../translations/en.json';
 import LeftMenuIcon from './LeftMenuIcon';
 import A from './A';
+import NotificationCount from './NotificationCount';
 
 const LinkLabel = styled.span`
   display: inline-block;
@@ -23,7 +23,14 @@ const LinkLabel = styled.span`
 `;
 
 // TODO: refacto this file
-const LeftMenuLinkContent = ({ destination, iconName, label, location }) => {
+const LeftMenuLinkContent = ({
+  destination,
+  iconName,
+  label,
+  location,
+  notificationsCount,
+  search,
+}) => {
   const isLinkActive = startsWith(
     location.pathname.replace('/admin', '').concat('/'),
     destination.concat('/')
@@ -63,14 +70,19 @@ const LeftMenuLinkContent = ({ destination, iconName, label, location }) => {
       className={isLinkActive ? 'linkActive' : ''}
       to={{
         pathname: destination,
+        search,
       }}
     >
       <LeftMenuIcon icon={iconName} />
       {content}
+      {notificationsCount > 0 && <NotificationCount count={notificationsCount} />}
     </A>
   );
 };
 
+LeftMenuLinkContent.defaultProps = {
+  search: null,
+};
 LeftMenuLinkContent.propTypes = {
   destination: PropTypes.string.isRequired,
   iconName: PropTypes.string.isRequired,
@@ -78,6 +90,8 @@ LeftMenuLinkContent.propTypes = {
   location: PropTypes.shape({
     pathname: PropTypes.string,
   }).isRequired,
+  notificationsCount: PropTypes.number.isRequired,
+  search: PropTypes.string,
 };
 
 export default withRouter(LeftMenuLinkContent);

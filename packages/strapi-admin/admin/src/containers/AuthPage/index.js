@@ -1,28 +1,30 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit, upperFirst, pick } from 'lodash';
+import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useQuery } from 'strapi-helper-plugin';
+import { BaselineAlignment, auth, useQuery } from 'strapi-helper-plugin';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import BaselineAlignment from '../../components/BaselineAlignement';
+import forms from 'ee_else_ce/containers/AuthPage/utils/forms';
+
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../LocaleToggle';
 import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
-import { forms } from './utils';
 import init from './init';
 import { initialState, reducer } from './reducer';
+import useChangeLanguage from '../LanguageProvider/hooks/useChangeLanguage';
 
-const AuthPage = ({ hasAdmin }) => {
+const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();
+  const changeLocale = useChangeLanguage();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
   const registrationToken = query.get('registrationToken');
-  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema } = get(
+  const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
     forms,
     authType,
     {}
@@ -60,14 +62,19 @@ const AuthPage = ({ hasAdmin }) => {
             `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
           );
 
-          dispatch({
-            type: 'SET_DATA',
-            data: { registrationToken, userInfo: data },
-          });
+          if (data) {
+            dispatch({
+              type: 'SET_DATA',
+              data: { registrationToken, userInfo: data },
+            });
+          }
         } catch (err) {
-          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occured');
+          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
 
-          strapi.notification.error(errorMessage);
+          strapi.notification.toggle({
+            type: 'warning',
+            message: errorMessage,
+          });
 
           // Redirect to the oops page in case of an invalid token
           // @alexandrebodin @JAB I am not sure it is the wanted behavior
@@ -138,7 +145,10 @@ const AuthPage = ({ hasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -154,6 +164,10 @@ const AuthPage = ({ hasAdmin }) => {
         data: body,
         cancelToken: source.token,
       });
+
+      if (user.preferedLanguage) {
+        changeLocale(user.preferedLanguage);
+      }
 
       auth.setToken(token, modifiedData.rememberMe);
       auth.setUserInfo(user, modifiedData.rememberMe);
@@ -206,10 +220,14 @@ const AuthPage = ({ hasAdmin }) => {
         axios({
           method: 'POST',
           url: 'https://analytics.strapi.io/register',
-          data: pick(modifiedData, ['userInfo.email', 'userInfo.firstname']),
+          data: {
+            email: user.email,
+            username: user.firstname,
+          },
         });
       }
       // Redirect to the homePage
+      setHasAdmin(true);
       push('/');
     } catch (err) {
       if (err.response) {
@@ -256,13 +274,11 @@ const AuthPage = ({ hasAdmin }) => {
     }
   };
 
-  // Redirect the user to the login page if the endpoint does not exist
-  if (!forms[authType]) {
-    return <Redirect to="/" />;
-  }
-
-  // Redirect the user to the login page if there is already an admin user
-  if (hasAdmin && authType === 'register-admin') {
+  // Redirect the user to the login page if
+  // the endpoint does not exist or
+  // there is already an admin user oo
+  // the user is already logged in
+  if (!forms[authType] || (hasAdmin && authType === 'register-admin') || auth.getToken()) {
     return <Redirect to="/" />;
   }
 
@@ -271,31 +287,25 @@ const AuthPage = ({ hasAdmin }) => {
     return <Redirect to="/auth/register-admin" />;
   }
 
-  // Redirect the user to the homepage if he is logged in
-  if (auth.getToken()) {
-    return <Redirect to="/" />;
-  }
-
   return (
-    <>
-      <Padded bottom size="md">
-        <PageTitle title={upperFirst(authType)} />
-        <NavTopRightWrapper>
-          <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
-        </NavTopRightWrapper>
-        <BaselineAlignment top size="78px">
-          <Component
-            fieldsToDisable={fieldsToDisable}
-            formErrors={formErrors}
-            inputsPrefix={inputsPrefix}
-            modifiedData={modifiedData}
-            onChange={handleChange}
-            onSubmit={handleSubmit}
-            requestError={requestError}
-          />
-        </BaselineAlignment>
-      </Padded>
-    </>
+    <Padded bottom size="md">
+      <PageTitle title={upperFirst(authType)} />
+      <NavTopRightWrapper>
+        <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
+      </NavTopRightWrapper>
+      <BaselineAlignment top size="78px">
+        <Component
+          {...rest}
+          fieldsToDisable={fieldsToDisable}
+          formErrors={formErrors}
+          inputsPrefix={inputsPrefix}
+          modifiedData={modifiedData}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          requestError={requestError}
+        />
+      </BaselineAlignment>
+    </Padded>
   );
 };
 
@@ -305,6 +315,7 @@ AuthPage.defaultProps = {
 
 AuthPage.propTypes = {
   hasAdmin: PropTypes.bool,
+  setHasAdmin: PropTypes.func.isRequired,
 };
 
 export default AuthPage;

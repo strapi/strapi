@@ -1,8 +1,9 @@
+'use strict';
+
 const path = require('path');
-const { cleanTestApp, generateTestApp, startTestApp } = require('./helpers/testAppGenerator');
 const execa = require('execa');
-const waitOn = require('wait-on');
 const yargs = require('yargs');
+const { cleanTestApp, generateTestApp } = require('./helpers/test-app-generator');
 
 const appName = 'testApp';
 
@@ -37,8 +38,8 @@ const databases = {
   },
 };
 
-const test = async args => {
-  return execa('yarn', ['-s', 'test:e2e', ...args.split(' ')], {
+const runAllTests = async args => {
+  return execa('yarn', ['-s', 'test:e2e', ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {
@@ -51,21 +52,15 @@ const main = async (database, args) => {
   try {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
-    const testAppProcess = startTestApp({ appName });
 
-    await waitOn({ resources: ['http://localhost:1337'] });
-
-    await test(args).catch(() => {
-      testAppProcess.kill();
+    await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });
     });
 
-    testAppProcess.kill();
     process.exit(0);
   } catch (error) {
-    console.log(error);
     process.stdout.write('Tests failed\n', () => {
       process.exit(1);
     });
@@ -87,7 +82,7 @@ yargs
     argv => {
       const { database, _: args } = argv;
 
-      main(databases[database], args.join(' '));
+      main(databases[database], args);
     }
   )
   .help().argv;

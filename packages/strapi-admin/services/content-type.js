@@ -1,9 +1,11 @@
 'use strict';
 
 const _ = require('lodash');
-const fp = require('lodash/fp');
-
-const EXCLUDE_FIELDS = ['created_by', 'updated_by'];
+const { uniq, startsWith, intersection } = require('lodash/fp');
+const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { getService } = require('../utils');
+const actionDomain = require('../domain/action');
+const permissionDomain = require('../domain/permission');
 
 /**
  * Creates an array of paths to the fields and nested fields, without path nodes
@@ -25,14 +27,16 @@ const getNestedFields = (
     return prefix ? [prefix] : [];
   }
 
+  const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
+
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
-      if (EXCLUDE_FIELDS.includes(key)) return fields;
+      if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       const requiredOrNotNeeded = !requiredOnly || attr.required === true;
-      const insideExistingFields = existingFields && existingFields.some(fp.startsWith(fieldPath));
+      const insideExistingFields = existingFields && existingFields.some(startsWith(fieldPath));
 
       if (attr.type === 'component') {
         if (requiredOrNotNeeded || insideExistingFields) {
@@ -81,10 +85,12 @@ const getNestedFieldsWithIntermediate = (
     return [];
   }
 
+  const nonAuthorizableFields = contentTypesUtils.getNonVisibleAttributes(model);
+
   return _.reduce(
     model.attributes,
     (fields, attr, key) => {
-      if (EXCLUDE_FIELDS.includes(key)) return fields;
+      if (nonAuthorizableFields.includes(key)) return fields;
 
       const fieldPath = prefix ? `${prefix}.${key}` : key;
       fields.push(fieldPath);
@@ -106,74 +112,91 @@ const getNestedFieldsWithIntermediate = (
 };
 
 /**
- * Creates an array of permissions with the "fields" attribute filled
+ * Creates an array of permissions with the "properties.fields" attribute filled
  * @param {array} actions array of actions
  * @param {object} options
  * @param {number} options.nestingLevel level of nesting
- * @param {array} options.fieldsNullFor actionIds where the fields should be null
  * @param {array} options.restrictedSubjects subjectsId to ignore
- * @returns {array<permissions>}
+ * @returns {Permission[]}
  */
 const getPermissionsWithNestedFields = (
   actions,
-  { nestingLevel, fieldsNullFor = [], restrictedSubjects = [] } = {}
-) =>
-  actions.reduce((perms, action) => {
-    action.subjects
-      .filter(subject => !restrictedSubjects.includes(subject))
-      .forEach(contentTypeUid => {
-        const fields = fieldsNullFor.includes(action.actionId)
-          ? null
-          : getNestedFields(strapi.contentTypes[contentTypeUid], {
-              components: strapi.components,
-              nestingLevel,
-            });
-        perms.push({
-          action: action.actionId,
-          subject: contentTypeUid,
-          fields,
-          conditions: [],
-        });
-      });
-    return perms;
-  }, []);
+  { nestingLevel, restrictedSubjects = [] } = {}
+) => {
+  return actions.reduce((permissions, action) => {
+    const validSubjects = action.subjects.filter(subject => !restrictedSubjects.includes(subject));
 
-/**
- * Cleans fields of permissions (add required ones, remove the non-existing anymore ones)
- * @param {object} permissions array of existing permissions in db
- * @param {object} options
- * @param {number} options.nestingLevel level of nesting
- * @param {array} options.fieldsNullFor actionIds where the fields should be null
- * @returns {array<permissions>}
- */
-const cleanPermissionFields = (permissions, { nestingLevel, fieldsNullFor = [] }) =>
-  permissions.map(perm => {
-    let newFields = perm.fields;
-    if (fieldsNullFor.includes(perm.action)) {
-      newFields = null;
-    } else if (perm.subject && strapi.contentTypes[perm.subject]) {
-      const possiblefields = getNestedFieldsWithIntermediate(strapi.contentTypes[perm.subject], {
-        components: strapi.components,
-        nestingLevel,
+    // Create a Permission for each subject (content-type uid) within the action
+    for (const subject of validSubjects) {
+      const fields = actionDomain.appliesToProperty('fields', action)
+        ? getNestedFields(strapi.contentTypes[subject], {
+            components: strapi.components,
+            nestingLevel,
+          })
+        : undefined;
+
+      const permission = permissionDomain.create({
+        action: action.actionId,
+        subject,
+        properties: { fields },
       });
 
-      const requiredFields = getNestedFields(strapi.contentTypes[perm.subject], {
-        components: strapi.components,
-        requiredOnly: true,
-        nestingLevel,
-        existingFields: perm.fields,
-      });
-      const badNestedFields = _.uniq([
-        ..._.intersection(perm.fields, possiblefields),
-        ...requiredFields,
-      ]);
-      newFields = badNestedFields.filter(
-        field => !badNestedFields.some(fp.startsWith(`${field}.`))
-      );
+      permissions.push(permission);
     }
 
-    return { ...perm, fields: newFields };
+    return permissions;
   }, []);
+};
+
+/**
+ * Cleans permissions' fields (add required ones, remove the non-existing ones)
+ * @param {Permission[]} permissions array of existing permissions in db
+ * @param {object} options
+ * @param {number} options.nestingLevel level of nesting
+ * @returns {Permission[]}
+ */
+const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
+  const { actionProvider } = getService('permission');
+
+  return permissions.map(permission => {
+    const {
+      action: actionId,
+      subject,
+      properties: { fields },
+    } = permission;
+
+    const action = actionProvider.get(actionId);
+
+    // todo see if it's possible to check property on action + subject (async)
+    if (!actionDomain.appliesToProperty('fields', action)) {
+      return permissionDomain.deleteProperty('fields', permission);
+    }
+
+    if (!subject || !strapi.contentTypes[subject]) {
+      return permission;
+    }
+
+    const possibleFields = getNestedFieldsWithIntermediate(strapi.contentTypes[subject], {
+      components: strapi.components,
+      nestingLevel,
+    });
+
+    const requiredFields = getNestedFields(strapi.contentTypes[subject], {
+      components: strapi.components,
+      requiredOnly: true,
+      nestingLevel,
+      existingFields: fields,
+    });
+
+    const badNestedFields = uniq([...intersection(fields, possibleFields), ...requiredFields]);
+
+    const newFields = badNestedFields.filter(
+      field => !badNestedFields.some(startsWith(`${field}.`))
+    );
+
+    return permissionDomain.setProperty('fields', newFields, permission);
+  }, []);
+};
 
 module.exports = {
   getNestedFields,

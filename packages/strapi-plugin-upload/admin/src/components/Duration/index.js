@@ -1,8 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { themePropTypes } from 'strapi-helper-plugin';
+import { Text } from '@buffetjs/core';
 
-import Text from '../Text';
 import formatDuration from './utils/formatDuration';
 
 const Duration = styled(({ duration, ...rest }) => (

@@ -1,26 +1,42 @@
 'use strict';
 
 const _ = require('lodash');
+const { QUERY_OPERATORS } = require('strapi-utils');
 
 /**
- * Merges
+ * @typedef {object} Schema
+ * @property {object} resolvers
+ * @property {object} mutation
+ * @property {object} query
+ * @property {string} definition
  */
-const mergeSchemas = (root, ...subs) => {
-  subs.forEach(sub => {
+
+/**
+ * Merges strapi graphql schema together
+ * @param {Schema} object - destination object
+ * @param  {Schema[]} sources - source objects to merge into the destination object
+ * @returns {Schema}
+ */
+const mergeSchemas = (object, ...sources) => {
+  sources.forEach(sub => {
     if (_.isEmpty(sub)) return;
     const { definition = '', query = {}, mutation = {}, resolvers = {} } = sub;
 
-    root.definition += '\n' + definition;
-    _.merge(root, {
+    object.definition += '\n' + definition;
+    _.merge(object, {
       query,
       mutation,
       resolvers,
     });
   });
 
-  return root;
+  return object;
 };
 
+/**
+ * Returns an empty schema
+ * @returns {Schema}
+ */
 const createDefaultSchema = () => ({
   definition: '',
   query: {},
@@ -58,7 +74,9 @@ const convertToQuery = params => {
   const result = {};
 
   _.forEach(params, (value, key) => {
-    if (_.isPlainObject(value)) {
+    if (QUERY_OPERATORS.includes(key)) {
+      result[key] = _.isArray(value) ? value.map(convertToQuery) : convertToQuery(value);
+    } else if (_.isPlainObject(value)) {
       const flatObject = convertToQuery(value);
       _.forEach(flatObject, (_value, _key) => {
         result[`${key}.${_key}`] = _value;
@@ -76,7 +94,7 @@ const amountLimiting = (params = {}) => {
 
   if (!amountLimit) return params;
 
-  if (!params.limit || params.limit === -1 || params.limit > amountLimit) {
+  if (_.isNil(params.limit) || params.limit === -1 || params.limit > amountLimit) {
     params.limit = amountLimit;
   } else if (params.limit < 0) {
     params.limit = 0;

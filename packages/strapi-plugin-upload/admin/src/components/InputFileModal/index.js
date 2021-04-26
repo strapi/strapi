@@ -47,7 +47,7 @@ const InputFileModal = ({ name, onChange }) => {
       onDrop={handleDrop}
     >
       <Cloud />
-      <P>
+      <P isDragging={isDragging}>
         <span className="bold">{formatMessage({ id: getTrad('input.label-bold') })}&nbsp;</span>
         <span>{formatMessage({ id: getTrad('input.label-normal') })}</span>
       </P>

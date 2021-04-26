@@ -1,5 +1,7 @@
 'use strict';
 
+const { merge } = require('lodash/fp');
+const { toPermission } = require('../../domain/permission');
 const contentTypeService = require('../content-type');
 
 describe('Content-Type', () => {
@@ -52,7 +54,11 @@ describe('Content-Type', () => {
     },
   };
 
-  global.strapi = { components, contentTypes };
+  global.strapi = {
+    components,
+    contentTypes,
+    admin: { services: { condition: { isValidCondition: () => true } } },
+  };
 
   describe('getNestedFields', () => {
     const testsA = [
@@ -220,13 +226,14 @@ describe('Content-Type', () => {
   describe('getPermissionsWithNestedFields', () => {
     test('1 action (no nesting)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
-        { actionId: 'action-1', subjects: ['country'] },
+        { actionId: 'action-1', subjects: ['country'], options: { applyToProperties: ['fields'] } },
       ]);
+
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
-          fields: ['name', 'code'],
+          properties: { fields: ['name', 'code'] },
           conditions: [],
         },
       ]);
@@ -234,20 +241,26 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 1)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
-        [{ actionId: 'action-1', subjects: ['country', 'user'] }],
+        [
+          {
+            actionId: 'action-1',
+            subjects: ['country', 'user'],
+            options: { applyToProperties: ['fields'] },
+          },
+        ],
         { nestingLevel: 1 }
       );
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
-          fields: ['name', 'code'],
+          properties: { fields: ['name', 'code'] },
           conditions: [],
         },
         {
           action: 'action-1',
           subject: 'user',
-          fields: ['firstname', 'restaurant', 'car'],
+          properties: { fields: ['firstname', 'restaurant', 'car'] },
           conditions: [],
         },
       ]);
@@ -255,26 +268,34 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 2)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields(
-        [{ actionId: 'action-1', subjects: ['country', 'user'] }],
+        [
+          {
+            actionId: 'action-1',
+            subjects: ['country', 'user'],
+            options: { applyToProperties: ['fields'] },
+          },
+        ],
         { nestingLevel: 2 }
       );
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
-          fields: ['name', 'code'],
+          properties: { fields: ['name', 'code'] },
           conditions: [],
         },
         {
           action: 'action-1',
           subject: 'user',
-          fields: [
-            'firstname',
-            'restaurant.name',
-            'restaurant.description',
-            'restaurant.address',
-            'car.model',
-          ],
+          properties: {
+            fields: [
+              'firstname',
+              'restaurant.name',
+              'restaurant.description',
+              'restaurant.address',
+              'car.model',
+            ],
+          },
           conditions: [],
         },
       ]);
@@ -282,28 +303,34 @@ describe('Content-Type', () => {
 
     test('2 actions (with nesting level 100)', async () => {
       const resultLevel1 = contentTypeService.getPermissionsWithNestedFields([
-        { actionId: 'action-1', subjects: ['country', 'user'] },
+        {
+          actionId: 'action-1',
+          subjects: ['country', 'user'],
+          options: { applyToProperties: ['fields'] },
+        },
       ]);
       expect(resultLevel1).toEqual([
         {
           action: 'action-1',
           subject: 'country',
-          fields: ['name', 'code'],
+          properties: { fields: ['name', 'code'] },
           conditions: [],
         },
         {
           action: 'action-1',
           subject: 'user',
-          fields: [
-            'firstname',
-            'restaurant.name',
-            'restaurant.description',
-            'restaurant.address.city',
-            'restaurant.address.country',
-            'restaurant.address.gpsCoordinates.lat',
-            'restaurant.address.gpsCoordinates.long',
-            'car.model',
-          ],
+          properties: {
+            fields: [
+              'firstname',
+              'restaurant.name',
+              'restaurant.description',
+              'restaurant.address.city',
+              'restaurant.address.country',
+              'restaurant.address.gpsCoordinates.lat',
+              'restaurant.address.gpsCoordinates.long',
+              'car.model',
+            ],
+          },
           conditions: [],
         },
       ]);
@@ -311,6 +338,20 @@ describe('Content-Type', () => {
   });
 
   describe('cleanPermissionFields', () => {
+    beforeAll(() => {
+      global.strapi = merge(global.strapi, {
+        admin: {
+          services: {
+            permission: {
+              actionProvider: {
+                get: () => ({ options: { applyToProperties: ['fields'] } }),
+              },
+            },
+          },
+        },
+      });
+    });
+
     const tests = [
       [undefined, ['firstname', 'car']],
       [null, ['firstname', 'car']],
@@ -332,20 +373,23 @@ describe('Content-Type', () => {
 
     test.each(tests)('requiredOnly : %p -> %p', (fields, expectedFields) => {
       const res = contentTypeService.cleanPermissionFields(
-        [
+        toPermission([
           {
+            action: 'foo',
             subject: 'user',
-            fields,
+            properties: { fields },
           },
-        ],
+        ]),
         {
           requiredOnly: true,
         }
       );
       expect(res).toEqual([
         {
+          action: 'foo',
           subject: 'user',
-          fields: expectedFields,
+          properties: { fields: expectedFields },
+          conditions: [],
         },
       ]);
     });

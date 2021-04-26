@@ -1,16 +1,19 @@
+'use strict';
+
 const path = require('path');
 
 const alias = [
   'object-assign',
   'whatwg-fetch',
   '@babel/polyfill',
-  '@buffetjs/core',
-  '@buffetjs/custom',
-  '@buffetjs/icons',
-  '@buffetjs/styles',
-  '@buffetjs/utils',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
+  '@buffetjs/core',
+  '@buffetjs/custom',
+  '@buffetjs/custom',
+  '@buffetjs/utils',
+  '@buffetjs/icons',
+  '@buffetjs/hooks',
   'classnames',
   'history',
   'hoist-non-react-statics',
@@ -18,11 +21,13 @@ const alias = [
   'immutable',
   'invariant',
   'moment',
+  'qs',
   'react',
   'react-copy-to-clipboard',
   'react-dnd',
   'react-dnd-html5-backend',
   'react-dom',
+  'react-error-boundary',
   'react-fast-compare',
   'react-helmet',
   'react-is',
@@ -32,12 +37,12 @@ const alias = [
   'react-router',
   'react-router-dom',
   'react-transition-group',
+  'react-tooltip',
   'react-virtualized',
   'reactstrap',
   'react-select',
   'redux',
   'redux-immutable',
-  'remove-markdown',
   'reselect',
   'styled-components',
   'yup',
@@ -45,8 +50,7 @@ const alias = [
 
 module.exports = alias.reduce(
   (acc, curr) => {
-    acc[curr] = require.resolve(curr);
-
+    acc[`${curr}$`] = require.resolve(curr);
     return acc;
   },
   {

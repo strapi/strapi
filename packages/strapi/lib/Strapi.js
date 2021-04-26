@@ -1,8 +1,5 @@
 'use strict';
 
-// required first because it loads env files.
-const loadConfiguration = require('./core/app-configuration');
-
 const http = require('http');
 const path = require('path');
 const fse = require('fs-extra');
@@ -13,6 +10,7 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
 const { createDatabaseManager } = require('strapi-database');
+const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
 const loadModules = require('./core/load-modules');
@@ -25,9 +23,15 @@ const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
-const createEntityValidator = require('./services/entity-validator');
+const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
+
+const LIFECYCLES = {
+  REGISTER: 'register',
+  BOOTSTRAP: 'bootstrap',
+};
 
 /**
  * Construct an Strapi instance.
@@ -66,6 +70,8 @@ class Strapi {
     this.eventHub = createEventHub();
 
     this.requireProjectBootstrap();
+
+    createUpdateNotifier(this).notify();
   }
 
   get EE() {
@@ -199,6 +205,34 @@ class Strapi {
     }
   }
 
+  async destroy() {
+    if (_.has(this, 'server.destroy')) {
+      await new Promise(res => this.server.destroy(res));
+    }
+
+    await Promise.all(
+      Object.values(this.plugins).map(plugin => {
+        if (_.has(plugin, 'destroy') && typeof plugin.destroy === 'function') {
+          return plugin.destroy();
+        }
+      })
+    );
+
+    if (_.has(this, 'admin')) {
+      await this.admin.destroy();
+    }
+
+    this.eventHub.removeAllListeners();
+
+    if (_.has(this, 'db')) {
+      await this.db.destroy();
+    }
+
+    this.telemetry.destroy();
+
+    delete global.strapi;
+  }
+
   /**
    * Add behaviors to the server
    */
@@ -222,8 +256,15 @@ class Strapi {
         }
       }
 
+      // Get database clients
+      const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
+
       // Emit started event.
-      await this.telemetry.send('didStartServer');
+      await this.telemetry.send('didStartServer', {
+        database: databaseClients,
+        plugins: this.config.installedPlugins,
+        providers: this.config.installedProviders,
+      });
 
       if (cb && typeof cb === 'function') {
         cb();
@@ -238,9 +279,18 @@ class Strapi {
       }
     };
 
-    this.server.listen(this.config.get('server.port'), this.config.get('server.host'), err =>
-      onListen(err).catch(err => this.stopWithError(err))
-    );
+    const listenSocket = this.config.get('server.socket');
+    const listenErrHandler = err => onListen(err).catch(err => this.stopWithError(err));
+
+    if (listenSocket) {
+      this.server.listen(listenSocket, listenErrHandler);
+    } else {
+      this.server.listen(
+        this.config.get('server.port'),
+        this.config.get('server.host'),
+        listenErrHandler
+      );
+    }
   }
 
   stopWithError(err, customMessage) {
@@ -262,13 +312,13 @@ class Strapi {
       process.send('stop');
     }
 
-    // Kill process.
+    // Kill process
     process.exit(exitCode);
   }
 
   async load() {
     this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ctx.request.method === 'HEAD') {
+      if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
         ctx.set('strapi', 'You are so French!');
         ctx.status = 204;
       } else {
@@ -299,6 +349,8 @@ class Strapi {
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
+
+    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     await this.db.initialize();
 
     this.store = createCoreStore({
@@ -310,9 +362,7 @@ class Strapi {
 
     await this.startWebhooks();
 
-    this.entityValidator = createEntityValidator({
-      strapi: this,
-    });
+    this.entityValidator = entityValidator;
 
     this.entityService = createEntityService({
       db: this.db,
@@ -326,11 +376,10 @@ class Strapi {
     await initializeMiddlewares.call(this);
     await initializeHooks.call(this);
 
-    await this.runBootstrapFunctions();
+    await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
     await this.freeze();
 
     this.isLoaded = true;
-
     return this;
   }
 
@@ -379,30 +428,37 @@ class Strapi {
     return reload;
   }
 
-  async runBootstrapFunctions() {
-    const execBootstrap = async fn => {
-      if (!fn) return;
+  async runLifecyclesFunctions(lifecycleName) {
+    const execLifecycle = async fn => {
+      if (!fn) {
+        return;
+      }
 
       return fn();
     };
 
-    // plugins bootstrap
-    const pluginBoostraps = Object.keys(this.plugins).map(plugin => {
-      return execBootstrap(_.get(this.plugins[plugin], 'config.functions.bootstrap')).catch(err => {
-        strapi.log.error(`Bootstrap function in plugin "${plugin}" failed`);
-        strapi.log.error(err);
-        strapi.stop();
-      });
-    });
-    await Promise.all(pluginBoostraps);
+    const configPath = `functions.${lifecycleName}`;
 
-    // user bootstrap
-    await execBootstrap(_.get(this.config, ['functions', 'bootstrap']));
+    // plugins
+    await Promise.all(
+      Object.keys(this.plugins).map(plugin => {
+        const pluginFunc = _.get(this.plugins[plugin], `config.${configPath}`);
 
-    // admin bootstrap : should always run after the others
-    const adminBootstrap = _.get(this.admin.config, 'functions.bootstrap');
-    return execBootstrap(adminBootstrap).catch(err => {
-      strapi.log.error(`Bootstrap function in admin failed`);
+        return execLifecycle(pluginFunc).catch(err => {
+          strapi.log.error(`${lifecycleName} function in plugin "${plugin}" failed`);
+          strapi.log.error(err);
+          strapi.stop();
+        });
+      })
+    );
+
+    // user
+    await execLifecycle(_.get(this.config, configPath));
+
+    // admin
+    const adminFunc = _.get(this.admin.config, configPath);
+    return execLifecycle(adminFunc).catch(err => {
+      strapi.log.error(`${lifecycleName} function in admin failed`);
       strapi.log.error(err);
       strapi.stop();
     });

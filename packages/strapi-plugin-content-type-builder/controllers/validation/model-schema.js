@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const yup = require('yup');
 
-const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('./constants');
+const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('../../services/constants');
 const { isValidCollectionName, isValidKey } = require('./common');
 const getTypeValidator = require('./types');
 const getRelationValidator = require('./relations');
@@ -15,6 +15,8 @@ const createSchema = (types, relations, { modelType } = {}) => {
       .min(1)
       .required('name.required'),
     description: yup.string(),
+    draftAndPublish: yup.boolean(),
+    pluginOptions: yup.object(),
     connection: yup.string(),
     collectionName: yup
       .string()
@@ -44,16 +46,13 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
           }
 
           if (_.has(attribute, 'type')) {
-            return getTypeValidator(attribute, { types, modelType, attributes })
-              .test(isValidKey(key))
-              .noUnknown();
+            return getTypeValidator(attribute, { types, modelType, attributes }).test(
+              isValidKey(key)
+            );
           }
 
           if (_.has(attribute, 'target')) {
-            return yup
-              .object(getRelationValidator(attribute, relations))
-              .test(isValidKey(key))
-              .noUnknown();
+            return yup.object(getRelationValidator(attribute, relations)).test(isValidKey(key));
           }
 
           return typeOrRelationValidator;

@@ -54,7 +54,10 @@ const AdvancedSettingsPage = () => {
             type: 'GET_DATA_ERROR',
           });
           console.error(err);
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
         }
       }
     };
@@ -95,13 +98,19 @@ const AdvancedSettingsPage = () => {
           type: 'ON_SUBMIT_SUCCEEDED',
         });
 
-        strapi.notification.success(getTrad('notification.success.submit'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('notification.success.submit') },
+        });
       } catch (err) {
         dispatch({
           type: 'ON_SUBMIT_ERROR',
         });
         console.error(err);
-        strapi.notification.error('notification.error');
+        strapi.notification.toggle({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
       }
 
       strapi.unlockApp();

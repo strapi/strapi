@@ -1,14 +1,29 @@
 'use strict';
 
 const yup = require('yup');
+const { typeKinds, coreUids } = require('../../services/constants');
 const { validators, isValidName } = require('./common');
-const { typeKinds } = require('./constants');
 
 const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
+const STRAPI_USER_RELATIONS = ['oneWay', 'manyWay'];
+
+const isValidNature = validNatures =>
+  function(value) {
+    const allowedRelations =
+      this.parent.target === coreUids.STRAPI_USER ? STRAPI_USER_RELATIONS : validNatures;
+
+    return allowedRelations.includes(value)
+      ? true
+      : this.createError({
+          path: this.path,
+          message: `must be one of the following values: ${allowedRelations.join(', ')}`,
+        });
+  };
 
 module.exports = (obj, validNatures) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter(key => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
+    .filter(key => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 
   return {
@@ -18,7 +33,7 @@ module.exports = (obj, validNatures) => {
       .required(),
     nature: yup
       .string()
-      .oneOf(validNatures)
+      .test('isValidNature', isValidNature(validNatures))
       .required(),
     unique: validators.unique.nullable(),
     configurable: yup.boolean().nullable(),
@@ -36,5 +51,6 @@ module.exports = (obj, validNatures) => {
           .nullable(),
     targetColumnName: yup.string().nullable(),
     private: yup.boolean().nullable(),
+    pluginOptions: yup.object(),
   };
 };

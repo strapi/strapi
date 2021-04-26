@@ -4,9 +4,9 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('strapi-utils');
-const { typeKinds } = require('../../controllers/validation/constants');
+const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
+const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -77,12 +77,16 @@ module.exports = function createComponentBuilder() {
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
-        .set(['info', 'name'], infos.name)
-        .set(['info', 'description'], infos.description)
+        .set('info', {
+          name: infos.name,
+          description: infos.description,
+        })
         .set('options', {
           increments: true,
           timestamps: true,
+          draftAndPublish: infos.draftAndPublish || false,
         })
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
@@ -184,6 +188,8 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
+        .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
@@ -220,6 +226,7 @@ const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute =
     plugin,
     columnName: attribute.targetColumnName || undefined,
     autoPopulate: targetAttribute.autoPopulate,
+    private: targetAttribute.private || undefined,
   };
 
   switch (attribute.nature) {

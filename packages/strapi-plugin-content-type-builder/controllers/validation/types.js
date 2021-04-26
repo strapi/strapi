@@ -3,6 +3,8 @@
 const _ = require('lodash');
 const yup = require('yup');
 
+const { hasComponent } = require('../../utils/attributes');
+const { modelTypes, VALID_UID_TARGETS } = require('../../services/constants');
 const {
   validators,
   areEnumValuesUnique,
@@ -12,8 +14,6 @@ const {
   isValidUID,
   isValidRegExpPattern,
 } = require('./common');
-const { hasComponent } = require('../../utils/attributes');
-const { modelTypes, VALID_UID_TARGETS } = require('./constants');
 
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
@@ -36,6 +36,7 @@ const getTypeValidator = (attribute, { types, modelType, attributes }) => {
       .required(),
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),
+    pluginOptions: yup.object(),
     ...getTypeShape(attribute, { modelType, attributes }),
   });
 };

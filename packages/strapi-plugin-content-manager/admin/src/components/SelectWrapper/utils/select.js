@@ -1,14 +1,13 @@
 import { useMemo } from 'react';
-import useDataManager from '../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 
 function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name }) {
   const {
     isCreatingEntry,
     createActionAllowedFields,
     readActionAllowedFields,
-    slug,
     updateActionAllowedFields,
-  } = useDataManager();
+  } = useContentManagerEditViewDataManager();
 
   const isFieldAllowed = useMemo(() => {
     if (isUserAllowedToEditField === true) {
@@ -40,7 +39,6 @@ function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name })
     isCreatingEntry,
     isFieldAllowed,
     isFieldReadable,
-    slug,
   };
 }
 

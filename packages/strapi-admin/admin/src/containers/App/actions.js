@@ -8,12 +8,12 @@ import {
   DISABLE_GLOBAL_OVERLAY_BLOCKER,
   ENABLE_GLOBAL_OVERLAY_BLOCKER,
   FREEZE_APP,
+  GET_INFOS_DATA_SUCCEEDED,
   GET_DATA_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
   UNFREEZE_APP,
-  UNSET_HAS_USERS_PLUGIN,
   UPDATE_PLUGIN,
 } from './constants';
 
@@ -32,6 +32,13 @@ export function enableGlobalOverlayBlocker() {
 export function freezeApp(data) {
   return {
     type: FREEZE_APP,
+    data,
+  };
+}
+
+export function getInfosDataSucceeded(data) {
+  return {
+    type: GET_INFOS_DATA_SUCCEEDED,
     data,
   };
 }
@@ -67,12 +74,6 @@ export function pluginLoaded(newPlugin) {
 export function unfreezeApp() {
   return {
     type: UNFREEZE_APP,
-  };
-}
-
-export function unsetHasUserPlugin() {
-  return {
-    type: UNSET_HAS_USERS_PLUGIN,
   };
 }
 

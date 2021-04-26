@@ -8,7 +8,8 @@ import LoadingIndicatorPage from '../LoadingIndicatorPage';
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
-  const userPermissions = useUser();
+  const { userPermissions } = useUser();
+
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
 
@@ -26,7 +27,10 @@ const CheckPagePermissions = ({ permissions, children }) => {
         if (isMounted.current) {
           console.error(err);
 
-          strapi.notification.error('notification.error');
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: 'notification.error' },
+          });
 
           setState({ isLoading: false });
         }

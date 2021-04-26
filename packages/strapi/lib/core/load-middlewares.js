@@ -1,8 +1,8 @@
 'use strict';
 
 // Dependencies.
-const fs = require('fs-extra');
 const path = require('path');
+const fs = require('fs-extra');
 const _ = require('lodash');
 const glob = require('../load/glob');
 const findPackagePath = require('../load/package-path');
@@ -78,8 +78,14 @@ const createLoaders = strapi => {
   };
 
   const loadAdminMiddlewares = async middlewares => {
-    const dir = path.resolve(findPackagePath(`strapi-admin`), 'middlewares');
+    const middlewaresDir = 'middlewares';
+    const dir = path.resolve(findPackagePath(`strapi-admin`), middlewaresDir);
     await loadMiddlewaresInDir(dir, middlewares);
+
+    // load ee admin middlewares if they exist
+    if (process.env.STRAPI_DISABLE_EE !== 'true' && strapi.EE) {
+      await loadMiddlewaresInDir(`${dir}/../ee/${middlewaresDir}`, middlewares);
+    }
   };
 
   const loadMiddlewareDependencies = async (packages, middlewares) => {

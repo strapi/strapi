@@ -1,22 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { useRouteMatch, useHistory } from 'react-router-dom';
-import { get, has, isEmpty } from 'lodash';
-import { useGlobalContext, request, difference } from 'strapi-helper-plugin';
+import { useRouteMatch } from 'react-router-dom';
+import get from 'lodash/get';
+import { BaselineAlignment, useGlobalContext, request } from 'strapi-helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import BaselineAlignement from '../../../components/BaselineAlignement';
 import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
-import { formatPermissionsToApi } from '../../../utils';
 import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const { goBack } = useHistory();
   const { emitEvent, settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
@@ -25,7 +22,12 @@ const EditPage = () => {
   const permissionsRef = useRef();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
-  const { role, permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
+  const {
+    role,
+    permissions: rolePermissions,
+    isLoading: isRoleLoading,
+    onSubmitSucceeded,
+  } = useFetchRole(id);
 
   /* eslint-disable indent */
   const headerActions = (handleSubmit, handleReset) =>
@@ -38,7 +40,10 @@ const EditPage = () => {
               defaultMessage: 'Reset',
             }),
             disabled: role.code === 'strapi-super-admin',
-            onClick: handleReset,
+            onClick: () => {
+              handleReset();
+              permissionsRef.current.resetForm();
+            },
             color: 'cancel',
             type: 'button',
           },
@@ -61,53 +66,50 @@ const EditPage = () => {
       strapi.lockAppWithOverlay();
       setIsSubmiting(true);
 
-      const permissionsToSend = permissionsRef.current.getPermissions();
-
-      const checkConditionsDiff = () => {
-        const diff = difference(
-          get(permissionsToSend, 'contentTypesPermissions', {}),
-          get(rolePermissions, 'contentTypesPermissions', {})
-        );
-
-        if (isEmpty(diff)) {
-          return false;
-        }
-
-        return Object.keys(diff).some(key => {
-          return has(diff, [key, 'conditions']);
-        });
-      };
+      const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();
 
       await request(`/admin/roles/${id}`, {
         method: 'PUT',
         body: data,
       });
 
-      if (role.code !== 'strapi-super-admin' && !isEmpty(permissionsToSend)) {
+      if (role.code !== 'strapi-super-admin') {
         await request(`/admin/roles/${id}/permissions`, {
           method: 'PUT',
           body: {
-            permissions: formatPermissionsToApi(permissionsToSend),
+            permissions: permissionsToSend,
           },
         });
 
-        if (checkConditionsDiff()) {
+        if (didUpdateConditions) {
           emitEvent('didUpdateConditions');
         }
       }
 
-      strapi.notification.success('notification.success.saved');
-      goBack();
+      permissionsRef.current.setFormAfterSubmit();
+      onSubmitSucceeded({ name: data.name, description: data.description });
+
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: 'notification.success.saved' },
+      });
     } catch (err) {
       console.error(err.response);
-      const message = get(err, 'response.payload.message', 'An error occured');
 
-      strapi.notification.error(message);
+      const errorMessage = get(err, 'response.payload.message', 'An error occured');
+      const message = get(err, 'response.payload.data.permissions[0]', errorMessage);
+
+      strapi.notification.toggle({
+        type: 'warning',
+        message,
+      });
     } finally {
       setIsSubmiting(false);
       strapi.unlockApp();
     }
   };
+
+  const isFormDisabled = role.code === 'strapi-super-admin';
 
   return (
     <>
@@ -139,10 +141,10 @@ const EditPage = () => {
                 actions={headerActions(handleSubmit, handleReset)}
                 isLoading={isLayoutLoading || isRoleLoading}
               />
-              <BaselineAlignement top size="3px" />
+              <BaselineAlignment top size="3px" />
               <RoleForm
                 isLoading={isRoleLoading}
-                disabled={role.code === 'strapi-super-admin'}
+                disabled={isFormDisabled}
                 errors={errors}
                 values={values}
                 onChange={handleChange}
@@ -152,10 +154,10 @@ const EditPage = () => {
               {!isLayoutLoading && !isRoleLoading && (
                 <Padded top bottom size="md">
                   <Permissions
-                    permissionsLayout={permissionsLayout}
-                    rolePermissions={rolePermissions}
-                    role={role}
+                    isFormDisabled={isFormDisabled}
+                    permissions={rolePermissions}
                     ref={permissionsRef}
+                    layout={permissionsLayout}
                   />
                 </Padded>
               )}

@@ -36,8 +36,13 @@ module.exports = (projectDirectory, cliArguments) => {
     strapiVersion: require('../package.json').version,
     debug: cliArguments.debug !== undefined,
     quick: cliArguments.quickstart !== undefined,
-    docker: process.env.DOCKER === 'true',
+    template: cliArguments.template,
+    packageJsonStrapi: {
+      template: cliArguments.template,
+      starter: cliArguments.starter,
+    },
     uuid: (process.env.STRAPI_UUID_PREFIX || '') + uuid(),
+    docker: process.env.DOCKER === 'true',
     deviceId: machineIdSync(),
     tmpPath,
     // use yarn if available and --use-npm isn't true
@@ -52,6 +57,7 @@ module.exports = (projectDirectory, cliArguments) => {
       'strapi-plugin-users-permissions',
       'strapi-plugin-email',
       'strapi-plugin-upload',
+      'strapi-plugin-i18n',
     ],
     additionalsDependencies: {},
   };

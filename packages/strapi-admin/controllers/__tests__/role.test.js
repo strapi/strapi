@@ -93,6 +93,9 @@ describe('Role controller', () => {
       global.strapi = {
         admin: {
           services: {
+            permission: {
+              sanitizePermission: jest.fn(p => p),
+            },
             role: {
               findOne,
             },
@@ -127,7 +130,11 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: { findOne },
-            permission: { conditionProvider: { getAll: jest.fn(() => []) } },
+            permission: {
+              sanitizePermission: jest.fn(p => p),
+              actionProvider: { get: jest.fn() },
+              conditionProvider: { values: jest.fn(() => []) },
+            },
           },
         },
       };
@@ -152,7 +159,7 @@ describe('Role controller', () => {
         {
           action: 'test',
           subject: 'model1',
-          fields: ['title'],
+          properties: { fields: ['title'] },
           conditions: ['admin::is-creator'],
         },
       ];
@@ -168,16 +175,22 @@ describe('Role controller', () => {
         admin: {
           services: {
             role: {
+              assignPermissions,
               findOne: findOneRole,
               getSuperAdmin: jest.fn(() => undefined),
             },
             permission: {
-              assign: assignPermissions,
+              sanitizePermission: jest.fn(permissions => permissions),
               conditionProvider: {
-                getAll: jest.fn(() => [{ id: 'admin::is-creator' }]),
+                values: jest.fn(() => [{ id: 'admin::is-creator' }]),
               },
               actionProvider: {
-                getAllByMap: jest.fn(),
+                values: jest.fn(() => [{ actionId: 'test', subjects: ['model1'] }]),
+                get: jest.fn(() => ({
+                  actionId: 'test',
+                  subjects: ['model1'],
+                  options: { applyToProperties: ['fields'] },
+                })),
               },
             },
           },

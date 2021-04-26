@@ -1,12 +1,67 @@
 'use strict';
 
 const _ = require('lodash');
-const { generateTimestampCode, stringIncludes } = require('strapi-utils');
+const {
+  set,
+  omit,
+  isEqual,
+  pick,
+  prop,
+  isArray,
+  isObject,
+  mapValues,
+  differenceWith,
+  differenceBy,
+} = require('lodash/fp');
+const {
+  generateTimestampCode,
+  stringIncludes,
+  hooks: { createAsyncSeriesWaterfallHook },
+} = require('strapi-utils');
+const permissionDomain = require('../domain/permission');
+const { validatePermissionsExist } = require('../validation/permission');
+const { getService } = require('../utils');
 const { SUPER_ADMIN_CODE } = require('./constants');
-const { createPermission } = require('../domain/permission');
 
-const sanitizeRole = role => {
-  return _.omit(role, ['users', 'permissions']);
+const hooks = {
+  willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
+};
+
+const ACTIONS = {
+  publish: 'plugins::content-manager.explorer.publish',
+};
+
+const sanitizeRole = omit(['users', 'permissions']);
+
+const fieldsToCompare = ['action', 'subject', 'properties', 'conditions'];
+
+const sortDeep = data => {
+  if (isArray(data)) {
+    return data.slice(0).sort();
+  }
+
+  if (isObject(data)) {
+    return mapValues(sortDeep, data);
+  }
+
+  return data;
+};
+
+const sortPermissionProperties = permission => {
+  return Object.entries(permission.properties).reduce(
+    (acc, [name, value]) => permissionDomain.setProperty(name, sortDeep(value), acc),
+    permission
+  );
+};
+
+const arePermissionsEqual = (p1, p2) => {
+  const permissionsFields = [p1, p2]
+    // Sort the permissions' properties to remove false negatives
+    .map(sortPermissionProperties)
+    // Only keep comparison fields
+    .map(pick(fieldsToCompare));
+
+  return isEqual(...permissionsFields);
 };
 
 /**
@@ -129,28 +184,34 @@ const count = async (params = {}) => {
 };
 
 /**
- * Delete roles in database if they have no user assigned
- * @param ids query params to find the roles
- * @returns {Promise<array>}
+ * Check if the given roles id can be deleted safely, throw otherwise
+ * @param ids
+ * @returns {Promise<void>}
  */
-const deleteByIds = async (ids = []) => {
+const checkRolesIdForDeletion = async (ids = []) => {
   const superAdminRole = await getSuperAdmin();
+
   if (superAdminRole && stringIncludes(ids, superAdminRole.id)) {
-    throw strapi.errors.badRequest('ValidationError', {
-      ids: ['You cannot delete the super admin role'],
-    });
+    throw new Error('You cannot delete the super admin role');
   }
 
   for (let roleId of ids) {
     const usersCount = await getUsersCount(roleId);
     if (usersCount !== 0) {
-      throw strapi.errors.badRequest('ValidationError', {
-        ids: ['Some roles are still assigned to some users.'],
-      });
+      throw new Error('Some roles are still assigned to some users');
     }
   }
+};
 
-  await strapi.admin.services.permission.deleteByRolesIds(ids);
+/**
+ * Delete roles in database if they have no user assigned
+ * @param ids query params to find the roles
+ * @returns {Promise<array>}
+ */
+const deleteByIds = async (ids = []) => {
+  await checkRolesIdForDeletion(ids);
+
+  await getService('permission').deleteByRolesIds(ids);
 
   let deletedRoles = await strapi.query('role', 'admin').delete({ id_in: ids });
 
@@ -162,7 +223,7 @@ const deleteByIds = async (ids = []) => {
 };
 
 /** Count the number of users for some roles
- * @returns {Promise<integer>}
+ * @returns {Promise<number>}
  * @param roleId
  */
 const getUsersCount = async roleId => {
@@ -182,13 +243,15 @@ const getSuperAdminWithUsersCount = () => findOneWithUsersCount({ code: SUPER_AD
 /** Create superAdmin, Author and Editor role is no role already exist
  * @returns {Promise<>}
  */
-const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}) => {
+const createRolesIfNoneExist = async () => {
   const someRolesExist = await exists();
   if (someRolesExist) {
     return;
   }
 
-  const allActions = strapi.admin.services.permission.actionProvider.getAll();
+  const { actionProvider } = getService('permission');
+
+  const allActions = actionProvider.values();
   const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
 
   // create 3 roles
@@ -198,7 +261,7 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
     description: 'Super Admins can access and manage all features and settings.',
   });
 
-  await strapi.admin.services.user.assignARoleToAll(superAdminRole.id);
+  await getService('user').assignARoleToAll(superAdminRole.id);
 
   const editorRole = await create({
     name: 'Editor',
@@ -209,37 +272,33 @@ const createRolesIfNoneExist = async ({ createPermissionsForAdmin = false } = {}
   const authorRole = await create({
     name: 'Author',
     code: 'strapi-author',
-    description: 'Authors can manage and publish the content they created.',
+    description: 'Authors can manage the content they have created.',
   });
 
   // create content-type permissions for each role
-  const editorPermissions = strapi.admin.services['content-type'].getPermissionsWithNestedFields(
+  const editorPermissions = getService('content-type').getPermissionsWithNestedFields(
     contentTypesActions,
     {
-      fieldsNullFor: ['plugins::content-manager.explorer.delete'],
       restrictedSubjects: ['plugins::users-permissions.user'],
     }
   );
 
-  const authorPermissions = editorPermissions.map(p => ({
-    ...p,
-    conditions: ['admin::is-creator'],
-  }));
+  const authorPermissions = editorPermissions
+    .filter(({ action }) => action !== ACTIONS.publish)
+    .map(permission =>
+      permissionDomain.create({ ...permission, conditions: ['admin::is-creator'] })
+    );
 
   editorPermissions.push(...getDefaultPluginPermissions());
   authorPermissions.push(...getDefaultPluginPermissions({ isAuthor: true }));
 
   // assign permissions to roles
-  await strapi.admin.services.permission.assign(editorRole.id, editorPermissions);
-  await strapi.admin.services.permission.assign(authorRole.id, authorPermissions);
-
-  if (createPermissionsForAdmin) {
-    await strapi.admin.services.permission.resetSuperAdminPermissions();
-  }
+  await addPermissions(editorRole.id, editorPermissions);
+  await addPermissions(authorRole.id, authorPermissions);
 };
 
 const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
-  const conditions = isAuthor ? ['admin::is-creator'] : null;
+  const conditions = isAuthor ? ['admin::is-creator'] : [];
 
   // add plugin permissions for each role
   return [
@@ -248,7 +307,7 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
     { action: 'plugins::upload.assets.update', conditions },
     { action: 'plugins::upload.assets.download' },
     { action: 'plugins::upload.assets.copy-link' },
-  ].map(createPermission);
+  ].map(permissionDomain.create);
 };
 
 /** Display a warning if the role superAdmin doesn't exist
@@ -257,7 +316,8 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
  */
 const displayWarningIfNoSuperAdmin = async () => {
   const superAdminRole = await getSuperAdminWithUsersCount();
-  const someUsersExists = await strapi.admin.services.user.exists();
+  const someUsersExists = await getService('user').exists();
+
   if (!superAdminRole) {
     strapi.log.warn("Your application doesn't have a super admin role.");
   } else if (someUsersExists && superAdminRole.usersCount === 0) {
@@ -265,7 +325,113 @@ const displayWarningIfNoSuperAdmin = async () => {
   }
 };
 
+/**
+ * Assign permissions to a role
+ * @param {string|int} roleId - role ID
+ * @param {Array<Permission{action,subject,fields,conditions}>} permissions - permissions to assign to the role
+ */
+const assignPermissions = async (roleId, permissions = []) => {
+  try {
+    await validatePermissionsExist(permissions);
+  } catch (err) {
+    throw strapi.errors.badRequest('ValidationError', err);
+  }
+
+  const superAdmin = await getService('role').getSuperAdmin();
+  const isSuperAdmin = superAdmin && superAdmin.id === roleId;
+  const assignRole = set('role', roleId);
+
+  const permissionsWithRole = permissions
+    // Add the role attribute to every permission
+    .map(assignRole)
+    // Transform each permission into a Permission instance
+    .map(permissionDomain.create);
+
+  const existingPermissions = await getService('permission').find({
+    role: roleId,
+    _limit: -1,
+  });
+
+  const permissionsToAdd = differenceWith(
+    arePermissionsEqual,
+    permissionsWithRole,
+    existingPermissions
+  );
+  const permissionsToDelete = differenceWith(
+    arePermissionsEqual,
+    existingPermissions,
+    permissionsWithRole
+  );
+  const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
+
+  if (permissionsToDelete.length > 0) {
+    await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
+  }
+
+  if (permissionsToAdd.length > 0) {
+    const createdPermissions = await addPermissions(roleId, permissionsToAdd);
+    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
+  }
+
+  if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
+    await getService('metrics').sendDidUpdateRolePermissions();
+  }
+
+  return permissionsToReturn;
+};
+
+const addPermissions = async (roleId, permissions) => {
+  const { conditionProvider, createMany } = getService('permission');
+  const { sanitizeConditions } = permissionDomain;
+
+  const permissionsWithRole = permissions
+    .map(set('role', roleId))
+    .map(sanitizeConditions(conditionProvider));
+
+  return createMany(permissionsWithRole);
+};
+
+/**
+ * Reset super admin permissions (giving it all permissions)
+ * @returns {Promise<>}
+ */
+const resetSuperAdminPermissions = async () => {
+  const superAdminRole = await getService('role').getSuperAdmin();
+  if (!superAdminRole) {
+    return;
+  }
+
+  const allActions = getService('permission').actionProvider.values();
+  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
+  const otherActions = allActions.filter(a => a.section !== 'contentTypes');
+
+  // First, get the content-types permissions
+  const permissions = getService('content-type').getPermissionsWithNestedFields(
+    contentTypesActions
+  );
+
+  // Then add every other permission
+  const otherPermissions = otherActions.reduce((acc, action) => {
+    const { actionId, subjects } = action;
+
+    if (isArray(subjects)) {
+      acc.push(...subjects.map(subject => permissionDomain.create({ action: actionId, subject })));
+    } else {
+      acc.push(permissionDomain.create({ action: actionId }));
+    }
+
+    return acc;
+  }, []);
+
+  permissions.push(...otherPermissions);
+
+  const transformedPermissions = await hooks.willResetSuperAdminPermissions.call(permissions);
+
+  await assignPermissions(superAdminRole.id, transformedPermissions);
+};
+
 module.exports = {
+  hooks,
   sanitizeRole,
   create,
   findOne,
@@ -281,4 +447,11 @@ module.exports = {
   getSuperAdminWithUsersCount,
   createRolesIfNoneExist,
   displayWarningIfNoSuperAdmin,
+  addPermissions,
+  assignPermissions,
+  resetSuperAdminPermissions,
+  checkRolesIdForDeletion,
+  constants: {
+    superAdminCode: SUPER_ADMIN_CODE,
+  },
 };

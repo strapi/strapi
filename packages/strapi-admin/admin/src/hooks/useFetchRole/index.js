@@ -1,8 +1,6 @@
-import { useReducer, useEffect } from 'react';
+import { useCallback, useReducer, useEffect } from 'react';
 import { request } from 'strapi-helper-plugin';
-
 import reducer, { initialState } from './reducer';
-import { formatPermissionsFromApi } from '../../utils';
 
 const useFetchRole = id => {
   const [state, dispatch] = useReducer(reducer, initialState);
@@ -14,7 +12,7 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         role: {},
-        permissions: {},
+        permissions: [],
       });
     }
 
@@ -32,7 +30,7 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         role,
-        permissions: formatPermissionsFromApi(permissions),
+        permissions,
       });
     } catch (err) {
       console.error(err);
@@ -40,11 +38,21 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_ERROR',
       });
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
-  return state;
+  const handleSubmitSucceeded = useCallback(data => {
+    dispatch({
+      type: 'ON_SUBMIT_SUCCEEDED',
+      ...data,
+    });
+  }, []);
+
+  return { ...state, onSubmitSucceeded: handleSubmitSucceeded };
 };
 
 export default useFetchRole;

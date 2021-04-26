@@ -173,8 +173,6 @@
   "components.WysiwygBottomControls.fullscreen": "Rozbalit",
   "components.WysiwygBottomControls.uploadFiles": "Přetáhněte soubory, vložte ze schránky nebo {browse}.",
   "components.WysiwygBottomControls.uploadFiles.browse": "vyberte je",
-  "components.popUpWarning.button.cancel": "Zrušit",
-  "components.popUpWarning.button.confirm": "Potvrdit",
   "components.popUpWarning.message": "Opravdu to chcete smazat?",
   "components.popUpWarning.title": "Prosím potvrďte",
   "form.button.done": "OK",

@@ -4,8 +4,8 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { isConfigurable } = require('../../utils/attributes');
 const { nameToSlug, nameToCollectionName } = require('strapi-utils');
+const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
 
 module.exports = function createComponentBuilder() {
@@ -52,6 +52,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       if (this.components.size === 0) {
@@ -101,6 +102,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       if (newUID !== uid) {

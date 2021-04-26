@@ -1,34 +1,76 @@
 'use strict';
 
 const _ = require('lodash');
+const { getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 const generator = require('strapi-generate');
 
+const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');
-const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
-const { nameToSlug } = require('strapi-utils');
+const { coreUids, pluginsUids } = require('./constants');
+
+const isContentTypeVisible = model =>
+  getOr(true, 'pluginOptions.content-type-builder.visible', model) === true;
+
+const getRestrictRelationsTo = (contentType = {}) => {
+  const { uid } = contentType;
+  if (uid === coreUids.STRAPI_USER) {
+    return ['oneWay', 'manyWay'];
+  }
+
+  if (uid.startsWith(coreUids.PREFIX) || uid === pluginsUids.UPLOAD_FILE) {
+    return [];
+  }
+
+  return null;
+};
+
+const getformattedName = (contentType = {}) => {
+  const { uid, info } = contentType;
+  const name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
+
+  return name;
+};
 
 /**
  * Format a contentType info to be used by the front-end
  * @param {Object} contentType
  */
 const formatContentType = contentType => {
-  const { uid, kind, modelName, plugin, connection, collectionName, info } = contentType;
+  const { uid, kind, modelName, plugin, connection, collectionName, info, options } = contentType;
 
   return {
     uid,
     plugin,
     apiID: modelName,
     schema: {
-      name: _.get(info, 'name') || _.upperFirst(pluralize(uid)),
+      name: getformattedName(contentType),
       description: _.get(info, 'description', ''),
+      draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
+      pluginOptions: contentType.pluginOptions,
       connection,
       kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
+      visible: isContentTypeVisible(contentType),
+      restrictRelationsTo: getRestrictRelationsTo(contentType),
     },
   };
+};
+
+const createContentTypes = async contentTypes => {
+  const builder = createBuilder();
+  const createdContentTypes = [];
+
+  for (const contentType of contentTypes) {
+    createdContentTypes.push(await createContentType(contentType, { defaultBuilder: builder }));
+  }
+
+  await builder.writeFiles();
+
+  return createdContentTypes;
 };
 
 /**
@@ -36,10 +78,11 @@ const formatContentType = contentType => {
  * @param {Object} params params object
  * @param {Object} params.contentType Main component to create
  * @param {Array<Object>} params.components List of nested components to created or edit
+ * @param {Object} options
+ * @param {Builder} options.defaultBuilder
  */
-const createContentType = async ({ contentType, components = [] }) => {
-  const builder = createBuilder();
-
+const createContentType = async ({ contentType, components = [] }, options = {}) => {
+  const builder = options.defaultBuilder || createBuilder();
   const uidMap = builder.createNewComponentUIDMap(components);
 
   const replaceTmpUIDs = replaceTemporaryUIDs(uidMap);
@@ -68,13 +111,16 @@ const createContentType = async ({ contentType, components = [] }) => {
     return builder.editComponent(options);
   });
 
-  // generate api squeleton
+  // generate api skeleton
   await generateAPI({
     name: contentType.name,
     kind: contentType.kind,
   });
 
-  await builder.writeFiles();
+  if (!options.defaultBuilder) {
+    await builder.writeFiles();
+  }
+
   return newContentType;
 };
 
@@ -104,6 +150,7 @@ const generateAPI = ({ name, kind = 'collectionType' }) => {
 
 /**
  * Edits a contentType and handle the nested contentTypes sent with it
+ * @param {String} uid Content-type's uid
  * @param {Object} params params object
  * @param {Object} params.contentType Main contentType to create
  * @param {Array<Object>} params.components List of nested components to created or edit
@@ -145,7 +192,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
     try {
       await apiHandler.clear(uid);
 
-      // generate new api squeleton
+      // generate new api skeleton
       await generateAPI({
         name: updatedContentType.schema.info.name,
         kind: updatedContentType.schema.kind,
@@ -164,32 +211,53 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   return updatedContentType;
 };
 
+const deleteContentTypes = async uids => {
+  const builder = createBuilder();
+
+  for (const uid of uids) {
+    await deleteContentType(uid, builder);
+  }
+
+  await builder.writeFiles();
+  for (const uid of uids) {
+    try {
+      await apiHandler.clear(uid);
+    } catch (error) {
+      strapi.log.error(error);
+      await apiHandler.rollback(uid);
+    }
+  }
+};
+
 /**
  * Deletes a content type and the api files related to it
  * @param {string} uid content type uid
+ * @param defaultBuilder
  */
-const deleteContentType = async uid => {
-  const builder = createBuilder();
-
+const deleteContentType = async (uid, defaultBuilder = undefined) => {
+  const builder = defaultBuilder || createBuilder();
   // make a backup
   await apiHandler.backup(uid);
 
-  const component = builder.deleteContentType(uid);
+  const contentType = builder.deleteContentType(uid);
 
-  try {
-    await builder.writeFiles();
-    await apiHandler.clear(uid);
-  } catch (error) {
-    await apiHandler.rollback(uid);
+  if (!defaultBuilder) {
+    try {
+      await builder.writeFiles();
+      await apiHandler.clear(uid);
+    } catch (error) {
+      await apiHandler.rollback(uid);
+    }
   }
 
-  return component;
+  return contentType;
 };
 
 module.exports = {
   createContentType,
   editContentType,
   deleteContentType,
-
   formatContentType,
+  createContentTypes,
+  deleteContentTypes,
 };

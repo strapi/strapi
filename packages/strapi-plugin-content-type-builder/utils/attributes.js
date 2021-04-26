@@ -1,6 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
+const utils = require('strapi-utils');
+const { isMediaAttribute } = require('strapi-utils').contentTypes;
 
 const toUID = (name, plugin) => {
   const modelUID = Object.keys(strapi.contentTypes).find(key => {
@@ -38,11 +40,10 @@ const isRelation = attribute =>
  * @param {Object} context.component - the associated component
  */
 const formatAttributes = model => {
-  return Object.keys(model.attributes).reduce((acc, key) => {
-    if (key === 'created_by' || key === 'updated_by') {
-      return acc;
-    }
+  const { getVisibleAttributes } = utils.contentTypes;
 
+  // only get attributes that can be seen in the CTB
+  return getVisibleAttributes(model).reduce((acc, key) => {
     acc[key] = formatAttribute(key, model.attributes[key], { model });
     return acc;
   }, {});
@@ -63,13 +64,14 @@ const formatAttribute = (key, attribute, { model }) => {
   const { plugin, configurable } = attribute;
   let targetEntity = attribute.model || attribute.collection;
 
-  if (plugin === 'upload' && targetEntity === 'file') {
+  if (isMediaAttribute(attribute)) {
     return {
       type: 'media',
       multiple: attribute.collection ? true : false,
       required: attribute.required ? true : false,
       configurable: configurable === false ? false : undefined,
       allowedTypes: attribute.allowedTypes,
+      pluginOptions: attribute.pluginOptions,
     };
   } else {
     return {
@@ -85,8 +87,10 @@ const formatAttribute = (key, attribute, { model }) => {
         ['attributes', attribute.via, 'columnName'],
         undefined
       ),
+      private: attribute.private ? true : false,
       unique: attribute.unique ? true : false,
       autoPopulate: attribute.autoPopulate,
+      pluginOptions: attribute.pluginOptions,
     };
   }
 };
@@ -144,7 +148,6 @@ module.exports = {
   hasComponent,
   isRelation,
   isConfigurable,
-
   replaceTemporaryUIDs,
   formatAttributes,
   formatAttribute,

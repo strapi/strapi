@@ -9,7 +9,7 @@ const Option = styled.div`
   line-height: 3rem;
   cursor: pointer;
   &:hover {
-    background-color: #e4f0fc;
+    background-color: ${({ theme }) => theme.main.colors.lightestBlue};
     .right-label {
       display: block;
     }

@@ -2,10 +2,10 @@ import React, { useRef, useEffect } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { Flex } from '@buffetjs/core';
 import { getFileExtension } from 'strapi-helper-plugin';
 import { formatBytes, getType, ItemTypes } from '../../utils';
 
-import Flex from '../Flex';
 import Border from '../CardBorder';
 import CardImgWrapper from '../CardImgWrapper';
 import CardPreview from '../CardPreview';

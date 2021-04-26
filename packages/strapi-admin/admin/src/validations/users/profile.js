@@ -7,6 +7,7 @@ const schema = {
   email: yup
     .string()
     .email(translatedErrors.email)
+    .lowercase()
     .required(translatedErrors.required),
   username: yup.string().nullable(),
   password: yup
@@ -22,6 +23,7 @@ const schema = {
     .when('password', (password, passSchema) => {
       return password ? passSchema.required(translatedErrors.required) : passSchema;
     }),
+  preferedLanguage: yup.string().nullable(),
 };
 
 export default schema;

@@ -23,5 +23,9 @@
   "error.regenerateDoc": "An error occurred while regenerating the doc",
   "error.regenerateDoc.versionMissing": "The version you are trying to generate doesn't exist",
   "notification.update.success": "Settings updated successfully",
-  "plugin.name": "Documentation"
+  "notification.delete.success": "Doc deleted",
+  "notification.generate.success": "Doc generated",
+  "plugin.name": "Documentation",
+  "plugin.description.long": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
+  "plugin.description.short": "Create an OpenAPI Document and visualize your API with SWAGGER UI."
 }

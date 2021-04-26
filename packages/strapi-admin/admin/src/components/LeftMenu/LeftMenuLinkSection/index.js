@@ -46,6 +46,8 @@ const LeftMenuLinksSection = ({
               iconName={link.icon}
               label={link.label}
               destination={link.destination}
+              notificationsCount={link.notificationsCount || 0}
+              search={link.search}
             />
           ))
         ) : (
