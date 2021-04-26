@@ -234,13 +234,14 @@ const buildAssocResolvers = model => {
           resolver[alias] = async (obj, options) => {
             // force component relations to be refetched
             if (model.modelType === 'component') {
-              obj[alias] = _.get(obj[alias], 'id', obj[alias]);
+              obj[alias] = _.get(obj[alias], targetModel.primaryKey, obj[alias]);
             }
 
             const loader = strapi.plugins.graphql.services['data-loaders'].loaders[targetModel.uid];
 
-            const localId = obj.id;
-            const foreignId = _.get(obj[alias], 'id', obj[alias]);
+            const localId = obj[model.primaryKey];
+            const targetPK = targetModel.primaryKey;
+            const foreignId = _.get(obj[alias], targetModel.primaryKey, obj[alias]);
 
             const params = {
               ...initQueryOptions(targetModel, obj),
@@ -254,7 +255,7 @@ const buildAssocResolvers = model => {
               }
 
               // check this is an entity and not a mongo ID
-              if (_.has(obj[alias], 'id')) {
+              if (_.has(obj[alias], targetPK)) {
                 return assignOptions(obj[alias], obj);
               }
 
@@ -262,7 +263,7 @@ const buildAssocResolvers = model => {
                 single: true,
                 filters: {
                   ...params,
-                  id: foreignId,
+                  [targetPK]: foreignId,
                 },
               };
 
@@ -291,20 +292,22 @@ const buildAssocResolvers = model => {
 
               // find the related ids to query them and apply the filters
               if (Array.isArray(obj[alias])) {
-                targetIds = obj[alias].map(value => value.id || value);
+                targetIds = obj[alias].map(value => value[targetPK] || value);
               } else {
-                const entry = await strapi.query(model.uid).findOne({ id: obj.id }, [alias]);
+                const entry = await strapi
+                  .query(model.uid)
+                  .findOne({ [primaryKey]: obj[primaryKey] }, [alias]);
 
                 if (_.isEmpty(entry[alias])) {
                   return [];
                 }
 
-                targetIds = entry[alias].map(el => el.id);
+                targetIds = entry[alias].map(el => el[targetPK]);
               }
 
               const filters = {
                 ...params,
-                id_in: targetIds.map(_.toString),
+                [`${targetPK}_in`]: targetIds.map(_.toString),
               };
 
               return loader.load({ filters }).then(r => assignOptions(r, obj));
