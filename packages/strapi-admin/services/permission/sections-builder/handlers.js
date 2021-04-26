@@ -94,7 +94,7 @@ const subjectsHandlerFor = kind => ({ action, section: contentTypesSection }) =>
   contentTypesSection.subjects.push(...newSubjects);
 };
 
-const buildNodeFor = model => ([attributeName, attribute]) => {
+const buildNode = (model, attributeName, attribute) => {
   if (!isVisibleAttribute(model, attributeName)) {
     return null;
   }
@@ -115,7 +115,7 @@ const buildNodeFor = model => ([attributeName, attribute]) => {
 
 const buildDeepAttributesCollection = model => {
   return Object.entries(model.attributes)
-    .map(buildNodeFor(model))
+    .map(([attributeName, attribute]) => buildNode(model, attributeName, attribute))
     .filter(node => node !== null);
 };
 
