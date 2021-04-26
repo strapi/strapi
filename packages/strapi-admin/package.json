@@ -42,7 +42,7 @@
     "babel-loader": "^8.1.0",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.6.0",
-    "chalk": "^2.4.2",
+    "chalk": "^4.1.1",
     "chokidar": "^3.5.1",
     "classnames": "^2.3.1",
     "cross-env": "^7.0.3",
