@@ -13,7 +13,7 @@ const playerModel = {
     },
   },
   connection: 'default',
-  name: 'person',
+  name: 'player',
   description: '',
   collectionName: '',
 };
