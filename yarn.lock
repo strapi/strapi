@@ -3318,11 +3318,6 @@
     "@types/keygrip" "*"
     "@types/node" "*"
 
-"@types/cors@^2.8.4":
-  version "2.8.10"
-  resolved "https://registry.yarnpkg.com/@types/cors/-/cors-2.8.10.tgz#61cc8469849e5bcdd0c7044122265c39cec10cf4"
-  integrity sha512-C7srjHiVG3Ey1nR6d511dtDkCEjxuN9W1HWAEjGq8kpcwmNM6JJkpC0xvabM7BXTG2wDq8Eu33iH9aQKa7IvLQ==
-
 "@types/debug@^4.1.4":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
@@ -4381,7 +4376,7 @@ apollo-server-caching@^0.6.0:
   dependencies:
     lru-cache "^6.0.0"
 
-apollo-server-core@^2.22.1:
+apollo-server-core@^2.23.0:
   version "2.23.0"
   resolved "https://registry.yarnpkg.com/apollo-server-core/-/apollo-server-core-2.23.0.tgz#65ac55a293205efa63eadbf09d30704d6a5974d3"
   integrity sha512-3/a4LPgRADc8CdT/nRh7W0CAqQv3Q4DJvakWQgKqGSqDEb/0u4IBynYjlQKuPBi4wwKdeK2Hb1wiQLl+zu4StQ==
@@ -4434,21 +4429,20 @@ apollo-server-errors@^2.5.0:
   resolved "https://registry.yarnpkg.com/apollo-server-errors/-/apollo-server-errors-2.5.0.tgz#5d1024117c7496a2979e3e34908b5685fe112b68"
   integrity sha512-lO5oTjgiC3vlVg2RKr3RiXIIQ5pGXBFxYGGUkKDhTud3jMIhs+gel8L8zsEjKaKxkjHhCQAA/bcEfYiKkGQIvA==
 
-apollo-server-koa@2.22.1:
-  version "2.22.1"
-  resolved "https://registry.yarnpkg.com/apollo-server-koa/-/apollo-server-koa-2.22.1.tgz#dcc75898a1f90ca12ddc67285030fc8e049e4915"
-  integrity sha512-KhGIv/lc/c9plKcNqXbwcavcDpYjVtjXU5ugIeTMGla3Z1GZVp11GYX+tj93iET7Ypw2THssQNwEKlOma9K2nA==
+apollo-server-koa@2.23.0:
+  version "2.23.0"
+  resolved "https://registry.yarnpkg.com/apollo-server-koa/-/apollo-server-koa-2.23.0.tgz#c2a0915955a65e32f6ac61e239bbdc27eefd182c"
+  integrity sha512-EX2dOp6IRuwYE6ElrnLi1FqWCYvq0nMfd8rOU/MPfcHQ+iRIANVrJiZzEpjdwIu1n2tuk4m6jjj5NLiN5JedsQ==
   dependencies:
     "@apollographql/graphql-playground-html" "1.6.27"
     "@koa/cors" "^2.2.1"
     "@types/accepts" "^1.3.5"
-    "@types/cors" "^2.8.4"
     "@types/koa" "^2.0.46"
     "@types/koa-bodyparser" "^4.2.1"
     "@types/koa-compose" "^3.2.2"
     "@types/koa__cors" "^2.2.1"
     accepts "^1.3.5"
-    apollo-server-core "^2.22.1"
+    apollo-server-core "^2.23.0"
     apollo-server-types "^0.7.0"
     graphql-subscriptions "^1.0.0"
     graphql-tools "^4.0.8"
