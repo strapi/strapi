@@ -3088,10 +3088,10 @@
   dependencies:
     "@swc/core" "^1.2.50"
 
-"@swc-node/jest@^1.1.0":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@swc-node/jest/-/jest-1.1.1.tgz#0f7dd11d1ec036731d0dca55923d416dd77b5946"
-  integrity sha512-TfOLK9heOCkFCrW+PQyR5gec9lEMLLm/XppkIUtrtWautNtDv+3Rx4cBaxHuSRYEG2kkU3YlGSlywqSFeNrGHA==
+"@swc-node/jest@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@swc-node/jest/-/jest-1.2.0.tgz#4d0216b30a014cf9920b596901076dcf42e279f4"
+  integrity sha512-jvtgc1vfF75e9vG+BQZlwGvpNSFA/IvFsaV+r0EFrSrvnSP4VHyyKwaERLfSpDeQdMiIUkgZ09n/8SKsoXaj7A==
   dependencies:
     "@swc-node/core" "^1.3.0"
 
