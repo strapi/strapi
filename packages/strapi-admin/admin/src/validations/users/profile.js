@@ -23,6 +23,7 @@ const schema = {
     .when('password', (password, passSchema) => {
       return password ? passSchema.required(translatedErrors.required) : passSchema;
     }),
+  preferedLanguage: yup.string().nullable(),
 };
 
 export default schema;

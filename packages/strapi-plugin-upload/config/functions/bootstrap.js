@@ -25,7 +25,7 @@ module.exports = async () => {
   }
 
   await pruneObsoleteRelations();
-  registerPermissionActions();
+  await registerPermissionActions();
 };
 
 const wrapFunctionForErrors = fn => async (...args) => {
@@ -94,7 +94,7 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
   );
 };
 
-const registerPermissionActions = () => {
+const registerPermissionActions = async () => {
   const actions = [
     {
       section: 'plugins',
@@ -139,6 +139,5 @@ const registerPermissionActions = () => {
     },
   ];
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

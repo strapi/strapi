@@ -1,12 +1,13 @@
 import { fromJS, OrderedMap } from 'immutable';
 import reducer, { initialState } from '../reducer';
+import { EDIT_ATTRIBUTE } from '../constants';
 
 describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
       const contentTypeUID = 'application::address.address';
       const action = {
-        type: 'EDIT_ATTRIBUTE',
+        type: EDIT_ATTRIBUTE,
         attributeToSet: {
           type: 'media',
           multiple: true,
@@ -87,10 +88,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         .setIn(['modifiedData', 'contentType'], contentType)
         .setIn(['modifiedData', 'components'], fromJS({}));
 
-      const expected = state.setIn(
-        ['modifiedData', 'contentType'],
-        expectedContentType
-      );
+      const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -99,7 +97,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
       const contentTypeUID = 'application::address.address';
       const componentUID = 'default.dish';
       const action = {
-        type: 'EDIT_ATTRIBUTE',
+        type: EDIT_ATTRIBUTE,
         attributeToSet: {
           type: 'text',
           required: true,
@@ -228,10 +226,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         .setIn(['modifiedData', 'components', componentUID], component)
         .setIn(['components', componentUID], component);
 
-      const expected = state.setIn(
-        ['modifiedData', 'components', componentUID],
-        expectedComponent
-      );
+      const expected = state.setIn(['modifiedData', 'components', componentUID], expectedComponent);
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -325,7 +320,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           });
 
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'manyWay',
               targetAttribute: '-',
@@ -356,10 +351,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -408,7 +400,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           });
 
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'oneToOne',
               targetAttribute: 'address',
@@ -489,10 +481,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -541,7 +530,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           });
 
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'oneWay',
               targetAttribute: '-',
@@ -622,10 +611,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -677,7 +663,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           });
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'oneWay',
               targetAttribute: '-',
@@ -749,10 +735,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -851,7 +834,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           });
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'manyToMany',
               targetAttribute: 'many_to_many_right',
@@ -882,10 +865,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -944,7 +924,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             },
           });
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'manyToMany',
               targetAttribute: 'many_to_many_right_updated',
@@ -1024,10 +1004,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -1116,7 +1093,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           });
 
           const action = {
-            type: 'EDIT_ATTRIBUTE',
+            type: EDIT_ATTRIBUTE,
             attributeToSet: {
               nature: 'oneWay',
               targetAttribute: '-',
@@ -1147,10 +1124,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             .setIn(['modifiedData', 'contentType'], contentType)
             .setIn(['modifiedData', 'components'], fromJS({}));
 
-          const expected = state.setIn(
-            ['modifiedData', 'contentType'],
-            expectedContentType
-          );
+          const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
           expect(reducer(state, action)).toEqual(expected);
         });
@@ -1243,7 +1217,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         const action = {
-          type: 'EDIT_ATTRIBUTE',
+          type: EDIT_ATTRIBUTE,
           attributeToSet: {
             nature: 'oneWay',
             targetAttribute: '-',
@@ -1274,10 +1248,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           .setIn(['modifiedData', 'contentType'], contentType)
           .setIn(['modifiedData', 'components'], fromJS({}));
 
-        const expected = state.setIn(
-          ['modifiedData', 'contentType'],
-          expectedContentType
-        );
+        const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
         expect(reducer(state, action)).toEqual(expected);
       });
@@ -1377,7 +1348,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         const action = {
-          type: 'EDIT_ATTRIBUTE',
+          type: EDIT_ATTRIBUTE,
           attributeToSet: {
             nature: 'oneToMany',
             targetAttribute: 'many_to_one',
@@ -1408,10 +1379,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           .setIn(['modifiedData', 'contentType'], contentType)
           .setIn(['modifiedData', 'components'], fromJS({}));
 
-        const expected = state.setIn(
-          ['modifiedData', 'contentType'],
-          expectedContentType
-        );
+        const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
         expect(reducer(state, action)).toEqual(expected);
       });
@@ -1511,7 +1479,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         const action = {
-          type: 'EDIT_ATTRIBUTE',
+          type: EDIT_ATTRIBUTE,
           attributeToSet: {
             nature: 'manyToMany',
             targetAttribute: 'many_to_many_right',
@@ -1542,10 +1510,7 @@ describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
           .setIn(['modifiedData', 'contentType'], contentType)
           .setIn(['modifiedData', 'components'], fromJS({}));
 
-        const expected = state.setIn(
-          ['modifiedData', 'contentType'],
-          expectedContentType
-        );
+        const expected = state.setIn(['modifiedData', 'contentType'], expectedContentType);
 
         expect(reducer(state, action)).toEqual(expected);
       });

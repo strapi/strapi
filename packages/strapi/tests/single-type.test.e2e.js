@@ -27,12 +27,12 @@ describe('Content Manager single types', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   test('find single type content returns 404 when not created', async () => {
     const res = await rq({

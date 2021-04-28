@@ -33,12 +33,12 @@ describe('Content Manager single types', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Generate UID', () => {
     test('Throws if input is not provided', async () => {

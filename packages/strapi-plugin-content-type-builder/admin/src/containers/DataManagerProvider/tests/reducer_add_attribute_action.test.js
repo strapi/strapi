@@ -2,6 +2,7 @@ import { fromJS } from 'immutable';
 import { get } from 'lodash';
 import reducer, { initialState } from '../reducer';
 import testData from './data';
+import { ADD_ATTRIBUTE } from '../constants';
 
 describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
   describe('Adding a common field that is not a relation', () => {
@@ -11,7 +12,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         fromJS(get(testData, ['contentTypes', 'application::address.address']))
       );
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
 
         attributeToSet: {
           type: 'string',
@@ -51,9 +52,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const state = initialState
         .setIn(
           ['modifiedData', 'contentType'],
-          fromJS(
-            get(testData, ['contentTypes', 'application::address.address'])
-          ).setIn(
+          fromJS(get(testData, ['contentTypes', 'application::address.address'])).setIn(
             ['schema', 'attributes', 'compo_field'],
             fromJS({
               type: 'component',
@@ -65,7 +64,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .setIn(['components', compoUID], compoSchema);
 
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'test',
           type: 'integer',
@@ -81,14 +80,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       };
 
       const expected = state.setIn(
-        [
-          'modifiedData',
-          'components',
-          compoUID,
-          'schema',
-          'attributes',
-          'test',
-        ],
+        ['modifiedData', 'components', compoUID, 'schema', 'attributes', 'test'],
         fromJS({
           type: 'integer',
           default: 2,
@@ -117,7 +109,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'component',
           repeatable: true,
@@ -168,7 +160,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'component',
           repeatable: true,
@@ -225,7 +217,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         );
 
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'component',
           repeatable: true,
@@ -276,7 +268,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       };
       const contentTypeUID = 'application::address.address';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'newCompo',
           type: 'component',
@@ -291,14 +283,8 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
       const state = initialState
         .setIn(['components', componentToCreateUID], fromJS(componentToCreate))
-        .setIn(
-          ['modifiedData', 'components', componentToCreateUID],
-          fromJS(componentToCreate)
-        )
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'components', componentToCreateUID], fromJS(componentToCreate))
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'newCompo'],
@@ -317,7 +303,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     it('Should create the dynamiczone attribute correctly', () => {
       const contentTypeUID = 'application::address.address';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           type: 'dynamiczone',
           components: [],
@@ -350,7 +336,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const contentTypeUID = 'application::address.address';
       const targetContentTypeUID = 'application::category.category';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'categories',
           nature: 'oneToMany',
@@ -370,10 +356,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        )
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]))
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.setIn(
@@ -396,7 +379,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const componentUID = 'default.dish';
       const targetContentTypeUID = 'application::category.category';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'address',
           nature: 'oneWay',
@@ -418,10 +401,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'component'],
-          fromJS(testData.components[componentUID])
-        )
+        .setIn(['modifiedData', 'component'], fromJS(testData.components[componentUID]))
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.setIn(
@@ -444,7 +424,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const componentUID = 'default.dish';
       const targetContentTypeUID = 'application::category.category';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'address',
           nature: 'oneWay',
@@ -466,10 +446,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[targetContentTypeUID])
-        )
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[targetContentTypeUID]))
         .setIn(
           ['modifiedData', 'components', componentUID],
           fromJS(testData.components[componentUID])
@@ -477,14 +454,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .setIn(['modifiedData', 'components'], fromJS({}));
 
       const expected = state.setIn(
-        [
-          'modifiedData',
-          'components',
-          componentUID,
-          'schema',
-          'attributes',
-          'address',
-        ],
+        ['modifiedData', 'components', componentUID, 'schema', 'attributes', 'address'],
         fromJS({
           nature: 'oneWay',
           targetAttribute: '-',
@@ -504,7 +474,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     it('Should not create an opposite attribute if the relation is oneWay', () => {
       const contentTypeUID = 'application::address.address';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
         attributeToSet: {
@@ -524,10 +494,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
         fromJS({
@@ -547,7 +514,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     it('Should not create an opposite attribute if the relation is manyWay', () => {
       const contentTypeUID = 'application::address.address';
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
         attributeToSet: {
@@ -567,10 +534,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
         fromJS({
@@ -603,7 +567,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         targetColumnName,
       };
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
         attributeToSet: {
@@ -626,24 +590,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 
@@ -666,7 +618,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         targetColumnName,
       };
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
         attributeToSet: {
@@ -689,24 +641,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 
@@ -729,7 +669,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         targetColumnName,
       };
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
         attributeToSet: {
@@ -752,24 +692,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 
@@ -792,7 +720,7 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         targetColumnName,
       };
       const action = {
-        type: 'ADD_ATTRIBUTE',
+        type: ADD_ATTRIBUTE,
         forTarget: 'contentType',
         targetUid: contentTypeUID,
         attributeToSet: {
@@ -815,24 +743,12 @@ describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         .set('components', fromJS(testData.components))
         .set('initialComponents', fromJS(testData.components))
         .set('initialContentTypes', fromJS(testData.contentTypes))
-        .setIn(
-          ['modifiedData', 'contentType'],
-          fromJS(testData.contentTypes[contentTypeUID])
-        );
+        .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
 
       const expected = state
+        .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
         .setIn(
-          ['modifiedData', 'contentType', 'schema', 'attributes', name],
-          fromJS(attribute)
-        )
-        .setIn(
-          [
-            'modifiedData',
-            'contentType',
-            'schema',
-            'attributes',
-            targetAttribute,
-          ],
+          ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
           fromJS(oppositeAttribute)
         );
 

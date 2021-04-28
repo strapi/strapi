@@ -29,7 +29,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { emitEvent, updateMenu } = useGlobalContext();
   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
   const { labelForm, labelToEdit, initialData, modifiedData } = reducerState.toJS();
   const attributes = useMemo(() => {
@@ -181,6 +181,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
           });
         }}
         onConfirmSubmit={handleConfirm}
+        onModalConfirmClosed={updateMenu}
         name={getName}
       >
         <DragWrapper>

@@ -36,6 +36,7 @@ const getTypeValidator = (attribute, { types, modelType, attributes }) => {
       .required(),
     configurable: yup.boolean().nullable(),
     private: yup.boolean().nullable(),
+    pluginOptions: yup.object(),
     ...getTypeShape(attribute, { modelType, attributes }),
   });
 };

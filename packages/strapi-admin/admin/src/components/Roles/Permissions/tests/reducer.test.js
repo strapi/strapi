@@ -1,565 +1,815 @@
 import reducer from '../reducer';
-import { STATIC_ATTRIBUTE_ACTIONS } from '../utils';
 
-describe('ADMIN | COMPONENTS | Permissions | ContentTypes | reducer', () => {
+describe('ADMIN | COMPONENTS | Permissions | reducer', () => {
   describe('DEFAULT_ACTION', () => {
-    it('should return the initialState', () => {
-      const state = {
-        test: true,
-      };
+    it('should return the initialState when the type is undefined', () => {
+      const initialState = { ok: true };
+      const action = { type: undefined };
 
-      expect(reducer(state, {})).toEqual(state);
+      expect(reducer(initialState, action)).toEqual(initialState);
     });
   });
-
-  describe('COLLAPSE_PATH', () => {
-    it('should add the first level of the path', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 0,
-        value: 'address',
-      };
+  describe('ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX', () => {
+    it('should set all the leafs in each content type corresponding to the correct action and remove the applied conditions when the value is falsy', () => {
       const initialState = {
-        collapsePath: [],
-      };
-      const expected = {
-        collapsePath: ['address'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove the value from the level level if click on the same value and level', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 0,
-        value: 'address',
-      };
-      const initialState = {
-        collapsePath: ['address'],
-      };
-      const expected = {
-        collapsePath: [],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should add another level to the path', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 1,
-        value: 'city',
-      };
-      const initialState = {
-        collapsePath: ['address'],
-      };
-      const expected = {
-        collapsePath: ['address', 'city'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should replace the value at the right level', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 2,
-        value: 'floor',
-      };
-      const initialState = {
-        collapsePath: ['address', 'city', 'number', 'door'],
-      };
-      const expected = {
-        collapsePath: ['address', 'city', 'floor'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all values from the index if same values and index', () => {
-      const action = {
-        type: 'COLLAPSE_PATH',
-        index: 1,
-        value: 'city',
-      };
-      const initialState = {
-        collapsePath: ['address', 'city', 'number', 'door'],
-      };
-      const expected = {
-        collapsePath: ['address'],
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ALL_ATTRIBUTE_ACTIONS_SELECT', () => {
-    it('should set all static actions to an attribute permissions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: { attributeName: 'picture', required: false },
-        shouldEnable: true,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
             },
-            contentTypeActions: {},
-            attributes: {
-              picture: {
-                actions: [],
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                    services: {
+                      name: true,
+                      media: true,
+                      closing: {
+                        name: {
+                          test: true,
+                        },
+                      },
+                    },
+                    dz: true,
+                    relation: true,
+                  },
+                  locales: {
+                    fr: true,
+                    en: true,
+                  },
+                },
+                conditions: {
+                  test: true,
+                },
               },
             },
           },
         },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.publish': true,
-            },
-            attributes: {
-              picture: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all actions if they are already in permissions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: { attributeName: 'picture', required: false },
-        shouldEnable: false,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-            },
-            attributes: {
-              picture: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              video: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              name: {
-                actions: ['plugins::content-manager.explorer.create'],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-            },
-            attributes: {
-              picture: {
-                actions: [],
-              },
-              video: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              name: {
-                actions: ['plugins::content-manager.explorer.create'],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete' },
-              { action: 'plugins::content-manager.explorer.publish' },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all actions if they are already in permissions and remove content type actions', () => {
-      const action = {
-        type: 'ALL_ATTRIBUTE_ACTIONS_SELECT',
-        subject: 'place',
-        attribute: { attributeName: 'picture', required: false },
-        shouldEnable: false,
-      };
-      const initialState = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-            },
-            attributes: {
-              picture: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              video: {
-                actions: [],
-              },
-              name: {
-                actions: [],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-      const expected = {
-        collapsePath: [],
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {},
-            attributes: {
-              picture: {
-                actions: [],
-              },
-              video: {
-                actions: [],
-              },
-              name: {
-                actions: [],
-              },
-            },
-          },
-        },
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('ALL_CONTENT_TYPE_PERMISSIONS_SELECT', () => {
-    it('should add all the content type permissions with content type actions', () => {
-      const action = {
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: 'place',
-        attributes: [
-          { attributeName: 'address', required: false },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: false },
-          { attributeName: 'media.vote', required: false },
-          { attributeName: 'media.vote.like', required: false },
-          { attributeName: 'media.vote.long_description', required: false },
-        ],
-        shouldEnable: true,
-        shouldSetAllContentTypes: true,
-      };
-
-      const initialState = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            attributes: {
-              address: {
-                actions: ['read'],
-              },
-              city: {
-                actions: ['read'],
-              },
-              postal_code: {
-                actions: ['read'],
-              },
-              'media.vote': {
-                actions: [],
-              },
-              'media.vote.like': {
-                actions: [],
-              },
-              'media.vote.long_description': {
-                actions: [],
-              },
-            },
-          },
-        },
-      };
-
-      const expected = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.create', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.read', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.update', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-              { action: 'plugins::content-manager.explorer.publish', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            conditions: {
-              read: ['admin::is-creator'],
-            },
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-              'plugins::content-manager.explorer.publish': true,
-            },
-            attributes: {
-              address: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              city: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              postal_code: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              'media.vote': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              'media.vote.like': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              'media.vote.long_description': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-
-    it('should remove all the content type permissions', () => {
-      const action = {
-        type: 'ALL_CONTENT_TYPE_PERMISSIONS_SELECT',
-        subject: 'place',
-        attributes: [
-          { attributeName: 'address', required: false },
-          { attributeName: 'city', required: false },
-          { attributeName: 'postal_code', required: false },
-          { attributeName: 'media.vote', required: false },
-          { attributeName: 'media.vote.like', required: false },
-          { attributeName: 'media.vote.long_description', required: false },
-        ],
-        shouldEnable: false,
-        shouldSetAllContentTypes: true,
-      };
-
-      const initialState = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {
-              'plugins::content-manager.explorer.delete': true,
-            },
-            attributes: {
-              address: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              city: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              postal_code: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              'media.vote': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              'media.vote.like': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-              'media.vote.long_description': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
-              },
-            },
-          },
-        },
-      };
-
-      const expected = {
-        permissionsLayout: {
-          sections: {
-            contentTypes: [
-              { action: 'plugins::content-manager.explorer.delete', subjects: ['place'] },
-            ],
-          },
-        },
-        contentTypesPermissions: {
-          place: {
-            contentTypeActions: {},
-            attributes: {
-              address: {
-                actions: [],
-              },
-              city: {
-                actions: [],
-              },
-              postal_code: {
-                actions: [],
-              },
-              'media.vote': {
-                actions: [],
-              },
-              'media.vote.like': {
-                actions: [],
-              },
-              'media.vote.long_description': {
-                actions: [],
-              },
-            },
-          },
-        },
-      };
-
-      expect(reducer(initialState, action)).toEqual(expected);
-    });
-  });
-
-  describe('SELECT_MULTIPLE_ATTRIBUTE', () => {
-    it('should select an action of an array of attributes in a content type', () => {
-      const action = {
-        type: 'SELECT_MULTIPLE_ATTRIBUTE',
-        attributes: [
-          { attributeName: 'city.componentfield1' },
-          { attributeName: 'postal_code' },
-          { attributeName: 'city.componentfield2.field' },
-        ],
-        subject: 'test',
-      };
-      const initialState = {
-        contentTypesPermissions: {
+        singleTypes: {
           test: {
-            attributes: {},
-          },
-          test2: {
-            attributes: {
-              postal_code: {
-                actions: [
-                  'plugins::content-manager.explorer.create',
-                  'plugins::content-manager.explorer.read',
-                ],
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: true },
               },
             },
           },
         },
       };
+
       const expected = {
-        contentTypesPermissions: {
-          test: {
-            attributes: {
-              'city.componentfield1': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: false,
+                  },
+                },
               },
-              'city.componentfield2.field': {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
               },
-              postal_code: {
-                actions: STATIC_ATTRIBUTE_ACTIONS,
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                    services: {
+                      name: false,
+                      media: false,
+                      closing: {
+                        name: {
+                          test: false,
+                        },
+                      },
+                    },
+                    dz: false,
+                    relation: false,
+                  },
+                  locales: {
+                    fr: false,
+                    en: false,
+                  },
+                },
+                conditions: {
+                  test: false,
+                },
               },
             },
           },
-          test2: {
-            attributes: {
-              postal_code: {
-                actions: [
-                  'plugins::content-manager.explorer.create',
-                  'plugins::content-manager.explorer.read',
-                ],
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: true },
+              },
+            },
+          },
+        },
+      };
+      const action = {
+        type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
+        collectionTypeKind: 'collectionTypes',
+        actionId: 'content-manager.explorer.create',
+        value: false,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should set all the leafs in each content type corresponding to the correct action and remove the applied conditions when the value is truthy', () => {
+      const initialState = {
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                  locales: {
+                    fr: false,
+                    en: false,
+                  },
+                },
+                conditions: {
+                  test: true,
+                },
+              },
+            },
+          },
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: false },
+              },
+            },
+          },
+        },
+      };
+
+      const expected = {
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              'content-manager.explorer.update': {
+                properties: {
+                  fields: {
+                    f1: true,
+                  },
+                },
+              },
+            },
+            restaurant: {
+              'content-manager.explorer.create': {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                  locales: {
+                    fr: true,
+                    en: true,
+                  },
+                },
+                conditions: {
+                  test: true,
+                },
+              },
+            },
+          },
+        },
+        singleTypes: {
+          test: {
+            'content-manager.explorer.create': {
+              properties: {
+                fields: { f1: false },
+              },
+            },
+          },
+        },
+      };
+      const action = {
+        type: 'ON_CHANGE_COLLECTION_TYPE_GLOBAL_ACTION_CHECKBOX',
+        collectionTypeKind: 'collectionTypes',
+        actionId: 'content-manager.explorer.create',
+        value: true,
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX', () => {
+    it('should set all the leafs of a content type property to true when the value is truthy and not remove the applied conditions', () => {
+      const action = {
+        pathToCollectionType: 'collectionTypes..address',
+        propertyName: 'fields',
+        rowName: 'f2',
+        type: 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX',
+        value: true,
+      };
+      const initialState = {
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+            },
+          },
+          plugins: { ok: true },
+        },
+      };
+
+      const expected = {
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: true,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: true,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+            },
+          },
+          plugins: { ok: true },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should set all the leafs of a content type property to false when the value is falsy and remove the applied conditions', () => {
+      const action = {
+        pathToCollectionType: 'collectionTypes..address',
+        propertyName: 'fields',
+        rowName: 'f1',
+        type: 'ON_CHANGE_COLLECTION_TYPE_ROW_LEFT_CHECKBOX',
+        value: false,
+      };
+      const initialState = {
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+            },
+          },
+          plugins: { ok: true },
+        },
+      };
+
+      const expected = {
+        initialData: { ok: true },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: false,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
+            restaurant: {
+              delete: {
+                properties: {
+                  enabled: true,
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+            },
+          },
+          plugins: { ok: true },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_CONDITIONS', () => {
+    it('should apply the conditions only to the correct actions', () => {
+      const initialState = {
+        initialData: { ok: true },
+        layouts: { foo: 'bar' },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: true,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: true,
+                  roles: false,
+                },
+              },
+            },
+          },
+          plugins: {
+            ctb: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+            },
+            doc: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+              settings: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+                updated: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const conditions = {
+        'collectionTypes..address..create': {
+          creator: true,
+          roles: false,
+        },
+        'collectionTypes..address..read': {
+          creator: false,
+          roles: false,
+        },
+        'plugins..doc..settings..updated': {
+          creator: true,
+          roles: true,
+        },
+      };
+
+      const expected = {
+        initialData: { ok: true },
+        layouts: { foo: 'bar' },
+        modifiedData: {
+          collectionTypes: {
+            address: {
+              create: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: true,
+                  roles: false,
+                },
+              },
+              read: {
+                properties: {
+                  fields: {
+                    f1: true,
+                    f2: false,
+                  },
+                },
+                conditions: {
+                  creator: false,
+                  roles: false,
+                },
+              },
+            },
+          },
+          plugins: {
+            ctb: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+            },
+            doc: {
+              general: {
+                read: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+              },
+              settings: {
+                read: {
+                  properties: {
+                    enabled: false,
+                  },
+                  conditions: {
+                    creator: false,
+                    roles: false,
+                  },
+                },
+                updated: {
+                  properties: {
+                    enabled: true,
+                  },
+                  conditions: {
+                    creator: true,
+                    roles: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      };
+
+      const action = { type: 'ON_CHANGE_CONDITIONS', conditions };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_SIMPLE_CHECKBOX', () => {
+    it('should set the modifiedData.test.enabled to false when the value is falsy and remove the applied conditions', () => {
+      const action = {
+        type: 'ON_CHANGE_SIMPLE_CHECKBOX',
+        keys: 'test..properties..enabled',
+        value: false,
+      };
+
+      const initialState = {
+        initialData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+      };
+      const expected = {
+        initialData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: false }, conditions: { creator: false, roles: false } },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should set the modifiedData.test.enabled to true when the value is truthy and not remove the applied conditions', () => {
+      const action = {
+        type: 'ON_CHANGE_SIMPLE_CHECKBOX',
+        keys: 'test..properties..enabled',
+        value: true,
+      };
+
+      const initialState = {
+        initialData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
+        },
+      };
+      const expected = {
+        initialData: {
+          test: { properties: { enabled: false }, conditions: { creator: true, roles: true } },
+        },
+        modifiedData: {
+          test: { properties: { enabled: true }, conditions: { creator: true, roles: true } },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_TOGGLE_PARENT_CHECKBOX', () => {
+    it('should set all the leafs of the create action to true and not remove the applied conditions when the value is truthy', () => {
+      const action = {
+        type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
+        keys: 'restaurant..create',
+        value: true,
+      };
+
+      const initialState = {
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: false, f2: { f1: false } },
+                locales: { en: false },
+              },
+              conditions: {
+                test: 'test',
+              },
+            },
+            update: {
+              properties: {
+                test: true,
+              },
+            },
+          },
+        },
+      };
+
+      const expected = {
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: true, f2: { f1: true } },
+                locales: { en: true },
+              },
+              conditions: {
+                test: 'test',
+              },
+            },
+            update: {
+              properties: {
+                test: true,
+              },
+            },
+          },
+        },
+      };
+
+      expect(reducer(initialState, action)).toEqual(expected);
+    });
+
+    it('should set all the leafs of the create action to true and remove the applied conditions when the value is falsy', () => {
+      const action = {
+        type: 'ON_CHANGE_TOGGLE_PARENT_CHECKBOX',
+        keys: 'restaurant..create',
+        value: false,
+      };
+
+      const initialState = {
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: true, f2: { f1: false } },
+                locales: { en: false },
+              },
+              conditions: {
+                test: true,
+              },
+            },
+            update: {
+              properties: {
+                test: true,
+              },
+            },
+          },
+        },
+      };
+
+      const expected = {
+        initialData: {},
+        modifiedData: {
+          restaurant: {
+            create: {
+              properties: {
+                fields: { f1: false, f2: { f1: false } },
+                locales: { en: false },
+              },
+              conditions: {
+                test: false,
+              },
+            },
+            update: {
+              properties: {
+                test: true,
               },
             },
           },
