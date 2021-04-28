@@ -11,6 +11,15 @@ const playerModel = {
     age: {
       type: 'integer',
     },
+    level: {
+      type: 'enumeration',
+      enum: [
+        'amateur',
+        'intermediary',
+        'pro'
+      ],
+      default: 'amateur',
+    },
   },
   connection: 'default',
   name: 'player',
