@@ -70,7 +70,7 @@
     "match-sorter": "^4.0.2",
     "mini-css-extract-plugin": "^1.4.0",
     "moment": "^2.29.1",
-    "p-map": "4.0.0",
+    "p-map": "5.0.0",
     "passport-local": "1.0.0",
     "prop-types": "^15.7.2",
     "qs": "6.10.1",
