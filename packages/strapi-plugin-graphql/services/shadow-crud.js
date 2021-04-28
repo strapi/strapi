@@ -77,6 +77,8 @@ const getMutationInfo = (schema, name) => {
   return _.get(schema, `resolver.Mutation.${name}`, {});
 };
 
+const isTypeAttributeEnabled = (model, attr) =>
+  _.get(strapi.plugins.graphql, `config._schema.graphql.type.${model.globalId}.${attr}`) !== false;
 const isNotPrivate = _.curry((model, attributeName) => {
   return !contentTypes.isPrivateAttribute(model, attributeName);
 });
@@ -105,6 +107,7 @@ const buildTypeDefObj = model => {
 
   Object.keys(attributes)
     .filter(isNotPrivate(model))
+    .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
     .forEach(attributeName => {
       const attribute = attributes[attributeName];
       // Convert our type to the GraphQL type.
@@ -119,6 +122,7 @@ const buildTypeDefObj = model => {
   associations
     .filter(association => association.type === 'collection')
     .filter(association => isNotPrivate(model, association.alias))
+    .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
     .forEach(association => {
       typeDef[`${association.alias}(sort: String, limit: Int, start: Int, where: JSON)`] =
         typeDef[association.alias];
@@ -129,9 +133,11 @@ const buildTypeDefObj = model => {
   return typeDef;
 };
 
-const generateEnumDefinitions = (attributes, globalId) => {
+const generateEnumDefinitions = (model, globalId) => {
+  const { attributes } = model;
   return Object.keys(attributes)
     .filter(attribute => attributes[attribute].type === 'enumeration')
+    .filter(attribute => isTypeAttributeEnabled(model, attribute))
     .map(attribute => {
       const definition = attributes[attribute];
 
@@ -203,6 +209,7 @@ const buildAssocResolvers = model => {
 
   return associations
     .filter(association => isNotPrivate(model, association.alias))
+    .filter(association => isTypeAttributeEnabled(model, association.alias))
     .reduce((resolver, association) => {
       const target = association.model || association.collection;
       const targetModel = strapi.getModel(target, association.plugin);
@@ -363,7 +370,7 @@ const buildModelDefinition = (model, globalType = {}) => {
     typeDefObj,
   };
 
-  schema.definition += generateEnumDefinitions(model.attributes, globalId);
+  schema.definition += generateEnumDefinitions(model, globalId);
   generateDynamicZoneDefinitions(model.attributes, globalId, schema);
 
   const description = getTypeDescription(globalType, model);
