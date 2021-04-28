@@ -17,7 +17,8 @@ const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
 
 const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
-const isTypeAttributeEnabled = (model, attr) => _.get(strapi.plugins.graphql, `config._schema.graphql.type.${model.globalId}.${attr}`) !== false
+const isTypeAttributeEnabled = (model, attr) =>
+  _.get(strapi.plugins.graphql, `config._schema.graphql.type.${model.globalId}.${attr}`) !== false;
 
 module.exports = {
   /**
@@ -216,8 +217,11 @@ module.exports = {
   generateInputModel(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.upperFirst(toSingular(name))}Input`;
-    const hasAllAttributesDisabled = Object.keys(model.attributes).filter(attributeName => isTypeAttributeEnabled(model, attributeName)).length === 0
-    
+    const hasAllAttributesDisabled =
+      Object.keys(model.attributes).filter(attributeName =>
+        isTypeAttributeEnabled(model, attributeName)
+      ).length === 0;
+
     if (_.isEmpty(model.attributes) || hasAllAttributesDisabled) {
       return `
       input ${inputName} {
