@@ -1,6 +1,6 @@
 'use strict';
 
-const { generateInputModel } = require('../services/type-builder');
+const types = require('../services/type-builder');
 
 const playerModel = {
   attributes: {
@@ -27,6 +27,7 @@ const playerModel = {
   name: 'player',
   description: '',
   collectionName: '',
+  globalId: 'Player'
 };
 
 describe('generateInputModel', () => {
@@ -40,6 +41,7 @@ describe('generateInputModel', () => {
                 type: {
                   Player: {
                     age: false,
+                    level: false,
                   },
                 },
               },
@@ -48,8 +50,20 @@ describe('generateInputModel', () => {
         },
       },
     };
-    expect(generateInputModel(playerModel, 'player')).toMatch(
-      'input PlayerInput {\nlastname: String\nfirstname: String\n}'
+    expect(types.generateInputModel(playerModel, 'player')).toEqual(
+      `
+      input PlayerInput {
+
+        lastname: String
+firstname: String
+      }
+
+      input editPlayerInput {
+        
+        lastname: String
+firstname: String
+      }
+    `
     );
   });
 });
