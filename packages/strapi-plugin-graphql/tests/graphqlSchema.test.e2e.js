@@ -17,7 +17,7 @@ const playerModel = {
   description: '',
   collectionName: '',
 };
-  
+
 describe('generateInputModel', () => {
   test('removes disabled attributes', () => {
     global.strapi = {
@@ -28,15 +28,15 @@ describe('generateInputModel', () => {
               graphql: {
                 type: {
                   Player: {
-                    age: false
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+                    age: false,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
     expect(generateInputModel(playerModel, 'player')).toMatch(
       'input PlayerInput {\nlastname: String\nfirstname: String\n}'
     );
