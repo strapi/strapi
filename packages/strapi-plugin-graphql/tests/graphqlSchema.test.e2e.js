@@ -1,3 +1,5 @@
+'use strict';
+
 const { generateInputModel } = require('../services/type-builder');
 
 const playerModel = {
