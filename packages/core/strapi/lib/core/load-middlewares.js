@@ -56,7 +56,7 @@ const createLoaders = strapi => {
 
   const loadPluginsMiddlewares = async (plugins, middlewares) => {
     for (let pluginName of plugins) {
-      const dir = path.resolve(findPackagePath(`strapi-plugin-${pluginName}`), 'middlewares');
+      const dir = path.resolve(findPackagePath(`@strapi/plugin-${pluginName}`), 'middlewares');
       await loadMiddlewaresInDir(dir, middlewares);
     }
   };
@@ -79,7 +79,7 @@ const createLoaders = strapi => {
 
   const loadAdminMiddlewares = async middlewares => {
     const middlewaresDir = 'middlewares';
-    const dir = path.resolve(findPackagePath(`strapi-admin`), middlewaresDir);
+    const dir = path.resolve(findPackagePath(`@strapi/admin`), middlewaresDir);
     await loadMiddlewaresInDir(dir, middlewares);
 
     // load ee admin middlewares if they exist
@@ -90,7 +90,7 @@ const createLoaders = strapi => {
 
   const loadMiddlewareDependencies = async (packages, middlewares) => {
     for (let packageName of packages) {
-      const baseDir = path.dirname(require.resolve(`strapi-middleware-${packageName}`));
+      const baseDir = path.dirname(require.resolve(`@strapi/middleware-${packageName}`));
       const files = await glob('*(index|defaults).*(js|json)', {
         cwd: baseDir,
         absolute: true,

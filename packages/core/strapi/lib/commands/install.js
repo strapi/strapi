@@ -10,7 +10,7 @@ module.exports = async plugins => {
   const loader = ora();
   const dir = process.cwd();
 
-  const version = require(join(dir, 'package.json')).dependencies.strapi;
+  const version = require(join(dir, 'package.json')).dependencies['@strapi/strapi'];
 
   const pluginArgs = plugins.map(name => `@strapi/plugin-${name}@${version}`);
 

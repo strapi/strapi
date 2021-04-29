@@ -23,6 +23,7 @@ window.strapi = Object.assign(window.strapi || {}, {
 });
 
 module.exports = {
+  // FIXME:
   'strapi-plugin-documentation': require('../../../../plugins/documentation/admin/src').default,
   'strapi-plugin-users-permissions': require('../../../../plugins/users-permissions/admin/src')
     .default,
