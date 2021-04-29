@@ -58,7 +58,7 @@
     "build": "lerna run --stream build --no-private",
     "lint": "npm-run-all -p lint:code lint:css",
     "lint:code": "eslint .",
-    "lint:css": "stylelint packages/**/admin/src/**/**/*.js",
+    "lint:css": "stylelint packages/**/admin/src/**/*.js",
     "lint:fix": "eslint --fix .",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
@@ -106,6 +106,7 @@
   "name": "strapi-monorepo",
   "workspaces": [
     "packages/*",
+    "packages/*/*",
     "examples/*"
   ],
   "husky": {

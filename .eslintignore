@@ -5,9 +5,9 @@
 testApp/**
 examples/**
 cypress/**
-packages/strapi-generate-plugin/files/admin/src/**
-packages/strapi-helper-plugin/**
-packages/strapi-plugin-users-permissions/admin/OLD/**
+packages/generators/strapi-generate-plugin/files/admin/src/**
+packages/core/strapi-helper-plugin/**
+packages/plugins/strapi-plugin-users-permissions/admin/OLD/**
 .eslintrc.js
 .eslintrc.front.js
 .eslintrc.back.js

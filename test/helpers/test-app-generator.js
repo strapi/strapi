@@ -2,7 +2,7 @@
 
 const path = require('path');
 const rimraf = require('rimraf');
-const generateNew = require('../../packages/strapi-generate-new/lib/generate-new');
+const generateNew = require('../../packages/generators/strapi-generate-new/lib/generate-new');
 
 /**
  * Delete the testApp folder
@@ -34,7 +34,7 @@ const generateTestApp = async ({ appName, database }) => {
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use package version as strapiVersion (all packages have the same version);
-    strapiVersion: require('../../packages/strapi/package.json').version,
+    strapiVersion: require('../../packages/core/strapi/package.json').version,
     debug: false,
     quick: false,
     uuid: undefined,
