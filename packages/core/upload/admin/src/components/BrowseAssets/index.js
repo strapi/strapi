@@ -1,6 +1,6 @@
 import React from 'react';
 import { isEmpty } from 'lodash';
-import { PageFooter } from 'strapi-helper-plugin';
+import { PageFooter } from '@strapi/helper-plugin';
 import { Flex, Padded } from '@buffetjs/core';
 
 import { generatePageFromStart, generateStartFromPage } from '../../utils';

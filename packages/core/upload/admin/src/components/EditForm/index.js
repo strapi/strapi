@@ -14,7 +14,7 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Row } from 'reactstrap';
 import { Inputs } from '@buffetjs/custom';
-import { useGlobalContext, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { useGlobalContext, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { createFileToDownloadName } from '../../utils';

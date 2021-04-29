@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { Flex } from '@buffetjs/core';
 import styled from 'styled-components';
 import CTIcon from './CT';

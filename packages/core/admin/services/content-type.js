@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { uniq, startsWith, intersection } = require('lodash/fp');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { getService } = require('../utils');
 const actionDomain = require('../domain/action');
 const permissionDomain = require('../domain/permission');

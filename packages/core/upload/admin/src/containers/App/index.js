@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import { LoadingIndicatorPage, useUserPermissions } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useUserPermissions } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { AppContext } from '../../contexts';

@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { useUserPermissions, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { useUserPermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import isEqual from 'react-fast-compare';
 import ListView from '../ListView';
 import { generatePermissionsObject } from '../../utils';

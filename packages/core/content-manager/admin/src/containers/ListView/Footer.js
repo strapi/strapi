@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { GlobalPagination, InputSelect, useGlobalContext } from 'strapi-helper-plugin';
+import { GlobalPagination, InputSelect, useGlobalContext } from '@strapi/helper-plugin';
 
 import { FooterWrapper, SelectWrapper, Label } from './components';
 

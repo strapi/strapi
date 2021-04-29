@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FilterButton } from 'strapi-helper-plugin';
+import { FilterButton } from '@strapi/helper-plugin';
 
 import formatFilter from './utils/formatFilter';
 

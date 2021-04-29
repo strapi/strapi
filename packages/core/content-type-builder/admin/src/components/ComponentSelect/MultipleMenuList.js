@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { components } from 'react-select';
 import { FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
-import { useQuery } from 'strapi-helper-plugin';
+import { useQuery } from '@strapi/helper-plugin';
 import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';

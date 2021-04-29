@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 import CreatableSelect from 'react-select/creatable';
 import { render, cleanup } from '@testing-library/react';
 import { InputText } from '@buffetjs/core';
-import { CircleButton } from 'strapi-helper-plugin';
+import { CircleButton } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 
 import HeadersInput from '../index';

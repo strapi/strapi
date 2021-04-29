@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { has, prop, pick, reduce, map, keys, toPath } = require('lodash/fp');
-const { contentTypes, parseMultipartData, sanitizeEntity } = require('strapi-utils');
+const { contentTypes, parseMultipartData, sanitizeEntity } = require('@strapi/utils');
 
 const { getService } = require('../utils');
 

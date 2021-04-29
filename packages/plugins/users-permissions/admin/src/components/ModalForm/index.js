@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, ModalHeader, ModalSection, ModalFooter } from 'strapi-helper-plugin';
+import { Modal, ModalHeader, ModalSection, ModalFooter } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Button, Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';

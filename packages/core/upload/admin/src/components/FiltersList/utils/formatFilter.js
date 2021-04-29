@@ -1,5 +1,5 @@
 import moment from 'moment';
-import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin';
+import { dateFormats, dateToUtcTime } from '@strapi/helper-plugin';
 import { formatBytes } from '../../../utils';
 
 const formatFilter = filterToFormat => {

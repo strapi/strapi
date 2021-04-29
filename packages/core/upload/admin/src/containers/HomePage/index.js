@@ -10,7 +10,7 @@ import {
   generateSearchFromFilters,
   request,
   useQuery,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
@@ -292,7 +292,7 @@ const HomePage = () => {
       {
         disabled: dataToDelete.length === 0,
         color: 'delete',
-        // TradId from the strapi-admin package
+        // TradId from the @strapi/admin package
         label: formatMessage({ id: 'app.utils.delete' }),
         onClick: () => setIsPopupOpen(true),
         type: 'button',

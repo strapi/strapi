@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useUserPermissions, request } from 'strapi-helper-plugin';
+import { useUserPermissions, request } from '@strapi/helper-plugin';
 import { getRequestURL } from '../../utils';
 import reducer, { initialState } from './reducer';
 

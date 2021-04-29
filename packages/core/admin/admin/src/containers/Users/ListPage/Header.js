@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { Header as HeaderCompo } from '@buffetjs/custom';
 import { Envelope } from '@buffetjs/icons';

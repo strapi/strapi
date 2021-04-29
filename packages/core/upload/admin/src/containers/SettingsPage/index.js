@@ -3,7 +3,7 @@ import { Header, Inputs } from '@buffetjs/custom';
 import { Helmet } from 'react-helmet';
 import { Text } from '@buffetjs/core';
 import { isEqual } from 'lodash';
-import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useGlobalContext, request } from '@strapi/helper-plugin';
 
 import { getRequestUrl, getTrad } from '../../utils';
 import SectionTitleWrapper from './SectionTitleWrapper';
@@ -78,7 +78,7 @@ const SettingsPage = () => {
       {
         color: 'cancel',
         disabled: isEqual(initialData, modifiedData),
-        // TradId from the strapi-admin package
+        // TradId from the @strapi/admin package
         label: formatMessage({ id: 'app.components.Button.cancel' }),
         onClick: () => {
           dispatch({
@@ -90,7 +90,7 @@ const SettingsPage = () => {
       {
         disabled: false,
         color: 'success',
-        // TradId from the strapi-admin package
+        // TradId from the @strapi/admin package
         label: formatMessage({ id: 'app.components.Button.save' }),
         onClick: handleSubmit,
         type: 'button',

@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useUserPermissions } from 'strapi-helper-plugin';
+import { useUserPermissions } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { omit } from 'lodash';

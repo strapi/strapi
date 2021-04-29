@@ -2,7 +2,7 @@ import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { get, toString } from 'lodash';
 import moment from 'moment';
-import { FilterButton } from 'strapi-helper-plugin';
+import { FilterButton } from '@strapi/helper-plugin';
 import { dateFormats, formatFiltersToQuery } from '../../utils';
 
 function Filter({

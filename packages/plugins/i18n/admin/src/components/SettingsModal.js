@@ -9,7 +9,7 @@ import {
   TabsNav,
   Tab,
   TabsPanel,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../utils';
 

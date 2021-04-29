@@ -10,7 +10,7 @@ import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 import { Description, ErrorMessage, Label } from '@buffetjs/styles';
 import { Error } from '@buffetjs/core';
-import { LabelIconWrapper } from 'strapi-helper-plugin';
+import { LabelIconWrapper } from '@strapi/helper-plugin';
 import Wysiwyg from '../Wysiwyg';
 import Wrapper from './Wrapper';
 

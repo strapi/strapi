@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get } from 'lodash';
-import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect(name) {
   const {

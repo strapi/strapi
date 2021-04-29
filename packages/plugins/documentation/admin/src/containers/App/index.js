@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { NotFound, CheckPagePermissions } from 'strapi-helper-plugin';
+import { NotFound, CheckPagePermissions } from '@strapi/helper-plugin';
 // Utils
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';

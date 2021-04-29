@@ -3,7 +3,7 @@ import { Switch, Route } from 'react-router-dom';
 import { ErrorBoundary } from 'react-error-boundary';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { ErrorFallback, LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
+import { ErrorFallback, LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';

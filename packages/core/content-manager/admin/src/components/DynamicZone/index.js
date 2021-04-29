@@ -4,7 +4,7 @@ import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Flex } from '@buffetjs/core';
-import { LabelIconWrapper, NotAllowedInput } from 'strapi-helper-plugin';
+import { LabelIconWrapper, NotAllowedInput } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import connect from './utils/connect';
 import select from './utils/select';

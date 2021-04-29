@@ -1,6 +1,6 @@
 'use strict';
 
-jest.mock('strapi/lib/utils/ee', () => {
+jest.mock('@strapi/strapi/lib/utils/ee', () => {
   const eeModule = () => true;
 
   Object.assign(eeModule, {

@@ -3,7 +3,7 @@ import { components } from 'react-select';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex, Padded, Text } from '@buffetjs/core';
-import { RelationDPState } from 'strapi-helper-plugin';
+import { RelationDPState } from '@strapi/helper-plugin';
 import { getDisplayedValue } from '../../utils';
 
 const SingleValue = props => {

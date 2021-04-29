@@ -1,6 +1,6 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { HeaderModalTitle } from 'strapi-helper-plugin';
+import { HeaderModalTitle } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

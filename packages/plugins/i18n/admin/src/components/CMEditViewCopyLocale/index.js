@@ -13,7 +13,7 @@ import {
   selectStyles,
   useContentManagerEditViewDataManager,
   request,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 import { cleanData, generateOptions } from './utils';
 

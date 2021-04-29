@@ -255,18 +255,18 @@ function parseTarget(target, scope, cb) {
     }
 
     // If we couldn't find a generator using the configured module,
-    // try requiring `strapi-generate-<module>` to get the core generator.
-    if (!subGenerator && !module.match(/^strapi-generate-/)) {
+    // try requiring `@strapi/generate-<module>` to get the core generator.
+    if (!subGenerator && !module.match(/^@strapi\/generate-/)) {
       try {
         if (process.mainModule.filename.indexOf('yarn') !== -1) {
           subGenerator = require(path.resolve(
             process.mainModule.paths[2],
-            'strapi-generate-' + module
+            '@strapi/generate-' + module
           ));
         } else {
           subGenerator = require(path.resolve(
             process.mainModule.paths[1],
-            'strapi-generate-' + module
+            '@strapi/generate-' + module
           ));
         }
       } catch (e1) {

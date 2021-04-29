@@ -1,7 +1,7 @@
-import { request, hasPermissions } from 'strapi-helper-plugin';
+import { request, hasPermissions } from '@strapi/helper-plugin';
 import getCtOrStLinks from '../getCtOrStLinks';
 
-jest.mock('strapi-helper-plugin');
+jest.mock('@strapi/helper-plugin');
 
 describe('checkPermissions', () => {
   beforeEach(() => {

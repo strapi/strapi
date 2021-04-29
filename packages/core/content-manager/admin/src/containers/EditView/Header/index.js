@@ -5,7 +5,7 @@ import { get, isEqual, isEmpty, toString } from 'lodash';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
 import { Text } from '@buffetjs/core';
-import { templateObject, ModalConfirm } from 'strapi-helper-plugin';
+import { templateObject, ModalConfirm } from '@strapi/helper-plugin';
 import { getTrad } from '../../../utils';
 import { connect, getDraftRelations, select } from './utils';
 

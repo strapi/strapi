@@ -1,6 +1,6 @@
 /*
  * NOTE:
- * This component should be put in the strapi-helper-plugin
+ * This component should be put in the @strapi/helper-plugin
  * at some point so the other packages can benefits from the updates
  *
  *

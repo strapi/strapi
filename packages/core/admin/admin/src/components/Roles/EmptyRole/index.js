@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, Padded, Text } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment, useQuery } from 'strapi-helper-plugin';
+import { BaselineAlignment, useQuery } from '@strapi/helper-plugin';
 
 const EmptyRole = () => {
   const { formatMessage } = useIntl();

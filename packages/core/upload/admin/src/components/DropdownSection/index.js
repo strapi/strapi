@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from '@strapi/helper-plugin';
 
 const DropdownSection = styled.div`
   display: none;

@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { LoadingBar } from 'strapi-helper-plugin';
+import { LoadingBar } from '@strapi/helper-plugin';
 
 const BlogPost = ({ error, isFirst, isLoading, title, content, link }) => {
   if (isLoading) {

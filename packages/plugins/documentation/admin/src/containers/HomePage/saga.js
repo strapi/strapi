@@ -1,6 +1,6 @@
 import { cloneDeep, isArray } from 'lodash';
 import { all, takeLatest, put, fork, call, select } from 'redux-saga/effects';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import { GET_DOC_INFOS, ON_CONFIRM_DELETE_DOC, ON_UPDATE_DOC, ON_SUBMIT } from './constants';
 import { getDocInfosSucceeded, setFormErrors } from './actions';
 import { makeSelectVersionToDelete, makeSelectPrefix, makeSelectForm } from './selectors';

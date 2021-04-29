@@ -10,7 +10,7 @@ import {
   useUser,
   findMatchingPermissions,
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 
 import pluginId from '../../pluginId';
 import { formatFiltersToQuery, getTrad } from '../../utils';

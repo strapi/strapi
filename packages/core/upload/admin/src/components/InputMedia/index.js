@@ -6,7 +6,7 @@ import {
   CheckPermissions,
   LabelIconWrapper,
   prefixFileUrlWithBackendUrl,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';

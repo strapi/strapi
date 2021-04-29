@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { useSelector, shallowEqual } from 'react-redux';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import formatLayouts from './utils/formatLayouts';
 import reducer, { initialState } from './reducer';
 import { makeSelectModelAndComponentSchemas } from '../../containers/Main/selectors';

@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-const { hasDraftAndPublish } = require('strapi-utils').contentTypes;
+const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 
 const {
   validateContentTypeInput,

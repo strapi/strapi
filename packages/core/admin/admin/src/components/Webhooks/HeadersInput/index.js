@@ -3,7 +3,7 @@ import { FormattedMessage } from 'react-intl';
 import CreatableSelect from 'react-select/creatable';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { CircleButton } from 'strapi-helper-plugin';
+import { CircleButton } from '@strapi/helper-plugin';
 import { InputText } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 

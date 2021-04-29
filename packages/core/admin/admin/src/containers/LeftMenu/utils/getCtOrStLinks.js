@@ -1,4 +1,4 @@
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import generateModelsLinks from './generateModelsLinks';
 import checkPermissions from './checkPermissions';
 

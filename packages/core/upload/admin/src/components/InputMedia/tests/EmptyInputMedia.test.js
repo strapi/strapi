@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
-import themes from '../../../../../../strapi-admin/admin/src/themes';
+import themes from '../../../../../../admin/admin/src/themes';
 
 import EmptyInputMedia from '../EmptyInputMedia';
 

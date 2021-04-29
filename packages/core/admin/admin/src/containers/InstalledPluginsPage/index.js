@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGlobalContext, request } from 'strapi-helper-plugin';
+import { useGlobalContext, request } from '@strapi/helper-plugin';
 import { Header, List } from '@buffetjs/custom';
 import PageTitle from '../../components/PageTitle';
 import ContainerFluid from '../../components/ContainerFluid';

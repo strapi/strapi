@@ -1,5 +1,5 @@
 import React from 'react';
-import { useUserPermissions } from 'strapi-helper-plugin';
+import { useUserPermissions } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import LocaleSettingsPage from './LocaleSettingsPage';
 import i18nPermissions from '../../permissions';

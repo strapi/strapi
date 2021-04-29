@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ModalSection } from 'strapi-helper-plugin';
+import { ModalSection } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import { Row } from 'reactstrap';
 import { useIntl } from 'react-intl';

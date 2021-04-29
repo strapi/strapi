@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { QUERY_OPERATORS } = require('strapi-utils');
+const { QUERY_OPERATORS } = require('@strapi/utils');
 
 /**
  * @typedef {object} Schema

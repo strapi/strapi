@@ -4,7 +4,7 @@ import { LoadingIndicator } from '@buffetjs/styles';
 import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { BaselineAlignment } from '@strapi/helper-plugin';
 
 import Box from '../../../../../../admin/src/containers/AuthPage/components/Box';
 import Logo from '../../../../../../admin/src/containers/AuthPage/components/Logo';

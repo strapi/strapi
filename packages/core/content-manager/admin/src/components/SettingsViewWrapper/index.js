@@ -11,7 +11,7 @@ import {
   PopUpWarning,
   // contexts
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import Block from '../Block';
 import Container from '../Container';

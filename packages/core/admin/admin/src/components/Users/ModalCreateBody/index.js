@@ -1,6 +1,6 @@
 import React, { forwardRef, useReducer, useImperativeHandle, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { BaselineAlignment, ModalSection, request } from 'strapi-helper-plugin';
+import { BaselineAlignment, ModalSection, request } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import { Padded, Text } from '@buffetjs/core';

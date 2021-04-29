@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { LeftMenuList, useGlobalContext } from 'strapi-helper-plugin';
+import { LeftMenuList, useGlobalContext } from '@strapi/helper-plugin';
 import { Text } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';

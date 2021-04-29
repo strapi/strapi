@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { translatedErrors } from 'strapi-helper-plugin';
+import { translatedErrors } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Inputs } from '@buffetjs/custom';
 import PropTypes from 'prop-types';

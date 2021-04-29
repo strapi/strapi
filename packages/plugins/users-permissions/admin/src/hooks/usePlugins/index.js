@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import init from './init';

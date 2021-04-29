@@ -13,7 +13,7 @@ import { bindActionCreators, compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
-// Components from strapi-helper-plugin
+// Components from @strapi/helper-plugin
 import {
   difference,
   GlobalContextProvider,
@@ -21,7 +21,7 @@ import {
   OverlayBlocker,
   CheckPagePermissions,
   request,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { SETTINGS_BASE_URL, SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
 import { checkLatestStrapiVersion } from '../../utils';
 

@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const { features } = require('strapi/lib/utils/ee');
+const { features } = require('@strapi/strapi/lib/utils/ee');
 const routes = require('./routes');
 
 module.exports = strapi => ({

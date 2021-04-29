@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup } = require('strapi-utils');
+const { yup } = require('@strapi/utils');
 const _ = require('lodash');
 const { isEmpty, has, isNil, isArray } = require('lodash/fp');
 const { getService } = require('../utils');

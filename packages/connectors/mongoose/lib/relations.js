@@ -11,7 +11,7 @@ const mongoose = require('mongoose');
 // Utils
 const {
   models: { getValuePrimaryKey },
-} = require('strapi-utils');
+} = require('@strapi/utils');
 
 const transformToArrayID = (array, pk) => {
   if (_.isArray(array)) {

@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import { get, isEmpty } from 'lodash';
 import PropTypes from 'prop-types';
-import { CircleButton, getFilterType } from 'strapi-helper-plugin';
+import { CircleButton, getFilterType } from '@strapi/helper-plugin';
 import { Select } from '@buffetjs/core';
 
 import { InputWrapper, Wrapper } from './components';

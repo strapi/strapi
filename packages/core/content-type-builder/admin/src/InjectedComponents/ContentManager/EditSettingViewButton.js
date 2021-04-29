@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext, CheckPermissions } from 'strapi-helper-plugin';
+import { useGlobalContext, CheckPermissions } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

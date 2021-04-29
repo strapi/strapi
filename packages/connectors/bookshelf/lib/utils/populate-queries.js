@@ -6,7 +6,7 @@ const {
     hasDraftAndPublish,
     constants: { DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW, PUBLISHED_AT_ATTRIBUTE },
   },
-} = require('strapi-utils');
+} = require('@strapi/utils');
 
 const optionsMap = {
   publicationState: {

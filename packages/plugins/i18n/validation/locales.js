@@ -1,7 +1,7 @@
 'use strict';
 
 const { prop } = require('lodash/fp');
-const { yup, formatYupErrors } = require('strapi-utils');
+const { yup, formatYupErrors } = require('@strapi/utils');
 const { isoLocales } = require('../constants');
 
 const allowedLocaleCodes = isoLocales.map(prop('code'));

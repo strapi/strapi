@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
 

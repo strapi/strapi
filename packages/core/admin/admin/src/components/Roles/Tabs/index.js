@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import { LoadingIndicator } from 'strapi-helper-plugin';
+import { LoadingIndicator } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 import TabsWrapper from './TabsWrapper';

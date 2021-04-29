@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import { RESOLVE_LOCALES } from '../constants';
 

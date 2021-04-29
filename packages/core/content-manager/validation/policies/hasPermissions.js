@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('strapi-utils');
+const { yup, formatYupErrors } = require('@strapi/utils');
 
 const hasPermissionsSchema = yup.array().of(yup.string());
 

@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 import { get, toNumber } from 'lodash';
-import { translatedErrors as errorsTrads } from 'strapi-helper-plugin';
+import { translatedErrors as errorsTrads } from '@strapi/helper-plugin';
 import getTrad from '../../../../utils/getTrad';
 
 const NAME_REGEX = new RegExp('^[A-Za-z][_0-9A-Za-z]*$');

@@ -11,7 +11,7 @@ import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
 import { get } from 'lodash';
-import { auth } from 'strapi-helper-plugin';
+import { auth } from '@strapi/helper-plugin';
 import Wrapper from './components';
 
 const Logout = ({ history: { push } }) => {

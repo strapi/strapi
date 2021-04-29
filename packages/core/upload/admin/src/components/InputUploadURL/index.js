@@ -1,6 +1,6 @@
 import React from 'react';
 import { Inputs } from '@buffetjs/custom';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import Wrapper from './Wrapper';
 import { getTrad } from '../../utils';

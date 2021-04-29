@@ -23,16 +23,13 @@ window.strapi = Object.assign(window.strapi || {}, {
 });
 
 module.exports = {
-  'strapi-plugin-documentation': require('../../../../plugins/strapi-plugin-documentation/admin/src')
+  'strapi-plugin-documentation': require('../../../../plugins/documentation/admin/src').default,
+  'strapi-plugin-users-permissions': require('../../../../plugins/users-permissions/admin/src')
     .default,
-  'strapi-plugin-users-permissions': require('../../../../plugins/strapi-plugin-users-permissions/admin/src')
-    .default,
-  'strapi-plugin-content-manager': require('../../../strapi-plugin-content-manager/admin/src')
-    .default,
-  'strapi-plugin-content-type-builder': require('../../../strapi-plugin-content-type-builder/admin/src')
-    .default,
-  'strapi-plugin-email': require('../../../strapi-plugin-email/admin/src').default,
-  'strapi-plugin-upload': require('../../../strapi-plugin-upload/admin/src').default,
-  'strapi-plugin-graphql': require('../../../../plugins/strapi-plugin-graphql/admin/src').default,
-  'strapi-plugin-i18n': require('../../../../plugins/strapi-plugin-i18n/admin/src').default,
+  'strapi-plugin-content-manager': require('../../../content-manager/admin/src').default,
+  'strapi-plugin-content-type-builder': require('../../../content-type-builder/admin/src').default,
+  'strapi-plugin-email': require('../../../email/admin/src').default,
+  'strapi-plugin-upload': require('../../../upload/admin/src').default,
+  'strapi-plugin-graphql': require('../../../../plugins/graphql/admin/src').default,
+  'strapi-plugin-i18n': require('../../../../plugins/i18n/admin/src').default,
 };

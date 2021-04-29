@@ -1,7 +1,7 @@
 'use strict';
 
 const { eq } = require('lodash/fp');
-const { hooks } = require('strapi-utils');
+const { hooks } = require('@strapi/utils');
 
 /**
  * @typedef SectionOptions

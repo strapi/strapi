@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useSelector, useDispatch } from 'react-redux';
-import { LoadingIndicatorPage, UserProvider, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, UserProvider, request } from '@strapi/helper-plugin';
 import {
   getUserPermissions,
   getUserPermissionsError,

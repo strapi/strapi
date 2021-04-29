@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { yup, formatYupErrors } = require('strapi-utils');
+const { yup, formatYupErrors } = require('@strapi/utils');
 const { getService } = require('../utils');
 const { AUTHOR_CODE, PUBLISH_ACTION } = require('../services/constants');
 const {

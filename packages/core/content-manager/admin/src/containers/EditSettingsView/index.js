@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useSelector, shallowEqual } from 'react-redux';
 import { cloneDeep, flatMap, get, set, pick } from 'lodash';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext } from '@strapi/helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';

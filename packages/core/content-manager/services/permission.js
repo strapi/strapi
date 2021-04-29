@@ -1,7 +1,7 @@
 'use strict';
 
 const { prop } = require('lodash/fp');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { getService } = require('../utils');
 
 module.exports = {

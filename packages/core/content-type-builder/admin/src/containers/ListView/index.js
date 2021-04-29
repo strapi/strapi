@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useGlobalContext } from 'strapi-helper-plugin';
+import { BackHeader, ListWrapper, useGlobalContext } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';

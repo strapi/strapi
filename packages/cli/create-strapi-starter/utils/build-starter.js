@@ -8,7 +8,7 @@ const ora = require('ora');
 const ciEnv = require('ci-info');
 const chalk = require('chalk');
 
-const generateNewApp = require('strapi-generate-new');
+const generateNewApp = require('@strapi/generate-new');
 
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');

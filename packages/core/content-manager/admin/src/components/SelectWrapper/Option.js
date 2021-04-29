@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { get, has, isEmpty } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
-import { RelationDPState } from 'strapi-helper-plugin';
+import { RelationDPState } from '@strapi/helper-plugin';
 import { getDisplayedValue, getTrad } from '../../utils';
 
 const TextGrow = styled(Text)`

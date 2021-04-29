@@ -1,6 +1,6 @@
 'use strict';
 
-const { isVisibleAttribute } = require('strapi-utils').contentTypes;
+const { isVisibleAttribute } = require('@strapi/utils').contentTypes;
 
 const {
   toSubjectTemplate,

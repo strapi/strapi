@@ -6,7 +6,7 @@ import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { ListButton, useGlobalContext, useQuery, useUserPermissions } from 'strapi-helper-plugin';
+import { ListButton, useGlobalContext, useQuery, useUserPermissions } from '@strapi/helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';

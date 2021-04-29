@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { BaselineAlignment } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import IS_DISABLED from 'ee_else_ce/components/Roles/PluginsAndSettings/SubCategory/utils/constants';
 import { usePermissionsDataManager } from '../../../../hooks';

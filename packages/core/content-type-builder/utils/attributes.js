@@ -1,8 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const utils = require('strapi-utils');
-const { isMediaAttribute } = require('strapi-utils').contentTypes;
+const utils = require('@strapi/utils');
+const { isMediaAttribute } = require('@strapi/utils').contentTypes;
 
 const toUID = (name, plugin) => {
   const modelUID = Object.keys(strapi.contentTypes).find(key => {

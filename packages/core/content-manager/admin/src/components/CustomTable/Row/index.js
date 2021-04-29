@@ -1,7 +1,7 @@
 import React, { memo, useCallback, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { toString } from 'lodash';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

@@ -101,7 +101,7 @@ async function testDatabaseConnection({ scope, configuration }) {
   const connectivityFile = join(
     scope.tmpPath,
     'node_modules',
-    `strapi-connector-${configuration.connection.connector}`,
+    `@strapi/connector-${configuration.connection.connector}`,
     'lib',
     'utils',
     'connectivity.js'

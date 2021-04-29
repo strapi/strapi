@@ -1,6 +1,6 @@
 import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { difference } from 'strapi-helper-plugin';
+import { difference } from '@strapi/helper-plugin';
 import { has, isEmpty } from 'lodash';
 import Tabs from '../Tabs';
 import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';

@@ -8,7 +8,7 @@ import React, { memo } from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { HeaderSearch, GlobalContext } from 'strapi-helper-plugin';
+import { HeaderSearch, GlobalContext } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 
 const WAIT = 400;

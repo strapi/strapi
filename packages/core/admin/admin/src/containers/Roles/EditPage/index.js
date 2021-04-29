@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import get from 'lodash/get';
-import { BaselineAlignment, useGlobalContext, request } from 'strapi-helper-plugin';
+import { BaselineAlignment, useGlobalContext, request } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';

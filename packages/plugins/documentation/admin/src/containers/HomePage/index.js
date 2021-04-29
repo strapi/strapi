@@ -19,7 +19,7 @@ import {
   InputsIndex as Input,
   GlobalContext,
   CheckPermissions,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';

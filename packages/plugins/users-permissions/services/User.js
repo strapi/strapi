@@ -9,7 +9,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
-const { sanitizeEntity, getAbsoluteServerUrl } = require('strapi-utils');
+const { sanitizeEntity, getAbsoluteServerUrl } = require('@strapi/utils');
 
 module.exports = {
   /**

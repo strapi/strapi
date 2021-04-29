@@ -1,6 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
-import { BlockerComponent } from 'strapi-helper-plugin';
+import { BlockerComponent } from '@strapi/helper-plugin';
 import { PluginDispatcher } from '../index';
 
 const BlockerComponent2 = () => <div>BlockerComponent</div>;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Flex, Padded, Text } from '@buffetjs/core';
-import { LoadingIndicator } from 'strapi-helper-plugin';
+import { LoadingIndicator } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import BaselineAlignement from '../BaselineAlignement';
 import Bloc from '../Bloc';

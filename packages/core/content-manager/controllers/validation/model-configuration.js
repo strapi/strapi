@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup } = require('strapi-utils');
+const { yup } = require('@strapi/utils');
 const {
   isListable,
   hasRelationAttribute,

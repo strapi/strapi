@@ -4,7 +4,7 @@ import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 
 import formatVideoArray from './utils/formatAndStoreVideoArray';
 

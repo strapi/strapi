@@ -6,7 +6,7 @@ import { useIntl } from 'react-intl';
 import { Flex, Padded, Separator } from '@buffetjs/core';
 import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
 import { Dots } from '@buffetjs/icons';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { BaselineAlignment } from '@strapi/helper-plugin';
 
 import BaseLogin from '../../../../../../admin/src/containers/AuthPage/components/Login/BaseLogin';
 import ProviderButton from '../../../../components/ProviderButton';

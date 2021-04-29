@@ -18,7 +18,7 @@ import {
   useQueryParams,
   useUser,
   request,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';

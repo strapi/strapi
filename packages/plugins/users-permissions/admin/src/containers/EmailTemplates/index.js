@@ -9,7 +9,7 @@ import {
   useGlobalContext,
   request,
   getYupInnerErrors,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
 import { useForm } from '../../hooks';

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from '@strapi/helper-plugin';
 import { Text } from '@buffetjs/core';
 
 const Wrapper = styled(props => <Text as="ul" fontSize="md" {...props} />)`

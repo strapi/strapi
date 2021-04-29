@@ -17,7 +17,7 @@ const {
 } = require('lodash/fp');
 const { AbilityBuilder, Ability } = require('@casl/ability');
 const sift = require('sift');
-const { hooks } = require('strapi-utils');
+const { hooks } = require('@strapi/utils');
 const permissionDomain = require('../../domain/permission/index');
 const { getService } = require('../../utils');
 

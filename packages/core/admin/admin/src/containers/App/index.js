@@ -16,7 +16,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
 import GlobalStyle from '../../components/GlobalStyle';

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Text, Checkbox, Padded } from '@buffetjs/core';
 import { useFormikContext } from 'formik';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { BaselineAlignment } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 
 const AdvancedForm = ({ isDefaultLocale }) => {

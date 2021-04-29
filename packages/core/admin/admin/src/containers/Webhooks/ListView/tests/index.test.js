@@ -3,7 +3,7 @@ import { Router, Route, Switch } from 'react-router-dom';
 // import { render, cleanup } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import { createMemoryHistory } from 'history';
-import { GlobalContextProvider, UserProvider } from 'strapi-helper-plugin';
+import { GlobalContextProvider, UserProvider } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 
 import translationMessages from '../../../../translations/en.json';

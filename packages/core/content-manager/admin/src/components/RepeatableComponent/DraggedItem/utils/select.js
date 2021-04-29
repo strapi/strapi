@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get, toString } from 'lodash';
-import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect({ schema, componentFieldName }) {
   const {

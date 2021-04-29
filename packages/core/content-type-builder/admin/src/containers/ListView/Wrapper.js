@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { ViewContainer } from 'strapi-helper-plugin';
+import { ViewContainer } from '@strapi/helper-plugin';
 
 const Wrapper = styled(ViewContainer)`
   .button-secondary {

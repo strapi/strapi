@@ -1,7 +1,7 @@
 'use strict';
 
 const { intersection, prop } = require('lodash/fp');
-const { getRelationalFields } = require('strapi-utils').relations;
+const { getRelationalFields } = require('@strapi/utils').relations;
 
 const sendDidConfigureListView = async (contentType, configuration) => {
   const displayedFields = prop('length', configuration.layouts.list);

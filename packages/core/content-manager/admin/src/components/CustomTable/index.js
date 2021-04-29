@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { upperFirst, isEmpty } from 'lodash';
-import { LoadingIndicator, useGlobalContext } from 'strapi-helper-plugin';
+import { LoadingIndicator, useGlobalContext } from '@strapi/helper-plugin';
 import { parse, stringify } from 'qs';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';

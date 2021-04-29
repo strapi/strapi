@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
-import { LoadingIndicatorPage, useQueryParams } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
 import useSyncRbac from '../RBACManager/useSyncRbac';
 import { resetProps, setLayout } from './actions';
 import selectLayout from './selectors';

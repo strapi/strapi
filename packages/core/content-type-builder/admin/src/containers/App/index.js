@@ -6,7 +6,7 @@
 
 import React, { Suspense, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { LoadingIndicatorPage, CheckPagePermissions } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
 import DataManagerProvider from '../DataManagerProvider';

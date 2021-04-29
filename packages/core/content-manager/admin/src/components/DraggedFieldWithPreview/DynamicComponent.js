@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { hasPermissions, useUser } from 'strapi-helper-plugin';
+import { hasPermissions, useUser } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import DynamicComponentCard from '../DynamicComponentCard';

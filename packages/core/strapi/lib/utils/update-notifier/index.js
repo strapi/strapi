@@ -6,7 +6,7 @@ const Configstore = require('configstore');
 const semver = require('semver');
 const boxen = require('boxen');
 const chalk = require('chalk');
-const { env } = require('strapi-utils');
+const { env } = require('@strapi/utils');
 
 const pkg = require('../../../package');
 

@@ -28,7 +28,7 @@ import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 // Strapi provider with the internal APIs
-import { StrapiProvider } from 'strapi-helper-plugin';
+import { StrapiProvider } from '@strapi/helper-plugin';
 import { merge } from 'lodash';
 import Fonts from './components/Fonts';
 import { freezeApp, pluginLoaded, unfreezeApp, updatePlugin } from './containers/App/actions';

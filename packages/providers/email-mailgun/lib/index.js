@@ -1,7 +1,7 @@
 'use strict';
 
 const mailgunFactory = require('mailgun-js');
-const { removeUndefined } = require('strapi-utils');
+const { removeUndefined } = require('@strapi/utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {

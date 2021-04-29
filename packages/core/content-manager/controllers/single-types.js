@@ -1,7 +1,7 @@
 'use strict';
 
 const { pipe } = require('lodash/fp');
-const { setCreatorFields } = require('strapi-utils');
+const { setCreatorFields } = require('@strapi/utils');
 
 const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
 

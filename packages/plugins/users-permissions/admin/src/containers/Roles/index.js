@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { useGlobalContext, NotFound } from 'strapi-helper-plugin';
+import { useGlobalContext, NotFound } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 
 import ProtectedRolesListPage from './ProtectedListPage';

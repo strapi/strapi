@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingIndicatorPage, useGlobalContext, request } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage, useGlobalContext, request } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { useHistory } from 'react-router-dom';
 

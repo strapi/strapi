@@ -6,10 +6,10 @@ const createProvider = emailConfig => {
   const providerName = _.toLower(emailConfig.provider);
   let provider;
   try {
-    provider = require(`strapi-provider-email-${providerName}`);
+    provider = require(`@strapi/provider-email-${providerName}`);
   } catch (err) {
     throw new Error(
-      `The provider package isn't installed. Please run \`npm install strapi-provider-email-${providerName}\` --save`
+      `The provider package isn't installed. Please run \`npm install @strap/provider-email-${providerName}\` --save`
     );
   }
   return provider.init(emailConfig.providerOptions, emailConfig.settings);

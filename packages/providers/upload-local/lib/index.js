@@ -7,7 +7,7 @@
 // Public node modules.
 const fs = require('fs');
 const path = require('path');
-const { errors } = require('strapi-plugin-upload');
+const { errors } = require('@strapi/plugin-upload');
 
 module.exports = {
   init({ sizeLimit = 1000000 } = {}) {

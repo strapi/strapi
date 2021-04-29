@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const {
   policy: { createPolicyFactory },
-} = require('strapi-utils');
+} = require('@strapi/utils');
 const { validateHasPermissionsInput } = require('../../validation/policies/hasPermissions');
 
 const inputModifiers = [

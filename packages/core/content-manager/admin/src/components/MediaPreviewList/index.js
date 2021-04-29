@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get, isArray, includes, isEmpty } from 'lodash';
-import { getFileExtension, prefixFileUrlWithBackendUrl } from 'strapi-helper-plugin';
+import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import DefaultIcon from '../../icons/Na';
 import {
   StyledMediaPreviewList,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useDebounce } from '@buffetjs/hooks';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 
 import getTrad from '../../utils/getTrad';
 import useModalContext from '../../hooks/useModalContext';

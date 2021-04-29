@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import getTrad from '../../utils/getTrad';
 import SelectCheckbox from '../SelectCheckbox';

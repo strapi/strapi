@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
 import { getTrad } from '../../utils';

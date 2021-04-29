@@ -1,5 +1,5 @@
 import styled, { css } from 'styled-components';
-import { Button } from 'strapi-helper-plugin';
+import { Button } from '@strapi/helper-plugin';
 
 const Wrapper = styled.div`
   height: 54px;

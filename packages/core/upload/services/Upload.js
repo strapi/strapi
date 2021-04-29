@@ -16,7 +16,7 @@ const {
   contentTypes: contentTypesUtils,
   sanitizeEntity,
   webhook: webhookUtils,
-} = require('strapi-utils');
+} = require('@strapi/utils');
 
 const { MEDIA_UPDATE, MEDIA_CREATE, MEDIA_DELETE } = webhookUtils.webhookEvents;
 

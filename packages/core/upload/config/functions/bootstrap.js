@@ -38,7 +38,7 @@ const wrapFunctionForErrors = fn => async (...args) => {
 
 const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   try {
-    const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
+    const providerInstance = require(`@strapi/provider-upload-${provider}`).init(providerOptions);
 
     return Object.assign(Object.create(baseProvider), {
       ...providerInstance,
@@ -52,7 +52,7 @@ const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   } catch (err) {
     strapi.log.error(err);
     throw new Error(
-      `The provider package isn't installed. Please run \`npm install strapi-provider-upload-${provider}\``
+      `The provider package isn't installed. Please run \`npm install @strapi/provider-upload-${provider}\``
     );
   }
 };

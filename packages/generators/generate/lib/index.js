@@ -8,7 +8,7 @@
 const reportback = require('reportback')();
 
 // Logger.
-const logger = require('strapi-utils').logger;
+const logger = require('@strapi/utils').logger;
 
 // Local dependencies.
 const generate = require('./generate');
@@ -36,7 +36,7 @@ module.exports = (scope, cb) => {
   });
 
   // Use configured module name for this `generatorType` if applicable.
-  const module = 'strapi-generate-' + scope.generatorType;
+  const module = '@strapi/generate-' + scope.generatorType;
   let generator;
 
   function throwIfModuleNotFoundError(error, module) {

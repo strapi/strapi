@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { EmptyState, ListButton } from 'strapi-helper-plugin';
+import { EmptyState, ListButton } from '@strapi/helper-plugin';
 import { List } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';

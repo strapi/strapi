@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get, take } from 'lodash';
-import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 
 import { getFieldName } from '../../../utils';
 import { useContentTypeLayout } from '../../../hooks';

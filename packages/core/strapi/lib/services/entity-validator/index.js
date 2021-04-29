@@ -5,7 +5,7 @@
 'use strict';
 
 const { has, assoc, prop } = require('lodash/fp');
-const strapiUtils = require('strapi-utils');
+const strapiUtils = require('@strapi/utils');
 const validators = require('./validators');
 
 const { yup, formatYupErrors } = strapiUtils;

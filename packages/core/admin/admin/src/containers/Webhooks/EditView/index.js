@@ -15,7 +15,7 @@ import {
   getYupInnerErrors,
   BackHeader,
   LoadingIndicatorPage,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { useModels } from '../../../hooks';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';

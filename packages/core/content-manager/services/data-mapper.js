@@ -2,8 +2,8 @@
 
 const { upperFirst, has, prop, pick, getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
-const { isMediaAttribute } = require('strapi-utils').contentTypes;
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { isMediaAttribute } = require('@strapi/utils').contentTypes;
 
 const dtoFields = [
   'uid',

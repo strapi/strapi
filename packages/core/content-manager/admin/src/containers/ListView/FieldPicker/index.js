@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Picker } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { Carret } from 'strapi-helper-plugin';
+import { Carret } from '@strapi/helper-plugin';
 import Fields from './Fields';
 import Header from './Header';
 import Wrapper from './Wrapper';

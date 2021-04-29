@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Carret, useGlobalContext } from 'strapi-helper-plugin';
+import { Carret, useGlobalContext } from '@strapi/helper-plugin';
 import { useListView } from '../../../hooks';
 
 const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField }, name }) => {

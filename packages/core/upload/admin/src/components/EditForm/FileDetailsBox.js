@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { dateFormats, dateToUtcTime } from 'strapi-helper-plugin';
+import { dateFormats, dateToUtcTime } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import { useIntl } from 'react-intl';
 import { Text, Flex } from '@buffetjs/core';

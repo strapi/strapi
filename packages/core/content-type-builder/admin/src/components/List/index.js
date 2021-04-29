@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useGlobalContext, ListButton } from 'strapi-helper-plugin';
+import { useGlobalContext, ListButton } from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 

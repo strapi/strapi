@@ -1,7 +1,7 @@
 import React, { useMemo } from 'react';
 import { Flex, Text } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PermissionsWrapper, RowContainer } from 'strapi-helper-plugin';
+import { PermissionsWrapper, RowContainer } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import SubCategory from '../SubCategory';

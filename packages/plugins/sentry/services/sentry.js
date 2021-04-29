@@ -36,7 +36,7 @@ const createSentryService = () => {
           instance = Sentry;
           isReady = true;
         } else {
-          strapi.log.info('strapi-plugin-sentry is disabled because no Sentry DSN was provided');
+          strapi.log.info('@strapi/plugin-sentry is disabled because no Sentry DSN was provided');
         }
       } catch (error) {
         strapi.log.warn('Could not set up Sentry, make sure you entered a valid DSN');

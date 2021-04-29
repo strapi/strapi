@@ -8,7 +8,7 @@ const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
 // eslint-disable-next-line node/no-extraneous-require
-const hasEE = require('strapi/lib/utils/ee');
+const hasEE = require('@strapi/strapi/lib/utils/ee');
 const getWebpackConfig = require('./webpack.config.js');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));

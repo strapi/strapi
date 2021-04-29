@@ -2,7 +2,7 @@
 
 const {
   contentTypes: { hasDraftAndPublish },
-} = require('strapi-utils');
+} = require('@strapi/utils');
 
 module.exports = (ctx, next) => {
   const {

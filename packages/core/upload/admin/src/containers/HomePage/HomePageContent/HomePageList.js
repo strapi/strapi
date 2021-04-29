@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Padded } from '@buffetjs/core';
-import { PageFooter, useQuery } from 'strapi-helper-plugin';
+import { PageFooter, useQuery } from '@strapi/helper-plugin';
 import { generatePageFromStart, generateStartFromPage } from '../../../utils';
 import { useAppContext } from '../../../hooks';
 import List from '../../../components/List';

@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const { singular } = require('pluralize');
 
-const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { models: utilsModels, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const relations = require('./relations');
 const buildDatabaseSchema = require('./build-database-schema');
 const {

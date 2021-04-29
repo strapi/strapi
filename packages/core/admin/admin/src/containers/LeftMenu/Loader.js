@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import LoaderWrapper from './LoaderWrapper';
 

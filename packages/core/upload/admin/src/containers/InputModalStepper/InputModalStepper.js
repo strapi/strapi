@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from 'strapi-helper-plugin';
+import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { get, isEmpty, isEqual } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';

@@ -3,9 +3,9 @@
 const _ = require('lodash');
 const { getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
-const generator = require('strapi-generate');
+const generator = require('@strapi/generate');
 
-const { nameToSlug, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
 const apiHandler = require('./api-handler');

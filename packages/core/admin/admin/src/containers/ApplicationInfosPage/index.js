@@ -4,7 +4,7 @@ import { Flex, Padded, Text } from '@buffetjs/core';
 import { useSelector } from 'react-redux';
 import { createSelector } from 'reselect';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { BaselineAlignment } from '@strapi/helper-plugin';
 import Bloc from '../../components/Bloc';
 import PageTitle from '../../components/SettingsPageTitle';
 import makeSelectApp from '../App/selectors';

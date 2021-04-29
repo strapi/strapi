@@ -5,7 +5,7 @@ import { size } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import isEqual from 'react-fast-compare';
-import { NotAllowedInput, LabelIconWrapper } from 'strapi-helper-plugin';
+import { NotAllowedInput, LabelIconWrapper } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';

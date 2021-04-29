@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { useQuery } from 'strapi-helper-plugin';
+import { useQuery } from '@strapi/helper-plugin';
 import StyledHeaderSearch from './HeaderSearch';
 
 const HeaderSearch = ({ label, queryParameter }) => {

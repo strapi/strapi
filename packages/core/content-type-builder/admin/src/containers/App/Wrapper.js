@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { sizes } from 'strapi-helper-plugin';
+import { sizes } from '@strapi/helper-plugin';
 
 const Wrapper = styled.div`
   min-height: calc(100vh - ${sizes.header.height});

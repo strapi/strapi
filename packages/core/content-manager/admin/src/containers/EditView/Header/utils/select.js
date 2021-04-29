@@ -1,4 +1,4 @@
-import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect() {
   const {

@@ -2,7 +2,7 @@ import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Select } from '@buffetjs/core';
-import { getFilterType, useGlobalContext } from 'strapi-helper-plugin';
+import { getFilterType, useGlobalContext } from '@strapi/helper-plugin';
 import { getTrad, getFileModelTimestamps } from '../../../utils';
 import init from './init';
 import reducer, { initialState } from './reducer';

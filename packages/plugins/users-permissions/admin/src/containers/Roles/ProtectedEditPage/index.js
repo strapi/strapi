@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckPagePermissions } from 'strapi-helper-plugin';
+import { CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../../permissions';
 import RolesEditPage from '../EditPage';
 

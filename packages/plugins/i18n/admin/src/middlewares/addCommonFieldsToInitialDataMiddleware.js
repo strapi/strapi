@@ -6,7 +6,7 @@ import {
   request,
   formatComponentData,
   contentManagementUtilRemoveFieldsFromData,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import pluginId from '../pluginId';
 
 const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) => next => action => {

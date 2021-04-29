@@ -5,7 +5,7 @@ import get from 'lodash/get';
 import Select, { components } from 'react-select';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
-import { DropdownIndicator, BaselineAlignment, selectStyles } from 'strapi-helper-plugin';
+import { DropdownIndicator, BaselineAlignment, selectStyles } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
 import { getTrad } from '../../utils';

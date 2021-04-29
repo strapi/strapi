@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import { BaselineAlignment, useGlobalContext, SizedInput, auth } from 'strapi-helper-plugin';
+import { BaselineAlignment, useGlobalContext, SizedInput, auth } from '@strapi/helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';

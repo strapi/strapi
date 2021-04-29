@@ -1,5 +1,5 @@
 import { useQuery } from 'react-query';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 
 const fetchDefaultLocalesList = async () => {
   try {

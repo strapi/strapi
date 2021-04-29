@@ -21,7 +21,7 @@ jest.mock('@sentry/node', () => {
 let sentryService = require('../sentry');
 const defaultConfig = require('../../config/settings.json');
 
-describe('strapi-plugin-sentry service', () => {
+describe('Sentry service', () => {
   beforeEach(() => {
     // Reset Strapi state
     global.strapi = {

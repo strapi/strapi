@@ -4,7 +4,7 @@ import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { InjectionZone, useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { InjectionZone, useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 import { SubWrapper, StatusWrapper } from './components';
 import pluginId from '../../pluginId';
 import { getTrad } from '../../utils';

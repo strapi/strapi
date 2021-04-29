@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { LayoutIcon, CheckPermissions } from 'strapi-helper-plugin';
+import { LayoutIcon, CheckPermissions } from '@strapi/helper-plugin';
 import { Button as Base } from '@buffetjs/core';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';

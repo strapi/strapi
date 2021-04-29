@@ -6,7 +6,7 @@
 
 import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { request } from 'strapi-helper-plugin';
+import { request } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 
 const Initializer = ({ updatePlugin }) => {

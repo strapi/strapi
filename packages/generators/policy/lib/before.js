@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug } = require('@strapi/utils');
 
 /**
  * This `before` function is run before generating targets.

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useUserPermissions, LoadingIndicatorPage } from 'strapi-helper-plugin';
+import { useUserPermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Redirect } from 'react-router-dom';
 import adminPermissions from '../../../permissions';
 import EditPage from '../EditPage';

@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LiLink, useGlobalContext, CheckPermissions } from 'strapi-helper-plugin';
+import { LiLink, useGlobalContext, CheckPermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 
 // Create link from content-type-builder to content-manager

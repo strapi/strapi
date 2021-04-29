@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
+import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect({ isUserAllowedToEditField, isUserAllowedToReadField, name }) {
   const {

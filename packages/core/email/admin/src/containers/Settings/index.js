@@ -12,7 +12,7 @@ import {
   getYupInnerErrors,
   BaselineAlignment,
   CheckPagePermissions,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 import { AlignedButton, Text } from './components';
 import schema from '../../utils/schema';
@@ -157,7 +157,7 @@ const SettingsPage = () => {
                 options={providers}
                 size={{ xs: 6 }}
                 type="select"
-                value={`strapi-provider-email-${config.provider}`}
+                value={`@strapi/provider-email-${config.provider}`}
               />
             </FormBloc>
             <BaselineAlignment top size="32px" />
@@ -178,12 +178,12 @@ const SettingsPage = () => {
               <AlignedButton
                 color="success"
                 disabled={testSuccess}
-                icon={
+                icon={(
                   <Envelope
                     fill={testSuccess ? colors.button.disabled.color : null}
                     style={{ verticalAlign: 'middle', marginRight: '10px' }}
                   />
-                }
+                )}
                 isLoading={isTestButtonLoading}
                 style={{ fontWeight: 600 }}
                 type="submit"

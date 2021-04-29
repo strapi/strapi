@@ -2,7 +2,7 @@ import React from 'react';
 import { Text, Padded } from '@buffetjs/core';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment, useQuery } from 'strapi-helper-plugin';
+import { BaselineAlignment, useQuery } from '@strapi/helper-plugin';
 import Button from '../../../../components/FullWidthButton';
 import OopsLogo from '../../../../assets/images/oops.png';
 import Box from '../Box';

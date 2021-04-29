@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, TabPanel, useUser } from 'strapi-helper-plugin';
+import { Modal, ModalFooter, TabPanel, useUser } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';

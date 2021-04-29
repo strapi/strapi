@@ -13,7 +13,7 @@ module.exports = function requireConnector(connector) {
   }
 
   try {
-    require.resolve(`strapi-connector-${connector}`);
+    require.resolve(`@strapi/connector-${connector}`);
   } catch (error) {
     throw new VError(
       { name: 'ConnectorError', cause: error },
@@ -23,7 +23,7 @@ module.exports = function requireConnector(connector) {
   }
 
   try {
-    return require(`strapi-connector-${connector}`);
+    return require(`@strapi/connector-${connector}`);
   } catch (error) {
     throw new VError(
       { name: 'ConnectorError', cause: error },

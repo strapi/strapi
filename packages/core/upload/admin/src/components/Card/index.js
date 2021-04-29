@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { Tooltip } from '@buffetjs/styles';
-import { getFileExtension, useGlobalContext } from 'strapi-helper-plugin';
+import { getFileExtension, useGlobalContext } from '@strapi/helper-plugin';
 import { formatBytes, getType, getTrad } from '../../utils';
 
 import Border from '../CardBorder';

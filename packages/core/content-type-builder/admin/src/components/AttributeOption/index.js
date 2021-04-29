@@ -9,7 +9,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext, useQuery } from 'strapi-helper-plugin';
+import { useGlobalContext, useQuery } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import Button from './Button';

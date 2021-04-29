@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { Picker, Padded, Text, Flex } from '@buffetjs/core';
-import { Carret, useQueryParams } from 'strapi-helper-plugin';
+import { Carret, useQueryParams } from '@strapi/helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import get from 'lodash/get';

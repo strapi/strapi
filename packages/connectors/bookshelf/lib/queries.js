@@ -6,8 +6,8 @@
 const _ = require('lodash');
 const { omit } = require('lodash/fp');
 const pmap = require('p-map');
-const { convertRestQueryParams, buildQuery, escapeQuery } = require('strapi-utils');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery, escapeQuery } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { singular } = require('pluralize');
 const { handleDatabaseError } = require('./utils/errors');
 

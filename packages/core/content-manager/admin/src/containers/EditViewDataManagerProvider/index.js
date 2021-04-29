@@ -7,7 +7,7 @@ import {
   useGlobalContext,
   OverlayBlocker,
   ContentManagerEditViewDataManagerContext,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
 import { cleanData, createYupSchema, getYupInnerErrors } from './utils';

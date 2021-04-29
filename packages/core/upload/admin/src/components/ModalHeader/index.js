@@ -1,6 +1,6 @@
 /*
  * NOTE:
- * This component should be put in the strapi-helper-plugin
+ * This component should be put in the @strapi/helper-plugin
  * at some point so the other packages can benefits from the updates
  *
  *
@@ -8,7 +8,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ModalHeader as HeaderModal, useGlobalContext } from 'strapi-helper-plugin';
+import { ModalHeader as HeaderModal, useGlobalContext } from '@strapi/helper-plugin';
 
 const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponent }) => {
   const { emitEvent } = useGlobalContext();

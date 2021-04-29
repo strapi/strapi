@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useUser } from 'strapi-helper-plugin';
+import { useUser } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import getCtOrStLinks from './utils/getCtOrStLinks';
 import getPluginSectionLinks from './utils/getPluginSectionLinks';

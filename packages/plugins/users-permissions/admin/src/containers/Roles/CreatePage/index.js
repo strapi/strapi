@@ -4,7 +4,7 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext } from '@strapi/helper-plugin';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormCard from '../../../components/FormBloc';

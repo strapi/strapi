@@ -9,7 +9,7 @@ const {
     constants: { DP_PUB_STATES },
     hasDraftAndPublish,
   },
-} = require('strapi-utils');
+} = require('@strapi/utils');
 const utils = require('./utils')();
 const populateQueries = require('./utils/populate-queries');
 

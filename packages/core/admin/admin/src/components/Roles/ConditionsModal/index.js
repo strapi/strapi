@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { cloneDeep, get, groupBy, set } from 'lodash';
-import { Modal, ModalHeader, ModalFooter } from 'strapi-helper-plugin';
+import { Modal, ModalHeader, ModalFooter } from '@strapi/helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../hooks';

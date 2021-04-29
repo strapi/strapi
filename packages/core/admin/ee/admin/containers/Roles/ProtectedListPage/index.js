@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckPagePermissions } from 'strapi-helper-plugin';
+import { CheckPagePermissions } from '@strapi/helper-plugin';
 import adminPermissions from '../../../../../admin/src/permissions';
 import ListPage from '../ListPage';
 

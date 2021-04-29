@@ -7,7 +7,7 @@ import {
   ModalBody,
   ModalFooter,
   ModalForm,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import { upperFirst } from 'lodash';
 import { AttributeIcon, Button } from '@buffetjs/core';

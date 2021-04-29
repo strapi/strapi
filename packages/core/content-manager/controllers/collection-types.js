@@ -1,8 +1,8 @@
 'use strict';
 
 const { has, pipe, prop, pick } = require('lodash/fp');
-const { MANY_RELATIONS } = require('strapi-utils').relations.constants;
-const { setCreatorFields } = require('strapi-utils');
+const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
+const { setCreatorFields } = require('@strapi/utils');
 
 const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');

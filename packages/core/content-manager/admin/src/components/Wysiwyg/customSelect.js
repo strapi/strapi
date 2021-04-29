@@ -7,7 +7,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { InputSelect as Select } from 'strapi-helper-plugin';
+import { InputSelect as Select } from '@strapi/helper-plugin';
 import useWysiwyg from '../../hooks/useWysiwyg';
 import { SELECT_OPTIONS } from './constants';
 import SelectWrapper from './SelectWrapper';

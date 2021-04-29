@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const mongoose = require('mongoose');
 
-const { models: utilsModels, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { models: utilsModels, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const utils = require('./utils');
 const populateQueries = require('./utils/populate-queries');
 const relations = require('./relations');

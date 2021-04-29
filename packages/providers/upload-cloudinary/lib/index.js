@@ -7,7 +7,7 @@
 // Public node modules.
 const cloudinary = require('cloudinary').v2;
 const intoStream = require('into-stream');
-const { errors } = require('strapi-plugin-upload');
+const { errors } = require('@strapi/plugin-upload');
 
 module.exports = {
   init(config) {

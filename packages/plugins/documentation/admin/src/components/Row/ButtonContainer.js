@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { CheckPermissions } from 'strapi-helper-plugin';
+import { CheckPermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import openWithNewTab from '../../utils/openWithNewTab';
 import { StyledButton } from './components';

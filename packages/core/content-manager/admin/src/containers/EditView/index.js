@@ -7,7 +7,7 @@ import {
   LiLink,
   CheckPermissions,
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';

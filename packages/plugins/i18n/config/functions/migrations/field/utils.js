@@ -1,6 +1,6 @@
 'use strict';
 
-const { isScalarAttribute } = require('strapi-utils').contentTypes;
+const { isScalarAttribute } = require('@strapi/utils').contentTypes;
 const { pick, prop, map, intersection, isEmpty, orderBy, pipe, every } = require('lodash/fp');
 const { getService } = require('../../../../utils');
 

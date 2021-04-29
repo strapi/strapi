@@ -1,7 +1,7 @@
 'use strict';
 
 const nodeSES = require('node-ses');
-const { removeUndefined } = require('strapi-utils');
+const { removeUndefined } = require('@strapi/utils');
 
 module.exports = {
   init: (providerOptions = {}, settings = {}) => {

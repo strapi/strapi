@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Carret, useGlobalContext } from 'strapi-helper-plugin';
+import { Carret, useGlobalContext } from '@strapi/helper-plugin';
 import { Picker } from '@buffetjs/core';
 import { getTrad, getFileModelTimestamps } from '../../utils';
 

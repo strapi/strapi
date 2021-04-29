@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug } = require('@strapi/utils');
 /* eslint-disable prefer-template */
 /**
  * This `before` function is run before generating targets.

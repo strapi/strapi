@@ -7,7 +7,7 @@ import {
   useQueryParams,
   formatComponentData,
   contentManagementUtilRemoveFieldsFromData,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';

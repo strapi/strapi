@@ -6,7 +6,7 @@ import Select, { createFilter } from 'react-select';
 import { Col, Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
-import { BaselineAlignment, selectStyles, DropdownIndicator } from 'strapi-helper-plugin';
+import { BaselineAlignment, selectStyles, DropdownIndicator } from '@strapi/helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
 

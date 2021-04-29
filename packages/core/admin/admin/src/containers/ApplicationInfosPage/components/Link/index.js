@@ -1,7 +1,7 @@
 import React from 'react';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import { BaselineAlignment } from 'strapi-helper-plugin';
+import { BaselineAlignment } from '@strapi/helper-plugin';
 import LinkText, { LinkArrow } from './components';
 
 const Link = ({ href, label }) => {

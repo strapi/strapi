@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import Cookies from 'js-cookie';
-import { auth, LoadingIndicatorPage, request } from 'strapi-helper-plugin';
+import { auth, LoadingIndicatorPage, request } from '@strapi/helper-plugin';
 import { getRequestUrl } from '../../../../admin/src/utils';
 
 const AuthResponse = () => {

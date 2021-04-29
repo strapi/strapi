@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { Padded } from '@buffetjs/core';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { useRolesList } from '../../../hooks';
 import styles from './utils/styles';
 import ClearIndicator from './ClearIndicator';

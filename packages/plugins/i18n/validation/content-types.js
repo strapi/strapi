@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup, formatYupErrors } = require('strapi-utils');
+const { yup, formatYupErrors } = require('@strapi/utils');
 const { get } = require('lodash/fp');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));

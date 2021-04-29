@@ -6,8 +6,8 @@
 const _ = require('lodash');
 const { prop, omit } = require('lodash/fp');
 const pmap = require('p-map');
-const { convertRestQueryParams, buildQuery } = require('strapi-utils');
-const { contentTypes: contentTypesUtils } = require('strapi-utils');
+const { convertRestQueryParams, buildQuery } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const mongoose = require('mongoose');
 
 const populateQueries = require('./utils/populate-queries');

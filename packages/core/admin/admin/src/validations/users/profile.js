@@ -1,5 +1,5 @@
 import * as yup from 'yup';
-import { translatedErrors } from 'strapi-helper-plugin';
+import { translatedErrors } from '@strapi/helper-plugin';
 
 const schema = {
   firstname: yup.mixed().required(translatedErrors.required),

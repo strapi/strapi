@@ -1,7 +1,7 @@
 'use strict';
 
 // eslint-disable-next-line node/no-extraneous-require
-const loadUtils = require('strapi/lib/load');
+const loadUtils = require('@strapi/strapi/lib/load');
 const _ = require('lodash');
 
 const loadApisGraphqlConfig = appPath =>
@@ -11,7 +11,7 @@ const loadPluginsGraphqlConfig = async installedPlugins => {
   const root = {};
 
   for (let pluginName of installedPlugins) {
-    const pluginDir = loadUtils.findPackagePath(`strapi-plugin-${pluginName}`);
+    const pluginDir = loadUtils.findPackagePath(`@strapi/plugin-${pluginName}`);
 
     const result = await loadUtils.loadFiles(pluginDir, 'config/*.graphql?(.js)');
 

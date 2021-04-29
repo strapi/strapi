@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Success, Remove } from '@buffetjs/icons';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';

@@ -1,6 +1,6 @@
 'use strict';
 
-const { formatYupErrors } = require('strapi-utils');
+const { formatYupErrors } = require('@strapi/utils');
 const validators = require('../../validation/common-validators');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));

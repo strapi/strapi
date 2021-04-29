@@ -4,7 +4,7 @@ const path = require('path');
 const _ = require('lodash');
 const pluralize = require('pluralize');
 
-const { nameToSlug, nameToCollectionName } = require('strapi-utils');
+const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
 const { isConfigurable } = require('../../utils/attributes');
 const createSchemaHandler = require('./schema-handler');
 

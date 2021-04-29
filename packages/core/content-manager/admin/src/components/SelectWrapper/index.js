@@ -10,7 +10,7 @@ import {
   request,
   useContentManagerEditViewDataManager,
   useQueryParams,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import { stringify } from 'qs';
 import pluginId from '../../pluginId';

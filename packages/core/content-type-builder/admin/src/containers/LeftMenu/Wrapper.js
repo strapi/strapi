@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-import { colors, sizes } from 'strapi-helper-plugin';
+import { colors, sizes } from '@strapi/helper-plugin';
 
 const Wrapper = styled.div`
   width: 100%;

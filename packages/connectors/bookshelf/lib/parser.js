@@ -1,6 +1,6 @@
 'use strict';
 
-const { parseType } = require('strapi-utils');
+const { parseType } = require('@strapi/utils');
 
 const createParser = () => (type, value) => {
   if (value === null) return null;

@@ -8,7 +8,7 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
-const { nameToSlug } = require('strapi-utils');
+const { nameToSlug } = require('@strapi/utils');
 
 /**
  * This `before` function is run before generating targets.

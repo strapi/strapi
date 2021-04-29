@@ -6,7 +6,7 @@
 
 import styled from 'styled-components';
 import { CustomRow as Row } from '@buffetjs/styles';
-import { sizes } from 'strapi-helper-plugin';
+import { sizes } from '@strapi/helper-plugin';
 
 const StyledListRow = styled(Row)`
   cursor: ${({ disabled }) => (disabled ? 'default' : 'pointer')};

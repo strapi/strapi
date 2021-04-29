@@ -5,7 +5,7 @@ import {
   NotAllowedInput,
   SizedInput,
   useUserPermissions,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { getRequestUrl } from '../../../../../admin/src/utils';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';

@@ -1,6 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from '@strapi/helper-plugin';
 import { Text } from '@buffetjs/core';
 
 import formatDuration from './utils/formatDuration';

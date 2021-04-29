@@ -4,7 +4,7 @@ const {
   contentTypes: {
     constants: { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATE_LIVE, DP_PUB_STATE_PREVIEW },
   },
-} = require('strapi-utils');
+} = require('@strapi/utils');
 
 module.exports = {
   publicationState: {

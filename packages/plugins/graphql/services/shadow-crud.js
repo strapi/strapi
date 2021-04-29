@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes } = require('strapi-utils');
+const { contentTypes } = require('@strapi/utils');
 
 const {
   hasDraftAndPublish,

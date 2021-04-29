@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useClickAwayListener } from '@buffetjs/hooks';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 
 import DoubleFile from '../../icons/DoubleFile';

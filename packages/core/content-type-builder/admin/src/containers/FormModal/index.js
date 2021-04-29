@@ -12,7 +12,7 @@ import {
   useQuery,
   useStrapi,
   InputsIndex,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';

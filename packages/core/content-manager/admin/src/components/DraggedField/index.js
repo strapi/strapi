@@ -4,7 +4,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
-import { CheckPermissions } from 'strapi-helper-plugin';
+import { CheckPermissions } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import useLayoutDnd from '../../hooks/useLayoutDnd';

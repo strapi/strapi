@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty } from 'lodash';
 import { useLocation } from 'react-router-dom';
-import { generateFiltersFromSearch, useQuery } from 'strapi-helper-plugin';
+import { generateFiltersFromSearch, useQuery } from '@strapi/helper-plugin';
 
 import HomePageSettings from './HomePageSettings';
 import HomePageList from './HomePageList';

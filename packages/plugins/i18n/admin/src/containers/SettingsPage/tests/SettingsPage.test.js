@@ -6,13 +6,13 @@ import { combineReducers } from 'redux-immutable';
 import { fromJS } from 'immutable';
 
 import { Provider } from 'react-redux';
-import { request, useUserPermissions } from 'strapi-helper-plugin';
+import { request, useUserPermissions } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import LocaleSettingsPage from '..';
-// TODO: move to strapi-helper-plugin
-import themes from '../../../../../../../core/strapi-admin/admin/src/themes';
+// TODO: move to @strapi/helper-plugin
+import themes from '../../../../../../../core/admin/admin/src/themes';
 import i18nReducers, { initialState } from '../../../hooks/reducers';
 
 const TestWrapper = ({ children }) => {
@@ -33,7 +33,7 @@ const TestWrapper = ({ children }) => {
 
 // TODO: we should not be forced to mock this module
 // but it bugs somehow when run with jest
-jest.mock('strapi-helper-plugin', () => ({
+jest.mock('@strapi/helper-plugin', () => ({
   EmptyState: ({ title, description }) => (
     <div data-testid="empty-list">
       <p>{title}</p>

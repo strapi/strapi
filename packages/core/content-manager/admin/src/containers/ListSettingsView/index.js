@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
-import { request, useGlobalContext } from 'strapi-helper-plugin';
+import { request, useGlobalContext } from '@strapi/helper-plugin';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';

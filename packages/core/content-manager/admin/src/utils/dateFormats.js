@@ -4,7 +4,7 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
-import { dateFormats as defaultDateFormats } from 'strapi-helper-plugin';
+import { dateFormats as defaultDateFormats } from '@strapi/helper-plugin';
 
 const dateFormats = {
   ...defaultDateFormats,

@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { themePropTypes } from 'strapi-helper-plugin';
+import { themePropTypes } from '@strapi/helper-plugin';
 
 const FileDetailsBoxWrapper = styled.div`
   width: 100%;

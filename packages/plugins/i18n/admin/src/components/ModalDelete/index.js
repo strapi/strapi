@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Text } from '@buffetjs/core';
-import { ModalConfirm } from 'strapi-helper-plugin';
+import { ModalConfirm } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import useDeleteLocale from '../../hooks/useDeleteLocale';
 import { getTrad } from '../../utils';

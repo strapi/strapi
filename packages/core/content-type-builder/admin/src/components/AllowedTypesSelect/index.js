@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import { useGlobalContext } from 'strapi-helper-plugin';
+import { useGlobalContext } from '@strapi/helper-plugin';
 import { upperFirst } from 'lodash';
 import MenuList from './MenuList';
 import getTrad from '../../utils/getTrad';

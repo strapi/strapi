@@ -10,7 +10,7 @@ import {
   CheckPagePermissions,
   request,
   useGlobalContext,
-} from 'strapi-helper-plugin';
+} from '@strapi/helper-plugin';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';

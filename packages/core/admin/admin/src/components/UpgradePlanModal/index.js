@@ -3,7 +3,7 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Button, Padded, Text } from '@buffetjs/core';
-import { Modal } from 'strapi-helper-plugin';
+import { Modal } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Arrow, Download, Option, Wrapper } from './components';
 

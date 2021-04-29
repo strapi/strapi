@@ -7,7 +7,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Button, PopUpWarning, CheckPermissions } from 'strapi-helper-plugin';
+import { Button, PopUpWarning, CheckPermissions } from '@strapi/helper-plugin';
 import adminPermissions from '../../../permissions';
 import Wrapper from './Wrapper';
 
@@ -99,6 +99,7 @@ class PluginCard extends React.Component {
             </div>
             <div
               onClick={e => {
+                // FIXME: dead link as we are changing the naming. Would be better to use a url comming from the api call directly
                 window.open(
                   `https://github.com/strapi/strapi/tree/master/packages/strapi-plugin-${this.props.plugin.id}`,
                   '_blank'
