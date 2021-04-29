@@ -52,7 +52,7 @@ module.exports = (scope, cb) => {
 
   // Try to require the module or throw if error.
   try {
-    generator = require('../../' + module);
+    generator = require(module);
   } catch (error) {
     throwIfModuleNotFoundError(error, module);
   }
