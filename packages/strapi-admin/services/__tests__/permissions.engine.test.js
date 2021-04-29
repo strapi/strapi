@@ -282,7 +282,7 @@ describe('Permissions Engine', () => {
       });
     });
 
-    test('It should register the permission (conditions / true result)', async () => {
+    test('It should register the permission without a condition (non required true result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
@@ -297,7 +297,6 @@ describe('Permissions Engine', () => {
       const expected = {
         ..._.omit(permission, ['conditions', 'properties']),
         fields: permission.properties.fields,
-        condition: true,
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);
@@ -318,7 +317,7 @@ describe('Permissions Engine', () => {
       expect(registerFn).not.toHaveBeenCalled();
     });
 
-    test('It should register the permission (conditions / object result)', async () => {
+    test('It should register the permission (non required object result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
@@ -338,7 +337,13 @@ describe('Permissions Engine', () => {
       const expected = {
         ..._.omit(permission, ['conditions', 'properties']),
         fields: permission.properties.fields,
-        condition: { created_by: user.firstname },
+        condition: {
+          $and: [
+            {
+              $or: [{ created_by: user.firstname }],
+            },
+          ],
+        },
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);

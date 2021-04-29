@@ -1,18 +1,19 @@
 'use strict';
 
 const _ = require('lodash');
+const { get, has } = require('lodash/fp');
 const { rulesToQuery } = require('@casl/ability/extra');
 const { VALID_REST_OPERATORS } = require('strapi-utils');
 
 const ops = {
   common: VALID_REST_OPERATORS.map(op => `$${op}`),
-  boolean: ['$or'],
+  boolean: ['$or', '$and'],
   cleanable: ['$elemMatch'],
 };
 
 const buildCaslQuery = (ability, action, model) => {
   const query = rulesToQuery(ability, action, model, o => o.conditions);
-  return query && _.has(query, '$or') ? _.pick(query, '$or') : {};
+  return query && has('$or', query) ? get('$or[0].$and', query) : {};
 };
 
 const buildStrapiQuery = caslQuery => {

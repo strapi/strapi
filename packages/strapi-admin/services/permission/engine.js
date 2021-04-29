@@ -4,8 +4,9 @@ const {
   curry,
   map,
   filter,
-  each,
+  propEq,
   isFunction,
+  isBoolean,
   isArray,
   isEmpty,
   isObject,
@@ -23,6 +24,7 @@ const { getService } = require('../../utils');
 
 const allowedOperations = [
   '$or',
+  '$and',
   '$eq',
   '$ne',
   '$in',
@@ -179,48 +181,91 @@ module.exports = conditionProvider => {
       // 1. Replace each condition name by its associated value
       const resolveConditions = map(conditionProvider.get);
 
-      // 2. Only keep the handler of each condition
-      const pickHandlers = map(prop('handler'));
+      // 2. Filter conditions, only keep objects and functions
+      const filterValidConditions = filter(condition => isObject(condition.handler));
 
-      // 3. Filter conditions, only keep objects and functions
-      const filterValidConditions = filter(isObject);
-
-      // 4. Evaluate the conditions if they're a function, returns the object otherwise
+      // 3. Evaluate the conditions if they're a function, returns the object otherwise
       const evaluateConditions = conditions => {
         return Promise.all(
-          conditions.map(cond =>
-            isFunction(cond)
-              ? cond(user, merge(conditionOptions, { permission: cloneDeep(permission) }))
-              : cond
-          )
+          conditions.map(async cond => ({
+            ...cond,
+            handler: isFunction(cond.handler)
+              ? await cond.handler(
+                  user,
+                  merge(conditionOptions, { permission: cloneDeep(permission) })
+                )
+              : cond.handler,
+          }))
         );
       };
 
-      // 5. Only keeps 'true' booleans or objects as condition's result
-      const filterValidResults = filter(result => result === true || isObject(result));
-
-      // 6. Transform each result into registerFn options
-      const transformToRegisterOptions = map(result => ({
-        action,
-        subject,
-        fields: properties.fields,
-        condition: result,
-      }));
-
-      // 7. Register each result using the registerFn
-      const registerResults = each(registerFn);
+      // 4. Only keeps booleans or objects as condition's result
+      const filterValidResults = filter(
+        condition => isBoolean(condition.handler) || isObject(condition.handler)
+      );
 
       /**/
 
-      // Execute all the steps needed to register the permission with its associated conditions
-      await Promise.resolve(conditions)
+      const evaluatedConditions = await Promise.resolve(conditions)
         .then(resolveConditions)
-        .then(pickHandlers)
         .then(filterValidConditions)
         .then(evaluateConditions)
-        .then(filterValidResults)
-        .then(transformToRegisterOptions)
-        .then(registerResults);
+        .then(filterValidResults);
+
+      // Utils
+      const filterIsRequired = isRequired => filter(propEq('required', isRequired));
+      const pickHandlers = map(prop('handler'));
+
+      // If there is no condition, register the permission as is
+      if (isEmpty(evaluatedConditions)) {
+        registerFn({ action, subject, fields: properties.fields });
+        return;
+      }
+
+      const nonRequiredConditions = filterIsRequired(false)(evaluatedConditions);
+      const requiredConditions = filterIsRequired(true)(evaluatedConditions);
+
+      // If any required condition has its handler set to false, then don't register the permission at all
+      if (requiredConditions.some(propEq('handler', false))) {
+        return;
+      }
+
+      // If every non required condition is set to false, then don't register the permission at all
+      if (
+        !isEmpty(nonRequiredConditions) &&
+        nonRequiredConditions.every(propEq('handler', false))
+      ) {
+        return;
+      }
+
+      const nonRequiredObjectHandlers = pickHandlers(nonRequiredConditions).filter(isObject);
+      const requiredObjectHandlers = pickHandlers(requiredConditions).filter(isObject);
+
+      const builtCondition = { $and: [] };
+
+      if (
+        // Don't add the $or clause if there is not any object handler in the non-required conditions
+        !isEmpty(nonRequiredObjectHandlers) &&
+        // Don't add the $or clause if one of the non-required condition handler
+        // is true since it'll validate the $or clause everytime anyway
+        !nonRequiredConditions.some(propEq('handler', true))
+      ) {
+        // Add the non-required conditions handler as a $or clause within the root $and clause
+        builtCondition.$and.push({ $or: nonRequiredObjectHandlers });
+      }
+
+      // Add the required conditions at the root level of the $and clause
+      builtCondition.$and.push(...requiredObjectHandlers);
+
+      const permissionRegisterPayload = {
+        action,
+        subject,
+        fields: properties.fields,
+        condition: isEmpty(builtCondition.$and) ? undefined : builtCondition,
+      };
+
+      // Register the permission
+      registerFn(permissionRegisterPayload);
     },
 
     /**

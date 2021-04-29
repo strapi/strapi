@@ -38,7 +38,7 @@ module.exports = ({ ability, action, model }) => ({
     const permissionQuery = this.getQuery(action);
     return {
       ...query,
-      _where: query._where ? _.concat(permissionQuery, query._where) : [permissionQuery],
+      _where: (query._where || []).concat(permissionQuery),
     };
   },
 
