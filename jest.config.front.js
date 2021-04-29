@@ -31,16 +31,8 @@ if (IS_EE) {
 
 module.exports = {
   collectCoverageFrom: [
-    // 'packages/strapi-admin/admin/src/**/**/*.js',
-    // '!packages/strapi-admin/admin/src/*.js',
-    // '!packages/strapi-admin/admin/src/utils/*.js',
-    // 'packages/strapi-plugin-*/admin/src/**/**/*.js',
-    // 'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
-    // '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
-    // '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    // 'packages/strapi-plugin-*/admin/src/utils/*.js',
-    // '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
-    // '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
+    'packages/core/*/admin/src/**/*.js',
+    'packages/plugins/*/admin/src/**/*.js',
   ],
   globals: {
     __webpack_public_path__: 'http://localhost:4000',
