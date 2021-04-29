@@ -1,29 +1,30 @@
 {
-  "name": "strapi-hook-redis",
+  "name": "@strapi/generate",
   "version": "3.6.0",
-  "description": "Redis hook for the Strapi framework",
+  "description": "Master of ceremonies for the Strapi generators.",
   "homepage": "https://strapi.io",
   "keywords": [
-    "redis",
-    "hook",
-    "memory",
-    "cache",
+    "generate",
+    "generator",
     "strapi"
   ],
+  "main": "./lib/index.js",
   "directories": {
     "lib": "./lib"
   },
-  "main": "./lib",
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
   "dependencies": {
-    "ioredis": "^4.19.4",
+    "async": "^2.6.2",
+    "fs-extra": "^9.1.0",
     "lodash": "4.17.21",
-    "rimraf": "3.0.2",
-    "stack-trace": "0.0.10",
+    "reportback": "^2.0.2",
     "@strapi/utils": "3.6.0"
   },
   "author": {
-    "email": "hi@strapi.io",
     "name": "Strapi team",
+    "email": "hi@strapi.io",
     "url": "https://strapi.io"
   },
   "maintainers": [
@@ -45,8 +46,5 @@
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
 }

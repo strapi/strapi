@@ -1,13 +1,13 @@
 {
-  "name": "strapi-hook-redis",
+  "name": "@strapi/connector-mongoose",
   "version": "3.6.0",
-  "description": "Redis hook for the Strapi framework",
+  "description": "Mongoose hook for the Strapi framework",
   "homepage": "https://strapi.io",
   "keywords": [
-    "redis",
+    "mongoose",
     "hook",
-    "memory",
-    "cache",
+    "orm",
+    "nosql",
     "strapi"
   ],
   "directories": {
@@ -15,10 +15,13 @@
   },
   "main": "./lib",
   "dependencies": {
-    "ioredis": "^4.19.4",
     "lodash": "4.17.21",
-    "rimraf": "3.0.2",
-    "stack-trace": "0.0.10",
+    "mongoose": "5.10.8",
+    "mongoose-float": "^1.0.4",
+    "mongoose-long": "^0.3.2",
+    "p-map": "4.0.0",
+    "pluralize": "^8.0.0",
+    "semver": "^7.3.5",
     "@strapi/utils": "3.6.0"
   },
   "author": {
