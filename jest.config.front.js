@@ -5,15 +5,15 @@ const moduleNameMapper = {
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
     '<rootDir>/test/config/front/mocks/image.js',
   '^ee_else_ce(/.*)$': [
-    '<rootDir>/packages/strapi-admin/admin/src$1',
-    '<rootDir>/packages/strapi-plugin-*/admin/src$1',
+    '<rootDir>/packages/core/strapi-admin/admin/src$1',
+    '<rootDir>/packages/**/strapi-plugin-*/admin/src$1',
   ],
 };
 
 if (IS_EE) {
   const rootDirEE = [
-    '<rootDir>/packages/strapi-admin/ee/admin$1',
-    '<rootDir>/packages/strapi-plugin-*/ee/admin$1',
+    '<rootDir>/packages/core/strapi-admin/ee/admin$1',
+    '<rootDir>/packages/**/strapi-plugin-*/ee/admin$1',
   ];
 
   Object.assign(moduleNameMapper, {
@@ -23,16 +23,16 @@ if (IS_EE) {
 
 module.exports = {
   collectCoverageFrom: [
-    'packages/strapi-admin/admin/src/**/**/*.js',
-    '!packages/strapi-admin/admin/src/*.js',
-    '!packages/strapi-admin/admin/src/utils/*.js',
-    'packages/strapi-plugin-*/admin/src/**/**/*.js',
-    'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
-    '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
-    'packages/strapi-plugin-*/admin/src/utils/*.js',
-    '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
-    '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
+    // 'packages/strapi-admin/admin/src/**/**/*.js',
+    // '!packages/strapi-admin/admin/src/*.js',
+    // '!packages/strapi-admin/admin/src/utils/*.js',
+    // 'packages/strapi-plugin-*/admin/src/**/**/*.js',
+    // 'packages/strapi-plugin-*/admin/src/InjectedComponents/tests/*.js',
+    // '!packages/strapi-plugin-content-type-builder/admin/src/components/TableList/*.js',
+    // '!packages/strapi-plugin-content-type-builder/admin/src/components/TableListRow/*.js',
+    // 'packages/strapi-plugin-*/admin/src/utils/*.js',
+    // '!packages/strapi-plugin-*/admin/src/lifecycles/*.js',
+    // '!packages/strapi-plugin-*/admin/src/**/**/tests/*.test.{js,jsx}',
   ],
   globals: {
     __webpack_public_path__: 'http://localhost:4000',

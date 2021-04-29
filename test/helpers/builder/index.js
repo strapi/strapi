@@ -4,7 +4,7 @@ const { get } = require('lodash/fp');
 
 const _ = require('lodash');
 const modelsUtils = require('../models');
-const { sanitizeEntity } = require('../../../packages/strapi-utils');
+const { sanitizeEntity } = require('../../../packages/core/strapi-utils');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
 

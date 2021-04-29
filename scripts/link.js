@@ -7,14 +7,18 @@ const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
 
 async function run() {
-  const packageDirs = await glob('packages/*');
+  const packageDirs = await glob('packages/**/*', { ignore: '**/node_modules/**' });
 
   console.log('Linking all packages');
 
-  const packages = packageDirs.map(dir => ({
-    dir,
-    pkgJSON: fs.readJSONSync(join(dir, 'package.json')),
-  }));
+  const packages = packageDirs
+    .filter(dir => fs.pathExistsSync(join(dir, 'package.json')))
+    .map(dir => {
+      return {
+        dir,
+        pkgJSON: fs.readJSONSync(join(dir, 'package.json')),
+      };
+    });
 
   await Promise.all(packages.map(({ dir }) => execa('yarn', ['link'], { cwd: dir })));
 
