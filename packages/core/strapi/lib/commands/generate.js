@@ -8,10 +8,10 @@
 const path = require('path');
 
 // Master of ceremonies for generators.
-const generate = require('strapi-generate');
+const generate = require('@strapi/generate');
 
 // Logger.
-const { logger } = require('strapi-utils');
+const { logger } = require('@strapi/utils');
 
 // Local Strapi dependencies.
 const packageJSON = require('../../package.json');

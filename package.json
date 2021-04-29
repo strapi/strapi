@@ -103,7 +103,7 @@
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "name": "strapi-monorepo",
+  "name": "strapi",
   "workspaces": [
     "packages/*",
     "packages/*/*",

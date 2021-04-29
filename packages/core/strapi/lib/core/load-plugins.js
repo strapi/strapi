@@ -48,7 +48,7 @@ const loadPlugins = async ({ installedPlugins, config }) => {
   let plugins = {};
 
   for (let plugin of installedPlugins) {
-    const pluginPath = findPackagePath(`strapi-plugin-${plugin}`);
+    const pluginPath = findPackagePath(`@strapi/plugin-${plugin}`);
 
     const files = await loadFiles(
       pluginPath,

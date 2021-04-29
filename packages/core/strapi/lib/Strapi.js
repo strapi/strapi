@@ -8,8 +8,8 @@ const Router = require('koa-router');
 const _ = require('lodash');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
-const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('strapi-utils');
-const { createDatabaseManager } = require('strapi-database');
+const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
+const { createDatabaseManager } = require('@strapi/database');
 const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');

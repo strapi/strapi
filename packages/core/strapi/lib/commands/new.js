@@ -7,5 +7,5 @@
  */
 
 module.exports = function(...args) {
-  return require('strapi-generate-new')(...args);
+  return require('@strapi/generate-new')(...args);
 };

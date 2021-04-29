@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { getConfigUrls, contentTypes: contentTypesUtils } = require('strapi-utils');
+const { getConfigUrls, contentTypes: contentTypesUtils } = require('@strapi/utils');
 
 const { createCoreApi } = require('../core-api');
 

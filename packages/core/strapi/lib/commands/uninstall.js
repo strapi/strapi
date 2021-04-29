@@ -21,13 +21,13 @@ module.exports = async (plugins, { deleteFiles }) => {
   const loader = ora();
   const dir = process.cwd();
 
-  const pluginArgs = plugins.map(name => `strapi-plugin-${name}`);
+  const pluginArgs = plugins.map(name => `@strapi/plugin-${name}`);
 
   try {
     // verify should rebuild before removing the pacakge
     let shouldRebuild = false;
     for (let name of plugins) {
-      let pkgPath = findPackagePath(`strapi-plugin-${name}`);
+      let pkgPath = findPackagePath(`@strapi/plugin-${name}`);
       if (existsSync(join(pkgPath, 'admin', 'src', 'index.js'))) {
         shouldRebuild = true;
       }

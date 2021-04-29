@@ -12,7 +12,7 @@ var chalk = require('chalk');
 var spawn = require('cross-spawn');
 var opn = require('opn');
 const fetch = require('node-fetch');
-const { getAbsoluteAdminUrl } = require('strapi-utils');
+const { getAbsoluteAdminUrl } = require('@strapi/utils');
 
 // https://github.com/sindresorhus/opn#app
 var OSX_CHROME = 'google chrome';
