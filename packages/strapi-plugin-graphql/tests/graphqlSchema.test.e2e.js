@@ -1,6 +1,7 @@
 'use strict';
 
 const types = require('../services/type-builder');
+const buildShadowCrud = require('../services/shadow-crud');
 
 const playerModel = {
   attributes: {
@@ -27,7 +28,9 @@ const playerModel = {
   name: 'player',
   description: '',
   collectionName: '',
-  globalId: 'Player'
+  globalId: 'Player',
+  kind: 'collectionType',
+  modelName: 'player'
 };
 
 describe('generateInputModel', () => {
@@ -64,6 +67,34 @@ firstname: String
 firstname: String
       }
     `
+    );
+  });
+});
+
+describe('buildShadowCrud', () => {
+  test('removes disabled attributes', () => {
+    global.strapi = {
+      plugins: {
+        graphql: {
+          config: {
+            _schema: {
+              graphql: {
+                type: {
+                  Player: {
+                    age: false,
+                    level: false,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    };
+    global.strapi.contentTypes = [playerModel]
+    global.strapi.components = {}
+    expect(JSON.stringify(buildShadowCrud({}))).toEqual(
+      '{"definition":"\\ntype Player {id: ID!\\nundefined: ID!\\nlastname: String\\nfirstname: String}\\n\\n      input PlayerInput {\\n\\n        lastname: String\\nfirstname: String\\n      }\\n\\n      input editPlayerInput {\\n        \\n        lastname: String\\nfirstname: String\\n      }\\n    ","query":{},"mutation":{},"resolvers":{"Query":{},"Mutation":{},"Player":{}}}'
     );
   });
 });
