@@ -102,7 +102,7 @@ describe('Permissions Engine', () => {
         plugin: 'test',
         name: 'isContainedIn',
         category: 'default',
-        handler: { firstname: { $in: ['Alice', 'Foo'] } },
+        handler: () => ({ firstname: { $in: ['Alice', 'Foo'] } }),
       },
     ],
   };

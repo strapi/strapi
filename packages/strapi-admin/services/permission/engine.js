@@ -181,28 +181,25 @@ module.exports = conditionProvider => {
       // 1. Replace each condition name by its associated value
       const resolveConditions = map(conditionProvider.get);
 
-      // 2. Filter conditions, only keep objects and functions
-      const filterValidConditions = filter(condition => isObject(condition.handler));
+      // 2. Filter conditions, only keep those whose handler is a function
+      const filterValidConditions = filter(condition => isFunction(condition.handler));
 
-      // 3. Evaluate the conditions if they're a function, returns the object otherwise
+      // 3. Evaluate the conditions handler and returns an object
+      // containing both the original condition and its result
       const evaluateConditions = conditions => {
         return Promise.all(
-          conditions.map(async cond => ({
-            ...cond,
-            handler: isFunction(cond.handler)
-              ? await cond.handler(
-                  user,
-                  merge(conditionOptions, { permission: cloneDeep(permission) })
-                )
-              : cond.handler,
+          conditions.map(async condition => ({
+            condition,
+            result: await condition.handler(
+              user,
+              merge(conditionOptions, { permission: cloneDeep(permission) })
+            ),
           }))
         );
       };
 
       // 4. Only keeps booleans or objects as condition's result
-      const filterValidResults = filter(
-        condition => isBoolean(condition.handler) || isObject(condition.handler)
-      );
+      const filterValidResults = filter(({ result }) => isBoolean(result) || isObject(result));
 
       /**/
 
@@ -213,8 +210,9 @@ module.exports = conditionProvider => {
         .then(filterValidResults);
 
       // Utils
-      const filterIsRequired = isRequired => filter(propEq('required', isRequired));
-      const pickHandlers = map(prop('handler'));
+      const resultPropEq = propEq('result');
+      const filterIsRequired = isRequired => filter(propEq('condition.required', isRequired));
+      const pickResults = map(prop('result'));
 
       // If there is no condition, register the permission as is
       if (isEmpty(evaluatedConditions)) {
@@ -225,43 +223,41 @@ module.exports = conditionProvider => {
       const nonRequiredConditions = filterIsRequired(false)(evaluatedConditions);
       const requiredConditions = filterIsRequired(true)(evaluatedConditions);
 
-      // If any required condition has its handler set to false, then don't register the permission at all
-      if (requiredConditions.some(propEq('handler', false))) {
+      // If any required condition's result is set to false, then don't register the permission at all
+      if (requiredConditions.some(resultPropEq(false))) {
         return;
       }
 
-      // If every non required condition is set to false, then don't register the permission at all
-      if (
-        !isEmpty(nonRequiredConditions) &&
-        nonRequiredConditions.every(propEq('handler', false))
-      ) {
+      // If every non required condition's handler is set to false,
+      // then don't register the permission at all
+      if (!isEmpty(nonRequiredConditions) && nonRequiredConditions.every(resultPropEq(false))) {
         return;
       }
 
-      const nonRequiredObjectHandlers = pickHandlers(nonRequiredConditions).filter(isObject);
-      const requiredObjectHandlers = pickHandlers(requiredConditions).filter(isObject);
+      const nonRequiredObjectResults = pickResults(nonRequiredConditions).filter(isObject);
+      const requiredObjectResults = pickResults(requiredConditions).filter(isObject);
 
-      const builtCondition = { $and: [] };
+      const builtCondition = [];
 
       if (
         // Don't add the $or clause if there is not any object handler in the non-required conditions
-        !isEmpty(nonRequiredObjectHandlers) &&
+        !isEmpty(nonRequiredObjectResults) &&
         // Don't add the $or clause if one of the non-required condition handler
         // is true since it'll validate the $or clause everytime anyway
-        !nonRequiredConditions.some(propEq('handler', true))
+        !nonRequiredConditions.some(resultPropEq(true))
       ) {
         // Add the non-required conditions handler as a $or clause within the root $and clause
-        builtCondition.$and.push({ $or: nonRequiredObjectHandlers });
+        builtCondition.push({ $or: nonRequiredObjectResults });
       }
 
       // Add the required conditions at the root level of the $and clause
-      builtCondition.$and.push(...requiredObjectHandlers);
+      builtCondition.push(...requiredObjectResults);
 
       const permissionRegisterPayload = {
         action,
         subject,
         fields: properties.fields,
-        condition: isEmpty(builtCondition.$and) ? undefined : builtCondition,
+        condition: isEmpty(builtCondition) ? undefined : { $and: builtCondition },
       };
 
       // Register the permission
