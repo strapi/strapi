@@ -217,10 +217,7 @@ module.exports = {
   generateInputModel(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.upperFirst(toSingular(name))}Input`;
-    const hasAllAttributesDisabled =
-      Object.keys(model.attributes).filter(attributeName =>
-        isTypeAttributeEnabled(model, attributeName)
-      ).length === 0;
+    const hasAllAttributesDisabled = Object.keys(model.attributes).every(attr => !isTypeAttributeEnabled(model, attr));
 
     if (_.isEmpty(model.attributes) || hasAllAttributesDisabled) {
       return `
