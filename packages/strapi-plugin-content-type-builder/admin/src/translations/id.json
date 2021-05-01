@@ -111,7 +111,7 @@
     "form.button.add-first-field-to-created-component": "Tambahkan bidang pertama ke komponen",
     "form.button.add.field.to.collectionType": "Tambahkan bidang lain ke jenis koleksi ini",
     "form.button.add.field.to.component": "Tambahkan bidang lain ke komponen ini",
-    "form.button.add.field.to.contentType ": "Tambahkan bidang lain ke jenis konten ini",
+    "form.button.add.field.to.contentType": "Tambahkan bidang lain ke jenis konten ini",
     "form.button.add.field.to.singleType": "Tambahkan bidang lain ke jenis tunggal ini",
     "form.button.cancel": "Batal",
     "form.button.collection-type.description": "Paling baik untuk berbagai contoh seperti artikel, produk, komentar, dll.",
@@ -185,4 +185,3 @@
     "table.attributes.title.plural": "{number} bidang",
     "table.attributes.title.singular": "{number} bidang"
   }
-  
