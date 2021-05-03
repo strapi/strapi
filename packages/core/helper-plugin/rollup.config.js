@@ -45,7 +45,6 @@ export default {
           '@babel/preset-env',
           {
             modules: false,
-            // loose: true,
             targets: {
               browsers: ['Since 2017'],
             },

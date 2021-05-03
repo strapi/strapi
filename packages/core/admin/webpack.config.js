@@ -2,18 +2,15 @@
 
 const path = require('path');
 const webpack = require('webpack');
-
-// Webpack plugins
-const FriendlyErrorsWebpackPlugin = require('friendly-errors-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const DuplicatePckgChecker = require('duplicate-package-checker-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const isWsl = require('is-wsl');
 const alias = require('./webpack.alias.js');
 
-// TODO: parametrize
+// TODO: remove
 const URLs = {
   mode: 'host',
 };
@@ -31,6 +28,7 @@ module.exports = ({
   },
 }) => {
   const isProduction = env === 'production';
+
   const webpackPlugins = isProduction
     ? [
         new webpack.IgnorePlugin({
@@ -44,26 +42,19 @@ module.exports = ({
         }),
         new WebpackBar(),
       ]
-    : [
-        new DuplicatePckgChecker({
-          verbose: true,
-        }),
-        new FriendlyErrorsWebpackPlugin({
-          clearConsole: false,
-        }),
-      ];
+    : [];
 
   return {
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
-    devtool: isProduction ? false : 'cheap-module-source-map',
+    devtool: false,
     entry,
     output: {
       path: dest,
       publicPath: options.publicPath,
       // Utilize long-term caching by adding content hashes (not compilation hashes)
       // to compiled assets for production
-      filename: isProduction ? '[name].[contenthash:8].js' : 'bundle.js',
+      filename: isProduction ? '[name].[contenthash:8].js' : '[name].bundle.js',
       chunkFilename: isProduction ? '[name].[contenthash:8].chunk.js' : '[name].chunk.js',
     },
     optimization: {
@@ -168,8 +159,10 @@ module.exports = ({
       new HtmlWebpackPlugin({
         inject: true,
         template: path.resolve(__dirname, 'index.html'),
+        // FIXME
         // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
+      // FIXME: some variables are not needed anymore
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
         NODE_ENV: JSON.stringify(isProduction ? 'production' : 'development'),
@@ -195,6 +188,7 @@ module.exports = ({
           resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
         }
       }),
+      new NodePolyfillPlugin(),
       ...webpackPlugins,
     ],
   };
