@@ -5,7 +5,7 @@
  *
  */
 
-// Setup the strapi functioon global variable
+// Setup the strapi function global variable
 
 import '@testing-library/jest-dom/extend-expect';
 
