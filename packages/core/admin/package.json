@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "echo \"no tests yet\"",
-    "develop": "webpack-dev-server --config webpack.config.dev.js",
-    "develop:ce": "STRAPI_DISABLE_EE=true webpack-dev-server --config webpack.config.dev.js",
+    "develop": "webpack serve --config webpack.config.dev.js",
+    "develop:ce": "STRAPI_DISABLE_EE=true webpack serve --config webpack.config.dev.js",
     "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js"
   },
   "main": "index.js",
@@ -62,7 +62,7 @@
     "immer": "^8.0.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.4",
-    "is-wsl": "^2.0.0",
+    "is-wsl": "2.2.0",
     "js-cookie": "2.2.1",
     "jsonwebtoken": "8.5.1",
     "koa-compose": "4.1.0",
@@ -104,13 +104,13 @@
     "sift": "13.5.0",
     "style-loader": "2.0.0",
     "styled-components": "^5.2.3",
-    "terser-webpack-plugin": "^1.2.3",
+    "terser-webpack-plugin": "4.2.3",
     "url-loader": "4.1.1",
     "video-react": "^0.13.2",
-    "webpack": "^4.46.0",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.2",
-    "webpackbar": "^4.0.0",
+    "webpack": "4.46.0",
+    "webpack-cli": "4.6.0",
+    "webpack-dev-server": "3.11.2",
+    "webpackbar": "5.0.0-3",
     "yup": "^0.27.0"
   },
   "author": {
