@@ -31,7 +31,7 @@
     "@buffetjs/styles": "3.3.5",
     "@buffetjs/utils": "3.3.5",
     "@casl/ability": "^4.1.5",
-    "@fingerprintjs/fingerprintjs": "3.0.7",
+    "@fingerprintjs/fingerprintjs": "3.1.1",
     "@fortawesome/fontawesome-free": "^5.15.3",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.3",
