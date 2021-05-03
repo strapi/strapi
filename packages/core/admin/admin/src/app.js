@@ -226,13 +226,14 @@ const render = messages => {
   );
 };
 
-if (module.hot) {
-  module.hot.accept(['./i18n', './containers/App'], () => {
-    ReactDOM.unmountComponentAtNode(MOUNT_NODE);
+// Not needed we will use a plugin for this
+// if (module.hot) {
+//   module.hot.accept(['./i18n', './containers/App'], () => {
+//     ReactDOM.unmountComponentAtNode(MOUNT_NODE);
 
-    render(translationMessages);
-  });
-}
+//     render(translationMessages);
+//   });
+// }
 
 if (NODE_ENV !== 'test') {
   render(translationMessages);

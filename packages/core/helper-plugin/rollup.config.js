@@ -1,58 +1,69 @@
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
+import peerDepsExternal from 'rollup-plugin-peer-deps-external';
+import nodePolyfills from 'rollup-plugin-node-polyfills';
+import babel from '@rollup/plugin-babel';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import replace from '@rollup/plugin-replace';
 import svg from 'rollup-plugin-svg';
+import image from '@rollup/plugin-image';
 import postcss from 'rollup-plugin-postcss';
-import { terser } from 'rollup-plugin-terser';
-import replace from 'rollup-plugin-replace';
-import filesize from 'rollup-plugin-filesize';
-import pkg from './package.json';
+import packageJson from './package.json';
 
 export default {
   input: './lib/src/index.js',
   output: [
     {
-      exports: 'named',
-      file: pkg.main,
+      file: packageJson.main,
       format: 'cjs',
-      sourceMap: false,
-      name: '@strapi/helper-plugin',
-      compact: true,
-      globals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-      },
+      sourcemap: false,
     },
     {
-      exports: 'named',
-      sourceMap: false,
-      file: pkg.module,
-      format: 'es',
-      name: '@strapi/helper-plugin',
-      compact: true,
-      globals: {
-        react: 'React',
-        'react-dom': 'ReactDOM',
-      },
+      file: packageJson.module,
+      format: 'esm',
+      sourcemap: false,
     },
   ],
   plugins: [
-    postcss({
-      modules: true,
-      minimize: true,
+    peerDepsExternal({
+      packageJsonPath: './package.json',
     }),
-    resolve(),
+    image(),
+    postcss({
+      extensions: ['.css'],
+    }),
+    nodeResolve({
+      extensions: ['.js'],
+      preferBuiltins: true,
+    }),
+    replace({
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      preventAssignment: true,
+    }),
     babel({
+      presets: [
+        [
+          '@babel/preset-env',
+          {
+            modules: false,
+            // loose: true,
+            targets: {
+              browsers: ['Since 2017'],
+            },
+          },
+        ],
+        '@babel/preset-react',
+      ],
+      babelHelpers: 'runtime',
+      plugins: ['@babel/plugin-transform-runtime', '@babel/plugin-proposal-class-properties'],
       exclude: 'node_modules/**',
     }),
     commonjs(),
     svg(),
-    terser(),
-    filesize(),
-    replace({
-      'process.env.NODE_ENV': JSON.stringify('production'),
-    }),
-  ],
 
-  external: [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {})],
+    nodePolyfills(),
+  ],
+  external: [
+    ...Object.keys(packageJson.dependencies || {}),
+    ...Object.keys(packageJson.peerDependencies || {}),
+  ],
 };
