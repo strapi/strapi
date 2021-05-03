@@ -15,12 +15,12 @@ export default {
     {
       file: packageJson.main,
       format: 'cjs',
-      sourcemap: true,
+      sourcemap: false,
     },
     {
       file: packageJson.module,
       format: 'esm',
-      sourcemap: true,
+      sourcemap: false,
     },
   ],
   plugins: [
@@ -45,7 +45,7 @@ export default {
           '@babel/preset-env',
           {
             modules: false,
-            loose: true,
+            // loose: true,
             targets: {
               browsers: ['Since 2017'],
             },
