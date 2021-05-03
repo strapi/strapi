@@ -39,7 +39,6 @@
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@strapi/helper-plugin": "3.6.0",
     "@strapi/utils": "3.6.0",
-    "autoprefixer": "^9.8.6",
     "axios": "^0.21.1",
     "babel-loader": "8.2.2",
     "bcryptjs": "^2.4.3",
@@ -59,7 +58,7 @@
     "history": "^4.9.0",
     "hoist-non-react-statics": "^3.3.0",
     "html-loader": "2.1.2",
-    "html-webpack-plugin": "^3.2.0",
+    "html-webpack-plugin": "4.5.1",
     "immer": "^8.0.1",
     "immutable": "^3.8.2",
     "invariant": "^2.2.4",
@@ -106,7 +105,7 @@
     "style-loader": "2.0.0",
     "styled-components": "^5.2.3",
     "terser-webpack-plugin": "^1.2.3",
-    "url-loader": "^1.1.2",
+    "url-loader": "4.1.1",
     "video-react": "^0.13.2",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",
@@ -133,6 +132,6 @@
   "license": "SEE LICENSE IN LICENSE",
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53",
   "devDependencies": {
-    "webpack-bundle-analyzer": "4.4.0"
+    "webpack-bundle-analyzer": "4.4.1"
   }
 }
