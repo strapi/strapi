@@ -10,7 +10,8 @@
     "test": "echo \"no tests yet\"",
     "develop": "webpack serve --config webpack.config.dev.js --progress profile",
     "develop:ce": "STRAPI_DISABLE_EE=true webpack serve --config webpack.config.dev.js --progress profile",
-    "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js"
+    "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js",
+    "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile"
   },
   "main": "index.js",
   "dependencies": {
@@ -131,6 +132,7 @@
   "license": "SEE LICENSE IN LICENSE",
   "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53",
   "devDependencies": {
+    "duplicate-dependencies-webpack-plugin": "0.2.0",
     "webpack-bundle-analyzer": "4.4.1"
   }
 }

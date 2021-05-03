@@ -2,10 +2,13 @@
 
 const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
+
 const webpackConfig = require('./webpack.config.js');
 
 module.exports = () => {
   const analyzeBundle = process.env.ANALYZE_BUNDLE;
+  const analyzeDuplicateDependencies = process.env.ANALYZE_DEPS;
   const entry = path.join(__dirname, 'admin', 'src', 'app.js');
   const dest = path.join(__dirname, 'build');
 
@@ -30,6 +33,10 @@ module.exports = () => {
 
   if (analyzeBundle) {
     config.plugins.push(new BundleAnalyzerPlugin());
+  }
+
+  if (analyzeDuplicateDependencies === 'true') {
+    config.plugins.push(new DuplicateReporterPlugin());
   }
 
   return {
