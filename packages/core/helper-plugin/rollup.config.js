@@ -4,7 +4,6 @@ import babel from '@rollup/plugin-babel';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
-import svg from 'rollup-plugin-svg';
 import image from '@rollup/plugin-image';
 import postcss from 'rollup-plugin-postcss';
 import packageJson from './package.json';
@@ -27,9 +26,10 @@ export default {
     peerDepsExternal({
       packageJsonPath: './package.json',
     }),
-    image(),
+
     postcss({
-      extensions: ['.css'],
+      modules: true,
+      minimize: true,
     }),
     nodeResolve({
       extensions: ['.js'],
@@ -39,6 +39,7 @@ export default {
       'process.env.NODE_ENV': JSON.stringify('production'),
       preventAssignment: true,
     }),
+
     babel({
       presets: [
         [
@@ -58,10 +59,11 @@ export default {
         '@babel/plugin-proposal-class-properties',
         ['babel-plugin-styled-components', { pure: true }],
       ],
+      extensions: ['.js', '.svg'],
       exclude: 'node_modules/**',
     }),
     commonjs(),
-    svg(),
+    image(),
 
     nodePolyfills(),
   ],
