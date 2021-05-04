@@ -17,9 +17,9 @@
     "@buffetjs/icons": "3.3.5",
     "@buffetjs/styles": "3.3.5",
     "@buffetjs/utils": "3.3.5",
+    "@strapi/helper-plugin": "3.6.0",
     "cheerio": "^1.0.0-rc.5",
     "fs-extra": "^9.1.0",
-    "immutable": "^3.8.2",
     "koa-static": "^5.0.0",
     "lodash": "4.17.21",
     "moment": "^2.29.1",
@@ -33,9 +33,7 @@
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "redux": "^4.0.1",
-    "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "@strapi/helper-plugin": "3.6.0",
     "swagger-ui-dist": "3.47.1"
   },
   "author": {
