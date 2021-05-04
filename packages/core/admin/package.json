@@ -42,6 +42,7 @@
     "@strapi/utils": "3.6.0",
     "axios": "^0.21.1",
     "babel-loader": "8.2.2",
+    "babel-plugin-styled-components": "1.12.0",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^4.6.0",
     "chalk": "^4.1.1",
