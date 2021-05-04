@@ -26,7 +26,6 @@ export default {
     peerDepsExternal({
       packageJsonPath: './package.json',
     }),
-
     postcss({
       modules: true,
       minimize: true,
@@ -39,7 +38,6 @@ export default {
       'process.env.NODE_ENV': JSON.stringify('production'),
       preventAssignment: true,
     }),
-
     babel({
       presets: [
         [
@@ -64,7 +62,6 @@ export default {
     }),
     commonjs(),
     image(),
-
     nodePolyfills(),
   ],
   external: [
