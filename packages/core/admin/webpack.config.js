@@ -116,6 +116,7 @@ module.exports = ({
                     regenerator: true,
                   },
                 ],
+                [require.resolve('babel-plugin-styled-components'), { pure: true }],
               ],
             },
           },
