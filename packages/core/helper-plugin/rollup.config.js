@@ -45,7 +45,6 @@ export default {
           '@babel/preset-env',
           {
             modules: false,
-            // loose: true,
             targets: {
               browsers: ['Since 2017'],
             },
@@ -54,7 +53,11 @@ export default {
         '@babel/preset-react',
       ],
       babelHelpers: 'runtime',
-      plugins: ['@babel/plugin-transform-runtime', '@babel/plugin-proposal-class-properties'],
+      plugins: [
+        '@babel/plugin-transform-runtime',
+        '@babel/plugin-proposal-class-properties',
+        ['babel-plugin-styled-components', { pure: true }],
+      ],
       exclude: 'node_modules/**',
     }),
     commonjs(),
