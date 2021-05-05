@@ -22,7 +22,6 @@ import {
   CheckPagePermissions,
   request,
 } from '@strapi/helper-plugin';
-import { SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
 import { checkLatestStrapiVersion } from '../../utils';
 
 import adminPermissions from '../../permissions';
@@ -121,7 +120,7 @@ export class Admin extends React.Component {
       getStrapiLatestReleaseSucceeded,
     } = this.props;
 
-    if (!STRAPI_UPDATE_NOTIF) {
+    if (!STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true') {
       return;
     }
 
@@ -293,7 +292,7 @@ export class Admin extends React.Component {
               isOpen={blockApp && showGlobalAppBlocker}
               {...overlayBlockerData}
             />
-            {SHOW_TUTORIALS && <OnboardingVideos />}
+            {STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
           </Wrapper>
         </GlobalContextProvider>
       </PermissionsManager>

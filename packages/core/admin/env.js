@@ -29,7 +29,8 @@ const getClientEnvironment = (useEE, options) => {
         NODE_ENV: process.env.NODE_ENV || 'development',
         // REQUIRED STRAPI_ADMIN variables
         // TODO
-        // STRAPI_ADMIN_SHOW_TUTORIALS: 'true',
+        STRAPI_ADMIN_SHOW_TUTORIALS: 'true',
+        STRAPI_ADMIN_UPDATE_NOTIFICATION: 'true',
       }
     );
 
