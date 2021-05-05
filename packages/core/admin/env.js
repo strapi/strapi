@@ -38,7 +38,7 @@ const getClientEnvironment = (useEE, options) => {
     return env;
   }, {});
 
-  return { raw, stringified };
+  return stringified;
 };
 
 module.exports = getClientEnvironment;
