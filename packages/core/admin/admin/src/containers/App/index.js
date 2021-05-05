@@ -19,10 +19,19 @@ import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
 import { QueryClientProvider, QueryClient } from 'react-query';
 
+// FIXME
+import 'sanitize.css/sanitize.css';
+import 'bootstrap/dist/css/bootstrap.css';
+import 'font-awesome/css/font-awesome.min.css';
+import '@fortawesome/fontawesome-free/css/all.css';
+// eslint-disable-next-line import/extensions
+import '@fortawesome/fontawesome-free/js/all.min.js';
+
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
+// FIXME
 // eslint-disable-next-line import/no-cycle
 import NotificationProvider from '../NotificationProvider';
 import Theme from '../Theme';
@@ -33,6 +42,13 @@ import NewNotification from '../NewNotification';
 import PrivateRoute from '../PrivateRoute';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
+
+window.strapi = Object.assign(window.strapi || {}, {
+  notification: {
+    toggle: () => {},
+  },
+  backendURL: BACKEND_URL,
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

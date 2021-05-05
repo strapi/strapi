@@ -41,7 +41,7 @@ async function build({ dir, env, options, optimize }) {
   await createCacheDir(dir);
 
   const cacheDir = path.resolve(dir, '.cache');
-  const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
+  const entry = path.resolve(cacheDir, 'admin', 'src');
   const dest = path.resolve(dir, 'build');
   const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize });
 
@@ -79,6 +79,7 @@ async function build({ dir, env, options, optimize }) {
   });
 }
 
+// TODO remove
 async function createPluginsJs(plugins, localPlugins, dest) {
   const content = `
 const injectReducer = require('./utils/injectReducer').default;

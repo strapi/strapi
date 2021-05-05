@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the localeToggle state domain
  */
-const selectLocaleToggle = () => state => state.get('localeToggle');
+const selectLocaleToggle = () => state => state.localeToggle;
 
 /**
  * Other specific selectors

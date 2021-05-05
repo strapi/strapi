@@ -9,7 +9,7 @@ const webpackConfig = require('./webpack.config.js');
 module.exports = () => {
   const analyzeBundle = process.env.ANALYZE_BUNDLE;
   const analyzeDuplicateDependencies = process.env.ANALYZE_DEPS;
-  const entry = path.join(__dirname, 'admin', 'src', 'app.js');
+  const entry = path.join(__dirname, 'admin', 'src');
   const dest = path.join(__dirname, 'build');
 
   // When running the analyze:bundle command, it needs a production build
