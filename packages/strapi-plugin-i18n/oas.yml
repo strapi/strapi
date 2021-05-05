@@ -1,0 +1,195 @@
+openapi: 3.0.2
+info:
+  title: Strapi i18n Plugin
+  version: 1.0.0
+servers:
+  - url: http://localhost:1337
+    description: Local server
+externalDocs:
+  url: https://strapi.io/documentation
+  description: Strapi documentation
+paths:
+  /i18n/iso-locales:
+    get:
+      tags:
+        - ISO-locales
+      description: List iso-locales that the app can use
+      responses:
+        200:
+          description: The list of the locales the app can use
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/iso-locale'
+  /i18n/locales:
+    get:
+      tags:
+        - Locales
+      description: List locales used by the app
+      responses:
+        200:
+          description: A list of locales
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/locale'
+    post:
+      tags:
+        - Locales
+      description: Create a locale
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/localeInputCreate'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locale'
+  /i18n/locales/{id}:
+    put:
+      tags:
+        - Locales
+      description: Update the name of a locale
+      parameters:
+        - $ref: '#/components/parameters/locale-id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/localeInputUpdate'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/locale'
+  /i18n/content-manager/actions/get-non-localized-fields:
+    post:
+      tags:
+        - Content-Manager
+      description: Return the non localized fields of a related entity in order to pre-fill the creation form of a related entity.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/getNonLocalizedFieldsInput'
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  nonLocalizedFields:
+                    type: object
+                  localizations:
+                    description: All related entities id and locale
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          $ref: '#/components/schemas/id'
+                          description: Id of this related entity
+                        locale:
+                          type: string
+                          description: Code of the locale of this related entity
+
+components:
+  schemas:
+    id:
+      oneOf:
+        - type: string
+        - type: integer
+
+    localeInputCreate:
+      type: object
+      required:
+        - code
+        - isDefault
+      properties:
+        name:
+          type: string
+          description: Name of the locale
+        code:
+          type: string
+          description: ISO code of the locale
+        isDefault:
+          type: boolean
+          description: Set default locale (ignored if set to false)
+
+    localeInputUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the locale
+        isDefault:
+          type: boolean
+          description: Set default locale (ignored if set to false)
+
+    getNonLocalizedFieldsInput:
+      type: object
+      required:
+        - model
+        - id
+        - locale
+      properties:
+        model:
+          type: string
+          description: Model of the entity
+        id:
+          $ref: '#/components/schemas/id'
+          description: Id of an entity related to the one that will be created
+        locale:
+          type: string
+          description: The locale of the entity that will be pre-filled with the non localized fields this route returns
+
+    locale:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/id'
+        name:
+          type: string
+          description: Name of the locale
+        code:
+          type: string
+          description: ISO code of the locale
+        isDefault:
+          type: boolean
+          description: Is the default locale
+
+    iso-locale:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the locale
+        code:
+          type: string
+          description: ISO code of the locale
+
+  parameters:
+    locale-id:
+      in: path
+      name: id
+      schema:
+        type: string
+      required: true
+      description: Locale id
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+
+security:
+  - bearerAuth: []

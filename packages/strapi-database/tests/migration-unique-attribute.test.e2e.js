@@ -52,12 +52,12 @@ describe('Migration - unique attribute', () => {
     rq = await createAuthRequest({ strapi });
 
     data.dogs = builder.sanitizedFixturesFor(dogModel.name, strapi);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Unique: false -> true', () => {
     test('Can have duplicates before migration', async () => {
@@ -92,7 +92,7 @@ describe('Migration - unique attribute', () => {
         body: { name: data.dogs[0].name },
       });
       expect(res.statusCode).toBe(400);
-    }, 60000);
+    });
   });
 
   describe('Unique: true -> false', () => {
@@ -113,6 +113,6 @@ describe('Migration - unique attribute', () => {
 
       expect(res.body).toMatchObject({ name: data.dogs[0].name });
       data.dogs.push(res.body);
-    }, 60000);
+    });
   });
 });

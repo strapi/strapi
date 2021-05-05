@@ -54,6 +54,7 @@
   "error.validation.enum-duplicate": "Duplicate values are not allowed",
   "error.validation.minSupMax": "Can't be superior",
   "error.validation.regex": "Regex pattern is invalid",
+  "error.validation.enum-empty-string": "Empty strings are not allowed",
   "error.validation.relation.targetAttribute-taken": "This name exists in the target",
   "form.attribute.component.option.add": "Add a component",
   "form.attribute.component.option.create": "Create a new component",

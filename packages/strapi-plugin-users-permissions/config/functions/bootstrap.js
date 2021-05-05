@@ -121,6 +121,15 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/reddit/callback`,
       scope: ['identity'],
     },
+    auth0: {
+      enabled: false,
+      icon: '',
+      key: '',
+      secret: '',
+      subdomain: 'my-tenant.eu',
+      callback: `${strapi.config.server.url}/auth/auth0/callback`,
+      scope: ['openid', 'email', 'profile'],
+    },
   };
   const prevGrantConfig = (await pluginStore.get({ key: 'grant' })) || {};
   // store grant auth config to db
@@ -210,6 +219,7 @@ module.exports = async () => {
     strapi.reload.isWatching = true;
   }
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(usersPermissionsActions.actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(
+    usersPermissionsActions.actions
+  );
 };

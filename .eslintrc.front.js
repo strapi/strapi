@@ -30,6 +30,7 @@ module.exports = {
     expect: false,
     assert: false,
     chai: false,
+    ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
     REMOTE_URL: true,
     BACKEND_URL: true,

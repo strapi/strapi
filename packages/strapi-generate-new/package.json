@@ -1,8 +1,8 @@
 {
   "name": "strapi-generate-new",
-  "version": "3.4.4",
+  "version": "3.6.1",
   "description": "Generate a new Strapi application.",
-  "homepage": "http://strapi.io",
+  "homepage": "https://strapi.io",
   "keywords": [
     "generate",
     "generator",
@@ -13,16 +13,16 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "@sentry/node": "^5.27.3",
-    "chalk": "^2.4.2",
+    "@sentry/node": "6.3.0",
+    "chalk": "^4.1.1",
     "execa": "^1.0.0",
-    "fs-extra": "^9.0.1",
-    "hosted-git-info": "3.0.7",
+    "fs-extra": "^9.1.0",
+    "hosted-git-info": "3.0.8",
     "inquirer": "^6.3.1",
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "node-fetch": "^2.6.1",
     "node-machine-id": "^1.1.10",
-    "ora": "^3.4.0",
+    "ora": "^5.4.0",
     "tar": "6.1.0",
     "uuid": "^3.3.2"
   },
@@ -32,13 +32,13 @@
   "author": {
     "email": "hi@strapi.io",
     "name": "Strapi team",
-    "url": "http://strapi.io"
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
       "name": "Strapi team",
       "email": "hi@strapi.io",
-      "url": "http://strapi.io"
+      "url": "https://strapi.io"
     }
   ],
   "repository": {

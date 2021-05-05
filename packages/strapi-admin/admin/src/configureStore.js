@@ -10,11 +10,15 @@ import createReducer from './reducers';
 
 const sagaMiddleware = createSagaMiddleware();
 
-export default function configureStore(initialState = {}) {
+export default function configureStore(initialState = {}, reducers, strapi) {
   // Create the store with two middlewares
   // 1. sagaMiddleware: Makes redux-sagas work
   // 2. routerMiddleware: Syncs the location/URL path to the state
   const middlewares = [sagaMiddleware];
+
+  strapi.middlewares.middlewares.forEach(middleware => {
+    middlewares.push(middleware());
+  });
 
   const enhancers = [applyMiddleware(...middlewares)];
 
@@ -25,18 +29,18 @@ export default function configureStore(initialState = {}) {
     typeof window === 'object' &&
     window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
       ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-        // TODO Try to remove when `react-router-redux` is out of beta, LOCATION_CHANGE should not be fired more than once after hot reloading
-        // Prevent recomputing reducers for `replaceReducer`
-        shouldHotReload: false,
-        name: 'Strapi - Dashboard',
-      })
+          // TODO Try to remove when `react-router-redux` is out of beta, LOCATION_CHANGE should not be fired more than once after hot reloading
+          // Prevent recomputing reducers for `replaceReducer`
+          shouldHotReload: false,
+          name: 'Strapi - Dashboard',
+        })
       : compose;
   /* eslint-enable */
 
   const store = createStore(
-    createReducer(),
+    createReducer(reducers),
     fromJS(initialState),
-    composeEnhancers(...enhancers),
+    composeEnhancers(...enhancers)
   );
 
   // Extensions

@@ -93,8 +93,8 @@ const MultipleMenuList = ({
       });
     } else {
       // Close all collapses
-      categoriesToOpen.forEach(catName => {
-        setCollapses(prevState => ({ ...prevState, [catName]: false }));
+      categoriesToOpen.forEach((catName, index) => {
+        setCollapses(prevState => ({ ...prevState, [catName]: index === 0 }));
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

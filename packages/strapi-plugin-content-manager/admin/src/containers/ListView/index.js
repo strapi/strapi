@@ -6,24 +6,22 @@ import { get, isEmpty } from 'lodash';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
+import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
-  PopUpWarning,
-  request,
   CheckPermissions,
+  InjectionZone,
+  InjectionZoneList,
+  PopUpWarning,
   useGlobalContext,
-  useUserPermissions,
+  useQueryParams,
+  useUser,
+  request,
 } from 'strapi-helper-plugin';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
-import { useQueryParams } from '../../hooks';
-import {
-  formatFiltersFromQuery,
-  generatePermissionsObject,
-  getRequestUrl,
-  getTrad,
-} from '../../utils';
+import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
@@ -41,7 +39,6 @@ import {
   onDeleteDataError,
   onDeleteDataSucceeded,
   onDeleteSeveralDataSucceeded,
-  resetProps,
   setModalLoadingState,
   toggleModalDelete,
   toggleModalDeleteAll,
@@ -50,12 +47,14 @@ import {
   onResetListHeaders,
 } from './actions';
 import makeSelectListView from './selectors';
-
-import { getAllAllowedHeaders, getFirstSortableHeader } from './utils';
+import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from './utils';
 
 /* eslint-disable react/no-array-index-key */
-
 function ListView({
+  canCreate,
+  canDelete,
+  canRead,
+  canUpdate,
   didDeleteData,
   entriesToDelete,
   onChangeBulk,
@@ -78,38 +77,23 @@ function ListView({
   onChangeListHeaders,
   onResetListHeaders,
   pagination: { total },
-  resetProps,
-  setLayout,
   slug,
 }) {
   const {
     contentType: {
       attributes,
       metadatas,
-      settings: {
-        defaultSortBy,
-        defaultSortOrder,
-        bulkable: isBulkable,
-        filterable: isFilterable,
-        searchable: isSearchable,
-        pageSize: defaultPageSize,
-      },
+      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
   } = layout;
 
   const { emitEvent } = useGlobalContext();
+  const { fetchUserPermissions } = useUser();
   const emitEventRef = useRef(emitEvent);
-  const viewPermissions = useMemo(() => generatePermissionsObject(slug), [slug]);
-  const {
-    isLoading: isLoadingForPermissions,
-    allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useUserPermissions(viewPermissions);
-  const defaultSort = `${defaultSortBy}:${defaultSortOrder}`;
-  const initParams = useMemo(() => ({ page: 1, pageSize: defaultPageSize, _sort: defaultSort }), [
-    defaultPageSize,
-    defaultSort,
-  ]);
-  const [{ query, rawQuery }, setQuery] = useQueryParams(initParams);
+  const fetchPermissionsRef = useRef(fetchUserPermissions);
+
+  const [{ query }, setQuery] = useQueryParams();
+  const params = buildQueryString(query);
 
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -130,22 +114,13 @@ function ListView({
 
   const label = contentType.info.label;
 
-  const params = useMemo(() => {
-    return rawQuery || `?${stringify(initParams, { encode: false })}`;
-  }, [initParams, rawQuery]);
-
   const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
     displayedHeaders,
   ]);
 
   useEffect(() => {
-    setLayout(layout);
     setFilterPickerState(false);
-
-    return () => {
-      resetProps();
-    };
-  }, [layout, setLayout, resetProps]);
+  }, []);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
@@ -161,13 +136,26 @@ function ListView({
 
         getDataSucceeded(pagination, results);
       } catch (err) {
+        const resStatus = get(err, 'response.status', null);
+        console.log(err);
+
+        if (resStatus === 403) {
+          await fetchPermissionsRef.current();
+
+          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+
+          push('/');
+
+          return;
+        }
+
         if (err.name !== 'AbortError') {
           console.error(err);
           strapi.notification.error(getTrad('error.model.fetch'));
         }
       }
     },
-    [getData, getDataSucceeded]
+    [getData, getDataSucceeded, push]
   );
 
   const handleChangeListLabels = useCallback(
@@ -260,7 +248,7 @@ function ListView({
     const abortController = new AbortController();
     const { signal } = abortController;
 
-    const shouldSendRequest = !isLoadingForPermissions && canRead;
+    const shouldSendRequest = canRead;
     const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
@@ -271,7 +259,7 @@ function ListView({
       requestUrlRef.current = slug;
       abortController.abort();
     };
-  }, [isLoadingForPermissions, canRead, getData, slug, params, getDataSucceeded, fetchData]);
+  }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const handleClickDelete = id => {
     setIdToDelete(id);
@@ -317,6 +305,7 @@ function ListView({
           emitEventRef.current('willCreateEntry', trackerProperty);
           push({
             pathname: `${pathname}/create`,
+            search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
           });
         },
         color: 'primary',
@@ -329,7 +318,7 @@ function ListView({
         },
       },
     ];
-  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push]);
+  }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push, query]);
 
   const headerProps = useMemo(() => {
     /* eslint-disable indent */
@@ -389,10 +378,19 @@ function ListView({
           {isSearchable && canRead && (
             <Search changeParams={setQuery} initValue={_q} model={label} value={_q} />
           )}
+
+          {!canRead && (
+            <Flex justifyContent="flex-end">
+              <Padded right size="sm">
+                <InjectionZone area={`${pluginId}.listView.actions`} />
+              </Padded>
+            </Flex>
+          )}
+
           {canRead && (
             <Wrapper>
               <div className="row" style={{ marginBottom: '5px' }}>
-                <div className="col-10">
+                <div className="col-9">
                   <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
                     {isFilterable && (
                       <>
@@ -419,16 +417,23 @@ function ListView({
                     )}
                   </div>
                 </div>
-                <div className="col-2">
-                  <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
-                    <FieldPicker
-                      displayedHeaders={displayedHeaders}
-                      items={allAllowedHeaders}
-                      onChange={handleChangeListLabels}
-                      onClickReset={onResetListHeaders}
-                      slug={slug}
-                    />
-                  </CheckPermissions>
+
+                <div className="col-3">
+                  <Flex justifyContent="flex-end">
+                    <Padded right size="sm">
+                      <InjectionZone area={`${pluginId}.listView.actions`} />
+                    </Padded>
+
+                    <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+                      <FieldPicker
+                        displayedHeaders={displayedHeaders}
+                        items={allAllowedHeaders}
+                        onChange={handleChangeListLabels}
+                        onClickReset={onResetListHeaders}
+                        slug={slug}
+                      />
+                    </CheckPermissions>
+                  </Flex>
                 </div>
               </div>
               <div className="row" style={{ paddingTop: '12px' }}>
@@ -460,7 +465,9 @@ function ListView({
           popUpWarningType="danger"
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
         <PopUpWarning
           isOpen={showWarningDeleteAll}
           toggleModal={toggleModalDeleteAll}
@@ -475,13 +482,23 @@ function ListView({
           onConfirm={handleConfirmDeleteAllData}
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
-        />
+        >
+          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+        </PopUpWarning>
       </ListViewProvider>
     </>
   );
 }
 
+ListView.defaultProps = {
+  permissions: [],
+};
+
 ListView.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
+  canDelete: PropTypes.bool.isRequired,
+  canRead: PropTypes.bool.isRequired,
+  canUpdate: PropTypes.bool.isRequired,
   displayedHeaders: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
   didDeleteData: PropTypes.bool.isRequired,
@@ -511,7 +528,6 @@ ListView.propTypes = {
   onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
-  resetProps: PropTypes.func.isRequired,
   setModalLoadingState: PropTypes.func.isRequired,
   showModalConfirmButtonLoading: PropTypes.bool.isRequired,
   showWarningDelete: PropTypes.bool.isRequired,
@@ -520,6 +536,14 @@ ListView.propTypes = {
   toggleModalDelete: PropTypes.func.isRequired,
   toggleModalDeleteAll: PropTypes.func.isRequired,
   setLayout: PropTypes.func.isRequired,
+  permissions: PropTypes.arrayOf(
+    PropTypes.shape({
+      action: PropTypes.string.isRequired,
+      subject: PropTypes.string.isRequired,
+      properties: PropTypes.object,
+      conditions: PropTypes.arrayOf(PropTypes.string),
+    })
+  ),
 };
 
 const mapStateToProps = makeSelectListView();
@@ -536,7 +560,6 @@ export function mapDispatchToProps(dispatch) {
       onDeleteDataSucceeded,
       onDeleteSeveralDataSucceeded,
       onResetListHeaders,
-      resetProps,
       setModalLoadingState,
       toggleModalDelete,
       toggleModalDeleteAll,

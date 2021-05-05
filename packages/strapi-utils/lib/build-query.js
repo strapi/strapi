@@ -35,7 +35,7 @@ const getAssociationFromFieldKey = ({ model, field }) => {
 
     if (!assoc && (!isAttribute(tmpModel, part) || i !== fieldParts.length - 1)) {
       const err = new Error(
-        `Your filters contain a field '${field}' that doesn't appear on your model definition nor it's relations`
+        `Your filters contain a field '${field}' that doesn't appear on your model definition nor its relations`
       );
 
       err.status = 400;
@@ -111,7 +111,15 @@ const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
 
 const normalizeWhereClauses = (whereClauses, { model }) => {
   return whereClauses
-    .filter(({ value }) => !_.isNil(value))
+    .filter(({ field, value }) => {
+      if (_.isNull(value)) {
+        return false;
+      } else if (_.isUndefined(value)) {
+        strapi.log.warn(`The value of field: '${field}', in your where filter, is undefined.`);
+        return false;
+      }
+      return true;
+    })
     .map(({ field, operator, value }) => {
       if (BOOLEAN_OPERATORS.includes(operator)) {
         return {

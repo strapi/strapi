@@ -1,7 +1,7 @@
-import useDataManager from '../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 
 function useSelect() {
-  const { addRepeatableComponentToField, formErrors } = useDataManager();
+  const { addRepeatableComponentToField, formErrors } = useContentManagerEditViewDataManager();
 
   return {
     addRepeatableComponentToField,

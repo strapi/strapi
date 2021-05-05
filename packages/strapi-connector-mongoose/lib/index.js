@@ -19,6 +19,7 @@ const buildQuery = require('./buildQuery');
 const getQueryParams = require('./get-query-params');
 const mountModels = require('./mount-models');
 const queries = require('./queries');
+const registerCoreMigrations = require('./migrations');
 
 /**
  * Mongoose hook
@@ -53,6 +54,8 @@ module.exports = function(strapi) {
   );
 
   function initialize() {
+    registerCoreMigrations();
+
     const connectionsPromises = mongooseConnections.map(async connectionName => {
       const connection = connections[connectionName];
       const instance = new Mongoose();

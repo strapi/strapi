@@ -1,9 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { Padded } from '@buffetjs/core';
 
 import FiltersList from '../FiltersList';
 import FiltersPicker from '../FiltersPicker';
-import Padded from '../Padded';
 
 const Filters = ({ onChange, onClick, filters }) => {
   return (

@@ -2,13 +2,9 @@
 
 const { has, pipe, prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('strapi-utils').relations.constants;
+const { setCreatorFields } = require('strapi-utils');
 
-const {
-  getService,
-  wrapBadRequest,
-  setCreatorFields,
-  pickWritableAttributes,
-} = require('../utils');
+const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');
 
 module.exports = {
@@ -26,7 +22,7 @@ module.exports = {
 
     const method = has('_q', query) ? 'searchWithRelationCounts' : 'findWithRelationCounts';
 
-    const permissionQuery = permissionChecker.buildPermissionQuery(query);
+    const permissionQuery = permissionChecker.buildReadQuery(query);
 
     const { results, pagination } = await entityManager[method](permissionQuery, model);
 
@@ -214,7 +210,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildPermissionQuery(query);
+    const permissionQuery = permissionChecker.buildDeleteQuery(query);
 
     const idsWhereClause = { [`id_in`]: ids };
     const params = {

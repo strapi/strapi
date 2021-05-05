@@ -24,12 +24,12 @@ describe('Test type enumeration', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   test('Create entry value enumeration input JSON', async () => {
     const res = await rq.post(

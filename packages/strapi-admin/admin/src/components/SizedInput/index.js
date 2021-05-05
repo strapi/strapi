@@ -3,6 +3,7 @@ import { Col } from 'reactstrap';
 import PropTypes from 'prop-types';
 import IntlInput from '../IntlInput';
 
+// TODO: remove this component
 const SizedInput = ({ size, ...rest }) => {
   return (
     <Col {...size}>

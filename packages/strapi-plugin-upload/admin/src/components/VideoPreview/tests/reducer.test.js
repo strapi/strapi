@@ -79,4 +79,17 @@ describe('Upload | components | VideoPreview | reducer', () => {
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
+
+  it('should set isError to true when the payload is true', () => {
+    const state = initialState;
+
+    const action = {
+      type: 'SET_ERROR',
+      isError: true,
+    };
+
+    const expectedState = state.set('isError', true);
+
+    expect(reducer(state, action)).toEqual(expectedState);
+  });
 });

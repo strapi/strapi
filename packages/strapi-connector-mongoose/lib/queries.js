@@ -5,15 +5,18 @@
 
 const _ = require('lodash');
 const { prop, omit } = require('lodash/fp');
+const pmap = require('p-map');
 const { convertRestQueryParams, buildQuery } = require('strapi-utils');
 const { contentTypes: contentTypesUtils } = require('strapi-utils');
 const mongoose = require('mongoose');
 
 const populateQueries = require('./utils/populate-queries');
 
-const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
+const BATCH_SIZE = 1000;
 
+const { PUBLISHED_AT_ATTRIBUTE, DP_PUB_STATES } = contentTypesUtils.constants;
 const { findComponentByGlobalId } = require('./utils/helpers');
+const { handleDatabaseError } = require('./utils/errors');
 
 const hasPK = (obj, model) => _.has(obj, model.primaryKey) || _.has(obj, 'id');
 const getPK = (obj, model) => (_.has(obj, model.primaryKey) ? obj[model.primaryKey] : obj.id);
@@ -33,9 +36,16 @@ module.exports = ({ model, strapi }) => {
       .filter(ast => ast.autoPopulate !== false)
       .map(ast => {
         const assocModel = strapi.db.getModelByAssoc(ast);
+
+        const populateOptions = {
+          publicationState: options.publicationState,
+          _populateComponents: !_.isArray(ast.populate),
+          _populateMorphRelations: !_.isArray(ast.populate),
+        };
+
         const populate = {
           path: ast.alias,
-          options: { publicationState: options.publicationState },
+          options: populateOptions,
         };
 
         if (
@@ -58,6 +68,15 @@ module.exports = ({ model, strapi }) => {
   const omitExernalValues = values => {
     return _.omit(values, excludedKeys);
   };
+
+  const wrapErrors = fn => async (...args) => {
+    try {
+      return await fn(...args);
+    } catch (error) {
+      return handleDatabaseError(error);
+    }
+  };
+
   async function createComponents(entry, values, { isDraft, session = null } = {}) {
     if (componentKeys.length === 0) return;
 
@@ -489,7 +508,10 @@ module.exports = ({ model, strapi }) => {
     return model.updateRelations(Object.assign(params, { values: relations }), { session });
   }
 
-  async function deleteMany(params, { session = null } = {}) {
+  async function deleteMany(
+    params,
+    { session = null, returning = true, batchSize = BATCH_SIZE } = {}
+  ) {
     if (params[model.primaryKey]) {
       const entries = await find({ ...params, _limit: 1 }, null, { session });
       if (entries.length > 0) {
@@ -498,8 +520,28 @@ module.exports = ({ model, strapi }) => {
       return null;
     }
 
-    const entries = await find(params, null, { session });
-    return Promise.all(entries.map(entry => deleteOne(entry[model.primaryKey], { session })));
+    if (returning) {
+      const entries = await find(params, null, { session });
+      return pmap(entries, entry => deleteOne(entry[model.primaryKey], { session }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+    }
+
+    // returning false, we can optimize the function
+    const batchParams = _.assign({}, params, { _limit: batchSize, _sort: 'id:ASC' });
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const batch = await find(batchParams, null, { session });
+      await pmap(batch, entry => deleteOne(entry[model.primaryKey], { session }), {
+        concurrency: 100,
+        stopOnError: true,
+      });
+
+      if (batch.length < BATCH_SIZE) {
+        break;
+      }
+    }
   }
 
   async function deleteOne(id, { session = null } = {}) {
@@ -594,8 +636,8 @@ module.exports = ({ model, strapi }) => {
   return {
     findOne,
     find,
-    create,
-    update,
+    create: wrapErrors(create),
+    update: wrapErrors(update),
     delete: deleteMany,
     count,
     search,
