@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Header as Base } from '@buffetjs/custom';
+import { Header as BaseHeader } from '@buffetjs/custom';
 import { Button } from '@buffetjs/core';
 import { CheckPermissions } from '@strapi/helper-plugin';
 import openWithNewTab from '../../utils/openWithNewTab';
@@ -37,7 +37,6 @@ const Header = ({ currentDocVersion, docPrefixURL }) => {
         defaultMessage: 'Update',
       }),
       color: 'success',
-      // onClick: () => {},
       type: 'submit',
       key: 'button-submit',
       Component: props => (
@@ -49,7 +48,7 @@ const Header = ({ currentDocVersion, docPrefixURL }) => {
   ];
 
   return (
-    <Base
+    <BaseHeader
       actions={headerActions}
       content={formatMessage({
         id: getTrad('containers.HomePage.PluginHeader.description'),
