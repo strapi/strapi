@@ -2,21 +2,18 @@ import { fromJS } from 'immutable';
 
 import makeSelectApp, {
   selectApp,
-  selectHasUserPlugin,
-  selectPlugins,
   makeSelectBlockApp,
   makeSelectOverlayBlockerProps,
   makeSelectShowGlobalAppBlocker,
-  makeSelectUuid,
 } from '../selectors';
 
 describe('<App /> selectors', () => {
   describe('selectApp', () => {
     it('should select the global state', () => {
       const appState = fromJS({});
-      const mockedState = fromJS({
+      const mockedState = {
         app: appState,
-      });
+      };
 
       expect(selectApp()(mockedState)).toEqual(appState);
     });
@@ -25,37 +22,11 @@ describe('<App /> selectors', () => {
   describe('makeSelectApp', () => {
     it('should select the appState (.toJS())', () => {
       const appState = fromJS({});
-      const mockedState = fromJS({
+      const mockedState = {
         app: appState,
-      });
+      };
 
       expect(makeSelectApp()(mockedState)).toEqual(appState.toJS());
-    });
-  });
-
-  describe('selectHasUserPlugin', () => {
-    it('should select the hasUserPlugin', () => {
-      const appState = fromJS({
-        hasUserPlugin: true,
-      });
-      const mockedState = fromJS({
-        app: appState,
-      });
-
-      expect(selectHasUserPlugin()(mockedState)).toEqual(true);
-    });
-  });
-
-  describe('selectPlugins', () => {
-    it('should select the plugins', () => {
-      const plugins = fromJS({ email: { isReady: true } });
-      const mockedState = fromJS({
-        app: {
-          plugins,
-        },
-      });
-
-      expect(selectPlugins()(mockedState)).toEqual(plugins);
     });
   });
 
@@ -74,11 +45,11 @@ describe('<App /> selectors', () => {
   describe('makeSelectOverlayBlockerProps', () => {
     it('should select the overlayBlockerData', () => {
       const overlayBlockerData = fromJS({ title: 'title' });
-      const mockedState = fromJS({
+      const mockedState = {
         app: {
           overlayBlockerData,
         },
-      });
+      };
 
       expect(makeSelectOverlayBlockerProps()(mockedState)).toEqual(overlayBlockerData);
     });
@@ -86,25 +57,13 @@ describe('<App /> selectors', () => {
 
   describe('makeSelectShowGlobalAppBlocker', () => {
     it('should select the showGlobalAppBlocker', () => {
-      const mockedState = fromJS({
+      const mockedState = {
         app: {
           showGlobalAppBlocker: true,
         },
-      });
+      };
 
       expect(makeSelectShowGlobalAppBlocker()(mockedState)).toEqual(true);
-    });
-  });
-
-  describe('makeSelectUuid', () => {
-    it('should select the showGlobalAppBlocker', () => {
-      const mockedState = fromJS({
-        app: {
-          uuid: 'getstarted',
-        },
-      });
-
-      expect(makeSelectUuid()(mockedState)).toEqual('getstarted');
     });
   });
 });
