@@ -18,7 +18,7 @@ module.exports = () => {
   const options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
-    features: process.env.ENABLED_EE_FEATURES || ['sso'],
+    features: process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES || ['sso'],
   };
 
   const useEE = process.env.STRAPI_DISABLE_EE === 'true' ? false : true;

@@ -23,21 +23,21 @@ const getClientEnvironment = (useEE, options) => {
       },
       {
         ADMIN_PATH: options.adminPath,
-        BACKEND_URL: options.backend,
-        ENABLED_EE_FEATURES: options.features,
-        PROJECT_TYPE: useEE ? 'Enterprise' : 'Community',
         NODE_ENV: process.env.NODE_ENV || 'development',
-        // REQUIRED STRAPI_ADMIN variables
-        // TODO
+        STRAPI_ADMIN_BACKEND_URL: options.backend,
+        STRAPI_ADMIN_ENABLED_EE_FEATURES: options.features,
+        STRAPI_ADMIN_PROJECT_TYPE: useEE ? 'Enterprise' : 'Community',
         STRAPI_ADMIN_SHOW_TUTORIALS: 'true',
         STRAPI_ADMIN_UPDATE_NOTIFICATION: 'true',
       }
     );
 
-  const stringified = Object.keys(raw).reduce((env, key) => {
-    env[key] = JSON.stringify(raw[key]);
-    return env;
-  }, {});
+  const stringified = {
+    'process.env': Object.keys(raw).reduce((env, key) => {
+      env[key] = JSON.stringify(raw[key]);
+      return env;
+    }, {}),
+  };
 
   return { raw, stringified };
 };

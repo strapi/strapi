@@ -17,7 +17,7 @@ import {
 import { useAuthProviders } from '../../../../hooks';
 
 const Login = loginProps => {
-  const ssoEnabled = ENABLED_EE_FEATURES.includes('sso');
+  const ssoEnabled = process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES.includes('sso');
 
   const theme = useTheme();
   const { isLoading, data: providers } = useAuthProviders({ ssoEnabled });

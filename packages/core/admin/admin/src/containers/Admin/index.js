@@ -94,7 +94,7 @@ export class Admin extends React.Component {
           event,
           // PROJECT_TYPE is an env variable defined in the webpack config
           // eslint-disable-next-line no-undef
-          properties: { ...properties, projectType: PROJECT_TYPE },
+          properties: { ...properties, projectType: process.env.STRAPI_ADMIN_PROJECT_TYPE },
           uuid,
         });
       } catch (err) {
@@ -120,7 +120,7 @@ export class Admin extends React.Component {
       getStrapiLatestReleaseSucceeded,
     } = this.props;
 
-    if (!STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true') {
+    if (!process.env.STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true') {
       return;
     }
 
@@ -292,7 +292,7 @@ export class Admin extends React.Component {
               isOpen={blockApp && showGlobalAppBlocker}
               {...overlayBlockerData}
             />
-            {STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
+            {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
           </Wrapper>
         </GlobalContextProvider>
       </PermissionsManager>

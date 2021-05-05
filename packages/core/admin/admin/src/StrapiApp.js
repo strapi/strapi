@@ -14,6 +14,10 @@ import translationMessages from './translations';
 
 // const App = () => 'todo';
 
+window.strapi = {
+  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
+};
+
 class StrapiApp {
   plugins = {};
 
