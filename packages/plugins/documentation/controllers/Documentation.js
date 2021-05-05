@@ -222,11 +222,10 @@ module.exports = {
     strapi.reload.isWatching = false;
     const service = strapi.plugins.documentation.services.documentation;
     const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
+
     const {
-      request: {
-        params: { version },
-        admin,
-      },
+      params: { version },
+      request: { admin },
     } = ctx;
 
     if (_.isEmpty(version)) {

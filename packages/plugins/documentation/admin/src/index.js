@@ -10,9 +10,6 @@ import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
-import Initializer from './containers/Initializer';
-import lifecycles from './lifecycles';
-import reducers from './reducers';
 import trads from './translations';
 
 export default strapi => {
@@ -25,17 +22,13 @@ export default strapi => {
     description: pluginDescription,
     icon,
     id: pluginId,
-    initializer: Initializer,
     injectedComponents: [],
-    isReady: false,
+    isReady: true,
     isRequired: pluginPkg.strapi.required || false,
-    layout: null,
-    lifecycles,
     mainComponent: App,
     name,
     pluginLogo,
     preventComponentRendering: false,
-    reducers,
     trads,
     menu: {
       pluginsSectionLinks: [

@@ -11,24 +11,38 @@ const ButtonContainer = ({ currentDocVersion, isHeader, onClick, onClickDelete, 
     return <div />;
   }
 
+  const handleClickGenerate = e => {
+    e.preventDefault();
+    onClick(version);
+  };
+
+  const handleDelete = e => {
+    e.preventDefault();
+    onClickDelete(version);
+  };
+
   return (
     <div>
       <StyledButton
         type="openDocumentation"
-        onClick={() => openWithNewTab(`/documentation/v${version}`)}
+        onClick={e => {
+          e.preventDefault();
+          openWithNewTab(`/documentation/v${version}`);
+        }}
       >
         <FormattedMessage id="documentation.components.Row.open" />
       </StyledButton>
       <CheckPermissions permissions={pluginPermissions.regenerate}>
-        <StyledButton type="generateDocumentation" onClick={() => onClick(version)}>
+        <StyledButton
+          // FIXME when new DS ready
+          type="generateDocumentation"
+          onClick={handleClickGenerate}
+        >
           <FormattedMessage id="documentation.components.Row.regenerate" />
         </StyledButton>
       </CheckPermissions>
       <CheckPermissions permissions={pluginPermissions.update}>
-        <StyledButton
-          type={version === currentDocVersion ? '' : 'trash'}
-          onClick={() => onClickDelete(version)}
-        />
+        <StyledButton type={version === currentDocVersion ? '' : 'trash'} onClick={handleDelete} />
       </CheckPermissions>
     </div>
   );

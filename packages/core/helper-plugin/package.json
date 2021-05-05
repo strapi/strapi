@@ -46,12 +46,9 @@
     "enzyme-adapter-react-16": "^1.15.6",
     "rimraf": "3.0.2",
     "rollup": "2.46.0",
-    "rollup-plugin-livereload": "2.0.0",
     "rollup-plugin-node-polyfills": "0.2.1",
     "rollup-plugin-peer-deps-external": "2.2.4",
-    "rollup-plugin-postcss": "4.0.0",
-    "rollup-plugin-serve": "1.1.0",
-    "rollup-plugin-svg": "2.0.0"
+    "rollup-plugin-postcss": "4.0.0"
   },
   "dependencies": {
     "@buffetjs/core": "3.3.5",

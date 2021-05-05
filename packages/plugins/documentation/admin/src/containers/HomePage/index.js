@@ -4,280 +4,165 @@
  *
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { bindActionCreators, compose } from 'redux';
-import { get, isEmpty } from 'lodash';
-import { Header } from '@buffetjs/custom';
-import { Button } from '@buffetjs/core';
+import React, { useEffect, useState } from 'react';
+import flatten from 'lodash/flatten';
 import {
-  auth,
   PopUpWarning,
   LoadingIndicatorPage,
-  InputsIndex as Input,
-  GlobalContext,
   CheckPermissions,
+  SizedInput,
+  getYupInnerErrors,
 } from '@strapi/helper-plugin';
-
-import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import getTrad from '../../utils/getTrad';
-
 import Block from '../../components/Block';
+import Copy from '../../components/Copy';
+import Header from '../../components/Header';
 import Row from '../../components/Row';
-
-import openWithNewTab from '../../utils/openWithNewTab';
 import { ContainerFluid, StyledRow, VersionWrapper } from './components';
-// Actions
-import {
-  getDocInfos,
-  onChange,
-  onClickDeleteDoc,
-  onConfirmDeleteDoc,
-  onSubmit,
-  onUpdateDoc,
-} from './actions';
-// Selectors
-import selectHomePage from './selectors';
-import saga from './saga';
+import useHomePage from './useHomePage';
+import schema from './utils/schema';
 
-export class HomePage extends React.Component {
-  static contextType = GlobalContext;
+const HomePage = () => {
+  const [versionToDelete, setVersionToDelete] = useState(null);
 
-  componentDidMount() {
-    this.props.getDocInfos();
-  }
-
-  getRestrictedAccessValue = () => {
-    const { form } = this.props;
-
-    return get(form, [0, 0, 'value'], false);
-  };
-
-  getPluginHeaderActions = () => {
-    const actions = [
-      {
-        color: 'none',
-        label: this.context.formatMessage({
-          id: getTrad('containers.HomePage.Button.open'),
-        }),
-        className: 'buttonOutline',
-        onClick: this.openCurrentDocumentation,
-        type: 'button',
-        key: 'button-open',
-        Component: props => (
-          <CheckPermissions permissions={pluginPermissions.open}>
-            <Button {...props} />
-          </CheckPermissions>
-        ),
-      },
-      {
-        label: this.context.formatMessage({
-          id: getTrad('containers.HomePage.Button.update'),
-        }),
-        color: 'success',
-        onClick: () => {},
-        type: 'submit',
-        key: 'button-submit',
-        Component: props => (
-          <CheckPermissions permissions={pluginPermissions.update}>
-            <Button {...props} />
-          </CheckPermissions>
-        ),
-      },
-    ];
-
-    return actions;
-  };
-
-  handleCopy = () => {
-    strapi.notification.toggle({
-      type: 'info',
-      message: { id: getTrad('containers.HomePage.copied') },
-    });
-  };
-
-  openCurrentDocumentation = () => {
-    const { currentDocVersion, prefix } = this.props;
-    const slash = prefix.startsWith('/') ? '' : '/';
-
-    return openWithNewTab(`${slash}${prefix}/v${currentDocVersion}`);
-  };
-
-  shouldHideInput = inputName => {
-    return !this.getRestrictedAccessValue() && inputName === 'password';
-  };
-
-  toggleModal = () => this.props.onClickDeleteDoc('');
-
-  renderForm = (array, i) => {
-    const { didCheckErrors, formErrors } = this.props;
-
-    return (
-      <div className="row" key={i}>
-        {array.map((input, j) => {
-          if (this.shouldHideInput(input.name)) {
-            return null;
-          }
-
-          return (
-            <Input
-              key={input.name}
-              {...input}
-              didCheckErrors={didCheckErrors}
-              errors={get(formErrors, [input.name], [])}
-              name={`form.${i}.${j}.value`}
-              onChange={this.props.onChange}
-            />
-          );
-        })}
-      </div>
-    );
-  };
-
-  renderRow = data => {
-    const { currentDocVersion, onClickDeleteDoc, onUpdateDoc } = this.props;
-
-    return (
-      <Row
-        currentDocVersion={currentDocVersion}
-        data={data}
-        key={data.generatedDate}
-        onClickDelete={onClickDeleteDoc}
-        onUpdateDoc={onUpdateDoc}
-      />
-    );
-  };
-
-  render() {
-    const {
-      docVersions,
-      form,
-      isLoading,
-      onConfirmDeleteDoc,
-      onSubmit,
-      versionToDelete,
-    } = this.props;
-
-    const { formatMessage } = this.context;
-
-    if (isLoading) {
-      return <LoadingIndicatorPage />;
-    }
-
-    return (
-      <ContainerFluid className="container-fluid">
-        <PopUpWarning
-          isOpen={!isEmpty(versionToDelete)}
-          toggleModal={this.toggleModal}
-          content={{
-            title: 'components.popUpWarning.title',
-            message: getTrad('containers.HomePage.PopUpWarning.message'),
-            cancel: 'app.components.Button.cancel',
-            confirm: getTrad('containers.HomePage.PopUpWarning.confirm'),
-          }}
-          popUpWarningType="danger"
-          onConfirm={onConfirmDeleteDoc}
-        />
-        <form onSubmit={onSubmit}>
-          <Header
-            actions={this.getPluginHeaderActions()}
-            title={{
-              label: formatMessage({
-                id: getTrad('containers.HomePage.PluginHeader.title'),
-              }),
-            }}
-            content={formatMessage({
-              id: getTrad('containers.HomePage.PluginHeader.description'),
-            })}
-          />
-          <StyledRow className="row">
-            <Block>
-              <CopyToClipboard text={auth.getToken()} onCopy={this.handleCopy}>
-                <div className="row" style={{ zIndex: '99' }}>
-                  <Input
-                    style={{ zIndex: '9', cursor: 'pointer' }}
-                    inputStyle={{ cursor: 'pointer' }}
-                    name="jwtToken"
-                    value={auth.getToken()}
-                    type="string"
-                    onChange={() => {}}
-                    label={{ id: getTrad('containers.HomePage.form.jwtToken') }}
-                    inputDescription={{
-                      id: getTrad('containers.HomePage.form.jwtToken.description'),
-                    }}
-                  />
-                </div>
-              </CopyToClipboard>
-            </Block>
-            <CheckPermissions permissions={pluginPermissions.update}>
-              <Block>{form.map(this.renderForm)}</Block>
-            </CheckPermissions>
-            <Block title={getTrad('containers.HomePage.Block.title')}>
-              <VersionWrapper>
-                <Row isHeader />
-                {docVersions.map(this.renderRow)}
-              </VersionWrapper>
-            </Block>
-          </StyledRow>
-        </form>
-      </ContainerFluid>
-    );
-  }
-}
-
-HomePage.defaultProps = {
-  currentDocVersion: '',
-  didCheckErrors: false,
-  docVersions: [],
-  form: [],
-  formErrors: {},
-  isLoading: true,
-  onChange: () => {},
-  onClickDeleteDoc: () => {},
-  onConfirmDeleteDoc: () => {},
-  onSubmit: () => {},
-  onUpdateDoc: () => {},
-  prefix: '/documentation',
-  versionToDelete: '',
-};
-
-HomePage.propTypes = {
-  currentDocVersion: PropTypes.string,
-  didCheckErrors: PropTypes.bool,
-  docVersions: PropTypes.array,
-  form: PropTypes.array,
-  formErrors: PropTypes.object,
-  getDocInfos: PropTypes.func.isRequired,
-  isLoading: PropTypes.bool,
-  onChange: PropTypes.func,
-  onClickDeleteDoc: PropTypes.func,
-  onConfirmDeleteDoc: PropTypes.func,
-  onSubmit: PropTypes.func,
-  onUpdateDoc: PropTypes.func,
-  prefix: PropTypes.string,
-  versionToDelete: PropTypes.string,
-};
-
-function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      getDocInfos,
-      onChange,
-      onClickDeleteDoc,
-      onConfirmDeleteDoc,
-      onSubmit,
-      onUpdateDoc,
+  const [{ formErrors, modifiedData }, setState] = useState({
+    formErrors: null,
+    modifiedData: {
+      restrictedAccess: true,
+      password: '',
     },
-    dispatch
+  });
+
+  const { data, isLoading, deleteMutation, submitMutation, regenerateDocMutation } = useHomePage();
+
+  useEffect(() => {
+    if (data?.form) {
+      const initialData = flatten(data.form).reduce((acc, current) => {
+        acc[current.name] = current.value;
+
+        return acc;
+      }, {});
+      setState({ formErrors: null, modifiedData: initialData });
+    }
+  }, [data]);
+
+  const handleChange = ({ target: { name, value } }) => {
+    setState(prev => ({
+      ...prev,
+      modifiedData: {
+        ...prev.modifiedData,
+        [name]: value,
+      },
+    }));
+  };
+
+  const handleDeleteDoc = version => {
+    setVersionToDelete(version);
+  };
+
+  const handleConfirmDeleteDoc = () => {
+    deleteMutation.mutate({ prefix: data.prefix, version: versionToDelete });
+    toggleModal();
+  };
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    try {
+      await schema.validate(modifiedData, { abortEarly: false });
+
+      setState(prev => ({ ...prev, formErrors: null }));
+
+      submitMutation.mutate({ body: modifiedData, prefix: data.prefix });
+    } catch (err) {
+      const errors = getYupInnerErrors(err);
+
+      setState(prev => ({ ...prev, formErrors: errors }));
+    }
+  };
+
+  const handleUpdateDoc = version => {
+    regenerateDocMutation.mutate({ version, prefix: data.prefix });
+  };
+
+  const toggleModal = () => {
+    setVersionToDelete(null);
+  };
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
+
+  return (
+    <ContainerFluid className="container-fluid">
+      <PopUpWarning
+        isOpen={versionToDelete !== null}
+        toggleModal={toggleModal}
+        content={{
+          title: 'components.popUpWarning.title',
+          message: getTrad('containers.HomePage.PopUpWarning.message'),
+          cancel: 'app.components.Button.cancel',
+          confirm: getTrad('containers.HomePage.PopUpWarning.confirm'),
+        }}
+        popUpWarningType="danger"
+        onConfirm={handleConfirmDeleteDoc}
+      />
+      <form onSubmit={handleSubmit}>
+        <Header currentDocVersion={data.currentVersion} docPrefixURL={data.prefix} />
+        <StyledRow className="row">
+          <Block>
+            <Copy />
+          </Block>
+          <CheckPermissions permissions={pluginPermissions.update}>
+            <Block>
+              <div className="row">
+                <SizedInput
+                  description={getTrad(
+                    'containers.HomePage.form.restrictedAccess.inputDescription'
+                  )}
+                  label={getTrad('containers.HomePage.form.restrictedAccess')}
+                  name="restrictedAccess"
+                  onChange={handleChange}
+                  size={{ xs: 6 }}
+                  type="bool"
+                  value={modifiedData.restrictedAccess}
+                />
+                {modifiedData.restrictedAccess && (
+                  <SizedInput
+                    description={getTrad('containers.HomePage.form.password.inputDescription')}
+                    label={getTrad('containers.HomePage.form.password')}
+                    error={formErrors?.password}
+                    name="password"
+                    onChange={handleChange}
+                    size={{ xs: 6 }}
+                    type="password"
+                    value={modifiedData.password}
+                  />
+                )}
+              </div>
+            </Block>
+          </CheckPermissions>
+          <Block title={getTrad('containers.HomePage.Block.title')}>
+            <VersionWrapper>
+              <Row isHeader />
+              {data.docVersions.map(doc => {
+                return (
+                  <Row
+                    key={doc.generatedDate}
+                    data={doc}
+                    currentDocVersion={data.currentVersion}
+                    onClickDelete={handleDeleteDoc}
+                    onUpdateDoc={handleUpdateDoc}
+                  />
+                );
+              })}
+            </VersionWrapper>
+          </Block>
+        </StyledRow>
+      </form>
+    </ContainerFluid>
   );
-}
+};
 
-const mapStateToProps = selectHomePage();
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-const withSaga = strapi.injectSaga({ key: 'homePage', saga, pluginId });
-
-export default compose(withSaga, withConnect)(HomePage);
+export default HomePage;
