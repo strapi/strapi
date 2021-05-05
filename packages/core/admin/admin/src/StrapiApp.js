@@ -10,7 +10,7 @@ import App from './containers/App';
 import Fonts from './components/Fonts';
 
 // TODO
-import { translationMessages } from './i18n';
+import translationMessages from './translations';
 
 // const App = () => 'todo';
 

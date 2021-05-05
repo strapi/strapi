@@ -11,18 +11,5 @@ const selectApp = () => state => state.app;
 
 const makeSelectApp = () => createSelector(selectApp(), appState => appState.toJS());
 
-const makeSelectShowGlobalAppBlocker = () =>
-  createSelector(selectApp(), appState => appState.get('showGlobalAppBlocker'));
-
-const makeSelectBlockApp = () => createSelector(selectApp(), appState => appState.get('blockApp'));
-
-const makeSelectOverlayBlockerProps = () =>
-  createSelector(selectApp(), appState => appState.get('overlayBlockerData'));
-
 export default makeSelectApp;
-export {
-  selectApp,
-  makeSelectBlockApp,
-  makeSelectOverlayBlockerProps,
-  makeSelectShowGlobalAppBlocker,
-};
+export { selectApp };

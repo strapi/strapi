@@ -11,11 +11,13 @@ import { createStructuredSelector } from 'reselect';
 import { bindActionCreators, compose } from 'redux';
 import cn from 'classnames';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
+import translationMessages, { languageNativeNames } from '../../translations';
 import makeSelectLocale from '../LanguageProvider/selectors';
 import { changeLocale } from '../LanguageProvider/actions';
-import { languages, languageNativeNames } from '../../i18n';
 import Wrapper from './Wrapper';
 
+// TODO
+const languages = Object.keys(translationMessages);
 export class LocaleToggle extends React.Component {
   // eslint-disable-line
   state = { isOpen: false };

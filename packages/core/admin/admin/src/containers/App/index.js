@@ -48,6 +48,9 @@ window.strapi = Object.assign(window.strapi || {}, {
     toggle: () => {},
   },
   backendURL: BACKEND_URL,
+  lockApp: () => console.log('todo lockApp'),
+  unlockApp: () => console.log('todo unlockApp'),
+  lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
 });
 
 const queryClient = new QueryClient({
