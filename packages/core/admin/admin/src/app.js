@@ -126,16 +126,6 @@ pluginsToLoad.forEach(plugin => {
   dispatch(pluginLoaded(plugin));
 });
 
-// TODO
-const remoteURL = (() => {
-  // Relative URL (ex: /dashboard)
-  if (REMOTE_URL[0] === '/') {
-    return (window.location.origin + REMOTE_URL).replace(/\/$/, '');
-  }
-
-  return REMOTE_URL.replace(/\/$/, '');
-})();
-
 const displayNotification = (message, status) => {
   console.warn(
     // Validate the text
@@ -163,9 +153,6 @@ const lockAppWithOverlay = () => {
 };
 
 window.strapi = Object.assign(window.strapi || {}, {
-  node: MODE || 'host',
-  env: NODE_ENV,
-  remoteURL,
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   notification: {
     // New notification api

@@ -9,11 +9,7 @@ const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const isWsl = require('is-wsl');
 const alias = require('./webpack.alias.js');
-
-// TODO: remove
-const URLs = {
-  mode: 'host',
-};
+const getClientEnvironment = require('./env');
 
 module.exports = ({
   useEE,
@@ -23,11 +19,12 @@ module.exports = ({
   optimize,
   options = {
     backend: 'http://localhost:1337',
-    publicPath: '/admin/',
+    adminPath: '/admin/',
     features: [],
   },
 }) => {
   const isProduction = env === 'production';
+  const envVariables = getClientEnvironment(useEE, options);
 
   const webpackPlugins = isProduction
     ? [
@@ -51,7 +48,7 @@ module.exports = ({
     entry,
     output: {
       path: dest,
-      publicPath: options.publicPath,
+      publicPath: options.adminPath,
       // Utilize long-term caching by adding content hashes (not compilation hashes)
       // to compiled assets for production
       filename: isProduction ? '[name].[contenthash:8].js' : '[name].bundle.js',
@@ -163,17 +160,7 @@ module.exports = ({
         // FIXME
         // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
-      // FIXME: some variables are not needed anymore
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
-        NODE_ENV: JSON.stringify(isProduction ? 'production' : 'development'),
-        REMOTE_URL: JSON.stringify(options.publicPath),
-        BACKEND_URL: JSON.stringify(options.backend),
-        MODE: JSON.stringify(URLs.mode), // Allow us to define the public path for the plugins assets.
-        PUBLIC_PATH: JSON.stringify(options.publicPath),
-        PROJECT_TYPE: JSON.stringify(useEE ? 'Enterprise' : 'Community'),
-        ENABLED_EE_FEATURES: JSON.stringify(options.features),
-      }),
+      new webpack.DefinePlugin(envVariables.stringified),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
         let wantedPath = path.join(
           resource.context.substr(0, resource.context.lastIndexOf(`${path.sep}src${path.sep}`)),

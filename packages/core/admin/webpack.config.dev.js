@@ -17,7 +17,7 @@ module.exports = () => {
   const env = analyzeBundle ? 'production' : 'development';
   const options = {
     backend: 'http://localhost:1337',
-    publicPath: '/admin/',
+    adminPath: '/admin/',
     features: process.env.ENABLED_EE_FEATURES || ['sso'],
   };
 
