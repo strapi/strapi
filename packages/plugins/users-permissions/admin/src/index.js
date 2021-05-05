@@ -50,7 +50,7 @@ export default strapi => {
               defaultMessage: 'Roles',
             },
             name: 'roles',
-            to: `${strapi.settingsBaseURL}/${pluginId}/roles`,
+            to: `/settings/${pluginId}/roles`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
                 <RolesPage />
@@ -64,7 +64,7 @@ export default strapi => {
               defaultMessage: 'Providers',
             },
             name: 'providers',
-            to: `${strapi.settingsBaseURL}/${pluginId}/providers`,
+            to: `/settings/${pluginId}/providers`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.readProviders}>
                 <ProvidersPage />
@@ -78,7 +78,7 @@ export default strapi => {
               defaultMessage: 'Email templates',
             },
             name: 'email-templates',
-            to: `${strapi.settingsBaseURL}/${pluginId}/email-templates`,
+            to: `/settings/${pluginId}/email-templates`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
                 <EmailTemplatesPage />
@@ -92,7 +92,7 @@ export default strapi => {
               defaultMessage: 'Advanced Settings',
             },
             name: 'advanced-settings',
-            to: `${strapi.settingsBaseURL}/${pluginId}/advanced-settings`,
+            to: `/settings/${pluginId}/advanced-settings`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
                 <AdvancedSettingsPage />

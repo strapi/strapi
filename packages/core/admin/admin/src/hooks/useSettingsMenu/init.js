@@ -1,5 +1,4 @@
 import { retrieveGlobalLinks, retrievePluginsMenu, sortLinks } from '../../utils';
-import { SETTINGS_BASE_URL } from '../../config';
 import adminPermissions from '../../permissions';
 import formatLinks from './utils/formatLinks';
 import globalLinks from './utils/globalLinks';
@@ -25,7 +24,7 @@ const init = (initialState, plugins) => {
       links: [
         {
           title: { id: 'Settings.permissions.menu.link.roles.label' },
-          to: `${SETTINGS_BASE_URL}/roles`,
+          to: '/settings/roles',
           name: 'roles',
           isDisplayed: false,
           permissions: adminPermissions.settings.roles.main,
@@ -33,7 +32,7 @@ const init = (initialState, plugins) => {
         {
           title: { id: 'Settings.permissions.menu.link.users.label' },
           // Init the search params directly
-          to: `${SETTINGS_BASE_URL}/users?pageSize=10&page=1&_sort=firstname%3AASC`,
+          to: '/settings/users?pageSize=10&page=1&_sort=firstname%3AASC',
           name: 'users',
           isDisplayed: false,
           permissions: adminPermissions.settings.users.main,

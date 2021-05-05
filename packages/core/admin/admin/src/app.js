@@ -46,7 +46,6 @@ import App from './containers/App';
 import LanguageProvider from './containers/LanguageProvider';
 
 import configureStore from './configureStore';
-import { SETTINGS_BASE_URL } from './config';
 
 // Import i18n messages
 import { translationMessages, languages } from './i18n';
@@ -75,7 +74,6 @@ Object.keys(plugins).forEach(current => {
     registerComponent: strapi.componentApi.registerComponent,
     registerField: strapi.fieldApi.registerField,
     registerPlugin,
-    settingsBaseURL: SETTINGS_BASE_URL || '/settings',
     middlewares: strapi.middlewares,
   });
 

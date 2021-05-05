@@ -1,6 +1,5 @@
 import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
 import ProtectedRolesListPage from 'ee_else_ce/containers/Roles/ProtectedListPage';
-import { SETTINGS_BASE_URL } from '../../../config';
 import ApplicationInfosPage from '../../ApplicationInfosPage';
 import UsersEditPage from '../../Users/ProtectedEditPage';
 import UsersListPage from '../../Users/ProtectedListPage';
@@ -12,52 +11,52 @@ import WebhooksListView from '../../Webhooks/ProtectedListView';
 const defaultRoutes = [
   {
     Component: ApplicationInfosPage,
-    to: `${SETTINGS_BASE_URL}/application-infos`,
+    to: '/settings/application-infos',
     exact: true,
   },
   {
     Component: ProtectedRolesListPage,
-    to: `${SETTINGS_BASE_URL}/roles`,
+    to: '/settings/roles',
     exact: true,
   },
   {
     Component: RolesCreatePage,
-    to: `${SETTINGS_BASE_URL}/roles/duplicate/:id`,
+    to: '/settings/roles/duplicate/:id',
     exact: true,
   },
   {
     Component: RolesCreatePage,
-    to: `${SETTINGS_BASE_URL}/roles/new`,
+    to: '/settings/roles/new',
     exact: true,
   },
   {
     Component: RolesEditPage,
-    to: `${SETTINGS_BASE_URL}/roles/:id`,
+    to: '/settings/roles/:id',
     exact: true,
   },
   {
     Component: UsersListPage,
-    to: `${SETTINGS_BASE_URL}/users`,
+    to: '/settings/users',
     exact: true,
   },
   {
     Component: UsersEditPage,
-    to: `${SETTINGS_BASE_URL}/users/:id`,
+    to: '/settings/users/:id',
     exact: true,
   },
   {
     Component: WebhooksCreateView,
-    to: `${SETTINGS_BASE_URL}/webhooks/create`,
+    to: '/settings/webhooks/create',
     exact: true,
   },
   {
     Component: WebhooksEditView,
-    to: `${SETTINGS_BASE_URL}/webhooks/:id`,
+    to: '/settings/webhooks/:id',
     exact: true,
   },
   {
     Component: WebhooksListView,
-    to: `${SETTINGS_BASE_URL}/webhooks`,
+    to: '/settings/webhooks',
     exact: true,
   },
 ];

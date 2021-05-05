@@ -21,12 +21,14 @@ module.exports = () => {
     features: process.env.ENABLED_EE_FEATURES || ['sso'],
   };
 
+  const useEE = process.env.STRAPI_DISABLE_EE === 'true' ? false : true;
+
   const args = {
     entry,
     dest,
     env,
     options,
-    useEE: process.env.STRAPI_DISABLE_EE === 'true' ? false : true,
+    useEE,
   };
 
   const config = webpackConfig(args);

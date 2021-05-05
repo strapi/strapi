@@ -14,10 +14,10 @@ import schema from './utils/schema';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
-  const { emitEvent, settingsBaseURL } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
   const {
     params: { id },
-  } = useRouteMatch(`${settingsBaseURL}/roles/:id`);
+  } = useRouteMatch('/settings/roles/:id');
   const [isSubmiting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
 

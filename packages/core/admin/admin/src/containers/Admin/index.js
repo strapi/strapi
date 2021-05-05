@@ -22,7 +22,7 @@ import {
   CheckPagePermissions,
   request,
 } from '@strapi/helper-plugin';
-import { SETTINGS_BASE_URL, SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
+import { SHOW_TUTORIALS, STRAPI_UPDATE_NOTIF } from '../../config';
 import { checkLatestStrapiVersion } from '../../utils';
 
 import adminPermissions from '../../permissions';
@@ -249,7 +249,6 @@ export class Admin extends React.Component {
           formatMessage={formatMessage}
           shouldUpdateStrapi={shouldUpdateStrapi}
           plugins={plugins}
-          settingsBaseURL={SETTINGS_BASE_URL || '/settings'}
           strapiVersion={strapiVersion}
           updatePlugin={updatePlugin}
           updateMenu={this.state.updateMenu}
@@ -282,11 +281,8 @@ export class Admin extends React.Component {
                       <MarketplacePage />
                     </CheckPagePermissions>
                   </Route>
-                  <Route
-                    path={`${SETTINGS_BASE_URL || '/settings'}/:settingId`}
-                    component={SettingsPage}
-                  />
-                  <Route path={SETTINGS_BASE_URL || '/settings'} component={SettingsPage} exact />
+                  <Route path="/settings/:settingId" component={SettingsPage} />
+                  <Route path="/settings" component={SettingsPage} exact />
                   <Route key="7" path="" component={NotFoundPage} />
                   <Route key="8" path="/404" component={NotFoundPage} />
                 </Switch>

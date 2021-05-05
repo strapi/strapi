@@ -5,7 +5,6 @@ import { faTrashAlt, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 import { Table } from '@buffetjs/core';
 import { useGlobalContext } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
-import { SETTINGS_BASE_URL } from '../../../config';
 import { checkIfAllEntriesAreSelected, getSelectedIds, headers } from './utils';
 import { initialState, reducer } from './reducer';
 import init from './init';
@@ -89,7 +88,7 @@ const List = forwardRef(
     };
 
     const handleClick = id => {
-      push(`${SETTINGS_BASE_URL}/users/${id}`);
+      push(`/settings/users/${id}`);
     };
 
     return (

@@ -28,8 +28,8 @@ const CreatePage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { replace } = useHistory();
   const permissionsRef = useRef();
-  const { emitEvent, settingsBaseURL } = useGlobalContext();
-  const params = useRouteMatch(`${settingsBaseURL}/roles/duplicate/:id`);
+  const { emitEvent } = useGlobalContext();
+  const params = useRouteMatch('/settings/roles/duplicate/:id');
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
@@ -99,7 +99,7 @@ const CreatePage = () => {
           type: 'success',
           message: { id: 'Settings.roles.created' },
         });
-        replace(`${settingsBaseURL}/roles/${res.data.id}`);
+        replace(`/settings/roles/${res.data.id}`);
       })
       .catch(err => {
         console.error(err);

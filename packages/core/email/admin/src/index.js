@@ -46,7 +46,7 @@ export default strapi => {
               defaultMessage: 'Settings',
             },
             name: 'settings',
-            to: `${strapi.settingsBaseURL}/${pluginId}`,
+            to: `/settings/${pluginId}`,
             Component: () => (
               <CheckPagePermissions permissions={pluginPermissions.settings}>
                 <SettingsPage />

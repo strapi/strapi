@@ -1,6 +1,5 @@
 import cloneDeep from 'lodash/cloneDeep';
 import checkPermissions from './checkPermissions';
-import { SETTINGS_BASE_URL } from '../../../config';
 import getSettingsMenuLinksPermissions from './getSettingsMenuLinksPermissions';
 
 const getGeneralLinks = async (
@@ -18,7 +17,7 @@ const getGeneralLinks = async (
 
   const settingsLinkPermissions = getSettingsMenuLinksPermissions(settingsMenu);
   const settingsLinkIndex = authorizedGeneralSectionLinks.findIndex(
-    obj => obj.destination === SETTINGS_BASE_URL
+    obj => obj.destination === '/settings'
   );
 
   if (settingsLinkIndex === -1) {
