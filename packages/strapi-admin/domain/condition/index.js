@@ -12,7 +12,6 @@ const { pipe, merge, set, pick } = require('lodash/fp');
  * @property {string} id - The identifier of the condition
  * @property {string} displayName - The display name of a condition
  * @property {string} name - The name of a condition
- * @property {boolean} required - If set to false, it allows any other validated condition to bypass this one
  * @property {string} [plugin] - The plugin which provide the condition
  * @property {string} [category] - The main category of a condition
  * @property {ConditionHandler} handler - The handler of a condition
@@ -31,14 +30,13 @@ const DEFAULT_CATEGORY = 'default';
  */
 const getDefaultConditionAttributes = () => ({
   category: DEFAULT_CATEGORY,
-  required: false,
 });
 
 /**
  * Get the list of all the valid attributes of a {@link Condition}
  * @return {string[]}
  */
-const conditionFields = ['id', 'displayName', 'handler', 'plugin', 'category', 'required'];
+const conditionFields = ['id', 'displayName', 'handler', 'plugin', 'category'];
 
 /**
  * Remove unwanted attributes from a {@link Condition}

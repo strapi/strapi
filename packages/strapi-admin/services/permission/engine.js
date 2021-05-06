@@ -18,9 +18,13 @@ const {
 } = require('lodash/fp');
 const { AbilityBuilder, Ability } = require('@casl/ability');
 const sift = require('sift');
-const { hooks } = require('strapi-utils');
 const permissionDomain = require('../../domain/permission/index');
 const { getService } = require('../../utils');
+const {
+  createEngineHooks,
+  createWillEvaluateContext,
+  createWillRegisterContext,
+} = require('./engine-hooks');
 
 const allowedOperations = [
   '$or',
@@ -42,23 +46,9 @@ const conditionsMatcher = conditions => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-const createBoundAbstractPermissionDomain = permission => ({
-  get permission() {
-    return cloneDeep(permission);
-  },
-
-  addCondition(condition) {
-    Object.assign(permission, permissionDomain.addCondition(condition, permission));
-
-    return this;
-  },
-});
-
 module.exports = conditionProvider => {
   const state = {
-    hooks: {
-      willEvaluatePermission: hooks.createAsyncSeriesHook(),
-    },
+    hooks: createEngineHooks(),
   };
 
   return {
@@ -85,9 +75,10 @@ module.exports = conditionProvider => {
     generateAbilityCreatorFor(user) {
       return async (permissions, options) => {
         const { can, build } = new AbilityBuilder(Ability);
-        const registerFn = this.createRegisterFunction(can);
 
         for (const permission of permissions) {
+          const registerFn = this.createRegisterFunction(can, permission, user);
+
           await this.evaluate({ permission, user, options, registerFn });
         }
 
@@ -140,7 +131,7 @@ module.exports = conditionProvider => {
      * @returns {Promise<void>}
      */
     async applyPermissionProcessors(permission) {
-      const context = createBoundAbstractPermissionDomain(permission);
+      const context = createWillEvaluateContext(permission);
 
       // 1. Trigger willEvaluatePermission hook and await transformation operated on the permission
       await state.hooks.willEvaluatePermission.call(context);
@@ -173,7 +164,7 @@ module.exports = conditionProvider => {
 
       // Register the permission if there is no condition
       if (isEmpty(conditions)) {
-        return registerFn({ action, subject, fields: properties.fields, condition: true });
+        return registerFn({ action, subject, fields: properties.fields });
       }
 
       /** Set of functions used to resolve + evaluate conditions & register the permission if allowed */
@@ -211,67 +202,60 @@ module.exports = conditionProvider => {
 
       // Utils
       const resultPropEq = propEq('result');
-      const filterIsRequired = isRequired => filter(propEq('condition.required', isRequired));
       const pickResults = map(prop('result'));
 
-      // If there is no condition, register the permission as is
-      if (isEmpty(evaluatedConditions)) {
-        registerFn({ action, subject, fields: properties.fields });
+      if (evaluatedConditions.every(resultPropEq(false))) {
         return;
       }
 
-      const nonRequiredConditions = filterIsRequired(false)(evaluatedConditions);
-      const requiredConditions = filterIsRequired(true)(evaluatedConditions);
-
-      // If any required condition's result is set to false, then don't register the permission at all
-      if (requiredConditions.some(resultPropEq(false))) {
-        return;
+      // If there is no condition or if one of them return true, register the permission as is
+      if (isEmpty(evaluatedConditions) || evaluatedConditions.some(resultPropEq(true))) {
+        return registerFn({ action, subject, fields: properties.fields });
       }
 
-      // If every non required condition's handler is set to false,
-      // then don't register the permission at all
-      if (!isEmpty(nonRequiredConditions) && nonRequiredConditions.every(resultPropEq(false))) {
-        return;
+      const results = pickResults(evaluatedConditions).filter(isObject);
+
+      if (isEmpty(results)) {
+        return registerFn({ action, subject, fields: properties.fields });
       }
 
-      const nonRequiredObjectResults = pickResults(nonRequiredConditions).filter(isObject);
-      const requiredObjectResults = pickResults(requiredConditions).filter(isObject);
-
-      const builtCondition = [];
-
-      if (
-        // Don't add the $or clause if there is not any object handler in the non-required conditions
-        !isEmpty(nonRequiredObjectResults) &&
-        // Don't add the $or clause if one of the non-required condition handler
-        // is true since it'll validate the $or clause everytime anyway
-        !nonRequiredConditions.some(resultPropEq(true))
-      ) {
-        // Add the non-required conditions handler as a $or clause within the root $and clause
-        builtCondition.push({ $or: nonRequiredObjectResults });
-      }
-
-      // Add the required conditions at the root level of the $and clause
-      builtCondition.push(...requiredObjectResults);
-
-      const permissionRegisterPayload = {
+      // Register the permission
+      return registerFn({
         action,
         subject,
         fields: properties.fields,
-        condition: isEmpty(builtCondition) ? undefined : { $and: builtCondition },
-      };
-
-      // Register the permission
-      registerFn(permissionRegisterPayload);
+        condition: { $and: [{ $or: results }] },
+      });
     },
 
     /**
      * Encapsulate a register function with custom params to fit `evaluatePermission`'s syntax
      * @param can
-     * @returns {function({action?: *, subject?: *, fields?: *, condition?: *}): *}
+     * @param {Permission} permission
+     * @param {object} user
+     * @returns {function}
      */
-    createRegisterFunction(can) {
-      return ({ action, subject, fields, condition }) => {
-        return can(action, subject, fields, isObject(condition) ? condition : undefined);
+    createRegisterFunction(can, permission, user) {
+      const registerToCasl = caslPermission => {
+        const { action, subject, fields, condition } = caslPermission;
+
+        can(action, subject, fields, isObject(condition) ? condition : undefined);
+      };
+
+      const runWillRegisterHook = async caslPermission => {
+        const hookContext = createWillRegisterContext(caslPermission, {
+          permission,
+          user,
+        });
+
+        await state.hooks.willRegisterPermission.call(hookContext);
+
+        return caslPermission;
+      };
+
+      return async caslPermission => {
+        await runWillRegisterHook(caslPermission);
+        registerToCasl(caslPermission);
       };
     },
 

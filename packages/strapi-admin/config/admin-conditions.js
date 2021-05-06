@@ -6,14 +6,12 @@ module.exports = {
       displayName: 'Is creator',
       name: 'is-creator',
       plugin: 'admin',
-      required: true,
       handler: user => ({ 'created_by.id': user.id }),
     },
     {
       displayName: 'Has same role as creator',
       name: 'has-same-role-as-creator',
       plugin: 'admin',
-      required: true,
       handler: user => ({
         'created_by.roles': {
           $elemMatch: {

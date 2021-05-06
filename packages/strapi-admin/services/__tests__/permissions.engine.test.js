@@ -268,7 +268,7 @@ describe('Permissions Engine', () => {
   });
 
   describe('Evaluate', () => {
-    test('It should register the permission (no conditions / true result)', async () => {
+    test('It should register the permission (no conditions)', async () => {
       const permission = { action: 'read', subject: 'article', properties: { fields: ['title'] } };
       const user = getUser('alice');
       const registerFn = jest.fn();
@@ -278,7 +278,6 @@ describe('Permissions Engine', () => {
       expect(registerFn).toHaveBeenCalledWith({
         ..._.pick(permission, ['action', 'subject']),
         fields: permission.properties.fields,
-        condition: true,
       });
     });
 
@@ -356,18 +355,23 @@ describe('Permissions Engine', () => {
 
     beforeEach(() => {
       can = jest.fn();
-      registerFn = engine.createRegisterFunction(can);
+      registerFn = engine.createRegisterFunction(can, {}, {});
     });
 
-    test('It should calls the can function without any condition', () => {
-      registerFn({ action: 'read', subject: 'article', fields: '*', condition: true });
+    test('It should calls the can function without any condition', async () => {
+      await registerFn({ action: 'read', subject: 'article', fields: '*', condition: true });
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', undefined);
     });
 
-    test('It should calls the can function with a condition', () => {
-      registerFn({ action: 'read', subject: 'article', fields: '*', condition: { created_by: 1 } });
+    test('It should calls the can function with a condition', async () => {
+      await registerFn({
+        action: 'read',
+        subject: 'article',
+        fields: '*',
+        condition: { created_by: 1 },
+      });
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', { created_by: 1 });
