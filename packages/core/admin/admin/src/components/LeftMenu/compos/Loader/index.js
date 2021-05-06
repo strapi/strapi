@@ -10,16 +10,16 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import LoaderWrapper from './LoaderWrapper';
+import Wrapper from './Wrapper';
 
 const MOUNT_NODE = document.getElementById('app') || document.createElement('div');
 
 const Loader = ({ show }) => {
   if (show) {
     return createPortal(
-      <LoaderWrapper>
+      <Wrapper>
         <LoadingIndicatorPage />
-      </LoaderWrapper>,
+      </Wrapper>,
       MOUNT_NODE
     );
   }

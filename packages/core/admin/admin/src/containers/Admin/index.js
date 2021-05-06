@@ -26,7 +26,7 @@ import { checkLatestStrapiVersion } from '../../utils';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import LeftMenu from '../LeftMenu';
+import LeftMenu from '../../components/LeftMenu';
 import InstalledPluginsPage from '../InstalledPluginsPage';
 import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';

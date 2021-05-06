@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const LoaderWrapper = styled.div`
+const Wrapper = styled.div`
   position: fixed;
   top: 0;
   right: 0;
@@ -10,4 +10,4 @@ const LoaderWrapper = styled.div`
   background: ${({ theme }) => theme.main.colors.white};
 `;
 
-export default LoaderWrapper;
+export default Wrapper;

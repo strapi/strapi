@@ -4,8 +4,8 @@ import matchSorter from 'match-sorter';
 import { sortBy } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 
-import LeftMenuLink from '../LeftMenuLink';
-import LeftMenuLinkHeader from '../LeftMenuLinkHeader';
+import LeftMenuLink from '../Link';
+import LeftMenuLinkHeader from '../LinkHeader';
 import LeftMenuListLink from './LeftMenuListLink';
 import EmptyLinksList from './EmptyLinksList';
 import EmptyLinksListWrapper from './EmptyLinksListWrapper';

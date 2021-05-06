@@ -10,7 +10,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
-import en from '../../../translations/en.json';
+import en from '../../../../translations/en.json';
 import LeftMenuIcon from './LeftMenuIcon';
 import A from './A';
 import NotificationCount from './NotificationCount';
