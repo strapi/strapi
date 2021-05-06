@@ -1,6 +1,5 @@
 import produce from 'immer';
-import { get } from 'lodash';
-import { SHOW_NEW_NOTIFICATION, HIDE_NEW_NOTIFICATION } from './constants';
+import get from 'lodash/get';
 
 const initialState = {
   notifId: 0,
@@ -11,7 +10,7 @@ const notificationReducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
-      case SHOW_NEW_NOTIFICATION: {
+      case 'SHOW_NOTIFICATION': {
         draftState.notifications.push({
           // No action.config spread to limit the notification API and avoid customization
           id: state.notifId,
@@ -31,7 +30,7 @@ const notificationReducer = (state = initialState, action) =>
         draftState.notifId = state.notifId + 1;
         break;
       }
-      case HIDE_NEW_NOTIFICATION: {
+      case 'HIDE_NOTIFICATION': {
         const indexToRemove = state.notifications.findIndex(notif => notif.id === action.id);
 
         if (indexToRemove !== -1) {
@@ -47,3 +46,4 @@ const notificationReducer = (state = initialState, action) =>
   });
 
 export default notificationReducer;
+export { initialState };

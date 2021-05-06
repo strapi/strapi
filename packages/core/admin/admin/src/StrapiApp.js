@@ -8,6 +8,8 @@ import LanguageProvider from './containers/LanguageProvider';
 import Fonts from './components/Fonts';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
+import Theme from './components/Theme';
+
 import reducers from './reducers';
 
 // TODO
@@ -38,16 +40,22 @@ class StrapiApp {
     const store = configureStore(this);
 
     return (
-      <Provider store={store}>
+      <>
         <GlobalStyle />
-        <Notifications />
         <Fonts />
-        <LanguageProvider messages={translationMessages}>
-          <BrowserRouter basename={basename}>
-            <App store={store} />
-          </BrowserRouter>
-        </LanguageProvider>
-      </Provider>
+        <Theme>
+          <Provider store={store}>
+            <LanguageProvider messages={translationMessages}>
+              <>
+                <Notifications />
+                <BrowserRouter basename={basename}>
+                  <App store={store} />
+                </BrowserRouter>
+              </>
+            </LanguageProvider>
+          </Provider>
+        </Theme>
+      </>
     );
   }
 }

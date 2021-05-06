@@ -2,11 +2,11 @@ import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Padded, Text, Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-import { useDispatch } from 'react-redux';
+
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Remove } from '@buffetjs/icons';
 
-import { HIDE_NEW_NOTIFICATION } from '../constants';
+// import { HIDE_NEW_NOTIFICATION } from '../constants';
 import { NotificationWrapper, IconWrapper, LinkArrow, RemoveWrapper } from './styledComponents';
 
 const types = {
@@ -24,9 +24,9 @@ const types = {
   },
 };
 
-const Notification = ({ notification }) => {
+const Notification = ({ dispatch, notification }) => {
   const { formatMessage } = useIntl();
-  const dispatch = useDispatch();
+
   const {
     title,
     message,
@@ -40,14 +40,13 @@ const Notification = ({ notification }) => {
   } = notification;
 
   const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
-
   const handleClose = useCallback(() => {
     if (onClose) {
       onClose();
     }
 
     dispatch({
-      type: HIDE_NEW_NOTIFICATION,
+      type: 'HIDE_NOTIFICATION',
       id,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -140,6 +139,7 @@ Notification.defaultProps = {
 };
 
 Notification.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   notification: PropTypes.shape({
     id: PropTypes.number,
     message: PropTypes.oneOfType([

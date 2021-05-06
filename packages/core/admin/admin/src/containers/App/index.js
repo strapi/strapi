@@ -15,7 +15,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
-import Theme from '../Theme';
+
 import { getUID } from './utils';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
@@ -24,10 +24,6 @@ import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
 window.strapi = Object.assign(window.strapi || {}, {
-  notification: {
-    toggle: () => {},
-  },
-
   lockApp: () => console.log('todo lockApp'),
   unlockApp: () => console.log('todo unlockApp'),
   lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
@@ -123,26 +119,24 @@ function App(props) {
   }
 
   return (
-    <Theme>
-      <Wrapper>
-        <QueryClientProvider client={queryClient}>
-          <Content>
-            <Switch>
-              {authRoutes}
-              <Route
-                path="/auth/:authType"
-                render={routerProps => (
-                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-                )}
-                exact
-              />
-              <PrivateRoute path="/" component={Admin} />
-              <Route path="" component={NotFoundPage} />
-            </Switch>
-          </Content>
-        </QueryClientProvider>
-      </Wrapper>
-    </Theme>
+    <Wrapper>
+      <QueryClientProvider client={queryClient}>
+        <Content>
+          <Switch>
+            {authRoutes}
+            <Route
+              path="/auth/:authType"
+              render={routerProps => (
+                <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+              )}
+              exact
+            />
+            <PrivateRoute path="/" component={Admin} />
+            <Route path="" component={NotFoundPage} />
+          </Switch>
+        </Content>
+      </QueryClientProvider>
+    </Wrapper>
   );
 }
 
