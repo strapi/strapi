@@ -7,6 +7,7 @@ import configureStore from './core/store/configureStore';
 import basename from './utils/basename';
 import App from './containers/App';
 import LanguageProvider from './containers/LanguageProvider';
+import AutoReloadOverlayBlocker from './components/AutoReloadOverlayBlocker';
 import Fonts from './components/Fonts';
 import OverlayBlocker from './components/OverlayBlocker';
 import GlobalStyle from './components/GlobalStyle';
@@ -55,10 +56,11 @@ class StrapiApp {
         <ThemeProvider theme={themes}>
           <GlobalStyle />
           <Fonts />
-          <OverlayBlocker />
           <Provider store={store}>
             <LanguageProvider messages={translationMessages}>
               <>
+                <AutoReloadOverlayBlocker />
+                <OverlayBlocker />
                 <Notifications />
                 <BrowserRouter basename={basename}>
                   <App store={store} />

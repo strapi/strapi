@@ -1,47 +1,21 @@
 import {
-  FREEZE_APP,
   GET_DATA_SUCCEEDED,
   GET_INFOS_DATA_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
-  UNFREEZE_APP,
   UPDATE_PLUGIN,
 } from '../constants';
 import {
-  freezeApp,
   loadPlugin,
   getInfosDataSucceeded,
   getDataSucceeded,
   pluginDeleted,
   pluginLoaded,
-  unfreezeApp,
   updatePlugin,
 } from '../actions';
 
 describe('<App /> actions', () => {
-  describe('freezeApp', () => {
-    it('should return the correct type and the passed data', () => {
-      const data = { strapi: 'isCool' };
-      const expected = {
-        type: FREEZE_APP,
-        data,
-      };
-
-      expect(freezeApp(data)).toEqual(expected);
-    });
-  });
-
-  describe('unfreezeApp', () => {
-    it('should return the correct type', () => {
-      const expected = {
-        type: UNFREEZE_APP,
-      };
-
-      expect(unfreezeApp()).toEqual(expected);
-    });
-  });
-
   describe('getDataSucceeded', () => {
     it('shoudl return the correct type and the passed data', () => {
       const data = { ok: true };

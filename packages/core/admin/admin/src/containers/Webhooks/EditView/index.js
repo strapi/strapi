@@ -190,7 +190,7 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
-      strapi.lockAppWithOverlay();
+      strapi.lockApp();
       setIsSubmitting(true);
       const { data } = await request('/admin/webhooks', {
         method: 'POST',
@@ -354,7 +354,7 @@ function EditView() {
 
   const updateWebhook = async () => {
     try {
-      strapi.lockAppWithOverlay();
+      strapi.lockApp();
       setIsSubmitting(true);
 
       const body = cleanData(modifiedData);

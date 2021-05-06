@@ -25,7 +25,7 @@ const MarketPlacePage = () => {
       description: 'app.components.InstallPluginPage.Download.description',
     };
     // Lock the app
-    strapi.lockApp(overlayblockerParams);
+    strapi.lockAppWithAutoreload(overlayblockerParams);
 
     try {
       const opts = {

@@ -63,7 +63,7 @@ const EditPage = () => {
 
   const handleEditRoleSubmit = async data => {
     try {
-      strapi.lockAppWithOverlay();
+      strapi.lockApp();
       setIsSubmiting(true);
 
       const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();

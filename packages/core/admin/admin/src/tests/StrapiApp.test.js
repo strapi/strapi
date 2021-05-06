@@ -72,7 +72,7 @@ describe('ADMIN | StrapiApp', () => {
         </body>,
         "container": <div>
           <div
-            class="sc-fTxPal krAKpM"
+            class="sc-bjeSvz VelTJ"
           />
           <div
             class="Loader-sc-1xt0x01-0 JXMaR"

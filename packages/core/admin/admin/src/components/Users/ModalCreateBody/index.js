@@ -46,7 +46,7 @@ const ModalCreateBody = forwardRef(
       if (!errors) {
         try {
           // Prevent user interactions until the request is completed
-          strapi.lockAppWithOverlay();
+          strapi.lockApp();
 
           setIsSubmiting(true);
 

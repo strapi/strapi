@@ -1,13 +1,7 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-// FIXME
-// import { OverlayBlocker } from '@strapi/helper-plugin';
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-  updatePlugin,
-} from '../../App/actions';
+import { updatePlugin } from '../../App/actions';
 
 import { Admin, mapDispatchToProps } from '../index';
 import { setAppError } from '../actions';
@@ -22,9 +16,9 @@ describe('<Admin />', () => {
         latestStrapiReleaseTag: '3',
         shouldUpdateStrapi: false,
       },
-      disableGlobalOverlayBlocker: jest.fn(),
+
       emitEvent: jest.fn(),
-      enableGlobalOverlayBlocker: jest.fn(),
+
       getInfosDataSucceeded: jest.fn(),
       getStrapiLatestReleaseSucceeded: jest.fn(),
       getUserPermissions: jest.fn(),
@@ -32,24 +26,18 @@ describe('<Admin />', () => {
       getUserPermissionsSucceeded: jest.fn(),
       global: {
         autoReload: false,
-        blockApp: false,
         currentEnvironment: 'development',
         hasAdminUser: false,
-        hasUserPlugin: true,
         isLoading: true,
-        overlayBlockerData: null,
         plugins: {},
-        showGlobalAppBlocker: true,
         strapiVersion: '3',
         uuid: false,
       },
       intl: {
         formatMessage: jest.fn(),
       },
-
       location: {},
       setAppError: jest.fn(),
-      showGlobalAppBlocker: jest.fn(),
       updatePlugin: jest.fn(),
     };
   });
@@ -137,40 +125,6 @@ describe('<Admin />', () => {
 });
 
 describe('<Admin />, mapDispatchToProps', () => {
-  describe('disableGlobalOverlayBlocker', () => {
-    it('should be injected', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
-
-      expect(result.disableGlobalOverlayBlocker).toBeDefined();
-    });
-
-    it('should dispatch the disableGlobalOverlayBlocker action when called', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
-      result.disableGlobalOverlayBlocker();
-
-      expect(dispatch).toHaveBeenCalledWith(disableGlobalOverlayBlocker());
-    });
-  });
-
-  describe('enableGlobalOverlayBlocker', () => {
-    it('should be injected', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
-
-      expect(result.enableGlobalOverlayBlocker).toBeDefined();
-    });
-
-    it('should dispatch the enableGlobalOverlayBlocker action when called', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
-      result.enableGlobalOverlayBlocker();
-
-      expect(dispatch).toHaveBeenCalledWith(enableGlobalOverlayBlocker());
-    });
-  });
-
   describe('setAppError', () => {
     it('should be injected', () => {
       const dispatch = jest.fn();
