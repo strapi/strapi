@@ -1,10 +1,8 @@
-import globalReducer from '../containers/App/reducer';
-import adminReducer from '../containers/Admin/reducer';
+import globalReducer from '../pages/App/reducer';
+import adminReducer from '../pages/Admin/reducer';
 import languageProviderReducer from '../components/LanguageProvider/reducer';
 import permissionsManagerReducer from '../components/PermissionsManager/reducer';
 import menuReducer from '../components/LeftMenu/reducer';
-
-// TODO move containers reducers into this folder
 
 const reducers = {
   app: globalReducer,

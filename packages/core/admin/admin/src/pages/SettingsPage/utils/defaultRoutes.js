@@ -1,5 +1,5 @@
-import RolesCreatePage from 'ee_else_ce/containers/Roles/CreatePage';
-import ProtectedRolesListPage from 'ee_else_ce/containers/Roles/ProtectedListPage';
+import RolesCreatePage from 'ee_else_ce/pages/Roles/CreatePage';
+import ProtectedRolesListPage from 'ee_else_ce/pages/Roles/ProtectedListPage';
 import ApplicationInfosPage from '../../ApplicationInfosPage';
 import UsersEditPage from '../../Users/ProtectedEditPage';
 import UsersListPage from '../../Users/ProtectedListPage';

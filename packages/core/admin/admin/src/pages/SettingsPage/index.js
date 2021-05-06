@@ -20,9 +20,9 @@ import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom
 import { useIntl } from 'react-intl';
 import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
+import SettingsSearchHeaderProvider from '../../components/SettingsHeaderSearchContextProvider';
 import { useSettingsMenu } from '../../hooks';
 import { retrieveGlobalLinks } from '../../utils';
-import SettingsSearchHeaderProvider from '../SettingsHeaderSearchContextProvider';
 import {
   ApplicationDetailLink,
   MenuWrapper,

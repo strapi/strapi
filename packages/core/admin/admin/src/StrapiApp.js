@@ -5,7 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import configureStore from './core/store/configureStore';
 import basename from './utils/basename';
-import App from './containers/App';
+import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
 import AutoReloadOverlayBlocker from './components/AutoReloadOverlayBlocker';
 import Fonts from './components/Fonts';

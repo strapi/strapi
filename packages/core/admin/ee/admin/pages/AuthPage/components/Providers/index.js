@@ -5,10 +5,9 @@ import { Redirect, useHistory } from 'react-router-dom';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { BaselineAlignment } from '@strapi/helper-plugin';
-
-import Box from '../../../../../../admin/src/containers/AuthPage/components/Box';
-import Logo from '../../../../../../admin/src/containers/AuthPage/components/Logo';
-import Section from '../../../../../../admin/src/containers/AuthPage/components/Section';
+import Box from '../../../../../../admin/src/pages/AuthPage/components/Box';
+import Logo from '../../../../../../admin/src/pages/AuthPage/components/Logo';
+import Section from '../../../../../../admin/src/pages/AuthPage/components/Section';
 import ProviderButton from '../../../../components/ProviderButton';
 import { useAuthProviders } from '../../../../hooks';
 

@@ -1,6 +1,6 @@
 import * as yup from 'yup';
 import { translatedErrors } from '@strapi/helper-plugin';
-import Login from 'ee_else_ce/containers/AuthPage/components/Login';
+import Login from 'ee_else_ce/pages/AuthPage/components/Login';
 import ForgotPassword from '../components/ForgotPassword';
 import ForgotPasswordSuccess from '../components/ForgotPasswordSuccess';
 import Oops from '../components/Oops';
