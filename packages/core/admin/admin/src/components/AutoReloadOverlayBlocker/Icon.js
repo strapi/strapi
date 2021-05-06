@@ -5,7 +5,6 @@ import PropTypes from 'prop-types';
 const Icon = ({ elapsed, icon }) => {
   let displayedIcon = icon;
   let className = 'icoContainer spinner';
-  console.log({ icon });
 
   if (elapsed > 15) {
     displayedIcon = ['far', 'clock'];
