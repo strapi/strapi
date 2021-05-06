@@ -5,7 +5,7 @@ import { initialState } from './reducer';
  * Direct selector to the admin state domain
  */
 const selectAdminDomain = () => state => {
-  return state.get('admin') || initialState;
+  return state.admin || initialState;
 };
 
 /**

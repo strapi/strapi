@@ -12,7 +12,7 @@ import Notification from './Notification';
 import NotificationsWrapper from './Wrapper';
 
 const NotificationsContainer = () => {
-  const notifications = useSelector(state => state.get('newNotification').notifications);
+  const notifications = useSelector(state => state.newNotification.notifications);
 
   return (
     <NotificationsWrapper>

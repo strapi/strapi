@@ -5,9 +5,12 @@
  */
 
 /* eslint-disable import/no-cycle */
-import { dispatch } from '../../app';
+// import { dispatch } from '../../app';
 
 import { SHOW_NOTIFICATION, HIDE_NOTIFICATION } from './constants';
+
+// TODO
+const dispatch = () => {};
 
 let nextNotificationId = 0;
 

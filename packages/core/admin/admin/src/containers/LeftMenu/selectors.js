@@ -1,3 +1,3 @@
-const selectMenuLinks = state => state.get('menu');
+const selectMenuLinks = state => state.menu;
 
 export default selectMenuLinks;

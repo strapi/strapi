@@ -4,7 +4,7 @@ import { Padded, Text } from '@buffetjs/core';
 import { Col } from 'reactstrap';
 import { get } from 'lodash';
 import { useIntl } from 'react-intl';
-import { languages, languageNativeNames } from '../../i18n';
+import translationMessages, { languageNativeNames } from '../../translations';
 import ContainerFluid from '../../components/ContainerFluid';
 import PageTitle from '../../components/PageTitle';
 import SizedInput from '../../components/SizedInput';
@@ -14,6 +14,8 @@ import { useSettingsForm } from '../../hooks';
 import useChangeLanguage from '../LanguageProvider/hooks/useChangeLanguage';
 import ProfilePageLabel from './components';
 import { form, schema } from './utils';
+
+const languages = Object.keys(translationMessages);
 
 const ProfilePage = () => {
   const changeLanguage = useChangeLanguage();

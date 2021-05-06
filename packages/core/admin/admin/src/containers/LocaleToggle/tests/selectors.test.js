@@ -8,9 +8,9 @@ describe('<LocaleToggle /> selectors', () => {
       const state = fromJS({
         className: null,
       });
-      const mockedState = fromJS({
+      const mockedState = {
         localeToggle: state,
-      });
+      };
 
       expect(selectLocaleToggle()(mockedState)).toEqual(state);
     });
@@ -21,9 +21,9 @@ describe('<LocaleToggle /> selectors', () => {
       const state = fromJS({
         className: null,
       });
-      const mockedState = fromJS({
+      const mockedState = {
         localeToggle: state,
-      });
+      };
 
       expect(makeSelectLocaleToggle()(mockedState)).toEqual(state.toJS());
     });

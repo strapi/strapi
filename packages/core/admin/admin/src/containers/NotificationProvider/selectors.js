@@ -3,7 +3,7 @@ import { createSelector } from 'reselect';
 /**
  * Direct selector to the notificationProvider state domain
  */
-const selectNotificationProviderDomain = () => state => state.get('notification');
+const selectNotificationProviderDomain = () => state => state.notification;
 
 /**
  * Other specific selectors

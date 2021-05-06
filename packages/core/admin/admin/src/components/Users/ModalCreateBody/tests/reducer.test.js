@@ -1,6 +1,10 @@
 import { reducer } from '../reducer';
 
 describe('ADMIN | COMPONENTS | USERS | MODALCREATEBODY | reducer', () => {
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const initialState = {

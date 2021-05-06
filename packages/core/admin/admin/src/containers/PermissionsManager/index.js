@@ -9,7 +9,7 @@ import {
 } from './actions';
 
 const PermissionsManager = ({ children }) => {
-  const { isLoading, userPermissions } = useSelector(state => state.get('permissionsManager'));
+  const { isLoading, userPermissions } = useSelector(state => state.permissionsManager);
 
   const dispatch = useDispatch();
   const fetchUserPermissions = async (resetState = false) => {

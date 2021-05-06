@@ -24,6 +24,10 @@ const hoc = () => WrappedComponent => {
   return hoistNonReactStatics(HocInjector, WrappedComponent);
 };
 
+// FIXME
+global.process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES = [];
+global.process.env.ADMIN_PATH = '/admin/';
+
 global.strapi = {
   backendURL: 'http://localhost:1337',
   injectReducer: hoc,

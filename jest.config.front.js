@@ -42,9 +42,10 @@ module.exports = {
     BACKEND_URL: 'http://localhost:1337',
     ADMIN_PATH: '/admin',
     NODE_ENV: 'test',
-    ENABLED_EE_FEATURES: [],
-    STRAPI_ADMIN_SHOW_TUTORIALS: 'false',
-    STRAPI_ADMIN_UPDATE_NOTIFICATION: 'false',
+    'process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES': [],
+    STRAPI_ADMIN_ENABLED_EE_FEATURES: [],
+    'process.env.STRAPI_ADMIN_SHOW_TUTORIALS': 'false',
+    'process.env.STRAPI_ADMIN_UPDATE_NOTIFICATION': 'false',
   },
   moduleDirectories: [
     'node_modules',

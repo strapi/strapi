@@ -17,7 +17,7 @@ const ProviderWrapper = styled.div`
 `;
 
 const Providers = () => {
-  const ssoEnabled = ENABLED_EE_FEATURES.includes('sso');
+  const ssoEnabled = process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES.includes('sso');
 
   const { push } = useHistory();
   const { formatMessage } = useIntl();
