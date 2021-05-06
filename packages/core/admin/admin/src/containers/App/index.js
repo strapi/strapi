@@ -2,13 +2,6 @@
  *
  * App.js
  *
- * This component is the skeleton around the actual pages, and should only
- * contain code that should be seen on all pages. (e.g. navigation bar)
- *
- * NOTE: while this component should technically be a stateless functional
- * component (SFC), hot reloading does not currently support SFCs. If hot
- * reloading is not a neccessity for you then you can refactor it and remove
- * the linting exception.
  */
 
 import React, { useEffect, useRef, useState, useMemo } from 'react';
@@ -17,48 +10,22 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
-import { QueryClientProvider, QueryClient } from 'react-query';
 
-// FIXME
-import 'sanitize.css/sanitize.css';
-import 'bootstrap/dist/css/bootstrap.css';
-import 'font-awesome/css/font-awesome.min.css';
-import '@fortawesome/fontawesome-free/css/all.css';
-// eslint-disable-next-line import/extensions
-import '@fortawesome/fontawesome-free/js/all.min.js';
-
-import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
-// FIXME
-// eslint-disable-next-line import/no-cycle
-import NotificationProvider from '../NotificationProvider';
-import Theme from '../Theme';
+
 import { getUID } from './utils';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
-import NewNotification from '../NewNotification';
 import PrivateRoute from '../PrivateRoute';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
 window.strapi = Object.assign(window.strapi || {}, {
-  notification: {
-    toggle: () => {},
-  },
-
   lockApp: () => console.log('todo lockApp'),
   unlockApp: () => console.log('todo unlockApp'),
   lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
-});
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
 });
 
 function App(props) {
@@ -143,29 +110,22 @@ function App(props) {
   }
 
   return (
-    <Theme>
-      <Wrapper>
-        <GlobalStyle />
-        <QueryClientProvider client={queryClient}>
-          <NotificationProvider />
-          <NewNotification />
-          <Content>
-            <Switch>
-              {authRoutes}
-              <Route
-                path="/auth/:authType"
-                render={routerProps => (
-                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-                )}
-                exact
-              />
-              <PrivateRoute path="/" component={Admin} />
-              <Route path="" component={NotFoundPage} />
-            </Switch>
-          </Content>
-        </QueryClientProvider>
-      </Wrapper>
-    </Theme>
+    <Wrapper>
+      <Content>
+        <Switch>
+          {authRoutes}
+          <Route
+            path="/auth/:authType"
+            render={routerProps => (
+              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+            )}
+            exact
+          />
+          <PrivateRoute path="/" component={Admin} />
+          <Route path="" component={NotFoundPage} />
+        </Switch>
+      </Content>
+    </Wrapper>
   );
 }
 

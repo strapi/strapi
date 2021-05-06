@@ -1,22 +1,33 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClientProvider, QueryClient } from 'react-query';
+import { ThemeProvider } from 'styled-components';
 import configureStore from './core/store/configureStore';
-import reducers from './reducers';
 import basename from './utils/basename';
-import LanguageProvider from './containers/LanguageProvider';
-// TODO remove
 import App from './containers/App';
+import LanguageProvider from './containers/LanguageProvider';
 import Fonts from './components/Fonts';
+import GlobalStyle from './components/GlobalStyle';
+import Notifications from './components/Notifications';
+import themes from './themes';
+
+import reducers from './reducers';
 
 // TODO
 import translationMessages from './translations';
 
-// const App = () => 'todo';
-
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
 };
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 class StrapiApp {
   plugins = {};
@@ -39,14 +50,22 @@ class StrapiApp {
     const store = configureStore(this);
 
     return (
-      <Provider store={store}>
-        <Fonts />
-        <LanguageProvider messages={translationMessages}>
-          <BrowserRouter basename={basename}>
-            <App store={store} />
-          </BrowserRouter>
-        </LanguageProvider>
-      </Provider>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={themes}>
+          <GlobalStyle />
+          <Fonts />
+          <Provider store={store}>
+            <LanguageProvider messages={translationMessages}>
+              <>
+                <Notifications />
+                <BrowserRouter basename={basename}>
+                  <App store={store} />
+                </BrowserRouter>
+              </>
+            </LanguageProvider>
+          </Provider>
+        </ThemeProvider>
+      </QueryClientProvider>
     );
   }
 }

@@ -1,7 +1,6 @@
 import reducer from '../reducer';
-import { SHOW_NEW_NOTIFICATION, HIDE_NEW_NOTIFICATION } from '../constants';
 
-describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
+describe('ADMIN | COMPONENTS | NOTIFICATIONS | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const state = {
@@ -12,10 +11,10 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
     });
   });
 
-  describe('SHOW_NEW_NOTIFICATION', () => {
+  describe('SHOW_NOTIFICATION', () => {
     it('should add a notification', () => {
       const action = {
-        type: SHOW_NEW_NOTIFICATION,
+        type: 'SHOW_NOTIFICATION',
         config: {
           type: 'success',
           message: {
@@ -49,10 +48,10 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
     });
   });
 
-  describe('HIDE_NEW_NOTIFICATION', () => {
+  describe('HIDE_NOTIFICATION', () => {
     it('should remove a notification if the notification exist', () => {
       const action = {
-        type: HIDE_NEW_NOTIFICATION,
+        type: 'HIDE_NOTIFICATION',
         id: 1,
       };
       const initialState = {
@@ -67,7 +66,7 @@ describe('AMDIN | CONTAINERS | NEWNOTIFICATION | reducer', () => {
 
     it('should not remove the notification if the notification does not exist', () => {
       const action = {
-        type: HIDE_NEW_NOTIFICATION,
+        type: 'HIDE_NOTIFICATION',
         id: 3,
       };
       const initialState = {
