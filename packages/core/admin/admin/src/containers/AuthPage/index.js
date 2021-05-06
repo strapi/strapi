@@ -9,12 +9,12 @@ import forms from 'ee_else_ce/containers/AuthPage/utils/forms';
 
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
-import LocaleToggle from '../LocaleToggle';
+import LocaleToggle from '../../components/LocaleToggle';
 import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
-import useChangeLanguage from '../LanguageProvider/hooks/useChangeLanguage';
+import useChangeLanguage from '../../components/LanguageProvider/hooks/useChangeLanguage';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const { push } = useHistory();

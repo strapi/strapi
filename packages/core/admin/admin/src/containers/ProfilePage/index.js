@@ -11,7 +11,7 @@ import SizedInput from '../../components/SizedInput';
 import { Header } from '../../components/Settings';
 import FormBloc from '../../components/FormBloc';
 import { useSettingsForm } from '../../hooks';
-import useChangeLanguage from '../LanguageProvider/hooks/useChangeLanguage';
+import useChangeLanguage from '../../components/LanguageProvider/hooks/useChangeLanguage';
 import ProfilePageLabel from './components';
 import { form, schema } from './utils';
 

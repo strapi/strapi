@@ -6,7 +6,7 @@ import { ThemeProvider } from 'styled-components';
 import configureStore from './core/store/configureStore';
 import basename from './utils/basename';
 import App from './containers/App';
-import LanguageProvider from './containers/LanguageProvider';
+import LanguageProvider from './components/LanguageProvider';
 import AutoReloadOverlayBlocker from './components/AutoReloadOverlayBlocker';
 import Fonts from './components/Fonts';
 import OverlayBlocker from './components/OverlayBlocker';

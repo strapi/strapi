@@ -10,15 +10,13 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
-
+import PrivateRoute from '../../components/PrivateRoute';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
-
 import { getUID } from './utils';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
-import PrivateRoute from '../PrivateRoute';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
