@@ -8,6 +8,7 @@ import basename from './utils/basename';
 import App from './containers/App';
 import LanguageProvider from './containers/LanguageProvider';
 import Fonts from './components/Fonts';
+import OverlayBlocker from './components/OverlayBlocker';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
 import themes from './themes';
@@ -54,6 +55,7 @@ class StrapiApp {
         <ThemeProvider theme={themes}>
           <GlobalStyle />
           <Fonts />
+          <OverlayBlocker />
           <Provider store={store}>
             <LanguageProvider messages={translationMessages}>
               <>
