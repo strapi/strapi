@@ -2,17 +2,16 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import configureStore from './core/store/configureStore';
-import reducers from './reducers';
 import basename from './utils/basename';
-import LanguageProvider from './containers/LanguageProvider';
-// TODO remove
 import App from './containers/App';
+import LanguageProvider from './containers/LanguageProvider';
 import Fonts from './components/Fonts';
+import GlobalStyle from './components/GlobalStyle';
+import Notifications from './components/Notifications';
+import reducers from './reducers';
 
 // TODO
 import translationMessages from './translations';
-
-// const App = () => 'todo';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
@@ -40,6 +39,8 @@ class StrapiApp {
 
     return (
       <Provider store={store}>
+        <GlobalStyle />
+        <Notifications />
         <Fonts />
         <LanguageProvider messages={translationMessages}>
           <BrowserRouter basename={basename}>

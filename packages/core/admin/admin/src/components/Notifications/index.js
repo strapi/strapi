@@ -1,2 +1,7 @@
-export { default as Notification } from './Notification';
-export { default as NotificationsContainer } from './NotificationsContainer';
+import React from 'react';
+
+const Notifications = () => {
+  return null;
+};
+
+export default Notifications;
