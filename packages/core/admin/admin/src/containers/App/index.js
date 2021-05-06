@@ -10,7 +10,6 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
-import { QueryClientProvider, QueryClient } from 'react-query';
 
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
@@ -27,14 +26,6 @@ window.strapi = Object.assign(window.strapi || {}, {
   lockApp: () => console.log('todo lockApp'),
   unlockApp: () => console.log('todo unlockApp'),
   lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
-});
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
 });
 
 function App(props) {
@@ -120,22 +111,20 @@ function App(props) {
 
   return (
     <Wrapper>
-      <QueryClientProvider client={queryClient}>
-        <Content>
-          <Switch>
-            {authRoutes}
-            <Route
-              path="/auth/:authType"
-              render={routerProps => (
-                <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-              )}
-              exact
-            />
-            <PrivateRoute path="/" component={Admin} />
-            <Route path="" component={NotFoundPage} />
-          </Switch>
-        </Content>
-      </QueryClientProvider>
+      <Content>
+        <Switch>
+          {authRoutes}
+          <Route
+            path="/auth/:authType"
+            render={routerProps => (
+              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+            )}
+            exact
+          />
+          <PrivateRoute path="/" component={Admin} />
+          <Route path="" component={NotFoundPage} />
+        </Switch>
+      </Content>
     </Wrapper>
   );
 }

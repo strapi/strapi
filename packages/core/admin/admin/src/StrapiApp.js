@@ -1,6 +1,7 @@
 import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
+import { QueryClientProvider, QueryClient } from 'react-query';
 import configureStore from './core/store/configureStore';
 import basename from './utils/basename';
 import App from './containers/App';
@@ -18,6 +19,14 @@ import translationMessages from './translations';
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
 };
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 class StrapiApp {
   plugins = {};
@@ -40,10 +49,10 @@ class StrapiApp {
     const store = configureStore(this);
 
     return (
-      <>
-        <GlobalStyle />
-        <Fonts />
+      <QueryClientProvider client={queryClient}>
         <Theme>
+          <GlobalStyle />
+          <Fonts />
           <Provider store={store}>
             <LanguageProvider messages={translationMessages}>
               <>
@@ -55,7 +64,7 @@ class StrapiApp {
             </LanguageProvider>
           </Provider>
         </Theme>
-      </>
+      </QueryClientProvider>
     );
   }
 }
