@@ -2,11 +2,8 @@ import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { Padded, Text, Flex } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
-
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Remove } from '@buffetjs/icons';
-
-// import { HIDE_NEW_NOTIFICATION } from '../constants';
 import { NotificationWrapper, IconWrapper, LinkArrow, RemoveWrapper } from './styledComponents';
 
 const types = {

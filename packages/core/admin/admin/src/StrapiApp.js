@@ -2,6 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
+import { ThemeProvider } from 'styled-components';
 import configureStore from './core/store/configureStore';
 import basename from './utils/basename';
 import App from './containers/App';
@@ -9,7 +10,7 @@ import LanguageProvider from './containers/LanguageProvider';
 import Fonts from './components/Fonts';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
-import Theme from './components/Theme';
+import themes from './themes';
 
 import reducers from './reducers';
 
@@ -50,7 +51,7 @@ class StrapiApp {
 
     return (
       <QueryClientProvider client={queryClient}>
-        <Theme>
+        <ThemeProvider theme={themes}>
           <GlobalStyle />
           <Fonts />
           <Provider store={store}>
@@ -63,7 +64,7 @@ class StrapiApp {
               </>
             </LanguageProvider>
           </Provider>
-        </Theme>
+        </ThemeProvider>
       </QueryClientProvider>
     );
   }
