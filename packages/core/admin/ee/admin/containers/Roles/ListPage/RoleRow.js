@@ -1,6 +1,5 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { Pencil, Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,7 +17,6 @@ const RoleRow = ({
   selectedRoles,
 }) => {
   const { push } = useHistory();
-  const { settingsBaseURL } = useGlobalContext();
 
   const handleRoleSelection = e => {
     e.stopPropagation();
@@ -41,9 +39,9 @@ const RoleRow = ({
   };
 
   const handleGoTo = useCallback(() => {
-    push(`${settingsBaseURL}/roles/${role.id}`);
+    push(`/settings/roles/${role.id}`);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role.id, settingsBaseURL]);
+  }, [role.id]);
 
   const prefix = canDelete ? (
     <Checkbox

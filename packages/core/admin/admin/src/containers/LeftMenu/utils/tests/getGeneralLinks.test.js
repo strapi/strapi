@@ -375,7 +375,7 @@ describe('getGeneralLinks', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('resolves an empty array when the SETTINGS_BASE_URL is not in the authorized links', async () => {
+  it('resolves an empty array when the destination (/settings) is not in the authorized links', async () => {
     hasPermissions.mockImplementation(() => Promise.resolve(false));
 
     const permissions = [

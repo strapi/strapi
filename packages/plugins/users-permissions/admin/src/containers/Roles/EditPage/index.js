@@ -4,7 +4,7 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { request, useGlobalContext } from '@strapi/helper-plugin';
+import { request } from '@strapi/helper-plugin';
 
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -20,10 +20,9 @@ import schema from './utils/schema';
 const EditPage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { settingsBaseURL } = useGlobalContext();
   const {
     params: { id },
-  } = useRouteMatch(`${settingsBaseURL}/${pluginId}/roles/:id`);
+  } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
   const { routes, policies, isLoading } = usePlugins();
   const { role, isLoading: isRoleLoading, onSubmitSucceeded } = useFetchRole(id);
   const permissionsRef = useRef();

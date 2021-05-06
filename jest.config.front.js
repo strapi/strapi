@@ -43,6 +43,8 @@ module.exports = {
     ADMIN_PATH: '/admin',
     NODE_ENV: 'test',
     ENABLED_EE_FEATURES: [],
+    STRAPI_ADMIN_SHOW_TUTORIALS: 'false',
+    STRAPI_ADMIN_UPDATE_NOTIFICATION: 'false',
   },
   moduleDirectories: [
     'node_modules',

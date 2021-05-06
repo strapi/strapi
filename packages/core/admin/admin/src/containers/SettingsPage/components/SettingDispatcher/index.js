@@ -19,7 +19,8 @@ const SettingDispatcher = () => {
   return (
     <>
       <PageTitle name={pluginId} />
-      <Compo settingsBaseURL="/settings" />
+      {/* FIXME */}
+      <Compo />
     </>
   );
 };

@@ -6,7 +6,6 @@ import { Plus } from '@buffetjs/icons';
 import matchSorter from 'match-sorter';
 import { get } from 'lodash';
 import {
-  useGlobalContext,
   useQuery,
   ListButton,
   PopUpWarning,
@@ -25,7 +24,6 @@ import BaselineAlignment from './BaselineAlignment';
 import reducer, { initialState } from './reducer';
 
 const RoleListPage = () => {
-  const { settingsBaseURL } = useGlobalContext();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { formatMessage } = useIntl();
   const { push } = useHistory();
@@ -129,10 +127,10 @@ const RoleListPage = () => {
   };
 
   const handleDuplicateRole = id => {
-    push(`${settingsBaseURL}/roles/duplicate/${id}`);
+    push(`/settings/roles/duplicate/${id}`);
   };
 
-  const handleNewRoleClick = () => push(`${settingsBaseURL}/roles/new`);
+  const handleNewRoleClick = () => push('/settings/roles/new');
 
   const handleRemoveRole = roleId => {
     dispath({

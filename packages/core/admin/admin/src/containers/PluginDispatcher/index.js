@@ -11,7 +11,6 @@ import { get } from 'lodash';
 import { ErrorBoundary } from 'react-error-boundary';
 import { BlockerComponent, ErrorFallback } from '@strapi/helper-plugin';
 import PageTitle from '../../components/PageTitle';
-import { LOGIN_LOGO } from '../../config';
 
 export function PluginDispatcher(props) {
   const {
@@ -45,11 +44,7 @@ export function PluginDispatcher(props) {
     <div>
       <PageTitle title={`Strapi - ${name}`} />
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <PluginEntryComponent
-          {...props}
-          {...blockerComponentProps}
-          assets={{ loginLogo: LOGIN_LOGO }}
-        />
+        <PluginEntryComponent {...props} {...blockerComponentProps} />
       </ErrorBoundary>
     </div>
   );

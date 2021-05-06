@@ -18,7 +18,7 @@ const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const [isOpen, setIsOpen] = useState(false);
-  const { emitEvent, settingsBaseURL } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
   const { roles, isLoading } = useRolesList();
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const {
@@ -39,10 +39,10 @@ const RoleListPage = () => {
 
   const handleGoTo = useCallback(
     id => {
-      push(`${settingsBaseURL}/roles/${id}`);
+      push(`/settings/roles/${id}`);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [settingsBaseURL]
+    []
   );
 
   const handleToggle = useCallback(e => {

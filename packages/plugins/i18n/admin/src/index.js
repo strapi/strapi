@@ -44,7 +44,7 @@ export default strapi => {
               defaultMessage: 'Internationalization',
             },
             name: 'internationalization',
-            to: `${strapi.settingsBaseURL}/internationalization`,
+            to: '/settings/internationalization',
             Component: () => <SettingsPage />,
             permissions: pluginPermissions.accessMain,
           },

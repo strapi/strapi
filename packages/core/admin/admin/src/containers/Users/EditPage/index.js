@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import { BaselineAlignment, useGlobalContext, SizedInput, auth } from '@strapi/helper-plugin';
+import { BaselineAlignment, SizedInput, auth } from '@strapi/helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
@@ -16,11 +16,10 @@ import { editValidation } from '../../../validations/users';
 import form from './utils/form';
 
 const EditPage = ({ canUpdate }) => {
-  const { settingsBaseURL } = useGlobalContext();
   const { formatMessage } = useIntl();
   const {
     params: { id },
-  } = useRouteMatch(`${settingsBaseURL}/users/:id`);
+  } = useRouteMatch('/settings/users/:id');
 
   const cbSuccess = data => {
     const userInfos = auth.getUserInfo();

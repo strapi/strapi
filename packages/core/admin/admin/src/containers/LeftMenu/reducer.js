@@ -1,6 +1,5 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
-import { SETTINGS_BASE_URL } from '../../config';
 import adminPermissions from '../../permissions';
 import {
   SET_CT_OR_ST_LINKS,
@@ -32,7 +31,7 @@ const initialState = {
       icon: 'cog',
       label: 'app.components.LeftMenuLinkContainer.settings',
       isDisplayed: false,
-      destination: SETTINGS_BASE_URL,
+      destination: '/settings',
       // Permissions of this link are retrieved in the init phase
       // using the settings menu
       permissions: [],

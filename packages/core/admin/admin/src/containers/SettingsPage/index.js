@@ -42,7 +42,7 @@ import {
 function SettingsPage() {
   const { settingId } = useParams();
   const { goBack } = useHistory();
-  const { settingsBaseURL, plugins } = useGlobalContext();
+  const { plugins } = useGlobalContext();
   const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
   const { isLoading, menu } = useSettingsMenu();
   const { formatMessage } = useIntl();
@@ -91,7 +91,7 @@ function SettingsPage() {
   }
 
   if (!settingId) {
-    return <Redirect to={`${settingsBaseURL}/application-infos`} />;
+    return <Redirect to="/settings/application-infos" />;
   }
 
   const settingTitle = formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' });
@@ -119,7 +119,7 @@ function SettingsPage() {
               {appRoutes}
               {globalSectionCreatedRoutes}
               {pluginsLinksRoutes}
-              <Route path={`${settingsBaseURL}/:pluginId`} component={SettingDispatcher} />
+              <Route path="/settings/:pluginId" component={SettingDispatcher} />
             </Switch>
           </div>
         </div>
