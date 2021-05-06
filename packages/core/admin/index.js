@@ -88,7 +88,6 @@ const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
 const { languages } = require('./i18n');
 
 window.strapi = Object.assign(window.strapi || {}, {
-  node: MODE || 'host',
   backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
   languages,
   currentLanguage:
