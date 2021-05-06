@@ -1,21 +1,10 @@
 import { reducer } from '../reducer';
 
 describe('ADMIN | COMPONENTS | USERS | MODALCREATEBODY | reducer', () => {
-  const OLD_ENV = process.env;
-
   beforeEach(() => {
     jest.resetModules();
-    process.env = {
-      ...OLD_ENV,
-      IS_EE: false,
-      'process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES': [],
-      STRAPI_ADMIN_ENABLED_EE_FEATURES: [],
-    };
   });
 
-  afterAll(() => {
-    process.env = OLD_ENV; // Restore old environment
-  });
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const initialState = {

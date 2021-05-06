@@ -2,7 +2,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import configureStore from './core/store/configureStore';
-import reducers from './reducers/index';
+import reducers from './reducers';
 import basename from './utils/basename';
 import LanguageProvider from './containers/LanguageProvider';
 // TODO remove

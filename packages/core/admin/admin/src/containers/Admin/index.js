@@ -120,40 +120,38 @@ export class Admin extends React.Component {
       getStrapiLatestReleaseSucceeded,
     } = this.props;
 
-    if (!process.env.STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true') {
-      return;
-    }
+    if (process.env.STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true') {
+      try {
+        const {
+          data: { tag_name },
+        } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
+        const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
 
-    try {
-      const {
-        data: { tag_name },
-      } = await axios.get('https://api.github.com/repos/strapi/strapi/releases/latest');
-      const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
+        getStrapiLatestReleaseSucceeded(tag_name, shouldUpdateStrapi);
 
-      getStrapiLatestReleaseSucceeded(tag_name, shouldUpdateStrapi);
+        const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
 
-      const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
+        if (!showUpdateNotif) {
+          return;
+        }
 
-      if (!showUpdateNotif) {
-        return;
-      }
-
-      if (shouldUpdateStrapi) {
-        strapi.notification.toggle({
-          type: 'info',
-          message: { id: 'notification.version.update.message' },
-          link: {
-            url: `https://github.com/strapi/strapi/releases/tag/${tag_name}`,
-            label: {
-              id: 'notification.version.update.link',
+        if (shouldUpdateStrapi) {
+          strapi.notification.toggle({
+            type: 'info',
+            message: { id: 'notification.version.update.message' },
+            link: {
+              url: `https://github.com/strapi/strapi/releases/tag/${tag_name}`,
+              label: {
+                id: 'notification.version.update.link',
+              },
             },
-          },
-          blockTransition: true,
-          onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
-        });
+            blockTransition: true,
+            onClose: () => localStorage.setItem('STRAPI_UPDATE_NOTIF', true),
+          });
+        }
+      } catch (err) {
+        // Silent
       }
-    } catch (err) {
-      // Silent
     }
   };
 

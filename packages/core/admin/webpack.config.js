@@ -160,7 +160,7 @@ module.exports = ({
         // FIXME
         // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
-      new webpack.DefinePlugin(envVariables.stringified),
+      new webpack.DefinePlugin(envVariables),
       new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
         let wantedPath = path.join(
           resource.context.substr(0, resource.context.lastIndexOf(`${path.sep}src${path.sep}`)),
