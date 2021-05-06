@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import ReactDOM from 'react-dom';
-import Button from './Button';
 import Content from './Content';
-import Icon from './Icon';
 import Overlay from './Overlay';
 import Wrapper from './Wrapper';
 
@@ -64,14 +63,53 @@ const AutoReloadOverlayBlocker = () => {
     };
   }, [isOpen, elapsed]);
 
+  let displayedIcon = config?.icon || 'sync-alt';
+  let className = 'icoContainer spinner';
+  let description = {
+    id: config?.description || 'components.OverlayBlocker.description',
+    defaultMessage:
+      "You're using a feature that needs the server to restart. Please wait until the server is up.",
+  };
+  let title = {
+    id: config?.title || 'components.OverlayBlocker.title',
+    defaultMessage: 'Waiting for restart',
+  };
+
+  if (elapsed > 15) {
+    displayedIcon = ['far', 'clock'];
+    className = 'icoContainer';
+    description = {
+      id: 'components.OverlayBlocker.description.serverError',
+      defaultMessage: 'The server should have restarted, please check your logs in the terminal.',
+    };
+
+    title = {
+      id: 'components.OverlayBlocker.title.serverError',
+      defaultMessage: 'The restart is taking longer than expected',
+    };
+  }
+
   if (isOpen) {
     return ReactDOM.createPortal(
       <Overlay>
         <Wrapper>
-          <Icon {...config} elapsed={elapsed} />
+          <div className={className}>
+            <FontAwesomeIcon icon={displayedIcon} />
+          </div>
           <div>
-            <Content {...config} elapsed={elapsed} />
-            <Button elapsed={elapsed} />
+            <Content description={description} title={title} />
+            {elapsed < 15 && (
+              <div className="buttonContainer">
+                <a
+                  className="primary btn"
+                  href="https://strapi.io/documentation"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Read the documentation
+                </a>
+              </div>
+            )}
           </div>
         </Wrapper>
       </Overlay>,
