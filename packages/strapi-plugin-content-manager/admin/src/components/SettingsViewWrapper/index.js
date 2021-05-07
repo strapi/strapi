@@ -7,6 +7,7 @@ import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
   LoadingIndicatorPage,
+  ModalConfirm,
   PopUpWarning,
   // contexts
   useGlobalContext,
@@ -26,10 +27,11 @@ const SettingsViewWrapper = ({
   isEditSettings,
   isLoading,
   modifiedData,
+  name,
   onChange,
   onConfirmReset,
   onConfirmSubmit,
-  name,
+  onModalConfirmClosed,
 }) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const [showWarningCancel, setWarningCancel] = useState(false);
@@ -203,16 +205,21 @@ const SettingsViewWrapper = ({
               toggleWarningCancel();
             }}
           />
-          <PopUpWarning
+          <ModalConfirm
             isOpen={showWarningSubmit}
-            toggleModal={toggleWarningSubmit}
+            toggle={toggleWarningSubmit}
             content={{
-              message: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+              id: `${pluginId}.popUpWarning.warning.updateAllSettings`,
             }}
-            popUpWarningType="danger"
+            type="success"
             onConfirm={async () => {
               await onConfirmSubmit();
               toggleWarningSubmit();
+            }}
+            onClosed={() => {
+              if (onModalConfirmClosed) {
+                onModalConfirmClosed();
+              }
             }}
           />
         </form>
@@ -230,6 +237,7 @@ SettingsViewWrapper.defaultProps = {
   name: '',
   onConfirmReset: () => {},
   onConfirmSubmit: async () => {},
+  onModalConfirmClosed: null,
   onSubmit: () => {},
   pluginHeaderProps: {
     actions: [],
@@ -258,6 +266,7 @@ SettingsViewWrapper.propTypes = {
   onChange: PropTypes.func.isRequired,
   onConfirmReset: PropTypes.func,
   onConfirmSubmit: PropTypes.func,
+  onModalConfirmClosed: PropTypes.func,
   onSubmit: PropTypes.func,
   pluginHeaderProps: PropTypes.shape({
     actions: PropTypes.array,

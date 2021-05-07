@@ -51,5 +51,6 @@ module.exports = (obj, validNatures) => {
           .nullable(),
     targetColumnName: yup.string().nullable(),
     private: yup.boolean().nullable(),
+    pluginOptions: yup.object(),
   };
 };

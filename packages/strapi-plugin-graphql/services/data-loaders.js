@@ -15,24 +15,8 @@ module.exports = {
   initializeLoader() {
     this.resetLoaders();
 
-    // Create loaders for each relational field (exclude core models).
-    Object.keys(strapi.models)
-      .filter(model => model.internal !== true)
-      .forEach(modelKey => {
-        const model = strapi.models[modelKey];
-        this.createLoader(model.uid);
-      });
-
-    // Reproduce the same pattern for each plugin.
-    Object.keys(strapi.plugins).forEach(plugin => {
-      Object.keys(strapi.plugins[plugin].models).forEach(modelKey => {
-        const model = strapi.plugins[plugin].models[modelKey];
-        this.createLoader(model.uid);
-      });
-    });
-
-    // Add the loader for the AdminUser as well, so we can query `created_by` and `updated_by` AdminUsers
-    this.createLoader('strapi::user');
+    // Create loaders for each relational field (exclude core models & plugins).
+    Object.values(strapi.contentTypes).forEach(model => this.createLoader(model.uid));
   },
 
   resetLoaders() {

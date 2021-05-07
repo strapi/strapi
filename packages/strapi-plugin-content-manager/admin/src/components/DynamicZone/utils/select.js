@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get } from 'lodash';
-import useDataManager from '../../../hooks/useDataManager';
+import { useContentManagerEditViewDataManager } from 'strapi-helper-plugin';
 
 function useSelect(name) {
   const {
@@ -11,10 +11,11 @@ function useSelect(name) {
     modifiedData,
     moveComponentUp,
     moveComponentDown,
+    moveComponentTo,
     removeComponentFromDynamicZone,
     readActionAllowedFields,
     updateActionAllowedFields,
-  } = useDataManager();
+  } = useContentManagerEditViewDataManager();
 
   const dynamicDisplayedComponents = useMemo(
     () => get(modifiedData, [name], []).map(data => data.__component),
@@ -40,6 +41,7 @@ function useSelect(name) {
     isFieldAllowed,
     isFieldReadable,
     moveComponentUp,
+    moveComponentTo,
     moveComponentDown,
     removeComponentFromDynamicZone,
     dynamicDisplayedComponents,

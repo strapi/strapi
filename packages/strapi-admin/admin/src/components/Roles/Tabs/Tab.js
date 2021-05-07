@@ -5,6 +5,7 @@ const Tab = styled.div`
   flex: 1;
   padding: 1rem;
   text-align: center;
+
   ${({ isActive, theme }) =>
     isActive
       ? {

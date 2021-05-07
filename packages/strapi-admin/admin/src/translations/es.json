@@ -64,7 +64,7 @@
   "Roles.ListPage.notification.delete-all-not-allowed": "Algunos roles no se pudieron eliminar porque están asociados a usuarios",
   "Roles.ListPage.notification.delete-not-allowed": "No se puede eliminar un rol si está asociado a usuarios",
   "Roles.RoleRow.user-count.plural": "{number} usuarios",
-  "Roles.RoleRow.user-count.singular": "{número} usuario",
+  "Roles.RoleRow.user-count.singular": "{number} usuario",
   "Roles.components.List.empty.withSearch": "No hay rol correspondiente a la búsqueda ({search})...",
   "Settings.PageTitle": "Configuración - {name}",
   "Settings.error": "Error",

@@ -55,7 +55,10 @@ const WrapperSelect = ({ error, label, name, type, ...rest }) => {
   }
 
   return (
-    <SelectWrapper className="form-group" style={{ marginBottom: 0 }}>
+    <SelectWrapper
+      className="form-group"
+      style={{ marginBottom: type === 'allowedTypesSelect' ? 28 : 0 }}
+    >
       <SelectNav>
         <div>
           <label htmlFor={name}>{label}</label>

@@ -23,12 +23,12 @@ describe('Test type text', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   test('Creates an entry with JSON', async () => {
     const res = await rq.post('/content-manager/collection-types/application::withtext.withtext', {

@@ -11,9 +11,7 @@ import PropTypes from 'prop-types';
 
 class WysiwygEditor extends React.Component {
   render() {
-    return (
-      <Editor {...this.props} ref={this.props.setRef} />
-    );
+    return <Editor {...this.props} ref={this.props.setRef} />;
   }
 }
 

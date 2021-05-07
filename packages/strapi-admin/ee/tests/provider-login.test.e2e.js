@@ -58,7 +58,7 @@ describe('Provider Login', () => {
   let hasSSO;
 
   beforeAll(async () => {
-    strapi = await createStrapiInstance({ logLevel: 'debug' });
+    strapi = await createStrapiInstance();
     utils = createUtils(strapi);
     // eslint-disable-next-line node/no-extraneous-require
     hasSSO = require('strapi/lib/utils/ee').features.isEnabled('sso');
@@ -68,12 +68,12 @@ describe('Provider Login', () => {
     requests.public = createRequest({ strapi });
     requests.admin = await createAuthRequest({ strapi });
     requests.noPermissions = await createAuthRequest({ strapi, userInfo: restrictedUser });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await deleteFixtures();
     await strapi.destroy();
-  }, 60000);
+  });
 
   describe('Get the provider list', () => {
     test.each(Object.keys(requests))('It should be available for everyone (%s)', async type => {
