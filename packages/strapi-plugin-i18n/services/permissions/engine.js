@@ -18,9 +18,7 @@ const willRegisterPermission = context => {
   const { permission, condition, user } = context;
   const { subject, properties } = permission;
 
-  const { superAdminCode } = strapi.admin.services.role.constants;
-
-  const isSuperAdmin = user.roles.some(role => role.code === superAdminCode);
+  const isSuperAdmin = strapi.admin.services.role.hasSuperAdminRole(user);
 
   if (isSuperAdmin) {
     return;
