@@ -58,6 +58,8 @@ const ComponentWrapper = styled.div`
         border-radius: 2px;
         border-color: #ffffff;
         box-shadow: 0 2px 4px #e3e9f3;
+        height: 400px;
+        overflow-y: auto;
 
         .dropdown-header {
           font-size: 95%;
