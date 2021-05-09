@@ -452,12 +452,12 @@ const getProfile = async (provider, query, callback) => {
           });
         };
 
-        const { localizedFirstName } = await getDetailsRequest();
+        const { vanityName } = await getDetailsRequest();
         const { elements } = await getEmailRequest();
         const email = elements[0]['handle~'];
 
         callback(null, {
-          username: localizedFirstName,
+          username: vanityName,
           email: email.emailAddress,
         });
       } catch (err) {
