@@ -12,7 +12,7 @@ import FormBloc from '../../../components/FormBloc';
 import { Header } from '../../../components/Settings';
 import { MagicLink, SelectRoles } from '../../../components/Users';
 import { useSettingsForm } from '../../../hooks';
-import { editValidation } from '../../../validations/users';
+import { editValidation } from '../utils/validations/users';
 import form from './utils/form';
 
 const EditPage = ({ canUpdate }) => {
