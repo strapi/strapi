@@ -203,15 +203,7 @@ export class Admin extends React.Component {
   render() {
     const {
       admin: { shouldUpdateStrapi },
-      global: {
-        autoReload,
-
-        currentEnvironment,
-
-        plugins,
-
-        strapiVersion,
-      },
+      global: { autoReload, currentEnvironment, plugins, strapiVersion },
       // FIXME
       intl: { formatMessage, locale },
       updatePlugin,

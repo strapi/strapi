@@ -3,7 +3,9 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
+import { StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
+import { Middlewares, Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -32,12 +34,23 @@ const queryClient = new QueryClient({
 });
 
 class StrapiApp {
-  plugins = {};
+  constructor({ appPlugins }) {
+    this.appPlugins = appPlugins || {};
+    this.middlewares = Middlewares();
+    this.plugins = {};
+    this.reducers = { ...reducers };
+  }
 
-  reducers = { ...reducers };
+  addReducers(reducers) {
+    Object.keys(reducers).forEach(reducerName => {
+      this.reducers[reducerName] = reducers[reducerName];
+    });
+  }
 
   async initialize() {
-    console.log('initializing');
+    Object.keys(this.appPlugins).forEach(plugin => {
+      this.appPlugins[plugin].register(this);
+    });
 
     return this;
   }
@@ -46,6 +59,14 @@ class StrapiApp {
     console.log('booting');
 
     return this;
+  }
+
+  getPlugin(pluginId) {
+    return this.plugins[pluginId] || null;
+  }
+
+  registerPlugin(pluginConf) {
+    this.plugins[pluginConf.id] = Plugin(pluginConf);
   }
 
   render() {
@@ -57,16 +78,18 @@ class StrapiApp {
           <GlobalStyle />
           <Fonts />
           <Provider store={store}>
-            <LanguageProvider messages={translationMessages}>
-              <>
-                <AutoReloadOverlayBlocker />
-                <OverlayBlocker />
-                <Notifications />
-                <BrowserRouter basename={basename}>
-                  <App store={store} />
-                </BrowserRouter>
-              </>
-            </LanguageProvider>
+            <StrapiProvider strapi={this}>
+              <LanguageProvider messages={translationMessages}>
+                <>
+                  <AutoReloadOverlayBlocker />
+                  <OverlayBlocker />
+                  <Notifications />
+                  <BrowserRouter basename={basename}>
+                    <App store={store} />
+                  </BrowserRouter>
+                </>
+              </LanguageProvider>
+            </StrapiProvider>
           </Provider>
         </ThemeProvider>
       </QueryClientProvider>
@@ -74,4 +97,4 @@ class StrapiApp {
   }
 }
 
-export default () => new StrapiApp();
+export default ({ appPlugins }) => new StrapiApp({ appPlugins });
