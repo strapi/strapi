@@ -18,7 +18,6 @@ import {
   difference,
   GlobalContextProvider,
   LoadingIndicatorPage,
-  OverlayBlocker,
   CheckPagePermissions,
   request,
 } from '@strapi/helper-plugin';
@@ -38,12 +37,7 @@ import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
 import SettingsPage from '../SettingsPage';
 import Logout from './Logout';
-import {
-  disableGlobalOverlayBlocker,
-  enableGlobalOverlayBlocker,
-  getInfosDataSucceeded,
-  updatePlugin,
-} from '../App/actions';
+import { getInfosDataSucceeded, updatePlugin } from '../App/actions';
 import makeSelecApp from '../App/selectors';
 import { getStrapiLatestReleaseSucceeded, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
@@ -211,15 +205,14 @@ export class Admin extends React.Component {
       admin: { shouldUpdateStrapi },
       global: {
         autoReload,
-        blockApp,
+
         currentEnvironment,
-        overlayBlockerData,
+
         plugins,
-        showGlobalAppBlocker,
+
         strapiVersion,
       },
-      disableGlobalOverlayBlocker,
-      enableGlobalOverlayBlocker,
+      // FIXME
       intl: { formatMessage, locale },
       updatePlugin,
     } = this.props;
@@ -241,8 +234,9 @@ export class Admin extends React.Component {
           emitEvent={this.emitEvent}
           currentEnvironment={currentEnvironment}
           currentLocale={locale}
-          disableGlobalOverlayBlocker={disableGlobalOverlayBlocker}
-          enableGlobalOverlayBlocker={enableGlobalOverlayBlocker}
+          // FIXME
+          disableGlobalOverlayBlocker={() => console.log('todo')}
+          enableGlobalOverlayBlocker={() => console.log('todo')}
           formatMessage={formatMessage}
           shouldUpdateStrapi={shouldUpdateStrapi}
           plugins={plugins}
@@ -285,11 +279,7 @@ export class Admin extends React.Component {
                 </Switch>
               </Content>
             </div>
-            <OverlayBlocker
-              key="overlayBlocker"
-              isOpen={blockApp && showGlobalAppBlocker}
-              {...overlayBlockerData}
-            />
+
             {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
           </Wrapper>
         </GlobalContextProvider>
@@ -310,17 +300,12 @@ Admin.propTypes = {
     appError: PropTypes.bool,
     shouldUpdateStrapi: PropTypes.bool.isRequired,
   }).isRequired,
-  disableGlobalOverlayBlocker: PropTypes.func.isRequired,
-  enableGlobalOverlayBlocker: PropTypes.func.isRequired,
   getInfosDataSucceeded: PropTypes.func.isRequired,
   getStrapiLatestReleaseSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
     autoReload: PropTypes.bool,
-    blockApp: PropTypes.bool,
     currentEnvironment: PropTypes.string,
-    overlayBlockerData: PropTypes.oneOfType([PropTypes.bool, PropTypes.object]),
     plugins: PropTypes.object,
-    showGlobalAppBlocker: PropTypes.bool,
     strapiVersion: PropTypes.string,
     uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   }).isRequired,
@@ -341,8 +326,6 @@ const mapStateToProps = createStructuredSelector({
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
     {
-      disableGlobalOverlayBlocker,
-      enableGlobalOverlayBlocker,
       getInfosDataSucceeded,
       getStrapiLatestReleaseSucceeded,
       setAppError,

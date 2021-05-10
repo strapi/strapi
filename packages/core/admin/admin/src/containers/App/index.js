@@ -23,8 +23,6 @@ import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
 window.strapi = Object.assign(window.strapi || {}, {
-  lockApp: () => console.log('todo lockApp'),
-  unlockApp: () => console.log('todo unlockApp'),
   lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
 });
 

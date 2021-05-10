@@ -60,7 +60,7 @@ const CreatePage = () => {
   ];
 
   const handleCreateRoleSubmit = data => {
-    strapi.lockAppWithOverlay();
+    strapi.lockApp();
     setIsSubmiting(true);
 
     if (id) {

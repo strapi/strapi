@@ -71,7 +71,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
 
     if (!errors) {
       try {
-        strapi.lockAppWithOverlay();
+        strapi.lockApp();
 
         dispatch({
           type: 'ON_SUBMIT',

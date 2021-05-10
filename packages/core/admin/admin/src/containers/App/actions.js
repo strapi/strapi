@@ -5,36 +5,13 @@
  */
 
 import {
-  DISABLE_GLOBAL_OVERLAY_BLOCKER,
-  ENABLE_GLOBAL_OVERLAY_BLOCKER,
-  FREEZE_APP,
   GET_INFOS_DATA_SUCCEEDED,
   GET_DATA_SUCCEEDED,
   LOAD_PLUGIN,
   PLUGIN_DELETED,
   PLUGIN_LOADED,
-  UNFREEZE_APP,
   UPDATE_PLUGIN,
 } from './constants';
-
-export function disableGlobalOverlayBlocker() {
-  return {
-    type: DISABLE_GLOBAL_OVERLAY_BLOCKER,
-  };
-}
-
-export function enableGlobalOverlayBlocker() {
-  return {
-    type: ENABLE_GLOBAL_OVERLAY_BLOCKER,
-  };
-}
-
-export function freezeApp(data) {
-  return {
-    type: FREEZE_APP,
-    data,
-  };
-}
 
 export function getInfosDataSucceeded(data) {
   return {
@@ -68,12 +45,6 @@ export function pluginLoaded(newPlugin) {
   return {
     type: PLUGIN_LOADED,
     plugin: newPlugin,
-  };
-}
-
-export function unfreezeApp() {
-  return {
-    type: UNFREEZE_APP,
   };
 }
 
