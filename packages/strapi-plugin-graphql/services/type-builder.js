@@ -17,6 +17,8 @@ const Time = require('../types/time');
 const { toSingular, toInputName } = require('./naming');
 
 const isScalarAttribute = ({ type }) => type && !['component', 'dynamiczone'].includes(type);
+const isTypeAttributeEnabled = (model, attr) =>
+  _.get(strapi.plugins.graphql, `config._schema.graphql.type.${model.globalId}.${attr}`) !== false;
 
 module.exports = {
   /**
@@ -215,8 +217,9 @@ module.exports = {
   generateInputModel(model, name, { allowIds = false } = {}) {
     const globalId = model.globalId;
     const inputName = `${_.upperFirst(toSingular(name))}Input`;
+    const hasAllAttributesDisabled = Object.keys(model.attributes).every(attr => !isTypeAttributeEnabled(model, attr));
 
-    if (_.isEmpty(model.attributes)) {
+    if (_.isEmpty(model.attributes) || hasAllAttributesDisabled) {
       return `
       input ${inputName} {
         _: String
@@ -232,6 +235,7 @@ module.exports = {
       input ${inputName} {
 
         ${Object.keys(model.attributes)
+          .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
               attribute: model.attributes[attributeName],
@@ -246,6 +250,7 @@ module.exports = {
       input edit${inputName} {
         ${allowIds ? 'id: ID' : ''}
         ${Object.keys(model.attributes)
+          .filter(attributeName => isTypeAttributeEnabled(model, attributeName))
           .map(attributeName => {
             return `${attributeName}: ${this.convertType({
               attribute: model.attributes[attributeName],
