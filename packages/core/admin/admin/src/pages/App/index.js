@@ -10,8 +10,8 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
+import PluginsInitializer from '../../components/PluginsInitializer';
 import PrivateRoute from '../../components/PrivateRoute';
-import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import { getUID } from './utils';
@@ -117,7 +117,7 @@ function App(props) {
             )}
             exact
           />
-          <PrivateRoute path="/" component={Admin} />
+          <PrivateRoute path="/" component={PluginsInitializer} />
           <Route path="" component={NotFoundPage} />
         </Switch>
       </Content>

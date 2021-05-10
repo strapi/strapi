@@ -17,7 +17,6 @@ import { isEmpty } from 'lodash';
 import {
   difference,
   GlobalContextProvider,
-  LoadingIndicatorPage,
   CheckPagePermissions,
   request,
 } from '@strapi/helper-plugin';
@@ -149,43 +148,9 @@ export class Admin extends React.Component {
     }
   };
 
-  hasApluginNotReady = props => {
-    const {
-      global: { plugins },
-    } = props;
-
-    return !Object.keys(plugins).every(plugin => plugins[plugin].isReady === true);
-  };
-
   initApp = async () => {
     await this.fetchAppInfo();
     await this.fetchStrapiLatestRelease();
-  };
-
-  /**
-   * Display the app loader until the app is ready
-   * @returns {Boolean}
-   */
-  showLoader = () => {
-    return this.hasApluginNotReady(this.props);
-  };
-
-  renderInitializers = () => {
-    const {
-      global: { plugins },
-    } = this.props;
-
-    return Object.keys(plugins).reduce((acc, current) => {
-      const InitializerComponent = plugins[current].initializer;
-
-      if (InitializerComponent) {
-        const key = plugins[current].id;
-
-        acc.push(<InitializerComponent key={key} {...this.props} {...this.helpers} />);
-      }
-
-      return acc;
-    }, []);
   };
 
   renderPluginDispatcher = props => {
@@ -203,29 +168,13 @@ export class Admin extends React.Component {
   render() {
     const {
       admin: { shouldUpdateStrapi },
-      global: {
-        autoReload,
-
-        currentEnvironment,
-
-        plugins,
-
-        strapiVersion,
-      },
+      global: { autoReload, currentEnvironment, strapiVersion },
       // FIXME
       intl: { formatMessage, locale },
+      // FIXME
+      plugins,
       updatePlugin,
     } = this.props;
-
-    // We need the admin data in order to make the initializers work
-    if (this.showLoader()) {
-      return (
-        <>
-          {this.renderInitializers()}
-          <LoadingIndicatorPage />
-        </>
-      );
-    }
 
     return (
       <PermissionsManager>
@@ -305,7 +254,6 @@ Admin.propTypes = {
   global: PropTypes.shape({
     autoReload: PropTypes.bool,
     currentEnvironment: PropTypes.string,
-    plugins: PropTypes.object,
     strapiVersion: PropTypes.string,
     uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   }).isRequired,
@@ -313,7 +261,7 @@ Admin.propTypes = {
     formatMessage: PropTypes.func,
     locale: PropTypes.string,
   }),
-  location: PropTypes.object.isRequired,
+  plugins: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
   updatePlugin: PropTypes.func.isRequired,
 };

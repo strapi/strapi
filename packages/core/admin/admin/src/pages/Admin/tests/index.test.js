@@ -24,12 +24,12 @@ describe('<Admin />', () => {
       getUserPermissions: jest.fn(),
       getUserPermissionsError: jest.fn(),
       getUserPermissionsSucceeded: jest.fn(),
+      plugins: {},
       global: {
         autoReload: false,
         currentEnvironment: 'development',
         hasAdminUser: false,
         isLoading: true,
-        plugins: {},
         strapiVersion: '3',
         uuid: false,
       },

@@ -9,7 +9,7 @@ const Email = () => <div>Email Plugin</div>;
 describe('<PluginDispatcher />', () => {
   it('Should return null if the params does not match the pluginId', () => {
     const props = {
-      global: { plugins: {} },
+      plugins: {},
       match: { params: { pluginId: 'email' } },
     };
 
@@ -20,13 +20,11 @@ describe('<PluginDispatcher />', () => {
 
   it('Should return the BlockerComponent if the plugin preventRendering prop is true', () => {
     const props = {
-      global: {
-        plugins: {
-          email: {
-            mainComponent: Email,
-            preventComponentRendering: true,
-            blockerComponent: null,
-          },
+      plugins: {
+        email: {
+          mainComponent: Email,
+          preventComponentRendering: true,
+          blockerComponent: null,
         },
       },
       match: { params: { pluginId: 'email' } },
@@ -39,13 +37,11 @@ describe('<PluginDispatcher />', () => {
 
   it('Should return a custom BlockerComponent if the plugin preventRendering prop is true and a custom blocker is given', () => {
     const props = {
-      global: {
-        plugins: {
-          email: {
-            mainComponent: Email,
-            preventComponentRendering: true,
-            blockerComponent: BlockerComponent2,
-          },
+      plugins: {
+        email: {
+          mainComponent: Email,
+          preventComponentRendering: true,
+          blockerComponent: BlockerComponent2,
         },
       },
       match: { params: { pluginId: 'email' } },
@@ -58,11 +54,9 @@ describe('<PluginDispatcher />', () => {
 
   it("Should return the plugin's mainComponent if all conditions are met", () => {
     const props = {
-      global: {
-        plugins: {
-          email: {
-            mainComponent: Email,
-          },
+      plugins: {
+        email: {
+          mainComponent: Email,
         },
       },
       match: { params: { pluginId: 'email' } },

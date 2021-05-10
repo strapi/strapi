@@ -1,15 +1,15 @@
 import globalReducer from './pages/App/reducer';
 import adminReducer from './pages/Admin/reducer';
 import languageProviderReducer from './components/LanguageProvider/reducer';
-import permissionsManagerReducer from './components/PermissionsManager/reducer';
 import menuReducer from './components/LeftMenu/reducer';
+import permissionsManagerReducer from './components/PermissionsManager/reducer';
 
 const reducers = {
-  app: globalReducer,
   admin: adminReducer,
+  app: globalReducer,
   language: languageProviderReducer,
-  permissionsManager: permissionsManagerReducer,
   menu: menuReducer,
+  permissionsManager: permissionsManagerReducer,
 };
 
 export default reducers;

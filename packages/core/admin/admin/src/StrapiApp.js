@@ -3,7 +3,9 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
+import { StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
+import { Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -17,7 +19,7 @@ import themes from './themes';
 import reducers from './reducers';
 
 // TODO
-import translationMessages from './translations';
+import translations from './translations';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
@@ -31,21 +33,86 @@ const queryClient = new QueryClient({
   },
 });
 
-class StrapiApp {
-  plugins = {};
+// FIXME
+const appLocales = Object.keys(translations);
 
-  reducers = { ...reducers };
+class StrapiApp {
+  constructor({ appPlugins }) {
+    this.translationMessages = translations;
+    this.appPlugins = appPlugins || {};
+    this.middlewares = [];
+    this.plugins = {};
+    this.reducers = { ...reducers };
+  }
+
+  addMiddleware(middleware) {
+    this.middlewares.push(middleware);
+  }
+
+  addReducers(reducers) {
+    Object.keys(reducers).forEach(reducerName => {
+      this.reducers[reducerName] = reducers[reducerName];
+    });
+  }
 
   async initialize() {
-    console.log('initializing');
-
-    return this;
+    Object.keys(this.appPlugins).forEach(plugin => {
+      this.appPlugins[plugin].register(this);
+    });
   }
 
   async boot() {
-    console.log('booting');
+    Object.keys(this.appPlugins).forEach(plugin => {
+      const boot = this.appPlugins[plugin].boot;
 
-    return this;
+      if (boot) {
+        boot(this);
+      }
+    });
+  }
+
+  getPlugin(pluginId) {
+    return this.plugins[pluginId] || null;
+  }
+
+  // FIXME
+  registerPluginTranslations(pluginId, trads) {
+    const pluginTranslations = appLocales.reduce((acc, currentLanguage) => {
+      const currentLocale = trads[currentLanguage];
+
+      if (currentLocale) {
+        const localeprefixedWithPluginId = Object.keys(currentLocale).reduce((acc2, current) => {
+          acc2[`${pluginId}.${current}`] = currentLocale[current];
+
+          return acc2;
+        }, {});
+
+        acc[currentLanguage] = localeprefixedWithPluginId;
+      }
+
+      return acc;
+    }, {});
+
+    this.translationMessages = Object.keys(this.translationMessages).reduce((acc, current) => {
+      acc[current] = {
+        ...this.translationMessages[current],
+        ...(pluginTranslations[current] || {}),
+      };
+
+      return acc;
+    }, {});
+  }
+
+  registerPlugin(pluginConf) {
+    const plugin = Plugin(pluginConf);
+
+    this.plugins[plugin.pluginId] = plugin;
+
+    // FIXME
+    // Translations should be loaded differently
+    // This is a temporary fix
+
+    this.registerPluginTranslations(plugin.pluginId, plugin.trads);
   }
 
   render() {
@@ -57,16 +124,18 @@ class StrapiApp {
           <GlobalStyle />
           <Fonts />
           <Provider store={store}>
-            <LanguageProvider messages={translationMessages}>
-              <>
-                <AutoReloadOverlayBlocker />
-                <OverlayBlocker />
-                <Notifications />
-                <BrowserRouter basename={basename}>
-                  <App store={store} />
-                </BrowserRouter>
-              </>
-            </LanguageProvider>
+            <StrapiProvider strapi={this}>
+              <LanguageProvider messages={this.translationMessages}>
+                <>
+                  <AutoReloadOverlayBlocker />
+                  <OverlayBlocker />
+                  <Notifications />
+                  <BrowserRouter basename={basename}>
+                    <App store={store} />
+                  </BrowserRouter>
+                </>
+              </LanguageProvider>
+            </StrapiProvider>
           </Provider>
         </ThemeProvider>
       </QueryClientProvider>
@@ -74,4 +143,4 @@ class StrapiApp {
   }
 }
 
-export default () => new StrapiApp();
+export default ({ appPlugins }) => new StrapiApp({ appPlugins });
