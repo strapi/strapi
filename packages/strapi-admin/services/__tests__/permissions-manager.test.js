@@ -1,8 +1,39 @@
 'use strict';
 
-const { defineAbility } = require('@casl/ability');
+const { AbilityBuilder, Ability } = require('@casl/ability');
+const { pick } = require('lodash/fp');
+const sift = require('sift');
 const { buildStrapiQuery } = require('../permission/permissions-manager/query-builers');
 const createPermissionsManager = require('../permission/permissions-manager');
+
+const allowedOperations = [
+  '$or',
+  '$and',
+  '$eq',
+  '$ne',
+  '$in',
+  '$nin',
+  '$lt',
+  '$lte',
+  '$gt',
+  '$gte',
+  '$exists',
+  '$elemMatch',
+];
+
+const operations = pick(allowedOperations, sift);
+
+const conditionsMatcher = conditions => {
+  return sift.createQueryTester(conditions, { operations });
+};
+
+const defineAbility = register => {
+  const { can, build } = new AbilityBuilder(Ability);
+
+  register(can);
+
+  return build({ conditionsMatcher });
+};
 
 describe('Permissions Manager', () => {
   describe('get Query', () => {
@@ -18,14 +49,14 @@ describe('Permissions Manager', () => {
     });
 
     test('It should returns a valid query from the ability', () => {
-      const ability = defineAbility(can => can('read', 'foo', ['bar'], { kai: 'doe' }));
+      const ability = defineAbility(can => can('read', 'foo', ['bar'], { $and: [{ kai: 'doe' }] }));
       const pm = createPermissionsManager({
         ability,
         action: 'read',
         model: 'foo',
       });
 
-      const expected = { _or: [{ kai: 'doe' }] };
+      const expected = [{ kai: 'doe' }];
 
       expect(pm.getQuery()).toStrictEqual(expected);
     });
@@ -149,18 +180,20 @@ describe('Permissions Manager', () => {
   });
 
   describe('queryFrom', () => {
-    const ability = defineAbility(can => can('read', 'article', ['title'], { title: 'foo' }));
+    const ability = defineAbility(can =>
+      can('read', 'article', ['title'], { $and: [{ title: 'foo' }] })
+    );
     const pm = createPermissionsManager({
       ability,
       action: 'read',
       model: 'article',
     });
 
-    const pmQuery = { _or: [{ title: 'foo' }] };
+    const pmQuery = [{ title: 'foo' }];
 
     test('Create query from simple object', () => {
       const query = { _limit: 100 };
-      const expected = { _limit: 100, _where: [pmQuery] };
+      const expected = { _limit: 100, _where: pmQuery };
 
       const res = pm.queryFrom(query);
 
@@ -171,7 +204,7 @@ describe('Permissions Manager', () => {
       const query = { _limit: 100, _where: [{ a: 'b' }, { c: 'd' }] };
       const expected = {
         _limit: 100,
-        _where: [pmQuery, { a: 'b' }, { c: 'd' }],
+        _where: [{ a: 'b' }, { c: 'd' }, ...pmQuery],
       };
 
       const res = pm.queryFrom(query);

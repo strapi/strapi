@@ -3,15 +3,28 @@
 const { getService } = require('../../utils');
 
 /**
+ * @typedef {object} WillRegisterPermissionContext
+ * @property {Permission} permission
+ * @property {object} user
+ * @property {object} condition
+ */
+
+/**
  * Locales property handler for the permission engine
  * Add the has-locale-access condition if the locales property is defined
- * @param {Permission} permission
- * @param {function(string)} addCondition
+ * @param {WillRegisterPermissionContext} context
  */
-const willEvaluatePermissionHandler = ({ permission, addCondition }) => {
+const willRegisterPermission = context => {
+  const { permission, condition, user } = context;
   const { subject, properties } = permission;
-  const { locales } = properties || {};
 
+  const isSuperAdmin = strapi.admin.services.role.hasSuperAdminRole(user);
+
+  if (isSuperAdmin) {
+    return;
+  }
+
+  const { locales } = properties || {};
   const { isLocalizedContentType } = getService('content-types');
 
   // If there is no subject defined, ignore the permission
@@ -31,16 +44,20 @@ const willEvaluatePermissionHandler = ({ permission, addCondition }) => {
     return;
   }
 
-  addCondition('plugins::i18n.has-locale-access');
+  condition.and({
+    locale: {
+      $in: locales || [],
+    },
+  });
 };
 
 const registerI18nPermissionsHandlers = () => {
   const { engine } = strapi.admin.services.permission;
 
-  engine.hooks.willEvaluatePermission.register(willEvaluatePermissionHandler);
+  engine.hooks.willRegisterPermission.register(willRegisterPermission);
 };
 
 module.exports = {
-  willEvaluatePermissionHandler,
+  willRegisterPermission,
   registerI18nPermissionsHandlers,
 };
