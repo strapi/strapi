@@ -46,7 +46,7 @@ RolesSelectComponent.defaultProps = {
 RolesSelectComponent.propTypes = {
   isDisabled: PropTypes.bool.isRequired,
   value: PropTypes.array,
-  error: PropTypes.string,
+  error: PropTypes.object,
   onChange: PropTypes.func.isRequired,
 };
 

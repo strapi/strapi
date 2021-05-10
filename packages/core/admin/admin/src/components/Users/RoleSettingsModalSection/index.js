@@ -67,7 +67,7 @@ RoleSettingsModalSection.propTypes = {
     useSSORegistration: PropTypes.bool,
   }).isRequired,
   formErrors: PropTypes.shape({
-    roles: PropTypes.array,
+    roles: PropTypes.object,
     useSSORegistration: PropTypes.bool,
   }),
   onChange: PropTypes.func.isRequired,
