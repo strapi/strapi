@@ -90,7 +90,7 @@ const normalizeFieldName = ({ model, field }) => {
     : fieldPath.join('.');
 };
 
-const BOOLEAN_OPERATORS = ['or'];
+const BOOLEAN_OPERATORS = ['or', 'and'];
 
 const hasDeepFilters = ({ where = [], sort = [] }, { minDepth = 1 } = {}) => {
   // A query uses deep filtering if some of the clauses contains a sort or a match expression on a field of a relation

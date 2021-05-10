@@ -4,8 +4,9 @@ const {
   curry,
   map,
   filter,
-  each,
+  propEq,
   isFunction,
+  isBoolean,
   isArray,
   isEmpty,
   isObject,
@@ -17,12 +18,17 @@ const {
 } = require('lodash/fp');
 const { AbilityBuilder, Ability } = require('@casl/ability');
 const sift = require('sift');
-const { hooks } = require('strapi-utils');
 const permissionDomain = require('../../domain/permission/index');
 const { getService } = require('../../utils');
+const {
+  createEngineHooks,
+  createWillEvaluateContext,
+  createWillRegisterContext,
+} = require('./engine-hooks');
 
 const allowedOperations = [
   '$or',
+  '$and',
   '$eq',
   '$ne',
   '$in',
@@ -40,23 +46,9 @@ const conditionsMatcher = conditions => {
   return sift.createQueryTester(conditions, { operations });
 };
 
-const createBoundAbstractPermissionDomain = permission => ({
-  get permission() {
-    return cloneDeep(permission);
-  },
-
-  addCondition(condition) {
-    Object.assign(permission, permissionDomain.addCondition(condition, permission));
-
-    return this;
-  },
-});
-
 module.exports = conditionProvider => {
   const state = {
-    hooks: {
-      willEvaluatePermission: hooks.createAsyncSeriesHook(),
-    },
+    hooks: createEngineHooks(),
   };
 
   return {
@@ -83,9 +75,10 @@ module.exports = conditionProvider => {
     generateAbilityCreatorFor(user) {
       return async (permissions, options) => {
         const { can, build } = new AbilityBuilder(Ability);
-        const registerFn = this.createRegisterFunction(can);
 
         for (const permission of permissions) {
+          const registerFn = this.createRegisterFunction(can, permission, user);
+
           await this.evaluate({ permission, user, options, registerFn });
         }
 
@@ -138,7 +131,7 @@ module.exports = conditionProvider => {
      * @returns {Promise<void>}
      */
     async applyPermissionProcessors(permission) {
-      const context = createBoundAbstractPermissionDomain(permission);
+      const context = createWillEvaluateContext(permission);
 
       // 1. Trigger willEvaluatePermission hook and await transformation operated on the permission
       await state.hooks.willEvaluatePermission.call(context);
@@ -171,7 +164,7 @@ module.exports = conditionProvider => {
 
       // Register the permission if there is no condition
       if (isEmpty(conditions)) {
-        return registerFn({ action, subject, fields: properties.fields, condition: true });
+        return registerFn({ action, subject, fields: properties.fields });
       }
 
       /** Set of functions used to resolve + evaluate conditions & register the permission if allowed */
@@ -179,58 +172,90 @@ module.exports = conditionProvider => {
       // 1. Replace each condition name by its associated value
       const resolveConditions = map(conditionProvider.get);
 
-      // 2. Only keep the handler of each condition
-      const pickHandlers = map(prop('handler'));
+      // 2. Filter conditions, only keep those whose handler is a function
+      const filterValidConditions = filter(condition => isFunction(condition.handler));
 
-      // 3. Filter conditions, only keep objects and functions
-      const filterValidConditions = filter(isObject);
-
-      // 4. Evaluate the conditions if they're a function, returns the object otherwise
+      // 3. Evaluate the conditions handler and returns an object
+      // containing both the original condition and its result
       const evaluateConditions = conditions => {
         return Promise.all(
-          conditions.map(cond =>
-            isFunction(cond)
-              ? cond(user, merge(conditionOptions, { permission: cloneDeep(permission) }))
-              : cond
-          )
+          conditions.map(async condition => ({
+            condition,
+            result: await condition.handler(
+              user,
+              merge(conditionOptions, { permission: cloneDeep(permission) })
+            ),
+          }))
         );
       };
 
-      // 5. Only keeps 'true' booleans or objects as condition's result
-      const filterValidResults = filter(result => result === true || isObject(result));
-
-      // 6. Transform each result into registerFn options
-      const transformToRegisterOptions = map(result => ({
-        action,
-        subject,
-        fields: properties.fields,
-        condition: result,
-      }));
-
-      // 7. Register each result using the registerFn
-      const registerResults = each(registerFn);
+      // 4. Only keeps booleans or objects as condition's result
+      const filterValidResults = filter(({ result }) => isBoolean(result) || isObject(result));
 
       /**/
 
-      // Execute all the steps needed to register the permission with its associated conditions
-      await Promise.resolve(conditions)
+      const evaluatedConditions = await Promise.resolve(conditions)
         .then(resolveConditions)
-        .then(pickHandlers)
         .then(filterValidConditions)
         .then(evaluateConditions)
-        .then(filterValidResults)
-        .then(transformToRegisterOptions)
-        .then(registerResults);
+        .then(filterValidResults);
+
+      // Utils
+      const resultPropEq = propEq('result');
+      const pickResults = map(prop('result'));
+
+      if (evaluatedConditions.every(resultPropEq(false))) {
+        return;
+      }
+
+      // If there is no condition or if one of them return true, register the permission as is
+      if (isEmpty(evaluatedConditions) || evaluatedConditions.some(resultPropEq(true))) {
+        return registerFn({ action, subject, fields: properties.fields });
+      }
+
+      const results = pickResults(evaluatedConditions).filter(isObject);
+
+      if (isEmpty(results)) {
+        return registerFn({ action, subject, fields: properties.fields });
+      }
+
+      // Register the permission
+      return registerFn({
+        action,
+        subject,
+        fields: properties.fields,
+        condition: { $and: [{ $or: results }] },
+      });
     },
 
     /**
      * Encapsulate a register function with custom params to fit `evaluatePermission`'s syntax
      * @param can
-     * @returns {function({action?: *, subject?: *, fields?: *, condition?: *}): *}
+     * @param {Permission} permission
+     * @param {object} user
+     * @returns {function}
      */
-    createRegisterFunction(can) {
-      return ({ action, subject, fields, condition }) => {
-        return can(action, subject, fields, isObject(condition) ? condition : undefined);
+    createRegisterFunction(can, permission, user) {
+      const registerToCasl = caslPermission => {
+        const { action, subject, fields, condition } = caslPermission;
+
+        can(action, subject, fields, isObject(condition) ? condition : undefined);
+      };
+
+      const runWillRegisterHook = async caslPermission => {
+        const hookContext = createWillRegisterContext(caslPermission, {
+          permission,
+          user,
+        });
+
+        await state.hooks.willRegisterPermission.call(hookContext);
+
+        return caslPermission;
+      };
+
+      return async caslPermission => {
+        await runWillRegisterHook(caslPermission);
+        registerToCasl(caslPermission);
       };
     },
 
