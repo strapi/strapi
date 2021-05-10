@@ -9,8 +9,8 @@ const _ = require('lodash');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const { models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
-const { createDatabaseManager } = require('@strapi/database');
 const { createLogger } = require('@strapi/logger');
+const { Database } = require('@strapi/database');
 const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
@@ -350,7 +350,8 @@ class Strapi {
     this.models['core_store'] = coreStoreModel(this.config);
     this.models['strapi_webhooks'] = webhookModel(this.config);
 
-    this.db = createDatabaseManager(this);
+    this.db = new Database(this.config.get('database'));
+    // this.db = createDatabaseManager(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     await this.db.initialize();
