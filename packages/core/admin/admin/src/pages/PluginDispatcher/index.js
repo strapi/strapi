@@ -14,7 +14,7 @@ import PageTitle from '../../components/PageTitle';
 
 export function PluginDispatcher(props) {
   const {
-    global: { plugins },
+    plugins,
     match: {
       params: { pluginId },
     },
@@ -53,12 +53,12 @@ export function PluginDispatcher(props) {
 PluginDispatcher.defaultProps = {};
 
 PluginDispatcher.propTypes = {
-  global: PropTypes.object.isRequired,
   match: PropTypes.shape({
     params: PropTypes.shape({
       pluginId: PropTypes.string,
     }),
   }).isRequired,
+  plugins: PropTypes.object.isRequired,
 };
 
 export default memo(PluginDispatcher);

@@ -5,7 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
-import { Middlewares, Plugin } from './core/apis';
+import { Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -19,7 +19,7 @@ import themes from './themes';
 import reducers from './reducers';
 
 // TODO
-import translationMessages from './translations';
+import translations from './translations';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
@@ -33,12 +33,20 @@ const queryClient = new QueryClient({
   },
 });
 
+// FIXME
+const appLocales = Object.keys(translations);
+
 class StrapiApp {
   constructor({ appPlugins }) {
+    this.translationMessages = translations;
     this.appPlugins = appPlugins || {};
-    this.middlewares = Middlewares();
+    this.middlewares = [];
     this.plugins = {};
     this.reducers = { ...reducers };
+  }
+
+  addMiddleware(middleware) {
+    this.middlewares.push(middleware);
   }
 
   addReducers(reducers) {
@@ -51,22 +59,60 @@ class StrapiApp {
     Object.keys(this.appPlugins).forEach(plugin => {
       this.appPlugins[plugin].register(this);
     });
-
-    return this;
   }
 
   async boot() {
-    console.log('booting');
+    Object.keys(this.appPlugins).forEach(plugin => {
+      const boot = this.appPlugins[plugin].boot;
 
-    return this;
+      if (boot) {
+        boot(this);
+      }
+    });
   }
 
   getPlugin(pluginId) {
     return this.plugins[pluginId] || null;
   }
 
+  // FIXME
+  registerPluginTranslations(pluginId, trads) {
+    const pluginTranslations = appLocales.reduce((acc, currentLanguage) => {
+      const currentLocale = trads[currentLanguage];
+
+      if (currentLocale) {
+        const localeprefixedWithPluginId = Object.keys(currentLocale).reduce((acc2, current) => {
+          acc2[`${pluginId}.${current}`] = currentLocale[current];
+
+          return acc2;
+        }, {});
+
+        acc[currentLanguage] = localeprefixedWithPluginId;
+      }
+
+      return acc;
+    }, {});
+
+    this.translationMessages = Object.keys(this.translationMessages).reduce((acc, current) => {
+      acc[current] = {
+        ...this.translationMessages[current],
+        ...(pluginTranslations[current] || {}),
+      };
+
+      return acc;
+    }, {});
+  }
+
   registerPlugin(pluginConf) {
-    this.plugins[pluginConf.id] = Plugin(pluginConf);
+    const plugin = Plugin(pluginConf);
+
+    this.plugins[plugin.pluginId] = plugin;
+
+    // FIXME
+    // Translations should be loaded differently
+    // This is a temporary fix
+
+    this.registerPluginTranslations(plugin.pluginId, plugin.trads);
   }
 
   render() {
@@ -79,7 +125,7 @@ class StrapiApp {
           <Fonts />
           <Provider store={store}>
             <StrapiProvider strapi={this}>
-              <LanguageProvider messages={translationMessages}>
+              <LanguageProvider messages={this.translationMessages}>
                 <>
                   <AutoReloadOverlayBlocker />
                   <OverlayBlocker />

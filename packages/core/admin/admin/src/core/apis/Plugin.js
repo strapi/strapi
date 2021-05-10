@@ -5,8 +5,9 @@ class Plugin {
     this.description = pluginConf.description;
     // TODO
     this.icon = pluginConf.icon;
+    this.initializer = pluginConf.initializer || null;
     this.injectionZones = pluginConf.injectionZones || {};
-    this.isReady = pluginConf.isReady || true;
+    this.isReady = pluginConf.isReady !== undefined ? pluginConf.isReady : true;
     // TODO
     this.isRequired = pluginConf.isRequired;
     // TODO

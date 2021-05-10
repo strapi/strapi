@@ -2,8 +2,6 @@ import ReactDOM from 'react-dom';
 import StrapiApp from './StrapiApp';
 import plugins from './plugins';
 
-console.log({ plugins });
-
 const app = StrapiApp({ appPlugins: plugins });
 
 const MOUNT_NODE = document.getElementById('app');
