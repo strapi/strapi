@@ -4,6 +4,7 @@ const tar = require('tar');
 const fetch = require('node-fetch');
 const parseGitUrl = require('git-url-parse');
 const chalk = require('chalk');
+
 const stopProcess = require('./stop-process');
 
 function getShortcut(starter) {
@@ -21,6 +22,7 @@ function getShortcut(starter) {
     usedShortcut: true,
   };
 }
+
 /**
  * @param  {string} repo The path to repo
  */
@@ -45,20 +47,21 @@ async function getDefaultBranch(repo) {
  */
 async function getRepoInfo(starter) {
   const repoInfo = await parseGitUrl(starter);
-  const { name, full_name, ref, protocols, source } = repoInfo;
+  const { name, full_name, ref, filepath, protocols, source } = repoInfo;
 
   if (protocols.length === 0) {
     return getShortcut(starter);
   }
 
   if (source !== 'github.com') {
-    stopProcess(`Github URL not found for: ${chalk.yellow(starter)}`);
+    stopProcess(`GitHub URL not found for: ${chalk.yellow(starter)}.`);
   }
 
   return {
     name,
     full_name,
     ref,
+    filepath,
   };
 }
 
@@ -66,11 +69,16 @@ async function getRepoInfo(starter) {
  * @param  {string} starterUrl Github url for strapi starter
  * @param  {string} tmpDir Path to temporary directory
  */
-async function downloadGithubRepo(starterUrl, tmpDir) {
-  const { full_name, ref, usedShortcut } = await getRepoInfo(starterUrl);
+async function downloadGitHubRepo(starterUrl, tmpDir) {
+  const { full_name, ref, filepath, usedShortcut } = await getRepoInfo(starterUrl);
   const default_branch = await getDefaultBranch(full_name);
 
-  const branch = ref ? ref : default_branch;
+  let branch = default_branch;
+  if (ref) {
+    // Append the filepath to the parsed ref since a branch name could contain '/'
+    // If so, the rest of the branch name will be considered 'filepath' by 'parseGitUrl'
+    branch = filepath ? `${ref}/${filepath}` : ref;
+  }
 
   // Download from GitHub
   const codeload = `https://codeload.github.com/${full_name}/tar.gz/${branch}`;
@@ -86,4 +94,4 @@ async function downloadGithubRepo(starterUrl, tmpDir) {
   });
 }
 
-module.exports = { getRepoInfo, downloadGithubRepo };
+module.exports = { getRepoInfo, downloadGitHubRepo };

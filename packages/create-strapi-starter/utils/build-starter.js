@@ -12,7 +12,7 @@ const generateNewApp = require('strapi-generate-new');
 
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');
-const { getRepoInfo, downloadGithubRepo } = require('./fetch-github');
+const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
 const logger = require('./logger');
 const stopProcess = require('./stop-process');
 
@@ -99,7 +99,7 @@ module.exports = async function buildStarter(projectArgs, program) {
   const { full_name } = await getRepoInfo(starterUrl);
 
   // Download repo inside tmp dir
-  await downloadGithubRepo(starterUrl, tmpDir);
+  await downloadGitHubRepo(starterUrl, tmpDir);
 
   const starterJson = readStarterJson(join(tmpDir, 'starter.json'), starterUrl);
 

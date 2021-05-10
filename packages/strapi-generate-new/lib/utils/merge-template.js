@@ -7,7 +7,9 @@ const fetch = require('node-fetch');
 const tar = require('tar');
 const _ = require('lodash');
 const chalk = require('chalk');
-const gitInfo = require('hosted-git-info');
+const parseGitUrl = require('git-url-parse');
+
+const stopProcess = require('./stop-process');
 
 // Specify all the files and directories a template can have
 const allowChildren = '*';
@@ -33,16 +35,16 @@ const allowedTemplateContents = {
 module.exports = async function mergeTemplate(scope, rootPath) {
   // Parse template info
   const repoInfo = getRepoInfo(scope.template);
-  const { user, project } = repoInfo;
-  console.log(`Installing ${chalk.yellow(`${user}/${project}`)} template.`);
+  const { full_name } = repoInfo;
+  console.log(`Installing ${chalk.yellow(full_name)} template.`);
 
   // Download template repository to a temporary directory
   const templatePath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
 
   try {
-    await downloadGithubRepo(repoInfo, templatePath);
+    await downloadGitHubRepo(repoInfo, templatePath);
   } catch (error) {
-    throw Error(`Could not download ${chalk.yellow(`${user}/${project}`)} repository.`);
+    throw Error(`Could not download ${chalk.yellow(full_name)} repository.`);
   }
 
   // Make sure the downloaded template matches the required format
@@ -50,7 +52,7 @@ module.exports = async function mergeTemplate(scope, rootPath) {
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
-  const fullTemplateUrl = `https://github.com/${user}/${project}`;
+  const fullTemplateUrl = `https://github.com/${full_name}`;
   await mergePackageJSON(rootPath, templateConfig, fullTemplateUrl);
   await mergeFilesAndDirectories(rootPath, templatePath);
 
@@ -169,36 +171,68 @@ async function checkTemplateContentsStructure(templateContentsPath) {
   checkPathContents(templateContentsPath, []);
 }
 
-function getRepoInfo(template) {
-  try {
-    const { user, project, default: urlStrategy } = gitInfo.fromUrl(template);
-    if (urlStrategy === 'https' || urlStrategy === 'http') {
-      // A full GitHub URL was provided, return username and project directly
-      return { user, project };
-    }
-    if (urlStrategy === 'shortcut') {
-      // A shorthand was provided, so prefix the project name with "strapi-template-"
-      return {
-        user,
-        project: `strapi-template-${project}`,
-      };
-    }
-  } catch (error) {
-    // If it's not a GitHub URL, then assume it's a shorthand for an official template
-    return {
-      user: 'strapi',
-      project: `strapi-template-${template}`,
-    };
+function parseShorthand(template) {
+  let full_name;
+  // Determine if it is another owner
+  if (template.includes('/')) {
+    const [owner, project] = template.split('/');
+    full_name = `${owner}/strapi-template-${project}`;
+  } else {
+    full_name = `strapi/strapi-template-${template}`;
   }
+
+  return {
+    full_name,
+  };
 }
 
-async function downloadGithubRepo(repoInfo, templatePath) {
+function getRepoInfo(template) {
+  const { name, full_name, ref, filepath, protocols, source } = parseGitUrl(template);
+
+  if (protocols.length === 0) {
+    return parseShorthand(template);
+  }
+
+  if (source !== 'github.com') {
+    stopProcess(`GitHub URL not found for: ${chalk.yellow(template)}.`);
+  }
+
+  return { name, full_name, ref, filepath };
+}
+
+/**
+ * @param {string} repo The full name of the repository.
+ */
+async function getDefaultBranch(repo) {
+  const response = await fetch(`https://api.github.com/repos/${repo}`);
+  if (!response.ok) {
+    stopProcess(
+      `Could not find the information for ${chalk.yellow(
+        repo
+      )}. Make sure it is publicly accessible on github.`
+    );
+  }
+
+  const { default_branch } = await response.json();
+  return default_branch;
+}
+
+async function downloadGitHubRepo(repoInfo, templatePath) {
   // Download from GitHub
-  const { user, project } = repoInfo;
-  const codeload = `https://codeload.github.com/${user}/${project}/tar.gz/master`;
+  const { full_name, ref, filepath } = repoInfo;
+  const default_branch = await getDefaultBranch(full_name);
+
+  let branch = default_branch;
+  if (ref) {
+    // Append the filepath to the parsed ref since a branch name could contain '/'
+    // If so, the rest of the branch name will be considered 'filepath' by 'parseGitUrl'
+    branch = filepath ? `${ref}/${filepath}` : ref;
+  }
+
+  const codeload = `https://codeload.github.com/${full_name}/tar.gz/${branch}`;
   const response = await fetch(codeload);
   if (!response.ok) {
-    throw Error(`Could not download the ${chalk.green(`${user}/${project}`)} repository`);
+    throw Error(`Could not download the ${chalk.green(full_name)} repository`);
   }
 
   await new Promise(resolve => {
