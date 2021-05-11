@@ -63,9 +63,11 @@ const DataManagerProvider = ({
   reservedNames,
 }) => {
   const dispatch = useDispatch();
+  // TODO
   const {
     strapi: { getPlugin },
   } = useStrapi();
+
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const { autoReload, emitEvent, formatMessage } = useGlobalContext();
