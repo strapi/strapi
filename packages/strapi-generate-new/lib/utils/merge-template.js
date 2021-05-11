@@ -172,16 +172,16 @@ async function checkTemplateContentsStructure(templateContentsPath) {
 }
 
 function parseShorthand(template) {
-  let user = 'strapi',
-    name = `strapi-template-${template}`;
+  let owner = 'strapi';
+  let name = `strapi-template-${template}`;
 
-  // Determine if it is comes from another user
+  // Determine if it is comes from another owner
   if (template.includes('/')) {
-    [user, name] = template.split('/');
+    [owner, name] = template.split('/');
     name = `strapi-template-${name}`;
   }
 
-  const full_name = `${user}/${name}`;
+  const full_name = `${owner}/${name}`;
   return {
     name,
     full_name,

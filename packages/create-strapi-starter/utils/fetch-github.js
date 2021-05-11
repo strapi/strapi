@@ -8,16 +8,16 @@ const chalk = require('chalk');
 const stopProcess = require('./stop-process');
 
 function parseShorthand(starter) {
-  let user = 'strapi',
-    name = `strapi-starter-${starter}`;
+  let owner = 'strapi';
+  let name = `strapi-starter-${starter}`;
 
-  // Determine if it is comes from another user
+  // Determine if it is comes from another owner
   if (starter.includes('/')) {
-    [user, name] = starter.split('/');
+    [owner, name] = starter.split('/');
     name = `strapi-starter-${name}`;
   }
 
-  const full_name = `${user}/${name}`;
+  const full_name = `${owner}/${name}`;
   return {
     name,
     full_name,
