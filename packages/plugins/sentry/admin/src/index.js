@@ -3,27 +3,23 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import trads from './translations';
 
-export default strapi => {
-  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const icon = pluginPkg.strapi.icon;
+const name = pluginPkg.strapi.name;
 
-  const plugin = {
-    blockerComponent: null,
-    blockerComponentProps: {},
-    description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
-    id: pluginId,
-    isReady: true,
-    initializer: () => null,
-    injectedComponents: [],
-    isRequired: pluginPkg.strapi.required || false,
-    layout: null,
-    lifecycles: () => {},
-    mainComponent: null,
-    name: pluginPkg.strapi.name,
-    pluginLogo,
-    preventComponentRendering: false,
-    trads,
-  };
-
-  return strapi.registerPlugin(plugin);
+export default {
+  register(app) {
+    app.registerPlugin({
+      description: pluginDescription,
+      icon,
+      id: pluginId,
+      isReady: true,
+      isRequired: pluginPkg.strapi.required || false,
+      name,
+      pluginLogo,
+      preventComponentRendering: false,
+      trads,
+    });
+  },
+  boot() {},
 };
