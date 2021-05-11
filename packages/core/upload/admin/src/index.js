@@ -31,8 +31,6 @@ export default {
 
     app.registerPlugin({
       description: pluginDescription,
-      // FIXME
-      fileModel: null,
       icon,
       id: pluginId,
       initializer: Initializer,
