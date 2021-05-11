@@ -91,10 +91,13 @@ module.exports = {
       for (const permission of permissions) {
         const { fields, _id } = permission;
 
-        await model.updateOne({ _id }, [
-          { $set: { properties: { fields } } },
-          { $unset: ['fields'] },
-        ]);
+        await model.updateOne(
+          { _id },
+          {
+            $set: { properties: { fields } },
+            $unset: { fields: true },
+          }
+        );
       }
     }
   },
