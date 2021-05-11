@@ -27,6 +27,9 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
+      injectionZones: {
+        listView: { links: [] },
+      },
       isRequired: pluginPkg.strapi.required || false,
       isReady: true,
       mainComponent: App,

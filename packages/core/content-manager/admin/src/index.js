@@ -25,15 +25,6 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      // TODO
-      injectedComponents: [
-        {
-          plugin: 'content-type-builder.listView',
-          area: 'list.link',
-          component: ConfigureViewButton,
-          key: 'content-manager.link',
-        },
-      ],
       injectionZones: {
         editSettingsView: { links: [] },
         editView: { informations: [], 'right-links': [] },
@@ -48,5 +39,12 @@ export default {
       trads,
     });
   },
-  boot() {},
+  boot(app) {
+    const ctbPlugin = app.getPlugin('content-type-builder');
+
+    ctbPlugin.injectComponent('listView', 'links', {
+      name: 'content-type-builder.link',
+      Component: ConfigureViewButton,
+    });
+  },
 };

@@ -1,14 +1,13 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useGlobalContext, useStrapi } from '@strapi/helper-plugin';
+import { BackHeader, InjectionZone, ListWrapper, useGlobalContext } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import pluginId from '../../pluginId';
-import getComponents from '../../utils/getComponents';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import ListRow from '../../components/ListRow';
@@ -32,10 +31,6 @@ const ListView = () => {
   } = useDataManager();
 
   const { emitEvent, formatMessage } = useGlobalContext();
-  const {
-    strapi: { plugins },
-  } = useStrapi();
-
   const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
@@ -260,17 +255,19 @@ const ListView = () => {
     },
   };
 
-  const listInjectedComponents = useMemo(() => {
-    return getComponents('listView', 'list.link', plugins, {
-      targetUid,
-      isTemporary,
-      isInContentTypeView,
-      contentTypeKind,
-    });
-  }, [plugins, isTemporary, targetUid, isInContentTypeView, contentTypeKind]);
+  const listInjectedComponents = (
+    <InjectionZone
+      key="injection-zone"
+      area={`${pluginId}.listView.links`}
+      targetUid={targetUid}
+      isTemporary={isTemporary}
+      isInContentTypeView={isInContentTypeView}
+      contentTypeKind={contentTypeKind}
+    />
+  );
 
   const listActions = isInDevelopmentMode
-    ? [...listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]
+    ? [listInjectedComponents, <ListButton {...addButtonProps} key="add-button" />]
     : listInjectedComponents;
 
   const CustomRow = props => {
