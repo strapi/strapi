@@ -11,22 +11,21 @@ import pluginPermissions from '../../permissions';
 
 // Create link from content-type-builder to content-manager
 function EditViewLink(props) {
-  const { currentEnvironment, emitEvent } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
   // Retrieve URL from props
-  const url = `/plugins/content-type-builder/content-types/${props.getModelName()}`;
+  const url = `/plugins/content-type-builder/content-types/${props.slug}`;
 
-  if (currentEnvironment !== 'development') {
-    return null;
-  }
-
-  if (props.getModelName() === 'strapi::administrator') {
+  if (props.slug === 'strapi::administrator') {
     return null;
   }
 
   return (
     <CheckPermissions permissions={pluginPermissions.main}>
       <LiLink
-        {...props}
+        message={{
+          id: 'content-manager.containers.Edit.Link.Fields',
+        }}
+        icon="fa-cog"
         url={url}
         onClick={() => {
           emitEvent('willEditEditLayout');
@@ -37,8 +36,7 @@ function EditViewLink(props) {
 }
 
 EditViewLink.propTypes = {
-  currentEnvironment: PropTypes.string.isRequired,
-  getModelName: PropTypes.func.isRequired,
+  slug: PropTypes.string.isRequired,
 };
 
 export default EditViewLink;

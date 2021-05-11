@@ -35,7 +35,8 @@ export default {
         },
       ],
       injectionZones: {
-        editView: { informations: [] },
+        editSettingsView: { links: [] },
+        editView: { informations: [], 'right-links': [] },
         listView: { actions: [], deleteModalAdditionalInfos: [] },
       },
       isReady: true,

@@ -4,9 +4,9 @@ import { get } from 'lodash';
 import {
   BackHeader,
   BaselineAlignment,
+  InjectionZone,
   LiLink,
   CheckPermissions,
-  useGlobalContext,
 } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -17,7 +17,6 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
-import { getInjectedComponents } from '../../utils';
 import CollectionTypeFormWrapper from '../CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../SingleTypeFormWrapper';
@@ -38,8 +37,6 @@ const EditView = ({
   origin,
   userPermissions,
 }) => {
-  const { currentEnvironment, plugins } = useGlobalContext();
-
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -235,13 +232,8 @@ const EditView = ({
                           }}
                         />
                       </CheckPermissions>
-                      {getInjectedComponents(
-                        'editView',
-                        'right.links',
-                        plugins,
-                        currentEnvironment,
-                        slug
-                      )}
+                      <InjectionZone area={`${pluginId}.editView.right-links`} slug={slug} />
+
                       {allowedActions.canDelete && (
                         <DeleteLink
                           isCreatingEntry={isCreatingEntry}

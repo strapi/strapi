@@ -7,50 +7,38 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext, CheckPermissions } from '@strapi/helper-plugin';
-import { get } from 'lodash';
+import { useHistory } from 'react-router-dom';
+import get from 'lodash/get';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import getTrad from '../../utils/getTrad';
 import pluginPermissions from '../../permissions';
 
 // Create link from content-type-builder to content-manager
-function EditViewButton(props) {
-  const { currentEnvironment, emitEvent, formatMessage } = useGlobalContext();
-  // Retrieve URL from props
-  const { modifiedData, componentSlug, type } = get(
-    props,
-    ['viewProps', '0'],
-
-    {
-      componentSlug: '',
-    }
-  );
+function EditViewButton({ modifiedData, slug, type }) {
+  const { emitEvent, formatMessage } = useGlobalContext();
+  const { push } = useHistory();
 
   const baseUrl = `/plugins/content-type-builder/${
     type === 'content-types' ? type : 'component-categories'
   }`;
   const category = get(modifiedData, 'category', '');
 
-  const suffixUrl =
-    type === 'content-types' ? props.getModelName() : `${category}/${componentSlug}`;
+  const suffixUrl = type === 'content-types' ? slug : `${category}/${slug}`;
 
   const handleClick = () => {
     emitEvent('willEditEditLayout');
-    props.push(`${baseUrl}/${suffixUrl}`);
+    push(`${baseUrl}/${suffixUrl}`);
   };
 
-  if (currentEnvironment !== 'development') {
-    return null;
-  }
-
-  if (props.getModelName() === 'strapi::administrator') {
+  if (slug === 'strapi::administrator') {
     return null;
   }
 
   return (
     <CheckPermissions permissions={pluginPermissions.main}>
       <Button
-        {...props}
+        type="button"
         onClick={handleClick}
         icon={<FontAwesomeIcon icon="cog" style={{ fontSize: 13 }} />}
         label={formatMessage({
@@ -68,9 +56,9 @@ function EditViewButton(props) {
 }
 
 EditViewButton.propTypes = {
-  currentEnvironment: PropTypes.string.isRequired,
-  getModelName: PropTypes.func.isRequired,
-  push: PropTypes.func.isRequired,
+  modifiedData: PropTypes.object.isRequired,
+  slug: PropTypes.string.isRequired,
+  type: PropTypes.string.isRequired,
 };
 
 export default EditViewButton;

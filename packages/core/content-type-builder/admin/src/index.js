@@ -27,26 +27,6 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      injectedComponents: [
-        {
-          plugin: 'content-manager.editView',
-          area: 'right.links',
-          component: Link,
-          key: 'content-type-builder.link',
-          props: {
-            message: {
-              id: 'content-manager.containers.Edit.Link.Fields',
-            },
-            icon: 'fa-cog',
-          },
-        },
-        {
-          plugin: 'content-manager.editSettingsView',
-          area: 'left.links',
-          component: Button,
-          key: 'content-type-builder.form',
-        },
-      ],
       isRequired: pluginPkg.strapi.required || false,
       isReady: true,
       mainComponent: App,
@@ -73,5 +53,17 @@ export default {
       },
     });
   },
-  boot() {},
+  boot(app) {
+    const cmPlugin = app.getPlugin('content-manager');
+
+    cmPlugin.injectComponent('editView', 'right-links', {
+      name: 'content-type-builder.link',
+      Component: Link,
+    });
+
+    cmPlugin.injectComponent('editSettingsView', 'links', {
+      name: 'content-type-builder.left-link',
+      Component: Button,
+    });
+  },
 };
