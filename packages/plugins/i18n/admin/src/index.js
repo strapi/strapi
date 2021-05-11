@@ -28,7 +28,7 @@ export default {
       app.middlewares.add(middleware);
     });
 
-    app.addReducers(i18nReducers);
+    app.reducers.add(i18nReducers);
 
     app.registerPlugin({
       description: pluginDescription,

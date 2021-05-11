@@ -5,7 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
-import { Components, Fields, Middlewares, Plugin } from './core/apis';
+import { Components, Fields, Middlewares, Plugin, Reducers } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -42,15 +42,9 @@ class StrapiApp {
     this.fieldApi = Fields();
     this.middlewares = Middlewares();
     this.plugins = {};
-    this.reducers = { ...reducers };
+    this.reducers = Reducers({ appReducers: reducers });
     this.translations = translations;
     this.getPlugin = this.getPlugin.bind(this);
-  }
-
-  addReducers(reducers) {
-    Object.keys(reducers).forEach(reducerName => {
-      this.reducers[reducerName] = reducers[reducerName];
-    });
   }
 
   async initialize() {

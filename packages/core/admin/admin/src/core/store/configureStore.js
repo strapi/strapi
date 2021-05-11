@@ -8,7 +8,7 @@ const configureStore = app => {
     middlewares.push(middleware());
   });
 
-  return createStore(createReducer(app.reducers), {}, applyMiddleware(...middlewares));
+  return createStore(createReducer(app.reducers.reducers), {}, applyMiddleware(...middlewares));
 };
 
 export default configureStore;

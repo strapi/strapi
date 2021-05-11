@@ -27,7 +27,7 @@ export default {
   register(app) {
     app.componentApi.registerComponent({ name: 'media-library', Component: InputModalStepper });
     app.fieldApi.registerField({ type: 'media', Component: InputMedia });
-    app.addReducers(reducers);
+    app.reducers.add(reducers);
 
     app.registerPlugin({
       description: pluginDescription,
