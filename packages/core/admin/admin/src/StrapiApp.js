@@ -45,6 +45,8 @@ class StrapiApp {
     this.plugins = {};
     this.reducers = { ...reducers };
     this.translations = translations;
+
+    this.getPlugin = this.getPlugin.bind(this);
   }
 
   addMiddleware(middleware) {

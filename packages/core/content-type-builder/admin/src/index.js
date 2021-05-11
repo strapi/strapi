@@ -8,76 +8,71 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
-import Initializer from './containers/Initializer';
 import Link from './InjectedComponents/ContentManager/EditViewLink';
 import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
-import lifecycles from './lifecycles';
 import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import reducers from './reducers';
 import formsAPI from './utils/formAPI';
 
-export default strapi => {
-  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-  const icon = pluginPkg.strapi.icon;
-  const name = pluginPkg.strapi.name;
+const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const icon = pluginPkg.strapi.icon;
+const name = pluginPkg.strapi.name;
 
-  const plugin = {
-    blockerComponent: null,
-    blockerComponentProps: {},
-    description: pluginDescription,
-    icon,
-    id: pluginId,
-    initializer: Initializer,
-    injectedComponents: [
-      {
-        plugin: 'content-manager.editView',
-        area: 'right.links',
-        component: Link,
-        key: 'content-type-builder.link',
-        props: {
-          message: {
-            id: 'content-manager.containers.Edit.Link.Fields',
-          },
-          icon: 'fa-cog',
-        },
-      },
-      {
-        plugin: 'content-manager.editSettingsView',
-        area: 'left.links',
-        component: Button,
-        key: 'content-type-builder.form',
-      },
-    ],
-    isRequired: pluginPkg.strapi.required || false,
-    layout: null,
-    lifecycles,
-    mainComponent: App,
-    name,
-    pluginLogo,
-    preventComponentRendering: false,
-    reducers,
-    trads,
-    menu: {
-      pluginsSectionLinks: [
+export default {
+  register(app) {
+    app.addReducers(reducers);
+    app.registerPlugin({
+      description: pluginDescription,
+      icon,
+      id: pluginId,
+      // FIXME
+      injectedComponents: [
         {
-          destination: `/plugins/${pluginId}`,
-          icon,
-          label: {
-            id: `${pluginId}.plugin.name`,
-            defaultMessage: 'Content-Types Builder',
+          plugin: 'content-manager.editView',
+          area: 'right.links',
+          component: Link,
+          key: 'content-type-builder.link',
+          props: {
+            message: {
+              id: 'content-manager.containers.Edit.Link.Fields',
+            },
+            icon: 'fa-cog',
           },
-          name,
-          permissions: pluginPermissions.main,
+        },
+        {
+          plugin: 'content-manager.editSettingsView',
+          area: 'left.links',
+          component: Button,
+          key: 'content-type-builder.form',
         },
       ],
-    },
-    // Internal APIs exposed by the CTB for the other plugins to use
-    apis: {
-      forms: formsAPI,
-    },
-  };
-
-  return strapi.registerPlugin(plugin);
+      isRequired: pluginPkg.strapi.required || false,
+      isReady: true,
+      mainComponent: App,
+      name,
+      pluginLogo,
+      trads,
+      menu: {
+        pluginsSectionLinks: [
+          {
+            destination: `/plugins/${pluginId}`,
+            icon,
+            label: {
+              id: `${pluginId}.plugin.name`,
+              defaultMessage: 'Content-Types Builder',
+            },
+            name,
+            permissions: pluginPermissions.main,
+          },
+        ],
+      },
+      // Internal APIs exposed by the CTB for the other plugins to use
+      apis: {
+        forms: formsAPI,
+      },
+    });
+  },
+  boot() {},
 };
