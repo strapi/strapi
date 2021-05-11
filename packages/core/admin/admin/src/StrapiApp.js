@@ -5,7 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
-import { Components, Fields, Plugin } from './core/apis';
+import { Components, Fields, Middlewares, Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -33,7 +33,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// FIXME
 const appLocales = Object.keys(translations);
 
 class StrapiApp {
@@ -41,17 +40,11 @@ class StrapiApp {
     this.appPlugins = appPlugins || {};
     this.componentApi = Components();
     this.fieldApi = Fields();
-    // FIXME
-    this.middlewares = [];
+    this.middlewares = Middlewares();
     this.plugins = {};
     this.reducers = { ...reducers };
     this.translations = translations;
-    // this.addMiddleware = this.addMiddleware.bind(this);
     this.getPlugin = this.getPlugin.bind(this);
-  }
-
-  addMiddleware(middleware) {
-    this.middlewares.push(middleware);
   }
 
   addReducers(reducers) {
