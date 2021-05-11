@@ -96,10 +96,11 @@ module.exports = async function buildStarter(projectArgs, program) {
   const tmpDir = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
 
   // Fetch repo info
-  const { full_name } = await getRepoInfo(starterUrl);
+  const repoInfo = await getRepoInfo(starterUrl);
+  const { full_name } = repoInfo;
 
   // Download repo inside tmp dir
-  await downloadGitHubRepo(starterUrl, tmpDir);
+  await downloadGitHubRepo(repoInfo, tmpDir);
 
   const starterJson = readStarterJson(join(tmpDir, 'starter.json'), starterUrl);
 

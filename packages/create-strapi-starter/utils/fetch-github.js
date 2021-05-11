@@ -7,28 +7,28 @@ const chalk = require('chalk');
 
 const stopProcess = require('./stop-process');
 
-function getShortcut(starter) {
-  let full_name;
-  // Determine if it is another organization
+function parseShorthand(starter) {
+  let user = 'strapi',
+    name = `strapi-starter-${starter}`;
+
+  // Determine if it is comes from another user
   if (starter.includes('/')) {
-    const [org, project] = starter.split('/');
-    full_name = `${org}/strapi-starter-${project}`;
-  } else {
-    full_name = `strapi/strapi-starter-${starter}`;
+    [user, name] = starter.split('/');
+    name = `strapi-starter-${name}`;
   }
 
+  const full_name = `${user}/${name}`;
   return {
+    name,
     full_name,
-    usedShortcut: true,
   };
 }
 
 /**
- * @param  {string} repo The path to repo
+ * @param {string} repo The full name of the repository.
  */
 async function getDefaultBranch(repo) {
   const response = await fetch(`https://api.github.com/repos/${repo}`);
-
   if (!response.ok) {
     stopProcess(
       `Could not find the starter information for ${chalk.yellow(
@@ -38,55 +38,46 @@ async function getDefaultBranch(repo) {
   }
 
   const { default_branch } = await response.json();
-
   return default_branch;
 }
 
 /**
- * @param {string} starterUrl Github url to starter project
+ * @param {string} starter GitHub url or shorthand to starter project.
  */
 async function getRepoInfo(starter) {
-  const repoInfo = await parseGitUrl(starter);
-  const { name, full_name, ref, filepath, protocols, source } = repoInfo;
+  let usedShorthand = false;
+  let { name, full_name, ref, filepath, protocols, source } = parseGitUrl(starter);
 
   if (protocols.length === 0) {
-    return getShortcut(starter);
-  }
-
-  if (source !== 'github.com') {
+    usedShorthand = true;
+    ({ name, full_name } = parseShorthand(starter));
+  } else if (source !== 'github.com') {
     stopProcess(`GitHub URL not found for: ${chalk.yellow(starter)}.`);
   }
 
-  return {
-    name,
-    full_name,
-    ref,
-    filepath,
-  };
-}
-
-/**
- * @param  {string} starterUrl Github url for strapi starter
- * @param  {string} tmpDir Path to temporary directory
- */
-async function downloadGitHubRepo(starterUrl, tmpDir) {
-  const { full_name, ref, filepath, usedShortcut } = await getRepoInfo(starterUrl);
-  const default_branch = await getDefaultBranch(full_name);
-
-  let branch = default_branch;
+  let branch = await getDefaultBranch(full_name);
   if (ref) {
     // Append the filepath to the parsed ref since a branch name could contain '/'
     // If so, the rest of the branch name will be considered 'filepath' by 'parseGitUrl'
     branch = filepath ? `${ref}/${filepath}` : ref;
   }
 
+  return { name, full_name, branch, usedShorthand };
+}
+
+/**
+ * @param {string} starter GitHub url or shorthand to starter project.
+ * @param {string} tmpDir Path to temporary directory.
+ */
+async function downloadGitHubRepo(repoInfo, tmpDir) {
+  const { full_name, branch, usedShorthand } = repoInfo;
+
   // Download from GitHub
   const codeload = `https://codeload.github.com/${full_name}/tar.gz/${branch}`;
-
   const response = await fetch(codeload);
   if (!response.ok) {
-    const message = usedShortcut ? `using the shortcut` : `using the url`;
-    stopProcess(`Could not download the repository ${message}: ${chalk.yellow(`${starterUrl}`)}`);
+    const message = usedShorthand ? `using the shortcut` : `using the url`;
+    stopProcess(`Could not download the repository ${message}: ${chalk.yellow(`${full_name}`)}`);
   }
 
   await new Promise(resolve => {
