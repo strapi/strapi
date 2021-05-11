@@ -44,7 +44,7 @@ class StrapiApp {
     this.middlewares = [];
     this.plugins = {};
     this.reducers = { ...reducers };
-    this.translationMessages = translations;
+    this.translations = translations;
   }
 
   addMiddleware(middleware) {
@@ -95,9 +95,9 @@ class StrapiApp {
       return acc;
     }, {});
 
-    this.translationMessages = Object.keys(this.translationMessages).reduce((acc, current) => {
+    this.translations = Object.keys(this.translations).reduce((acc, current) => {
       acc[current] = {
-        ...this.translationMessages[current],
+        ...this.translations[current],
         ...(pluginTranslations[current] || {}),
       };
 
@@ -127,7 +127,7 @@ class StrapiApp {
           <Fonts />
           <Provider store={store}>
             <StrapiProvider strapi={this}>
-              <LanguageProvider messages={this.translationMessages}>
+              <LanguageProvider messages={this.translations}>
                 <>
                   <AutoReloadOverlayBlocker />
                   <OverlayBlocker />
