@@ -12,9 +12,9 @@ import {
   compactParams,
   createNewFilesToUploadArray,
   urlSchema,
-  getFileModelTimestamps,
   formatFilters,
 } from '../../utils';
+import { useSelectTimestamps } from '../../hooks';
 import InputModalStepperContext from '../../contexts/InputModal/InputModalDataManager';
 
 import init from './init';
@@ -39,8 +39,8 @@ const InputModalStepperProvider = ({
   const [formErrors, setFormErrors] = useState(null);
 
   const { formatMessage } = useIntl();
-  const { emitEvent, plugins } = useGlobalContext();
-  const [, updated_at] = getFileModelTimestamps(plugins);
+  const { emitEvent } = useGlobalContext();
+  const [, updated_at] = useSelectTimestamps();
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,

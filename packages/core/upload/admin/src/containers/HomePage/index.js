@@ -11,10 +11,10 @@ import {
   request,
   useQuery,
 } from '@strapi/helper-plugin';
-import { formatFileForEditing, getRequestUrl, getTrad, getFileModelTimestamps } from '../../utils';
+import { formatFileForEditing, getRequestUrl, getTrad } from '../../utils';
+import { useAppContext, useSelectTimestamps } from '../../hooks';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
-import { useAppContext } from '../../hooks';
 import ModalStepper from '../ModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
@@ -23,8 +23,8 @@ import reducer, { initialState } from './reducer';
 const HomePage = () => {
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
-  const { formatMessage, plugins } = useGlobalContext();
-  const [, updated_at] = getFileModelTimestamps(plugins);
+  const { formatMessage } = useGlobalContext();
+  const [, updated_at] = useSelectTimestamps();
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, allowedActions)
   );

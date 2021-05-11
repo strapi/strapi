@@ -4,8 +4,8 @@ import { useDebounce } from '@buffetjs/hooks';
 import { Padded } from '@buffetjs/core';
 import { HeaderSearch, useGlobalContext, useQuery, LoadingIndicator } from '@strapi/helper-plugin';
 
-import { useAppContext } from '../../../hooks';
-import { getTrad, getFileModelTimestamps } from '../../../utils';
+import { useAppContext, useSelectTimestamps } from '../../../hooks';
+import { getTrad } from '../../../utils';
 import ControlsWrapper from '../../../components/ControlsWrapper';
 import Filters from '../../../components/Filters';
 import SelectAll from '../../../components/SelectAll';
@@ -23,8 +23,9 @@ const HomePageSettings = ({
   const {
     allowedActions: { canUpdate },
   } = useAppContext();
-  const { formatMessage, plugins } = useGlobalContext();
-  const [, updated_at] = getFileModelTimestamps(plugins);
+  // FIXME: when react-intl refacto
+  const { formatMessage } = useGlobalContext();
+  const [, updated_at] = useSelectTimestamps();
   const query = useQuery();
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const debouncedSearch = useDebounce(searchValue, 300);

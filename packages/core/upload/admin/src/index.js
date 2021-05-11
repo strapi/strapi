@@ -14,7 +14,7 @@ import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import InputMedia from './components/InputMedia';
 import InputModalStepper from './containers/InputModalStepper';
-
+import reducers from './reducers';
 import trads from './translations';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
@@ -27,6 +27,7 @@ export default {
   register(app) {
     app.componentApi.registerComponent({ name: 'media-library', Component: InputModalStepper });
     app.fieldApi.registerField({ type: 'media', Component: InputMedia });
+    app.addReducers(reducers);
 
     app.registerPlugin({
       description: pluginDescription,
