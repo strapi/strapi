@@ -1,10 +1,7 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
-import { createStore } from 'redux';
-import { combineReducers } from 'redux-immutable';
-import { fromJS } from 'immutable';
-
+import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import { request, useUserPermissions } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
@@ -14,13 +11,13 @@ import LocaleSettingsPage from '..';
 // TODO: move to @strapi/helper-plugin
 import themes from '../../../../../../../core/admin/admin/src/themes';
 import i18nReducers, { initialState } from '../../../hooks/reducers';
+import pluginId from '../../../pluginId';
 
 const TestWrapper = ({ children }) => {
   const queryClient = new QueryClient();
 
-  const initialStoreState = fromJS(initialState);
   const rootReducer = combineReducers(i18nReducers);
-  const store = createStore(rootReducer, initialStoreState);
+  const store = createStore(rootReducer, { [`${pluginId}_locales`]: initialState });
 
   return (
     <Provider store={store}>

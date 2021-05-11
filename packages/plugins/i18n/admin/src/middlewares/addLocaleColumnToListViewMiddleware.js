@@ -14,7 +14,7 @@ const addLocaleColumnToListViewMiddleware = () => ({ getState }) => next => acti
   }
 
   const store = getState();
-  const { locales } = store.get('i18n_locales');
+  const { locales } = store.i18n_locales;
 
   const locale = {
     key: '__locale_key__',

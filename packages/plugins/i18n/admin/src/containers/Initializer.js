@@ -9,15 +9,15 @@ import PropTypes from 'prop-types';
 import pluginId from '../pluginId';
 import useLocales from '../hooks/useLocales';
 
-const Initializer = ({ updatePlugin }) => {
+const Initializer = ({ setPlugin }) => {
   const { isLoading, locales } = useLocales();
   const ref = useRef();
 
-  ref.current = updatePlugin;
+  ref.current = setPlugin;
 
   useEffect(() => {
     if (!isLoading && locales.length > 0) {
-      ref.current(pluginId, 'isReady', true);
+      ref.current(pluginId);
     }
   }, [isLoading, locales]);
 
@@ -25,7 +25,7 @@ const Initializer = ({ updatePlugin }) => {
 };
 
 Initializer.propTypes = {
-  updatePlugin: PropTypes.func.isRequired,
+  setPlugin: PropTypes.func.isRequired,
 };
 
 export default Initializer;

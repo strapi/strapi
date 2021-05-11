@@ -14,12 +14,13 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
   const dispatch = jest.fn();
 
   beforeEach(() => {
-    const store = new Map();
+    const store = {};
 
-    store.set('content-manager_editViewCrudReducer', {
+    store['content-manager_editViewCrudReducer'] = {
       contentTypeDataStructure: { name: 'test', common: 'common default value' },
-    });
-    store.set('content-manager_editViewLayoutManager', {
+    };
+
+    store['content-manager_editViewLayoutManager'] = {
       currentLayout: {
         components: {},
         contentType: {
@@ -30,7 +31,7 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
           },
         },
       },
-    });
+    };
 
     getState = () => store;
   });

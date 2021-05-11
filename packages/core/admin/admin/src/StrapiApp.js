@@ -41,10 +41,12 @@ class StrapiApp {
     this.appPlugins = appPlugins || {};
     this.componentApi = Components();
     this.fieldApi = Fields();
+    // FIXME
     this.middlewares = [];
     this.plugins = {};
     this.reducers = { ...reducers };
     this.translations = translations;
+    // this.addMiddleware = this.addMiddleware.bind(this);
     this.getPlugin = this.getPlugin.bind(this);
   }
 
