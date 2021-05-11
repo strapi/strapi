@@ -20,6 +20,8 @@ class Plugin {
     // TODO
     this.pluginLogo = pluginConf.pluginLogo;
     // TODO
+    this.settings = pluginConf.settings || null;
+    // TODO
     this.trads = pluginConf.trads;
   }
 
