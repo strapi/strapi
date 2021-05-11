@@ -4,6 +4,8 @@ class Plugin {
     // TODO
     this.description = pluginConf.description;
     // TODO
+    this.fileModel = pluginConf.fileModel || null;
+    // TODO
     this.icon = pluginConf.icon;
     this.initializer = pluginConf.initializer || null;
 

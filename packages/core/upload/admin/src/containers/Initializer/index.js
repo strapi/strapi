@@ -9,9 +9,9 @@ import PropTypes from 'prop-types';
 import { request } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 
-const Initializer = ({ updatePlugin }) => {
+const Initializer = ({ setPlugin }) => {
   const ref = useRef();
-  ref.current = updatePlugin;
+  ref.current = setPlugin;
 
   useEffect(() => {
     const getData = async () => {
@@ -38,7 +38,7 @@ const Initializer = ({ updatePlugin }) => {
 };
 
 Initializer.propTypes = {
-  updatePlugin: PropTypes.func.isRequired,
+  setPlugin: PropTypes.func.isRequired,
 };
 
 export default Initializer;
