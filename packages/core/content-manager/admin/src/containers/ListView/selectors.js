@@ -5,7 +5,7 @@ import { initialState } from './reducer';
 /**
  * Direct selector to the listView state domain
  */
-const listViewDomain = () => state => state.get(`${pluginId}_listView`) || initialState;
+const listViewDomain = () => state => state[`${pluginId}_listView`] || initialState;
 
 /**
  * Other specific selectors

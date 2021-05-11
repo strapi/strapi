@@ -174,7 +174,8 @@ function Inputs({
   ]);
 
   const otherFields = useMemo(() => {
-    return fieldApi.getFields();
+    // return fieldApi.getFields();
+    return {};
   }, [fieldApi]);
 
   const { description, visible } = metadatas;
