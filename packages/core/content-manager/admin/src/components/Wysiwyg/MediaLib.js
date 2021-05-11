@@ -17,7 +17,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
     }
   }, [isOpen]);
 
-  const Component = getComponent('media-library').Component;
+  const Component = getComponent('media-library')?.Component;
 
   const handleInputChange = data => {
     if (data) {

@@ -36,6 +36,7 @@ function Inputs({
   queryInfos,
   value,
 }) {
+  // TODO change to app
   const {
     strapi: { fieldApi },
   } = useStrapi();
@@ -174,8 +175,7 @@ function Inputs({
   ]);
 
   const otherFields = useMemo(() => {
-    // return fieldApi.getFields();
-    return {};
+    return fieldApi.getFields();
   }, [fieldApi]);
 
   const { description, visible } = metadatas;

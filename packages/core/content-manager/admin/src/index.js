@@ -44,45 +44,8 @@ export default {
       name,
       pluginLogo,
       preventComponentRendering: false,
-      // reducers,
       trads,
     });
   },
   boot() {},
 };
-
-// export default strapi => {
-//   const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-//   const plugin = {
-//     blockerComponent: null,
-//     blockerComponentProps: {},
-//     description: pluginDescription,
-//     icon: pluginPkg.strapi.icon,
-//     id: pluginId,
-//     initializer: null,
-//     injectedComponents: [
-//       {
-//         plugin: 'content-type-builder.listView',
-//         area: 'list.link',
-//         component: ConfigureViewButton,
-//         key: 'content-manager.link',
-//       },
-//     ],
-//     injectionZones: {
-//       editView: { informations: [] },
-//       listView: { actions: [], deleteModalAdditionalInfos: [] },
-//     },
-//     isReady: true,
-//     isRequired: pluginPkg.strapi.required || false,
-//     layout: null,
-
-//     mainComponent: App,
-//     name: pluginPkg.strapi.name,
-//     pluginLogo,
-//     preventComponentRendering: false,
-//     reducers,
-//     trads,
-//   };
-
-//   return strapi.registerPlugin(plugin);
-// };
