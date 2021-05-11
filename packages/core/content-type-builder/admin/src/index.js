@@ -27,7 +27,11 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
+<<<<<<< HEAD
       // FIXME
+=======
+
+>>>>>>> 6665d1068 (Init load CTB)
       injectedComponents: [
         {
           plugin: 'content-manager.editView',
@@ -53,6 +57,11 @@ export default {
       mainComponent: App,
       name,
       pluginLogo,
+<<<<<<< HEAD
+=======
+
+      // reducers,
+>>>>>>> 6665d1068 (Init load CTB)
       trads,
       menu: {
         pluginsSectionLinks: [
@@ -76,3 +85,63 @@ export default {
   },
   boot() {},
 };
+
+// export default strapi => {
+//   const plugin = {
+//     blockerComponent: null,
+//     blockerComponentProps: {},
+//     description: pluginDescription,
+//     icon,
+//     id: pluginId,
+//     initializer: Initializer,
+//     injectedComponents: [
+//       {
+//         plugin: 'content-manager.editView',
+//         area: 'right.links',
+//         component: Link,
+//         key: 'content-type-builder.link',
+//         props: {
+//           message: {
+//             id: 'content-manager.containers.Edit.Link.Fields',
+//           },
+//           icon: 'fa-cog',
+//         },
+//       },
+//       {
+//         plugin: 'content-manager.editSettingsView',
+//         area: 'left.links',
+//         component: Button,
+//         key: 'content-type-builder.form',
+//       },
+//     ],
+//     isRequired: pluginPkg.strapi.required || false,
+//     layout: null,
+//     lifecycles,
+//     mainComponent: App,
+//     name,
+//     pluginLogo,
+//     preventComponentRendering: false,
+//     reducers,
+//     trads,
+//     menu: {
+//       pluginsSectionLinks: [
+//         {
+//           destination: `/plugins/${pluginId}`,
+//           icon,
+//           label: {
+//             id: `${pluginId}.plugin.name`,
+//             defaultMessage: 'Content-Types Builder',
+//           },
+//           name,
+//           permissions: pluginPermissions.main,
+//         },
+//       ],
+//     },
+//     // Internal APIs exposed by the CTB for the other plugins to use
+//     apis: {
+//       forms: formsAPI,
+//     },
+//   };
+
+//   return strapi.registerPlugin(plugin);
+// };
