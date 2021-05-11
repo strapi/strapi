@@ -1,5 +1,5 @@
 const selectMenuLinks = state => {
-  const menuState = state.get('menu');
+  const menuState = state.menu;
 
   return menuState.collectionTypesSectionLinks;
 };

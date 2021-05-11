@@ -18,6 +18,7 @@ const Wrapper = styled.div`
     display: flex;
 
     > select {
+      background-image: url("${Bkg}");
       width: 75px !important;
       height: 3.2rem !important;
       padding-top: 0rem;
@@ -25,7 +26,6 @@ const Wrapper = styled.div`
       padding-right: 3rem;
       background-position: right -1px center;
       background-repeat: no-repeat;
-      background-image: url(${Bkg});
       border: 1px solid #e3e9f3;
       border-radius: 0.25rem;
       line-height: 29px;

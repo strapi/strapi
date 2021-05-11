@@ -3,7 +3,7 @@ import pluginId from '../../pluginId';
 import { initialState } from './reducer';
 
 const selectMainDomain = () => state => {
-  return state.get(`${pluginId}_main`) || initialState;
+  return state[`${pluginId}_main`] || initialState;
 };
 
 const makeSelectMain = () =>

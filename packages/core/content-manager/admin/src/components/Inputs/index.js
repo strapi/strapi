@@ -36,6 +36,7 @@ function Inputs({
   queryInfos,
   value,
 }) {
+  // TODO change to app
   const {
     strapi: { fieldApi },
   } = useStrapi();

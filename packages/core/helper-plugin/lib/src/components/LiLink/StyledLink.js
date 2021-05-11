@@ -21,7 +21,7 @@ const StyledLink = styled(Link)`
   }
   .layout {
     display: inline-block;
-    background-image: url(${Layout});
+    background-image: url("${Layout}");
   }
   &:hover {
     text-decoration: none;
@@ -31,7 +31,7 @@ const StyledLink = styled(Link)`
       color: #007eff;
     }
     .layout {
-      background-image: url(${LayoutHover});
+      background-image: url("${LayoutHover}");
     }
   }
 `;

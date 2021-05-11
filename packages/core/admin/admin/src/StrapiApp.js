@@ -5,7 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
-import { Plugin } from './core/apis';
+import { Components, Fields, Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -38,11 +38,13 @@ const appLocales = Object.keys(translations);
 
 class StrapiApp {
   constructor({ appPlugins }) {
-    this.translationMessages = translations;
     this.appPlugins = appPlugins || {};
+    this.componentApi = Components();
+    this.fieldApi = Fields();
     this.middlewares = [];
     this.plugins = {};
     this.reducers = { ...reducers };
+    this.translations = translations;
   }
 
   addMiddleware(middleware) {
@@ -93,9 +95,9 @@ class StrapiApp {
       return acc;
     }, {});
 
-    this.translationMessages = Object.keys(this.translationMessages).reduce((acc, current) => {
+    this.translations = Object.keys(this.translations).reduce((acc, current) => {
       acc[current] = {
-        ...this.translationMessages[current],
+        ...this.translations[current],
         ...(pluginTranslations[current] || {}),
       };
 
@@ -125,7 +127,7 @@ class StrapiApp {
           <Fonts />
           <Provider store={store}>
             <StrapiProvider strapi={this}>
-              <LanguageProvider messages={this.translationMessages}>
+              <LanguageProvider messages={this.translations}>
                 <>
                   <AutoReloadOverlayBlocker />
                   <OverlayBlocker />
