@@ -27,7 +27,6 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      // FIXME
       injectedComponents: [
         {
           plugin: 'content-manager.editView',

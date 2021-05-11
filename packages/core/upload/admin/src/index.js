@@ -14,72 +14,70 @@ import Initializer from './containers/Initializer';
 import SettingsPage from './containers/SettingsPage';
 import InputMedia from './components/InputMedia';
 import InputModalStepper from './containers/InputModalStepper';
-
+import reducers from './reducers';
 import trads from './translations';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 
-export default strapi => {
-  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
-  const icon = pluginPkg.strapi.icon;
-  const name = pluginPkg.strapi.name;
+const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const icon = pluginPkg.strapi.icon;
+const name = pluginPkg.strapi.name;
 
-  const plugin = {
-    blockerComponent: null,
-    blockerComponentProps: {},
-    description: pluginDescription,
-    fileModel: null,
-    icon,
-    id: pluginId,
-    initializer: Initializer,
-    injectedComponents: [],
-    isReady: false,
-    isRequired: pluginPkg.strapi.required || false,
-    layout: null,
-    lifecycles: null,
-    mainComponent: App,
-    name,
-    pluginLogo,
-    preventComponentRendering: false,
-    settings: {
-      global: {
-        links: [
+export default {
+  register(app) {
+    app.componentApi.registerComponent({ name: 'media-library', Component: InputModalStepper });
+    app.fieldApi.registerField({ type: 'media', Component: InputMedia });
+    app.addReducers(reducers);
+
+    app.registerPlugin({
+      description: pluginDescription,
+      icon,
+      id: pluginId,
+      initializer: Initializer,
+
+      isReady: false,
+      isRequired: pluginPkg.strapi.required || false,
+
+      mainComponent: App,
+      name,
+      pluginLogo,
+      preventComponentRendering: false,
+      settings: {
+        global: {
+          links: [
+            {
+              title: {
+                id: getTrad('plugin.name'),
+                defaultMessage: 'Media Library',
+              },
+              name: 'media-library',
+              to: '/settings/media-library',
+              Component: () => (
+                <CheckPagePermissions permissions={pluginPermissions.settings}>
+                  <SettingsPage />
+                </CheckPagePermissions>
+              ),
+              permissions: pluginPermissions.settings,
+            },
+          ],
+        },
+      },
+      trads,
+      menu: {
+        pluginsSectionLinks: [
           {
-            title: {
-              id: getTrad('plugin.name'),
+            destination: `/plugins/${pluginId}`,
+            icon,
+            label: {
+              id: `${pluginId}.plugin.name`,
               defaultMessage: 'Media Library',
             },
-            name: 'media-library',
-            to: '/settings/media-library',
-            Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.settings}>
-                <SettingsPage />
-              </CheckPagePermissions>
-            ),
-            permissions: pluginPermissions.settings,
+            name,
+            permissions: pluginPermissions.main,
           },
         ],
       },
-    },
-    trads,
-    menu: {
-      pluginsSectionLinks: [
-        {
-          destination: `/plugins/${pluginId}`,
-          icon,
-          label: {
-            id: `${pluginId}.plugin.name`,
-            defaultMessage: 'Media Library',
-          },
-          name,
-          permissions: pluginPermissions.main,
-        },
-      ],
-    },
-  };
-
-  strapi.registerComponent({ name: 'media-library', Component: InputModalStepper });
-  strapi.registerField({ type: 'media', Component: InputMedia });
-
-  return strapi.registerPlugin(plugin);
+    });
+  },
+  boot() {},
 };

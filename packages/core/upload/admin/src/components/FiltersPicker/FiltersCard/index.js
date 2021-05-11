@@ -2,8 +2,9 @@ import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Select } from '@buffetjs/core';
-import { getFilterType, useGlobalContext } from '@strapi/helper-plugin';
-import { getTrad, getFileModelTimestamps } from '../../../utils';
+import { getFilterType } from '@strapi/helper-plugin';
+import { getTrad } from '../../../utils';
+import { useSelectTimestamps } from '../../../hooks';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
@@ -13,8 +14,7 @@ import FilterButton from './FilterButton';
 import FilterInput from './FilterInput';
 
 const FiltersCard = ({ onChange }) => {
-  const { plugins } = useGlobalContext();
-  const timestamps = getFileModelTimestamps(plugins);
+  const timestamps = useSelectTimestamps();
   const [state, dispatch] = useReducer(reducer, initialState, () => init(initialState, timestamps));
   const { name, filter, filtersForm, value } = state.toJS();
 
