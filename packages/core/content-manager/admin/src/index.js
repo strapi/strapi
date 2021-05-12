@@ -26,7 +26,6 @@ export default {
       icon,
       id: pluginId,
       injectionZones: {
-        editSettingsView: { links: [] },
         editView: { informations: [], 'right-links': [] },
         listView: { actions: [], deleteModalAdditionalInfos: [] },
       },

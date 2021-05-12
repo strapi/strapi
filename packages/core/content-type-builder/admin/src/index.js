@@ -8,8 +8,6 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
-import Link from './InjectedComponents/ContentManager/EditViewLink';
-import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
 import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
@@ -56,17 +54,5 @@ export default {
       },
     });
   },
-  boot(app) {
-    const cmPlugin = app.getPlugin('content-manager');
-
-    cmPlugin.injectComponent('editView', 'right-links', {
-      name: 'content-type-builder.link',
-      Component: Link,
-    });
-
-    cmPlugin.injectComponent('editSettingsView', 'links', {
-      name: 'content-type-builder.left-link',
-      Component: Button,
-    });
-  },
+  boot() {},
 };

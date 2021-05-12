@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useSelector, shallowEqual } from 'react-redux';
 import { cloneDeep, flatMap, get, set, pick } from 'lodash';
-import { InjectionZone, request, useGlobalContext } from '@strapi/helper-plugin';
+import { request, useGlobalContext } from '@strapi/helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -20,6 +20,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from './utils';
 import { unformatLayout } from './utils/layout';
+import LinkToCTB from './LinkToCTB';
 
 const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, updateLayout }) => {
   const { push } = useHistory();
@@ -310,8 +311,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
                   marginTop: -6,
                 }}
               >
-                <InjectionZone
-                  area={`${pluginId}.editSettingsView.links`}
+                <LinkToCTB
                   modifiedData={modifiedData}
                   slug={slug}
                   type={isContentTypeView ? 'content-types' : 'components'}

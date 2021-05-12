@@ -7,6 +7,7 @@ import {
   InjectionZone,
   LiLink,
   CheckPermissions,
+  useGlobalContext,
 } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -25,6 +26,9 @@ import { createAttributesLayout, getFieldsActionMatchingPermissions } from './ut
 import { LinkWrapper, SubWrapper } from './components';
 import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
+import { getTrad } from '../../utils';
+
+const ctbPermissions = [{ action: 'plugins::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({
@@ -37,6 +41,7 @@ const EditView = ({
   origin,
   userPermissions,
 }) => {
+  const { emitEvent } = useGlobalContext();
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -232,6 +237,21 @@ const EditView = ({
                           }}
                         />
                       </CheckPermissions>
+                      {slug !== 'strapi::administrator' && (
+                        <CheckPermissions permissions={ctbPermissions}>
+                          <LiLink
+                            message={{
+                              id: getTrad('containers.Edit.Link.Fields'),
+                            }}
+                            onClick={() => {
+                              emitEvent('willEditEditLayout');
+                            }}
+                            icon="fa-cog"
+                            url={`/plugins/content-type-builder/content-types/${slug}`}
+                          />
+                        </CheckPermissions>
+                      )}
+                      {/*  TODO add DOCUMENTATION */}
                       <InjectionZone area={`${pluginId}.editView.right-links`} slug={slug} />
 
                       {allowedActions.canDelete && (

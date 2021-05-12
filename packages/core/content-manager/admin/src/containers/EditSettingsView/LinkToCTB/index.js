@@ -11,11 +11,12 @@ import { useHistory } from 'react-router-dom';
 import get from 'lodash/get';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import getTrad from '../../utils/getTrad';
-import pluginPermissions from '../../permissions';
+import getTrad from '../../../utils/getTrad';
+
+const permissions = [{ action: 'plugins::content-type-builder.read', subject: null }];
 
 // Create link from content-type-builder to content-manager
-function EditViewButton({ modifiedData, slug, type }) {
+const LinkToCTB = ({ modifiedData, slug, type }) => {
   const { emitEvent, formatMessage } = useGlobalContext();
   const { push } = useHistory();
 
@@ -36,13 +37,13 @@ function EditViewButton({ modifiedData, slug, type }) {
   }
 
   return (
-    <CheckPermissions permissions={pluginPermissions.main}>
+    <CheckPermissions permissions={permissions}>
       <Button
         type="button"
         onClick={handleClick}
         icon={<FontAwesomeIcon icon="cog" style={{ fontSize: 13 }} />}
         label={formatMessage({
-          id: getTrad(`injected-components.content-manager.edit-settings-view.link.${type}`),
+          id: getTrad(`edit-settings-view.link-to-ctb.${type}`),
         })}
         style={{
           paddingLeft: 15,
@@ -53,12 +54,12 @@ function EditViewButton({ modifiedData, slug, type }) {
       />
     </CheckPermissions>
   );
-}
+};
 
-EditViewButton.propTypes = {
+LinkToCTB.propTypes = {
   modifiedData: PropTypes.object.isRequired,
   slug: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
 };
 
-export default EditViewButton;
+export default LinkToCTB;
