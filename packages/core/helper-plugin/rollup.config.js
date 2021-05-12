@@ -6,6 +6,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
 import image from '@rollup/plugin-image';
 import postcss from 'rollup-plugin-postcss';
+import { terser } from 'rollup-plugin-terser';
 import packageJson from './package.json';
 
 export default {
@@ -63,6 +64,7 @@ export default {
     commonjs(),
     image(),
     nodePolyfills(),
+    terser(),
   ],
   external: [
     ...Object.keys(packageJson.dependencies || {}),
