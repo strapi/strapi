@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, InjectionZone, ListWrapper, useGlobalContext } from '@strapi/helper-plugin';
+import { BackHeader, ListWrapper, useGlobalContext } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
@@ -16,6 +16,7 @@ import ListButton from '../../components/ListButton';
 import useDataManager from '../../hooks/useDataManager';
 import ListHeader from '../../components/ListHeader';
 import LeftMenu from '../LeftMenu';
+import LinkToCMSettingsView from './LinkToCMSettingsView';
 import Wrapper from './Wrapper';
 
 /* eslint-disable indent */
@@ -256,9 +257,8 @@ const ListView = () => {
   };
 
   const listInjectedComponents = (
-    <InjectionZone
-      key="injection-zone"
-      area={`${pluginId}.listView.links`}
+    <LinkToCMSettingsView
+      key="link-to-cm-settings-view"
       targetUid={targetUid}
       isTemporary={isTemporary}
       isInContentTypeView={isInContentTypeView}

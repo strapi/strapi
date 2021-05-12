@@ -9,7 +9,6 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/Main';
-import ConfigureViewButton from './InjectedComponents/ContentTypeBuilder/ConfigureViewButton';
 import reducers from './reducers';
 import trads from './translations';
 
@@ -37,12 +36,5 @@ export default {
       trads,
     });
   },
-  boot(app) {
-    const ctbPlugin = app.getPlugin('content-type-builder');
-
-    ctbPlugin.injectComponent('listView', 'links', {
-      name: 'content-type-builder.link',
-      Component: ConfigureViewButton,
-    });
-  },
+  boot() {},
 };
