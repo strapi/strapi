@@ -1,9 +1,13 @@
 import { render } from '@testing-library/react';
 import StrapiApp from '../StrapiApp';
+import appReducers from '../reducers';
 
 describe('ADMIN | StrapiApp', () => {
   it('should render the app without plugins', () => {
-    const app = StrapiApp({});
+    const library = { fields: {}, components: {} };
+    const middlewares = { middlewares: [] };
+    const reducers = { reducers: appReducers };
+    const app = StrapiApp({ middlewares, reducers, library });
 
     expect(render(app.render())).toMatchInlineSnapshot(`
       Object {

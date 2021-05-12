@@ -82,26 +82,6 @@ async function build({ dir, env, options, optimize }) {
 // TODO remove
 async function createPluginsJs(plugins, localPlugins, dest) {
   const content = `
-const injectReducer = require('./utils/injectReducer').default;
-const injectSaga = require('./utils/injectSaga').default;
-const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
-const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
-const { languages } = require('./i18n');
-
-window.strapi = Object.assign(window.strapi || {}, {
-  backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
-  languages,
-  currentLanguage:
-  window.localStorage.getItem('strapi-admin-language') ||
-  window.navigator.language ||
-  window.navigator.userLanguage ||
-  'en',
-  injectReducer,
-  injectSaga,
-  useInjectReducer,
-  useInjectSaga,
-});
-
 module.exports = {
   ${plugins
     .map(name => {

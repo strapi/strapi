@@ -1,43 +1,19 @@
-import { cloneDeep } from 'lodash';
 import invariant from 'invariant';
 
-// TODO this API should be merged with the components one
 class Components {
-  components = {};
+  constructor() {
+    this.components = {};
+  }
 
-  getComponent = name => {
-    invariant(name, 'A name must be provided');
-
-    return cloneDeep(this.components[name]) || null;
-  };
-
-  getComponents = () => {
-    const components = cloneDeep(this.components);
-
-    return Object.keys(components).reduce((acc, current) => {
-      acc[current] = components[current].Component;
-
-      return acc;
-    }, {});
-  };
-
-  registerComponent = component => {
+  add(component) {
     const { name, Component } = component;
 
     invariant(Component, 'A Component must be provided');
     invariant(name, 'A name must be provided');
     invariant(this.components[name] === undefined, 'A similar field already exists');
 
-    this.components[name] = { Component };
-  };
-
-  removeComponent = name => {
-    invariant(name, 'A name must be provided in order to remove a field');
-
-    delete this.components[name];
-  };
+    this.components[name] = Component;
+  }
 }
 
-export default () => {
-  return new Components();
-};
+export default () => new Components();

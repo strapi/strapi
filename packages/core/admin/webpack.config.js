@@ -24,7 +24,8 @@ module.exports = ({
   },
 }) => {
   const isProduction = env === 'production';
-  const envVariables = getClientEnvironment(useEE, options);
+
+  const envVariables = getClientEnvironment(useEE, { ...options, env });
 
   const webpackPlugins = isProduction
     ? [

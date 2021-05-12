@@ -24,10 +24,7 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    // FIXME
-    middlewares.forEach(middleware => {
-      app.addMiddleware(middleware);
-    });
+    app.addMiddlewares(middlewares);
 
     app.addReducers(i18nReducers);
 
