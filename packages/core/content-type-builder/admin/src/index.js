@@ -8,8 +8,6 @@
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/App';
-import Link from './InjectedComponents/ContentManager/EditViewLink';
-import Button from './InjectedComponents/ContentManager/EditSettingViewButton';
 import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
@@ -27,26 +25,6 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      injectedComponents: [
-        {
-          plugin: 'content-manager.editView',
-          area: 'right.links',
-          component: Link,
-          key: 'content-type-builder.link',
-          props: {
-            message: {
-              id: 'content-manager.containers.Edit.Link.Fields',
-            },
-            icon: 'fa-cog',
-          },
-        },
-        {
-          plugin: 'content-manager.editSettingsView',
-          area: 'left.links',
-          component: Button,
-          key: 'content-type-builder.form',
-        },
-      ],
       isRequired: pluginPkg.strapi.required || false,
       isReady: true,
       mainComponent: App,

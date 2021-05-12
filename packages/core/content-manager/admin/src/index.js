@@ -9,7 +9,6 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './containers/Main';
-import ConfigureViewButton from './InjectedComponents/ContentTypeBuilder/ConfigureViewButton';
 import reducers from './reducers';
 import trads from './translations';
 
@@ -25,17 +24,8 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      // TODO
-      injectedComponents: [
-        {
-          plugin: 'content-type-builder.listView',
-          area: 'list.link',
-          component: ConfigureViewButton,
-          key: 'content-manager.link',
-        },
-      ],
       injectionZones: {
-        editView: { informations: [] },
+        editView: { informations: [], 'right-links': [] },
         listView: { actions: [], deleteModalAdditionalInfos: [] },
       },
       isReady: true,
@@ -43,7 +33,6 @@ export default {
       mainComponent: App,
       name,
       pluginLogo,
-      preventComponentRendering: false,
       trads,
     });
   },

@@ -5,22 +5,41 @@ import { LayoutIcon, CheckPermissions } from '@strapi/helper-plugin';
 import { Button as Base } from '@buffetjs/core';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import pluginPermissions from '../../../permissions';
-import pluginId from '../../../pluginId';
 
 const StyledButton = styled(Base)`
   padding-left: 15px;
   padding-right: 15px;
 `;
 
-const Button = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }) => {
+const cmPermissions = {
+  collectionTypesConfigurations: [
+    {
+      action: 'plugins::content-manager.collection-types.configure-view',
+      subject: null,
+    },
+  ],
+  componentsConfigurations: [
+    {
+      action: 'plugins::content-manager.components.configure-layout',
+      subject: null,
+    },
+  ],
+  singleTypesConfigurations: [
+    {
+      action: 'plugins::content-manager.single-types.configure-view',
+      subject: null,
+    },
+  ],
+};
+
+const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }) => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const {
     collectionTypesConfigurations,
     componentsConfigurations,
     singleTypesConfigurations,
-  } = pluginPermissions;
+  } = cmPermissions;
   const icon = <LayoutIcon className="colored" fill={isTemporary ? '#B4B6BA' : '#007eff'} />;
   const label = formatMessage({ id: 'content-type-builder.form.button.configure-view' });
   let permissionsToApply = collectionTypesConfigurations;
@@ -31,9 +50,9 @@ const Button = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }
     }
 
     if (isInContentTypeView) {
-      push(`/plugins/${pluginId}/collectionType/${targetUid}/configurations/edit`);
+      push(`/plugins/content-manager/collectionType/${targetUid}/configurations/edit`);
     } else {
-      push(`/plugins/${pluginId}/components/${targetUid}/configurations/edit`);
+      push(`/plugins/content-manager/components/${targetUid}/configurations/edit`);
     }
 
     return false;
@@ -61,18 +80,18 @@ const Button = ({ isTemporary, isInContentTypeView, contentTypeKind, targetUid }
   );
 };
 
-Button.defaultProps = {
+LinkToCMSettingsView.defaultProps = {
   contentTypeKind: 'collectionType',
   isInContentTypeView: true,
   isTemporary: false,
   targetUid: '',
 };
 
-Button.propTypes = {
+LinkToCMSettingsView.propTypes = {
   contentTypeKind: PropTypes.string,
   isInContentTypeView: PropTypes.bool,
   isTemporary: PropTypes.bool,
   targetUid: PropTypes.string,
 };
 
-export default memo(Button);
+export default memo(LinkToCMSettingsView);

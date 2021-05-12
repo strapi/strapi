@@ -7,7 +7,7 @@ import { request, useGlobalContext } from '@strapi/helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
-import { getInjectedComponents, getRequestUrl } from '../../utils';
+import { getRequestUrl } from '../../utils';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import LayoutTitle from '../../components/LayoutTitle';
@@ -20,10 +20,11 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from './utils';
 import { unformatLayout } from './utils/layout';
+import LinkToCTB from './LinkToCTB';
 
 const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, updateLayout }) => {
   const { push } = useHistory();
-  const { currentEnvironment, emitEvent, plugins } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
 
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, mainLayout, components)
@@ -310,19 +311,11 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
                   marginTop: -6,
                 }}
               >
-                {getInjectedComponents(
-                  'editSettingsView',
-                  'left.links',
-                  plugins,
-                  currentEnvironment,
-                  slug,
-                  push,
-                  {
-                    componentSlug: slug,
-                    type: isContentTypeView ? 'content-types' : 'components',
-                    modifiedData,
-                  }
-                )}
+                <LinkToCTB
+                  modifiedData={modifiedData}
+                  slug={slug}
+                  type={isContentTypeView ? 'content-types' : 'components'}
+                />
               </div>
             </div>
           </LayoutTitle>
