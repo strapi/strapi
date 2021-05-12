@@ -4,17 +4,18 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   let getState;
 
   beforeEach(() => {
-    const store = new Map();
-    store.set('i18n_locales', { locales: [] });
-    store.set('permissionsManager', { userPermissions: [] });
-    store.set('permissionsManager', {
-      collectionTypesRelatedPermissions: {
-        test: {
-          'plugins::content-manager.explorer.read': [],
-          'plugins::content-manager.explorer.create': [],
+    const store = {
+      i18n_locales: { locales: [] },
+      permissionsManager: {
+        userPermissions: [],
+        collectionTypesRelatedPermissions: {
+          test: {
+            'plugins::content-manager.explorer.read': [],
+            'plugins::content-manager.explorer.create': [],
+          },
         },
       },
-    });
+    };
 
     getState = () => store;
   });
@@ -75,17 +76,19 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   });
 
   it('should add a search key with the default locale when the user has the right to read it', () => {
-    const tempStore = new Map();
-    tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    tempStore.set('permissionsManager', { userPermissions: [] });
-    tempStore.set('permissionsManager', {
-      collectionTypesRelatedPermissions: {
-        test: {
-          'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-          'plugins::content-manager.explorer.create': [],
+    const tempStore = {
+      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
+      permissionsManager: {
+        userPermissions: [],
+        collectionTypesRelatedPermissions: {
+          test: {
+            'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
+            'plugins::content-manager.explorer.create': [],
+          },
         },
       },
-    });
+    };
+
     const action = {
       type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
       data: {
@@ -113,17 +116,28 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   });
 
   it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
-    const tempStore = new Map();
-    tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    tempStore.set('permissionsManager', { userPermissions: [] });
-    tempStore.set('permissionsManager', {
-      collectionTypesRelatedPermissions: {
-        test: {
-          'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
-          'plugins::content-manager.explorer.create': [],
+    const tempStore = {
+      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
+      permissionsManager: {
+        userPermissions: [],
+        collectionTypesRelatedPermissions: {
+          test: {
+            'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
+            'plugins::content-manager.explorer.create': [],
+          },
         },
       },
-    });
+    };
+    // tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
+    // tempStore.set('permissionsManager', { userPermissions: [] });
+    // tempStore.set('permissionsManager', {
+    //   collectionTypesRelatedPermissions: {
+    //     test: {
+    //       'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
+    //       'plugins::content-manager.explorer.create': [],
+    //     },
+    //   },
+    // });
     const action = {
       type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
       data: {
@@ -149,17 +163,28 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   });
 
   it('should keep the previous search', () => {
-    const tempStore = new Map();
-    tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    tempStore.set('permissionsManager', { userPermissions: [] });
-    tempStore.set('permissionsManager', {
-      collectionTypesRelatedPermissions: {
-        test: {
-          'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-          'plugins::content-manager.explorer.create': [],
+    const tempStore = {
+      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
+      permissionsManager: {
+        userPermissions: [],
+        collectionTypesRelatedPermissions: {
+          test: {
+            'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
+            'plugins::content-manager.explorer.create': [],
+          },
         },
       },
-    });
+    };
+    // tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
+    // tempStore.set('permissionsManager', { userPermissions: [] });
+    // tempStore.set('permissionsManager', {
+    //   collectionTypesRelatedPermissions: {
+    //     test: {
+    //       'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
+    //       'plugins::content-manager.explorer.create': [],
+    //     },
+    //   },
+    // });
     const action = {
       type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
       data: {

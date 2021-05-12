@@ -22,8 +22,8 @@ const fetchLocalesList = async () => {
 
 const useLocales = () => {
   const dispatch = useDispatch();
-  const locales = useSelector(state => state.get('i18n_locales').locales);
-  const isLoading = useSelector(state => state.get('i18n_locales').isLoading);
+  const locales = useSelector(state => state.i18n_locales.locales);
+  const isLoading = useSelector(state => state.i18n_locales.isLoading);
 
   useEffect(() => {
     fetchLocalesList().then(locales => dispatch({ type: RESOLVE_LOCALES, locales }));

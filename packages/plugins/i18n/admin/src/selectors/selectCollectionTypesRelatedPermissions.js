@@ -1,4 +1,4 @@
 const selectCollectionTypesRelatedPermissions = state =>
-  state.get('permissionsManager').collectionTypesRelatedPermissions;
+  state.permissionsManager.collectionTypesRelatedPermissions;
 
 export default selectCollectionTypesRelatedPermissions;
