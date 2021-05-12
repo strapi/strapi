@@ -5,8 +5,8 @@ class Plugin {
     this.description = pluginConf.description;
     // TODO
     this.icon = pluginConf.icon;
+    // TODO
     this.initializer = pluginConf.initializer || null;
-
     this.injectionZones = pluginConf.injectionZones || {};
     this.isReady = pluginConf.isReady !== undefined ? pluginConf.isReady : true;
     // TODO
@@ -22,8 +22,6 @@ class Plugin {
     this.pluginLogo = pluginConf.pluginLogo;
     // TODO
     this.settings = pluginConf.settings || null;
-    // TODO
-    this.trads = pluginConf.trads;
   }
 
   getInjectedComponents(containerName, blockName) {

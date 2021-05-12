@@ -3,10 +3,8 @@ class Reducers {
     this.reducers = { ...appReducers };
   }
 
-  add(reducers) {
-    Object.keys(reducers).forEach(reducerName => {
-      this.reducers[reducerName] = reducers[reducerName];
-    });
+  add(reducerName, reducer) {
+    this.reducers[reducerName] = reducer;
   }
 }
 

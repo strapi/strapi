@@ -13,14 +13,6 @@ class Fields {
 
     this.fields[type] = Component;
   }
-
-  addFields(fields) {
-    fields.map(this.add);
-  }
-
-  get(fieldName) {
-    return this.fields[fieldName];
-  }
 }
 
 export default () => new Fields();

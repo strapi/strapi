@@ -12,15 +12,7 @@ class Components {
     invariant(name, 'A name must be provided');
     invariant(this.components[name] === undefined, 'A similar field already exists');
 
-    this.components[name] = { Component };
-  }
-
-  addComponents(components) {
-    components.map(this.add);
-  }
-
-  get(componentName) {
-    return this.components[componentName];
+    this.components[name] = Component;
   }
 }
 

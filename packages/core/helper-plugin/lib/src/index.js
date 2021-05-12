@@ -115,6 +115,7 @@ export { default as ContentManagerEditViewDataManagerContext } from './contexts/
 // Hooks
 export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
+export { default as useLibrary } from './hooks/useLibrary';
 export { default as useStrapi } from './hooks/useStrapi';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
@@ -122,6 +123,7 @@ export { default as useQueryParams } from './hooks/useQueryParams';
 
 // Providers
 export { default as StrapiProvider } from './providers/StrapiProvider';
+export { default as LibraryProvider } from './providers/LibraryProvider';
 
 // Utils
 export { default as auth } from './utils/auth';

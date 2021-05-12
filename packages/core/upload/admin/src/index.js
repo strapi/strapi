@@ -26,11 +26,11 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     // TODO update doc and guides
-    app.library.components.add({ name: 'media-library', Component: InputModalStepper });
+    app.addComponent({ name: 'media-library', Component: InputModalStepper });
     // TODO update guide
-    app.library.fields.add({ type: 'media', Component: InputMedia });
+    app.addField({ type: 'media', Component: InputMedia });
 
-    app.reducers.add(reducers);
+    app.addReducers(reducers);
 
     app.registerPlugin({
       description: pluginDescription,

@@ -1,13 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useStrapi, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import React, { useEffect, useState } from 'react';
+import { useLibrary, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
 const MediaLib = ({ isOpen, onChange, onToggle }) => {
-  const {
-    strapi: {
-      library: { components },
-    },
-  } = useStrapi();
+  const { components } = useLibrary();
 
   const [data, setData] = useState(null);
   const [isDisplayed, setIsDisplayed] = useState(false);
@@ -18,9 +14,7 @@ const MediaLib = ({ isOpen, onChange, onToggle }) => {
     }
   }, [isOpen]);
 
-  const mediaLibComponent = useRef(components.get('media-library')?.Component);
-
-  const Component = mediaLibComponent.current;
+  const Component = components['media-library'];
 
   const handleInputChange = data => {
     if (data) {

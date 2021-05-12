@@ -20,7 +20,7 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    app.reducers.add(reducers);
+    app.addReducers(reducers);
     app.registerPlugin({
       description: pluginDescription,
       icon,

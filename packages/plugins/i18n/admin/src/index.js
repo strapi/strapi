@@ -24,11 +24,9 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    middlewares.forEach(middleware => {
-      app.middlewares.add(middleware);
-    });
+    app.addMiddlewares(middlewares);
 
-    app.reducers.add(i18nReducers);
+    app.addReducers(i18nReducers);
 
     app.registerPlugin({
       description: pluginDescription,

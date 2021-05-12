@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
-import { StrapiProvider } from '@strapi/helper-plugin';
+import { LibraryProvider, StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
 import { Library, Middlewares, Plugin, Reducers } from './core/apis';
 import basename from './utils/basename';
@@ -43,12 +43,57 @@ class StrapiApp {
     this.plugins = {};
     this.reducers = Reducers({ appReducers: reducers });
     this.translations = translations;
-    this.getPlugin = this.getPlugin.bind(this);
   }
+
+  addComponent = component => {
+    this.library.components.add(component);
+  };
+
+  addComponents = components => {
+    components.map(compo => this.library.components.add(compo));
+  };
+
+  addField = field => {
+    this.library.fields.add(field);
+  };
+
+  addFields = fields => {
+    fields.map(field => this.library.fields.add(field));
+  };
+
+  addMiddleware = middleware => {
+    this.middlewares.add(middleware);
+  };
+
+  addMiddlewares = middlewares => {
+    middlewares.forEach(middleware => {
+      this.middlewares.add(middleware);
+    });
+  };
+
+  addReducer = reducer => {
+    this.reducers.add(reducer);
+  };
+
+  addReducers = reducers => {
+    Object.keys(reducers).forEach(reducerName => {
+      this.reducers.add(reducerName, reducers[reducerName]);
+    });
+  };
 
   async initialize() {
     Object.keys(this.appPlugins).forEach(plugin => {
-      this.appPlugins[plugin].register(this);
+      this.appPlugins[plugin].register({
+        addComponent: this.addComponent,
+        addComponents: this.addComponents,
+        addField: this.addField,
+        addFields: this.addFields,
+        addMiddleware: this.addMiddleware,
+        addMiddlewares: this.addMiddlewares,
+        addReducer: this.addReducer,
+        addReducers: this.addReducers,
+        registerPlugin: this.registerPlugin,
+      });
     });
   }
 
@@ -57,14 +102,14 @@ class StrapiApp {
       const boot = this.appPlugins[plugin].boot;
 
       if (boot) {
-        boot(this);
+        boot({ getPlugin: this.getPlugin });
       }
     });
   }
 
-  getPlugin(pluginId) {
+  getPlugin = pluginId => {
     return this.plugins[pluginId] || null;
-  }
+  };
 
   // FIXME
   registerPluginTranslations(pluginId, trads) {
@@ -94,20 +139,23 @@ class StrapiApp {
     }, {});
   }
 
-  registerPlugin(pluginConf) {
-    const plugin = Plugin(pluginConf);
-
-    this.plugins[plugin.pluginId] = plugin;
-
+  registerPlugin = pluginConf => {
     // FIXME
     // Translations should be loaded differently
     // This is a temporary fix
+    this.registerPluginTranslations(pluginConf.id, pluginConf.trads);
 
-    this.registerPluginTranslations(plugin.pluginId, plugin.trads);
-  }
+    const plugin = Plugin(pluginConf);
+
+    this.plugins[plugin.pluginId] = plugin;
+  };
 
   render() {
-    const store = configureStore(this);
+    const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
+    const {
+      components: { components },
+      fields: { fields },
+    } = this.library;
 
     return (
       <QueryClientProvider client={queryClient}>
@@ -115,18 +163,21 @@ class StrapiApp {
           <GlobalStyle />
           <Fonts />
           <Provider store={store}>
-            <StrapiProvider strapi={this}>
-              <LanguageProvider messages={this.translations}>
-                <>
-                  <AutoReloadOverlayBlocker />
-                  <OverlayBlocker />
-                  <Notifications />
-                  <BrowserRouter basename={basename}>
-                    <App store={store} />
-                  </BrowserRouter>
-                </>
-              </LanguageProvider>
-            </StrapiProvider>
+            <LibraryProvider components={components} fields={fields}>
+              {/* TODO remove this */}
+              <StrapiProvider strapi={this}>
+                <LanguageProvider messages={this.translations}>
+                  <>
+                    <AutoReloadOverlayBlocker />
+                    <OverlayBlocker />
+                    <Notifications />
+                    <BrowserRouter basename={basename}>
+                      <App store={store} />
+                    </BrowserRouter>
+                  </>
+                </LanguageProvider>
+              </StrapiProvider>
+            </LibraryProvider>
           </Provider>
         </ThemeProvider>
       </QueryClientProvider>

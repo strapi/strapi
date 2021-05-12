@@ -1,10 +1,12 @@
-import React, { memo, useMemo, useRef } from 'react';
+import React, { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { get, omit, take } from 'lodash';
+import get from 'lodash/get';
+import omit from 'lodash/omit';
+import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 import { Inputs as InputsIndex } from '@buffetjs/custom';
-import { NotAllowedInput, useStrapi } from '@strapi/helper-plugin';
+import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import InputJSONWithErrors from '../InputJSONWithErrors';
@@ -36,13 +38,7 @@ function Inputs({
   queryInfos,
   value,
 }) {
-  // TODO change to app
-  const {
-    strapi: {
-      library: { fields },
-    },
-  } = useStrapi();
-  const otherFields = useRef(fields.fields);
+  const { fields } = useLibrary();
 
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
   const { formatMessage } = useIntl();
@@ -226,7 +222,7 @@ function Inputs({
         json: InputJSONWithErrors,
         wysiwyg: WysiwygWithErrors,
         uid: InputUID,
-        ...otherFields.current,
+        ...fields,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
