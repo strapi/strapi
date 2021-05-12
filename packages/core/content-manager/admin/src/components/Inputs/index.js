@@ -1,4 +1,4 @@
-import React, { memo, useMemo } from 'react';
+import React, { memo, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { get, omit, take } from 'lodash';
 import isEqual from 'react-fast-compare';
@@ -38,8 +38,12 @@ function Inputs({
 }) {
   // TODO change to app
   const {
-    strapi: { fieldApi },
+    strapi: {
+      library: { fields },
+    },
   } = useStrapi();
+  const otherFields = useRef(fields.fields);
+
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
   const { formatMessage } = useIntl();
 
@@ -174,10 +178,6 @@ function Inputs({
     isRequired,
   ]);
 
-  const otherFields = useMemo(() => {
-    return fieldApi.getFields();
-  }, [fieldApi]);
-
   const { description, visible } = metadatas;
 
   if (visible === false) {
@@ -226,7 +226,7 @@ function Inputs({
         json: InputJSONWithErrors,
         wysiwyg: WysiwygWithErrors,
         uid: InputUID,
-        ...otherFields,
+        ...otherFields.current,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
