@@ -79,26 +79,42 @@ async function build({ dir, env, options, optimize }) {
   });
 }
 
-// TODO remove
 async function createPluginsJs(plugins, localPlugins, dest) {
+  const createPluginsArray = plugins =>
+    plugins.map(name => {
+      const shortName = _.camelCase(name.replace(/^@strapi\/plugin-/i, ''));
+
+      return { name, shortName };
+    });
+  const appPluginsArray = createPluginsArray(plugins);
+  const localPluginsArray = createPluginsArray(localPlugins);
+
   const content = `
-module.exports = {
-  ${plugins
-    .map(name => {
-      const shortName = name.replace(/^@strapi\/plugin-/i, '');
-      const req = `require('../../plugins/${name}/admin/src').default`;
-      return `'${shortName}': ${req},`;
-    })
-    .join('\n')}
-  ${localPlugins
-    .map(name => {
-      const shortName = name.replace(/^@strapi\/plugin-/i, '');
-      const req = `require('../../../plugins/${name}/admin/src').default`;
-      return `'${shortName}': ${req}`;
-    })
-    .join(',\n')}
-}
-  `;
+${appPluginsArray
+  .map(({ name, shortName }) => {
+    const req = `'../../plugins/${name}/admin/src'`;
+
+    return `import ${shortName} from ${req};`;
+  })
+  .join('\n')}
+${localPluginsArray
+  .map(({ name, shortName }) => {
+    const req = `'../../../plugins/${name}/admin/src'`;
+
+    return `import ${shortName} from ${req};`;
+  })
+  .join('\n')}
+
+const plugins = {
+${[...appPluginsArray, ...localPluginsArray]
+  .map(({ name, shortName }) => {
+    return `  '${name}': ${shortName},`;
+  })
+  .join('\n')}
+};
+
+export default plugins;
+`;
 
   return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
 }
@@ -123,13 +139,6 @@ async function copyPlugin(name, dest) {
 
   // Copy the entire admin folder
   await copy('admin');
-
-  // Copy the layout.js if it exists
-  if (await fs.exists(path.resolve(pkgFilePath, 'config', 'layout.js'))) {
-    await fs.ensureDir(resolveDest('config'));
-    await copy('config', 'layout.js');
-  }
-
   await copy('package.json');
 }
 
@@ -218,7 +227,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
   // Create the cache dir containing the front-end files.
   await createCacheDir(dir);
 
-  const entry = path.join(dir, '.cache', 'admin', 'src', 'app.js');
+  const entry = path.join(dir, '.cache', 'admin', 'src');
   const dest = path.join(dir, 'build');
   const env = 'development';
 
@@ -234,9 +243,9 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     clientLogLevel: 'silent',
     quiet: true,
     open: browser === 'true' ? true : browser,
-    publicPath: options.publicPath,
+    publicPath: options.adminPath,
     historyApiFallback: {
-      index: options.publicPath,
+      index: options.adminPath,
       disableDotRule: true,
     },
   };

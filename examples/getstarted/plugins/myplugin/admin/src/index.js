@@ -1,28 +1,37 @@
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 
-// TODO
-export default strapi => {
-  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const icon = pluginPkg.strapi.icon;
+const name = pluginPkg.strapi.name;
 
-  const plugin = {
-    blockerComponent: null,
-    blockerComponentProps: {},
-    description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
-    id: pluginId,
-    initializer: () => null,
-    injectedComponents: [],
-    isReady: true,
-    isRequired: pluginPkg.strapi.required || false,
-    leftMenuLinks: [],
-    leftMenuSections: [],
-    mainComponent: null,
-    name: pluginPkg.strapi.name,
-    preventComponentRendering: false,
-    settings: null,
-    trads: {},
-  };
-
-  return strapi.registerPlugin(plugin);
+export default {
+  register(app) {
+    app.registerPlugin({
+      description: pluginDescription,
+      icon,
+      id: pluginId,
+      isReady: true,
+      isRequired: pluginPkg.strapi.required || false,
+      mainComponent: () => 'My plugin',
+      name,
+      settings: null,
+      trads: {},
+      menu: {
+        pluginsSectionLinks: [
+          {
+            destination: `/plugins/${pluginId}`,
+            icon,
+            label: {
+              id: `${pluginId}.plugin.name`,
+              defaultMessage: 'My plugin',
+            },
+            name,
+            permissions: null,
+          },
+        ],
+      },
+    });
+  },
+  boot() {},
 };
