@@ -1,13 +1,13 @@
 import React, { useReducer, useRef } from 'react';
-import { LoadingIndicatorPage, useStrapi } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import Admin from '../../pages/Admin';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const PluginsInitializer = () => {
-  // TODO rename strapi to avoid mismatch with the window.strapi
-  const { strapi: app } = useStrapi();
-  const [{ plugins }, dispatch] = useReducer(reducer, initialState, () => init(app.plugins));
+  const { plugins: appPlugins } = useStrapiApp();
+
+  const [{ plugins }, dispatch] = useReducer(reducer, initialState, () => init(appPlugins));
   const setPlugin = useRef(pluginId => {
     dispatch({ type: 'SET_PLUGIN_READY', pluginId });
   });

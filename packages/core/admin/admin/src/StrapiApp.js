@@ -3,7 +3,7 @@ import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
-import { LibraryProvider, StrapiProvider } from '@strapi/helper-plugin';
+import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import basename from './utils/basename';
@@ -149,9 +149,8 @@ class StrapiApp {
           <GlobalStyle />
           <Fonts />
           <Provider store={store}>
-            <LibraryProvider components={components} fields={fields}>
-              {/* TODO remove this */}
-              <StrapiProvider strapi={this}>
+            <StrapiAppProvider getPlugin={this.getPlugin} plugins={this.plugins}>
+              <LibraryProvider components={components} fields={fields}>
                 <LanguageProvider messages={this.translations}>
                   <>
                     <AutoReloadOverlayBlocker />
@@ -162,8 +161,8 @@ class StrapiApp {
                     </BrowserRouter>
                   </>
                 </LanguageProvider>
-              </StrapiProvider>
-            </LibraryProvider>
+              </LibraryProvider>
+            </StrapiAppProvider>
           </Provider>
         </ThemeProvider>
       </QueryClientProvider>

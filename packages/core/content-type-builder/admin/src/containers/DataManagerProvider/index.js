@@ -6,7 +6,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
-  useStrapi,
+  useStrapiApp,
   useUser,
 } from '@strapi/helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
@@ -63,10 +63,8 @@ const DataManagerProvider = ({
   reservedNames,
 }) => {
   const dispatch = useDispatch();
-  // TODO
-  const {
-    strapi: { getPlugin },
-  } = useStrapi();
+
+  const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });

@@ -10,7 +10,12 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import React, { memo, useMemo, useState } from 'react';
-import { BackHeader, LeftMenuList, LoadingIndicatorPage, useStrapi } from '@strapi/helper-plugin';
+import {
+  BackHeader,
+  LeftMenuList,
+  LoadingIndicatorPage,
+  useStrapiApp,
+} from '@strapi/helper-plugin';
 import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import HeaderSearch from '../../components/HeaderSearch';
@@ -37,10 +42,7 @@ import {
 function SettingsPage() {
   const { settingId } = useParams();
   const { goBack } = useHistory();
-  // TODO
-  const {
-    strapi: { plugins },
-  } = useStrapi();
+  const { plugins } = useStrapiApp();
   const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
   const { isLoading, menu } = useSettingsMenu();
   const { formatMessage } = useIntl();

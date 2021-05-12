@@ -10,7 +10,7 @@ import {
   getYupInnerErrors,
   useGlobalContext,
   useQuery,
-  useStrapi,
+  useStrapiApp,
   InputsIndex,
 } from '@strapi/helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
@@ -72,9 +72,7 @@ const FormModal = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
-  const {
-    strapi: { getPlugin },
-  } = useStrapi();
+  const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI = ctbPlugin.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
