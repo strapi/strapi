@@ -5,7 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { LibraryProvider, StrapiProvider } from '@strapi/helper-plugin';
 import configureStore from './core/store/configureStore';
-import { Library, Middlewares, Plugin, Reducers } from './core/apis';
+import { Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
@@ -15,8 +15,6 @@ import OverlayBlocker from './components/OverlayBlocker';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
 import themes from './themes';
-
-import reducers from './reducers';
 
 // TODO
 import translations from './translations';
@@ -36,43 +34,35 @@ const queryClient = new QueryClient({
 const appLocales = Object.keys(translations);
 
 class StrapiApp {
-  constructor({ appPlugins }) {
+  constructor({ appPlugins, library, middlewares, reducers }) {
     this.appPlugins = appPlugins || {};
-    this.library = Library();
-    this.middlewares = Middlewares();
+    this.library = library;
+    this.middlewares = middlewares;
     this.plugins = {};
-    this.reducers = Reducers({ appReducers: reducers });
+    this.reducers = reducers;
     this.translations = translations;
   }
 
-  addComponent = component => {
-    this.library.components.add(component);
-  };
-
   addComponents = components => {
-    components.map(compo => this.library.components.add(compo));
-  };
-
-  addField = field => {
-    this.library.fields.add(field);
+    if (Array.isArray(components)) {
+      components.map(compo => this.library.components.add(compo));
+    } else {
+      this.library.components.add(components);
+    }
   };
 
   addFields = fields => {
-    fields.map(field => this.library.fields.add(field));
-  };
-
-  addMiddleware = middleware => {
-    this.middlewares.add(middleware);
+    if (Array.isArray(fields)) {
+      fields.map(field => this.library.fields.add(field));
+    } else {
+      this.library.fields.add(fields);
+    }
   };
 
   addMiddlewares = middlewares => {
     middlewares.forEach(middleware => {
       this.middlewares.add(middleware);
     });
-  };
-
-  addReducer = reducer => {
-    this.reducers.add(reducer);
   };
 
   addReducers = reducers => {
@@ -84,13 +74,9 @@ class StrapiApp {
   async initialize() {
     Object.keys(this.appPlugins).forEach(plugin => {
       this.appPlugins[plugin].register({
-        addComponent: this.addComponent,
         addComponents: this.addComponents,
-        addField: this.addField,
         addFields: this.addFields,
-        addMiddleware: this.addMiddleware,
         addMiddlewares: this.addMiddlewares,
-        addReducer: this.addReducer,
         addReducers: this.addReducers,
         registerPlugin: this.registerPlugin,
       });
@@ -108,7 +94,7 @@ class StrapiApp {
   }
 
   getPlugin = pluginId => {
-    return this.plugins[pluginId] || null;
+    return this.plugins[pluginId];
   };
 
   // FIXME
@@ -185,4 +171,5 @@ class StrapiApp {
   }
 }
 
-export default ({ appPlugins }) => new StrapiApp({ appPlugins });
+export default ({ appPlugins, library, middlewares, reducers }) =>
+  new StrapiApp({ appPlugins, library, middlewares, reducers });
