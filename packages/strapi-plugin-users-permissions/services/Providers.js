@@ -569,7 +569,7 @@ const getProfile = async (provider, query, callback) => {
               ? body.attributes.strapiemail || body.attributes.email
               : body.strapiemail || body.email;
             if (!username || !email) {
-              console.log(
+              strapi.log.warn(
                 'CAS Response Body did not contain required attributes: ' + JSON.stringify(body)
               );
             }
