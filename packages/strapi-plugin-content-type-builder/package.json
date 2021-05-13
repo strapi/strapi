@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-content-type-builder",
-  "version": "3.6.1",
+  "version": "3.6.2",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -8,12 +8,12 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.5",
-    "@buffetjs/custom": "3.3.5",
-    "@buffetjs/hooks": "3.3.5",
-    "@buffetjs/icons": "3.3.5",
-    "@buffetjs/styles": "3.3.5",
-    "@buffetjs/utils": "3.3.5",
+    "@buffetjs/core": "3.3.6",
+    "@buffetjs/custom": "3.3.6",
+    "@buffetjs/hooks": "3.3.6",
+    "@buffetjs/icons": "3.3.6",
+    "@buffetjs/styles": "3.3.6",
+    "@buffetjs/utils": "3.3.6",
     "@sindresorhus/slugify": "1.1.0",
     "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
@@ -29,10 +29,10 @@
     "redux": "^4.0.1",
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
-    "strapi-generate": "3.6.1",
-    "strapi-generate-api": "3.6.1",
-    "strapi-helper-plugin": "3.6.1",
-    "strapi-utils": "3.6.1",
+    "strapi-generate": "3.6.2",
+    "strapi-generate-api": "3.6.2",
+    "strapi-helper-plugin": "3.6.2",
+    "strapi-utils": "3.6.2",
     "yup": "^0.27.0"
   },
   "author": {
