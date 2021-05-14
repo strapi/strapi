@@ -257,7 +257,11 @@ const buildAssocResolvers = model => {
             };
 
             if (['oneToOne', 'oneWay', 'manyToOne'].includes(nature)) {
-              if (!_.has(obj, alias) || _.isNil(foreignId)) {
+              if (
+                !_.has(obj, alias) ||
+                _.isNil(foreignId) ||
+                (_.isObject(obj[alias]) && !_.has(obj[alias], targetPK))
+              ) {
                 return null;
               }
 
