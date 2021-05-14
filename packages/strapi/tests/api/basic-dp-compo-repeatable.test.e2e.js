@@ -59,12 +59,12 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   test('Create product with compo', async () => {
     const product = {

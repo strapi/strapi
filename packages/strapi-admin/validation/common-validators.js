@@ -2,11 +2,17 @@
 
 const { yup } = require('strapi-utils');
 const _ = require('lodash');
+const { isEmpty, has, isNil, isArray } = require('lodash/fp');
+const { getService } = require('../utils');
 const actionDomain = require('../domain/action');
 const {
   checkFieldsAreCorrectlyNested,
   checkFieldsDontHaveDuplicates,
 } = require('./common-functions');
+
+const getActionFromProvider = actionId => {
+  return getService('permission').actionProvider.get(actionId);
+};
 
 const email = yup
   .string()
@@ -40,7 +46,7 @@ const arrayOfConditionNames = yup
   .array()
   .of(yup.string())
   .test('is-an-array-of-conditions', 'is not a plugin name', function(value) {
-    const ids = strapi.admin.services.permission.conditionProvider.getAll().map(c => c.id);
+    const ids = strapi.admin.services.permission.conditionProvider.keys();
     return _.isUndefined(value) || _.difference(value, ids).length === 0
       ? true
       : this.createError({ path: this.path, message: `contains conditions that don't exist` });
@@ -55,17 +61,36 @@ const checkNoDuplicatedPermissions = permissions =>
     permissions.slice(i + 1).every(permB => !permissionsAreEquals(permA, permB))
   );
 
-const checkNilFields = function(fields) {
-  // If the parent has no action field, then we ignore this test
-  if (_.isNil(this.parent.action)) {
-    return true;
-  }
+const checkNilFields = action =>
+  function(fields) {
+    // If the parent has no action field, then we ignore this test
+    if (isNil(action)) {
+      return true;
+    }
 
-  const { actionProvider } = strapi.admin.services.permission;
-  const action = actionProvider.getByActionId(this.parent.action);
+    return actionDomain.appliesToProperty('fields', action) || isNil(fields);
+  };
 
-  return actionDomain.hasFieldsRestriction(action) || _.isNil(fields);
-};
+const fieldsPropertyValidation = action =>
+  yup
+    .array()
+    .of(yup.string())
+    .nullable()
+    .test(
+      'field-nested',
+      'Fields format are incorrect (bad nesting).',
+      checkFieldsAreCorrectlyNested
+    )
+    .test(
+      'field-nested',
+      'Fields format are incorrect (duplicates).',
+      checkFieldsDontHaveDuplicates
+    )
+    .test(
+      'fields-restriction',
+      'The permission at ${path} must have fields set to null or undefined',
+      checkNilFields(action)
+    );
 
 const updatePermissions = yup
   .object()
@@ -77,27 +102,92 @@ const updatePermissions = yup
         yup
           .object()
           .shape({
-            action: yup.string().required(),
-            subject: yup.string().nullable(),
-            fields: yup
-              .array()
-              .of(yup.string())
+            action: yup
+              .string()
+              .required()
+              .test('action-validity', 'action is not an existing permission action', function(
+                actionId
+              ) {
+                // If the action field is Nil, ignore the test and let the required check handle the error
+                if (isNil(actionId)) {
+                  return true;
+                }
+
+                return !!getActionFromProvider(actionId);
+              }),
+            subject: yup
+              .string()
               .nullable()
-              .test(
-                'field-nested',
-                'Fields format are incorrect (bad nesting).',
-                checkFieldsAreCorrectlyNested
-              )
-              .test(
-                'field-nested',
-                'Fields format are incorrect (duplicates).',
-                checkFieldsDontHaveDuplicates
-              )
-              .test(
-                'fields-restriction',
-                'The permission at ${path} must have fields set to null or undefined',
-                checkNilFields
-              ),
+              .test('subject-validity', 'Invalid subject submitted', function(subject) {
+                const action = getActionFromProvider(this.options.parent.action);
+
+                if (!action) {
+                  return true;
+                }
+
+                if (isNil(action.subjects)) {
+                  return isNil(subject);
+                }
+
+                if (isArray(action.subjects)) {
+                  return action.subjects.includes(subject);
+                }
+
+                return false;
+              }),
+            properties: yup
+              .object()
+              .test('properties-structure', 'Invalid property set at ${path}', function(
+                properties
+              ) {
+                const action = getActionFromProvider(this.options.parent.action);
+                const hasNoProperties = isEmpty(properties) || isNil(properties);
+
+                if (!has('options.applyToProperties', action)) {
+                  return hasNoProperties;
+                }
+
+                if (hasNoProperties) {
+                  return true;
+                }
+
+                const { applyToProperties } = action.options;
+
+                if (!isArray(applyToProperties)) {
+                  return false;
+                }
+
+                return Object.keys(properties).every(property =>
+                  applyToProperties.includes(property)
+                );
+              })
+              .test('fields-property', 'Invalid fields property at ${path}', async function(
+                properties = {}
+              ) {
+                const action = getActionFromProvider(this.options.parent.action);
+
+                if (!action || !properties) {
+                  return true;
+                }
+
+                if (!actionDomain.appliesToProperty('fields', action)) {
+                  return true;
+                }
+
+                try {
+                  await fieldsPropertyValidation(action).validate(properties.fields, {
+                    strict: true,
+                    abortEarly: false,
+                  });
+                  return true;
+                } catch (e) {
+                  // Propagate fieldsPropertyValidation error with updated path
+                  throw this.createError({
+                    message: e.message,
+                    path: `${this.path}.fields`,
+                  });
+                }
+              }),
             conditions: yup.array().of(yup.string()),
           })
           .noUnknown()

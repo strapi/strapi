@@ -52,7 +52,7 @@ describe('Migration - required attribute', () => {
     rq = await createAuthRequest({ strapi });
 
     data.dogs = builder.sanitizedFixturesFor(dogModel.name, strapi);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
@@ -94,7 +94,7 @@ describe('Migration - required attribute', () => {
         body: { name: null },
       });
       expect(res.body.message).toBe('ValidationError');
-    }, 60000);
+    });
   });
 
   describe('Required: true -> false', () => {
@@ -115,6 +115,6 @@ describe('Migration - required attribute', () => {
 
       expect(res.body).toMatchObject({ name: null });
       data.dogs.push(res.body);
-    }, 60000);
+    });
   });
 });

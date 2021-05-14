@@ -123,12 +123,12 @@ describe('CM API', () => {
 
     data.collectors = builder.sanitizedFixturesFor(collector.name, strapi);
     data.stamps = builder.sanitizedFixturesFor(stamp.name, strapi);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('Count relations', () => {
     test('many-way', async () => {

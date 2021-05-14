@@ -120,14 +120,14 @@ if (edition === 'EE') {
       utils = createUtils(strapi);
 
       await createFixtures();
-    }, 60000);
+    });
 
     afterAll(async () => {
       await deleteFixtures();
 
       await strapi.destroy();
       await builder.cleanup();
-    }, 60000);
+    });
 
     test('User A can create an entry', async () => {
       const rq = getUserRequest(0);

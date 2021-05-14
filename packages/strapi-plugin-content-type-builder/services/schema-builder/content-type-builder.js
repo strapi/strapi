@@ -86,6 +86,7 @@ module.exports = function createComponentBuilder() {
           timestamps: true,
           draftAndPublish: infos.draftAndPublish || false,
         })
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
       Object.keys(infos.attributes).forEach(key => {
@@ -157,7 +158,8 @@ module.exports = function createComponentBuilder() {
             this.unsetRelation(oldAttribute);
           }
 
-          newAttribute.autoPopulate = newAttribute.autoPopulate || oldAttribute.autoPopulate;
+          // keep extra options that were set manually on oldAttribute
+          _.defaults(newAttribute, oldAttribute);
 
           return this.setRelation({
             key,
@@ -188,6 +190,7 @@ module.exports = function createComponentBuilder() {
         .set(['info', 'name'], infos.name)
         .set(['info', 'description'], infos.description)
         .set(['options', 'draftAndPublish'], infos.draftAndPublish || false)
+        .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(newAttributes));
 
       return contentType;
@@ -224,6 +227,7 @@ const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute =
     plugin,
     columnName: attribute.targetColumnName || undefined,
     autoPopulate: targetAttribute.autoPopulate,
+    private: targetAttribute.private || undefined,
   };
 
   switch (attribute.nature) {

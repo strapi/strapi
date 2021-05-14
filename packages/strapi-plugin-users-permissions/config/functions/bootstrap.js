@@ -219,6 +219,7 @@ module.exports = async () => {
     strapi.reload.isWatching = true;
   }
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(usersPermissionsActions.actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(
+    usersPermissionsActions.actions
+  );
 };

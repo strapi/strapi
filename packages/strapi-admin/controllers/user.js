@@ -17,7 +17,13 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const attributes = _.pick(body, ['firstname', 'lastname', 'email', 'roles']);
+    const attributes = _.pick(body, [
+      'firstname',
+      'lastname',
+      'email',
+      'roles',
+      'preferedLanguage',
+    ]);
 
     const userAlreadyExists = await strapi.admin.services.user.exists({
       email: attributes.email,

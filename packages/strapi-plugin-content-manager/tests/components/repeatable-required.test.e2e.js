@@ -44,12 +44,12 @@ describe.each([
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
     rq.setURLPrefix(path);
-  }, 60000);
+  });
 
   afterAll(async () => {
     await strapi.destroy();
     await builder.cleanup();
-  }, 60000);
+  });
 
   describe('POST new entry', () => {
     test('Creating entry with JSON works', async () => {

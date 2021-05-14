@@ -5,7 +5,7 @@ const { keys, each, prop, isEmpty } = require('lodash/fp');
 const { singular } = require('pluralize');
 const { toQueries, runPopulateQueries } = require('./utils/populate-queries');
 
-const BOOLEAN_OPERATORS = ['or'];
+const BOOLEAN_OPERATORS = ['or', 'and'];
 
 /**
  * Build filters on a bookshelf query
@@ -296,7 +296,7 @@ const buildJoinsAndFilter = (qb, model, filters) => {
  * @param {Object} options.value - Filter value
  */
 const buildWhereClause = ({ qb, field, operator, value }) => {
-  if (Array.isArray(value) && !['or', 'in', 'nin'].includes(operator)) {
+  if (Array.isArray(value) && !['and', 'or', 'in', 'nin'].includes(operator)) {
     return qb.where(subQb => {
       for (let val of value) {
         subQb.orWhere(q => buildWhereClause({ qb: q, field, operator, value: val }));
@@ -305,6 +305,20 @@ const buildWhereClause = ({ qb, field, operator, value }) => {
   }
 
   switch (operator) {
+    case 'and':
+      return qb.where(andQb => {
+        value.forEach(andClause => {
+          andQb.where(subQb => {
+            if (Array.isArray(andClause)) {
+              andClause.forEach(clause =>
+                subQb.where(andQb => buildWhereClause({ qb: andQb, ...clause }))
+              );
+            } else {
+              buildWhereClause({ qb: subQb, ...andClause });
+            }
+          });
+        });
+      });
     case 'or':
       return qb.where(orQb => {
         value.forEach(orClause => {

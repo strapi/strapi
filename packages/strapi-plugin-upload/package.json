@@ -1,6 +1,6 @@
 {
   "name": "strapi-plugin-upload",
-  "version": "3.5.4",
+  "version": "3.6.2",
   "description": "Makes it easy to upload images and files to your Strapi Application.",
   "strapi": {
     "name": "Media Library",
@@ -12,12 +12,12 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.4",
-    "@buffetjs/custom": "3.3.4",
-    "@buffetjs/hooks": "3.3.4",
-    "@buffetjs/icons": "3.3.4",
-    "@buffetjs/styles": "3.3.4",
-    "@buffetjs/utils": "3.3.4",
+    "@buffetjs/core": "3.3.6",
+    "@buffetjs/custom": "3.3.6",
+    "@buffetjs/hooks": "3.3.6",
+    "@buffetjs/icons": "3.3.6",
+    "@buffetjs/styles": "3.3.6",
+    "@buffetjs/utils": "3.3.6",
     "byte-size": "^7.0.1",
     "cropperjs": "^1.5.11",
     "immer": "^8.0.1",
@@ -31,27 +31,27 @@
     "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^16.9.0",
     "react-intl": "4.5.0",
-    "react-redux": "7.2.2",
+    "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
     "reactstrap": "8.4.1",
     "sharp": "0.28.1",
-    "strapi-helper-plugin": "3.5.4",
-    "strapi-provider-upload-local": "3.5.4",
-    "strapi-utils": "3.5.4",
+    "strapi-helper-plugin": "3.6.2",
+    "strapi-provider-upload-local": "3.6.2",
+    "strapi-utils": "3.6.2",
     "stream-to-array": "^2.3.0",
     "uuid": "^3.2.1"
   },
   "author": {
-    "name": "A Strapi developer",
-    "email": "",
-    "url": ""
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
   },
   "maintainers": [
     {
-      "name": "A Strapi developer",
-      "email": "",
-      "url": ""
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
     }
   ],
   "engines": {
