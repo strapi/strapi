@@ -28,7 +28,7 @@ import { checkLatestStrapiVersion } from '../../utils';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import LeftMenu from '../LeftMenu';
+import SpixlerLeftMenu from '../SpixlerLeftMenu';
 import InstalledPluginsPage from '../InstalledPluginsPage';
 import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
@@ -255,7 +255,7 @@ export class Admin extends React.Component {
           updateMenu={this.state.updateMenu}
         >
           <Wrapper>
-            <LeftMenu
+            <SpixlerLeftMenu
               shouldUpdateStrapi={shouldUpdateStrapi}
               version={strapiVersion}
               plugins={plugins}
