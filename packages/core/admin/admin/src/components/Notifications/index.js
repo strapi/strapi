@@ -1,5 +1,5 @@
 import { NotificationsProvider } from '@strapi/helper-plugin';
-import React, { useEffect, useReducer } from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { CSSTransition } from 'react-transition-group';
 
@@ -16,16 +16,6 @@ const Notifications = ({ children }) => {
       config,
     });
   };
-
-  useEffect(() => {
-    window.strapi = Object.assign(window.strapi || {}, {
-      notification: {
-        toggle: config => {
-          displayNotification(config);
-        },
-      },
-    });
-  }, []);
 
   return (
     <NotificationsProvider toggleNotification={displayNotification}>

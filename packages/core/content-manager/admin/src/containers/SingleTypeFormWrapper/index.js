@@ -6,6 +6,7 @@ import {
   useGlobalContext,
   formatComponentData,
   useQueryParams,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
@@ -31,6 +32,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
   const searchToSend = buildQueryString(query);
+  const toggleNotification = useNotification();
+  const toggleNotificationRef = useRef(toggleNotification);
 
   const dispatch = useDispatch();
   const {
@@ -122,7 +125,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         }
 
         if (responseStatus === 403) {
-          strapi.notification.toggle({
+          toggleNotificationRef.current({
             type: 'info',
             message: { id: getTrad('permissions.not-allowed.update') },
           });
@@ -149,7 +152,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     }
 
     if (typeof errorMessage === 'string') {
-      strapi.notification.toggle({ type: 'warning', message: errorMessage });
+      toggleNotificationRef.current({ type: 'warning', message: errorMessage });
     }
   }, []);
 
@@ -162,7 +165,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           method: 'DELETE',
         });
 
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
@@ -195,7 +198,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -224,7 +227,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       const data = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didPublishEntry');
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'success',
         message: { id: getTrad('success.record.publish') },
       });
@@ -250,7 +253,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         const response = await request(endPoint, { method: 'PUT', body });
 
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -283,7 +286,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      strapi.notification.success(getTrad('success.record.unpublish'));
+      toggleNotificationRef.current({
+        type: 'success',
+        message: { id: getTrad('success.record.unpublish') },
+      });
 
       dispatch(submitSucceeded(cleanReceivedData(response)));
 

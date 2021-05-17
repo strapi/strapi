@@ -1,5 +1,5 @@
 import React from 'react';
-import { useGlobalContext, request } from '@strapi/helper-plugin';
+import { useGlobalContext, request, useNotification } from '@strapi/helper-plugin';
 import { Header, List } from '@buffetjs/custom';
 import PageTitle from '../../components/PageTitle';
 import ContainerFluid from '../../components/ContainerFluid';
@@ -8,6 +8,7 @@ import Row from './Row';
 import generateRows from './utils/generateRows';
 
 const InstalledPluginsPage = () => {
+  const toggleNotification = useNotification();
   const { formatMessage, plugins } = useGlobalContext();
   const onConfirm = async id => {
     try {
@@ -28,7 +29,7 @@ const InstalledPluginsPage = () => {
       }
     } catch (err) {
       strapi.unlockAppWithAutoreload();
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'app.components.listPluginsPage.deletePlugin.error' },
       });

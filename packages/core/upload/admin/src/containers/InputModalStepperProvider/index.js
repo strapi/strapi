@@ -1,6 +1,11 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { request, generateSearchFromFilters, useGlobalContext } from '@strapi/helper-plugin';
+import {
+  request,
+  generateSearchFromFilters,
+  useGlobalContext,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { clone, get, isEmpty, set } from 'lodash';
 import { useIntl } from 'react-intl';
 import axios from 'axios';
@@ -37,6 +42,7 @@ const InputModalStepperProvider = ({
   step,
 }) => {
   const [formErrors, setFormErrors] = useState(null);
+  const toggleNotification = useNotification();
 
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
@@ -338,7 +344,7 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -368,7 +374,7 @@ const InputModalStepperProvider = ({
       });
     } catch (err) {
       console.error(err);
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

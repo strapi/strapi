@@ -4,6 +4,7 @@ import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
+import { useNotification } from '@strapi/helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
 import pluginId from '../../pluginId';
 import { getMaxTempKey } from '../../utils';
@@ -27,6 +28,7 @@ const RepeatableComponent = ({
   min,
   name,
 }) => {
+  const toggleNotification = useNotification();
   const [collapseToOpen, setCollapseToOpen] = useState('');
   const [, drop] = useDrop({ accept: ItemTypes.COMPONENT });
   const { getComponentLayout } = useContentTypeLayout();
@@ -67,7 +69,7 @@ const RepeatableComponent = ({
 
         setCollapseToOpen(nextTempKey);
       } else if (componentValueLength >= max) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'info',
           message: { id: `${pluginId}.components.notification.info.maximum-requirement` },
         });
@@ -82,6 +84,7 @@ const RepeatableComponent = ({
     max,
     name,
     nextTempKey,
+    toggleNotification,
   ]);
 
   return (

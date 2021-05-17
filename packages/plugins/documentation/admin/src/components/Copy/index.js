@@ -1,11 +1,13 @@
 import React from 'react';
-import { auth, InputsIndex as Input } from '@strapi/helper-plugin';
+import { auth, InputsIndex as Input, useNotification } from '@strapi/helper-plugin';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import getTrad from '../../utils/getTrad';
 
 const Copy = () => {
+  const toggleNotification = useNotification();
+
   const handleCopy = () => {
-    strapi.notification.toggle({
+    toggleNotification({
       type: 'info',
       message: { id: getTrad('containers.HomePage.copied') },
     });

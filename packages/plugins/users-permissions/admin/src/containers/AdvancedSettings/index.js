@@ -9,6 +9,7 @@ import {
   SizedInput,
   useUserPermissions,
   request,
+  useNotification,
 } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, getRequestURL } from '../../utils';
@@ -18,6 +19,7 @@ import reducer, { initialState } from './reducer';
 
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
   const [showModalWarning, setShowModalWarning] = useState(false);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
   const updatePermissions = useMemo(() => {
@@ -54,7 +56,7 @@ const AdvancedSettingsPage = () => {
             type: 'GET_DATA_ERROR',
           });
           console.error(err);
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -98,7 +100,7 @@ const AdvancedSettingsPage = () => {
           type: 'ON_SUBMIT_SUCCEEDED',
         });
 
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('notification.success.submit') },
         });
@@ -107,7 +109,7 @@ const AdvancedSettingsPage = () => {
           type: 'ON_SUBMIT_ERROR',
         });
         console.error(err);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -115,7 +117,7 @@ const AdvancedSettingsPage = () => {
 
       strapi.unlockApp();
     },
-    [modifiedData]
+    [modifiedData, toggleNotification]
   );
 
   const handleConfirmReset = useCallback(() => {

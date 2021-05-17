@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
+import useNotification from '../../hooks/useNotification';
 import useUser from '../../hooks/useUser';
 import hasPermissions from '../../utils/hasPermissions';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
@@ -9,6 +10,7 @@ const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
   const { userPermissions } = useUser();
+  const toggleNotification = useNotification();
 
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
@@ -27,7 +29,7 @@ const CheckPagePermissions = ({ permissions, children }) => {
         if (isMounted.current) {
           console.error(err);
 
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useUser , useNotification } from '@strapi/helper-plugin';
+import { useUser, useNotification } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 
 import getCtOrStLinks from './utils/getCtOrStLinks';
@@ -12,7 +12,6 @@ import selectMenuLinks from './selectors';
 
 const useMenuSections = (plugins, shouldUpdateStrapi) => {
   const toggleNotification = useNotification();
-  console.log(toggleNotification);
   const state = useSelector(selectMenuLinks);
   const dispatch = useDispatch();
   const { userPermissions } = useUser();

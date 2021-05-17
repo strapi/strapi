@@ -5,17 +5,18 @@ const deleteDoc = ({ prefix, version }) => {
   return request(`${prefix}/deleteDoc/${version}`, { method: 'DELETE' });
 };
 
-const fetchData = async () => {
+const fetchData = async toggleNotification => {
   try {
     const data = await request(`/${pluginId}/getInfos`, { method: 'GET' });
 
     return data;
   } catch (err) {
-    strapi.notification.toggle({
+    toggleNotification({
       type: 'warning',
       message: { id: 'notification.error' },
     });
 
+    // FIXME
     return null;
   }
 };

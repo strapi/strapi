@@ -9,6 +9,7 @@ import {
   useGlobalContext,
   request,
   getYupInnerErrors,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -23,6 +24,7 @@ import schema from './utils/schema';
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
+  const toggleNotification = useNotification();
   const emitEventRef = useRef(emitEvent);
   const buttonSubmitRef = useRef(null);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.emailTemplates') });
@@ -111,7 +113,7 @@ const EmailTemplatesPage = () => {
 
           emitEventRef.current('didEditEmailTemplates');
 
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'success',
             message: { id: getTrad('notification.success.submit') },
           });
@@ -122,7 +124,7 @@ const EmailTemplatesPage = () => {
         } catch (err) {
           console.error(err);
 
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -136,7 +138,14 @@ const EmailTemplatesPage = () => {
 
       dispatchSetFormErrors(errors);
     },
-    [dispatchSetFormErrors, dispatchSubmitSucceeded, modifiedData, templateToEdit, handleToggle]
+    [
+      dispatchSetFormErrors,
+      dispatchSubmitSucceeded,
+      modifiedData,
+      templateToEdit,
+      handleToggle,
+      toggleNotification,
+    ]
   );
 
   const handleClick = useCallback(() => {

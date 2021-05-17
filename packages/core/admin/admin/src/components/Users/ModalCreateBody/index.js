@@ -1,6 +1,6 @@
 import React, { forwardRef, useReducer, useImperativeHandle, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { BaselineAlignment, ModalSection, request } from '@strapi/helper-plugin';
+import { BaselineAlignment, ModalSection, request, useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import { Padded, Text } from '@buffetjs/core';
@@ -19,6 +19,7 @@ import RoleSettingsModalSection from '../RoleSettingsModalSection';
 // This component accepts a ref so we can have access to the submit handler.
 const ModalCreateBody = forwardRef(
   ({ isDisabled, onSubmit, registrationToken, setIsSubmiting, showMagicLink }, ref) => {
+    const toggleNotification = useNotification();
     const [reducerState, dispatch] = useReducer(reducer, initialState, init);
     const { formErrors, modifiedData } = reducerState;
     const buttonSubmitRef = useRef(null);
@@ -62,7 +63,7 @@ const ModalCreateBody = forwardRef(
         } catch (err) {
           const message = get(err, ['response', 'payload', 'message'], 'An error occured');
 
-          strapi.notification.toggle({ type: 'warning', message });
+          toggleNotification({ type: 'warning', message });
         } finally {
           strapi.unlockApp();
           setIsSubmiting(false);

@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
 import { camelCase, get, omit, upperFirst } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { BaselineAlignment, auth, useQuery } from '@strapi/helper-plugin';
+import { BaselineAlignment, auth, useNotification, useQuery } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
@@ -17,6 +17,7 @@ import { initialState, reducer } from './reducer';
 import useChangeLanguage from '../../components/LanguageProvider/hooks/useChangeLanguage';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
+  const toggleNotification = useNotification();
   const { push } = useHistory();
   const changeLocale = useChangeLanguage();
   const {
@@ -71,7 +72,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         } catch (err) {
           const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
 
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: errorMessage,
           });
@@ -145,7 +146,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

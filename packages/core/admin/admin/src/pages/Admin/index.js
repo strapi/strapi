@@ -19,6 +19,7 @@ import {
   GlobalContextProvider,
   CheckPagePermissions,
   request,
+  NotificationsContext,
 } from '@strapi/helper-plugin';
 import { checkLatestStrapiVersion } from '../../utils';
 
@@ -45,6 +46,7 @@ import Content from './Content';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = NotificationsContext;
 
   // This state is really temporary until we create a menu API
   state = { updateMenu: null };
@@ -101,7 +103,7 @@ export class Admin extends React.Component {
       this.props.getInfosDataSucceeded(data);
     } catch (err) {
       console.error(err);
-      strapi.notification.toggle({
+      this.context.toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -130,7 +132,7 @@ export class Admin extends React.Component {
         }
 
         if (shouldUpdateStrapi) {
-          strapi.notification.toggle({
+          this.context.toggleNotification({
             type: 'info',
             message: { id: 'notification.version.update.message' },
             link: {

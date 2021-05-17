@@ -1,5 +1,5 @@
-import { useEffect, useReducer } from 'react';
-import { request } from '@strapi/helper-plugin';
+import { useEffect, useReducer, useRef } from 'react';
+import { request, useNotification } from '@strapi/helper-plugin';
 import { get, has, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
@@ -10,6 +10,8 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
     dispatch,
   ] = useReducer(reducer, initialState, () => init(initialState, fieldsToPick));
+  const toggleNotification = useNotification();
+  const toggleNotificationRef = useRef(toggleNotification);
 
   useEffect(() => {
     const getData = async () => {
@@ -23,7 +25,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         });
       } catch (err) {
         console.error(err.response);
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -95,7 +97,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           data,
         });
 
-        strapi.notification.toggle({
+        toggleNotificationRef.curent({
           type: 'success',
           message: { id: 'notification.success.saved' },
         });
@@ -103,12 +105,12 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         const data = get(err, 'response.payload', { data: {} });
 
         if (has(data, 'data') && typeof data.data === 'string') {
-          strapi.notification.toggle({
+          toggleNotificationRef.current({
             type: 'warning',
             message: data.data,
           });
         } else {
-          strapi.notification.toggle({
+          toggleNotificationRef.current({
             type: 'warning',
             message: data.message,
           });

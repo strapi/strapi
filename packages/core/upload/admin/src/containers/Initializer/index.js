@@ -8,7 +8,7 @@ import { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch } from 'react-redux';
 import get from 'lodash/get';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import { setFileModelTimestamps } from './actions';
 
@@ -16,6 +16,7 @@ const Initializer = ({ setPlugin }) => {
   const ref = useRef();
   const dispatch = useDispatch();
   ref.current = setPlugin;
+  const toggleNotification = useNotification();
 
   useEffect(() => {
     const getData = async () => {
@@ -35,7 +36,7 @@ const Initializer = ({ setPlugin }) => {
 
         ref.current(pluginId);
       } catch (err) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'content-manager.error.model.fetch' },
         });
@@ -43,7 +44,7 @@ const Initializer = ({ setPlugin }) => {
     };
 
     getData();
-  }, [dispatch]);
+  }, [dispatch, toggleNotification]);
 
   return null;
 };

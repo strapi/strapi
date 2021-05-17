@@ -6,6 +6,7 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
+  useNotification,
   useStrapiApp,
   useUser,
 } from '@strapi/helper-plugin';
@@ -63,6 +64,8 @@ const DataManagerProvider = ({
   reservedNames,
 }) => {
   const dispatch = useDispatch();
+  const toggleNotification = useNotification();
+  const toggleNotificationRef = useRef(toggleNotification);
 
   const { getPlugin } = useStrapiApp();
 
@@ -124,7 +127,7 @@ const DataManagerProvider = ({
       });
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -146,7 +149,7 @@ const DataManagerProvider = ({
 
   useEffect(() => {
     if (!autoReload) {
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'info',
         message: { id: getTrad('notification.info.autoreaload-disable') },
       });
@@ -258,7 +261,7 @@ const DataManagerProvider = ({
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -309,7 +312,7 @@ const DataManagerProvider = ({
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -339,7 +342,7 @@ const DataManagerProvider = ({
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -495,7 +498,7 @@ const DataManagerProvider = ({
       }
 
       console.error({ err: err.response });
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: { id: 'notification.error' },
       });

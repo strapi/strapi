@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo } from 'react';
-import { useUserPermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import { useUserPermissions, LoadingIndicatorPage, useNotification } from '@strapi/helper-plugin';
 import { Redirect, useLocation } from 'react-router-dom';
 import { get } from 'lodash';
 import adminPermissions from '../../../permissions';
 import EditPage from '../EditPage';
 
 const ProtectedEditPage = () => {
+  const toggleNotification = useNotification();
   const permissions = useMemo(() => {
     return {
       read: adminPermissions.settings.users.read,
@@ -23,13 +24,13 @@ const ProtectedEditPage = () => {
   useEffect(() => {
     if (!isLoading) {
       if (!canRead && !canUpdate) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'info',
           message: { id: 'notification.permission.not-allowed-read' },
         });
       }
     }
-  }, [isLoading, canRead, canUpdate]);
+  }, [isLoading, canRead, canUpdate, toggleNotification]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;

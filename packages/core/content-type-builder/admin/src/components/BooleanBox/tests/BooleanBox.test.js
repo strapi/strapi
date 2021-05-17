@@ -1,11 +1,16 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
+
 import defaultThemes from '../../../../../../admin/admin/src/themes';
 import BooleanBox from '..';
 
+jest.mock('react-intl', () => ({
+  useIntl: () => ({ formatMessage: ({ id }) => id }),
+}));
+
 jest.mock('@strapi/helper-plugin', () => ({
-  useGlobalContext: () => ({ formatMessage: ({ id }) => id }),
+  useNotification: () => jest.fn(),
 }));
 
 describe('BooleanBox', () => {

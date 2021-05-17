@@ -4,6 +4,7 @@ import { get } from 'lodash';
 import {
   request,
   useGlobalContext,
+  useNotification,
   useQueryParams,
   formatComponentData,
   contentManagementUtilRemoveFieldsFromData,
@@ -28,6 +29,8 @@ import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
+  const toggleNotification = useNotification();
+  const toggleNotificationRef = useRef(toggleNotification);
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
   const [{ rawQuery }] = useQueryParams();
@@ -152,7 +155,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         // Not allowed to read a document
         if (resStatus === 403) {
-          strapi.notification.toggle({
+          toggleNotificationRef.current({
             type: 'info',
             message: { id: getTrad('permissions.not-allowed.update') },
           });
@@ -195,7 +198,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     }
 
     if (typeof errorMessage === 'string') {
-      strapi.notification.toggle({ type: 'warning', message: errorMessage });
+      toggleNotificationRef.current({ type: 'warning', message: errorMessage });
     }
   }, []);
 
@@ -208,7 +211,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           method: 'DELETE',
         });
 
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
@@ -240,7 +243,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         const response = await request(endPoint, { method: 'POST', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -273,7 +276,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(submitSucceeded(cleanReceivedData(data)));
       dispatch(setStatus('resolved'));
 
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'success',
         message: { id: getTrad('success.record.publish') },
       });
@@ -295,7 +298,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -324,7 +327,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'success',
         message: { id: getTrad('success.record.unpublish') },
       });

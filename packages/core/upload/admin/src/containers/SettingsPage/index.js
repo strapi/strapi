@@ -3,7 +3,12 @@ import { Header, Inputs } from '@buffetjs/custom';
 import { Helmet } from 'react-helmet';
 import { Text } from '@buffetjs/core';
 import { isEqual } from 'lodash';
-import { LoadingIndicatorPage, useGlobalContext, request } from '@strapi/helper-plugin';
+import {
+  LoadingIndicatorPage,
+  useGlobalContext,
+  useNotification,
+  request,
+} from '@strapi/helper-plugin';
 
 import { getRequestUrl, getTrad } from '../../utils';
 import SectionTitleWrapper from './SectionTitleWrapper';
@@ -17,6 +22,8 @@ const SettingsPage = () => {
   const { initialData, isLoading, modifiedData } = reducerState.toJS();
   const isMounted = useRef(true);
   const getDataRef = useRef();
+  const toggleNotification = useNotification();
+
   const abortController = new AbortController();
 
   getDataRef.current = async () => {
@@ -58,7 +65,7 @@ const SettingsPage = () => {
         });
       }
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
         message: { id: 'notification.form.success.fields' },
       });

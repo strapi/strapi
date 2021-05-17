@@ -15,6 +15,7 @@ import {
   InjectionZoneList,
   PopUpWarning,
   useGlobalContext,
+  useNotification,
   useQueryParams,
   useUser,
   request,
@@ -86,6 +87,8 @@ function ListView({
       settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
   } = layout;
+  const toggleNotification = useNotification();
+  const toggleNotificationRef = useRef(toggleNotification);
 
   const { emitEvent } = useGlobalContext();
   const { fetchUserPermissions } = useUser();
@@ -142,7 +145,7 @@ function ListView({
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
 
-          strapi.notification.toggle({
+          toggleNotificationRef.current({
             type: 'info',
             message: { id: getTrad('permissions.not-allowed.update') },
           });
@@ -154,7 +157,7 @@ function ListView({
 
         if (err.name !== 'AbortError') {
           console.error(err);
-          strapi.notification.toggle({
+          toggleNotificationRef.current({
             type: 'warning',
             message: { id: getTrad('error.model.fetch') },
           });
@@ -169,7 +172,7 @@ function ListView({
       // Display a notification if trying to remove the last displayed field
 
       if (value && displayedHeaders.length === 1) {
-        strapi.notification.toggle({
+        toggleNotificationRef.current({
           type: 'warning',
           message: { id: 'content-manager.notification.error.displayedFields' },
         });
@@ -194,7 +197,7 @@ function ListView({
       onDeleteSeveralDataSucceeded();
       emitEventRef.current('didBulkDeleteEntries');
     } catch (err) {
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: { id: getTrad('error.record.delete') },
       });
@@ -220,7 +223,7 @@ function ListView({
         method: 'DELETE',
       });
 
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'success',
         message: { id: getTrad('success.record.delete') },
       });
@@ -235,7 +238,7 @@ function ListView({
         formatMessage({ id: getTrad('error.record.delete') })
       );
 
-      strapi.notification.toggle({
+      toggleNotificationRef.current({
         type: 'warning',
         message: errorMessage,
       });

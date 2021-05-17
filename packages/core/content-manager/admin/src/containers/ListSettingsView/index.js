@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
-import { request, useGlobalContext } from '@strapi/helper-plugin';
+import { request, useGlobalContext, useNotification } from '@strapi/helper-plugin';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
@@ -22,6 +22,7 @@ import reducer, { initialState } from './reducer';
 import forms from './forms.json';
 
 const ListSettingsView = ({ layout, slug, updateLayout }) => {
+  const toggleNotification = useNotification();
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
@@ -103,7 +104,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
       });
       emitEvent('didEditListSettings');
     } catch (err) {
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -211,7 +212,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
                         e.stopPropagation();
 
                         if (displayedFields.length === 1) {
-                          strapi.notification.toggle({
+                          toggleNotification({
                             type: 'info',
                             message: { id: `${pluginId}.notification.info.minimumFields` },
                           });

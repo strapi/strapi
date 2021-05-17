@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useUserPermissions, request } from '@strapi/helper-plugin';
+import { useUserPermissions, request, useNotification } from '@strapi/helper-plugin';
 import { getRequestURL } from '../../utils';
 import reducer, { initialState } from './reducer';
 
@@ -9,7 +9,7 @@ const useUserForm = (endPoint, permissions) => {
     reducer,
     initialState
   );
-
+  const toggleNotification = useNotification();
   const isMounted = useRef(true);
 
   const abortController = new AbortController();
@@ -35,7 +35,7 @@ const useUserForm = (endPoint, permissions) => {
             type: 'GET_DATA_ERROR',
           });
           console.error(err);
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });

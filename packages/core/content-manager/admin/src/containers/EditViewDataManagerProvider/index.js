@@ -7,6 +7,7 @@ import {
   useGlobalContext,
   OverlayBlocker,
   ContentManagerEditViewDataManagerContext,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
@@ -43,6 +44,7 @@ const EditViewDataManagerProvider = ({
     modifiedDZName,
     shouldCheckErrors,
   } = reducerState.toJS();
+  const toggleNotification = useNotification();
 
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
@@ -83,12 +85,12 @@ const EditViewDataManagerProvider = ({
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'info',
         message: { id: getTrad('permissions.not-allowed.update') },
       });
     }
-  }, [shouldRedirectToHomepageWhenEditingEntry]);
+  }, [shouldRedirectToHomepageWhenEditingEntry, toggleNotification]);
 
   useEffect(() => {
     dispatch({

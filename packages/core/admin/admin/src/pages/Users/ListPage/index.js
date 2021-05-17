@@ -6,6 +6,7 @@ import {
   useUserPermissions,
   LoadingIndicatorPage,
   PopUpWarning,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -25,6 +26,7 @@ const ListPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useUserPermissions(adminPermissions.settings.users);
+  const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
   const [isModalOpened, setIsModalOpened] = useState(false);
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
@@ -78,7 +80,7 @@ const ListPage = () => {
       });
     } catch (err) {
       console.error(err.response);
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -185,7 +187,7 @@ const ListPage = () => {
     } catch (err) {
       const errorMessage = get(err, 'response.payload.data', 'An error occured');
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: errorMessage,
       });
@@ -199,7 +201,7 @@ const ListPage = () => {
     }
 
     handleToggleModal();
-  }, [dataToDelete]);
+  }, [dataToDelete, toggleNotification]);
 
   const handleToggle = () => setIsModalOpened(prev => !prev);
 

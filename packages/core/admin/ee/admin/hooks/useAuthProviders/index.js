@@ -1,11 +1,12 @@
 import { useReducer, useEffect } from 'react';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 
 import { getRequestUrl } from '../../../../admin/src/utils';
 import reducer, { initialState } from './reducer';
 
 const useAuthProviders = ({ ssoEnabled }) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const toggleNotification = useNotification();
 
   useEffect(() => {
     fetchAuthProviders();
@@ -37,7 +38,7 @@ const useAuthProviders = ({ ssoEnabled }) => {
         type: 'GET_DATA_ERROR',
       });
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
         centered: true,

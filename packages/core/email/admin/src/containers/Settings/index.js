@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-wrap-multilines */
 import React, { useState, useEffect, useRef } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';
@@ -12,6 +13,7 @@ import {
   getYupInnerErrors,
   BaselineAlignment,
   CheckPagePermissions,
+  useNotification,
 } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 import { AlignedButton, Text } from './components';
@@ -19,6 +21,7 @@ import schema from '../../utils/schema';
 import pluginPermissions from '../../permissions';
 
 const SettingsPage = () => {
+  const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [formErrors, setFormErrors] = useState({});
   const [isTestButtonLoading, setIsTestButtonLoading] = useState(false);
@@ -54,13 +57,13 @@ const SettingsPage = () => {
           { id: getTrad('Settings.notification.test.success') },
           { to: testAddress }
         );
-        strapi.notification.toggle({ type: 'success', message });
+        toggleNotification({ type: 'success', message });
       } catch (err) {
         const message = formatMessage(
           { id: getTrad('Settings.notification.test.error') },
           { to: testAddress }
         );
-        strapi.notification.toggle({ type: 'warning', message });
+        toggleNotification({ type: 'warning', message });
       } finally {
         if (isMounted.current) {
           setIsTestButtonLoading(false);
@@ -86,7 +89,7 @@ const SettingsPage = () => {
           setTestAddress(get(data, 'config.settings.testAddress'));
         })
         .catch(() =>
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: getTrad('Settings.notification.config.error') },
           })
@@ -95,7 +98,7 @@ const SettingsPage = () => {
     };
 
     fetchEmailSettings();
-  }, [formatMessage]);
+  }, [formatMessage, toggleNotification]);
 
   useEffect(() => {
     return () => {
@@ -182,12 +185,12 @@ const SettingsPage = () => {
               <AlignedButton
                 color="success"
                 disabled={testSuccess}
-                icon={(
+                icon={
                   <Envelope
                     fill={testSuccess ? colors.button.disabled.color : null}
                     style={{ verticalAlign: 'middle', marginRight: '10px' }}
                   />
-                )}
+                }
                 isLoading={isTestButtonLoading}
                 style={{ fontWeight: 600 }}
                 type="submit"

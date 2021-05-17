@@ -9,6 +9,7 @@ import {
   PopUpWarning,
   getYupInnerErrors,
   useGlobalContext,
+  useNotification,
   useQuery,
   useStrapiApp,
   InputsIndex,
@@ -68,6 +69,7 @@ const FormModal = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
+  const toggleNotification = useNotification();
   const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
@@ -704,7 +706,7 @@ const FormModal = () => {
             push({ search: '' });
             submitData(modifiedData);
           } else {
-            strapi.notification.toggle({
+            toggleNotification({
               type: 'warning',
               message: { id: 'notification.contentType.relations.conflict' },
             });

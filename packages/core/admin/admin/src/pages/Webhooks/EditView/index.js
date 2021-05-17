@@ -15,6 +15,7 @@ import {
   getYupInnerErrors,
   BackHeader,
   LoadingIndicatorPage,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { useModels } from '../../../hooks';
 import PageTitle from '../../../components/SettingsPageTitle';
@@ -25,7 +26,7 @@ import Wrapper from './Wrapper';
 
 function EditView() {
   const { isLoading: isLoadingForModels, collectionTypes } = useModels();
-
+  const toggleNotification = useNotification();
   const isMounted = useRef();
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
@@ -69,7 +70,7 @@ function EditView() {
           dispatch({ type: 'UNSET_LOADER' });
 
           if (err.code !== 20) {
-            strapi.notification.toggle({
+            toggleNotification({
               type: 'warning',
               message: { id: 'notification.error' },
             });
@@ -179,7 +180,7 @@ function EditView() {
         setErrors(getYupInnerErrors(err));
 
         if (submit) {
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.form.error.fields' },
           });
@@ -200,14 +201,14 @@ function EditView() {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
         message: { id: 'Settings.webhooks.created' },
       });
       replace(`/settings/webhooks/${data.id}`);
     } catch (err) {
       setIsSubmitting(false);
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -272,7 +273,7 @@ function EditView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -368,13 +369,13 @@ function EditView() {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
         message: { id: 'notification.form.success.fields' },
       });
     } catch (err) {
       setIsSubmitting(false);
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

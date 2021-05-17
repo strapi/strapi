@@ -12,6 +12,7 @@ import {
   ModalConfirm,
   selectStyles,
   useContentManagerEditViewDataManager,
+  useNotification,
   request,
 } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
@@ -28,6 +29,7 @@ const CMEditViewCopyLocale = props => {
 const Content = ({ appLocales, currentLocale, localizations, readPermissions }) => {
   const options = generateOptions(appLocales, currentLocale, localizations, readPermissions);
 
+  const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const { allLayoutData, slug } = useContentManagerEditViewDataManager();
@@ -52,7 +54,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
 
       dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
         message: {
           id: getTrad('CMEditViewCopyLocale.copy-success'),
@@ -62,7 +64,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
     } catch (err) {
       console.error(err);
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: {
           id: getTrad('CMEditViewCopyLocale.copy-failure'),

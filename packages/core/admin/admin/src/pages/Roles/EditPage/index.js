@@ -1,7 +1,12 @@
 import React, { useState, useRef } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import get from 'lodash/get';
-import { BaselineAlignment, useGlobalContext, request } from '@strapi/helper-plugin';
+import {
+  BaselineAlignment,
+  useGlobalContext,
+  request,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -13,6 +18,7 @@ import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 import schema from './utils/schema';
 
 const EditPage = () => {
+  const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
   const {
@@ -89,7 +95,7 @@ const EditPage = () => {
       permissionsRef.current.setFormAfterSubmit();
       onSubmitSucceeded({ name: data.name, description: data.description });
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
         message: { id: 'notification.success.saved' },
       });
@@ -99,7 +105,7 @@ const EditPage = () => {
       const errorMessage = get(err, 'response.payload.message', 'An error occured');
       const message = get(err, 'response.payload.data.permissions[0]', errorMessage);
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message,
       });

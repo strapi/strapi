@@ -10,6 +10,7 @@ import {
   CheckPagePermissions,
   request,
   useGlobalContext,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
@@ -24,6 +25,7 @@ import Permissions from '../../../../../admin/src/components/Roles/Permissions';
 import schema from './utils/schema';
 
 const CreatePage = () => {
+  const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { replace } = useHistory();
@@ -95,7 +97,7 @@ const CreatePage = () => {
       })
       .then(res => {
         setIsSubmiting(false);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'success',
           message: { id: 'Settings.roles.created' },
         });
@@ -104,7 +106,7 @@ const CreatePage = () => {
       .catch(err => {
         console.error(err);
         setIsSubmiting(false);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
