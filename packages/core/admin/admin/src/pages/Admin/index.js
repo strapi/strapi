@@ -101,7 +101,10 @@ export class Admin extends React.Component {
       this.props.getInfosDataSucceeded(data);
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 

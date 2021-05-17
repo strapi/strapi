@@ -142,7 +142,10 @@ function ListView({
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
 
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+          strapi.notification.toggle({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
 
           push('/');
 
@@ -151,7 +154,10 @@ function ListView({
 
         if (err.name !== 'AbortError') {
           console.error(err);
-          strapi.notification.error(getTrad('error.model.fetch'));
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: getTrad('error.model.fetch') },
+          });
         }
       }
     },
@@ -188,7 +194,10 @@ function ListView({
       onDeleteSeveralDataSucceeded();
       emitEventRef.current('didBulkDeleteEntries');
     } catch (err) {
-      strapi.notification.error(`${pluginId}.error.record.delete`);
+      strapi.notification.toggle({
+        type: 'warning',
+        message: { id: getTrad('error.record.delete') },
+      });
     }
   }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
 
@@ -213,7 +222,7 @@ function ListView({
 
       strapi.notification.toggle({
         type: 'success',
-        message: { id: `${pluginId}.success.record.delete` },
+        message: { id: getTrad('success.record.delete') },
       });
 
       // Close the modal and refetch data
@@ -223,7 +232,7 @@ function ListView({
       const errorMessage = get(
         err,
         'response.payload.message',
-        formatMessage({ id: `${pluginId}.error.record.delete` })
+        formatMessage({ id: getTrad('error.record.delete') })
       );
 
       strapi.notification.toggle({

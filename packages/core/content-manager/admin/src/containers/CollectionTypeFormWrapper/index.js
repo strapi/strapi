@@ -152,7 +152,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         // Not allowed to read a document
         if (resStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+          strapi.notification.toggle({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
 
           push(redirectionLink);
         }
@@ -192,7 +195,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     }
 
     if (typeof errorMessage === 'string') {
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({ type: 'warning', message: errorMessage });
     }
   }, []);
 
@@ -205,7 +208,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           method: 'DELETE',
         });
 
-        strapi.notification.success(getTrad('success.record.delete'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('success.record.delete') },
+        });
 
         emitEventRef.current('didDeleteEntry', trackerProperty);
 
@@ -318,7 +324,10 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      strapi.notification.success(getTrad('success.record.unpublish'));
+      strapi.notification.toggle({
+        type: 'success',
+        message: { id: getTrad('success.record.unpublish') },
+      });
 
       dispatch(submitSucceeded(cleanReceivedData(response)));
       dispatch(setStatus('resolved'));

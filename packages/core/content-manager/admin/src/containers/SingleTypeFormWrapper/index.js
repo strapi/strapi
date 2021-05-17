@@ -122,7 +122,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         }
 
         if (responseStatus === 403) {
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+          strapi.notification.toggle({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
 
           push('/');
         }
@@ -146,7 +149,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     }
 
     if (typeof errorMessage === 'string') {
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({ type: 'warning', message: errorMessage });
     }
   }, []);
 
@@ -159,7 +162,10 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           method: 'DELETE',
         });
 
-        strapi.notification.success(getTrad('success.record.delete'));
+        strapi.notification.toggle({
+          type: 'success',
+          message: { id: getTrad('success.record.delete') },
+        });
 
         emitEventRef.current('didDeleteEntry', trackerProperty);
 

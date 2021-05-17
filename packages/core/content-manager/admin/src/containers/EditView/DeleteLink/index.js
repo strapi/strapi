@@ -36,7 +36,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
         'response.payload.message',
         formatMessage({ id: `${pluginId}.error.record.delete` })
       );
-      strapi.notification.error(errorMessage);
+      strapi.notification.toggle({ type: 'warning', message: errorMessage });
     } finally {
       setIsModalConfirmButtonLoading(false);
       toggleWarningDelete();

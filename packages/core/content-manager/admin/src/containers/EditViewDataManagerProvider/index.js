@@ -83,7 +83,10 @@ const EditViewDataManagerProvider = ({
 
   useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
-      strapi.notification.info(getTrad('permissions.not-allowed.update'));
+      strapi.notification.toggle({
+        type: 'info',
+        message: { id: getTrad('permissions.not-allowed.update') },
+      });
     }
   }, [shouldRedirectToHomepageWhenEditingEntry]);
 

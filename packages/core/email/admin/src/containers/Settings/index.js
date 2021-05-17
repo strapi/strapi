@@ -50,14 +50,17 @@ const SettingsPage = () => {
         });
 
         setTestSuccess(true);
-
-        strapi.notification.success(
-          formatMessage({ id: getTrad('Settings.notification.test.success') }, { to: testAddress })
+        const message = formatMessage(
+          { id: getTrad('Settings.notification.test.success') },
+          { to: testAddress }
         );
+        strapi.notification.toggle({ type: 'success', message });
       } catch (err) {
-        strapi.notification.error(
-          formatMessage({ id: getTrad('Settings.notification.test.error') }, { to: testAddress })
+        const message = formatMessage(
+          { id: getTrad('Settings.notification.test.error') },
+          { to: testAddress }
         );
+        strapi.notification.toggle({ type: 'warning', message });
       } finally {
         if (isMounted.current) {
           setIsTestButtonLoading(false);
@@ -83,9 +86,10 @@ const SettingsPage = () => {
           setTestAddress(get(data, 'config.settings.testAddress'));
         })
         .catch(() =>
-          strapi.notification.error(
-            formatMessage({ id: getTrad('Settings.notification.config.error') })
-          )
+          strapi.notification.toggle({
+            type: 'warning',
+            message: { id: getTrad('Settings.notification.config.error') },
+          })
         )
         .finally(() => setShowLoader(false));
     };

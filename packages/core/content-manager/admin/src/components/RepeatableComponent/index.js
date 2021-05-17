@@ -67,7 +67,10 @@ const RepeatableComponent = ({
 
         setCollapseToOpen(nextTempKey);
       } else if (componentValueLength >= max) {
-        strapi.notification.info(`${pluginId}.components.notification.info.maximum-requirement`);
+        strapi.notification.toggle({
+          type: 'info',
+          message: { id: `${pluginId}.components.notification.info.maximum-requirement` },
+        });
       }
     }
   }, [
