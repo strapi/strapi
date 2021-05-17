@@ -152,14 +152,16 @@ class StrapiApp {
             <StrapiAppProvider getPlugin={this.getPlugin} plugins={this.plugins}>
               <LibraryProvider components={components} fields={fields}>
                 <LanguageProvider messages={this.translations}>
-                  <>
-                    <AutoReloadOverlayBlocker />
-                    <OverlayBlocker />
-                    <Notifications />
-                    <BrowserRouter basename={basename}>
-                      <App store={store} />
-                    </BrowserRouter>
-                  </>
+                  <Notifications>
+                    <>
+                      <AutoReloadOverlayBlocker />
+                      <OverlayBlocker />
+
+                      <BrowserRouter basename={basename}>
+                        <App store={store} />
+                      </BrowserRouter>
+                    </>
+                  </Notifications>
                 </LanguageProvider>
               </LibraryProvider>
             </StrapiAppProvider>
