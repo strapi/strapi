@@ -32,24 +32,19 @@ const allowedTemplateContents = {
 module.exports = async function mergeTemplate(scope, rootPath) {
   // Parse template info
   const repoInfo = await getRepoInfo(scope.template);
-  const { full_name } = repoInfo;
-  console.log(`Installing ${chalk.yellow(full_name)} template.`);
+  const { fullName } = repoInfo;
+  console.log(`Installing ${chalk.yellow(fullName)} template.`);
 
   // Download template repository to a temporary directory
   const templatePath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
-
-  try {
-    await downloadGitHubRepo(repoInfo, templatePath);
-  } catch (error) {
-    throw Error(`Could not download ${chalk.yellow(full_name)} repository.`);
-  }
+  await downloadGitHubRepo(repoInfo, templatePath);
 
   // Make sure the downloaded template matches the required format
   const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
-  const fullTemplateUrl = `https://github.com/${full_name}`;
+  const fullTemplateUrl = `https://github.com/${fullName}`;
   await mergePackageJSON(rootPath, templateConfig, fullTemplateUrl);
   await mergeFilesAndDirectories(rootPath, templatePath);
 

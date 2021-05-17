@@ -8,39 +8,49 @@ const chalk = require('chalk');
 const stopProcess = require('./stop-process');
 
 function parseShorthand(template) {
-  let owner = 'strapi';
-  let name = `strapi-template-${template}`;
-
   // Determine if it is comes from another owner
   if (template.includes('/')) {
-    [owner, name] = template.split('/');
-    name = `strapi-template-${name}`;
+    const [owner, partialName] = template.split('/');
+    const name = `strapi-template-${partialName}`;
+    return {
+      name,
+      fullName: `${owner}/${name}`,
+    };
   }
 
-  const full_name = `${owner}/${name}`;
+  const name = `strapi-template-${template}`;
   return {
     name,
-    full_name,
+    fullName: `strapi/${name}`,
   };
 }
 
 async function getRepoInfo(template) {
-  let { name, full_name, ref, filepath, protocols, source } = parseGitUrl(template);
+  const { name, full_name: fullName, ref, filepath, protocols, source } = parseGitUrl(template);
 
   if (protocols.length === 0) {
-    ({ name, full_name } = parseShorthand(template));
-  } else if (source !== 'github.com') {
+    const repoInfo = parseShorthand(template);
+    return {
+      ...repoInfo,
+      branch: await getDefaultBranch(repoInfo.fullName),
+      usedShorthand: true,
+    };
+  }
+
+  if (source !== 'github.com') {
     stopProcess(`GitHub URL not found for: ${chalk.yellow(template)}.`);
   }
 
-  let branch = await getDefaultBranch(full_name);
+  let branch;
   if (ref) {
     // Append the filepath to the parsed ref since a branch name could contain '/'
     // If so, the rest of the branch name will be considered 'filepath' by 'parseGitUrl'
     branch = filepath ? `${ref}/${filepath}` : ref;
+  } else {
+    branch = await getDefaultBranch(fullName);
   }
 
-  return { name, full_name, branch };
+  return { name, fullName, branch };
 }
 
 /**
@@ -62,11 +72,11 @@ async function getDefaultBranch(repo) {
 
 async function downloadGitHubRepo(repoInfo, templatePath) {
   // Download from GitHub
-  const { full_name, branch } = repoInfo;
-  const codeload = `https://codeload.github.com/${full_name}/tar.gz/${branch}`;
+  const { fullName, branch } = repoInfo;
+  const codeload = `https://codeload.github.com/${fullName}/tar.gz/${branch}`;
   const response = await fetch(codeload);
   if (!response.ok) {
-    throw Error(`Could not download the ${chalk.yellow(full_name)} repository`);
+    throw Error(`Could not download the ${chalk.yellow(fullName)} repository.`);
   }
 
   await new Promise(resolve => {
