@@ -3,23 +3,9 @@
  */
 'use strict';
 
-const webhookModel = config => ({
-  connection: config.get('database.defaultConnection'),
-  uid: 'strapi::webhooks',
-  globalId: 'StrapiWebhooks',
-  collectionName: 'strapi_webhooks',
-  info: {
-    name: 'Strapi webhooks',
-    description: '',
-  },
-  pluginOptions: {
-    'content-manager': {
-      visible: false,
-    },
-    'content-type-builder': {
-      visible: false,
-    },
-  },
+const webhookModel = {
+  uid: 'webhook',
+  tableName: 'strapi_webhooks',
   attributes: {
     name: {
       type: 'string',
@@ -37,7 +23,7 @@ const webhookModel = config => ({
       type: 'boolean',
     },
   },
-});
+};
 
 const toDBObject = data => {
   return {
@@ -61,7 +47,7 @@ const fromDBObject = row => {
 };
 
 const createWebhookStore = ({ db }) => {
-  const webhookQueries = db.query('strapi_webhooks');
+  const webhookQueries = db.query('webhook');
 
   return {
     async findWebhooks() {

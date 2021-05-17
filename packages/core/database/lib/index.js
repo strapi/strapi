@@ -170,9 +170,11 @@ class Database {
   constructor(config) {
     this.config = Configuration.from(config);
 
-    console.log(util.inspect(this.config, null, null, true));
-
     this.connector = resolveConnector(this.config);
+  }
+
+  getSchema() {
+    return this.connector.getSchema();
   }
 }
 

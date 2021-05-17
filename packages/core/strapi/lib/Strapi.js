@@ -347,11 +347,24 @@ class Strapi {
     });
 
     // Init core store
-    this.models['core_store'] = coreStoreModel(this.config);
-    this.models['strapi_webhooks'] = webhookModel(this.config);
 
-    this.db = new Database(this.config.get('database'));
+    const models = [
+      coreStoreModel,
+      webhookModel,
+      ...Object.values(strapi.models),
+      ...Object.values(strapi.components),
+      ...Object.values(strapi.admin.models),
+      ...Object.values(strapi.plugins).flatMap(plugin => Object.values(plugin.models)),
+      ...Object.values(strapi.api).flatMap(api => Object.values(api.models)),
+    ];
+
+    this.db = new Database({
+      ...this.config.get('database'),
+      models,
+    });
     // this.db = createDatabaseManager(this);
+
+    await this.db.getSchema().create();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     await this.db.initialize();

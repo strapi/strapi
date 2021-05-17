@@ -6592,7 +6592,7 @@ commander@^6.2.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-6.2.1.tgz#0792eb682dfbc325999bb2b84fddddba110ac73c"
   integrity sha512-U7VdrJFnJgo4xjrHpTzu0yrHPGImdsmD95ZlgYSEajAn2JKzDhDTPG9kBTefmObL2w/ngeZnilk+OV9CG3d7UA==
 
-commander@^7.0.0:
+commander@^7.0.0, commander@^7.1.0:
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
   integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
@@ -12464,6 +12464,25 @@ knex@0.21.18:
     tarn "^3.0.1"
     tildify "2.0.0"
     v8flags "^3.2.0"
+
+knex@0.95.5:
+  version "0.95.5"
+  resolved "https://registry.yarnpkg.com/knex/-/knex-0.95.5.tgz#129d60afb16c08641e3012de01fcc9004f3047d4"
+  integrity sha512-h6cuN78nSCqt5KLb06HnLE2Oj2svMf3l2YUSYpLnJuwXetGysn7KgmFJU1RDdl5dftvLAEEfA8IvqQIalgcnag==
+  dependencies:
+    colorette "1.2.1"
+    commander "^7.1.0"
+    debug "4.3.1"
+    escalade "^3.1.1"
+    esm "^3.2.25"
+    getopts "2.2.5"
+    interpret "^2.2.0"
+    lodash "^4.17.21"
+    pg-connection-string "2.4.0"
+    rechoir "^0.7.0"
+    resolve-from "^5.0.0"
+    tarn "^3.0.1"
+    tildify "2.0.0"
 
 known-css-properties@^0.21.0:
   version "0.21.0"

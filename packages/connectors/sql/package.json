@@ -14,5 +14,8 @@
   "bugs": {
     "url": "https://github.com/strapi/strapi/issues"
   },
-  "license": "SEE LICENSE IN LICENSE"
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "knex": "0.95.5"
+  }
 }

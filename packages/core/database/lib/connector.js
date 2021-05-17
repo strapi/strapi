@@ -16,7 +16,9 @@ function resolveConnector(config) {
   }
 
   try {
-    require(connector);
+    const constructor = require(connector);
+
+    return new constructor(config);
   } catch (error) {
     throw new InvalidConnector();
   }

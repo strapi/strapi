@@ -1,20 +1,8 @@
 'use strict';
 
-const coreStoreModel = config => ({
-  connection: config.get('database.defaultConnection'),
-  uid: 'strapi::core-store',
-  info: {
-    name: 'core_store',
-    description: '',
-  },
-  pluginOptions: {
-    'content-manager': {
-      visible: false,
-    },
-    'content-type-builder': {
-      visible: false,
-    },
-  },
+const coreStoreModel = {
+  uid: 'core-store',
+  tableName: 'strapi_core_store_settings',
   attributes: {
     key: {
       type: 'string',
@@ -32,9 +20,7 @@ const coreStoreModel = config => ({
       type: 'string',
     },
   },
-  globalId: 'StrapiConfigs',
-  collectionName: 'core_store',
-});
+};
 
 const createCoreStore = ({ environment: defaultEnv, db }) => {
   return (source = {}) => {
@@ -53,7 +39,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         tag,
       };
 
-      const data = await db.query('core_store').findOne(where);
+      const data = await db.query('core-store').findOne(where);
 
       if (!data) {
         return null;
@@ -92,7 +78,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         tag,
       };
 
-      const data = await db.query('core_store').findOne(where);
+      const data = await db.query('core-store').findOne(where);
 
       if (data) {
         Object.assign(data, {
@@ -100,7 +86,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
           type: (typeof value).toString(),
         });
 
-        await db.query('core_store').update({ id: data.id }, data);
+        await db.query('core-store').update({ id: data.id }, data);
       } else {
         const data = Object.assign({}, where, {
           value: JSON.stringify(value) || value.toString(),
@@ -108,7 +94,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
           tag,
         });
 
-        await db.query('core_store').create(data);
+        await db.query('core-store').create(data);
       }
     }
 
@@ -127,7 +113,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         tag,
       };
 
-      await db.query('core_store').delete(where);
+      await db.query('core-store').delete(where);
     }
 
     return {

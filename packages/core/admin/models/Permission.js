@@ -4,4 +4,52 @@
  * Lifecycle callbacks for the `Permission` model.
  */
 
-module.exports = {};
+module.exports = {
+  collectionName: 'strapi_permissions',
+  info: {
+    name: 'Permission',
+    description: '',
+  },
+  options: {
+    timestamps: true,
+  },
+  pluginOptions: {
+    'content-manager': {
+      visible: false,
+    },
+    'content-type-builder': {
+      visible: false,
+    },
+  },
+  attributes: {
+    action: {
+      type: 'string',
+      minLength: 1,
+      configurable: false,
+      required: true,
+    },
+    subject: {
+      type: 'string',
+      minLength: 1,
+      configurable: false,
+      required: false,
+    },
+    properties: {
+      type: 'json',
+      configurable: false,
+      required: false,
+      default: {},
+    },
+    conditions: {
+      type: 'json',
+      configurable: false,
+      required: false,
+      default: [],
+    },
+    role: {
+      configurable: false,
+      model: 'role',
+      plugin: 'admin',
+    },
+  },
+};
