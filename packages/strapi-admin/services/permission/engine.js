@@ -8,6 +8,7 @@ const {
   isFunction,
   isBoolean,
   isArray,
+  isNil,
   isEmpty,
   isObject,
   prop,
@@ -160,7 +161,7 @@ module.exports = conditionProvider => {
       await this.applyPermissionProcessors(permission);
 
       // Extract the up-to-date components from the permission
-      const { action, subject = 'all', properties = {}, conditions } = permission;
+      const { action, subject, properties = {}, conditions } = permission;
 
       // Register the permission if there is no condition
       if (isEmpty(conditions)) {
@@ -239,7 +240,12 @@ module.exports = conditionProvider => {
       const registerToCasl = caslPermission => {
         const { action, subject, fields, condition } = caslPermission;
 
-        can(action, subject, fields, isObject(condition) ? condition : undefined);
+        can(
+          action,
+          isNil(subject) ? 'all' : subject,
+          fields,
+          isObject(condition) ? condition : undefined
+        );
       };
 
       const runWillRegisterHook = async caslPermission => {
