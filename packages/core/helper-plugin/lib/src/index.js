@@ -3,9 +3,6 @@ import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfo
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
 
-// CommonPropTypes
-export { default as routerPropTypes } from './commonPropTypes/router';
-export { default as themePropTypes } from './commonPropTypes/themeShape';
 // Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BaselineAlignment } from './components/BaselineAlignment';
@@ -140,9 +137,7 @@ export { darken } from './utils/colors';
 export { default as getFileExtension } from './utils/getFileExtension';
 export { default as getFilterType } from './utils/getFilterType';
 export { default as getQueryParameters } from './utils/getQueryParameters';
-export { default as injectHooks } from './utils/injectHooks';
 export { default as validateInput } from './utils/inputsValidations';
-export { default as Manager } from './utils/Manager';
 export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';
