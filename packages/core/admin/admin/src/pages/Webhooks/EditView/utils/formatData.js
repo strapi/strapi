@@ -1,7 +1,7 @@
 import { set } from 'lodash';
 
 const cleanData = data => {
-  const webhooks = data;
+  const webhooks = { ...data };
 
   set(webhooks, 'headers', unformatHeaders(data.headers));
 

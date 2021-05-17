@@ -35,11 +35,12 @@ function ListView() {
   const isMounted = useRef(true);
   const { formatMessage } = useIntl();
   const [showModal, setShowModal] = useState(false);
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
+  const [{ webhooks, webhooksToDelete, webhookToDelete }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
   const { push } = useHistory();
   const { pathname } = useLocation();
-
-  const { webhooks, webhooksToDelete, webhookToDelete } = reducerState.toJS();
 
   useEffect(() => {
     isMounted.current = true;
