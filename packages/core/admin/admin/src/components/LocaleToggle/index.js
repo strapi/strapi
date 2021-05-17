@@ -27,9 +27,7 @@ export class LocaleToggle extends React.Component {
   render() {
     const {
       currentLocale: { locale },
-      className,
     } = this.props;
-    const style = cn('localeDropdownMenu', className);
 
     return (
       <Wrapper>
@@ -38,7 +36,7 @@ export class LocaleToggle extends React.Component {
             <span>{languageNativeNames[locale]}</span>
           </DropdownToggle>
 
-          <DropdownMenu className={style}>
+          <DropdownMenu className="localeDropdownMenu">
             {languages.map(language => (
               <DropdownItem
                 key={language}
@@ -58,12 +56,7 @@ export class LocaleToggle extends React.Component {
   }
 }
 
-LocaleToggle.defaultProps = {
-  className: null,
-};
-
 LocaleToggle.propTypes = {
-  className: PropTypes.string,
   changeLocale: PropTypes.func.isRequired,
   currentLocale: PropTypes.object.isRequired,
 };
