@@ -4,6 +4,7 @@ import {
   useGlobalContext,
   request,
   useNotification,
+  useAutoReloadOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { useHistory } from 'react-router-dom';
@@ -14,6 +15,7 @@ import Wrapper from './Wrapper';
 
 const MarketPlacePage = () => {
   const toggleNotification = useNotification();
+  const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const history = useHistory();
   const { autoReload, currentEnvironment, formatMessage, plugins } = useGlobalContext();
   const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
@@ -30,7 +32,7 @@ const MarketPlacePage = () => {
       description: 'app.components.InstallPluginPage.Download.description',
     };
     // Lock the app
-    strapi.lockAppWithAutoreload(overlayblockerParams);
+    lockAppWithAutoreload(overlayblockerParams);
 
     try {
       const opts = {
@@ -47,7 +49,7 @@ const MarketPlacePage = () => {
         window.location.reload();
       }
     } catch (err) {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
       toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },

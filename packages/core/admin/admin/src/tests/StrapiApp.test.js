@@ -73,6 +73,12 @@ describe('ADMIN | StrapiApp', () => {
               <div />
             </div>
           </div>
+          <div
+            id="autoReloadOverlayBlocker"
+          />
+          <div
+            id="overlayBlocker"
+          />
         </body>,
         "container": <div>
           <div

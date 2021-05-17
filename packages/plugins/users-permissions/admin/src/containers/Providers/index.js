@@ -10,6 +10,7 @@ import {
   getYupInnerErrors,
   request,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
@@ -32,6 +33,7 @@ const ProvidersPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -140,7 +142,7 @@ const ProvidersPage = () => {
 
       try {
         await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
-        strapi.lockAppWithOverlay();
+        lockApp();
 
         try {
           emitEventRef.current('willEditAuthenticationProvider');
@@ -176,7 +178,7 @@ const ProvidersPage = () => {
       dispatchSetFormErrors(errors);
 
       setIsSubmiting(false);
-      strapi.unlockApp();
+      unlockApp();
     },
     [
       dispatchSetFormErrors,
@@ -186,6 +188,8 @@ const ProvidersPage = () => {
       modifiedData,
       providerToEditName,
       toggleNotification,
+      lockApp,
+      unlockApp,
     ]
   );
 

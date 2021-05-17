@@ -9,6 +9,7 @@ import {
   useNotification,
   useStrapiApp,
   useUser,
+  useAutoReloadOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
@@ -65,6 +66,11 @@ const DataManagerProvider = ({
 }) => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
+<<<<<<< HEAD
+=======
+  const toggleNotificationRef = useRef(toggleNotification);
+  const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+>>>>>>> 5b870248a (Remove strapi.lockApp)
 
   const { getPlugin } = useStrapiApp();
 
@@ -247,7 +253,7 @@ const DataManagerProvider = ({
       push({ search: '' });
 
       if (userConfirm) {
-        strapi.lockApp();
+        lockAppWithAutoreload();
 
         await request(requestURL, { method: 'DELETE' }, true);
 
@@ -265,7 +271,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 
@@ -296,7 +302,7 @@ const DataManagerProvider = ({
           return;
         }
 
-        strapi.lockApp();
+        lockAppWithAutoreload();
 
         await request(requestURL, { method: 'DELETE' }, true);
 
@@ -316,7 +322,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 
@@ -328,7 +334,7 @@ const DataManagerProvider = ({
       push({ search: '' });
 
       // Lock the app
-      strapi.lockApp();
+      lockAppWithAutoreload();
 
       // Update the category
       await request(requestURL, { method: 'PUT', body }, true);
@@ -346,7 +352,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 
@@ -467,7 +473,7 @@ const DataManagerProvider = ({
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
       // Lock the app
-      strapi.lockApp();
+      lockAppWithAutoreload();
 
       await request(requestURL, { method, body }, true);
 
@@ -502,7 +508,7 @@ const DataManagerProvider = ({
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 

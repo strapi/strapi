@@ -6,6 +6,7 @@ import {
   useGlobalContext,
   request,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
@@ -26,6 +27,7 @@ const EditPage = () => {
   } = useRouteMatch('/settings/roles/:id');
   const [isSubmiting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const {
@@ -69,7 +71,7 @@ const EditPage = () => {
 
   const handleEditRoleSubmit = async data => {
     try {
-      strapi.lockApp();
+      lockApp();
       setIsSubmiting(true);
 
       const { permissionsToSend, didUpdateConditions } = permissionsRef.current.getPermissions();
@@ -111,7 +113,7 @@ const EditPage = () => {
       });
     } finally {
       setIsSubmiting(false);
-      strapi.unlockApp();
+      unlockApp();
     }
   };
 

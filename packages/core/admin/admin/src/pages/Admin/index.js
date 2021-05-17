@@ -185,9 +185,6 @@ export class Admin extends React.Component {
           emitEvent={this.emitEvent}
           currentEnvironment={currentEnvironment}
           currentLocale={locale}
-          // FIXME
-          disableGlobalOverlayBlocker={() => console.log('todo')}
-          enableGlobalOverlayBlocker={() => console.log('todo')}
           formatMessage={formatMessage}
           plugins={plugins}
           shouldUpdateStrapi={shouldUpdateStrapi}

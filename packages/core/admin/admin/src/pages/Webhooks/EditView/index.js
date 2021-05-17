@@ -16,6 +16,7 @@ import {
   BackHeader,
   LoadingIndicatorPage,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { useModels } from '../../../hooks';
 import PageTitle from '../../../components/SettingsPageTitle';
@@ -27,6 +28,7 @@ import Wrapper from './Wrapper';
 function EditView() {
   const { isLoading: isLoadingForModels, collectionTypes } = useModels();
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const isMounted = useRef();
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
@@ -191,7 +193,7 @@ function EditView() {
 
   const createWebhooks = async () => {
     try {
-      strapi.lockApp();
+      lockApp();
       setIsSubmitting(true);
       const { data } = await request('/admin/webhooks', {
         method: 'POST',
@@ -213,7 +215,7 @@ function EditView() {
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockApp();
     }
   };
 
@@ -355,7 +357,7 @@ function EditView() {
 
   const updateWebhook = async () => {
     try {
-      strapi.lockApp();
+      lockApp();
       setIsSubmitting(true);
 
       const body = cleanData(modifiedData);
@@ -380,7 +382,7 @@ function EditView() {
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockApp();
     }
   };
 
