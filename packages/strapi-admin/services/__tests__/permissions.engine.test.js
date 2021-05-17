@@ -349,6 +349,25 @@ describe('Permissions Engine', () => {
     });
   });
 
+  test('It should register the condition even if the subject is Nil', async () => {
+    const permission = {
+      action: 'read',
+      subject: null,
+      properties: {},
+      conditions: ['plugins::test.isCreatedBy'],
+    };
+
+    const user = getUser('alice');
+    const can = jest.fn();
+    const registerFn = engine.createRegisterFunction(can, {}, user);
+
+    await engine.evaluate({ permission, user, registerFn });
+
+    expect(can).toHaveBeenCalledWith('read', 'all', undefined, {
+      $and: [{ $or: [{ created_by: user.firstname }] }],
+    });
+  });
+
   describe('Create Register Function', () => {
     let can;
     let registerFn;
@@ -375,6 +394,18 @@ describe('Permissions Engine', () => {
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', { created_by: 1 });
+    });
+
+    test(`It should use 'all' as a subject if it's Nil`, async () => {
+      await registerFn({
+        action: 'read',
+        subject: null,
+        fields: null,
+        condition: { created_by: 1 },
+      });
+
+      expect(can).toHaveBeenCalledTimes(1);
+      expect(can).toHaveBeenCalledWith('read', 'all', null, { created_by: 1 });
     });
   });
 
