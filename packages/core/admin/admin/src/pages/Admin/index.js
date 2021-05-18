@@ -19,6 +19,7 @@ import {
   GlobalContextProvider,
   CheckPagePermissions,
   request,
+  NotificationsContext,
 } from '@strapi/helper-plugin';
 import { checkLatestStrapiVersion } from '../../utils';
 
@@ -36,7 +37,7 @@ import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
 import SettingsPage from '../SettingsPage';
 import Logout from './Logout';
-import { getInfosDataSucceeded, updatePlugin } from '../App/actions';
+import { getInfosDataSucceeded } from '../App/actions';
 import makeSelecApp from '../App/selectors';
 import { getStrapiLatestReleaseSucceeded, setAppError } from './actions';
 import makeSelectAdmin from './selectors';
@@ -45,13 +46,12 @@ import Content from './Content';
 
 export class Admin extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
+  static contextType = NotificationsContext;
 
   // This state is really temporary until we create a menu API
   state = { updateMenu: null };
 
-  helpers = {
-    updatePlugin: this.props.updatePlugin,
-  };
+  helpers = {};
 
   componentDidMount() {
     this.emitEvent('didAccessAuthenticatedAdministration');
@@ -103,7 +103,10 @@ export class Admin extends React.Component {
       this.props.getInfosDataSucceeded(data);
     } catch (err) {
       console.error(err);
-      strapi.notification.error('notification.error');
+      this.context.toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
     }
   };
 
@@ -129,7 +132,7 @@ export class Admin extends React.Component {
         }
 
         if (shouldUpdateStrapi) {
-          strapi.notification.toggle({
+          this.context.toggleNotification({
             type: 'info',
             message: { id: 'notification.version.update.message' },
             link: {
@@ -173,7 +176,6 @@ export class Admin extends React.Component {
       intl: { formatMessage, locale },
       // FIXME
       plugins,
-      updatePlugin,
     } = this.props;
 
     return (
@@ -187,10 +189,9 @@ export class Admin extends React.Component {
           disableGlobalOverlayBlocker={() => console.log('todo')}
           enableGlobalOverlayBlocker={() => console.log('todo')}
           formatMessage={formatMessage}
-          shouldUpdateStrapi={shouldUpdateStrapi}
           plugins={plugins}
+          shouldUpdateStrapi={shouldUpdateStrapi}
           strapiVersion={strapiVersion}
-          updatePlugin={updatePlugin}
           updateMenu={this.state.updateMenu}
         >
           <Wrapper>
@@ -263,7 +264,6 @@ Admin.propTypes = {
   }),
   plugins: PropTypes.object.isRequired,
   setAppError: PropTypes.func.isRequired,
-  updatePlugin: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
@@ -277,7 +277,6 @@ export function mapDispatchToProps(dispatch) {
       getInfosDataSucceeded,
       getStrapiLatestReleaseSucceeded,
       setAppError,
-      updatePlugin,
     },
     dispatch
   );

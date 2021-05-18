@@ -10,6 +10,7 @@ import {
   generateSearchFromFilters,
   request,
   useQuery,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { formatFileForEditing, getRequestUrl, getTrad } from '../../utils';
 import { useAppContext, useSelectTimestamps } from '../../hooks';
@@ -21,6 +22,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const HomePage = () => {
+  const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
   const { formatMessage } = useGlobalContext();
@@ -91,7 +93,7 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -114,7 +116,7 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -232,7 +234,7 @@ const HomePage = () => {
         type: 'ON_DELETE_MEDIAS_SUCCEEDED',
       });
     } catch (err) {
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: err,
       });
@@ -243,7 +245,7 @@ const HomePage = () => {
     } finally {
       setIsPopupOpen(false);
     }
-  }, [dataToDelete]);
+  }, [dataToDelete, toggleNotification]);
 
   const handleClosedModalDeleteAll = useCallback(() => {
     if (shouldRefetchData) {

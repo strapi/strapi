@@ -1,8 +1,6 @@
 import React from 'react';
 import { shallow } from 'enzyme';
 
-import { updatePlugin } from '../../App/actions';
-
 import { Admin, mapDispatchToProps } from '../index';
 import { setAppError } from '../actions';
 
@@ -28,7 +26,6 @@ describe('<Admin />', () => {
       global: {
         autoReload: false,
         currentEnvironment: 'development',
-        hasAdminUser: false,
         isLoading: true,
         strapiVersion: '3',
         uuid: false,
@@ -38,7 +35,6 @@ describe('<Admin />', () => {
       },
       location: {},
       setAppError: jest.fn(),
-      updatePlugin: jest.fn(),
     };
   });
 
@@ -139,23 +135,6 @@ describe('<Admin />, mapDispatchToProps', () => {
       result.setAppError();
 
       expect(dispatch).toHaveBeenCalledWith(setAppError());
-    });
-  });
-
-  describe('updatePlugin', () => {
-    it('should be injected', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
-
-      expect(result.updatePlugin).toBeDefined();
-    });
-
-    it('should dispatch the updatePlugin action when called', () => {
-      const dispatch = jest.fn();
-      const result = mapDispatchToProps(dispatch);
-      result.updatePlugin();
-
-      expect(dispatch).toHaveBeenCalledWith(updatePlugin());
     });
   });
 });

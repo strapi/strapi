@@ -105,6 +105,7 @@ export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
+export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as UserContext } from './contexts/UserContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
@@ -113,6 +114,7 @@ export { default as ContentManagerEditViewDataManagerContext } from './contexts/
 export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
+export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
@@ -120,6 +122,7 @@ export { default as useQueryParams } from './hooks/useQueryParams';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';
+export { default as NotificationsProvider } from './providers/NotificationsProvider';
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
 
 // Utils

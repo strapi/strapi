@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useRef } from 'react';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
@@ -9,6 +9,7 @@ const useRolesList = (shouldFetchData = true) => {
   const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, shouldFetchData)
   );
+  const toggleNotification = useNotification();
 
   const isMounted = useRef(true);
   const abortController = new AbortController();
@@ -47,7 +48,7 @@ const useRolesList = (shouldFetchData = true) => {
         });
 
         if (message !== 'Forbidden') {
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message,
           });

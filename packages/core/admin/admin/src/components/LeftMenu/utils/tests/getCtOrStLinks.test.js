@@ -135,14 +135,14 @@ describe('checkPermissions', () => {
 
   it('creates an array of boolean corresponding to the permission state', async () => {
     console.error = () => undefined;
-    strapi.notification.toggle = jest.fn();
+    const toggleNotification = jest.fn();
     const userPermissions = [];
 
     request.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
 
-    await getCtOrStLinks(userPermissions);
-    expect(strapi.notification.toggle).toBeCalled();
+    await getCtOrStLinks(userPermissions, toggleNotification);
+    expect(toggleNotification).toBeCalled();
   });
 });

@@ -1,6 +1,7 @@
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
+import { useNotification } from '@strapi/helper-plugin';
 import { Pencil, Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { RoleRow as RoleRowBase } from '../../../../../admin/src/components/Roles';
@@ -17,6 +18,7 @@ const RoleRow = ({
   selectedRoles,
 }) => {
   const { push } = useHistory();
+  const toggleNotification = useNotification();
 
   const handleRoleSelection = e => {
     e.stopPropagation();
@@ -29,7 +31,7 @@ const RoleRow = ({
     e.stopPropagation();
 
     if (role.usersCount) {
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'info',
         message: { id: 'Roles.ListPage.notification.delete-not-allowed' },
       });

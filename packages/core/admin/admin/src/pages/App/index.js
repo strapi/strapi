@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, auth, request } from '@strapi/helper-plugin';
+import { LoadingIndicatorPage, auth, request, useNotification } from '@strapi/helper-plugin';
 import PluginsInitializer from '../../components/PluginsInitializer';
 import PrivateRoute from '../../components/PrivateRoute';
 import AuthPage from '../AuthPage';
@@ -25,6 +25,7 @@ window.strapi = Object.assign(window.strapi || {}, {
 });
 
 function App(props) {
+  const toggleNotification = useNotification();
   const getDataRef = useRef();
   const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
   getDataRef.current = props.getDataSucceeded;
@@ -89,7 +90,7 @@ function App(props) {
         getDataRef.current(data);
         setState({ isLoading: false, hasAdmin: data.hasAdmin });
       } catch (err) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'app.containers.App.notification.error.init' },
         });
@@ -97,7 +98,7 @@ function App(props) {
     };
 
     getData();
-  }, []);
+  }, [toggleNotification]);
 
   const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
 

@@ -14,7 +14,11 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Row } from 'reactstrap';
 import { Inputs } from '@buffetjs/custom';
-import { useGlobalContext, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
+import {
+  useGlobalContext,
+  useNotification,
+  prefixFileUrlWithBackendUrl,
+} from '@strapi/helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { createFileToDownloadName } from '../../utils';
@@ -53,6 +57,7 @@ const EditForm = forwardRef(
     },
     ref
   ) => {
+    const toggleNotification = useNotification();
     const { formatMessage } = useGlobalContext();
     const [isCropping, setIsCropping] = useState(false);
     const [infos, setInfos] = useState({ width: null, height: null });
@@ -193,7 +198,7 @@ const EditForm = forwardRef(
     };
 
     const handleCopy = () => {
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'info',
         message: { id: 'notification.link-copied' },
       });

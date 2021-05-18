@@ -8,7 +8,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { LeftMenuList, useGlobalContext } from '@strapi/helper-plugin';
+import { LeftMenuList, useGlobalContext, useNotification } from '@strapi/helper-plugin';
 import { Text } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
@@ -19,13 +19,6 @@ import Wrapper from './Wrapper';
 
 /* eslint-disable indent */
 
-const displayNotificationCTNotSaved = () => {
-  strapi.notification.toggle({
-    type: 'info',
-    message: { id: `${pluginId}.notification.info.creating.notSaved` },
-  });
-};
-
 function LeftMenu({ wait }) {
   const {
     components,
@@ -34,8 +27,10 @@ function LeftMenu({ wait }) {
     isInDevelopmentMode,
     sortedContentTypesList,
   } = useDataManager();
+  const toggleNotification = useNotification();
   const { emitEvent, formatMessage } = useGlobalContext();
   const { push } = useHistory();
+
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
       name: category,
@@ -107,7 +102,10 @@ function LeftMenu({ wait }) {
         search,
       });
     } else {
-      displayNotificationCTNotSaved();
+      toggleNotification({
+        type: 'info',
+        message: { id: `${pluginId}.notification.info.creating.notSaved` },
+      });
     }
   };
 

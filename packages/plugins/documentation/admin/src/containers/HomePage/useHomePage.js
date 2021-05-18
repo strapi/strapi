@@ -1,13 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from 'react-query';
+import { useNotification } from '@strapi/helper-plugin';
 import { fetchData, deleteDoc, regenerateDoc, submit } from './utils/api';
 import getTrad from '../../utils/getTrad';
 
 const useHomePage = () => {
   const queryClient = useQueryClient();
-  const { isLoading, data } = useQuery('get-documentation', fetchData);
+  const toggleNotification = useNotification();
+  const { isLoading, data } = useQuery('get-documentation', () => fetchData(toggleNotification));
 
   const handleError = err => {
-    strapi.notification.toggle({
+    toggleNotification({
       type: 'warning',
       message: err.response.payload.message,
     });
@@ -16,7 +18,7 @@ const useHomePage = () => {
   const deleteMutation = useMutation(deleteDoc, {
     onSuccess: () => {
       queryClient.invalidateQueries('get-documentation');
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'info',
         message: { id: getTrad('notification.delete.success') },
       });
@@ -28,7 +30,7 @@ const useHomePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries('get-documentation');
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
         message: { id: getTrad('notification.update.success') },
       });
@@ -40,7 +42,7 @@ const useHomePage = () => {
     onSuccess: () => {
       queryClient.invalidateQueries('get-documentation');
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'info',
         message: { id: getTrad('notification.generate.success') },
       });

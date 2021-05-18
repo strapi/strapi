@@ -18,6 +18,7 @@ import {
   useUserPermissions,
   LoadingIndicatorPage,
   EmptyState,
+  useNotification,
 } from '@strapi/helper-plugin';
 import adminPermissions from '../../../permissions';
 import PageTitle from '../../../components/SettingsPageTitle';
@@ -30,7 +31,7 @@ function ListView() {
     isLoading,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(adminPermissions.settings.webhooks);
-
+  const toggleNotification = useNotification();
   const isMounted = useRef(true);
   const { formatMessage } = useIntl();
   const [showModal, setShowModal] = useState(false);
@@ -52,6 +53,7 @@ function ListView() {
     if (canRead) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
   const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
@@ -138,7 +140,7 @@ function ListView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -175,7 +177,7 @@ function ListView() {
       });
     } catch (err) {
       if (err.code !== 20) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -203,7 +205,7 @@ function ListView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -255,7 +257,7 @@ function ListView() {
         });
 
         if (err.code !== 20) {
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });

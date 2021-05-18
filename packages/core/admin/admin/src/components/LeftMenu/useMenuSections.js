@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
-import { useUser } from '@strapi/helper-plugin';
+import { useUser, useNotification } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
+
 import getCtOrStLinks from './utils/getCtOrStLinks';
 import getPluginSectionLinks from './utils/getPluginSectionLinks';
 import getGeneralLinks from './utils/getGeneralLinks';
@@ -10,6 +11,7 @@ import toPluginLinks from './utils/toPluginLinks';
 import selectMenuLinks from './selectors';
 
 const useMenuSections = (plugins, shouldUpdateStrapi) => {
+  const toggleNotification = useNotification();
   const state = useSelector(selectMenuLinks);
   const dispatch = useDispatch();
   const { userPermissions } = useUser();
@@ -30,7 +32,8 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
   const resolvePermissions = async (permissions = userPermissions) => {
     const pluginsSectionLinks = toPluginLinks(pluginsRef.current);
     const { authorizedCtLinks, authorizedStLinks, contentTypes } = await getCtOrStLinks(
-      permissions
+      permissions,
+      toggleNotification
     );
 
     const authorizedPluginSectionLinks = await getPluginSectionLinks(

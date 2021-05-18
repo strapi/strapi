@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import init from './init';
@@ -9,6 +9,7 @@ import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
   const [{ permissions, routes, policies, isLoading }, dispatch] = useReducer(
     reducer,
     initialState,
@@ -47,13 +48,13 @@ const usePlugins = (shouldFetchData = true) => {
       });
 
       if (message !== 'Forbidden') {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message,
         });
       }
     }
-  }, [formatMessage]);
+  }, [formatMessage, toggleNotification]);
 
   useEffect(() => {
     if (shouldFetchData) {

@@ -1,7 +1,7 @@
 import { useQuery } from 'react-query';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 
-const fetchDefaultLocalesList = async () => {
+const fetchDefaultLocalesList = async toggleNotification => {
   try {
     const data = await request('/i18n/iso-locales', {
       method: 'GET',
@@ -9,7 +9,7 @@ const fetchDefaultLocalesList = async () => {
 
     return data;
   } catch (e) {
-    strapi.notification.toggle({
+    toggleNotification({
       type: 'warning',
       message: { id: 'notification.error' },
     });
@@ -19,7 +19,10 @@ const fetchDefaultLocalesList = async () => {
 };
 
 const useDefaultLocales = () => {
-  const { isLoading, data } = useQuery('default-locales', fetchDefaultLocalesList);
+  const toggleNotification = useNotification();
+  const { isLoading, data } = useQuery('default-locales', () =>
+    fetchDefaultLocalesList(toggleNotification)
+  );
 
   return { defaultLocales: data, isLoading };
 };

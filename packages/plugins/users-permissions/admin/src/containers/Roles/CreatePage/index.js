@@ -4,7 +4,7 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import { request, useGlobalContext } from '@strapi/helper-plugin';
+import { request, useGlobalContext, useNotification } from '@strapi/helper-plugin';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormCard from '../../../components/FormBloc';
@@ -18,6 +18,7 @@ import schema from './utils/schema';
 const CreatePage = () => {
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
+  const toggleNotification = useNotification();
   const { goBack } = useHistory();
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { permissions, routes, policies, isLoading } = usePlugins();
@@ -68,7 +69,7 @@ const CreatePage = () => {
     )
       .then(() => {
         emitEvent('didCreateRole');
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'success',
           message: { id: 'Settings.roles.created' },
         });
@@ -78,7 +79,7 @@ const CreatePage = () => {
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });

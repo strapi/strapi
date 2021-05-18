@@ -4,7 +4,7 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -20,6 +20,7 @@ import schema from './utils/schema';
 const EditPage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
+  const toggleNotification = useNotification();
   const {
     params: { id },
   } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
@@ -73,14 +74,14 @@ const EditPage = () => {
       .then(() => {
         onSubmitSucceeded({ name: data.name, description: data.description });
         permissionsRef.current.setFormAfterSubmit();
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('Settings.roles.edited') },
         });
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });

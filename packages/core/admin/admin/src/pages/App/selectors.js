@@ -9,7 +9,7 @@ const selectApp = () => state => state.app;
  * Select the language locale
  */
 
-const makeSelectApp = () => createSelector(selectApp(), appState => appState.toJS());
+const makeSelectApp = () => createSelector(selectApp(), appState => appState);
 
 export default makeSelectApp;
 export { selectApp };

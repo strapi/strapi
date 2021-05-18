@@ -2,7 +2,7 @@ import { request } from '@strapi/helper-plugin';
 import generateModelsLinks from './generateModelsLinks';
 import checkPermissions from './checkPermissions';
 
-const getCtOrStLinks = async userPermissions => {
+const getCtOrStLinks = async (userPermissions, toggleNotification) => {
   const requestURL = '/content-manager/content-types';
 
   try {
@@ -37,7 +37,7 @@ const getCtOrStLinks = async userPermissions => {
   } catch (err) {
     console.error(err);
 
-    strapi.notification.toggle({
+    toggleNotification({
       type: 'warning',
       message: { id: 'notification.error' },
     });

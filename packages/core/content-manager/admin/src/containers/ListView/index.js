@@ -15,6 +15,7 @@ import {
   InjectionZoneList,
   PopUpWarning,
   useGlobalContext,
+  useNotification,
   useQueryParams,
   useUser,
   request,
@@ -86,7 +87,7 @@ function ListView({
       settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
   } = layout;
-
+  const toggleNotification = useNotification();
   const { emitEvent } = useGlobalContext();
   const { fetchUserPermissions } = useUser();
   const emitEventRef = useRef(emitEvent);
@@ -142,7 +143,10 @@ function ListView({
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
 
-          strapi.notification.info(getTrad('permissions.not-allowed.update'));
+          toggleNotification({
+            type: 'info',
+            message: { id: getTrad('permissions.not-allowed.update') },
+          });
 
           push('/');
 
@@ -151,11 +155,14 @@ function ListView({
 
         if (err.name !== 'AbortError') {
           console.error(err);
-          strapi.notification.error(getTrad('error.model.fetch'));
+          toggleNotification({
+            type: 'warning',
+            message: { id: getTrad('error.model.fetch') },
+          });
         }
       }
     },
-    [getData, getDataSucceeded, push]
+    [getData, getDataSucceeded, push, toggleNotification]
   );
 
   const handleChangeListLabels = useCallback(
@@ -163,7 +170,7 @@ function ListView({
       // Display a notification if trying to remove the last displayed field
 
       if (value && displayedHeaders.length === 1) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'content-manager.notification.error.displayedFields' },
         });
@@ -173,7 +180,7 @@ function ListView({
         onChangeListHeaders({ name, value });
       }
     },
-    [displayedHeaders, onChangeListHeaders]
+    [displayedHeaders, onChangeListHeaders, toggleNotification]
   );
 
   const handleConfirmDeleteAllData = useCallback(async () => {
@@ -188,9 +195,18 @@ function ListView({
       onDeleteSeveralDataSucceeded();
       emitEventRef.current('didBulkDeleteEntries');
     } catch (err) {
-      strapi.notification.error(`${pluginId}.error.record.delete`);
+      toggleNotification({
+        type: 'warning',
+        message: { id: getTrad('error.record.delete') },
+      });
     }
-  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
+  }, [
+    entriesToDelete,
+    onDeleteSeveralDataSucceeded,
+    slug,
+    setModalLoadingState,
+    toggleNotification,
+  ]);
 
   const handleConfirmDeleteData = useCallback(async () => {
     try {
@@ -211,9 +227,9 @@ function ListView({
         method: 'DELETE',
       });
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'success',
-        message: { id: `${pluginId}.success.record.delete` },
+        message: { id: getTrad('success.record.delete') },
       });
 
       // Close the modal and refetch data
@@ -223,10 +239,10 @@ function ListView({
       const errorMessage = get(
         err,
         'response.payload.message',
-        formatMessage({ id: `${pluginId}.error.record.delete` })
+        formatMessage({ id: getTrad('error.record.delete') })
       );
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: errorMessage,
       });
@@ -234,6 +250,7 @@ function ListView({
       onDeleteDataError();
     }
   }, [
+    toggleNotification,
     hasDraftAndPublish,
     setModalLoadingState,
     slug,

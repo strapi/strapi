@@ -9,6 +9,7 @@ import {
   useGlobalContext,
   getYupInnerErrors,
   request,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
@@ -30,6 +31,7 @@ const ProvidersPage = () => {
   const buttonSubmitRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
+  const toggleNotification = useNotification();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -150,7 +152,7 @@ const ProvidersPage = () => {
 
           emitEventRef.current('didEditAuthenticationProvider');
 
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'success',
             message: { id: getTrad('notification.success.submit') },
           });
@@ -160,7 +162,7 @@ const ProvidersPage = () => {
           handleToggle();
         } catch (err) {
           console.error(err);
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -183,6 +185,7 @@ const ProvidersPage = () => {
       handleToggle,
       modifiedData,
       providerToEditName,
+      toggleNotification,
     ]
   );
 

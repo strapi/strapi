@@ -11,6 +11,7 @@ import {
   PopUpWarning,
   request,
   useUserPermissions,
+  useNotification,
   LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -24,6 +25,7 @@ import BaselineAlignment from './BaselineAlignment';
 import reducer, { initialState } from './reducer';
 
 const RoleListPage = () => {
+  const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { formatMessage } = useIntl();
   const { push } = useHistory();
@@ -85,7 +87,7 @@ const RoleListPage = () => {
       });
 
       if (selectedRoles.length !== filteredRoles.length) {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'info',
           message: { id: 'Roles.ListPage.notification.delete-all-not-allowed' },
         });
@@ -111,12 +113,12 @@ const RoleListPage = () => {
 
       if (errorIds && Array.isArray(errorIds)) {
         const errorsMsg = errorIds.join('\n');
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: errorsMsg,
         });
       } else {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });

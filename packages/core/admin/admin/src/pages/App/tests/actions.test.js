@@ -1,19 +1,5 @@
-import {
-  GET_DATA_SUCCEEDED,
-  GET_INFOS_DATA_SUCCEEDED,
-  LOAD_PLUGIN,
-  PLUGIN_DELETED,
-  PLUGIN_LOADED,
-  UPDATE_PLUGIN,
-} from '../constants';
-import {
-  loadPlugin,
-  getInfosDataSucceeded,
-  getDataSucceeded,
-  pluginDeleted,
-  pluginLoaded,
-  updatePlugin,
-} from '../actions';
+import { GET_DATA_SUCCEEDED, GET_INFOS_DATA_SUCCEEDED } from '../constants';
+import { getInfosDataSucceeded, getDataSucceeded } from '../actions';
 
 describe('<App /> actions', () => {
   describe('getDataSucceeded', () => {
@@ -37,64 +23,6 @@ describe('<App /> actions', () => {
       };
 
       expect(getInfosDataSucceeded(data)).toEqual(expected);
-    });
-  });
-
-  describe('loadPlugin', () => {
-    it('should return the correct type and the passed data', () => {
-      const plugin = {
-        id: 'content-manager',
-        description: 'Manage your content',
-      };
-      const expected = {
-        type: LOAD_PLUGIN,
-        plugin,
-      };
-
-      expect(loadPlugin(plugin)).toEqual(expected);
-    });
-  });
-
-  describe('pluginLoaded', () => {
-    it('should return the correct type and the passed data', () => {
-      const plugin = {
-        id: 'content-manager',
-        description: 'Manage your content',
-      };
-      const expected = {
-        type: PLUGIN_LOADED,
-        plugin,
-      };
-
-      expect(pluginLoaded(plugin)).toEqual(expected);
-    });
-  });
-
-  describe('pluginDeleted', () => {
-    it('should return the correct type and the passed data', () => {
-      const plugin = 'content-manager';
-      const expected = {
-        type: PLUGIN_DELETED,
-        plugin,
-      };
-
-      expect(pluginDeleted(plugin)).toEqual(expected);
-    });
-  });
-
-  describe('updatePlugin', () => {
-    it('should return the correct type and the passed data', () => {
-      const pluginId = 'content-manager';
-      const updatedKey = 'isReady';
-      const updatedValue = true;
-      const expected = {
-        type: UPDATE_PLUGIN,
-        pluginId,
-        updatedKey,
-        updatedValue,
-      };
-
-      expect(updatePlugin(pluginId, updatedKey, updatedValue)).toEqual(expected);
     });
   });
 });

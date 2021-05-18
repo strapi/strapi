@@ -1,14 +1,19 @@
 import React from 'react';
-import { LoadingIndicatorPage, useGlobalContext, request } from '@strapi/helper-plugin';
+import {
+  LoadingIndicatorPage,
+  useGlobalContext,
+  request,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { useHistory } from 'react-router-dom';
-
 import { useFetchPluginsFromMarketPlace } from '../../hooks';
 import PageTitle from '../../components/PageTitle';
 import PluginCard from './PluginCard';
 import Wrapper from './Wrapper';
 
 const MarketPlacePage = () => {
+  const toggleNotification = useNotification();
   const history = useHistory();
   const { autoReload, currentEnvironment, formatMessage, plugins } = useGlobalContext();
   const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
@@ -43,7 +48,7 @@ const MarketPlacePage = () => {
       }
     } catch (err) {
       strapi.unlockApp();
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

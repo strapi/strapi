@@ -1,6 +1,7 @@
 // This component is a work in progress
 // It's made to be used when the users API is ready
 import React from 'react';
+import { useNotification } from '@strapi/helper-plugin';
 import { Flex, Text } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import PropTypes from 'prop-types';
@@ -10,8 +11,10 @@ import Envelope from './Envelope';
 import Wrapper from './Wrapper';
 
 const LinkNotification = ({ target, children }) => {
+  const toggleNotification = useNotification();
+
   const handleCopy = () => {
-    strapi.notification.toggle({ type: 'info', message: { id: 'notification.link-copied' } });
+    toggleNotification({ type: 'info', message: { id: 'notification.link-copied' } });
   };
 
   return (
