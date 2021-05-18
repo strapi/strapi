@@ -5,19 +5,15 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
 import { useGlobalContext } from '@strapi/helper-plugin';
-
 import formatVideoArray from './utils/formatAndStoreVideoArray';
-
 import StaticLinks from './StaticLinks';
 import Video from './Video';
 import Wrapper from './Wrapper';
-import init from './init';
 import reducer, { initialState } from './reducer';
 
 const OnboardingVideos = () => {
   const { emitEvent } = useGlobalContext();
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { isLoading, isOpen, videos } = reducerState.toJS();
+  const [{ isLoading, isOpen, videos }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     const getData = async () => {

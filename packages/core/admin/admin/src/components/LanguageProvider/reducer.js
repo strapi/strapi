@@ -4,7 +4,6 @@
  *
  */
 
-import { fromJS } from 'immutable';
 import { get, includes, split } from 'lodash';
 
 // Import supported languages from the translations folder
@@ -32,9 +31,9 @@ if (!foundLanguage) {
   foundLanguage = includes(languages, userLanguageShort) && userLanguageShort;
 }
 
-const initialState = fromJS({
+const initialState = {
   locale: foundLanguage || 'en',
-});
+};
 
 function languageProviderReducer(state = initialState, action) {
   switch (action.type) {
@@ -42,7 +41,7 @@ function languageProviderReducer(state = initialState, action) {
       // Set user language in local storage.
       window.localStorage.setItem(localStorageKey, action.locale);
 
-      return state.set('locale', action.locale);
+      return { ...state, locale: action.locale };
     default:
       return state;
   }

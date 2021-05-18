@@ -1,12 +1,11 @@
-import { fromJS } from 'immutable';
 import reducer from '../reducer';
 
 describe('Admin | containers | Webhooks | ListView | reducer', () => {
-  const initialState = fromJS({
+  const initialState = {
     webhooks: [],
     webhooksToDelete: [],
     webhookToDelete: null,
-  });
+  };
 
   describe('Load webhooks', () => {
     it('should update webhooks with received data', () => {
@@ -35,7 +34,7 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
         data: receivedData,
       };
 
-      const expectedState = state.set('webhooks', fromJS(receivedData));
+      const expectedState = { ...state, webhooks: receivedData };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -61,15 +60,35 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
           isEnabled: false,
         },
       ];
-      const state = initialState.set('webhooks', fromJS(webhooks));
+      const state = { ...initialState, webhooks };
 
       const action = {
         type: 'SET_WEBHOOK_ENABLED',
         keys: [1, 'isEnabled'],
-        value: false,
+        value: true,
       };
 
-      const expectedState = state.setIn(['webhooks', 1, 'isEnabled'], false);
+      const expectedState = {
+        ...state,
+        webhooks: [
+          {
+            id: 1,
+            name: 'webhook 1',
+            url: 'http://localhost:5000',
+            headers: {},
+            events: ['entry.create', 'entry.update', 'entry.delete'],
+            isEnabled: true,
+          },
+          {
+            id: 2,
+            name: 'webhook 2',
+            url: 'http://localhost:4000',
+            headers: {},
+            events: ['media.create', 'media.update'],
+            isEnabled: true,
+          },
+        ],
+      };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -95,13 +114,13 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
           isEnabled: false,
         },
       ];
-      const state = initialState.set('webhooks', fromJS(webhooks));
+      const state = { ...initialState, webhooks };
       const action = {
         type: 'SET_WEBHOOK_TO_DELETE',
         id: 1,
       };
 
-      const expectedState = state.set('webhookToDelete', 1);
+      const expectedState = { ...state, webhookToDelete: 1 };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -125,14 +144,14 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
           isEnabled: false,
         },
       ];
-      const state = initialState.set('webhooks', fromJS(webhooks));
+      const state = { ...initialState, webhooks };
       const action = {
         type: 'SET_WEBHOOKS_TO_DELETE',
         id: 1,
         value: true,
       };
 
-      const expectedState = state.set('webhooksToDelete', fromJS([1]));
+      const expectedState = { ...state, webhooksToDelete: [1] };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -156,16 +175,15 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
           isEnabled: false,
         },
       ];
-      const state = initialState
-        .set('webhooks', fromJS(webhooks))
-        .set('webhooksToDelete', fromJS([1, 2]));
+      const state = { ...initialState, webhooks, webhooksToDelete: [1, 2] };
+
       const action = {
         type: 'SET_WEBHOOKS_TO_DELETE',
         id: 1,
         value: false,
       };
 
-      const expectedState = state.set('webhooksToDelete', fromJS([2]));
+      const expectedState = { ...state, webhooksToDelete: [2] };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -200,14 +218,12 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
         },
       ];
 
-      const state = initialState.set('webhooksToDelete', [1]).set('webhooks', fromJS(webhooks));
+      const state = { ...initialState, webhooksToDelete: [1], webhooks };
       const action = {
         type: 'WEBHOOKS_DELETED',
       };
 
-      const expectedState = state
-        .set('webhooks', fromJS(updatedWebhooks))
-        .set('webhooksToDelete', []);
+      const expectedState = { ...state, webhooks: updatedWebhooks, webhooksToDelete: [] };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -260,18 +276,14 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
 
       const webhookIdToDelete = 4;
 
-      const state = initialState
-        .set('webhookToDelete', webhookIdToDelete)
-        .set('webhooks', fromJS(webhooks));
+      const state = { ...initialState, webhookToDelete: webhookIdToDelete, webhooks };
 
       const action = {
         type: 'WEBHOOK_DELETED',
         index: 1,
       };
 
-      const expectedState = state
-        .set('webhooks', fromJS(updatedWebhooks))
-        .set('webhookToDelete', null);
+      const expectedState = { ...state, webhooks: updatedWebhooks, webhookToDelete: null };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });

@@ -33,7 +33,10 @@ function EditView() {
   const { formatMessage } = useGlobalContext();
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [reducerState, dispatch] = useReducer(reducer, initialState);
+  const [
+    { formErrors, modifiedData, initialData, isLoading, isTriggering, triggerResponse },
+    dispatch,
+  ] = useReducer(reducer, initialState);
   const { push, replace } = useHistory();
   const {
     params: { id },
@@ -42,15 +45,6 @@ function EditView() {
   const abortController = new AbortController();
   const { signal } = abortController;
   const isCreating = id === 'create';
-
-  const {
-    formErrors,
-    modifiedData,
-    initialData,
-    isLoading,
-    isTriggering,
-    triggerResponse,
-  } = reducerState.toJS();
 
   useEffect(() => {
     isMounted.current = true;
@@ -195,6 +189,7 @@ function EditView() {
     try {
       lockApp();
       setIsSubmitting(true);
+
       const { data } = await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),

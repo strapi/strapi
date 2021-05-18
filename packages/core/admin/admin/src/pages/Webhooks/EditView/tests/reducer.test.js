@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import reducer from '../reducer';
 
 describe('Admin | containers | Webhooks | EditView | reducer', () => {
@@ -11,14 +10,14 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
     url: '',
   };
 
-  const initialState = fromJS({
+  const initialState = {
     formErrors: {},
     initialData: initialWebhook,
     isTriggering: false,
     modifiedData: initialWebhook,
     isLoading: true,
     triggerResponse: {},
-  });
+  };
 
   describe('Format headers object', () => {
     it('should convert headers object to an array of an empty object if it is empty', () => {
@@ -39,10 +38,7 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
       };
 
       const data = { ...receivedData, headers: [header] };
-      const expectedState = state
-        .set('isLoading', false)
-        .set('initialData', fromJS(data))
-        .set('modifiedData', fromJS(data));
+      const expectedState = { ...state, isLoading: false, initialData: data, modifiedData: data };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -74,10 +70,7 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
 
       const data = { ...receivedData, headers: formattedHeaders };
 
-      const expectedState = state
-        .set('isLoading', false)
-        .update('initialData', () => fromJS(data))
-        .update('modifiedData', () => fromJS(data));
+      const expectedState = { ...state, isLoading: false, initialData: data, modifiedData: data };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -93,7 +86,10 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         value: 'new webhook name',
       };
 
-      const expectedState = state.setIn(['modifiedData', ...action.keys], action.value);
+      const expectedState = {
+        ...state,
+        modifiedData: { ...state.modifiedData, name: action.value },
+      };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -106,13 +102,16 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         keys: ['headers'],
       };
 
-      const expectedState = state.setIn(
-        ['modifiedData', 'headers'],
-        fromJS([
-          { key: '', value: '' },
-          { key: '', value: '' },
-        ])
-      );
+      const expectedState = {
+        ...state,
+        modifiedData: {
+          ...state.modifiedData,
+          headers: [
+            { key: '', value: '' },
+            { key: '', value: '' },
+          ],
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -122,9 +121,16 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         { key: 'accept', value: 'text/html' },
         { key: 'authorization', value: 'Basic YWxhZGRpbjpvcGVuc2VzYW1l' },
       ];
-      const state = initialState
-        .setIn(['initialData', 'headers'], fromJS(initialHeaders))
-        .setIn(['modifiedData', 'headers'], fromJS(initialHeaders));
+      const state = {
+        ...initialState,
+        initialData: {
+          headers: initialHeaders,
+        },
+        modifiedData: {
+          ok: true,
+          headers: initialHeaders,
+        },
+      };
 
       const action = {
         type: 'ON_HEADER_REMOVE',
@@ -132,26 +138,25 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
       };
 
       const updatedHeaders = [{ key: 'accept', value: 'text/html' }];
-
-      const expectedState = state.setIn(['modifiedData', 'headers'], fromJS(updatedHeaders));
+      const expectedState = {
+        ...state,
+        modifiedData: { ...state.modifiedData, headers: updatedHeaders },
+      };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
 
     it('should clear a header to modifiedData if it is the last', () => {
       const initialHeaders = [{ key: 'accept', value: 'text/html' }];
-      const state = initialState
-        .setIn(['initialData', 'headers'], fromJS(initialHeaders))
-        .setIn(['modifiedData', 'headers'], fromJS(initialHeaders));
+      const initialData = { headers: initialHeaders, ok: true };
+      const state = { ...initialState, initialData, modifiedData: initialData };
 
       const action = {
         type: 'ON_HEADER_REMOVE',
         index: 0,
       };
 
-      const updatedHeaders = [header];
-
-      const expectedState = state.setIn(['modifiedData', 'headers'], fromJS(updatedHeaders));
+      const expectedState = { ...state, modifiedData: { headers: [header], ok: true } };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -159,28 +164,31 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
 
   describe('Trigger actions', () => {
     it('should set isTriggering to false when trigger action is canceled', () => {
-      const state = initialState.set('isTriggering', true);
+      const state = { ...initialState, isTriggering: true };
 
       const action = {
         type: 'ON_TRIGGER_CANCELED',
       };
 
-      const expectedState = state.update('isTriggering', () => false);
+      const expectedState = { ...state, isTriggering: false };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
 
     it('should clear triggerResponse when trigger action is canceled', () => {
-      const state = initialState.set('triggerResponse', {
-        statusCode: 200,
-        message: 'succeed',
-      });
+      const state = {
+        ...initialState,
+        triggerResponse: {
+          statusCode: 200,
+          message: 'succeed',
+        },
+      };
 
       const action = {
         type: 'ON_TRIGGER_CANCELED',
       };
 
-      const expectedState = state.update('triggerResponse', () => fromJS({}));
+      const expectedState = { ...state, triggerResponse: {} };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -192,13 +200,13 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         type: 'SET_IS_TRIGGERING',
       };
 
-      const expectedState = state.set('isTriggering', true);
+      const expectedState = { ...state, isTriggering: true };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
 
     it('should update isTriggering and triggerResponse if trigger succeed', () => {
-      const state = initialState.set('isTriggering', true);
+      const state = { ...initialState, isTriggering: true };
 
       const action = {
         type: 'TRIGGER_SUCCEEDED',
@@ -208,9 +216,7 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         },
       };
 
-      const expectedState = state
-        .update('triggerResponse', () => fromJS(action.response))
-        .update('isTriggering', () => false);
+      const expectedState = { ...state, triggerResponse: action.response, isTriggering: false };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -218,15 +224,13 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
 
   describe('Reset form', () => {
     it('should reset modifiedData with initialData values', () => {
-      const state = initialState
-        .setIn(['modifiedData', 'name'], 'updated name')
-        .setIn(['modifiedData', 'url'], 'updated url');
+      const state = { ...initialState, modifiedData: { name: 'updated name', url: 'updated url' } };
 
       const action = {
         type: 'RESET_FORM',
       };
 
-      const expectedState = state.update('modifiedData', () => state.get('initialData'));
+      const expectedState = initialState;
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
@@ -243,7 +247,7 @@ describe('Admin | containers | Webhooks | EditView | reducer', () => {
         },
       };
 
-      const expectedState = state.update('formErrors', () => fromJS(action.errors));
+      const expectedState = { ...state, formErrors: action.errors };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });

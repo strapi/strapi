@@ -1,43 +1,56 @@
-import { fromJS } from 'immutable';
+import produce from 'immer';
+import set from 'lodash/set';
 
-const initialState = fromJS({
+const initialState = {
   webhooks: [],
   webhooksToDelete: [],
   webhookToDelete: null,
-});
+};
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'GET_DATA_SUCCEEDED':
-      return state.update('webhooks', () => fromJS(action.data));
-    case 'SET_WEBHOOK_ENABLED':
-      return state.updateIn(['webhooks', ...action.keys], () => action.value);
-    case 'SET_WEBHOOK_TO_DELETE':
-      return state.update('webhookToDelete', () => action.id);
-    case 'SET_WEBHOOKS_TO_DELETE':
-      return state.update('webhooksToDelete', list => {
+const reducer = (state, action) =>
+  // eslint-disable-next-line consistent-return
+  produce(state, draftState => {
+    switch (action.type) {
+      case 'GET_DATA_SUCCEEDED': {
+        draftState.webhooks = action.data;
+        break;
+      }
+
+      case 'SET_WEBHOOK_ENABLED': {
+        set(draftState, ['webhooks', ...action.keys], action.value);
+        break;
+      }
+
+      case 'SET_WEBHOOK_TO_DELETE': {
+        draftState.webhookToDelete = action.id;
+        break;
+      }
+      case 'SET_WEBHOOKS_TO_DELETE': {
         if (action.value) {
-          return list.push(action.id);
+          draftState.webhooksToDelete.push(action.id);
+        } else {
+          draftState.webhooksToDelete = state.webhooksToDelete.filter(id => id !== action.id);
         }
 
-        return list.filter(data => data !== action.id);
-      });
-    case 'WEBHOOKS_DELETED':
-      return state
-        .update('webhooks', webhooks =>
-          webhooks.filter(webhook => {
-            return !state.get('webhooksToDelete').includes(webhook.get('id'));
-          })
-        )
-        .update('webhooksToDelete', () => []);
-    case 'WEBHOOK_DELETED':
-      return state
-        .update('webhooks', webhooks => webhooks.remove(action.index))
-        .update('webhookToDelete', () => null);
-    default:
-      return state;
-  }
-};
+        break;
+      }
+      case 'WEBHOOKS_DELETED': {
+        draftState.webhooks = state.webhooks.filter(
+          webhook => !state.webhooksToDelete.includes(webhook.id)
+        );
+        draftState.webhooksToDelete = [];
+        break;
+      }
+      case 'WEBHOOK_DELETED': {
+        draftState.webhooks = state.webhooks.filter((_, index) => index !== action.index);
+        draftState.webhookToDelete = null;
+
+        break;
+      }
+      default:
+        return draftState;
+    }
+  });
 
 export default reducer;
 export { initialState };

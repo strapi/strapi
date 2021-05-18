@@ -13,9 +13,6 @@ describe('<LocaleToggle />', () => {
       currentLocale: {
         locale: 'en',
       },
-      localeToggle: {
-        className: '',
-      },
     };
   });
 
