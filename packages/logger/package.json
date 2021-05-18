@@ -1,0 +1,34 @@
+{
+  "name": "@strapi/logger",
+  "version": "3.6.0",
+  "description": "Strapi's logger",
+  "homepage": "https://strapi.io",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">=10.16.0 <=14.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "winston": "3.3.3",
+    "lodash": "4.17.21"
+  }
+}
