@@ -11,6 +11,16 @@ const ButtonContainer = ({ currentDocVersion, isHeader, onClick, onClickDelete, 
     return <div />;
   }
 
+  const handleClickGenerate = e => {
+    e.preventDefault();
+    onClick(version);
+  };
+
+  const handleDelete = e => {
+    e.preventDefault();
+    onClickDelete(version);
+  };
+
   return (
     <div>
       <StyledButton
@@ -26,22 +36,13 @@ const ButtonContainer = ({ currentDocVersion, isHeader, onClick, onClickDelete, 
         <StyledButton
           // FIXME when new DS ready
           type="generateDocumentation"
-          onClick={e => {
-            e.preventDefault();
-            onClick(version);
-          }}
+          onClick={handleClickGenerate}
         >
           <FormattedMessage id="documentation.components.Row.regenerate" />
         </StyledButton>
       </CheckPermissions>
       <CheckPermissions permissions={pluginPermissions.update}>
-        <StyledButton
-          type={version === currentDocVersion ? '' : 'trash'}
-          onClick={e => {
-            e.preventDefault();
-            onClickDelete(version);
-          }}
-        />
+        <StyledButton type={version === currentDocVersion ? '' : 'trash'} onClick={handleDelete} />
       </CheckPermissions>
     </div>
   );
