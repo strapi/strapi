@@ -9,9 +9,10 @@ import { Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
-import AutoReloadOverlayBlocker from './components/AutoReloadOverlayBlocker';
-import Fonts from './components/Fonts';
+import AutoReloadOverlayBlockerProvider from './components/AutoReloadOverlayBlockerProvider';
 import OverlayBlocker from './components/OverlayBlocker';
+import Fonts from './components/Fonts';
+
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
 import themes from './themes';
@@ -152,16 +153,15 @@ class StrapiApp {
             <StrapiAppProvider getPlugin={this.getPlugin} plugins={this.plugins}>
               <LibraryProvider components={components} fields={fields}>
                 <LanguageProvider messages={this.translations}>
-                  <Notifications>
-                    <>
-                      <AutoReloadOverlayBlocker />
-                      <OverlayBlocker />
-
-                      <BrowserRouter basename={basename}>
-                        <App store={store} />
-                      </BrowserRouter>
-                    </>
-                  </Notifications>
+                  <AutoReloadOverlayBlockerProvider>
+                    <OverlayBlocker>
+                      <Notifications>
+                        <BrowserRouter basename={basename}>
+                          <App store={store} />
+                        </BrowserRouter>
+                      </Notifications>
+                    </OverlayBlocker>
+                  </AutoReloadOverlayBlockerProvider>
                 </LanguageProvider>
               </LibraryProvider>
             </StrapiAppProvider>

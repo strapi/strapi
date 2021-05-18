@@ -78,7 +78,7 @@ export { default as ModalForm } from './components/FormModal';
 export { default as ModalSection } from './components/ModalSection';
 export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as NotFound } from './components/NotFound';
-export { default as OverlayBlocker } from './components/OverlayBlocker';
+
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
 export { default as RelationDPState } from './components/RelationDPState';
@@ -95,6 +95,7 @@ export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as FormBloc } from './components/FormBloc';
 export { default as IntlInput } from './components/IntlInput';
 export { default as SizedInput } from './components/SizedInput';
+
 export * from './components/Permissions';
 
 // PopUpWarning
@@ -105,7 +106,9 @@ export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
+export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
+export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as UserContext } from './contexts/UserContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
@@ -119,6 +122,8 @@ export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
 export { default as useQueryParams } from './hooks/useQueryParams';
+export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
+export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';

@@ -1,39 +1,33 @@
 /**
  *
- * OverlayBlocker
- * This component is used to prevent user interactions
+ * OverlayBlockerProvider
  *
  */
-
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
-import Overlay from './Overlay';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import { OverlayBlockerContext } from '@strapi/helper-plugin';
 
 const overlayContainer = document.createElement('div');
 overlayContainer.setAttribute('id', 'overlayBlocker');
 
-const OverlayBlocker = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1140;
+`;
 
-  const lockApp = () => {
+const Portal = ({ isOpen }) => {
+  useEffect(() => {
     document.body.appendChild(overlayContainer);
 
-    setIsOpen(true);
-  };
-
-  const unlockApp = () => {
-    setIsOpen(false);
-
-    if (document.getElementById('overlayBlocker')) {
+    return () => {
       document.body.removeChild(overlayContainer);
-    }
-  };
-
-  useEffect(() => {
-    window.strapi = Object.assign(window.strapi || {}, {
-      lockApp,
-      unlockApp,
-    });
+    };
   }, []);
 
   if (isOpen) {
@@ -43,4 +37,27 @@ const OverlayBlocker = () => {
   return null;
 };
 
-export default OverlayBlocker;
+const OverlayBlockerProvider = ({ children }) => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const lockApp = () => {
+    setIsOpen(true);
+  };
+
+  const unlockApp = () => {
+    setIsOpen(false);
+  };
+
+  return (
+    <OverlayBlockerContext.Provider value={{ lockApp, unlockApp }}>
+      {children}
+      <Portal isOpen={isOpen} />
+    </OverlayBlockerContext.Provider>
+  );
+};
+
+OverlayBlockerProvider.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
+export default OverlayBlockerProvider;

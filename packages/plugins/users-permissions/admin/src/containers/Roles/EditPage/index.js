@@ -4,7 +4,7 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { request, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -21,6 +21,7 @@ const EditPage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     params: { id },
   } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
@@ -60,7 +61,7 @@ const EditPage = () => {
   };
 
   const handleCreateRoleSubmit = data => {
-    strapi.lockAppWithOverlay();
+    lockApp();
     setIsSubmiting(true);
 
     const permissions = permissionsRef.current.getPermissions();
@@ -88,7 +89,7 @@ const EditPage = () => {
       })
       .finally(() => {
         setIsSubmiting(false);
-        strapi.unlockApp();
+        unlockApp();
       });
   };
 

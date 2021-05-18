@@ -10,6 +10,7 @@ import {
   request,
   getYupInnerErrors,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -25,6 +26,7 @@ const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const emitEventRef = useRef(emitEvent);
   const buttonSubmitRef = useRef(null);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.emailTemplates') });
@@ -101,7 +103,7 @@ const EmailTemplatesPage = () => {
         setIsSubmiting(true);
         await schema.validate(modifiedData[templateToEdit.id], { abortEarly: false });
 
-        strapi.lockAppWithOverlay();
+        lockApp();
 
         try {
           emitEventRef.current('willEditEmailTemplates');
@@ -133,7 +135,7 @@ const EmailTemplatesPage = () => {
         errors = getYupInnerErrors(err);
       } finally {
         setIsSubmiting(false);
-        strapi.unlockApp();
+        unlockApp();
       }
 
       dispatchSetFormErrors(errors);
@@ -145,6 +147,8 @@ const EmailTemplatesPage = () => {
       templateToEdit,
       handleToggle,
       toggleNotification,
+      lockApp,
+      unlockApp,
     ]
   );
 

@@ -10,6 +10,7 @@ import {
   useUserPermissions,
   request,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, getRequestURL } from '../../utils';
@@ -20,6 +21,7 @@ import reducer, { initialState } from './reducer';
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const [showModalWarning, setShowModalWarning] = useState(false);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
   const updatePermissions = useMemo(() => {
@@ -93,7 +95,7 @@ const AdvancedSettingsPage = () => {
           type: 'ON_SUBMIT',
         });
 
-        strapi.lockAppWithOverlay();
+        lockApp();
         await request(getRequestURL('advanced'), { method: 'PUT', body: modifiedData });
 
         dispatch({
@@ -115,9 +117,9 @@ const AdvancedSettingsPage = () => {
         });
       }
 
-      strapi.unlockApp();
+      unlockApp();
     },
-    [modifiedData, toggleNotification]
+    [lockApp, modifiedData, toggleNotification, unlockApp]
   );
 
   const handleConfirmReset = useCallback(() => {

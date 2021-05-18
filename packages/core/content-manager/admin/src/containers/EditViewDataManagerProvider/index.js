@@ -5,9 +5,10 @@ import { Prompt, Redirect } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   useGlobalContext,
-  OverlayBlocker,
+  // OverlayBlocker,
   ContentManagerEditViewDataManagerContext,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
@@ -45,6 +46,7 @@ const EditViewDataManagerProvider = ({
     shouldCheckErrors,
   } = reducerState.toJS();
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   const currentContentTypeLayout = get(allLayoutData, ['contentType'], {});
 
@@ -74,6 +76,14 @@ const EditViewDataManagerProvider = ({
 
     return false;
   }, [isLoadingForData, isCreatingEntry, canRead, canUpdate]);
+
+  useEffect(() => {
+    if (status === 'resolved') {
+      unlockApp();
+    } else {
+      lockApp();
+    }
+  }, [lockApp, unlockApp, status]);
 
   // TODO check this effect if it is really needed (not prio)
   useEffect(() => {
@@ -421,13 +431,13 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  const overlayBlockerParams = useMemo(
-    () => ({
-      children: <div />,
-      noGradient: true,
-    }),
-    []
-  );
+  // const overlayBlockerParams = useMemo(
+  //   () => ({
+  //     children: <div />,
+  //     noGradient: true,
+  //   }),
+  //   []
+  // );
 
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
@@ -472,11 +482,11 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        <OverlayBlocker
+        {/* <OverlayBlocker
           key="overlayBlocker"
           isOpen={status !== 'resolved'}
           {...overlayBlockerParams}
-        />
+        /> */}
         {isLoadingForData ? (
           <LoadingIndicatorPage />
         ) : (

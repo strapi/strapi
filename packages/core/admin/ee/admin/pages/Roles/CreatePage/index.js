@@ -11,6 +11,7 @@ import {
   request,
   useGlobalContext,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
@@ -26,6 +27,7 @@ import schema from './utils/schema';
 
 const CreatePage = () => {
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { replace } = useHistory();
@@ -62,7 +64,7 @@ const CreatePage = () => {
   ];
 
   const handleCreateRoleSubmit = data => {
-    strapi.lockApp();
+    lockApp();
     setIsSubmiting(true);
 
     if (id) {
@@ -112,7 +114,7 @@ const CreatePage = () => {
         });
       })
       .finally(() => {
-        strapi.unlockApp();
+        unlockApp();
       });
   };
 

@@ -10,6 +10,7 @@ import {
   request,
   useGlobalContext,
   useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 
 import permissions from '../../../permissions';
@@ -24,7 +25,7 @@ const RoleListPage = () => {
   const { emitEvent } = useGlobalContext();
   const { push } = useHistory();
   const toggleNotification = useNotification();
-
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const [modalToDelete, setModalDelete] = useState();
   const [shouldRefetchData, setShouldRefetchData] = useState(false);
   const [showModalConfirmButtonLoading, setModalButtonLoading] = useState(false);
@@ -52,7 +53,7 @@ const RoleListPage = () => {
   };
 
   const handleDelete = () => {
-    strapi.lockAppWithOverlay();
+    lockApp();
 
     setModalButtonLoading(true);
 
@@ -77,7 +78,7 @@ const RoleListPage = () => {
       })
       .finally(() => {
         setModalDelete(null);
-        strapi.unlockApp();
+        unlockApp();
       });
   };
 

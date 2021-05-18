@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { request, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import { get, has, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
 import { initialState, reducer } from './reducer';
@@ -11,6 +11,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     dispatch,
   ] = useReducer(reducer, initialState, () => init(initialState, fieldsToPick));
   const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   useEffect(() => {
     const getData = async () => {
@@ -72,7 +73,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
 
     if (!errors) {
       try {
-        strapi.lockApp();
+        lockApp();
 
         dispatch({
           type: 'ON_SUBMIT',
@@ -122,7 +123,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           errors: apiErrors,
         });
       } finally {
-        strapi.unlockApp();
+        unlockApp();
       }
     }
   };

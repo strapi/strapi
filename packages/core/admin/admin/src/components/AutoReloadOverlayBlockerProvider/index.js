@@ -1,22 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import ReactDOM from 'react-dom';
-import Content from './Content';
-import Overlay from './Overlay';
-import Wrapper from './Wrapper';
+import React, { useEffect, useRef, useState } from 'react';
+import { AutoReloadOverlayBockerContext } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
+import Blocker from './Blocker';
 
-const overlayContainer = document.createElement('div');
-const ID = 'autoReloadOverlayBlocker';
-overlayContainer.setAttribute('id', ID);
-
-const AutoReloadOverlayBlocker = () => {
+const AutoReloadOverlayBlockerProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [{ elapsed }, setState] = useState({ elapsed: 0, start: 0 });
   const [config, setConfig] = useState(undefined);
 
   const lockAppWithAutoreload = (config = undefined) => {
-    document.body.appendChild(overlayContainer);
-
     setIsOpen(true);
     setConfig(config);
     setState(prev => ({ ...prev, start: Date.now() }));
@@ -26,18 +18,10 @@ const AutoReloadOverlayBlocker = () => {
     setIsOpen(false);
     setState({ start: 0, elapsed: 0 });
     setConfig(undefined);
-
-    if (document.getElementById(ID)) {
-      document.body.removeChild(overlayContainer);
-    }
   };
 
-  useEffect(() => {
-    window.strapi = Object.assign(window.strapi || {}, {
-      lockAppWithAutoreload,
-      unlockAppWithAutoreload,
-    });
-  }, []);
+  const lockApp = useRef(lockAppWithAutoreload);
+  const unlockApp = useRef(unlockAppWithAutoreload);
 
   useEffect(() => {
     let timer = null;
@@ -89,35 +73,25 @@ const AutoReloadOverlayBlocker = () => {
     };
   }
 
-  if (isOpen) {
-    return ReactDOM.createPortal(
-      <Overlay>
-        <Wrapper>
-          <div className={className}>
-            <FontAwesomeIcon icon={displayedIcon} />
-          </div>
-          <div>
-            <Content description={description} title={title} />
-            {elapsed < 15 && (
-              <div className="buttonContainer">
-                <a
-                  className="primary btn"
-                  href="https://strapi.io/documentation"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Read the documentation
-                </a>
-              </div>
-            )}
-          </div>
-        </Wrapper>
-      </Overlay>,
-      overlayContainer
-    );
-  }
-
-  return null;
+  return (
+    <AutoReloadOverlayBockerContext.Provider
+      value={{ lockApp: lockApp.current, unlockApp: unlockApp.current }}
+    >
+      <Blocker
+        displayedIcon={displayedIcon}
+        isOpen={isOpen}
+        elapsed={elapsed}
+        className={className}
+        description={description}
+        title={title}
+      />
+      {children}
+    </AutoReloadOverlayBockerContext.Provider>
+  );
 };
 
-export default AutoReloadOverlayBlocker;
+AutoReloadOverlayBlockerProvider.propTypes = {
+  children: PropTypes.element.isRequired,
+};
+
+export default AutoReloadOverlayBlockerProvider;
