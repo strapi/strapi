@@ -2,14 +2,12 @@
 
 const { config } = require('winston');
 
-const COLORIZE = true;
-const USE_TIMESTAMPS = true;
-const LEVEL = config.npm.levels.silly;
 const LEVELS = config.npm.levels;
+const LEVEL_LABEL = 'silly';
+const LEVEL = LEVELS[LEVEL_LABEL];
 
 module.exports = {
-  COLORIZE,
-  USE_TIMESTAMPS,
   LEVEL,
+  LEVEL_LABEL,
   LEVELS,
 };

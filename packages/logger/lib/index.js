@@ -2,18 +2,15 @@
 
 const winston = require('winston');
 
+const formats = require('./formats');
 const createDefaultConfiguration = require('./default-configuration');
 
-const createLogger = options => {
-  const { override, ...rest } = options;
+const createLogger = userConfiguration => {
+  const configuration = createDefaultConfiguration();
 
-  const configuration = createDefaultConfiguration(rest);
-
-  if (override) {
-    Object.assign(configuration, override);
-  }
+  Object.assign(configuration, userConfiguration);
 
   return winston.createLogger(configuration);
 };
 
-module.exports = { createLogger, winston };
+module.exports = { createLogger, winston, formats };
