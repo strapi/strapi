@@ -127,25 +127,14 @@ const getKind = obj => obj.kind || 'collectionType';
 
 const pickSchema = model => {
   const schema = _.cloneDeep(
-    _.pick(model, [
-      'connection',
-      'collectionName',
-      'info',
-      'options',
-      'pluginOptions',
-      'attributes',
-    ])
+    _.pick(model, ['collectionName', 'info', 'options', 'pluginOptions', 'attributes'])
   );
 
   schema.kind = getKind(model);
   return schema;
 };
 
-const createContentType = (
-  model,
-  { modelName, defaultConnection },
-  { apiName, pluginName } = {}
-) => {
+const createContentType = (model, { modelName }, { apiName, pluginName } = {}) => {
   if (apiName) {
     Object.assign(model, {
       uid: `application::${apiName}.${modelName}`,
@@ -173,7 +162,6 @@ const createContentType = (
     kind: getKind(model),
     modelType: 'contentType',
     modelName,
-    connection: model.connection || defaultConnection,
   });
   Object.defineProperty(model, 'privateAttributes', {
     get() {

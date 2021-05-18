@@ -21,7 +21,6 @@ const productModel = {
       type: 'string',
     },
   },
-  connection: 'default',
   name: 'product',
   description: '',
   collectionName: '',
@@ -33,7 +32,6 @@ const productWithDPModel = {
       type: 'string',
     },
   },
-  connection: 'default',
   name: 'product',
   draftAndPublish: true,
   description: '',
@@ -52,7 +50,6 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
-  connection: 'default',
   name: 'shop',
 };
 

@@ -124,7 +124,6 @@ program
   .option('-a, --api <api>', 'API name to generate the files in')
   .option('-p, --plugin <api>', 'Name of the local plugin')
   .option('-e, --extend <api>', 'Name of the plugin to extend')
-  .option('-c, --connection <connection>', 'The name of the connection to use')
   .option('--draft-and-publish', 'Enable draft/publish', false)
   .description('Generate a basic API')
   .action((id, attributes, cliArguments) => {
@@ -146,7 +145,6 @@ program
   .command('generate:model <id> [attributes...]')
   .option('-a, --api <api>', 'API name to generate a sub API')
   .option('-p, --plugin <api>', 'plugin name')
-  .option('-c, --connection <connection>', 'The name of the connection to use')
   .option('--draft-and-publish', 'Enable draft/publish', false)
   .description('Generate a model for an API')
   .action((id, attributes, cliArguments) => {

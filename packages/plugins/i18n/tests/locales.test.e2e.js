@@ -25,7 +25,6 @@ const productModel = {
       type: 'string',
     },
   },
-  connection: 'default',
   name: 'product',
   description: '',
   collectionName: '',

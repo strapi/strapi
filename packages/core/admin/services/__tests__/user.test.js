@@ -630,7 +630,6 @@ describe('User', () => {
         query: () => ({
           model: {
             orm: 'bookshelf',
-            connection: 'default',
             associations: [{ alias: 'roles', tableCollectionName: 'strapi_users_roles' }],
             collectionName: 'strapi_administrators',
           },

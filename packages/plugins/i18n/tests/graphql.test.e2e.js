@@ -22,7 +22,6 @@ const recipesModel = {
       localized: true,
     },
   },
-  connection: 'default',
   name: 'recipes',
   description: '',
   collectionName: '',

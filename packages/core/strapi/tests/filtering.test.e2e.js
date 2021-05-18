@@ -33,7 +33,6 @@ const product = {
       type: 'biginteger',
     },
   },
-  connection: 'default',
   name: 'product',
   description: '',
   collectionName: '',

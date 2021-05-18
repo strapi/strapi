@@ -230,7 +230,6 @@ module.exports = function createSchemaHandler(infos) {
           filePath,
           {
             kind: state.schema.kind,
-            connection: state.schema.connection,
             collectionName: state.schema.collectionName,
             info: state.schema.info,
             options: state.schema.options,

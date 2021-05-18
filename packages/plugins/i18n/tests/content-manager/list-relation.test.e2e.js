@@ -24,7 +24,6 @@ const productModel = {
       type: 'string',
     },
   },
-  connection: 'default',
   name: 'product',
   description: '',
   collectionName: '',
@@ -47,7 +46,6 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
-  connection: 'default',
   name: 'shop',
 };
 

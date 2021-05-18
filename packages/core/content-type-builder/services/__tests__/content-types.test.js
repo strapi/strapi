@@ -8,7 +8,6 @@ describe('Content types service', () => {
       uid: 'test-uid',
       kind: 'singleType',
       plugin: 'some-plugin',
-      connection: 'default',
       modelName: 'my-name',
       collectionName: 'tests',
       info: {

@@ -27,7 +27,6 @@ const createContentType = async (model, { strapi } = {}) => {
 
   const contentType = await contentTypeService.createContentType({
     contentType: {
-      connection: 'default',
       ...model,
     },
   });
@@ -43,7 +42,6 @@ const createContentTypes = async (models, { strapi } = {}) => {
   const contentTypes = await contentTypeService.createContentTypes(
     models.map(model => ({
       contentType: {
-        connection: 'default',
         ...model,
       },
     }))
@@ -61,7 +59,6 @@ const createComponent = async (component, { strapi } = {}) => {
     component: {
       category: 'default',
       icon: 'default',
-      connection: 'default',
       ...component,
     },
   });
@@ -190,7 +187,6 @@ async function modifyContentType(data, { strapi } = {}) {
 
   const ct = await contentTypeService.editContentType(uid, {
     contentType: {
-      connection: 'default',
       ...sanitizedData,
     },
   });

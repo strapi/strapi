@@ -17,7 +17,6 @@ const createSchema = (types, relations, { modelType } = {}) => {
     description: yup.string(),
     draftAndPublish: yup.boolean(),
     pluginOptions: yup.object(),
-    connection: yup.string(),
     collectionName: yup
       .string()
       .nullable()

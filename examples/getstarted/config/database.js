@@ -29,23 +29,10 @@ const mysql = {
   },
 };
 
-// const mongo = {
-//   connector: 'mongoose',
-//   settings: {
-//     database: 'strapi',
-//     username: 'root',
-//     password: 'strapi',
-//     port: 27017,
-//     host: 'localhost',
-//   },
-//   options: {},
-// };
-
 const db = {
   mysql,
   sqlite,
   postgres,
-  // mongo,
 };
 
 module.exports = {
