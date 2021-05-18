@@ -23,7 +23,6 @@ import reducer, { initialState } from './reducer';
 
 const HomePage = () => {
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
   const { formatMessage } = useGlobalContext();
@@ -94,7 +93,7 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -117,7 +116,7 @@ const HomePage = () => {
     } catch (err) {
       if (isMounted.current) {
         dispatch({ type: 'GET_DATA_ERROR' });
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -235,7 +234,7 @@ const HomePage = () => {
         type: 'ON_DELETE_MEDIAS_SUCCEEDED',
       });
     } catch (err) {
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: err,
       });
@@ -246,7 +245,7 @@ const HomePage = () => {
     } finally {
       setIsPopupOpen(false);
     }
-  }, [dataToDelete]);
+  }, [dataToDelete, toggleNotification]);
 
   const handleClosedModalDeleteAll = useCallback(() => {
     if (shouldRefetchData) {

@@ -33,9 +33,8 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const [{ query, rawQuery }] = useQueryParams();
   const searchToSend = buildQueryString(query);
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
-
   const dispatch = useDispatch();
+
   const {
     componentsDataStructure,
     contentTypeDataStructure,
@@ -125,7 +124,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         }
 
         if (responseStatus === 403) {
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'info',
             message: { id: getTrad('permissions.not-allowed.update') },
           });
@@ -138,23 +137,26 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     fetchData(signal);
 
     return () => abortController.abort();
-  }, [cleanReceivedData, push, slug, dispatch, searchToSend, rawQuery]);
+  }, [cleanReceivedData, push, slug, dispatch, searchToSend, rawQuery, toggleNotification]);
 
-  const displayErrors = useCallback(err => {
-    const errorPayload = err.response.payload;
-    console.error(errorPayload);
+  const displayErrors = useCallback(
+    err => {
+      const errorPayload = err.response.payload;
+      console.error(errorPayload);
 
-    let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
 
-    // TODO handle errors correctly when back-end ready
-    if (Array.isArray(errorMessage)) {
-      errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
-    }
+      // TODO handle errors correctly when back-end ready
+      if (Array.isArray(errorMessage)) {
+        errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
+      }
 
-    if (typeof errorMessage === 'string') {
-      toggleNotificationRef.current({ type: 'warning', message: errorMessage });
-    }
-  }, []);
+      if (typeof errorMessage === 'string') {
+        toggleNotification({ type: 'warning', message: errorMessage });
+      }
+    },
+    [toggleNotification]
+  );
 
   const onDelete = useCallback(
     async trackerProperty => {
@@ -165,7 +167,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           method: 'DELETE',
         });
 
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
@@ -179,7 +181,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         return Promise.reject(err);
       }
     },
-    [slug]
+    [slug, toggleNotification]
   );
 
   const onDeleteSucceeded = useCallback(() => {
@@ -198,7 +200,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -215,7 +217,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
   );
   const onPublish = useCallback(async () => {
     try {
@@ -227,7 +229,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       const data = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didPublishEntry');
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.publish') },
       });
@@ -240,7 +242,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       dispatch(setStatus('resolved'));
     }
-  }, [cleanReceivedData, displayErrors, slug, searchToSend, dispatch]);
+  }, [cleanReceivedData, displayErrors, slug, searchToSend, dispatch, toggleNotification]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
@@ -253,7 +255,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         const response = await request(endPoint, { method: 'PUT', body });
 
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -271,7 +273,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery]
+    [cleanReceivedData, displayErrors, slug, dispatch, rawQuery, toggleNotification]
   );
 
   // The publish and unpublish method could be refactored but let's leave the duplication for now
@@ -286,7 +288,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.unpublish') },
       });
@@ -298,7 +300,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, slug, dispatch, searchToSend]);
+  }, [cleanReceivedData, toggleNotification, displayErrors, slug, dispatch, searchToSend]);
 
   return children({
     componentsDataStructure,

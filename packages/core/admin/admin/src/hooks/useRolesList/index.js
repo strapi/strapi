@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer } from 'react';
 import { request, useNotification } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
@@ -6,7 +6,6 @@ import reducer, { initialState } from './reducer';
 
 const useRolesList = (shouldFetchData = true) => {
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
   const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, shouldFetchData)
   );
@@ -15,6 +14,7 @@ const useRolesList = (shouldFetchData = true) => {
     if (shouldFetchData) {
       fetchRolesList();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldFetchData]);
 
   const fetchRolesList = async () => {
@@ -37,7 +37,7 @@ const useRolesList = (shouldFetchData = true) => {
       });
 
       if (message !== 'Forbidden') {
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'warning',
           message,
         });

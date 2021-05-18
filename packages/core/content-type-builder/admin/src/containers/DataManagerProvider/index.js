@@ -65,7 +65,6 @@ const DataManagerProvider = ({
 }) => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
 
   const { getPlugin } = useStrapiApp();
 
@@ -127,7 +126,7 @@ const DataManagerProvider = ({
       });
     } catch (err) {
       console.error({ err });
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -149,12 +148,12 @@ const DataManagerProvider = ({
 
   useEffect(() => {
     if (!autoReload) {
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'info',
         message: { id: getTrad('notification.info.autoreaload-disable') },
       });
     }
-  }, [autoReload]);
+  }, [autoReload, toggleNotification]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
@@ -261,7 +260,7 @@ const DataManagerProvider = ({
       }
     } catch (err) {
       console.error({ err });
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -312,7 +311,7 @@ const DataManagerProvider = ({
       }
     } catch (err) {
       console.error({ err });
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -342,7 +341,7 @@ const DataManagerProvider = ({
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -498,7 +497,7 @@ const DataManagerProvider = ({
       }
 
       console.error({ err: err.response });
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

@@ -88,8 +88,6 @@ function ListView({
     },
   } = layout;
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
-
   const { emitEvent } = useGlobalContext();
   const { fetchUserPermissions } = useUser();
   const emitEventRef = useRef(emitEvent);
@@ -145,7 +143,7 @@ function ListView({
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
 
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'info',
             message: { id: getTrad('permissions.not-allowed.update') },
           });
@@ -157,14 +155,14 @@ function ListView({
 
         if (err.name !== 'AbortError') {
           console.error(err);
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'warning',
             message: { id: getTrad('error.model.fetch') },
           });
         }
       }
     },
-    [getData, getDataSucceeded, push]
+    [getData, getDataSucceeded, push, toggleNotification]
   );
 
   const handleChangeListLabels = useCallback(
@@ -172,7 +170,7 @@ function ListView({
       // Display a notification if trying to remove the last displayed field
 
       if (value && displayedHeaders.length === 1) {
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'warning',
           message: { id: 'content-manager.notification.error.displayedFields' },
         });
@@ -182,7 +180,7 @@ function ListView({
         onChangeListHeaders({ name, value });
       }
     },
-    [displayedHeaders, onChangeListHeaders]
+    [displayedHeaders, onChangeListHeaders, toggleNotification]
   );
 
   const handleConfirmDeleteAllData = useCallback(async () => {
@@ -197,12 +195,18 @@ function ListView({
       onDeleteSeveralDataSucceeded();
       emitEventRef.current('didBulkDeleteEntries');
     } catch (err) {
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: { id: getTrad('error.record.delete') },
       });
     }
-  }, [entriesToDelete, onDeleteSeveralDataSucceeded, slug, setModalLoadingState]);
+  }, [
+    entriesToDelete,
+    onDeleteSeveralDataSucceeded,
+    slug,
+    setModalLoadingState,
+    toggleNotification,
+  ]);
 
   const handleConfirmDeleteData = useCallback(async () => {
     try {
@@ -223,7 +227,7 @@ function ListView({
         method: 'DELETE',
       });
 
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.delete') },
       });
@@ -238,7 +242,7 @@ function ListView({
         formatMessage({ id: getTrad('error.record.delete') })
       );
 
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'warning',
         message: errorMessage,
       });
@@ -246,6 +250,7 @@ function ListView({
       onDeleteDataError();
     }
   }, [
+    toggleNotification,
     hasDraftAndPublish,
     setModalLoadingState,
     slug,

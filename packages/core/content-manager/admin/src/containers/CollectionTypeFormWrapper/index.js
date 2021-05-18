@@ -30,7 +30,6 @@ import { getRequestUrl } from './utils';
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
   const { emitEvent } = useGlobalContext();
   const { push, replace } = useHistory();
   const [{ rawQuery }] = useQueryParams();
@@ -155,7 +154,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         // Not allowed to read a document
         if (resStatus === 403) {
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'info',
             message: { id: getTrad('permissions.not-allowed.update') },
           });
@@ -184,23 +183,35 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     return () => {
       abortController.abort();
     };
-  }, [cleanClonedData, cleanReceivedData, push, requestURL, dispatch, rawQuery, redirectionLink]);
+  }, [
+    cleanClonedData,
+    cleanReceivedData,
+    push,
+    requestURL,
+    dispatch,
+    rawQuery,
+    redirectionLink,
+    toggleNotification,
+  ]);
 
-  const displayErrors = useCallback(err => {
-    const errorPayload = err.response.payload;
-    console.error(errorPayload);
+  const displayErrors = useCallback(
+    err => {
+      const errorPayload = err.response.payload;
+      console.error(errorPayload);
 
-    let errorMessage = get(errorPayload, ['message'], 'Bad Request');
+      let errorMessage = get(errorPayload, ['message'], 'Bad Request');
 
-    // TODO handle errors correctly when back-end ready
-    if (Array.isArray(errorMessage)) {
-      errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
-    }
+      // TODO handle errors correctly when back-end ready
+      if (Array.isArray(errorMessage)) {
+        errorMessage = get(errorMessage, ['0', 'messages', '0', 'id']);
+      }
 
-    if (typeof errorMessage === 'string') {
-      toggleNotificationRef.current({ type: 'warning', message: errorMessage });
-    }
-  }, []);
+      if (typeof errorMessage === 'string') {
+        toggleNotification({ type: 'warning', message: errorMessage });
+      }
+    },
+    [toggleNotification]
+  );
 
   const onDelete = useCallback(
     async trackerProperty => {
@@ -211,7 +222,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           method: 'DELETE',
         });
 
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.delete') },
         });
@@ -225,7 +236,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         return Promise.reject(err);
       }
     },
-    [id, slug]
+    [id, slug, toggleNotification]
   );
 
   const onDeleteSucceeded = useCallback(() => {
@@ -243,7 +254,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         const response = await request(endPoint, { method: 'POST', body });
 
         emitEventRef.current('didCreateEntry', trackerProperty);
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -259,7 +270,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, replace, slug, dispatch, rawQuery]
+    [cleanReceivedData, displayErrors, replace, slug, dispatch, rawQuery, toggleNotification]
   );
 
   const onPublish = useCallback(async () => {
@@ -276,7 +287,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(submitSucceeded(cleanReceivedData(data)));
       dispatch(setStatus('resolved'));
 
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.publish') },
       });
@@ -284,7 +295,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       displayErrors(err);
       dispatch(setStatus('resolved'));
     }
-  }, [cleanReceivedData, displayErrors, id, slug, dispatch]);
+  }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
@@ -298,7 +309,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         const response = await request(endPoint, { method: 'PUT', body });
 
         emitEventRef.current('didEditEntry', { trackerProperty });
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.save') },
         });
@@ -313,7 +324,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         dispatch(setStatus('resolved'));
       }
     },
-    [cleanReceivedData, displayErrors, slug, id, dispatch]
+    [cleanReceivedData, displayErrors, slug, id, dispatch, toggleNotification]
   );
 
   const onUnpublish = useCallback(async () => {
@@ -327,7 +338,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       const response = await request(endPoint, { method: 'POST' });
 
       emitEventRef.current('didUnpublishEntry');
-      toggleNotificationRef.current({
+      toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.unpublish') },
       });
@@ -338,7 +349,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       dispatch(setStatus('resolved'));
       displayErrors(err);
     }
-  }, [cleanReceivedData, displayErrors, id, slug, dispatch]);
+  }, [cleanReceivedData, displayErrors, id, slug, dispatch, toggleNotification]);
 
   return children({
     componentsDataStructure,

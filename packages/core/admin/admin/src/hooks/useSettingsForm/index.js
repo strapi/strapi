@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer } from 'react';
 import { request, useNotification } from '@strapi/helper-plugin';
 import { get, has, omit } from 'lodash';
 import { checkFormValidity, formatAPIErrors } from '../../utils';
@@ -11,7 +11,6 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
     dispatch,
   ] = useReducer(reducer, initialState, () => init(initialState, fieldsToPick));
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
 
   useEffect(() => {
     const getData = async () => {
@@ -25,7 +24,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         });
       } catch (err) {
         console.error(err.response);
-        toggleNotificationRef.current({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
@@ -97,7 +96,7 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
           data,
         });
 
-        toggleNotificationRef.curent({
+        toggleNotification({
           type: 'success',
           message: { id: 'notification.success.saved' },
         });
@@ -105,12 +104,12 @@ const useSettingsForm = (endPoint, schema, cbSuccess, fieldsToPick) => {
         const data = get(err, 'response.payload', { data: {} });
 
         if (has(data, 'data') && typeof data.data === 'string') {
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'warning',
             message: data.data,
           });
         } else {
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'warning',
             message: data.message,
           });

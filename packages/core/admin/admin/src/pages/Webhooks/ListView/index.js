@@ -32,7 +32,6 @@ function ListView() {
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useUserPermissions(adminPermissions.settings.webhooks);
   const toggleNotification = useNotification();
-  const toggleNotificationRef = useRef(toggleNotification);
   const isMounted = useRef(true);
   const { formatMessage } = useIntl();
   const [showModal, setShowModal] = useState(false);
@@ -54,6 +53,7 @@ function ListView() {
     if (canRead) {
       fetchData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
   const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
@@ -140,7 +140,7 @@ function ListView() {
     } catch (err) {
       if (isMounted.current) {
         if (err.code !== 20) {
-          toggleNotificationRef.current({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
