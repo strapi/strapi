@@ -230,11 +230,10 @@ program
   .option('-p, --password <password>', 'New password for the user')
   .action(getLocalScript('admin-reset'));
 
-// `$ strapi export-template <name>`
+// `$ strapi export:template <name>`
 program
-  .command('export-template')
-  .arguments('<name>')
+  .command('export:template <directory>')
   .description('Export project as Strapi template')
-  .action(getLocalScript('exportTemplate'));
+  .action(getLocalScript('export-template'));
 
 program.parseAsync(process.argv);
