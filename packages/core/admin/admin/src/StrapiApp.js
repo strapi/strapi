@@ -9,7 +9,7 @@ import { Plugin } from './core/apis';
 import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
-import AutoReloadOverlayBlocker from './components/AutoReloadOverlayBlocker';
+import AutoReloadOverlayBlockerProvider from './components/AutoReloadOverlayBlockerProvider';
 import OverlayBlocker from './components/OverlayBlocker';
 import Fonts from './components/Fonts';
 
@@ -153,7 +153,7 @@ class StrapiApp {
             <StrapiAppProvider getPlugin={this.getPlugin} plugins={this.plugins}>
               <LibraryProvider components={components} fields={fields}>
                 <LanguageProvider messages={this.translations}>
-                  <AutoReloadOverlayBlocker>
+                  <AutoReloadOverlayBlockerProvider>
                     <OverlayBlocker>
                       <Notifications>
                         <BrowserRouter basename={basename}>
@@ -161,7 +161,7 @@ class StrapiApp {
                         </BrowserRouter>
                       </Notifications>
                     </OverlayBlocker>
-                  </AutoReloadOverlayBlocker>
+                  </AutoReloadOverlayBlockerProvider>
                 </LanguageProvider>
               </LibraryProvider>
             </StrapiAppProvider>

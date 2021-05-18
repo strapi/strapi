@@ -1,9 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AutoReloadOverlayBockerContext } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import Portal from './Portal';
+import Blocker from './Blocker';
 
-const AutoReloadOverlayBlocker = ({ children }) => {
+const AutoReloadOverlayBlockerProvider = ({ children }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [{ elapsed }, setState] = useState({ elapsed: 0, start: 0 });
   const [config, setConfig] = useState(undefined);
@@ -77,7 +77,7 @@ const AutoReloadOverlayBlocker = ({ children }) => {
     <AutoReloadOverlayBockerContext.Provider
       value={{ lockApp: lockApp.current, unlockApp: unlockApp.current }}
     >
-      <Portal
+      <Blocker
         displayedIcon={displayedIcon}
         isOpen={isOpen}
         elapsed={elapsed}
@@ -90,8 +90,8 @@ const AutoReloadOverlayBlocker = ({ children }) => {
   );
 };
 
-AutoReloadOverlayBlocker.propTypes = {
+AutoReloadOverlayBlockerProvider.propTypes = {
   children: PropTypes.element.isRequired,
 };
 
-export default AutoReloadOverlayBlocker;
+export default AutoReloadOverlayBlockerProvider;

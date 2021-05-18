@@ -10,7 +10,7 @@ const overlayContainer = document.createElement('div');
 const ID = 'autoReloadOverlayBlocker';
 overlayContainer.setAttribute('id', ID);
 
-const Portal = ({ className, displayedIcon, description, title, elapsed, isOpen }) => {
+const Blocker = ({ className, displayedIcon, description, title, elapsed, isOpen }) => {
   useEffect(() => {
     document.body.appendChild(overlayContainer);
 
@@ -50,7 +50,7 @@ const Portal = ({ className, displayedIcon, description, title, elapsed, isOpen 
   return null;
 };
 
-Portal.propTypes = {
+Blocker.propTypes = {
   className: PropTypes.string.isRequired,
   displayedIcon: PropTypes.oneOfType([PropTypes.string, PropTypes.array]).isRequired,
   description: PropTypes.object.isRequired,
@@ -59,4 +59,4 @@ Portal.propTypes = {
   title: PropTypes.object.isRequired,
 };
 
-export default Portal;
+export default Blocker;
