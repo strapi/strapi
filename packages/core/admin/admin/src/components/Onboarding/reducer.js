@@ -38,7 +38,6 @@ const reducer = (state, action) =>
         break;
       }
       case 'UPDATE_VIDEO_STARTED_TIME_AND_PLAYED_INFOS': {
-        //
         const nextVideos = state.videos.map((video, index) => {
           if (index !== action.videoIndex) {
             return video;

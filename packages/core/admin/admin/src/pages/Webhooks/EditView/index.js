@@ -46,15 +46,6 @@ function EditView() {
   const { signal } = abortController;
   const isCreating = id === 'create';
 
-  // const {
-  //   formErrors,
-  //   modifiedData,
-  //   initialData,
-  //   isLoading,
-  //   isTriggering,
-  //   triggerResponse,
-  // } = reducerState.toJS();
-
   useEffect(() => {
     isMounted.current = true;
 
@@ -198,7 +189,7 @@ function EditView() {
     try {
       lockApp();
       setIsSubmitting(true);
-      console.log(cleanData(modifiedData), modifiedData);
+
       const { data } = await request('/admin/webhooks', {
         method: 'POST',
         body: cleanData(modifiedData),
