@@ -10,7 +10,7 @@ const chalk = require('chalk');
 const CLITable = require('cli-table3');
 const { models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const { createDatabaseManager } = require('@strapi/database');
-const { createLogger } = require('../../../logger');
+const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
