@@ -66,11 +66,8 @@ const DataManagerProvider = ({
 }) => {
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
-<<<<<<< HEAD
-=======
-  const toggleNotificationRef = useRef(toggleNotification);
+
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
->>>>>>> 5b870248a (Remove strapi.lockApp)
 
   const { getPlugin } = useStrapiApp();
 
