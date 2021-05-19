@@ -25,6 +25,26 @@ function parseShorthand(template) {
   };
 }
 
+/**
+ * @param {string} repo The full name of the repository.
+ */
+async function getDefaultBranch(repo) {
+  const response = await fetch(`https://api.github.com/repos/${repo}`);
+  if (!response.ok) {
+    stopProcess(
+      `Could not find the information for ${chalk.yellow(
+        repo
+      )}. Make sure it is publicly accessible on github.`
+    );
+  }
+
+  const { default_branch } = await response.json();
+  return default_branch;
+}
+
+/**
+ * @param {string} template GitHub URL or shorthand to a template project.
+ */
 async function getRepoInfo(template) {
   const { name, full_name: fullName, ref, filepath, protocols, source } = parseGitUrl(template);
 
@@ -54,23 +74,10 @@ async function getRepoInfo(template) {
 }
 
 /**
- * @param {string} repo The full name of the repository.
+ * @param {string} repoInfo GitHub repository information (full name, branch...).
+ * @param {string} tmpDir Path to the destination temporary directory.
  */
-async function getDefaultBranch(repo) {
-  const response = await fetch(`https://api.github.com/repos/${repo}`);
-  if (!response.ok) {
-    stopProcess(
-      `Could not find the information for ${chalk.yellow(
-        repo
-      )}. Make sure it is publicly accessible on github.`
-    );
-  }
-
-  const { default_branch } = await response.json();
-  return default_branch;
-}
-
-async function downloadGitHubRepo(repoInfo, templatePath) {
+async function downloadGitHubRepo(repoInfo, tmpDir) {
   // Download from GitHub
   const { fullName, branch } = repoInfo;
   const codeload = `https://codeload.github.com/${fullName}/tar.gz/${branch}`;
@@ -80,7 +87,7 @@ async function downloadGitHubRepo(repoInfo, templatePath) {
   }
 
   await new Promise(resolve => {
-    response.body.pipe(tar.extract({ strip: 1, cwd: templatePath })).on('close', resolve);
+    response.body.pipe(tar.extract({ strip: 1, cwd: tmpDir })).on('close', resolve);
   });
 }
 

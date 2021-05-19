@@ -43,7 +43,7 @@ async function getDefaultBranch(repo) {
 }
 
 /**
- * @param {string} starter GitHub url or shorthand to starter project.
+ * @param {string} starter GitHub URL or shorthand to a starter project.
  */
 async function getRepoInfo(starter) {
   const { name, full_name: fullName, ref, filepath, protocols, source } = parseGitUrl(starter);
@@ -74,8 +74,8 @@ async function getRepoInfo(starter) {
 }
 
 /**
- * @param {string} starter GitHub url or shorthand to starter project.
- * @param {string} tmpDir Path to temporary directory.
+ * @param {string} repoInfo GitHub repository information (full name, branch...).
+ * @param {string} tmpDir Path to the destination temporary directory.
  */
 async function downloadGitHubRepo(repoInfo, tmpDir) {
   const { fullName, branch, usedShorthand } = repoInfo;
