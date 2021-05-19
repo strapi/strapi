@@ -23,23 +23,15 @@ module.exports = strapi => {
      * Initialize the hook
      */
     initialize() {
-      const { exposeInContext, requests } = strapi.config.middleware.settings.logger;
+      strapi.app.context.log = strapi.log;
 
-      const { levels: logLevels, level: currentLogLevel } = strapi.log;
+      strapi.app.use(async (ctx, next) => {
+        const start = Date.now();
+        await next();
+        const delta = Math.ceil(Date.now() - start);
 
-      if (exposeInContext) {
-        strapi.app.context.log = strapi.log;
-      }
-
-      if (requests && currentLogLevel >= logLevels.debug) {
-        strapi.app.use(async (ctx, next) => {
-          const start = Date.now();
-          await next();
-          const delta = Math.ceil(Date.now() - start);
-
-          strapi.log.http(`${ctx.method} ${ctx.url} (${delta} ms) ${codeToColor(ctx.status)}`);
-        });
-      }
+        strapi.log.http(`${ctx.method} ${ctx.url} (${delta} ms) ${codeToColor(ctx.status)}`);
+      });
     },
   };
 };
