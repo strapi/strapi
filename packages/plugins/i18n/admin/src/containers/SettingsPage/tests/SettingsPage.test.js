@@ -1,26 +1,25 @@
 /* eslint-disable react/prop-types */
 
 import React from 'react';
-import { createStore } from 'redux';
-import { combineReducers } from 'redux-immutable';
-import { fromJS } from 'immutable';
-
+import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
 import { request, useUserPermissions } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import LocaleSettingsPage from '..';
+// eslint-disable-next-line import/extensions
+import '@fortawesome/fontawesome-free/js/all.min.js';
 // TODO: move to @strapi/helper-plugin
 import themes from '../../../../../../../core/admin/admin/src/themes';
 import i18nReducers, { initialState } from '../../../hooks/reducers';
+import pluginId from '../../../pluginId';
 
 const TestWrapper = ({ children }) => {
   const queryClient = new QueryClient();
 
-  const initialStoreState = fromJS(initialState);
   const rootReducer = combineReducers(i18nReducers);
-  const store = createStore(rootReducer, initialStoreState);
+  const store = createStore(rootReducer, { [`${pluginId}_locales`]: initialState });
 
   return (
     <Provider store={store}>
@@ -30,6 +29,8 @@ const TestWrapper = ({ children }) => {
     </Provider>
   );
 };
+
+const toggleNotificationMock = jest.fn();
 
 // TODO: we should not be forced to mock this module
 // but it bugs somehow when run with jest
@@ -68,6 +69,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   selectStyles: () => ({ control: () => ({}), indicatorsContainer: () => ({}) }),
   useGlobalContext: () => ({ updateMenu: jest.fn() }),
   useUser: () => ({ fetchUserPermissions: jest.fn() }),
+  useNotification: () => toggleNotificationMock,
 }));
 
 jest.mock('../../../utils', () => ({
@@ -103,8 +105,6 @@ describe('i18n settings page', () => {
       isLoading: false,
       allowedActions: { canRead: true, canUpdate: true, canCreate: true, canDelete: true },
     }));
-
-    strapi.notification.toggle = jest.fn();
   });
 
   afterEach(() => {
@@ -178,7 +178,7 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('Confirm'));
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'success',
           message: { id: 'Settings.locales.modal.delete.success' },
         })
@@ -218,7 +218,7 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('Confirm'));
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'warning',
           message: { id: 'notification.error' },
         })
@@ -319,7 +319,7 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('Settings.locales.modal.edit.confirmation'));
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'warning',
           message: { id: 'notification.error' },
         })
@@ -366,7 +366,7 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('Settings.locales.modal.edit.confirmation'));
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'success',
           message: { id: 'Settings.locales.modal.edit.success' },
         })
@@ -425,7 +425,7 @@ describe('i18n settings page', () => {
       fireEvent.click(screen.getByText('Settings.locales.modal.edit.confirmation'));
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'success',
           message: { id: 'Settings.locales.modal.edit.success' },
         })
@@ -451,7 +451,7 @@ describe('i18n settings page', () => {
       );
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'warning',
           message: { id: 'notification.error' },
         })
@@ -700,7 +700,7 @@ describe('i18n settings page', () => {
       fireEvent.click(confirmationButton);
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'warning',
           message: { id: 'notification.error' },
         })
@@ -735,7 +735,7 @@ describe('i18n settings page', () => {
       fireEvent.click(confirmationButton);
 
       await waitFor(() =>
-        expect(strapi.notification.toggle).toBeCalledWith({
+        expect(toggleNotificationMock).toBeCalledWith({
           type: 'success',
           message: { id: 'Settings.locales.modal.create.success' },
         })

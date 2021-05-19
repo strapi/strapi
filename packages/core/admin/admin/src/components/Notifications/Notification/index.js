@@ -1,104 +1,178 @@
-/**
- *
- * Notification
- *
- */
-/* eslint-disable */
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { isObject } from 'lodash';
+import { Padded, Text, Flex } from '@buffetjs/core';
+import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Remove } from '@buffetjs/icons';
-import Li, { GlobalNotification } from './Li';
+import { NotificationWrapper, IconWrapper, LinkArrow, RemoveWrapper } from './styledComponents';
 
-class Notification extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  handleCloseClicked = () => {
-    this.props.onHideNotification(this.props.notification.id);
-  };
+const types = {
+  success: {
+    icon: 'check',
+    color: 'green',
+  },
+  warning: {
+    icon: 'exclamation',
+    color: 'orange',
+  },
+  info: {
+    icon: 'info',
+    color: 'blue',
+  },
+};
 
-  options = {
-    success: {
-      icon: 'check',
-      title: 'Success',
-      class: 'notificationSuccess',
-    },
-    warning: {
-      icon: 'exclamation',
-      title: 'Warning',
-      class: 'notificationWarning',
-    },
-    error: {
-      icon: 'exclamation',
-      title: 'Error',
-      class: 'notificationError',
-    },
-    info: {
-      icon: 'info',
-      title: 'Info',
-      class: 'notificationInfo',
-    },
-  };
+const Notification = ({ dispatch, notification }) => {
+  const { formatMessage } = useIntl();
 
-  render() {
-    const options = this.options[this.props.notification.status] || this.options.info;
-    const {
-      notification: { message },
-    } = this.props;
-    const content =
-      isObject(message) && message.id ? (
-        <FormattedMessage id={message.id} defaultMessage={message.id} values={message.values} />
-      ) : (
-        <FormattedMessage id={message} defaultMessage={message} />
-      );
+  const {
+    title,
+    message,
+    link,
+    type,
+    id,
+    onClose,
+    timeout,
+    blockTransition,
+    centered,
+  } = notification;
 
-    return (
-      <>
-        <GlobalNotification />
-        <Li
-          key={this.props.notification.id}
-          className={`${options.class}`}
-          onClick={this.handleCloseClicked}
-        >
-          <div className={`notificationIcon`}>
-            <div>
-              <FontAwesomeIcon icon={options.icon} />
-            </div>
-          </div>
-          <div className="notificationContent">
-            <p className="notificationTitle">{content}</p>
-          </div>
-          <div className={`notificationClose`}>
-            <Remove onClick={this.handleCloseClicked} />
-          </div>
-        </Li>
-      </>
-    );
-  }
-}
+  const formattedMessage = msg => (typeof msg === 'string' ? msg : formatMessage(msg, msg.values));
+  const handleClose = useCallback(() => {
+    if (onClose) {
+      onClose();
+    }
+
+    dispatch({
+      type: 'HIDE_NOTIFICATION',
+      id,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  useEffect(() => {
+    let timeoutToClear;
+
+    if (!blockTransition) {
+      timeoutToClear = setTimeout(() => {
+        handleClose();
+      }, timeout || 2500);
+    }
+
+    return () => clearTimeout(timeoutToClear);
+  }, [blockTransition, handleClose, timeout]);
+
+  return (
+    <NotificationWrapper centered={centered} color={types[type].color}>
+      <Padded top left right bottom size="smd">
+        <Flex alignItems="center" justifyContent="space-between">
+          <IconWrapper>
+            <FontAwesomeIcon icon={types[type].icon} />
+          </IconWrapper>
+          <Padded left size="sm" style={{ width: '80%', flex: 1 }}>
+            {title && (
+              <Text
+                fontSize="xs"
+                textTransform="uppercase"
+                color="grey"
+                title={formattedMessage(title)}
+              >
+                {formattedMessage(title)}
+              </Text>
+            )}
+            <Flex justifyContent="space-between">
+              {message && (
+                <Text title={formattedMessage(message)}>{formattedMessage(message)}</Text>
+              )}
+              {link && (
+                <a
+                  href={link.url}
+                  target={link.target || '_blank'}
+                  rel={!link.target || link.target === '_blank' ? 'noopener noreferrer' : ''}
+                >
+                  <Padded right left size="xs">
+                    <Flex alignItems="center">
+                      <Text
+                        style={{ maxWidth: '100px' }}
+                        ellipsis
+                        fontWeight="bold"
+                        color="blue"
+                        title={formattedMessage(link.label)}
+                      >
+                        {formattedMessage(link.label)}
+                      </Text>
+                      {link.target === '_blank' && (
+                        <Padded left size="xs">
+                          <LinkArrow />
+                        </Padded>
+                      )}
+                    </Flex>
+                  </Padded>
+                </a>
+              )}
+            </Flex>
+          </Padded>
+          <RemoveWrapper>
+            <Remove onClick={handleClose} />
+          </RemoveWrapper>
+        </Flex>
+      </Padded>
+    </NotificationWrapper>
+  );
+};
 
 Notification.defaultProps = {
   notification: {
     id: 1,
-    message: 'app.utils.defaultMessage',
-    status: 'success',
+    type: 'success',
+    message: {
+      id: 'notification.success.saved',
+      defaultMessage: 'Saved',
+    },
+    onClose: () => null,
+    timeout: 2500,
+    blockTransition: false,
+    centered: false,
   },
 };
 
 Notification.propTypes = {
+  dispatch: PropTypes.func.isRequired,
   notification: PropTypes.shape({
     id: PropTypes.number,
     message: PropTypes.oneOfType([
       PropTypes.string,
       PropTypes.shape({
-        id: PropTypes.string,
+        id: PropTypes.string.isRequired,
+        defaultMessage: PropTypes.string,
         values: PropTypes.object,
       }),
     ]),
-    status: PropTypes.string,
+    title: PropTypes.oneOfType([
+      PropTypes.string,
+      PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        defaultMessage: PropTypes.string,
+        values: PropTypes.object,
+      }),
+    ]),
+    link: PropTypes.shape({
+      target: PropTypes.string,
+      url: PropTypes.string.isRequired,
+      label: PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          defaultMessage: PropTypes.string,
+          values: PropTypes.object,
+        }),
+      ]).isRequired,
+    }),
+    type: PropTypes.string,
+    onClose: PropTypes.func,
+    timeout: PropTypes.number,
+    blockTransition: PropTypes.bool,
+    centered: PropTypes.bool,
   }),
-  onHideNotification: PropTypes.func.isRequired,
 };
 
 export default Notification;

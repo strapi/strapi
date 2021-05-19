@@ -41,7 +41,7 @@ async function build({ dir, env, options, optimize }) {
   await createCacheDir(dir);
 
   const cacheDir = path.resolve(dir, '.cache');
-  const entry = path.resolve(cacheDir, 'admin', 'src', 'app.js');
+  const entry = path.resolve(cacheDir, 'admin', 'src');
   const dest = path.resolve(dir, 'build');
   const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize });
 
@@ -80,45 +80,41 @@ async function build({ dir, env, options, optimize }) {
 }
 
 async function createPluginsJs(plugins, localPlugins, dest) {
+  const createPluginsArray = plugins =>
+    plugins.map(name => {
+      const shortName = _.camelCase(name.replace(/^@strapi\/plugin-/i, ''));
+
+      return { name, shortName };
+    });
+  const appPluginsArray = createPluginsArray(plugins);
+  const localPluginsArray = createPluginsArray(localPlugins);
+
   const content = `
-const injectReducer = require('./utils/injectReducer').default;
-const injectSaga = require('./utils/injectSaga').default;
-const useInjectReducer = require('./utils/injectReducer').useInjectReducer;
-const useInjectSaga = require('./utils/injectSaga').useInjectSaga;
-const { languages } = require('./i18n');
+${appPluginsArray
+  .map(({ name, shortName }) => {
+    const req = `'../../plugins/${name}/admin/src'`;
 
-window.strapi = Object.assign(window.strapi || {}, {
-  node: MODE || 'host',
-  backendURL: BACKEND_URL === '/' ? window.location.origin : BACKEND_URL,
-  languages,
-  currentLanguage:
-  window.localStorage.getItem('strapi-admin-language') ||
-  window.navigator.language ||
-  window.navigator.userLanguage ||
-  'en',
-  injectReducer,
-  injectSaga,
-  useInjectReducer,
-  useInjectSaga,
-});
+    return `import ${shortName} from ${req};`;
+  })
+  .join('\n')}
+${localPluginsArray
+  .map(({ name, shortName }) => {
+    const req = `'../../../plugins/${name}/admin/src'`;
 
-module.exports = {
-  ${plugins
-    .map(name => {
-      const shortName = name.replace(/^@strapi\/plugin-/i, '');
-      const req = `require('../../plugins/${name}/admin/src').default`;
-      return `'${shortName}': ${req},`;
-    })
-    .join('\n')}
-  ${localPlugins
-    .map(name => {
-      const shortName = name.replace(/^@strapi\/plugin-/i, '');
-      const req = `require('../../../plugins/${name}/admin/src').default`;
-      return `'${shortName}': ${req}`;
-    })
-    .join(',\n')}
-}
-  `;
+    return `import ${shortName} from ${req};`;
+  })
+  .join('\n')}
+
+const plugins = {
+${[...appPluginsArray, ...localPluginsArray]
+  .map(({ name, shortName }) => {
+    return `  '${name}': ${shortName},`;
+  })
+  .join('\n')}
+};
+
+export default plugins;
+`;
 
   return fs.writeFile(path.resolve(dest, 'admin', 'src', 'plugins.js'), content);
 }
@@ -143,13 +139,6 @@ async function copyPlugin(name, dest) {
 
   // Copy the entire admin folder
   await copy('admin');
-
-  // Copy the layout.js if it exists
-  if (await fs.exists(path.resolve(pkgFilePath, 'config', 'layout.js'))) {
-    await fs.ensureDir(resolveDest('config'));
-    await copy('config', 'layout.js');
-  }
-
   await copy('package.json');
 }
 
@@ -238,7 +227,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
   // Create the cache dir containing the front-end files.
   await createCacheDir(dir);
 
-  const entry = path.join(dir, '.cache', 'admin', 'src', 'app.js');
+  const entry = path.join(dir, '.cache', 'admin', 'src');
   const dest = path.join(dir, 'build');
   const env = 'development';
 
@@ -254,9 +243,9 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     clientLogLevel: 'silent',
     quiet: true,
     open: browser === 'true' ? true : browser,
-    publicPath: options.publicPath,
+    publicPath: options.adminPath,
     historyApiFallback: {
-      index: options.publicPath,
+      index: options.adminPath,
       disableDotRule: true,
     },
   };

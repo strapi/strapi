@@ -33,7 +33,7 @@ module.exports = async ({ clean, optimization }) => {
       optimize: optimization,
       options: {
         backend: serverUrl,
-        publicPath: addSlash(adminPath),
+        adminPath: addSlash(adminPath),
         features: ee.isEE ? ee.features.getEnabled() : [],
       },
     })

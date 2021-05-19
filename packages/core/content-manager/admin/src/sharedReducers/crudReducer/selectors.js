@@ -1,5 +1,5 @@
 import pluginId from '../../pluginId';
 
-const selectCrudReducer = state => state.get(`${pluginId}_editViewCrudReducer`);
+const selectCrudReducer = state => state[`${pluginId}_editViewCrudReducer`];
 
 export default selectCrudReducer;

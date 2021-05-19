@@ -15,49 +15,44 @@ import trads from './translations';
 import getTrad from './utils/getTrad';
 import SettingsPage from './containers/Settings';
 
-export default strapi => {
-  const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
+const icon = pluginPkg.strapi.icon;
+const name = pluginPkg.strapi.name;
 
-  const plugin = {
-    blockerComponent: null,
-    blockerComponentProps: {},
-    description: pluginDescription,
-    icon: pluginPkg.strapi.icon,
-    id: pluginId,
-    isReady: true,
-    initializer: () => null,
-    injectedComponents: [],
-    isRequired: pluginPkg.strapi.required || false,
-    layout: null,
-    lifecycles: () => {},
-    mainComponent: null,
-    name: pluginPkg.strapi.name,
-    pluginLogo,
-    preventComponentRendering: false,
-    trads,
-    settings: {
-      menuSection: {
-        id: pluginId,
-        title: getTrad('SettingsNav.section-label'),
-        links: [
-          {
-            title: {
-              id: getTrad('SettingsNav.link.settings'),
-              defaultMessage: 'Settings',
+export default {
+  register(app) {
+    app.registerPlugin({
+      description: pluginDescription,
+      icon,
+      id: pluginId,
+      isReady: true,
+      isRequired: pluginPkg.strapi.required || false,
+      name,
+      pluginLogo,
+      trads,
+      settings: {
+        menuSection: {
+          id: pluginId,
+          title: getTrad('SettingsNav.section-label'),
+          links: [
+            {
+              title: {
+                id: getTrad('SettingsNav.link.settings'),
+                defaultMessage: 'Settings',
+              },
+              name: 'settings',
+              to: `/settings/${pluginId}`,
+              Component: () => (
+                <CheckPagePermissions permissions={pluginPermissions.settings}>
+                  <SettingsPage />
+                </CheckPagePermissions>
+              ),
+              permissions: pluginPermissions.settings,
             },
-            name: 'settings',
-            to: `${strapi.settingsBaseURL}/${pluginId}`,
-            Component: () => (
-              <CheckPagePermissions permissions={pluginPermissions.settings}>
-                <SettingsPage />
-              </CheckPagePermissions>
-            ),
-            permissions: pluginPermissions.settings,
-          },
-        ],
+          ],
+        },
       },
-    },
-  };
-
-  return strapi.registerPlugin(plugin);
+    });
+  },
+  boot() {},
 };

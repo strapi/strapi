@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { useNotification } from '@strapi/helper-plugin';
 import { Flex } from '@buffetjs/core';
 import styled from 'styled-components';
 import CTIcon from './CT';
@@ -25,11 +26,13 @@ const STHackSpan = styled.span`
 `;
 
 const BooleanBox = ({ label, name, onChange, onChangeCallback, options, value }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
+
+  const toggleNotification = useNotification();
 
   const handleChange = e => {
     onChange(e);
-    onChangeCallback();
+    onChangeCallback({ toggleNotification });
   };
 
   return (

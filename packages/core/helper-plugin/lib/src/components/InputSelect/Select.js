@@ -8,7 +8,7 @@ const Select = styled.select`
   padding-left: 1rem;
   background-position: right -1px center;
   background-repeat: no-repeat;
-  background-image: url(${Bkg});
+  background-image: url("${Bkg}");
   border: 1px solid #e3e9f3;
   border-radius: 0.25rem;
   line-height: 3.2rem;

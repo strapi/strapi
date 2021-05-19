@@ -27,7 +27,7 @@ module.exports = async function({ browser }) {
     browser,
     options: {
       backend: getAbsoluteServerUrl(config, true),
-      publicPath: addSlash(adminPath),
+      adminPath: addSlash(adminPath),
       watchIgnoreFiles: adminWatchIgnoreFiles,
       features: ee.isEE ? ee.features.getEnabled() : [],
     },

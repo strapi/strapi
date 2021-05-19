@@ -87,8 +87,8 @@ const forms = {
               name: 'kind',
               type: 'booleanBox',
               size: 12,
-              onChangeCallback: () =>
-                strapi.notification.toggle({
+              onChangeCallback: ({ toggleNotification }) =>
+                toggleNotification({
                   type: 'info',
                   message: { id: getTrad('contentType.kind.change.warning') },
                 }),

@@ -125,6 +125,7 @@
       "component": "default.restaurantservice",
       "repeatable": true,
       "type": "component",
+      "max": 1,
       "pluginOptions": {
         "i18n": {
           "localized": true

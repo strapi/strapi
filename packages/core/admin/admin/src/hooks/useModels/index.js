@@ -1,13 +1,14 @@
 import { useReducer, useEffect } from 'react';
-import { request } from '@strapi/helper-plugin';
-
+import { request, useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 
 const useModels = () => {
+  const toggleNotification = useNotification();
   const [state, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
     fetchModels();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchModels = async () => {
@@ -31,7 +32,7 @@ const useModels = () => {
       dispatch({
         type: 'GET_MODELS_ERROR',
       });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

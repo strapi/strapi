@@ -28,8 +28,9 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
     return next(action);
   }
 
-  const cmDataStore = getState().get('content-manager_editViewCrudReducer');
-  const cmLayoutStore = getState().get('content-manager_editViewLayoutManager');
+  const store = getState();
+  const cmDataStore = store['content-manager_editViewCrudReducer'];
+  const cmLayoutStore = store['content-manager_editViewLayoutManager'];
   const { contentTypeDataStructure } = cmDataStore;
   const { currentLayout } = cmLayoutStore;
 

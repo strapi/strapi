@@ -2,7 +2,14 @@ import React, { useCallback, useEffect, useState, useReducer, useRef } from 'rea
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { isEqual, isEmpty, get, set } from 'lodash';
-import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from '@strapi/helper-plugin';
+import {
+  Modal,
+  ModalFooter,
+  PopUpWarning,
+  useGlobalContext,
+  request,
+  useNotification,
+} from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
@@ -20,6 +27,7 @@ const ModalStepper = ({
   onRemoveFileFromDataToDelete,
   onToggle,
 }) => {
+  const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
   const { emitEvent, formatMessage } = useGlobalContext();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
@@ -191,7 +199,7 @@ const ModalStepper = ({
     } catch (err) {
       const errorMessage = get(err, 'response.payload.message', 'An error occured');
 
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: errorMessage,
       });

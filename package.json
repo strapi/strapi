@@ -120,5 +120,8 @@
     "*.js": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@babel/polyfill": "7.12.1"
   }
 }

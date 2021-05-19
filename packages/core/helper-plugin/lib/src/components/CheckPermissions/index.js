@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-
 import PropTypes from 'prop-types';
+import useNotification from '../../hooks/useNotification';
 import useUser from '../../hooks/useUser';
 import hasPermissions from '../../utils/hasPermissions';
 
@@ -9,6 +9,7 @@ import hasPermissions from '../../utils/hasPermissions';
 
 const CheckPermissions = ({ permissions, children }) => {
   const { userPermissions } = useUser();
+  const toggleNotification = useNotification();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
   const abortController = new AbortController();
@@ -27,7 +28,7 @@ const CheckPermissions = ({ permissions, children }) => {
       } catch (err) {
         if (isMounted.current) {
           console.error(err);
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });

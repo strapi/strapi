@@ -4,7 +4,7 @@ import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { request, useGlobalContext } from '@strapi/helper-plugin';
+import { request, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
@@ -20,10 +20,11 @@ import schema from './utils/schema';
 const EditPage = () => {
   const { formatMessage } = useIntl();
   const [isSubmiting, setIsSubmiting] = useState(false);
-  const { settingsBaseURL } = useGlobalContext();
+  const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const {
     params: { id },
-  } = useRouteMatch(`${settingsBaseURL}/${pluginId}/roles/:id`);
+  } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
   const { routes, policies, isLoading } = usePlugins();
   const { role, isLoading: isRoleLoading, onSubmitSucceeded } = useFetchRole(id);
   const permissionsRef = useRef();
@@ -60,7 +61,7 @@ const EditPage = () => {
   };
 
   const handleCreateRoleSubmit = data => {
-    strapi.lockAppWithOverlay();
+    lockApp();
     setIsSubmiting(true);
 
     const permissions = permissionsRef.current.getPermissions();
@@ -74,21 +75,21 @@ const EditPage = () => {
       .then(() => {
         onSubmitSucceeded({ name: data.name, description: data.description });
         permissionsRef.current.setFormAfterSubmit();
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('Settings.roles.edited') },
         });
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
       })
       .finally(() => {
         setIsSubmiting(false);
-        strapi.unlockApp();
+        unlockApp();
       });
   };
 

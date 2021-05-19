@@ -6,7 +6,7 @@ import { initialState } from './reducer';
  * Direct selector to the dataManagerProvider state domain
  */
 const dataManagerProviderDomain = () => state =>
-  state.get(`${pluginId}_dataManagerProvider`) || initialState;
+  state[`${pluginId}_dataManagerProvider`] || initialState;
 
 /**
  * Other specific selectors

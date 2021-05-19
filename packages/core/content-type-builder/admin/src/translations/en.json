@@ -126,8 +126,6 @@
   "form.button.single-type.description": "Best for single instance like about us, homepage, etc.",
   "form.contentType.divider.draft-publish": "DRAFT/PUBLISH",
   "from": "from",
-  "injected-components.content-manager.edit-settings-view.link.components": "Edit the component",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Edit the content type",
   "menu.section.components.name.plural": "Components",
   "menu.section.components.name.singular": "Component",
   "menu.section.models.name.plural": "Collection Types",

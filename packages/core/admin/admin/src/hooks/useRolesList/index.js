@@ -1,10 +1,11 @@
 import { useEffect, useReducer } from 'react';
-import { request } from '@strapi/helper-plugin';
+import { request, useNotification } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const useRolesList = (shouldFetchData = true) => {
+  const toggleNotification = useNotification();
   const [{ roles, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, shouldFetchData)
   );
@@ -13,6 +14,7 @@ const useRolesList = (shouldFetchData = true) => {
     if (shouldFetchData) {
       fetchRolesList();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldFetchData]);
 
   const fetchRolesList = async () => {
@@ -35,7 +37,7 @@ const useRolesList = (shouldFetchData = true) => {
       });
 
       if (message !== 'Forbidden') {
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message,
         });

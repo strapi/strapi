@@ -9,8 +9,9 @@ import {
   PopUpWarning,
   getYupInnerErrors,
   useGlobalContext,
+  useNotification,
   useQuery,
-  useStrapi,
+  useStrapiApp,
   InputsIndex,
 } from '@strapi/helper-plugin';
 import { Button, Text, Padded } from '@buffetjs/core';
@@ -68,13 +69,12 @@ const FormModal = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const formModalSelector = useMemo(makeSelectFormModal, []);
   const dispatch = useDispatch();
+  const toggleNotification = useNotification();
   const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
   const { emitEvent, formatMessage } = useGlobalContext();
-  const {
-    strapi: { getPlugin },
-  } = useStrapi();
+  const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI = ctbPlugin.apis.forms;
   const inputsFromPlugins = ctbFormsAPI.components.inputs;
@@ -706,7 +706,7 @@ const FormModal = () => {
             push({ search: '' });
             submitData(modifiedData);
           } else {
-            strapi.notification.toggle({
+            toggleNotification({
               type: 'warning',
               message: { id: 'notification.contentType.relations.conflict' },
             });

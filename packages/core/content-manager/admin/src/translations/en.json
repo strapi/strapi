@@ -173,5 +173,7 @@
   "success.record.delete": "Deleted",
   "success.record.publish": "Published",
   "success.record.save": "Saved",
-  "success.record.unpublish": "Unpublished"
+  "success.record.unpublish": "Unpublished",
+  "edit-settings-view.link-to-ctb.components": "Edit the component",
+  "edit-settings-view.link-to-ctb.content-types": "Edit the content type"
 }

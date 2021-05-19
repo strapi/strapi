@@ -5,7 +5,6 @@ const path = require('path');
 const alias = [
   'object-assign',
   'whatwg-fetch',
-  '@babel/polyfill',
   '@fortawesome/fontawesome-svg-core',
   '@fortawesome/free-solid-svg-icons',
   '@buffetjs/core',
@@ -20,6 +19,7 @@ const alias = [
   'immer',
   'immutable',
   'invariant',
+  'lodash',
   'moment',
   'qs',
   'react',

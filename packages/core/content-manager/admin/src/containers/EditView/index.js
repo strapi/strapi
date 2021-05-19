@@ -4,6 +4,7 @@ import { get } from 'lodash';
 import {
   BackHeader,
   BaselineAlignment,
+  InjectionZone,
   LiLink,
   CheckPermissions,
   useGlobalContext,
@@ -17,7 +18,6 @@ import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 import SelectWrapper from '../../components/SelectWrapper';
-import { getInjectedComponents } from '../../utils';
 import CollectionTypeFormWrapper from '../CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../SingleTypeFormWrapper';
@@ -26,6 +26,9 @@ import { createAttributesLayout, getFieldsActionMatchingPermissions } from './ut
 import { LinkWrapper, SubWrapper } from './components';
 import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
+import { getTrad } from '../../utils';
+
+const ctbPermissions = [{ action: 'plugins::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({
@@ -38,8 +41,7 @@ const EditView = ({
   origin,
   userPermissions,
 }) => {
-  const { currentEnvironment, plugins } = useGlobalContext();
-
+  const { emitEvent } = useGlobalContext();
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -235,13 +237,23 @@ const EditView = ({
                           }}
                         />
                       </CheckPermissions>
-                      {getInjectedComponents(
-                        'editView',
-                        'right.links',
-                        plugins,
-                        currentEnvironment,
-                        slug
+                      {slug !== 'strapi::administrator' && (
+                        <CheckPermissions permissions={ctbPermissions}>
+                          <LiLink
+                            message={{
+                              id: getTrad('containers.Edit.Link.Fields'),
+                            }}
+                            onClick={() => {
+                              emitEvent('willEditEditLayout');
+                            }}
+                            icon="fa-cog"
+                            url={`/plugins/content-type-builder/content-types/${slug}`}
+                          />
+                        </CheckPermissions>
                       )}
+                      {/*  TODO add DOCUMENTATION */}
+                      <InjectionZone area={`${pluginId}.editView.right-links`} slug={slug} />
+
                       {allowedActions.canDelete && (
                         <DeleteLink
                           isCreatingEntry={isCreatingEntry}

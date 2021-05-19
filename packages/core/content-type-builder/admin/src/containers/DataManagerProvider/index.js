@@ -6,8 +6,10 @@ import {
   LoadingIndicatorPage,
   useGlobalContext,
   PopUpWarning,
-  useStrapi,
+  useNotification,
+  useStrapiApp,
   useUser,
+  useAutoReloadOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
@@ -63,9 +65,11 @@ const DataManagerProvider = ({
   reservedNames,
 }) => {
   const dispatch = useDispatch();
-  const {
-    strapi: { getPlugin },
-  } = useStrapi();
+  const toggleNotification = useNotification();
+  const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+
+  const { getPlugin } = useStrapiApp();
+
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const { autoReload, emitEvent, formatMessage } = useGlobalContext();
@@ -124,7 +128,7 @@ const DataManagerProvider = ({
       });
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
@@ -146,12 +150,12 @@ const DataManagerProvider = ({
 
   useEffect(() => {
     if (!autoReload) {
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'info',
         message: { id: getTrad('notification.info.autoreaload-disable') },
       });
     }
-  }, [autoReload]);
+  }, [autoReload, toggleNotification]);
 
   const didModifiedComponents =
     getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
@@ -245,7 +249,7 @@ const DataManagerProvider = ({
       push({ search: '' });
 
       if (userConfirm) {
-        strapi.lockApp();
+        lockAppWithAutoreload();
 
         await request(requestURL, { method: 'DELETE' }, true);
 
@@ -258,12 +262,12 @@ const DataManagerProvider = ({
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 
@@ -294,7 +298,7 @@ const DataManagerProvider = ({
           return;
         }
 
-        strapi.lockApp();
+        lockAppWithAutoreload();
 
         await request(requestURL, { method: 'DELETE' }, true);
 
@@ -309,12 +313,12 @@ const DataManagerProvider = ({
       }
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 
@@ -326,7 +330,7 @@ const DataManagerProvider = ({
       push({ search: '' });
 
       // Lock the app
-      strapi.lockApp();
+      lockAppWithAutoreload();
 
       // Update the category
       await request(requestURL, { method: 'PUT', body }, true);
@@ -339,12 +343,12 @@ const DataManagerProvider = ({
       getDataRef.current();
     } catch (err) {
       console.error({ err });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 
@@ -465,7 +469,7 @@ const DataManagerProvider = ({
       const requestURL = isCreating ? baseURL : `${baseURL}/${currentUid}`;
 
       // Lock the app
-      strapi.lockApp();
+      lockAppWithAutoreload();
 
       await request(requestURL, { method, body }, true);
 
@@ -495,12 +499,12 @@ const DataManagerProvider = ({
       }
 
       console.error({ err: err.response });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });
     } finally {
-      strapi.unlockApp();
+      unlockAppWithAutoreload();
     }
   };
 

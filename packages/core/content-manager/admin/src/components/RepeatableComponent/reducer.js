@@ -1,5 +1,4 @@
 import { fromJS } from 'immutable';
-import getTrad from '../../utils/getTrad';
 
 const initialState = fromJS({ collapses: [] });
 
@@ -33,11 +32,6 @@ const reducer = (state, action) => {
         // https://github.com/react-dnd/react-dnd/issues/1368
         // https://github.com/frontend-collective/react-sortable-tree/issues/490
         if (oldList.size !== newList.size) {
-          strapi.notification.toggle({
-            type: 'warning',
-            message: getTrad('components.repeatable.reorder.error'),
-          });
-
           return oldList;
         }
 

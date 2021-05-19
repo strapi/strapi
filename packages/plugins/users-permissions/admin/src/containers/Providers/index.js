@@ -9,6 +9,8 @@ import {
   useGlobalContext,
   getYupInnerErrors,
   request,
+  useNotification,
+  useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
@@ -30,6 +32,8 @@ const ProvidersPage = () => {
   const buttonSubmitRef = useRef(null);
   const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
+  const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -138,7 +142,7 @@ const ProvidersPage = () => {
 
       try {
         await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
-        strapi.lockAppWithOverlay();
+        lockApp();
 
         try {
           emitEventRef.current('willEditAuthenticationProvider');
@@ -150,7 +154,7 @@ const ProvidersPage = () => {
 
           emitEventRef.current('didEditAuthenticationProvider');
 
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'success',
             message: { id: getTrad('notification.success.submit') },
           });
@@ -160,7 +164,7 @@ const ProvidersPage = () => {
           handleToggle();
         } catch (err) {
           console.error(err);
-          strapi.notification.toggle({
+          toggleNotification({
             type: 'warning',
             message: { id: 'notification.error' },
           });
@@ -174,7 +178,7 @@ const ProvidersPage = () => {
       dispatchSetFormErrors(errors);
 
       setIsSubmiting(false);
-      strapi.unlockApp();
+      unlockApp();
     },
     [
       dispatchSetFormErrors,
@@ -183,6 +187,9 @@ const ProvidersPage = () => {
       handleToggle,
       modifiedData,
       providerToEditName,
+      toggleNotification,
+      lockApp,
+      unlockApp,
     ]
   );
 

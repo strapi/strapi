@@ -1,12 +1,11 @@
 import { useCallback, useReducer, useEffect } from 'react';
-import { request } from '@strapi/helper-plugin';
-
+import { request, useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
-
 import pluginId from '../../pluginId';
 
 const useFetchRole = id => {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const toggleNotification = useNotification();
 
   useEffect(() => {
     if (id) {
@@ -35,7 +34,7 @@ const useFetchRole = id => {
       dispatch({
         type: 'GET_DATA_ERROR',
       });
-      strapi.notification.toggle({
+      toggleNotification({
         type: 'warning',
         message: { id: 'notification.error' },
       });

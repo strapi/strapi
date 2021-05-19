@@ -6,6 +6,7 @@ import {
   CheckPermissions,
   LabelIconWrapper,
   prefixFileUrlWithBackendUrl,
+  useNotification,
 } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
@@ -33,6 +34,7 @@ const InputMedia = ({
   error,
   labelIcon,
 }) => {
+  const toggleNotification = useNotification();
   const [modal, setModal] = useState({
     isOpen: false,
     step: 'list',
@@ -108,7 +110,7 @@ const InputMedia = ({
   };
 
   const handleCopy = () => {
-    strapi.notification.toggle({
+    toggleNotification({
       type: 'info',
       message: { id: 'notification.link-copied' },
     });

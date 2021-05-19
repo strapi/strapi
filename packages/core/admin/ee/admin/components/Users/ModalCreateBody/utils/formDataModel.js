@@ -1,6 +1,6 @@
 import baseModel from '../../../../../../admin/src/components/Users/ModalCreateBody/utils/formDataModel';
 
-const ssoInputsModel = ENABLED_EE_FEATURES.includes('sso')
+const ssoInputsModel = process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES.includes('sso')
   ? {
       useSSORegistration: true,
     }

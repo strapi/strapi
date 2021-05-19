@@ -3,9 +3,6 @@ import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfo
 export { default as colors } from './assets/styles/colors';
 export { default as sizes } from './assets/styles/sizes';
 
-// CommonPropTypes
-export { default as routerPropTypes } from './commonPropTypes/router';
-export { default as themePropTypes } from './commonPropTypes/themeShape';
 // Components
 export { default as BackHeader } from './components/BackHeader';
 export { default as BaselineAlignment } from './components/BaselineAlignment';
@@ -16,7 +13,6 @@ export { default as Carret } from './components/Carret';
 export { default as CircleButton } from './components/CircleButton';
 export { default as ContainerFluid } from './components/ContainerFluid';
 export { default as ErrorBoundary } from './components/ErrorBoundary';
-export { default as ExtendComponent } from './components/ExtendComponent';
 export { default as ErrorFallback } from './components/ErrorFallback';
 export { default as FilterButton } from './components/FilterButton';
 export { default as GlobalPagination } from './components/GlobalPagination';
@@ -82,7 +78,7 @@ export { default as ModalForm } from './components/FormModal';
 export { default as ModalSection } from './components/ModalSection';
 export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as NotFound } from './components/NotFound';
-export { default as OverlayBlocker } from './components/OverlayBlocker';
+
 export { default as PageFooter } from './components/PageFooter';
 export { default as PluginHeader } from './components/PluginHeader';
 export { default as RelationDPState } from './components/RelationDPState';
@@ -99,6 +95,7 @@ export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as FormBloc } from './components/FormBloc';
 export { default as IntlInput } from './components/IntlInput';
 export { default as SizedInput } from './components/SizedInput';
+
 export * from './components/Permissions';
 
 // PopUpWarning
@@ -109,6 +106,9 @@ export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
+export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
+export { default as NotificationsContext } from './contexts/NotificationsContext';
+export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as UserContext } from './contexts/UserContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
@@ -116,13 +116,19 @@ export { default as ContentManagerEditViewDataManagerContext } from './contexts/
 // Hooks
 export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
-export { default as useStrapi } from './hooks/useStrapi';
+export { default as useLibrary } from './hooks/useLibrary';
+export { default as useNotification } from './hooks/useNotification';
+export { default as useStrapiApp } from './hooks/useStrapiApp';
 export { default as useUser } from './hooks/useUser';
 export { default as useUserPermissions } from './hooks/useUserPermissions';
 export { default as useQueryParams } from './hooks/useQueryParams';
+export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
+export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
 
 // Providers
-export { default as StrapiProvider } from './providers/StrapiProvider';
+export { default as LibraryProvider } from './providers/LibraryProvider';
+export { default as NotificationsProvider } from './providers/NotificationsProvider';
+export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
 
 // Utils
 export { default as auth } from './utils/auth';
@@ -139,9 +145,7 @@ export { darken } from './utils/colors';
 export { default as getFileExtension } from './utils/getFileExtension';
 export { default as getFilterType } from './utils/getFilterType';
 export { default as getQueryParameters } from './utils/getQueryParameters';
-export { default as injectHooks } from './utils/injectHooks';
 export { default as validateInput } from './utils/inputsValidations';
-export { default as Manager } from './utils/Manager';
 export { default as request } from './utils/request';
 export { default as storeData } from './utils/storeData';
 export { default as templateObject } from './utils/templateObject';

@@ -4,7 +4,7 @@ import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Flex } from '@buffetjs/core';
-import { LabelIconWrapper, NotAllowedInput } from '@strapi/helper-plugin';
+import { LabelIconWrapper, NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import connect from './utils/connect';
 import select from './utils/select';
@@ -35,6 +35,7 @@ const DynamicZone = ({
   fieldSchema,
   metadatas,
 }) => {
+  const toggleNotification = useNotification();
   const [isOpen, setIsOpen] = useState(false);
   const { formatMessage } = useIntl();
   // We cannot use the default props here
@@ -71,7 +72,10 @@ const DynamicZone = ({
     if (dynamicDisplayedComponentsLength < max) {
       setIsOpen(prev => !prev);
     } else {
-      strapi.notification.info(`${pluginId}.components.notification.info.maximum-requirement`);
+      toggleNotification({
+        type: 'info',
+        message: { id: `${pluginId}.components.notification.info.maximum-requirement` },
+      });
     }
   };
 

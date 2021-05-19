@@ -4,7 +4,14 @@ import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useUserPermissions, PopUpWarning, request, useGlobalContext } from '@strapi/helper-plugin';
+import {
+  useUserPermissions,
+  PopUpWarning,
+  request,
+  useGlobalContext,
+  useNotification,
+  useOverlayBlocker,
+} from '@strapi/helper-plugin';
 
 import permissions from '../../../permissions';
 import { EmptyRole, RoleListWrapper, RoleRow } from '../../../components/Roles';
@@ -17,7 +24,8 @@ const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { emitEvent } = useGlobalContext();
   const { push } = useHistory();
-
+  const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
   const [modalToDelete, setModalDelete] = useState();
   const [shouldRefetchData, setShouldRefetchData] = useState(false);
   const [showModalConfirmButtonLoading, setModalButtonLoading] = useState(false);
@@ -45,7 +53,7 @@ const RoleListPage = () => {
   };
 
   const handleDelete = () => {
-    strapi.lockAppWithOverlay();
+    lockApp();
 
     setModalButtonLoading(true);
 
@@ -56,21 +64,21 @@ const RoleListPage = () => {
     )
       .then(() => {
         setShouldRefetchData(true);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'success',
           message: { id: getTrad('Settings.roles.deleted') },
         });
       })
       .catch(err => {
         console.error(err);
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: { id: 'notification.error' },
         });
       })
       .finally(() => {
         setModalDelete(null);
-        strapi.unlockApp();
+        unlockApp();
       });
   };
 

@@ -8,6 +8,7 @@ import {
   LoadingIndicatorPage,
   NotFound,
   request,
+  useNotification,
 } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -22,6 +23,8 @@ import { getData, getDataSucceeded, resetProps } from './actions';
 import makeSelectMain from './selectors';
 
 function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
+  const toggleNotification = useNotification();
+
   useEffect(() => {
     const abortController = new AbortController();
     const { signal } = abortController;
@@ -39,7 +42,7 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
         getDataSucceeded(models, components);
       } catch (err) {
         console.error(err);
-        strapi.notification.error('notification.error');
+        toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
       }
     };
 
@@ -49,7 +52,7 @@ function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
       abortController.abort();
       resetProps();
     };
-  }, [getData, getDataSucceeded, resetProps]);
+  }, [getData, getDataSucceeded, resetProps, toggleNotification]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;

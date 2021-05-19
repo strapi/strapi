@@ -1,6 +1,13 @@
 import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, PopUpWarning, useGlobalContext, request } from '@strapi/helper-plugin';
+import {
+  Modal,
+  ModalFooter,
+  PopUpWarning,
+  useGlobalContext,
+  useNotification,
+  request,
+} from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { get, isEmpty, isEqual } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
@@ -19,6 +26,7 @@ const InputModalStepper = ({
   const { emitEvent, formatMessage } = useGlobalContext();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
+  const toggleNotification = useNotification();
   const {
     addFilesToUpload,
     currentStep,
@@ -210,7 +218,7 @@ const InputModalStepper = ({
           ['response', 'payload', 'message', '0', 'messages', '0', 'message'],
           get(err, ['response', 'payload', 'message'], statusText)
         );
-        strapi.notification.toggle({
+        toggleNotification({
           type: 'warning',
           message: errorMessage,
         });

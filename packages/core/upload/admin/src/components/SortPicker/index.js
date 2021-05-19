@@ -1,15 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { Carret, useGlobalContext } from '@strapi/helper-plugin';
+import { Carret } from '@strapi/helper-plugin';
 import { Picker } from '@buffetjs/core';
-import { getTrad, getFileModelTimestamps } from '../../utils';
+import { getTrad } from '../../utils';
+import { useSelectTimestamps } from '../../hooks';
 
 import SortList from '../SortList';
 
 const SortPicker = ({ onChange, value }) => {
-  const { plugins } = useGlobalContext();
-  const [created_at, updated_at] = getFileModelTimestamps(plugins);
+  const [created_at, updated_at] = useSelectTimestamps();
   const orders = {
     created_at_desc: `${created_at}:DESC`,
     created_at_asc: `${created_at}:ASC`,

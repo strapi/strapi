@@ -9,7 +9,7 @@ const webpackConfig = require('./webpack.config.js');
 module.exports = () => {
   const analyzeBundle = process.env.ANALYZE_BUNDLE;
   const analyzeDuplicateDependencies = process.env.ANALYZE_DEPS;
-  const entry = path.join(__dirname, 'admin', 'src', 'app.js');
+  const entry = path.join(__dirname, 'admin', 'src');
   const dest = path.join(__dirname, 'build');
 
   // When running the analyze:bundle command, it needs a production build
@@ -17,16 +17,18 @@ module.exports = () => {
   const env = analyzeBundle ? 'production' : 'development';
   const options = {
     backend: 'http://localhost:1337',
-    publicPath: '/admin/',
-    features: process.env.ENABLED_EE_FEATURES || ['sso'],
+    adminPath: '/admin/',
+    features: process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES || ['sso'],
   };
+
+  const useEE = process.env.STRAPI_DISABLE_EE === 'true' ? false : true;
 
   const args = {
     entry,
     dest,
     env,
     options,
-    useEE: process.env.STRAPI_DISABLE_EE === 'true' ? false : true,
+    useEE,
   };
 
   const config = webpackConfig(args);
