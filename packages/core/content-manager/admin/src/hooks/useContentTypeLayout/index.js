@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import { get } from 'lodash';
 import { useSelector } from 'react-redux';
-import selectLayout from '../../containers/EditViewLayoutManager/selectors';
+import selectLayout from '../../pages/EditViewLayoutManager/selectors';
 
 const useContentTypeLayout = () => {
   const currentLayout = useSelector(selectLayout);

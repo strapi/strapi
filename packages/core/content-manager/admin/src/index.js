@@ -8,7 +8,7 @@
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
-import App from './containers/Main';
+import App from './pages/Main';
 import reducers from './reducers';
 import trads from './translations';
 
