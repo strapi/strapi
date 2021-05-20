@@ -56,6 +56,7 @@
     "rimraf": "^3.0.2",
     "semver": "7.3.5",
     "@strapi/database": "3.6.0",
+    "@strapi/logger": "3.6.0",
     "@strapi/generate": "3.6.0",
     "@strapi/generate-api": "3.6.0",
     "@strapi/generate-controller": "3.6.0",

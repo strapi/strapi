@@ -8,8 +8,9 @@ const Router = require('koa-router');
 const _ = require('lodash');
 const chalk = require('chalk');
 const CLITable = require('cli-table3');
-const { logger, models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
+const { models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const { createDatabaseManager } = require('@strapi/database');
+const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
@@ -48,9 +49,6 @@ class Strapi {
 
     this.initServer();
 
-    // Logger.
-    this.log = logger;
-
     // Utils.
     this.utils = {
       models,
@@ -62,6 +60,10 @@ class Strapi {
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
     this.app.proxy = this.config.get('server.proxy');
+
+    // Logger.
+    const loggerUserConfiguration = this.config.get('logger', {});
+    this.log = createLogger(loggerUserConfiguration);
 
     this.isLoaded = false;
 
@@ -75,7 +77,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dir, logger });
+    return ee({ dir: this.dir, logger: this.log });
   }
 
   handleRequest(req, res) {

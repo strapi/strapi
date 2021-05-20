@@ -9,7 +9,7 @@ module.exports = (initialConfig = {}) => {
     'Initial config must be an object'
   );
 
-  const _config = _.cloneDeep(initialConfig);
+  const _config = initialConfig;
 
   return Object.assign(_config, {
     get(path, defaultValue) {
