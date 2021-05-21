@@ -27,7 +27,7 @@ import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
-import ListViewProvider from '../ListViewProvider';
+import ListViewProvider from '../../components/ListViewProvider';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import FieldPicker from './FieldPicker';
 import Filter from './Filter';

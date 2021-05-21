@@ -16,7 +16,7 @@ import {
 import PropTypes from 'prop-types';
 import { isEmpty, isNaN, replace, words } from 'lodash';
 import cn from 'classnames';
-import WysiwygProvider from '../../pages/WysiwygProvider';
+import WysiwygProvider from '../WysiwygProvider';
 import Controls from '../WysiwygInlineControls';
 import PreviewWysiwyg from '../PreviewWysiwyg';
 import WysiwygBottomControls from '../WysiwygBottomControls';

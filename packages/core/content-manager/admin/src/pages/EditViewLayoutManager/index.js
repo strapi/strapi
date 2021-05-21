@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoadingIndicatorPage, useQueryParams } from '@strapi/helper-plugin';
-import useSyncRbac from '../RBACManager/useSyncRbac';
+import { useSyncRbac } from '../../hooks';
 import { resetProps, setLayout } from './actions';
 import selectLayout from './selectors';
 import Permissions from './Permissions';
