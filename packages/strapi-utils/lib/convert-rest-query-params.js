@@ -10,8 +10,8 @@ const {
   constants: { DP_PUB_STATES },
 } = require('./content-types');
 
-const BOOLEAN_OPERATORS = ['or'];
-const QUERY_OPERATORS = ['_where', '_or'];
+const BOOLEAN_OPERATORS = ['or', 'and'];
+const QUERY_OPERATORS = ['_where', '_or', '_and'];
 
 /**
  * Global converter

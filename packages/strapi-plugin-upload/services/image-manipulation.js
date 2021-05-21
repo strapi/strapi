@@ -24,6 +24,7 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 
 const resizeTo = (buffer, options) =>
   sharp(buffer)
+    .withMetadata()
     .resize(options)
     .toBuffer()
     .catch(() => null);
