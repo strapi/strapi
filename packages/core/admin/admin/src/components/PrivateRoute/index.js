@@ -32,7 +32,7 @@ const PrivateRoute = ({ component: Component, path, ...rest }) => (
 );
 
 PrivateRoute.propTypes = {
-  component: PropTypes.oneOfType([PropTypes.node, PropTypes.func]).isRequired,
+  component: PropTypes.oneOfType([PropTypes.node, PropTypes.func, PropTypes.element]).isRequired,
   path: PropTypes.string.isRequired,
 };
 

@@ -6,7 +6,7 @@ import { Footer, Header, Loader, LinksContainer, LinksSection } from './compos';
 import Wrapper from './Wrapper';
 import useMenuSections from './useMenuSections';
 
-const LeftMenu = ({ shouldUpdateStrapi, version, plugins, setUpdateMenu }) => {
+const LeftMenu = ({ shouldUpdateStrapi, plugins, setUpdateMenu }) => {
   const location = useLocation();
 
   const {
@@ -81,14 +81,13 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins, setUpdateMenu }) => {
           />
         )}
       </LinksContainer>
-      <Footer key="footer" version={version} />
+      <Footer key="footer" />
     </Wrapper>
   );
 };
 
 LeftMenu.propTypes = {
   shouldUpdateStrapi: PropTypes.bool.isRequired,
-  version: PropTypes.string.isRequired,
   plugins: PropTypes.object.isRequired,
   setUpdateMenu: PropTypes.func.isRequired,
 };

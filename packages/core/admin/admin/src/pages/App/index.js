@@ -10,7 +10,7 @@ import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request, useNotification } from '@strapi/helper-plugin';
-import PluginsInitializer from '../../components/PluginsInitializer';
+import AuthenticatedApp from '../../components/AuthenticatedApp';
 import PrivateRoute from '../../components/PrivateRoute';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
@@ -19,10 +19,6 @@ import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
-
-window.strapi = Object.assign(window.strapi || {}, {
-  lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
-});
 
 function App(props) {
   const toggleNotification = useNotification();
@@ -118,7 +114,7 @@ function App(props) {
             )}
             exact
           />
-          <PrivateRoute path="/" component={PluginsInitializer} />
+          <PrivateRoute path="/" component={AuthenticatedApp} />
           <Route path="" component={NotFoundPage} />
         </Switch>
       </Content>
