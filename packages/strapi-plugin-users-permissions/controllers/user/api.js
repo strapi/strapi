@@ -33,17 +33,19 @@ module.exports = {
     if (!username) return ctx.badRequest('missing.username');
     if (!password) return ctx.badRequest('missing.password');
 
-    const validUsername = await strapi.plugins['users-permissions']
-    .services.user.validateUsername(username);
+    const validUsername = await strapi.plugins['users-permissions'].services.user.validateUsername(
+      username
+    );
     if (!validUsername) {
       return ctx.badRequest(
         null,
         formatError({
           id: 'invalid.username',
           message: 'Username only include letters, numbers, and underscores',
-          field: ['username']
-        }))
-    };
+          field: ['username'],
+        })
+      );
+    }
 
     const userWithSameUsername = await strapi
       .query('user', 'users-permissions')
