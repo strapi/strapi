@@ -1,13 +1,14 @@
 import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
-// import { LinksSection, LinksContainer } from '../LeftMenuCompos';
+import { useAppInfos } from '@strapi/helper-plugin';
 import { Footer, Header, Loader, LinksContainer, LinksSection } from './compos';
 import Wrapper from './Wrapper';
 import useMenuSections from './useMenuSections';
 
-const LeftMenu = ({ shouldUpdateStrapi, plugins, setUpdateMenu }) => {
+const LeftMenu = ({ plugins, setUpdateMenu }) => {
   const location = useLocation();
+  const { shouldUpdateStrapi } = useAppInfos();
 
   const {
     state: {
@@ -36,6 +37,8 @@ const LeftMenu = ({ shouldUpdateStrapi, plugins, setUpdateMenu }) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  console.log({ generalSectionLinks });
 
   return (
     <Wrapper>
@@ -87,7 +90,6 @@ const LeftMenu = ({ shouldUpdateStrapi, plugins, setUpdateMenu }) => {
 };
 
 LeftMenu.propTypes = {
-  shouldUpdateStrapi: PropTypes.bool.isRequired,
   plugins: PropTypes.object.isRequired,
   setUpdateMenu: PropTypes.func.isRequired,
 };

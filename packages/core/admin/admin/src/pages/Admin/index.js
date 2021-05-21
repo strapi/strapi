@@ -144,7 +144,9 @@ export class Admin extends React.Component {
           currentLocale={locale}
           formatMessage={formatMessage}
           plugins={plugins}
+          // TODO
           shouldUpdateStrapi={shouldUpdateStrapi}
+          // TODO
           strapiVersion={strapiVersion}
           updateMenu={this.state.updateMenu}
         >

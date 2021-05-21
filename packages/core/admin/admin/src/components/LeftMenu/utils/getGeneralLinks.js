@@ -33,7 +33,7 @@ const getGeneralLinks = async (
   const authorizedGeneralLinksClone = cloneDeep(authorizedGeneralSectionLinks);
 
   authorizedGeneralLinksClone[settingsLinkIndex].permissions = settingsLinkPermissions;
-  authorizedGeneralLinksClone[settingsLinkIndex].notificationCount = shouldUpdateStrapi ? 1 : 0;
+  authorizedGeneralLinksClone[settingsLinkIndex].notificationsCount = shouldUpdateStrapi ? 1 : 0;
 
   return authorizedGeneralLinksClone;
 };
