@@ -1,31 +1,16 @@
-import React, { memo, useMemo } from 'react';
+import React from 'react';
 import { Header } from '@buffetjs/custom';
 import { Flex, Padded, Text } from '@buffetjs/core';
-import { useSelector } from 'react-redux';
-import { createSelector } from 'reselect';
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from '@strapi/helper-plugin';
+import { BaselineAlignment, useAppInfos } from '@strapi/helper-plugin';
 import Bloc from '../../components/Bloc';
 import PageTitle from '../../components/SettingsPageTitle';
-import makeSelectApp from '../App/selectors';
-import makeSelectAdmin from '../Admin/selectors';
 import { Detail, InfoText } from './components';
 
-const makeSelectAppInfos = () => createSelector(makeSelectApp(), appState => appState.appInfos);
-const makeSelectLatestRelease = () =>
-  createSelector(makeSelectAdmin(), adminState => ({
-    latestStrapiReleaseTag: adminState.latestStrapiReleaseTag,
-    shouldUpdateStrapi: adminState.shouldUpdateStrapi,
-  }));
-
 const ApplicationInfosPage = () => {
+  const appInfos = useAppInfos();
+  const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
   const { formatMessage } = useIntl();
-  const selectAppInfos = useMemo(makeSelectAppInfos, []);
-  const selectLatestRealase = useMemo(makeSelectLatestRelease, []);
-  const appInfos = useSelector(state => selectAppInfos(state));
-  const { shouldUpdateStrapi, latestStrapiReleaseTag } = useSelector(state =>
-    selectLatestRealase(state)
-  );
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'
@@ -86,4 +71,4 @@ const ApplicationInfosPage = () => {
   );
 };
 
-export default memo(ApplicationInfosPage);
+export default ApplicationInfosPage;
