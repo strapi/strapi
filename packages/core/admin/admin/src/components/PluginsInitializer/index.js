@@ -1,12 +1,12 @@
 import React, { useReducer, useRef } from 'react';
 import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import Admin from '../../pages/Admin';
+import ReleaseNotification from '../ReleaseNotification';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
 const PluginsInitializer = () => {
   const { plugins: appPlugins } = useStrapiApp();
-
   const [{ plugins }, dispatch] = useReducer(reducer, initialState, () => init(appPlugins));
   const setPlugin = useRef(pluginId => {
     dispatch({ type: 'SET_PLUGIN_READY', pluginId });
@@ -35,7 +35,12 @@ const PluginsInitializer = () => {
     );
   }
 
-  return <Admin plugins={plugins} />;
+  return (
+    <>
+      <ReleaseNotification />
+      <Admin plugins={plugins} />
+    </>
+  );
 };
 
 export default PluginsInitializer;

@@ -106,6 +106,7 @@ export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
+export { default as AppInfosContext } from './contexts/AppInfosContext';
 export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
@@ -114,6 +115,7 @@ export { default as UserContext } from './contexts/UserContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
 
 // Hooks
+export { default as useAppInfos } from './hooks/useAppInfos';
 export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
