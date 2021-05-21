@@ -9,10 +9,9 @@ import {
   request,
   LabelIconWrapper,
   LoadingIndicator,
-  useGlobalContext,
   useContentManagerEditViewDataManager,
 } from '@strapi/helper-plugin';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { get } from 'lodash';
 import getTrad from '../../utils/getTrad';
 import pluginId from '../../pluginId';
@@ -68,7 +67,7 @@ const InputUID = ({
   const initialValue = initialData[name];
   const createdAtName = get(layout, ['options', 'timestamps', 0]);
   const isCreation = !initialData[createdAtName];
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);

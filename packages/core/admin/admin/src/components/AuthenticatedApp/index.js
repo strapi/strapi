@@ -8,8 +8,7 @@ import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } f
 import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 
 const { STRAPI_ADMIN_UPDATE_NOTIFICATION } = process.env;
-// TODO
-const canFetchRelease = STRAPI_ADMIN_UPDATE_NOTIFICATION === 'false';
+const canFetchRelease = STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true';
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {

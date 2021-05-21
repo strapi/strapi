@@ -3,9 +3,9 @@ import { get, includes, toString, isEqual, intersectionWith } from 'lodash';
 import { useHistory, useLocation } from 'react-router-dom';
 import { Header } from '@buffetjs/custom';
 import { Button, Padded } from '@buffetjs/core';
+import { useIntl } from 'react-intl';
 import {
   PopUpWarning,
-  useGlobalContext,
   generateFiltersFromSearch,
   generateSearchFromFilters,
   request,
@@ -25,7 +25,7 @@ const HomePage = () => {
   const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [, updated_at] = useSelectTimestamps();
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, allowedActions)

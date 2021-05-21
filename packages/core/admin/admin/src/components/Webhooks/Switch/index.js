@@ -6,13 +6,13 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 
 import Toggle from './Toggle';
 import Wrapper from './Wrapper';
 
 function Switch({ disabled, name, value, onChange }) {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   return (
     <Wrapper>

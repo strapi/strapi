@@ -3,6 +3,7 @@ import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
 import { BackHeader, ListWrapper, useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
 import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
@@ -30,8 +31,8 @@ const ListView = () => {
     submitData,
     toggleModalCancel,
   } = useDataManager();
-
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
+  const { emitEvent } = useGlobalContext();
   const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);

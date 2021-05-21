@@ -1,8 +1,8 @@
-import { useGlobalContext } from '../../contexts/GlobalContext';
-import { isObject } from 'lodash';
+import { useIntl } from 'react-intl';
+import isObject from 'lodash/isObject';
 
 const useFormattedMessage = message => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   if (isObject(message) && message.id) {
     return formatMessage({

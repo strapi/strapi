@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState, useReducer, useRef } from 'rea
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import { isEqual, isEmpty, get, set } from 'lodash';
+import { useIntl } from 'react-intl';
 import {
   Modal,
   ModalFooter,
@@ -29,7 +30,8 @@ const ModalStepper = ({
 }) => {
   const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [showModalConfirmButtonLoading, setShowModalConfirmButtonLoading] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);

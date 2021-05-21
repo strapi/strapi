@@ -3,12 +3,8 @@ import { Header, Inputs } from '@buffetjs/custom';
 import { Helmet } from 'react-helmet';
 import { Text } from '@buffetjs/core';
 import { isEqual } from 'lodash';
-import {
-  LoadingIndicatorPage,
-  useGlobalContext,
-  useNotification,
-  request,
-} from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { LoadingIndicatorPage, useNotification, request } from '@strapi/helper-plugin';
 
 import { getRequestUrl, getTrad } from '../../utils';
 import SectionTitleWrapper from './SectionTitleWrapper';
@@ -17,7 +13,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 
 const SettingsPage = () => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [reducerState, dispatch] = useReducer(reducer, initialState, init);
   const { initialData, isLoading, modifiedData } = reducerState.toJS();
   const isMounted = useRef(true);

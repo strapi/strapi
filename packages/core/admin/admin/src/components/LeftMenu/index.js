@@ -38,8 +38,6 @@ const LeftMenu = ({ plugins, setUpdateMenu }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  console.log({ generalSectionLinks });
-
   return (
     <Wrapper>
       <Loader show={isLoading} />

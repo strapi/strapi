@@ -1,18 +1,12 @@
 /*
  *
- * LanguageProvider actions
+ * App actions
  *
  */
 
-import { GET_INFOS_DATA_SUCCEEDED, GET_DATA_SUCCEEDED } from './constants';
+import { GET_DATA_SUCCEEDED } from './constants';
 
-export function getInfosDataSucceeded(data) {
-  return {
-    type: GET_INFOS_DATA_SUCCEEDED,
-    data,
-  };
-}
-
+// eslint-disable-next-line import/prefer-default-export
 export function getDataSucceeded(data) {
   return {
     type: GET_DATA_SUCCEEDED,

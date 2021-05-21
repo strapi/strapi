@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useClickAwayListener } from '@buffetjs/hooks';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { Padded } from '@buffetjs/core';
 
 import DoubleFile from '../../icons/DoubleFile';
@@ -14,7 +14,7 @@ import { getTrad } from '../../utils';
 
 const CheckControl = ({ title, onSubmitEdit }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const dropdownRef = useRef();
 
   useClickAwayListener(dropdownRef, () => setIsOpen(false));
