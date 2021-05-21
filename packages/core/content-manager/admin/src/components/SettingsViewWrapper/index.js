@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEqual, upperFirst } from 'lodash';
 import { withRouter } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
@@ -33,7 +33,8 @@ const SettingsViewWrapper = ({
   onConfirmSubmit,
   onModalConfirmClosed,
 }) => {
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 

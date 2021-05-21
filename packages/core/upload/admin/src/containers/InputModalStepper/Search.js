@@ -1,7 +1,6 @@
 import React, { useState, useEffect, memo } from 'react';
 import { useDebounce } from '@buffetjs/hooks';
-import { useGlobalContext } from '@strapi/helper-plugin';
-
+import { useIntl } from 'react-intl';
 import getTrad from '../../utils/getTrad';
 import useModalContext from '../../hooks/useModalContext';
 import HeaderSearch from './HeaderSearch';
@@ -12,7 +11,7 @@ const Search = () => {
     allowedActions: { canRead },
     setParam,
   } = useModalContext();
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const debouncedSearch = useDebounce(value, 300);
 
   useEffect(() => {

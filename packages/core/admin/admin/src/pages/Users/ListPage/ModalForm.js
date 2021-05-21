@@ -1,7 +1,8 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-import { Modal, ModalFooter, ModalHeader, useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { Modal, ModalFooter, ModalHeader } from '@strapi/helper-plugin';
 import stepper from './stepper';
 
 const ModalForm = ({ isOpen, onClosed, onToggle }) => {
@@ -11,7 +12,7 @@ const ModalForm = ({ isOpen, onClosed, onToggle }) => {
   const [showBody, setShowBody] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
   const [registrationToken, setRegistrationToken] = useState(null);
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const ref = useRef(null);
   const { buttonSubmitLabel, Component, isDisabled, next } = stepper[currentStep];
 

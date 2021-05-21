@@ -1,11 +1,11 @@
 import React, { memo } from 'react';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useStrapiApp } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import { useParams } from 'react-router-dom';
 import PageTitle from '../../../../components/SettingsPageTitle';
 
 const SettingDispatcher = () => {
-  const { plugins } = useGlobalContext();
+  const { plugins } = useStrapiApp();
   const { pluginId } = useParams();
 
   const pluginToRender = get(plugins, [pluginId, 'settings', 'mainComponent'], null);

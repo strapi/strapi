@@ -4,6 +4,7 @@ import { render } from '@testing-library/react';
 import PluginsInitializer from '../index';
 
 jest.mock('../../../pages/Admin', () => () => <div>ADMIN</div>);
+jest.mock('../../ReleaseNotification', () => () => null);
 
 describe('ADMIN | COMPONENTS | PluginsInitializer', () => {
   it('should not crash', () => {

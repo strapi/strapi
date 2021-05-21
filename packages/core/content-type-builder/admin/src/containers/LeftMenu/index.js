@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 import { LeftMenuList, useGlobalContext, useNotification } from '@strapi/helper-plugin';
 import { Text } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -28,7 +29,8 @@ function LeftMenu({ wait }) {
     sortedContentTypesList,
   } = useDataManager();
   const toggleNotification = useNotification();
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const { push } = useHistory();
 
   const componentsData = sortBy(

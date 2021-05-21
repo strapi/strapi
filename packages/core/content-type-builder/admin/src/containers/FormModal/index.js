@@ -14,10 +14,11 @@ import {
   useStrapiApp,
   InputsIndex,
 } from '@strapi/helper-plugin';
+import { useIntl , FormattedMessage } from 'react-intl';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+
 import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import pluginId from '../../pluginId';
@@ -73,7 +74,8 @@ const FormModal = () => {
   const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
   const ctbFormsAPI = ctbPlugin.apis.forms;

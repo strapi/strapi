@@ -10,22 +10,12 @@ const GlobalContextProvider = ({ children, ...rest }) => {
 const useGlobalContext = () => useContext(GlobalContext);
 
 GlobalContextProvider.defaultProps = {
-  currentEnvironment: 'development',
-  disableGlobalOverlayBlocker: () => {},
   emitEvent: () => {},
-  enableGlobalOverlayBlocker: () => {},
-  plugins: {},
-  updatePlugin: () => {},
 };
 
 GlobalContextProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  currentEnvironment: PropTypes.string,
-  disableGlobalOverlayBlocker: PropTypes.func,
   emitEvent: PropTypes.func,
-  enableGlobalOverlayBlocker: PropTypes.func,
-  plugins: PropTypes.object,
-  updatePlugin: PropTypes.func,
 };
 
 export { GlobalContext, GlobalContextProvider, useGlobalContext };

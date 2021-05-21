@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Carret, useGlobalContext } from '@strapi/helper-plugin';
+import { Carret } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { useListView } from '../../../hooks';
 
 const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField }, name }) => {
   const { _sort, firstSortableHeader, setQuery } = useListView();
-  const { emitEvent } = useGlobalContext();
+  const { emitEvent } = useIntl();
   const [sortBy, sortOrder] = _sort.split(':');
 
   let sortField = name;

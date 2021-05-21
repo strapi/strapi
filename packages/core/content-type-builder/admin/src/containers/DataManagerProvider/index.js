@@ -10,7 +10,9 @@ import {
   useStrapiApp,
   useUser,
   useAutoReloadOverlayBlocker,
+  useAppInfos,
 } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
@@ -72,7 +74,9 @@ const DataManagerProvider = ({
 
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { autoReload, emitEvent, formatMessage } = useGlobalContext();
+  const { autoReload } = useAppInfos();
+  const { formatMessage } = useIntl();
+  const { emitEvent } = useGlobalContext();
   const { fetchUserPermissions } = useUser();
 
   const { pathname } = useLocation();

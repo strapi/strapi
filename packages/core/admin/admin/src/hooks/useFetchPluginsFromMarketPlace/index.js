@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 
 const useFetchPluginsFromMarketPlace = () => {
-  const { currentLocale } = useGlobalContext();
+  const { locale: currentLocale } = useIntl();
   const [state, setState] = useState({
     error: false,
     isLoading: true,

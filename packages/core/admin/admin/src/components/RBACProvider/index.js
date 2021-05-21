@@ -1,12 +1,15 @@
-import React, { createContext, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { resetStore, setPermissions } from './actions';
 
-export const C = createContext();
-
-const RBACProvider = ({ children, permissions, refetchPermissions }) => {
+// TODO
+const RBACProvider = ({
+  children,
+  permissions,
+  // refetchPermissions
+}) => {
   const { allPermissions } = useSelector(state => state.rbacProvider);
   const dispatch = useDispatch();
 
@@ -14,7 +17,6 @@ const RBACProvider = ({ children, permissions, refetchPermissions }) => {
     dispatch(setPermissions(permissions));
 
     return () => {
-      console.log('up');
       dispatch(resetStore());
     };
   }, [permissions, dispatch]);
@@ -23,7 +25,7 @@ const RBACProvider = ({ children, permissions, refetchPermissions }) => {
     return <LoadingIndicatorPage />;
   }
 
-  return <C.Provider value={refetchPermissions}>{children}</C.Provider>;
+  return children;
 };
 
 RBACProvider.propTypes = {

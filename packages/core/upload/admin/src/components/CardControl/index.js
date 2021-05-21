@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Pencil, Plus } from '@buffetjs/icons';
 import { Tooltip } from '@buffetjs/styles';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { getTrad } from '../../utils';
@@ -10,7 +10,7 @@ import DownloadIcon from '../../icons/Download';
 import Wrapper from './Wrapper';
 
 const CardControl = ({ title, color, onClick, small, type, iconStyle }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [tooltipIsDisplayed, setTooltipIsDisplayed] = useState(false);
 
   const handleToggleTooltip = () => {

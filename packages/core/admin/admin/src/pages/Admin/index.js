@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
-import { bindActionCreators, compose } from 'redux';
+import { compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
@@ -18,7 +18,6 @@ import {
   difference,
   GlobalContextProvider,
   CheckPagePermissions,
-  request,
   NotificationsContext,
 } from '@strapi/helper-plugin';
 
@@ -36,10 +35,8 @@ import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
 import SettingsPage from '../SettingsPage';
 import Logout from './Logout';
-import { getInfosDataSucceeded } from '../App/actions';
 import makeSelecApp from '../App/selectors';
-import { getStrapiLatestReleaseSucceeded, setAppError } from './actions';
-import makeSelectAdmin from './selectors';
+
 import Wrapper from './Wrapper';
 import Content from './Content';
 
@@ -54,25 +51,10 @@ export class Admin extends React.Component {
 
   componentDidMount() {
     this.emitEvent('didAccessAuthenticatedAdministration');
-    this.initApp();
   }
 
   shouldComponentUpdate(prevProps, prevState) {
     return !isEmpty(difference(prevProps, this.props)) || !isEmpty(prevState, this.state);
-  }
-
-  /* istanbul ignore next */
-  componentDidCatch(error, info) {
-    /* eslint-disable */
-    console.log('An error has occured');
-    console.log('--------------------');
-    console.log(error);
-    console.log('Here is some infos');
-    console.log(info);
-    /* eslint-enable */
-
-    // Display the error log component which is not designed yet
-    this.props.setAppError();
   }
 
   emitEvent = async (event, properties) => {
@@ -95,24 +77,6 @@ export class Admin extends React.Component {
     }
   };
 
-  fetchAppInfo = async () => {
-    try {
-      const { data } = await request('/admin/information', { method: 'GET' });
-
-      this.props.getInfosDataSucceeded(data);
-    } catch (err) {
-      console.error(err);
-      this.context.toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-  };
-
-  initApp = async () => {
-    await this.fetchAppInfo();
-  };
-
   renderPluginDispatcher = props => {
     // NOTE: Send the needed props instead of everything...
 
@@ -127,10 +91,7 @@ export class Admin extends React.Component {
 
   render() {
     const {
-      admin: { shouldUpdateStrapi },
-      global: { autoReload, currentEnvironment, strapiVersion },
-      // FIXME
-      intl: { formatMessage, locale },
+      intl: { formatMessage },
       // FIXME
       plugins,
     } = this.props;
@@ -138,24 +99,13 @@ export class Admin extends React.Component {
     return (
       <PermissionsManager>
         <GlobalContextProvider
-          autoReload={autoReload}
           emitEvent={this.emitEvent}
-          currentEnvironment={currentEnvironment}
-          currentLocale={locale}
           formatMessage={formatMessage}
           plugins={plugins}
-          // TODO
-          shouldUpdateStrapi={shouldUpdateStrapi}
-          // TODO
-          strapiVersion={strapiVersion}
           updateMenu={this.state.updateMenu}
         >
           <Wrapper>
-            <LeftMenu
-              shouldUpdateStrapi={shouldUpdateStrapi}
-              plugins={plugins}
-              setUpdateMenu={this.setUpdateMenu}
-            />
+            <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
             <NavTopRightWrapper>
               {/* Injection zone not ready yet */}
               <Logout />
@@ -201,16 +151,7 @@ Admin.defaultProps = {
 };
 
 Admin.propTypes = {
-  admin: PropTypes.shape({
-    appError: PropTypes.bool,
-    shouldUpdateStrapi: PropTypes.bool.isRequired,
-  }).isRequired,
-  getInfosDataSucceeded: PropTypes.func.isRequired,
-  getStrapiLatestReleaseSucceeded: PropTypes.func.isRequired,
   global: PropTypes.shape({
-    autoReload: PropTypes.bool,
-    currentEnvironment: PropTypes.string,
-    strapiVersion: PropTypes.string,
     uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   }).isRequired,
   intl: PropTypes.shape({
@@ -218,25 +159,12 @@ Admin.propTypes = {
     locale: PropTypes.string,
   }),
   plugins: PropTypes.object.isRequired,
-  setAppError: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = createStructuredSelector({
-  admin: makeSelectAdmin(),
   global: makeSelecApp(),
 });
 
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      getInfosDataSucceeded,
-      getStrapiLatestReleaseSucceeded,
-      setAppError,
-    },
-    dispatch
-  );
-}
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
+const withConnect = connect(mapStateToProps);
 
 export default compose(injectIntl, withConnect)(Admin);
