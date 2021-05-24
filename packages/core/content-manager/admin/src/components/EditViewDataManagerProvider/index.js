@@ -5,7 +5,6 @@ import { Prompt, Redirect } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
   useGlobalContext,
-  // OverlayBlocker,
   ContentManagerEditViewDataManagerContext,
   useNotification,
   useOverlayBlocker,

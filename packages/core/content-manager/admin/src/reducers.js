@@ -1,7 +1,7 @@
-import mainReducer from './containers/Main/reducer';
-import editViewLayoutManagerReducer from './containers/EditViewLayoutManager/reducer';
-import listViewReducer from './containers/ListView/reducer';
-import rbacManagerReducer from './containers/RBACManager/reducer';
+import mainReducer from './pages/Main/reducer';
+import editViewLayoutManagerReducer from './pages/EditViewLayoutManager/reducer';
+import listViewReducer from './pages/ListView/reducer';
+import rbacManagerReducer from './hooks/useSyncRbac/reducer';
 import editViewCrudReducer from './sharedReducers/crudReducer/reducer';
 import pluginId from './pluginId';
 

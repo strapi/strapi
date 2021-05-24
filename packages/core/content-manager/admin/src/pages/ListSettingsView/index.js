@@ -11,7 +11,7 @@ import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl } from '../../u
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
-import LayoutDndProvider from '../LayoutDndProvider';
+import LayoutDndProvider from '../../components/LayoutDndProvider';
 import Label from './Label';
 import MenuDropdown from './MenuDropdown';
 import DropdownButton from './DropdownButton';

@@ -15,7 +15,7 @@ import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
 import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
-import LayoutDndProvider from '../LayoutDndProvider';
+import LayoutDndProvider from '../../components/LayoutDndProvider';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import { createPossibleMainFieldsForModelsAndComponents, getInputProps } from './utils';
