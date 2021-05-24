@@ -1,12 +1,14 @@
 import { render } from '@testing-library/react';
+import { fixtures } from '../../../../../admin-test-utils';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
 
+const library = { fields: {}, components: {} };
+const middlewares = { middlewares: [] };
+const reducers = { reducers: appReducers };
+
 describe('ADMIN | StrapiApp', () => {
   it('should render the app without plugins', () => {
-    const library = { fields: {}, components: {} };
-    const middlewares = { middlewares: [] };
-    const reducers = { reducers: appReducers };
     const app = StrapiApp({ middlewares, reducers, library });
 
     expect(render(app.render())).toMatchInlineSnapshot(`
@@ -143,5 +145,12 @@ describe('ADMIN | StrapiApp', () => {
         "unmount": [Function],
       }
     `);
+  });
+
+  it('should create a valid store', () => {
+    const app = StrapiApp({ middlewares, reducers, library });
+
+    const store = app.createStore();
+    expect(store.getState()).toEqual(fixtures.store);
   });
 });

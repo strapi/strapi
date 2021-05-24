@@ -21,9 +21,7 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      // TODO
       isReady: true,
-      // TODO
       isRequired: pluginPkg.strapi.required || false,
       // TODO
       mainComponent: App,

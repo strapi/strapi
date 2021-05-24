@@ -17,8 +17,6 @@ const AuthenticatedApp = () => {
     latestStrapiReleaseTag: strapiVersion,
   });
 
-  // TODO: clean components that depends on this
-  // This part is just to prepare the refactoring of the Admin page
   const [
     { data: appInfos, status },
     { data: tag_name, status: releaseStatus, isLoading },

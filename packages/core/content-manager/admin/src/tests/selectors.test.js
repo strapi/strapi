@@ -1,10 +1,11 @@
+import { fixtures } from '../../../../../admin-test-utils';
 import { selectPermissions, selectCollectionTypePermissions } from '../selectors';
 
 describe('selectors', () => {
   let store;
 
   beforeEach(() => {
-    store = {};
+    store = { ...fixtures.store };
   });
 
   describe('selectPermissions', () => {
@@ -25,13 +26,8 @@ describe('selectors', () => {
   });
 
   describe('selectCollectionTypePermissions', () => {
-    // TODO add store fixture
     it('resolves the permissions key of the "rbacProvider" store key', () => {
-      store.rbacProvider = {
-        collectionTypesRelatedPermissions: {
-          some: 'permission again',
-        },
-      };
+      store.rbacProvider.collectionTypesRelatedPermissions.some = 'permission again';
 
       const actual = selectCollectionTypePermissions(store);
       const expected = {

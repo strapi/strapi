@@ -4,7 +4,6 @@ import { LoadingIndicatorPage, RBACProviderContext } from '@strapi/helper-plugin
 import PropTypes from 'prop-types';
 import { resetStore, setPermissions } from './actions';
 
-// TODO
 const RBACProvider = ({ children, permissions, refetchPermissions }) => {
   const { allPermissions } = useSelector(state => state.rbacProvider);
 

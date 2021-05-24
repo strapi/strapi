@@ -1,23 +1,25 @@
+import { fixtures } from '../../../../../../admin-test-utils';
 import addLocaleToCollectionTypesMiddleware from '../addLocaleToCollectionTypesMiddleware';
 
 describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
   let getState;
+  let store;
 
   beforeEach(() => {
-    const store = {
+    store = {
+      ...fixtures.store,
       i18n_locales: { locales: [] },
-      rbacProvider: {
-        allPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
+    };
+    store.rbacProvider.allPermissions = [];
+
+    store.rbacProvider.collectionTypesRelatedPermissions = {
+      test: {
+        'plugins::content-manager.explorer.read': [],
+        'plugins::content-manager.explorer.create': [],
       },
     };
 
-    getState = () => store;
+    getState = jest.fn(() => store);
   });
 
   it('should forward the action when the type is undefined', () => {
@@ -76,18 +78,10 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
   });
 
   it('should add a search key with the default locale when the user has the right to read it', () => {
-    const tempStore = {
-      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      rbacProvider: {
-        allPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
-      },
-    };
+    store.i18n_locales = { locales: [{ code: 'en', isDefault: true }] };
+    store.rbacProvider.collectionTypesRelatedPermissions.test[
+      'plugins::content-manager.explorer.read'
+    ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
       type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
@@ -96,7 +90,7 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
-    const middleware = addLocaleToCollectionTypesMiddleware()({ getState: () => tempStore });
+    const middleware = addLocaleToCollectionTypesMiddleware()({ getState });
 
     const next = jest.fn();
 
@@ -116,17 +110,10 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
   });
 
   it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
-    const tempStore = {
-      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      rbacProvider: {
-        allPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
-          },
-        },
-      },
-    };
+    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.rbacProvider.collectionTypesRelatedPermissions.test[
+      'plugins::content-manager.explorer.read'
+    ] = [{ properties: { locales: [] } }];
 
     const action = {
       type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
@@ -137,7 +124,7 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
-    const middleware = addLocaleToCollectionTypesMiddleware()({ getState: () => tempStore });
+    const middleware = addLocaleToCollectionTypesMiddleware()({ getState });
 
     const next = jest.fn();
 
@@ -161,18 +148,10 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
   });
 
   it('should keep the previous search', () => {
-    const tempStore = {
-      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      rbacProvider: {
-        allPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
-      },
-    };
+    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.rbacProvider.collectionTypesRelatedPermissions.test[
+      'plugins::content-manager.explorer.read'
+    ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
       type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
@@ -183,7 +162,7 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
-    const middleware = addLocaleToCollectionTypesMiddleware()({ getState: () => tempStore });
+    const middleware = addLocaleToCollectionTypesMiddleware()({ getState });
 
     const next = jest.fn();
 
