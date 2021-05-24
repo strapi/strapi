@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import init from '../init';
 
 describe('CONTENT MANAGER | containers | ListSettingsView | init', () => {
@@ -11,7 +10,7 @@ describe('CONTENT MANAGER | containers | ListSettingsView | init', () => {
       initialData: { foo: 'bar' },
     };
 
-    const result = init(fromJS(initialState), layout).toJS();
+    const result = init(initialState, layout);
 
     expect(result).toEqual(expected);
   });
