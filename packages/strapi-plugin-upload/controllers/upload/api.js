@@ -16,7 +16,7 @@ module.exports = {
   async find(ctx) {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
-    const files = await strapi.plugins.upload.services.upload[method](ctx.query);
+    const files = await strapi.plugins.upload.services.upload[method](ctx.query, []);
 
     ctx.body = sanitize(files);
   },
@@ -26,7 +26,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await strapi.plugins.upload.services.upload.fetch({ id });
+    const file = await strapi.plugins.upload.services.upload.fetch({ id }, []);
 
     if (!file) {
       return ctx.notFound('file.notFound');
