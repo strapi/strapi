@@ -80,7 +80,8 @@
     "related": {
       "collection": "*",
       "filter": "field",
-      "configurable": false
+      "configurable": false,
+      "autoPopulate": false
     }
   }
 }
