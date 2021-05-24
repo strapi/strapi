@@ -35,7 +35,7 @@ const ModalCreate = ({ alreadyUsedLocales, onClose, isOpened }) => {
       await refetchPermissions();
     }
 
-    shouldUpdatePermissions.current = true;
+    shouldUpdatePermissions.current = false;
   };
 
   const options = (defaultLocales || [])

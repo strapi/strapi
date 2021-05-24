@@ -10,7 +10,7 @@ import {
   ListButton,
   PopUpWarning,
   request,
-  useUserPermissions,
+  useRBAC,
   useNotification,
   LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
@@ -36,7 +36,7 @@ const RoleListPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useUserPermissions(adminPermissions.settings.roles);
+  } = useRBAC(adminPermissions.settings.roles);
   const { getData, roles, isLoading } = useRolesList(false);
   const getDataRef = useRef(getData);
   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();

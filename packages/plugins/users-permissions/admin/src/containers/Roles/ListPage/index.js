@@ -5,7 +5,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  useUserPermissions,
+  useRBAC,
   PopUpWarning,
   request,
   useGlobalContext,
@@ -41,7 +41,7 @@ const RoleListPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canUpdate, canDelete, canRead },
-  } = useUserPermissions(updatePermissions);
+  } = useRBAC(updatePermissions);
   const shouldFetchData = !isLoadingForPermissions && canRead;
 
   const { roles, getData, isLoading } = useRolesList(shouldFetchData);

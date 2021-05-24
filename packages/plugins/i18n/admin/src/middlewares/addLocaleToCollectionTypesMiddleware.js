@@ -8,7 +8,7 @@ const addLocaleToCollectionTypesMiddleware = () => ({ getState }) => next => act
   if (action.data.authorizedCtLinks.length) {
     const store = getState();
     const { locales } = store.i18n_locales;
-    const { collectionTypesRelatedPermissions } = store.permissionsManager;
+    const { collectionTypesRelatedPermissions } = store.rbacProvider;
 
     action.data.authorizedCtLinks = addLocaleToLinksSearch(
       action.data.authorizedCtLinks,

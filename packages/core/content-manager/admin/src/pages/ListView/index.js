@@ -17,7 +17,7 @@ import {
   useGlobalContext,
   useNotification,
   useQueryParams,
-  useUser,
+  useRBACProvider,
   request,
 } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
@@ -89,9 +89,9 @@ function ListView({
   } = layout;
   const toggleNotification = useNotification();
   const { emitEvent } = useGlobalContext();
-  const { fetchUserPermissions } = useUser();
+  const { refetchPermissions } = useRBACProvider();
   const emitEventRef = useRef(emitEvent);
-  const fetchPermissionsRef = useRef(fetchUserPermissions);
+  const fetchPermissionsRef = useRef(refetchPermissions);
 
   const [{ query }, setQuery] = useQueryParams();
   const params = buildQueryString(query);

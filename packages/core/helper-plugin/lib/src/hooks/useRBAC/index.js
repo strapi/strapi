@@ -6,7 +6,7 @@ import reducer from './reducer';
 import init from './init';
 import useRBACProvider from '../useRBACProvider';
 
-const useUserPermissions = (pluginPermissions, permissions) => {
+const useRBAC = (pluginPermissions, permissions) => {
   const abortController = new AbortController();
   const { signal } = abortController;
 
@@ -84,4 +84,4 @@ const useUserPermissions = (pluginPermissions, permissions) => {
   return { ...state, setIsLoading };
 };
 
-export default useUserPermissions;
+export default useRBAC;

@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('HELPER_PLUGIN | hooks | useUserPermissions | reducer', () => {
+describe('HELPER_PLUGIN | hooks | useRBAC | reducer', () => {
   describe('DEFAULT_ACTION', () => {
     it('should return the initialState', () => {
       const initialState = {

@@ -25,8 +25,9 @@ describe('selectors', () => {
   });
 
   describe('selectCollectionTypePermissions', () => {
-    it('resolves the permissions key of the "permissionsManager" store key', () => {
-      store.permissionsManager = {
+    // TODO add store fixture
+    it('resolves the permissions key of the "rbacProvider" store key', () => {
+      store.rbacProvider = {
         collectionTypesRelatedPermissions: {
           some: 'permission again',
         },

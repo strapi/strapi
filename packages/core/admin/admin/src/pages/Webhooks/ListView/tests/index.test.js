@@ -2,7 +2,7 @@ import React from 'react';
 import { Router, Route, Switch } from 'react-router-dom';
 import { shallow } from 'enzyme';
 import { createMemoryHistory } from 'history';
-import { GlobalContextProvider, UserProvider } from '@strapi/helper-plugin';
+import { GlobalContextProvider } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 import Notifications from '../../../../components/Notifications';
 
@@ -23,15 +23,13 @@ describe('Admin | containers | ListView', () => {
       >
         <Notifications>
           <GlobalContextProvider formatMessage={jest.fn()}>
-            <UserProvider permissions={[]}>
-              <Router history={history}>
-                <Switch>
-                  <Route path="/settings/webhooks">
-                    <ListView />
-                  </Route>
-                </Switch>
-              </Router>
-            </UserProvider>
+            <Router history={history}>
+              <Switch>
+                <Route path="/settings/webhooks">
+                  <ListView />
+                </Route>
+              </Switch>
+            </Router>
           </GlobalContextProvider>
         </Notifications>
       </IntlProvider>

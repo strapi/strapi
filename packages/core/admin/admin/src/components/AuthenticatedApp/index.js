@@ -34,6 +34,7 @@ const AuthenticatedApp = () => {
     {
       queryKey: 'admin-users-permission',
       queryFn: fetchCurrentUserPermissions,
+      initialData: [],
     },
   ]);
 

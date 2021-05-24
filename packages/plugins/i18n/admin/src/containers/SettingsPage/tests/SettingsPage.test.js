@@ -3,7 +3,7 @@
 import React from 'react';
 import { createStore, combineReducers } from 'redux';
 import { Provider } from 'react-redux';
-import { request, useUserPermissions } from '@strapi/helper-plugin';
+import { request, useRBAC } from '@strapi/helper-plugin';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import { QueryClient, QueryClientProvider } from 'react-query';
@@ -64,11 +64,11 @@ jest.mock('@strapi/helper-plugin', () => ({
   Tab: ({ children }) => <div>{children}</div>,
   TabsPanel: ({ children }) => <div>{children}</div>,
   TabPanel: ({ children }) => <div>{children}</div>,
-  useUserPermissions: jest.fn(),
+  useRBAC: jest.fn(),
   request: jest.fn(),
   selectStyles: () => ({ control: () => ({}), indicatorsContainer: () => ({}) }),
   useGlobalContext: () => ({ updateMenu: jest.fn() }),
-  useUser: () => ({ fetchUserPermissions: jest.fn() }),
+  useRBACProvider: () => ({ refetchPermissions: jest.fn() }),
   useNotification: () => toggleNotificationMock,
 }));
 
@@ -101,7 +101,7 @@ describe('i18n settings page', () => {
       ])
     );
 
-    useUserPermissions.mockImplementation(() => ({
+    useRBAC.mockImplementation(() => ({
       isLoading: false,
       allowedActions: { canRead: true, canUpdate: true, canCreate: true, canDelete: true },
     }));
@@ -473,7 +473,7 @@ describe('i18n settings page', () => {
 
   describe('permissions', () => {
     it('shows a loading information when resolving the permissions', () => {
-      useUserPermissions.mockImplementation(() => ({
+      useRBAC.mockImplementation(() => ({
         isLoading: true,
         allowedActions: { canRead: false, canUpdate: true, canCreate: true, canDelete: true },
       }));
@@ -490,7 +490,7 @@ describe('i18n settings page', () => {
     it("shows nothing when the user doesn't have read permission", () => {
       const canRead = false;
 
-      useUserPermissions.mockImplementation(() => ({
+      useRBAC.mockImplementation(() => ({
         isLoading: false,
         allowedActions: { canRead, canUpdate: true, canCreate: true, canDelete: true },
       }));
@@ -508,7 +508,7 @@ describe('i18n settings page', () => {
       const canCreate = false;
 
       request.mockImplementation(() => Promise.resolve([]));
-      useUserPermissions.mockImplementation(() => ({
+      useRBAC.mockImplementation(() => ({
         isLoading: false,
         allowedActions: { canRead: true, canUpdate: true, canCreate, canDelete: true },
       }));
@@ -527,7 +527,7 @@ describe('i18n settings page', () => {
     it('hides the "Edit locale" button (pencil) when the user is not allowed to update a locale', async () => {
       const canUpdate = false;
 
-      useUserPermissions.mockImplementation(() => ({
+      useRBAC.mockImplementation(() => ({
         isLoading: false,
         allowedActions: { canRead: true, canUpdate, canCreate: true, canDelete: true },
       }));
@@ -545,7 +545,7 @@ describe('i18n settings page', () => {
     it('hides the "Delete locale" button (garbage) when the user is not allowed to delete a locale', async () => {
       const canDelete = false;
 
-      useUserPermissions.mockImplementation(() => ({
+      useRBAC.mockImplementation(() => ({
         isLoading: false,
         allowedActions: { canRead: true, canUpdate: false, canCreate: true, canDelete },
       }));

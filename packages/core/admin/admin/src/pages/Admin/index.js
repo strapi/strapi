@@ -11,7 +11,6 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
-import { injectIntl } from 'react-intl';
 import { isEmpty } from 'lodash';
 // Components from @strapi/helper-plugin
 import {
@@ -30,7 +29,7 @@ import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../../components/Onboarding';
-import PermissionsManager from '../../components/PermissionsManager';
+
 import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
 import SettingsPage from '../SettingsPage';
@@ -90,74 +89,53 @@ export class Admin extends React.Component {
   };
 
   render() {
-    const {
-      intl: { formatMessage },
-      // FIXME
-      plugins,
-    } = this.props;
+    const { plugins } = this.props;
 
     return (
-      <PermissionsManager>
-        <GlobalContextProvider
-          emitEvent={this.emitEvent}
-          formatMessage={formatMessage}
-          plugins={plugins}
-          updateMenu={this.state.updateMenu}
-        >
-          <Wrapper>
-            <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
-            <NavTopRightWrapper>
-              {/* Injection zone not ready yet */}
-              <Logout />
-            </NavTopRightWrapper>
-            <div className="adminPageRightWrapper">
-              <Header />
-              <Content>
-                <Switch>
-                  <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
-                  <Route path="/me" component={ProfilePage} />
-                  <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
-                  <Route path="/list-plugins" exact>
-                    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                      <InstalledPluginsPage />
-                    </CheckPagePermissions>
-                  </Route>
-                  <Route path="/marketplace">
-                    <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                      <MarketplacePage />
-                    </CheckPagePermissions>
-                  </Route>
-                  <Route path="/settings/:settingId" component={SettingsPage} />
-                  <Route path="/settings" component={SettingsPage} exact />
-                  <Route key="7" path="" component={NotFoundPage} />
-                  <Route key="8" path="/404" component={NotFoundPage} />
-                </Switch>
-              </Content>
-            </div>
+      <GlobalContextProvider emitEvent={this.emitEvent} updateMenu={this.state.updateMenu}>
+        <Wrapper>
+          <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
+          <NavTopRightWrapper>
+            {/* Injection zone not ready yet */}
+            <Logout />
+          </NavTopRightWrapper>
+          <div className="adminPageRightWrapper">
+            <Header />
+            <Content>
+              <Switch>
+                <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
+                <Route path="/me" component={ProfilePage} />
+                <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
+                <Route path="/list-plugins" exact>
+                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                    <InstalledPluginsPage />
+                  </CheckPagePermissions>
+                </Route>
+                <Route path="/marketplace">
+                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                    <MarketplacePage />
+                  </CheckPagePermissions>
+                </Route>
+                <Route path="/settings/:settingId" component={SettingsPage} />
+                <Route path="/settings" component={SettingsPage} exact />
+                <Route key="7" path="" component={NotFoundPage} />
+                <Route key="8" path="/404" component={NotFoundPage} />
+              </Switch>
+            </Content>
+          </div>
 
-            {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
-          </Wrapper>
-        </GlobalContextProvider>
-      </PermissionsManager>
+          {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
+        </Wrapper>
+      </GlobalContextProvider>
     );
   }
 }
-
-Admin.defaultProps = {
-  intl: {
-    formatMessage: () => {},
-    locale: 'en',
-  },
-};
 
 Admin.propTypes = {
   global: PropTypes.shape({
     uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
   }).isRequired,
-  intl: PropTypes.shape({
-    formatMessage: PropTypes.func,
-    locale: PropTypes.string,
-  }),
+
   plugins: PropTypes.object.isRequired,
 };
 
@@ -167,4 +145,4 @@ const mapStateToProps = createStructuredSelector({
 
 const withConnect = connect(mapStateToProps);
 
-export default compose(injectIntl, withConnect)(Admin);
+export default compose(withConnect)(Admin);

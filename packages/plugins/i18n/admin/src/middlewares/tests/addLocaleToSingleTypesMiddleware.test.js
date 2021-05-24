@@ -6,8 +6,8 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   beforeEach(() => {
     const store = {
       i18n_locales: { locales: [] },
-      permissionsManager: {
-        userPermissions: [],
+      rbacProvider: {
+        allPermissions: [],
         collectionTypesRelatedPermissions: {
           test: {
             'plugins::content-manager.explorer.read': [],
@@ -78,8 +78,8 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   it('should add a search key with the default locale when the user has the right to read it', () => {
     const tempStore = {
       i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      permissionsManager: {
-        userPermissions: [],
+      rbacProvider: {
+        allPermissions: [],
         collectionTypesRelatedPermissions: {
           test: {
             'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
@@ -118,8 +118,8 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
     const tempStore = {
       i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      permissionsManager: {
-        userPermissions: [],
+      rbacProvider: {
+        allPermissions: [],
         collectionTypesRelatedPermissions: {
           test: {
             'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
@@ -129,8 +129,8 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
       },
     };
     // tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    // tempStore.set('permissionsManager', { userPermissions: [] });
-    // tempStore.set('permissionsManager', {
+    // tempStore.set('rbacProvider', { allPermissions: [] });
+    // tempStore.set('rbacProvider', {
     //   collectionTypesRelatedPermissions: {
     //     test: {
     //       'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
@@ -165,8 +165,8 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   it('should keep the previous search', () => {
     const tempStore = {
       i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      permissionsManager: {
-        userPermissions: [],
+      rbacProvider: {
+        allPermissions: [],
         collectionTypesRelatedPermissions: {
           test: {
             'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
@@ -176,8 +176,8 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
       },
     };
     // tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    // tempStore.set('permissionsManager', { userPermissions: [] });
-    // tempStore.set('permissionsManager', {
+    // tempStore.set('rbacProvider', { allPermissions: [] });
+    // tempStore.set('rbacProvider', {
     //   collectionTypesRelatedPermissions: {
     //     test: {
     //       'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],

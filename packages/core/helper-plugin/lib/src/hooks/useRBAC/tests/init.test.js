@@ -1,6 +1,6 @@
 import init from '../init';
 
-describe('HELPER_PLUGIN | hooks | useUserPermissions | init', () => {
+describe('HELPER_PLUGIN | hooks | useRBAC | init', () => {
   it('should return the correct state with an empty allowedActions object', () => {
     const expected = {
       isLoading: true,
