@@ -113,6 +113,7 @@ export { default as OverlayBlockerContext } from './contexts/OverlayBlockerConte
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as UserContext } from './contexts/UserContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
+export { default as RBACProviderContext } from './contexts/RBACProviderContext';
 
 // Hooks
 export { default as useAppInfos } from './hooks/useAppInfos';
@@ -126,6 +127,7 @@ export { default as useUserPermissions } from './hooks/useUserPermissions';
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
 export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
+export { default as useRBACProvider } from './hooks/useRBACProvider';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';

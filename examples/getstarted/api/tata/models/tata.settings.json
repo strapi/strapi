@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tatas",
+  "info": {
+    "name": "tata",
+    "description": ""
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "eee": {
+      "type": "string"
+    },
+    "eeee": {
+      "type": "string"
+    }
+  }
+}

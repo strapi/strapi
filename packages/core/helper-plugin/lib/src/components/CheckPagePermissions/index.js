@@ -2,14 +2,15 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
-import useUser from '../../hooks/useUser';
+
 import hasPermissions from '../../utils/hasPermissions';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
+import useRBACProvider from '../../hooks/useRBACProvider';
 
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
   const { signal } = abortController;
-  const { userPermissions } = useUser();
+  const { allPermissions } = useRBACProvider();
   const toggleNotification = useNotification();
 
   const [state, setState] = useState({ isLoading: true, canAccess: false });
@@ -20,7 +21,7 @@ const CheckPagePermissions = ({ permissions, children }) => {
       try {
         setState({ isLoading: true, canAccess: false });
 
-        const canAccess = await hasPermissions(userPermissions, permissions, signal);
+        const canAccess = await hasPermissions(allPermissions, permissions, signal);
 
         if (isMounted.current) {
           setState({ isLoading: false, canAccess });

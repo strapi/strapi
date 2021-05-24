@@ -13,9 +13,7 @@ import { RESET_STORE, SET_PERMISSIONS } from './constants';
 
 const initialState = {
   allPermissions: null,
-  adminPermissions: {},
   collectionTypesRelatedPermissions: {},
-  pluginsPermissions: {},
 };
 
 const reducer = (state = initialState, action) =>

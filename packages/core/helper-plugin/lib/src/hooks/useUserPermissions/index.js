@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import hasPermissions from '../../utils/hasPermissions';
-import useUser from '../useUser';
 
 import generateResultsObject from './utils/generateResultsObject';
 import reducer from './reducer';
 import init from './init';
+import useRBACProvider from '../useRBACProvider';
 
 const useUserPermissions = (pluginPermissions, permissions) => {
   const abortController = new AbortController();
@@ -14,8 +14,8 @@ const useUserPermissions = (pluginPermissions, permissions) => {
   const permissionNames = useMemo(() => {
     return Object.keys(pluginPermissions);
   }, [pluginPermissions]);
-  const { userPermissions } = useUser();
-  const currentUserPermissions = permissions || userPermissions;
+  const { allPermissions } = useRBACProvider();
+  const currentUserPermissions = permissions || allPermissions;
   const [state, dispatch] = useReducer(reducer, {}, () => init(permissionNames));
   const checkPermissionsRef = useRef();
   const generateArrayOfPromisesRef = useRef();
