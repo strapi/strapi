@@ -140,7 +140,7 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
   });
 
   describe('REMOVE_FIELD', () => {
-    it('should remove field that is not the id nor the default sort field', () => {
+    it('should remove the field', () => {
       state.modifiedData = {
         layouts: {
           list: ['id', 'description', 'title'],
@@ -161,66 +161,6 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
         },
       };
       const action = { type: 'REMOVE_FIELD', index: 1 };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should remove field that is used for the default sort and update the default sort', () => {
-      state.modifiedData = {
-        layouts: {
-          list: ['id', 'description', 'title'],
-        },
-        settings: {
-          defaultSortBy: 'id',
-        },
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            list: ['description', 'title'],
-          },
-          settings: {
-            defaultSortBy: 'description',
-          },
-        },
-      };
-      const action = { type: 'REMOVE_FIELD', index: 0 };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('should set the default sort to id if the first field is not sortable', () => {
-      state.modifiedData = {
-        layouts: {
-          list: ['id', 'cover', 'description', 'title'],
-        },
-        settings: {
-          defaultSortBy: 'id',
-        },
-        attributes: {
-          cover: {
-            type: 'media',
-          },
-        },
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            list: ['cover', 'description', 'title'],
-          },
-          settings: {
-            defaultSortBy: 'id',
-          },
-          attributes: {
-            cover: {
-              type: 'media',
-            },
-          },
-        },
-      };
-      const action = { type: 'REMOVE_FIELD', index: 0 };
 
       expect(reducer(state, action)).toEqual(expected);
     });

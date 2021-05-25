@@ -49,30 +49,11 @@ const reducer = (state = initialState, action) =>
       }
       case 'REMOVE_FIELD': {
         const layoutFieldList = get(state, layoutFieldListPath, []);
-        const defaultSortPath = ['modifiedData', 'settings', 'defaultSortBy'];
         set(
           draftState,
           layoutFieldListPath,
           layoutFieldList.filter((_, index) => action.index !== index)
         );
-
-        // TODO : Check with the team if we still need the defaultSortBy reassignment.
-        const fieldToRemove = get(state, [...layoutFieldListPath, action.index], '');
-        const defaultSortField = get(state, defaultSortPath, '');
-
-        if (fieldToRemove === defaultSortField) {
-          const newDefaultSortField = get(current(draftState), [...layoutFieldListPath, 0], '');
-          const firstFieldType = get(
-            current(draftState),
-            ['modifiedData', 'attributes', newDefaultSortField, 'type'],
-            ''
-          );
-          const fieldToSelectAsDefaultSort =
-            firstFieldType !== 'media' && firstFieldType !== 'richtext'
-              ? newDefaultSortField
-              : 'id';
-          set(draftState, defaultSortPath, fieldToSelectAsDefaultSort);
-        }
         break;
       }
       case 'SET_LABEL_TO_EDIT': {
