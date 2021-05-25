@@ -3,7 +3,7 @@ import {
   BaselineAlignment,
   useQuery,
   request,
-  useUserPermissions,
+  useRBAC,
   LoadingIndicatorPage,
   PopUpWarning,
   useNotification,
@@ -25,7 +25,7 @@ const ListPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-  } = useUserPermissions(adminPermissions.settings.users);
+  } = useRBAC(adminPermissions.settings.users);
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
   const [isModalOpened, setIsModalOpened] = useState(false);

@@ -1,11 +1,12 @@
 import React from 'react';
 import {
-  useGlobalContext,
   request,
   useNotification,
   useAutoReloadOverlayBlocker,
+  useStrapiApp,
 } from '@strapi/helper-plugin';
 import { Header, List } from '@buffetjs/custom';
+import { useIntl } from 'react-intl';
 import PageTitle from '../../components/PageTitle';
 import ContainerFluid from '../../components/ContainerFluid';
 import ListWrapper from './ListWrapper';
@@ -15,7 +16,8 @@ import generateRows from './utils/generateRows';
 const InstalledPluginsPage = () => {
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
-  const { formatMessage, plugins } = useGlobalContext();
+  const { formatMessage } = useIntl();
+  const { plugins } = useStrapiApp();
   const onConfirm = async id => {
     try {
       const requestUrl = `/admin/plugins/uninstall/${id}`;

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import {
   Modal,
   ModalFooter,
@@ -23,7 +24,8 @@ const InputModalStepper = ({
   noNavigation,
   onInputMediaChange,
 }) => {
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
   const toggleNotification = useNotification();

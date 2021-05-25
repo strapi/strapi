@@ -2,8 +2,8 @@ import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRedu
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import { useIntl } from 'react-intl';
 import { Table } from '@buffetjs/core';
-import { useGlobalContext } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { checkIfAllEntriesAreSelected, getSelectedIds, headers } from './utils';
 import { initialState, reducer } from './reducer';
@@ -18,7 +18,7 @@ const List = forwardRef(
     const { push } = useHistory();
     const [{ rows }, dispatch] = useReducer(reducer, initialState, init);
 
-    const { formatMessage } = useGlobalContext();
+    const { formatMessage } = useIntl();
 
     useEffect(() => {
       dispatch({

@@ -7,7 +7,7 @@ import {
   PopUpWarning,
   SettingsPageTitle,
   SizedInput,
-  useUserPermissions,
+  useRBAC,
   request,
   useNotification,
   useOverlayBlocker,
@@ -30,7 +30,7 @@ const AdvancedSettingsPage = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-  } = useUserPermissions(updatePermissions);
+  } = useRBAC(updatePermissions);
   const [
     { initialData, isConfirmButtonLoading, isLoading, modifiedData, roles },
     dispatch,

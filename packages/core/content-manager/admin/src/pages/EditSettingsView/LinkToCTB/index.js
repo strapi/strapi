@@ -8,6 +8,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useGlobalContext, CheckPermissions } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 import get from 'lodash/get';
 import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -17,7 +18,8 @@ const permissions = [{ action: 'plugins::content-type-builder.read', subject: nu
 
 // Create link from content-type-builder to content-manager
 const LinkToCTB = ({ modifiedData, slug, type }) => {
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const { push } = useHistory();
 
   const baseUrl = `/plugins/content-type-builder/${

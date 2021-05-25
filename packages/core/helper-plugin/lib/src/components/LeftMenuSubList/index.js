@@ -3,13 +3,13 @@ import PropTypes from 'prop-types';
 import { isObject } from 'lodash';
 import { Collapse } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useGlobalContext } from '../../contexts/GlobalContext';
+import { useIntl } from 'react-intl';
 import LeftMenuLink from '../LeftMenuLink';
 import Dropdown from './Dropdown';
 
 const LeftMenuSubList = ({ isEditable, isFirstItem, isSearching, links, name, onClickEdit }) => {
   const [collapse, setCollapse] = useState(isFirstItem);
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   const toggle = () => {
     setCollapse(!collapse);

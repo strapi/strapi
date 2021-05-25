@@ -7,7 +7,7 @@ import { FormattedMessage } from 'react-intl';
 import {
   PluginHeader,
   getFilterType,
-  useUser,
+  useRBACProvider,
   findMatchingPermissions,
   useGlobalContext,
 } from '@strapi/helper-plugin';
@@ -34,9 +34,9 @@ function FilterPicker({
 }) {
   const { emitEvent } = useGlobalContext();
   const emitEventRef = useRef(emitEvent);
-  const { userPermissions } = useUser();
+  const { allPermissions } = useRBACProvider();
   const readActionAllowedFields = useMemo(() => {
-    const matchingPermissions = findMatchingPermissions(userPermissions, [
+    const matchingPermissions = findMatchingPermissions(allPermissions, [
       {
         action: 'plugins::content-manager.explorer.read',
         subject: slug,
@@ -44,7 +44,7 @@ function FilterPicker({
     ]);
 
     return get(matchingPermissions, ['0', 'properties', 'fields'], []);
-  }, [userPermissions, slug]);
+  }, [allPermissions, slug]);
 
   let timestamps = get(contentType, ['options', 'timestamps']);
 

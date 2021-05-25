@@ -4,7 +4,7 @@ import {
   CheckPagePermissions,
   NotAllowedInput,
   SizedInput,
-  useUserPermissions,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { getRequestUrl } from '../../../../../admin/src/utils';
@@ -26,7 +26,7 @@ const SingleSignOn = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
-  } = useUserPermissions(ssoPermissions);
+  } = useRBAC(ssoPermissions);
 
   const [
     { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader },

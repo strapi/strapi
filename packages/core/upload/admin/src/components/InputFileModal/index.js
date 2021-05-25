@@ -1,7 +1,7 @@
 import React, { createRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import Cloud from '../../icons/Cloud';
 import Label from './Label';
@@ -10,7 +10,7 @@ import P from './P';
 
 const InputFileModal = ({ name, onChange }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const ref = createRef();
 
   const handleAllowDrop = e => e.preventDefault();

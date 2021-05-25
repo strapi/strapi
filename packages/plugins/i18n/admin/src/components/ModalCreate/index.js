@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, TabPanel, useUser } from '@strapi/helper-plugin';
+import { Modal, ModalFooter, TabPanel, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -16,8 +16,8 @@ const ModalCreate = ({ alreadyUsedLocales, onClose, isOpened }) => {
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { isAdding, addLocale } = useAddLocale();
   const { formatMessage } = useIntl();
+  const { refetchPermissions } = useRBACProvider();
 
-  const { fetchUserPermissions } = useUser();
   const shouldUpdatePermissions = useRef(false);
 
   if (isLoading) {
@@ -32,10 +32,10 @@ const ModalCreate = ({ alreadyUsedLocales, onClose, isOpened }) => {
 
   const handleClosed = async () => {
     if (shouldUpdatePermissions.current) {
-      await fetchUserPermissions();
+      await refetchPermissions();
     }
 
-    shouldUpdatePermissions.current = true;
+    shouldUpdatePermissions.current = false;
   };
 
   const options = (defaultLocales || [])

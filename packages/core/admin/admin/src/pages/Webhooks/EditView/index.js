@@ -11,13 +11,13 @@ import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
 import { Play } from '@buffetjs/icons';
 import {
   request,
-  useGlobalContext,
   getYupInnerErrors,
   BackHeader,
   LoadingIndicatorPage,
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { useModels } from '../../../hooks';
 import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
@@ -30,7 +30,7 @@ function EditView() {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const isMounted = useRef();
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [submittedOnce, setSubmittedOnce] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [

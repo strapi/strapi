@@ -1,12 +1,12 @@
 import React from 'react';
 import { Inputs } from '@buffetjs/custom';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import Wrapper from './Wrapper';
 import { getTrad } from '../../utils';
 
 const InputUploadURL = ({ errors, onChange, value }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const label = formatMessage({ id: getTrad('input.url.label') });
   const description = formatMessage({ id: getTrad('input.url.description') });
   const error = errors ? formatMessage({ id: errors.id }, { number: errors.number }) : null;

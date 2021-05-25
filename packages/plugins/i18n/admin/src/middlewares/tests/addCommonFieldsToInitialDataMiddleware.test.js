@@ -1,3 +1,4 @@
+import { fixtures } from '../../../../../../admin-test-utils';
 import addCommonFieldsToInitialDataMiddleware from '../addCommonFieldsToInitialDataMiddleware';
 
 jest.mock('@strapi/helper-plugin', () => ({
@@ -14,20 +15,20 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
   const dispatch = jest.fn();
 
   beforeEach(() => {
-    const store = {};
-
-    store['content-manager_editViewCrudReducer'] = {
-      contentTypeDataStructure: { name: 'test', common: 'common default value' },
-    };
-
-    store['content-manager_editViewLayoutManager'] = {
-      currentLayout: {
-        components: {},
-        contentType: {
-          uid: 'article',
-          attributes: {
-            name: { type: 'string' },
-            common: { type: 'string' },
+    const store = {
+      ...fixtures.store,
+      'content-manager_editViewCrudReducer': {
+        contentTypeDataStructure: { name: 'test', common: 'common default value' },
+      },
+      'content-manager_editViewLayoutManager': {
+        currentLayout: {
+          components: {},
+          contentType: {
+            uid: 'article',
+            attributes: {
+              name: { type: 'string' },
+              common: { type: 'string' },
+            },
           },
         },
       },

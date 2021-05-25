@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useUserPermissions } from '@strapi/helper-plugin';
+import { useRBAC } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { omit } from 'lodash';
@@ -25,7 +25,7 @@ const InputModal = ({
 }) => {
   const singularTypes = allowedTypes.map(type => type.substring(0, type.length - 1));
   const permissions = React.useMemo(() => omit(pluginPermissions, 'main'), []);
-  const { allowedActions, isLoading } = useUserPermissions(permissions);
+  const { allowedActions, isLoading } = useRBAC(permissions);
 
   if (isLoading) {
     return null;

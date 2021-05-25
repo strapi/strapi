@@ -5,6 +5,8 @@ import MockAdapter from 'axios-mock-adapter';
 
 import useFetch from '../index';
 
+jest.mock('react-intl', () => ({ useIntl: () => ({ locale: 'en' }) }));
+
 describe('ADMIN | hooks | useFetchPluginsFromMarketPlace', () => {
   it('should perform a GET request', async () => {
     const mock = new MockAdapter(axios);

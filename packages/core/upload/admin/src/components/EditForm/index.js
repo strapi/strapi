@@ -13,12 +13,9 @@ import axios from 'axios';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { Row } from 'reactstrap';
+import { useIntl } from 'react-intl';
 import { Inputs } from '@buffetjs/custom';
-import {
-  useGlobalContext,
-  useNotification,
-  prefixFileUrlWithBackendUrl,
-} from '@strapi/helper-plugin';
+import { useNotification, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
 import Cropper from 'cropperjs';
 import 'cropperjs/dist/cropper.css';
 import { createFileToDownloadName } from '../../utils';
@@ -58,7 +55,7 @@ const EditForm = forwardRef(
     ref
   ) => {
     const toggleNotification = useNotification();
-    const { formatMessage } = useGlobalContext();
+    const { formatMessage } = useIntl();
     const [isCropping, setIsCropping] = useState(false);
     const [infos, setInfos] = useState({ width: null, height: null });
     const [src, setSrc] = useState(null);

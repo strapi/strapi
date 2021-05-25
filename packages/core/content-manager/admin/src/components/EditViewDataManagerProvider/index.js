@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useReducer } from 'react';
 import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
@@ -57,7 +58,8 @@ const EditViewDataManagerProvider = ({
     return hasDraftAndPublish && !initialData.published_at;
   }, [hasDraftAndPublish, initialData.published_at]);
 
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { emitEvent } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const emitEventRef = useRef(emitEvent);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {

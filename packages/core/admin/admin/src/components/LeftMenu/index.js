@@ -1,13 +1,14 @@
 import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
-// import { LinksSection, LinksContainer } from '../LeftMenuCompos';
+import { useAppInfos } from '@strapi/helper-plugin';
 import { Footer, Header, Loader, LinksContainer, LinksSection } from './compos';
 import Wrapper from './Wrapper';
 import useMenuSections from './useMenuSections';
 
-const LeftMenu = ({ shouldUpdateStrapi, version, plugins, setUpdateMenu }) => {
+const LeftMenu = ({ plugins, setUpdateMenu }) => {
   const location = useLocation();
+  const { shouldUpdateStrapi } = useAppInfos();
 
   const {
     state: {
@@ -81,14 +82,12 @@ const LeftMenu = ({ shouldUpdateStrapi, version, plugins, setUpdateMenu }) => {
           />
         )}
       </LinksContainer>
-      <Footer key="footer" version={version} />
+      <Footer key="footer" />
     </Wrapper>
   );
 };
 
 LeftMenu.propTypes = {
-  shouldUpdateStrapi: PropTypes.bool.isRequired,
-  version: PropTypes.string.isRequired,
   plugins: PropTypes.object.isRequired,
   setUpdateMenu: PropTypes.func.isRequired,
 };

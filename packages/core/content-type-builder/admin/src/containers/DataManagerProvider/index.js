@@ -8,9 +8,11 @@ import {
   PopUpWarning,
   useNotification,
   useStrapiApp,
-  useUser,
   useAutoReloadOverlayBlocker,
+  useAppInfos,
+  useRBACProvider,
 } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
@@ -72,8 +74,10 @@ const DataManagerProvider = ({
 
   const { apis } = getPlugin(pluginId);
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
-  const { autoReload, emitEvent, formatMessage } = useGlobalContext();
-  const { fetchUserPermissions } = useUser();
+  const { autoReload } = useAppInfos();
+  const { formatMessage } = useIntl();
+  const { emitEvent } = useGlobalContext();
+  const { refetchPermissions } = useRBACProvider();
 
   const { pathname } = useLocation();
   const { push } = useHistory();
@@ -514,7 +518,7 @@ const DataManagerProvider = ({
   };
 
   const updatePermissions = async () => {
-    await fetchUserPermissions();
+    await refetchPermissions();
   };
 
   const updateSchema = (data, schemaType, componentUID) => {

@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDebounce } from '@buffetjs/hooks';
 import { Padded } from '@buffetjs/core';
-import { HeaderSearch, useGlobalContext, useQuery, LoadingIndicator } from '@strapi/helper-plugin';
-
+import { HeaderSearch, useQuery, LoadingIndicator } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { useAppContext, useSelectTimestamps } from '../../../hooks';
 import { getTrad } from '../../../utils';
 import ControlsWrapper from '../../../components/ControlsWrapper';
@@ -23,8 +23,7 @@ const HomePageSettings = ({
   const {
     allowedActions: { canUpdate },
   } = useAppContext();
-  // FIXME: when react-intl refacto
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [, updated_at] = useSelectTimestamps();
   const query = useQuery();
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
