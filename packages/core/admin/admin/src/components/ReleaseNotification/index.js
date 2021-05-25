@@ -3,6 +3,9 @@ import { useAppInfos, useNotification } from '@strapi/helper-plugin';
 
 const showUpdateNotif = !JSON.parse(localStorage.getItem('STRAPI_UPDATE_NOTIF'));
 
+// TODO
+// This should be a hook used in the Admin page
+// SWITCH to hook when the rework of the Admin page is under development
 const ReleaseNotification = () => {
   const { latestStrapiReleaseTag, shouldUpdateStrapi } = useAppInfos();
   const toggleNotification = useNotification();

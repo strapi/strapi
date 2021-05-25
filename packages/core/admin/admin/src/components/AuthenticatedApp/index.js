@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useMemo } from 'react';
 import { LoadingIndicatorPage, AppInfosContext } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import packageJSON from '../../../../package.json';
@@ -12,14 +12,9 @@ const canFetchRelease = STRAPI_ADMIN_UPDATE_NOTIFICATION === 'true';
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
-  const [state, setState] = useState({
-    shouldUpdateStrapi: false,
-    latestStrapiReleaseTag: strapiVersion,
-  });
-
   const [
     { data: appInfos, status },
-    { data: tag_name, status: releaseStatus, isLoading },
+    { data: tag_name, isLoading },
     { data: permissions, status: fetchPermissionsStatus, refetch, isFetched, isFetching },
   ] = useQueries([
     { queryKey: 'app-infos', queryFn: fetchAppInfo },
@@ -36,14 +31,12 @@ const AuthenticatedApp = () => {
     },
   ]);
 
-  useEffect(() => {
-    if (releaseStatus === 'success') {
-      const shouldUpdateStrapi = checkLatestStrapiVersion(strapiVersion, tag_name);
+  const shouldUpdateStrapi = useMemo(() => checkLatestStrapiVersion(strapiVersion, tag_name), [
+    tag_name,
+  ]);
 
-      setState({ shouldUpdateStrapi, latestStrapiReleaseTag: tag_name });
-    }
-  }, [releaseStatus, tag_name]);
-
+  // We don't need to wait for the release query to be fetched before rendering the plugins
+  // however, we need the appInfos and the permissions
   const shouldShowNotDependentQueriesLoader =
     (isFetching && isFetched) || status === 'loading' || fetchPermissionsStatus === 'loading';
 
@@ -59,7 +52,9 @@ const AuthenticatedApp = () => {
   }
 
   return (
-    <AppInfosContext.Provider value={{ ...appInfos, ...state }}>
+    <AppInfosContext.Provider
+      value={{ ...appInfos, latestStrapiReleaseTag: tag_name, shouldUpdateStrapi }}
+    >
       <RBACProvider permissions={permissions} refetchPermissions={refetch}>
         <PluginsInitializer />
       </RBACProvider>
