@@ -3,11 +3,10 @@
 const os = require('os');
 const path = require('path');
 const fse = require('fs-extra');
-const fetch = require('node-fetch');
-const tar = require('tar');
 const _ = require('lodash');
 const chalk = require('chalk');
-const gitInfo = require('hosted-git-info');
+
+const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
 
 // Specify all the files and directories a template can have
 const allowChildren = '*';
@@ -32,25 +31,20 @@ const allowedTemplateContents = {
  */
 module.exports = async function mergeTemplate(scope, rootPath) {
   // Parse template info
-  const repoInfo = getRepoInfo(scope.template);
-  const { user, project } = repoInfo;
-  console.log(`Installing ${chalk.yellow(`${user}/${project}`)} template.`);
+  const repoInfo = await getRepoInfo(scope.template);
+  const { fullName } = repoInfo;
+  console.log(`Installing ${chalk.yellow(fullName)} template.`);
 
   // Download template repository to a temporary directory
   const templatePath = await fse.mkdtemp(path.join(os.tmpdir(), 'strapi-'));
-
-  try {
-    await downloadGithubRepo(repoInfo, templatePath);
-  } catch (error) {
-    throw Error(`Could not download ${chalk.yellow(`${user}/${project}`)} repository.`);
-  }
+  await downloadGitHubRepo(repoInfo, templatePath);
 
   // Make sure the downloaded template matches the required format
   const { templateConfig } = await checkTemplateRootStructure(templatePath, scope);
   await checkTemplateContentsStructure(path.resolve(templatePath, 'template'));
 
   // Merge contents of the template in the project
-  const fullTemplateUrl = `https://github.com/${user}/${project}`;
+  const fullTemplateUrl = `https://github.com/${fullName}`;
   await mergePackageJSON(rootPath, templateConfig, fullTemplateUrl);
   await mergeFilesAndDirectories(rootPath, templatePath);
 
@@ -167,43 +161,6 @@ async function checkTemplateContentsStructure(templateContentsPath) {
   };
 
   checkPathContents(templateContentsPath, []);
-}
-
-function getRepoInfo(template) {
-  try {
-    const { user, project, default: urlStrategy } = gitInfo.fromUrl(template);
-    if (urlStrategy === 'https' || urlStrategy === 'http') {
-      // A full GitHub URL was provided, return username and project directly
-      return { user, project };
-    }
-    if (urlStrategy === 'shortcut') {
-      // A shorthand was provided, so prefix the project name with "strapi-template-"
-      return {
-        user,
-        project: `strapi-template-${project}`,
-      };
-    }
-  } catch (error) {
-    // If it's not a GitHub URL, then assume it's a shorthand for an official template
-    return {
-      user: 'strapi',
-      project: `strapi-template-${template}`,
-    };
-  }
-}
-
-async function downloadGithubRepo(repoInfo, templatePath) {
-  // Download from GitHub
-  const { user, project } = repoInfo;
-  const codeload = `https://codeload.github.com/${user}/${project}/tar.gz/master`;
-  const response = await fetch(codeload);
-  if (!response.ok) {
-    throw Error(`Could not download the ${chalk.green(`${user}/${project}`)} repository`);
-  }
-
-  await new Promise(resolve => {
-    response.body.pipe(tar.extract({ strip: 1, cwd: templatePath })).on('close', resolve);
-  });
 }
 
 // Merge the template's template.json into the Strapi project's package.json
