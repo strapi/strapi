@@ -1,77 +1,95 @@
-import { fromJS } from 'immutable';
+import produce, { current } from 'immer';
+import set from 'lodash/set';
+import get from 'lodash/get';
 
-const initialState = fromJS({
+const initialState = {
   labelForm: {},
   labelToEdit: '',
   initialData: {},
   modifiedData: {},
   status: 'resolved',
-});
-
-const reducer = (state, action) => {
-  const layoutPath = ['modifiedData', 'layouts', 'list'];
-
-  switch (action.type) {
-    case 'ADD_FIELD':
-      return state.updateIn(layoutPath, list => list.push(action.item));
-
-    case 'MOVE_FIELD':
-      return state.updateIn(['modifiedData', 'layouts', 'list'], list => {
-        return list
-          .delete(action.originalIndex)
-          .insert(action.atIndex, list.get(action.originalIndex));
-      });
-    case 'ON_CHANGE':
-      return state.updateIn(['modifiedData', ...action.keys.split('.')], () => action.value);
-    case 'ON_CHANGE_LABEL_METAS':
-      return state.updateIn(['labelForm', action.name], () => action.value);
-    case 'ON_RESET':
-      return state.update('modifiedData', () => state.get('initialData'));
-    case 'REMOVE_FIELD': {
-      const defaultSortByPath = ['modifiedData', 'settings', 'defaultSortBy'];
-      const defaultSortBy = state.getIn(defaultSortByPath);
-      const attrPath = ['modifiedData', 'layouts', 'list', action.index];
-      const attrToBeRemoved = state.getIn(attrPath);
-
-      const firstAttr = state.getIn(['modifiedData', 'layouts', 'list', 1]);
-      const firstAttrType = state.getIn(['modifiedData', 'attributes', firstAttr, 'type']);
-      const attrToSelect =
-        firstAttrType !== 'media' && firstAttrType !== 'richtext' ? firstAttr : 'id';
-
-      return state
-        .removeIn(['modifiedData', 'layouts', 'list', action.index])
-        .updateIn(defaultSortByPath, () => {
-          if (attrToBeRemoved === defaultSortBy) {
-            return attrToSelect;
-          }
-
-          return defaultSortBy;
-        });
-    }
-    case 'SET_LABEL_TO_EDIT':
-      return state
-        .update('labelToEdit', () => action.labelToEdit)
-        .updateIn(['labelForm', 'label'], () =>
-          state.getIn(['modifiedData', 'metadatas', action.labelToEdit, 'list', 'label'])
-        )
-        .updateIn(['labelForm', 'sortable'], () =>
-          state.getIn(['modifiedData', 'metadatas', action.labelToEdit, 'list', 'sortable'])
-        );
-    case 'UNSET_LABEL_TO_EDIT':
-      return state.update('labelToEdit', () => '').update('labelForm', () => fromJS({}));
-    case 'SUBMIT_LABEL_FORM': {
-      const metaPath = ['modifiedData', 'metadatas', state.get('labelToEdit'), 'list'];
-
-      return state
-        .updateIn([...metaPath, 'label'], () => state.getIn(['labelForm', 'label']))
-        .updateIn([...metaPath, 'sortable'], () => state.getIn(['labelForm', 'sortable']));
-    }
-    case 'SUBMIT_SUCCEEDED':
-      return state.update('initialData', () => state.get('modifiedData'));
-    default:
-      return state;
-  }
 };
+
+const reducer = (state = initialState, action) =>
+  // eslint-disable-next-line consistent-return
+  produce(state, draftState => {
+    const layoutFieldListPath = ['modifiedData', 'layouts', 'list'];
+    switch (action.type) {
+      case 'ADD_FIELD': {
+        const layoutFieldList = get(state, layoutFieldListPath, []);
+        set(draftState, layoutFieldListPath, [...layoutFieldList, action.item]);
+        break;
+      }
+      case 'MOVE_FIELD': {
+        const layoutFieldList = get(state, layoutFieldListPath, []);
+        const { originalIndex, atIndex } = action;
+
+        if (
+          layoutFieldList.length > 1 &&
+          originalIndex <= layoutFieldList.length &&
+          atIndex <= layoutFieldList.length
+        ) {
+          const item = layoutFieldList.splice(action.originalIndex, 1);
+          layoutFieldList.splice(action.atIndex, 0, item[0]);
+          set(draftState, layoutFieldListPath, layoutFieldList);
+        }
+        break;
+      }
+      case 'ON_CHANGE': {
+        set(draftState, ['modifiedData', ...action.keys.split('.')], action.value);
+        break;
+      }
+      case 'ON_CHANGE_LABEL_METAS': {
+        set(draftState, ['labelForm', action.name], action.value);
+        break;
+      }
+      case 'ON_RESET': {
+        draftState.modifiedData = state.initialData;
+        break;
+      }
+      case 'REMOVE_FIELD': {
+        const layoutFieldList = get(state, layoutFieldListPath, []);
+        set(
+          draftState,
+          layoutFieldListPath,
+          layoutFieldList.filter((_, index) => action.index !== index)
+        );
+        break;
+      }
+      case 'SET_LABEL_TO_EDIT': {
+        const { labelToEdit } = action;
+        draftState.labelToEdit = labelToEdit;
+        draftState.labelForm.label = get(
+          current(draftState),
+          ['modifiedData', 'metadatas', labelToEdit, 'list', 'label'],
+          ''
+        );
+        draftState.labelForm.sortable = get(
+          current(draftState),
+          ['modifiedData', 'metadatas', labelToEdit, 'list', 'sortable'],
+          ''
+        );
+        break;
+      }
+      case 'UNSET_LABEL_TO_EDIT': {
+        draftState.labelToEdit = '';
+        draftState.labelForm = {};
+        break;
+      }
+      case 'SUBMIT_LABEL_FORM': {
+        const fieldMetadataPath = ['modifiedData', 'metadatas', state.labelToEdit, 'list'];
+        set(draftState, [...fieldMetadataPath, 'label'], state.labelForm.label);
+        set(draftState, [...fieldMetadataPath, 'sortable'], state.labelForm.sortable);
+        break;
+      }
+      case 'SUBMIT_SUCCEEDED': {
+        draftState.initialData = state.modifiedData;
+        break;
+      }
+      default:
+        return draftState;
+    }
+  });
 
 export default reducer;
 export { initialState };

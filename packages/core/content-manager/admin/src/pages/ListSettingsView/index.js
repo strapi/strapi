@@ -32,7 +32,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   const { formatMessage } = useIntl();
   const { emitEvent, updateMenu } = useGlobalContext();
   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
-  const { labelForm, labelToEdit, initialData, modifiedData } = reducerState.toJS();
+  const { labelForm, labelToEdit, initialData, modifiedData } = reducerState;
   const attributes = useMemo(() => {
     return get(modifiedData, ['attributes'], {});
   }, [modifiedData]);
