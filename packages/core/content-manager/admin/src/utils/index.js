@@ -1,3 +1,4 @@
+export { default as arrayMoveItem } from './arrayMoveItem';
 export { default as checkIfAttributeIsDisplayable } from './checkIfAttributeIsDisplayable';
 export { default as createDefaultForm } from './createDefaultForm';
 export { default as dateFormats } from './dateFormats';

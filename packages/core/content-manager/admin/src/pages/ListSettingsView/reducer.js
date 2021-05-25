@@ -1,6 +1,7 @@
 import produce, { current } from 'immer';
 import set from 'lodash/set';
 import get from 'lodash/get';
+import { arrayMoveItem } from '../../utils';
 
 const initialState = {
   labelForm: {},
@@ -23,16 +24,11 @@ const reducer = (state = initialState, action) =>
       case 'MOVE_FIELD': {
         const layoutFieldList = get(state, layoutFieldListPath, []);
         const { originalIndex, atIndex } = action;
-
-        if (
-          layoutFieldList.length > 1 &&
-          originalIndex <= layoutFieldList.length &&
-          atIndex <= layoutFieldList.length
-        ) {
-          const item = layoutFieldList.splice(action.originalIndex, 1);
-          layoutFieldList.splice(action.atIndex, 0, item[0]);
-          set(draftState, layoutFieldListPath, layoutFieldList);
-        }
+        set(
+          draftState,
+          layoutFieldListPath,
+          arrayMoveItem(layoutFieldList, originalIndex, atIndex)
+        );
         break;
       }
       case 'ON_CHANGE': {

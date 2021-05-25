@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
+describe('CONTENT MANAGER | CONTAINERS | ListSettingsView | reducer', () => {
   let state;
 
   beforeEach(() => {
@@ -51,42 +51,6 @@ describe('CONTENT MANAGER | CONTAINERS | ListView | reducer', () => {
         },
       };
       const action = { type: 'MOVE_FIELD', atIndex: 1, originalIndex: 2 };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-    it('should not change the field list if 1 item', () => {
-      state.modifiedData = {
-        layouts: {
-          list: ['id'],
-        },
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            list: ['id'],
-          },
-        },
-      };
-      const action = { type: 'MOVE_FIELD', atIndex: 1, originalIndex: 2 };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-    it('should not change the field list if indices are wrong', () => {
-      state.modifiedData = {
-        layouts: {
-          list: ['id', 'description', 'id'],
-        },
-      };
-      const expected = {
-        ...state,
-        modifiedData: {
-          layouts: {
-            list: ['id', 'description', 'id'],
-          },
-        },
-      };
-      const action = { type: 'MOVE_FIELD', atIndex: 5, originalIndex: 7 };
 
       expect(reducer(state, action)).toEqual(expected);
     });

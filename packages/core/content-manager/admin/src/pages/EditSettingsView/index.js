@@ -36,7 +36,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
   const schemasSelector = useMemo(makeSelectModelAndComponentSchemas, []);
   const { schemas } = useSelector(state => schemasSelector(state), shallowEqual);
 
-  const { componentLayouts, initialData, metaToEdit, modifiedData, metaForm } = reducerState.toJS();
+  const { componentLayouts, initialData, metaToEdit, modifiedData, metaForm } = reducerState;
 
   const componentsAndModelsPossibleMainFields = useMemo(() => {
     return createPossibleMainFieldsForModelsAndComponents(schemas);
@@ -167,11 +167,11 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
     }
   };
 
-  const moveRow = (dragRowIndex, hoverRowIndex) => {
+  const moveRow = (fromIndex, toIndex) => {
     dispatch({
       type: 'MOVE_ROW',
-      dragRowIndex,
-      hoverRowIndex,
+      fromIndex,
+      toIndex,
     });
   };
 
@@ -240,7 +240,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
       moveRow={moveRow}
       onAddData={name => {
         dispatch({
-          type: 'ON_ADD_DATA',
+          type: 'ON_ADD_FIELD',
           name,
         });
       }}
@@ -339,11 +339,11 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
                 });
               }}
               buttonData={editRelationsLayoutRemainingFields}
-              moveItem={(dragIndex, hoverIndex) => {
+              moveItem={(fromIndex, toIndex) => {
                 dispatch({
                   type: 'MOVE_RELATION',
-                  dragIndex,
-                  hoverIndex,
+                  fromIndex,
+                  toIndex,
                 });
               }}
               removeItem={index => {

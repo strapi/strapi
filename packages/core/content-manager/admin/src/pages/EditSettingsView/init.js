@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import { cloneDeep, set } from 'lodash';
 import { createLayout, formatLayout } from './utils/layout';
 
@@ -7,12 +6,12 @@ const init = (initialState, mainLayout, components) => {
 
   set(initialData, ['layouts', 'edit'], formatLayout(createLayout(mainLayout.layouts.edit)));
 
-  return fromJS({
-    ...initialState.toJS(),
+  return {
+    ...initialState,
     initialData,
     modifiedData: initialData,
     componentLayouts: components,
-  });
+  };
 };
 
 export default init;
