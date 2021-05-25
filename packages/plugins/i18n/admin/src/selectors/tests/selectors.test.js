@@ -1,6 +1,6 @@
 import { fixtures } from '../../../../../../admin-test-utils';
 import selectCollectionTypePermissions from '../selectCollectionTypesRelatedPermissions';
-import selectI18NLocales from '../selectI18NLocales';
+import selectI18NLocales from '../selectI18nLocales';
 
 describe('i18n | selectors | selectCollectionTypePermissions', () => {
   let store;
