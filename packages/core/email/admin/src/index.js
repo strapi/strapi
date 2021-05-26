@@ -13,7 +13,7 @@ import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import trads from './translations';
 import getTrad from './utils/getTrad';
-import SettingsPage from './containers/Settings';
+import SettingsPage from './pages/Settings';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
