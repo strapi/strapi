@@ -1,5 +1,4 @@
-import { fromJS } from 'immutable';
-import reducer from '../reducer';
+import reducer, { initialState } from '../reducer';
 
 describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
   describe('default action', () => {
@@ -7,11 +6,9 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'TEST',
       };
-      const initialState = fromJS({
-        test: true,
-      });
+      const state = initialState;
 
-      expect(reducer(initialState, action)).toEqual(initialState);
+      expect(reducer(state, action)).toEqual(initialState);
     });
   });
 
@@ -25,11 +22,13 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         },
         nextStep: 'test',
       };
-      const state = fromJS({
+
+      const state = {
         currentStep: 'browse',
         filesToUpload: [],
-      });
-      const expected = fromJS({
+      };
+
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -63,7 +62,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: null,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -77,7 +76,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         },
         nextStep: 'test',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
         filesToUpload: [
           {
@@ -96,8 +95,9 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: null,
           },
         ],
-      });
-      const expected = fromJS({
+      };
+
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -146,7 +146,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: null,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -157,7 +157,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         filesToUpload: {},
         nextStep: 'test',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
         filesToUpload: [
           {
@@ -170,8 +170,8 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: null,
           },
         ],
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -184,7 +184,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: null,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -196,11 +196,11 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
         nextStep: 'test',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
         filesToUpload: [],
         filesToDownload: ['http://www.un.com/photo-1', 'http://www.deux.com/photo-2'],
-      });
+      };
       const firstURL = new URL('http://www.un.com/photo-1');
       const firstURLName = decodeURIComponent(
         firstURL.pathname.substring(firstURL.pathname.lastIndexOf('/') + 1)
@@ -209,7 +209,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const secondURLName = decodeURIComponent(
         secondURL.pathname.substring(secondURL.pathname.lastIndexOf('/') + 1)
       );
-      const expected = fromJS({
+      const expected = {
         currentStep: 'test',
         filesToDownload: [],
         filesToUpload: [
@@ -246,22 +246,22 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 2,
           },
         ],
-      });
+      };
 
       const received = reducer(state, action);
 
-      expect(received.get('currentStep')).toEqual(expected.get('currentStep'));
-      expect(received.get('filesToDownload')).toEqual(expected.get('filesToDownload'));
-      expect(received.get('filesToUpload').toJS()).toEqual(
+      expect(received.currentStep).toEqual(expected.currentStep);
+      expect(received.filesToDownload).toEqual(expected.filesToDownload);
+      expect(received.filesToUpload).toEqual(
         expect.arrayContaining([
-          expect.objectContaining(expected.getIn(['filesToUpload', '0']).toJS()),
-          expect.objectContaining(expected.getIn(['filesToUpload', '1']).toJS()),
+          expect.objectContaining(expected.filesToUpload[0]),
+          expect.objectContaining(expected.filesToUpload[1]),
         ])
       );
     });
 
     it('should add the files to the (not empty) filesToUpload array and update the current step', () => {
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
         filesToDownload: ['http://www.trois.com/photo-3', 'http://www.quatre.com/photo-4'],
         filesToUpload: [
@@ -297,7 +297,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 2,
           },
         ],
-      });
+      };
       const action = {
         type: 'ADD_URLS_TO_FILES_TO_UPLOAD',
         nextStep: 'test',
@@ -310,7 +310,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const secondURLName = decodeURIComponent(
         secondURL.pathname.substring(secondURL.pathname.lastIndexOf('/') + 1)
       );
-      const expected = fromJS({
+      const expected = {
         currentStep: 'test',
         filesToDownload: [],
         filesToUpload: [
@@ -378,18 +378,18 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 4,
           },
         ],
-      });
+      };
 
       const received = reducer(state, action);
 
-      expect(received.get('currentStep')).toEqual(expected.get('currentStep'));
-      expect(received.get('filesToDownload')).toEqual(expected.get('filesToDownload'));
-      expect(received.get('filesToUpload').toJS()).toEqual(
+      expect(received.currentStep).toEqual(expected.currentStep);
+      expect(received.filesToDownload).toEqual(expected.filesToDownload);
+      expect(received.filesToUpload).toEqual(
         expect.arrayContaining([
-          expect.objectContaining(expected.getIn(['filesToUpload', '0']).toJS()),
-          expect.objectContaining(expected.getIn(['filesToUpload', '1']).toJS()),
-          expect.objectContaining(expected.getIn(['filesToUpload', '2']).toJS()),
-          expect.objectContaining(expected.getIn(['filesToUpload', '3']).toJS()),
+          expect.objectContaining(expected.filesToUpload[0]),
+          expect.objectContaining(expected.filesToUpload[1]),
+          expect.objectContaining(expected.filesToUpload[2]),
+          expect.objectContaining(expected.filesToUpload[3]),
         ])
       );
     });
@@ -400,10 +400,10 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'CLEAN_FILES_ERROR',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'test',
         filesToUpload: [],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(state);
     });
@@ -412,7 +412,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'CLEAN_FILES_ERROR',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -440,9 +440,9 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
-      const expected = fromJS({
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -470,7 +470,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -479,7 +479,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'CLEAN_FILES_ERROR',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -508,9 +508,9 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
-      const expected = fromJS({
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -539,7 +539,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -547,7 +547,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
 
   describe('FILE_DOWLOADED', () => {
     it('should update the corresponding file', () => {
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
         filesToDownload: [],
         filesToUpload: [
@@ -581,7 +581,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 2,
           },
         ],
-      });
+      };
 
       const action = {
         type: 'FILE_DOWNLOADED',
@@ -589,7 +589,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         blob: 'test',
       };
 
-      const expected = fromJS({
+      const expected = {
         currentStep: 'browse',
         filesToDownload: [],
         filesToUpload: [
@@ -623,7 +623,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -635,12 +635,12 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         type: 'GO_TO',
         to: 'test',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         currentStep: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -654,16 +654,16 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
           test: 'test',
         },
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: null,
         currentStep: 'test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           test: 'test',
         },
         currentStep: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -674,20 +674,20 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'ON_ABORT_UPLOAD',
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: {
           test: 'test',
           isUploading: true,
         },
         currentStep: 'test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           test: 'test',
           isUploading: false,
         },
         currentStep: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -700,20 +700,20 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         keys: 'test',
         value: 'test 1',
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: {
           test: 'test',
           isUploading: true,
         },
         currentStep: 'test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           test: 'test 1',
           isUploading: true,
         },
         currentStep: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -726,14 +726,14 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         keys: 'test',
         value: ['test 1', 'test 2'],
       };
-      const state = fromJS({
+      const state = {
         filesToDownload: [],
         currentStep: 'test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         filesToDownload: ['test 1', 'test 2'],
         currentStep: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -744,20 +744,20 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'ON_SUBMIT_EDIT_EXISTING_FILE',
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: {
           test: 'test',
           isUploading: false,
         },
         currentStep: 'test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           test: 'test',
           isUploading: true,
         },
         currentStep: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -768,7 +768,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'ON_SUBMIT_EDIT_NEW_FILE',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'edit-new',
         filesToUpload: [
           {
@@ -797,8 +797,8 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             otherTest: true,
           },
         },
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         currentStep: 'edit-new',
         filesToUpload: [
           {
@@ -822,7 +822,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
           },
         ],
         fileToEdit: null,
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -834,7 +834,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         type: 'REMOVE_FILE_TO_UPLOAD',
         fileIndex: 1,
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -862,8 +862,8 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -884,23 +884,23 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
   });
 
-  describe('RESET_FILE_TO_UPLOAD', () => {
+  describe('RESET_FILE_TO_EDIT', () => {
     it('should set the fileToEdit key to null', () => {
       const action = {
         type: 'RESET_FILE_TO_EDIT',
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: 'test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: null,
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -910,12 +910,12 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
     it('should return the initialState', () => {
       const action = { type: 'RESET_PROPS' };
       const state = { test: true };
-      const expected = fromJS({
+      const expected = {
         currentStep: 'browse',
         filesToUpload: [],
         filesToDownload: [],
         fileToEdit: null,
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -929,20 +929,20 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
           test: true,
         },
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: {
           originalIndex: 1,
           file: null,
         },
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           originalIndex: 1,
           file: {
             test: true,
           },
         },
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -950,7 +950,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
 
   describe('SET_FILE_TO_DOWNLOAD_ERROR', () => {
     it('should update the specified file error', () => {
-      const state = fromJS({
+      const state = {
         currentStep: 'browse',
         filesToDownload: [],
         filesToUpload: [
@@ -986,14 +986,14 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 2,
           },
         ],
-      });
+      };
 
       const action = {
         type: 'SET_FILE_TO_DOWNLOAD_ERROR',
         fileTempId: 2,
       };
 
-      const expected = fromJS({
+      const expected = {
         currentStep: 'browse',
         filesToDownload: [],
         filesToUpload: [
@@ -1029,7 +1029,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             tempId: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -1042,7 +1042,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         fileIndex: 1,
         errorMessage: 'size limit exceeded',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -1070,9 +1070,9 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
-      const expected = fromJS({
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -1100,7 +1100,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -1112,7 +1112,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         type: 'SET_FILE_TO_EDIT',
         fileIndex: 1,
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: null,
         filesToUpload: [
           {
@@ -1134,8 +1134,8 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             },
           },
         ],
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           originalIndex: 1,
           file: {
@@ -1162,7 +1162,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             },
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -1174,7 +1174,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         type: 'SET_FILE_TO_EDIT_ERROR',
         errorMessage: 'Bad request',
       };
-      const state = fromJS({
+      const state = {
         fileToEdit: {
           originalIndex: 1,
           file: {
@@ -1204,8 +1204,8 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             },
           },
         ],
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         fileToEdit: {
           originalIndex: 1,
           file: {
@@ -1235,7 +1235,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             },
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -1246,7 +1246,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
       const action = {
         type: 'SET_FILES_UPLOADING_STATE',
       };
-      const state = fromJS({
+      const state = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -1274,8 +1274,8 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         currentStep: 'test',
         filesToUpload: [
           {
@@ -1303,7 +1303,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
             originalIndex: 2,
           },
         ],
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });

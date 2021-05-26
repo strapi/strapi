@@ -1,88 +1,98 @@
-import { fromJS } from 'immutable';
+import produce from 'immer';
 
-const initialState = fromJS({
+const initialState = {
   data: [],
   dataCount: 0,
   dataToDelete: [],
   isLoading: true,
   showModalConfirmButtonLoading: false,
   shouldRefetchData: false,
-});
-
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'CLEAR_DATA_TO_DELETE':
-      return state.update('dataToDelete', () => fromJS([]));
-    case 'GET_DATA':
-      return state.update('isLoading', () => true);
-    case 'GET_DATA_ERROR':
-      return state.update('isLoading', () => false);
-    case 'GET_DATA_SUCCEEDED':
-      return state
-        .update('data', () => fromJS(action.data))
-        .update('dataCount', () => action.count)
-        .update('isLoading', () => false);
-    case 'ON_CHANGE_DATA_TO_DELETE': {
-      const { id } = action;
-      const isSelected = state
-        .get('dataToDelete')
-        .find(item => item.get('id').toString() === id.toString());
-
-      if (!isSelected) {
-        const item = state.get('data').find(item => item.get('id').toString() === id.toString());
-
-        return state.update('dataToDelete', dataToDelete => {
-          return dataToDelete.push(item);
-        });
-      }
-
-      const index = state
-        .get('dataToDelete')
-        .findIndex(item => item.get('id').toString() === id.toString());
-
-      return state.removeIn(['dataToDelete', index]);
-    }
-    case 'ON_DELETE_MEDIAS': {
-      return state.update('showModalConfirmButtonLoading', () => true);
-    }
-    case 'ON_DELETE_MEDIAS_SUCCEEDED': {
-      return state
-        .update('dataToDelete', () => fromJS([]))
-        .update('shouldRefetchData', () => true)
-        .update('showModalConfirmButtonLoading', () => false);
-    }
-    case 'ON_DELETE_MEDIAS_ERROR': {
-      return state
-        .update('dataToDelete', () => fromJS([]))
-        .update('showModalConfirmButtonLoading', () => false);
-    }
-    case 'RESET_DATA_TO_DELETE': {
-      return state
-        .update('dataToDelete', () => fromJS([]))
-        .update('shouldRefetchData', () => false)
-        .update('showModalConfirmButtonLoading', () => false);
-    }
-    case 'TOGGLE_SELECT_ALL': {
-      const isSelected = state.get('data').every(item => state.get('dataToDelete').includes(item));
-
-      if (isSelected) {
-        return state.update('dataToDelete', dataToDelete =>
-          dataToDelete.filter(item => !state.get('data').includes(item))
-        );
-      }
-
-      return state.update('dataToDelete', dataToDelete => {
-        const newItems = state.get('data').filter(item => {
-          return !state.get('dataToDelete').includes(item);
-        });
-
-        return dataToDelete.concat(newItems);
-      });
-    }
-    default:
-      return state;
-  }
 };
+
+const reducer = (state, action) =>
+  // eslint-disable-next-line consistent-return
+  produce(state, draftState => {
+    switch (action.type) {
+      case 'CLEAR_DATA_TO_DELETE': {
+        draftState.dataToDelete = [];
+        break;
+      }
+      case 'GET_DATA': {
+        draftState.isLoading = true;
+        break;
+      }
+      case 'GET_DATA_ERROR': {
+        draftState.isLoading = false;
+        break;
+      }
+      case 'GET_DATA_SUCCEEDED': {
+        draftState.data = action.data;
+        draftState.dataCount = action.count;
+        draftState.isLoading = false;
+        break;
+      }
+      case 'ON_CHANGE_DATA_TO_DELETE': {
+        const id = action.id.toString();
+        const index = state.dataToDelete.findIndex(item => item.id.toString() === id);
+        const isSelected = index !== -1;
+
+        if (!isSelected) {
+          const item = state.data.find(item => item.id.toString() === id);
+
+          draftState.dataToDelete.push(item);
+
+          break;
+        }
+
+        draftState.dataToDelete.splice(index, 1);
+
+        break;
+      }
+      case 'ON_DELETE_MEDIAS': {
+        draftState.showModalConfirmButtonLoading = true;
+        break;
+      }
+      case 'ON_DELETE_MEDIAS_SUCCEEDED': {
+        draftState.dataToDelete = [];
+        draftState.shouldRefetchData = true;
+        draftState.showModalConfirmButtonLoading = false;
+
+        break;
+      }
+      case 'ON_DELETE_MEDIAS_ERROR': {
+        draftState.dataToDelete = [];
+        draftState.showModalConfirmButtonLoading = false;
+
+        break;
+      }
+      case 'RESET_DATA_TO_DELETE': {
+        draftState.dataToDelete = [];
+        draftState.shouldRefetchData = false;
+        draftState.showModalConfirmButtonLoading = false;
+        break;
+      }
+      case 'TOGGLE_SELECT_ALL': {
+        const isSelected = state.data.every(
+          item => state.dataToDelete.find(data => data.id === item.id) !== undefined
+        );
+
+        if (isSelected) {
+          draftState.dataToDelete = state.dataToDelete.filter(item => {
+            return state.data.findIndex(data => data.id === item.id) === -1;
+          });
+          break;
+        }
+
+        const newItems = state.data.filter(item => !state.dataToDelete.includes(item));
+
+        draftState.dataToDelete = [...state.dataToDelete, ...newItems];
+
+        break;
+      }
+      default:
+        return state;
+    }
+  });
 
 export default reducer;
 export { initialState };

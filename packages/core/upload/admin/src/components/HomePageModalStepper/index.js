@@ -20,7 +20,6 @@ import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils
 import { useAppContext } from '../../hooks';
 import ModalHeader from '../ModalHeader';
 import stepper from './stepper';
-import init from './init';
 import reducer, { initialState } from './reducer';
 
 const HomePageModalStepper = ({
@@ -41,8 +40,11 @@ const HomePageModalStepper = ({
   const [formErrors, setFormErrors] = useState(null);
   const [shouldRefetch, setShouldRefetch] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { currentStep, fileToEdit, filesToDownload, filesToUpload } = reducerState.toJS();
+  const [{ currentStep, fileToEdit, filesToDownload, filesToUpload }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
+
   const { Component, components, headerBreadcrumbs, next, prev, withBackButton } = stepper[
     currentStep
   ];

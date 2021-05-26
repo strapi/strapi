@@ -14,8 +14,12 @@ import reducer, { initialState } from './reducer';
 
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
-  const [reducerState, dispatch] = useReducer(reducer, initialState, init);
-  const { initialData, isLoading, modifiedData } = reducerState.toJS();
+  const [{ initialData, isLoading, modifiedData }, dispatch] = useReducer(
+    reducer,
+    initialState,
+    init
+  );
+
   const isMounted = useRef(true);
   const getDataRef = useRef();
   const toggleNotification = useNotification();

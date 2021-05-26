@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import reducer from '../reducer';
 
 describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
@@ -7,14 +6,14 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
       const action = {
         type: 'CANCEL_CHANGES',
       };
-      const state = fromJS({
+      const state = {
         initialData: 'test',
         modifiedData: 'new test',
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         initialData: 'test',
         modifiedData: 'test',
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -26,16 +25,16 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
         type: 'GET_DATA_SUCCEEDED',
         data: { test: true },
       };
-      const state = fromJS({
+      const state = {
         initialData: null,
         isLoading: true,
         modifiedData: null,
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         initialData: { test: true },
         isLoading: false,
         modifiedData: { test: true },
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -48,7 +47,7 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
         keys: 'responsiveDimensions',
         value: false,
       };
-      const state = fromJS({
+      const state = {
         initialData: {
           responsiveDimensions: true,
         },
@@ -56,12 +55,12 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
         modifiedData: {
           responsiveDimensions: true,
         },
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         initialData: { responsiveDimensions: true },
         isLoading: false,
         modifiedData: { responsiveDimensions: false },
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -72,7 +71,7 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
       const action = {
         type: 'SUBMIT_SUCCEEDED',
       };
-      const state = fromJS({
+      const state = {
         initialData: {
           responsiveDimensions: true,
         },
@@ -80,12 +79,12 @@ describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
         modifiedData: {
           responsiveDimensions: false,
         },
-      });
-      const expected = fromJS({
+      };
+      const expected = {
         initialData: { responsiveDimensions: false },
         isLoading: false,
         modifiedData: { responsiveDimensions: false },
-      });
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
