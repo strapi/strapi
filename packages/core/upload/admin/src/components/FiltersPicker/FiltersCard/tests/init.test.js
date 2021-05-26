@@ -1,9 +1,8 @@
-import { fromJS } from 'immutable';
 import init from '../init';
 
 describe('UPLOAD | components | FiltersPicker | FilersCard | init', () => {
   it('should set the initialState correctly with the retrieved timestamps', () => {
-    const state = fromJS({
+    const state = {
       name: 'created_at',
       filter: '=',
       value: 'test',
@@ -29,11 +28,11 @@ describe('UPLOAD | components | FiltersPicker | FilersCard | init', () => {
           defaultValue: 'image',
         },
       },
-    });
+    };
 
     const timestamps = ['createdAtCustom', 'updatedAtCustom'];
 
-    const expected = fromJS({
+    const expected = {
       name: 'createdAtCustom',
       filter: '=',
       value: 'test',
@@ -59,7 +58,7 @@ describe('UPLOAD | components | FiltersPicker | FilersCard | init', () => {
           defaultValue: 'image',
         },
       },
-    });
+    };
 
     expect(init(state, timestamps)).toEqual(expected);
   });

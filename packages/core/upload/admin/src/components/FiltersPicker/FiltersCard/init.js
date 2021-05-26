@@ -1,21 +1,30 @@
 const init = (initialState, timestamps) => {
   const [created_at, updated_at] = timestamps;
 
-  return initialState
-    .update('name', () => created_at)
-    .updateIn(['filtersForm'], object => {
-      return object.keySeq().reduce((acc, current) => {
-        if (current === 'created_at' && created_at !== 'created_at') {
-          return acc.set(created_at, object.get('created_at')).remove('created_at');
-        }
+  const filtersForm = Object.keys(initialState.filtersForm).reduce((acc, current) => {
+    // The timestamps can be customised so we need to update them
+    if (current === 'created_at') {
+      acc[created_at] = initialState.filtersForm.created_at;
 
-        if (current === 'updated_at' && updated_at !== 'updated_at') {
-          return acc.set(updated_at, object.get('updated_at')).remove('updated_at');
-        }
+      return acc;
+    }
 
-        return acc;
-      }, object);
-    });
+    if (current === 'updated_at') {
+      acc[updated_at] = initialState.filtersForm.updated_at;
+
+      return acc;
+    }
+
+    acc[current] = initialState.filtersForm[current];
+
+    return acc;
+  }, {});
+
+  return {
+    ...initialState,
+    name: created_at,
+    filtersForm,
+  };
 };
 
 export default init;
