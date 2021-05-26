@@ -1,7 +1,7 @@
 import { fromJS } from 'immutable';
 import reducer from '../reducer';
 
-describe('MEDIA LIBRARY | containers | SettingsPage | reducer', () => {
+describe('MEDIA LIBRARY | pages | SettingsPage | reducer', () => {
   describe('CANCEL_CHANGES', () => {
     it('should set the modifiedData with the initialData', () => {
       const action = {

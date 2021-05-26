@@ -1,6 +1,6 @@
 import reducer from '../reducer';
 
-describe('UPLOAD | containers | ModalStepper | reducer', () => {
+describe('UPLOAD | components | InputModalStepperProvider | reducer', () => {
   describe('ADD_FILES_TO_UPLOAD', () => {
     it('should add the files to the empty filesToUpload array and update the current step', () => {
       const action = {

@@ -4,13 +4,12 @@
  *
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, lazy, Suspense } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request, useNotification } from '@strapi/helper-plugin';
-import AuthenticatedApp from '../../components/AuthenticatedApp';
 import PrivateRoute from '../../components/PrivateRoute';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
@@ -20,6 +19,7 @@ import { getDataSucceeded } from './actions';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
+const AuthenticatedApp = lazy(() => import('../../components/AuthenticatedApp'));
 function App(props) {
   const toggleNotification = useNotification();
   const getDataRef = useRef();
@@ -103,22 +103,24 @@ function App(props) {
   }
 
   return (
-    <Wrapper>
-      <Content>
-        <Switch>
-          {authRoutes}
-          <Route
-            path="/auth/:authType"
-            render={routerProps => (
-              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-            )}
-            exact
-          />
-          <PrivateRoute path="/" component={AuthenticatedApp} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
-      </Content>
-    </Wrapper>
+    <Suspense fallback={<LoadingIndicatorPage />}>
+      <Wrapper>
+        <Content>
+          <Switch>
+            {authRoutes}
+            <Route
+              path="/auth/:authType"
+              render={routerProps => (
+                <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+              )}
+              exact
+            />
+            <PrivateRoute path="/" component={AuthenticatedApp} />
+            <Route path="" component={NotFoundPage} />
+          </Switch>
+        </Content>
+      </Wrapper>
+    </Suspense>
   );
 }
 

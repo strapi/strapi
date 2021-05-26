@@ -1,7 +1,10 @@
 import React, { useCallback, useEffect, useState, useReducer, useRef } from 'react';
 import axios from 'axios';
 import PropTypes from 'prop-types';
-import { isEqual, isEmpty, get, set } from 'lodash';
+import isEqual from 'lodash/isEqual';
+import isEmpty from 'lodash/isEmpty';
+import get from 'lodash/get';
+import set from 'lodash/set';
 import { useIntl } from 'react-intl';
 import {
   Modal,
@@ -15,12 +18,12 @@ import { Button } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import { getFilesToDownload, getTrad, getYupError, urlSchema } from '../../utils';
 import { useAppContext } from '../../hooks';
-import ModalHeader from '../../components/ModalHeader';
+import ModalHeader from '../ModalHeader';
 import stepper from './stepper';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const ModalStepper = ({
+const HomePageModalStepper = ({
   initialFileToEdit,
   initialStep,
   isOpen,
@@ -619,7 +622,7 @@ const ModalStepper = ({
   );
 };
 
-ModalStepper.defaultProps = {
+HomePageModalStepper.defaultProps = {
   initialFileToEdit: null,
   initialStep: 'browse',
   onClosed: () => {},
@@ -627,7 +630,7 @@ ModalStepper.defaultProps = {
   onToggle: () => {},
 };
 
-ModalStepper.propTypes = {
+HomePageModalStepper.propTypes = {
   initialFileToEdit: PropTypes.object,
   initialStep: PropTypes.string,
   isOpen: PropTypes.bool.isRequired,
@@ -636,4 +639,4 @@ ModalStepper.propTypes = {
   onToggle: PropTypes.func,
 };
 
-export default ModalStepper;
+export default HomePageModalStepper;

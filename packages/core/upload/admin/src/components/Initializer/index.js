@@ -12,6 +12,7 @@ import { request, useNotification } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import { setFileModelTimestamps } from './actions';
 
+// TODO use the models API and remove this component
 const Initializer = ({ setPlugin }) => {
   const ref = useRef();
   const dispatch = useDispatch();

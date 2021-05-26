@@ -1,7 +1,7 @@
-import CheckControl from '../../components/CheckControl';
-import EditForm from '../../components/EditForm';
-import UploadForm from '../../components/UploadForm';
-import UploadList from '../../components/UploadList';
+import CheckControl from '../CheckControl';
+import EditForm from '../EditForm';
+import UploadForm from '../UploadForm';
+import UploadList from '../UploadList';
 import { getTrad } from '../../utils';
 
 const stepper = {
