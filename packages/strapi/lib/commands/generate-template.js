@@ -10,7 +10,7 @@ const TEMPLATE_CONTENT = ['api', 'components', 'config/functions/bootstrap.js', 
 
 /**
  *
- * @param {string} templatePath Absolute path to template content directory
+ * @param {string} templatePath Absolute path to template directory
  * @param {string} rootBase Name of the root directory
  */
 async function copyContent(templatePath, rootBase) {
@@ -55,18 +55,20 @@ async function templateConfigExists(rootPath) {
 }
 
 module.exports = async function generateTemplate(directory) {
+  // Allow any relative path,
+  // otherwise default destination is at the same level as the current directory
   const dir = directory.startsWith('.') ? directory : `../${directory}`;
   const rootPath = resolve(dir);
 
   // Get path to template directory: <rootPath>/template
   const templatePath = join(rootPath, 'template');
 
-  // Check if the correct template directory structure exists
+  // Check if the template directory exists
   const exists = await fse.pathExists(templatePath);
   const rootBase = basename(rootPath);
 
   if (exists) {
-    // Confirm the user wants to update the existing template
+    // Confirm the user wants to replace the existing template
     const inquiry = await inquirer.prompt({
       type: 'confirm',
       name: 'confirm',
@@ -78,9 +80,9 @@ module.exports = async function generateTemplate(directory) {
     }
   }
 
-  // Create or replace the template content directory
+  // Create or replace root directory with <roothPath>/template
   await fse.ensureDir(templatePath);
-  // Copy the content
+  // Copy content to /template
   await copyContent(templatePath, rootBase);
   // Create config file if it doesn't exist
   const configExists = await templateConfigExists(rootPath);

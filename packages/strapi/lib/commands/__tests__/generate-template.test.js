@@ -55,7 +55,7 @@ describe('generate:template command', () => {
   });
 
   describe('handles prompt input', () => {
-    it('updates directory if confirmed', async () => {
+    it('replaces directory if confirmed', async () => {
       fse.pathExists.mockReturnValue(true);
       const mockInquiry = jest
         .spyOn(inquirer, 'prompt')
