@@ -21,37 +21,37 @@ describe('generate:template command', () => {
   it('creates a new template directory', async () => {
     fse.pathExists.mockReturnValue(false);
     const directory = '../test-dir';
-    const templatePath = resolve(directory);
-    const contentPath = join(templatePath, 'template');
+    const rootPath = resolve(directory);
+    const templatePath = join(rootPath, 'template');
 
     await exportTemplate(directory);
 
-    expect(fse.pathExists).toHaveBeenCalledWith(contentPath);
-    expect(fse.ensureDir).toHaveBeenCalledWith(contentPath);
+    expect(fse.pathExists).toHaveBeenCalledWith(templatePath);
+    expect(fse.ensureDir).toHaveBeenCalledWith(templatePath);
   });
 
   it.each(['api', 'components', 'config/functions/bootstrap.js', 'data'])(
     'copies folder %s',
     async item => {
       const directory = '../test-dir';
-      const templatePath = resolve(directory);
-      const contentPath = join(templatePath, 'template');
+      const rootPath = resolve(directory);
+      const templatePath = join(rootPath, 'template');
 
       await exportTemplate(directory);
 
-      expect(fse.copy).toHaveBeenCalledWith(join(process.cwd(), item), join(contentPath, item));
+      expect(fse.copy).toHaveBeenCalledWith(join(process.cwd(), item), join(templatePath, item));
     }
   );
 
   it('creates a json config file', async () => {
     fse.pathExists.mockReturnValue(false);
     const directory = '../test-dir';
-    const templatePath = resolve(directory);
+    const rootPath = resolve(directory);
 
     await exportTemplate(directory);
 
-    expect(fse.pathExists).toHaveBeenCalledWith(join(templatePath, 'template.json'));
-    expect(fse.writeJSON).toHaveBeenCalledWith(join(templatePath, 'template.json'), {});
+    expect(fse.pathExists).toHaveBeenCalledWith(join(rootPath, 'template.json'));
+    expect(fse.writeJSON).toHaveBeenCalledWith(join(rootPath, 'template.json'), {});
   });
 
   describe('handles prompt input', () => {
@@ -61,12 +61,12 @@ describe('generate:template command', () => {
         .spyOn(inquirer, 'prompt')
         .mockImplementationOnce(() => ({ confirm: true }));
       const directory = '../test-dir';
-      const templatePath = resolve(directory);
-      const contentPath = join(templatePath, 'template');
+      const rootPath = resolve(directory);
+      const templatePath = join(rootPath, 'template');
 
       await exportTemplate(directory);
 
-      expect(fse.pathExists).toHaveBeenCalledWith(contentPath);
+      expect(fse.pathExists).toHaveBeenCalledWith(templatePath);
       expect(mockInquiry).toHaveBeenLastCalledWith(
         expect.objectContaining({ message: expect.any(String), name: 'confirm', type: 'confirm' })
       );
@@ -78,10 +78,10 @@ describe('generate:template command', () => {
       fse.pathExists.mockReturnValue(true);
       jest.spyOn(inquirer, 'prompt').mockImplementationOnce(() => ({ confirm: true }));
       const directory = '../test-dir';
-      const templatePath = resolve(directory);
+      const rootPath = resolve(directory);
 
       await exportTemplate(directory);
-      expect(fse.pathExists).toHaveBeenCalledWith(join(templatePath, 'template.json'));
+      expect(fse.pathExists).toHaveBeenCalledWith(join(rootPath, 'template.json'));
       expect(fse.writeJSON).not.toHaveBeenCalled();
     });
 
@@ -96,14 +96,14 @@ describe('generate:template command', () => {
         throw new Error('exit');
       });
       const directory = '../test-dir';
-      const templatePath = resolve(directory);
-      const contentPath = join(templatePath, 'template');
+      const rootPath = resolve(directory);
+      const templatePath = join(rootPath, 'template');
 
       await exportTemplate(directory).catch(err => {
         expect(err).toEqual(new Error('exit'));
       });
 
-      expect(fse.pathExists).toHaveBeenCalledWith(contentPath);
+      expect(fse.pathExists).toHaveBeenCalledWith(templatePath);
       expect(mockInquiry).toHaveBeenLastCalledWith(
         expect.objectContaining({ message: expect.any(String), name: 'confirm', type: 'confirm' })
       );
