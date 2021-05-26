@@ -7,9 +7,6 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
         type: 'TEST',
       };
       const state = initialState;
-      // const initialState = fromJS({
-      //   test: true,
-      // });
 
       expect(reducer(state, action)).toEqual(initialState);
     });
@@ -392,7 +389,7 @@ describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
           expect.objectContaining(expected.filesToUpload[0]),
           expect.objectContaining(expected.filesToUpload[1]),
           expect.objectContaining(expected.filesToUpload[2]),
-          expect.objectContaining(expected.filesToUpload[[3]]),
+          expect.objectContaining(expected.filesToUpload[3]),
         ])
       );
     });

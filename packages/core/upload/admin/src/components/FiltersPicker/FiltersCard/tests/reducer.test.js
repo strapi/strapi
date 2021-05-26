@@ -24,7 +24,6 @@ describe('Upload | components | FiltersCard | reducer', () => {
       name: 'size',
       value: '0KB',
     };
-    // const expected = state.set('name', 'size').set('value', '0KB');
 
     expect(actual).toEqual(expected);
   });
