@@ -8,54 +8,31 @@ const inquirer = require('inquirer');
 // All directories that a template could need
 const TEMPLATE_CONTENT = ['api', 'components', 'config/functions/bootstrap.js', 'data'];
 
-async function createTemplate(templatePath) {
-  // Get path to template directory: strapi-template-<name>/template
-  const contentPath = join(templatePath, 'template');
-  let successMessage = 'create';
-
-  // Check if the correct template directory structure exists
-  const exists = await fse.pathExists(contentPath);
-  const templateBase = basename(templatePath);
-
-  if (exists) {
-    // Confirm the user wants to update the existing template
-    const inquiry = await inquirer.prompt({
-      type: 'confirm',
-      name: 'confirm',
-      message: `${chalk.yellow(templateBase)} already exists.  Do you want to replace it?`,
-    });
-
-    if (!inquiry.confirm) {
-      process.exit(0);
-    }
-
-    successMessage = 'update';
-  }
-
-  // Create/update the template
-  await fse.ensureDir(contentPath);
-  console.log(`${chalk.cyan(successMessage)}: ${templatePath}`);
-}
-
-async function copyContent(templatePath) {
-  const contentPath = join(templatePath, 'template');
-
-  TEMPLATE_CONTENT.forEach(async item => {
+/**
+ *
+ * @param {string} templatePath Absolute path to template content directory
+ * @param {string} rootBase Name of the root directory
+ */
+async function copyContent(templatePath, rootBase) {
+  for (const item of TEMPLATE_CONTENT) {
     try {
-      await fse.copy(join(process.cwd(), item), join(contentPath, item));
-      const templateBase = basename(templatePath);
+      await fse.copy(join(process.cwd(), item), join(templatePath, item));
       const currentProjectBase = basename(process.cwd());
       console.log(
         `${chalk.green(
           'success'
-        )}: copy ${currentProjectBase}/${item} => ${templateBase}/template/${item}`
+        )}: copy ${currentProjectBase}/${item} => ${rootBase}/template/${item}`
       );
     } catch (error) {
       console.error(`${chalk.red('error')}: ${error.message}`);
     }
-  });
+  }
 }
 
+/**
+ *
+ * @param {string} rootPath Absolute path to the root directory
+ */
 async function writeTemplateJson(rootPath) {
   try {
     await fse.writeJSON(join(rootPath, 'template.json'), {});
@@ -65,22 +42,51 @@ async function writeTemplateJson(rootPath) {
   }
 }
 
-async function configExists(templatePath) {
-  const jsonConfig = await fse.pathExists(join(templatePath, 'template.json'));
-  const functionConfig = await fse.pathExists(join(templatePath, 'template.js'));
+/**
+ *
+ * @param {string} rootPath Absolute path to the root directory
+ * @returns boolean
+ */
+async function templateConfigExists(rootPath) {
+  const jsonConfig = await fse.pathExists(join(rootPath, 'template.json'));
+  const functionConfig = await fse.pathExists(join(rootPath, 'template.js'));
 
   return jsonConfig || functionConfig;
 }
 
 module.exports = async function generateTemplate(directory) {
   const dir = directory.startsWith('.') ? directory : `../${directory}`;
-  const templatePath = resolve(dir);
+  const rootPath = resolve(dir);
 
-  await createTemplate(templatePath);
-  await copyContent(templatePath);
+  // Get path to template directory: <rootPath>/template
+  const templatePath = join(rootPath, 'template');
 
-  const exists = await configExists(templatePath);
-  if (!exists) {
-    await writeTemplateJson(templatePath);
+  // Check if the correct template directory structure exists
+  const exists = await fse.pathExists(templatePath);
+  const rootBase = basename(rootPath);
+
+  if (exists) {
+    // Confirm the user wants to update the existing template
+    const inquiry = await inquirer.prompt({
+      type: 'confirm',
+      name: 'confirm',
+      message: `${chalk.yellow(rootBase)} already exists.  Do you want to replace it?`,
+    });
+
+    if (!inquiry.confirm) {
+      process.exit(0);
+    }
   }
+
+  // Create or replace the template content directory
+  await fse.ensureDir(templatePath);
+  // Copy the content
+  await copyContent(templatePath, rootBase);
+  // Create config file if it doesn't exist
+  const configExists = await templateConfigExists(rootPath);
+  if (!configExists) {
+    await writeTemplateJson(rootPath);
+  }
+
+  console.log(`${chalk.green('success')}: generated template at ${chalk.yellow(rootPath)}`);
 };
