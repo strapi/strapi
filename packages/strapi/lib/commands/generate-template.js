@@ -56,10 +56,31 @@ async function copyContent(templatePath) {
   });
 }
 
+async function writeTemplateJson(rootPath) {
+  try {
+    await fse.writeJSON(join(rootPath, 'template.json'), {});
+    console.log(`${chalk.green('success')}: create JSON config file`);
+  } catch (error) {
+    console.error(`${chalk.red('error')}: ${error.message}`);
+  }
+}
+
+async function configExists(templatePath) {
+  const jsonConfig = await fse.pathExists(join(templatePath, 'template.json'));
+  const functionConfig = await fse.pathExists(join(templatePath, 'template.js'));
+
+  return jsonConfig || functionConfig;
+}
+
 module.exports = async function generateTemplate(directory) {
   const dir = directory.startsWith('.') ? directory : `../${directory}`;
   const templatePath = resolve(dir);
 
   await createTemplate(templatePath);
   await copyContent(templatePath);
+
+  const exists = await configExists(templatePath);
+  if (!exists) {
+    await writeTemplateJson(templatePath);
+  }
 };

@@ -3,6 +3,7 @@ jest.mock('fs-extra', () => ({
   ensureDir: jest.fn(() => Promise.resolve()),
   copy: jest.fn(() => Promise.resolve()),
   pathExists: jest.fn(() => Promise.resolve()),
+  writeJSON: jest.fn(() => Promise.resolve()),
 }));
 
 const { resolve, join } = require('path');
@@ -42,6 +43,17 @@ describe('generate:template command', () => {
     }
   );
 
+  it('creates a json config file', async () => {
+    fse.pathExists.mockReturnValue(false);
+    const directory = '../test-dir';
+    const templatePath = resolve(directory);
+
+    await exportTemplate(directory);
+
+    expect(fse.pathExists).toHaveBeenCalledWith(join(templatePath, 'template.json'));
+    expect(fse.writeJSON).toHaveBeenCalledWith(join(templatePath, 'template.json'), {});
+  });
+
   describe('handles prompt input', () => {
     it('updates directory if confirmed', async () => {
       fse.pathExists.mockReturnValue(true);
@@ -60,6 +72,17 @@ describe('generate:template command', () => {
       );
       expect(fse.ensureDir).toHaveBeenCalled();
       expect(fse.copy).toHaveBeenCalled();
+    });
+
+    it('does not replace existing config file', async () => {
+      fse.pathExists.mockReturnValue(true);
+      jest.spyOn(inquirer, 'prompt').mockImplementationOnce(() => ({ confirm: true }));
+      const directory = '../test-dir';
+      const templatePath = resolve(directory);
+
+      await exportTemplate(directory);
+      expect(fse.pathExists).toHaveBeenCalledWith(join(templatePath, 'template.json'));
+      expect(fse.writeJSON).not.toHaveBeenCalled();
     });
 
     it('exits if not confirmed', async () => {
