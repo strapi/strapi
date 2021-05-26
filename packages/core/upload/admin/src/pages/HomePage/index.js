@@ -27,9 +27,10 @@ const HomePage = () => {
   const { canRead } = allowedActions;
   const { formatMessage } = useIntl();
   const [, updated_at] = useSelectTimestamps();
-  const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, allowedActions)
-  );
+  const [
+    { data, dataCount, dataToDelete, isLoading, shouldRefetchData, showModalConfirmButtonLoading },
+    dispatch,
+  ] = useReducer(reducer, initialState, () => init(initialState, allowedActions));
   const query = useQuery();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -39,14 +40,7 @@ const HomePage = () => {
   const { push } = useHistory();
   const { search } = useLocation();
   const isMounted = useRef(true);
-  const {
-    data,
-    dataCount,
-    dataToDelete,
-    isLoading,
-    shouldRefetchData,
-    showModalConfirmButtonLoading,
-  } = reducerState.toJS();
+
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
   const paramsKeys = ['_limit', '_start', '_q', '_sort'];
 
