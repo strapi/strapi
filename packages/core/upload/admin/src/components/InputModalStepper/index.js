@@ -4,8 +4,7 @@ import { useRBAC } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
 import { omit } from 'lodash';
-import DragLayer from '../../components/DragLayer';
-
+import DragLayer from '../DragLayer';
 import pluginPermissions from '../../permissions';
 import InputModalStepper from './InputModalStepper';
 import InputModalStepperProvider from '../InputModalStepperProvider';

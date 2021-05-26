@@ -12,7 +12,7 @@ import {
 import { Button } from '@buffetjs/core';
 import { get, isEmpty, isEqual } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
-import ModalHeader from '../../components/ModalHeader';
+import ModalHeader from "../ModalHeader";
 import pluginId from '../../pluginId';
 import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';

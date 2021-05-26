@@ -1,6 +1,6 @@
 import createNewFilesToUploadArray from '../createNewFilesToUploadArray';
 
-describe('UPLOAD | containers | ModalStepper | utils', () => {
+describe('UPLOAD | utils', () => {
   describe('createNewFilesToUploadArray', () => {
     it('should create an array containing the data', () => {
       const data = {

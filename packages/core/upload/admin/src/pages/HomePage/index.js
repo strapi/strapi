@@ -16,7 +16,7 @@ import { formatFileForEditing, getRequestUrl, getTrad } from '../../utils';
 import { useAppContext, useSelectTimestamps } from '../../hooks';
 import Container from '../../components/Container';
 import HomePageContent from './HomePageContent';
-import ModalStepper from '../ModalStepper';
+import HomePageModalStepper from '../../components/HomePageModalStepper';
 import { generateStringFromParams, getHeaderLabel } from './utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
@@ -349,7 +349,7 @@ const HomePage = () => {
     <Container>
       <Header {...headerProps} isLoading={isLoading} />
       {content}
-      <ModalStepper
+      <HomePageModalStepper
         initialFileToEdit={fileToEdit}
         initialStep={modalInitialStep}
         isOpen={isModalOpen}

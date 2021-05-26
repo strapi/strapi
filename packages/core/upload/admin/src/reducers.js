@@ -1,4 +1,4 @@
-import initializerReducer from './containers/Initializer/reducer';
+import initializerReducer from './components/Initializer/reducer';
 import pluginId from './pluginId';
 
 const reducers = {

@@ -11,12 +11,12 @@ import {
 import pluginPermissions from '../../permissions';
 import { getTrad, formatFileForEditing } from '../../utils';
 import CardControl from '../CardControl';
+import InputModalStepper from '../InputModalStepper';
 import CardControlWrapper from './CardControlWrapper';
 import CardPreviewWrapper from './CardPreviewWrapper';
 import EmptyInputMedia from './EmptyInputMedia';
 import EmptyText from './EmptyText';
 import InputFilePreview from './InputFilePreview';
-import InputModalStepper from '../../containers/InputModalStepper';
 import Name from './Name';
 import Wrapper from './Wrapper';
 import Input from '../Input';

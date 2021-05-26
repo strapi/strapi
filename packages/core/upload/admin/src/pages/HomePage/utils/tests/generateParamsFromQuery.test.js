@@ -1,6 +1,6 @@
 import generateParamsFromQuery from '../generateParamsFromQuery';
 
-describe('MEDIA LIBRARY | containers | HomePage | utils', () => {
+describe('MEDIA LIBRARY | pages | HomePage | utils', () => {
   describe('generateParamsFromQuery', () => {
     it('should return the initial object if search is empty', () => {
       const search = '';

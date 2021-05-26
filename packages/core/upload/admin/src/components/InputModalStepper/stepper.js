@@ -1,10 +1,10 @@
-import CheckControl from '../../components/CheckControl';
-import EditForm from '../../components/EditForm';
+import CheckControl from '../CheckControl';
+import EditForm from '../EditForm';
 import getTrad from '../../utils/getTrad';
-import ListModal from '../../components/ListModal';
+import ListModal from '../ListModal';
 import Search from './Search';
-import UploadForm from '../../components/UploadForm';
-import UploadList from '../../components/UploadList';
+import UploadForm from '../UploadForm';
+import UploadList from '../UploadList';
 
 const stepper = {
   list: {

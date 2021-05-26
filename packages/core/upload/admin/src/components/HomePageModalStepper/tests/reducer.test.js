@@ -1,7 +1,7 @@
 import { fromJS } from 'immutable';
 import reducer from '../reducer';
 
-describe('UPLOAD | containers | ModalStepper | reducer', () => {
+describe('UPLOAD | components | HomePageModalStepper | reducer', () => {
   describe('default action', () => {
     it('should return the initialState', () => {
       const action = {

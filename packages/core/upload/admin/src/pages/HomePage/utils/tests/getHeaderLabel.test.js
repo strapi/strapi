@@ -1,6 +1,6 @@
 import getHeaderLabel from '../getHeaderLabel';
 
-describe('MEDIA LIBRARY | containers | HomePage | utils', () => {
+describe('MEDIA LIBRARY | pages | HomePage | utils', () => {
   describe('getHeaderLabel', () => {
     it('should return the header translation with this empty suffix if count is 0', () => {
       const count = 0;

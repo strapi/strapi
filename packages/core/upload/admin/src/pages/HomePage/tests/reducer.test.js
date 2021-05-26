@@ -1,7 +1,7 @@
 import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
 
-describe('Upload | containers | HomePage | reducer', () => {
+describe('Upload | pages | HomePage | reducer', () => {
   describe('GET_DATA', () => {
     it('should set isLoading to true', () => {
       const state = fromJS({
