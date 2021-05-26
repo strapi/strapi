@@ -51,7 +51,7 @@ const validateLocaleCreation = async (ctx, next) => {
 
   let relatedEntity;
   try {
-    relatedEntity = await getAndValidateRelatedEntity(relatedEntityId, model, locale);
+    relatedEntity = await getAndValidateRelatedEntity(relatedEntityId, model, entityLocale);
   } catch (e) {
     return ctx.badRequest(
       "The related entity doesn't exist or the entity already exists in this locale"
