@@ -36,23 +36,19 @@ const reducer = (state, action) =>
         break;
       }
       case 'CLEAN_FILES_ERROR': {
-        draftState.filesToUpload = state.filesToUpload.map(data => {
-          if (data.tempId) {
-            return data;
+        state.filesToUpload.forEach((file, index) => {
+          if (!file.tempId) {
+            draftState.filesToUpload[index] = { ...file, hasError: false, errorMessage: null };
           }
-
-          return { ...data, hasError: false, errorMessage: null };
         });
 
         break;
       }
       case 'FILE_DOWNLOADED': {
-        draftState.filesToUpload = state.filesToUpload.map(file => {
+        state.filesToUpload.forEach((file, index) => {
           if (file.tempId === action.fileTempId) {
-            return { ...file, isDownloading: false, file: action.blob };
+            draftState.filesToUpload[index] = { ...file, isDownloading: false, file: action.blob };
           }
-
-          return file;
         });
 
         break;
@@ -82,7 +78,7 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_SUBMIT_EDIT_NEW_FILE': {
-        const originalIndex = state.fileToEdit.originalIndex;
+        const { originalIndex } = state.fileToEdit;
 
         draftState.filesToUpload[originalIndex] = state.fileToEdit;
         draftState.fileToEdit = null;
@@ -107,33 +103,29 @@ const reducer = (state, action) =>
         break;
       }
       case 'SET_FILE_ERROR': {
-        draftState.filesToUpload = state.filesToUpload.map(file => {
+        state.filesToUpload.forEach((file, index) => {
           if (file.originalIndex === action.fileIndex) {
-            return {
+            draftState.filesToUpload[index] = {
               ...file,
               isUploading: false,
               hasError: true,
               errorMessage: action.errorMessage,
             };
           }
-
-          return file;
         });
 
         break;
       }
       case 'SET_FILE_TO_DOWNLOAD_ERROR': {
-        draftState.filesToUpload = state.filesToUpload.map(file => {
+        state.filesToUpload.forEach((file, index) => {
           if (file.tempId === action.fileTempId) {
-            return {
+            draftState.filesToUpload[index] = {
               ...file,
               isDownloading: false,
               hasError: true,
               errorMessage: file.fileOriginalName,
             };
           }
-
-          return file;
         });
 
         break;
@@ -150,12 +142,14 @@ const reducer = (state, action) =>
         break;
       }
       case 'SET_FILES_UPLOADING_STATE': {
-        draftState.filesToUpload = state.filesToUpload.map(file => ({
-          ...file,
-          isUploading: true,
-          hasError: false,
-          errorMessage: null,
-        }));
+        state.filesToUpload.forEach((file, index) => {
+          draftState.filesToUpload[index] = {
+            ...file,
+            isUploading: true,
+            hasError: false,
+            errorMessage: null,
+          };
+        });
 
         break;
       }
