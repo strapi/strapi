@@ -13,7 +13,7 @@ import { LeftMenuList, useGlobalContext, useNotification } from '@strapi/helper-
 import { Text } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
-import CustomLink from '../../components/CustomLink';
+import CustomLink from '../CustomLink';
 import useDataManager from '../../hooks/useDataManager';
 import makeSearch from '../../utils/makeSearch';
 import Wrapper from './Wrapper';

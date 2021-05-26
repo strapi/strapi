@@ -2,7 +2,7 @@ import { fromJS, OrderedMap } from 'immutable';
 import reducer, { initialState } from '../reducer';
 import { EDIT_ATTRIBUTE } from '../constants';
 
-describe('CTB | containers | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
+describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
       const contentTypeUID = 'application::address.address';

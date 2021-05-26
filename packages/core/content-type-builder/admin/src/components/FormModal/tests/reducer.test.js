@@ -2,7 +2,7 @@ import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
 import * as actions from '../constants';
 
-describe('CTB | containers | FormModal | reducer | actions', () => {
+describe('CTB | components | FormModal | reducer | actions', () => {
   describe('ADD_COMPONENTS_TO_DYNAMIC_ZONE', () => {
     it('Should add the components correctly', () => {
       const action = {

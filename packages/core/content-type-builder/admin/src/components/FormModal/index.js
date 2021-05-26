@@ -14,7 +14,7 @@ import {
   useStrapiApp,
   InputsIndex,
 } from '@strapi/helper-plugin';
-import { useIntl , FormattedMessage } from 'react-intl';
+import { useIntl, FormattedMessage } from 'react-intl';
 import { Button, Text, Padded } from '@buffetjs/core';
 import { Inputs } from '@buffetjs/custom';
 import { useHistory, useLocation } from 'react-router-dom';
@@ -23,16 +23,16 @@ import { get, has, isEmpty, set, toLower, toString, upperFirst } from 'lodash';
 import { useSelector, useDispatch, shallowEqual } from 'react-redux';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
-import AttributeOption from '../../components/AttributeOption';
-import BooleanBox from '../../components/BooleanBox';
-import ComponentIconPicker from '../../components/ComponentIconPicker';
-import CheckboxWithDescription from '../../components/CheckboxWithDescription';
-import CustomCheckbox from '../../components/CustomCheckbox';
-import ModalHeader from '../../components/ModalHeader';
-import HeaderModalNavContainer from '../../components/HeaderModalNavContainer';
-import RelationForm from '../../components/RelationForm';
-import HeaderNavLink from '../../components/HeaderNavLink';
-import WrapperSelect from '../../components/WrapperSelect';
+import AttributeOption from '../AttributeOption';
+import BooleanBox from '../BooleanBox';
+import ComponentIconPicker from '../ComponentIconPicker';
+import CheckboxWithDescription from '../CheckboxWithDescription';
+import CustomCheckbox from '../CustomCheckbox';
+import ModalHeader from '../ModalHeader';
+import HeaderModalNavContainer from '../HeaderModalNavContainer';
+import RelationForm from '../RelationForm';
+import HeaderNavLink from '../HeaderNavLink';
+import WrapperSelect from '../WrapperSelect';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import {
