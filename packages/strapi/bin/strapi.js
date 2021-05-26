@@ -232,8 +232,8 @@ program
 
 // `$ strapi export:template <name>`
 program
-  .command('export:template <directory>')
-  .description('Export project as Strapi template')
-  .action(getLocalScript('export-template'));
+  .command('generate:template <directory>')
+  .description('Generate template from current Strapi project')
+  .action(getLocalScript('generate-template'));
 
 program.parseAsync(process.argv);

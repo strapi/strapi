@@ -56,7 +56,7 @@ async function copyContent(templatePath) {
   });
 }
 
-module.exports = async function exportTemplate(directory) {
+module.exports = async function generateTemplate(directory) {
   const dir = directory.startsWith('.') ? directory : `../${directory}`;
   const templatePath = resolve(dir);
 

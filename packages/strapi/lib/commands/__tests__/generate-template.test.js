@@ -9,9 +9,9 @@ const { resolve, join } = require('path');
 const fse = require('fs-extra');
 const inquirer = require('inquirer');
 
-const exportTemplate = require('../export-template');
+const exportTemplate = require('../generate-template');
 
-describe('export:template command', () => {
+describe('generate:template command', () => {
   beforeEach(() => {
     jest.spyOn(console, 'log').mockImplementation(() => {});
     jest.clearAllMocks();
