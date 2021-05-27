@@ -1,4 +1,3 @@
-import { upperFirst } from 'lodash';
 import generateAllowedActions from './utils/generateAllowedActions';
 
 const init = permissionsNames => {
