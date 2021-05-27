@@ -4,7 +4,7 @@ import reducer, { initialState } from '../reducer';
 import testData from './data';
 import { ADD_ATTRIBUTE } from '../constants';
 
-describe('CTB | containers | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
+describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
   describe('Adding a common field that is not a relation', () => {
     it('Should add a text field to a content type correctly', () => {
       const state = initialState.setIn(

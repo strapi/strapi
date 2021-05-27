@@ -4,7 +4,7 @@ import reducer, { initialState } from '../reducer';
 import testData from './data';
 import * as actions from '../constants';
 
-describe('CTB | containers | DataManagerProvider | reducer | basics actions ', () => {
+describe('CTB | components | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
     expect(reducer(initialState, { type: 'TEST' })).toEqual(initialState);
   });

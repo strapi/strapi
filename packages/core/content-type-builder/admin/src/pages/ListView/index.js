@@ -11,12 +11,12 @@ import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
+import LeftMenu from '../../components/LeftMenu';
 import ListRow from '../../components/ListRow';
 import List from '../../components/List';
 import ListButton from '../../components/ListButton';
 import useDataManager from '../../hooks/useDataManager';
 import ListHeader from '../../components/ListHeader';
-import LeftMenu from '../LeftMenu';
 import LinkToCMSettingsView from './LinkToCMSettingsView';
 import Wrapper from './Wrapper';
 

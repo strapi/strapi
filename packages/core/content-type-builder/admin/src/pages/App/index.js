@@ -9,7 +9,7 @@ import { Switch, Route } from 'react-router-dom';
 import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import pluginId from '../../pluginId';
-import DataManagerProvider from '../DataManagerProvider';
+import DataManagerProvider from '../../components/DataManagerProvider';
 import RecursivePath from '../RecursivePath';
 import icons from './utils/icons.json';
 import Wrapper from './Wrapper';

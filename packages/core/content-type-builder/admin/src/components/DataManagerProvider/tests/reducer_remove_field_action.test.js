@@ -3,7 +3,7 @@ import reducer, { initialState } from '../reducer';
 import testData from './data';
 import { REMOVE_FIELD } from '../constants';
 
-describe('CTB | containers | DataManagerProvider | reducer | REMOVE_FIELD', () => {
+describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () => {
   describe('Removing a field that is not a relation', () => {
     it('Should remove the attribute correctly from the content type', () => {
       const contentTypeUID = 'application::address.address';
