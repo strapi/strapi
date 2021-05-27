@@ -11,10 +11,10 @@ import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import trads from './translations';
-import RolesPage from './containers/Roles';
-import ProvidersPage from './containers/Providers';
-import EmailTemplatesPage from './containers/EmailTemplates';
-import AdvancedSettingsPage from './containers/AdvancedSettings';
+import RolesPage from './pages/Roles';
+import ProvidersPage from './pages/Providers';
+import EmailTemplatesPage from './pages/EmailTemplates';
+import AdvancedSettingsPage from './pages/AdvancedSettings';
 import getTrad from './utils/getTrad';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
