@@ -1,7 +1,7 @@
 import React, { memo, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
-import { request, useGlobalContext, useNotification } from '@strapi/helper-plugin';
+import { request, useAppMenu, useNotification, useTracking } from '@strapi/helper-plugin';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
@@ -30,7 +30,9 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const { formatMessage } = useIntl();
-  const { emitEvent, updateMenu } = useGlobalContext();
+  // FIXME when we create the CM menu remove the useAppMenu completely
+  const updateMenu = useAppMenu();
+  const { trackUsage } = useTracking();
   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
   const { labelForm, labelToEdit, initialData, modifiedData } = reducerState;
   const attributes = useMemo(() => {
@@ -102,7 +104,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
       dispatch({
         type: 'SUBMIT_SUCCEEDED',
       });
-      emitEvent('didEditListSettings');
+      trackUsage('didEditListSettings');
     } catch (err) {
       toggleNotification({
         type: 'warning',

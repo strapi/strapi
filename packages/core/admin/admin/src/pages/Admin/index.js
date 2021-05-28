@@ -7,19 +7,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import { compose } from 'redux';
 import { Switch, Route } from 'react-router-dom';
 import { isEmpty } from 'lodash';
 // Components from @strapi/helper-plugin
 import {
   difference,
-  GlobalContextProvider,
   CheckPagePermissions,
   NotificationsContext,
+  AppMenuContext,
 } from '@strapi/helper-plugin';
-
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -29,12 +25,10 @@ import HomePage from '../HomePage';
 import MarketplacePage from '../MarketplacePage';
 import NotFoundPage from '../NotFoundPage';
 import OnboardingVideos from '../../components/Onboarding';
-
 import PluginDispatcher from '../PluginDispatcher';
 import ProfilePage from '../ProfilePage';
 import SettingsPage from '../SettingsPage';
 import Logout from './Logout';
-import makeSelecApp from '../App/selectors';
 
 import Wrapper from './Wrapper';
 import Content from './Content';
@@ -56,6 +50,8 @@ export class Admin extends React.Component {
     return !isEmpty(difference(prevProps, this.props)) || !isEmpty(prevState, this.state);
   }
 
+  // FIXME
+  // use the hook when migration to functionnal component
   emitEvent = async (event, properties) => {
     const {
       global: { uuid },
@@ -91,8 +87,9 @@ export class Admin extends React.Component {
   render() {
     const { plugins } = this.props;
 
+    // FIXME: remove the AppMenuContext when refactoring the menu
     return (
-      <GlobalContextProvider emitEvent={this.emitEvent} updateMenu={this.state.updateMenu}>
+      <AppMenuContext.Provider value={this.state.updateMenu}>
         <Wrapper>
           <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
           <NavTopRightWrapper>
@@ -126,23 +123,24 @@ export class Admin extends React.Component {
 
           {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
         </Wrapper>
-      </GlobalContextProvider>
+      </AppMenuContext.Provider>
     );
   }
 }
 
+// TODO
+Admin.defaultProps = {
+  global: {
+    uuid: false,
+  },
+};
+
 Admin.propTypes = {
   global: PropTypes.shape({
     uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-  }).isRequired,
+  }),
 
   plugins: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = createStructuredSelector({
-  global: makeSelecApp(),
-});
-
-const withConnect = connect(mapStateToProps);
-
-export default compose(withConnect)(Admin);
+export default Admin;

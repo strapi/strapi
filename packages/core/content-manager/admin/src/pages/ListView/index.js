@@ -14,7 +14,7 @@ import {
   InjectionZone,
   InjectionZoneList,
   PopUpWarning,
-  useGlobalContext,
+  useTracking,
   useNotification,
   useQueryParams,
   useRBACProvider,
@@ -88,9 +88,9 @@ function ListView({
     },
   } = layout;
   const toggleNotification = useNotification();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
-  const emitEventRef = useRef(emitEvent);
+  const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
 
   const [{ query }, setQuery] = useQueryParams();
@@ -175,7 +175,7 @@ function ListView({
           message: { id: 'content-manager.notification.error.displayedFields' },
         });
       } else {
-        emitEventRef.current('didChangeDisplayedFields');
+        trackUsageRef.current('didChangeDisplayedFields');
 
         onChangeListHeaders({ name, value });
       }
@@ -193,7 +193,7 @@ function ListView({
       });
 
       onDeleteSeveralDataSucceeded();
-      emitEventRef.current('didBulkDeleteEntries');
+      trackUsageRef.current('didBulkDeleteEntries');
     } catch (err) {
       toggleNotification({
         type: 'warning',
@@ -220,7 +220,7 @@ function ListView({
         trackerProperty = { status };
       }
 
-      emitEventRef.current('willDeleteEntry', trackerProperty);
+      trackUsageRef.current('willDeleteEntry', trackerProperty);
       setModalLoadingState();
 
       await request(getRequestUrl(`collection-types/${slug}/${idToDelete}`), {
@@ -234,7 +234,7 @@ function ListView({
 
       // Close the modal and refetch data
       onDeleteDataSucceeded();
-      emitEventRef.current('didDeleteEntry', trackerProperty);
+      trackUsageRef.current('didDeleteEntry', trackerProperty);
     } catch (err) {
       const errorMessage = get(
         err,
@@ -294,7 +294,7 @@ function ListView({
   const toggleFilterPickerState = useCallback(() => {
     setFilterPickerState(prevState => {
       if (!prevState) {
-        emitEventRef.current('willFilterEntries');
+        trackUsageRef.current('willFilterEntries');
       }
 
       return !prevState;
@@ -319,7 +319,7 @@ function ListView({
         onClick: () => {
           const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
 
-          emitEventRef.current('willCreateEntry', trackerProperty);
+          trackUsageRef.current('willCreateEntry', trackerProperty);
           push({
             pathname: `${pathname}/create`,
             search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
@@ -359,7 +359,7 @@ function ListView({
   }, [total, headerAction, label, canRead, formatMessage]);
 
   const handleToggleModalDeleteAll = e => {
-    emitEventRef.current('willBulkDeleteEntries');
+    trackUsageRef.current('willBulkDeleteEntries');
     toggleModalDeleteAll(e);
   };
 
@@ -393,7 +393,13 @@ function ListView({
         <Container className="container-fluid">
           {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading && canRead} />}
           {isSearchable && canRead && (
-            <Search changeParams={setQuery} initValue={_q} model={label} value={_q} />
+            <Search
+              changeParams={setQuery}
+              initValue={_q}
+              model={label}
+              value={_q}
+              trackUsage={trackUsage}
+            />
           )}
 
           {!canRead && (

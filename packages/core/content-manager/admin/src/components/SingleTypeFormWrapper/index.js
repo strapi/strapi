@@ -3,7 +3,7 @@ import { useHistory } from 'react-router-dom';
 import { get } from 'lodash';
 import {
   request,
-  useGlobalContext,
+  useTracking,
   formatComponentData,
   useQueryParams,
   useNotification,
@@ -26,9 +26,9 @@ import buildQueryString from '../../pages/ListView/utils/buildQueryString';
 
 // This container is used to handle the CRUD
 const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { push } = useHistory();
-  const emitEventRef = useRef(emitEvent);
+  const trackUsageRef = useRef(trackUsage);
   const [isCreatingEntry, setIsCreatingEntry] = useState(true);
   const [{ query, rawQuery }] = useQueryParams();
   const searchToSend = buildQueryString(query);
@@ -161,7 +161,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   const onDelete = useCallback(
     async trackerProperty => {
       try {
-        emitEventRef.current('willDeleteEntry', trackerProperty);
+        trackUsageRef.current('willDeleteEntry', trackerProperty);
 
         const response = await request(getRequestUrl(`${slug}`), {
           method: 'DELETE',
@@ -172,11 +172,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           message: { id: getTrad('success.record.delete') },
         });
 
-        emitEventRef.current('didDeleteEntry', trackerProperty);
+        trackUsageRef.current('didDeleteEntry', trackerProperty);
 
         return Promise.resolve(response);
       } catch (err) {
-        emitEventRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
+        trackUsageRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
 
         return Promise.reject(err);
       }
@@ -199,7 +199,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         const response = await request(endPoint, { method: 'PUT', body });
 
-        emitEventRef.current('didCreateEntry', trackerProperty);
+        trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
           type: 'success',
           message: { id: getTrad('success.record.save') },
@@ -210,7 +210,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         dispatch(setStatus('resolved'));
       } catch (err) {
-        emitEventRef.current('didNotCreateEntry', { error: err, trackerProperty });
+        trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
 
         displayErrors(err);
 
@@ -221,14 +221,14 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
   );
   const onPublish = useCallback(async () => {
     try {
-      emitEventRef.current('willPublishEntry');
+      trackUsageRef.current('willPublishEntry');
       const endPoint = getRequestUrl(`${slug}/actions/publish${searchToSend}`);
 
       dispatch(setStatus('publish-pending'));
 
       const data = await request(endPoint, { method: 'POST' });
 
-      emitEventRef.current('didPublishEntry');
+      trackUsageRef.current('didPublishEntry');
       toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.publish') },
@@ -249,7 +249,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       const endPoint = getRequestUrl(`${slug}${rawQuery}`);
 
       try {
-        emitEventRef.current('willEditEntry', trackerProperty);
+        trackUsageRef.current('willEditEntry', trackerProperty);
 
         dispatch(setStatus('submit-pending'));
 
@@ -260,7 +260,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           message: { id: getTrad('success.record.save') },
         });
 
-        emitEventRef.current('didEditEntry', { trackerProperty });
+        trackUsageRef.current('didEditEntry', { trackerProperty });
 
         dispatch(submitSucceeded(cleanReceivedData(response)));
 
@@ -268,7 +268,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       } catch (err) {
         displayErrors(err);
 
-        emitEventRef.current('didNotEditEntry', { error: err, trackerProperty });
+        trackUsageRef.current('didNotEditEntry', { error: err, trackerProperty });
 
         dispatch(setStatus('resolved'));
       }
@@ -283,11 +283,11 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     dispatch(setStatus('unpublish-pending'));
 
     try {
-      emitEventRef.current('willUnpublishEntry');
+      trackUsageRef.current('willUnpublishEntry');
 
       const response = await request(endPoint, { method: 'POST' });
 
-      emitEventRef.current('didUnpublishEntry');
+      trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
         type: 'success',
         message: { id: getTrad('success.record.unpublish') },

@@ -110,9 +110,11 @@ export { default as AppInfosContext } from './contexts/AppInfosContext';
 export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
-export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
 export { default as RBACProviderContext } from './contexts/RBACProviderContext';
+export { default as TrackingContext } from './contexts/TrackingContext';
+// TODO Remove this context
+export { default as AppMenuContext } from './contexts/AppMenuContext';
 
 // Hooks
 export { default as useAppInfos } from './hooks/useAppInfos';
@@ -121,6 +123,9 @@ export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
+export { default as useTracking } from './hooks/useTracking';
+// TODO remove this hook
+export { default as useAppMenu } from './hooks/useAppMenu';
 
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';

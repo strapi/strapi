@@ -9,7 +9,7 @@ import {
   getFilterType,
   useRBACProvider,
   findMatchingPermissions,
-  useGlobalContext,
+  useTracking,
 } from '@strapi/helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -32,8 +32,8 @@ function FilterPicker({
   setQuery,
   slug,
 }) {
-  const { emitEvent } = useGlobalContext();
-  const emitEventRef = useRef(emitEvent);
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
   const { allPermissions } = useRBACProvider();
   const readActionAllowedFields = useMemo(() => {
     const matchingPermissions = findMatchingPermissions(allPermissions, [
@@ -167,7 +167,7 @@ function FilterPicker({
       const nextFilters = formatFiltersToQuery(modifiedData, metadatas);
       const useRelation = nextFilters._where.some(obj => Object.keys(obj)[0].includes('.'));
 
-      emitEventRef.current('didFilterEntries', { useRelation });
+      trackUsageRef.current('didFilterEntries', { useRelation });
       setQuery({ ...nextFilters, page: 1 });
       toggleFilterPickerState();
     },

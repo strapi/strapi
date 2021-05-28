@@ -5,10 +5,10 @@ import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
 import {
   LoadingIndicatorPage,
-  useGlobalContext,
   ContentManagerEditViewDataManagerContext,
   useNotification,
   useOverlayBlocker,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { getTrad, removeKeyInObject } from '../../utils';
 import reducer, { initialState } from './reducer';
@@ -58,9 +58,9 @@ const EditViewDataManagerProvider = ({
     return hasDraftAndPublish && !initialData.published_at;
   }, [hasDraftAndPublish, initialData.published_at]);
 
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
-  const emitEventRef = useRef(emitEvent);
+  const trackUsageRef = useRef(trackUsage);
 
   const shouldRedirectToHomepageWhenEditingEntry = useMemo(() => {
     if (isLoadingForData) {
@@ -119,7 +119,7 @@ const EditViewDataManagerProvider = ({
   }, [initialValues]);
 
   const addComponentToDynamicZone = useCallback((keys, componentUid, shouldCheckErrors = false) => {
-    emitEventRef.current('didAddComponentToDynamicZone');
+    trackUsageRef.current('didAddComponentToDynamicZone');
 
     dispatch({
       type: 'ADD_COMPONENT_TO_DYNAMIC_ZONE',
@@ -345,7 +345,7 @@ const EditViewDataManagerProvider = ({
 
   const moveComponentDown = useCallback(
     (dynamicZoneName, currentIndex) => {
-      emitEventRef.current('changeComponentsOrder');
+      trackUsageRef.current('changeComponentsOrder');
 
       dispatch({
         type: 'MOVE_COMPONENT_DOWN',
@@ -359,7 +359,7 @@ const EditViewDataManagerProvider = ({
 
   const moveComponentUp = useCallback(
     (dynamicZoneName, currentIndex) => {
-      emitEventRef.current('changeComponentsOrder');
+      trackUsageRef.current('changeComponentsOrder');
 
       dispatch({
         type: 'MOVE_COMPONENT_UP',
@@ -398,7 +398,7 @@ const EditViewDataManagerProvider = ({
 
   const removeComponentFromDynamicZone = useCallback(
     (dynamicZoneName, index) => {
-      emitEventRef.current('removeComponentFromDynamicZone');
+      trackUsageRef.current('removeComponentFromDynamicZone');
 
       dispatch({
         type: 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE',

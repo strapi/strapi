@@ -4,12 +4,7 @@ import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
-import {
-  request,
-  useGlobalContext,
-  useNotification,
-  useOverlayBlocker,
-} from '@strapi/helper-plugin';
+import { request, useTracking, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
 import BaselineAlignement from '../../../components/BaselineAlignement';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormCard from '../../../components/FormBloc';
@@ -22,7 +17,7 @@ import schema from './utils/schema';
 
 const CreatePage = () => {
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { goBack } = useHistory();
@@ -74,7 +69,7 @@ const CreatePage = () => {
       })
     )
       .then(() => {
-        emitEvent('didCreateRole');
+        trackUsage('didCreateRole');
         toggleNotification({
           type: 'success',
           message: { id: 'Settings.roles.created' },

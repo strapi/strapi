@@ -2,18 +2,18 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Flex, Padded, Text } from '@buffetjs/core';
-import { BaselineAlignment, useGlobalContext } from '@strapi/helper-plugin';
+import { BaselineAlignment, useTracking } from '@strapi/helper-plugin';
 import { getTrad } from '../../../../utils';
 import Reset from './Reset';
 
 const Header = ({ onClick, onToggle }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
 
   const handleClick = () => {
     onClick();
     onToggle();
 
-    emitEvent('willChangeListFieldsSettings');
+    trackUsage('willChangeListFieldsSettings');
   };
 
   return (

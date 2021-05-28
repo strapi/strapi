@@ -8,14 +8,14 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { ModalHeader as HeaderModal, useGlobalContext } from '@strapi/helper-plugin';
+import { ModalHeader as HeaderModal, useTracking } from '@strapi/helper-plugin';
 
 const ModalHeader = ({ goBack, headerBreadcrumbs, withBackButton, HeaderComponent }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
 
   const handleClick = () => {
-    // Emit event on backButton with hardcoded upload location
-    emitEvent('didGoBack', { location: 'upload' });
+    // Track event on the backButton with hardcoded upload location
+    trackUsage('didGoBack', { location: 'upload' });
 
     goBack('backButton');
   };

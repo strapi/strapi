@@ -4,7 +4,7 @@ import { get, groupBy, set, size } from 'lodash';
 import {
   request,
   LoadingIndicatorPage,
-  useGlobalContext,
+  useTracking,
   PopUpWarning,
   useNotification,
   useStrapiApp,
@@ -76,7 +76,7 @@ const DataManagerProvider = ({
   const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const { autoReload } = useAppInfos();
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
 
   const { pathname } = useLocation();
@@ -229,7 +229,7 @@ const DataManagerProvider = ({
       mainDataKey === 'components' ? REMOVE_FIELD_FROM_DISPLAYED_COMPONENT : REMOVE_FIELD;
 
     if (mainDataKey === 'contentType') {
-      emitEvent('willDeleteFieldOfContentType');
+      trackUsage('willDeleteFieldOfContentType');
     }
 
     dispatch({
@@ -460,11 +460,11 @@ const DataManagerProvider = ({
 
         body.contentType = contentType;
 
-        emitEvent('willSaveContentType');
+        trackUsage('willSaveContentType');
       } else {
         body.component = formatMainDataType(modifiedData.component, true);
 
-        emitEvent('willSaveComponent');
+        trackUsage('willSaveComponent');
       }
 
       const method = isCreating ? 'POST' : 'PUT';
@@ -481,16 +481,16 @@ const DataManagerProvider = ({
 
       // Submit ct tracking success
       if (isInContentTypeView) {
-        emitEvent('didSaveContentType');
+        trackUsage('didSaveContentType');
 
         const oldName = get(body, ['contentType', 'schema', 'name'], '');
         const newName = get(initialData, ['contentType', 'schema', 'name'], '');
 
         if (!isCreating && oldName !== newName) {
-          emitEvent('didEditNameOfContentType');
+          trackUsage('didEditNameOfContentType');
         }
       } else {
-        emitEvent('didSaveComponent');
+        trackUsage('didSaveComponent');
       }
 
       // Reload the plugin so the cycle is new again
@@ -499,7 +499,7 @@ const DataManagerProvider = ({
       getDataRef.current();
     } catch (err) {
       if (!isInContentTypeView) {
-        emitEvent('didNotSaveComponent');
+        trackUsage('didNotSaveComponent');
       }
 
       console.error({ err: err.response });

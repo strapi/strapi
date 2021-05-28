@@ -6,7 +6,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useGlobalContext, CheckPermissions } from '@strapi/helper-plugin';
+import { useTracking, CheckPermissions } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
@@ -18,7 +18,7 @@ const permissions = [{ action: 'plugins::content-type-builder.read', subject: nu
 
 // Create link from content-type-builder to content-manager
 const LinkToCTB = ({ modifiedData, slug, type }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { push } = useHistory();
 
@@ -30,7 +30,7 @@ const LinkToCTB = ({ modifiedData, slug, type }) => {
   const suffixUrl = type === 'content-types' ? slug : `${category}/${slug}`;
 
   const handleClick = () => {
-    emitEvent('willEditEditLayout');
+    trackUsage('willEditEditLayout');
     push(`${baseUrl}/${suffixUrl}`);
   };
 

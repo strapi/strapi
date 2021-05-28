@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useGlobalContext } from '@strapi/helper-plugin';
+import { BackHeader, ListWrapper, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
@@ -32,7 +32,7 @@ const ListView = () => {
     toggleModalCancel,
   } = useDataManager();
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { push, goBack } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
@@ -207,10 +207,10 @@ const ListView = () => {
                 const contentType = kind || firstMainDataPath;
 
                 if (contentType === 'collectionType') {
-                  emitEvent('willEditNameOfContentType');
+                  trackUsage('willEditNameOfContentType');
                 }
                 if (contentType === 'singleType') {
-                  emitEvent('willEditNameOfSingleType');
+                  trackUsage('willEditNameOfSingleType');
                 }
 
                 push({

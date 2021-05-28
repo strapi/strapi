@@ -72,6 +72,7 @@ const useRBAC = (pluginPermissions, permissions) => {
     return () => {
       abortController.abort();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [permissionNames, currentUserPermissions]);
 
   // This function is used to synchronise the hook when used in dynamic components

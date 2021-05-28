@@ -4,18 +4,16 @@
  *
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { isEmpty, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { HeaderSearch, GlobalContext } from '@strapi/helper-plugin';
+import { HeaderSearch } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 
 const WAIT = 400;
 
 class Search extends React.Component {
-  static contextType = GlobalContext;
-
   state = { didType: false, value: this.props.initValue };
 
   timer = null;
@@ -32,7 +30,7 @@ class Search extends React.Component {
 
   handleChange = ({ target }) => {
     if (!this.state.didType) {
-      this.context.emitEvent('didSearch');
+      this.props.trackUsage('didSearch');
     }
 
     clearTimeout(this.timer);
@@ -82,7 +80,8 @@ Search.propTypes = {
   changeParams: PropTypes.func,
   initValue: PropTypes.string.isRequired,
   model: PropTypes.string,
+  trackUsage: PropTypes.func.isRequired,
   value: PropTypes.string,
 };
 
-export default memo(Search);
+export default Search;

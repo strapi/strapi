@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {
   request,
   generateSearchFromFilters,
-  useGlobalContext,
+  useTracking,
   useNotification,
 } from '@strapi/helper-plugin';
 import { clone, get, isEmpty, set } from 'lodash';
@@ -45,7 +45,7 @@ const InputModalStepperProvider = ({
   const toggleNotification = useNotification();
 
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const [, updated_at] = useSelectTimestamps();
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
@@ -82,7 +82,7 @@ const InputModalStepperProvider = ({
 
     // Emit event when the users download files from url
     if (files.length > 0) {
-      emitEvent('didSelectFile', { source: 'url', location: 'content-manager' });
+      trackUsage('didSelectFile', { source: 'url', location: 'content-manager' });
     }
 
     try {
@@ -285,7 +285,7 @@ const InputModalStepperProvider = ({
 
   const handleSetCropResult = blob => {
     // Emit event : the user cropped a file that is not uploaded
-    emitEvent('didCropFile', { duplicatedFile: null, location: 'content-manager' });
+    trackUsage('didCropFile', { duplicatedFile: null, location: 'content-manager' });
 
     dispatch({
       type: 'SET_CROP_RESULT',
@@ -384,7 +384,7 @@ const InputModalStepperProvider = ({
   };
 
   const addFilesToUpload = ({ target: { value } }) => {
-    emitEvent('didSelectFile', { source: 'computer', location: 'content-manager' });
+    trackUsage('didSelectFile', { source: 'computer', location: 'content-manager' });
 
     dispatch({
       type: 'ADD_FILES_TO_UPLOAD',

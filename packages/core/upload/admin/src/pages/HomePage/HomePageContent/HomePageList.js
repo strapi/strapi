@@ -53,7 +53,7 @@ const HomePageList = ({
         <Padded left right size="sm">
           <Padded left right size="xs">
             <PageFooter
-              context={{ emitEvent: () => {} }}
+              context={{ trackUsage: () => {} }}
               count={dataCount}
               onChangeParams={handleChangeListParams}
               params={params}

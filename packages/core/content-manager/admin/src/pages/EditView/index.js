@@ -7,7 +7,7 @@ import {
   InjectionZone,
   LiLink,
   CheckPermissions,
-  useGlobalContext,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import pluginId from '../../pluginId';
@@ -41,7 +41,7 @@ const EditView = ({
   origin,
   userPermissions,
 }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -233,7 +233,7 @@ const EditView = ({
                           icon="layout"
                           url={configurationsURL}
                           onClick={() => {
-                            // emitEvent('willEditContentTypeLayoutFromEditView');
+                            // trackUsage('willEditContentTypeLayoutFromEditView');
                           }}
                         />
                       </CheckPermissions>
@@ -244,7 +244,7 @@ const EditView = ({
                               id: getTrad('containers.Edit.Link.Fields'),
                             }}
                             onClick={() => {
-                              emitEvent('willEditEditLayout');
+                              trackUsage('willEditEditLayout');
                             }}
                             icon="fa-cog"
                             url={`/plugins/content-type-builder/content-types/${slug}`}

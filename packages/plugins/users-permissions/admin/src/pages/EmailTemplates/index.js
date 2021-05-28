@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import {
   SettingsPageTitle,
   SizedInput,
-  useGlobalContext,
+  useTracking,
   request,
   getYupInnerErrors,
   useNotification,
@@ -24,10 +24,10 @@ import schema from './utils/schema';
 
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const emitEventRef = useRef(emitEvent);
+  const trackUsageRef = useRef(trackUsage);
   const buttonSubmitRef = useRef(null);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.emailTemplates') });
   const updatePermissions = useMemo(() => {
@@ -106,14 +106,14 @@ const EmailTemplatesPage = () => {
         lockApp();
 
         try {
-          emitEventRef.current('willEditEmailTemplates');
+          trackUsageRef.current('willEditEmailTemplates');
 
           await request(getRequestURL('email-templates'), {
             method: 'PUT',
             body: { 'email-templates': modifiedData },
           });
 
-          emitEventRef.current('didEditEmailTemplates');
+          trackUsageRef.current('didEditEmailTemplates');
 
           toggleNotification({
             type: 'success',

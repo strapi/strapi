@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useSelector, shallowEqual } from 'react-redux';
 import { cloneDeep, flatMap, get, set, pick } from 'lodash';
-import { request, useGlobalContext, useNotification } from '@strapi/helper-plugin';
+import { request, useTracking, useNotification } from '@strapi/helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import pluginId from '../../pluginId';
@@ -24,7 +24,7 @@ import LinkToCTB from './LinkToCTB';
 
 const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, updateLayout }) => {
   const { push } = useHistory();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const toggleNotification = useNotification();
 
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
@@ -133,7 +133,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
         type: 'SUBMIT_SUCCEEDED',
       });
 
-      emitEvent('didEditEditSettings');
+      trackUsage('didEditEditSettings');
     } catch (err) {
       toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
     }

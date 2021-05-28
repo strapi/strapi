@@ -4,7 +4,7 @@
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {
-  app: jest.fn(() => ({ isLoading: true, uuid: false })),
+  // app: jest.fn(() => ({ isLoading: true, uuid: false })),
   language: jest.fn(() => ({ locale: 'en' })),
   menu: jest.fn(() => ({
     collectionTypesSectionLinks: [],
