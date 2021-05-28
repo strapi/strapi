@@ -113,7 +113,7 @@ export { default as OverlayBlockerContext } from './contexts/OverlayBlockerConte
 export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
 export { default as RBACProviderContext } from './contexts/RBACProviderContext';
-
+export { default as TrackingContext } from './contexts/TrackingContext';
 // Hooks
 export { default as useAppInfos } from './hooks/useAppInfos';
 export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
@@ -121,6 +121,7 @@ export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
+export { default as useTracking } from './hooks/useTracking';
 
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
