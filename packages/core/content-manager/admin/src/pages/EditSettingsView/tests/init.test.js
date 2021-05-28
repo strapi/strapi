@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import init from '../init';
 
 describe('CONTENT MANAGER | containers | EditSettingsView | init', () => {
@@ -12,7 +11,7 @@ describe('CONTENT MANAGER | containers | EditSettingsView | init', () => {
       componentLayouts: {},
     };
 
-    const result = init(fromJS(initialState), mainLayout, {}).toJS();
+    const result = init(initialState, mainLayout, {});
 
     expect(result).toEqual(expected);
   });

@@ -1,126 +1,193 @@
-import { fromJS } from 'immutable';
+import produce from 'immer';
+import set from 'lodash/set';
+import get from 'lodash/get';
+import cloneDeep from 'lodash/cloneDeep';
+
+import { arrayMoveItem } from '../../utils';
 import { formatLayout, getInputSize } from './utils/layout';
 
-const initialState = fromJS({
+const initialState = {
   fieldForm: {},
   componentLayouts: {},
   metaToEdit: '',
   initialData: {},
   metaForm: {},
   modifiedData: {},
-});
-
-const reducer = (state, action) => {
-  const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
-  const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
-
-  switch (action.type) {
-    case 'ADD_RELATION':
-      return state.updateIn(layoutPathRelations, list => list.push(action.name));
-    case 'MOVE_RELATION': {
-      return state.updateIn(layoutPathRelations, list => {
-        return list
-          .delete(action.dragIndex)
-          .insert(action.hoverIndex, state.getIn([...layoutPathRelations, action.dragIndex]));
-      });
-    }
-    case 'MOVE_ROW':
-      return state.updateIn(layoutPathEdit, list => {
-        return list
-          .delete(action.dragRowIndex)
-          .insert(action.hoverRowIndex, state.getIn([...layoutPathEdit, action.dragRowIndex]));
-      });
-    case 'ON_ADD_DATA': {
-      const size = getInputSize(state.getIn(['modifiedData', 'attributes', action.name, 'type']));
-
-      const listSize = state.getIn(layoutPathEdit).size;
-      const newList = state.getIn(layoutPathEdit).updateIn([listSize - 1, 'rowContent'], list => {
-        if (list) {
-          return list.push({
-            name: action.name,
-            size,
-          });
-        }
-
-        return fromJS([{ name: action.name, size }]);
-      });
-      const formattedList = formatLayout(newList.toJS());
-
-      return state.updateIn(layoutPathEdit, () => fromJS(formattedList));
-    }
-    case 'ON_CHANGE':
-      return state.updateIn(['modifiedData', ...action.keys], () => action.value);
-    case 'ON_CHANGE_META':
-      return state.updateIn(['metaForm', ...action.keys], () => action.value);
-    case 'ON_RESET':
-      return state.update('modifiedData', () => state.get('initialData'));
-    case 'REMOVE_FIELD': {
-      const row = state.getIn([...layoutPathEdit, action.rowIndex, 'rowContent']);
-      let newState;
-
-      // Delete the entire row if length is one or if lenght is equal to 2 and the second element is the hidden div used to make the dnd exp smoother
-      if (row.size === 1 || (row.size === 2 && row.getIn([1, 'name']) === '_TEMP_')) {
-        newState = state.updateIn(layoutPathEdit, list => list.delete(action.rowIndex));
-      } else {
-        newState = state.updateIn([...layoutPathEdit, action.rowIndex, 'rowContent'], list =>
-          list.delete(action.fieldIndex)
-        );
-      }
-      const updatedList = fromJS(formatLayout(newState.getIn(layoutPathEdit).toJS()));
-
-      return state.updateIn(layoutPathEdit, () => updatedList);
-    }
-    case 'REMOVE_RELATION':
-      return state.updateIn(layoutPathRelations, list => list.delete(action.index));
-    case 'REORDER_DIFF_ROW': {
-      const newState = state
-        .updateIn([...layoutPathEdit, action.dragRowIndex, 'rowContent'], list => {
-          return list.remove(action.dragIndex);
-        })
-        .updateIn([...layoutPathEdit, action.hoverRowIndex, 'rowContent'], list => {
-          return list.insert(
-            action.hoverIndex,
-            state.getIn([...layoutPathEdit, action.dragRowIndex, 'rowContent', action.dragIndex])
-          );
-        });
-
-      const updatedList = formatLayout(newState.getIn(layoutPathEdit).toJS());
-
-      return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
-    }
-    case 'REORDER_ROW': {
-      const newState = state.updateIn(
-        [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
-        list => {
-          return list
-            .delete(action.dragIndex)
-            .insert(action.hoverIndex, list.get(action.dragIndex));
-        }
-      );
-
-      const updatedList = formatLayout(newState.getIn(layoutPathEdit).toJS());
-
-      return state.updateIn(layoutPathEdit, () => fromJS(updatedList));
-    }
-    case 'SET_FIELD_TO_EDIT':
-      return state
-        .update('metaToEdit', () => action.name)
-        .updateIn(['metaForm'], () =>
-          state.getIn(['modifiedData', 'metadatas', action.name, 'edit'])
-        );
-    case 'SUBMIT_META_FORM': {
-      const metaPath = ['modifiedData', 'metadatas', state.get('metaToEdit'), 'edit'];
-
-      return state.updateIn(metaPath, () => state.getIn(['metaForm']));
-    }
-    case 'SUBMIT_SUCCEEDED':
-      return state.update('initialData', () => state.get('modifiedData'));
-    case 'UNSET_FIELD_TO_EDIT':
-      return state.update('metaToEdit', () => '').update('metaForm', () => fromJS({}));
-    default:
-      return state;
-  }
 };
+
+const reducer = (state = initialState, action) =>
+  // eslint-disable-next-line consistent-return
+  produce(state, draftState => {
+    const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
+    const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
+
+    switch (action.type) {
+      case 'ADD_RELATION': {
+        const editRelationLayoutValue = get(state, layoutPathRelations, []);
+        set(draftState, layoutPathRelations, [...editRelationLayoutValue, action.name]);
+        break;
+      }
+      case 'MOVE_RELATION': {
+        const editRelationLayoutValue = get(state, layoutPathRelations, []);
+        const { fromIndex, toIndex } = action;
+        set(
+          draftState,
+          layoutPathRelations,
+          arrayMoveItem(editRelationLayoutValue, fromIndex, toIndex)
+        );
+        break;
+      }
+      case 'MOVE_ROW': {
+        const editFieldLayoutValue = get(state, layoutPathEdit, []);
+        const { fromIndex, toIndex } = action;
+        set(draftState, layoutPathEdit, arrayMoveItem(editFieldLayoutValue, fromIndex, toIndex));
+        break;
+      }
+      case 'ON_ADD_FIELD': {
+        const newState = cloneDeep(state);
+        const size = getInputSize(
+          get(newState, ['modifiedData', 'attributes', action.name, 'type'], '')
+        );
+        const listSize = get(newState, layoutPathEdit, []).length;
+        const actualRowContentPath = [...layoutPathEdit, listSize - 1, 'rowContent'];
+        const rowContentToSet = get(newState, actualRowContentPath, []);
+        let newList = get(newState, layoutPathEdit, []);
+
+        if (Array.isArray(rowContentToSet)) {
+          set(
+            newList,
+            [listSize > 0 ? listSize - 1 : 0, 'rowContent'],
+            [...rowContentToSet, { name: action.name, size }]
+          );
+        } else {
+          set(
+            newList,
+            [listSize > 0 ? listSize - 1 : 0, 'rowContent'],
+            [{ name: action.name, size }]
+          );
+        }
+
+        const formattedList = formatLayout(newList);
+        set(draftState, layoutPathEdit, formattedList);
+        break;
+      }
+      case 'ON_CHANGE': {
+        set(draftState, ['modifiedData', ...action.keys], action.value);
+        break;
+      }
+      case 'ON_CHANGE_META': {
+        set(draftState, ['metaForm', ...action.keys], action.value);
+        break;
+      }
+      case 'ON_RESET': {
+        draftState.modifiedData = state.initialData;
+        break;
+      }
+      case 'REMOVE_FIELD': {
+        const row = get(state, [...layoutPathEdit, action.rowIndex, 'rowContent'], []);
+        let newState = cloneDeep(state);
+
+        if (row.length === 1 || (row.length === 2 && get(row, [1, 'name'], '') === '_TEMP_')) {
+          const currentRowFieldList = get(state, layoutPathEdit, []);
+          set(
+            newState,
+            layoutPathEdit,
+            currentRowFieldList.filter((_, index) => action.rowIndex !== index)
+          );
+        } else {
+          set(
+            newState,
+            [...layoutPathEdit, action.rowIndex, 'rowContent'],
+            row.filter((_, index) => index !== action.fieldIndex)
+          );
+        }
+        const updatedList = formatLayout(get(newState, layoutPathEdit, []));
+        set(draftState, layoutPathEdit, updatedList);
+        break;
+      }
+      case 'REMOVE_RELATION': {
+        const relationList = get(state, layoutPathRelations, []);
+        set(
+          draftState,
+          layoutPathRelations,
+          relationList.filter((_, index) => action.index !== index)
+        );
+        break;
+      }
+      case 'REORDER_DIFF_ROW': {
+        const actualRowContent = get(
+          state,
+          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
+          []
+        );
+        const targetRowContent = get(
+          state,
+          [...layoutPathEdit, action.hoverRowIndex, 'rowContent'],
+          []
+        );
+        const itemToInsert = get(
+          state,
+          [...layoutPathEdit, action.dragRowIndex, 'rowContent', action.dragIndex],
+          {}
+        );
+        const rowContent = [...targetRowContent, itemToInsert];
+        let newState = cloneDeep(state);
+
+        set(
+          newState,
+          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
+          actualRowContent.filter((_, index) => action.dragIndex !== index)
+        );
+        set(
+          newState,
+          [...layoutPathEdit, action.hoverRowIndex, 'rowContent'],
+          arrayMoveItem(rowContent, rowContent.length - 1, action.hoverIndex)
+        );
+
+        const updatedList = formatLayout(get(newState, layoutPathEdit, []));
+        set(draftState, layoutPathEdit, updatedList);
+        break;
+      }
+      case 'REORDER_ROW': {
+        const newState = cloneDeep(state);
+        const rowContent = get(
+          newState,
+          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
+          []
+        );
+
+        set(
+          newState,
+          [...layoutPathEdit, action.dragRowIndex, 'rowContent'],
+          arrayMoveItem(rowContent, action.dragIndex, action.hoverIndex)
+        );
+
+        const updatedList = formatLayout(get(newState, layoutPathEdit, []));
+        set(draftState, layoutPathEdit, updatedList);
+        break;
+      }
+      case 'SET_FIELD_TO_EDIT': {
+        draftState.metaToEdit = action.name;
+        draftState.metaForm = get(state, ['modifiedData', 'metadatas', action.name, 'edit'], {});
+        break;
+      }
+      case 'SUBMIT_META_FORM': {
+        set(draftState, ['modifiedData', 'metadatas', state.metaToEdit, 'edit'], state.metaForm);
+        break;
+      }
+      case 'SUBMIT_SUCCEEDED': {
+        draftState.initialData = state.modifiedData;
+        break;
+      }
+      case 'UNSET_FIELD_TO_EDIT': {
+        draftState.metaToEdit = '';
+        draftState.metaForm = {};
+        break;
+      }
+      default:
+        return draftState;
+    }
+  });
 
 export default reducer;
 export { initialState };
