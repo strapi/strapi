@@ -99,7 +99,7 @@ const connect = (provider, query) => {
         // Add a new #randomsuffix to the username till we find one that is not taken
         var newUsername;
         while (!_.isEmpty(usernames)) {
-          newUsername = `${profile.username} #${randomSuffix()}`;
+          newUsername = `${profile.username}~${randomSuffix()}`;
           usernames = await strapi.query('user', 'users-permissions').find({
             username: newUsername,
           });
