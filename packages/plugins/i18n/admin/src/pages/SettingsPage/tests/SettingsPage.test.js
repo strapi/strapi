@@ -67,7 +67,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   useRBAC: jest.fn(),
   request: jest.fn(),
   selectStyles: () => ({ control: () => ({}), indicatorsContainer: () => ({}) }),
-  useGlobalContext: () => ({ updateMenu: jest.fn() }),
+  useAppMenu: () => jest.fn(),
   useRBACProvider: () => ({ refetchPermissions: jest.fn() }),
   useNotification: () => toggleNotificationMock,
 }));

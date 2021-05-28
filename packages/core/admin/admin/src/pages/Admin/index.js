@@ -12,9 +12,9 @@ import { isEmpty } from 'lodash';
 // Components from @strapi/helper-plugin
 import {
   difference,
-  GlobalContextProvider,
   CheckPagePermissions,
   NotificationsContext,
+  AppMenuContext,
 } from '@strapi/helper-plugin';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
@@ -87,8 +87,9 @@ export class Admin extends React.Component {
   render() {
     const { plugins } = this.props;
 
+    // FIXME: remove the AppMenuContext when refactoring the menu
     return (
-      <GlobalContextProvider updateMenu={this.state.updateMenu}>
+      <AppMenuContext.Provider value={this.state.updateMenu}>
         <Wrapper>
           <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
           <NavTopRightWrapper>
@@ -122,7 +123,7 @@ export class Admin extends React.Component {
 
           {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
         </Wrapper>
-      </GlobalContextProvider>
+      </AppMenuContext.Provider>
     );
   }
 }
