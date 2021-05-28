@@ -87,6 +87,22 @@ const connect = (provider, query) => {
           .query('role', 'users-permissions')
           .findOne({ type: advanced.default_role }, []);
 
+        // Check if a user with the username exists
+        var usernames = await strapi.query('user', 'users-permissions').find({
+            username: profile.username,
+          });
+        
+          // Add ~(number) to the username till we find one that is not taken
+        var i=0;
+        while(!_.isEmpty(usernames)) {
+            usernames = await strapi.query('user', 'users-permissions').find({
+                username: `${profile.username}~${i}`,
+              });
+        }
+
+        // Set the update username
+        profile.username = `${profile.username}~${i}`;
+
         // Create the new user.
         const params = _.assign(profile, {
           provider: provider,
