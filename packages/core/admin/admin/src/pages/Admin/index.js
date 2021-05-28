@@ -88,7 +88,7 @@ export class Admin extends React.Component {
     const { plugins } = this.props;
 
     return (
-      <GlobalContextProvider emitEvent={this.emitEvent} updateMenu={this.state.updateMenu}>
+      <GlobalContextProvider updateMenu={this.state.updateMenu}>
         <Wrapper>
           <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
           <NavTopRightWrapper>

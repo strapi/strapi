@@ -8,7 +8,7 @@ import {
   ModalForm,
   PopUpWarning,
   getYupInnerErrors,
-  useGlobalContext,
+  useTracking,
   useNotification,
   useQuery,
   useStrapiApp,
@@ -74,7 +74,7 @@ const FormModal = () => {
   const reducerState = useSelector(state => formModalSelector(state), shallowEqual);
   const { push } = useHistory();
   const { search } = useLocation();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { getPlugin } = useStrapiApp();
   const ctbPlugin = getPlugin(pluginId);
@@ -206,7 +206,7 @@ const FormModal = () => {
       }
 
       if (actionType === 'edit' && modalType === 'attribute' && forTarget === 'contentType') {
-        emitEvent('willEditFieldOfContentType');
+        trackUsage('willEditFieldOfContentType');
       }
 
       // Case:
@@ -914,7 +914,7 @@ const FormModal = () => {
             header_icon_name_1: 'component',
           };
 
-          emitEvent('willCreateComponentFromAttributesModal');
+          trackUsage('willCreateComponentFromAttributesModal');
 
           push({
             search: makeNextSearch(searchObj, shouldContinue),
@@ -1076,13 +1076,13 @@ const FormModal = () => {
     }
 
     if (isCreatingContentType) {
-      emitEvent('didSelectContentTypeSettings');
+      trackUsage('didSelectContentTypeSettings');
 
       return;
     }
 
     if (state.forTarget === 'contentType') {
-      emitEvent('didSelectContentTypeFieldSettings');
+      trackUsage('didSelectContentTypeFieldSettings');
     }
   };
 
@@ -1093,7 +1093,7 @@ const FormModal = () => {
       state.attributeType !== 'dynamiczone' &&
       shouldContinue
     ) {
-      emitEvent('willAddMoreFieldToContentType');
+      trackUsage('willAddMoreFieldToContentType');
     }
   };
 

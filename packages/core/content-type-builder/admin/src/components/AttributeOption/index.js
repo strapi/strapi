@@ -9,7 +9,7 @@ import { AttributeIcon } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useGlobalContext, useQuery } from '@strapi/helper-plugin';
+import { useTracking, useQuery } from '@strapi/helper-plugin';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import Button from './Button';
@@ -20,7 +20,7 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
   const tabRef = useRef();
   const query = useQuery();
   const { push } = useHistory();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   tabRef.current = tabIndex;
 
   useImperativeHandle(ref, () => ({
@@ -89,7 +89,7 @@ const AttributeOption = forwardRef(({ tabIndex, type }, ref) => {
     });
 
     if (forTarget === 'contentType') {
-      emitEvent('didSelectContentTypeFieldType', { type });
+      trackUsage('didSelectContentTypeFieldType', { type });
     }
 
     push({

@@ -5,14 +5,14 @@ import {
   Modal,
   ModalFooter,
   PopUpWarning,
-  useGlobalContext,
+  useTracking,
   useNotification,
   request,
 } from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { get, isEmpty, isEqual } from 'lodash';
 import { getRequestUrl, getTrad } from '../../utils';
-import ModalHeader from "../ModalHeader";
+import ModalHeader from '../ModalHeader';
 import pluginId from '../../pluginId';
 import stepper from './stepper';
 import useModalContext from '../../hooks/useModalContext';
@@ -24,7 +24,7 @@ const InputModalStepper = ({
   noNavigation,
   onInputMediaChange,
 }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const [shouldDeleteFile, setShouldDeleteFile] = useState(false);
   const [displayNextButton, setDisplayNextButton] = useState(false);
@@ -79,7 +79,7 @@ const InputModalStepper = ({
   const editModalRef = useRef();
 
   const handleReplaceMedia = () => {
-    emitEvent('didReplaceMedia', { location: 'upload' });
+    trackUsage('didReplaceMedia', { location: 'upload' });
 
     editModalRef.current.click();
   };
@@ -243,7 +243,7 @@ const InputModalStepper = ({
     submitEditExistingFile();
 
     if (isSubmittingAfterCrop) {
-      emitEvent('didCropFile', {
+      trackUsage('didCropFile', {
         duplicatedFile: shouldDuplicateMedia,
         location: 'content-manager',
       });

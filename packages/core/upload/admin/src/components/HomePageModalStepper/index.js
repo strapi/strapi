@@ -10,7 +10,7 @@ import {
   Modal,
   ModalFooter,
   PopUpWarning,
-  useGlobalContext,
+  useTracking,
   request,
   useNotification,
 } from '@strapi/helper-plugin';
@@ -32,7 +32,7 @@ const HomePageModalStepper = ({
 }) => {
   const toggleNotification = useNotification();
   const { allowedActions } = useAppContext();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const [isWarningDeleteOpen, setIsWarningDeleteOpen] = useState(false);
   const [showModalConfirmButtonLoading, setShowModalConfirmButtonLoading] = useState(false);
@@ -84,7 +84,7 @@ const HomePageModalStepper = ({
   }, [isOpen]);
 
   const addFilesToUpload = ({ target: { value } }) => {
-    emitEvent('didSelectFile', { source: 'computer', location: 'upload' });
+    trackUsage('didSelectFile', { source: 'computer', location: 'upload' });
 
     dispatch({
       type: 'ADD_FILES_TO_UPLOAD',
@@ -99,7 +99,7 @@ const HomePageModalStepper = ({
 
     // Emit event when the users download files from url
     if (files.length > 0) {
-      emitEvent('didSelectFile', { source: 'url', location: 'upload' });
+      trackUsage('didSelectFile', { source: 'url', location: 'upload' });
     }
 
     try {
@@ -294,7 +294,7 @@ const HomePageModalStepper = ({
 
   const handleSetCropResult = blob => {
     // Emit event : the user cropped a file that is not uploaded
-    emitEvent('didCropFile', { duplicatedFile: null, location: 'upload' });
+    trackUsage('didCropFile', { duplicatedFile: null, location: 'upload' });
 
     dispatch({
       type: 'SET_CROP_RESULT',
@@ -321,7 +321,7 @@ const HomePageModalStepper = ({
     e.preventDefault();
 
     if (isSubmittingAfterCrop) {
-      emitEvent('didCropFile', { duplicatedFile: shouldDuplicateMedia, location: 'upload' });
+      trackUsage('didCropFile', { duplicatedFile: shouldDuplicateMedia, location: 'upload' });
     }
 
     dispatch({
@@ -382,7 +382,7 @@ const HomePageModalStepper = ({
   };
 
   const handleReplaceMedia = () => {
-    emitEvent('didReplaceMedia', { location: 'upload' });
+    trackUsage('didReplaceMedia', { location: 'upload' });
     editModalRef.current.click();
   };
 

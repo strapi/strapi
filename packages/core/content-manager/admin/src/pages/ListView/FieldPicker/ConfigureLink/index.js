@@ -1,15 +1,15 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { LayoutIcon, useGlobalContext } from '@strapi/helper-plugin';
+import { LayoutIcon, useTracking } from '@strapi/helper-plugin';
 import { FormattedMessage } from 'react-intl';
 import Link from './StyledLink';
 import Wrapper from './Wrapper';
 
 const ConfigureLink = ({ slug }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
 
   const handleClick = () => {
-    emitEvent('willEditListLayout');
+    trackUsage('willEditListLayout');
   };
 
   return (

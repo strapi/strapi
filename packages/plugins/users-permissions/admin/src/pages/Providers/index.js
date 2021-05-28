@@ -6,7 +6,7 @@ import { Pencil } from '@buffetjs/icons';
 import {
   SettingsPageTitle,
   SizedInput,
-  useGlobalContext,
+  useTracking,
   getYupInnerErrors,
   request,
   useNotification,
@@ -25,8 +25,8 @@ import forms from './utils/forms';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
-  const emitEventRef = useRef(emitEvent);
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
   const buttonSubmitRef = useRef(null);
@@ -145,14 +145,14 @@ const ProvidersPage = () => {
         lockApp();
 
         try {
-          emitEventRef.current('willEditAuthenticationProvider');
+          trackUsageRef.current('willEditAuthenticationProvider');
 
           await request(getRequestURL('providers'), {
             method: 'PUT',
             body: { providers: modifiedData },
           });
 
-          emitEventRef.current('didEditAuthenticationProvider');
+          trackUsageRef.current('didEditAuthenticationProvider');
 
           toggleNotification({
             type: 'success',

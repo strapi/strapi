@@ -9,13 +9,8 @@ const GlobalContextProvider = ({ children, ...rest }) => {
 
 const useGlobalContext = () => useContext(GlobalContext);
 
-GlobalContextProvider.defaultProps = {
-  emitEvent: () => {},
-};
-
 GlobalContextProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  emitEvent: PropTypes.func,
 };
 
 export { GlobalContext, GlobalContextProvider, useGlobalContext };

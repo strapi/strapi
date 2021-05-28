@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { upperFirst, isEmpty } from 'lodash';
-import { LoadingIndicator, useGlobalContext } from '@strapi/helper-plugin';
+import { LoadingIndicator, useTracking } from '@strapi/helper-plugin';
 import { parse, stringify } from 'qs';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';
@@ -25,7 +25,7 @@ const CustomTable = ({
 }) => {
   const { formatMessage } = useIntl();
   const { entriesToDelete, label, filters, _q } = useListView();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { pathname, search } = useLocation();
   const query = search ? parse(search.substring(1)) : {};
   const { push } = useHistory();
@@ -63,7 +63,7 @@ const CustomTable = ({
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
   const handleRowGoTo = id => {
-    emitEvent('willEditEntryFromList');
+    trackUsage('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
@@ -71,7 +71,7 @@ const CustomTable = ({
     });
   };
   const handleEditGoTo = id => {
-    emitEvent('willEditEntryFromButton');
+    trackUsage('willEditEntryFromButton');
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },

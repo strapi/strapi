@@ -9,7 +9,7 @@ import PropTypes from 'prop-types';
 import { sortBy, camelCase, upperFirst } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-import { LeftMenuList, useGlobalContext, useNotification } from '@strapi/helper-plugin';
+import { LeftMenuList, useTracking, useNotification } from '@strapi/helper-plugin';
 import { Text } from '@buffetjs/core';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
@@ -29,7 +29,7 @@ function LeftMenu({ wait }) {
     sortedContentTypesList,
   } = useDataManager();
   const toggleNotification = useNotification();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { push } = useHistory();
 
@@ -86,7 +86,7 @@ function LeftMenu({ wait }) {
     const type = kind === 'singleType' ? kind : modalType;
 
     if (canOpenModalCreateCTorComponent()) {
-      emitEvent(`willCreate${upperFirst(camelCase(type))}`);
+      trackUsage(`willCreate${upperFirst(camelCase(type))}`);
 
       await wait();
       const search = makeSearch({

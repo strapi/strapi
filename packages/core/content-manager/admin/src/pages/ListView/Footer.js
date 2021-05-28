@@ -1,12 +1,12 @@
 import React, { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
-import { GlobalPagination, InputSelect, useGlobalContext } from '@strapi/helper-plugin';
+import { GlobalPagination, InputSelect, useTracking } from '@strapi/helper-plugin';
 
 import { FooterWrapper, SelectWrapper, Label } from './components';
 
 function Footer({ count, onChange, params }) {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const _limit = parseInt(params.pageSize, 10);
   const _page = parseInt(params.page, 10);
 
@@ -15,7 +15,7 @@ function Footer({ count, onChange, params }) {
   };
 
   const handleChangeLimit = ({ target: { value } }) => {
-    emitEvent('willChangeNumberOfEntriesPerPage');
+    trackUsage('willChangeNumberOfEntriesPerPage');
 
     onChange({ pageSize: value });
   };

@@ -8,7 +8,7 @@ import {
   useRBAC,
   PopUpWarning,
   request,
-  useGlobalContext,
+  useTracking,
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
@@ -22,7 +22,7 @@ import { getTrad } from '../../../utils';
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { push } = useHistory();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -91,7 +91,7 @@ const RoleListPage = () => {
   };
 
   const handleNewRoleClick = () => {
-    emitEvent('willCreateRole');
+    trackUsage('willCreateRole');
     push(`/settings/${pluginId}/roles/new`);
   };
 

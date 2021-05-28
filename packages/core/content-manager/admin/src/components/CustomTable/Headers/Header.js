@@ -1,12 +1,11 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Carret } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
+import { Carret, useTracking } from '@strapi/helper-plugin';
 import { useListView } from '../../../hooks';
 
 const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField }, name }) => {
   const { _sort, firstSortableHeader, setQuery } = useListView();
-  const { emitEvent } = useIntl();
+  const { trackUsage } = useTracking();
   const [sortBy, sortOrder] = _sort.split(':');
 
   let sortField = name;
@@ -19,7 +18,7 @@ const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField
 
   const handleClick = () => {
     if (sortable) {
-      emitEvent('didSortEntries', { useRelation });
+      trackUsage('didSortEntries', { useRelation });
 
       const isCurrentSort = sortField === sortBy;
       const nextOrder = isCurrentSort && sortOrder === 'ASC' ? 'DESC' : 'ASC';

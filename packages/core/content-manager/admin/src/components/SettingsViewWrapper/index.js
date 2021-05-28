@@ -9,8 +9,7 @@ import {
   LoadingIndicatorPage,
   ModalConfirm,
   PopUpWarning,
-  // contexts
-  useGlobalContext,
+  useTracking,
 } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import Block from '../Block';
@@ -33,7 +32,7 @@ const SettingsViewWrapper = ({
   onConfirmSubmit,
   onModalConfirmClosed,
 }) => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
@@ -134,7 +133,7 @@ const SettingsViewWrapper = ({
   const handleSubmit = e => {
     e.preventDefault();
     toggleWarningSubmit();
-    emitEvent('willSaveContentTypeLayout');
+    trackUsage('willSaveContentTypeLayout');
   };
 
   if (isLoading) {

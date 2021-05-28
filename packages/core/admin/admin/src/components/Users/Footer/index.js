@@ -9,7 +9,7 @@ const Footer = ({ count, onChange, params }) => {
     <Wrapper>
       <Padded left right size="xs">
         <PageFooter
-          context={{ emitEvent: () => {} }}
+          context={{ trackUsage: () => {} }}
           count={count}
           onChangeParams={onChange}
           params={params}
