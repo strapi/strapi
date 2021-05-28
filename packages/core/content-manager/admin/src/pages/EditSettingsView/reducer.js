@@ -20,22 +20,27 @@ const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     const layoutPathEdit = ['modifiedData', 'layouts', 'edit'];
     const layoutPathRelations = ['modifiedData', 'layouts', 'editRelations'];
+
     switch (action.type) {
       case 'ADD_RELATION': {
-        const layoutFieldList = get(state, layoutPathRelations, []);
-        set(draftState, layoutPathRelations, [...layoutFieldList, action.name]);
+        const editRelationLayoutValue = get(state, layoutPathRelations, []);
+        set(draftState, layoutPathRelations, [...editRelationLayoutValue, action.name]);
         break;
       }
       case 'MOVE_RELATION': {
-        const layoutFieldList = get(state, layoutPathRelations, []);
+        const editRelationLayoutValue = get(state, layoutPathRelations, []);
         const { fromIndex, toIndex } = action;
-        set(draftState, layoutPathRelations, arrayMoveItem(layoutFieldList, fromIndex, toIndex));
+        set(
+          draftState,
+          layoutPathRelations,
+          arrayMoveItem(editRelationLayoutValue, fromIndex, toIndex)
+        );
         break;
       }
       case 'MOVE_ROW': {
-        const layoutFieldRowList = get(state, layoutPathEdit, []);
+        const editFieldLayoutValue = get(state, layoutPathEdit, []);
         const { fromIndex, toIndex } = action;
-        set(draftState, layoutPathEdit, arrayMoveItem(layoutFieldRowList, fromIndex, toIndex));
+        set(draftState, layoutPathEdit, arrayMoveItem(editFieldLayoutValue, fromIndex, toIndex));
         break;
       }
       case 'ON_ADD_FIELD': {
