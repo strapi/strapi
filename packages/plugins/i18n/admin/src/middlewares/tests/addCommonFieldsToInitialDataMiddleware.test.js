@@ -16,7 +16,7 @@ describe('i18n | middlewares | addCommonFieldsToInitialDataMiddleware', () => {
 
   beforeEach(() => {
     const store = {
-      ...fixtures.store,
+      ...fixtures.store.state,
       'content-manager_editViewCrudReducer': {
         contentTypeDataStructure: { name: 'test', common: 'common default value' },
       },

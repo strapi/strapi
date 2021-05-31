@@ -4,7 +4,6 @@
 const { combineReducers, createStore } = require('redux');
 
 const reducers = {
-  // app: jest.fn(() => ({ isLoading: true, uuid: false })),
   language: jest.fn(() => ({ locale: 'en' })),
   menu: jest.fn(() => ({
     collectionTypesSectionLinks: [],
@@ -51,6 +50,9 @@ const reducers = {
   rbacProvider: jest.fn(() => ({ allPermissions: null, collectionTypesRelatedPermissions: {} })),
 };
 
-const store = createStore(combineReducers(reducers)).getState();
+const store = createStore(combineReducers(reducers));
 
-module.exports = store;
+module.exports = {
+  store,
+  state: store.getState(),
+};

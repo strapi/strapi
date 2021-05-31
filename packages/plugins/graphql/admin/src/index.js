@@ -17,7 +17,6 @@ export default {
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,
-      preventComponentRendering: false,
       trads,
     });
   },

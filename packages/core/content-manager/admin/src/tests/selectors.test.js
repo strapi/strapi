@@ -5,7 +5,7 @@ describe('selectors', () => {
   let store;
 
   beforeEach(() => {
-    store = { ...fixtures.store };
+    store = { ...fixtures.store.state };
   });
 
   describe('selectPermissions', () => {

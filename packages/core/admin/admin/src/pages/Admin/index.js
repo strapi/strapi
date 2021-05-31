@@ -31,18 +31,23 @@ const PluginDispatcher = lazy(() => import('../PluginDispatcher'));
 const ProfilePage = lazy(() => import('../ProfilePage'));
 const SettingsPage = lazy(() => import('../SettingsPage'));
 
-const Admin = () => {
-  // Show a notification when the current version of Strapi is not the latest one
-  useReleaseNotification();
+// Simple hook easier for testing
+const useTrackUsage = () => {
   const { trackUsage } = useTracking();
-
-  // FIXME:
-  // This is temporary until we refactor the menu
-  const [{ updateMenu }, setUpdateMenuFn] = useState({ updateMenu: null });
 
   useEffect(() => {
     trackUsage('didAccessAuthenticatedAdministration');
-  }, [trackUsage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+};
+
+const Admin = () => {
+  // Show a notification when the current version of Strapi is not the latest one
+  useReleaseNotification();
+  useTrackUsage();
+  // FIXME:
+  // This is temporary until we refactor the menu
+  const [{ updateMenu }, setUpdateMenuFn] = useState({ updateMenu: null });
 
   const setUpdateMenu = updateMenuFn => {
     setUpdateMenuFn({ updateMenu: updateMenuFn });
@@ -89,3 +94,4 @@ const Admin = () => {
 };
 
 export default Admin;
+export { useTrackUsage };
