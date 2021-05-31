@@ -12,7 +12,6 @@ import pluginPermissions from './permissions';
 import Initializer from './components/Initializer';
 import InputMedia from './components/InputMedia';
 import InputModalStepper from './components/InputModalStepper';
-import App from './pages/App';
 import SettingsPage from './pages/SettingsPage';
 import reducers from './reducers';
 import trads from './translations';
@@ -40,8 +39,6 @@ export default {
 
       isReady: false,
       isRequired: pluginPkg.strapi.required || false,
-
-      mainComponent: App,
       name,
       pluginLogo,
 

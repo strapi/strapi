@@ -8,7 +8,6 @@
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
-import App from './pages/Main';
 import reducers from './reducers';
 import trads from './translations';
 
@@ -30,7 +29,6 @@ export default {
       },
       isReady: true,
       isRequired: pluginPkg.strapi.required || false,
-      mainComponent: App,
       name,
       pluginLogo,
       trads,
