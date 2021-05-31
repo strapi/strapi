@@ -16,13 +16,17 @@ const TEMPLATE_CONTENT = ['api', 'components', 'config/functions/bootstrap.js', 
 async function copyContent(templatePath, rootBase) {
   for (const item of TEMPLATE_CONTENT) {
     try {
-      await fse.copy(join(process.cwd(), item), join(templatePath, item));
-      const currentProjectBase = basename(process.cwd());
-      console.log(
-        `${chalk.green(
-          'success'
-        )}: copy ${currentProjectBase}/${item} => ${rootBase}/template/${item}`
-      );
+      const folderExists = await fse.pathExists(join(process.cwd(), item));
+
+      if (folderExists) {
+        await fse.copy(join(process.cwd(), item), join(templatePath, item));
+        const currentProjectBase = basename(process.cwd());
+        console.log(
+          `${chalk.green(
+            'success'
+          )}: copy ${currentProjectBase}/${item} => ${rootBase}/template/${item}`
+        );
+      }
     } catch (error) {
       console.error(`${chalk.red('error')}: ${error.message}`);
     }

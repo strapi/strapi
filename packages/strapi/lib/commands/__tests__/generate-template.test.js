@@ -33,12 +33,17 @@ describe('generate:template command', () => {
   it.each(['api', 'components', 'config/functions/bootstrap.js', 'data'])(
     'copies folder %s',
     async item => {
+      // Mock the empty directory arg
+      fse.pathExists.mockReturnValueOnce(false);
+      // Mock the folder exists
+      fse.pathExists.mockReturnValue(true);
       const directory = '../test-dir';
       const rootPath = resolve(directory);
       const templatePath = join(rootPath, 'template');
 
       await exportTemplate(directory);
 
+      expect(fse.pathExists).toHaveBeenCalledWith(join(process.cwd(), item));
       expect(fse.copy).toHaveBeenCalledWith(join(process.cwd(), item), join(templatePath, item));
     }
   );
