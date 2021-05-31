@@ -4,143 +4,88 @@
  *
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import axios from 'axios';
+import React, { Suspense, useEffect, useState, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { isEmpty } from 'lodash';
 // Components from @strapi/helper-plugin
 import {
-  difference,
   CheckPagePermissions,
-  NotificationsContext,
   AppMenuContext,
+  useTracking,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../../components/LeftMenu';
-import InstalledPluginsPage from '../InstalledPluginsPage';
-import HomePage from '../HomePage';
-import MarketplacePage from '../MarketplacePage';
-import NotFoundPage from '../NotFoundPage';
-import OnboardingVideos from '../../components/Onboarding';
-import PluginDispatcher from '../PluginDispatcher';
-import ProfilePage from '../ProfilePage';
-import SettingsPage from '../SettingsPage';
+import Onboarding from '../../components/Onboarding';
+import { useReleaseNotification } from '../../hooks';
 import Logout from './Logout';
-
 import Wrapper from './Wrapper';
 import Content from './Content';
 
-export class Admin extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
-  static contextType = NotificationsContext;
+const HomePage = lazy(() => import('../HomePage'));
+const InstalledPluginsPage = lazy(() => import('../InstalledPluginsPage'));
+const MarketplacePage = lazy(() => import('../MarketplacePage'));
+const NotFoundPage = lazy(() => import('../NotFoundPage'));
+const PluginDispatcher = lazy(() => import('../PluginDispatcher'));
+const ProfilePage = lazy(() => import('../ProfilePage'));
+const SettingsPage = lazy(() => import('../SettingsPage'));
 
-  // This state is really temporary until we create a menu API
-  state = { updateMenu: null };
+const Admin = () => {
+  // Show a notification when the current version of Strapi is not the latest one
+  useReleaseNotification();
+  const { trackUsage } = useTracking();
 
-  helpers = {};
+  // FIXME:
+  // This is temporary until we refactor the menu
+  const [{ updateMenu }, setUpdateMenuFn] = useState({ updateMenu: null });
 
-  componentDidMount() {
-    this.emitEvent('didAccessAuthenticatedAdministration');
-  }
+  useEffect(() => {
+    trackUsage('didAccessAuthenticatedAdministration');
+  }, [trackUsage]);
 
-  shouldComponentUpdate(prevProps, prevState) {
-    return !isEmpty(difference(prevProps, this.props)) || !isEmpty(prevState, this.state);
-  }
-
-  // FIXME
-  // use the hook when migration to functionnal component
-  emitEvent = async (event, properties) => {
-    const {
-      global: { uuid },
-    } = this.props;
-
-    if (uuid) {
-      try {
-        await axios.post('https://analytics.strapi.io/track', {
-          event,
-          // PROJECT_TYPE is an env variable defined in the webpack config
-          // eslint-disable-next-line no-undef
-          properties: { ...properties, projectType: process.env.STRAPI_ADMIN_PROJECT_TYPE },
-          uuid,
-        });
-      } catch (err) {
-        // Silent
-      }
-    }
+  const setUpdateMenu = updateMenuFn => {
+    setUpdateMenuFn({ updateMenu: updateMenuFn });
   };
 
-  renderPluginDispatcher = props => {
-    // NOTE: Send the needed props instead of everything...
-
-    return <PluginDispatcher {...this.props} {...props} {...this.helpers} />;
-  };
-
-  renderRoute = (props, Component) => <Component {...this.props} {...props} />;
-
-  setUpdateMenu = updateMenuFn => {
-    this.setState({ updateMenu: updateMenuFn });
-  };
-
-  render() {
-    const { plugins } = this.props;
-
-    // FIXME: remove the AppMenuContext when refactoring the menu
-    return (
-      <AppMenuContext.Provider value={this.state.updateMenu}>
-        <Wrapper>
-          <LeftMenu plugins={plugins} setUpdateMenu={this.setUpdateMenu} />
-          <NavTopRightWrapper>
-            {/* Injection zone not ready yet */}
-            <Logout />
-          </NavTopRightWrapper>
-          <div className="adminPageRightWrapper">
-            <Header />
-            <Content>
+  return (
+    <AppMenuContext.Provider value={updateMenu}>
+      <Wrapper>
+        <LeftMenu setUpdateMenu={setUpdateMenu} />
+        <NavTopRightWrapper>
+          {/* Injection zone not ready yet */}
+          <Logout />
+        </NavTopRightWrapper>
+        <div className="adminPageRightWrapper">
+          <Header />
+          <Content>
+            <Suspense fallback={<LoadingIndicatorPage />}>
               <Switch>
-                <Route path="/" render={props => this.renderRoute(props, HomePage)} exact />
-                <Route path="/me" component={ProfilePage} />
-                <Route path="/plugins/:pluginId" render={this.renderPluginDispatcher} />
-                <Route path="/list-plugins" exact>
-                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                    <InstalledPluginsPage />
-                  </CheckPagePermissions>
-                </Route>
+                <Route path="/" component={HomePage} exact />
+                <Route path="/me" component={ProfilePage} exact />
+                <Route path="/plugins/:pluginId" component={PluginDispatcher} />
+                <Route path="/settings/:settingId" component={SettingsPage} />
+                <Route path="/settings" component={SettingsPage} exact />
                 <Route path="/marketplace">
                   <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
                     <MarketplacePage />
                   </CheckPagePermissions>
                 </Route>
-                <Route path="/settings/:settingId" component={SettingsPage} />
-                <Route path="/settings" component={SettingsPage} exact />
-                <Route key="7" path="" component={NotFoundPage} />
-                <Route key="8" path="/404" component={NotFoundPage} />
+                <Route path="/list-plugins" exact>
+                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                    <InstalledPluginsPage />
+                  </CheckPagePermissions>
+                </Route>
+                <Route path="/404" component={NotFoundPage} />
+                <Route path="" component={NotFoundPage} />
               </Switch>
-            </Content>
-          </div>
-
-          {process.env.STRAPI_ADMIN_SHOW_TUTORIALS === 'true' && <OnboardingVideos />}
-        </Wrapper>
-      </AppMenuContext.Provider>
-    );
-  }
-}
-
-// TODO
-Admin.defaultProps = {
-  global: {
-    uuid: false,
-  },
-};
-
-Admin.propTypes = {
-  global: PropTypes.shape({
-    uuid: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-  }),
-
-  plugins: PropTypes.object.isRequired,
+            </Suspense>
+          </Content>
+        </div>
+        <Onboarding />
+      </Wrapper>
+    </AppMenuContext.Provider>
+  );
 };
 
 export default Admin;

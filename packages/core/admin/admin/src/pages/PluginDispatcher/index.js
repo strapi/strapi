@@ -7,18 +7,18 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Redirect } from 'react-router-dom';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { ErrorBoundary } from 'react-error-boundary';
-import { BlockerComponent, ErrorFallback } from '@strapi/helper-plugin';
+import { BlockerComponent, ErrorFallback, useStrapiApp } from '@strapi/helper-plugin';
 import PageTitle from '../../components/PageTitle';
 
 export function PluginDispatcher(props) {
   const {
-    plugins,
     match: {
       params: { pluginId },
     },
   } = props;
+  const { plugins } = useStrapiApp();
 
   const pluginToRender = get(plugins, pluginId, null);
 
@@ -58,7 +58,6 @@ PluginDispatcher.propTypes = {
       pluginId: PropTypes.string,
     }),
   }).isRequired,
-  plugins: PropTypes.object.isRequired,
 };
 
 export default memo(PluginDispatcher);

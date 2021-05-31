@@ -1,15 +1,15 @@
 import React, { memo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useLocation } from 'react-router-dom';
-import { useAppInfos } from '@strapi/helper-plugin';
+import { useAppInfos, useStrapiApp } from '@strapi/helper-plugin';
 import { Footer, Header, Loader, LinksContainer, LinksSection } from './compos';
 import Wrapper from './Wrapper';
 import useMenuSections from './useMenuSections';
 
-const LeftMenu = ({ plugins, setUpdateMenu }) => {
+const LeftMenu = ({ setUpdateMenu }) => {
   const location = useLocation();
   const { shouldUpdateStrapi } = useAppInfos();
-
+  const { plugins } = useStrapiApp();
   const {
     state: {
       isLoading,
@@ -88,7 +88,6 @@ const LeftMenu = ({ plugins, setUpdateMenu }) => {
 };
 
 LeftMenu.propTypes = {
-  plugins: PropTypes.object.isRequired,
   setUpdateMenu: PropTypes.func.isRequired,
 };
 
