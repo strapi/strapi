@@ -21,7 +21,10 @@ import { Content, Wrapper } from './components';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
-const AuthenticatedApp = lazy(() => import('../../components/AuthenticatedApp'));
+const AuthenticatedApp = lazy(() =>
+  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
+);
+
 function App() {
   const toggleNotification = useNotification();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
