@@ -178,6 +178,12 @@ program
   .description('Generate a basic plugin')
   .action(getLocalScript('generate'));
 
+// `$ strapi generate:template <directory>`
+program
+  .command('generate:template <directory>')
+  .description('Generate template from Strapi project')
+  .action(getLocalScript('generate-template'));
+
 program
   .command('build')
   .option('--clean', 'Remove the build and .cache folders', false)
@@ -229,11 +235,5 @@ program
   .option('-e, --email <email>', 'The user email')
   .option('-p, --password <password>', 'New password for the user')
   .action(getLocalScript('admin-reset'));
-
-// `$ strapi export:template <name>`
-program
-  .command('generate:template <directory>')
-  .description('Generate template from current Strapi project')
-  .action(getLocalScript('generate-template'));
 
 program.parseAsync(process.argv);

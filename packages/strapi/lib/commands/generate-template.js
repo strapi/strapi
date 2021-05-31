@@ -55,10 +55,7 @@ async function templateConfigExists(rootPath) {
 }
 
 module.exports = async function generateTemplate(directory) {
-  // Allow any relative path,
-  // otherwise default destination is at the same level as the current directory
-  const dir = directory.startsWith('.') ? directory : `../${directory}`;
-  const rootPath = resolve(dir);
+  const rootPath = resolve(directory);
 
   // Get path to template directory: <rootPath>/template
   const templatePath = join(rootPath, 'template');
