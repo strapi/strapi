@@ -11,7 +11,7 @@ const findPackagePath = require('../load/package-path');
  * Load middlewares
  */
 module.exports = async function(strapi) {
-  const { installedMiddlewares, installedPlugins, appPath } = strapi.config;
+  const { installedMiddlewares, appPath } = strapi.config;
 
   let middlewares = {};
 
@@ -22,8 +22,6 @@ module.exports = async function(strapi) {
   await loaders.loadInternalMiddlewares(middlewares);
   // local middleware
   await loaders.loadLocalMiddlewares(appPath, middlewares);
-  // plugins middlewares
-  await loaders.loadPluginsMiddlewares(installedPlugins, middlewares);
   // local plugin middlewares
   await loaders.loadLocalPluginsMiddlewares(appPath, middlewares);
   // load admin middlwares

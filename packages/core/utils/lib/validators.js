@@ -20,9 +20,14 @@ function arrayRequiredAllowEmpty(message = '${path} is required') {
   return this.test('field is required', message, value => _.isArray(value));
 }
 
+function isFunction(message = '${path} is not a function') {
+  return this.test('is a function', message, value => _.isFunction(value));
+}
+
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
 yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
+yup.addMethod(yup.mixed, 'isFunction', isFunction);
 
 class StrapiIDSchema extends MixedSchemaType {
   constructor() {

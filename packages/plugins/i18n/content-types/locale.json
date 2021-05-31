@@ -1,7 +1,10 @@
 {
+  "singularName": "locAle",
+  "pluralName": "locales",
   "collectionName": "i18n_locales",
   "info": {
-    "name": "locale",
+    "displaySingularName": "Locale",
+    "displayPluralName": "Locales",
     "description": ""
   },
   "options": {

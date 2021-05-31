@@ -28,6 +28,7 @@ const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
+const createPluginProvider = require('./core/plugins/plugin-provider');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -327,6 +328,13 @@ class Strapi {
         await next();
       }
     });
+
+    try {
+      const pluginProvider = await createPluginProvider(this);
+      console.log(pluginProvider.getAllContentTypes());
+    } catch (e) {
+      console.log('oh', e);
+    }
 
     const modules = await loadModules(this);
 

@@ -10,7 +10,7 @@ const findPackagePath = require('../load/package-path');
 /**
  * Load hooks
  */
-module.exports = async function({ installedHooks, installedPlugins, appPath }) {
+module.exports = async function({ installedHooks, appPath }) {
   let hooks = {};
 
   await Promise.all([
@@ -19,8 +19,6 @@ module.exports = async function({ installedHooks, installedPlugins, appPath }) {
     loadLocalHooks(appPath, hooks),
     // admin hooks
     loadAdminHooks(hooks),
-    // plugins middlewares
-    loadPluginsHooks(installedPlugins, hooks),
     // local plugin middlewares
     loadLocalPluginsHooks(appPath, hooks),
   ]);
@@ -41,12 +39,12 @@ const loadHooksInDir = async (dir, hooks) => {
 
 const loadLocalHooks = (appPath, hooks) => loadHooksInDir(path.resolve(appPath, 'hooks'), hooks);
 
-const loadPluginsHooks = async (plugins, hooks) => {
-  for (let pluginName of plugins) {
-    const dir = path.resolve(findPackagePath(`@strapi/plugin-${pluginName}`), 'hooks');
-    await loadHooksInDir(dir, hooks);
-  }
-};
+// const loadPluginsHooks = async (plugins, hooks) => {
+//   for (let pluginName of plugins) {
+//     const dir = path.resolve(findPackagePath(`@strapi/plugin-${pluginName}`), 'hooks');
+//     await loadHooksInDir(dir, hooks);
+//   }
+// };
 
 const loadAdminHooks = async hooks => {
   const hooksDir = 'hooks';

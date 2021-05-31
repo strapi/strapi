@@ -2,7 +2,7 @@
 
 const loadApis = require('./load-apis');
 const loadAdmin = require('./load-admin');
-const loadPlugins = require('./load-plugins');
+// const loadPlugins = require('./load-plugins');
 const loadMiddlewares = require('./load-middlewares');
 const loadExtensions = require('./load-extensions');
 const loadHooks = require('./load-hooks');
@@ -12,7 +12,7 @@ const loadComponents = require('./load-components');
 module.exports = {
   loadApis,
   loadAdmin,
-  loadPlugins,
+  // loadPlugins,
   loadMiddlewares,
   loadHooks,
   loadExtensions,
