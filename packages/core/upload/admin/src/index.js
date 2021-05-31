@@ -44,7 +44,7 @@ export default {
       mainComponent: App,
       name,
       pluginLogo,
-      preventComponentRendering: false,
+
       settings: {
         global: {
           links: [

@@ -5,6 +5,7 @@
     "@testing-library/jest-dom": "^5.11.10",
     "@testing-library/react": "^11.2.6",
     "@testing-library/react-hooks": "^3.4.2",
+    "@testing-library/user-event": "13.1.9",
     "axios-mock-adapter": "^1.19.0",
     "babel-eslint": "^10.0.0",
     "chalk": "4.1.1",

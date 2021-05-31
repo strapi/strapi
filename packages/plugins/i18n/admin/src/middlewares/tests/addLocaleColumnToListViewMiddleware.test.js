@@ -5,7 +5,7 @@ describe('addLocaleColumnToListViewMiddleware', () => {
   let getState;
 
   beforeEach(() => {
-    const store = { ...fixtures.store, i18n_locales: { locales: [] } };
+    const store = { ...fixtures.store.state, i18n_locales: { locales: [] } };
 
     getState = () => store;
   });

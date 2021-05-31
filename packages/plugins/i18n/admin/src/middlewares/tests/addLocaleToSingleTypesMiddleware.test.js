@@ -7,7 +7,7 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
 
   beforeEach(() => {
     store = {
-      ...fixtures.store,
+      ...fixtures.store.state,
       i18n_locales: { locales: [] },
     };
     store.rbacProvider.allPermissions = [];

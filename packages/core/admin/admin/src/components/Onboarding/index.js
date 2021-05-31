@@ -1,4 +1,4 @@
-import React, { useEffect, useReducer, memo } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { FormattedMessage } from 'react-intl';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -10,6 +10,14 @@ import StaticLinks from './StaticLinks';
 import Video from './Video';
 import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
+
+const Onboarding = () => {
+  if (process.env.STRAPI_ADMIN_SHOW_TUTORIALS !== 'true') {
+    return null;
+  }
+
+  return <OnboardingVideos />;
+};
 
 const OnboardingVideos = () => {
   const { trackUsage } = useTracking();
@@ -127,4 +135,4 @@ const OnboardingVideos = () => {
   );
 };
 
-export default memo(OnboardingVideos);
+export default Onboarding;

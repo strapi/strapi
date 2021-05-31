@@ -1,69 +1,73 @@
 import React from 'react';
-import { shallow } from 'enzyme';
-import { BlockerComponent } from '@strapi/helper-plugin';
+import { Router, Route, Link } from 'react-router-dom';
+import { StrapiAppProvider } from '@strapi/helper-plugin';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { createMemoryHistory } from 'history';
 import { PluginDispatcher } from '../index';
 
-const BlockerComponent2 = () => <div>BlockerComponent</div>;
 const Email = () => <div>Email Plugin</div>;
 
+const makeApp = (history, plugins) => (
+  <StrapiAppProvider plugins={plugins}>
+    <Router history={history}>
+      <Link to="/plugins/email">Go to email</Link>
+      <Route path="/plugins/:pluginId" component={PluginDispatcher} />
+      <Route path="/404" component={() => <h1>404</h1>} />
+    </Router>
+  </StrapiAppProvider>
+);
+
 describe('<PluginDispatcher />', () => {
-  it('Should return null if the params does not match the pluginId', () => {
-    const props = {
-      plugins: {},
-      match: { params: { pluginId: 'email' } },
-    };
+  it('should not crash', () => {
+    const history = createMemoryHistory();
+    const App = makeApp(history, {});
 
-    const rendered = shallow(<PluginDispatcher {...props} />);
+    const { container } = render(App);
 
-    expect(rendered.children()).toHaveLength(0);
+    expect(container.firstChild).toMatchInlineSnapshot(`
+      <a
+        href="/plugins/email"
+      >
+        Go to email
+      </a>
+    `);
   });
 
-  it('Should return the BlockerComponent if the plugin preventRendering prop is true', () => {
-    const props = {
-      plugins: {
-        email: {
-          mainComponent: Email,
-          preventComponentRendering: true,
-          blockerComponent: null,
-        },
+  it('should redirect to the 404 page if the params does not match the pluginId', () => {
+    const plugins = {
+      email: {
+        mainComponent: Email,
+        name: 'email',
       },
-      match: { params: { pluginId: 'email' } },
     };
+    const history = createMemoryHistory();
+    const route = '/plugins/email-test';
+    history.push(route);
 
-    const renderedComponent = shallow(<PluginDispatcher {...props} />);
+    const App = makeApp(history, plugins);
 
-    expect(renderedComponent.find(BlockerComponent)).toHaveLength(1);
+    render(App);
+
+    expect(screen.getByText(/404/i)).toBeInTheDocument();
   });
 
-  it('Should return a custom BlockerComponent if the plugin preventRendering prop is true and a custom blocker is given', () => {
-    const props = {
-      plugins: {
-        email: {
-          mainComponent: Email,
-          preventComponentRendering: true,
-          blockerComponent: BlockerComponent2,
-        },
+  it('should match the pluginId params with the correct plugin', () => {
+    const plugins = {
+      email: {
+        mainComponent: Email,
+        name: 'email',
       },
-      match: { params: { pluginId: 'email' } },
     };
+    const history = createMemoryHistory();
 
-    const renderedComponent = shallow(<PluginDispatcher {...props} />);
+    const App = makeApp(history, plugins);
 
-    expect(renderedComponent.find(BlockerComponent2)).toHaveLength(1);
-  });
+    render(App);
 
-  it("Should return the plugin's mainComponent if all conditions are met", () => {
-    const props = {
-      plugins: {
-        email: {
-          mainComponent: Email,
-        },
-      },
-      match: { params: { pluginId: 'email' } },
-    };
+    const leftClick = { button: 0 };
+    userEvent.click(screen.getByText(/Go to email/i), leftClick);
 
-    const renderedComponent = shallow(<PluginDispatcher {...props} />);
-
-    expect(renderedComponent.find(Email)).toHaveLength(1);
+    expect(screen.getByText(/Email Plugin/i)).toBeInTheDocument();
   });
 });
