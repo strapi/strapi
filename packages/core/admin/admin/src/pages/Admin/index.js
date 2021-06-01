@@ -43,7 +43,7 @@ const SettingsPage = lazy(() =>
 // These are internal plugins
 const CM = lazy(() =>
   import(
-    /* webpackChunkName: "content-manager" */ '@strapi/plugin-content-manager/admin/src/pages/Main'
+    /* webpackChunkName: "content-manager" */ '@strapi/plugin-content-manager/admin/src/pages/App'
   )
 );
 const CTB = lazy(() =>

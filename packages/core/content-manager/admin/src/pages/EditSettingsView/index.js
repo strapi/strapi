@@ -14,7 +14,7 @@ import LayoutTitle from '../../components/LayoutTitle';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortableList from '../../components/SortableList';
-import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
+import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import LayoutDndProvider from '../../components/LayoutDndProvider';
 import init from './init';
 import reducer, { initialState } from './reducer';

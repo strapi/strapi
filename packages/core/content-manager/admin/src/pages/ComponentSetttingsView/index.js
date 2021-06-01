@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, request } from '@strapi/helper-plugin';
 import { useSelector, shallowEqual } from 'react-redux';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
-import { makeSelectModelAndComponentSchemas } from '../Main/selectors';
+import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import pluginPermissions from '../../permissions';
 import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
 import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
