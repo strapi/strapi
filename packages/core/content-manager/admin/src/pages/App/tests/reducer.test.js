@@ -2,7 +2,7 @@ import produce from 'immer';
 import { getData, getDataSucceeded, resetProps } from '../actions';
 import mainReducer from '../reducer';
 
-describe('Content Manager | Main | reducer', () => {
+describe('Content Manager | App | reducer', () => {
   let state;
 
   beforeEach(() => {

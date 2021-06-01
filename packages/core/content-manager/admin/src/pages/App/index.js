@@ -20,7 +20,7 @@ import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import { getData, getDataSucceeded, resetProps } from './actions';
-import makeSelectMain from './selectors';
+import makeSelectApp from './selectors';
 
 function Main({ getData, getDataSucceeded, isLoading, resetProps }) {
   const toggleNotification = useNotification();
@@ -86,7 +86,7 @@ Main.propTypes = {
   resetProps: PropTypes.func.isRequired,
 };
 
-const mapStateToProps = makeSelectMain();
+const mapStateToProps = makeSelectApp();
 
 export function mapDispatchToProps(dispatch) {
   return bindActionCreators(
