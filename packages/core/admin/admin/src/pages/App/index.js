@@ -4,31 +4,30 @@
  *
  */
 
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState, useMemo, lazy, Suspense } from 'react';
 import { Switch, Route } from 'react-router-dom';
-import { connect } from 'react-redux';
-import { bindActionCreators, compose } from 'redux';
-import { LoadingIndicatorPage, auth, request, useNotification } from '@strapi/helper-plugin';
-import PluginsInitializer from '../../components/PluginsInitializer';
+import {
+  LoadingIndicatorPage,
+  auth,
+  request,
+  useNotification,
+  TrackingContext,
+} from '@strapi/helper-plugin';
 import PrivateRoute from '../../components/PrivateRoute';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import { getUID } from './utils';
 import { Content, Wrapper } from './components';
-import { getDataSucceeded } from './actions';
 import routes from './utils/routes';
 import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
-window.strapi = Object.assign(window.strapi || {}, {
-  lockAppWithOverlay: () => console.log('todo unlockAppWithOverlay'),
-});
+const AuthenticatedApp = lazy(() =>
+  import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')
+);
 
-function App(props) {
+function App() {
   const toggleNotification = useNotification();
-  const getDataRef = useRef();
-  const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
-  getDataRef.current = props.getDataSucceeded;
+  const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
   const authRoutes = useMemo(() => {
     return makeUniqueRoutes(
@@ -63,9 +62,9 @@ function App(props) {
   useEffect(() => {
     const getData = async () => {
       try {
-        const { data } = await request('/admin/init', { method: 'GET' });
-
-        const { uuid } = data;
+        const {
+          data: { hasAdmin, uuid },
+        } = await request('/admin/init', { method: 'GET' });
 
         if (uuid) {
           try {
@@ -87,8 +86,7 @@ function App(props) {
           }
         }
 
-        getDataRef.current(data);
-        setState({ isLoading: false, hasAdmin: data.hasAdmin });
+        setState({ isLoading: false, hasAdmin, uuid });
       } catch (err) {
         toggleNotification({
           type: 'warning',
@@ -107,34 +105,27 @@ function App(props) {
   }
 
   return (
-    <Wrapper>
-      <Content>
-        <Switch>
-          {authRoutes}
-          <Route
-            path="/auth/:authType"
-            render={routerProps => (
-              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-            )}
-            exact
-          />
-          <PrivateRoute path="/" component={PluginsInitializer} />
-          <Route path="" component={NotFoundPage} />
-        </Switch>
-      </Content>
-    </Wrapper>
+    <Suspense fallback={<LoadingIndicatorPage />}>
+      <TrackingContext.Provider value={uuid}>
+        <Wrapper>
+          <Content>
+            <Switch>
+              {authRoutes}
+              <Route
+                path="/auth/:authType"
+                render={routerProps => (
+                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+                )}
+                exact
+              />
+              <PrivateRoute path="/" component={AuthenticatedApp} />
+              <Route path="" component={NotFoundPage} />
+            </Switch>
+          </Content>
+        </Wrapper>
+      </TrackingContext.Provider>
+    </Suspense>
   );
 }
 
-App.propTypes = {
-  getDataSucceeded: PropTypes.func.isRequired,
-};
-
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators({ getDataSucceeded }, dispatch);
-}
-
-const withConnect = connect(null, mapDispatchToProps);
-
-export default compose(withConnect)(App);
-export { App };
+export default App;

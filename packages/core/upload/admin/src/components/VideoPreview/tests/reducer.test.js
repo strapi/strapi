@@ -2,70 +2,70 @@ import reducer, { initialState } from '../reducer';
 
 describe('Upload | components | VideoPreview | reducer', () => {
   it('should update duration and set dataLoaded to true', () => {
-    const state = initialState;
+    const state = { ...initialState };
 
     const action = {
       type: 'DATA_LOADED',
       duration: 2000,
     };
 
-    const expectedState = state.set('dataLoaded', true).set('duration', 2000);
+    const expectedState = { ...state, dataLoaded: true, duration: 2000 };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should set metadataLoaded to true', () => {
-    const state = initialState;
+    const state = { ...initialState };
 
     const action = {
       type: 'METADATA_LOADED',
     };
 
-    const expectedState = state.set('metadataLoaded', true);
+    const expectedState = { ...state, metadataLoaded: true };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should set seeked to true', () => {
-    const state = initialState;
+    const state = { ...initialState };
 
     const action = {
       type: 'SEEKED',
     };
 
-    const expectedState = state.set('seeked', true);
+    const expectedState = { ...state, seeked: true };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should set isHover to true if passed value is true', () => {
-    const state = initialState;
+    const state = { ...initialState };
 
     const action = {
       type: 'SET_IS_HOVER',
       isHover: true,
     };
 
-    const expectedState = state.set('isHover', true);
+    const expectedState = { ...state, isHover: true };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should set isHover to false if passed value is false', () => {
-    const state = initialState.set('isHover', true);
+    const state = { ...initialState, isHover: true };
 
     const action = {
       type: 'SET_IS_HOVER',
       isHover: false,
     };
 
-    const expectedState = state.set('isHover', false);
+    const expectedState = { ...state, isHover: false };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should update snapshot', () => {
-    const state = initialState;
+    const state = { ...initialState };
 
     const snapshot =
       'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAeAAAANQCAYAAADwgbzJAAAgAElEQVR4Xuy9aaytaXYetPY8nfnO99Z0q6va7e622+2y27ZCiEFEJkDjeIhp2zG22+3EwcEGIwhI/AiREAIRCRQsCBJCIkKBH0kQNj9sImhCJMuNbCltu6fq6qq+VXc';
@@ -75,20 +75,20 @@ describe('Upload | components | VideoPreview | reducer', () => {
       snapshot,
     };
 
-    const expectedState = state.set('snapshot', snapshot);
+    const expectedState = { ...state, snapshot };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });
 
   it('should set isError to true when the payload is true', () => {
-    const state = initialState;
+    const state = { ...initialState };
 
     const action = {
       type: 'SET_ERROR',
       isError: true,
     };
 
-    const expectedState = state.set('isError', true);
+    const expectedState = { ...state, isError: true };
 
     expect(reducer(state, action)).toEqual(expectedState);
   });

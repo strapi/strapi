@@ -1,7 +1,7 @@
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { toString } from 'lodash';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import { IconLinks } from '@buffetjs/core';
 import { Duplicate } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -15,8 +15,7 @@ import Cell from './Cell';
 
 function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }) {
   const { entriesToDelete, onChangeBulk, onClickDelete } = useListView();
-  const { emitEvent } = useGlobalContext();
-  const emitEventRef = useRef(emitEvent);
+  const { trackUsage } = useTracking();
 
   const memoizedDisplayedValue = useCallback(
     (name, type) => {
@@ -37,7 +36,7 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
       icon: canUpdate ? <FontAwesomeIcon icon="pencil-alt" /> : null,
       onClick: e => {
         e.stopPropagation();
-        emitEventRef.current('willDeleteEntryFromList');
+        trackUsage('willEditEntryFromList');
         goTo(row.id);
       },
     },
@@ -45,7 +44,7 @@ function Row({ canCreate, canDelete, canUpdate, isBulkable, row, headers, goTo }
       icon: canDelete ? <FontAwesomeIcon icon="trash-alt" /> : null,
       onClick: e => {
         e.stopPropagation();
-        emitEventRef.current('willDeleteEntryFromList');
+        trackUsage('willDeleteEntryFromList');
         onClickDelete(row.id);
       },
     },

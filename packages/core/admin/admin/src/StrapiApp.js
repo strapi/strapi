@@ -94,6 +94,12 @@ class StrapiApp {
     });
   }
 
+  createStore = () => {
+    const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
+
+    return store;
+  };
+
   getPlugin = pluginId => {
     return this.plugins[pluginId];
   };
@@ -138,7 +144,8 @@ class StrapiApp {
   };
 
   render() {
-    const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
+    const store = this.createStore();
+
     const {
       components: { components },
       fields: { fields },

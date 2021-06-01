@@ -9,11 +9,10 @@ import { CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
-import App from './containers/App';
-import Initializer from './containers/Initializer';
-import SettingsPage from './containers/SettingsPage';
+import Initializer from './components/Initializer';
 import InputMedia from './components/InputMedia';
-import InputModalStepper from './containers/InputModalStepper';
+import InputModalStepper from './components/InputModalStepper';
+import SettingsPage from './pages/SettingsPage';
 import reducers from './reducers';
 import trads from './translations';
 import pluginId from './pluginId';
@@ -40,11 +39,9 @@ export default {
 
       isReady: false,
       isRequired: pluginPkg.strapi.required || false,
-
-      mainComponent: App,
       name,
       pluginLogo,
-      preventComponentRendering: false,
+
       settings: {
         global: {
           links: [

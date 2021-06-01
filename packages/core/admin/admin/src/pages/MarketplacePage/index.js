@@ -1,12 +1,14 @@
 import React from 'react';
 import {
   LoadingIndicatorPage,
-  useGlobalContext,
   request,
   useNotification,
   useAutoReloadOverlayBlocker,
+  useAppInfos,
+  useStrapiApp,
 } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
+import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { useFetchPluginsFromMarketPlace } from '../../hooks';
 import PageTitle from '../../components/PageTitle';
@@ -17,7 +19,10 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const history = useHistory();
-  const { autoReload, currentEnvironment, formatMessage, plugins } = useGlobalContext();
+  const { autoReload, currentEnvironment } = useAppInfos();
+  const { formatMessage } = useIntl();
+  const { plugins } = useStrapiApp();
+
   const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
 
   if (isLoading || error) {

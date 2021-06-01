@@ -7,7 +7,6 @@
 
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
-import App from './containers/App';
 import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
@@ -27,7 +26,6 @@ export default {
       id: pluginId,
       isRequired: pluginPkg.strapi.required || false,
       isReady: true,
-      mainComponent: App,
       name,
       pluginLogo,
       trads,

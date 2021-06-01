@@ -1,7 +1,7 @@
 import React, { isValidElement, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEmpty, isObject, toLower } from 'lodash';
-import { useGlobalContext } from '../../contexts/GlobalContext';
+import { useIntl } from 'react-intl';
 import matchSorter from 'match-sorter';
 import LeftMenuLink from '../LeftMenuLink';
 import LeftMenuSubList from '../LeftMenuSubList';
@@ -11,7 +11,7 @@ import Wrapper from './Wrapper';
 
 function LeftMenuList({ customLink, links, title, searchable }) {
   const [search, setSearch] = useState('');
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   const getLabel = message => {
     if (isObject(message) && message.id) {

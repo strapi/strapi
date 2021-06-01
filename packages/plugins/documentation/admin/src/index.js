@@ -8,7 +8,7 @@ import pluginPkg from '../../package.json';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
-import App from './containers/App';
+import App from './pages/App';
 import trads from './translations';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -21,9 +21,7 @@ export default {
       description: pluginDescription,
       icon,
       id: pluginId,
-      // TODO
       isReady: true,
-      // TODO
       isRequired: pluginPkg.strapi.required || false,
       // TODO
       mainComponent: App,

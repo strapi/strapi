@@ -1,12 +1,11 @@
+import { fixtures } from '../../../../../../admin-test-utils';
 import addLocaleColumnToListViewMiddleware from '../addLocaleColumnToListViewMiddleware';
 
 describe('addLocaleColumnToListViewMiddleware', () => {
   let getState;
 
   beforeEach(() => {
-    const store = {};
-
-    store.i18n_locales = { locales: [] };
+    const store = { ...fixtures.store.state, i18n_locales: { locales: [] } };
 
     getState = () => store;
   });

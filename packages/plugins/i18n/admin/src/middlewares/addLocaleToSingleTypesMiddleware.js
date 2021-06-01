@@ -8,7 +8,7 @@ const addLocaleToSingleTypesMiddleware = () => ({ getState }) => next => action 
   if (action.data.authorizedStLinks.length) {
     const store = getState();
     const { locales } = store.i18n_locales;
-    const { collectionTypesRelatedPermissions } = store.permissionsManager;
+    const { collectionTypesRelatedPermissions } = store.rbacProvider;
 
     action.data.authorizedStLinks = addLocaleToLinksSearch(
       action.data.authorizedStLinks,

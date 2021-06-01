@@ -16,7 +16,7 @@ import FilterInput from './FilterInput';
 const FiltersCard = ({ onChange }) => {
   const timestamps = useSelectTimestamps();
   const [state, dispatch] = useReducer(reducer, initialState, () => init(initialState, timestamps));
-  const { name, filter, filtersForm, value } = state.toJS();
+  const { name, filter, filtersForm, value } = state;
 
   const type = filtersForm[name].type;
   const filtersOptions = getFilterType(type);

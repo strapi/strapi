@@ -5,20 +5,15 @@
  */
 
 import React, { memo } from 'react';
-import PropTypes from 'prop-types';
-import { Redirect } from 'react-router-dom';
-import { get } from 'lodash';
+import { Redirect, useParams } from 'react-router-dom';
+import get from 'lodash/get';
 import { ErrorBoundary } from 'react-error-boundary';
-import { BlockerComponent, ErrorFallback } from '@strapi/helper-plugin';
+import { ErrorFallback, useStrapiApp } from '@strapi/helper-plugin';
 import PageTitle from '../../components/PageTitle';
 
-export function PluginDispatcher(props) {
-  const {
-    plugins,
-    match: {
-      params: { pluginId },
-    },
-  } = props;
+const PluginDispatcher = () => {
+  const { pluginId } = useParams();
+  const { plugins } = useStrapiApp();
 
   const pluginToRender = get(plugins, pluginId, null);
 
@@ -26,39 +21,18 @@ export function PluginDispatcher(props) {
     return <Redirect to="/404" />;
   }
 
-  const {
-    blockerComponent,
-    blockerComponentProps,
-    mainComponent,
-    name,
-    preventComponentRendering,
-  } = pluginToRender;
-  let PluginEntryComponent = preventComponentRendering ? BlockerComponent : mainComponent;
-
-  // Change the plugin's blockerComponent if the plugin uses a custom one.
-  if (preventComponentRendering && blockerComponent) {
-    PluginEntryComponent = blockerComponent;
-  }
+  const { mainComponent, name } = pluginToRender;
+  const PluginEntryComponent = mainComponent;
 
   return (
     <div>
       <PageTitle title={`Strapi - ${name}`} />
       <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <PluginEntryComponent {...props} {...blockerComponentProps} />
+        <PluginEntryComponent />
       </ErrorBoundary>
     </div>
   );
-}
-
-PluginDispatcher.defaultProps = {};
-
-PluginDispatcher.propTypes = {
-  match: PropTypes.shape({
-    params: PropTypes.shape({
-      pluginId: PropTypes.string,
-    }),
-  }).isRequired,
-  plugins: PropTypes.object.isRequired,
 };
 
 export default memo(PluginDispatcher);
+export { PluginDispatcher };

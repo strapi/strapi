@@ -1,18 +1,26 @@
-import React, { useEffect, useReducer, memo } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { FormattedMessage } from 'react-intl';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useTracking } from '@strapi/helper-plugin';
 import formatVideoArray from './utils/formatAndStoreVideoArray';
 import StaticLinks from './StaticLinks';
 import Video from './Video';
 import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
 
+const Onboarding = () => {
+  if (process.env.STRAPI_ADMIN_SHOW_TUTORIALS !== 'true') {
+    return null;
+  }
+
+  return <OnboardingVideos />;
+};
+
 const OnboardingVideos = () => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const [{ isLoading, isOpen, videos }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
@@ -50,7 +58,7 @@ const OnboardingVideos = () => {
       : 'didCloseGetStartedVideoContainer';
 
     dispatch({ type: 'SET_IS_OPEN' });
-    emitEvent(eventName);
+    trackUsage(eventName);
   };
   const handleClickOpenVideo = videoIndexToOpen => {
     dispatch({
@@ -104,12 +112,12 @@ const OnboardingVideos = () => {
               didPlayVideo={(_, elapsedTime) => {
                 const eventName = `didPlay${index}GetStartedVideo`;
 
-                emitEvent(eventName, { timestamp: elapsedTime });
+                trackUsage(eventName, { timestamp: elapsedTime });
               }}
               didStopVideo={(_, elapsedTime) => {
                 const eventName = `didStop${index}Video`;
 
-                emitEvent(eventName, { timestamp: elapsedTime });
+                trackUsage(eventName, { timestamp: elapsedTime });
               }}
             />
           ))}
@@ -127,4 +135,4 @@ const OnboardingVideos = () => {
   );
 };
 
-export default memo(OnboardingVideos);
+export default Onboarding;

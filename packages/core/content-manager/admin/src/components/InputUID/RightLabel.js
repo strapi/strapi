@@ -1,14 +1,14 @@
 import PropTypes from 'prop-types';
 import React from 'react';
 import { Success, Remove } from '@buffetjs/icons';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import RightContentLabel from './RightContentLabel';
 
 const RightLabel = ({ isAvailable }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   return isAvailable ? (
     <>

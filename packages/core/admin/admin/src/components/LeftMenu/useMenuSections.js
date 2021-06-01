@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useUser, useNotification } from '@strapi/helper-plugin';
+import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 
 import getCtOrStLinks from './utils/getCtOrStLinks';
@@ -14,7 +14,8 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
   const toggleNotification = useNotification();
   const state = useSelector(selectMenuLinks);
   const dispatch = useDispatch();
-  const { userPermissions } = useUser();
+  const { allPermissions } = useRBACProvider();
+
   const { menu: settingsMenu } = useSettingsMenu(true);
   // We are using a ref because we don't want our effect to have this in its dependencies array
   const generalSectionLinksRef = useRef(state.generalSectionLinks);
@@ -29,7 +30,7 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
 
   const toggleLoading = () => dispatch(toggleIsLoading());
 
-  const resolvePermissions = async (permissions = userPermissions) => {
+  const resolvePermissions = async (permissions = allPermissions) => {
     const pluginsSectionLinks = toPluginLinks(pluginsRef.current);
     const { authorizedCtLinks, authorizedStLinks, contentTypes } = await getCtOrStLinks(
       permissions,
@@ -56,8 +57,8 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
   const resolvePermissionsRef = useRef(resolvePermissions);
 
   useEffect(() => {
-    resolvePermissionsRef.current(userPermissions);
-  }, [userPermissions, dispatch]);
+    resolvePermissionsRef.current(allPermissions);
+  }, [allPermissions, dispatch]);
 
   return { state, generateMenu: resolvePermissionsRef.current, toggleLoading };
 };

@@ -2,7 +2,8 @@ import React, { memo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Flex } from '@buffetjs/core';
 import { Tooltip } from '@buffetjs/styles';
-import { getFileExtension, useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { getFileExtension } from '@strapi/helper-plugin';
 import { formatBytes, getType, getTrad } from '../../utils';
 
 import Border from '../CardBorder';
@@ -37,7 +38,7 @@ const Card = ({
     withoutFileInfo,
   },
 }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [tooltipIsDisplayed, setDisplayTooltip] = useState(false);
   const fileSize = formatBytes(size, 0);
   const fileType = mime || type;

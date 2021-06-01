@@ -1,14 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
-import useUser from '../../hooks/useUser';
+
 import hasPermissions from '../../utils/hasPermissions';
+import useRBACProvider from '../../hooks/useRBACProvider';
 
 // NOTE: this component is very similar to the CheckPagePermissions
 // except that it does not handle redirections nor loading state
 
 const CheckPermissions = ({ permissions, children }) => {
-  const { userPermissions } = useUser();
+  const { allPermissions } = useRBACProvider();
   const toggleNotification = useNotification();
   const [state, setState] = useState({ isLoading: true, canAccess: false });
   const isMounted = useRef(true);
@@ -20,7 +21,7 @@ const CheckPermissions = ({ permissions, children }) => {
       try {
         setState({ isLoading: true, canAccess: false });
 
-        const canAccess = await hasPermissions(userPermissions, permissions, signal);
+        const canAccess = await hasPermissions(allPermissions, permissions, signal);
 
         if (isMounted.current) {
           setState({ isLoading: false, canAccess });

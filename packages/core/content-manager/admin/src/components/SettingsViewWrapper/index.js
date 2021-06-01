@@ -2,15 +2,14 @@ import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEqual, upperFirst } from 'lodash';
 import { withRouter } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage, useIntl } from 'react-intl';
 import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   BackHeader,
   LoadingIndicatorPage,
   ModalConfirm,
   PopUpWarning,
-  // contexts
-  useGlobalContext,
+  useTracking,
 } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import Block from '../Block';
@@ -33,7 +32,8 @@ const SettingsViewWrapper = ({
   onConfirmSubmit,
   onModalConfirmClosed,
 }) => {
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { trackUsage } = useTracking();
+  const { formatMessage } = useIntl();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
 
@@ -133,7 +133,7 @@ const SettingsViewWrapper = ({
   const handleSubmit = e => {
     e.preventDefault();
     toggleWarningSubmit();
-    emitEvent('willSaveContentTypeLayout');
+    trackUsage('willSaveContentTypeLayout');
   };
 
   if (isLoading) {

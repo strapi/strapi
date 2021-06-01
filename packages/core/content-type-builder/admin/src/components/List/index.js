@@ -8,10 +8,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { useGlobalContext, ListButton } from '@strapi/helper-plugin';
+import { ListButton } from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
-
+import { useIntl } from 'react-intl';
 import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import useDataManager from '../../hooks/useDataManager';
@@ -40,7 +40,7 @@ function List({
   isSub,
   dzName,
 }) {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
   const onClickAddField = () => {

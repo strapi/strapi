@@ -87,7 +87,7 @@ export { default as Row } from './components/Row';
 export { default as SearchInfo } from './components/SearchInfo';
 export { default as SelectNav } from './components/SelectNav';
 export { default as SelectWrapper } from './components/SelectWrapper';
-export { default as UserProvider } from './components/UserProvider';
+
 export { default as ViewContainer } from './components/ViewContainer';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
@@ -106,24 +106,32 @@ export { default as PopUpWarningIcon } from './components/PopUpWarning/Icon';
 export { default as PopUpWarningModal } from './components/PopUpWarning/StyledModal';
 
 // Contexts
+export { default as AppInfosContext } from './contexts/AppInfosContext';
 export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
-export { GlobalContext, GlobalContextProvider, useGlobalContext } from './contexts/GlobalContext';
-export { default as UserContext } from './contexts/UserContext';
 export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
+export { default as RBACProviderContext } from './contexts/RBACProviderContext';
+export { default as TrackingContext } from './contexts/TrackingContext';
+// TODO Remove this context
+export { default as AppMenuContext } from './contexts/AppMenuContext';
 
 // Hooks
+export { default as useAppInfos } from './hooks/useAppInfos';
 export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
 export { default as useStrapiApp } from './hooks/useStrapiApp';
-export { default as useUser } from './hooks/useUser';
-export { default as useUserPermissions } from './hooks/useUserPermissions';
+export { default as useTracking } from './hooks/useTracking';
+// TODO remove this hook
+export { default as useAppMenu } from './hooks/useAppMenu';
+
 export { default as useQueryParams } from './hooks/useQueryParams';
 export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
 export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
+export { default as useRBACProvider } from './hooks/useRBACProvider';
+export { default as useRBAC } from './hooks/useRBAC';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';

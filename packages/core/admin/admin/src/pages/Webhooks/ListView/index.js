@@ -15,7 +15,7 @@ import {
   request,
   ListButton,
   PopUpWarning,
-  useUserPermissions,
+  useRBAC,
   LoadingIndicatorPage,
   EmptyState,
   useNotification,
@@ -30,7 +30,7 @@ function ListView() {
   const {
     isLoading,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useUserPermissions(adminPermissions.settings.webhooks);
+  } = useRBAC(adminPermissions.settings.webhooks);
   const toggleNotification = useNotification();
   const isMounted = useRef(true);
   const { formatMessage } = useIntl();

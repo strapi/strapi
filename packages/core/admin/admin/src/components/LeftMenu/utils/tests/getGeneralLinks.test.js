@@ -367,7 +367,6 @@ describe('getGeneralLinks', () => {
           },
         ],
         notificationsCount: 0,
-        notificationCount: 0,
       },
     ];
     const actual = await getGeneralLinks(permissions, generalSectionRawLinks, settingsMenu, false);

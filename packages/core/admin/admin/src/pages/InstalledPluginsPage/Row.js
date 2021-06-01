@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { IconLinks, Text } from '@buffetjs/core';
 import { CustomRow } from '@buffetjs/styles';
-import { useGlobalContext, PopUpWarning, CheckPermissions } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { PopUpWarning, CheckPermissions } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
 import adminPermissions from '../../permissions';
 import LogoContainer from './Logo';
 
 const Row = ({ logo, name, description, isRequired, id, icon, onConfirm }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const [isOpen, setIsOpen] = useState(false);
   const links = [];
 
