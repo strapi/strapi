@@ -69,7 +69,7 @@
   "Roles.ListPage.notification.delete-not-allowed": "如果角色和用户关联，则不能被删除",
   "Roles.RoleRow.user-count.plural": "{number}个用户",
   "Roles.RoleRow.user-count.singular": "{number}个用户",
-  "Roles.components.List.empty.withSearch": "没有角色匹配搜索({search})...",
+  "Roles.components.List.empty.withSearch": "没有找到您要搜索的角色({search})...",
   "Settings.application.title": "应用",
   "Settings.application.description": "查看项目详情",
   "Settings.application.link-pricing": "查看所有价格",
