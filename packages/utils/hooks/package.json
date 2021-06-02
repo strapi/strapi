@@ -1,0 +1,12 @@
+{
+  "name": "@strapi/hooks",
+  "main": "./lib/index.js",
+  "version": "0.1.0",
+  "license": "SEE LICENSE IN LICENSE",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^27.0.3"
+  }
+}

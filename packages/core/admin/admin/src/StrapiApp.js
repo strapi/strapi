@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
+import createHook from '@strapi/hooks';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import basename from './utils/basename';
@@ -12,7 +13,6 @@ import LanguageProvider from './components/LanguageProvider';
 import AutoReloadOverlayBlockerProvider from './components/AutoReloadOverlayBlockerProvider';
 import OverlayBlocker from './components/OverlayBlocker';
 import Fonts from './components/Fonts';
-
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
 import themes from './themes';
@@ -42,6 +42,7 @@ class StrapiApp {
     this.plugins = {};
     this.reducers = reducers;
     this.translations = translations;
+    this.hooksDict = {};
   }
 
   addComponents = components => {
@@ -142,6 +143,24 @@ class StrapiApp {
 
     this.plugins[plugin.pluginId] = plugin;
   };
+
+  createHook = name => {
+    this.hooksDict[name] = createHook();
+  };
+
+  registerHook = (name, fn) => {
+    this.hooksDict[name].register(fn);
+  };
+
+  runHookSeries = (name, asynchronous = false) =>
+    asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
+
+  runHookWaterfall = (name, initialValue, asynchronous = false) =>
+    asynchronous
+      ? this.hooksDict[name].runWaterfallAsync(initialValue)
+      : this.hooksDict[name].runWaterfall(initialValue);
+
+  runHookParallel = name => this.hooksDict[name].runParallel();
 
   render() {
     const store = this.createStore();
