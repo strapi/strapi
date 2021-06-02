@@ -43,6 +43,28 @@ module.exports = () => {
 
   return {
     ...config,
+    snapshot: {
+      managedPaths: [
+        path.resolve(__dirname, '../core/@strapi/plugin/content-manager'),
+        path.resolve(__dirname, '../core/@strapi/plugin/content-type-builder'),
+        path.resolve(__dirname, '../core/@strapi/plugin/upload'),
+        path.resolve(__dirname, '../core/@strapi/helper-plugin'),
+      ],
+      buildDependencies: {
+        hash: true,
+        timestamp: true,
+      },
+      module: {
+        timestamp: true,
+      },
+      resolve: {
+        timestamp: true,
+      },
+      resolveBuildDependencies: {
+        hash: true,
+        timestamp: true,
+      },
+    },
     devServer: {
       port: 4000,
       clientLogLevel: 'none',
