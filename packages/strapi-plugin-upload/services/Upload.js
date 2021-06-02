@@ -305,17 +305,17 @@ module.exports = {
     return res;
   },
 
-  fetch(params) {
-    return strapi.query('file', 'upload').findOne(params);
+  fetch(params, populate) {
+    return strapi.query('file', 'upload').findOne(params, populate);
   },
 
-  fetchAll(params) {
+  fetchAll(params, populate) {
     combineFilters(params);
-    return strapi.query('file', 'upload').find(params);
+    return strapi.query('file', 'upload').find(params, populate);
   },
 
-  search(params) {
-    return strapi.query('file', 'upload').search(params);
+  search(params, populate) {
+    return strapi.query('file', 'upload').search(params, populate);
   },
 
   countSearch(params) {
