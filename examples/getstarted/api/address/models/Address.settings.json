@@ -14,9 +14,19 @@
     ],
     "comment": ""
   },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "postal_coder": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "categories": {
       "collection": "category",
@@ -33,7 +43,11 @@
       ],
       "plugin": "upload",
       "required": false,
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "images": {
       "collection": "file",
@@ -43,22 +57,70 @@
       ],
       "plugin": "upload",
       "required": false,
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "city": {
       "type": "string",
       "required": true,
-      "maxLength": 200
+      "maxLength": 200,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "likes": {
       "collection": "like",
       "via": "address"
     },
     "json": {
-      "type": "json"
+      "type": "json",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "slug": {
       "type": "uid"
+    },
+    "notrepeat_req": {
+      "type": "component",
+      "repeatable": false,
+      "pluginOptions": {
+        "i18n": {
+          "localized": false
+        }
+      },
+      "component": "blog.test-como",
+      "required": true
+    },
+    "repeat_req": {
+      "type": "component",
+      "repeatable": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "blog.test-como",
+      "required": true
+    },
+    "repeat_req_min": {
+      "type": "component",
+      "repeatable": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
+      "component": "blog.test-como",
+      "required": false,
+      "min": 2
     }
   }
 }

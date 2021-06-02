@@ -45,10 +45,10 @@ module.exports = () => {
     ...config,
     snapshot: {
       managedPaths: [
-        path.resolve(__dirname, '../core/@strapi/plugin/content-manager'),
-        path.resolve(__dirname, '../core/@strapi/plugin/content-type-builder'),
-        path.resolve(__dirname, '../core/@strapi/plugin/upload'),
-        path.resolve(__dirname, '../core/@strapi/helper-plugin'),
+        path.resolve(__dirname, '../content-manager'),
+        path.resolve(__dirname, '../content-type-builder'),
+        path.resolve(__dirname, '../upload'),
+        path.resolve(__dirname, '../helper-plugin'),
       ],
       buildDependencies: {
         hash: true,
