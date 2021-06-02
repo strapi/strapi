@@ -123,12 +123,9 @@ components_seos
 
 core_store
 
-
-
-
 Scenarios for migrations
 
-- user edit a CT in the Admin -> should we update the DB in place ? or dump a migration file
+- User edit a CT in the Admin -> should we update the DB in place ? or dump a migration file
 
 */
 
@@ -305,10 +302,10 @@ const entityService = () => {
 
 class Database {
   constructor(config) {
-    this.metadata = createMetadata();
+    this.metadata = createMetadata(config.models);
 
     // validate models are valid
-    this.metadata.validate();
+    // this.metadata.validate();
 
     // this.connector = resolveConnector(this.config);
 
@@ -319,7 +316,7 @@ class Database {
     // build schema
     // load form memory
     // sync schema
-    this.schemaProvider = createSchemaProvider(this);
+    this.schema = createSchemaProvider(this);
 
     // migrations -> allow running them through cli before startup
 

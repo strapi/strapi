@@ -364,7 +364,7 @@ class Strapi {
     });
     // this.db = createDatabaseManager(this);
 
-    await this.db.getSchema().create();
+    await this.db.schema.sync();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     await this.db.initialize();

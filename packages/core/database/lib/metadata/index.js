@@ -2,7 +2,7 @@
 
 const fields = require('../fields');
 
-const createMetadata = models => {
+const createMetadata = (models = []) => {
   /*
     primarykey => id only so not needed
 
@@ -40,7 +40,7 @@ const createMetadata = models => {
 
   models.forEach(model => {
     const modelMetadata = {
-      tableName: '',
+      tableName: model.collectionName,
       attributes: {
         id: {
           type: 'integer',
@@ -52,40 +52,39 @@ const createMetadata = models => {
         updatedAt: {
           columnName: 'created_at',
         },
-        ...Object.keys(model.attributes).reduce((acc, attributeName) => {
-          const attribute = model.attributes[attributeName];
+        ...Object.keys(model.attributes)
+          .map(attributeName => {
+            const attribute = model.attributes[attributeName];
 
+            // if relation
+            // if compo
+            // if dz
+            // if scalar
 
-          // if relation
-          // if compo
-          // if dz
-          // if scalar
-
-          acc[attributeName] = {
-            // find type
-            type: attribute.type,
-            default: attribute.default,
-            field: fields.get(attribute.type)(attribute), // field type with parser / formatter / validator ...
-            column: {
-              columnType: attribute.columnType,
-              columnName: attribute.columnName,
-              indexes: {},
-              unique: Boolean(attribute.unique),
-              nullable: Boolean(attribute.notNull),
-            },
-          };
-        }),
+            return {
+              [attributeName]: {
+                // find type
+                type: attribute.type,
+                default: attribute.default,
+                // field: fields.get(attribute.type)(attribute), // field type with parser / formatter / validator ...
+                column: {
+                  columnType: attribute.columnType,
+                  columnName: attribute.columnName,
+                  indexes: {},
+                  unique: Boolean(attribute.unique),
+                  nullable: Boolean(attribute.notNull),
+                },
+              },
+            };
+          })
+          .reduce((acc, obj) => Object.assign(acc, obj), {}),
       },
     };
 
     metadata[model.uid] = modelMetadata;
   });
 
-  return {
-    get(uid) {
-      return metadata[uid];
-    },
-  };
+  return metadata;
 };
 
 module.exports = createMetadata;
