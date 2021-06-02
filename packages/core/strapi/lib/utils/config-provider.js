@@ -1,15 +1,9 @@
 'use strict';
 
-const assert = require('assert');
 const _ = require('lodash');
 
 module.exports = (initialConfig = {}) => {
-  assert(
-    typeof initialConfig === 'object' && initialConfig !== null,
-    'Initial config must be an object'
-  );
-
-  const _config = initialConfig;
+  const _config = _.cloneDeep(initialConfig);
 
   return Object.assign(_config, {
     get(path, defaultValue) {

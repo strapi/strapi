@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const pluralize = require('pluralize');
-const { nameToSlug } = require('./string-formatting');
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
@@ -124,76 +123,6 @@ const isMediaAttribute = attr => {
   return (attr.collection || attr.model) === 'file' && attr.plugin === 'upload';
 };
 
-const getKind = obj => obj.kind || 'collectionType';
-
-const pickSchema = model => {
-  const schema = _.cloneDeep(
-    _.pick(model, [
-      'connection',
-      'collectionName',
-      'info',
-      'options',
-      'pluginOptions',
-      'attributes',
-    ])
-  );
-
-  schema.kind = getKind(model);
-  return schema;
-};
-
-const createContentType = (model, { apiName, pluginName } = {}) => {
-  // todo : validate schema with yup
-  const createdContentType = _.cloneDeep(model);
-  const singularModelName = nameToSlug(model.singularName);
-  const pluralModelName = nameToSlug(model.pluralName);
-
-  if (apiName) {
-    Object.assign(createdContentType, {
-      uid: `application::${apiName}.${singularModelName}`,
-      apiName,
-      collectionName: model.collectionName || singularModelName,
-      globalId: getGlobalId(createdContentType, singularModelName),
-    });
-  } else if (pluginName) {
-    Object.assign(createdContentType, {
-      uid: `plugins::${pluginName}.${singularModelName}`,
-      plugin: pluginName,
-      collectionName:
-        createdContentType.collectionName || `${pluginName}_${singularModelName}`.toLowerCase(),
-      globalId: getGlobalId(createdContentType, singularModelName, pluginName),
-    });
-  } else {
-    Object.assign(createdContentType, {
-      uid: `strapi::${singularModelName}`,
-      plugin: 'admin',
-      globalId: getGlobalId(createdContentType, singularModelName, 'admin'),
-    });
-  }
-
-  Object.assign(createdContentType, {
-    __schema__: pickSchema(createdContentType),
-    kind: getKind(createdContentType),
-    modelType: 'contentType',
-    modelName: singularModelName,
-    singularName: singularModelName,
-    pluralName: pluralModelName,
-  });
-  Object.defineProperty(createdContentType, 'privateAttributes', {
-    get() {
-      return strapi.getModel(createdContentType.uid).privateAttributes;
-    },
-  });
-
-  return createdContentType;
-};
-
-const getGlobalId = (model, modelName, prefix) => {
-  let globalId = prefix ? `${prefix}-${modelName}` : modelName;
-
-  return model.globalId || _.upperFirst(_.camelCase(globalId));
-};
-
 const isRelationalAttribute = attribute =>
   _.has(attribute, 'model') || _.has(attribute, 'collection');
 
@@ -237,7 +166,5 @@ module.exports = {
   isSingleType,
   isCollectionType,
   isKind,
-  createContentType,
-  getGlobalId,
   getContentTypeRoutePrefix,
 };

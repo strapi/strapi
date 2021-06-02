@@ -9,11 +9,11 @@ dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
+const createConfigProvider = require('../../utils/config-provider');
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 const loadPolicies = require('../load-policies');
 const loadFunctions = require('../load-functions');
 const loadConfigDir = require('./config-loader');
-const createConfigProvider = require('./config-provider');
 
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
 

@@ -1,39 +1,29 @@
 'use strict';
 
 const { join } = require('path');
-const { isFunction, defaultsDeep } = require('lodash/fp');
-const { env } = require('@strapi/utils');
-const { createContentType } = require('@strapi/utils').contentTypes;
 const { validateStrapiServer } = require('./validation');
+const createConfigProvider = require('./config-provider');
+const createServiceProvider = require('./service-provider');
+const createContentTypeProvider = require('./content-type-provider');
 
 const createPlugin = async (strapi, name, path) => {
   const loadPluginServer = require(join(path, 'strapi-server.js'));
-  const userPluginConfig = strapi.config.get(`plugins.${name}`);
   const pluginServer = await loadPluginServer(strapi);
+  const cleanPluginServer = await validateStrapiServer(pluginServer);
 
-  await validateStrapiServer(pluginServer);
-
-  const defaultConfig = isFunction(pluginServer.config)
-    ? await pluginServer.config({ env })
-    : pluginServer.config;
-
-  const contentTypes = pluginServer.contentTypes.map(ct =>
-    createContentType(ct, { pluginName: name })
-  );
-  const contentTypesMap = contentTypes.reduce((map, ct) => {
-    map[ct.info.singularName] = ct;
-    map[ct.info.pluralName] = ct;
-  }, {});
+  const configProvider = await createConfigProvider(name, cleanPluginServer.config);
+  const serviceProvider = await createServiceProvider(cleanPluginServer.services);
+  const contentTypeProvider = await createContentTypeProvider(name, cleanPluginServer.contentTypes);
 
   return {
-    bootstrap: pluginServer.bootstrap,
-    destroy: pluginServer.destroy,
-    config: defaultsDeep(defaultConfig, userPluginConfig),
-    // routes: pluginServer.routes,
-    // controller: (name) => pluginServer.controllers[name],
-    service: name => pluginServer.services[name],
-    contentType: name => contentTypesMap[name],
-    getAllContentTypes: () => Object.values(contentTypes),
+    bootstrap: cleanPluginServer.bootstrap,
+    destroy: cleanPluginServer.destroy,
+    config: configProvider,
+    service: serviceProvider.get,
+    contentType: contentTypeProvider.get,
+    getAllContentTypes: contentTypeProvider.getAll,
+    // routes: cleanPluginServer.routes,
+    // controller: (name) => cleanPluginServer.controllers[name],
   };
 };
 
