@@ -20,7 +20,11 @@
     "index.js"
   ],
   "dependencies": {
+    "axios": "0.21.1",
+    "chalk": "4.1.1",
     "commander": "6.1.0",
+    "inquirer": "8.1.0",
+    "js-yaml": "4.1.0",
     "strapi-generate-new": "3.6.3"
   },
   "scripts": {

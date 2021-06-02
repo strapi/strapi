@@ -16,13 +16,15 @@
     "create-strapi-starter": "./index.js"
   },
   "dependencies": {
+    "axios": "0.21.1",
     "chalk": "4.1.1",
     "ci-info": "3.1.1",
     "commander": "7.1.0",
     "execa": "5.0.0",
     "fs-extra": "9.1.0",
     "git-url-parse": "11.4.4",
-    "node-fetch": "2.6.1",
+    "inquirer": "8.1.0",
+    "js-yaml": "4.1.0",
     "ora": "5.4.0",
     "strapi-generate-new": "3.6.3",
     "tar": "6.1.0"
