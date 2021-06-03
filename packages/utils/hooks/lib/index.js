@@ -7,7 +7,7 @@ const createHook = () => {
     register(fn) {
       _handlers.push(fn);
     },
-    delete: handler => {
+    delete(handler) {
       _handlers.splice(_handlers.indexOf(handler), 1);
     },
     runWaterfall(args) {
