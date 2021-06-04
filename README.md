@@ -33,11 +33,8 @@
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
   </a>
-  <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
-  </a>
-  <a href="https://slack.strapi.io">
-    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
+  <a href="https://discord.strapi.io">
+    <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
   </a>
 </p>
 
