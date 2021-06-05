@@ -159,12 +159,9 @@ const cleanPermissionFields = (permissions, { nestingLevel } = {}) => {
   const { actionProvider } = getService('permission');
 
   return permissions.map(permission => {
-    const {
-      action: actionId,
-      subject,
-      properties: { fields },
-    } = permission;
+    const { action: actionId, subject, properties } = permission;
 
+    const { fields = [] } = properties || {};
     const action = actionProvider.get(actionId);
 
     // todo see if it's possible to check property on action + subject (async)

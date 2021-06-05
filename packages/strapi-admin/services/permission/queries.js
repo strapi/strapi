@@ -156,7 +156,10 @@ const cleanPermissionsInDatabase = async () => {
     // Update only the ones that need to be updated
     const permissionsNeedingToBeUpdated = differenceWith(
       (a, b) => {
-        return a.id === b.id && xor(a.properties.fields, b.properties.fields).length === 0;
+        const aFields = (a.properties && a.properties.fields) || [];
+        const bFields = (b.properties && b.properties.fields) || [];
+
+        return a.id === b.id && xor(aFields, bFields).length === 0;
       },
       permissionsWithCleanFields,
       remainingPermissions

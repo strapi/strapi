@@ -48,6 +48,10 @@ const sortDeep = data => {
 };
 
 const sortPermissionProperties = permission => {
+  if (!permission.properties) {
+    return permission;
+  }
+
   return Object.entries(permission.properties).reduce(
     (acc, [name, value]) => permissionDomain.setProperty(name, sortDeep(value), acc),
     permission
