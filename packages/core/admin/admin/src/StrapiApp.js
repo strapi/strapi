@@ -176,7 +176,13 @@ class StrapiApp {
           <GlobalStyle />
           <Fonts />
           <Provider store={store}>
-            <StrapiAppProvider getPlugin={this.getPlugin} plugins={this.plugins}>
+            <StrapiAppProvider
+              getPlugin={this.getPlugin}
+              plugins={this.plugins}
+              runHookParallel={this.runHookParallel}
+              runHookWaterfall={this.runHookWaterfall}
+              runHookSeries={this.runHookSeries}
+            >
               <LibraryProvider components={components} fields={fields}>
                 <LanguageProvider messages={this.translations}>
                   <AutoReloadOverlayBlockerProvider>
