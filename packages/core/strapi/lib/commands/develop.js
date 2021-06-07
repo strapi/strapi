@@ -6,7 +6,7 @@ const fs = require('fs-extra');
 const chokidar = require('chokidar');
 const execa = require('execa');
 
-const { logger } = require('@strapi/utils');
+const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('../core/app-configuration');
 const strapi = require('../index');
 
@@ -17,6 +17,7 @@ const strapi = require('../index');
 module.exports = async function({ build, watchAdmin, polling, browser }) {
   const dir = process.cwd();
   const config = loadConfiguration(dir);
+  const logger = createLogger(config.get('logger', {}));
 
   const adminWatchIgnoreFiles = config.get('server.admin.watchIgnoreFiles', []);
   const serveAdminPanel = config.get('server.admin.serveAdminPanel', true);
