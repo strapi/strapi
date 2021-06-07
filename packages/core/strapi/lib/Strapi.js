@@ -203,6 +203,7 @@ class Strapi {
       // Launch server.
       this.listen(cb);
     } catch (err) {
+      console.log(err);
       this.stopWithError(err);
     }
   }

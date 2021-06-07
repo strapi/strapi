@@ -14367,6 +14367,14 @@ netmask@^1.0.6:
   resolved "https://registry.yarnpkg.com/netmask/-/netmask-1.0.6.tgz#20297e89d86f6f6400f250d9f4f6b4c1945fcd35"
   integrity sha1-ICl+idhvb2QA8lDZ9Pa0wZRfzTU=
 
+nexus@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/nexus/-/nexus-1.0.0.tgz#633b39abae1d7e9472ca40e37bb5d3e1263f6aa3"
+  integrity sha512-Toa91s9BJsX8pDX34QkOyKdnw8MmuOQkEboZMKSxvF9mWuAFkY74Zj1ssaexeV7yTQ7HoLQYUQ00FaWzXPmggQ==
+  dependencies:
+    iterall "^1.3.0"
+    tslib "^2.0.3"
+
 nice-try@^1.0.4:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nice-try/-/nice-try-1.0.5.tgz#a3378a7696ce7d223e88fc9b764bd7ef1089e366"

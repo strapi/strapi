@@ -73,6 +73,7 @@ module.exports = strapi => {
     },
 
     initialize() {
+      const nexusSchema = strapi.plugins.graphql.services.v2.generateSchema();
       const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
 
       if (_.isEmpty(schema)) {
@@ -99,7 +100,7 @@ module.exports = strapi => {
       const apolloServerConfig = _.get(config, 'apolloServer', {});
 
       const serverParams = {
-        schema,
+        schema: nexusSchema,
         uploads: false,
         context: ({ ctx }) => {
           // Initiliase loaders for this request.
