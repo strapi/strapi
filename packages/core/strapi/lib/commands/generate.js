@@ -11,7 +11,10 @@ const path = require('path');
 const generate = require('@strapi/generate');
 
 // Logger.
-const { logger } = require('@strapi/utils');
+const { createLogger } = require('@strapi/logger');
+
+// Configuration
+const loadConfiguration = require('../core/app-configuration');
 
 // Local Strapi dependencies.
 const packageJSON = require('../../package.json');
@@ -23,6 +26,10 @@ const packageJSON = require('../../package.json');
  */
 
 module.exports = function(id, cliArguments) {
+  const dir = process.cwd();
+  const config = loadConfiguration(dir);
+  const logger = createLogger(config.get('logger', {}));
+
   // Build initial scope.
   const scope = {
     rootPath: process.cwd(),
