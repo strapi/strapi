@@ -49,4 +49,92 @@ describe('ADMIN | StrapiApp', () => {
 
     expect(store.getState()).toEqual(fixtures.store.state);
   });
+
+  describe('Hook api', () => {
+    it('runs the "moto" hooks in series', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+
+      app.createHook('hello');
+      app.createHook('moto');
+
+      app.registerHook('hello', () => 5);
+      app.registerHook('moto', () => 1);
+      app.registerHook('moto', () => 2);
+      app.registerHook('moto', () => 3);
+
+      const [a, b, c] = app.runHookSeries('moto');
+
+      expect(a).toBe(1);
+      expect(b).toBe(2);
+      expect(c).toBe(3);
+    });
+
+    it('runs the "moto" hooks in series asynchronously', async () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+
+      app.createHook('hello');
+      app.createHook('moto');
+
+      app.registerHook('hello', () => Promise.resolve(5));
+      app.registerHook('moto', () => 1);
+      app.registerHook('moto', () => 2);
+      app.registerHook('moto', () => 3);
+
+      const [a, b, c] = await app.runHookSeries('moto', true);
+
+      expect(a).toBe(1);
+      expect(b).toBe(2);
+      expect(c).toBe(3);
+    });
+
+    it('runs the "moto" hooks in waterfall', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+
+      app.createHook('hello');
+      app.createHook('moto');
+
+      app.registerHook('hello', () => 5);
+      app.registerHook('moto', n => n + 1);
+      app.registerHook('moto', n => n + 2);
+      app.registerHook('moto', n => n + 3);
+
+      const res = app.runHookWaterfall('moto', 1);
+
+      expect(res).toBe(7);
+    });
+
+    it('runs the "moto" hooks in waterfall asynchronously', async () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+
+      app.createHook('hello');
+      app.createHook('moto');
+
+      app.registerHook('hello', () => 5);
+      app.registerHook('moto', n => n + 1);
+      app.registerHook('moto', n => Promise.resolve(n + 2));
+      app.registerHook('moto', n => n + 3);
+
+      const res = await app.runHookWaterfall('moto', 1, true);
+
+      expect(res).toBe(7);
+    });
+
+    it('runs the "moto" hooks in parallel', async () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+
+      app.createHook('hello');
+      app.createHook('moto');
+
+      app.registerHook('hello', () => 5);
+      app.registerHook('moto', () => 1);
+      app.registerHook('moto', () => 2);
+      app.registerHook('moto', () => 3);
+
+      const [a, b, c] = await app.runHookParallel('moto');
+
+      expect(a).toBe(1);
+      expect(b).toBe(2);
+      expect(c).toBe(3);
+    });
+  });
 });
