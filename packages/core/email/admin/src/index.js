@@ -54,28 +54,6 @@ export default {
       name,
       pluginLogo,
       trads,
-      // settings: {
-      //   menuSection: {
-      //     id: pluginId,
-      //     title: getTrad('SettingsNav.section-label'),
-      //     links: [
-      //       {
-      //         title: {
-      //           id: getTrad('SettingsNav.link.settings'),
-      //           defaultMessage: 'Settings',
-      //         },
-      //         name: 'settings',
-      //         to: `/settings/${pluginId}`,
-      //         Component: () => (
-      //           <CheckPagePermissions permissions={pluginPermissions.settings}>
-      //             <SettingsPage />
-      //           </CheckPagePermissions>
-      //         ),
-      //         permissions: pluginPermissions.settings,
-      //       },
-      //     ],
-      //   },
-      // },
     });
   },
   boot() {},

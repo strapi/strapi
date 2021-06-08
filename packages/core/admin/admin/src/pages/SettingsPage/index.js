@@ -59,23 +59,6 @@ function SettingsPage() {
 
   const pluginsRoutes = useMemo(() => createSectionsRoutes(settings), [settings]);
 
-  // console.log({ adminRoutes, pluginsRoutesToCreate, settings });
-
-  // Create all the <Route /> that needs to be created by the plugins
-  // For instance the upload plugin needs to create a <Route />
-  // const globalSectionCreatedRoutes = useMemo(() => {
-  //   const routesToCreate = pluginsGlobalLinks.map(({ to, Component, exact }) =>
-  //     createRoute(Component, to, exact)
-  //   );
-
-  //   return makeUniqueRoutes(routesToCreate);
-  // }, [pluginsGlobalLinks]);
-
-  // // Same here for the plugins sections
-  // const pluginsLinksRoutes = useMemo(() => {
-  //   return createSectionsRoutes(menu);
-  // }, [menu]);
-
   // Only display accessible sections
   const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
 
@@ -94,7 +77,6 @@ function SettingsPage() {
     };
   });
 
-  // return null;
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {
       if (prev.show) {
@@ -142,8 +124,6 @@ function SettingsPage() {
               <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
               {adminRoutes}
               {pluginsRoutes}
-              {/* {globalSectionCreatedRoutes}
-              {pluginsLinksRoutes} */}
               <Route path="/settings/:pluginId" component={SettingDispatcher} />
             </Switch>
           </div>
@@ -155,3 +135,4 @@ function SettingsPage() {
 }
 
 export default memo(SettingsPage);
+export { SettingsPage };

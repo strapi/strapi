@@ -1,8 +1,6 @@
 import flatMap from 'lodash/flatMap';
 import createRoute from './createRoute';
 
-// const retrieveRoutes = links => links.filter(link => typeof link.Component === 'function');
-
 const createSectionsRoutes = settings => {
   const allLinks = flatMap(settings, section => section.links);
 
@@ -10,4 +8,3 @@ const createSectionsRoutes = settings => {
 };
 
 export default createSectionsRoutes;
-// export { retrieveRoutes };
