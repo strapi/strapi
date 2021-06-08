@@ -37,7 +37,7 @@ module.exports = {
     const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
 
     const query = pm.queryFrom(ctx.query);
-    const files = await strapi.plugins.upload.services.upload[method](query);
+    const files = await strapi.plugins.upload.services.upload[method](query, []);
 
     ctx.body = pm.sanitize(files, { withPrivate: false });
   },
@@ -191,7 +191,7 @@ module.exports = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const file = await strapi.plugins.upload.services.upload.fetch({ id });
+  const file = await strapi.plugins.upload.services.upload.fetch({ id }, []);
 
   if (_.isNil(file)) {
     throw strapi.errors.notFound();
