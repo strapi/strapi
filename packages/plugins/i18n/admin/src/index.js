@@ -1,4 +1,3 @@
-import React from 'react';
 import get from 'lodash/get';
 import * as yup from 'yup';
 import pluginPkg from '../../package.json';
@@ -38,22 +37,6 @@ export default {
       mainComponent: null,
       name,
       pluginLogo,
-      // settings: {
-      //   global: {
-      //     links: [
-      //       {
-      //         title: {
-      //           id: getTrad('plugin.name'),
-      //           defaultMessage: 'Internationalization',
-      //         },
-      //         name: 'internationalization',
-      //         to: '/settings/internationalization',
-      //         Component: () => <SettingsPage />,
-      //         permissions: pluginPermissions.accessMain,
-      //       },
-      //     ],
-      //   },
-      // },
       trads,
     });
   },

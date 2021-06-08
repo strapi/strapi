@@ -5,8 +5,8 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
-// import React from 'react';
-// import { CheckPagePermissions } from '@strapi/helper-plugin';
+import React from 'react';
+import { CheckPagePermissions } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
@@ -35,12 +35,12 @@ export default {
           },
           id: 'settings',
           to: `/settings/${pluginId}`,
-          // Component: () => (
-          //   <CheckPagePermissions permissions={pluginPermissions.settings}>
-          //     <SettingsPage />
-          //   </CheckPagePermissions>
-          // ),
-          Component: SettingsPage,
+          Component: () => (
+            <CheckPagePermissions permissions={pluginPermissions.settings}>
+              <SettingsPage />
+            </CheckPagePermissions>
+          ),
+
           permissions: pluginPermissions.settings,
         },
       ]

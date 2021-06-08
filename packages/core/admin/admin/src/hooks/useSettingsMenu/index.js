@@ -7,10 +7,10 @@ import init from './init';
 const useSettingsMenu = (noCheck = false) => {
   const { allPermissions: permissions } = useRBACProvider();
 
-  const { plugins } = useStrapiApp();
+  const { settings } = useStrapiApp();
 
   const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, plugins)
+    init(initialState, settings)
   );
 
   useEffect(() => {

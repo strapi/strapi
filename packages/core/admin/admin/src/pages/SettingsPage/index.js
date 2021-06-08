@@ -22,7 +22,7 @@ import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
 import SettingsSearchHeaderProvider from '../../components/SettingsHeaderSearchContextProvider';
 import { useSettingsMenu } from '../../hooks';
-// import { retrieveGlobalLinks } from '../../utils';
+
 import ApplicationInfosPage from '../ApplicationInfosPage';
 import {
   ApplicationDetailLink,
@@ -49,7 +49,6 @@ function SettingsPage() {
   const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
 
   const { isLoading, menu } = useSettingsMenu();
-  // const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
 
   // Creates the admin routes
   const adminRoutes = useMemo(() => {
@@ -79,8 +78,23 @@ function SettingsPage() {
 
   // Only display accessible sections
   const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
-  console.log({ filteredMenu });
 
+  // Adapter until we refactor the helper-plugin/leftMenu
+  const menuAdapter = filteredMenu.map(section => {
+    return {
+      ...section,
+      title: section.intlLabel,
+      links: section.links.map(link => {
+        return {
+          ...link,
+          title: link.intlLabel,
+          name: link.id,
+        };
+      }),
+    };
+  });
+
+  // return null;
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {
       if (prev.show) {
@@ -116,7 +130,7 @@ function SettingsPage() {
             <MenuWrapper>
               <ApplicationDetailLink />
               <StyledLeftMenu>
-                {filteredMenu.map(item => {
+                {menuAdapter.map(item => {
                   return <LeftMenuList {...item} key={item.id} />;
                 })}
               </StyledLeftMenu>
