@@ -102,153 +102,10 @@ describe('getGeneralLinks', () => {
       {
         icon: 'cog',
         label: 'app.components.LeftMenuLinkContainer.settings',
-        isDisplayed: false,
+        isDisplayed: true,
         destination: '/settings',
         permissions: [],
         notificationsCount: 0,
-      },
-    ];
-
-    const settingsMenu = [
-      {
-        id: 'global',
-        title: {
-          id: 'Settings.global',
-        },
-        links: [
-          {
-            title: {
-              id: 'i18n.plugin.name',
-              defaultMessage: 'Internationalization',
-            },
-            name: 'internationalization',
-            to: '/settings/internationalization',
-            permissions: [
-              {
-                action: 'plugins::i18n.locale.read',
-                subject: null,
-              },
-              {
-                action: 'plugins::i18n.locale.create',
-                subject: null,
-              },
-            ],
-            isDisplayed: false,
-          },
-          {
-            title: {
-              id: 'upload.plugin.name',
-              defaultMessage: 'Media Library',
-            },
-            name: 'media-library',
-            to: '/settings/media-library',
-            permissions: [
-              {
-                action: 'plugins::upload.settings.read',
-                subject: null,
-              },
-            ],
-            isDisplayed: false,
-          },
-          {
-            title: {
-              id: 'Settings.sso.title',
-            },
-            to: '/settings/single-sign-on',
-            name: 'sso',
-            isDisplayed: false,
-            permissions: [
-              {
-                action: 'admin::provider-login.read',
-                subject: null,
-              },
-            ],
-          },
-          {
-            title: {
-              id: 'Settings.webhooks.title',
-            },
-            to: '/settings/webhooks',
-            name: 'webhooks',
-            isDisplayed: false,
-            permissions: [
-              {
-                action: 'admin::webhooks.create',
-                subject: null,
-              },
-              {
-                action: 'admin::webhooks.read',
-                subject: null,
-              },
-              {
-                action: 'admin::webhooks.update',
-                subject: null,
-              },
-              {
-                action: 'admin::webhooks.delete',
-                subject: null,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'permissions',
-        title: 'Settings.permissions',
-        links: [
-          {
-            title: {
-              id: 'Settings.permissions.menu.link.roles.label',
-            },
-            to: '/settings/roles',
-            name: 'roles',
-            isDisplayed: false,
-            permissions: [
-              {
-                action: 'admin::roles.create',
-                subject: null,
-              },
-              {
-                action: 'admin::roles.update',
-                subject: null,
-              },
-              {
-                action: 'admin::roles.read',
-                subject: null,
-              },
-              {
-                action: 'admin::roles.delete',
-                subject: null,
-              },
-            ],
-          },
-          {
-            title: {
-              id: 'Settings.permissions.menu.link.users.label',
-            },
-            to: '/settings/users?pageSize=10&page=1&_sort=firstname%3AASC',
-            name: 'users',
-            isDisplayed: false,
-            permissions: [
-              {
-                action: 'admin::users.create',
-                subject: null,
-              },
-              {
-                action: 'admin::users.read',
-                subject: null,
-              },
-              {
-                action: 'admin::users.update',
-                subject: null,
-              },
-              {
-                action: 'admin::users.delete',
-                subject: null,
-              },
-            ],
-          },
-        ],
       },
     ];
 
@@ -298,78 +155,13 @@ describe('getGeneralLinks', () => {
       {
         icon: 'cog',
         label: 'app.components.LeftMenuLinkContainer.settings',
-        isDisplayed: false,
+        isDisplayed: true,
         destination: '/settings',
-        permissions: [
-          {
-            action: 'plugins::i18n.locale.read',
-            subject: null,
-          },
-          {
-            action: 'plugins::i18n.locale.create',
-            subject: null,
-          },
-          {
-            action: 'plugins::upload.settings.read',
-            subject: null,
-          },
-          {
-            action: 'admin::provider-login.read',
-            subject: null,
-          },
-          {
-            action: 'admin::webhooks.create',
-            subject: null,
-          },
-          {
-            action: 'admin::webhooks.read',
-            subject: null,
-          },
-          {
-            action: 'admin::webhooks.update',
-            subject: null,
-          },
-          {
-            action: 'admin::webhooks.delete',
-            subject: null,
-          },
-          {
-            action: 'admin::roles.create',
-            subject: null,
-          },
-          {
-            action: 'admin::roles.update',
-            subject: null,
-          },
-          {
-            action: 'admin::roles.read',
-            subject: null,
-          },
-          {
-            action: 'admin::roles.delete',
-            subject: null,
-          },
-          {
-            action: 'admin::users.create',
-            subject: null,
-          },
-          {
-            action: 'admin::users.read',
-            subject: null,
-          },
-          {
-            action: 'admin::users.update',
-            subject: null,
-          },
-          {
-            action: 'admin::users.delete',
-            subject: null,
-          },
-        ],
+        permissions: [],
         notificationsCount: 0,
       },
     ];
-    const actual = await getGeneralLinks(permissions, generalSectionRawLinks, settingsMenu, false);
+    const actual = await getGeneralLinks(permissions, generalSectionRawLinks, false);
 
     expect(actual).toEqual(expected);
   });
@@ -453,95 +245,8 @@ describe('getGeneralLinks', () => {
       },
     ];
 
-    const settingsMenu = [
-      {
-        id: 'global',
-        title: {
-          id: 'Settings.global',
-        },
-        links: [
-          {
-            title: {
-              id: 'i18n.plugin.name',
-              defaultMessage: 'Internationalization',
-            },
-            name: 'internationalization',
-            to: '/settings/internationalization',
-            permissions: [
-              {
-                action: 'plugins::i18n.locale.read',
-                subject: null,
-              },
-              {
-                action: 'plugins::i18n.locale.create',
-                subject: null,
-              },
-            ],
-            isDisplayed: false,
-          },
-          {
-            title: {
-              id: 'upload.plugin.name',
-              defaultMessage: 'Media Library',
-            },
-            name: 'media-library',
-            to: '/settings/media-library',
-            permissions: [
-              {
-                action: 'plugins::upload.settings.read',
-                subject: null,
-              },
-            ],
-            isDisplayed: false,
-          },
-          {
-            title: {
-              id: 'Settings.sso.title',
-            },
-            to: '/settings/single-sign-on',
-            name: 'sso',
-            isDisplayed: false,
-            permissions: [],
-          },
-          {
-            title: {
-              id: 'Settings.webhooks.title',
-            },
-            to: '/settings/webhooks',
-            name: 'webhooks',
-            isDisplayed: false,
-            permissions: [],
-          },
-        ],
-      },
-      {
-        id: 'permissions',
-        title: 'Settings.permissions',
-        links: [
-          {
-            title: {
-              id: 'Settings.permissions.menu.link.roles.label',
-            },
-            to: '/settings/roles',
-            name: 'roles',
-            isDisplayed: false,
-            permissions: [],
-          },
-          {
-            title: {
-              id: 'Settings.permissions.menu.link.users.label',
-            },
-            to: '/settings/users?pageSize=10&page=1&_sort=firstname%3AASC',
-            name: 'users',
-            isDisplayed: false,
-            permissions: [],
-          },
-        ],
-      },
-    ];
-
     const expected = [];
-    const actual = await getGeneralLinks(permissions, generalSectionRawLinks, settingsMenu, false);
+    const actual = await getGeneralLinks(permissions, generalSectionRawLinks, false);
 
     expect(actual).toEqual(expected);
   });

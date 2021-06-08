@@ -35,7 +35,7 @@ const reducers = {
       {
         icon: 'cog',
         label: 'app.components.LeftMenuLinkContainer.settings',
-        isDisplayed: false,
+        isDisplayed: true,
         destination: '/settings',
         // Permissions of this link are retrieved in the init phase
         // using the settings menu
