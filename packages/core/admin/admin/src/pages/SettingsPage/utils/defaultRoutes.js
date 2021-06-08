@@ -1,6 +1,5 @@
 import RolesCreatePage from 'ee_else_ce/pages/Roles/CreatePage';
 import ProtectedRolesListPage from 'ee_else_ce/pages/Roles/ProtectedListPage';
-import ApplicationInfosPage from '../../ApplicationInfosPage';
 import UsersEditPage from '../../Users/ProtectedEditPage';
 import UsersListPage from '../../Users/ProtectedListPage';
 import RolesEditPage from '../../Roles/ProtectedEditPage';
@@ -9,11 +8,6 @@ import WebhooksEditView from '../../Webhooks/ProtectedEditView';
 import WebhooksListView from '../../Webhooks/ProtectedListView';
 
 const defaultRoutes = [
-  {
-    Component: ApplicationInfosPage,
-    to: '/settings/application-infos',
-    exact: true,
-  },
   {
     Component: ProtectedRolesListPage,
     to: '/settings/roles',

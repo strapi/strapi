@@ -5,6 +5,7 @@ import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import createHook from '@strapi/hooks';
+import invariant from 'invariant';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import basename from './utils/basename';
@@ -43,6 +44,16 @@ class StrapiApp {
     this.reducers = reducers;
     this.translations = translations;
     this.hooksDict = {};
+    this.settings = {
+      global: {
+        id: 'global',
+        intlLabel: {
+          id: 'Settings.global',
+          defaultMessage: 'Global Settings',
+        },
+        links: [],
+      },
+    };
   }
 
   addComponents = components => {
@@ -73,6 +84,33 @@ class StrapiApp {
     });
   };
 
+  addSettingsLink = (sectionId, link) => {
+    invariant(this.settings[sectionId], 'The section does not exist');
+
+    const stringifiedLink = JSON.stringify(link);
+
+    invariant(link.id, `link.id should be defined for ${stringifiedLink}`);
+    invariant(
+      link.intlLabel?.id && link.intlLabel?.defaultMessage,
+      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
+    );
+    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
+    invariant(
+      link.Component && typeof link.Component === 'function',
+      `link.Component should be a valid React Component`
+    );
+
+    this.settings[sectionId].links.push(link);
+  };
+
+  addSettingsLinks = (sectionId, links) => {
+    invariant(this.settings[sectionId], 'The section does not exist');
+
+    links.forEach(link => {
+      this.addSettingsLink(sectionId, link);
+    });
+  };
+
   async initialize() {
     Object.keys(this.appPlugins).forEach(plugin => {
       this.appPlugins[plugin].register({
@@ -80,6 +118,7 @@ class StrapiApp {
         addFields: this.addFields,
         addMiddlewares: this.addMiddlewares,
         addReducers: this.addReducers,
+        createSection: this.createSection,
         registerPlugin: this.registerPlugin,
       });
     });
@@ -90,10 +129,30 @@ class StrapiApp {
       const boot = this.appPlugins[plugin].boot;
 
       if (boot) {
-        boot({ getPlugin: this.getPlugin });
+        boot({
+          addSettingsLink: this.addSettingsLink,
+          addSettingsLinks: this.addSettingsLinks,
+          getPlugin: this.getPlugin,
+        });
       }
     });
   }
+
+  createSection = (section, links) => {
+    invariant(section.id, 'section.id should be defined');
+    invariant(
+      section.intlLabel?.id && section.intlLabel?.defaultMessage,
+      'section.intlLabel should be defined'
+    );
+    invariant(links, 'links should be defined');
+    invariant(this.settings[section.id] === undefined, 'A similar section already exists');
+
+    this.settings[section.id] = { ...section, links: [] };
+
+    links.forEach(link => {
+      this.addSettingsLink(section.id, link);
+    });
+  };
 
   createStore = () => {
     const store = configureStore(this.middlewares.middlewares, this.reducers.reducers);
@@ -182,6 +241,7 @@ class StrapiApp {
               runHookParallel={this.runHookParallel}
               runHookWaterfall={this.runHookWaterfall}
               runHookSeries={this.runHookSeries}
+              settings={this.settings}
             >
               <LibraryProvider components={components} fields={fields}>
                 <LanguageProvider messages={this.translations}>

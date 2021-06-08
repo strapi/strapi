@@ -42,26 +42,26 @@ export default {
       name,
       pluginLogo,
 
-      settings: {
-        global: {
-          links: [
-            {
-              title: {
-                id: getTrad('plugin.name'),
-                defaultMessage: 'Media Library',
-              },
-              name: 'media-library',
-              to: '/settings/media-library',
-              Component: () => (
-                <CheckPagePermissions permissions={pluginPermissions.settings}>
-                  <SettingsPage />
-                </CheckPagePermissions>
-              ),
-              permissions: pluginPermissions.settings,
-            },
-          ],
-        },
-      },
+      // settings: {
+      //   global: {
+      //     links: [
+      //       {
+      //         title: {
+      //           id: getTrad('plugin.name'),
+      //           defaultMessage: 'Media Library',
+      //         },
+      //         name: 'media-library',
+      //         to: '/settings/media-library',
+      //         Component: () => (
+      //           <CheckPagePermissions permissions={pluginPermissions.settings}>
+      //             <SettingsPage />
+      //           </CheckPagePermissions>
+      //         ),
+      //         permissions: pluginPermissions.settings,
+      //       },
+      //     ],
+      //   },
+      // },
       trads,
       menu: {
         pluginsSectionLinks: [
@@ -79,5 +79,16 @@ export default {
       },
     });
   },
-  boot() {},
+  boot(app) {
+    app.addSettingsLink('global', {
+      id: 'upload-settings',
+      intlLabel: {
+        id: getTrad('plugin.name'),
+        defaultMessage: 'Media Library',
+      },
+      to: '/settings/media-library',
+      Component: SettingsPage,
+      permissions: pluginPermissions.settings,
+    });
+  },
 };

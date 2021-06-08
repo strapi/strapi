@@ -1,4 +1,4 @@
-export { default as createPluginsLinksRoutes } from './createPluginsLinksRoutes';
+export { default as createSectionsRoutes } from './createSectionsRoutes';
 export { default as createRoute } from './createRoute';
 export { default as findFirstAllowedEndpoint } from './findFirstAllowedEndpoint';
 export { default as getSectionsToDisplay } from './getSectionsToDisplay';

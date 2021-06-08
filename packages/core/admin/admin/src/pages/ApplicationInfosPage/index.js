@@ -6,6 +6,7 @@ import { BaselineAlignment, useAppInfos } from '@strapi/helper-plugin';
 import Bloc from '../../components/Bloc';
 import PageTitle from '../../components/SettingsPageTitle';
 import { Detail, InfoText } from './components';
+import { Button } from '@buffetjs/core';
 
 const ApplicationInfosPage = () => {
   const appInfos = useAppInfos();
