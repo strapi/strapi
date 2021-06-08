@@ -14,8 +14,8 @@ const { createLogger } = require('@strapi/logger');
 const loadConfiguration = require('./core/app-configuration');
 
 const utils = require('./utils');
-const loadModules = require('./core/load-modules');
-const bootstrap = require('./core/bootstrap');
+// const loadModules = require('./core/load-modules');
+// const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
@@ -61,6 +61,12 @@ class Strapi {
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
     this.app.proxy = this.config.get('server.proxy');
+
+    // this.pluginProvider = new CreatePluginProvider();
+    // this.plugin = pluginProvider.get
+
+    // this.pluginProvider.load() à mettre dans la fonction load
+    //
 
     // Logger.
     const loggerUserConfiguration = this.config.get('logger', {});
@@ -329,23 +335,19 @@ class Strapi {
       }
     });
 
-    try {
-      const pluginProvider = await createPluginProvider(this);
-      console.log(pluginProvider.getAllContentTypes());
-    } catch (e) {
-      console.log('oh', e);
-    }
+    const pluginProvider = await createPluginProvider(this);
+    this.plugin = pluginProvider;
 
-    const modules = await loadModules(this);
+    // const modules = await loadModules(this);
 
-    this.api = modules.api;
-    this.admin = modules.admin;
-    this.components = modules.components;
-    this.plugins = modules.plugins;
-    this.middleware = modules.middlewares;
-    this.hook = modules.hook;
+    // this.api = modules.api;
+    // this.admin = modules.admin;
+    // this.components = modules.components;
+    // this.plugins = modules.plugins;
+    // this.middleware = modules.middlewares;
+    // this.hook = modules.hook;
 
-    await bootstrap(this);
+    // await bootstrap(this);
 
     // init webhook runner
     this.webhookRunner = createWebhookRunner({
@@ -436,6 +438,18 @@ class Strapi {
     reload.isWatching = true;
 
     return reload;
+  }
+
+  async runBootstraps() {
+    for (const plugin of this.plugin.getAll()) {
+      await plugin.bootstrap(this);
+    }
+  }
+
+  async runRegisters() {
+    for (const plugin of this.plugin.getAll()) {
+      await plugin.register(this);
+    }
   }
 
   async runLifecyclesFunctions(lifecycleName) {

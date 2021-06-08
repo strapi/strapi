@@ -24,10 +24,15 @@ function isFunction(message = '${path} is not a function') {
   return this.test('is a function', message, value => _.isFunction(value));
 }
 
+function isCamelCase(message = '${path} is not in camel case (anExampleOfCamelCase)') {
+  return this.test('is in camelCase', message, value => value === _.camelCase(value));
+}
+
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
 yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
 yup.addMethod(yup.mixed, 'isFunction', isFunction);
+yup.addMethod(yup.string, 'isCamelCase', isCamelCase);
 
 class StrapiIDSchema extends MixedSchemaType {
   constructor() {

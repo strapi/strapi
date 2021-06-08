@@ -1,10 +1,9 @@
 {
-  "singularName": "locAle",
-  "pluralName": "locales",
-  "collectionName": "i18n_locales",
   "info": {
-    "displaySingularName": "Locale",
-    "displayPluralName": "Locales",
+    "singularName": "locale",
+    "pluralName": "locales",
+    "collectionName": "i18n_locales",
+    "displayName": "Locale",
     "description": ""
   },
   "options": {

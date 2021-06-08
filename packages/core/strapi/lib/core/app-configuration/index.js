@@ -11,8 +11,8 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 const createConfigProvider = require('../../utils/config-provider');
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
-const loadPolicies = require('../load-policies');
-const loadFunctions = require('../load-functions');
+// const loadPolicies = require('../load-policies');
+// const loadFunctions = require('../load-functions');
 const loadConfigDir = require('./config-loader');
 
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
@@ -88,8 +88,8 @@ module.exports = (dir, initialConfig = {}) => {
 
   const baseConfig = {
     ...loadConfigDir(configDir),
-    policies: loadPolicies(path.resolve(configDir, 'policies')),
-    functions: loadFunctions(path.resolve(configDir, 'functions')),
+    // policies: loadPolicies(path.resolve(configDir, 'policies')),
+    // functions: loadFunctions(path.resolve(configDir, 'functions')),
   };
 
   const envDir = path.resolve(configDir, 'env', process.env.NODE_ENV);

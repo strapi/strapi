@@ -11,7 +11,7 @@ module.exports = (/* strapi, config */) => {
     config: {},
     routes: [],
     controllers: {},
-    services: {},
+    services: () => {},
     policies: {},
     middlewares: {},
     contentTypes: [],

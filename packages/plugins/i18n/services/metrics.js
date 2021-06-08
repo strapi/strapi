@@ -20,7 +20,7 @@ const sendDidUpdateI18nLocalesEvent = async () => {
   await strapi.telemetry.send('didUpdateI18nLocales', { numberOfLocales });
 };
 
-module.exports = {
+module.exports = () => ({
   sendDidInitializeEvent,
   sendDidUpdateI18nLocalesEvent,
-};
+});

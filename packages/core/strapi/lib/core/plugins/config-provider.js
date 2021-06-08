@@ -1,15 +1,23 @@
-'use strict'
+'use strict';
 
-const { env } = require('@strapi/utils');
-const { isFunction } = require('lodash/fp');
-const createConfig = require('../domain/config');
+const { get, has } = require('lodash/fp');
+const { createConfig } = require('../domain/config');
 
-module.exports = async (pluginName, pluginDefaultConfig) => {
-  const defaultConfig = isFunction(pluginDefaultConfig)
-    ? await pluginDefaultConfig({ env })
-    : pluginDefaultConfig;
+module.exports = async (pluginName, pluginConfig, userConfig) => {
+  const currentConfig = createConfig(userConfig, pluginConfig.default);
 
-  const userPluginConfig = strapi.config.get(`plugins.${pluginName}`);
+  await pluginConfig.validator(currentConfig);
 
-  return createConfig(userPluginConfig, defaultConfig);
+  const provider = path => provider.get(path);
+
+  Object.assign(provider, {
+    get(path) {
+      return get(path)(currentConfig);
+    },
+    has(path) {
+      return has(path)(currentConfig);
+    },
+  });
+
+  return provider;
 };

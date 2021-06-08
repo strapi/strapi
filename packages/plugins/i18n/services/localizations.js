@@ -58,8 +58,8 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
   }
 };
 
-module.exports = {
+module.exports = () => ({
   assignDefaultLocale,
   syncLocalizations,
   syncNonLocalizedAttributes,
-};
+});

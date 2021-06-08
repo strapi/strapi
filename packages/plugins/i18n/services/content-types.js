@@ -192,7 +192,7 @@ const fillNonLocalizedAttributes = (entry, relatedEntry, { model }) => {
   });
 };
 
-module.exports = {
+module.exports = () => ({
   isLocalizedContentType,
   getValidLocale,
   getNewLocalizationsFrom,
@@ -201,4 +201,4 @@ module.exports = {
   copyNonLocalizedAttributes,
   getAndValidateRelatedEntity,
   fillNonLocalizedAttributes,
-};
+});

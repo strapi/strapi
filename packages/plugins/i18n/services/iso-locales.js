@@ -4,6 +4,6 @@ const { isoLocales } = require('../constants');
 
 const getIsoLocales = () => isoLocales;
 
-module.exports = {
+module.exports = () => ({
   getIsoLocales,
-};
+});

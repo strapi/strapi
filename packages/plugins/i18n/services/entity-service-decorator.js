@@ -149,7 +149,7 @@ const decorator = service => ({
   },
 });
 
-module.exports = {
+module.exports = () => ({
   decorator,
   wrapParams,
-};
+});

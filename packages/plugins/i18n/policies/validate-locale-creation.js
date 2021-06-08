@@ -1,7 +1,7 @@
 'use strict';
 
 const { get } = require('lodash/fp');
-const { getService } = require('../../utils');
+const { getService } = require('../utils');
 
 const validateLocaleCreation = async (ctx, next) => {
   const { model } = ctx.params;

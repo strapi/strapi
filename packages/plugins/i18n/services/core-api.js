@@ -289,8 +289,8 @@ const addGraphqlLocalizationAction = contentType => {
   });
 };
 
-module.exports = {
+module.exports = () => ({
   addCreateLocalizationAction,
   addGraphqlLocalizationAction,
   createSanitizer,
-};
+});

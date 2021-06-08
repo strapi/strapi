@@ -3,7 +3,7 @@
 const { join } = require('path');
 const _ = require('lodash');
 const { exists } = require('fs-extra');
-const loadFiles = require('../load/load-files');
+const loadFiles = require('../../load/load-files');
 
 module.exports = async strapi => {
   const componentsDir = join(strapi.dir, 'components');
@@ -32,7 +32,6 @@ module.exports = async strapi => {
         __schema__: _.cloneDeep(schema),
         uid,
         category,
-        modelType: 'component',
         modelName: key,
         globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
       });

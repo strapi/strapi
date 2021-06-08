@@ -1,6 +1,6 @@
 'use strict';
 
-const { getService } = require('../../utils');
+const { getService } = require('./utils');
 
 module.exports = async () => {
   const { sendDidInitializeEvent } = getService('metrics');

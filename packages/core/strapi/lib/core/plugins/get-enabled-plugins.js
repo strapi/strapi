@@ -13,7 +13,10 @@ const toDetailedDeclaration = declaration => {
     return { enabled: declaration };
   }
 
-  let detailedDeclaration = pick('enabled', declaration);
+  let detailedDeclaration = pick(['enabled'], declaration);
+  if (has('config', declaration)) {
+    detailedDeclaration.userConfig = declaration.config;
+  }
   if (has('resolve', declaration)) {
     let pathToPlugin = '';
     try {

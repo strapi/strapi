@@ -82,7 +82,7 @@ const deleteAllLocalizedEntriesFor = async ({ locale }) => {
   }
 };
 
-module.exports = {
+module.exports = () => ({
   find,
   findById,
   findByCode,
@@ -94,4 +94,4 @@ module.exports = {
   setIsDefault,
   delete: deleteFn,
   initDefaultLocale,
-};
+});
