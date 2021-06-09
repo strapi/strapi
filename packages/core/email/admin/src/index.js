@@ -21,6 +21,30 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
+    // Create the email settings section
+    app.createSettingSection(
+      {
+        id: pluginId,
+        intlLabel: { id: getTrad('SettingsNav.section-label'), defaultMessage: 'Email Plugin' },
+      },
+      [
+        {
+          intlLabel: {
+            id: getTrad('SettingsNav.link.settings'),
+            defaultMessage: 'Settings',
+          },
+          id: 'settings',
+          to: `/settings/${pluginId}`,
+          Component: () => (
+            <CheckPagePermissions permissions={pluginPermissions.settings}>
+              <SettingsPage />
+            </CheckPagePermissions>
+          ),
+
+          permissions: pluginPermissions.settings,
+        },
+      ]
+    );
     app.registerPlugin({
       description: pluginDescription,
       icon,
@@ -30,28 +54,6 @@ export default {
       name,
       pluginLogo,
       trads,
-      settings: {
-        menuSection: {
-          id: pluginId,
-          title: getTrad('SettingsNav.section-label'),
-          links: [
-            {
-              title: {
-                id: getTrad('SettingsNav.link.settings'),
-                defaultMessage: 'Settings',
-              },
-              name: 'settings',
-              to: `/settings/${pluginId}`,
-              Component: () => (
-                <CheckPagePermissions permissions={pluginPermissions.settings}>
-                  <SettingsPage />
-                </CheckPagePermissions>
-              ),
-              permissions: pluginPermissions.settings,
-            },
-          ],
-        },
-      },
     });
   },
   boot() {},

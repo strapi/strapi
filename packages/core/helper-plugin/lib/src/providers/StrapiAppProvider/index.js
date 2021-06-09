@@ -14,6 +14,7 @@ const StrapiAppProvider = ({
   runHookParallel,
   runHookWaterfall,
   runHookSeries,
+  settings,
 }) => {
   return (
     <StrapiAppContext.Provider
@@ -23,6 +24,7 @@ const StrapiAppProvider = ({
         runHookParallel,
         runHookWaterfall,
         runHookSeries,
+        settings,
       }}
     >
       {children}
@@ -37,6 +39,7 @@ StrapiAppProvider.propTypes = {
   runHookParallel: PropTypes.func.isRequired,
   runHookWaterfall: PropTypes.func.isRequired,
   runHookSeries: PropTypes.func.isRequired,
+  settings: PropTypes.object.isRequired,
 };
 
 export default StrapiAppProvider;

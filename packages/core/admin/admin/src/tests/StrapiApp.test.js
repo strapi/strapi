@@ -137,4 +137,62 @@ describe('ADMIN | StrapiApp', () => {
       expect(c).toBe(3);
     });
   });
+
+  describe('Settings api', () => {
+    it('the settings should be defined', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+
+      expect(app.settings).toBeDefined();
+      expect(app.settings.global).toBeDefined();
+    });
+
+    it('should creates a new section', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const section = { id: 'foo', intlLabel: { id: 'foo', defaultMessage: 'foo' } };
+      const links = [
+        {
+          Component: jest.fn(),
+          to: '/bar',
+          id: 'bar',
+          intlLabel: { id: 'bar', defaultMessage: 'bar' },
+        },
+      ];
+      app.createSettingSection(section, links);
+
+      expect(app.settings.foo).toBeDefined();
+      expect(app.settings.foo.links).toEqual(links);
+    });
+
+    it('should add a link correctly to the global sectionn', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const link = {
+        Component: jest.fn(),
+        to: '/bar',
+        id: 'bar',
+        intlLabel: { id: 'bar', defaultMessage: 'bar' },
+      };
+
+      app.addSettingsLink('global', link);
+
+      expect(app.settings.global.links).toHaveLength(1);
+      expect(app.settings.global.links[0]).toEqual(link);
+    });
+
+    it('should add an array of links correctly to the global section', () => {
+      const app = StrapiApp({ middlewares, reducers, library });
+      const links = [
+        {
+          Component: jest.fn(),
+          to: '/bar',
+          id: 'bar',
+          intlLabel: { id: 'bar', defaultMessage: 'bar' },
+        },
+      ];
+
+      app.addSettingsLinks('global', links);
+
+      expect(app.settings.global.links).toHaveLength(1);
+      expect(app.settings.global.links).toEqual(links);
+    });
+  });
 });

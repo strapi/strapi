@@ -22,7 +22,8 @@ import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
 import SettingsSearchHeaderProvider from '../../components/SettingsHeaderSearchContextProvider';
 import { useSettingsMenu } from '../../hooks';
-import { retrieveGlobalLinks } from '../../utils';
+
+import ApplicationInfosPage from '../ApplicationInfosPage';
 import {
   ApplicationDetailLink,
   MenuWrapper,
@@ -33,7 +34,7 @@ import {
 
 import {
   createRoute,
-  createPluginsLinksRoutes,
+  createSectionsRoutes,
   makeUniqueRoutes,
   getSectionsToDisplay,
   routes,
@@ -42,35 +43,39 @@ import {
 function SettingsPage() {
   const { settingId } = useParams();
   const { goBack } = useHistory();
-  const { plugins } = useStrapiApp();
-  const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
-  const { isLoading, menu } = useSettingsMenu();
+  const { settings } = useStrapiApp();
   const { formatMessage } = useIntl();
-  const pluginsGlobalLinks = useMemo(() => retrieveGlobalLinks(plugins), [plugins]);
+  // TODO
+  const [headerSearchState, setShowHeaderSearchState] = useState({ show: false, label: '' });
 
-  const appRoutes = useMemo(() => {
+  const { isLoading, menu } = useSettingsMenu();
+
+  // Creates the admin routes
+  const adminRoutes = useMemo(() => {
     return makeUniqueRoutes(
       routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
     );
   }, []);
 
-  // Create all the <Route /> that needs to be created by the plugins
-  // For instance the upload plugin needs to create a <Route />
-  const globalSectionCreatedRoutes = useMemo(() => {
-    const routesToCreate = pluginsGlobalLinks.map(({ to, Component, exact }) =>
-      createRoute(Component, to, exact)
-    );
-
-    return makeUniqueRoutes(routesToCreate);
-  }, [pluginsGlobalLinks]);
-
-  // Same here for the plugins sections
-  const pluginsLinksRoutes = useMemo(() => {
-    return createPluginsLinksRoutes(menu);
-  }, [menu]);
+  const pluginsRoutes = useMemo(() => createSectionsRoutes(settings), [settings]);
 
   // Only display accessible sections
   const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
+
+  // Adapter until we refactor the helper-plugin/leftMenu
+  const menuAdapter = filteredMenu.map(section => {
+    return {
+      ...section,
+      title: section.intlLabel,
+      links: section.links.map(link => {
+        return {
+          ...link,
+          title: link.intlLabel,
+          name: link.id,
+        };
+      }),
+    };
+  });
 
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {
@@ -107,7 +112,7 @@ function SettingsPage() {
             <MenuWrapper>
               <ApplicationDetailLink />
               <StyledLeftMenu>
-                {filteredMenu.map(item => {
+                {menuAdapter.map(item => {
                   return <LeftMenuList {...item} key={item.id} />;
                 })}
               </StyledLeftMenu>
@@ -116,9 +121,9 @@ function SettingsPage() {
 
           <div className="col-md-9">
             <Switch>
-              {appRoutes}
-              {globalSectionCreatedRoutes}
-              {pluginsLinksRoutes}
+              <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
+              {adminRoutes}
+              {pluginsRoutes}
               <Route path="/settings/:pluginId" component={SettingDispatcher} />
             </Switch>
           </div>
@@ -130,3 +135,4 @@ function SettingsPage() {
 }
 
 export default memo(SettingsPage);
+export { SettingsPage };

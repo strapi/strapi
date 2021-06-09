@@ -3,9 +3,9 @@ import adminPermissions from '../../../../../admin/src/permissions';
 const ssoGlobalRoutes = process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES.includes('sso')
   ? [
       {
-        title: { id: 'Settings.sso.title' },
+        intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
         to: '/settings/single-sign-on',
-        name: 'sso',
+        id: 'sso',
         isDisplayed: false,
         permissions: adminPermissions.settings.sso.main,
       },

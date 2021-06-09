@@ -1,13 +1,7 @@
 import cloneDeep from 'lodash/cloneDeep';
 import checkPermissions from './checkPermissions';
-import getSettingsMenuLinksPermissions from './getSettingsMenuLinksPermissions';
 
-const getGeneralLinks = async (
-  permissions,
-  generalSectionRawLinks,
-  settingsMenu,
-  shouldUpdateStrapi
-) => {
+const getGeneralLinks = async (permissions, generalSectionRawLinks, shouldUpdateStrapi) => {
   const generalSectionPermissionsPromises = checkPermissions(permissions, generalSectionRawLinks);
   const generalSectionLinksPermissions = await Promise.all(generalSectionPermissionsPromises);
 
@@ -15,7 +9,6 @@ const getGeneralLinks = async (
     (_, index) => generalSectionLinksPermissions[index]
   );
 
-  const settingsLinkPermissions = getSettingsMenuLinksPermissions(settingsMenu);
   const settingsLinkIndex = authorizedGeneralSectionLinks.findIndex(
     obj => obj.destination === '/settings'
   );
@@ -24,15 +17,8 @@ const getGeneralLinks = async (
     return [];
   }
 
-  const hasPermission = settingsLinkPermissions.every(Boolean);
-
-  if (!hasPermission) {
-    return [];
-  }
-
   const authorizedGeneralLinksClone = cloneDeep(authorizedGeneralSectionLinks);
 
-  authorizedGeneralLinksClone[settingsLinkIndex].permissions = settingsLinkPermissions;
   authorizedGeneralLinksClone[settingsLinkIndex].notificationsCount = shouldUpdateStrapi ? 1 : 0;
 
   return authorizedGeneralLinksClone;
