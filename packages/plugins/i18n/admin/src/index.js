@@ -11,7 +11,7 @@ import LocalePicker from './components/LocalePicker';
 import middlewares from './middlewares';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import trads from './translations';
+// import trads from './translations';
 import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
@@ -54,7 +54,7 @@ export default {
           ],
         },
       },
-      trads,
+      // trads,
     });
   },
   boot(app) {
@@ -165,5 +165,32 @@ export default {
         },
       });
     }
+  },
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: Object.keys(data).reduce((acc, current) => {
+                acc[`${pluginId}.${current}`] = data[current];
+
+                return acc;
+              }, {}),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
   },
 };

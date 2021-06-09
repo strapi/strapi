@@ -10,7 +10,7 @@ import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import trads from './translations';
+// import trads from './translations';
 import RolesPage from './pages/Roles';
 import ProvidersPage from './pages/Providers';
 import EmailTemplatesPage from './pages/EmailTemplates';
@@ -31,7 +31,7 @@ export default {
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,
-      trads,
+      // trads,
       // TODO
       settings: {
         menuSection: {
@@ -100,4 +100,31 @@ export default {
     });
   },
   boot() {},
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "users-permissions-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: Object.keys(data).reduce((acc, current) => {
+                acc[`${pluginId}.${current}`] = data[current];
+
+                return acc;
+              }, {}),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
+  },
 };

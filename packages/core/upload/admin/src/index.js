@@ -14,7 +14,7 @@ import InputMedia from './components/InputMedia';
 import InputModalStepper from './components/InputModalStepper';
 import SettingsPage from './pages/SettingsPage';
 import reducers from './reducers';
-import trads from './translations';
+// import trads from './translations';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 
@@ -62,7 +62,7 @@ export default {
           ],
         },
       },
-      trads,
+      // trads,
       menu: {
         pluginsSectionLinks: [
           {
@@ -80,4 +80,31 @@ export default {
     });
   },
   boot() {},
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "upload-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: Object.keys(data).reduce((acc, current) => {
+                acc[`${pluginId}.${current}`] = data[current];
+
+                return acc;
+              }, {}),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
+  },
 };

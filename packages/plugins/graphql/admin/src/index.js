@@ -21,4 +21,31 @@ export default {
     });
   },
   boot() {},
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "graphql-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: Object.keys(data).reduce((acc, current) => {
+                acc[`${pluginId}.${current}`] = data[current];
+
+                return acc;
+              }, {}),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
+  },
 };

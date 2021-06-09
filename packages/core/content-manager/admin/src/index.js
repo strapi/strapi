@@ -9,7 +9,7 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import reducers from './reducers';
-import trads from './translations';
+// import trads from './translations';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -31,8 +31,35 @@ export default {
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,
-      trads,
+      // trads,
     });
   },
   boot() {},
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "content-manager-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: Object.keys(data).reduce((acc, current) => {
+                acc[`${pluginId}.${current}`] = data[current];
+
+                return acc;
+              }, {}),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
+  },
 };
