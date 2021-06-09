@@ -1,7 +1,7 @@
 'use strict';
 
 const { getDefaultLocale } = require('../utils');
-const { getService } = require('../../../../../utils');
+const { getService } = require('../../../utils');
 
 const migrateForBookshelf = require('./migrate-for-bookshelf');
 const migrateForMongoose = require('./migrate-for-mongoose');

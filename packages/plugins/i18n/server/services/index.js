@@ -14,8 +14,8 @@ module.exports = () => ({
   metrics,
   localizations,
   locales,
-  'iso-locales': isoLocales,
-  'entity-service-decorator': entityServiceDecorator,
-  'core-api': coreApi,
-  'content-types': contentTypes,
+  isoLocales,
+  entityServiceDecorator,
+  coreApi,
+  contentTypes,
 });

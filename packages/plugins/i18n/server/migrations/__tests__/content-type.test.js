@@ -2,7 +2,7 @@
 
 const { after } = require('../content-type/enable');
 const { before } = require('../content-type/disable');
-const ctService = require('../../../../services/content-types');
+const ctService = require('../../services/content-types');
 
 describe('i18n - Migration - enable/disable localization on a CT', () => {
   beforeAll(() => {

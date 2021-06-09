@@ -1,7 +1,7 @@
 'use strict';
 
 const { listLocales, createLocale, updateLocale, deleteLocale } = require('../locales');
-const localeModel = require('../../models/Locale.settings');
+const localeModel = require('../../content-types/locale');
 
 describe('Locales', () => {
   describe('listLocales', () => {

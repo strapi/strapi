@@ -1,6 +1,6 @@
 'use strict';
 
-const { yup } = require('@strapi/utils');
+const { yup, kebabCase } = require('@strapi/utils');
 
 const strapiServerSchema = yup
   .object()
@@ -38,14 +38,16 @@ const validateStrapiServer = data => {
 const validateContentTypesUnicity = contentTypes => {
   const names = [];
   contentTypes.forEach(ct => {
-    if (names.includes(ct.info.singularName)) {
+    const singularName = kebabCase(ct.info.singularName);
+    const pluralName = kebabCase(ct.info.pluralName);
+    if (names.includes(singularName)) {
       throw new Error(`The singular name "${ct.info.singularName}" should be unique`);
     }
-    names.push(ct.info.singularName);
-    if (names.includes(ct.info.pluralName)) {
+    names.push(singularName);
+    if (names.includes(pluralName)) {
       throw new Error(`The plural name "${ct.info.pluralName}" should be unique`);
     }
-    names.push(ct.info.pluralName);
+    names.push(pluralName);
   });
 };
 

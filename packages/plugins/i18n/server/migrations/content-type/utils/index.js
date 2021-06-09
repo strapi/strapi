@@ -1,6 +1,6 @@
 'use strict';
 
-const { DEFAULT_LOCALE } = require('../../../../../constants');
+const { DEFAULT_LOCALE } = require('../../../constants');
 
 const getDefaultLocale = async (model, ORM) => {
   let defaultLocaleRows;

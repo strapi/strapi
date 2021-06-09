@@ -2,12 +2,12 @@
   "info": {
     "singularName": "locale",
     "pluralName": "locales",
-    "collectionName": "i18n_locales",
+    "collectionName": "locales",
     "displayName": "Locale",
     "description": ""
   },
   "options": {
-    "timestamps": true
+    "draftAndPublish": false
   },
   "pluginOptions": {
     "content-manager": {

@@ -1,7 +1,7 @@
 'use strict';
 
 const { difference, keys, intersection, isEmpty } = require('lodash/fp');
-const { getService } = require('../../../../utils');
+const { getService } = require('../../utils');
 const migrateForMongoose = require('./migrate-for-mongoose');
 const migrateForBookshelf = require('./migrate-for-bookshelf');
 

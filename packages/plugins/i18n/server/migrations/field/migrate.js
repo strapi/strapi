@@ -1,7 +1,7 @@
 'use strict';
 
 const { pick, prop } = require('lodash/fp');
-const { getService } = require('../../../../utils');
+const { getService } = require('../../utils');
 const { shouldBeProcessed, getUpdatesInfo, getSortedLocales } = require('./utils');
 
 const BATCH_SIZE = 1000;

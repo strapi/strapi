@@ -1,6 +1,6 @@
 'use strict';
 
-const { getService } = require('../../../../../utils');
+const { getService } = require('../../../utils');
 const { getDefaultLocale } = require('../utils');
 
 const updateLocale = (model, ORM, locale) => {
