@@ -24,7 +24,7 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     // Create the plugin's settings section
-    app.createSection(
+    app.createSettingSection(
       {
         id: pluginId,
         intlLabel: {

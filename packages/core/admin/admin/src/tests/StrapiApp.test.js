@@ -157,7 +157,7 @@ describe('ADMIN | StrapiApp', () => {
           intlLabel: { id: 'bar', defaultMessage: 'bar' },
         },
       ];
-      app.createSection(section, links);
+      app.createSettingSection(section, links);
 
       expect(app.settings.foo).toBeDefined();
       expect(app.settings.foo.links).toEqual(links);

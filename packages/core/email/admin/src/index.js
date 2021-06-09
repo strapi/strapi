@@ -22,7 +22,7 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     // Create the email settings section
-    app.createSection(
+    app.createSettingSection(
       {
         id: pluginId,
         intlLabel: { id: getTrad('SettingsNav.section-label'), defaultMessage: 'Email Plugin' },

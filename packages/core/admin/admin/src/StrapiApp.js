@@ -105,6 +105,7 @@ class StrapiApp {
 
   addSettingsLinks = (sectionId, links) => {
     invariant(this.settings[sectionId], 'The section does not exist');
+    invariant(Array.isArray(links), 'TypeError expected links to be an array');
 
     links.forEach(link => {
       this.addSettingsLink(sectionId, link);
@@ -118,7 +119,7 @@ class StrapiApp {
         addFields: this.addFields,
         addMiddlewares: this.addMiddlewares,
         addReducers: this.addReducers,
-        createSection: this.createSection,
+        createSettingSection: this.createSettingSection,
         registerPlugin: this.registerPlugin,
       });
     });
@@ -138,13 +139,14 @@ class StrapiApp {
     });
   }
 
-  createSection = (section, links) => {
+  createSettingSection = (section, links) => {
     invariant(section.id, 'section.id should be defined');
     invariant(
       section.intlLabel?.id && section.intlLabel?.defaultMessage,
       'section.intlLabel should be defined'
     );
-    invariant(links, 'links should be defined');
+
+    invariant(Array.isArray(links), 'TypeError expected links to be an array');
     invariant(this.settings[section.id] === undefined, 'A similar section already exists');
 
     this.settings[section.id] = { ...section, links: [] };
