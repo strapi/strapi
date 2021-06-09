@@ -1,6 +1,6 @@
 module.exports = {
   app: config => {
-    console.log(config);
+    config.locales = ['fr'];
 
     return config;
   },

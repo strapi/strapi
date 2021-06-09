@@ -6,8 +6,6 @@ module.exports = {
     return config;
   },
   app: config => {
-    console.log(config);
-
     return config;
   },
 };

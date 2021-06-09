@@ -107,9 +107,8 @@ class StrapiApp {
         .then(({ default: data }) => {
           return { data, locale };
         })
-        .catch(err => {
-          // TODO
-          console.log(err);
+        .catch(() => {
+          return { data: {}, locale };
         });
     });
     const adminLocales = await Promise.all(arrayOfPromises);

@@ -1,6 +1,7 @@
 import React from 'react';
 import get from 'lodash/get';
 import * as yup from 'yup';
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
@@ -11,7 +12,6 @@ import LocalePicker from './components/LocalePicker';
 import middlewares from './middlewares';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-// import trads from './translations';
 import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
@@ -54,7 +54,6 @@ export default {
           ],
         },
       },
-      // trads,
     });
   },
   boot(app) {
@@ -174,11 +173,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: Object.keys(data).reduce((acc, current) => {
-                acc[`${pluginId}.${current}`] = data[current];
-
-                return acc;
-              }, {}),
+              data: prefixPluginTranslations(data, pluginId),
               locale,
             };
           })

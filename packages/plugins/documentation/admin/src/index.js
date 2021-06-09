@@ -4,12 +4,12 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import App from './pages/App';
-// import trads from './translations';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -27,8 +27,6 @@ export default {
       mainComponent: App,
       name,
       pluginLogo,
-      // TODO
-      // trads,
       // TODO
       menu: {
         pluginsSectionLinks: [
@@ -55,11 +53,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: Object.keys(data).reduce((acc, current) => {
-                acc[`${pluginId}.${current}`] = data[current];
-
-                return acc;
-              }, {}),
+              data: prefixPluginTranslations(data, pluginId),
               locale,
             };
           })

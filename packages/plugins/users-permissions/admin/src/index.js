@@ -5,12 +5,11 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import React from 'react';
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-// import trads from './translations';
 import RolesPage from './pages/Roles';
 import ProvidersPage from './pages/Providers';
 import EmailTemplatesPage from './pages/EmailTemplates';
@@ -108,11 +107,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: Object.keys(data).reduce((acc, current) => {
-                acc[`${pluginId}.${current}`] = data[current];
-
-                return acc;
-              }, {}),
+              data: prefixPluginTranslations(data, pluginId),
               locale,
             };
           })

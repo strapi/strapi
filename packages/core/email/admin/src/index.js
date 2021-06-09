@@ -6,12 +6,11 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import React from 'react';
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
-// import trads from './translations';
 import getTrad from './utils/getTrad';
 import SettingsPage from './pages/Settings';
 
@@ -63,11 +62,7 @@ export default {
         )
           .then(({ default: data }) => {
             return {
-              data: Object.keys(data).reduce((acc, current) => {
-                acc[`${pluginId}.${current}`] = data[current];
-
-                return acc;
-              }, {}),
+              data: prefixPluginTranslations(data, pluginId),
               locale,
             };
           })
