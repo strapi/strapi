@@ -24,13 +24,7 @@ import SettingsSearchHeaderProvider from '../../components/SettingsHeaderSearchC
 import { useSettingsMenu } from '../../hooks';
 
 import ApplicationInfosPage from '../ApplicationInfosPage';
-import {
-  ApplicationDetailLink,
-  MenuWrapper,
-  SettingDispatcher,
-  StyledLeftMenu,
-  Wrapper,
-} from './components';
+import { ApplicationDetailLink, MenuWrapper, StyledLeftMenu, Wrapper } from './components';
 
 import {
   createRoute,
@@ -124,7 +118,6 @@ function SettingsPage() {
               <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
               {adminRoutes}
               {pluginsRoutes}
-              <Route path="/settings/:pluginId" component={SettingDispatcher} />
             </Switch>
           </div>
         </div>
