@@ -1,5 +1,5 @@
 import { request, hasPermissions } from '@strapi/helper-plugin';
-import getCtOrStLinks from '../getCtOrStLinks';
+import getContentTypeLinks from '../getContentTypeLinks';
 
 jest.mock('@strapi/helper-plugin');
 
@@ -128,7 +128,7 @@ describe('checkPermissions', () => {
       authorizedStLinks: [],
       contentTypes: data,
     };
-    const actual = await getCtOrStLinks(userPermissions);
+    const actual = await getContentTypeLinks(userPermissions);
 
     expect(actual).toEqual(expected);
   });
@@ -142,7 +142,7 @@ describe('checkPermissions', () => {
       throw new Error('Something went wrong');
     });
 
-    await getCtOrStLinks(userPermissions, toggleNotification);
+    await getContentTypeLinks(userPermissions, toggleNotification);
     expect(toggleNotification).toBeCalled();
   });
 });

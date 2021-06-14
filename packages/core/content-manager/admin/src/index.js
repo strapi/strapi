@@ -10,6 +10,7 @@ import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import reducers from './reducers';
 import trads from './translations';
+import pluginPermissions from './permissions';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -32,6 +33,20 @@ export default {
       name,
       pluginLogo,
       trads,
+      menu: {
+        pluginsSectionLinks: [
+          {
+            destination: `/plugins/${pluginId}`,
+            icon,
+            label: {
+              id: `${pluginId}.plugin.name`,
+              defaultMessage: 'Content manager',
+            },
+            name,
+            permissions: pluginPermissions.main,
+          },
+        ],
+      },
     });
   },
   boot() {},

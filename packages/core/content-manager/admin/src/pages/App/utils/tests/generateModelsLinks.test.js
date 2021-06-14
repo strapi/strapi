@@ -20,7 +20,6 @@ describe('ADMIN | LeftMenu | utils', () => {
       const data = [
         {
           isDisplayed: true,
-
           kind: 'collectionType',
           uid: 'application::address.address',
           info: {
@@ -47,10 +46,8 @@ describe('ADMIN | LeftMenu | utils', () => {
 
       const expected = [
         {
-          icon: 'circle',
-          destination: '/plugins/content-manager/collectionType/application::address.address',
+          to: '/plugins/content-manager/collectionType/application::address.address',
           isDisplayed: true,
-          label: 'Addresses',
           search: `page=1&pageSize=2&_sort=name:ASC`,
           permissions: [
             {
@@ -62,13 +59,19 @@ describe('ADMIN | LeftMenu | utils', () => {
               subject: 'application::address.address',
             },
           ],
+          kind: 'collectionType',
+          title: 'Addresses',
+          uid: 'application::address.address',
+          name: 'application::address.address',
         },
         {
-          icon: 'circle',
-          destination: '/plugins/content-manager/singleType/application::test1.test1',
+          to: '/plugins/content-manager/singleType/application::test1.test1',
           isDisplayed: true,
-          label: 'Test 1',
           search: null,
+          kind: 'singleType',
+          title: 'Test 1',
+          uid: 'application::test1.test1',
+          name: 'application::test1.test1',
           permissions: [
             {
               action: 'plugins::content-manager.explorer.create',
@@ -118,11 +121,13 @@ describe('ADMIN | LeftMenu | utils', () => {
       const expected = {
         collectionTypesSectionLinks: [
           {
-            icon: 'circle',
-            destination: '/plugins/content-manager/collectionType/application::address.address',
             isDisplayed: true,
-            label: 'Addresses',
             search: null,
+            kind: 'collectionType',
+            title: 'Addresses',
+            to: '/plugins/content-manager/collectionType/application::address.address',
+            uid: 'application::address.address',
+            name: 'application::address.address',
             permissions: [
               {
                 action: 'plugins::content-manager.explorer.create',
@@ -137,11 +142,13 @@ describe('ADMIN | LeftMenu | utils', () => {
         ],
         singleTypesSectionLinks: [
           {
-            icon: 'circle',
-            destination: '/plugins/content-manager/singleType/application::test1.test1',
             isDisplayed: true,
-            label: 'Test 1',
+            kind: 'singleType',
             search: null,
+            title: 'Test 1',
+            to: '/plugins/content-manager/singleType/application::test1.test1',
+            uid: 'application::test1.test1',
+            name: 'application::test1.test1',
             permissions: [
               {
                 action: 'plugins::content-manager.explorer.read',

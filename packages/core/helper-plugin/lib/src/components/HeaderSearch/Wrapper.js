@@ -3,6 +3,7 @@ import styled from 'styled-components';
 const Wrapper = styled.div`
   position: fixed;
   top: 0;
+  left: 25rem;
   display: flex;
   align-items: center;
   overflow: hidden;

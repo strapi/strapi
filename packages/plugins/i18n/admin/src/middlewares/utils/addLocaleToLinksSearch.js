@@ -4,7 +4,7 @@ import getDefaultLocale from '../../utils/getDefaultLocale';
 
 const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permissions) => {
   return links.map(link => {
-    const contentTypeUID = link.destination.split(`/${kind}/`)[1];
+    const contentTypeUID = link.to.split(`/${kind}/`)[1];
 
     const contentTypeSchema = contentTypeSchemas.find(({ uid }) => uid === contentTypeUID);
 
