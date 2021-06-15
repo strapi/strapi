@@ -90,8 +90,6 @@ module.exports = {
       id
     );
 
-    console.log(pm, file);
-
     await strapi.plugins['upload'].services.upload.remove(file);
 
     ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
