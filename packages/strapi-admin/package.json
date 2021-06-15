@@ -112,7 +112,7 @@
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.2",
     "webpackbar": "^4.0.0",
-    "yup": "^0.28.2"
+    "yup": "^0.32.9"
   },
   "author": {
     "name": "Strapi",
