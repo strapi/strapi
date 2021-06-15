@@ -6,44 +6,43 @@
  * IntlProvider component and i18n messages (loaded from `app/translations`)
  */
 
-import React from 'react';
+import React, { useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
 import { IntlProvider } from 'react-intl';
-import { defaultsDeep } from 'lodash';
-import { selectLocale } from './selectors';
+import defaultsDeep from 'lodash/defaultsDeep';
+import LocalesProvider from '../LocalesProvider';
+import init from './init';
+import reducer, { initialState } from './reducer';
 
-// eslint-disable-next-line react/prefer-stateless-function
-export class LanguageProvider extends React.Component {
-  render() {
-    const messages = defaultsDeep(this.props.messages[this.props.locale], this.props.messages.en);
+const LanguageProvider = ({ children, localesNativeNames, messages }) => {
+  const [{ locale }, dispatch] = useReducer(reducer, initialState, () => init(localesNativeNames));
 
-    return (
-      <IntlProvider
-        locale={this.props.locale}
-        defaultLocale="en"
-        messages={messages}
-        textComponent="span"
+  const changeLocale = locale => {
+    dispatch({
+      type: 'CHANGE_LOCALE',
+      locale,
+    });
+  };
+
+  const appMessages = defaultsDeep(messages[locale], messages.en);
+
+  return (
+    <IntlProvider locale={locale} defaultLocale="en" messages={appMessages} textComponent="span">
+      <LocalesProvider
+        changeLocale={changeLocale}
+        localesNativeNames={localesNativeNames}
+        messages={appMessages}
       >
-        {React.Children.only(this.props.children)}
-      </IntlProvider>
-    );
-  }
-}
+        {React.Children.only(children)}
+      </LocalesProvider>
+    </IntlProvider>
+  );
+};
 
 LanguageProvider.propTypes = {
   children: PropTypes.element.isRequired,
-  locale: PropTypes.string.isRequired,
+  localesNativeNames: PropTypes.object.isRequired,
   messages: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = createSelector(selectLocale(), locale => ({ locale }));
-
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch,
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(LanguageProvider);
+export default LanguageProvider;

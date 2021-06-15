@@ -4,76 +4,42 @@
  *
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createStructuredSelector } from 'reselect';
-import { bindActionCreators, compose } from 'redux';
-import cn from 'classnames';
+import React, { useState } from 'react';
+import { useIntl } from 'react-intl';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
-import translationMessages, { languageNativeNames } from '../../translations';
-import makeSelectLocale from '../LanguageProvider/selectors';
-import { changeLocale } from '../LanguageProvider/actions';
+import useLocalesProvider from '../LocalesProvider/useLocalesProvider';
 import Wrapper from './Wrapper';
 
-// TODO
-const languages = Object.keys(translationMessages);
-export class LocaleToggle extends React.Component {
-  // eslint-disable-line
-  state = { isOpen: false };
+const LocaleToggle = () => {
+  const { changeLocale, localesNativeNames } = useLocalesProvider();
 
-  toggle = () => this.setState(prevState => ({ isOpen: !prevState.isOpen }));
+  const [isOpen, setIsOpen] = useState(false);
+  const toggle = () => setIsOpen(prev => !prev);
+  const { locale } = useIntl();
 
-  render() {
-    const {
-      currentLocale: { locale },
-    } = this.props;
+  return (
+    <Wrapper>
+      <ButtonDropdown isOpen={isOpen} toggle={toggle}>
+        <DropdownToggle className="localeDropdownContent">
+          <span>{localesNativeNames[locale]}</span>
+        </DropdownToggle>
 
-    return (
-      <Wrapper>
-        <ButtonDropdown isOpen={this.state.isOpen} toggle={this.toggle}>
-          <DropdownToggle className="localeDropdownContent">
-            <span>{languageNativeNames[locale]}</span>
-          </DropdownToggle>
-
-          <DropdownMenu className="localeDropdownMenu">
-            {languages.map(language => (
+        <DropdownMenu className="localeDropdownMenu">
+          {Object.keys(localesNativeNames).map(lang => {
+            return (
               <DropdownItem
-                key={language}
-                onClick={() => this.props.changeLocale(language)}
-                className={cn(
-                  'localeToggleItem',
-                  locale === language ? 'localeToggleItemActive' : ''
-                )}
+                key={lang}
+                onClick={() => changeLocale(lang)}
+                className={`localeToggleItem ${locale === lang ? 'localeToggleItemActive' : ''}`}
               >
-                {languageNativeNames[language]}
+                {localesNativeNames[lang]}
               </DropdownItem>
-            ))}
-          </DropdownMenu>
-        </ButtonDropdown>
-      </Wrapper>
-    );
-  }
-}
-
-LocaleToggle.propTypes = {
-  changeLocale: PropTypes.func.isRequired,
-  currentLocale: PropTypes.object.isRequired,
+            );
+          })}
+        </DropdownMenu>
+      </ButtonDropdown>
+    </Wrapper>
+  );
 };
 
-const mapStateToProps = createStructuredSelector({
-  currentLocale: makeSelectLocale(),
-});
-
-export function mapDispatchToProps(dispatch) {
-  return bindActionCreators(
-    {
-      changeLocale,
-    },
-    dispatch
-  );
-}
-
-const withConnect = connect(mapStateToProps, mapDispatchToProps);
-
-export default compose(withConnect)(LocaleToggle);
+export default LocaleToggle;

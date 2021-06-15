@@ -4,25 +4,22 @@ import { Padded, Text } from '@buffetjs/core';
 import { Col } from 'reactstrap';
 import { get } from 'lodash';
 import { useIntl } from 'react-intl';
-import translationMessages, { languageNativeNames } from '../../translations';
 import ContainerFluid from '../../components/ContainerFluid';
+import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import PageTitle from '../../components/PageTitle';
 import SizedInput from '../../components/SizedInput';
 import { Header } from '../../components/Settings';
 import FormBloc from '../../components/FormBloc';
 import { useSettingsForm } from '../../hooks';
-import useChangeLanguage from '../../components/LanguageProvider/hooks/useChangeLanguage';
 import ProfilePageLabel from './components';
 import { form, schema } from './utils';
 
-const languages = Object.keys(translationMessages);
-
 const ProfilePage = () => {
-  const changeLanguage = useChangeLanguage();
+  const { changeLocale, localesNativeNames } = useLocalesProvider();
   const { formatMessage } = useIntl();
 
   const onSubmitSuccessCb = data => {
-    changeLanguage(data.preferedLanguage);
+    changeLocale(data.preferedLanguage);
     auth.setUserInfo(data);
   };
 
@@ -129,8 +126,8 @@ const ProfilePage = () => {
                       selectedValue={get(modifiedData, 'preferedLanguage')}
                       onChange={nextLocaleCode => setField('preferedLanguage', nextLocaleCode)}
                     >
-                      {languages.map(language => {
-                        const langName = languageNativeNames[language];
+                      {Object.keys(localesNativeNames).map(language => {
+                        const langName = localesNativeNames[language];
 
                         return (
                           <Option value={language} key={language}>
