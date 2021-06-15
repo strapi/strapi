@@ -1,4 +1,7 @@
 'use strict';
+/* eslint-disable no-unused-vars */
+
+// TODO move the file in the config folder
 
 module.exports = {
   webpack: (config, webpack) => {
