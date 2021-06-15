@@ -90,6 +90,8 @@ module.exports = {
       id
     );
 
+    console.log(pm, file);
+
     await strapi.plugins['upload'].services.upload.remove(file);
 
     ctx.body = pm.sanitize(file, { action: ACTIONS.read, withPrivate: false });
@@ -199,9 +201,8 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
 
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
-  const roles = _.has(file, 'created_by.id')
-    ? await strapi.query('role', 'admin').find({ 'users.id': file[CREATED_BY_ATTRIBUTE].id }, [])
-    : [];
+  const roles = await strapi.admin.services.role.find({ 'users.id': file[CREATED_BY_ATTRIBUTE] });
+
   const fileWithRoles = _.set(_.cloneDeep(file), 'created_by.roles', roles);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(fileWithRoles))) {
