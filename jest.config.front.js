@@ -54,7 +54,10 @@ module.exports = {
   ],
   moduleNameMapper,
   rootDir: process.cwd(),
-  setupFiles: ['<rootDir>/test/config/front/test-bundler.js'],
+  setupFiles: [
+    '<rootDir>/test/config/front/test-bundler.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
+  ],
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/examples/getstarted/',

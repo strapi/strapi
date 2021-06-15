@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
+import pick from 'lodash/pick';
 import createHook from '@strapi/hooks';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
@@ -16,6 +17,7 @@ import Fonts from './components/Fonts';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
 import themes from './themes';
+import languageNativeNames from './translations/languageNativeNames';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
@@ -188,6 +190,7 @@ class StrapiApp {
 
   render() {
     const store = this.createStore();
+    const localeNames = pick(languageNativeNames, this.appLocales);
 
     const {
       components: { components },
@@ -208,7 +211,7 @@ class StrapiApp {
               runHookSeries={this.runHookSeries}
             >
               <LibraryProvider components={components} fields={fields}>
-                <LanguageProvider messages={this.translations}>
+                <LanguageProvider messages={this.translations} localeNames={localeNames}>
                   <AutoReloadOverlayBlockerProvider>
                     <OverlayBlocker>
                       <Notifications>
