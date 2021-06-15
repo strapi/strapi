@@ -5,7 +5,7 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import React from 'react';
-import { CheckPagePermissions } from '@strapi/helper-plugin';
+import { CheckPagePermissions, prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
@@ -14,7 +14,6 @@ import InputMedia from './components/InputMedia';
 import InputModalStepper from './components/InputModalStepper';
 import SettingsPage from './pages/SettingsPage';
 import reducers from './reducers';
-import trads from './translations';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
 
@@ -62,7 +61,6 @@ export default {
           ],
         },
       },
-      trads,
       menu: {
         pluginsSectionLinks: [
           {
@@ -80,4 +78,27 @@ export default {
     });
   },
   boot() {},
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "upload-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: prefixPluginTranslations(data, pluginId),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
+  },
 };

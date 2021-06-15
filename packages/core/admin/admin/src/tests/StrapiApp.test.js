@@ -6,10 +6,11 @@ import appReducers from '../reducers';
 const library = { fields: {}, components: {} };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
+const locales = [];
 
 describe('ADMIN | StrapiApp', () => {
   it('should render the app without plugins', () => {
-    const app = StrapiApp({ middlewares, reducers, library });
+    const app = StrapiApp({ middlewares, reducers, library, locales });
     const { container } = render(app.render());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -43,7 +44,7 @@ describe('ADMIN | StrapiApp', () => {
   });
 
   it('should create a valid store', () => {
-    const app = StrapiApp({ middlewares, reducers, library });
+    const app = StrapiApp({ middlewares, reducers, library, locales });
 
     const store = app.createStore();
 
@@ -52,7 +53,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Hook api', () => {
     it('runs the "moto" hooks in series', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -70,7 +71,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in series asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -88,7 +89,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -104,7 +105,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -120,7 +121,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in parallel', async () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
