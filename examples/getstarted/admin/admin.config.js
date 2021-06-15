@@ -6,6 +6,8 @@ module.exports = {
     return config;
   },
   app: config => {
+    config.locales = ['fr'];
+
     return config;
   },
 };

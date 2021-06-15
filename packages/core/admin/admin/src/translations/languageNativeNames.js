@@ -18,6 +18,7 @@ const languageNativeNames = {
   pt: 'Português (Portugal)',
   ru: 'Русский',
   sk: 'Slovenčina',
+  sv: 'Swedish',
   th: 'ไทย',
   tr: 'Türkçe',
   uk: 'Українська',

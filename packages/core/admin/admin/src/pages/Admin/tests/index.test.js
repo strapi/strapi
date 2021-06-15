@@ -13,13 +13,14 @@ import RBACProvider from '../../../components/RBACProvider';
 import Admin from '../index';
 
 const messages = { en };
+const localesNativeNames = { en: 'English' };
 
 const store = fixtures.store.store;
 
 const makeApp = (history, plugins) => (
   <Provider store={store}>
     <StrapiAppProvider plugins={plugins}>
-      <LanguageProvider messages={messages}>
+      <LanguageProvider messages={messages} localesNativeNames={localesNativeNames}>
         <Notifications>
           <AppInfosContext.Provider
             value={{ latestStrapiReleaseTag: 'v4', shouldUpdateStrapi: false }}

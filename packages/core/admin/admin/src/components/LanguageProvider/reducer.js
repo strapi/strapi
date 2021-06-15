@@ -7,7 +7,7 @@
 const localStorageKey = 'strapi-admin-language';
 
 const initialState = {
-  localesNativeNames: {},
+  localesNativeNames: { en: 'English' },
   locale: 'en',
 };
 
