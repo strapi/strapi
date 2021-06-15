@@ -1,3 +1,5 @@
+'use strict';
+
 class LocalStorageMock {
   constructor() {
     this.store = {};

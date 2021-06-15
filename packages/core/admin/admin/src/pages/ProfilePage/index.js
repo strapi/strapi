@@ -15,7 +15,7 @@ import ProfilePageLabel from './components';
 import { form, schema } from './utils';
 
 const ProfilePage = () => {
-  const { changeLocale, localesNativeNames } = useLocalesProvider();
+  const { changeLocale, localeNames } = useLocalesProvider();
   const { formatMessage } = useIntl();
 
   const onSubmitSuccessCb = data => {
@@ -126,8 +126,8 @@ const ProfilePage = () => {
                       selectedValue={get(modifiedData, 'preferedLanguage')}
                       onChange={nextLocaleCode => setField('preferedLanguage', nextLocaleCode)}
                     >
-                      {Object.keys(localesNativeNames).map(language => {
-                        const langName = localesNativeNames[language];
+                      {Object.keys(localeNames).map(language => {
+                        const langName = localeNames[language];
 
                         return (
                           <Option value={language} key={language}>

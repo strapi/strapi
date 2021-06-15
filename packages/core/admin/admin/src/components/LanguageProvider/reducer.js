@@ -4,10 +4,8 @@
  *
  */
 
-const localStorageKey = 'strapi-admin-language';
-
 const initialState = {
-  localesNativeNames: { en: 'English' },
+  localeNames: { en: 'English' },
   locale: 'en',
 };
 
@@ -16,12 +14,9 @@ const languageProviderReducer = (state = initialState, action) => {
     case 'CHANGE_LOCALE': {
       const { locale } = action;
 
-      if (!state.localesNativeNames[locale]) {
+      if (!state.localeNames[locale]) {
         return state;
       }
-
-      // Set user language in local storage.
-      window.localStorage.setItem(localStorageKey, locale);
 
       return { ...state, locale };
     }

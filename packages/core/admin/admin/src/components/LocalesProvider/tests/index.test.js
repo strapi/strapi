@@ -7,7 +7,7 @@ describe('LocalesProvider', () => {
     const { container } = render(
       <LocalesProvider
         changeLocale={jest.fn()}
-        localesNativeNames={{ en: 'English' }}
+        localeNames={{ en: 'English' }}
         messages={{ en: {} }}
       >
         <div>Test</div>

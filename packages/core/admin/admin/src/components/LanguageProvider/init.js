@@ -1,14 +1,12 @@
-const localStorageKey = 'strapi-admin-language';
+import localStorageKey from './utils/localStorageKey';
 
-const init = localesNativeNames => {
+const init = localeNames => {
   const languageFromLocaleStorage = window.localStorage.getItem(localStorageKey);
-  const appLanguage = localesNativeNames[languageFromLocaleStorage]
-    ? languageFromLocaleStorage
-    : 'en';
+  const appLanguage = localeNames[languageFromLocaleStorage] ? languageFromLocaleStorage : 'en';
 
   return {
     locale: appLanguage,
-    localesNativeNames,
+    localeNames,
   };
 };
 

@@ -190,7 +190,7 @@ class StrapiApp {
 
   render() {
     const store = this.createStore();
-    const localesNativeNames = pick(languageNativeNames, this.appLocales);
+    const localeNames = pick(languageNativeNames, this.appLocales);
 
     const {
       components: { components },
@@ -211,10 +211,7 @@ class StrapiApp {
               runHookSeries={this.runHookSeries}
             >
               <LibraryProvider components={components} fields={fields}>
-                <LanguageProvider
-                  messages={this.translations}
-                  localesNativeNames={localesNativeNames}
-                >
+                <LanguageProvider messages={this.translations} localeNames={localeNames}>
                   <AutoReloadOverlayBlockerProvider>
                     <OverlayBlocker>
                       <Notifications>

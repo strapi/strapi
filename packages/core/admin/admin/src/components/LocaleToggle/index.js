@@ -11,7 +11,7 @@ import useLocalesProvider from '../LocalesProvider/useLocalesProvider';
 import Wrapper from './Wrapper';
 
 const LocaleToggle = () => {
-  const { changeLocale, localesNativeNames } = useLocalesProvider();
+  const { changeLocale, localeNames } = useLocalesProvider();
 
   const [isOpen, setIsOpen] = useState(false);
   const toggle = () => setIsOpen(prev => !prev);
@@ -21,18 +21,18 @@ const LocaleToggle = () => {
     <Wrapper>
       <ButtonDropdown isOpen={isOpen} toggle={toggle}>
         <DropdownToggle className="localeDropdownContent">
-          <span>{localesNativeNames[locale]}</span>
+          <span>{localeNames[locale]}</span>
         </DropdownToggle>
 
         <DropdownMenu className="localeDropdownMenu">
-          {Object.keys(localesNativeNames).map(lang => {
+          {Object.keys(localeNames).map(lang => {
             return (
               <DropdownItem
                 key={lang}
                 onClick={() => changeLocale(lang)}
                 className={`localeToggleItem ${locale === lang ? 'localeToggleItemActive' : ''}`}
               >
-                {localesNativeNames[lang]}
+                {localeNames[lang]}
               </DropdownItem>
             );
           })}

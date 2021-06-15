@@ -8,12 +8,16 @@ import en from '../../../translations/en.json';
 import fr from '../../../translations/fr.json';
 
 const messages = { en, fr };
-const localesNativeNames = { en: 'English', fr: 'Français' };
+const localeNames = { en: 'English', fr: 'Français' };
 
 describe('LanguageProvider', () => {
+  afterEach(() => {
+    localStorage.removeItem('strapi-admin-language');
+  });
+
   it('should not crash', () => {
     const { container } = render(
-      <LanguageProvider messages={messages} localesNativeNames={localesNativeNames}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
         <div>Test</div>
       </LanguageProvider>
     );
@@ -25,14 +29,14 @@ describe('LanguageProvider', () => {
     `);
   });
 
-  it('should change the locale', () => {
+  it('should change the locale and set the strapi-admin-language item in the localStorage', () => {
     const Test = () => {
       const { locale } = useIntl();
       const { changeLocale } = useLocalesProvider();
 
       return (
         <div>
-          <h1>{localesNativeNames[locale]}</h1>
+          <h1>{localeNames[locale]}</h1>
           <button type="button" onClick={() => changeLocale('fr')}>
             CHANGE
           </button>
@@ -41,15 +45,18 @@ describe('LanguageProvider', () => {
     };
 
     render(
-      <LanguageProvider messages={messages} localesNativeNames={localesNativeNames}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
         <Test />
       </LanguageProvider>
     );
+
+    expect(localStorage.getItem('strapi-admin-language')).toEqual('en');
 
     expect(screen.getByText('English')).toBeInTheDocument();
 
     userEvent.click(screen.getByText('CHANGE'));
 
     expect(screen.getByText('Français')).toBeInTheDocument();
+    expect(localStorage.getItem('strapi-admin-language')).toEqual('fr');
   });
 });

@@ -5,12 +5,12 @@ import en from '../../../translations/en.json';
 import LocaleToggle from '../index';
 
 const messages = { en };
-const localesNativeNames = { en: 'English' };
+const localeNames = { en: 'English' };
 
 describe('<LocaleToggle />', () => {
   it('should not crash', () => {
     const App = (
-      <LanguageProvider messages={messages} localesNativeNames={localesNativeNames}>
+      <LanguageProvider messages={messages} localeNames={localeNames}>
         <LocaleToggle />
       </LanguageProvider>
     );

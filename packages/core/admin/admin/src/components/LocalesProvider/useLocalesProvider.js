@@ -2,9 +2,9 @@ import { useContext } from 'react';
 import LocalesProviderContext from './context';
 
 const useLocalesProvider = () => {
-  const { changeLocale, localesNativeNames, messages } = useContext(LocalesProviderContext);
+  const { changeLocale, localeNames, messages } = useContext(LocalesProviderContext);
 
-  return { changeLocale, localesNativeNames, messages };
+  return { changeLocale, localeNames, messages };
 };
 
 export default useLocalesProvider;

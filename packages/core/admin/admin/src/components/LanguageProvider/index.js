@@ -6,16 +6,22 @@
  * IntlProvider component and i18n messages (loaded from `app/translations`)
  */
 
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { IntlProvider } from 'react-intl';
 import defaultsDeep from 'lodash/defaultsDeep';
 import LocalesProvider from '../LocalesProvider';
+import localStorageKey from './utils/localStorageKey';
 import init from './init';
 import reducer, { initialState } from './reducer';
 
-const LanguageProvider = ({ children, localesNativeNames, messages }) => {
-  const [{ locale }, dispatch] = useReducer(reducer, initialState, () => init(localesNativeNames));
+const LanguageProvider = ({ children, localeNames, messages }) => {
+  const [{ locale }, dispatch] = useReducer(reducer, initialState, () => init(localeNames));
+
+  useEffect(() => {
+    // Set user language in local storage.
+    window.localStorage.setItem(localStorageKey, locale);
+  }, [locale]);
 
   const changeLocale = locale => {
     dispatch({
@@ -28,12 +34,8 @@ const LanguageProvider = ({ children, localesNativeNames, messages }) => {
 
   return (
     <IntlProvider locale={locale} defaultLocale="en" messages={appMessages} textComponent="span">
-      <LocalesProvider
-        changeLocale={changeLocale}
-        localesNativeNames={localesNativeNames}
-        messages={appMessages}
-      >
-        {React.Children.only(children)}
+      <LocalesProvider changeLocale={changeLocale} localeNames={localeNames} messages={appMessages}>
+        {children}
       </LocalesProvider>
     </IntlProvider>
   );
@@ -41,7 +43,7 @@ const LanguageProvider = ({ children, localesNativeNames, messages }) => {
 
 LanguageProvider.propTypes = {
   children: PropTypes.element.isRequired,
-  localesNativeNames: PropTypes.object.isRequired,
+  localeNames: PropTypes.objectOf(PropTypes.string).isRequired,
   messages: PropTypes.object.isRequired,
 };
 

@@ -1,7 +1,6 @@
 import init from '../init';
-import './LocaleStorageMock';
 
-const localesNativeNames = { en: 'English', fr: 'Français' };
+const localeNames = { en: 'English', fr: 'Français' };
 
 describe('LanguageProvider | init', () => {
   afterEach(() => {
@@ -11,25 +10,25 @@ describe('LanguageProvider | init', () => {
   it('should return the language from the localStorage', () => {
     localStorage.setItem('strapi-admin-language', 'fr');
 
-    expect(init(localesNativeNames)).toEqual({
+    expect(init(localeNames)).toEqual({
       locale: 'fr',
-      localesNativeNames,
+      localeNames,
     });
   });
 
   it('should return "en" when the strapi-admin-language is not set in the locale storage', () => {
-    expect(init(localesNativeNames)).toEqual({
+    expect(init(localeNames)).toEqual({
       locale: 'en',
-      localesNativeNames,
+      localeNames,
     });
   });
 
-  it('should return "en" when the language from the local storage is not included in the localesNativeNames', () => {
+  it('should return "en" when the language from the local storage is not included in the localeNames', () => {
     localStorage.setItem('strapi-admin-language', 'foo');
 
-    expect(init(localesNativeNames)).toEqual({
+    expect(init(localeNames)).toEqual({
       locale: 'en',
-      localesNativeNames,
+      localeNames,
     });
   });
 });
