@@ -1,6 +1,6 @@
 import getRedirectionLink, { mergeParams } from '../getRedirectionLink';
 
-describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', () => {
+describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils', () => {
   describe('getRedirectionLink', () => {
     it('should return an when no links is matching the slug', () => {
       const links = [

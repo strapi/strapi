@@ -1,5 +1,5 @@
 import React from 'react';
-import { Switch, Route, useRouteMatch, Redirect } from 'react-router-dom';
+import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
@@ -14,15 +14,36 @@ import useModels from './useModels';
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/plugins/${pluginId}/:kind/:uid`);
-  const { status, collectionTypeLinks, singleTypeLinks } = useModels();
-  const models = [...collectionTypeLinks, ...singleTypeLinks];
+  const { status, collectionTypeLinks, singleTypeLinks, models } = useModels();
+  const authorisedModels = [...collectionTypeLinks, ...singleTypeLinks];
+  const { pathname } = useLocation();
 
   if (status === 'loading') {
     return <LoadingIndicatorPage />;
   }
 
-  if (!contentTypeMatch && models.length > 0) {
-    return <Redirect to={`${models[0].to}${models[0].search ? `?${models[0].search}` : ''}`} />;
+  // Redirect the user to the 403 page
+  if (
+    authorisedModels.length === 0 &&
+    models.length > 0 &&
+    pathname !== `/plugins/${pluginId}/403`
+  ) {
+    return <Redirect to={`/plugins/${pluginId}/403`} />;
+  }
+
+  // Redirect the user to the create content type page
+  if (models.length === 0 && pathname !== '/plugins/content-manager/no-content-types') {
+    return <Redirect to={`/plugins/${pluginId}/no-content-types`} />;
+  }
+
+  if (!contentTypeMatch && authorisedModels.length > 0) {
+    return (
+      <Redirect
+        to={`${authorisedModels[0].to}${
+          authorisedModels[0].search ? `?${authorisedModels[0].search}` : ''
+        }`}
+      />
+    );
   }
 
   return (
@@ -46,6 +67,16 @@ const App = () => {
               <Route
                 path={`/plugins/${pluginId}/singleType/:slug`}
                 component={SingleTypeRecursivePath}
+              />
+
+              {/* These pages must be defined */}
+              <Route
+                path={`/plugins/${pluginId}/403`}
+                render={() => <div>TBD No rights to see the content types</div>}
+              />
+              <Route
+                path={`/plugins/${pluginId}/no-content-types`}
+                render={() => <div>TBD No ct</div>}
               />
               <Route path="" component={NotFound} />
             </Switch>

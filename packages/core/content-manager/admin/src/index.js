@@ -37,7 +37,7 @@ export default {
         pluginsSectionLinks: [
           {
             destination: `/plugins/${pluginId}`,
-            icon,
+            icon: 'book-open',
             label: {
               id: `${pluginId}.plugin.name`,
               defaultMessage: 'Content manager',
