@@ -6,10 +6,11 @@ import appReducers from '../reducers';
 const library = { fields: {}, components: {} };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
+const locales = [];
 
 describe('ADMIN | StrapiApp', () => {
   it('should render the app without plugins', () => {
-    const app = StrapiApp({ middlewares, reducers, library });
+    const app = StrapiApp({ middlewares, reducers, library, locales });
     const { container } = render(app.render());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -43,7 +44,7 @@ describe('ADMIN | StrapiApp', () => {
   });
 
   it('should create a valid store', () => {
-    const app = StrapiApp({ middlewares, reducers, library });
+    const app = StrapiApp({ middlewares, reducers, library, locales });
 
     const store = app.createStore();
 
@@ -52,7 +53,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Hook api', () => {
     it('runs the "moto" hooks in series', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -70,7 +71,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in series asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -88,7 +89,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -104,7 +105,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -120,7 +121,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in parallel', async () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -140,14 +141,14 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Settings api', () => {
     it('the settings should be defined', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
 
       expect(app.settings).toBeDefined();
       expect(app.settings.global).toBeDefined();
     });
 
     it('should creates a new section', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
       const section = { id: 'foo', intlLabel: { id: 'foo', defaultMessage: 'foo' } };
       const links = [
         {
@@ -164,7 +165,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add a link correctly to the global sectionn', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
       const link = {
         Component: jest.fn(),
         to: '/bar',
@@ -179,7 +180,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add an array of links correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, reducers, library });
+      const app = StrapiApp({ middlewares, reducers, library, locales });
       const links = [
         {
           Component: jest.fn(),

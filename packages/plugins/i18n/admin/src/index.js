@@ -1,5 +1,6 @@
 import get from 'lodash/get';
 import * as yup from 'yup';
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
@@ -10,7 +11,6 @@ import LocalePicker from './components/LocalePicker';
 import middlewares from './middlewares';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import trads from './translations';
 import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
@@ -37,7 +37,6 @@ export default {
       mainComponent: null,
       name,
       pluginLogo,
-      trads,
     });
   },
   boot(app) {
@@ -160,5 +159,28 @@ export default {
         },
       });
     }
+  },
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: prefixPluginTranslations(data, pluginId),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
   },
 };

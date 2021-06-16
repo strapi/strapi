@@ -199,6 +199,16 @@ async function createCacheDir(dir) {
     await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
   }
 
+  // Copy admin.config.js
+  const customAdminConfigFilePath = path.join(dir, 'admin', 'admin.config.js');
+
+  if (fs.existsSync(customAdminConfigFilePath)) {
+    await fs.copy(
+      customAdminConfigFilePath,
+      path.resolve(cacheDir, 'admin', 'src', 'admin.config.js')
+    );
+  }
+
   // create plugins.js with plugins requires
   await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
 
