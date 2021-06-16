@@ -51,7 +51,6 @@
     "validations": {}
   },
   {
-    "label": { "id": "app.utils.defaultMessage" },
     "customBootstrapClass": "col-md-2",
     "didCheckErrors": false,
     "errors": [],

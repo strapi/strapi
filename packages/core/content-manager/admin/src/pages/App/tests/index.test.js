@@ -391,8 +391,8 @@ describe('Content manager | App | main', () => {
             </div>
           </div>
           <div
-            class="col-md-9 content"
-            style="padding: 0px 30px;"
+            class="col-md-9"
+            style="padding: 0px;"
           >
             <div
               class="c3"

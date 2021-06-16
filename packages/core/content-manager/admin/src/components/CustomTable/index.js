@@ -4,7 +4,6 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { upperFirst, isEmpty } from 'lodash';
 import { LoadingIndicator, useTracking } from '@strapi/helper-plugin';
-import { parse, stringify } from 'qs';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';
 import State from '../State';
@@ -12,6 +11,7 @@ import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from '.
 import ActionCollapse from './ActionCollapse';
 import Headers from './Headers';
 import Row from './Row';
+import { usePluginsQueryParams } from '../../hooks';
 
 const CustomTable = ({
   canCreate,
@@ -26,12 +26,9 @@ const CustomTable = ({
   const { formatMessage } = useIntl();
   const { entriesToDelete, label, filters, _q } = useListView();
   const { trackUsage } = useTracking();
-  const { pathname, search } = useLocation();
-  const query = search ? parse(search.substring(1)) : {};
+  const { pathname } = useLocation();
   const { push } = useHistory();
-  const searchToPersist = query.plugins
-    ? stringify({ plugins: query.plugins }, { encode: false })
-    : '';
+  const pluginsQueryParams = usePluginsQueryParams();
 
   const headers = useMemo(() => {
     if (hasDraftAndPublish) {
@@ -67,7 +64,7 @@ const CustomTable = ({
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
-      search: searchToPersist,
+      search: pluginsQueryParams,
     });
   };
   const handleEditGoTo = id => {
@@ -75,7 +72,7 @@ const CustomTable = ({
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
-      search: searchToPersist,
+      search: pluginsQueryParams,
     });
   };
 

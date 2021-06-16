@@ -54,7 +54,7 @@ const App = () => {
         <div className="container-fluid">
           <div className="row">
             <LeftMenu />
-            <div className="col-md-9 content" style={{ padding: '0 30px' }}>
+            <div className="col-md-9" style={{ padding: 0 }}>
               <Switch>
                 <Route path={`/plugins/${pluginId}/components/:uid/configurations/edit`}>
                   <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
