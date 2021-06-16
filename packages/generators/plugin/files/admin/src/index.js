@@ -10,6 +10,22 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
+    app.addMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: name,
+      },
+      Component: App,
+      permissions: [
+        // Uncomment to set the permissions of the plugin here
+        // {
+        //   action: '', // the action name should be plugins::plugin-name.actionType
+        //   subject: null,
+        // },
+      ],
+    });
     app.registerPlugin({
       description: pluginDescription,
       icon,
@@ -17,28 +33,7 @@ export default {
       initializer: Initializer,
       isReady: false,
       isRequired: pluginPkg.strapi.required || false,
-      mainComponent: App,
       name,
-      menu: {
-        pluginsSectionLinks: [
-          {
-            destination: `/plugins/${pluginId}`,
-            icon,
-            label: {
-              id: `${pluginId}.plugin.name`,
-              defaultMessage: name,
-            },
-            name,
-            permissions: [
-              // Uncomment to set the permissions of the plugin here
-              // {
-              //   action: '', // the action name should be plugins::plugin-name.actionType
-              //   subject: null,
-              // },
-            ],
-          },
-        ],
-      },
     });
   },
   boot(app) {},
