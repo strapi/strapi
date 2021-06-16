@@ -14,10 +14,9 @@ const useMenu = () => {
   const generalSectionLinksRef = useRef(state.generalSectionLinks);
   const shouldUpdateStrapiRef = useRef(shouldUpdateStrapi);
   // Once in the app lifecycle the menu should not be added into any dependencies array
-  const menuRef = useRef(menu);
 
   const resolvePermissions = async (permissions = allPermissions) => {
-    const pluginsSectionLinks = menuRef.current;
+    const pluginsSectionLinks = menu;
 
     const authorizedPluginSectionLinks = await getPluginSectionLinks(
       permissions,
