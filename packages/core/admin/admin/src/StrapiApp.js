@@ -63,6 +63,28 @@ class StrapiApp {
     }
   };
 
+  addCorePluginMenuLink = link => {
+    const stringifiedLink = JSON.stringify(link);
+
+    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
+    invariant(
+      typeof link.to === 'string',
+      `Expected link.to to be a string instead received ${typeof link.to}`
+    );
+    invariant(
+      ['/plugins/content-manager', '/plugins/content-type-builder', '/plugins/upload'].includes(
+        link.to
+      ),
+      'This method is not available for your plugin'
+    );
+    invariant(
+      link.intlLabel?.id && link.intlLabel?.defaultMessage,
+      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
+    );
+
+    this.menu.push(link);
+  };
+
   addFields = fields => {
     if (Array.isArray(fields)) {
       fields.map(field => this.library.fields.add(field));
@@ -87,6 +109,8 @@ class StrapiApp {
       link.Component && typeof link.Component === 'function',
       `link.Component should be a valid React Component`
     );
+
+    this.menu.push(link);
   };
 
   addMiddlewares = middlewares => {
@@ -133,6 +157,7 @@ class StrapiApp {
     Object.keys(this.appPlugins).forEach(plugin => {
       this.appPlugins[plugin].register({
         addComponents: this.addComponents,
+        addCorePluginMenuLink: this.addCorePluginMenuLink,
         addFields: this.addFields,
         addMenuLink: this.addMenuLink,
         addMiddlewares: this.addMiddlewares,
@@ -286,6 +311,7 @@ class StrapiApp {
           <Provider store={store}>
             <StrapiAppProvider
               getPlugin={this.getPlugin}
+              menu={this.menu}
               plugins={this.plugins}
               runHookParallel={this.runHookParallel}
               runHookWaterfall={this.runHookWaterfall}

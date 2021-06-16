@@ -4,10 +4,15 @@
  *
  */
 
-import React, { Suspense, useEffect, lazy } from 'react';
+import React, { Suspense, useEffect, useMemo, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
 // Components from @strapi/helper-plugin
-import { CheckPagePermissions, useTracking, LoadingIndicatorPage } from '@strapi/helper-plugin';
+import {
+  CheckPagePermissions,
+  useTracking,
+  LoadingIndicatorPage,
+  useStrapiApp,
+} from '@strapi/helper-plugin';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -20,6 +25,7 @@ import { useReleaseNotification } from '../../hooks';
 import Logout from './Logout';
 import Wrapper from './Wrapper';
 import Content from './Content';
+import { createRoute } from '../../utils';
 
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
@@ -29,9 +35,7 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() => import('../NotFoundPage'));
-const PluginDispatcher = lazy(() =>
-  import(/* webpackChunkName: "Admin_pluginDispatcher" */ '../PluginDispatcher')
-);
+
 const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
 );
@@ -69,6 +73,13 @@ const Admin = () => {
   useTrackUsage();
   // TODO
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenuSections();
+  const { menu } = useStrapiApp();
+
+  const routes = useMemo(() => {
+    return menu
+      .filter(link => link.Component)
+      .map(({ to, Component, exact }) => createRoute(Component, to, exact));
+  }, [menu]);
 
   if (isLoading) {
     return <LoadingIndicatorPage />;
@@ -94,7 +105,7 @@ const Admin = () => {
               <Route path="/plugins/content-manager" component={CM} />
               <Route path="/plugins/content-type-builder" component={CTB} />
               <Route path="/plugins/upload" component={Upload} />
-              <Route path="/plugins/:pluginId" component={PluginDispatcher} />
+              {routes}
               <Route path="/settings/:settingId" component={SettingsPage} />
               <Route path="/settings" component={SettingsPage} exact />
               <Route path="/marketplace">

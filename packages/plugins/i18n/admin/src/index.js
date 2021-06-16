@@ -34,7 +34,6 @@ export default {
       initializer: Initializer,
       isReady: false,
       isRequired: pluginPkg.strapi.required || false,
-      mainComponent: null,
       name,
       pluginLogo,
     });

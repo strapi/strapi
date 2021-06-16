@@ -19,6 +19,16 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addReducers(reducers);
+    app.addCorePluginMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Content-Types Builder',
+      },
+      permissions: pluginPermissions.main,
+    });
+
     app.registerPlugin({
       description: pluginDescription,
       icon,
@@ -27,19 +37,6 @@ export default {
       isReady: true,
       name,
       pluginLogo,
-      menu: {
-        pluginsSectionLinks: [
-          {
-            to: `/plugins/${pluginId}`,
-            icon,
-            intlLabel: {
-              id: `${pluginId}.plugin.name`,
-              defaultMessage: 'Content-Types Builder',
-            },
-            permissions: pluginPermissions.main,
-          },
-        ],
-      },
       // Internal APIs exposed by the CTB for the other plugins to use
       apis: {
         forms: formsAPI,
