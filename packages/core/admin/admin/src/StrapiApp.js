@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { ThemeProvider } from 'styled-components';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
+import pick from 'lodash/pick';
 import createHook from '@strapi/hooks';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
@@ -16,9 +17,7 @@ import Fonts from './components/Fonts';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
 import themes from './themes';
-
-// TODO
-import translations from './translations';
+import languageNativeNames from './translations/languageNativeNames';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
@@ -32,16 +31,15 @@ const queryClient = new QueryClient({
   },
 });
 
-const appLocales = Object.keys(translations);
-
 class StrapiApp {
-  constructor({ appPlugins, library, middlewares, reducers }) {
+  constructor({ appPlugins, library, locales, middlewares, reducers }) {
+    this.appLocales = ['en', ...locales.filter(loc => loc !== 'en')];
     this.appPlugins = appPlugins || {};
     this.library = library;
     this.middlewares = middlewares;
     this.plugins = {};
     this.reducers = reducers;
-    this.translations = translations;
+    this.translations = {};
     this.hooksDict = {};
   }
 
@@ -105,20 +103,51 @@ class StrapiApp {
     return this.plugins[pluginId];
   };
 
-  // FIXME
-  registerPluginTranslations(pluginId, trads) {
-    const pluginTranslations = appLocales.reduce((acc, currentLanguage) => {
-      const currentLocale = trads[currentLanguage];
+  async loadAdminTrads() {
+    const arrayOfPromises = this.appLocales.map(locale => {
+      return import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`)
+        .then(({ default: data }) => {
+          return { data, locale };
+        })
+        .catch(() => {
+          return { data: {}, locale };
+        });
+    });
+    const adminLocales = await Promise.all(arrayOfPromises);
 
-      if (currentLocale) {
-        const localeprefixedWithPluginId = Object.keys(currentLocale).reduce((acc2, current) => {
-          acc2[`${pluginId}.${current}`] = currentLocale[current];
+    this.translations = adminLocales.reduce((acc, current) => {
+      acc[current.locale] = current.data;
 
-          return acc2;
-        }, {});
+      return acc;
+    }, {});
 
-        acc[currentLanguage] = localeprefixedWithPluginId;
-      }
+    return Promise.resolve();
+  }
+
+  async loadTrads() {
+    const arrayOfPromises = Object.keys(this.appPlugins)
+      .map(plugin => {
+        const registerTrads = this.appPlugins[plugin].registerTrads;
+
+        if (registerTrads) {
+          return registerTrads({ locales: this.appLocales });
+        }
+
+        return null;
+      })
+      .filter(a => a);
+
+    const pluginsTrads = await Promise.all(arrayOfPromises);
+    const mergedTrads = pluginsTrads.reduce((acc, currentPluginTrads) => {
+      const pluginTrads = currentPluginTrads.reduce((acc1, current) => {
+        acc1[current.locale] = current.data;
+
+        return acc1;
+      }, {});
+
+      Object.keys(pluginTrads).forEach(locale => {
+        acc[locale] = { ...acc[locale], ...pluginTrads[locale] };
+      });
 
       return acc;
     }, {});
@@ -126,19 +155,16 @@ class StrapiApp {
     this.translations = Object.keys(this.translations).reduce((acc, current) => {
       acc[current] = {
         ...this.translations[current],
-        ...(pluginTranslations[current] || {}),
+        ...(mergedTrads[current] || {}),
       };
 
       return acc;
     }, {});
+
+    return Promise.resolve();
   }
 
   registerPlugin = pluginConf => {
-    // FIXME
-    // Translations should be loaded differently
-    // This is a temporary fix
-    this.registerPluginTranslations(pluginConf.id, pluginConf.trads);
-
     const plugin = Plugin(pluginConf);
 
     this.plugins[plugin.pluginId] = plugin;
@@ -164,6 +190,7 @@ class StrapiApp {
 
   render() {
     const store = this.createStore();
+    const localeNames = pick(languageNativeNames, this.appLocales);
 
     const {
       components: { components },
@@ -184,7 +211,7 @@ class StrapiApp {
               runHookSeries={this.runHookSeries}
             >
               <LibraryProvider components={components} fields={fields}>
-                <LanguageProvider messages={this.translations}>
+                <LanguageProvider messages={this.translations} localeNames={localeNames}>
                   <AutoReloadOverlayBlockerProvider>
                     <OverlayBlocker>
                       <Notifications>
@@ -204,5 +231,5 @@ class StrapiApp {
   }
 }
 
-export default ({ appPlugins, library, middlewares, reducers }) =>
-  new StrapiApp({ appPlugins, library, middlewares, reducers });
+export default ({ appPlugins, library, locales, middlewares, reducers }) =>
+  new StrapiApp({ appPlugins, library, locales, middlewares, reducers });
