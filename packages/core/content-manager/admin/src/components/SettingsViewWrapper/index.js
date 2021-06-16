@@ -5,7 +5,6 @@ import { withRouter } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
-  BackHeader,
   LoadingIndicatorPage,
   ModalConfirm,
   PopUpWarning,
@@ -16,6 +15,7 @@ import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
 import Separator from '../Separator';
+import BackHeader from '../BackHeader';
 
 const SettingsViewWrapper = ({
   children,
