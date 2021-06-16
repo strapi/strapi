@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 import adminPermissions from '../../permissions';
-import { SET_SECTION_LINKS, TOGGLE_IS_LOADING, UNSET_IS_LOADING } from './constants';
+import { SET_SECTION_LINKS, UNSET_IS_LOADING } from './constants';
 
 const initialState = {
   generalSectionLinks: [
@@ -45,16 +45,10 @@ const reducer = (state = initialState, action) =>
         draftState.pluginsSectionLinks = authorizedPluginLinks;
         break;
       }
-
-      case TOGGLE_IS_LOADING: {
-        draftState.isLoading = !state.isLoading;
-        break;
-      }
       case UNSET_IS_LOADING: {
         draftState.isLoading = false;
         break;
       }
-
       default:
         return draftState;
     }

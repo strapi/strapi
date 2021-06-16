@@ -1,5 +1,5 @@
 import reducer, { initialState } from '../reducer';
-import { SET_SECTION_LINKS, TOGGLE_IS_LOADING } from '../constants';
+import { SET_SECTION_LINKS } from '../constants';
 
 describe('ADMIN | LeftMenu | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -9,24 +9,6 @@ describe('ADMIN | LeftMenu | reducer', () => {
       };
 
       expect(reducer(state, {})).toEqual(state);
-    });
-  });
-
-  describe('TOGGLE_IS_LOADING', () => {
-    it('should change the isLoading property correctly', () => {
-      const state = {
-        isLoading: true,
-      };
-
-      const expected = {
-        isLoading: false,
-      };
-
-      const action = {
-        type: TOGGLE_IS_LOADING,
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
     });
   });
 

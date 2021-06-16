@@ -45,19 +45,20 @@ const useModels = () => {
 
   fetchDataRef.current = fetchData;
 
-  useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+  const abortController = new AbortController();
+  const { signal } = abortController;
 
+  useEffect(() => {
     fetchDataRef.current(signal);
 
     return () => {
       abortController.abort();
       dispatch(resetProps());
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, toggleNotification]);
 
-  return state;
+  return { ...state, refetchData: fetchDataRef.current };
 };
 
 export default useModels;
