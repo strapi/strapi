@@ -2,7 +2,6 @@ import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import {
-  BackHeader,
   BaselineAlignment,
   InjectionZone,
   LiLink,
@@ -23,7 +22,7 @@ import EditViewDataManagerProvider from '../../components/EditViewDataManagerPro
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import Header from './Header';
 import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
-import { LinkWrapper, SubWrapper } from './components';
+import { LinkWrapper, SubWrapper, BackHeader } from './components';
 import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 import { getTrad } from '../../utils';

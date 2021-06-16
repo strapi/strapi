@@ -30,12 +30,15 @@ const generateLinks = (links, type, configurations = []) => {
       }
 
       return {
-        icon: 'circle',
-        destination: `/plugins/content-manager/${link.kind}/${link.uid}`,
-        isDisplayed: true,
-        label: link.info.label,
         permissions,
         search,
+        kind: link.kind,
+        title: link.info.label,
+        to: `/plugins/content-manager/${link.kind}/${link.uid}`,
+        uid: link.uid,
+        // Used for the list item key in the helper plugin
+        name: link.uid,
+        isDisplayed: link.isDisplayed,
       };
     });
 };

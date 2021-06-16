@@ -1,5 +1,5 @@
 import reducer, { initialState } from '../reducer';
-import { SET_CT_OR_ST_LINKS, SET_SECTION_LINKS, TOGGLE_IS_LOADING } from '../constants';
+import { SET_SECTION_LINKS, TOGGLE_IS_LOADING } from '../constants';
 
 describe('ADMIN | LeftMenu | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -46,29 +46,6 @@ describe('ADMIN | LeftMenu | reducer', () => {
         generalSectionLinks: ['authorizd', 'links'],
         pluginsSectionLinks: ['authorizd', 'plugin-links'],
       };
-      const actual = reducer(state, action);
-
-      expect(actual).toEqual(expected);
-    });
-  });
-
-  describe('SET_CT_OR_ST_LINKS', () => {
-    it('sets the generalSectionLinks and the pluginsSectionLinks with the action', () => {
-      const state = { ...initialState };
-      const action = {
-        type: SET_CT_OR_ST_LINKS,
-        data: {
-          authorizedCtLinks: ['authorizd', 'ct-links'],
-          authorizedStLinks: ['authorizd', 'st-links'],
-        },
-      };
-
-      const expected = {
-        ...initialState,
-        collectionTypesSectionLinks: ['authorizd', 'ct-links'],
-        singleTypesSectionLinks: ['authorizd', 'st-links'],
-      };
-
       const actual = reducer(state, action);
 
       expect(actual).toEqual(expected);

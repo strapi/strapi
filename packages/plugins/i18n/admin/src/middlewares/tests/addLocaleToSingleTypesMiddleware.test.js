@@ -33,7 +33,7 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     expect(next).toBeCalledWith(action);
   });
 
-  it('should forward the action when the type is not StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS', () => {
+  it('should forward the action when the type is not ContentManager/App/SET_CONTENT_TYPE_LINKS', () => {
     const action = { test: true, type: 'TEST' };
 
     const next = jest.fn();
@@ -46,7 +46,7 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
 
   it('should forward when the authorizedStLinks array is empty', () => {
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedStLinks: [],
       },
@@ -62,9 +62,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
 
   it('should not add the search key to a single type link when i18n is not enabled on the single type', () => {
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test' }],
+        authorizedStLinks: [{ to: 'cm/singleType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
       },
     };
@@ -84,9 +84,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test' }],
+        authorizedStLinks: [{ to: 'cm/singleType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -97,11 +97,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [
-          { destination: 'cm/singleType/test', search: 'plugins[i18n][locale]=en' },
-        ],
+        authorizedStLinks: [{ to: 'cm/singleType/test', search: 'plugins[i18n][locale]=en' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -116,9 +114,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     ] = [{ properties: { locales: [] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test' }],
+        authorizedStLinks: [{ to: 'cm/singleType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -129,9 +127,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test', isDisplayed: false }],
+        authorizedStLinks: [{ to: 'cm/singleType/test', isDisplayed: false }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -146,11 +144,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [
-          { destination: 'cm/singleType/test', search: 'plugins[plugin][test]=test' },
-        ],
+        authorizedStLinks: [{ to: 'cm/singleType/test', search: 'plugins[plugin][test]=test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -161,11 +157,11 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedStLinks: [
           {
-            destination: 'cm/singleType/test',
+            to: 'cm/singleType/test',
             search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
           },
         ],

@@ -1,15 +1,9 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 import adminPermissions from '../../permissions';
-import {
-  SET_CT_OR_ST_LINKS,
-  SET_SECTION_LINKS,
-  TOGGLE_IS_LOADING,
-  UNSET_IS_LOADING,
-} from './constants';
+import { SET_SECTION_LINKS, TOGGLE_IS_LOADING, UNSET_IS_LOADING } from './constants';
 
 const initialState = {
-  collectionTypesSectionLinks: [],
   generalSectionLinks: [
     {
       icon: 'list',
@@ -38,7 +32,6 @@ const initialState = {
       notificationsCount: 0,
     },
   ],
-  singleTypesSectionLinks: [],
   pluginsSectionLinks: [],
   isLoading: true,
 };
@@ -46,13 +39,6 @@ const initialState = {
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case SET_CT_OR_ST_LINKS: {
-        const { authorizedCtLinks, authorizedStLinks } = action.data;
-        draftState.collectionTypesSectionLinks = authorizedCtLinks;
-        draftState.singleTypesSectionLinks = authorizedStLinks;
-        break;
-      }
-
       case SET_SECTION_LINKS: {
         const { authorizedGeneralLinks, authorizedPluginLinks } = action.data;
         draftState.generalSectionLinks = authorizedGeneralLinks;

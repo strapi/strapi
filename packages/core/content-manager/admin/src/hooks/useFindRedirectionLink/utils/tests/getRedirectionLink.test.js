@@ -1,15 +1,15 @@
 import getRedirectionLink, { mergeParams } from '../getRedirectionLink';
 
-describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', () => {
+describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils', () => {
   describe('getRedirectionLink', () => {
     it('should return an when no links is matching the slug', () => {
       const links = [
         {
-          destination: '/cm/foo',
+          to: '/cm/foo',
           search: 'page=1&pageSize=10',
         },
         {
-          destination: '/cm/bar',
+          to: '/cm/bar',
           search: 'page=1&pageSize=10',
         },
       ];
@@ -21,11 +21,11 @@ describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', ()
     it('should not mutate the link when the rawQuery is empty', () => {
       const links = [
         {
-          destination: '/cm/foo',
+          to: '/cm/foo',
           search: 'page=1&pageSize=10',
         },
         {
-          destination: '/cm/bar',
+          to: '/cm/bar',
           search: 'page=1&pageSize=10',
         },
       ];
@@ -38,11 +38,11 @@ describe('CONTENT MANAGER | Containers | CollectionTypeFormWrapper | utils ', ()
     it('should merge the current search with the link original one', () => {
       const links = [
         {
-          destination: '/cm/foo',
+          to: '/cm/foo',
           search: 'page=1&pageSize=10&plugins[i18n][locale]=en',
         },
         {
-          destination: '/cm/bar',
+          to: '/cm/bar',
           search: 'page=1&pageSize=10&plugins[i18n][locale]=en',
         },
       ];

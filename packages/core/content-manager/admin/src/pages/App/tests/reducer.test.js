@@ -1,5 +1,5 @@
 import produce from 'immer';
-import { getData, getDataSucceeded, resetProps } from '../actions';
+import { getData, setContentTypeLinks, resetProps } from '../actions';
 import mainReducer from '../reducer';
 
 describe('Content Manager | App | reducer', () => {
@@ -8,8 +8,10 @@ describe('Content Manager | App | reducer', () => {
   beforeEach(() => {
     state = {
       components: [],
-      isLoading: true,
+      status: 'loading',
       models: [],
+      collectionTypeLinks: [],
+      singleTypeLinks: [],
     };
   });
 
@@ -18,10 +20,10 @@ describe('Content Manager | App | reducer', () => {
   });
 
   it('should handle the getData action correctly', () => {
-    state.isLoading = false;
+    state.status = 'resolved';
 
     const expected = produce(state, draft => {
-      draft.isLoading = true;
+      draft.status = 'loading';
     });
 
     expect(mainReducer(state, getData())).toEqual(expected);
@@ -29,12 +31,19 @@ describe('Content Manager | App | reducer', () => {
 
   it('should handle the getData action correctly', () => {
     const expected = produce(state, draft => {
-      draft.isLoading = false;
+      draft.status = 'resolved';
       draft.components = ['test'];
       draft.models = ['test'];
+      draft.collectionTypeLinks = ['authorizedCt'];
+      draft.singleTypeLinks = ['authorizedSt'];
     });
 
-    expect(mainReducer(state, getDataSucceeded(['test'], ['test']))).toEqual(expected);
+    expect(
+      mainReducer(
+        state,
+        setContentTypeLinks(['authorizedCt'], ['authorizedSt'], ['test'], ['test'])
+      )
+    ).toEqual(expected);
   });
 
   it('should handle the resetProps action correctly', () => {
@@ -43,7 +52,9 @@ describe('Content Manager | App | reducer', () => {
     expect(mainReducer(state, resetProps())).toEqual({
       components: [],
       models: [],
-      isLoading: true,
+      collectionTypeLinks: [],
+      singleTypeLinks: [],
+      status: 'loading',
     });
   });
 });

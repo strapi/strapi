@@ -6,7 +6,6 @@ const { combineReducers, createStore } = require('redux');
 const reducers = {
   language: jest.fn(() => ({ locale: 'en' })),
   menu: jest.fn(() => ({
-    collectionTypesSectionLinks: [],
     generalSectionLinks: [
       {
         icon: 'list',
@@ -43,7 +42,6 @@ const reducers = {
         notificationsCount: 0,
       },
     ],
-    singleTypesSectionLinks: [],
     pluginsSectionLinks: [],
     isLoading: true,
   })),

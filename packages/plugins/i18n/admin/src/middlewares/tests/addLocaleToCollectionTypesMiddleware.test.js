@@ -33,7 +33,7 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     expect(next).toBeCalledWith(action);
   });
 
-  it('should forward the action when the type is not StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS', () => {
+  it('should forward the action when the type is not ContentManager/App/SET_CONTENT_TYPE_LINKS', () => {
     const action = { test: true, type: 'TEST' };
 
     const next = jest.fn();
@@ -46,7 +46,7 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
 
   it('should forward when the authorizedStLinks array is empty', () => {
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedCtLinks: [],
       },
@@ -62,9 +62,9 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
 
   it('should not add the search key to a single type link when i18n is not enabled on the single type', () => {
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedCtLinks: [{ destination: 'cm/collectionType/test' }],
+        authorizedCtLinks: [{ to: 'cm/collectionType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
       },
     };
@@ -84,9 +84,9 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedCtLinks: [{ destination: 'cm/collectionType/test', search: null }],
+        authorizedCtLinks: [{ to: 'cm/collectionType/test', search: null }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -97,11 +97,9 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedCtLinks: [
-          { destination: 'cm/collectionType/test', search: 'plugins[i18n][locale]=en' },
-        ],
+        authorizedCtLinks: [{ to: 'cm/collectionType/test', search: 'plugins[i18n][locale]=en' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -116,11 +114,9 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     ] = [{ properties: { locales: [] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedCtLinks: [
-          { destination: 'cm/collectionType/test', search: 'page=1&pageSize=10' },
-        ],
+        authorizedCtLinks: [{ to: 'cm/collectionType/test', search: 'page=1&pageSize=10' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -131,11 +127,11 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedCtLinks: [
           {
-            destination: 'cm/collectionType/test',
+            to: 'cm/collectionType/test',
             isDisplayed: false,
             search: 'page=1&pageSize=10',
           },
@@ -154,11 +150,9 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedCtLinks: [
-          { destination: 'cm/collectionType/test', search: 'plugins[plugin][test]=test' },
-        ],
+        authorizedCtLinks: [{ to: 'cm/collectionType/test', search: 'plugins[plugin][test]=test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -169,11 +163,11 @@ describe('i18n | middlewares | addLocaleToCollectionTypesMiddleware', () => {
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedCtLinks: [
           {
-            destination: 'cm/collectionType/test',
+            to: 'cm/collectionType/test',
             search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
           },
         ],

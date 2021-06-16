@@ -1,15 +1,13 @@
 import { useEffect, useRef } from 'react';
-import { useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { useRBACProvider } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
-import getCtOrStLinks from './utils/getCtOrStLinks';
 import getPluginSectionLinks from './utils/getPluginSectionLinks';
 import getGeneralLinks from './utils/getGeneralLinks';
-import { setCtOrStLinks, setSectionLinks, toggleIsLoading, unsetIsLoading } from './actions';
+import { setSectionLinks, toggleIsLoading, unsetIsLoading } from './actions';
 import toPluginLinks from './utils/toPluginLinks';
 import selectMenuLinks from './selectors';
 
 const useMenuSections = (plugins, shouldUpdateStrapi) => {
-  const toggleNotification = useNotification();
   const state = useSelector(selectMenuLinks);
   const dispatch = useDispatch();
   const { allPermissions } = useRBACProvider();
@@ -26,10 +24,6 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
 
   const resolvePermissions = async (permissions = allPermissions) => {
     const pluginsSectionLinks = toPluginLinks(pluginsRef.current);
-    const { authorizedCtLinks, authorizedStLinks, contentTypes } = await getCtOrStLinks(
-      permissions,
-      toggleNotification
-    );
 
     const authorizedPluginSectionLinks = await getPluginSectionLinks(
       permissions,
@@ -42,7 +36,6 @@ const useMenuSections = (plugins, shouldUpdateStrapi) => {
       shouldUpdateStrapiRef.current
     );
 
-    dispatch(setCtOrStLinks(authorizedCtLinks, authorizedStLinks, contentTypes));
     dispatch(setSectionLinks(authorizedGeneralSectionLinks, authorizedPluginSectionLinks));
     dispatch(unsetIsLoading());
   };

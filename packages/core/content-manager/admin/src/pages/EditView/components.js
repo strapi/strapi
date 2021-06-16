@@ -1,5 +1,10 @@
 import styled from 'styled-components';
+import { BackHeader as BaseBackHeader } from '@strapi/helper-plugin';
 import { Flex, Text } from '@buffetjs/core';
+
+const BackHeader = styled(BaseBackHeader)`
+  left: 24rem;
+`;
 
 const SubWrapper = styled.div`
   background: #ffffff;
@@ -71,4 +76,4 @@ const StatusWrapper = styled.div`
   `}
 `;
 
-export { LinkWrapper, MainWrapper, SubWrapper, DeleteButton, StatusWrapper };
+export { LinkWrapper, MainWrapper, SubWrapper, DeleteButton, StatusWrapper, BackHeader };

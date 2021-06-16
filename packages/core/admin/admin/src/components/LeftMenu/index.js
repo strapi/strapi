@@ -11,21 +11,10 @@ const LeftMenu = ({ setUpdateMenu }) => {
   const { shouldUpdateStrapi } = useAppInfos();
   const { plugins } = useStrapiApp();
   const {
-    state: {
-      isLoading,
-      collectionTypesSectionLinks,
-      singleTypesSectionLinks,
-      generalSectionLinks,
-      pluginsSectionLinks,
-    },
+    state: { isLoading, generalSectionLinks, pluginsSectionLinks },
     toggleLoading,
     generateMenu,
   } = useMenuSections(plugins, shouldUpdateStrapi);
-
-  const filteredCollectionTypeLinks = collectionTypesSectionLinks.filter(
-    ({ isDisplayed }) => isDisplayed
-  );
-  const filteredSingleTypeLinks = singleTypesSectionLinks.filter(({ isDisplayed }) => isDisplayed);
 
   // This effect is really temporary until we create the menu api
   // We need this because we need to regenerate the links when the settings are being changed
@@ -43,25 +32,6 @@ const LeftMenu = ({ setUpdateMenu }) => {
       <Loader show={isLoading} />
       <Header />
       <LinksContainer>
-        {filteredCollectionTypeLinks.length > 0 && (
-          <LinksSection
-            section="collectionType"
-            name="collectionType"
-            links={filteredCollectionTypeLinks}
-            location={location}
-            searchable
-          />
-        )}
-        {filteredSingleTypeLinks.length > 0 && (
-          <LinksSection
-            section="singleType"
-            name="singleType"
-            links={filteredSingleTypeLinks}
-            location={location}
-            searchable
-          />
-        )}
-
         {pluginsSectionLinks.length > 0 && (
           <LinksSection
             section="plugins"
