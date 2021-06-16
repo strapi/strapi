@@ -60,7 +60,7 @@ describe('getGeneralLinks', () => {
       {
         icon: 'list',
         label: 'app.components.LeftMenuLinkContainer.listPlugins',
-        destination: '/list-plugins',
+        to: '/list-plugins',
         isDisplayed: false,
         permissions: [
           {
@@ -81,7 +81,7 @@ describe('getGeneralLinks', () => {
       {
         icon: 'shopping-basket',
         label: 'app.components.LeftMenuLinkContainer.installNewPlugin',
-        destination: '/marketplace',
+        to: '/marketplace',
         isDisplayed: false,
         permissions: [
           {
@@ -103,7 +103,7 @@ describe('getGeneralLinks', () => {
         icon: 'cog',
         label: 'app.components.LeftMenuLinkContainer.settings',
         isDisplayed: true,
-        destination: '/settings',
+        to: '/settings',
         permissions: [],
         notificationsCount: 0,
       },
@@ -113,7 +113,7 @@ describe('getGeneralLinks', () => {
       {
         icon: 'list',
         label: 'app.components.LeftMenuLinkContainer.listPlugins',
-        destination: '/list-plugins',
+        to: '/list-plugins',
         isDisplayed: false,
         permissions: [
           {
@@ -134,7 +134,7 @@ describe('getGeneralLinks', () => {
       {
         icon: 'shopping-basket',
         label: 'app.components.LeftMenuLinkContainer.installNewPlugin',
-        destination: '/marketplace',
+        to: '/marketplace',
         isDisplayed: false,
         permissions: [
           {
@@ -156,7 +156,7 @@ describe('getGeneralLinks', () => {
         icon: 'cog',
         label: 'app.components.LeftMenuLinkContainer.settings',
         isDisplayed: true,
-        destination: '/settings',
+        to: '/settings',
         permissions: [],
         notificationsCount: 0,
       },
@@ -166,7 +166,7 @@ describe('getGeneralLinks', () => {
     expect(actual).toEqual(expected);
   });
 
-  it('resolves an empty array when the destination (/settings) is not in the authorized links', async () => {
+  it('resolves an empty array when the to (/settings) is not in the authorized links', async () => {
     hasPermissions.mockImplementation(() => Promise.resolve(false));
 
     const permissions = [
@@ -222,7 +222,7 @@ describe('getGeneralLinks', () => {
       {
         icon: 'list',
         label: 'app.components.LeftMenuLinkContainer.listPlugins',
-        destination: '/list-plugins',
+        to: '/list-plugins',
         isDisplayed: false,
         permissions: [],
         notificationsCount: 0,
@@ -230,7 +230,7 @@ describe('getGeneralLinks', () => {
       {
         icon: 'shopping-basket',
         label: 'app.components.LeftMenuLinkContainer.installNewPlugin',
-        destination: '/marketplace',
+        to: '/marketplace',
         isDisplayed: false,
         permissions: [],
         notificationsCount: 0,
@@ -239,7 +239,7 @@ describe('getGeneralLinks', () => {
         icon: 'cog',
         label: 'app.components.LeftMenuLinkContainer.settings',
         isDisplayed: false,
-        destination: '/settings',
+        to: '/settings',
         permissions: [],
         notificationsCount: 0,
       },

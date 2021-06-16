@@ -9,39 +9,37 @@ const reducers = {
     generalSectionLinks: [
       {
         icon: 'list',
-        label: {
+        intlLabel: {
           id: 'app.components.LeftMenuLinkContainer.listPlugins',
           defaultMessage: 'Plugins',
         },
-        destination: '/list-plugins',
-        isDisplayed: false,
+        to: '/list-plugins',
         permissions: [
           { action: 'admin::marketplace.read', subject: null },
           { action: 'admin::marketplace.plugins.install', subject: null },
           { action: 'admin::marketplace.plugins.uninstall', subject: null },
         ],
-        notificationsCount: 0,
       },
       {
         icon: 'shopping-basket',
-        label: {
+        intlLabel: {
           id: 'app.components.LeftMenuLinkContainer.installNewPlugin',
           defaultMessage: 'Marketplace',
         },
-        destination: '/marketplace',
-        isDisplayed: false,
+        to: '/marketplace',
         permissions: [
           { action: 'admin::marketplace.read', subject: null },
           { action: 'admin::marketplace.plugins.install', subject: null },
           { action: 'admin::marketplace.plugins.uninstall', subject: null },
         ],
-        notificationsCount: 0,
       },
       {
         icon: 'cog',
-        label: { id: 'app.components.LeftMenuLinkContainer.settings', defaultMessage: 'Settings' },
-        isDisplayed: true,
-        destination: '/settings',
+        intlLabel: {
+          id: 'app.components.LeftMenuLinkContainer.settings',
+          defaultMessage: 'Settings',
+        },
+        to: '/settings',
         // Permissions of this link are retrieved in the init phase
         // using the settings menu
         permissions: [],

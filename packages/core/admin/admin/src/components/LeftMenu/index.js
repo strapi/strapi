@@ -1,13 +1,10 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { useLocation } from 'react-router-dom';
 import { Footer, Header, LinksContainer, LinksSection, SectionTitle } from './compos';
 import Wrapper from './Wrapper';
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
-  const location = useLocation();
-
   return (
     <Wrapper>
       <Header />
@@ -22,7 +19,6 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
             </SectionTitle>
             <LinksSection
               links={pluginsSectionLinks}
-              location={location}
               searchable={false}
               emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
             />
@@ -36,7 +32,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                 defaultMessage="General"
               />
             </SectionTitle>
-            <LinksSection links={generalSectionLinks} location={location} searchable={false} />
+            <LinksSection links={generalSectionLinks} searchable={false} />
           </>
         )}
       </LinksContainer>

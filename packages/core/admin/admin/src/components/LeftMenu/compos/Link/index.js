@@ -12,26 +12,29 @@ import Link from './Link';
 import LeftMenuIcon from './LeftMenuIcon';
 import NotificationCount from './NotificationCount';
 
-const LeftMenuLink = ({ destination, iconName, label, notificationsCount }) => {
+const LeftMenuLink = ({ to, icon, intlLabel, notificationsCount }) => {
   return (
-    <Link to={destination}>
-      <LeftMenuIcon icon={iconName} />
+    <Link to={to}>
+      <LeftMenuIcon icon={icon} />
       {/* TODO change with new DS */}
-      <FormattedMessage {...label}>{message => <LinkLabel>{message}</LinkLabel>}</FormattedMessage>
+      <FormattedMessage {...intlLabel}>
+        {message => <LinkLabel>{message}</LinkLabel>}
+      </FormattedMessage>
       {notificationsCount > 0 && <NotificationCount count={notificationsCount} />}
     </Link>
   );
 };
 
 LeftMenuLink.propTypes = {
-  destination: PropTypes.string.isRequired,
-  iconName: PropTypes.string,
-  label: PropTypes.object.isRequired,
-  notificationsCount: PropTypes.number.isRequired,
+  to: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+  intlLabel: PropTypes.object.isRequired,
+  notificationsCount: PropTypes.number,
 };
 
 LeftMenuLink.defaultProps = {
-  iconName: 'circle',
+  icon: 'circle',
+  notificationsCount: 0,
 };
 
 export default LeftMenuLink;

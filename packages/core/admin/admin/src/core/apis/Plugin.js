@@ -9,7 +9,7 @@ class Plugin {
     this.isRequired = pluginConf.isRequired;
     this.mainComponent = pluginConf.mainComponent || null;
     // TODO
-    this.menu = pluginConf.menu || null;
+    // this.menu = pluginConf.menu || null;
     this.name = pluginConf.name;
     this.pluginId = pluginConf.id;
     this.pluginLogo = pluginConf.pluginLogo;

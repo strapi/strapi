@@ -7,37 +7,29 @@ const initialState = {
   generalSectionLinks: [
     {
       icon: 'list',
-      label: {
+      intlLabel: {
         id: 'app.components.LeftMenuLinkContainer.listPlugins',
         defaultMessage: 'Plugins',
       },
-      destination: '/list-plugins',
-      // TODO
-      isDisplayed: false,
+      to: '/list-plugins',
       permissions: adminPermissions.marketplace.main,
-      notificationsCount: 0,
     },
     {
       icon: 'shopping-basket',
-      label: {
+      intlLabel: {
         id: 'app.components.LeftMenuLinkContainer.installNewPlugin',
         defaultMessage: 'Marketplace',
       },
-      destination: '/marketplace',
-      // TODO
-      isDisplayed: false,
+      to: '/marketplace',
       permissions: adminPermissions.marketplace.main,
-      notificationsCount: 0,
     },
     {
       icon: 'cog',
-      label: {
+      intlLabel: {
         id: 'app.components.LeftMenuLinkContainer.settings',
         defaultMessage: 'Settings',
       },
-      // TODO
-      isDisplayed: true,
-      destination: '/settings',
+      to: '/settings',
       // Permissions of this link are retrieved in the init phase
       // using the settings menu
       permissions: [],
