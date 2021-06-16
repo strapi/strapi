@@ -40,7 +40,7 @@ describe('Content manager | App | main', () => {
           uid: 'category',
           title: 'Categories',
           name: 'category',
-          to: '/category',
+          to: `/plugins/${pluginId}/collectionType/category`,
           kind: 'collectionType',
           isDisplayed: true,
           permissions: [
@@ -82,7 +82,7 @@ describe('Content manager | App | main', () => {
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
     const history = createMemoryHistory();
-    history.push('/plugins/content-manager/collectionType/category');
+    history.push(`/plugins/${pluginId}`);
 
     const { container } = render(
       <Provider store={store}>
@@ -94,6 +94,7 @@ describe('Content manager | App | main', () => {
 
     expect(screen.getByText('Home page')).toBeVisible();
     expect(screen.getByText('Categories')).toBeVisible();
+    expect(history.location.pathname).toEqual(`/plugins/${pluginId}/collectionType/category`);
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c2 {
         margin-bottom: 0;
@@ -338,7 +339,9 @@ describe('Content manager | App | main', () => {
                 >
                   <li>
                     <a
-                      href="/category"
+                      aria-current="page"
+                      class="active"
+                      href="/plugins/content-manager/collectionType/category"
                     >
                       <p>
                         Categories
@@ -402,6 +405,53 @@ describe('Content manager | App | main', () => {
     `);
   });
 
+  it('should redirect to the single type', () => {
+    const contentManagerState = {
+      collectionTypeLinks: [],
+      singleTypeLinks: [
+        {
+          uid: 'homepage',
+          title: 'Home page',
+          name: 'homepage',
+          to: `/plugins/${pluginId}/homepage`,
+          kind: 'singleType',
+          isDisplayed: true,
+          permissions: [
+            {
+              action: 'plugins::content-manager.explorer.read',
+              subject: 'homepage',
+            },
+          ],
+        },
+      ],
+      models: [
+        {
+          kind: 'collectionType',
+          uid: 'category',
+          info: { label: 'Categories', name: 'category' },
+        },
+        { kind: 'singleType', uid: 'homepage', info: { label: 'Home page', name: 'homepage' } },
+      ],
+      components: [],
+      status: 'resolved',
+    };
+    useModels.mockImplementation(() => contentManagerState);
+    const rootReducer = combineReducers(cmReducers);
+    const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
+    const history = createMemoryHistory();
+    history.push(`/plugins/${pluginId}`);
+
+    render(
+      <Provider store={store}>
+        <Router history={history}>
+          <ContentManagerApp />
+        </Router>
+      </Provider>
+    );
+
+    expect(history.location.pathname).toEqual(`/plugins/${pluginId}/homepage`);
+  });
+
   it('should redirect to 403 page', () => {
     const history = createMemoryHistory();
     const contentManagerState = {
@@ -426,7 +476,7 @@ describe('Content manager | App | main', () => {
     );
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
-    history.push('/plugins/content-manager/collectionType/category');
+    history.push(`/plugins/${pluginId}/collectionType/category`);
 
     render(
       <Provider store={store}>
@@ -456,14 +506,11 @@ describe('Content manager | App | main', () => {
     );
     const rootReducer = combineReducers(cmReducers);
     const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
-    history.push('/plugins/content-manager/collectionType/category');
+    history.push(`/plugins/${pluginId}/collectionType/category`);
 
     render(
       <Provider store={store}>
-        <Router
-          history={history}
-          //   initialEntries={['/plugins/content-manager/collectionType/category']}
-        >
+        <Router history={history}>
           <ContentManagerApp />
         </Router>
       </Provider>
