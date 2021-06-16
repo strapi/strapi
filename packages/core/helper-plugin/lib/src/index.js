@@ -160,6 +160,7 @@ export { default as generateFiltersFromSearch } from './utils/generateFiltersFro
 export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';
 export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
 export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
+export { default as prefixPluginTranslations } from './utils/prefixPluginTranslations';
 
 // SVGS
 export { default as LayoutIcon } from './svgs/Layout';

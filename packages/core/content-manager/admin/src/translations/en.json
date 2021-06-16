@@ -163,7 +163,7 @@
   "permissions.not-allowed.update": "You are not allowed to see this document",
   "plugin.description.long": "Quick way to see, edit and delete the data in your database.",
   "plugin.description.short": "Quick way to see, edit and delete the data in your database.",
-  "plugin.name": "Content manager",
+  "plugin.name": "Content Manager",
   "popUpWarning.bodyMessage.contentType.delete": "Are you sure you want to delete this entry?",
   "popUpWarning.bodyMessage.contentType.delete.all": "Are you sure you want to delete these entries?",
   "popUpWarning.warning.cancelAllSettings": "Are you sure you want to cancel your modifications?",

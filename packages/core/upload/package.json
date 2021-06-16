@@ -32,7 +32,7 @@
     "react": "^16.14.0",
     "react-copy-to-clipboard": "^5.0.3",
     "react-dom": "^16.9.0",
-    "react-intl": "4.5.0",
+    "react-intl": "5.20.2",
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",

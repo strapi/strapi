@@ -6,44 +6,45 @@
  * IntlProvider component and i18n messages (loaded from `app/translations`)
  */
 
-import React from 'react';
+import React, { useEffect, useReducer } from 'react';
 import PropTypes from 'prop-types';
-import { connect } from 'react-redux';
-import { createSelector } from 'reselect';
 import { IntlProvider } from 'react-intl';
-import { defaultsDeep } from 'lodash';
-import { selectLocale } from './selectors';
+import defaultsDeep from 'lodash/defaultsDeep';
+import LocalesProvider from '../LocalesProvider';
+import localStorageKey from './utils/localStorageKey';
+import init from './init';
+import reducer, { initialState } from './reducer';
 
-// eslint-disable-next-line react/prefer-stateless-function
-export class LanguageProvider extends React.Component {
-  render() {
-    const messages = defaultsDeep(this.props.messages[this.props.locale], this.props.messages.en);
+const LanguageProvider = ({ children, localeNames, messages }) => {
+  const [{ locale }, dispatch] = useReducer(reducer, initialState, () => init(localeNames));
 
-    return (
-      <IntlProvider
-        locale={this.props.locale}
-        defaultLocale="en"
-        messages={messages}
-        textComponent="span"
-      >
-        {React.Children.only(this.props.children)}
-      </IntlProvider>
-    );
-  }
-}
+  useEffect(() => {
+    // Set user language in local storage.
+    window.localStorage.setItem(localStorageKey, locale);
+  }, [locale]);
+
+  const changeLocale = locale => {
+    dispatch({
+      type: 'CHANGE_LOCALE',
+      locale,
+    });
+  };
+
+  const appMessages = defaultsDeep(messages[locale], messages.en);
+
+  return (
+    <IntlProvider locale={locale} defaultLocale="en" messages={appMessages} textComponent="span">
+      <LocalesProvider changeLocale={changeLocale} localeNames={localeNames} messages={appMessages}>
+        {children}
+      </LocalesProvider>
+    </IntlProvider>
+  );
+};
 
 LanguageProvider.propTypes = {
   children: PropTypes.element.isRequired,
-  locale: PropTypes.string.isRequired,
+  localeNames: PropTypes.objectOf(PropTypes.string).isRequired,
   messages: PropTypes.object.isRequired,
 };
 
-const mapStateToProps = createSelector(selectLocale(), locale => ({ locale }));
-
-function mapDispatchToProps(dispatch) {
-  return {
-    dispatch,
-  };
-}
-
-export default connect(mapStateToProps, mapDispatchToProps)(LanguageProvider);
+export default LanguageProvider;
