@@ -45,13 +45,12 @@ export default {
       menu: {
         pluginsSectionLinks: [
           {
-            destination: `/plugins/${pluginId}`,
+            to: `/plugins/${pluginId}`,
             icon,
-            label: {
+            intlLabel: {
               id: `${pluginId}.plugin.name`,
               defaultMessage: 'Media Library',
             },
-            name,
             permissions: pluginPermissions.main,
           },
         ],

@@ -33,13 +33,12 @@ export default {
       menu: {
         pluginsSectionLinks: [
           {
-            destination: `/plugins/${pluginId}`,
+            to: `/plugins/${pluginId}`,
             icon,
-            label: {
+            intlLabel: {
               id: `${pluginId}.plugin.name`,
               defaultMessage: 'Documentation',
             },
-            name,
             permissions: pluginPermissions.main,
           },
         ],

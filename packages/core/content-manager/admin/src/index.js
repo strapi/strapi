@@ -36,13 +36,12 @@ export default {
       menu: {
         pluginsSectionLinks: [
           {
-            destination: `/plugins/${pluginId}`,
+            to: `/plugins/${pluginId}`,
             icon: 'book-open',
-            label: {
+            intlLabel: {
               id: `${pluginId}.plugin.name`,
               defaultMessage: 'Content manager',
             },
-            name,
             permissions: pluginPermissions.main,
           },
         ],

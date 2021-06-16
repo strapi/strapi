@@ -32,13 +32,12 @@ export default {
       menu: {
         pluginsSectionLinks: [
           {
-            destination: `/plugins/${pluginId}`,
+            to: `/plugins/${pluginId}`,
             icon,
-            label: {
+            intlLabel: {
               id: `${pluginId}.plugin.name`,
               defaultMessage: 'Content-Types Builder',
             },
-            name,
             permissions: pluginPermissions.main,
           },
         ],
