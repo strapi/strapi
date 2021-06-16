@@ -17,9 +17,9 @@ const localeNames = { en: 'English' };
 
 const store = fixtures.store.store;
 
-const makeApp = (history, plugins) => (
+const makeApp = history => (
   <Provider store={store}>
-    <StrapiAppProvider plugins={plugins}>
+    <StrapiAppProvider menu={[]} plugins={[]}>
       <LanguageProvider messages={messages} localeNames={localeNames}>
         <Notifications>
           <AppInfosContext.Provider
@@ -40,7 +40,7 @@ const makeApp = (history, plugins) => (
 describe('<Admin />', () => {
   it('should not crash', () => {
     const history = createMemoryHistory();
-    const App = makeApp(history, {});
+    const App = makeApp(history);
 
     const { container } = render(App);
 

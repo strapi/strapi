@@ -6,7 +6,7 @@ import getGeneralLinks from './utils/getGeneralLinks';
 import { setSectionLinks, unsetIsLoading } from './actions';
 import selectMenuLinks from './selectors';
 
-const useMenuSections = () => {
+const useMenu = () => {
   const state = useSelector(selectMenuLinks);
   const dispatch = useDispatch();
   const { allPermissions } = useRBACProvider();
@@ -46,4 +46,4 @@ const useMenuSections = () => {
   return state;
 };
 
-export default useMenuSections;
+export default useMenu;

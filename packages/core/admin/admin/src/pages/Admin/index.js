@@ -17,11 +17,8 @@ import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../../components/LeftMenu';
-
-// TODO
-import useMenuSections from '../../components/LeftMenu/useMenuSections';
 import Onboarding from '../../components/Onboarding';
-import { useReleaseNotification } from '../../hooks';
+import { useMenu, useReleaseNotification } from '../../hooks';
 import Logout from './Logout';
 import Wrapper from './Wrapper';
 import Content from './Content';
@@ -72,7 +69,7 @@ const Admin = () => {
   useReleaseNotification();
   useTrackUsage();
   // TODO
-  const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenuSections();
+  const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
 
   const routes = useMemo(() => {
