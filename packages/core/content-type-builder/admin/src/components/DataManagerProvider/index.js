@@ -477,6 +477,8 @@ const DataManagerProvider = ({
 
       await request(requestURL, { method, body }, true);
 
+      unlockAppWithAutoreload();
+
       await updatePermissions();
 
       // Submit ct tracking success
