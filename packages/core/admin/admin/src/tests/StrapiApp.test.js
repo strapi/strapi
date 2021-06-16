@@ -164,7 +164,7 @@ describe('ADMIN | StrapiApp', () => {
       expect(app.settings.foo.links).toEqual(links);
     });
 
-    it('should add a link correctly to the global sectionn', () => {
+    it('should add a link correctly to the global section', () => {
       const app = StrapiApp({ middlewares, reducers, library, locales });
       const link = {
         Component: jest.fn(),
@@ -194,6 +194,46 @@ describe('ADMIN | StrapiApp', () => {
 
       expect(app.settings.global.links).toHaveLength(1);
       expect(app.settings.global.links).toEqual(links);
+    });
+  });
+
+  describe('Menu api', () => {
+    it('the menu should be defined', () => {
+      const app = StrapiApp({ middlewares, reducers, library, locales });
+
+      expect(app.menu).toBeDefined();
+      expect(Array.isArray(app.menu)).toBe(true);
+    });
+
+    it('addMenuLink should add a link to the menu', () => {
+      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const link = {
+        Component: jest.fn(),
+        to: '/plugins/bar',
+        intlLabel: { id: 'bar', defaultMessage: 'bar' },
+        permissions: [],
+        icon: 'book',
+      };
+
+      app.addMenuLink(link);
+
+      expect(app.menu[0]).toBeDefined();
+      expect(app.menu[0]).toEqual(link);
+    });
+
+    it('addCorePluginMenuLink should add a link to the menu', () => {
+      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const link = {
+        to: '/plugins/content-manager',
+        icon: 'book',
+        permissions: [],
+        intlLabel: { id: 'content-manager.plugin.name', defaultMessage: 'Content Manager' },
+      };
+
+      app.addCorePluginMenuLink(link);
+
+      expect(app.menu).toHaveLength(1);
+      expect(app.menu[0]).toEqual(link);
     });
   });
 });
