@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEqual, upperFirst } from 'lodash';
-import { withRouter } from 'react-router-dom';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import { stringify } from 'qs';
+import { useIntl } from 'react-intl';
 import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
   LoadingIndicatorPage,
@@ -16,10 +17,10 @@ import Container from '../Container';
 import SectionTitle from '../SectionTitle';
 import Separator from '../Separator';
 import BackHeader from '../BackHeader';
+import { usePluginsQueryParams } from '../../hooks';
 
 const SettingsViewWrapper = ({
   children,
-  history: { goBack },
   displayedFields,
   inputs,
   initialData,
@@ -34,8 +35,10 @@ const SettingsViewWrapper = ({
 }) => {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
+  const history = useHistory();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const pluginsQueryParams = usePluginsQueryParams();
 
   const attributes = useMemo(() => {
     return get(modifiedData, ['attributes'], {});
@@ -136,6 +139,26 @@ const SettingsViewWrapper = ({
     trackUsage('willSaveContentTypeLayout');
   };
 
+  const goBack = () => {
+    if (isEditSettings) {
+      history.goBack();
+    } else {
+      const {
+        settings: { pageSize, defaultSortBy, defaultSortOrder },
+        kind,
+        uid,
+      } = modifiedData;
+      const _sort = `${defaultSortBy}:${defaultSortOrder}`;
+
+      history.replace(
+        `/plugins/${pluginId}/${kind}/${uid}?${stringify({
+          page: 1,
+          pageSize,
+        })}&_sort=${_sort}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`
+      );
+    }
+  };
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -161,30 +184,26 @@ const SettingsViewWrapper = ({
             >
               <SectionTitle isSettings />
               <div className="row">
-                {inputs.map(input => {
-                  return (
-                    <FormattedMessage key={input.name} id={input.label.id}>
-                      {label => (
-                        <div className={input.customBootstrapClass}>
-                          <FormattedMessage
-                            id={get(input, 'description.id', 'app.utils.defaultMessage')}
-                          >
-                            {description => (
-                              <Input
-                                {...input}
-                                description={description}
-                                label={label === ' ' ? null : label}
-                                onChange={onChange}
-                                options={getSelectOptions(input)}
-                                value={get(modifiedData, input.name, '')}
-                              />
-                            )}
-                          </FormattedMessage>
-                        </div>
-                      )}
-                    </FormattedMessage>
-                  );
-                })}
+                {inputs.map(input => (
+                  <div key={input.name} className={input.customBootstrapClass}>
+                    <Input
+                      {...input}
+                      description={formatMessage({
+                        id: get(input, 'description.id', 'app.utils.defaultMessage'),
+                      })}
+                      label={
+                        input.label
+                          ? formatMessage({
+                              id: input.label.id,
+                            })
+                          : ''
+                      }
+                      onChange={onChange}
+                      options={getSelectOptions(input)}
+                      value={get(modifiedData, input.name, '')}
+                    />
+                  </div>
+                ))}
                 <div className="col-12">
                   <Separator style={{ marginBottom: 20 }} />
                 </div>
@@ -254,9 +273,6 @@ SettingsViewWrapper.defaultProps = {
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
   displayedFields: PropTypes.array,
-  history: PropTypes.shape({
-    goBack: PropTypes.func.isRequired,
-  }).isRequired,
   initialData: PropTypes.object,
   inputs: PropTypes.array,
   isEditSettings: PropTypes.bool,
@@ -280,4 +296,4 @@ SettingsViewWrapper.propTypes = {
   }),
 };
 
-export default withRouter(SettingsViewWrapper);
+export default SettingsViewWrapper;
