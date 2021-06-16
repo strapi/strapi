@@ -149,13 +149,16 @@ const SettingsViewWrapper = ({
         uid,
       } = modifiedData;
       const _sort = `${defaultSortBy}:${defaultSortOrder}`;
-
-      history.replace(
-        `/plugins/${pluginId}/${kind}/${uid}?${stringify({
+      const goBackSearch = `${stringify(
+        {
           page: 1,
           pageSize,
-        })}&_sort=${_sort}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`
-      );
+          _sort,
+        },
+        { encode: false }
+      )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
+
+      history.replace(`/plugins/${pluginId}/${kind}/${uid}?${goBackSearch}`);
     }
   };
 
