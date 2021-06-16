@@ -12,6 +12,9 @@ import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../../components/LeftMenu';
+
+// TODO
+import useMenuSections from '../../components/LeftMenu/useMenuSections';
 import Onboarding from '../../components/Onboarding';
 import { useReleaseNotification } from '../../hooks';
 import Logout from './Logout';
@@ -64,10 +67,18 @@ const Admin = () => {
   // Show a notification when the current version of Strapi is not the latest one
   useReleaseNotification();
   useTrackUsage();
+  const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenuSections();
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <Wrapper>
-      <LeftMenu />
+      <LeftMenu
+        generalSectionLinks={generalSectionLinks}
+        pluginsSectionLinks={pluginsSectionLinks}
+      />
       <NavTopRightWrapper>
         {/* Injection zone not ready yet */}
         <Logout />

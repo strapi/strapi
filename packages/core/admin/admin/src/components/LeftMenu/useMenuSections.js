@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useRBACProvider } from '@strapi/helper-plugin';
+import { useRBACProvider, useAppInfos, useStrapiApp } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import getPluginSectionLinks from './utils/getPluginSectionLinks';
 import getGeneralLinks from './utils/getGeneralLinks';
@@ -7,10 +7,12 @@ import { setSectionLinks, unsetIsLoading } from './actions';
 import toPluginLinks from './utils/toPluginLinks';
 import selectMenuLinks from './selectors';
 
-const useMenuSections = (plugins, shouldUpdateStrapi) => {
+const useMenuSections = () => {
   const state = useSelector(selectMenuLinks);
   const dispatch = useDispatch();
   const { allPermissions } = useRBACProvider();
+  const { shouldUpdateStrapi } = useAppInfos();
+  const { plugins } = useStrapiApp();
 
   // We are using a ref because we don't want our effect to have this in its dependencies array
   const generalSectionLinksRef = useRef(state.generalSectionLinks);

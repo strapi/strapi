@@ -44,6 +44,7 @@ class StrapiApp {
     this.reducers = reducers;
     this.translations = translations;
     this.hooksDict = {};
+    this.menu = [];
     this.settings = {
       global: {
         id: 'global',
@@ -70,6 +71,24 @@ class StrapiApp {
     } else {
       this.library.fields.add(fields);
     }
+  };
+
+  addMenuLink = link => {
+    const stringifiedLink = JSON.stringify(link);
+
+    invariant(link.to, `link.to should be defined for ${stringifiedLink}`);
+    invariant(
+      typeof link.to === 'string',
+      `Expected link.to to be a string instead received ${typeof link.to}`
+    );
+    invariant(
+      link.intlLabel?.id && link.intlLabel?.defaultMessage,
+      `link.intlLabel.id & link.intlLabel.defaultMessage for ${stringifiedLink}`
+    );
+    invariant(
+      link.Component && typeof link.Component === 'function',
+      `link.Component should be a valid React Component`
+    );
   };
 
   addMiddlewares = middlewares => {
@@ -117,6 +136,7 @@ class StrapiApp {
       this.appPlugins[plugin].register({
         addComponents: this.addComponents,
         addFields: this.addFields,
+        addMenuLink: this.addMenuLink,
         addMiddlewares: this.addMiddlewares,
         addReducers: this.addReducers,
         createSettingSection: this.createSettingSection,

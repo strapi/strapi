@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const Title = styled.div`
+const SectionTitle = styled.div`
   display: flex;
   justify-content: space-between;
   padding-left: 2rem;
@@ -15,7 +15,7 @@ const Title = styled.div`
   max-height: 26px;
 `;
 
-Title.defaultProps = {
+SectionTitle.defaultProps = {
   theme: {
     main: {
       colors: {
@@ -27,4 +27,4 @@ Title.defaultProps = {
   },
 };
 
-export default Title;
+export default SectionTitle;
