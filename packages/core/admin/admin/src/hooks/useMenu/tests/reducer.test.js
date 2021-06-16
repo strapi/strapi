@@ -1,5 +1,4 @@
 import reducer, { initialState } from '../reducer';
-import { SET_SECTION_LINKS } from '../constants';
 
 describe('ADMIN | LeftMenu | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -16,10 +15,10 @@ describe('ADMIN | LeftMenu | reducer', () => {
     it('sets the generalSectionLinks and the pluginsSectionLinks with the action', () => {
       const state = { ...initialState };
       const action = {
-        type: SET_SECTION_LINKS,
+        type: 'SET_SECTION_LINKS',
         data: {
-          authorizedGeneralLinks: ['authorizd', 'links'],
-          authorizedPluginLinks: ['authorizd', 'plugin-links'],
+          authorizedGeneralSectionLinks: ['authorizd', 'links'],
+          authorizedPluginSectionLinks: ['authorizd', 'plugin-links'],
         },
       };
 

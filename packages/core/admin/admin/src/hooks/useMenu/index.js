@@ -1,14 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useReducer, useRef } from 'react';
 import { useRBACProvider, useAppInfos, useStrapiApp } from '@strapi/helper-plugin';
-import { useSelector, useDispatch } from 'react-redux';
 import getPluginSectionLinks from './utils/getPluginSectionLinks';
 import getGeneralLinks from './utils/getGeneralLinks';
-import { setSectionLinks, unsetIsLoading } from './actions';
-import selectMenuLinks from './selectors';
+import reducer, { initialState } from './reducer';
 
 const useMenu = () => {
-  const state = useSelector(selectMenuLinks);
-  const dispatch = useDispatch();
+  const [state, dispatch] = useReducer(reducer, initialState);
   const { allPermissions } = useRBACProvider();
   const { shouldUpdateStrapi } = useAppInfos();
   const { menu } = useStrapiApp();
@@ -33,8 +30,14 @@ const useMenu = () => {
       shouldUpdateStrapiRef.current
     );
 
-    dispatch(setSectionLinks(authorizedGeneralSectionLinks, authorizedPluginSectionLinks));
-    dispatch(unsetIsLoading());
+    dispatch({
+      type: 'SET_SECTION_LINKS',
+      data: {
+        authorizedGeneralSectionLinks,
+        authorizedPluginSectionLinks,
+      },
+    });
+    dispatch({ type: 'UNSET_IS_LOADING' });
   };
 
   const resolvePermissionsRef = useRef(resolvePermissions);

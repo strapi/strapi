@@ -1,7 +1,6 @@
 /* eslint-disable consistent-return */
 import produce from 'immer';
 import adminPermissions from '../../permissions';
-import { SET_SECTION_LINKS, UNSET_IS_LOADING } from './constants';
 
 const initialState = {
   generalSectionLinks: [
@@ -43,13 +42,13 @@ const initialState = {
 const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
-      case SET_SECTION_LINKS: {
-        const { authorizedGeneralLinks, authorizedPluginLinks } = action.data;
-        draftState.generalSectionLinks = authorizedGeneralLinks;
-        draftState.pluginsSectionLinks = authorizedPluginLinks;
+      case 'SET_SECTION_LINKS': {
+        const { authorizedGeneralSectionLinks, authorizedPluginSectionLinks } = action.data;
+        draftState.generalSectionLinks = authorizedGeneralSectionLinks;
+        draftState.pluginsSectionLinks = authorizedPluginSectionLinks;
         break;
       }
-      case UNSET_IS_LOADING: {
+      case 'UNSET_IS_LOADING': {
         draftState.isLoading = false;
         break;
       }
