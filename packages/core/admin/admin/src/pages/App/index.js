@@ -14,12 +14,12 @@ import {
   TrackingContext,
 } from '@strapi/helper-plugin';
 import PrivateRoute from '../../components/PrivateRoute';
+import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import { getUID } from './utils';
 import { Content, Wrapper } from './components';
 import routes from './utils/routes';
-import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
 
 const AuthenticatedApp = lazy(() =>
   import(/* webpackChunkName: "Admin-authenticatedApp" */ '../../components/AuthenticatedApp')

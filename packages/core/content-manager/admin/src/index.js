@@ -18,6 +18,15 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addReducers(reducers);
+    app.addCorePluginMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon: 'book-open',
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Content manager',
+      },
+      permissions: pluginPermissions.main,
+    });
 
     app.registerPlugin({
       description: pluginDescription,
@@ -31,20 +40,6 @@ export default {
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,
-      menu: {
-        pluginsSectionLinks: [
-          {
-            destination: `/plugins/${pluginId}`,
-            icon: 'book-open',
-            label: {
-              id: `${pluginId}.plugin.name`,
-              defaultMessage: 'Content manager',
-            },
-            name,
-            permissions: pluginPermissions.main,
-          },
-        ],
-      },
     });
   },
   boot() {},

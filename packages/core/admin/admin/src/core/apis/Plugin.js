@@ -7,9 +7,9 @@ class Plugin {
     this.injectionZones = pluginConf.injectionZones || {};
     this.isReady = pluginConf.isReady !== undefined ? pluginConf.isReady : true;
     this.isRequired = pluginConf.isRequired;
-    this.mainComponent = pluginConf.mainComponent || null;
+    // this.mainComponent = pluginConf.mainComponent || null;
     // TODO
-    this.menu = pluginConf.menu || null;
+    // this.menu = pluginConf.menu || null;
     this.name = pluginConf.name;
     this.pluginId = pluginConf.id;
     this.pluginLogo = pluginConf.pluginLogo;

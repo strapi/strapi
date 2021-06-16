@@ -1,76 +1,82 @@
 import React from 'react';
+import { ThemeProvider } from 'styled-components';
 import { Router } from 'react-router-dom';
-import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
-import { render } from '@testing-library/react';
-import { Provider } from 'react-redux';
-// eslint-disable-next-line import/no-unresolved
+import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
-import { fixtures } from '../../../../../../../admin-test-utils';
-import en from '../../../translations/en.json';
-import LanguageProvider from '../../../components/LanguageProvider';
-import Notifications from '../../../components/Notifications';
-import RBACProvider from '../../../components/RBACProvider';
+import { useStrapiApp } from '@strapi/helper-plugin';
+import themes from '../../../themes';
+import { useMenu } from '../../../hooks';
 import Admin from '../index';
 
-const messages = { en };
-const localeNames = { en: 'English' };
+jest.mock('@strapi/helper-plugin', () => ({
+  LoadingIndicatorPage: () => <div>Loading</div>,
+  useStrapiApp: jest.fn(() => ({ menu: [] })),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  NotFound: () => <div>not found</div>,
+  CheckPagePermissions: ({ children }) => children,
+}));
 
-const store = fixtures.store.store;
+jest.mock('../../../hooks', () => ({
+  useMenu: jest.fn(() => ({ isLoading: true, generalSectionLinks: [], pluginsSectionLinks: [] })),
+  useTrackUsage: jest.fn(),
+  useReleaseNotification: jest.fn(),
+}));
 
-const makeApp = (history, plugins) => (
-  <Provider store={store}>
-    <StrapiAppProvider plugins={plugins}>
-      <LanguageProvider messages={messages} localeNames={localeNames}>
-        <Notifications>
-          <AppInfosContext.Provider
-            value={{ latestStrapiReleaseTag: 'v4', shouldUpdateStrapi: false }}
-          >
-            <RBACProvider permissions={[]} refetchPermissions={jest.fn()}>
-              <Router history={history}>
-                <Admin />
-              </Router>
-            </RBACProvider>
-          </AppInfosContext.Provider>
-        </Notifications>
-      </LanguageProvider>
-    </StrapiAppProvider>
-  </Provider>
+jest.mock('../../../components/LeftMenu', () => () => <div>menu</div>);
+
+jest.mock('../Logout', () => () => <div>Logout</div>);
+jest.mock('../../HomePage', () => () => <div>HomePage</div>);
+
+const makeApp = history => (
+  <ThemeProvider theme={themes}>
+    <Router history={history}>
+      <Admin />
+    </Router>
+  </ThemeProvider>
 );
 
 describe('<Admin />', () => {
   it('should not crash', () => {
     const history = createMemoryHistory();
-    const App = makeApp(history, {});
+    const App = makeApp(history);
 
     const { container } = render(App);
 
+    expect(screen.getByText('Loading')).toBeInTheDocument();
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        position: fixed;
-        top: 72px;
-        left: 0;
-        right: 0;
-        z-index: 1100;
-        list-style: none;
-        width: 100%;
-        overflow-y: hidden;
-        pointer-events: none;
-      }
-
-      <div
-        class="c0"
-      />
+      <div>
+        Loading
+      </div>
     `);
+  });
+
+  it('should create the plugin routes correctly', async () => {
+    useStrapiApp.mockImplementation(() => ({
+      menu: [
+        {
+          to: '/plugins/content-manager',
+        },
+        {
+          to: '/plugins/documentation',
+          Component: () => <div>DOCUMENTATION PLUGIN</div>,
+        },
+      ],
+    }));
+
+    useMenu.mockImplementation(() => ({
+      isLoading: false,
+      generalSectionLinks: [],
+      pluginsSectionLinks: [],
+    }));
+    const history = createMemoryHistory();
+    const App = makeApp(history);
+
+    render(App);
+
+    await waitFor(() => expect(screen.getByText('HomePage')).toBeInTheDocument());
+
+    history.push('/plugins/documentation');
+
+    await waitFor(() => expect(screen.getByText('DOCUMENTATION PLUGIN')).toBeInTheDocument());
   });
 });

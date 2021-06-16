@@ -1,5 +1,5 @@
 import flatMap from 'lodash/flatMap';
-import createRoute from './createRoute';
+import { createRoute } from '../../../utils';
 
 const createSectionsRoutes = settings => {
   const allLinks = flatMap(settings, section => section.links);

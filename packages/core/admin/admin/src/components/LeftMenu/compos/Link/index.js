@@ -6,36 +6,35 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { FormattedMessage } from 'react-intl';
+import LinkLabel from './LinkLabel';
+import Link from './Link';
+import LeftMenuIcon from './LeftMenuIcon';
+import NotificationCount from './NotificationCount';
 
-import LeftMenuLinkContent from './LeftMenuLinkContent';
-
-const LeftMenuLink = ({ destination, iconName, label, location, notificationsCount, search }) => {
+const LeftMenuLink = ({ to, icon, intlLabel, notificationsCount }) => {
   return (
-    <LeftMenuLinkContent
-      destination={destination}
-      iconName={iconName}
-      label={label}
-      location={location}
-      notificationsCount={notificationsCount}
-      search={search}
-    />
+    <Link to={to}>
+      <LeftMenuIcon icon={icon} />
+      {/* TODO change with new DS */}
+      <FormattedMessage {...intlLabel}>
+        {message => <LinkLabel>{message}</LinkLabel>}
+      </FormattedMessage>
+      {notificationsCount > 0 && <NotificationCount count={notificationsCount} />}
+    </Link>
   );
 };
 
 LeftMenuLink.propTypes = {
-  destination: PropTypes.string.isRequired,
-  iconName: PropTypes.string,
-  label: PropTypes.oneOfType([PropTypes.object, PropTypes.string]).isRequired,
-  location: PropTypes.shape({
-    pathname: PropTypes.string,
-  }).isRequired,
-  notificationsCount: PropTypes.number.isRequired,
-  search: PropTypes.string,
+  to: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+  intlLabel: PropTypes.object.isRequired,
+  notificationsCount: PropTypes.number,
 };
 
 LeftMenuLink.defaultProps = {
-  iconName: 'circle',
-  search: null,
+  icon: 'circle',
+  notificationsCount: 0,
 };
 
 export default LeftMenuLink;

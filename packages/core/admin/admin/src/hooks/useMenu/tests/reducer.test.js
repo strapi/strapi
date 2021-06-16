@@ -1,5 +1,4 @@
 import reducer, { initialState } from '../reducer';
-import { SET_SECTION_LINKS, TOGGLE_IS_LOADING } from '../constants';
 
 describe('ADMIN | LeftMenu | reducer', () => {
   describe('DEFAULT_ACTION', () => {
@@ -12,32 +11,14 @@ describe('ADMIN | LeftMenu | reducer', () => {
     });
   });
 
-  describe('TOGGLE_IS_LOADING', () => {
-    it('should change the isLoading property correctly', () => {
-      const state = {
-        isLoading: true,
-      };
-
-      const expected = {
-        isLoading: false,
-      };
-
-      const action = {
-        type: TOGGLE_IS_LOADING,
-      };
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe('SET_SECTION_LINKS', () => {
     it('sets the generalSectionLinks and the pluginsSectionLinks with the action', () => {
       const state = { ...initialState };
       const action = {
-        type: SET_SECTION_LINKS,
+        type: 'SET_SECTION_LINKS',
         data: {
-          authorizedGeneralLinks: ['authorizd', 'links'],
-          authorizedPluginLinks: ['authorizd', 'plugin-links'],
+          authorizedGeneralSectionLinks: ['authorizd', 'links'],
+          authorizedPluginSectionLinks: ['authorizd', 'plugin-links'],
         },
       };
 

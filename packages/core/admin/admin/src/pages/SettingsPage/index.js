@@ -22,17 +22,11 @@ import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
 import SettingsSearchHeaderProvider from '../../components/SettingsHeaderSearchContextProvider';
 import { useSettingsMenu } from '../../hooks';
-
+import { createRoute, makeUniqueRoutes } from '../../utils';
 import ApplicationInfosPage from '../ApplicationInfosPage';
 import { ApplicationDetailLink, MenuWrapper, StyledLeftMenu, Wrapper } from './components';
 
-import {
-  createRoute,
-  createSectionsRoutes,
-  makeUniqueRoutes,
-  getSectionsToDisplay,
-  routes,
-} from './utils';
+import { createSectionsRoutes, getSectionsToDisplay, routes } from './utils';
 
 function SettingsPage() {
   const { settingId } = useParams();
