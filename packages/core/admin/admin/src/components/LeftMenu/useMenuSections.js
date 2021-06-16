@@ -46,6 +46,8 @@ const useMenuSections = () => {
     resolvePermissionsRef.current(allPermissions);
   }, [allPermissions, dispatch]);
 
+  // TODO remove the isDisplayed key from the links it's not useful anymore
+
   return state;
 };
 

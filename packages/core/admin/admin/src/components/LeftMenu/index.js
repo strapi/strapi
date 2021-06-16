@@ -2,8 +2,7 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { useLocation } from 'react-router-dom';
-import SectionTitle from './compos/SectionTitle';
-import { Footer, Header, LinksContainer, LinksSection } from './compos';
+import { Footer, Header, LinksContainer, LinksSection, SectionTitle } from './compos';
 import Wrapper from './Wrapper';
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {

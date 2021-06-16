@@ -1,6 +1,7 @@
+import { NavLink } from 'react-router-dom';
 import styled from 'styled-components';
 
-const A = styled.a`
+const Link = styled(NavLink)`
   display: flex;
   position: relative;
   padding-top: 1rem;
@@ -30,10 +31,10 @@ const A = styled.a`
     color: ${props => props.theme.main.colors.leftMenu['link-color']};
   }
 
-  &.linkActive {
+  &.active {
     color: white !important;
     border-left: 0.3rem solid ${props => props.theme.main.colors.strapi.blue};
   }
 `;
 
-export default A;
+export default Link;

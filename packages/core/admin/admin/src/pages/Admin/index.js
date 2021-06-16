@@ -67,6 +67,7 @@ const Admin = () => {
   // Show a notification when the current version of Strapi is not the latest one
   useReleaseNotification();
   useTrackUsage();
+  // TODO
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenuSections();
 
   if (isLoading) {
