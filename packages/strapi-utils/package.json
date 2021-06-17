@@ -19,7 +19,7 @@
     "lodash": "4.17.21",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
-    "yup": "^0.28.2"
+    "yup": "^0.32.9"
   },
   "author": {
     "email": "hi@strapi.io",
