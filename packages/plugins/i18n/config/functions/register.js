@@ -40,7 +40,8 @@ module.exports = () => {
     }
   });
 
-  strapi.db.migrations.register(fieldMigration);
-  strapi.db.migrations.register(enableContentTypeMigration);
-  strapi.db.migrations.register(disableContentTypeMigration);
+  // FIXME: to implement
+  // strapi.db.migrations.register(fieldMigration);
+  // strapi.db.migrations.register(enableContentTypeMigration);
+  // strapi.db.migrations.register(disableContentTypeMigration);
 };

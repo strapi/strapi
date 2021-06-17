@@ -296,6 +296,7 @@ class Strapi {
   }
 
   stopWithError(err, customMessage) {
+    console.log(err);
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
       this.log.error(customMessage);
@@ -463,7 +464,7 @@ class Strapi {
 
         return execLifecycle(pluginFunc).catch(err => {
           strapi.log.error(`${lifecycleName} function in plugin "${plugin}" failed`);
-          strapi.log.error(err);
+          console.error(err);
           strapi.stop();
         });
       })
@@ -476,7 +477,7 @@ class Strapi {
     const adminFunc = _.get(this.admin.config, configPath);
     return execLifecycle(adminFunc).catch(err => {
       strapi.log.error(`${lifecycleName} function in admin failed`);
-      strapi.log.error(err);
+      console.error(err);
       strapi.stop();
     });
   }

@@ -26,6 +26,9 @@ const transformContentTypes = contentTypes => {
   return contentTypes.map(contentType => {
     return {
       ...contentType,
+      // reuse new model def
+      singularName: contentType.modelName,
+      tableName: contentType.collectionName,
       attributes: {
         created_at: {
           type: 'datetime',

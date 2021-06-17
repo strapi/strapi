@@ -158,6 +158,11 @@ const createMetadata = (models = []) => {
 
   // init pass
   for (const model of models) {
+
+    if (!model.tableName) {
+      console.log(model)
+    }
+
     metadata.add({
       singularName: model.singularName,
       uid: model.uid,

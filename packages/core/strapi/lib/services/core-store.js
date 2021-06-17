@@ -2,7 +2,7 @@
 
 const coreStoreModel = {
   uid: 'core-store',
-  tableName: 'strapi_core_store_settings',
+  collectionName: 'strapi_core_store_settings',
   attributes: {
     key: {
       type: 'string',

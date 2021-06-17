@@ -163,9 +163,12 @@ const createContentType = (model, { modelName }, { apiName, pluginName } = {}) =
     modelType: 'contentType',
     modelName,
   });
+
   Object.defineProperty(model, 'privateAttributes', {
     get() {
-      return strapi.getModel(model.uid).privateAttributes;
+      // FIXME: to fix
+      // return strapi.getModel(model.uid).privateAttributes;
+      return []
     },
   });
 };

@@ -5,7 +5,7 @@
 
 const webhookModel = {
   uid: 'webhook',
-  tableName: 'strapi_webhooks',
+  collectionName: 'strapi_webhooks',
   attributes: {
     name: {
       type: 'string',
@@ -51,27 +51,35 @@ const createWebhookStore = ({ db }) => {
 
   return {
     async findWebhooks() {
-      const results = await webhookQueries.find();
+      const results = await webhookQueries.findMany();
 
       return results.map(fromDBObject);
     },
 
     async findWebhook(id) {
-      const result = await webhookQueries.findOne({ id });
+      const result = await webhookQueries.findOne({ where: { id } });
       return result ? fromDBObject(result) : null;
     },
 
     createWebhook(data) {
-      return webhookQueries.create(toDBObject({ ...data, isEnabled: true })).then(fromDBObject);
+      return webhookQueries
+        .create({
+          data: toDBObject({ ...data, isEnabled: true }),
+        })
+        .then(fromDBObject);
     },
 
     async updateWebhook(id, data) {
-      const webhook = await webhookQueries.update({ id }, toDBObject(data));
+      const webhook = await webhookQueries.update({
+        where: { id },
+        data: toDBObject(data),
+      });
+
       return webhook ? fromDBObject(webhook) : null;
     },
 
     async deleteWebhook(id) {
-      const webhook = await webhookQueries.delete({ id });
+      const webhook = await webhookQueries.delete({ where: { id } });
       return webhook ? fromDBObject(webhook) : null;
     },
   };

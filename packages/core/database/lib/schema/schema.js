@@ -115,7 +115,12 @@ const getColumnType = attribute => {
       return { type: 'json' };
     }
     case 'enumeration': {
-      return { type: '' };
+      return {
+        type: 'enum',
+        args: [
+          attribute.enum /*,{ useNative: true, existingType: true, enumName: 'foo_type', schemaName: 'public' }*/,
+        ],
+      };
     }
 
     case 'integer': {
