@@ -300,6 +300,7 @@ class Strapi {
     if (customMessage) {
       this.log.error(customMessage);
     }
+
     this.log.error(err);
     return this.stop();
   }
@@ -348,7 +349,8 @@ class Strapi {
 
     // Init core store
 
-    const models = [
+    const contentTypes = [
+      // todo: move corestore and webhook to real models instead of content types
       coreStoreModel,
       webhookModel,
       ...Object.values(strapi.models),
@@ -360,14 +362,13 @@ class Strapi {
 
     this.db = new Database({
       ...this.config.get('database'),
-      models,
+      models: Database.transformContentTypes(contentTypes),
     });
-    // this.db = createDatabaseManager(this);
 
     await this.db.schema.sync();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
-    await this.db.initialize();
+    // await this.db.initialize();
 
     this.store = createCoreStore({
       environment: this.config.environment,

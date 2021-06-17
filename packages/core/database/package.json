@@ -28,6 +28,11 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
+    "debug": "4.3.1",
+    "knex": "0.95.6",
     "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "sqlite3": "5.0.2"
   }
 }
