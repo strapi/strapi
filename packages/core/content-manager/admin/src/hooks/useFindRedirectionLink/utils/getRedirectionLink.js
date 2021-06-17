@@ -23,23 +23,23 @@ const mergeParams = (initialParams, params) => {
   }, {});
 };
 
-const getDeleteRedirectionLink = (links, slug, rawQuery) => {
-  const matchingLink = links.find(({ destination }) => destination.includes(slug));
+const getRedirectionLink = (links, slug, rawQuery) => {
+  const matchingLink = links.find(({ to }) => to.includes(slug));
 
   if (!matchingLink) {
     return '/';
   }
 
-  const { destination, search } = matchingLink;
+  const { to, search } = matchingLink;
   const searchQueryParams = parse(search);
   const currentQueryParams = parse(rawQuery.substring(1));
 
   const mergedParams = mergeParams(searchQueryParams, currentQueryParams);
 
-  const link = `${destination}?${stringify(mergedParams, { encode: false })}`;
+  const link = `${to}?${stringify(mergedParams, { encode: false })}`;
 
   return link;
 };
 
-export default getDeleteRedirectionLink;
+export default getRedirectionLink;
 export { mergeParams };

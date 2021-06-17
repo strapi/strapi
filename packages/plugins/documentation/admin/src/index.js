@@ -17,31 +17,25 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
+    app.addMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Documentation',
+      },
+      permissions: pluginPermissions.main,
+      Component: App,
+    });
+
     app.registerPlugin({
       description: pluginDescription,
       icon,
       id: pluginId,
       isReady: true,
       isRequired: pluginPkg.strapi.required || false,
-      // TODO
-      mainComponent: App,
       name,
       pluginLogo,
-      // TODO
-      menu: {
-        pluginsSectionLinks: [
-          {
-            destination: `/plugins/${pluginId}`,
-            icon,
-            label: {
-              id: `${pluginId}.plugin.name`,
-              defaultMessage: 'Documentation',
-            },
-            name,
-            permissions: pluginPermissions.main,
-          },
-        ],
-      },
     });
   },
   boot() {},

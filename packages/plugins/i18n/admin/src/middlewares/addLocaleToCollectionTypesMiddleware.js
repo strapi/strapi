@@ -1,7 +1,7 @@
 import addLocaleToLinksSearch from './utils/addLocaleToLinksSearch';
 
 const addLocaleToCollectionTypesMiddleware = () => ({ getState }) => next => action => {
-  if (action.type !== 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS') {
+  if (action.type !== 'ContentManager/App/SET_CONTENT_TYPE_LINKS') {
     return next(action);
   }
 

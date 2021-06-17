@@ -1,7 +1,7 @@
-import React, { memo, useMemo, useReducer, useState } from 'react';
+import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
-import { request, useAppMenu, useNotification, useTracking } from '@strapi/helper-plugin';
+import { request, useNotification, useTracking } from '@strapi/helper-plugin';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
@@ -12,6 +12,7 @@ import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
 import LayoutDndProvider from '../../components/LayoutDndProvider';
+import ModelsContext from '../../contexts/ModelsContext';
 import Label from './Label';
 import MenuDropdown from './MenuDropdown';
 import DropdownButton from './DropdownButton';
@@ -23,6 +24,7 @@ import forms from './forms.json';
 
 const ListSettingsView = ({ layout, slug, updateLayout }) => {
   const toggleNotification = useNotification();
+  const { refetchData } = useContext(ModelsContext);
   const [reducerState, dispatch] = useReducer(reducer, initialState, () =>
     init(initialState, layout)
   );
@@ -30,8 +32,6 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
   const [isModalFormOpen, setIsModalFormOpen] = useState(false);
   const [isDraggingSibling, setIsDraggingSibling] = useState(false);
   const { formatMessage } = useIntl();
-  // FIXME when we create the CM menu remove the useAppMenu completely
-  const updateMenu = useAppMenu();
   const { trackUsage } = useTracking();
   const toggleModalForm = () => setIsModalFormOpen(prevState => !prevState);
   const { labelForm, labelToEdit, initialData, modifiedData } = reducerState;
@@ -184,7 +184,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
           });
         }}
         onConfirmSubmit={handleConfirm}
-        onModalConfirmClosed={updateMenu}
+        onModalConfirmClosed={refetchData}
         name={getName}
       >
         <DragWrapper>

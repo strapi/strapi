@@ -9,6 +9,7 @@ import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import reducers from './reducers';
+import pluginPermissions from './permissions';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -17,6 +18,15 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addReducers(reducers);
+    app.addCorePluginMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon: 'book-open',
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Content manager',
+      },
+      permissions: pluginPermissions.main,
+    });
 
     app.registerPlugin({
       description: pluginDescription,

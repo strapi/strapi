@@ -11,10 +11,23 @@ const makeSelectApp = () =>
     return substate;
   });
 
+const makeSelectModels = () => createSelector(selectAppDomain(), state => state.models);
+
+const makeSelectModelLinks = () =>
+  createSelector(selectAppDomain(), state => ({
+    collectionTypeLinks: state.collectionTypeLinks,
+    singleTypeLinks: state.singleTypeLinks,
+  }));
+
 const makeSelectModelAndComponentSchemas = () =>
   createSelector(selectAppDomain(), ({ components, models }) => ({
     schemas: [...components, ...models],
   }));
 
 export default makeSelectApp;
-export { makeSelectModelAndComponentSchemas, selectAppDomain };
+export {
+  makeSelectModelAndComponentSchemas,
+  makeSelectModelLinks,
+  makeSelectModels,
+  selectAppDomain,
+};

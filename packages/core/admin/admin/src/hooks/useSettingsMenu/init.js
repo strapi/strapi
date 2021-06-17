@@ -1,45 +1,43 @@
-import { retrieveGlobalLinks, retrievePluginsMenu, sortLinks } from '../../utils';
+import omit from 'lodash/omit';
+import sortLinks from './utils/sortLinks';
 import adminPermissions from '../../permissions';
 import formatLinks from './utils/formatLinks';
 import globalLinks from './utils/globalLinks';
 
-const init = (initialState, plugins) => {
+const init = (initialState, settings) => {
   // Retrieve the links that will be injected into the global section
-  const pluginsGlobalLinks = retrieveGlobalLinks(plugins);
+  const pluginsGlobalLinks = settings.global.links;
   // Sort the links by name
   const sortedGlobalLinks = sortLinks([...pluginsGlobalLinks, ...globalLinks]);
-  // Create the plugins settings sections
-  // Note it is currently not possible to add a link into a plugin section
-  const pluginsMenuSections = retrievePluginsMenu(plugins);
+  const otherSections = Object.values(omit(settings, 'global'));
 
   const menu = [
     {
-      id: 'global',
-      title: { id: 'Settings.global' },
+      ...settings.global,
       links: sortedGlobalLinks,
     },
     {
       id: 'permissions',
-      title: 'Settings.permissions',
+      intlLabel: { id: 'Settings.permissions', defaultMessage: 'Administration Panel' },
       links: [
         {
-          title: { id: 'Settings.permissions.menu.link.roles.label' },
+          intlLabel: { id: 'Settings.permissions.menu.link.roles.label' },
           to: '/settings/roles',
-          name: 'roles',
+          id: 'roles',
           isDisplayed: false,
           permissions: adminPermissions.settings.roles.main,
         },
         {
-          title: { id: 'Settings.permissions.menu.link.users.label' },
+          intlLabel: { id: 'Settings.permissions.menu.link.users.label' },
           // Init the search params directly
           to: '/settings/users?pageSize=10&page=1&_sort=firstname%3AASC',
-          name: 'users',
+          id: 'users',
           isDisplayed: false,
           permissions: adminPermissions.settings.users.main,
         },
       ],
     },
-    ...pluginsMenuSections,
+    ...otherSections,
   ];
 
   return { ...initialState, menu: formatLinks(menu) };

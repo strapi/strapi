@@ -25,6 +25,17 @@ export default {
   register(app) {
     // TODO update doc and guides
     app.addComponents({ name: 'media-library', Component: InputModalStepper });
+
+    app.addCorePluginMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Media Library',
+      },
+      permissions: pluginPermissions.main,
+    });
+
     // TODO update guide
     app.addFields({ type: 'media', Component: InputMedia });
 
@@ -40,44 +51,24 @@ export default {
       isRequired: pluginPkg.strapi.required || false,
       name,
       pluginLogo,
-
-      settings: {
-        global: {
-          links: [
-            {
-              title: {
-                id: getTrad('plugin.name'),
-                defaultMessage: 'Media Library',
-              },
-              name: 'media-library',
-              to: '/settings/media-library',
-              Component: () => (
-                <CheckPagePermissions permissions={pluginPermissions.settings}>
-                  <SettingsPage />
-                </CheckPagePermissions>
-              ),
-              permissions: pluginPermissions.settings,
-            },
-          ],
-        },
-      },
-      menu: {
-        pluginsSectionLinks: [
-          {
-            destination: `/plugins/${pluginId}`,
-            icon,
-            label: {
-              id: `${pluginId}.plugin.name`,
-              defaultMessage: 'Media Library',
-            },
-            name,
-            permissions: pluginPermissions.main,
-          },
-        ],
-      },
     });
   },
-  boot() {},
+  boot(app) {
+    app.addSettingsLink('global', {
+      id: 'media-library-settings',
+      intlLabel: {
+        id: getTrad('plugin.name'),
+        defaultMessage: 'Media Library',
+      },
+      to: '/settings/media-library',
+      Component: () => (
+        <CheckPagePermissions permissions={pluginPermissions.settings}>
+          <SettingsPage />
+        </CheckPagePermissions>
+      ),
+      permissions: pluginPermissions.settings,
+    });
+  },
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {

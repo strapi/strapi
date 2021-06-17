@@ -4,24 +4,25 @@
  *
  */
 
-import React, { Suspense, useEffect, useState, lazy } from 'react';
+import React, { Suspense, useEffect, useMemo, lazy } from 'react';
 import { Switch, Route } from 'react-router-dom';
 // Components from @strapi/helper-plugin
 import {
   CheckPagePermissions,
-  AppMenuContext,
   useTracking,
   LoadingIndicatorPage,
+  useStrapiApp,
 } from '@strapi/helper-plugin';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import LeftMenu from '../../components/LeftMenu';
 import Onboarding from '../../components/Onboarding';
-import { useReleaseNotification } from '../../hooks';
+import { useMenu, useReleaseNotification } from '../../hooks';
 import Logout from './Logout';
 import Wrapper from './Wrapper';
 import Content from './Content';
+import { createRoute } from '../../utils';
 
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
@@ -31,9 +32,7 @@ const MarketplacePage = lazy(() =>
   import(/* webpackChunkName: "Admin_marketplace" */ '../MarketplacePage')
 );
 const NotFoundPage = lazy(() => import('../NotFoundPage'));
-const PluginDispatcher = lazy(() =>
-  import(/* webpackChunkName: "Admin_pluginDispatcher" */ '../PluginDispatcher')
-);
+
 const ProfilePage = lazy(() =>
   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
 );
@@ -69,54 +68,61 @@ const Admin = () => {
   // Show a notification when the current version of Strapi is not the latest one
   useReleaseNotification();
   useTrackUsage();
-  // FIXME:
-  // This is temporary until we refactor the menu
-  const [{ updateMenu }, setUpdateMenuFn] = useState({ updateMenu: null });
+  // TODO
+  const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
+  const { menu } = useStrapiApp();
 
-  const setUpdateMenu = updateMenuFn => {
-    setUpdateMenuFn({ updateMenu: updateMenuFn });
-  };
+  const routes = useMemo(() => {
+    return menu
+      .filter(link => link.Component)
+      .map(({ to, Component, exact }) => createRoute(Component, to, exact));
+  }, [menu]);
+
+  if (isLoading) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
-    <AppMenuContext.Provider value={updateMenu}>
-      <Wrapper>
-        <LeftMenu setUpdateMenu={setUpdateMenu} />
-        <NavTopRightWrapper>
-          {/* Injection zone not ready yet */}
-          <Logout />
-        </NavTopRightWrapper>
-        <div className="adminPageRightWrapper">
-          <Header />
-          <Content>
-            <Suspense fallback={<LoadingIndicatorPage />}>
-              <Switch>
-                <Route path="/" component={HomePage} exact />
-                <Route path="/me" component={ProfilePage} exact />
-                <Route path="/plugins/content-manager" component={CM} />
-                <Route path="/plugins/content-type-builder" component={CTB} />
-                <Route path="/plugins/upload" component={Upload} />
-                <Route path="/plugins/:pluginId" component={PluginDispatcher} />
-                <Route path="/settings/:settingId" component={SettingsPage} />
-                <Route path="/settings" component={SettingsPage} exact />
-                <Route path="/marketplace">
-                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                    <MarketplacePage />
-                  </CheckPagePermissions>
-                </Route>
-                <Route path="/list-plugins" exact>
-                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                    <InstalledPluginsPage />
-                  </CheckPagePermissions>
-                </Route>
-                <Route path="/404" component={NotFoundPage} />
-                <Route path="" component={NotFoundPage} />
-              </Switch>
-            </Suspense>
-          </Content>
-        </div>
-        <Onboarding />
-      </Wrapper>
-    </AppMenuContext.Provider>
+    <Wrapper>
+      <LeftMenu
+        generalSectionLinks={generalSectionLinks}
+        pluginsSectionLinks={pluginsSectionLinks}
+      />
+      <NavTopRightWrapper>
+        {/* Injection zone not ready yet */}
+        <Logout />
+      </NavTopRightWrapper>
+      <div className="adminPageRightWrapper">
+        <Header />
+        <Content>
+          <Suspense fallback={<LoadingIndicatorPage />}>
+            <Switch>
+              <Route path="/" component={HomePage} exact />
+              <Route path="/me" component={ProfilePage} exact />
+              <Route path="/plugins/content-manager" component={CM} />
+              <Route path="/plugins/content-type-builder" component={CTB} />
+              <Route path="/plugins/upload" component={Upload} />
+              {routes}
+              <Route path="/settings/:settingId" component={SettingsPage} />
+              <Route path="/settings" component={SettingsPage} exact />
+              <Route path="/marketplace">
+                <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                  <MarketplacePage />
+                </CheckPagePermissions>
+              </Route>
+              <Route path="/list-plugins" exact>
+                <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                  <InstalledPluginsPage />
+                </CheckPagePermissions>
+              </Route>
+              <Route path="/404" component={NotFoundPage} />
+              <Route path="" component={NotFoundPage} />
+            </Switch>
+          </Suspense>
+        </Content>
+      </div>
+      <Onboarding />
+    </Wrapper>
   );
 };
 

@@ -10,19 +10,23 @@ import StrapiAppContext from '../../contexts/StrapiAppContext';
 const StrapiAppProvider = ({
   children,
   getPlugin,
+  menu,
   plugins,
   runHookParallel,
   runHookWaterfall,
   runHookSeries,
+  settings,
 }) => {
   return (
     <StrapiAppContext.Provider
       value={{
         getPlugin,
+        menu,
         plugins,
         runHookParallel,
         runHookWaterfall,
         runHookSeries,
+        settings,
       }}
     >
       {children}
@@ -33,10 +37,23 @@ const StrapiAppProvider = ({
 StrapiAppProvider.propTypes = {
   children: PropTypes.node.isRequired,
   getPlugin: PropTypes.func.isRequired,
+  menu: PropTypes.arrayOf(
+    PropTypes.shape({
+      to: PropTypes.string.isRequired,
+      icon: PropTypes.array,
+      intlLabel: PropTypes.shape({
+        id: PropTypes.string.isRequired,
+        defaultMessage: PropTypes.string.isRequired,
+      }).isRequired,
+      permissions: PropTypes.array,
+      Component: PropTypes.node,
+    })
+  ).isRequired,
   plugins: PropTypes.object.isRequired,
   runHookParallel: PropTypes.func.isRequired,
   runHookWaterfall: PropTypes.func.isRequired,
   runHookSeries: PropTypes.func.isRequired,
+  settings: PropTypes.object.isRequired,
 };
 
 export default StrapiAppProvider;

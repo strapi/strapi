@@ -1,85 +1,39 @@
-import React, { memo, useEffect } from 'react';
+import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { useLocation } from 'react-router-dom';
-import { useAppInfos, useStrapiApp } from '@strapi/helper-plugin';
-import { Footer, Header, Loader, LinksContainer, LinksSection } from './compos';
+import { FormattedMessage } from 'react-intl';
+import { Footer, Header, LinksContainer, LinksSection, SectionTitle } from './compos';
 import Wrapper from './Wrapper';
-import useMenuSections from './useMenuSections';
 
-const LeftMenu = ({ setUpdateMenu }) => {
-  const location = useLocation();
-  const { shouldUpdateStrapi } = useAppInfos();
-  const { plugins } = useStrapiApp();
-  const {
-    state: {
-      isLoading,
-      collectionTypesSectionLinks,
-      singleTypesSectionLinks,
-      generalSectionLinks,
-      pluginsSectionLinks,
-    },
-    toggleLoading,
-    generateMenu,
-  } = useMenuSections(plugins, shouldUpdateStrapi);
-
-  const filteredCollectionTypeLinks = collectionTypesSectionLinks.filter(
-    ({ isDisplayed }) => isDisplayed
-  );
-  const filteredSingleTypeLinks = singleTypesSectionLinks.filter(({ isDisplayed }) => isDisplayed);
-
-  // This effect is really temporary until we create the menu api
-  // We need this because we need to regenerate the links when the settings are being changed
-  // in the content manager configurations list
-  useEffect(() => {
-    setUpdateMenu(() => {
-      toggleLoading();
-      generateMenu();
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   return (
     <Wrapper>
-      <Loader show={isLoading} />
       <Header />
       <LinksContainer>
-        {filteredCollectionTypeLinks.length > 0 && (
-          <LinksSection
-            section="collectionType"
-            name="collectionType"
-            links={filteredCollectionTypeLinks}
-            location={location}
-            searchable
-          />
-        )}
-        {filteredSingleTypeLinks.length > 0 && (
-          <LinksSection
-            section="singleType"
-            name="singleType"
-            links={filteredSingleTypeLinks}
-            location={location}
-            searchable
-          />
-        )}
-
         {pluginsSectionLinks.length > 0 && (
-          <LinksSection
-            section="plugins"
-            name="plugins"
-            links={pluginsSectionLinks}
-            location={location}
-            searchable={false}
-            emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
-          />
+          <>
+            <SectionTitle>
+              <FormattedMessage
+                id="app.components.LeftMenuLinkContainer.listPlugins"
+                defaultMessage="Plugins"
+              />
+            </SectionTitle>
+            <LinksSection
+              links={pluginsSectionLinks}
+              searchable={false}
+              emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
+            />
+          </>
         )}
         {generalSectionLinks.length > 0 && (
-          <LinksSection
-            section="general"
-            name="general"
-            links={generalSectionLinks}
-            location={location}
-            searchable={false}
-          />
+          <>
+            <SectionTitle>
+              <FormattedMessage
+                id="app.components.LeftMenuLinkContainer.general"
+                defaultMessage="General"
+              />
+            </SectionTitle>
+            <LinksSection links={generalSectionLinks} searchable={false} />
+          </>
         )}
       </LinksContainer>
       <Footer key="footer" />
@@ -88,7 +42,8 @@ const LeftMenu = ({ setUpdateMenu }) => {
 };
 
 LeftMenu.propTypes = {
-  setUpdateMenu: PropTypes.func.isRequired,
+  generalSectionLinks: PropTypes.array.isRequired,
+  pluginsSectionLinks: PropTypes.array.isRequired,
 };
 
 export default memo(LeftMenu);
