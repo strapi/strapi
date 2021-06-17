@@ -102,7 +102,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Database:**
 
-- MongoDB >= 3.6 ([dropping MongoDB support](https://forum.strapi.io/t/dropping-mongodb-support/) in next major version)
+- MongoDB >= 3.6 ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108))
 - MySQL >= 5.6
 - MariaDB >= 10.1
 - PostgreSQL >= 10
