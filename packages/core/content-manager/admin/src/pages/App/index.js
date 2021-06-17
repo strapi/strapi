@@ -9,6 +9,7 @@ import DragLayer from '../../components/DragLayer';
 import ModelsContext from '../../contexts/ModelsContext';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
+import NoContentType from '../NoContentType';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import LeftMenu from './LeftMenu';
 import useModels from './useModels';
@@ -75,10 +76,9 @@ const App = () => {
                   path={`/plugins/${pluginId}/403`}
                   render={() => <div>TBD No rights to see the content types</div>}
                 />
-                <Route
-                  path={`/plugins/${pluginId}/no-content-types`}
-                  render={() => <div>TBD No ct</div>}
-                />
+                <Route path={`/plugins/${pluginId}/no-content-types`}>
+                  <NoContentType />
+                </Route>
                 <Route path="" component={NotFound} />
               </Switch>
             </div>
