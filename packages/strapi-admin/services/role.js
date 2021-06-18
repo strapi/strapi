@@ -430,6 +430,17 @@ const resetSuperAdminPermissions = async () => {
   await assignPermissions(superAdminRole.id, transformedPermissions);
 };
 
+/**
+ * Check if a user object includes the super admin role
+ * @param {object} user
+ * @return {boolean}
+ */
+const hasSuperAdminRole = user => {
+  const roles = _.get(user, 'roles', []);
+
+  return roles.map(prop('code')).includes(SUPER_ADMIN_CODE);
+};
+
 module.exports = {
   hooks,
   sanitizeRole,
@@ -448,6 +459,7 @@ module.exports = {
   createRolesIfNoneExist,
   displayWarningIfNoSuperAdmin,
   addPermissions,
+  hasSuperAdminRole,
   assignPermissions,
   resetSuperAdminPermissions,
   checkRolesIdForDeletion,

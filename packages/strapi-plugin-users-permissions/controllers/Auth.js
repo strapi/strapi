@@ -149,7 +149,8 @@ module.exports = {
       }
 
       // Connect the user with the third-party provider.
-      let user, error;
+      let user;
+      let error;
       try {
         [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(
           provider,

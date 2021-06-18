@@ -16,7 +16,7 @@
       "path": "/locales",
       "handler": "locales.listLocales",
       "config": {
-        "policies": ["admin::isAuthenticatedAdmin"]
+        "policies": []
       }
     },
     {

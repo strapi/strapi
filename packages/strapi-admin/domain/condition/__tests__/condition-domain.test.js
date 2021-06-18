@@ -48,9 +48,14 @@ describe('Condition Domain', () => {
 
   describe('create', () => {
     test('Should register a condition with the minimum amount of information', () => {
-      const condition = { handler: { foo: 'bar' }, name: 'foo', displayName: 'Foo' };
+      const handler = jest.fn(() => ({ foo: 'bar' }));
+      const condition = {
+        handler,
+        name: 'foo',
+        displayName: 'Foo',
+      };
       const expected = {
-        handler: { foo: 'bar' },
+        handler,
         id: 'application::foo',
         displayName: 'Foo',
         category: 'default',
@@ -62,11 +67,12 @@ describe('Condition Domain', () => {
     });
 
     test('Should handle multiple step of transformation', () => {
+      const handler = jest.fn(() => ({ foo: 'bar' }));
       const condition = {
         name: 'foo',
         plugin: 'bar',
         displayName: 'Foo',
-        handler: { foo: 'bar' },
+        handler,
         invalidAttribute: 'foobar',
       };
 
@@ -75,7 +81,7 @@ describe('Condition Domain', () => {
         category: 'default',
         plugin: 'bar',
         displayName: 'Foo',
-        handler: { foo: 'bar' },
+        handler,
       };
 
       const result = domain.create(condition);
