@@ -159,6 +159,8 @@
   "notification.info.minimumFields": "You need to have at least one field displayed",
   "notification.upload.error": "An error has occurred while uploading your files",
   "pageNotFound": "Page not found",
+  "pages.NoContentType.text": "You don't have any content yet, we recommend you to create your first Content-Type.",
+  "pages.NoContentType.button": "Create your first Content-Type",
   "permissions.not-allowed.create": "You are not allowed to create a document",
   "permissions.not-allowed.update": "You are not allowed to see this document",
   "plugin.description.long": "Quick way to see, edit and delete the data in your database.",

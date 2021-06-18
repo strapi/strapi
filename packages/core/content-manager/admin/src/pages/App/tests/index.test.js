@@ -24,6 +24,8 @@ jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => null,
 }));
 
+jest.mock('../../NoContentType', () => () => <div>NoContentType</div>);
+
 describe('Content manager | App | main', () => {
   beforeEach(() => {
     jest.resetModules(); // Most important - it clears the cache
