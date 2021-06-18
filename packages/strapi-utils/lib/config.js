@@ -46,7 +46,14 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
     new URL(adminUrl).origin === new URL(serverUrl).origin &&
     !forAdminBuild
   ) {
-    adminPath = adminUrl.replace(getCommonBeginning(serverUrl, adminUrl), '');
+    const getCommonPath = (path, ...paths)=> {
+      const [segments, ...otherSegments] = [path, ...paths].map(it=>_.split(it, '/'));
+      return _.join(
+        _.takeWhile(segments, (str, index)=>otherSegments.every(it=>it[index] === str))
+        , '/');
+    }
+
+    adminPath = adminUrl.replace(getCommonPath(serverUrl, adminUrl), '');
     adminPath = `/${_.trim(adminPath, '/')}`;
   } else if (adminUrl.startsWith('http')) {
     adminPath = new URL(adminUrl).pathname;
