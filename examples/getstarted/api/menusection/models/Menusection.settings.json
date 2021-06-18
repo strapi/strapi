@@ -24,8 +24,10 @@
       "required": true
     },
     "menu": {
-      "model": "menu",
-      "via": "menusections"
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "application::menu.menu",
+      "inversedBy": "menusections"
     }
   }
 }

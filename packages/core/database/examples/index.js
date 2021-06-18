@@ -4,9 +4,9 @@ const _ = require('lodash');
 const { Database } = require('../lib/index');
 
 const category = {
-  singularName: 'category',
+  modelName: 'category',
   uid: 'category',
-  tableName: 'categories',
+  collectionName: 'categories',
   attributes: {
     title: {
       type: 'string',
@@ -26,7 +26,7 @@ const category = {
       relation: 'oneToMany',
       target: 'article',
       mappedBy: 'category',
-      useJoinTable: false,
+      // useJoinTable: false,
     },
     compo: {
       type: 'component',
@@ -36,9 +36,9 @@ const category = {
 };
 
 const article = {
-  singularName: 'article',
+  modelName: 'article',
   uid: 'article',
-  tableName: 'articles',
+  collectionName: 'articles',
   attributes: {
     title: {
       type: 'string',
@@ -73,9 +73,9 @@ const article = {
 };
 
 const tags = {
-  singularName: 'tag',
+  modelName: 'tag',
   uid: 'tag',
-  tableName: 'tags',
+  collectionName: 'tags',
   attributes: {
     name: {
       type: 'string',
@@ -90,9 +90,9 @@ const tags = {
 };
 
 const compo = {
-  singularName: 'compo',
+  modelName: 'compo',
   uid: 'compo',
-  tableName: 'compos',
+  collectionName: 'compos',
   attributes: {
     key: {
       type: 'string',
@@ -104,9 +104,9 @@ const compo = {
 };
 
 const user = {
-  singularName: 'user',
+  modelName: 'user',
   uid: 'user',
-  tableName: 'users',
+  collectionName: 'users',
   attributes: {
     address: {
       type: 'relation',
@@ -119,9 +119,9 @@ const user = {
 };
 
 const address = {
-  singularName: 'address',
+  modelName: 'address',
   uid: 'address',
-  tableName: 'addresses',
+  collectionName: 'addresses',
   attributes: {
     name: {
       type: 'string',
@@ -148,9 +148,9 @@ const address = {
 // });
 
 const file = {
-  singularName: 'file',
+  modelName: 'file',
   uid: 'file',
-  tableName: 'files',
+  collectionName: 'files',
   attributes: {
     name: {
       type: 'string',
@@ -208,9 +208,9 @@ const file = {
 };
 
 const fileMorph = {
-  singularName: 'file-morph',
+  modelName: 'file-morph',
   uid: 'file-morph',
-  tableName: 'file_morphs',
+  collectionName: 'file_morphs',
   attributes: {
     // file: {
     //   type: 'relation',
@@ -233,7 +233,7 @@ const orm = new Database({
     },
     // debug: true,
   },
-  models: Database.transfomrContentType([
+  models: Database.transformContentTypes([
     category,
     article,
     compo,
@@ -294,7 +294,7 @@ async function main() {
 
   // const r = await orm.entityManager
   //   .createQueryBuilder('article')
-  //   .select(['*'])
+  //   .select('*')
   //   .join({
   //     rootColumn: 'id',
   //     alias: 'ac',
@@ -307,6 +307,12 @@ async function main() {
   //     alias: 'c',
   //     referencedTable: 'categories',
   //     referencedColumn: 'id',
+  //   })
+  //   .where({
+  //     $and: [],
+  //   })
+  //   .populate({
+  //     category: true,
   //   })
   //   .execute();
 
@@ -535,25 +541,71 @@ async function main() {
     limit: 5,
   });
 
+  // const articleCategory = orm.query('article').load(article, 'category', {
+  //   select: ['id', 'title'],
+  //   limit: 5,
+  //   offset: 2,
+  //   orderBy: 'title',
+  //   where: {},
+  // });
+
+  // const article = await orm.query('article').populate(article, {
+  //   category: true,
+  //   tags: true
+  // });
+
   await orm.query('article').findMany({
     limit: 5,
     where: {
-      category: {
-        title: {
-          $contains: '09',
-        },
+      // category: {
+      //   title: {
+      //     $contains: '09',
+      //   },
+      // },
+      // tags: {
+      //   title: {
+      //     $contains: 'xxx'
+      //   }
+      // },
+
+      compo: {
+        key: 'xx',
       },
+
+      // $and: [],
+      // $or: [],
+      // $not: {},
+      // field: {
+      //   $not: {
+      //     $contains: 'title',
+      //   },
+      // },
     },
     populate: {
       category: {
         select: ['id', 'title'],
+        limit: 5,
+        offset: 2,
+        orderBy: 'title',
         where: {
-          title: {
-            $contains: '7',
+          // title: {
+          //   $contains: '7',
+          // },
+          // article: {
+          //   title: {
+          //     $contains: 'test'
+          //   }
+          // }
+        },
+        populate: {
+          articles: {
+            populate: {
+              tags: true,
+            },
           },
         },
       },
-      tags: true,
+      // tags: true,
       compo: true,
     },
     orderBy: { compo: { key: 'DESC' } },

@@ -22,15 +22,20 @@
       "max": 5
     },
     "likes": {
-      "via": "review",
-      "collection": "like"
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "application::like.like",
+      "mappedBy": "review"
     },
     "author": {
-      "model": "user",
-      "plugin": "users-permissions"
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "plugins::users-permissions.user"
     },
     "restaurant": {
-      "model": "restaurant"
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "application::restaurant.restaurant"
     }
   }
 }

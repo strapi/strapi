@@ -16,8 +16,10 @@
       "type": "string"
     },
     "addresses": {
-      "via": "categories",
-      "collection": "address"
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "application::address.address",
+      "mappedBy": "categories"
     }
   }
 }

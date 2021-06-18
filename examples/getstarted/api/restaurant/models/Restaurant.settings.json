@@ -75,7 +75,9 @@
       "max": 35.12
     },
     "address": {
-      "model": "address"
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "application::address.address"
     },
     "cover": {
       "model": "file",
@@ -109,7 +111,9 @@
       }
     },
     "categories": {
-      "collection": "category"
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "application::category.category"
     },
     "description": {
       "type": "richtext",
@@ -133,8 +137,10 @@
       }
     },
     "menu": {
-      "model": "menu",
-      "via": "restaurant"
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "application::menu.menu",
+      "inversedBy": "restaurant"
     },
     "opening_times": {
       "component": "default.openingtimes",

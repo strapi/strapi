@@ -158,9 +158,8 @@ const createMetadata = (models = []) => {
 
   // init pass
   for (const model of models) {
-
     if (!model.tableName) {
-      console.log(model)
+      console.log(model);
     }
 
     metadata.add({
@@ -186,193 +185,207 @@ const createMetadata = (models = []) => {
     }
 
     for (const [attributeName, attribute] of Object.entries(meta.attributes)) {
-      if (types.isComponent(attribute.type)) {
-        // convert component to relation
+      try {
+        if (types.isComponent(attribute.type)) {
+          // convert component to relation
 
-        Object.assign(attribute, {
-          type: 'relation',
-          relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
-          target: attribute.component,
-          joinTable: {
-            name: meta.componentLink.tableName,
-            joinColumn: {
-              name: 'entity_id',
-              referencedColumn: 'id',
+          Object.assign(attribute, {
+            type: 'relation',
+            relation: attribute.repeatable === true ? 'oneToMany' : 'oneToOne',
+            target: attribute.component,
+            joinTable: {
+              name: meta.componentLink.tableName,
+              joinColumn: {
+                name: 'entity_id',
+                referencedColumn: 'id',
+              },
+              inverseJoinColumn: {
+                name: 'component_id',
+                referencedColumn: 'id',
+              },
+              on: {
+                field: attributeName,
+              },
             },
-            inverseJoinColumn: {
-              name: 'component_id',
-              referencedColumn: 'id',
-            },
-            on: ['field', '=', attributeName],
-          },
-        });
+          });
 
-        continue;
-      }
-
-      if (types.isDynamicZone(attribute.type)) {
-        continue;
-      }
-
-      if (types.isRelation(attribute.type)) {
-        // NOTE: also validate
-
-        switch (attribute.relation) {
-          case 'oneToOne': {
-            /*
-              if one to one then
-                if owner then
-                  if with join table then
-                    create join table
-                  else
-                    create joinColumn
-                  if bidirectional then
-                    set inverse attribute joinCol or joinTable info correctly
-                else
-                  this property must be set by the owner side
-                  verify the owner side is valid // should be done before or at the same time ?
-            */
-
-            if (isOwner(attribute)) {
-              if (shouldUseJoinTable(attribute)) {
-                createJoinTable(metadata, {
-                  attribute,
-                  attributeName,
-                  meta,
-                });
-              } else {
-                createJoinColum(metadata, {
-                  attribute,
-                  attributeName,
-                  meta,
-                });
-              }
-            } else {
-              // verify other side is valid
-            }
-            break;
-          }
-
-          case 'oneToMany': {
-            /*
-             if one to many then
-              if unidirectional then
-                create join table
-              if bidirectional then
-                cannot be owning side
-                do nothing
-            */
-
-            if (!isBidirectional(attribute)) {
-              createJoinTable(metadata, {
-                attribute,
-                attributeName,
-                meta,
-              });
-            } else {
-              if (isOwner(attribute)) {
-                throw new Error(
-                  'one side of a oneToMany cannot be the owner side in a bidirectional relation'
-                );
-              }
-            }
-
-            break;
-          }
-
-          case 'manyToOne': {
-            /*
-              if many to one then
-                if unidirectional then
-                  if with join table then
-                    create join table
-                  else
-                    create join column
-                else
-                  must be the owner side
-                  if with join table then
-                    create join table
-                  else
-                    create join column
-                  set inverse attribute joinCol or joinTable info correctly
-            */
-
-            if (isBidirectional(attribute) && !isOwner(attribute)) {
-              throw new Error('The many side of a manyToOne must be the owning side');
-            }
-
-            if (shouldUseJoinTable(attribute)) {
-              createJoinTable(metadata, {
-                attribute,
-                attributeName,
-                meta,
-              });
-            } else {
-              createJoinColum(metadata, {
-                attribute,
-                attributeName,
-                meta,
-              });
-            }
-
-            break;
-          }
-
-          case 'manyToMany': {
-            /*
-              if many to many then
-                if unidirectional
-                  create join table
-                else
-                  if owner then
-                    if with join table then
-                      create join table
-                  else
-                    do nothing
-            */
-
-            if (!isBidirectional(attribute) || isOwner(attribute)) {
-              createJoinTable(metadata, {
-                attribute,
-                attributeName,
-                meta,
-              });
-            }
-
-            break;
-          }
-
-          default: {
-            throw new Error(`Unknow relation ${attribute.relation}`);
-          }
+          continue;
         }
 
-        /*
+        if (types.isDynamicZone(attribute.type)) {
+          continue;
+        }
 
+        if (types.isRelation(attribute.type)) {
+          // NOTE: also validate
 
+          createRelation(attributeName, attribute, meta, metadata);
 
-
-            polymorphic relations
-
-            OneToOneX
-            ManyToOneX
-            OnetoManyX
-            ManytoManyX
-            XOneToOne
-            XManyToOne
-            XOnetoMany
-            XManytoMany
-
-            XOneToOneX
-            XManyToOneX
-            XOnetoManyX
-            XManytoManyX
-        */
+          continue;
+        }
+      } catch (error) {
+        throw new Error(
+          `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
+        );
       }
     }
   }
 
   return metadata;
+};
+
+const createRelation = (attributeName, attribute, meta, metadata) => {
+  switch (attribute.relation) {
+    case 'oneToOne': {
+      /*
+        if one to one then
+          if owner then
+            if with join table then
+              create join table
+            else
+              create joinColumn
+            if bidirectional then
+              set inverse attribute joinCol or joinTable info correctly
+          else
+            this property must be set by the owner side
+            verify the owner side is valid // should be done before or at the same time ?
+      */
+
+      if (isOwner(attribute)) {
+        if (shouldUseJoinTable(attribute)) {
+          createJoinTable(metadata, {
+            attribute,
+            attributeName,
+            meta,
+          });
+        } else {
+          createJoinColum(metadata, {
+            attribute,
+            attributeName,
+            meta,
+          });
+        }
+      } else {
+        // verify other side is valid
+      }
+      break;
+    }
+
+    case 'oneToMany': {
+      /*
+       if one to many then
+        if unidirectional then
+          create join table
+        if bidirectional then
+          cannot be owning side
+          do nothing
+      */
+
+      if (!isBidirectional(attribute)) {
+        createJoinTable(metadata, {
+          attribute,
+          attributeName,
+          meta,
+        });
+      } else {
+        if (isOwner(attribute)) {
+          throw new Error(
+            'one side of a oneToMany cannot be the owner side in a bidirectional relation'
+          );
+        }
+      }
+
+      break;
+    }
+
+    case 'manyToOne': {
+      /*
+        if many to one then
+          if unidirectional then
+            if with join table then
+              create join table
+            else
+              create join column
+          else
+            must be the owner side
+            if with join table then
+              create join table
+            else
+              create join column
+            set inverse attribute joinCol or joinTable info correctly
+      */
+
+      if (isBidirectional(attribute) && !isOwner(attribute)) {
+        throw new Error('The many side of a manyToOne must be the owning side');
+      }
+
+      if (shouldUseJoinTable(attribute)) {
+        createJoinTable(metadata, {
+          attribute,
+          attributeName,
+          meta,
+        });
+      } else {
+        createJoinColum(metadata, {
+          attribute,
+          attributeName,
+          meta,
+        });
+      }
+
+      break;
+    }
+
+    case 'manyToMany': {
+      /*
+        if many to many then
+          if unidirectional
+            create join table
+          else
+            if owner then
+              if with join table then
+                create join table
+            else
+              do nothing
+      */
+
+      if (!isBidirectional(attribute) || isOwner(attribute)) {
+        createJoinTable(metadata, {
+          attribute,
+          attributeName,
+          meta,
+        });
+      }
+
+      break;
+    }
+
+    default: {
+      throw new Error(`Unknow relation ${attribute.relation}`);
+    }
+  }
+
+  /*
+
+
+
+
+      polymorphic relations
+
+      OneToOneX
+      ManyToOneX
+      OnetoManyX
+      ManytoManyX
+      XOneToOne
+      XManyToOne
+      XOnetoMany
+      XManytoMany
+
+      XOneToOneX
+      XManyToOneX
+      XOnetoManyX
+      XManytoManyX
+  */
 };
 
 // NOTE: we might just move the compo logic outside this layer too at some point

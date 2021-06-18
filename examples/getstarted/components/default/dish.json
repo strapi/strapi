@@ -27,7 +27,9 @@
       "type": "richtext"
     },
     "categories": {
-      "collection": "category"
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "application::category.category"
     }
   }
 }

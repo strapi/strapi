@@ -8,10 +8,7 @@
   "options": {
     "draftAndPublish": false,
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "pluginOptions": {
@@ -29,18 +26,15 @@
       }
     },
     "categories": {
-      "collection": "category",
-      "via": "addresses",
-      "dominant": true
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "application::category.category",
+      "inversedBy": "addresses"
     },
     "cover": {
       "model": "file",
       "via": "related",
-      "allowedTypes": [
-        "files",
-        "images",
-        "videos"
-      ],
+      "allowedTypes": ["files", "images", "videos"],
       "plugin": "upload",
       "required": false,
       "pluginOptions": {
@@ -52,9 +46,7 @@
     "images": {
       "collection": "file",
       "via": "related",
-      "allowedTypes": [
-        "images"
-      ],
+      "allowedTypes": ["images"],
       "plugin": "upload",
       "required": false,
       "pluginOptions": {
@@ -74,8 +66,10 @@
       }
     },
     "likes": {
-      "collection": "like",
-      "via": "address"
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "application::like.like",
+      "mappedBy": "address"
     },
     "json": {
       "type": "json",
