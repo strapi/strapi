@@ -24,7 +24,7 @@ module.exports = () => {
         configurable: false,
         visible: false,
         collection: modelName,
-        populate: ['id', 'locale', PUBLISHED_AT_ATTRIBUTE],
+        populate: ['_id', 'id', 'locale', PUBLISHED_AT_ATTRIBUTE],
       });
 
       _.set(attributes, 'locale', {

@@ -1,24 +1,24 @@
 'use strict';
 
-const tar = require('tar');
 const fetch = require('node-fetch');
+const tar = require('tar');
 const parseGitUrl = require('git-url-parse');
 const chalk = require('chalk');
 
 const stopProcess = require('./stop-process');
 
-function parseShorthand(starter) {
+function parseShorthand(template) {
   // Determine if it is comes from another owner
-  if (starter.includes('/')) {
-    const [owner, partialName] = starter.split('/');
-    const name = `strapi-starter-${partialName}`;
+  if (template.includes('/')) {
+    const [owner, partialName] = template.split('/');
+    const name = `strapi-template-${partialName}`;
     return {
       name,
       fullName: `${owner}/${name}`,
     };
   }
 
-  const name = `strapi-starter-${starter}`;
+  const name = `strapi-template-${template}`;
   return {
     name,
     fullName: `strapi/${name}`,
@@ -32,7 +32,7 @@ async function getDefaultBranch(repo) {
   const response = await fetch(`https://api.github.com/repos/${repo}`);
   if (!response.ok) {
     stopProcess(
-      `Could not find the starter information for ${chalk.yellow(
+      `Could not find the information for ${chalk.yellow(
         repo
       )}. Make sure it is publicly accessible on github.`
     );
@@ -43,13 +43,13 @@ async function getDefaultBranch(repo) {
 }
 
 /**
- * @param {string} starter GitHub URL or shorthand to a starter project.
+ * @param {string} template GitHub URL or shorthand to a template project.
  */
-async function getRepoInfo(starter) {
-  const { name, full_name: fullName, ref, filepath, protocols, source } = parseGitUrl(starter);
+async function getRepoInfo(template) {
+  const { name, full_name: fullName, ref, filepath, protocols, source } = parseGitUrl(template);
 
   if (protocols.length === 0) {
-    const repoInfo = parseShorthand(starter);
+    const repoInfo = parseShorthand(template);
     return {
       ...repoInfo,
       branch: await getDefaultBranch(repoInfo.fullName),
@@ -58,7 +58,7 @@ async function getRepoInfo(starter) {
   }
 
   if (source !== 'github.com') {
-    stopProcess(`GitHub URL not found for: ${chalk.yellow(starter)}.`);
+    stopProcess(`GitHub URL not found for: ${chalk.yellow(template)}.`);
   }
 
   let branch;
@@ -78,14 +78,12 @@ async function getRepoInfo(starter) {
  * @param {string} tmpDir Path to the destination temporary directory.
  */
 async function downloadGitHubRepo(repoInfo, tmpDir) {
-  const { fullName, branch, usedShorthand } = repoInfo;
-
   // Download from GitHub
+  const { fullName, branch } = repoInfo;
   const codeload = `https://codeload.github.com/${fullName}/tar.gz/${branch}`;
   const response = await fetch(codeload);
   if (!response.ok) {
-    const message = usedShorthand ? `using the shorthand` : `using the url`;
-    stopProcess(`Could not download the repository ${message}: ${chalk.yellow(fullName)}.`);
+    throw Error(`Could not download the ${chalk.yellow(fullName)} repository.`);
   }
 
   await new Promise(resolve => {

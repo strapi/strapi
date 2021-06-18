@@ -48,7 +48,7 @@ const buildMutation = (mutationName, config) => {
     await policiesMiddleware(ctx);
 
     const values = await action(ctx);
-    const result = ctx.body || values;
+    const result = ctx.body !== undefined ? ctx.body : values;
 
     if (_.isError(result)) {
       throw result;
@@ -114,7 +114,7 @@ const buildQuery = (queryName, config) => {
     await policiesMiddleware(ctx);
 
     const values = await action(ctx);
-    const result = ctx.body || values;
+    const result = ctx.body !== undefined ? ctx.body : values;
 
     if (_.isError(result)) {
       throw result;
