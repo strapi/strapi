@@ -335,8 +335,13 @@ class Strapi {
       }
     });
 
-    const pluginProvider = await createPluginProvider(this);
-    this.plugin = pluginProvider;
+    try {
+      const pluginProvider = await createPluginProvider(this);
+      this.plugin = pluginProvider;
+      console.log(this.plugin('i18n').contentType.getAll());
+    } catch (e) {
+      console.log(e);
+    }
 
     // const modules = await loadModules(this);
 

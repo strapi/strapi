@@ -4,37 +4,37 @@ const { cloneDeep } = require('lodash/fp');
 const { validateContentTypeDefinition } = require('./validator');
 
 const createContentType = (definition, { apiName, pluginName } = {}) => {
-  const createdContentType = cloneDeep(definition);
-
   validateContentTypeDefinition(definition);
 
+  const createdContentType = cloneDeep(definition);
+
   if (apiName) {
-    Object.assign(createdContentType, {
-      uid: `application::${apiName}.${definition.info.singularName}`,
+    Object.assign(createdContentType.schema, {
+      uid: `application::${apiName}.${definition.schema.info.singularName}`,
       apiName,
-      collectionName: definition.collectionName || definition.info.singularName,
+      collectionName: definition.schema.collectionName || definition.schema.info.singularName,
     });
   } else if (pluginName) {
-    Object.assign(createdContentType, {
-      uid: `plugins::${pluginName}.${definition.info.singularName}`,
+    Object.assign(createdContentType.schema, {
+      uid: `plugins::${pluginName}.${definition.schema.info.singularName}`,
       plugin: pluginName,
       collectionName:
-        createdContentType.collectionName ||
-        `${pluginName}_${definition.info.singularName}`.toLowerCase(),
+        createdContentType.schema.collectionName ||
+        `${pluginName}_${definition.schema.info.singularName}`.toLowerCase(),
     });
   } else {
-    Object.assign(createdContentType, {
-      uid: `strapi::${definition.info.singularName}`,
+    Object.assign(createdContentType.schema, {
+      uid: `strapi::${definition.schema.info.singularName}`,
       plugin: 'admin',
     });
   }
 
-  Object.assign(createdContentType, {
-    kind: createdContentType.kind || 'collectionType',
+  Object.assign(createdContentType.schema, {
+    kind: createdContentType.schema.kind || 'collectionType',
   });
-  Object.defineProperty(createdContentType, 'privateAttributes', {
+  Object.defineProperty(createdContentType.schema, 'privateAttributes', {
     get() {
-      return strapi.getModel(createdContentType.uid).privateAttributes;
+      return strapi.getModel(createdContentType.schema.uid).privateAttributes;
     },
   });
 

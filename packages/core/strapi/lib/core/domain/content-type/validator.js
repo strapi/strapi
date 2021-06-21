@@ -1,22 +1,34 @@
 'use strict';
 
+const { keyBy, mapValues } = require('lodash');
 const { yup } = require('@strapi/utils');
 
+// To replace by directly using implemented lifecycles
+const lifecycles = ['beforeCreate', 'afterCreate'];
+const lifecyclesShape = mapValues(keyBy(lifecycles), () => yup.mixed().isFunction());
+
 const contentTypeSchemaValidator = yup.object().shape({
-  info: yup
+  schema: yup.object().shape({
+    info: yup
+      .object()
+      .shape({
+        singularName: yup
+          .string()
+          .isCamelCase()
+          .required(),
+        pluralName: yup
+          .string()
+          .isCamelCase()
+          .required(),
+        displayName: yup.string().required(),
+      })
+      .required(),
+  }),
+  actions: yup.object().onlyContainsFunctions(),
+  lifecycles: yup
     .object()
-    .shape({
-      singularName: yup
-        .string()
-        .isCamelCase()
-        .required(),
-      pluralName: yup
-        .string()
-        .isCamelCase()
-        .required(),
-      displayName: yup.string().required(),
-    })
-    .required(),
+    .shape(lifecyclesShape)
+    .noUnknown(),
 });
 
 const validateContentTypeDefinition = data => {

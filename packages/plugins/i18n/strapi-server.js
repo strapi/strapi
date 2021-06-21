@@ -4,27 +4,46 @@ const bootstrap = require('./server/bootstrap');
 const contentTypes = require('./server/content-types');
 const policies = require('./server/policies');
 const services = require('./server/services');
+// const routes = require('./server/routes');
 
 // object or function. If function then pass strapi.
 module.exports = () => {
   return {
-    bootstrap,
-    // register,
-    destroy: () => console.log('i18n DESTROY'),
-    config: {
-      default: () => ({
-        olala: 'olala',
-        pouet: 'pouet',
-        featureA: true,
-      }),
-      validator: () => {},
+    register: () => {
+      // extend entityService
+      // route.add('/giveBestCountries', { action: giveBestCountries });
+      // route.add('/giveBestCountries', [policies.get('plugins::users-permissions.permissions')],
+      //   handler: giveBestCountries,
+      // });
+      // route.add('/giveBestCountries', (ctx, {  }) => {
+      //   ctx.entityService('countries').giveBestCountries();
+      // });
+      //
+      // addQuery('giveBestCountries', {
+      //   args: ,
+      //   resolve: ,
+      //   type: ,
+      // });
+      //
+      // registerRoute('/countries', {
+      //   method: 'get',
+      //   handler: () => {},
+      // })
     },
-    routes: [],
-    controllers: {},
+    bootstrap,
+    // routes,
+    // controllers: {},
     middlewares: {},
     contentTypes,
     policies,
     services,
-    hooks: {},
+    // middlewares,
   };
 };
+
+// create, update, delete, read
+
+// modifier une route existance CRUD
+// Ajouter des nouvelles routes / query graphql
+
+//
