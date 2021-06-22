@@ -17,7 +17,6 @@ const name = pluginPkg.strapi.name;
 
 export default {
   register(app) {
-    app.addReducers(reducers);
     app.addCorePluginMenuLink({
       to: `/plugins/${pluginId}`,
       icon: 'book-open',
@@ -27,6 +26,11 @@ export default {
       },
       permissions: pluginPermissions.main,
     });
+
+    app.addReducers(reducers);
+
+    // Hook that allows to mutate the displayed headers of the list view table
+    app.createHook('cm/inject-column-in-table');
 
     app.registerPlugin({
       description: pluginDescription,
