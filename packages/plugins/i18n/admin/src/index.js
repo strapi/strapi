@@ -16,6 +16,7 @@ import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import i18nReducers from './hooks/reducers';
 import DeleteModalAdditionalInfos from './components/DeleteModalAdditionalInfos';
+import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -39,6 +40,7 @@ export default {
     });
   },
   boot(app) {
+    app.registerHook('cm/inject-column-in-table', addColumnToTableHook);
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {

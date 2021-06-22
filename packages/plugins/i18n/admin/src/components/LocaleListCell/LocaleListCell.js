@@ -1,9 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useSelector } from 'react-redux';
 import { Padded, Text } from '@buffetjs/core';
 import { Tooltip } from '@buffetjs/styles';
 import get from 'lodash/get';
 import styled from 'styled-components';
+import selectI18NLocales from '../../selectors/selectI18nLocales';
 
 const mapToLocaleName = (locales, localeCode) =>
   get(
@@ -18,7 +20,8 @@ const LocaleName = styled.div`
   white-space: nowrap;
 `;
 
-const LocaleListCell = ({ locales, localizations, locale: currentLocaleCode, id }) => {
+const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
+  const locales = useSelector(selectI18NLocales);
   const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
   const localizationNames = allLocalizations.map(locale => locale.locale);
   const defaultLocale = locales.find(locale => locale.isDefault);
@@ -75,13 +78,6 @@ LocaleListCell.propTypes = {
   localizations: PropTypes.arrayOf(
     PropTypes.shape({
       locale: PropTypes.string.isRequired,
-    })
-  ).isRequired,
-  locales: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      code: PropTypes.string.isRequired,
-      isDefault: PropTypes.bool,
     })
   ).isRequired,
   locale: PropTypes.string.isRequired,

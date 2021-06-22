@@ -4,7 +4,6 @@ import addLocaleToSingleTypesMiddleware from './addLocaleToSingleTypesMiddleware
 import extendCMEditViewLayoutMiddleware from './extendCMEditViewLayoutMiddleware';
 import extendCTBInitialDataMiddleware from './extendCTBInitialDataMiddleware';
 import extendCTBAttributeInitialDataMiddleware from './extendCTBAttributeInitialDataMiddleware';
-import addLocaleColumnToListViewMiddleware from './addLocaleColumnToListViewMiddleware';
 import localePermissionMiddleware from './localePermissionMiddleware';
 
 const middlewares = [
@@ -14,7 +13,6 @@ const middlewares = [
   extendCMEditViewLayoutMiddleware,
   extendCTBInitialDataMiddleware,
   extendCTBAttributeInitialDataMiddleware,
-  addLocaleColumnToListViewMiddleware,
   localePermissionMiddleware,
 ];
 

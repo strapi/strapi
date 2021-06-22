@@ -153,21 +153,6 @@ class StrapiApp {
     });
   };
 
-  async initialize() {
-    Object.keys(this.appPlugins).forEach(plugin => {
-      this.appPlugins[plugin].register({
-        addComponents: this.addComponents,
-        addCorePluginMenuLink: this.addCorePluginMenuLink,
-        addFields: this.addFields,
-        addMenuLink: this.addMenuLink,
-        addMiddlewares: this.addMiddlewares,
-        addReducers: this.addReducers,
-        createSettingSection: this.createSettingSection,
-        registerPlugin: this.registerPlugin,
-      });
-    });
-  }
-
   async boot() {
     Object.keys(this.appPlugins).forEach(plugin => {
       const boot = this.appPlugins[plugin].boot;
@@ -177,10 +162,15 @@ class StrapiApp {
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
+          registerHook: this.registerHook,
         });
       }
     });
   }
+
+  createHook = name => {
+    this.hooksDict[name] = createHook();
+  };
 
   createSettingSection = (section, links) => {
     invariant(section.id, 'section.id should be defined');
@@ -208,6 +198,22 @@ class StrapiApp {
   getPlugin = pluginId => {
     return this.plugins[pluginId];
   };
+
+  async initialize() {
+    Object.keys(this.appPlugins).forEach(plugin => {
+      this.appPlugins[plugin].register({
+        addComponents: this.addComponents,
+        addCorePluginMenuLink: this.addCorePluginMenuLink,
+        addFields: this.addFields,
+        addMenuLink: this.addMenuLink,
+        addMiddlewares: this.addMiddlewares,
+        addReducers: this.addReducers,
+        createHook: this.createHook,
+        createSettingSection: this.createSettingSection,
+        registerPlugin: this.registerPlugin,
+      });
+    });
+  }
 
   async loadAdminTrads() {
     const arrayOfPromises = this.appLocales.map(locale => {
@@ -270,18 +276,14 @@ class StrapiApp {
     return Promise.resolve();
   }
 
+  registerHook = (name, fn) => {
+    this.hooksDict[name].register(fn);
+  };
+
   registerPlugin = pluginConf => {
     const plugin = Plugin(pluginConf);
 
     this.plugins[plugin.pluginId] = plugin;
-  };
-
-  createHook = name => {
-    this.hooksDict[name] = createHook();
-  };
-
-  registerHook = (name, fn) => {
-    this.hooksDict[name].register(fn);
   };
 
   runHookSeries = (name, asynchronous = false) =>
