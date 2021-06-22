@@ -18,6 +18,7 @@ import {
   useNotification,
   useQueryParams,
   useRBACProvider,
+  useStrapiApp,
   request,
 } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
@@ -92,6 +93,14 @@ function ListView({
   const { refetchPermissions } = useRBACProvider();
   const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
+
+  const { runHookWaterfall } = useStrapiApp();
+
+  const tableHeaders = useMemo(() => {
+    const headers = runHookWaterfall('cm/inject-column-in-table', { displayedHeaders, layout });
+
+    return headers;
+  }, [runHookWaterfall, displayedHeaders, layout]);
 
   const [{ query }, setQuery] = useQueryParams();
   const params = buildQueryString(query);
@@ -466,7 +475,7 @@ function ListView({
                     canCreate={canCreate}
                     canDelete={canDelete}
                     canUpdate={canUpdate}
-                    displayedHeaders={displayedHeaders}
+                    displayedHeaders={tableHeaders}
                     hasDraftAndPublish={hasDraftAndPublish}
                     isBulkable={isBulkable}
                     setQuery={setQuery}
