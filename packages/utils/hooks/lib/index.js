@@ -10,14 +10,14 @@ const createHook = () => {
     delete(handler) {
       _handlers.splice(_handlers.indexOf(handler), 1);
     },
-    runWaterfall(args) {
-      return _handlers.reduce((acc, fn) => fn(acc), args);
+    runWaterfall(args, store) {
+      return _handlers.reduce((acc, fn) => fn(acc, store), args);
     },
-    async runWaterfallAsync(args) {
+    async runWaterfallAsync(args, store) {
       let result = args;
 
       for (const fn of _handlers) {
-        result = await fn(result);
+        result = await fn(result, store);
       }
 
       return result;
