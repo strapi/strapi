@@ -11,7 +11,7 @@ const { set } = require('lodash/fp');
  * @param {string?} defaultName - Optional, the name of the enum that will be used if config.enumName is nil
  * @return {NexusEnumTypeDef}
  */
-const buildEnumType = (definition, defaultName) => {
+const buildEnumTypeDefinition = (definition, defaultName) => {
   const name = defaultName || definition.enumName;
 
   if (!name) {
@@ -26,4 +26,4 @@ const buildEnumType = (definition, defaultName) => {
   });
 };
 
-module.exports = { buildEnumType };
+module.exports = { buildEnumTypeDefinition };

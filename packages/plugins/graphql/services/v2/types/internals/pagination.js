@@ -2,8 +2,10 @@
 
 const { objectType } = require('nexus');
 
+const { PAGINATION_TYPE_NAME } = require('../constants');
+
 const Pagination = objectType({
-  name: 'Pagination',
+  name: PAGINATION_TYPE_NAME,
 
   definition(t) {
     t.nonNull.field('total', {

@@ -2,25 +2,22 @@
 
 const { objectType } = require('nexus');
 
-const { utils } = require('../../../types/index');
-
-const { buildType } = require('./type');
-const { buildEntityMeta } = require('./meta');
+const { utils } = require('../../types/index');
 
 /**
  * Build a higher level type for a content type which contains both the attributes, the ID and the metadata
+ * @param {string} name - The type name of the entity
  * @param {object} contentType The content type which will be used to build its entity type
- * @return {NexusObjectTypeDef<string>}
+ * @return {NexusObjectTypeDef}
  */
-const buildEntity = contentType => {
-  const entityName = utils.getEntityName(contentType);
+const buildEntityDefinition = (name, contentType) => {
   const typeName = utils.getTypeName(contentType);
 
   return objectType({
-    name: entityName,
+    name,
 
     definition(t) {
-      t.int('id');
+      t.id('id');
       t.field('attributes', { type: typeName });
       // todo[v4]: add the meta field to the entity when there will be data in it
       // t.field('meta', { type: utils.getEntityMetaName(contentType) });
@@ -28,4 +25,4 @@ const buildEntity = contentType => {
   });
 };
 
-module.exports = { buildEntity, buildType, buildEntityMeta };
+module.exports = { buildEntityDefinition };
