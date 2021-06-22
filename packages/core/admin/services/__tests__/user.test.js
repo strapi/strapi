@@ -684,66 +684,6 @@ describe('User', () => {
     });
   });
 
-  describe('migrateUsers', () => {
-    test("Don't do anything if the migration has already been done", async () => {
-      const updateMany = jest.fn();
-      const exists = jest.fn(() => Promise.resolve(true));
-
-      global.strapi = {
-        query: () => ({ model: { orm: 'mongoose' } }),
-        admin: { services: { role: { exists } } },
-      };
-
-      await userService.migrateUsers();
-
-      expect(updateMany).toHaveBeenCalledTimes(0);
-    });
-    test('Migrate for mongoose', async () => {
-      const updateMany = jest.fn();
-      const exists = jest.fn(() => Promise.resolve(false));
-
-      global.strapi = {
-        query: () => ({ model: { orm: 'mongoose', updateMany } }),
-        admin: { services: { role: { exists } } },
-      };
-
-      await userService.migrateUsers();
-
-      expect(updateMany).toHaveBeenCalledTimes(2);
-      expect(updateMany).toHaveBeenNthCalledWith(
-        1,
-        { blocked: { $in: [false, null] } },
-        { isActive: true }
-      );
-      expect(updateMany).toHaveBeenNthCalledWith(2, { blocked: true }, { isActive: false });
-    });
-    test('Migrate for bookshelf', async () => {
-      const query = jest.fn(() => ({ save }));
-      const save = jest.fn(() => Promise.resolve());
-      const exists = jest.fn(() => Promise.resolve(false));
-
-      global.strapi = {
-        query: () => ({ model: { orm: 'bookshelf', query } }),
-        admin: { services: { role: { exists } } },
-      };
-
-      await userService.migrateUsers();
-
-      expect(query).toHaveBeenCalledTimes(2);
-      expect(save).toHaveBeenCalledTimes(2);
-      expect(save).toHaveBeenNthCalledWith(
-        1,
-        { isActive: true },
-        { method: 'update', patch: true, require: false }
-      );
-      expect(save).toHaveBeenNthCalledWith(
-        2,
-        { isActive: false },
-        { method: 'update', patch: true, require: false }
-      );
-    });
-  });
-
   describe('resetPasswordByEmail', () => {
     test('Throws on missing user', async () => {
       const email = 'email@email.fr';

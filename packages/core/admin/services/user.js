@@ -329,27 +329,6 @@ const displayWarningIfUsersDontHaveRole = async () => {
   }
 };
 
-// FIXME: to delete
-// const migrateUsers = async () => {
-//   const someRolesExist = await strapi.admin.services.role.exists();
-//   if (someRolesExist) {
-//     return;
-//   }
-
-//   const userModel = strapi.query('strapi::user').model;
-
-//   if (userModel.orm === 'bookshelf') {
-//     await userModel
-//       .query(qb => qb.where('blocked', false).orWhere('blocked', null))
-//       .save({ isActive: true }, { method: 'update', patch: true, require: false });
-//     await userModel
-//       .query(qb => qb.where('blocked', true))
-//       .save({ isActive: false }, { method: 'update', patch: true, require: false });
-//   } else if (userModel.orm === 'mongoose') {
-//     await userModel.updateMany({ blocked: { $in: [false, null] } }, { isActive: true });
-//     await userModel.updateMany({ blocked: true }, { isActive: false });
-//   }
-// };
 
 module.exports = {
   create,
@@ -367,6 +346,5 @@ module.exports = {
   count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
-  // migrateUsers,
   resetPasswordByEmail,
 };
