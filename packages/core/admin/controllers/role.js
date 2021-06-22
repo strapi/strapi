@@ -86,7 +86,7 @@ module.exports = {
       return ctx.notFound('role.notFound');
     }
 
-    const permissions = await permissionService.find({ role: role.id, _limit: -1 });
+    const permissions = await permissionService.find({ where: { role: { id: role.id } } });
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
     ctx.body = {

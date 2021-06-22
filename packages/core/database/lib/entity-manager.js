@@ -1,7 +1,18 @@
 'use strict';
 
+const _ = require('lodash/fp');
+const types = require('./types');
 const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
+
+const pickScalarAtttibutes = (metadata, data) => {
+  const { attributes } = metadata;
+
+  const scalarKeys = Object.keys(attributes).filter(key => types.isScalar(attributes[key].type));
+  const picker = _.pick(scalarKeys);
+
+  return Array.isArray(data) ? data.map(data => picker(data)) : picker(data);
+};
 
 const createEntityManager = db => {
   const repoMap = {};
@@ -29,7 +40,7 @@ const createEntityManager = db => {
     },
 
     // TODO: define api
-    async count(uid, params) {
+    async count(uid, params = {}) {
       const qb = this.createQueryBuilder(uid).where(params.where);
 
       const res = await qb
@@ -58,8 +69,10 @@ const createEntityManager = db => {
       // apply programatic defaults if any -> I think this should be handled outside of this layer as we might have some applicative rules in the entity service
       // remove relation entries
 
+      const dataToInsert = pickScalarAtttibutes(db.metadata.get(uid), data);
+
       const [id] = await this.createQueryBuilder(uid)
-        .insert(data)
+        .insert(dataToInsert)
         .execute();
 
       // create relation associations or move this to the entity service & call attach on the repo instead
@@ -70,9 +83,14 @@ const createEntityManager = db => {
     async createMany(uid, params) {
       const { data } = params;
 
+      // pick scalar fields only
+      const dataToInsert = pickScalarAtttibutes(db.metadata.get(uid), data);
+
       const ids = await this.createQueryBuilder(uid)
-        .insert(data)
+        .insert(dataToInsert)
         .execute();
+
+      // TODO: create relation links
 
       return ids.map(id => ({ id }));
     },
@@ -82,9 +100,11 @@ const createEntityManager = db => {
     async update(uid, params) {
       const { where, data } = params;
 
+      const dataToUpdate = pickScalarAtttibutes(db.metadata.get(uid), data);
+
       /*const r =*/ await this.createQueryBuilder(uid)
         .where(where)
-        .update(data)
+        .update(dataToUpdate)
         .execute();
 
       return {};
@@ -93,9 +113,11 @@ const createEntityManager = db => {
     async updateMany(uid, params) {
       const { where, data } = params;
 
+      const dataToUpdate = pickScalarAtttibutes(db.metadata.get(uid), data);
+
       return this.createQueryBuilder(uid)
         .where(where)
-        .update(data)
+        .update(dataToUpdate)
         .execute();
     },
 

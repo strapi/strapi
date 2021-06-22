@@ -80,7 +80,7 @@ module.exports = {
 
     if (_.has(input, 'email')) {
       const uniqueEmailCheck = await strapi.admin.services.user.exists({
-        id_ne: id,
+        id: { $ne: id },
         email: input.email,
       });
 

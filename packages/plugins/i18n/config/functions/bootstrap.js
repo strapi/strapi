@@ -3,6 +3,7 @@
 const { getService } = require('../../utils');
 
 module.exports = async () => {
+  return;
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');

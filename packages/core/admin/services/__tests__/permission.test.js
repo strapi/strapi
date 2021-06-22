@@ -29,7 +29,7 @@ describe('Permission Service', () => {
         },
       });
 
-      await permissionService.find({ role: 1 });
+      await permissionService.find({ where: { role: { id: 1 } } });
 
       expect(find).toHaveBeenCalledWith({ role: 1 }, []);
     });

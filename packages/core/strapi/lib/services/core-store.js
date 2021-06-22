@@ -1,7 +1,7 @@
 'use strict';
 
 const coreStoreModel = {
-  uid: 'core-store',
+  uid: 'strapi::core-store',
   collectionName: 'strapi_core_store_settings',
   attributes: {
     key: {
@@ -39,7 +39,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         tag,
       };
 
-      const data = await db.query('core-store').findOne(where);
+      const data = await db.query('strapi::core-store').findOne({ where });
 
       if (!data) {
         return null;
@@ -78,7 +78,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         tag,
       };
 
-      const data = await db.query('core-store').findOne(where);
+      const data = await db.query('strapi::core-store').findOne({ where });
 
       if (data) {
         Object.assign(data, {
@@ -86,7 +86,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
           type: (typeof value).toString(),
         });
 
-        await db.query('core-store').update({ id: data.id }, data);
+        await db.query('strapi::core-store').update({ where: { id: data.id }, data });
       } else {
         const data = Object.assign({}, where, {
           value: JSON.stringify(value) || value.toString(),
@@ -94,7 +94,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
           tag,
         });
 
-        await db.query('core-store').create(data);
+        await db.query('strapi::core-store').create({ data });
       }
     }
 
@@ -113,7 +113,7 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
         tag,
       };
 
-      await db.query('core-store').delete(where);
+      await db.query('strapi::core-store').delete({ where });
     }
 
     return {

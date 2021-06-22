@@ -351,7 +351,7 @@ class Strapi {
     // Init core store
 
     const contentTypes = [
-      // todo: move corestore and webhook to real models instead of content types
+      // todo: move corestore and webhook to real models instead of content types to avoid adding extra attributes
       coreStoreModel,
       webhookModel,
       ...Object.values(strapi.models),

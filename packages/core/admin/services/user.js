@@ -35,7 +35,8 @@ const create = async attributes => {
   }
 
   const user = createUser(userInfo);
-  const createdUser = await strapi.query('user', 'admin').create(user);
+
+  const createdUser = await strapi.query('strapi::user').create({ data: user });
 
   await strapi.admin.services.metrics.sendDidInviteUser();
 
@@ -78,16 +79,19 @@ const updateById = async (id, attributes) => {
   if (_.has(attributes, 'password')) {
     const hashedPassword = await strapi.admin.services.auth.hashPassword(attributes.password);
 
-    return strapi.query('user', 'admin').update(
-      { id },
-      {
+    return strapi.query('strapi::user').update({
+      where: { id },
+      data: {
         ...attributes,
         password: hashedPassword,
-      }
-    );
+      },
+    });
   }
 
-  return strapi.query('user', 'admin').update({ id }, attributes);
+  return strapi.query('strapi::user').update({
+    where: { id },
+    data: attributes,
+  });
 };
 
 /**
@@ -130,7 +134,7 @@ const isLastSuperAdminUser = async userId => {
  * @returns {Promise<boolean>}
  */
 const exists = async (attributes = {}) => {
-  return (await strapi.query('user', 'admin').count(attributes)) > 0;
+  return (await strapi.query('strapi::user').count({ where: attributes })) > 0;
 };
 
 /**
@@ -139,7 +143,7 @@ const exists = async (attributes = {}) => {
  * @returns {Promise<registrationInfo>} - Returns user email, firstname and lastname
  */
 const findRegistrationInfo = async registrationToken => {
-  const user = await strapi.query('user', 'admin').findOne({ registrationToken });
+  const user = await strapi.query('strapi::user').findOne({ where: { registrationToken } });
 
   if (!user) {
     return undefined;
@@ -155,7 +159,7 @@ const findRegistrationInfo = async registrationToken => {
  * @param {Object} params.userInfo user info
  */
 const register = async ({ registrationToken, userInfo }) => {
-  const matchingUser = await strapi.query('user', 'admin').findOne({ registrationToken });
+  const matchingUser = await strapi.query('strapi::user').findOne({ where: { registrationToken } });
 
   if (!matchingUser) {
     throw strapi.errors.badRequest('Invalid registration info');
@@ -173,24 +177,26 @@ const register = async ({ registrationToken, userInfo }) => {
 /**
  * Find one user
  */
-const findOne = async (params, populate) => {
-  return strapi.query('user', 'admin').findOne(params, populate);
+const findOne = async (where = {}, populate) => {
+  return strapi.query('strapi::user').findOne({ where, populate });
 };
 
 /** Find many users (paginated)
  * @param query
  * @returns {Promise<user>}
  */
+// FIXME: to impl
 const findPage = async query => {
-  return strapi.query('user', 'admin').findPage(query);
+  return strapi.query('strapi::user').findPage(query);
 };
 
 /** Search for many users (paginated)
  * @param query
  * @returns {Promise<user>}
  */
+// FIXME: to impl
 const searchPage = async query => {
-  return strapi.query('user', 'admin').searchPage(query);
+  return strapi.query('strapi::user').searchPage(query);
 };
 
 /** Delete a user
@@ -199,7 +205,11 @@ const searchPage = async query => {
  */
 const deleteById = async id => {
   // Check at least one super admin remains
-  const userToDelete = await strapi.query('user', 'admin').findOne({ id }, ['roles']);
+  const userToDelete = await strapi.query('strapi::user').findOne({
+    where: { id },
+    populate: ['roles'],
+  });
+
   if (userToDelete) {
     if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
@@ -214,7 +224,7 @@ const deleteById = async id => {
     return null;
   }
 
-  return strapi.query('user', 'admin').delete({ id });
+  return strapi.query('strapi::user').delete({ where: { id } });
 };
 
 /** Delete a user
@@ -224,9 +234,13 @@ const deleteById = async id => {
 const deleteByIds = async ids => {
   // Check at least one super admin remains
   const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
-  const nbOfSuperAdminToDelete = await strapi
-    .query('user', 'admin')
-    .count({ id_in: ids, roles: [superAdminRole.id] });
+  const nbOfSuperAdminToDelete = await strapi.query('strapi::user').count({
+    where: {
+      id: ids,
+      roles: { id: superAdminRole.id },
+    },
+  });
+
   if (superAdminRole.usersCount === nbOfSuperAdminToDelete) {
     throw strapi.errors.badRequest(
       'ValidationError',
@@ -234,30 +248,35 @@ const deleteByIds = async ids => {
     );
   }
 
-  return strapi.query('user', 'admin').delete({ id_in: ids });
+  return strapi.query('strapi::user').delete({
+    where: { id: ids },
+  });
 };
 
 /** Count the users that don't have any associated roles
  * @returns {Promise<number>}
  */
+// FIXME: test / cleanup
 const countUsersWithoutRole = async () => {
-  const userModel = strapi.query('user', 'admin').model;
-  let count;
+  return strapi.query('strapi::user').count({ where: { roles: { id: { $null: true } } } });
 
-  if (userModel.orm === 'bookshelf') {
-    count = await strapi.query('user', 'admin').count({ roles_null: true });
-  } else if (userModel.orm === 'mongoose') {
-    count = await strapi.query('user', 'admin').model.countDocuments({
-      $or: [{ roles: { $exists: false } }, { roles: { $size: 0 } }],
-    });
-  } else {
-    const allRoles = await strapi.query('role', 'admin').find({ _limit: -1 });
-    count = await strapi.query('user', 'admin').count({
-      roles_nin: allRoles.map(r => r.id),
-    });
-  }
+  // const userModel = strapi.query('strapi::user').model;
+  // let count;
 
-  return count;
+  // if (userModel.orm === 'bookshelf') {
+  //   count = await strapi.query('strapi::user').count({ roles_null: true });
+  // } else if (userModel.orm === 'mongoose') {
+  //   count = await strapi.query('strapi::user').model.countDocuments({
+  //     $or: [{ roles: { $exists: false } }, { roles: { $size: 0 } }],
+  //   });
+  // } else {
+  //   const allRoles = await strapi.query('role', 'admin').find({ _limit: -1 });
+  //   count = await strapi.query('strapi::user').count({
+  //     roles_nin: allRoles.map(r => r.id),
+  //   });
+  // }
+
+  // return count;
 };
 
 /**
@@ -265,34 +284,38 @@ const countUsersWithoutRole = async () => {
  * @param params params used for the query
  * @returns {Promise<number>}
  */
-const count = async (params = {}) => {
-  return strapi.query('user', 'admin').count(params);
+const count = async (where = {}) => {
+  return strapi.query('strapi::user').count({ where });
 };
 
 /** Assign some roles to several users
  * @returns {undefined}
  */
+// FIXME: to impl
 const assignARoleToAll = async roleId => {
-  const userModel = strapi.query('user', 'admin').model;
+  await strapi.query('strapi::user').updateMany({
+    where: { roles: { id: { $null: true } } },
+    data: { roles: [roleId] },
+  });
 
-  if (userModel.orm === 'bookshelf') {
-    const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
-    const userTable = userModel.collectionName;
-    const knex = strapi.connections[userModel.connection];
-    const usersIds = await knex
-      .select(`${userTable}.id`)
-      .from(userTable)
-      .leftJoin(assocTable, `${userTable}.id`, `${assocTable}.user_id`)
-      .where(`${assocTable}.role_id`, null)
-      .pluck(`${userTable}.id`);
-
-    if (usersIds.length > 0) {
-      const newRelations = usersIds.map(userId => ({ user_id: userId, role_id: roleId }));
-      await knex.insert(newRelations).into(assocTable);
-    }
-  } else if (userModel.orm === 'mongoose') {
-    await strapi.query('user', 'admin').model.updateMany({}, { roles: [roleId] });
-  }
+  // const userModel = strapi.query('strapi::user').model;
+  // if (userModel.orm === 'bookshelf') {
+  //   const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
+  //   const userTable = userModel.collectionName;
+  //   const knex = strapi.connections[userModel.connection];
+  //   const usersIds = await knex
+  //     .select(`${userTable}.id`)
+  //     .from(userTable)
+  //     .leftJoin(assocTable, `${userTable}.id`, `${assocTable}.user_id`)
+  //     .where(`${assocTable}.role_id`, null)
+  //     .pluck(`${userTable}.id`);
+  //   if (usersIds.length > 0) {
+  //     const newRelations = usersIds.map(userId => ({ user_id: userId, role_id: roleId }));
+  //     await knex.insert(newRelations).into(assocTable);
+  //   }
+  // } else if (userModel.orm === 'mongoose') {
+  //   await strapi.query('strapi::user').model.updateMany({}, { roles: [roleId] });
+  // }
 };
 
 /** Display a warning if some users don't have at least one role
@@ -306,26 +329,27 @@ const displayWarningIfUsersDontHaveRole = async () => {
   }
 };
 
-const migrateUsers = async () => {
-  const someRolesExist = await strapi.admin.services.role.exists();
-  if (someRolesExist) {
-    return;
-  }
+// FIXME: to delete
+// const migrateUsers = async () => {
+//   const someRolesExist = await strapi.admin.services.role.exists();
+//   if (someRolesExist) {
+//     return;
+//   }
 
-  const userModel = strapi.query('user', 'admin').model;
+//   const userModel = strapi.query('strapi::user').model;
 
-  if (userModel.orm === 'bookshelf') {
-    await userModel
-      .query(qb => qb.where('blocked', false).orWhere('blocked', null))
-      .save({ isActive: true }, { method: 'update', patch: true, require: false });
-    await userModel
-      .query(qb => qb.where('blocked', true))
-      .save({ isActive: false }, { method: 'update', patch: true, require: false });
-  } else if (userModel.orm === 'mongoose') {
-    await userModel.updateMany({ blocked: { $in: [false, null] } }, { isActive: true });
-    await userModel.updateMany({ blocked: true }, { isActive: false });
-  }
-};
+//   if (userModel.orm === 'bookshelf') {
+//     await userModel
+//       .query(qb => qb.where('blocked', false).orWhere('blocked', null))
+//       .save({ isActive: true }, { method: 'update', patch: true, require: false });
+//     await userModel
+//       .query(qb => qb.where('blocked', true))
+//       .save({ isActive: false }, { method: 'update', patch: true, require: false });
+//   } else if (userModel.orm === 'mongoose') {
+//     await userModel.updateMany({ blocked: { $in: [false, null] } }, { isActive: true });
+//     await userModel.updateMany({ blocked: true }, { isActive: false });
+//   }
+// };
 
 module.exports = {
   create,
@@ -343,6 +367,6 @@ module.exports = {
   count,
   assignARoleToAll,
   displayWarningIfUsersDontHaveRole,
-  migrateUsers,
+  // migrateUsers,
   resetPasswordByEmail,
 };

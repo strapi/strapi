@@ -64,17 +64,22 @@ const formatAttributes = model => {
   }, {});
 };
 
+// FIXME: not needed
 const formatAttribute = (key, attribute, { model }) => {
-  if (has('type', attribute)) return attribute;
+  return attribute;
 
-  if (isMediaAttribute(attribute)) {
-    return toMedia(attribute);
-  }
 
-  const relation = (model.associations || []).find(assoc => assoc.alias === key);
-  return toRelation(attribute, relation);
+  // if (has('type', attribute)) return attribute;
+
+  // if (isMediaAttribute(attribute)) {
+  //   return toMedia(attribute);
+  // }
+
+  // const relation = (model.associations || []).find(assoc => assoc.alias === key);
+  // return toRelation(attribute, relation);
 };
 
+// FIXME: not needed
 const toMedia = attribute => {
   return {
     type: 'media',
@@ -85,6 +90,7 @@ const toMedia = attribute => {
   };
 };
 
+// FIXME: not needed
 const toRelation = (attribute, relation) => {
   return {
     ...attribute,

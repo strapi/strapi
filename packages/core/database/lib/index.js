@@ -32,6 +32,10 @@ class Database {
   }
 
   query(uid) {
+    if (!this.metadata.has(uid)) {
+      throw new Error(`Model ${uid} not found`);
+    }
+
     return this.entityManager.getRepository(uid);
   }
 

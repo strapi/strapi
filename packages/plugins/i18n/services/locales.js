@@ -65,7 +65,7 @@ const setIsDefault = async locales => {
 };
 
 const initDefaultLocale = async () => {
-  const existingLocalesNb = await strapi.query('locale', 'i18n').count();
+  const existingLocalesNb = await strapi.query('plugins::i18n.locale').count();
   if (existingLocalesNb === 0) {
     await create(DEFAULT_LOCALE);
     await setDefaultLocale({ code: DEFAULT_LOCALE.code });

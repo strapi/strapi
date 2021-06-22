@@ -48,8 +48,10 @@ module.exports = {
     },
     role: {
       configurable: false,
-      model: 'role',
-      plugin: 'admin',
+      type: 'relation',
+      relation: 'manyToOne',
+      inversedBy: 'permissions',
+      target: 'strapi::role',
     },
   },
 };

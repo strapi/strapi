@@ -208,7 +208,12 @@ const processWhere = (where, ctx, depth = 0) => {
 
     // move to if else to check for scalar / relation / components & throw for other types
     if (attribute.type === 'relation') {
+      // TODO: support shortcut like { role: X } => {role: { id: X }}
+
       // TODO: pass down some filters (e.g published at)
+
+      // attribute
+
       const subAlias = createJoin(ctx, { alias, uid, attributeName: key, attribute });
 
       const nestedWhere = processNested(value, {
@@ -397,6 +402,22 @@ const processPopulate = (populate, ctx) => {
 
   if (populate === true) {
     // TODO: transform to full object populate
+  }
+
+  if (Array.isArray(populate)) {
+    return populate.reduce((acc, attributeName) => {
+      if (typeof attributeName !== 'string') {
+        throw new Error(`Expected a string receveid ${typeof attributeName}.`);
+      }
+
+      const attribute = meta.attributes[attributeName];
+
+      if (!attribute) {
+        throw new Error(`Cannot populate unknown field ${attributeName}`);
+      }
+
+      return { ...acc, [attributeName]: true };
+    }, {});
   }
 
   if (!_.isPlainObject(populate)) {

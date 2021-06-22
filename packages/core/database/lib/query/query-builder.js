@@ -63,7 +63,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     // TODO: convert where into aliases where & nested joins
-    where(where) {
+    where(where = {}) {
       const processedWhere = helpers.processWhere(where, { qb: this, uid, db });
 
       state.where.push(processedWhere);
@@ -190,7 +190,7 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'count': {
-          qb.count(state.count);
+          qb.count({ count: state.count });
           break;
         }
         case 'insert': {

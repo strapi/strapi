@@ -5,6 +5,7 @@ const path = require('path');
 const _ = require('lodash');
 
 module.exports = async () => {
+  return;
   // Check if the plugin users-permissions is installed because the documentation needs it
   if (Object.keys(strapi.plugins).indexOf('users-permissions') === -1) {
     throw new Error(
@@ -27,6 +28,7 @@ module.exports = async () => {
   const services = strapi.plugins['documentation'].services.documentation;
   // Generate plugins' documentation
   const pluginsWithDocumentationNeeded = services.getPluginsWithDocumentationNeeded();
+
   pluginsWithDocumentationNeeded.forEach(plugin => {
     const isDocExisting = services.checkIfPluginDocumentationFolderExists(plugin);
 

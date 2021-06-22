@@ -13,6 +13,7 @@ const uuid = require('uuid/v4');
 const usersPermissionsActions = require('../users-permissions-actions');
 
 module.exports = async () => {
+  return;
   const pluginStore = strapi.store({
     environment: '',
     type: 'plugin',

@@ -71,13 +71,14 @@ module.exports = {
       private: true,
     },
     roles: {
-      collection: 'role',
-      collectionName: 'strapi_users_roles',
-      via: 'users',
-      dominant: true,
-      plugin: 'admin',
       configurable: false,
       private: true,
+      type: 'relation',
+      relation: 'manyToMany',
+      inversedBy: 'users',
+      target: 'strapi::role',
+      // FIXME: Allow setting this
+      collectionName: 'strapi_users_roles',
     },
     blocked: {
       type: 'boolean',

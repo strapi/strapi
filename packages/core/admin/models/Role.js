@@ -42,15 +42,17 @@ module.exports = {
     },
     users: {
       configurable: false,
-      collection: 'user',
-      via: 'roles',
-      plugin: 'admin',
+      type: 'relation',
+      relation: 'manyToMany',
+      mappedBy: 'roles',
+      target: 'strapi::user',
     },
     permissions: {
       configurable: false,
-      plugin: 'admin',
-      collection: 'permission',
-      via: 'role',
+      type: 'relation',
+      relation: 'oneToMany',
+      mappedBy: 'role',
+      target: 'strapi::permission',
     },
   },
 };
