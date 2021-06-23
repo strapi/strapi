@@ -38,9 +38,9 @@
   "components.TableEmpty.withSearch": "There are no {contentType} corresponding to the search ({search})...",
   "components.TableEmpty.withoutFilter": "There are no {contentType}...",
   "components.empty-repeatable": "No entry yet. Click on the button below to add one.",
-  "components.repeatable.reorder.error": "An error occurred while reordering your component's field, please try again",
   "components.notification.info.maximum-requirement": "You have already reached the maximum number of fields",
   "components.notification.info.minimum-requirement": "A field has been added to match the minimum requirement",
+  "components.repeatable.reorder.error": "An error occurred while reordering your component's field, please try again",
   "components.reset-entry": "Reset entry",
   "components.uid.apply": "apply",
   "components.uid.available": "available",
@@ -109,6 +109,8 @@
   "containers.SettingsPage.pluginHeaderDescription": "Configure the settings for all your Collection types and Groups",
   "containers.SettingsView.list.subtitle": "Configure the layout and display of your Collection types and groups",
   "containers.SettingsView.list.title": "Display configurations",
+  "edit-settings-view.link-to-ctb.components": "Edit the component",
+  "edit-settings-view.link-to-ctb.content-types": "Edit the content type",
   "emptyAttributes.button": "Go to collection type builder",
   "emptyAttributes.description": "Add your first field to your Collection Type",
   "emptyAttributes.title": "There are no fields yet",
@@ -159,8 +161,8 @@
   "notification.info.minimumFields": "You need to have at least one field displayed",
   "notification.upload.error": "An error has occurred while uploading your files",
   "pageNotFound": "Page not found",
-  "pages.NoContentType.text": "You don't have any content yet, we recommend you to create your first Content-Type.",
   "pages.NoContentType.button": "Create your first Content-Type",
+  "pages.NoContentType.text": "You don't have any content yet, we recommend you to create your first Content-Type.",
   "permissions.not-allowed.create": "You are not allowed to create a document",
   "permissions.not-allowed.update": "You are not allowed to see this document",
   "plugin.description.long": "Quick way to see, edit and delete the data in your database.",
@@ -180,7 +182,5 @@
   "success.record.delete": "Deleted",
   "success.record.publish": "Published",
   "success.record.save": "Saved",
-  "success.record.unpublish": "Unpublished",
-  "edit-settings-view.link-to-ctb.components": "Edit the component",
-  "edit-settings-view.link-to-ctb.content-types": "Edit the content type"
+  "success.record.unpublish": "Unpublished"
 }

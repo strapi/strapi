@@ -113,8 +113,6 @@
   "form.button.select-component": "Selecteer een component",
   "form.button.single-type.description": "Het beste voor een enkele instantie zoals over ons, homepage, enz.",
   "from": "van",
-  "injected-components.content-manager.edit-settings-view.link.components": "Bewerk het component",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Bewerk het content type",
   "menu.section.components.name.plural": "Componenten",
   "menu.section.components.name.singular": "Component",
   "menu.section.models.name.plural": "Collectie types",
