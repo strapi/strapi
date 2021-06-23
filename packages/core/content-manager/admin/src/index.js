@@ -34,13 +34,9 @@ export default {
     });
 
     app.addReducers(reducers);
-
-    // Hook that allows to mutate the displayed headers of the list view table
     app.createHook(INJECT_COLUMN_IN_TABLE);
-    // Hook that allows to mutate the CM's link pre-set filters
     app.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     app.createHook(MUTATE_SINGLE_TYPES_LINKS);
-    // Hook that allows to mutate the CM's edit view layout
     app.createHook(MUTATE_EDIT_VIEW_LAYOUT);
 
     app.registerPlugin({
