@@ -50,19 +50,19 @@
   "PopUpForm.Providers.redirectURL.label": "Webbadressen för omdirigering som ska läggas till i {Provider} applikationskonfigurationer",
   "PopUpForm.Providers.secret.label": "Klient hemlighet",
   "PopUpForm.Providers.secret.placeholder": "TEXT",
-  "PopUpForm.header.edit.email-templates": "Redigera e-postmallar",
-  "PopUpForm.header.edit.providers": "Redigera leverantör",
   "PopUpForm.Providers.subdomain.label": "Host URI (Subdomän)",
   "PopUpForm.Providers.subdomain.placeholder": "min.subdomän.com",
+  "PopUpForm.header.edit.email-templates": "Redigera e-postmallar",
+  "PopUpForm.header.edit.providers": "Redigera leverantör",
   "Settings.roles.deleted": "Roll borttagen",
   "Settings.roles.edited": "Role redigerad",
   "Settings.section-label": "Roller och behörigheter",
   "notification.success.submit": "Inställningar har uppdaterats",
   "plugin.description.long": "Skydda ditt API med en fullständig autentiseringsprocess baserad på JWT. Detta plugin har också en ACL-strategi som låter dig hantera behörigheterna mellan användargrupperna.",
-  "plugin.description.short": "Skydda ditt API med en fullständig autentiseringsprocess baserad på JWT", 
+  "plugin.description.short": "Skydda ditt API med en fullständig autentiseringsprocess baserad på JWT",
   "plugin.name": "Roller och behörigheter",
   "popUpWarning.button.cancel": "Avbryt",
   "popUpWarning.button.confirm": "Bekräfta",
   "popUpWarning.title": "Var god bekräfta",
-  "popUpWarning.warning.cancel": "Är du säker att du vill avbryta dina ändringar?" 
+  "popUpWarning.warning.cancel": "Är du säker att du vill avbryta dina ändringar?"
 }

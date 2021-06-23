@@ -120,7 +120,6 @@
   "Settings.webhooks.enabled": "Habilitado",
   "Settings.webhooks.event.publish-tooltip": "Este evento solo existe para contenidos con el sistema Borrador/Publicación habilitado",
   "Settings.webhooks.events.create": "Crear",
-  "Settings.webhooks.events.edit": "Edición",
   "Settings.webhooks.events.update": "Actualizar",
   "Settings.webhooks.form.events": "Eventos",
   "Settings.webhooks.form.headers": "Encabezados",

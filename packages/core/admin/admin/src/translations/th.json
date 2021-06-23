@@ -1,6 +1,5 @@
 {
   "Analytics": "การวิเคราะห์",
-  "Auth.advanced.allow_register": "",
   "Auth.components.Oops.text": "แอคเคาต์ของคุณถูกระงับชั่วคราว",
   "Auth.form.button.forgot-password": "ส่งอีเมล",
   "Auth.form.button.go-home": "กลับไปยังหน้าหลัก",
@@ -118,7 +117,6 @@
   "Settings.webhooks.disabled": "ปิดใช้งาน",
   "Settings.webhooks.enabled": "ถูกเปิดใช้งาน",
   "Settings.webhooks.events.create": "สร้าง",
-  "Settings.webhooks.events.edit": "แก้ไข",
   "Settings.webhooks.form.events": "เหตุการณ์",
   "Settings.webhooks.form.headers": "ส่วนหัว",
   "Settings.webhooks.form.name": "ชื่อ",
