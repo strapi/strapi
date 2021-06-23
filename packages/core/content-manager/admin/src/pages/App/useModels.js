@@ -2,6 +2,7 @@ import { request, useNotification, useRBACProvider, useStrapiApp } from '@strapi
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getData, resetProps, setContentTypeLinks } from './actions';
+import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../exposedHooks';
 import { getRequestUrl } from '../../utils';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';
@@ -30,11 +31,11 @@ const useModels = () => {
         toggleNotification
       );
 
-      const { ctLinks } = runHookWaterfall('cm/mutate-collection-type-links', {
+      const { ctLinks } = runHookWaterfall(MUTATE_COLLECTION_TYPES_LINKS, {
         ctLinks: authorizedCtLinks,
         models,
       });
-      const { stLinks } = runHookWaterfall('cm/mutate-single-type-links', {
+      const { stLinks } = runHookWaterfall(MUTATE_SINGLE_TYPES_LINKS, {
         stLinks: authorizedStLinks,
         models,
       });

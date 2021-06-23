@@ -43,10 +43,13 @@ export default {
   },
   boot(app) {
     // Hooks that mutate the collection types links in order to add the locale filter
-    app.registerHook('cm/mutate-collection-type-links', addLocaleToCollectionTypesLinksHook);
-    app.registerHook('cm/mutate-single-type-links', addLocaleToSingleTypesLinksHook);
+    app.registerHook(
+      'CM/pages/App/mutate-collection-types-links',
+      addLocaleToCollectionTypesLinksHook
+    );
+    app.registerHook('CM/pages/App/mutate-single-types-links', addLocaleToSingleTypesLinksHook);
     // Hook that adds a column into the CM's LV table
-    app.registerHook('cm/inject-column-in-table', addColumnToTableHook);
+    app.registerHook('CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {
