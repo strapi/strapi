@@ -33,7 +33,7 @@ function readStarterJson(filePath, starterUrl) {
  * @param  {string} projectName Name of the project
  */
 async function initPackageJson(rootPath, projectName) {
-  const packageManager = hasYarn ? 'yarn --cwd' : 'npm run --prefix';
+  const packageManager = hasYarn() ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
     await fse.writeJson(
