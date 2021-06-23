@@ -1,6 +1,6 @@
 import addLocaleToLinksSearch from '../addLocaleToLinksSearch';
 
-describe('i18n | middlewares | utils | addLocaleToLinksSearch', () => {
+describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
   it('should return an array', () => {
     expect(addLocaleToLinksSearch([])).toEqual([]);
   });
