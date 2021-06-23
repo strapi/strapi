@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "Content Type Builder",
@@ -8,17 +8,17 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.5",
-    "@buffetjs/custom": "3.3.5",
-    "@buffetjs/hooks": "3.3.5",
-    "@buffetjs/icons": "3.3.5",
-    "@buffetjs/styles": "3.3.5",
-    "@buffetjs/utils": "3.3.5",
+    "@buffetjs/core": "3.3.6",
+    "@buffetjs/custom": "3.3.6",
+    "@buffetjs/hooks": "3.3.6",
+    "@buffetjs/icons": "3.3.6",
+    "@buffetjs/styles": "3.3.6",
+    "@buffetjs/utils": "3.3.6",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/generate": "3.6.0",
-    "@strapi/generate-api": "3.6.0",
-    "@strapi/helper-plugin": "3.6.0",
-    "@strapi/utils": "3.6.0",
+    "@strapi/generate": "3.6.5",
+    "@strapi/generate-api": "3.6.5",
+    "@strapi/helper-plugin": "3.6.5",
+    "@strapi/utils": "3.6.5",
     "fs-extra": "^9.1.0",
     "immutable": "^3.8.2",
     "lodash": "4.17.21",
@@ -52,7 +52,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

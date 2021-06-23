@@ -5,7 +5,6 @@ const validators = require('./common-validators');
 
 const registerProviderActionSchema = yup
   .array()
-  .requiredAllowEmpty()
   .required()
   .of(
     yup
@@ -32,7 +31,7 @@ const registerProviderActionSchema = yup
           then: yup
             .array()
             .of(yup.string())
-            .requiredAllowEmpty(),
+            .required(),
           otherwise: yup
             .mixed()
             .oneOf([undefined], 'subjects should only be defined for the "contentTypes" section'),

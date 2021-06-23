@@ -112,7 +112,7 @@
   "form.button.add-first-field-to-created-component": "Add first field to the component",
   "form.button.add.field.to.collectionType": "Add another field to this collection type",
   "form.button.add.field.to.component": "Add another field to this component",
-  "form.button.add.field.to.contentType ": "Add another field to this content type",
+  "form.button.add.field.to.contentType": "Add another field to this content type",
   "form.button.add.field.to.singleType": "Add another field to this single type",
   "form.button.cancel": "Cancel",
   "form.button.collection-type.description": "Best for multiple instances like articles, products, comments, etc.",

@@ -29,7 +29,10 @@ const schema = yup.object().shape({
       })
     );
   }),
-  events: yup.array().required(translatedErrors.required),
+  events: yup
+    .array()
+    .min(1, translatedErrors.min)
+    .required(translatedErrors.required),
 });
 
 export default schema;

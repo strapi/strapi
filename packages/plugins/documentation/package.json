@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-documentation",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "Create an OpenAPI Document and visualize your API with SWAGGER UI.",
   "strapi": {
     "name": "Documentation",
@@ -11,13 +11,13 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.5",
-    "@buffetjs/custom": "3.3.5",
-    "@buffetjs/hooks": "3.3.5",
-    "@buffetjs/icons": "3.3.5",
-    "@buffetjs/styles": "3.3.5",
-    "@buffetjs/utils": "3.3.5",
-    "@strapi/helper-plugin": "3.6.0",
+    "@buffetjs/core": "3.3.6",
+    "@buffetjs/custom": "3.3.6",
+    "@buffetjs/hooks": "3.3.6",
+    "@buffetjs/icons": "3.3.6",
+    "@buffetjs/styles": "3.3.6",
+    "@buffetjs/utils": "3.3.6",
+    "@strapi/helper-plugin": "3.6.5",
     "cheerio": "^1.0.0-rc.5",
     "fs-extra": "^9.1.0",
     "koa-static": "^5.0.0",
@@ -70,7 +70,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

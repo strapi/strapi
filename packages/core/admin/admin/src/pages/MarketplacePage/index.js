@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   LoadingIndicatorPage,
   request,
   useNotification,
   useAutoReloadOverlayBlocker,
   useAppInfos,
+  useTracking,
   useStrapiApp,
 } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
@@ -19,17 +20,25 @@ const MarketPlacePage = () => {
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
   const history = useHistory();
+  const { trackUsage } = useTracking();
   const { autoReload, currentEnvironment } = useAppInfos();
   const { formatMessage } = useIntl();
   const { plugins } = useStrapiApp();
 
   const { error, isLoading, data } = useFetchPluginsFromMarketPlace();
 
+  const emitEventRef = useRef(trackUsage);
+
+  useEffect(() => {
+    emitEventRef.current('didGotToMarketplace');
+  }, []);
+
   if (isLoading || error) {
     return <LoadingIndicatorPage />;
   }
 
   const handleDownloadPlugin = async pluginId => {
+    trackUsage('willInstallPlugin', { plugin: pluginId });
     // Force the Overlayblocker to be displayed
     const overlayblockerParams = {
       enabled: true,
@@ -50,6 +59,7 @@ const MarketPlacePage = () => {
       const response = await request('/admin/plugins/install', opts, overlayblockerParams);
 
       if (response.ok) {
+        trackUsage('didInstallPlugin', { plugin: pluginId });
         // Reload the app
         window.location.reload();
       }

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-policy",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "Generate a policy for a Strapi API.",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "lodash": "4.17.21",
-    "@strapi/utils": "3.6.0"
+    "@strapi/utils": "3.6.5"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
@@ -40,7 +40,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
