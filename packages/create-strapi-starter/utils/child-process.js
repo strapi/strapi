@@ -9,7 +9,7 @@ const logger = require('./logger');
  * @param  {string} path Path to directory (frontend, backend)
  */
 function runInstall(path) {
-  if (hasYarn) {
+  if (hasYarn()) {
     return execa('yarn', ['install'], {
       cwd: path,
       stdin: 'ignore',
@@ -20,7 +20,7 @@ function runInstall(path) {
 }
 
 function runApp(rootPath) {
-  if (hasYarn) {
+  if (hasYarn()) {
     return execa('yarn', ['develop'], {
       stdio: 'inherit',
       cwd: rootPath,
