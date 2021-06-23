@@ -9,6 +9,7 @@ import pluginPkg from '../../package.json';
 import {
   INJECT_COLUMN_IN_TABLE,
   MUTATE_COLLECTION_TYPES_LINKS,
+  MUTATE_EDIT_VIEW_LAYOUT,
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import pluginId from './pluginId';
@@ -39,6 +40,8 @@ export default {
     // Hook that allows to mutate the CM's link pre-set filters
     app.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     app.createHook(MUTATE_SINGLE_TYPES_LINKS);
+    // Hook that allows to mutate the CM's edit view layout
+    app.createHook(MUTATE_EDIT_VIEW_LAYOUT);
 
     app.registerPlugin({
       description: pluginDescription,
