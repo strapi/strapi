@@ -1,4 +1,4 @@
-import { fixtures } from '../../../../../../../admin-test-utils';
+import { fixtures } from '../../../../../../../../admin-test-utils';
 import { makeSelectModels } from '../selectors';
 
 describe('Content Manager | App | selectors', () => {

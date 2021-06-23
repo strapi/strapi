@@ -1,4 +1,4 @@
-import { fixtures } from '../../../../../admin-test-utils';
+import { fixtures } from '../../../../../../admin-test-utils';
 import { selectPermissions, selectCollectionTypePermissions } from '../selectors';
 
 describe('selectors', () => {

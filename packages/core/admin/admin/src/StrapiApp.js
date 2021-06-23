@@ -277,6 +277,10 @@ class StrapiApp {
   }
 
   registerHook = (name, fn) => {
+    invariant(
+      this.hooksDict[name],
+      `The hook ${name} is not defined. You are trying to register a hook that does not exist in the application.`
+    );
     this.hooksDict[name].register(fn);
   };
 
