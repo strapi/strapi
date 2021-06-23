@@ -125,8 +125,6 @@
   "form.button.single-type.description": "Nützlich für einzelne Instanz wie Über uns, Startseite, etc.",
   "form.contentType.divider.draft-publish": "ENTWURF/VERÖFFENTLICHEN",
   "from": "von",
-  "injected-components.content-manager.edit-settings-view.link.components": "Komponente bearbeiten",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Inhaltstyp bearbeiten",
   "menu.section.components.name.plural": "Komponenten",
   "menu.section.components.name.singular": "Komponente",
   "menu.section.models.name.plural": "Sammlungen",

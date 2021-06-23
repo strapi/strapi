@@ -122,8 +122,6 @@
   "form.button.select-component": "Вибрати компонент",
   "form.button.single-type.description": "Підходить для поодиноких об'єктів, як-то домашня сторінка, про нас тощо",
   "from": "з",
-  "injected-components.content-manager.edit-settings-view.link.components": "Редагувати компонент",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Редагувати Content Type",
   "menu.section.components.name.plural": "Компоненти",
   "menu.section.components.name.singular": "Компонент",
   "menu.section.models.name.plural": "Collection Types",

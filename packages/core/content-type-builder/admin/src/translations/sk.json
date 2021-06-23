@@ -124,8 +124,6 @@
   "form.button.select-component": "Vybrať komponent",
   "form.button.single-type.description": "Ideálne pre jednorazové inštancie ako sú napríklad domovská stránka, atď.",
   "from": "od",
-  "injected-components.content-manager.edit-settings-view.link.components": "Upraviť komponent",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Upraviť Typ obsahu",
   "menu.section.components.name.plural": "Komponenty",
   "menu.section.components.name.singular": "Komponent",
   "menu.section.models.name.plural": "Typy obsahu",
