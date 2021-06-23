@@ -37,7 +37,8 @@ const createTable = meta => {
     // TODO: if relation & has a joinColumn -> create it
 
     if (types.isRelation(attribute.type)) {
-      if (attribute.owner && attribute.joinColumn) {
+      if (attribute.joinColumn && attribute.owner) {
+        // TODO: pass uniquness for oneToOne to avoid create more than one to one
         const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
         table.columns.push(
           createColumn(columnName, {

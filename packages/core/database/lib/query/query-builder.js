@@ -196,7 +196,7 @@ const createQueryBuilder = (uid, db) => {
         case 'insert': {
           qb.insert(state.data);
 
-          if (db.dialect.useReturning()) {
+          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
             qb.returning('id');
           }
 
@@ -205,7 +205,7 @@ const createQueryBuilder = (uid, db) => {
         case 'update': {
           qb.update(state.data);
 
-          if (db.dialect.useReturning()) {
+          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
             qb.returning('id');
           }
 
@@ -214,7 +214,7 @@ const createQueryBuilder = (uid, db) => {
         case 'delete': {
           qb.del();
 
-          if (db.dialect.useReturning()) {
+          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
             qb.returning('id');
           }
 

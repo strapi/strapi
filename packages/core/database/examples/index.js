@@ -48,7 +48,7 @@ const article = {
       relation: 'manyToOne',
       target: 'category',
       inversedBy: 'articles',
-      useJoinTable: false,
+      // useJoinTable: false,
     },
     tags: {
       type: 'relation',
@@ -347,16 +347,6 @@ async function main() {
 
   // console.log(JSON.stringify(article, null, 4));
 
-  await orm.query('category').createMany({
-    // select: {},
-    // populate: {},
-    data: Array(100)
-      .fill({})
-      .map((v, idx) => ({
-        title: `Category ${_.padStart(idx, 3, '0')}`,
-      })),
-  });
-
   await orm.query('article').createMany({
     // select: {},
     // populate: {},
@@ -364,9 +354,48 @@ async function main() {
       .fill({})
       .map((v, idx) => ({
         title: `Article ${_.padStart(idx, 3, '0')}`,
-        category_id: idx + 1,
+        // category_id: idx + 1,
+        // category: idx+1
       })),
   });
+
+  // await orm.query('category').createMany({
+  //   // select: {},
+  //   // populate: {},
+  //   data: Array(100)
+  //     .fill({})
+  //     .map((v, idx) => ({
+  //       title: `Category ${_.padStart(idx, 3, '0')}`,
+  //       articles: [idx + 1, idx + 2],
+  //     })),
+  // });
+
+  const cat = await orm.query('category').create({
+    data: {
+      articles: [1, 2, 3, 4, 5],
+    },
+    populate: ['articles'],
+  });
+
+  console.log(cat);
+
+  const tag = await orm.query('tag').create({
+    data: {
+      articles: [1, 2, 3, 4, 5],
+    },
+    populate: ['articles'],
+  });
+
+  console.log(tag);
+
+  const someArticles = await orm.query('article').findMany({
+    where: {
+      id: [1, 2, 3, 4, 5],
+    },
+    populate: ['tags', 'category'],
+  });
+
+  console.log(someArticles);
 
   // await orm.query('category').updateMany({
   //   where: {
@@ -512,34 +541,34 @@ async function main() {
 
   // console.log(article);
 
-  await orm.query('category').findMany({
-    populate: {
-      compo: true,
-      articles: {
-        select: ['title'],
-        populate: {
-          category: {
-            select: ['title'],
-          },
-        },
-      },
-    },
-    limit: 5,
-  });
+  // await orm.query('category').findMany({
+  //   populate: {
+  //     compo: true,
+  //     articles: {
+  //       select: ['title'],
+  //       populate: {
+  //         category: {
+  //           select: ['title'],
+  //         },
+  //       },
+  //     },
+  //   },
+  //   limit: 5,
+  // });
 
-  await orm.query('article').findMany({
-    populate: {
-      tags: true,
-    },
-    limit: 5,
-  });
+  // await orm.query('article').findMany({
+  //   populate: {
+  //     tags: true,
+  //   },
+  //   limit: 5,
+  // });
 
-  await orm.query('tag').findMany({
-    populate: {
-      articles: true,
-    },
-    limit: 5,
-  });
+  // await orm.query('tag').findMany({
+  //   populate: {
+  //     articles: true,
+  //   },
+  //   limit: 5,
+  // });
 
   // const articleCategory = orm.query('article').load(article, 'category', {
   //   select: ['id', 'title'],
@@ -554,62 +583,32 @@ async function main() {
   //   tags: true
   // });
 
-  await orm.query('article').findMany({
-    limit: 5,
-    where: {
-      // category: {
-      //   title: {
-      //     $contains: '09',
-      //   },
-      // },
-      // tags: {
-      //   title: {
-      //     $contains: 'xxx'
-      //   }
-      // },
+  // await orm.query('article').findMany({
+  //   limit: 5,
+  //   where: {
+  //     compo: {
+  //       key: 'xx',
+  //     },
 
-      compo: {
-        key: 'xx',
-      },
-
-      // $and: [],
-      // $or: [],
-      // $not: {},
-      // field: {
-      //   $not: {
-      //     $contains: 'title',
-      //   },
-      // },
-    },
-    populate: {
-      category: {
-        select: ['id', 'title'],
-        limit: 5,
-        offset: 2,
-        orderBy: 'title',
-        where: {
-          // title: {
-          //   $contains: '7',
-          // },
-          // article: {
-          //   title: {
-          //     $contains: 'test'
-          //   }
-          // }
-        },
-        populate: {
-          articles: {
-            populate: {
-              tags: true,
-            },
-          },
-        },
-      },
-      // tags: true,
-      compo: true,
-    },
-    orderBy: { compo: { key: 'DESC' } },
-  });
+  //   },
+  //   populate: {
+  //     category: {
+  //       select: ['id', 'title'],
+  //       limit: 5,
+  //       offset: 2,
+  //       orderBy: 'title',
+  //       populate: {
+  //         articles: {
+  //           populate: {
+  //             tags: true,
+  //           },
+  //         },
+  //       },
+  //     },
+  //     compo: true,
+  //   },
+  //   orderBy: { compo: { key: 'DESC' } },
+  // });
 }
 
 main()

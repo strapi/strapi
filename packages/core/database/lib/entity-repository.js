@@ -6,7 +6,7 @@ const wrapDebug = obj => {
   for (const key in obj) {
     nOjb[key] = async function(...args) {
       const result = await obj[key](...args);
-      console.log(`[${key}]:`, result);
+      // console.log(`[${key}]:`, result);
       return result;
     };
   }

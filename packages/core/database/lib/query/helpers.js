@@ -506,6 +506,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
+          .addSelect(`${alias}.${joinTable.joinColumn.name}`)
           .where({
             [`${alias}.${joinTable.joinColumn.name}`]: results.map(
               r => r[joinTable.joinColumn.referencedColumn]
@@ -567,6 +568,8 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
+          //TODO: select join column
+          .addSelect(`${alias}.${joinTable.joinColumn.name}`)
           .where({
             [`${alias}.${joinTable.joinColumn.name}`]: results.map(
               r => r[joinTable.joinColumn.referencedColumn]
@@ -605,6 +608,7 @@ const applyPopulate = async (results, populate, ctx) => {
           rootTable: qb.alias,
           on: joinTable.on,
         })
+        .addSelect(`${alias}.${joinTable.joinColumn.name}`)
         .where({
           [`${alias}.${joinTable.joinColumn.name}`]: results.map(
             r => r[joinTable.joinColumn.referencedColumn]

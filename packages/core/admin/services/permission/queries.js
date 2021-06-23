@@ -139,16 +139,19 @@ const filterPermissionsToRemove = async permissions => {
  */
 const cleanPermissionsInDatabase = async () => {
   const pageSize = 200;
-  let total = Infinity;
 
-  for (let page = 1; page * pageSize < total; page++) {
+  const total = await strapi.query('strapi::permission').count();
+  const pageCount = Math.ceil(total / pageSize);
+
+  console.log('cleanPermissionsInDatabase', { total, pageCount });
+  // let total = Infinity;
+
+  for (let page = 1; page < pageCount; page++) {
     // 1. Find invalid permissions and collect their ID to delete them later
-    // FIXME: to impl / reimpl
-    const { pagination, results } = await strapi
-      .query('permission', 'admin')
-      .findPage({ page, pageSize }, []);
 
-    total = pagination.total;
+    const results = await strapi
+      .query('strapi::permission')
+      .findMany({ limit: pageSize, offset: page * pageSize });
 
     const permissions = permissionDomain.toPermission(results);
     const permissionsToRemove = await filterPermissionsToRemove(permissions);

@@ -38,7 +38,6 @@ const syncAuthSettings = async () => {
 };
 
 module.exports = async () => {
-  
   registerAdminConditions();
   registerPermissionActions();
 
@@ -47,8 +46,6 @@ module.exports = async () => {
   const roleService = getService('role');
 
   await roleService.createRolesIfNoneExist();
-
-  return;
 
   await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();

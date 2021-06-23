@@ -169,9 +169,8 @@ const update = async (params, attributes) => {
  * @returns {Promise<boolean>}
  */
 const exists = async (params = {}) => {
-  const foundCount = await strapi.query('strapi::role').count({ where: params });
-
-  return foundCount > 0;
+  const count = await strapi.query('strapi::role').count({ where: params });
+  return count > 0;
 };
 
 /**
@@ -368,7 +367,6 @@ const assignPermissions = async (roleId, permissions = []) => {
     await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
   }
 
-  
   if (permissionsToAdd.length > 0) {
     const createdPermissions = await addPermissions(roleId, permissionsToAdd);
     permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
