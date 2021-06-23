@@ -41,11 +41,6 @@ describe('Role CRUD End to End', () => {
           "conditions": Array [
             Object {
               "category": "default",
-              "displayName": "Has Locale Access",
-              "id": "plugins::i18n.has-locale-access",
-            },
-            Object {
-              "category": "default",
               "displayName": "Is creator",
               "id": "admin::is-creator",
             },
@@ -493,11 +488,6 @@ describe('Role CRUD End to End', () => {
         expect(sortedData).toMatchInlineSnapshot(`
           Object {
             "conditions": Array [
-              Object {
-                "category": "default",
-                "displayName": "Has Locale Access",
-                "id": "plugins::i18n.has-locale-access",
-              },
               Object {
                 "category": "default",
                 "displayName": "Is creator",

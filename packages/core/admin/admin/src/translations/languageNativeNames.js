@@ -13,6 +13,7 @@ const languageNativeNames = {
   ko: '한국어',
   ms: 'Melayu',
   nl: 'Nederlands',
+  no: 'Norwegian',
   pl: 'Polski',
   'pt-BR': 'Português (Brasil)',
   pt: 'Português (Portugal)',

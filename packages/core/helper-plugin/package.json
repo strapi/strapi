@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "Helper for Strapi plugins development",
   "main": "build/index.js",
   "module": "build/index.esm.js",

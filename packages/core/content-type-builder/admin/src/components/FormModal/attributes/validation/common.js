@@ -51,13 +51,11 @@ const validators = {
     yup
       .number()
       .integer()
-      .positive()
       .nullable(),
   min: () =>
     yup
       .number()
       .integer()
-      .positive()
       .when('max', (max, schema) => {
         if (max) {
           return schema.max(max, getTrad('error.validation.minSupMax'));

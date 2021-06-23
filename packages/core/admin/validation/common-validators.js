@@ -97,7 +97,7 @@ const updatePermissions = yup
   .shape({
     permissions: yup
       .array()
-      .requiredAllowEmpty()
+      .required()
       .of(
         yup
           .object()

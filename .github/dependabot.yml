@@ -7,3 +7,5 @@ updates:
     versioning-strategy: increase
     reviewers:
       - strapi/maintainers
+    # disable dependency pull requests while we work on v4
+    open-pull-requests-limit: 0

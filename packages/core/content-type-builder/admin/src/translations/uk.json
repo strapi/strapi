@@ -109,7 +109,7 @@
   "form.button.add-first-field-to-created-component": "Додати перше поле компоненту",
   "form.button.add.field.to.collectionType": "Додати ще одне поле до цього Collection Type",
   "form.button.add.field.to.component": "Додати ще одне поле до цього компоненту",
-  "form.button.add.field.to.contentType ": "Додати ще одне поле до цього Content Type",
+  "form.button.add.field.to.contentType": "Додати ще одне поле до цього Content Type",
   "form.button.add.field.to.singleType": "Додати ще одне поле до цього Single Type",
   "form.button.cancel": "Скасувати",
   "form.button.collection-type.description": "Підходить для множинних об'єктів, як-то дописи, товари, коментарі тощо.",
