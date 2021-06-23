@@ -1,7 +1,7 @@
 'use strict';
 
 const tar = require('tar');
-const axios = require('axios');
+const fetch = require('node-fetch');
 const parseGitUrl = require('git-url-parse');
 const chalk = require('chalk');
 
@@ -29,19 +29,18 @@ function parseShorthand(starter) {
  * @param {string} repo The full name of the repository.
  */
 async function getDefaultBranch(repo) {
-  try {
-    const {
-      data: { default_branch },
-    } = await axios.get(`https://api.github.com/repos/${repo}`);
+  const response = await fetch(`https://api.github.com/repos/${repo}`);
 
-    return default_branch;
-  } catch (error) {
+  if (!response.ok) {
     stopProcess(
       `Could not find the starter information for ${chalk.yellow(
         repo
       )}. Make sure it is publicly accessible on github.`
     );
   }
+
+  const { default_branch } = await response.json();
+  return default_branch;
 }
 
 /**
@@ -82,22 +81,17 @@ async function getRepoInfo(starter) {
 async function downloadGitHubRepo(repoInfo, tmpDir) {
   const { fullName, branch, usedShorthand } = repoInfo;
 
-  try {
-    // Download from GitHub
-    const codeload = `https://codeload.github.com/${fullName}/tar.gz/${branch}`;
-    const { data } = await axios({
-      url: codeload,
-      method: 'GET',
-      responseType: 'stream',
-    });
+  const codeload = `https://codeload.github.com/${fullName}/tar.gz/${branch}`;
+  const response = await fetch(codeload);
 
-    await new Promise(resolve => {
-      data.pipe(tar.extract({ strip: 1, cwd: tmpDir })).on('close', resolve);
-    });
-  } catch (error) {
+  if (!response.ok) {
     const message = usedShorthand ? `using the shorthand` : `using the url`;
     stopProcess(`Could not download the repository ${message}: ${chalk.yellow(fullName)}.`);
   }
+
+  await new Promise(resolve => {
+    response.body.pipe(tar.extract({ strip: 1, cwd: tmpDir })).on('close', resolve);
+  });
 }
 
 module.exports = { getRepoInfo, downloadGitHubRepo };

@@ -1,7 +1,7 @@
 'use strict';
 
 const inquirer = require('inquirer');
-const axios = require('axios');
+const fetch = require('node-fetch');
 const yaml = require('js-yaml');
 
 /**
@@ -99,18 +99,16 @@ async function getPromptQuestions(projectName, template) {
  * @returns JSON template data
  */
 async function getTemplateData() {
-  try {
-    const {
-      data: { content },
-    } = await axios.get(
-      `https://api.github.com/repos/strapi/community-content/contents/templates/templates.yml`
-    );
-
-    const buff = Buffer.from(content, 'base64');
-    const stringified = buff.toString('utf-8');
-
-    return yaml.load(stringified);
-  } catch (error) {
+  const response = await fetch(
+    `https://api.github.com/repos/strapi/community-content/contents/templates/templates.yml`
+  );
+  if (!response.ok) {
     return null;
   }
+
+  const { content } = await response.json();
+  const buff = Buffer.from(content, 'base64');
+  const stringified = buff.toString('utf-8');
+
+  return yaml.load(stringified);
 }
