@@ -9,7 +9,7 @@ const chalk = require('chalk');
 const chokidar = require('chokidar');
 // eslint-disable-next-line node/no-extraneous-require
 const hasEE = require('@strapi/strapi/lib/utils/ee');
-const getWebpackConfig = require('./webpack.config.js');
+const getWebpackConfig = require('./webpack.config');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 

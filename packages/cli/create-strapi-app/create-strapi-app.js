@@ -1,5 +1,7 @@
 'use strict';
 
+// FIXME
+/* eslint-disable import/extensions */
 const commander = require('commander');
 const generateNewApp = require('@strapi/generate-new');
 const promptUser = require('./utils/prompt-user');
