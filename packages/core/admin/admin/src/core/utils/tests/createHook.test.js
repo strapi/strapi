@@ -1,8 +1,6 @@
-'use strict';
+import createHook from '../createHook';
 
-const createHook = require('../');
-
-describe('createHook', () => {
+describe('ADMIN | core | utils | createHook', () => {
   let hooksContainer;
 
   beforeEach(() => {
