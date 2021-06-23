@@ -16,6 +16,8 @@ import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import i18nReducers from './hooks/reducers';
 import DeleteModalAdditionalInfos from './components/DeleteModalAdditionalInfos';
+import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
+import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -40,7 +42,14 @@ export default {
     });
   },
   boot(app) {
-    app.registerHook('cm/inject-column-in-table', addColumnToTableHook);
+    // Hooks that mutate the collection types links in order to add the locale filter
+    app.registerHook(
+      'CM/pages/App/mutate-collection-types-links',
+      addLocaleToCollectionTypesLinksHook
+    );
+    app.registerHook('CM/pages/App/mutate-single-types-links', addLocaleToSingleTypesLinksHook);
+    // Hook that adds a column into the CM's LV table
+    app.registerHook('CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {

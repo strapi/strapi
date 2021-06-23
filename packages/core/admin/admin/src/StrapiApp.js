@@ -289,10 +289,11 @@ class StrapiApp {
   runHookSeries = (name, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (name, initialValue, asynchronous = false) =>
-    asynchronous
-      ? this.hooksDict[name].runWaterfallAsync(initialValue)
-      : this.hooksDict[name].runWaterfall(initialValue);
+  runHookWaterfall = (name, initialValue, asynchronous = false, store) => {
+    return asynchronous
+      ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
+      : this.hooksDict[name].runWaterfall(initialValue, store);
+  };
 
   runHookParallel = name => this.hooksDict[name].runParallel();
 
@@ -316,7 +317,9 @@ class StrapiApp {
               menu={this.menu}
               plugins={this.plugins}
               runHookParallel={this.runHookParallel}
-              runHookWaterfall={this.runHookWaterfall}
+              runHookWaterfall={(name, initialValue, async = false) => {
+                return this.runHookWaterfall(name, initialValue, async, store);
+              }}
               runHookSeries={this.runHookSeries}
               settings={this.settings}
             >
