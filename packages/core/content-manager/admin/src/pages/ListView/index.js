@@ -21,6 +21,7 @@ import {
   useStrapiApp,
   request,
 } from '@strapi/helper-plugin';
+import { INJECT_COLUMN_IN_TABLE } from '../../exposedHooks';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';
@@ -97,7 +98,7 @@ function ListView({
   const { runHookWaterfall } = useStrapiApp();
 
   const tableHeaders = useMemo(() => {
-    const headers = runHookWaterfall('cm/inject-column-in-table', { displayedHeaders, layout });
+    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
 
     return headers;
   }, [runHookWaterfall, displayedHeaders, layout]);

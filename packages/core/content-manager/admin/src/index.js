@@ -6,6 +6,11 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
+import {
+  INJECT_COLUMN_IN_TABLE,
+  MUTATE_COLLECTION_TYPES_LINKS,
+  MUTATE_SINGLE_TYPES_LINKS,
+} from './exposedHooks';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import reducers from './reducers';
@@ -30,10 +35,10 @@ export default {
     app.addReducers(reducers);
 
     // Hook that allows to mutate the displayed headers of the list view table
-    app.createHook('cm/inject-column-in-table');
+    app.createHook(INJECT_COLUMN_IN_TABLE);
     // Hook that allows to mutate the CM's link pre-set filters
-    app.createHook('cm/mutate-collection-type-links');
-    app.createHook('cm/mutate-single-type-links');
+    app.createHook(MUTATE_COLLECTION_TYPES_LINKS);
+    app.createHook(MUTATE_SINGLE_TYPES_LINKS);
 
     app.registerPlugin({
       description: pluginDescription,
