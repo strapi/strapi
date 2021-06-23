@@ -1,4 +1,4 @@
-import { request, useNotification, useRBACProvider } from '@strapi/helper-plugin';
+import { request, useNotification, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getData, resetProps, setContentTypeLinks } from './actions';
@@ -12,6 +12,7 @@ const useModels = () => {
   const state = useSelector(selectAppDomain());
   const fetchDataRef = useRef();
   const { allPermissions } = useRBACProvider();
+  const { runHookWaterfall } = useStrapiApp();
 
   const fetchData = async signal => {
     dispatch(getData());
@@ -29,12 +30,16 @@ const useModels = () => {
         toggleNotification
       );
 
-      const actionToDispatch = setContentTypeLinks(
-        authorizedCtLinks,
-        authorizedStLinks,
+      const { ctLinks } = runHookWaterfall('cm/mutate-collection-type-links', {
+        ctLinks: authorizedCtLinks,
         models,
-        components
-      );
+      });
+      const { stLinks } = runHookWaterfall('cm/mutate-single-type-links', {
+        stLinks: authorizedStLinks,
+        models,
+      });
+
+      const actionToDispatch = setContentTypeLinks(ctLinks, stLinks, models, components);
 
       dispatch(actionToDispatch);
     } catch (err) {

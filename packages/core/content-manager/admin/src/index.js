@@ -31,6 +31,9 @@ export default {
 
     // Hook that allows to mutate the displayed headers of the list view table
     app.createHook('cm/inject-column-in-table');
+    // Hook that allows to mutate the CM's link pre-set filters
+    app.createHook('cm/mutate-collection-type-links');
+    app.createHook('cm/mutate-single-type-links');
 
     app.registerPlugin({
       description: pluginDescription,
