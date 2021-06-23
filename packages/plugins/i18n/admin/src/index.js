@@ -19,6 +19,7 @@ import DeleteModalAdditionalInfos from './components/DeleteModalAdditionalInfos'
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';
+import mutateEditViewLayoutHook from './contentManagerHooks/mutateEditViewLayout';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -50,6 +51,8 @@ export default {
     app.registerHook('CM/pages/App/mutate-single-types-links', addLocaleToSingleTypesLinksHook);
     // Hook that adds a column into the CM's LV table
     app.registerHook('CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+    // Hooks that mutates the edit view layout
+    app.registerHook('CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {

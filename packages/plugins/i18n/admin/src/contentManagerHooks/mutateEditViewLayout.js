@@ -97,60 +97,57 @@ const enhanceComponentLayoutForRelations = (layout, locale) =>
     return enhancedRow;
   });
 
-const extendCMEditViewLayoutMiddleware = () => () => next => action => {
-  if (action.type !== 'ContentManager/EditViewLayoutManager/SET_LAYOUT') {
-    return next(action);
-  }
+const getPathToContentType = pathArray => ['contentType', ...pathArray];
 
-  const hasi18nEnabled = get(
-    action,
+const mutateEditViewLayoutHook = ({ layout, query }) => {
+  const hasI18nEnabled = get(
+    layout,
     getPathToContentType(['pluginOptions', 'i18n', 'localized']),
     false
   );
 
-  if (!hasi18nEnabled) {
-    return next(action);
+  if (!hasI18nEnabled) {
+    return { layout, query };
   }
 
-  const currentLocale = get(action, ['query', 'plugins', 'i18n', 'locale'], null);
+  const currentLocale = get(query, ['plugins', 'i18n', 'locale'], null);
 
   // This might break the cm, has the user might be redirected to the homepage
   if (!currentLocale) {
-    return next(action);
+    return { layout, query };
   }
 
   const editLayoutPath = getPathToContentType(['layouts', 'edit']);
   const editRelationsPath = getPathToContentType(['layouts', 'editRelations']);
-  const editLayout = get(action, editLayoutPath);
-  const editRelationsLayout = get(action, editRelationsPath);
+  const editLayout = get(layout, editLayoutPath);
+  const editRelationsLayout = get(layout, editRelationsPath);
   const nextEditRelationLayout = enhanceRelationLayout(editRelationsLayout, currentLocale);
   const nextEditLayout = enhanceEditLayout(editLayout);
 
   const enhancedLayouts = {
-    ...action.layout.contentType.layouts,
+    ...layout.contentType.layouts,
     editRelations: nextEditRelationLayout,
     edit: nextEditLayout,
   };
-  const components = enhanceComponentsLayout(action.layout.components, currentLocale);
 
-  const enhancedAction = {
-    ...action,
+  const components = enhanceComponentsLayout(layout.components, currentLocale);
+
+  const enhancedData = {
+    query,
     layout: {
-      ...action.layout,
+      ...layout,
       contentType: {
-        ...action.layout.contentType,
+        ...layout.contentType,
         layouts: enhancedLayouts,
       },
       components,
     },
   };
 
-  return next(enhancedAction);
+  return enhancedData;
 };
 
-const getPathToContentType = pathArray => ['layout', 'contentType', ...pathArray];
-
-export default extendCMEditViewLayoutMiddleware;
+export default mutateEditViewLayoutHook;
 export {
   enhanceComponentLayoutForRelations,
   enhanceComponentsLayout,
