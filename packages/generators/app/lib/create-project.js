@@ -1,5 +1,8 @@
 'use strict';
 
+// FIXME
+/* eslint-disable import/extensions */
+
 const { join } = require('path');
 const fse = require('fs-extra');
 const chalk = require('chalk');

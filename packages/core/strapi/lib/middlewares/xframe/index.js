@@ -3,6 +3,9 @@
 const convert = require('koa-convert');
 const { xframe } = require('koa-lusca');
 
+// FIXME
+/* eslint-disable import/extensions */
+
 /**
  * CRON hook
  */

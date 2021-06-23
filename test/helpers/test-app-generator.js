@@ -4,6 +4,9 @@ const path = require('path');
 const rimraf = require('rimraf');
 const generateNew = require('../../packages/generators/app/lib/generate-new');
 
+// FIXME
+/* eslint-disable import/extensions */
+
 /**
  * Delete the testApp folder
  * @param {string} appName - name of the app / folder where the app is located
