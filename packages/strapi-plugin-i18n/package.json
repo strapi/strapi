@@ -9,7 +9,7 @@
     "required": false
   },
   "dependencies": {
-    "lodash": "4.17.20",
+    "lodash": "4.17.21",
     "p-map": "4.0.0",
     "pluralize": "8.0.0",
     "strapi-utils": "3.6.5"
