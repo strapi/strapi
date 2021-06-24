@@ -34,15 +34,6 @@ class StrapiApp {
     this.hooksDict = {};
     this.admin = {
       injectionZones,
-      getInjectedComponents(moduleName, containerName, blockName) {
-        try {
-          return this.injectionZones[moduleName][containerName][blockName] || {};
-        } catch (err) {
-          console.error('Cannot get injected component', err);
-
-          return err;
-        }
-      },
     };
 
     this.menu = [];
@@ -210,6 +201,16 @@ class StrapiApp {
     return store;
   };
 
+  getAdminInjectedComponents = (moduleName, containerName, blockName) => {
+    try {
+      return this.admin.injectionZones[moduleName][containerName][blockName] || [];
+    } catch (err) {
+      console.error('Cannot get injected component', err);
+
+      return err;
+    }
+  };
+
   getPlugin = pluginId => {
     return this.plugins[pluginId];
   };
@@ -341,7 +342,7 @@ class StrapiApp {
           components={components}
           fields={fields}
           localeNames={localeNames}
-          getAdminInjectedComponents={this.admin.getInjectedComponents}
+          getAdminInjectedComponents={this.getAdminInjectedComponents}
           getPlugin={this.getPlugin}
           messages={this.translations}
           menu={this.menu}

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
+import { AdminContext } from '../../contexts';
 import LanguageProvider from '../LanguageProvider';
 import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
 import Notifications from '../Notifications';
@@ -35,26 +36,27 @@ const Providers = ({
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <StrapiAppProvider
-          getAdminInjectedComponents={getAdminInjectedComponents}
-          getPlugin={getPlugin}
-          menu={menu}
-          plugins={plugins}
-          runHookParallel={runHookParallel}
-          runHookWaterfall={runHookWaterfall}
-          runHookSeries={runHookSeries}
-          settings={settings}
-        >
-          <LibraryProvider components={components} fields={fields}>
-            <LanguageProvider messages={messages} localeNames={localeNames}>
-              <AutoReloadOverlayBlockerProvider>
-                <OverlayBlocker>
-                  <Notifications>{children}</Notifications>
-                </OverlayBlocker>
-              </AutoReloadOverlayBlockerProvider>
-            </LanguageProvider>
-          </LibraryProvider>
-        </StrapiAppProvider>
+        <AdminContext.Provider value={{ getAdminInjectedComponents }}>
+          <StrapiAppProvider
+            getPlugin={getPlugin}
+            menu={menu}
+            plugins={plugins}
+            runHookParallel={runHookParallel}
+            runHookWaterfall={runHookWaterfall}
+            runHookSeries={runHookSeries}
+            settings={settings}
+          >
+            <LibraryProvider components={components} fields={fields}>
+              <LanguageProvider messages={messages} localeNames={localeNames}>
+                <AutoReloadOverlayBlockerProvider>
+                  <OverlayBlocker>
+                    <Notifications>{children}</Notifications>
+                  </OverlayBlocker>
+                </AutoReloadOverlayBlockerProvider>
+              </LanguageProvider>
+            </LibraryProvider>
+          </StrapiAppProvider>
+        </AdminContext.Provider>
       </Provider>
     </QueryClientProvider>
   );

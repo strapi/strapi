@@ -11,8 +11,6 @@ import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
   CheckPermissions,
-  InjectionZone,
-  InjectionZoneList,
   PopUpWarning,
   useTracking,
   useNotification,
@@ -21,6 +19,7 @@ import {
   useStrapiApp,
   request,
 } from '@strapi/helper-plugin';
+import { InjectionZone } from '../../../shared/components';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
@@ -30,6 +29,7 @@ import CustomTable from '../../components/CustomTable';
 import FilterPicker from '../../components/FilterPicker';
 import Search from '../../components/Search';
 import ListViewProvider from '../../components/ListViewProvider';
+import InjectionZoneList from '../../components/InjectionZoneList';
 import { AddFilterCta, FilterIcon, Wrapper } from './components';
 import FieldPicker from './FieldPicker';
 import Filter from './Filter';
@@ -415,7 +415,7 @@ function ListView({
           {!canRead && (
             <Flex justifyContent="flex-end">
               <Padded right size="sm">
-                <InjectionZone area={`${pluginId}.listView.actions`} />
+                <InjectionZone area="contentManager.listView.actions" />
               </Padded>
             </Flex>
           )}
@@ -454,7 +454,7 @@ function ListView({
                 <div className="col-3">
                   <Flex justifyContent="flex-end">
                     <Padded right size="sm">
-                      <InjectionZone area={`${pluginId}.listView.actions`} />
+                      <InjectionZone area="contentManager.listView.actions" />
                     </Padded>
 
                     <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
@@ -499,7 +499,7 @@ function ListView({
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
         >
-          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+          <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
         </PopUpWarning>
         <PopUpWarning
           isOpen={showWarningDeleteAll}
@@ -516,7 +516,7 @@ function ListView({
           onClosed={handleModalClose}
           isConfirmButtonLoading={showModalConfirmButtonLoading}
         >
-          <InjectionZoneList area={`${pluginId}.listView.deleteModalAdditionalInfos`} />
+          <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
         </PopUpWarning>
       </ListViewProvider>
     </>
