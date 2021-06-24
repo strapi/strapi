@@ -85,24 +85,6 @@ export default {
 
     const ctbPlugin = app.getPlugin('content-type-builder');
 
-    // FIXME
-    const cmPlugin = app.getPlugin('content-manager');
-
-    if (cmPlugin) {
-      // cmPlugin.injectComponent('editView', 'informations', {
-      //   name: 'i18n-locale-filter-edit-view',
-      //   Component: CMEditViewInjectedComponents,
-      // });
-      // cmPlugin.injectComponent('listView', 'actions', {
-      //   name: 'i18n-locale-filter',
-      //   Component: LocalePicker,
-      // });
-      // cmPlugin.injectComponent('listView', 'deleteModalAdditionalInfos', {
-      //   name: 'i18n-delete-bullets-in-modal',
-      //   Component: DeleteModalAdditionalInfos,
-      // });
-    }
-
     if (ctbPlugin) {
       const ctbFormsAPI = ctbPlugin.apis.forms;
       ctbFormsAPI.addContentTypeSchemaMutation(mutateCTBContentTypeSchema);
