@@ -3,9 +3,10 @@ import PropTypes from 'prop-types';
 import { useHistory } from 'react-router-dom';
 import { useSelector, shallowEqual } from 'react-redux';
 import { cloneDeep, flatMap, get, set, pick } from 'lodash';
-import { request, useTracking, useNotification } from '@strapi/helper-plugin';
+import { useTracking, useNotification } from '@strapi/helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
+import { axiosInstance } from '../../../core/utils';
 import pluginId from '../../pluginId';
 import { getRequestUrl } from '../../utils';
 import FieldsReorder from '../../components/FieldsReorder';
@@ -123,10 +124,12 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
         ? getRequestUrl(`content-types/${slug}/configuration`)
         : getRequestUrl(`components/${slug}/configuration`);
 
-      const response = await request(requestURL, { method: 'PUT', body });
+      const {
+        data: { data },
+      } = await axiosInstance.put(requestURL, body);
 
       if (updateLayout) {
-        updateLayout(response.data);
+        updateLayout(data);
       }
 
       dispatch({

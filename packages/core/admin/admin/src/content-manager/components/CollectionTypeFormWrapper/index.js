@@ -250,7 +250,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.post(endPoint, { ...body });
+        const { data } = await axiosInstance.post(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -305,7 +305,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         dispatch(setStatus('submit-pending'));
 
-        const { data } = await axiosInstance.put(endPoint, { ...body });
+        const { data } = await axiosInstance.put(endPoint, body);
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
         toggleNotification({

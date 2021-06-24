@@ -17,8 +17,9 @@ import {
   useQueryParams,
   useRBACProvider,
   useStrapiApp,
-  request,
 } from '@strapi/helper-plugin';
+import axios from 'axios';
+import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import pluginId from '../../pluginId';
@@ -138,15 +139,21 @@ function ListView({
   const requestUrlRef = useRef('');
 
   const fetchData = useCallback(
-    async (endPoint, abortSignal = false) => {
+    async (endPoint, source) => {
       getData();
-      const signal = abortSignal || new AbortController().signal;
 
       try {
-        const { results, pagination } = await request(endPoint, { method: 'GET', signal });
+        const opts = source ? { cancelToken: source.token } : null;
+        const {
+          data: { results, pagination },
+        } = await axiosInstance.get(endPoint, opts);
 
         getDataSucceeded(pagination, results);
       } catch (err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
+
         const resStatus = get(err, 'response.status', null);
         console.log(err);
 
@@ -163,13 +170,11 @@ function ListView({
           return;
         }
 
-        if (err.name !== 'AbortError') {
-          console.error(err);
-          toggleNotification({
-            type: 'warning',
-            message: { id: getTrad('error.model.fetch') },
-          });
-        }
+        console.error(err);
+        toggleNotification({
+          type: 'warning',
+          message: { id: getTrad('error.model.fetch') },
+        });
       }
     },
     [getData, getDataSucceeded, push, toggleNotification]
@@ -197,9 +202,8 @@ function ListView({
     try {
       setModalLoadingState();
 
-      await request(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
-        method: 'POST',
-        body: { ids: entriesToDelete },
+      await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+        ids: entriesToDelete,
       });
 
       onDeleteSeveralDataSucceeded();
@@ -233,9 +237,7 @@ function ListView({
       trackUsageRef.current('willDeleteEntry', trackerProperty);
       setModalLoadingState();
 
-      await request(getRequestUrl(`collection-types/${slug}/${idToDelete}`), {
-        method: 'DELETE',
-      });
+      await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
       toggleNotification({
         type: 'success',
@@ -272,20 +274,22 @@ function ListView({
   ]);
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
     const shouldSendRequest = canRead;
-    const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
+    const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
 
     if (shouldSendRequest && requestUrl.includes(requestUrlRef.current)) {
-      fetchData(requestUrl, signal);
+      fetchData(requestUrl, source);
     }
 
     return () => {
       requestUrlRef.current = slug;
-      abortController.abort();
+
+      source.cancel('Operation canceled by the user.');
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
   const handleClickDelete = id => {
@@ -295,7 +299,7 @@ function ListView({
 
   const handleModalClose = useCallback(() => {
     if (didDeleteData) {
-      const requestUrl = `/${pluginId}/collection-types/${slug}${params}`;
+      const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
 
       fetchData(requestUrl);
     }

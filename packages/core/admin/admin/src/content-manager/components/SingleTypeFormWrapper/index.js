@@ -1,8 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import {
-  request,
   useTracking,
   formatComponentData,
   useQueryParams,
@@ -10,6 +9,8 @@ import {
 } from '@strapi/helper-plugin';
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+import { axiosInstance } from '../../../core/utils';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import {
   getData,
@@ -94,25 +95,24 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
   // Check if creation mode or editing mode
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
-    const fetchData = async signal => {
+    const fetchData = async source => {
       dispatch(getData());
 
       setIsCreatingEntry(true);
 
       try {
-        const data = await request(getRequestUrl(`${slug}${searchToSend}`), {
-          method: 'GET',
-          signal,
+        const { data } = await axiosInstance(getRequestUrl(`${slug}${searchToSend}`), {
+          cancelToken: source.token,
         });
 
         dispatch(getDataSucceeded(cleanReceivedData(data)));
 
         setIsCreatingEntry(false);
       } catch (err) {
-        if (err.name === 'AbortError') {
+        if (axios.isCancel(err)) {
           return;
         }
 
@@ -134,9 +134,9 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       }
     };
 
-    fetchData(signal);
+    fetchData(source);
 
-    return () => abortController.abort();
+    return () => source.cancel('Operation canceled by the user.');
   }, [cleanReceivedData, push, slug, dispatch, searchToSend, rawQuery, toggleNotification]);
 
   const displayErrors = useCallback(
@@ -163,9 +163,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const response = await request(getRequestUrl(`${slug}`), {
-          method: 'DELETE',
-        });
+        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}`));
 
         toggleNotification({
           type: 'success',
@@ -174,7 +172,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         trackUsageRef.current('didDeleteEntry', trackerProperty);
 
-        return Promise.resolve(response);
+        return Promise.resolve(data);
       } catch (err) {
         trackUsageRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
 
@@ -197,7 +195,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
       try {
         dispatch(setStatus('submit-pending'));
 
-        const response = await request(endPoint, { method: 'PUT', body });
+        const { data } = await axiosInstance.put(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -205,7 +203,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
           message: { id: getTrad('success.record.save') },
         });
 
-        dispatch(submitSucceeded(cleanReceivedData(response)));
+        dispatch(submitSucceeded(cleanReceivedData(data)));
         setIsCreatingEntry(false);
 
         dispatch(setStatus('resolved'));
@@ -226,7 +224,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
       dispatch(setStatus('publish-pending'));
 
-      const data = await request(endPoint, { method: 'POST' });
+      const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
       toggleNotification({
@@ -253,7 +251,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         dispatch(setStatus('submit-pending'));
 
-        const response = await request(endPoint, { method: 'PUT', body });
+        const { data } = await axiosInstance.put(endPoint, body);
 
         toggleNotification({
           type: 'success',
@@ -262,7 +260,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
 
-        dispatch(submitSucceeded(cleanReceivedData(response)));
+        dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
       } catch (err) {
@@ -285,7 +283,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const response = await request(endPoint, { method: 'POST' });
+      const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
@@ -293,7 +291,7 @@ const SingleTypeFormWrapper = ({ allLayoutData, children, slug }) => {
         message: { id: getTrad('success.record.unpublish') },
       });
 
-      dispatch(submitSucceeded(cleanReceivedData(response)));
+      dispatch(submitSucceeded(cleanReceivedData(data)));
 
       dispatch(setStatus('resolved'));
     } catch (err) {

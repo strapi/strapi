@@ -7,12 +7,13 @@ import {
   DropdownIndicator,
   LabelIconWrapper,
   NotAllowedInput,
-  request,
   useContentManagerEditViewDataManager,
   useQueryParams,
 } from '@strapi/helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
 import { stringify } from 'qs';
+import axios from 'axios';
+import { axiosInstance } from '../../../core/utils';
 import pluginId from '../../pluginId';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
@@ -118,7 +119,7 @@ function SelectWrapper({
   }, [isSingle, value]);
 
   const getData = useCallback(
-    async signal => {
+    async source => {
       // Currently polymorphic relations are not handled
       if (isMorph) {
         setIsLoading(false);
@@ -141,12 +142,11 @@ function SelectWrapper({
       }
 
       try {
-        const data = await request(endPoint, {
-          method: 'POST',
-          params,
-          signal,
-          body: { idsToOmit },
-        });
+        const { data } = await axiosInstance.post(
+          endPoint,
+          { idsToOmit },
+          { params, cancelToken: source.token }
+        );
 
         const formattedData = data.map(obj => {
           return { value: obj, label: obj[mainField.name] };
@@ -166,6 +166,7 @@ function SelectWrapper({
         setIsLoading(false);
       } catch (err) {
         // Silent
+        setIsLoading(false);
       }
     },
     [
@@ -182,14 +183,14 @@ function SelectWrapper({
   );
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
     if (isOpen) {
-      getData(signal);
+      getData(source);
     }
 
-    return () => abortController.abort();
+    return () => source.cancel('Operation canceled by the user.');
   }, [getData, isOpen]);
 
   const handleInputChange = (inputValue, { action }) => {

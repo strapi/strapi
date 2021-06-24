@@ -1,9 +1,10 @@
 import { render } from '@testing-library/react';
 import { fixtures } from '../../../../../admin-test-utils';
+import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
 
-const library = { fields: {}, components: {} };
+const library = { fields: Fields(), components: Components() };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
 const locales = [];

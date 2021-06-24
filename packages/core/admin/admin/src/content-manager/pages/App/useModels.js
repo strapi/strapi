@@ -1,9 +1,11 @@
-import { request, useNotification, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
+import { useNotification, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
 import { useEffect, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getData, resetProps, setContentTypeLinks } from './actions';
+import axios from 'axios';
+import { axiosInstance } from '../../../core/utils';
 import { MUTATE_COLLECTION_TYPES_LINKS, MUTATE_SINGLE_TYPES_LINKS } from '../../../exposedHooks';
 import { getRequestUrl } from '../../utils';
+import { getData, resetProps, setContentTypeLinks } from './actions';
 import { selectAppDomain } from './selectors';
 import getContentTypeLinks from './utils/getContentTypeLinks';
 
@@ -14,14 +16,23 @@ const useModels = () => {
   const fetchDataRef = useRef();
   const { allPermissions } = useRBACProvider();
   const { runHookWaterfall } = useStrapiApp();
+  const CancelToken = axios.CancelToken;
+  const source = CancelToken.source();
 
-  const fetchData = async signal => {
+  const fetchData = async () => {
     dispatch(getData());
 
     try {
-      const [{ data: components }, { data: models }] = await Promise.all(
+      const [
+        {
+          data: { data: components },
+        },
+        {
+          data: { data: models },
+        },
+      ] = await Promise.all(
         ['components', 'content-types'].map(endPoint =>
-          request(getRequestUrl(endPoint), { method: 'GET', signal })
+          axiosInstance.get(getRequestUrl(endPoint), { cancelToken: source.token })
         )
       );
 
@@ -44,21 +55,23 @@ const useModels = () => {
 
       dispatch(actionToDispatch);
     } catch (err) {
+      if (axios.isCancel(err)) {
+        return;
+      }
+
       console.error(err);
+
       toggleNotification({ type: 'warning', message: { id: 'notification.error' } });
     }
   };
 
   fetchDataRef.current = fetchData;
 
-  const abortController = new AbortController();
-  const { signal } = abortController;
-
   useEffect(() => {
-    fetchDataRef.current(signal);
+    fetchDataRef.current();
 
     return () => {
-      abortController.abort();
+      source.cancel('Operation canceled by the user.');
       dispatch(resetProps());
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,7 +1,9 @@
 import React, { memo, useEffect, useMemo, useReducer } from 'react';
 import { useParams } from 'react-router-dom';
-import { CheckPagePermissions, LoadingIndicatorPage, request } from '@strapi/helper-plugin';
+import { CheckPagePermissions, LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { useSelector, shallowEqual } from 'react-redux';
+import axios from 'axios';
+import { axiosInstance } from '../../../core/utils';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
 import pluginPermissions from '../../permissions';
@@ -16,28 +18,33 @@ const ComponentSettingsView = () => {
   const { uid } = useParams();
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
-    const fetchData = async signal => {
+    const fetchData = async source => {
       try {
         dispatch(getData());
 
-        const { data } = await request(getRequestUrl(`components/${uid}/configuration`), {
-          method: 'GET',
-          signal,
+        const {
+          data: { data },
+        } = await axiosInstance.get(getRequestUrl(`components/${uid}/configuration`), {
+          cancelToken: source.token,
         });
 
         dispatch(getDataSucceeded(mergeMetasWithSchema(data, schemas, 'component')));
       } catch (err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
+
         console.error(err);
       }
     };
 
-    fetchData(signal);
+    fetchData(source);
 
     return () => {
-      abortController.abort();
+      source.cancel('Operation canceled by the user.');
     };
   }, [uid, schemas]);
 
