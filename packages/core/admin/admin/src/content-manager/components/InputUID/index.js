@@ -6,13 +6,13 @@ import { Label, Error } from '@buffetjs/core';
 import { useDebounce, useClickAwayListener } from '@buffetjs/hooks';
 import styled from 'styled-components';
 import {
-  request,
   LabelIconWrapper,
   LoadingIndicator,
   useContentManagerEditViewDataManager,
 } from '@strapi/helper-plugin';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { get } from 'lodash';
+import { axiosInstance } from '../../../core/utils';
 import getTrad from '../../utils/getTrad';
 import pluginId from '../../pluginId';
 import getRequestUrl from '../../utils/getRequestUrl';
@@ -73,13 +73,12 @@ const InputUID = ({
     setIsLoading(true);
     const requestURL = getRequestUrl('uid/generate');
     try {
-      const { data } = await request(requestURL, {
-        method: 'POST',
-        body: {
-          contentTypeUID,
-          field: name,
-          data: modifiedData,
-        },
+      const {
+        data: { data },
+      } = await axiosInstance.post(requestURL, {
+        contentTypeUID,
+        field: name,
+        data: modifiedData,
       });
 
       onChange({ target: { name, value: data, type: 'text' } }, shouldSetInitialValue);
@@ -100,14 +99,12 @@ const InputUID = ({
     }
 
     try {
-      const data = await request(requestURL, {
-        method: 'POST',
-        body: {
-          contentTypeUID,
-          field: name,
-          value: value ? value.trim() : '',
-        },
+      const { data } = await axiosInstance.post(requestURL, {
+        contentTypeUID,
+        field: name,
+        value: value ? value.trim() : '',
       });
+
       setAvailability(data);
 
       if (data.suggestion) {
@@ -270,20 +267,16 @@ const InputUID = ({
                 )}
               </RightContent>
               {availability && availability.suggestion && isSuggestionOpen && (
-                <FormattedMessage id={`${pluginId}.components.uid.suggested`}>
-                  {msg => (
-                    <Options
-                      title={msg}
-                      options={[
-                        {
-                          id: 'suggestion',
-                          label: availability.suggestion,
-                          onClick: handleSuggestionClick,
-                        },
-                      ]}
-                    />
-                  )}
-                </FormattedMessage>
+                <Options
+                  title={formatMessage({ id: `${pluginId}.components.uid.suggested` })}
+                  options={[
+                    {
+                      id: 'suggestion',
+                      label: availability.suggestion,
+                      onClick: handleSuggestionClick,
+                    },
+                  ]}
+                />
               )}
             </InputContainer>
             {!hasError && description && <SubLabel as={Description}>{description}</SubLabel>}

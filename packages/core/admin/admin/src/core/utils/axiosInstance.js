@@ -11,7 +11,7 @@ instance.interceptors.request.use(
     config.headers = {
       Authorization: `Bearer ${auth.getToken()}`,
       Accept: 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded',
+      'Content-Type': 'application/json',
     };
 
     return config;

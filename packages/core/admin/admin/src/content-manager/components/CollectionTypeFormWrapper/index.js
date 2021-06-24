@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { useHistory } from 'react-router-dom';
-import { get } from 'lodash';
+import axios from 'axios';
+import get from 'lodash/get';
 import {
-  request,
   useTracking,
   useNotification,
   useQueryParams,
@@ -12,6 +12,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
+import { axiosInstance } from '../../../core/utils';
 import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
 import pluginId from '../../pluginId';
 import { useFindRedirectionLink } from '../../hooks';
@@ -127,18 +128,18 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   }, [dispatch]);
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
-    const fetchData = async signal => {
+    const fetchData = async source => {
       dispatch(getData());
 
       try {
-        const data = await request(requestURL, { method: 'GET', signal });
+        const { data } = await axiosInstance.get(requestURL, { cancelToken: source.token });
 
         dispatch(getDataSucceeded(cleanReceivedData(cleanClonedData(data))));
       } catch (err) {
-        if (err.name === 'AbortError') {
+        if (axios.isCancel(err)) {
           return;
         }
 
@@ -175,13 +176,13 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     }
 
     if (requestURL) {
-      fetchData(signal);
+      fetchData(source);
     } else {
       init();
     }
 
     return () => {
-      abortController.abort();
+      source.cancel('Operation canceled by the user.');
     };
   }, [
     cleanClonedData,
@@ -218,9 +219,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const response = await request(getRequestUrl(`${slug}/${id}`), {
-          method: 'DELETE',
-        });
+        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}/${id}`));
 
         toggleNotification({
           type: 'success',
@@ -229,7 +228,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         trackUsageRef.current('didDeleteEntry', trackerProperty);
 
-        return Promise.resolve(response);
+        return Promise.resolve(data);
       } catch (err) {
         trackUsageRef.current('didNotDeleteEntry', { error: err, ...trackerProperty });
 
@@ -251,7 +250,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
         dispatch(setStatus('submit-pending'));
 
-        const response = await request(endPoint, { method: 'POST', body });
+        const { data } = await axiosInstance.post(endPoint, body);
 
         trackUsageRef.current('didCreateEntry', trackerProperty);
         toggleNotification({
@@ -259,11 +258,11 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           message: { id: getTrad('success.record.save') },
         });
 
-        dispatch(submitSucceeded(cleanReceivedData(response)));
+        dispatch(submitSucceeded(cleanReceivedData(data)));
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
-        replace(`/plugins/${pluginId}/collectionType/${slug}/${response.id}${rawQuery}`);
+        replace(`/plugins/${pluginId}/collectionType/${slug}/${data.id}${rawQuery}`);
       } catch (err) {
         trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);
@@ -280,7 +279,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
       dispatch(setStatus('publish-pending'));
 
-      const data = await request(endPoint, { method: 'POST' });
+      const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didPublishEntry');
 
@@ -306,7 +305,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
         dispatch(setStatus('submit-pending'));
 
-        const response = await request(endPoint, { method: 'PUT', body });
+        const { data } = await axiosInstance.put(endPoint, body);
 
         trackUsageRef.current('didEditEntry', { trackerProperty });
         toggleNotification({
@@ -314,7 +313,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
           message: { id: getTrad('success.record.save') },
         });
 
-        dispatch(submitSucceeded(cleanReceivedData(response)));
+        dispatch(submitSucceeded(cleanReceivedData(data)));
 
         dispatch(setStatus('resolved'));
       } catch (err) {
@@ -335,7 +334,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
     try {
       trackUsageRef.current('willUnpublishEntry');
 
-      const response = await request(endPoint, { method: 'POST' });
+      const { data } = await axiosInstance.post(endPoint);
 
       trackUsageRef.current('didUnpublishEntry');
       toggleNotification({
@@ -343,7 +342,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         message: { id: getTrad('success.record.unpublish') },
       });
 
-      dispatch(submitSucceeded(cleanReceivedData(response)));
+      dispatch(submitSucceeded(cleanReceivedData(data)));
       dispatch(setStatus('resolved'));
     } catch (err) {
       dispatch(setStatus('resolved'));

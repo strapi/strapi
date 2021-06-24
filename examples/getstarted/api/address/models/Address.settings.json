@@ -6,7 +6,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
+    "draftAndPublish": true,
     "increments": true,
     "timestamps": [
       "created_at",
@@ -86,7 +86,8 @@
       }
     },
     "slug": {
-      "type": "uid"
+      "type": "uid",
+      "targetField": "city"
     },
     "notrepeat_req": {
       "type": "component",
