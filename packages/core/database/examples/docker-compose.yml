@@ -12,3 +12,18 @@ services:
       POSTGRES_DB: strapi
     ports:
       - '5432:5432'
+
+  mysql:
+    image: mysql
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: strapi
+      MYSQL_USER: strapi
+      MYSQL_PASSWORD: strapi
+      MYSQL_ROOT_HOST: '%'
+      MYSQL_ROOT_PASSWORD: strapi
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - '3306:3306'

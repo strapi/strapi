@@ -291,12 +291,37 @@ const count = async (where = {}) => {
 /** Assign some roles to several users
  * @returns {undefined}
  */
-// FIXME: to impl
+// TODO: impl with updateMany
 const assignARoleToAll = async roleId => {
-  await strapi.query('strapi::user').updateMany({
-    where: { roles: { id: { $null: true } } },
-    data: { roles: [roleId] },
+  // await strapi.query('strapi::user').updateMany({
+  //   where: { roles: { id: { $null: true } } },
+  //   data: { roles: [roleId] },
+  // });
+
+  const users = await strapi.query('strapi::user').findMany({
+    select: ['id'],
+    where: {
+      roles: { id: { $null: true } },
+    },
   });
+
+  console.log(users);
+
+  await strapi.query('strapi;:role').update({
+    where: { id: roleId },
+    data: {
+      users: users.map(u => u.id),
+    },
+  });
+
+  // for (const user of users) {
+  //   await strapi
+  //     .query('strapi::user')
+  //     .update({ where: { id: user.id }, data: { roles: [roleId] } });
+
+  //   // or
+
+  // }
 
   // const userModel = strapi.query('strapi::user').model;
   // if (userModel.orm === 'bookshelf') {
@@ -328,7 +353,6 @@ const displayWarningIfUsersDontHaveRole = async () => {
     strapi.log.warn(`Some users (${count}) don't have any role.`);
   }
 };
-
 
 module.exports = {
   create,

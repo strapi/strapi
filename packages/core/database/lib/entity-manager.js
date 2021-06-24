@@ -179,23 +179,17 @@ const createEntityManager = db => {
 
       const metadata = db.metadata.get(uid);
 
-      // select fields that go into db
-      // format input values for the db
-      // change name to column names
-
-      // select relations
-
       const { data } = params;
 
-      // remove unknow fields or throw
-      // rename to columns
       // transform value to storage value
       // apply programatic defaults if any -> I think this should be handled outside of this layer as we might have some applicative rules in the entity service
-      // remove relation entries except for joinColumns
 
-      const dataToInsert = pickRowAttributes(db.metadata.get(uid), data);
+      // TODO: in query builder ?
+      const dataToInsert = pickRowAttributes(metadata, data);
 
-      console.log(dataToInsert);
+      if (_.isEmpty(dataToInsert)) {
+        throw new Error('Create requires data');
+      }
 
       const [id] = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
@@ -212,17 +206,18 @@ const createEntityManager = db => {
 
       const metadata = db.metadata.get(uid);
 
-      // TODO: pick scalar fields
-      // TODO: pick joinColumns to create directly on the table
+      // Add defaults / transform to storage type
       const dataToInsert = data.map(datum => pickRowAttributes(metadata, datum));
 
-      const ids = await this.createQueryBuilder(uid)
+      if (_.isEmpty(dataToInsert)) {
+        throw new Error('Create requires data');
+      }
+
+      await this.createQueryBuilder(uid)
         .insert(dataToInsert)
         .execute();
 
-      // TODO: create relation links
-
-      return ids.map(id => ({ id }));
+      return { count: data.length };
     },
 
     // TODO: make it update one somehow
@@ -233,42 +228,70 @@ const createEntityManager = db => {
       const metadata = db.metadata.get(uid);
       const dataToUpdate = pickRowAttributes(metadata, data);
 
-      /*const r =*/ await this.createQueryBuilder(uid)
+      if (_.isEmpty(dataToUpdate)) {
+        throw new Error('Update requires data');
+      }
+
+      const res = await this.createQueryBuilder(uid)
         .where(where)
         .update(dataToUpdate)
         .execute();
 
+      // TODO: update relations
+      console.log({ res });
+
+      // TODO: return obj
       return {};
     },
 
+    // only returns the number of affected rows
     async updateMany(uid, params) {
       const { where, data } = params;
 
       const metadata = db.metadata.get(uid);
-      const dataToUpdate = data.map(datum => pickRowAttributes(metadata, datum));
+      const dataToUpdate = pickRowAttributes(metadata, data);
 
-      return this.createQueryBuilder(uid)
+      if (_.isEmpty(dataToUpdate)) {
+        throw new Error('Update requires data');
+      }
+
+      const res = await this.createQueryBuilder(uid)
         .where(where)
         .update(dataToUpdate)
         .execute();
+
+      console.log({ res });
+
+      // TODO: update relations
+
+      // TODO: Return count on updateMany
     },
 
     // TODO: make it deleteOne somehow
     // findOne + delete with a return -> should go in the entity service
     async delete(uid, params) {
-      return await this.createQueryBuilder(uid)
+      const res = await this.createQueryBuilder(uid)
         .init(params)
         .delete()
         .execute();
+
+      console.log({ res });
+      // TODO: delete relations
+
+      return res;
     },
 
     async deleteMany(uid, params) {
       const { where } = params;
 
-      return await this.createQueryBuilder(uid)
+      const res = await this.createQueryBuilder(uid)
         .where(where)
         .delete()
         .execute();
+
+      // TODO: delete relations
+
+      return res;
     },
 
     // populate already loaded entry

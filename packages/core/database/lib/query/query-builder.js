@@ -97,13 +97,13 @@ const createQueryBuilder = (uid, db) => {
     // TODO: map to column name
     orderBy(orderBy) {
       state.orderBy = helpers.processOrderBy(orderBy, { qb: this, uid, db });
-
       return this;
     },
 
     // TODO: add processing
     groupBy(groupBy) {
       state.groupBy = groupBy;
+      return this;
     },
 
     // TODO: implement
@@ -154,13 +154,11 @@ const createQueryBuilder = (uid, db) => {
 
     first() {
       state.first = true;
-
       return this;
     },
 
     join(join) {
       state.joins.push(join);
-
       return this;
     },
 
@@ -171,114 +169,114 @@ const createQueryBuilder = (uid, db) => {
 
     // TODO: trigger result processing to allow 100% sql queries
     async execute() {
-      const qb = db.connection({ [this.alias]: tableName });
+      const aliasedTableName = state.type === 'insert' ? tableName : { [this.alias]: tableName };
 
-      switch (state.type) {
-        case 'select': {
-          if (state.select.length === 0) {
-            state.select = [this.aliasColumn('*')];
+      try {
+        const qb = db.connection(aliasedTableName);
+
+        switch (state.type) {
+          case 'select': {
+            if (state.select.length === 0) {
+              state.select = [this.aliasColumn('*')];
+            }
+
+            if (state.joins.length > 0) {
+              // TODO: check implementation
+              // add ordered columns to distinct in case of joins
+              qb.distinct();
+              state.select.unshift(...state.orderBy.map(({ column }) => column));
+            }
+
+            qb.select(state.select);
+            break;
           }
-
-          if (state.joins.length > 0) {
-            // TODO: check implementation
-            // add ordered columns to distinct in case of joins
-            qb.distinct();
-            state.select.unshift(...state.orderBy.map(({ column }) => column));
+          case 'count': {
+            qb.count({ count: state.count });
+            break;
           }
+          case 'insert': {
+            qb.insert(state.data);
 
-          qb.select(state.select);
-          break;
-        }
-        case 'count': {
-          qb.count({ count: state.count });
-          break;
-        }
-        case 'insert': {
-          qb.insert(state.data);
+            if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
+              qb.returning('id');
+            }
 
-          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
-            qb.returning('id');
+            break;
           }
+          case 'update': {
+            qb.update(state.data);
 
-          break;
-        }
-        case 'update': {
-          qb.update(state.data);
-
-          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
-            qb.returning('id');
+            break;
           }
+          case 'delete': {
+            qb.del();
 
-          break;
-        }
-        case 'delete': {
-          qb.del();
-
-          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
-            qb.returning('id');
+            break;
           }
-
-          break;
         }
-      }
 
-      if (state.limit) {
-        qb.limit(state.limit);
-      }
+        if (state.limit) {
+          qb.limit(state.limit);
+        }
 
-      if (state.offset) {
-        qb.offset(state.offset);
-      }
+        if (state.offset) {
+          qb.offset(state.offset);
+        }
 
-      if (state.orderBy.length > 0) {
-        qb.orderBy(state.orderBy);
-      }
+        if (state.orderBy.length > 0) {
+          qb.orderBy(state.orderBy);
+        }
 
-      if (state.first) {
-        qb.first();
-      }
+        if (state.first) {
+          qb.first();
+        }
 
-      if (state.groupBy.length > 0) {
-        qb.groupBy(state.groupBy);
-      }
+        if (state.groupBy.length > 0) {
+          qb.groupBy(state.groupBy);
+        }
 
-      if (state.where) {
-        helpers.applyWhere(qb, state.where);
-      }
+        if (state.where) {
+          helpers.applyWhere(qb, state.where);
+        }
 
-      // TODO: apply joins
-      if (state.joins.length > 0) {
-        helpers.applyJoins(qb, state.joins);
-      }
+        // TODO: apply joins
+        if (state.joins.length > 0) {
+          helpers.applyJoins(qb, state.joins);
+        }
 
-      // TODO: hanlde populate
+        // TODO: hanlde populate
 
-      console.log('Running query: ', qb.toQuery());
+        console.log('Running query: ', qb.toSQL());
 
-      const results = await qb;
+        const queryResult = await qb;
 
-      // if query response should be process (in case of custom queries we shouldn't for example)
+        const results = db.dialect.processResult(queryResult, state.type);
 
-      if (state.populate) {
-        await helpers.applyPopulate(_.castArray(results), state.populate, { qb: this, uid, db });
-      }
+        // if query response should be process (in case of custom queries we shouldn't for example)
 
-      return results;
+        if (state.populate) {
+          await helpers.applyPopulate(_.castArray(results), state.populate, { qb: this, uid, db });
+        }
 
-      // TODO:
-      // if (!processResult) {
-      //   return results;
-      // } else {
-      //   return Array.isArray(results)
-      //     ? results.map((r) => pickAttributes(r))
-      //     : pickAttributes(results);
-      // }
-      /*
+        return results;
+
+        // TODO:
+        // if (!processResult) {
+        //   return results;
+        // } else {
+        //   return Array.isArray(results)
+        //     ? results.map((r) => pickAttributes(r))
+        //     : pickAttributes(results);
+        // }
+        /*
         - format results
         - populate relationships
       */
 
-      // return results;
+        // return results;
+      } catch (error) {
+        db.dialect.transformErrors(error);
+      }
     },
   };
 };

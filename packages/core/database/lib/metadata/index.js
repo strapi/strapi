@@ -71,14 +71,14 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     },
     foreignKeys: [
       {
-        name: 'join_column_fk',
+        name: `${joinTableName}_join_column_fk`,
         columns: [joinColumnName],
         referencedColumns: ['id'],
         referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
       {
-        name: 'inverse_join_column_fk',
+        name: `${joinTableName}_inverse_join_column_fk`,
         columns: [inverseJoinColumnName],
         referencedColumns: ['id'],
         referencedTable: targetMeta.tableName,
@@ -433,7 +433,7 @@ const createCompoLinkModelMeta = baseModelMeta => {
     ],
     foreignKeys: [
       {
-        name: 'entity_fk',
+        name: `${baseModelMeta.tableName}_entity_fk`,
         columns: ['entity_id'],
         referencedColumns: ['id'],
         referencedTable: baseModelMeta.tableName,
