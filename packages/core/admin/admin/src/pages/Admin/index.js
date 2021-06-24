@@ -96,7 +96,7 @@ const Admin = () => {
               <Route path="/" component={HomePage} exact />
               <Route path="/me" component={ProfilePage} exact />
 
-              <Route path="/plugins/content-manager" component={CM} />
+              <Route path="/content-manager" component={CM} />
               <Route path="/plugins/content-type-builder" component={CTB} />
               <Route path="/plugins/upload" component={Upload} />
               {routes}

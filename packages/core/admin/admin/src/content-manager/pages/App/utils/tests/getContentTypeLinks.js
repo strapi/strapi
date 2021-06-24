@@ -92,7 +92,7 @@ describe('checkPermissions', () => {
     const expected = {
       authorizedCtLinks: [
         {
-          destination: '/plugins/content-manager/collectionType/application::address.address',
+          destination: '/content-manager/collectionType/application::address.address',
           icon: 'circle',
           isDisplayed: true,
           label: 'address',
@@ -109,7 +109,7 @@ describe('checkPermissions', () => {
           search: 'page=1&pageSize=10&_sort=name:ASC',
         },
         {
-          destination: '/plugins/content-manager/collectionType/application::article.article',
+          destination: '/content-manager/collectionType/application::article.article',
           icon: 'circle',
           isDisplayed: true,
           label: 'article',

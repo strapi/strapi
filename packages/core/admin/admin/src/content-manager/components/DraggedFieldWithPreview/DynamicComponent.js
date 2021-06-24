@@ -45,8 +45,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       isOver={isOver}
       onClick={() => {
         if (!isLoading && canAccess) {
-          // FIXME when changing the routing
-          push(`/plugins/content-manager/components/${componentUid}/configurations/edit`);
+          push(`/content-manager/components/${componentUid}/configurations/edit`);
         }
       }}
       onMouseEvent={handleMouseEvent}

@@ -51,7 +51,7 @@ const EditView = ({
   }, [isSingleType]);
 
   // FIXME when changing the routing
-  const configurationsURL = `/plugins/content-manager/${
+  const configurationsURL = `/content-manager/${
     isSingleType ? 'singleType' : 'collectionType'
   }/${slug}/configurations/edit`;
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);

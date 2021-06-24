@@ -9,8 +9,6 @@ import ContentManagerApp from '..';
 import cmReducers from '../../../../reducers';
 import useModels from '../useModels';
 
-const pluginId = 'content-manager';
-
 jest.mock('../useModels', () =>
   jest.fn(() => {
     return {};
@@ -43,7 +41,7 @@ describe('Content manager | App | main', () => {
           uid: 'category',
           title: 'Categories',
           name: 'category',
-          to: `/plugins/${pluginId}/collectionType/category`,
+          to: '/content-manager/collectionType/category',
           kind: 'collectionType',
           isDisplayed: true,
           permissions: [
@@ -83,9 +81,9 @@ describe('Content manager | App | main', () => {
     };
     useModels.mockImplementation(() => contentManagerState);
     const rootReducer = combineReducers(cmReducers);
-    const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
+    const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
-    history.push(`/plugins/${pluginId}`);
+    history.push('/content-manager');
 
     const { container } = render(
       <Provider store={store}>
@@ -97,7 +95,7 @@ describe('Content manager | App | main', () => {
 
     expect(screen.getByText('Home page')).toBeVisible();
     expect(screen.getByText('Categories')).toBeVisible();
-    expect(history.location.pathname).toEqual(`/plugins/${pluginId}/collectionType/category`);
+    expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c2 {
         margin-bottom: 0;
@@ -344,7 +342,7 @@ describe('Content manager | App | main', () => {
                     <a
                       aria-current="page"
                       class="active"
-                      href="/plugins/content-manager/collectionType/category"
+                      href="/content-manager/collectionType/category"
                     >
                       <p>
                         Categories
@@ -416,7 +414,7 @@ describe('Content manager | App | main', () => {
           uid: 'homepage',
           title: 'Home page',
           name: 'homepage',
-          to: `/plugins/${pluginId}/homepage`,
+          to: '/content-manager/homepage',
           kind: 'singleType',
           isDisplayed: true,
           permissions: [
@@ -440,9 +438,9 @@ describe('Content manager | App | main', () => {
     };
     useModels.mockImplementation(() => contentManagerState);
     const rootReducer = combineReducers(cmReducers);
-    const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
+    const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
     const history = createMemoryHistory();
-    history.push(`/plugins/${pluginId}`);
+    history.push('/content-manager');
 
     render(
       <Provider store={store}>
@@ -452,7 +450,7 @@ describe('Content manager | App | main', () => {
       </Provider>
     );
 
-    expect(history.location.pathname).toEqual(`/plugins/${pluginId}/homepage`);
+    expect(history.location.pathname).toEqual('/content-manager/homepage');
   });
 
   it('should redirect to 403 page', () => {
@@ -478,8 +476,8 @@ describe('Content manager | App | main', () => {
       })
     );
     const rootReducer = combineReducers(cmReducers);
-    const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
-    history.push(`/plugins/${pluginId}/collectionType/category`);
+    const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
+    history.push('/content-manager/collectionType/category');
 
     render(
       <Provider store={store}>
@@ -489,7 +487,7 @@ describe('Content manager | App | main', () => {
       </Provider>
     );
 
-    expect(history.location.pathname).toEqual(`/plugins/${pluginId}/403`);
+    expect(history.location.pathname).toEqual('/content-manager/403');
   });
 
   it('should redirect to the no-content-types page', () => {
@@ -508,8 +506,8 @@ describe('Content manager | App | main', () => {
       })
     );
     const rootReducer = combineReducers(cmReducers);
-    const store = createStore(rootReducer, { [`${pluginId}_app`]: contentManagerState });
-    history.push(`/plugins/${pluginId}/collectionType/category`);
+    const store = createStore(rootReducer, { 'content-manager_app': contentManagerState });
+    history.push('/content-manager/collectionType/category');
 
     render(
       <Provider store={store}>
@@ -519,6 +517,6 @@ describe('Content manager | App | main', () => {
       </Provider>
     );
 
-    expect(history.location.pathname).toEqual(`/plugins/${pluginId}/no-content-types`);
+    expect(history.location.pathname).toEqual('/content-manager/no-content-types');
   });
 });

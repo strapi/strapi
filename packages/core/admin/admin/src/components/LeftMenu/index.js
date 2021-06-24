@@ -15,7 +15,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       <LinksContainer>
         <BaselineAlignment top size="16px" />
         <LeftMenuLink
-          to="/plugins/content-manager"
+          to="/content-manager"
           icon="book-open"
           intlLabel={{
             id: `content-manager.plugin.name`,
