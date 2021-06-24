@@ -3,7 +3,7 @@ import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-route
 import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
 import { DndProvider } from 'react-dnd';
 import HTML5Backend from 'react-dnd-html5-backend';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import DragLayer from '../../components/DragLayer';
 import ModelsContext from '../../contexts/ModelsContext';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
@@ -12,6 +12,8 @@ import NoContentType from '../NoContentType';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import LeftMenu from './LeftMenu';
 import useModels from './useModels';
+
+const cmPermissions = permissions.contentManager;
 
 const App = () => {
   const contentTypeMatch = useRouteMatch(`/plugins/content-manager/:kind/:uid`);
@@ -58,7 +60,7 @@ const App = () => {
             <div className="col-md-9" style={{ padding: 0 }}>
               <Switch>
                 <Route path="/plugins/content-manager/components/:uid/configurations/edit">
-                  <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
+                  <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
                     <ComponentSettingsView />
                   </CheckPagePermissions>
                 </Route>

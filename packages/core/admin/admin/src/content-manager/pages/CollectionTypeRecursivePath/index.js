@@ -4,7 +4,7 @@ import { ErrorBoundary } from 'react-error-boundary';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { ErrorFallback, LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
@@ -12,6 +12,8 @@ import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
 import ListViewLayout from '../ListViewLayoutManager';
 import ListSettingsView from '../ListSettingsView';
+
+const cmPermissions = permissions.contentManager;
 
 const CollectionTypeRecursivePath = ({
   match: {
@@ -87,7 +89,7 @@ const CollectionTypeRecursivePath = ({
       <ContentTypeLayoutContext.Provider value={layout}>
         <Switch>
           <Route path={`${url}/configurations/list`}>
-            <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+            <CheckPagePermissions permissions={cmPermissions.collectionTypesConfigurations}>
               <ListSettingsView
                 layout={rawContentTypeLayout}
                 slug={slug}
@@ -96,7 +98,7 @@ const CollectionTypeRecursivePath = ({
             </CheckPagePermissions>
           </Route>
           <Route path={`${url}/configurations/edit`}>
-            <CheckPagePermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+            <CheckPagePermissions permissions={cmPermissions.collectionTypesConfigurations}>
               <EditSettingsView
                 components={rawComponentsLayouts}
                 isContentTypeView
