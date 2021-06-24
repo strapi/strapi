@@ -7,7 +7,6 @@ import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import App from './pages/App';
 import Providers from './components/Providers';
-
 import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
 import {
@@ -17,7 +16,6 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
-import adminPermissions from './permissions';
 import themes from './themes';
 
 window.strapi = {
@@ -175,19 +173,6 @@ class StrapiApp {
   }
 
   bootstrapAdmin = async () => {
-    // TODO move link in menu
-    this.addCorePluginMenuLink({
-      // TODO
-      to: `/plugins/content-manager`,
-      icon: 'book-open',
-      intlLabel: {
-        id: `content-manager.plugin.name`,
-        defaultMessage: 'Content manager',
-      },
-      // permissions: pluginPermissions.main,
-      permissions: adminPermissions.contentManager.main,
-    });
-
     this.createHook(INJECT_COLUMN_IN_TABLE);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
