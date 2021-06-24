@@ -1,21 +1,14 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { ThemeProvider } from 'styled-components';
-import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import pick from 'lodash/pick';
 import invariant from 'invariant';
 import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import App from './pages/App';
-import LanguageProvider from './components/LanguageProvider';
-import AutoReloadOverlayBlockerProvider from './components/AutoReloadOverlayBlockerProvider';
-import OverlayBlocker from './components/OverlayBlocker';
-import Fonts from './components/Fonts';
-import GlobalStyle from './components/GlobalStyle';
-import Notifications from './components/Notifications';
+import Providers from './components/Providers';
+
+import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
 import {
   INJECT_COLUMN_IN_TABLE,
@@ -30,14 +23,6 @@ import themes from './themes';
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
 };
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 class StrapiApp {
   constructor({ appPlugins, library, locales, middlewares, reducers }) {
@@ -366,40 +351,29 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={themes}>
-          <GlobalStyle />
-          <Fonts />
-          <Provider store={store}>
-            <StrapiAppProvider
-              getAdminInjectedComponents={this.admin.getInjectedComponents}
-              getPlugin={this.getPlugin}
-              menu={this.menu}
-              plugins={this.plugins}
-              runHookParallel={this.runHookParallel}
-              runHookWaterfall={(name, initialValue, async = false) => {
-                return this.runHookWaterfall(name, initialValue, async, store);
-              }}
-              runHookSeries={this.runHookSeries}
-              settings={this.settings}
-            >
-              <LibraryProvider components={components} fields={fields}>
-                <LanguageProvider messages={this.translations} localeNames={localeNames}>
-                  <AutoReloadOverlayBlockerProvider>
-                    <OverlayBlocker>
-                      <Notifications>
-                        <BrowserRouter basename={basename}>
-                          <App store={store} />
-                        </BrowserRouter>
-                      </Notifications>
-                    </OverlayBlocker>
-                  </AutoReloadOverlayBlockerProvider>
-                </LanguageProvider>
-              </LibraryProvider>
-            </StrapiAppProvider>
-          </Provider>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <Theme theme={themes}>
+        <Providers
+          components={components}
+          fields={fields}
+          localeNames={localeNames}
+          getAdminInjectedComponents={this.admin.getInjectedComponents}
+          getPlugin={this.getPlugin}
+          messages={this.translations}
+          menu={this.menu}
+          plugins={this.plugins}
+          runHookParallel={this.runHookParallel}
+          runHookWaterfall={(name, initialValue, async = false) => {
+            return this.runHookWaterfall(name, initialValue, async, store);
+          }}
+          runHookSeries={this.runHookSeries}
+          settings={this.settings}
+          store={store}
+        >
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </Providers>
+      </Theme>
     );
   }
 }
