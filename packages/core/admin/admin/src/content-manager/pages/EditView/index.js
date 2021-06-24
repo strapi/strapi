@@ -1,14 +1,9 @@
 import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import {
-  BaselineAlignment,
-  InjectionZone,
-  LiLink,
-  CheckPermissions,
-  useTracking,
-} from '@strapi/helper-plugin';
+import { BaselineAlignment, LiLink, CheckPermissions, useTracking } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
+import { InjectionZone } from '../../../shared/components';
 import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
@@ -252,7 +247,7 @@ const EditView = ({
                         </CheckPermissions>
                       )}
                       {/*  TODO add DOCUMENTATION */}
-                      <InjectionZone area={`${pluginId}.editView.right-links`} slug={slug} />
+                      <InjectionZone area="contentManager.editView.right-links" slug={slug} />
 
                       {allowedActions.canDelete && (
                         <DeleteLink

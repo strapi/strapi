@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import useInjectionZone from './useInjectionZone';
+import { useInjectionZone } from '../../../shared/hooks';
 
 const List = styled.ul`
   list-style-type: none;

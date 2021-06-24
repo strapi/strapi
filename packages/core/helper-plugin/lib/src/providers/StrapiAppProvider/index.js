@@ -9,7 +9,6 @@ import StrapiAppContext from '../../contexts/StrapiAppContext';
 
 const StrapiAppProvider = ({
   children,
-  getAdminInjectedComponents,
   getPlugin,
   menu,
   plugins,
@@ -21,7 +20,6 @@ const StrapiAppProvider = ({
   return (
     <StrapiAppContext.Provider
       value={{
-        getAdminInjectedComponents,
         getPlugin,
         menu,
         plugins,
@@ -38,12 +36,11 @@ const StrapiAppProvider = ({
 
 StrapiAppProvider.propTypes = {
   children: PropTypes.node.isRequired,
-  getAdminInjectedComponents: PropTypes.func.isRequired,
   getPlugin: PropTypes.func.isRequired,
   menu: PropTypes.arrayOf(
     PropTypes.shape({
       to: PropTypes.string.isRequired,
-      icon: PropTypes.array,
+      icon: PropTypes.string,
       intlLabel: PropTypes.shape({
         id: PropTypes.string.isRequired,
         defaultMessage: PropTypes.string.isRequired,
