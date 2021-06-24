@@ -140,8 +140,8 @@ const DraggedField = forwardRef(
                 <Link
                   onClick={e => {
                     e.stopPropagation();
-                    // FIXME when changing the routing
-                    goTo(`/plugins/content-manager/components/${componentUid}/configurations/edit`);
+
+                    goTo(`/content-manager/components/${componentUid}/configurations/edit`);
                   }}
                 >
                   <FontAwesomeIcon icon="cog" />

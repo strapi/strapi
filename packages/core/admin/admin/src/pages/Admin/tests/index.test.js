@@ -54,7 +54,7 @@ describe('<Admin />', () => {
     useStrapiApp.mockImplementation(() => ({
       menu: [
         {
-          to: '/plugins/content-manager',
+          to: '/plugins/ctb',
         },
         {
           to: '/plugins/documentation',

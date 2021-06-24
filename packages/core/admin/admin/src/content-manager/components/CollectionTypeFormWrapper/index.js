@@ -267,8 +267,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
-        // FIXME when updating the routing
-        replace(`/plugins/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
+        replace(`/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
       } catch (err) {
         trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);

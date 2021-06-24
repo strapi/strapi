@@ -34,7 +34,7 @@ const generateLinks = (links, type, configurations = []) => {
         search,
         kind: link.kind,
         title: link.info.label,
-        to: `/plugins/content-manager/${link.kind}/${link.uid}`,
+        to: `/content-manager/${link.kind}/${link.uid}`,
         uid: link.uid,
         // Used for the list item key in the helper plugin
         name: link.uid,
