@@ -6,10 +6,9 @@ import { ThemeProvider } from 'styled-components';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import pick from 'lodash/pick';
 import invariant from 'invariant';
-import createHook from './core/utils/createHook';
+import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
-import basename from './utils/basename';
 import App from './pages/App';
 import LanguageProvider from './components/LanguageProvider';
 import AutoReloadOverlayBlockerProvider from './components/AutoReloadOverlayBlockerProvider';
@@ -17,8 +16,16 @@ import OverlayBlocker from './components/OverlayBlocker';
 import Fonts from './components/Fonts';
 import GlobalStyle from './components/GlobalStyle';
 import Notifications from './components/Notifications';
-import themes from './themes';
 import languageNativeNames from './translations/languageNativeNames';
+import {
+  INJECT_COLUMN_IN_TABLE,
+  MUTATE_COLLECTION_TYPES_LINKS,
+  MUTATE_EDIT_VIEW_LAYOUT,
+  MUTATE_SINGLE_TYPES_LINKS,
+} from './exposedHooks';
+import injectionZones from './injectionZones';
+import adminPermissions from './permissions';
+import themes from './themes';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
@@ -42,6 +49,19 @@ class StrapiApp {
     this.reducers = reducers;
     this.translations = {};
     this.hooksDict = {};
+    this.admin = {
+      injectionZones,
+      getInjectedComponents(moduleName, containerName, blockName) {
+        try {
+          return this.injectionZones[moduleName][containerName][blockName] || {};
+        } catch (err) {
+          console.error('Cannot get injected component', err);
+
+          return err;
+        }
+      },
+    };
+
     this.menu = [];
     this.settings = {
       global: {
@@ -162,11 +182,36 @@ class StrapiApp {
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
+          injectContentManagerComponent: this.injectContentManagerComponent,
           registerHook: this.registerHook,
         });
       }
     });
   }
+
+  bootstrapAdmin = async () => {
+    // TODO move link in menu
+    this.addCorePluginMenuLink({
+      // TODO
+      to: `/plugins/content-manager`,
+      icon: 'book-open',
+      intlLabel: {
+        id: `content-manager.plugin.name`,
+        defaultMessage: 'Content manager',
+      },
+      // permissions: pluginPermissions.main,
+      permissions: adminPermissions.contentManager.main,
+    });
+
+    this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
+    this.createHook(MUTATE_SINGLE_TYPES_LINKS);
+    this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
+
+    await this.loadAdminTrads();
+
+    return Promise.resolve();
+  };
 
   createHook = name => {
     this.hooksDict[name] = createHook();
@@ -214,6 +259,16 @@ class StrapiApp {
       });
     });
   }
+
+  injectContentManagerComponent = (containerName, blockName, component) => {
+    invariant(
+      this.admin.injectionZones.contentManager[containerName]?.[blockName],
+      `The ${containerName} ${blockName} zone is not defined in the content manager`
+    );
+    invariant(component, 'A Component must be provided');
+
+    this.admin.injectionZones.contentManager[containerName][blockName].push(component);
+  };
 
   async loadAdminTrads() {
     const arrayOfPromises = this.appLocales.map(locale => {
@@ -317,6 +372,7 @@ class StrapiApp {
           <Fonts />
           <Provider store={store}>
             <StrapiAppProvider
+              getAdminInjectedComponents={this.admin.getInjectedComponents}
               getPlugin={this.getPlugin}
               menu={this.menu}
               plugins={this.plugins}

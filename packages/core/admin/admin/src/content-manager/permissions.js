@@ -1,3 +1,4 @@
+// TODO
 const pluginPermissions = {
   // This permission regards the main component (App) and is used to tell
   // If the plugin link should be displayed in the menu
