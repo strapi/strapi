@@ -1,5 +1,3 @@
-import pluginId from '../pluginId';
-
-const getTrad = id => `${pluginId}.${id}`;
+const getTrad = id => `content-manager.${id}`;
 
 export default getTrad;
