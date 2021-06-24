@@ -1,6 +1,7 @@
 import { request, hasPermissions } from '@strapi/helper-plugin';
 import getContentTypeLinks from '../getContentTypeLinks';
 
+// FIXME
 jest.mock('@strapi/helper-plugin');
 
 describe('checkPermissions', () => {

@@ -1,11 +1,12 @@
 import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
-import { request, useNotification, useTracking } from '@strapi/helper-plugin';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
+import { axiosInstance } from '../../../core/utils';
 import pluginId from '../../pluginId';
 import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl } from '../../utils';
 import PopupForm from '../../components/PopupForm';
@@ -94,12 +95,15 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     try {
       const body = pick(modifiedData, ['layouts', 'settings', 'metadatas']);
 
-      const response = await request(getRequestUrl(`content-types/${slug}/configuration`), {
-        method: 'PUT',
-        body,
-      });
+      const {
+        data: { data },
+      } = await axiosInstance.put(
+        getRequestUrl(`content-types/${slug}/configuration`),
 
-      updateLayout(response.data);
+        body
+      );
+
+      updateLayout(data);
 
       dispatch({
         type: 'SUBMIT_SUCCEEDED',

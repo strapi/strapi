@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { Text, Padded } from '@buffetjs/core';
-import { request } from '@strapi/helper-plugin';
 import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
 import PropTypes from 'prop-types';
+import axios from 'axios';
+import { axiosInstance } from '../../../core/utils';
 import { getDisplayedValue, getRequestUrl } from '../../utils';
 
 const RelationPreviewTooltip = ({
@@ -18,17 +19,21 @@ const RelationPreviewTooltip = ({
   const tooltipRef = useRef();
 
   const fetchRelationData = useCallback(
-    async signal => {
+    async source => {
       const requestURL = getRequestUrl(`${endPoint}/${rowId}/${name}`);
+
       try {
-        const { results } = await request(requestURL, {
-          method: 'GET',
-          signal,
-        });
+        const {
+          data: { results },
+        } = await axiosInstance.get(requestURL, { cancelToken: source.token });
 
         setRelationData(results);
         setIsLoading(false);
       } catch (err) {
+        if (axios.isCancel(err)) {
+          return;
+        }
+
         console.error({ err });
         setIsLoading(false);
       }
@@ -37,16 +42,17 @@ const RelationPreviewTooltip = ({
   );
 
   useEffect(() => {
-    const abortController = new AbortController();
-    const { signal } = abortController;
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
     const timeout = setTimeout(() => {
-      fetchRelationData(signal);
+      fetchRelationData(source);
     }, 500);
 
     return () => {
       clearTimeout(timeout);
-      abortController.abort();
+
+      source.cancel('Operation canceled by the user.');
     };
   }, [fetchRelationData]);
 
