@@ -1,5 +1,3 @@
-import pluginId from '../../pluginId';
-
-const selectCrudReducer = state => state[`${pluginId}_editViewCrudReducer`];
+const selectCrudReducer = state => state['content-manager_editViewCrudReducer'];
 
 export default selectCrudReducer;

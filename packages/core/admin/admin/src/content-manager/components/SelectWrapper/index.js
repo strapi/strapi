@@ -14,7 +14,7 @@ import { Flex, Text, Padded } from '@buffetjs/core';
 import { stringify } from 'qs';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
-import pluginId from '../../pluginId';
+import { getTrad } from '../../utils';
 import SelectOne from '../SelectOne';
 import SelectMany from '../SelectMany';
 import ClearIndicator from './ClearIndicator';
@@ -230,7 +230,8 @@ function SelectWrapper({
     setIsOpen(true);
   };
 
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${value ? value.id : null}`;
+  // FIXME when changing the routing
+  const to = `/plugins/content-manager/collectionType/${targetModel}/${value ? value.id : null}`;
 
   const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
 
@@ -331,7 +332,7 @@ function SelectWrapper({
           onRemove={onRemoveRelation}
           placeholder={
             isEmpty(placeholder) ? (
-              <FormattedMessage id={`${pluginId}.containers.Edit.addAnItem`} />
+              <FormattedMessage id={getTrad('containers.Edit.addAnItem')} />
             ) : (
               placeholder
             )

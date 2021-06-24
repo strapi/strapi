@@ -11,8 +11,6 @@ import {
   findMatchingPermissions,
   useTracking,
 } from '@strapi/helper-plugin';
-
-import pluginId from '../../pluginId';
 import { formatFiltersToQuery, getTrad } from '../../utils';
 import Container from '../Container';
 import FilterPickerOption from '../FilterPickerOption';
@@ -99,7 +97,7 @@ function FilterPicker({
   };
 
   const renderTitle = () => (
-    <FormattedMessage id={`${pluginId}.components.FiltersPickWrapper.PluginHeader.title.filter`}>
+    <FormattedMessage id={getTrad('components.FiltersPickWrapper.PluginHeader.title.filter')}>
       {message => (
         <span>
           {capitalize(name)}&nbsp;-&nbsp;
@@ -208,7 +206,7 @@ function FilterPicker({
             actions={actions}
             title={renderTitle}
             description={{
-              id: `${pluginId}.components.FiltersPickWrapper.PluginHeader.description`,
+              id: getTrad('components.FiltersPickWrapper.PluginHeader.description'),
             }}
           />
           <Wrapper>

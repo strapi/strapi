@@ -1,7 +1,5 @@
-import pluginId from '../../pluginId';
-
 const selectMenuLinks = state => {
-  const cmState = state[`${pluginId}_app`];
+  const cmState = state['content-manager_app'];
 
   return cmState.collectionTypeLinks;
 };

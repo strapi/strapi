@@ -1,4 +1,4 @@
-import pluginId from '../../../pluginId';
+import { getTrad } from '../../../utils';
 
 const getInputProps = fieldName => {
   let type;
@@ -21,8 +21,8 @@ const getInputProps = fieldName => {
 
   const labelId =
     fieldName === 'mainField'
-      ? `${pluginId}.containers.SettingPage.editSettings.entry.title`
-      : `${pluginId}.form.Input.${fieldName}`;
+      ? getTrad('containers.SettingPage.editSettings.entry.title')
+      : getTrad(`form.Input.${fieldName}`);
 
   return { type, label: { id: labelId } };
 };

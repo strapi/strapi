@@ -1,7 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import pluginId from '../../../pluginId';
+import { getTrad } from '../../../utils';
 import useListView from '../../../hooks/useListView';
 import DeleteAll from './DeleteAll';
 import Delete from './Delete';
@@ -18,12 +18,12 @@ function ActionCollapse({ colSpan }) {
     <Wrapper colSpan={colSpan}>
       <td colSpan={colSpan}>
         <FormattedMessage
-          id={`${pluginId}.components.TableDelete.entries.${suffix}`}
+          id={getTrad(`components.TableDelete.entries.${suffix}`)}
           values={{ number }}
         >
           {message => <Delete>{message}</Delete>}
         </FormattedMessage>
-        <FormattedMessage id={`${pluginId}.components.TableDelete.${deleteMessageId}`}>
+        <FormattedMessage id={getTrad(`components.TableDelete.${deleteMessageId}`)}>
           {message => <DeleteAll onClick={toggleModalDeleteAll}>{message}</DeleteAll>}
         </FormattedMessage>
       </td>
