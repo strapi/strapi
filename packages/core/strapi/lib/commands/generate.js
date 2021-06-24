@@ -4,6 +4,9 @@
  * Module dependencies
  */
 
+// FIXME
+/* eslint-disable import/extensions */
+
 // Node.js core.
 const path = require('path');
 

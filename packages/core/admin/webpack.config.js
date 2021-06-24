@@ -8,7 +8,7 @@ const TerserPlugin = require('terser-webpack-plugin');
 const WebpackBar = require('webpackbar');
 const NodePolyfillPlugin = require('node-polyfill-webpack-plugin');
 const isWsl = require('is-wsl');
-const alias = require('./webpack.alias.js');
+const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
 module.exports = ({
