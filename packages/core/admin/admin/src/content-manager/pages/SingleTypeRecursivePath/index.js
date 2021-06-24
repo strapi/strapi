@@ -2,12 +2,14 @@ import React, { memo, useMemo } from 'react';
 import { Switch, Route } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { LoadingIndicatorPage, CheckPagePermissions } from '@strapi/helper-plugin';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import { ContentTypeLayoutContext } from '../../contexts';
 import { useFetchContentTypeLayout } from '../../hooks';
 import { formatLayoutToApi } from '../../utils';
 import EditViewLayoutManager from '../EditViewLayoutManager';
 import EditSettingsView from '../EditSettingsView';
+
+const cmPermissions = permissions.contentManager;
 
 const SingleTypeRecursivePath = ({
   match: {
@@ -44,7 +46,7 @@ const SingleTypeRecursivePath = ({
     <ContentTypeLayoutContext.Provider value={layout}>
       <Switch>
         <Route path={`${url}/configurations/edit`}>
-          <CheckPagePermissions permissions={pluginPermissions.singleTypesConfigurations}>
+          <CheckPagePermissions permissions={cmPermissions.singleTypesConfigurations}>
             <EditSettingsView
               components={rawComponentsLayouts}
               isContentTypeView

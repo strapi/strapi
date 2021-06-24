@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
 import { CheckPermissions } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
 import GrabWrapper from './GrabWrapper';
 import Link from './Link';
@@ -15,6 +15,8 @@ import RemoveWrapper from './RemoveWrapper';
 import SubWrapper from './SubWrapper';
 import Wrapper from './Wrapper';
 import Close from './Close';
+
+const cmPermissions = permissions.contentManager;
 
 /* eslint-disable */
 const DraggedField = forwardRef(
@@ -132,7 +134,7 @@ const DraggedField = forwardRef(
           </SubWrapper>
         )}
         {type === 'component' && (
-          <CheckPermissions permissions={pluginPermissions.componentsConfigurations}>
+          <CheckPermissions permissions={cmPermissions.componentsConfigurations}>
             <FormattedMessage id={getTrad('components.FieldItem.linkToComponentLayout')}>
               {msg => (
                 <Link
