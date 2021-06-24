@@ -1,5 +1,4 @@
-import pluginId from '../pluginId';
-
-const getRequestUrl = path => `/${pluginId}/${path}`;
+// FIXME when back-end ready
+const getRequestUrl = path => `/content-manager/${path}`;
 
 export default getRequestUrl;
