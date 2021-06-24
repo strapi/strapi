@@ -13,8 +13,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import PropTypes from 'prop-types';
 import isEqual from 'react-fast-compare';
 import { axiosInstance } from '../../../core/utils';
-import { createDefaultForm, getTrad, removePasswordFieldsFromData } from '../../utils';
-import pluginId from '../../pluginId';
+import {
+  createDefaultForm,
+  getTrad,
+  getRequestUrl,
+  removePasswordFieldsFromData,
+} from '../../utils';
 import { useFindRedirectionLink } from '../../hooks';
 import {
   getData,
@@ -26,7 +30,6 @@ import {
   submitSucceeded,
 } from '../../sharedReducers/crudReducer/actions';
 import selectCrudReducer from '../../sharedReducers/crudReducer/selectors';
-import { getRequestUrl } from './utils';
 
 // This container is used to handle the CRUD
 const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }) => {
@@ -56,7 +59,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       return null;
     }
 
-    return getRequestUrl(`${slug}/${origin || id}`);
+    return getRequestUrl(`collection-types/${slug}/${origin || id}`);
   }, [slug, id, isCreatingEntry, origin]);
 
   const cleanClonedData = useCallback(
@@ -219,7 +222,9 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
       try {
         trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-        const { data } = await axiosInstance.delete(getRequestUrl(`${slug}/${id}`));
+        const { data } = await axiosInstance.delete(
+          getRequestUrl(`collection-types/${slug}/${id}`)
+        );
 
         toggleNotification({
           type: 'success',
@@ -244,7 +249,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPost = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = `${getRequestUrl(slug)}${rawQuery}`;
+      const endPoint = `${getRequestUrl(`collection-types/${slug}`)}${rawQuery}`;
 
       try {
         // Show a loading button in the EditView/Header.js && lock the app => no navigation
@@ -262,7 +267,8 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
         // Enable navigation and remove loaders
         dispatch(setStatus('resolved'));
 
-        replace(`/plugins/${pluginId}/collectionType/${slug}/${data.id}${rawQuery}`);
+        // FIXME when updating the routing
+        replace(`/plugins/content-manager/collectionType/${slug}/${data.id}${rawQuery}`);
       } catch (err) {
         trackUsageRef.current('didNotCreateEntry', { error: err, trackerProperty });
         displayErrors(err);
@@ -275,7 +281,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   const onPublish = useCallback(async () => {
     try {
       trackUsageRef.current('willPublishEntry');
-      const endPoint = getRequestUrl(`${slug}/${id}/actions/publish`);
+      const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/publish`);
 
       dispatch(setStatus('publish-pending'));
 
@@ -298,7 +304,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
 
   const onPut = useCallback(
     async (body, trackerProperty) => {
-      const endPoint = getRequestUrl(`${slug}/${id}`);
+      const endPoint = getRequestUrl(`collection-types/${slug}/${id}`);
 
       try {
         trackUsageRef.current('willEditEntry', trackerProperty);
@@ -327,7 +333,7 @@ const CollectionTypeFormWrapper = ({ allLayoutData, children, slug, id, origin }
   );
 
   const onUnpublish = useCallback(async () => {
-    const endPoint = getRequestUrl(`${slug}/${id}/actions/unpublish`);
+    const endPoint = getRequestUrl(`collection-types/${slug}/${id}/actions/unpublish`);
 
     dispatch(setStatus('unpublish-pending'));
 

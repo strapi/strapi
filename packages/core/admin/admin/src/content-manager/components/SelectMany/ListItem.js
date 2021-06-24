@@ -3,8 +3,6 @@ import PropTypes from 'prop-types';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
 import { has } from 'lodash';
-
-import pluginId from '../../pluginId';
 import ItemTypes from '../../utils/ItemTypes';
 
 import { Li } from './components';
@@ -21,7 +19,8 @@ function ListItem({
   searchToPersist,
   targetModel,
 }) {
-  const to = `/plugins/${pluginId}/collectionType/${targetModel}/${data.id}`;
+  // FIXME when changing the routing
+  const to = `/plugins/content-manager/collectionType/${targetModel}/${data.id}`;
 
   const hasDraftAndPublish = has(data, 'published_at');
 

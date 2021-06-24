@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { hasPermissions, useRBACProvider } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import DynamicComponentCard from '../DynamicComponentCard';
 import Tooltip from './Tooltip';
@@ -44,7 +43,8 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       isOver={isOver}
       onClick={() => {
         if (!isLoading && canAccess) {
-          push(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
+          // FIXME when changing the routing
+          push(`/plugins/content-manager/components/${componentUid}/configurations/edit`);
         }
       }}
       onMouseEvent={handleMouseEvent}

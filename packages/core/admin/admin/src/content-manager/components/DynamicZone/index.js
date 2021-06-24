@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { Flex } from '@buffetjs/core';
 import { LabelIconWrapper, NotAllowedInput, useNotification } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
+import { getTrad } from '../../utils';
 import connect from './utils/connect';
 import select from './utils/select';
 import BaselineAlignement from './BaselineAlignement';
@@ -74,7 +74,7 @@ const DynamicZone = ({
     } else {
       toggleNotification({
         type: 'info',
-        message: { id: `${pluginId}.components.notification.info.maximum-requirement` },
+        message: { id: getTrad('components.notification.info.maximum-requirement') },
       });
     }
   };
@@ -160,7 +160,7 @@ const DynamicZone = ({
           />
           {hasRequiredError && !isOpen && !hasMaxError && (
             <div className="error-label">
-              <FormattedMessage id={`${pluginId}.components.DynamicZone.required`} />
+              <FormattedMessage id={getTrad('components.DynamicZone.required')} />
             </div>
           )}
           {hasMaxError && !isOpen && (
@@ -171,16 +171,18 @@ const DynamicZone = ({
           {hasMinError && !isOpen && (
             <div className="error-label">
               <FormattedMessage
-                id={`${pluginId}.components.DynamicZone.missing${
-                  missingComponentNumber > 1 ? '.plural' : '.singular'
-                }`}
+                id={getTrad(
+                  `components.DynamicZone.missing${
+                    missingComponentNumber > 1 ? '.plural' : '.singular'
+                  }`
+                )}
                 values={{ count: missingComponentNumber }}
               />
             </div>
           )}
           <div className="info">
             <FormattedMessage
-              id={`${pluginId}.components.DynamicZone.add-compo`}
+              id={getTrad('components.DynamicZone.add-compo')}
               values={{ componentName: metadatas.label }}
             />
           </div>

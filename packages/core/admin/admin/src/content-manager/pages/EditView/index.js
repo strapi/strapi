@@ -4,7 +4,6 @@ import { get } from 'lodash';
 import { BaselineAlignment, LiLink, CheckPermissions, useTracking } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import { InjectionZone } from '../../../shared/components';
-import pluginId from '../../pluginId';
 import pluginPermissions from '../../permissions';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
@@ -50,7 +49,8 @@ const EditView = ({
       : pluginPermissions.collectionTypesConfigurations;
   }, [isSingleType]);
 
-  const configurationsURL = `/plugins/${pluginId}/${
+  // FIXME when changing the routing
+  const configurationsURL = `/plugins/content-manager/${
     isSingleType ? 'singleType' : 'collectionType'
   }/${slug}/configurations/edit`;
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);

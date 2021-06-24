@@ -5,7 +5,7 @@ import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
 import { CheckPermissions } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
+import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
 import GrabWrapper from './GrabWrapper';
@@ -133,13 +133,13 @@ const DraggedField = forwardRef(
         )}
         {type === 'component' && (
           <CheckPermissions permissions={pluginPermissions.componentsConfigurations}>
-            <FormattedMessage id={`${pluginId}.components.FieldItem.linkToComponentLayout`}>
+            <FormattedMessage id={getTrad('components.FieldItem.linkToComponentLayout')}>
               {msg => (
                 <Link
                   onClick={e => {
                     e.stopPropagation();
-
-                    goTo(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
+                    // FIXME when changing the routing
+                    goTo(`/plugins/content-manager/components/${componentUid}/configurations/edit`);
                   }}
                 >
                   <FontAwesomeIcon icon="cog" />

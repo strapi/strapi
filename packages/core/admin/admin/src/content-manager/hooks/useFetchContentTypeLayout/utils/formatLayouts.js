@@ -1,6 +1,5 @@
 import { cloneDeep, get, set } from 'lodash';
-import { mergeMetasWithSchema } from '../../../utils';
-import pluginId from '../../../pluginId';
+import { getRequestUrl, mergeMetasWithSchema } from '../../../utils';
 
 const getRelationModel = (targetModel, models) => models.find(model => model.uid === targetModel);
 
@@ -175,7 +174,7 @@ const formatListLayoutWithMetas = contentTypeConfiguration => {
 
 const generateRelationQueryInfos = (contentTypeConfiguration, fieldName, models) => {
   const uid = contentTypeConfiguration.uid;
-  const endPoint = `/${pluginId}/relations/${uid}/${fieldName}`;
+  const endPoint = getRequestUrl(`relations/${uid}/${fieldName}`);
   const mainField = get(
     contentTypeConfiguration,
     ['metadatas', fieldName, 'edit', 'mainField', 'name'],
@@ -200,7 +199,7 @@ const generateRelationQueryInfosForComponents = (
   ctUid,
   models
 ) => {
-  const endPoint = `/${pluginId}/relations/${ctUid}/${fieldName}`;
+  const endPoint = getRequestUrl(`relations/${ctUid}/${fieldName}`);
   const mainField = get(
     contentTypeConfiguration,
     ['metadatas', fieldName, 'edit', 'mainField', 'name'],

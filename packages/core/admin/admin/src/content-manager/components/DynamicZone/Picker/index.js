@@ -3,7 +3,7 @@ import { groupBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import pluginId from '../../../pluginId';
+import { getTrad } from '../../../utils';
 import { useContentTypeLayout } from '../../../hooks';
 import Category from './Category';
 import Wrapper from './Wrapper';
@@ -56,7 +56,7 @@ const Picker = ({ components, isOpen, onClickAddComponent }) => {
       <Wrapper>
         <div>
           <p className="componentPickerTitle">
-            <FormattedMessage id={`${pluginId}.components.DynamicZone.pick-compo`} />
+            <FormattedMessage id={getTrad('components.DynamicZone.pick-compo')} />
           </p>
           <div className="categoriesList">
             {dynamicComponentCategories.map(({ category, components }, index) => {

@@ -2,13 +2,12 @@ import React, { memo, useContext, useMemo, useReducer, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get, pick } from 'lodash';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import { useDrop } from 'react-dnd';
 import { DropdownItem } from 'reactstrap';
 import { Inputs as Input } from '@buffetjs/custom';
 import { axiosInstance } from '../../../core/utils';
-import pluginId from '../../pluginId';
-import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl } from '../../utils';
+import { checkIfAttributeIsDisplayable, ItemTypes, getRequestUrl, getTrad } from '../../utils';
 import PopupForm from '../../components/PopupForm';
 import SettingsViewWrapper from '../../components/SettingsViewWrapper';
 import SortWrapper from '../../components/SortWrapper';
@@ -131,8 +130,8 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
     const type = get(attributes, [labelToEdit, 'type'], 'text');
     const relationType = get(attributes, [labelToEdit, 'relationType']);
     let shouldDisplaySortToggle = !['media', 'relation'].includes(type);
-    const label = formatMessage({ id: `${pluginId}.form.Input.label` });
-    const description = formatMessage({ id: `${pluginId}.form.Input.label.inputDescription` });
+    const label = formatMessage({ id: getTrad('form.Input.label') });
+    const description = formatMessage({ id: getTrad('form.Input.label.inputDescription') });
 
     if (['oneWay', 'oneToOne', 'manyToOne'].includes(relationType)) {
       shouldDisplaySortToggle = true;
@@ -153,17 +152,13 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
         </div>
         {shouldDisplaySortToggle && (
           <div className="col-6" style={{ marginBottom: 4 }}>
-            <FormattedMessage id={`${pluginId}.form.Input.sort.field`}>
-              {label => (
-                <Input
-                  label={label}
-                  type="bool"
-                  name="sortable"
-                  value={get(labelForm, 'sortable', false)}
-                  onChange={handleChangeEditLabel}
-                />
-              )}
-            </FormattedMessage>
+            <Input
+              label={formatMessage({ id: getTrad('form.Input.sort.field') })}
+              type="bool"
+              name="sortable"
+              value={get(labelForm, 'sortable', false)}
+              onChange={handleChangeEditLabel}
+            />
           </div>
         )}
       </>
@@ -220,7 +215,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
                         if (displayedFields.length === 1) {
                           toggleNotification({
                             type: 'info',
-                            message: { id: `${pluginId}.notification.info.minimumFields` },
+                            message: { id: getTrad('notification.info.minimumFields') },
                           });
                         } else {
                           dispatch({
@@ -271,7 +266,7 @@ const ListSettingsView = ({ layout, slug, updateLayout }) => {
         </DragWrapper>
       </SettingsViewWrapper>
       <PopupForm
-        headerId={`${pluginId}.containers.ListSettingsView.modal-form.edit-label`}
+        headerId={getTrad('containers.ListSettingsView.modal-form.edit-label')}
         isOpen={isModalFormOpen}
         onClosed={handleClosed}
         onSubmit={e => {
