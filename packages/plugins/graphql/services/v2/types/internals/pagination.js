@@ -4,6 +4,11 @@ const { objectType } = require('nexus');
 
 const { PAGINATION_TYPE_NAME } = require('../constants');
 
+// todo[v4]: Use custom resolvers to handle pagination
+/**
+ * Type definition for a Pagination object
+ * @type {NexusObjectTypeDef}
+ */
 const Pagination = objectType({
   name: PAGINATION_TYPE_NAME,
 

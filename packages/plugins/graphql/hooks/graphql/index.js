@@ -103,7 +103,7 @@ module.exports = strapi => {
         schema: nexusSchema,
         uploads: false,
         context: ({ ctx }) => {
-          // Initiliase loaders for this request.
+          // Initialize loaders for this request.
           // TODO: set loaders in the context not globally
 
           strapi.plugins.graphql.services['data-loaders'].initializeLoader();

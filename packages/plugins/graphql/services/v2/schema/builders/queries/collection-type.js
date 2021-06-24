@@ -7,7 +7,6 @@ const { buildQuery } = require('../../../../resolvers-builder');
 const { toSingular, toPlural } = require('../../../../naming');
 const { actionExists } = require('../../../../utils');
 const { utils, mappers } = require('../../../types');
-const { convertGraphQLFiltersToStrapiQuery } = require('../../../types/convert');
 
 const { SortArg, PublicationStateArg } = require('../args');
 
@@ -27,7 +26,7 @@ const buildCollectionTypeQueries = contentType => {
 };
 
 /**
- *
+ * Register a "find one" query field to the nexus type definition
  * @param {OutputDefinitionBlock<Query>} t
  * @param contentType
  */
@@ -44,18 +43,19 @@ const addFindOneQuery = (t, contentType) => {
     return;
   }
 
+  const resolver = buildQuery(toSingular(modelName), resolverOptions);
+
+  // Only authorize filtering using unique fields for findOne queries
   const uniqueAttributes = Object.entries(attributes)
     // Only keep scalar attributes
     .filter(([, attribute]) => utils.isScalar(attribute) && attribute.unique)
     // Create a map with the name of the attribute & its filters type
     .reduce((acc, [name, attribute]) => {
-      const gqlType = mappers.strapiTypeToGraphQLScalar[attribute.type];
+      const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
       const filtersType = utils.getScalarFilterInputTypeName(gqlType);
 
       return set(name, filtersType, acc);
     }, {});
-
-  const resolver = buildQuery(toSingular(modelName), resolverOptions);
 
   t.field(findOneQueryName, {
     type: responseTypeName,
@@ -67,7 +67,7 @@ const addFindOneQuery = (t, contentType) => {
     },
 
     async resolve(parent, args, context, info) {
-      const query = convertGraphQLFiltersToStrapiQuery(args, contentType);
+      const query = mappers.graphQLFiltersToStrapiQuery(args, contentType);
 
       const res = await resolver(parent, query, context, info);
 
@@ -77,7 +77,7 @@ const addFindOneQuery = (t, contentType) => {
 };
 
 /**
- *
+ * Register a "find" query field to the nexus type definition
  * @param {OutputDefinitionBlock<Query>} t
  * @param contentType
  */
@@ -108,7 +108,7 @@ const addFindQuery = (t, contentType) => {
     },
 
     async resolve(parent, args, context, info) {
-      args.filters = convertGraphQLFiltersToStrapiQuery(args.filters, contentType);
+      args.filters = mappers.graphQLFiltersToStrapiQuery(args.filters, contentType);
 
       const res = await resolver(parent, args, context, info);
 

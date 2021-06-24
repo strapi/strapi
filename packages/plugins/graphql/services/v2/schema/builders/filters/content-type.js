@@ -7,27 +7,6 @@ const operators = require('./operators');
 
 const rootLevelOperators = [operators.AND, operators.OR, operators.NOT];
 
-const buildFindOneCollectionTypeFilters = contentType => {
-  const { attributes } = contentType;
-
-  // only keep unique scalars attributes
-  const validAttributes = Object.keys(attributes).filter(attributeName => {
-    const attribute = attributes[attributeName];
-    return utils.isScalar(attribute) && attribute.unique;
-  });
-
-  return {
-    id: 'ID',
-
-    ...validAttributes.reduce((acc, attributeName) => {
-      const attribute = attributes[attributeName];
-      const gqlType = mappers.strapiTypeToGraphQLScalar[attribute.type];
-
-      return { ...acc, [attributeName]: gqlType };
-    }, {}),
-  };
-};
-
 const buildContentTypeFilters = contentType => {
   const { attributes } = contentType;
 
@@ -37,20 +16,20 @@ const buildContentTypeFilters = contentType => {
     name: filtersTypeName,
 
     definition(t) {
-      // adding attributes
+      // Add every defined attribute
       for (const [attributeName, attribute] of Object.entries(attributes)) {
-        // scalar attribute
+        // Handle scalars
         if (utils.isScalar(attribute)) {
           addScalarAttribute(t, attributeName, attribute);
         }
 
-        // relational attribute
+        // Handle relations
         else if (utils.isRelation(attribute)) {
           addRelationalAttribute(t, attributeName, attribute);
         }
       }
 
-      // adding conditional clauses
+      // Conditional clauses
       for (const operator of rootLevelOperators) {
         operator.add(t, filtersTypeName);
       }
@@ -59,18 +38,21 @@ const buildContentTypeFilters = contentType => {
 };
 
 const addScalarAttribute = (builder, attributeName, attribute) => {
-  const gqlType = mappers.strapiTypeToGraphQLScalar[attribute.type];
+  const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
   builder.field(attributeName, { type: utils.getScalarFilterInputTypeName(gqlType) });
 };
 
 const addRelationalAttribute = (builder, attributeName, attribute) => {
-  const model = strapi.getModel(attribute.model, attribute.plugin);
+  const model = strapi.getModel(attribute.model || attribute.collection, attribute.plugin);
+
+  // If there is no model corresponding to the attribute configuration
+  // or if the attribute is a polymorphic relation, then ignore it
+  if (!model || utils.isMorphRelation(attribute)) return;
 
   builder.field(attributeName, { type: utils.getFiltersInputTypeName(model) });
 };
 
 module.exports = {
-  buildFindOneCollectionTypeFilters,
   buildContentTypeFilters,
 };

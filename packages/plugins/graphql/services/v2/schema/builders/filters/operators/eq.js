@@ -1,6 +1,6 @@
 'use strict';
 
-const { SCALARS } = require('../../../../types/constants');
+const { GRAPHQL_SCALARS } = require('../../../../types/constants');
 
 const EQ_FIELD_NAME = 'eq';
 
@@ -10,7 +10,7 @@ module.exports = {
   strapiOperator: '$eq',
 
   add(t, type) {
-    if (!SCALARS.includes(type)) {
+    if (!GRAPHQL_SCALARS.includes(type)) {
       throw new Error(`Can't use "${EQ_FIELD_NAME}" operator. "${type}" is not a valid scalar`);
     }
 

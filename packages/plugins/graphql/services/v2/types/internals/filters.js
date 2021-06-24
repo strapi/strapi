@@ -2,52 +2,40 @@
 
 const { inputObjectType } = require('nexus');
 
-const {
-  eq,
-  gt,
-  lt,
-  contains,
-  endsWith,
-  startsWith,
-} = require('../../schema/builders/filters/operators');
 const { getScalarFilterInputTypeName } = require('../utils');
+const { graphqlScalarToOperators } = require('../mappers');
 
-const operatorCollectionByGraphQLScalar = {
-  // ID
-  ID: [eq],
-  // Booleans
-  Boolean: [eq],
-  // Strings
-  String: [eq, contains, startsWith, endsWith],
-  // Numbers
-  Int: [eq, gt, lt],
-  Long: [eq, gt, lt],
-  Float: [eq, gt, lt],
-  // Dates
-  Date: [eq, gt, lt],
-  Time: [eq, gt, lt],
-  DateTime: [eq, gt, lt],
-  // Others
-  JSON: [eq],
+const { enabledScalars } = graphqlScalarToOperators;
+
+/**
+ * Build a map of filters type for every GraphQL scalars
+ * @return {Object<string, NexusInputTypeDef>}
+ */
+const buildScalarFilters = () => {
+  return enabledScalars.reduce((acc, type) => {
+    const operators = graphqlScalarToOperators(type);
+    const typeName = getScalarFilterInputTypeName(type);
+
+    if (!operators || operators.length === 0) {
+      return acc;
+    }
+
+    return {
+      ...acc,
+
+      [typeName]: inputObjectType({
+        name: typeName,
+
+        definition(t) {
+          for (const operator of operators) {
+            operator.add(t, type);
+          }
+        },
+      }),
+    };
+  }, {});
 };
 
-const VALID_SCALARS = Object.keys(operatorCollectionByGraphQLScalar);
-
-const scalarFilters = VALID_SCALARS.reduce((acc, type) => {
-  const operators = operatorCollectionByGraphQLScalar[type];
-  const inputTypeName = getScalarFilterInputTypeName(type);
-
-  acc[inputTypeName] = inputObjectType({
-    name: inputTypeName,
-
-    definition(t) {
-      operators.forEach(operator => operator.add(t, type));
-    },
-  });
-
-  return acc;
-}, {});
-
 module.exports = {
-  scalars: scalarFilters,
+  scalars: buildScalarFilters(),
 };

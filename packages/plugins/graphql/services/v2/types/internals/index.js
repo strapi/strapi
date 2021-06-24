@@ -6,9 +6,16 @@ const publicationState = require('./publication-state');
 const filters = require('./filters');
 
 module.exports = {
-  pagination,
-  responseCollectionMeta,
-  publicationState,
+  internals: {
+    pagination,
+    responseCollectionMeta,
+  },
 
-  ...filters.scalars,
+  enums: {
+    publicationState,
+  },
+
+  ['filters-inputs']: {
+    ...filters,
+  },
 };

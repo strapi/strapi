@@ -1,7 +1,6 @@
 'use strict';
 
 const enums = require('./enums');
-const component = require('./component');
 const dynamicZone = require('./dynamic-zones');
 
 const entity = require('./entity');
@@ -17,7 +16,6 @@ const args = require('./args');
 
 module.exports = {
   ...enums,
-  ...component,
   ...dynamicZone,
 
   ...entity,

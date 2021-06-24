@@ -4,6 +4,10 @@ const { GraphQLScalarType } = require('graphql');
 const { Kind } = require('graphql');
 const { parseType } = require('@strapi/utils');
 
+/**
+ * A GraphQL scalar used to store Time (HH:mm:ss.SSS) values
+ * @type {GraphQLScalarType}
+ */
 const TimeScalar = new GraphQLScalarType({
   name: 'Time',
 

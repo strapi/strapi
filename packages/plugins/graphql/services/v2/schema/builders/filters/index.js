@@ -1,7 +1,7 @@
 'use strict';
 
-const collectionType = require('./collection-type');
+const contentType = require('./content-type');
 
 module.exports = {
-  ...collectionType,
+  ...contentType,
 };

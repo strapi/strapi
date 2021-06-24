@@ -6,7 +6,6 @@ const { objectType } = require('nexus');
 const { contentTypes } = require('@strapi/utils');
 
 const { mappers, utils: typeUtils } = require('../../types');
-// const { buildAssociationResolver } = require('../resolvers');
 const { buildAssocResolvers } = require('../../../shadow-crud');
 
 /**
@@ -61,6 +60,8 @@ const buildTypeDefinition = (name, contentType) => {
         .forEach(attributeName => {
           const attribute = attributes[attributeName];
 
+          // We create a copy of the builder (t) to apply custom
+          // rules only on the current attribute (eg: nonNull, list, ...)
           let builder = t;
 
           if (attribute.required) {
@@ -108,7 +109,7 @@ const buildTypeDefinition = (name, contentType) => {
  * @param {string} attribute.type - The Strapi type of the attribute
  */
 const addScalarAttribute = (builder, attributeName, attribute) => {
-  const gqlType = mappers.strapiTypeToGraphQLScalar[attribute.type];
+  const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
   builder.field(attributeName, { type: gqlType });
 };
@@ -126,13 +127,13 @@ const addScalarAttribute = (builder, attributeName, attribute) => {
  * @param {boolean} attribute.repeatable - Whether the component is repeatable or not
  */
 const addComponentAttribute = (builder, attributeName, attribute) => {
-  const component = strapi.components[attribute.component];
+  const type = typeUtils.getComponentNameFromAttribute(attribute);
 
   if (attribute.repeatable) {
     builder = builder.list;
   }
 
-  builder.field(attributeName, { type: component.globalId });
+  builder.field(attributeName, { type });
 };
 
 /**
@@ -175,7 +176,8 @@ const addEnumAttribute = (builder, attributeName, attribute, contentType) => {
  * @param {ObjectDefinitionBlock} builder - Nexus type builder
  * @param {string} attributeName - The name of the attribute
  * @param {object} attribute - The attribute object
- * @param {string} attribute.model - The model on which the relation is made
+ * @param {string} [attribute.model] - The model on which the relation is made
+ * @param {string} [attribute.collection] - The collection on which the relation is made
  * @param {string} attribute.plugin - The plugin of the attribute's model
  * @param {object} contentType - The content type we're building the definition for
  * @param {string[]} contentType.associations - The list of associations defined for the content type
@@ -183,7 +185,17 @@ const addEnumAttribute = (builder, attributeName, attribute, contentType) => {
 const addRelationalAttribute = (builder, attributeName, attribute, contentType) => {
   const { associations = [] } = contentType;
 
-  const rel = strapi.getModel(attribute.model, attribute.plugin);
+  // Polymorphic relations
+  if (attribute.collection === '*') {
+    builder.field(attributeName, {
+      type: typeUtils.getMorphRelationTypeName(contentType, attributeName),
+      resolve: buildAssocResolvers(contentType)[attributeName],
+    });
+
+    return;
+  }
+
+  const rel = strapi.getModel(attribute.model || attribute.collection, attribute.plugin);
 
   const relationType = associations.find(assoc => assoc.alias === attributeName).nature;
   const type = typeUtils.getTypeName(rel);
