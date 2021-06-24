@@ -24,6 +24,9 @@ import Wrapper from './Wrapper';
 import Content from './Content';
 import { createRoute } from '../../utils';
 
+const CM = lazy(() =>
+  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
+);
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
@@ -40,12 +43,6 @@ const SettingsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
 );
 
-// FIXME
-// const CM = lazy(() =>
-//   import(
-//     /* webpackChunkName: "content-manager" */ '@strapi/plugin-content-manager/admin/src/pages/App'
-//   )
-// );
 const CTB = lazy(() =>
   import(
     /* webpackChunkName: "content-type-builder" */ '@strapi/plugin-content-type-builder/admin/src/pages/App'
@@ -98,8 +95,8 @@ const Admin = () => {
             <Switch>
               <Route path="/" component={HomePage} exact />
               <Route path="/me" component={ProfilePage} exact />
-              {/* FIXME */}
-              {/* <Route path="/plugins/content-manager" component={CM} /> */}
+
+              <Route path="/plugins/content-manager" component={CM} />
               <Route path="/plugins/content-type-builder" component={CTB} />
               <Route path="/plugins/upload" component={Upload} />
               {routes}
