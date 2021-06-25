@@ -256,27 +256,14 @@ const deleteByIds = async ids => {
 /** Count the users that don't have any associated roles
  * @returns {Promise<number>}
  */
-// FIXME: test / cleanup
 const countUsersWithoutRole = async () => {
-  return strapi.query('strapi::user').count({ where: { roles: { id: { $null: true } } } });
-
-  // const userModel = strapi.query('strapi::user').model;
-  // let count;
-
-  // if (userModel.orm === 'bookshelf') {
-  //   count = await strapi.query('strapi::user').count({ roles_null: true });
-  // } else if (userModel.orm === 'mongoose') {
-  //   count = await strapi.query('strapi::user').model.countDocuments({
-  //     $or: [{ roles: { $exists: false } }, { roles: { $size: 0 } }],
-  //   });
-  // } else {
-  //   const allRoles = await strapi.query('role', 'admin').find({ _limit: -1 });
-  //   count = await strapi.query('strapi::user').count({
-  //     roles_nin: allRoles.map(r => r.id),
-  //   });
-  // }
-
-  // return count;
+  return strapi.query('strapi::user').count({
+    where: {
+      roles: {
+        id: { $null: true },
+      },
+    },
+  });
 };
 
 /**
@@ -291,13 +278,7 @@ const count = async (where = {}) => {
 /** Assign some roles to several users
  * @returns {undefined}
  */
-// TODO: impl with updateMany
 const assignARoleToAll = async roleId => {
-  // await strapi.query('strapi::user').updateMany({
-  //   where: { roles: { id: { $null: true } } },
-  //   data: { roles: [roleId] },
-  // });
-
   const users = await strapi.query('strapi::user').findMany({
     select: ['id'],
     where: {
@@ -305,42 +286,12 @@ const assignARoleToAll = async roleId => {
     },
   });
 
-  console.log(users);
-
-  await strapi.query('strapi;:role').update({
+  await strapi.query('strapi::role').update({
     where: { id: roleId },
     data: {
       users: users.map(u => u.id),
     },
   });
-
-  // for (const user of users) {
-  //   await strapi
-  //     .query('strapi::user')
-  //     .update({ where: { id: user.id }, data: { roles: [roleId] } });
-
-  //   // or
-
-  // }
-
-  // const userModel = strapi.query('strapi::user').model;
-  // if (userModel.orm === 'bookshelf') {
-  //   const assocTable = userModel.associations.find(a => a.alias === 'roles').tableCollectionName;
-  //   const userTable = userModel.collectionName;
-  //   const knex = strapi.connections[userModel.connection];
-  //   const usersIds = await knex
-  //     .select(`${userTable}.id`)
-  //     .from(userTable)
-  //     .leftJoin(assocTable, `${userTable}.id`, `${assocTable}.user_id`)
-  //     .where(`${assocTable}.role_id`, null)
-  //     .pluck(`${userTable}.id`);
-  //   if (usersIds.length > 0) {
-  //     const newRelations = usersIds.map(userId => ({ user_id: userId, role_id: roleId }));
-  //     await knex.insert(newRelations).into(assocTable);
-  //   }
-  // } else if (userModel.orm === 'mongoose') {
-  //   await strapi.query('strapi::user').model.updateMany({}, { roles: [roleId] });
-  // }
 };
 
 /** Display a warning if some users don't have at least one role

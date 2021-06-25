@@ -280,7 +280,6 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
 
         return qb.where(column, '<>', value);
       }
-
       case '$gt': {
         return qb.where(column, '>', value);
       }
@@ -293,20 +292,16 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
       case '$lte': {
         return qb.where(column, '<=', value);
       }
-
       case '$null': {
-        return value === true ? qb.whereNull() : qb.whereNotNull();
+        return value === true ? qb.whereNull(column) : qb.whereNotNull(column);
       }
-
       case '$between': {
         return qb.whereBetween(column, value);
       }
-
       case '$regexp': {
         // TODO:
         return;
       }
-
       // string
       // TODO: use $case to make it case insensitive
       case '$like': {
@@ -447,21 +442,19 @@ const processPopulate = (populate, ctx) => {
 
 const applyPopulate = async (results, populate, ctx) => {
   // TODO: cleanup code
+  // TODO: create aliases for pivot columns
+  // TODO: remove joinColumn
+  // TODO: optimize depth to avoid overfetching
   // TODO: ⚠️ on join tables we might want to make one query to find all the xxx_id then one query instead of a join to avoid returning multiple times the same object
 
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 
-  // TODO: support deep populates
   for (const key in populate) {
     const populateValue = populate[key];
     const attribute = meta.attributes[key];
 
     const targetMeta = db.metadata.get(attribute.target);
-
-    // TODO: use query builder directly ?
-
-    // will need some specific code per relation
 
     if (attribute.relation === 'oneToOne' || attribute.relation === 'manyToOne') {
       if (attribute.joinColumn) {
@@ -497,7 +490,6 @@ const applyPopulate = async (results, populate, ctx) => {
         const alias = qb.getAlias();
         const rr = await qb
           .init(populateValue)
-          .select('*')
           .join({
             alias: alias,
             referencedTable: joinTable.name,
@@ -550,16 +542,12 @@ const applyPopulate = async (results, populate, ctx) => {
 
       if (attribute.joinTable) {
         const { joinTable } = attribute;
-        // query the target through the join table
 
         const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
-
-        // TODO: create aliases for the columns
 
         const alias = qb.getAlias();
         const rr = await qb
           .init(populateValue)
-          .select('*')
           .join({
             alias: alias,
             referencedTable: joinTable.name,
@@ -568,7 +556,6 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
-          //TODO: select join column
           .addSelect(`${alias}.${joinTable.joinColumn.name}`)
           .where({
             [`${alias}.${joinTable.joinColumn.name}`]: results.map(
@@ -590,16 +577,12 @@ const applyPopulate = async (results, populate, ctx) => {
       continue;
     } else if (attribute.relation === 'manyToMany') {
       const { joinTable } = attribute;
-      // query the target through the join table
 
       const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
-
-      // TODO: create aliases for the columns
 
       const alias = qb.getAlias();
       const rr = await qb
         .init(populateValue)
-        .select('*')
         .join({
           alias: alias,
           referencedTable: joinTable.name,
@@ -618,12 +601,13 @@ const applyPopulate = async (results, populate, ctx) => {
 
       const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
 
-      // TODO: remove joinColumn
       results.forEach(r => {
         Object.assign(r, {
           [key]: rrMap[r[joinTable.joinColumn.referencedColumn]] || [],
         });
       });
+
+      continue;
     }
   }
 };

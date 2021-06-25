@@ -19,32 +19,6 @@ async function main() {
 
     await orm.schema.reset();
     // await orm.schema.sync();
-
-    // const article = await orm.query('article').create({
-    //   data: {
-    //     title: 'Test',
-    //   },
-    // });
-
-    // // console.log(article);
-
-    // await orm.query('article').findOne({
-    //   where: {
-    //     id: 2,
-    //   },
-    // });
-
-    // await orm.query('article').update({
-    //   data: {
-    //     title: 'Test',
-    //   },
-    // });
-
-    // await orm.query('article').delete({
-    //   where: {
-    //     id: 2,
-    //   },
-    // });
   } finally {
     orm.destroy();
   }

@@ -26,7 +26,10 @@ const pickRowAttributes = (metadata, data = {}) => {
         // TODO: ensure joinColumn name respect convention ?
         const joinColumnName = attribute.joinColumn.name;
 
-        const attrValue = data[attributeName] || data[joinColumnName];
+        // allow setting to null
+        const attrValue = !_.isUndefined(data[attributeName])
+          ? data[attributeName]
+          : data[joinColumnName];
 
         if (!_.isUndefined(attrValue)) {
           obj[joinColumnName] = attrValue;
@@ -38,6 +41,45 @@ const pickRowAttributes = (metadata, data = {}) => {
   return obj;
 };
 
+/**
+ * Attach relations to a new entity
+ * oneToOne
+ *   if owner
+ *     if joinColumn
+ *       -> Id should have been added in the column of the model table beforehand to avoid extra updates
+ *     if joinTable
+ *       -> add relation
+ *
+ *   if not owner
+ *     if joinColumn
+ *       -> add relation
+ *     if joinTable
+ *       -> add relation in join table
+ *
+ * oneToMany
+ *   owner -> cannot be owner
+ *   not owner
+ *     joinColumn
+ *       -> add relations in target
+ *     joinTable
+ *       -> add relations in join table
+ *
+ * manyToOne
+ *   not owner -> must be owner
+ *   owner
+ *     join Column
+ *       -> Id should have been added in the column of the model table beforehand to avoid extra updates
+ *     joinTable
+ *       -> add relation in join table
+ *
+ * manyToMany
+ *   -> add relation in join table
+ *
+ * @param {EntityManager} em - entity manager instance
+ * @param {Metadata} metadata - model metadta
+ * @param {ID} id - entity ID
+ * @param {object} data - data received for creation
+ */
 const attachRelations = async (em, metadata, id, data) => {
   const { attributes } = metadata;
 
@@ -80,11 +122,13 @@ const attachRelations = async (em, metadata, id, data) => {
               return {
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: datum,
+                ...(joinTable.on || {}),
               };
             })
           : {
               [joinColumn.name]: id,
               [inverseJoinColumn.name]: data[attributeName],
+              ...(joinTable.on || {}),
             };
 
         await em
@@ -93,48 +137,166 @@ const attachRelations = async (em, metadata, id, data) => {
           .execute();
       }
     }
-
-    /*
-          oneToOne
-            if owner
-              if joinColumn
-                TODO: We might actually want to make the column unique and throw -> doing this makes the code generic and doesn't require specific logic
-                removing existing relation
-                -> Id should have been added in the column of the model table beforehand to avoid extra updates
-              if joinTable
-                -> clear join Table assoc
-                -> add relation
-
-            if not owner
-              if joinColumn
-                remove existing relation
-                -> add relation
-              if joinTable
-                -> clear join Table assoc
-                -> add relation in join table
-
-          oneToMany
-            owner -> cannot be owner
-            not owner
-              joinColumn
-                -> add relations in target
-              joinTable
-                -> add relations in join table
-
-          manyToOne
-            not owner -> must be owner
-            owner
-              join Column
-                -> Id should have been added in the column of the model table beforehand to avoid extra updates
-              joinTable
-                -> add relation in join table
-
-          manyToMany
-            -> add relation in join table
-
-        */
   }
 };
+
+/**
+ * Updates relations of an existing entity
+ * oneToOne
+ *   if owner
+ *     if joinColumn
+ *      -> handled in the DB row
+ *     if joinTable
+ *       -> clear join Table assoc
+ *       -> add relation in join table
+ *
+ *   if not owner
+ *     if joinColumn
+ *       -> set join column on the target
+ *     if joinTable
+ *       -> clear join Table assoc
+ *       -> add relation in join table
+ *
+ * oneToMany
+ *   owner -> cannot be owner
+ *   not owner
+ *     joinColumn
+ *       -> set join column on the target
+ *     joinTable
+ *       -> add relations in join table
+ *
+ * manyToOne
+ *   not owner -> must be owner
+ *   owner
+ *     join Column
+ *      -> handled in the DB row
+ *     joinTable
+ *       -> add relation in join table
+ *
+ * manyToMany
+ *   -> clear join Table assoc
+ *   -> add relation in join table
+ *
+ * @param {EntityManager} em - entity manager instance
+ * @param {Metadata} metadata - model metadta
+ * @param {ID} id - entity ID
+ * @param {object} data - data received for creation
+ */
+// TODO: check relation exists (handled by FKs except for polymorphics)
+const updateRelations = async (em, metadata, id, data) => {
+  const { attributes } = metadata;
+
+  for (const attributeName in attributes) {
+    const attribute = attributes[attributeName];
+
+    // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
+    if (attribute.joinColumn && attribute.owner) {
+      // nothing to do => relation already added on the table
+      continue;
+    }
+
+    // oneToOne oneToMany on the non owning side.
+    // Since it is a join column no need to remove previous relations
+    if (attribute.joinColumn && !attribute.owner) {
+      // need to set the column on the target
+      const { target } = attribute;
+
+      if (data[attributeName]) {
+        await em
+          .createQueryBuilder(target)
+          .update({ [attribute.joinColumn.referencedColumn]: id })
+          // NOTE: works if it is an array or a single id
+          .where({ id: data[attributeName] })
+          .execute();
+      }
+    }
+
+    if (attribute.joinTable) {
+      const { joinTable } = attribute;
+      const { joinColumn, inverseJoinColumn } = joinTable;
+
+      if (data[attributeName]) {
+        // clear previous associations in the joinTable
+        await em
+          .createQueryBuilder(joinTable.name)
+          .delete()
+          .where({
+            [joinColumn.name]: id,
+          })
+          // TODO: add join.on filters to only clear the valid info
+          .where(joinTable.on ? joinTable.on : {})
+          .execute();
+
+        // TODO: add pivot informations too
+        const insert = Array.isArray(data[attributeName])
+          ? data[attributeName].map(datum => {
+              return {
+                [joinColumn.name]: id,
+                [inverseJoinColumn.name]: datum,
+                ...(joinTable.on || {}),
+              };
+            })
+          : {
+              [joinColumn.name]: id,
+              [inverseJoinColumn.name]: data[attributeName],
+              ...(joinTable.on || {}),
+            };
+
+        console.log(insert);
+
+        await em
+          .createQueryBuilder(joinTable.name)
+          .insert(insert)
+          .execute();
+      }
+    }
+  }
+};
+
+/**
+ * Delete relations of an existing entity
+ * This removes associations but doesn't do cascade deletions for components for example. This will be handled on the entity service layer instead
+ * NOTE: Most of the deletion should be handled by ON DELETE CASCADE
+ *
+ * oneToOne
+ *   if owner
+ *     if joinColumn
+ *      -> handled in the DB row
+ *     if joinTable
+ *       -> clear join Table assoc
+ *
+ *   if not owner
+ *     if joinColumn
+ *       -> set join column on the target // CASCADING should do the job
+ *     if joinTable
+ *       -> clear join Table assoc // CASCADING
+ *
+ * oneToMany
+ *   owner -> cannot be owner
+ *   not owner
+ *     joinColumn
+ *       -> set join column on the target
+ *     joinTable
+ *       -> add relations in join table
+ *
+ * manyToOne
+ *   not owner -> must be owner
+ *   owner
+ *     join Column
+ *      -> handled in the DB row
+ *     joinTable
+ *       -> add relation in join table
+ *
+ * manyToMany
+ *   -> clear join Table assoc
+ *   -> add relation in join table
+ *
+ * @param {EntityManager} em - entity manager instance
+ * @param {Metadata} metadata - model metadta
+ * @param {ID} id - entity ID
+ */
+// noop as cascade FKs does the job
+const deleteRelations = () => {};
 
 const createEntityManager = db => {
   const repoMap = {};
@@ -161,7 +323,6 @@ const createEntityManager = db => {
       return await Promise.all([this.findMany(uid, params), this.count(uid, params)]);
     },
 
-    // TODO: define api
     async count(uid, params = {}) {
       const qb = this.createQueryBuilder(uid).where(params.where);
 
@@ -173,23 +334,24 @@ const createEntityManager = db => {
       return Number(res.count);
     },
 
-    // TODO: make it create one somehow
-    async create(uid, params) {
+    async create(uid, params = {}) {
       // create entry in DB
-
       const metadata = db.metadata.get(uid);
 
       const { data } = params;
 
+      if (!_.isPlainObject(data)) {
+        throw new Error('Create expects a data object');
+      }
+
       // transform value to storage value
       // apply programatic defaults if any -> I think this should be handled outside of this layer as we might have some applicative rules in the entity service
 
-      // TODO: in query builder ?
       const dataToInsert = pickRowAttributes(metadata, data);
 
-      if (_.isEmpty(dataToInsert)) {
-        throw new Error('Create requires data');
-      }
+      // if (_.isEmpty(dataToInsert)) {
+      //   throw new Error('Create requires data');
+      // }
 
       const [id] = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
@@ -198,19 +360,25 @@ const createEntityManager = db => {
       // create relation associations or move this to the entity service & call attach on the repo instead
       await attachRelations(this, metadata, id, data);
 
+      // TODO: in case there is not select or populate specified return the inserted data ?
+
       return this.findOne(uid, { where: { id }, select: params.select, populate: params.populate });
     },
 
-    async createMany(uid, params) {
+    // TODO: where do we handle relation processing for many queries ?
+    async createMany(uid, params = {}) {
       const { data } = params;
+
+      if (!_.isArray(data)) {
+        throw new Error('CreateMany expecets data to be an array');
+      }
 
       const metadata = db.metadata.get(uid);
 
-      // Add defaults / transform to storage type
       const dataToInsert = data.map(datum => pickRowAttributes(metadata, datum));
 
       if (_.isEmpty(dataToInsert)) {
-        throw new Error('Create requires data');
+        throw new Error('Nothing to insert');
       }
 
       await this.createQueryBuilder(uid)
@@ -220,9 +388,43 @@ const createEntityManager = db => {
       return { count: data.length };
     },
 
-    // TODO: make it update one somehow
-    // findOne + update with a return
-    async update(uid, params) {
+    async update(uid, params = {}) {
+      const { where, data } = params;
+      const metadata = db.metadata.get(uid);
+
+      if (_.isEmpty(where)) {
+        throw new Error('Update requires a where parameter');
+      }
+
+      const entity = await this.createQueryBuilder(uid)
+        .select('id')
+        .where(where)
+        .first()
+        .execute();
+
+      if (!entity) {
+        // TODO: or throw ?
+        return null;
+      }
+
+      const { id } = entity;
+
+      const dataToUpdate = pickRowAttributes(metadata, data);
+
+      if (!_.isEmpty(dataToUpdate)) {
+        await this.createQueryBuilder(uid)
+          .where({ id })
+          .update(dataToUpdate)
+          .execute();
+      }
+
+      await updateRelations(this, metadata, id, data);
+
+      return this.findOne(uid, { where: { id }, select: params.select, populate: params.populate });
+    },
+
+    // TODO: where do we handle relation processing for many queries ?
+    async updateMany(uid, params = {}) {
       const { where, data } = params;
 
       const metadata = db.metadata.get(uid);
@@ -232,66 +434,54 @@ const createEntityManager = db => {
         throw new Error('Update requires data');
       }
 
-      const res = await this.createQueryBuilder(uid)
+      const updatedRows = await this.createQueryBuilder(uid)
         .where(where)
         .update(dataToUpdate)
         .execute();
 
-      // TODO: update relations
-      console.log({ res });
-
-      // TODO: return obj
-      return {};
+      return { count: updatedRows };
     },
 
-    // only returns the number of affected rows
-    async updateMany(uid, params) {
-      const { where, data } = params;
-
+    async delete(uid, params = {}) {
+      const { where, select, populate } = params;
       const metadata = db.metadata.get(uid);
-      const dataToUpdate = pickRowAttributes(metadata, data);
 
-      if (_.isEmpty(dataToUpdate)) {
-        throw new Error('Update requires data');
+      if (_.isEmpty(where)) {
+        throw new Error('Delete requires a where parameter');
       }
 
-      const res = await this.createQueryBuilder(uid)
-        .where(where)
-        .update(dataToUpdate)
-        .execute();
+      const entity = await this.findOne(uid, {
+        where,
+        select: select && ['id'].concat(select),
+        populate,
+      });
 
-      console.log({ res });
+      if (!entity) {
+        return null;
+      }
 
-      // TODO: update relations
+      const { id } = entity;
 
-      // TODO: Return count on updateMany
-    },
-
-    // TODO: make it deleteOne somehow
-    // findOne + delete with a return -> should go in the entity service
-    async delete(uid, params) {
-      const res = await this.createQueryBuilder(uid)
-        .init(params)
+      await this.createQueryBuilder(uid)
+        .where({ id })
         .delete()
         .execute();
 
-      console.log({ res });
-      // TODO: delete relations
+      await deleteRelations(this, metadata, id);
 
-      return res;
+      return entity;
     },
 
-    async deleteMany(uid, params) {
+    // TODO: where do we handle relation processing for many queries ?
+    async deleteMany(uid, params = {}) {
       const { where } = params;
 
-      const res = await this.createQueryBuilder(uid)
+      const deletedRows = await this.createQueryBuilder(uid)
         .where(where)
         .delete()
         .execute();
 
-      // TODO: delete relations
-
-      return res;
+      return { count: deletedRows };
     },
 
     // populate already loaded entry

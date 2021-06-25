@@ -389,7 +389,7 @@ const createCompoLinkModelMeta = baseModelMeta => {
   return {
     // TODO: make sure there can't be any conflicts with a prefix
     // singularName: 'compo',
-    uid: `${baseModelMeta.uid}_components`,
+    uid: `${baseModelMeta.tableName}_components`,
     tableName: `${baseModelMeta.tableName}_components`,
     attributes: {
       id: {

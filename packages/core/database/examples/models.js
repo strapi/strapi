@@ -22,11 +22,6 @@ const category = {
       relation: 'oneToMany',
       target: 'article',
       mappedBy: 'category',
-      // useJoinTable: false,
-    },
-    compo: {
-      type: 'component',
-      component: 'compo',
     },
   },
 };
@@ -52,7 +47,7 @@ const article = {
       target: 'tag',
       inversedBy: 'articles',
     },
-    compo: {
+    compos: {
       type: 'component',
       component: 'compo',
       repeatable: true,
@@ -94,7 +89,7 @@ const compo = {
       type: 'string',
     },
     value: {
-      type: 'integer',
+      type: 'string',
     },
   },
 };

@@ -244,17 +244,14 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyJoins(qb, state.joins);
         }
 
-        // TODO: hanlde populate
-
-        console.log('Running query: ', qb.toSQL());
+        // console.log('Running query: ', qb.toQuery());
 
         const queryResult = await qb;
 
         const results = db.dialect.processResult(queryResult, state.type);
 
-        // if query response should be process (in case of custom queries we shouldn't for example)
-
         if (state.populate) {
+          // TODO: hanlde populate
           await helpers.applyPopulate(_.castArray(results), state.populate, { qb: this, uid, db });
         }
 
