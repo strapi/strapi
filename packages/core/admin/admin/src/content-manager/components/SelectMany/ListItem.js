@@ -19,8 +19,7 @@ function ListItem({
   searchToPersist,
   targetModel,
 }) {
-  // FIXME when changing the routing
-  const to = `/plugins/content-manager/collectionType/${targetModel}/${data.id}`;
+  const to = `/content-manager/collectionType/${targetModel}/${data.id}`;
 
   const hasDraftAndPublish = has(data, 'published_at');
 

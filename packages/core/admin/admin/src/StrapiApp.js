@@ -66,9 +66,7 @@ class StrapiApp {
       `Expected link.to to be a string instead received ${typeof link.to}`
     );
     invariant(
-      ['/plugins/content-manager', '/plugins/content-type-builder', '/plugins/upload'].includes(
-        link.to
-      ),
+      ['/plugins/content-type-builder', '/plugins/upload'].includes(link.to),
       'This method is not available for your plugin'
     );
     invariant(

@@ -162,7 +162,7 @@ const SettingsViewWrapper = ({
       )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
 
       // FIXME when changing the routing
-      history.replace(`/plugins/content-manager/${kind}/${uid}?${goBackSearch}`);
+      history.replace(`/content-manager/${kind}/${uid}?${goBackSearch}`);
     }
   };
 

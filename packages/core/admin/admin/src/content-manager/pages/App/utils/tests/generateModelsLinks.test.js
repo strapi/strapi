@@ -46,7 +46,7 @@ describe('ADMIN | LeftMenu | utils', () => {
 
       const expected = [
         {
-          to: '/plugins/content-manager/collectionType/application::address.address',
+          to: '/content-manager/collectionType/application::address.address',
           isDisplayed: true,
           search: `page=1&pageSize=2&_sort=name:ASC`,
           permissions: [
@@ -65,7 +65,7 @@ describe('ADMIN | LeftMenu | utils', () => {
           name: 'application::address.address',
         },
         {
-          to: '/plugins/content-manager/singleType/application::test1.test1',
+          to: '/content-manager/singleType/application::test1.test1',
           isDisplayed: true,
           search: null,
           kind: 'singleType',
@@ -125,7 +125,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             search: null,
             kind: 'collectionType',
             title: 'Addresses',
-            to: '/plugins/content-manager/collectionType/application::address.address',
+            to: '/content-manager/collectionType/application::address.address',
             uid: 'application::address.address',
             name: 'application::address.address',
             permissions: [
@@ -146,7 +146,7 @@ describe('ADMIN | LeftMenu | utils', () => {
             kind: 'singleType',
             search: null,
             title: 'Test 1',
-            to: '/plugins/content-manager/singleType/application::test1.test1',
+            to: '/content-manager/singleType/application::test1.test1',
             uid: 'application::test1.test1',
             name: 'application::test1.test1',
             permissions: [

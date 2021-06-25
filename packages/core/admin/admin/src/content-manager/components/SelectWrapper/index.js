@@ -230,8 +230,7 @@ function SelectWrapper({
     setIsOpen(true);
   };
 
-  // FIXME when changing the routing
-  const to = `/plugins/content-manager/collectionType/${targetModel}/${value ? value.id : null}`;
+  const to = `/content-manager/collectionType/${targetModel}/${value ? value.id : null}`;
 
   const searchToPersist = stringify(buildParams(query, paramsToKeep), { encode: false });
 

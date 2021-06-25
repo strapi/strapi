@@ -225,10 +225,13 @@ describe('ADMIN | StrapiApp', () => {
     it('addCorePluginMenuLink should add a link to the menu', () => {
       const app = StrapiApp({ middlewares, reducers, library, locales });
       const link = {
-        to: '/plugins/content-manager',
+        to: '/plugins/content-type-builder',
         icon: 'book',
         permissions: [],
-        intlLabel: { id: 'content-manager.plugin.name', defaultMessage: 'Content Manager' },
+        intlLabel: {
+          id: 'content-type-builder.plugin.name',
+          defaultMessage: 'Content Type builder',
+        },
       };
 
       app.addCorePluginMenuLink(link);
