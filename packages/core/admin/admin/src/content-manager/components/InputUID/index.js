@@ -11,11 +11,9 @@ import {
   useContentManagerEditViewDataManager,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
+import get from 'lodash/get';
 import { axiosInstance } from '../../../core/utils';
-import getTrad from '../../utils/getTrad';
-import pluginId from '../../pluginId';
-import getRequestUrl from '../../utils/getRequestUrl';
+import { getRequestUrl, getTrad } from '../../utils';
 import RightLabel from './RightLabel';
 import Options from './Options';
 import RegenerateButton from './RegenerateButton';
@@ -268,7 +266,7 @@ const InputUID = ({
               </RightContent>
               {availability && availability.suggestion && isSuggestionOpen && (
                 <Options
-                  title={formatMessage({ id: `${pluginId}.components.uid.suggested` })}
+                  title={formatMessage({ id: getTrad('components.uid.suggested') })}
                   options={[
                     {
                       id: 'suggestion',

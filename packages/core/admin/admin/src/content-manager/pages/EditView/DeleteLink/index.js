@@ -6,7 +6,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Text } from '@buffetjs/core';
 import { PopUpWarning, useNotification } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import pluginId from '../../../pluginId';
 import { getTrad } from '../../../utils';
 import { DeleteButton } from '../components';
 import { connect, select } from './utils';
@@ -35,7 +34,7 @@ const DeleteLink = ({ isCreatingEntry, onDelete, onDeleteSucceeded, trackerPrope
       const errorMessage = get(
         err,
         'response.payload.message',
-        formatMessage({ id: `${pluginId}.error.record.delete` })
+        formatMessage({ id: getTrad('error.record.delete') })
       );
       toggleNotification({ type: 'warning', message: errorMessage });
     } finally {

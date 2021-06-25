@@ -2,10 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { hasPermissions, useRBACProvider } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import DynamicComponentCard from '../DynamicComponentCard';
 import Tooltip from './Tooltip';
+
+const cmPermissions = permissions.contentManager;
 
 const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZone }) => {
   const [isOver, setIsOver] = useState(false);
@@ -18,7 +19,7 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       try {
         const canAccess = await hasPermissions(
           allPermissions,
-          pluginPermissions.componentsConfigurations
+          cmPermissions.componentsConfigurations
         );
 
         setState({ isLoading: false, canAccess });
@@ -44,7 +45,8 @@ const DynamicComponent = ({ componentUid, friendlyName, icon, setIsOverDynamicZo
       isOver={isOver}
       onClick={() => {
         if (!isLoading && canAccess) {
-          push(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
+          // FIXME when changing the routing
+          push(`/plugins/content-manager/components/${componentUid}/configurations/edit`);
         }
       }}
       onMouseEvent={handleMouseEvent}

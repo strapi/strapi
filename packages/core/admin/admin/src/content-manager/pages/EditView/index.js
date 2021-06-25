@@ -4,8 +4,7 @@ import { get } from 'lodash';
 import { BaselineAlignment, LiLink, CheckPermissions, useTracking } from '@strapi/helper-plugin';
 import { Padded } from '@buffetjs/core';
 import { InjectionZone } from '../../../shared/components';
-import pluginId from '../../pluginId';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import Container from '../../components/Container';
 import DynamicZone from '../../components/DynamicZone';
 import FormWrapper from '../../components/FormWrapper';
@@ -23,6 +22,7 @@ import DeleteLink from './DeleteLink';
 import InformationCard from './InformationCard';
 import { getTrad } from '../../utils';
 
+const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugins::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
@@ -46,11 +46,12 @@ const EditView = ({
   }, [userPermissions, slug]);
   const configurationPermissions = useMemo(() => {
     return isSingleType
-      ? pluginPermissions.singleTypesConfigurations
-      : pluginPermissions.collectionTypesConfigurations;
+      ? cmPermissions.singleTypesConfigurations
+      : cmPermissions.collectionTypesConfigurations;
   }, [isSingleType]);
 
-  const configurationsURL = `/plugins/${pluginId}/${
+  // FIXME when changing the routing
+  const configurationsURL = `/plugins/content-manager/${
     isSingleType ? 'singleType' : 'collectionType'
   }/${slug}/configurations/edit`;
   const currentContentTypeLayoutData = useMemo(() => get(layout, ['contentType'], {}), [layout]);

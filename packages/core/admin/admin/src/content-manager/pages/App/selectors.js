@@ -1,9 +1,8 @@
 import { createSelector } from 'reselect';
-import pluginId from '../../pluginId';
 import { initialState } from './reducer';
 
 const selectAppDomain = () => state => {
-  return state[`${pluginId}_app`] || initialState;
+  return state['content-manager_app'] || initialState;
 };
 
 const makeSelectApp = () =>

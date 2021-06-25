@@ -7,8 +7,7 @@ import { useTracking, useNotification } from '@strapi/helper-plugin';
 import { Inputs as Input } from '@buffetjs/custom';
 import { FormattedMessage } from 'react-intl';
 import { axiosInstance } from '../../../core/utils';
-import pluginId from '../../pluginId';
-import { getRequestUrl } from '../../utils';
+import { getRequestUrl, getTrad } from '../../utils';
 import FieldsReorder from '../../components/FieldsReorder';
 import FormTitle from '../../components/FormTitle';
 import LayoutTitle from '../../components/LayoutTitle';
@@ -205,7 +204,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
       return (
         <div className="col-6" key={meta}>
           <FormattedMessage
-            id={`${pluginId}.containers.SettingPage.editSettings.relation-field.description`}
+            id={getTrad('containers.SettingPage.editSettings.relation-field.description')}
           >
             {description => (
               <FormattedMessage
@@ -214,8 +213,8 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
                 {label => (
                   <Input
                     autoFocus={index === 0}
-                    description={meta === 'mainField' ? description : ''}
-                    label={label}
+                    description={meta === 'mainField' ? description[0] : ''}
+                    label={label[0]}
                     name={meta}
                     type={getInputProps(meta).type}
                     value={get(metaForm, meta, '')}
@@ -269,10 +268,10 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
         inputs={[
           {
             label: {
-              id: `${pluginId}.containers.SettingPage.editSettings.entry.title`,
+              id: getTrad('containers.SettingPage.editSettings.entry.title'),
             },
             description: {
-              id: `${pluginId}.containers.SettingPage.editSettings.entry.title.description`,
+              id: getTrad('containers.SettingPage.editSettings.entry.title.description'),
             },
             type: 'select',
             name: 'settings.mainField',
@@ -306,8 +305,8 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
             >
               <div>
                 <FormTitle
-                  title={`${pluginId}.global.displayedFields`}
-                  description={`${pluginId}.containers.SettingPage.editSettings.description`}
+                  title={getTrad('global.displayedFields')}
+                  description={getTrad('containers.SettingPage.editSettings.description')}
                 />
               </div>
               <div
@@ -326,8 +325,8 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
           {isContentTypeView && (
             <LayoutTitle className="col-4">
               <FormTitle
-                title={`${pluginId}.containers.SettingPage.relations`}
-                description={`${pluginId}.containers.SettingPage.editSettings.description`}
+                title={getTrad('containers.SettingPage.relations')}
+                description={getTrad('containers.SettingPage.editSettings.description')}
               />
             </LayoutTitle>
           )}
@@ -361,7 +360,7 @@ const EditSettingsView = ({ components, mainLayout, isContentTypeView, slug, upd
       </SettingsViewWrapper>
 
       <PopupForm
-        headerId={`${pluginId}.containers.EditSettingsView.modal-form.edit-field`}
+        headerId={getTrad('containers.EditSettingsView.modal-form.edit-field')}
         isOpen={isModalFormOpen}
         onClosed={() => {
           dispatch({

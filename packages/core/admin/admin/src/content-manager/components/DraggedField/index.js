@@ -5,8 +5,8 @@ import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Grab, GrabLarge, Pencil } from '@buffetjs/icons';
 import { CheckPermissions } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
-import pluginPermissions from '../../permissions';
+import { getTrad } from '../../utils';
+import permissions from '../../../permissions';
 import useLayoutDnd from '../../hooks/useLayoutDnd';
 import GrabWrapper from './GrabWrapper';
 import Link from './Link';
@@ -15,6 +15,8 @@ import RemoveWrapper from './RemoveWrapper';
 import SubWrapper from './SubWrapper';
 import Wrapper from './Wrapper';
 import Close from './Close';
+
+const cmPermissions = permissions.contentManager;
 
 /* eslint-disable */
 const DraggedField = forwardRef(
@@ -132,14 +134,14 @@ const DraggedField = forwardRef(
           </SubWrapper>
         )}
         {type === 'component' && (
-          <CheckPermissions permissions={pluginPermissions.componentsConfigurations}>
-            <FormattedMessage id={`${pluginId}.components.FieldItem.linkToComponentLayout`}>
+          <CheckPermissions permissions={cmPermissions.componentsConfigurations}>
+            <FormattedMessage id={getTrad('components.FieldItem.linkToComponentLayout')}>
               {msg => (
                 <Link
                   onClick={e => {
                     e.stopPropagation();
-
-                    goTo(`/plugins/${pluginId}/components/${componentUid}/configurations/edit`);
+                    // FIXME when changing the routing
+                    goTo(`/plugins/content-manager/components/${componentUid}/configurations/edit`);
                   }}
                 >
                   <FontAwesomeIcon icon="cog" />

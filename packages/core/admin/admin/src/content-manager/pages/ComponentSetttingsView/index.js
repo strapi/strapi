@@ -6,10 +6,12 @@ import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 import { getRequestUrl, mergeMetasWithSchema } from '../../utils';
 import { makeSelectModelAndComponentSchemas } from '../App/selectors';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import crudReducer, { crudInitialState } from '../../sharedReducers/crudReducer/reducer';
 import { getData, getDataSucceeded } from '../../sharedReducers/crudReducer/actions';
 import EditSettingsView from '../EditSettingsView';
+
+const cmPermissions = permissions.contentManager;
 
 const ComponentSettingsView = () => {
   const [{ isLoading, data: layout }, dispatch] = useReducer(crudReducer, crudInitialState);
@@ -53,7 +55,7 @@ const ComponentSettingsView = () => {
   }
 
   return (
-    <CheckPagePermissions permissions={pluginPermissions.componentsConfigurations}>
+    <CheckPagePermissions permissions={cmPermissions.componentsConfigurations}>
       <EditSettingsView components={layout.components} mainLayout={layout.component} slug={uid} />
     </CheckPagePermissions>
   );

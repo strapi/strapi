@@ -1,5 +1,5 @@
-import pluginId from '../../../pluginId';
+import { getRequestUrl } from '../../../utils';
 
-const getRequestUrl = path => `/${pluginId}/single-types/${path}`;
+const requestURL = path => getRequestUrl(`single-types/${path}`);
 
-export default getRequestUrl;
+export default requestURL;

@@ -22,8 +22,7 @@ import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
-import pluginId from '../../pluginId';
-import pluginPermissions from '../../permissions';
+import permissions from '../../../permissions';
 import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';
 import Container from '../../components/Container';
 import CustomTable from '../../components/CustomTable';
@@ -52,6 +51,8 @@ import {
 } from './actions';
 import makeSelectListView from './selectors';
 import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from './utils';
+
+const cmPermissions = permissions.contentManager;
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
@@ -362,8 +363,8 @@ function ListView({
             {
               id:
                 total > 1
-                  ? `${pluginId}.containers.List.pluginHeaderDescription`
-                  : `${pluginId}.containers.List.pluginHeaderDescription.singular`,
+                  ? getTrad('containers.List.pluginHeaderDescription')
+                  : getTrad('containers.List.pluginHeaderDescription.singular'),
             },
             { label: total }
           )
@@ -461,7 +462,7 @@ function ListView({
                       <InjectionZone area="contentManager.listView.actions" />
                     </Padded>
 
-                    <CheckPermissions permissions={pluginPermissions.collectionTypesConfigurations}>
+                    <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
                       <FieldPicker
                         displayedHeaders={displayedHeaders}
                         items={allAllowedHeaders}

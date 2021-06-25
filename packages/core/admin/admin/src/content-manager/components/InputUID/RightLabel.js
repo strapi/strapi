@@ -2,9 +2,7 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { Success, Remove } from '@buffetjs/icons';
 import { useIntl } from 'react-intl';
-
-import pluginId from '../../pluginId';
-import getTrad from '../../utils/getTrad';
+import { getTrad } from '../../utils';
 import RightContentLabel from './RightContentLabel';
 
 const RightLabel = ({ isAvailable }) => {
@@ -15,7 +13,7 @@ const RightLabel = ({ isAvailable }) => {
       <Success fill="#27b70f" width="20px" height="20px" />
       <RightContentLabel color="green">
         {formatMessage({
-          id: `${pluginId}.components.uid.available`,
+          id: getTrad('components.uid.available'),
         })}
       </RightContentLabel>
     </>

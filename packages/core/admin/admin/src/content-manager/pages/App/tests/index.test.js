@@ -6,9 +6,10 @@ import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
 import { render, screen } from '@testing-library/react';
 import ContentManagerApp from '..';
-import cmReducers from '../../../reducers';
-import pluginId from '../../../pluginId';
+import cmReducers from '../../../../reducers';
 import useModels from '../useModels';
+
+const pluginId = 'content-manager';
 
 jest.mock('../useModels', () =>
   jest.fn(() => {

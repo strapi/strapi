@@ -1,7 +1,7 @@
-import { fixtures } from '../../../../../../admin-test-utils';
+import { fixtures } from '../../../../../../../../admin-test-utils/lib';
 import { selectPermissions, selectCollectionTypePermissions } from '../selectors';
 
-describe('selectors', () => {
+describe('Admin | content manager | hooks | useSyncRbac | selectors', () => {
   let store;
 
   beforeEach(() => {

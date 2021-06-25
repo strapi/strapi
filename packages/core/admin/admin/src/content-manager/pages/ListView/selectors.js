@@ -1,11 +1,10 @@
 import { createSelector } from 'reselect';
-import pluginId from '../../pluginId';
 import { initialState } from './reducer';
 
 /**
  * Direct selector to the listView state domain
  */
-const listViewDomain = () => state => state[`${pluginId}_listView`] || initialState;
+const listViewDomain = () => state => state['content-manager_listView'] || initialState;
 
 /**
  * Other specific selectors

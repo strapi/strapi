@@ -6,8 +6,7 @@ import { get, take } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
 import { ErrorMessage } from '@buffetjs/styles';
-import pluginId from '../../pluginId';
-import { getMaxTempKey } from '../../utils';
+import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
 import ItemTypes from '../../utils/ItemTypes';
 import connect from './utils/connect';
@@ -71,7 +70,7 @@ const RepeatableComponent = ({
       } else if (componentValueLength >= max) {
         toggleNotification({
           type: 'info',
-          message: { id: `${pluginId}.components.notification.info.maximum-requirement` },
+          message: { id: getTrad('components.notification.info.maximum-requirement') },
         });
       }
     }
@@ -91,7 +90,7 @@ const RepeatableComponent = ({
     <div>
       {componentValueLength === 0 && (
         <EmptyComponent hasMinError={hasMinError}>
-          <FormattedMessage id={`${pluginId}.components.empty-repeatable`}>
+          <FormattedMessage id={getTrad('components.empty-repeatable')}>
             {msg => <p>{msg}</p>}
           </FormattedMessage>
         </EmptyComponent>
@@ -148,14 +147,16 @@ const RepeatableComponent = ({
         onClick={handleClick}
       >
         <i className="fa fa-plus" />
-        <FormattedMessage id={`${pluginId}.containers.EditView.add.new`} />
+        <FormattedMessage id={getTrad('containers.EditView.add.new')} />
       </Button>
       {hasMinError && (
         <ErrorMessage>
           <FormattedMessage
-            id={`${pluginId}.components.DynamicZone.missing${
-              missingComponentsValue > 1 ? '.plural' : '.singular'
-            }`}
+            id={getTrad(
+              `components.DynamicZone.missing${
+                missingComponentsValue > 1 ? '.plural' : '.singular'
+              }`
+            )}
             values={{ count: missingComponentsValue }}
           />
         </ErrorMessage>

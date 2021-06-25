@@ -11,7 +11,7 @@ import {
   PopUpWarning,
   useTracking,
 } from '@strapi/helper-plugin';
-import pluginId from '../../pluginId';
+import { getTrad } from '../../utils';
 import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
@@ -66,7 +66,8 @@ const SettingsViewWrapper = ({
       {
         color: 'success',
         label: formatMessage({
-          id: `${pluginId}.containers.Edit.submit`,
+          // TODO remove this trad
+          id: getTrad('containers.Edit.submit'),
         }),
         type: 'submit',
         disabled: isEqual(modifiedData, initialData),
@@ -83,15 +84,17 @@ const SettingsViewWrapper = ({
     title: {
       label: formatMessage(
         {
-          id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.title`,
+          id: getTrad('components.SettingsViewWrapper.pluginHeader.title'),
         },
         { name: upperFirst(name) }
       ),
     },
     content: formatMessage({
-      id: `${pluginId}.components.SettingsViewWrapper.pluginHeader.description.${
-        isEditSettings ? 'edit' : 'list'
-      }-settings`,
+      id: getTrad(
+        `components.SettingsViewWrapper.pluginHeader.description.${
+          isEditSettings ? 'edit' : 'list'
+        }-settings`
+      ),
     }),
   };
 
@@ -158,7 +161,8 @@ const SettingsViewWrapper = ({
         { encode: false }
       )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
 
-      history.replace(`/plugins/${pluginId}/${kind}/${uid}?${goBackSearch}`);
+      // FIXME when changing the routing
+      history.replace(`/plugins/content-manager/${kind}/${uid}?${goBackSearch}`);
     }
   };
 
@@ -219,7 +223,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningCancel}
             toggleModal={toggleWarningCancel}
             content={{
-              message: `${pluginId}.popUpWarning.warning.cancelAllSettings`,
+              message: getTrad('popUpWarning.warning.cancelAllSettings'),
             }}
             popUpWarningType="danger"
             onConfirm={() => {
@@ -231,7 +235,7 @@ const SettingsViewWrapper = ({
             isOpen={showWarningSubmit}
             toggle={toggleWarningSubmit}
             content={{
-              id: `${pluginId}.popUpWarning.warning.updateAllSettings`,
+              id: getTrad('popUpWarning.warning.updateAllSettings'),
             }}
             type="success"
             onConfirm={async () => {

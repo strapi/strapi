@@ -4,7 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Carret, Grab } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import pluginId from '../../pluginId';
+import { getTrad } from '../../utils';
 import PreviewCarret from '../PreviewCarret';
 import BannerWrapper from './BannerWrapper';
 
@@ -48,7 +48,7 @@ const Banner = forwardRef(
             <Carret />
           </div>
 
-          <FormattedMessage id={`${pluginId}.containers.Edit.pluginHeader.title.new`}>
+          <FormattedMessage id={getTrad('containers.Edit.pluginHeader.title.new')}>
             {msg => {
               // The displayed value may be "falsey" when the main field is a number or boolean
               return <div style={{ display }}>{displayedValue ?? msg}</div>;

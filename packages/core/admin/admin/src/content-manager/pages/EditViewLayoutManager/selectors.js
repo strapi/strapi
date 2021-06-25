@@ -1,5 +1,3 @@
-import pluginId from '../../pluginId';
-
-const selectLayout = state => state[`${pluginId}_editViewLayoutManager`].currentLayout;
+const selectLayout = state => state['content-manager_editViewLayoutManager'].currentLayout;
 
 export default selectLayout;
