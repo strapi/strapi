@@ -45,14 +45,17 @@ export default {
   boot(app) {
     // Hooks that mutate the collection types links in order to add the locale filter
     app.registerHook(
-      'CM/pages/App/mutate-collection-types-links',
+      'Admin/CM/pages/App/mutate-collection-types-links',
       addLocaleToCollectionTypesLinksHook
     );
-    app.registerHook('CM/pages/App/mutate-single-types-links', addLocaleToSingleTypesLinksHook);
+    app.registerHook(
+      'Admin/CM/pages/App/mutate-single-types-links',
+      addLocaleToSingleTypesLinksHook
+    );
     // Hook that adds a column into the CM's LV table
-    app.registerHook('CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
+    app.registerHook('Admin/CM/pages/ListView/inject-column-in-table', addColumnToTableHook);
     // Hooks that mutates the edit view layout
-    app.registerHook('CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
+    app.registerHook('Admin/CM/pages/EditView/mutate-edit-view-layout', mutateEditViewLayoutHook);
     // Add the settings link
     app.addSettingsLink('global', {
       intlLabel: {
@@ -65,24 +68,22 @@ export default {
       permissions: pluginPermissions.accessMain,
     });
 
+    app.injectContentManagerComponent('editView', 'informations', {
+      name: 'i18n-locale-filter-edit-view',
+      Component: CMEditViewInjectedComponents,
+    });
+
+    app.injectContentManagerComponent('listView', 'actions', {
+      name: 'i18n-locale-filter',
+      Component: LocalePicker,
+    });
+
+    app.injectContentManagerComponent('listView', 'deleteModalAdditionalInfos', {
+      name: 'i18n-delete-bullets-in-modal',
+      Component: DeleteModalAdditionalInfos,
+    });
+
     const ctbPlugin = app.getPlugin('content-type-builder');
-    const cmPlugin = app.getPlugin('content-manager');
-
-    if (cmPlugin) {
-      cmPlugin.injectComponent('editView', 'informations', {
-        name: 'i18n-locale-filter-edit-view',
-        Component: CMEditViewInjectedComponents,
-      });
-      cmPlugin.injectComponent('listView', 'actions', {
-        name: 'i18n-locale-filter',
-        Component: LocalePicker,
-      });
-
-      cmPlugin.injectComponent('listView', 'deleteModalAdditionalInfos', {
-        name: 'i18n-delete-bullets-in-modal',
-        Component: DeleteModalAdditionalInfos,
-      });
-    }
 
     if (ctbPlugin) {
       const ctbFormsAPI = ctbPlugin.apis.forms;

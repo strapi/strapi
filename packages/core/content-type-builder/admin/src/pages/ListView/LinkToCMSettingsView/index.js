@@ -50,9 +50,9 @@ const LinkToCMSettingsView = ({ isTemporary, isInContentTypeView, contentTypeKin
     }
 
     if (isInContentTypeView) {
-      push(`/plugins/content-manager/collectionType/${targetUid}/configurations/edit`);
+      push(`/content-manager/collectionType/${targetUid}/configurations/edit`);
     } else {
-      push(`/plugins/content-manager/components/${targetUid}/configurations/edit`);
+      push(`/content-manager/components/${targetUid}/configurations/edit`);
     }
 
     return false;

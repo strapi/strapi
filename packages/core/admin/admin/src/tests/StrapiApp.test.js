@@ -1,9 +1,10 @@
 import { render } from '@testing-library/react';
 import { fixtures } from '../../../../../admin-test-utils';
+import { Components, Fields } from '../core/apis';
 import StrapiApp from '../StrapiApp';
 import appReducers from '../reducers';
 
-const library = { fields: {}, components: {} };
+const library = { fields: Fields(), components: Components() };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
 const locales = [];
@@ -224,10 +225,13 @@ describe('ADMIN | StrapiApp', () => {
     it('addCorePluginMenuLink should add a link to the menu', () => {
       const app = StrapiApp({ middlewares, reducers, library, locales });
       const link = {
-        to: '/plugins/content-manager',
+        to: '/plugins/content-type-builder',
         icon: 'book',
         permissions: [],
-        intlLabel: { id: 'content-manager.plugin.name', defaultMessage: 'Content Manager' },
+        intlLabel: {
+          id: 'content-type-builder.plugin.name',
+          defaultMessage: 'Content Type builder',
+        },
       };
 
       app.addCorePluginMenuLink(link);
