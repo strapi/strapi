@@ -86,6 +86,8 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
           type: (typeof value).toString(),
         });
 
+
+
         await db.query('strapi::core-store').update({ where: { id: data.id }, data });
       } else {
         const data = Object.assign({}, where, {

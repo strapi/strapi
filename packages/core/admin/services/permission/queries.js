@@ -140,15 +140,13 @@ const filterPermissionsToRemove = async permissions => {
 const cleanPermissionsInDatabase = async () => {
   const pageSize = 200;
 
+  const contentTypeService = getService('content-type');
+
   const total = await strapi.query('strapi::permission').count();
   const pageCount = Math.ceil(total / pageSize);
 
-  console.log('cleanPermissionsInDatabase', { total, pageCount });
-  // let total = Infinity;
-
   for (let page = 1; page < pageCount; page++) {
     // 1. Find invalid permissions and collect their ID to delete them later
-
     const results = await strapi
       .query('strapi::permission')
       .findMany({ limit: pageSize, offset: page * pageSize });
@@ -161,7 +159,8 @@ const cleanPermissionsInDatabase = async () => {
     const remainingPermissions = permissions.filter(
       permission => !permissionsIdToRemove.includes(permission.id)
     );
-    const permissionsWithCleanFields = getService('content-type').cleanPermissionFields(
+
+    const permissionsWithCleanFields = contentTypeService.cleanPermissionFields(
       remainingPermissions
     );
 
@@ -196,9 +195,7 @@ const ensureBoundPermissionsInDatabase = async () => {
 
   const contentTypes = Object.values(strapi.contentTypes);
   const editorRole = await strapi.query('strapi::role').findOne({
-    where: {
-      code: EDITOR_CODE,
-    },
+    where: { code: EDITOR_CODE },
   });
 
   if (isNil(editorRole)) {
@@ -212,9 +209,7 @@ const ensureBoundPermissionsInDatabase = async () => {
       where: {
         subject: contentType.uid,
         action: boundActions,
-        role: {
-          id: editorRole.id,
-        },
+        role: { id: editorRole.id },
       },
     });
 

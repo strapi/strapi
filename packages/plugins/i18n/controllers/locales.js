@@ -7,7 +7,7 @@ const { validateCreateLocaleInput, validateUpdateLocaleInput } = require('../val
 const { formatLocale } = require('../domain/locale');
 
 const sanitizeLocale = locale => {
-  const model = strapi.getModel('locale', 'i18n');
+  const model = strapi.contentTypes['plugins::i18n.locale'];
 
   return sanitizeEntity(locale, { model });
 };

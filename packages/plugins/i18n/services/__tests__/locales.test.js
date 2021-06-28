@@ -71,7 +71,7 @@ describe('Locales', () => {
       const params = { name_contains: 'en' };
 
       const localesFound = await localesService.find(params);
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(find).toHaveBeenCalledWith(params);
       expect(localesFound).toMatchObject(locales);
     });
@@ -83,7 +83,7 @@ describe('Locales', () => {
       global.strapi = { query };
 
       const localeFound = await localesService.findById(1);
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(findOne).toHaveBeenCalledWith({ id: 1 });
       expect(localeFound).toMatchObject(locale);
     });
@@ -95,7 +95,7 @@ describe('Locales', () => {
       global.strapi = { query };
 
       const localeFound = await localesService.findByCode('fr');
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(findOne).toHaveBeenCalledWith({ code: 'fr' });
       expect(localeFound).toMatchObject(locale);
     });
@@ -114,7 +114,7 @@ describe('Locales', () => {
       };
 
       const createdLocale = await localesService.create(locale);
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(create).toHaveBeenCalledWith(locale);
       expect(createdLocale).toMatchObject(locale);
     });
@@ -133,7 +133,7 @@ describe('Locales', () => {
       };
 
       const updatedLocale = await localesService.update({ code: 'fr' }, { name: 'French' });
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(update).toHaveBeenCalledWith({ code: 'fr' }, { name: 'French' });
       expect(updatedLocale).toMatchObject(locale);
     });
@@ -155,7 +155,7 @@ describe('Locales', () => {
       };
 
       const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(deleteFn).toHaveBeenCalledWith({ id: 1 });
       expect(deletedLocale).toMatchObject(locale);
     });
@@ -175,7 +175,7 @@ describe('Locales', () => {
       };
 
       const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('locale', 'i18n');
+      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
       expect(deleteFn).not.toHaveBeenCalled();
       expect(deletedLocale).toBeUndefined();
     });

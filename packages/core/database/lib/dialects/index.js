@@ -57,8 +57,6 @@ class MysqlDialect extends Dialect {
       }
 
       if (field.type == 'TINY' && field.length == 1) {
-        console.log('coucou');
-
         let value = field.string();
         return value ? value == '1' : null;
       }

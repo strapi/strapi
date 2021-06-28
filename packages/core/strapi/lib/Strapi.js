@@ -491,8 +491,8 @@ class Strapi {
     Object.freeze(this.api);
   }
 
-  getModel(modelKey, plugin) {
-    return this.db.getModel(modelKey, plugin);
+  getModel(uid) {
+    return this.contentTypes[uid];
   }
 
   /**

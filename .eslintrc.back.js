@@ -7,7 +7,9 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:node/recommended',
+    'plugin:jsdoc/recommended',
   ],
+  plugins: ['jsdoc'],
   env: {
     es6: true,
     node: true,

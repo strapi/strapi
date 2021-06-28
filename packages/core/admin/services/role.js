@@ -376,15 +376,16 @@ const resetSuperAdminPermissions = async () => {
     return;
   }
 
-  const allActions = getService('permission').actionProvider.values();
+  const permissionService = getService('permission');
+  const contentTypeService = getService('content-type');
+
+  const allActions = permissionService.actionProvider.values();
 
   const contentTypesActions = allActions.filter(action => isContentTypeAction(action));
   const otherActions = allActions.filter(action => !isContentTypeAction(action));
 
   // First, get the content-types permissions
-  const permissions = getService('content-type').getPermissionsWithNestedFields(
-    contentTypesActions
-  );
+  const permissions = contentTypeService.getPermissionsWithNestedFields(contentTypesActions);
 
   // Then add every other permission
   const otherPermissions = otherActions.reduce((acc, action) => {

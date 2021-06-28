@@ -6,8 +6,12 @@ const types = require('../types');
 const { createField } = require('../fields');
 const helpers = require('./helpers');
 
-const fromRow = (metadata, row = {}) => {
+const fromRow = (metadata, row) => {
   const { attributes } = metadata;
+
+  if (_.isNil(row)) {
+    return null;
+  }
 
   const obj = {};
 
@@ -40,8 +44,6 @@ const fromRow = (metadata, row = {}) => {
       obj[attributeName] = row[column];
     }
   }
-
-  console.log(obj);
 
   return obj;
 };
@@ -286,7 +288,7 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyJoins(qb, state.joins);
         }
 
-        console.log('Running query: ', qb.toQuery());
+        // console.log('Running query: ', qb.toQuery());
 
         const rows = await qb;
 

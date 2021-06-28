@@ -1330,6 +1330,15 @@
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.5.tgz#8eed982e2ee6f7f4e44c253e12962980791efd46"
   integrity sha512-6U71C2Wp7r5XtFtQzYrW5iKFT67OixrSxjI4MptCHzdSVlgabczzqLe0ZSgnub/5Kp4hSbpDB1tMytZY9pwxxA==
 
+"@es-joy/jsdoccomment@^0.8.0-alpha.2":
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/@es-joy/jsdoccomment/-/jsdoccomment-0.8.0.tgz#1add451f50f57597676ab85ee7bd0a273d7b7c43"
+  integrity sha512-Xd3GzYsL2sz2pcdtYt5Q0Wz1ol/o9Nt2UQL4nFPDcaEomvPmwjJsbjkKx1SKhl2h3TgwazNBLdcNr2m0UiGiFA==
+  dependencies:
+    comment-parser "^1.1.5"
+    esquery "^1.4.0"
+    jsdoc-type-pratt-parser "1.0.4"
+
 "@eslint/eslintrc@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-0.4.0.tgz#99cc0a0584d72f1df38b900fb062ba995f395547"
@@ -6587,6 +6596,11 @@ commander@^7.0.0, commander@^7.1.0:
   resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
   integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
 
+comment-parser@1.1.5, comment-parser@^1.1.5:
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/comment-parser/-/comment-parser-1.1.5.tgz#453627ef8f67dbcec44e79a9bd5baa37f0bce9b2"
+  integrity sha512-RePCE4leIhBlmrqiYTvaqEeGYg7qpSl4etaIabKtdOQVi+mSTIBBklGUwIr79GXYnl3LpMwmDw4KeR2stNc6FA==
+
 commondir@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/commondir/-/commondir-1.0.1.tgz#ddd800da0c66127393cca5950ea968a3aaf1253b"
@@ -8506,6 +8520,21 @@ eslint-plugin-import@^2.22.1:
     read-pkg-up "^2.0.0"
     resolve "^1.17.0"
     tsconfig-paths "^3.9.0"
+
+eslint-plugin-jsdoc@35.4.0:
+  version "35.4.0"
+  resolved "https://registry.yarnpkg.com/eslint-plugin-jsdoc/-/eslint-plugin-jsdoc-35.4.0.tgz#4f4809ffa9430070aed10087fe691b9ededa2b05"
+  integrity sha512-0cr+NkPTxpTiMCtYOd8W5fd2IyC/CmaTHKb+0bzkpP9p8HfmJ3B2/M6FWj97rQJOLwLMkx+g2MIEZsrttpbFmQ==
+  dependencies:
+    "@es-joy/jsdoccomment" "^0.8.0-alpha.2"
+    comment-parser "1.1.5"
+    debug "^4.3.1"
+    esquery "^1.4.0"
+    jsdoc-type-pratt-parser "^1.0.4"
+    lodash "^4.17.21"
+    regextras "^0.8.0"
+    semver "^7.3.5"
+    spdx-expression-parse "^3.0.1"
 
 eslint-plugin-jsx-a11y@^6.4.1:
   version "6.4.1"
@@ -12035,6 +12064,11 @@ jsbn@~0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/jsbn/-/jsbn-0.1.1.tgz#a5e654c2e5a2deb5f201d96cefbca80c0ef2f513"
   integrity sha1-peZUwuWi3rXyAdls77yoDA7y9RM=
+
+jsdoc-type-pratt-parser@1.0.4, jsdoc-type-pratt-parser@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/jsdoc-type-pratt-parser/-/jsdoc-type-pratt-parser-1.0.4.tgz#5750d2d32ffb001866537d3baaedea7cf84c7036"
+  integrity sha512-jzmW9gokeq9+bHPDR1nCeidMyFUikdZlbOhKzh9+/nJqB75XhpNKec1/UuxW5c4+O+Pi31Gc/dCboyfSm/pSpQ==
 
 jsdom@^16.4.0:
   version "16.5.3"
@@ -17270,6 +17304,11 @@ regexpu-core@^4.7.1:
     unicode-match-property-ecmascript "^1.0.4"
     unicode-match-property-value-ecmascript "^1.2.0"
 
+regextras@^0.8.0:
+  version "0.8.0"
+  resolved "https://registry.yarnpkg.com/regextras/-/regextras-0.8.0.tgz#ec0f99853d4912839321172f608b544814b02217"
+  integrity sha512-k519uI04Z3SaY0fLX843MRXnDeG2+vHOFsyhiPZvNLe7r8rD2YNRjq4BQLZZ0oAr2NrtvZlICsXysGNFPGa3CQ==
+
 registry-auth-token@^4.0.0:
   version "4.2.1"
   resolved "https://registry.yarnpkg.com/registry-auth-token/-/registry-auth-token-4.2.1.tgz#6d7b4006441918972ccd5fedcd41dc322c79b250"
@@ -18778,7 +18817,7 @@ spdx-exceptions@^2.1.0:
   resolved "https://registry.yarnpkg.com/spdx-exceptions/-/spdx-exceptions-2.3.0.tgz#3f28ce1a77a00372683eade4a433183527a2163d"
   integrity sha512-/tTrYOC7PPI1nUAgx34hUpqXuyJG+DTHJTnIULG4rDygi4xu/tfgmq1e1cIRwRzwZgo4NLySi+ricLkZkw4i5A==
 
-spdx-expression-parse@^3.0.0:
+spdx-expression-parse@^3.0.0, spdx-expression-parse@^3.0.1:
   version "3.0.1"
   resolved "https://registry.yarnpkg.com/spdx-expression-parse/-/spdx-expression-parse-3.0.1.tgz#cf70f50482eefdc98e3ce0a6833e4a53ceeba679"
   integrity sha512-cbqHunsQWnJNE6KhVSMsMeH5H/L9EpymbzqTQ3uLwNCLZ1Q481oWaofqH7nO6V07xlXwY6PhQdQ2IedWx/ZK4Q==
