@@ -39,7 +39,15 @@ interface ModelConfig {
   [k: string]: any;
 }
 
+interface ConnectionConfig {}
+
+interface DatabaseConfig {
+  connection: ConnectionConfig;
+  models: ModelConfig[];
+}
+
 export class Database {
   static transformContentTypes(contentTypes: any[]): ModelConfig[];
+  static init(config: DatabaseConfig): Database;
   query<T extends keyof AllTypes>(uid: T): QueryFromContentType<T>;
 }

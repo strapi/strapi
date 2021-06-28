@@ -3,24 +3,24 @@ const sqlite = {
   connection: {
     filename: '.tmp/data.db',
   },
-  // debug: true,
   useNullAsDefault: true,
 };
 
 const postgres = {
+  client: 'postgres',
   connection: {
-    client: 'postgres',
     database: 'strapi',
     username: 'strapi',
     password: 'strapi',
     port: 5432,
     host: 'localhost',
   },
+  debug: true,
 };
 
 const mysql = {
+  client: 'mysql',
   connection: {
-    client: 'mysql',
     database: 'strapi',
     username: 'strapi',
     password: 'strapi',

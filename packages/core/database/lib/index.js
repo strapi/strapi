@@ -16,19 +16,23 @@ class Database {
   constructor(config) {
     this.metadata = createMetadata(config.models);
 
-    // TODO:; validate meta
+    // TODO: validate meta
     // this.metadata.validate();
 
     // this.connector = resolveConnector(this.config);
 
     this.connection = knex(config.connection);
-    this.dialect = getDialect(this.connection);
+    this.dialect = getDialect(this);
 
     this.schema = createSchemaProvider(this);
 
     // TODO: migrations -> allow running them through cli before startup
 
     this.entityManager = createEntityManager(this);
+  }
+
+  async initialize() {
+    await this.dialect.initialize();
   }
 
   query(uid) {
@@ -45,6 +49,13 @@ class Database {
 }
 
 Database.transformContentTypes = transformContentTypes;
+Database.init = async config => {
+  const db = new Database(config);
+
+  await db.initialize();
+
+  return db;
+};
 
 module.exports = {
   Database,

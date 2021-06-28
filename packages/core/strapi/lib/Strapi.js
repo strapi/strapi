@@ -272,13 +272,13 @@ class Strapi {
         cb();
       }
 
-      if (
-        (this.config.environment === 'development' &&
-          this.config.get('server.admin.autoOpen', true) !== false) ||
-        !isInitialised
-      ) {
-        await utils.openBrowser.call(this);
-      }
+      // if (
+      //   (this.config.environment === 'development' &&
+      //     this.config.get('server.admin.autoOpen', true) !== false) ||
+      //   !isInitialised
+      // ) {
+      //   await utils.openBrowser.call(this);
+      // }
     };
 
     const listenSocket = this.config.get('server.socket');
@@ -361,7 +361,8 @@ class Strapi {
       ...Object.values(strapi.api).flatMap(api => Object.values(api.models)),
     ];
 
-    this.db = new Database({
+    // TODO: create in RootProvider
+    this.db = await Database.init({
       ...this.config.get('database'),
       models: Database.transformContentTypes(contentTypes),
     });

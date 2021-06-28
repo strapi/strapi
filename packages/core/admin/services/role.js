@@ -21,7 +21,7 @@ const {
 const permissionDomain = require('../domain/permission');
 const { validatePermissionsExist } = require('../validation/permission');
 const { getService } = require('../utils');
-const { SUPER_ADMIN_CODE } = require('./constants');
+const { SUPER_ADMIN_CODE, CONTENT_TYPE_SECTION } = require('./constants');
 
 const hooks = {
   willResetSuperAdminPermissions: createAsyncSeriesWaterfallHook(),
@@ -346,7 +346,7 @@ const assignPermissions = async (roleId, permissions = []) => {
     // Transform each permission into a Permission instance
     .map(permissionDomain.create);
 
-  const existingPermissions = await getService('permission').find({
+  const existingPermissions = await getService('permission').findMany({
     where: { role: { id: roleId } },
     populate: ['role'],
   });
@@ -356,20 +356,29 @@ const assignPermissions = async (roleId, permissions = []) => {
     permissionsWithRole,
     existingPermissions
   );
+
   const permissionsToDelete = differenceWith(
     arePermissionsEqual,
     existingPermissions,
     permissionsWithRole
   );
+
   const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
+
+  console.log(
+    existingPermissions.length,
+    permissionsToAdd.length,
+    permissionsToDelete.length,
+    permissionsToReturn
+  );
 
   if (permissionsToDelete.length > 0) {
     await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
   }
 
   if (permissionsToAdd.length > 0) {
-    const createdPermissions = await addPermissions(roleId, permissionsToAdd);
-    permissionsToReturn.push(...createdPermissions.map(p => ({ ...p, role: p.role.id })));
+    await addPermissions(roleId, permissionsToAdd);
+    permissionsToReturn.push(...permissionsToAdd);
   }
 
   if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {
@@ -390,6 +399,8 @@ const addPermissions = async (roleId, permissions) => {
   return createMany(permissionsWithRole);
 };
 
+const isContentTypeAction = action => action.section === CONTENT_TYPE_SECTION;
+
 /**
  * Reset super admin permissions (giving it all permissions)
  * @returns {Promise<>}
@@ -401,8 +412,9 @@ const resetSuperAdminPermissions = async () => {
   }
 
   const allActions = getService('permission').actionProvider.values();
-  const contentTypesActions = allActions.filter(a => a.section === 'contentTypes');
-  const otherActions = allActions.filter(a => a.section !== 'contentTypes');
+
+  const contentTypesActions = allActions.filter(action => isContentTypeAction(action));
+  const otherActions = allActions.filter(action => !isContentTypeAction(action));
 
   // First, get the content-types permissions
   const permissions = getService('content-type').getPermissionsWithNestedFields(

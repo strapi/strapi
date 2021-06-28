@@ -6,7 +6,7 @@ const models = require('./models');
 const connections = require('./connections');
 
 async function main() {
-  const orm = new Database({
+  const orm = await Database.init({
     connection: connections.mysql,
     models: Database.transformContentTypes(models),
   });
@@ -19,6 +19,8 @@ async function main() {
 
     await orm.schema.reset();
     // await orm.schema.sync();
+
+    orm.query('article');
   } finally {
     orm.destroy();
   }

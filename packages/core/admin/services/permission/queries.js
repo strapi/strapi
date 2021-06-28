@@ -26,13 +26,11 @@ const permissionDomain = require('../../domain/permission/index');
  * @returns {Promise<array>}
  */
 const deleteByRolesIds = async rolesIds => {
-  const deletedPermissions = await strapi.query('strapi::permission').delete({
+  await strapi.query('strapi::permission').deleteMany({
     where: {
       role: { id: rolesIds },
     },
   });
-
-  return permissionDomain.toPermission(deletedPermissions);
 };
 
 /**
@@ -41,11 +39,14 @@ const deleteByRolesIds = async rolesIds => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async ids => {
-  const deletedPermissions = await strapi
-    .query('strapi::permission')
-    .delete({ where: { id: ids } });
-
-  return permissionDomain.toPermission(deletedPermissions);
+  await Promise.all(
+    ids.map(id => {
+      return strapi.query('strapi::permission').delete({ where: { id } });
+    })
+  );
+  
+  // TODO: find a way to do delete many with auto association deletes (FKs should do the job)
+  // await strapi.query('strapi::permission').deleteMany({ where: { id: ids } });
 };
 
 /**
@@ -54,9 +55,11 @@ const deleteByIds = async ids => {
  * @returns {Promise<*[]|*>}
  */
 const createMany = async permissions => {
-  const createdPermissions = await strapi
-    .query('strapi::permission')
-    .createMany({ data: permissions });
+  const createdPermissions = await Promise.all(
+    permissions.map(permission => {
+      return strapi.query('strapi::permission').create({ data: permission });
+    })
+  );
 
   return permissionDomain.toPermission(createdPermissions);
 };
@@ -68,11 +71,11 @@ const createMany = async permissions => {
  * @param attributes
  */
 const update = async (params, attributes) => {
-  const updatedPermissions = await strapi
+  const updatedPermission = await strapi
     .query('strapi::permission')
     .update({ where: params, data: attributes });
 
-  return permissionDomain.toPermission(updatedPermissions);
+  return permissionDomain.toPermission(updatedPermission);
 };
 
 /**
@@ -80,7 +83,7 @@ const update = async (params, attributes) => {
  * @param params query params to find the permissions
  * @returns {Promise<Permission[]>}
  */
-const find = async (params = {}) => {
+const findMany = async (params = {}) => {
   const rawPermissions = await strapi.query('strapi::permission').findMany(params);
 
   return permissionDomain.toPermission(rawPermissions);
@@ -88,15 +91,11 @@ const find = async (params = {}) => {
 
 /**
  * Find all permissions for a user
- * @param roles
+ * @param user - user
  * @returns {Promise<Permission[]>}
  */
-const findUserPermissions = async ({ roles }) => {
-  if (!isArray(roles)) {
-    return [];
-  }
-
-  return find({ role: { id: roles.map(prop('id')) } });
+const findUserPermissions = async user => {
+  return findMany({ where: { role: { users: { id: user.id } } } });
 };
 
 const filterPermissionsToRemove = async permissions => {
@@ -208,10 +207,14 @@ const ensureBoundPermissionsInDatabase = async () => {
   for (const contentType of contentTypes) {
     const boundActions = getBoundActionsBySubject(editorRole, contentType.uid);
 
-    const permissions = await find({
-      subject: contentType.uid,
-      action_in: boundActions,
-      role: editorRole.id,
+    const permissions = await findMany({
+      where: {
+        subject: contentType.uid,
+        action: boundActions,
+        role: {
+          id: editorRole.id,
+        },
+      },
     });
 
     if (permissions.length === 0) {
@@ -248,7 +251,7 @@ const ensureBoundPermissionsInDatabase = async () => {
 
 module.exports = {
   createMany,
-  find,
+  findMany,
   deleteByRolesIds,
   deleteByIds,
   findUserPermissions,

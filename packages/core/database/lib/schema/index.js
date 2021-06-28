@@ -82,7 +82,6 @@ const createSchemaProvider = db => {
 
       // TODO: replace by schemaDiff.hasChanged()
       if (status === 'UNCHANGED') {
-        console.log('Unchanged');
         // NOTE: should we still update the schema in DB ?
         return;
       }
