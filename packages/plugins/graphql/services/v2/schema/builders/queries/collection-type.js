@@ -47,7 +47,7 @@ const addFindOneQuery = (t, contentType) => {
 
   // Only authorize filtering using unique fields for findOne queries
   const uniqueAttributes = Object.entries(attributes)
-    // Only keep scalar attributes
+    // Only keep unique scalar attributes
     .filter(([, attribute]) => utils.isScalar(attribute) && attribute.unique)
     // Create a map with the name of the attribute & its filters type
     .reduce((acc, [name, attribute]) => {
