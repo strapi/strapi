@@ -186,7 +186,7 @@ const addRelationalAttribute = (builder, attributeName, attribute, contentType) 
   const { associations = [] } = contentType;
 
   // Polymorphic relations
-  if (attribute.collection === '*') {
+  if (typeUtils.isMorphRelation(attribute)) {
     builder.field(attributeName, {
       type: typeUtils.getMorphRelationTypeName(contentType, attributeName),
       resolve: buildAssocResolvers(contentType)[attributeName],
