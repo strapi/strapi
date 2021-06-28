@@ -15,7 +15,7 @@ const MarketPlacePage = () => {
   const emitEventRef = useRef(emitEvent);
 
   useEffect(() => {
-    emitEventRef.current('didGotToMarketplace');
+    emitEventRef.current('didGoToMarketplace');
   }, []);
 
   if (isLoading || error) {
