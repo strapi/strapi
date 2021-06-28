@@ -4,12 +4,13 @@ const commander = require('commander');
 
 const packageJson = require('./package.json');
 const buildStarter = require('./utils/build-starter');
+const promptUser = require('./utils/prompt-user');
 
 const program = new commander.Command(packageJson.name);
 
 program
   .version(packageJson.version)
-  .arguments('<directory> <starterurl>')
+  .arguments('[directory], [starterurl]')
   .option('--use-npm', 'Force usage of npm instead of yarn to create the project')
   .option('--debug', 'Display database connection error')
   .option('--quickstart', 'Quickstart app creation')
@@ -30,13 +31,41 @@ program
   .action((directory, starterUrl, programArgs) => {
     const projectArgs = { projectName: directory, starterUrl };
 
-    buildStarter(projectArgs, programArgs).catch(error => {
-      console.error(error.message);
-      process.exit(1);
-    });
+    initProject(projectArgs, programArgs);
   });
 
-program.exitOverride();
+function generateApp(projectArgs, programArgs) {
+  if (!projectArgs.projectName || !projectArgs.starterUrl) {
+    console.error(
+      'Please specify the <directory> and <starterurl> of your project when using --quickstart'
+    );
+    // eslint-disable-next-line no-process-exit
+    process.exit(1);
+  }
+
+  return buildStarter(projectArgs, programArgs);
+}
+
+async function initProject(projectArgs, program) {
+  const { projectName, starterUrl } = projectArgs;
+  if (program.quickstart) {
+    return generateApp(projectArgs, program);
+  }
+
+  const prompt = await promptUser(projectName, starterUrl);
+
+  const promptProjectArgs = {
+    projectName: prompt.directory || projectName,
+    starterUrl: prompt.starter || starterUrl,
+  };
+
+  const programArgs = {
+    ...program,
+    quickstart: prompt.quick,
+  };
+
+  return generateApp(promptProjectArgs, programArgs);
+}
 
 try {
   program.parse(process.argv);
