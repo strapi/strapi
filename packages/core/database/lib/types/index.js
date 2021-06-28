@@ -2,7 +2,6 @@
 
 const SCALAR_TYPES = [
   'increments',
-
   'password',
   'email',
   'string',

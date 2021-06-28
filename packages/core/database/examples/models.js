@@ -23,6 +23,10 @@ const category = {
       target: 'article',
       mappedBy: 'category',
     },
+    compo: {
+      type: 'component',
+      component: 'compo',
+    },
   },
 };
 
@@ -126,18 +130,6 @@ const address = {
   },
 };
 
-// const orm = new Database({
-//   connection: {
-//     client: 'sqlite',
-//     connection: {
-//       filename: 'test.sqlite',
-//     },
-//     useNullAsDefault: true,
-//     debug: true,
-//   },
-//   models: [category, article],
-// });
-
 const file = {
   modelName: 'file',
   uid: 'file',
@@ -213,4 +205,64 @@ const fileMorph = {
   },
 };
 
-module.exports = [category, article, compo, tags, user, address, file, fileMorph];
+const blogPost = {
+  modelName: 'blogPost',
+  uid: 'blogPost',
+  collectionName: 'blog_posts',
+  attributes: {
+    passwordField: {
+      type: 'password',
+    },
+    emailField: {
+      type: 'email',
+    },
+    stringField: {
+      type: 'string',
+    },
+    uidField: {
+      type: 'uid',
+    },
+    richtextField: {
+      type: 'richtext',
+    },
+    textField: {
+      type: 'text',
+    },
+    enumerationField: {
+      type: 'enumeration',
+      enum: ['A', 'B'],
+    },
+    jsonField: {
+      type: 'json',
+    },
+    bigintegerField: {
+      type: 'biginteger',
+    },
+    integerField: {
+      type: 'integer',
+    },
+    floatField: {
+      type: 'float',
+    },
+    decimalField: {
+      type: 'decimal',
+    },
+    dateField: {
+      type: 'date',
+    },
+    timeField: {
+      type: 'time',
+    },
+    datetimeField: {
+      type: 'datetime',
+    },
+    timestampField: {
+      type: 'timestamp',
+    },
+    booleanField: {
+      type: 'boolean',
+    },
+  },
+};
+
+module.exports = [category, article, tags, compo, user, address, file, fileMorph, blogPost];

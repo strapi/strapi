@@ -2,7 +2,49 @@
 
 const _ = require('lodash/fp');
 
+const types = require('../types');
+const { createField } = require('../fields');
 const helpers = require('./helpers');
+
+const fromRow = (metadata, row = {}) => {
+  const { attributes } = metadata;
+
+  const obj = {};
+
+  for (const column in row) {
+    // to field Name
+    const attributeName = column;
+
+    if (!attributes[attributeName]) {
+      // ignore value that are not related to an attribute (join columns ...)
+      continue;
+    }
+
+    const attribute = attributes[attributeName];
+
+    if (types.isScalar(attribute.type)) {
+      // TODO: we convert to column name
+      // TODO: handle default value too
+      // TODO: format data & use dialect to know which type they support (json particularly)
+
+      const field = createField(attribute.type, attribute);
+
+      // TODO: validate data on creation
+      // field.validate(data[attributeName]);
+      const val = row[column] === null ? null : field.fromDB(row[column]);
+
+      obj[attributeName] = val;
+    }
+
+    if (types.isRelation(attribute.type)) {
+      obj[attributeName] = row[column];
+    }
+  }
+
+  console.log(obj);
+
+  return obj;
+};
 
 const createQueryBuilder = (uid, db) => {
   const meta = db.metadata.get(uid);
@@ -168,7 +210,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     // TODO: trigger result processing to allow 100% sql queries
-    async execute() {
+    async execute({ mapResults = true } = {}) {
       const aliasedTableName = state.type === 'insert' ? tableName : { [this.alias]: tableName };
 
       try {
@@ -244,11 +286,14 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyJoins(qb, state.joins);
         }
 
-        // console.log('Running query: ', qb.toQuery());
+        console.log('Running query: ', qb.toQuery());
 
-        const queryResult = await qb;
+        const rows = await qb;
 
-        const results = db.dialect.processResult(queryResult, state.type);
+        let results = rows;
+        if (mapResults && state.type === 'select') {
+          results = Array.isArray(rows) ? rows.map(row => fromRow(meta, row)) : fromRow(meta, rows);
+        }
 
         if (state.populate) {
           // TODO: hanlde populate
@@ -256,21 +301,6 @@ const createQueryBuilder = (uid, db) => {
         }
 
         return results;
-
-        // TODO:
-        // if (!processResult) {
-        //   return results;
-        // } else {
-        //   return Array.isArray(results)
-        //     ? results.map((r) => pickAttributes(r))
-        //     : pickAttributes(results);
-        // }
-        /*
-        - format results
-        - populate relationships
-      */
-
-        // return results;
       } catch (error) {
         db.dialect.transformErrors(error);
       }

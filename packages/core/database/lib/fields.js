@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash/fp');
+const dateFns = require('date-fns');
 
 class Field {
   constructor(config) {
@@ -30,11 +31,20 @@ class StringField extends Field {
   toDB(value) {
     return _.toString(value);
   }
+
+  fromDB(value) {
+    return _.toString(value);
+  }
 }
 
 class JSONField extends Field {
   toDB(value) {
     return JSON.stringify(value);
+  }
+
+  fromDB(value) {
+    if (typeof value === 'string') return JSON.parse(value);
+    return value;
   }
 }
 
@@ -49,6 +59,140 @@ class BooleanField extends Field {
     if (['false', 'f', '0', 0].includes(value)) {
       return false;
     }
+
+    return Boolean(value);
+  }
+
+  fromDB(value) {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+
+    const strVal = _.toString(value);
+
+    if (strVal === '1') {
+      return true;
+    } else if (strVal === '0') {
+      return false;
+    } else {
+      return null;
+    }
+  }
+}
+
+class NumberField extends Field {
+  toDB(value) {
+    const numberValue = _.toNumber(value);
+
+    if (Number.isNaN(numberValue)) {
+      throw new Error(`Expected a valid Number, got ${value}`);
+    }
+
+    return numberValue;
+  }
+
+  fromDB(value) {
+    return _.toNumber(value);
+  }
+}
+
+class BigIntegerField extends NumberField {
+  toDB(value) {
+    return _.toString(value);
+  }
+
+  fromDB(value) {
+    return _.toString(value);
+  }
+}
+
+const timeRegex = new RegExp('^(2[0-3]|[01][0-9]):([0-5][0-9]):([0-5][0-9])(.[0-9]{1,3})?$');
+
+const parseTime = value => {
+  if (dateFns.isDate(value)) return dateFns.format(value, 'HH:mm:ss.SSS');
+
+  if (typeof value !== 'string') {
+    throw new Error(`Expected a string, got a ${typeof value}`);
+  }
+  const result = value.match(timeRegex);
+
+  if (result === null) {
+    throw new Error('Invalid time format, expected HH:mm:ss.SSS');
+  }
+
+  const [, hours, minutes, seconds, fraction = '.000'] = result;
+  const fractionPart = _.padEnd(fraction.slice(1), 3, '0');
+
+  return `${hours}:${minutes}:${seconds}.${fractionPart}`;
+};
+
+const parseDate = value => {
+  if (dateFns.isDate(value)) return dateFns.format(value, 'yyyy-MM-dd');
+  try {
+    let date = dateFns.parseISO(value);
+
+    if (dateFns.isValid(date)) return dateFns.format(date, 'yyyy-MM-dd');
+
+    throw new Error(`Invalid format, expected an ISO compatible date`);
+  } catch (error) {
+    throw new Error(`Invalid format, expected an ISO compatible date`);
+  }
+};
+
+const parseDateTimeOrTimestamp = value => {
+  if (dateFns.isDate(value)) return value;
+  try {
+    const date = dateFns.parseISO(value);
+    if (dateFns.isValid(date)) return date;
+
+    const milliUnixDate = dateFns.parse(value, 'T', new Date());
+    if (dateFns.isValid(milliUnixDate)) return milliUnixDate;
+
+    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+  } catch (error) {
+    throw new Error(`Invalid format, expected a timestamp or an ISO date`);
+  }
+};
+
+class DateField extends Field {
+  toDB(value) {
+    return parseDate(value);
+  }
+
+  fromDB(value) {
+    const cast = new Date(value);
+    return dateFns.isValid(cast) ? dateFns.formatISO(cast, { representation: 'date' }) : null;
+  }
+}
+class DatetimeField extends Field {
+  toDB(value) {
+    return parseDateTimeOrTimestamp(value);
+  }
+
+  fromDB(value) {
+    const cast = new Date(value);
+    return dateFns.isValid(cast) ? cast.toISOString() : null;
+  }
+}
+
+class TimeField extends Field {
+  toDB(value) {
+    return parseTime(value);
+  }
+
+  fromDB(value) {
+    // make sure that's a string with valid format ?
+    return value;
+  }
+}
+class TimestampField extends Field {
+  toDB(value) {
+    return parseDateTimeOrTimestamp(value);
+  }
+
+  fromDB(value) {
+    const cast = new Date(value);
+    return dateFns.isValid(cast) ? dateFns.format(cast, 'T') : null;
   }
 }
 
@@ -60,16 +204,16 @@ const typeToFieldMap = {
   uid: StringField,
   richtext: StringField,
   text: StringField,
-  json: JSONField,
   enumeration: StringField,
-  integer: Field,
-  biginteger: StringField,
-  float: Field,
-  decimal: Field,
-  date: Field,
-  time: Field,
-  datetime: Field,
-  timestamp: Field,
+  json: JSONField,
+  biginteger: BigIntegerField,
+  integer: NumberField,
+  float: NumberField,
+  decimal: NumberField,
+  date: DateField,
+  time: TimeField,
+  datetime: DatetimeField,
+  timestamp: TimestampField,
   boolean: BooleanField,
 };
 
@@ -84,51 +228,3 @@ const createField = (type /*attribute*/) => {
 module.exports = {
   createField,
 };
-
-// class ArrayField {
-//   fields: Field[] = [];
-
-//   add(f: Field) {
-//     this.fields.push(f);
-//     return this;
-//   }
-
-//   remove(f: Field) {
-//     this.fields.splice(this.fields.indexOf(f), 1);
-//     return this;
-//   }
-
-//   wrapError(err, idx) {
-//     return new Error(`Error on field ${idx + 1}: ${err.message}`);
-//   }
-
-//   validate() {
-//     return this.fields?.flatMap((field, idx) =>
-//       field.validate().map(error => this.wrapError(error, idx))
-//     );
-//   }
-// }
-
-// class GroupField {
-//   fields: { [key: string]: Field } = {};
-
-//   add(key: string, f: Field) {
-//     this.fields[key] = f;
-//     return this;
-//   }
-
-//   remove(key: string) {
-//     delete this.fields[key];
-//     return this;
-//   }
-
-//   wrapError(err: Error, key: string) {
-//     return new Error(`Error on field ${key}: ${err.message}`);
-//   }
-
-//   validate() {
-//     return Object.keys(this.fields).flatMap(key =>
-//       this.fields[key].validate().map(error => this.wrapError(error, key))
-//     );
-//   }
-// }

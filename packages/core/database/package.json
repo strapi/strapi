@@ -28,6 +28,7 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
+    "date-fns": "2.22.1",
     "debug": "4.3.1",
     "knex": "0.95.6",
     "lodash": "4.17.21"

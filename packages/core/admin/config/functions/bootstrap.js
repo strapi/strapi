@@ -41,7 +41,7 @@ module.exports = async () => {
   registerAdminConditions();
   registerPermissionActions();
 
-  // const permissionService = getService('permission');
+  const permissionService = getService('permission');
   const userService = getService('user');
   const roleService = getService('role');
 
@@ -50,7 +50,7 @@ module.exports = async () => {
   await roleService.resetSuperAdminPermissions();
   await roleService.displayWarningIfNoSuperAdmin();
 
-  // await permissionService.ensureBoundPermissionsInDatabase();
+  await permissionService.ensureBoundPermissionsInDatabase();
   // await permissionService.cleanPermissionsInDatabase();
 
   await userService.displayWarningIfUsersDontHaveRole();

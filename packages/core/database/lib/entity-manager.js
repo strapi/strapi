@@ -6,26 +6,27 @@ const { createField } = require('./fields');
 const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
 
-const pickRowAttributes = (metadata, data = {}) => {
+// TODO: move to query layer
+const toRow = (metadata, data = {}) => {
   const { attributes } = metadata;
 
   const obj = {};
-
-  // pick attribute
 
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
     if (types.isScalar(attribute.type) && _.has(attributeName, data)) {
       // TODO: we convert to column name
+      // TODO: handle default value too
       // TODO: format data & use dialect to know which type they support (json particularly)
 
       const field = createField(attribute.type, attribute);
 
+      // TODO: validate data on creation
       // field.validate(data[attributeName]);
+      const val = data[attributeName] === null ? null : field.toDB(data[attributeName]);
 
-      // TODO: handle default value too
-      obj[attributeName] = field.toDB(data[attributeName]);
+      obj[attributeName] = val;
     }
 
     if (types.isRelation(attribute.type)) {
@@ -98,7 +99,7 @@ const createEntityManager = db => {
       // transform value to storage value
       // apply programatic defaults if any -> I think this should be handled outside of this layer as we might have some applicative rules in the entity service
 
-      const dataToInsert = pickRowAttributes(metadata, data);
+      const dataToInsert = toRow(metadata, data);
 
       // if (_.isEmpty(dataToInsert)) {
       //   throw new Error('Create requires data');
@@ -126,7 +127,7 @@ const createEntityManager = db => {
 
       const metadata = db.metadata.get(uid);
 
-      const dataToInsert = data.map(datum => pickRowAttributes(metadata, datum));
+      const dataToInsert = data.map(datum => toRow(metadata, datum));
 
       if (_.isEmpty(dataToInsert)) {
         throw new Error('Nothing to insert');
@@ -160,7 +161,7 @@ const createEntityManager = db => {
 
       const { id } = entity;
 
-      const dataToUpdate = pickRowAttributes(metadata, data);
+      const dataToUpdate = toRow(metadata, data);
 
       if (!_.isEmpty(dataToUpdate)) {
         await this.createQueryBuilder(uid)
@@ -179,7 +180,7 @@ const createEntityManager = db => {
       const { where, data } = params;
 
       const metadata = db.metadata.get(uid);
-      const dataToUpdate = pickRowAttributes(metadata, data);
+      const dataToUpdate = toRow(metadata, data);
 
       if (_.isEmpty(dataToUpdate)) {
         throw new Error('Update requires data');
@@ -258,38 +259,7 @@ const createEntityManager = db => {
 
     /**
      * Attach relations to a new entity
-     * oneToOne
-     *   if owner
-     *     if joinColumn
-     *       -> Id should have been added in the column of the model table beforehand to avoid extra updates
-     *     if joinTable
-     *       -> add relation
-     *
-     *   if not owner
-     *     if joinColumn
-     *       -> add relation
-     *     if joinTable
-     *       -> add relation in join table
-     *
-     * oneToMany
-     *   owner -> cannot be owner
-     *   not owner
-     *     joinColumn
-     *       -> add relations in target
-     *     joinTable
-     *       -> add relations in join table
-     *
-     * manyToOne
-     *   not owner -> must be owner
-     *   owner
-     *     join Column
-     *       -> Id should have been added in the column of the model table beforehand to avoid extra updates
-     *     joinTable
-     *       -> add relation in join table
-     *
-     * manyToMany
-     *   -> add relation in join table
-     *
+     * TODO: Link to documentation
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
@@ -297,8 +267,6 @@ const createEntityManager = db => {
      */
     async attachRelations(metadata, id, data) {
       const { attributes } = metadata;
-
-      // TODO: optimize later for createMany
 
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
@@ -354,41 +322,7 @@ const createEntityManager = db => {
 
     /**
      * Updates relations of an existing entity
-     * oneToOne
-     *   if owner
-     *     if joinColumn
-     *      -> handled in the DB row
-     *     if joinTable
-     *       -> clear join Table assoc
-     *       -> add relation in join table
-     *
-     *   if not owner
-     *     if joinColumn
-     *       -> set join column on the target
-     *     if joinTable
-     *       -> clear join Table assoc
-     *       -> add relation in join table
-     *
-     * oneToMany
-     *   owner -> cannot be owner
-     *   not owner
-     *     joinColumn
-     *       -> set join column on the target
-     *     joinTable
-     *       -> add relations in join table
-     *
-     * manyToOne
-     *   not owner -> must be owner
-     *   owner
-     *     join Column
-     *      -> handled in the DB row
-     *     joinTable
-     *       -> add relation in join table
-     *
-     * manyToMany
-     *   -> clear join Table assoc
-     *   -> add relation in join table
-     *
+     * TODO: [Link to the documentation]
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
@@ -458,47 +392,18 @@ const createEntityManager = db => {
     /**
      * Delete relations of an existing entity
      * This removes associations but doesn't do cascade deletions for components for example. This will be handled on the entity service layer instead
-     * NOTE: Most of the deletion should be handled by ON DELETE CASCADE
-     *
-     * oneToOne
-     *   if owner
-     *     if joinColumn
-     *      -> handled in the DB row
-     *     if joinTable
-     *       -> clear join Table assoc
-     *
-     *   if not owner
-     *     if joinColumn
-     *       -> set join column on the target // CASCADING should do the job
-     *     if joinTable
-     *       -> clear join Table assoc // CASCADING
-     *
-     * oneToMany
-     *   owner -> cannot be owner
-     *   not owner
-     *     joinColumn
-     *       -> set join column on the target
-     *     joinTable
-     *       -> add relations in join table
-     *
-     * manyToOne
-     *   not owner -> must be owner
-     *   owner
-     *     join Column
-     *      -> handled in the DB row
-     *     joinTable
-     *       -> add relation in join table
-     *
-     * manyToMany
-     *   -> clear join Table assoc
-     *   -> add relation in join table
-     *
+     * NOTE: Most of the deletion should be handled by ON DELETE CASCADE for dialect that have FKs
+     * TODO: link to documentation
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
      */
-    // noop as cascade FKs does the job
     async deleteRelations(metadata, id) {
+      // TODO: Implement correctly
+      if (db.dialect.usesForeignKeys()) {
+        return;
+      }
+
       const { attributes } = metadata;
 
       for (const attributeName in attributes) {

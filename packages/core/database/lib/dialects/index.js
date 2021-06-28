@@ -7,12 +7,12 @@ class Dialect {
     this.db = db;
   }
 
-  useReturning() {
+  usesForeignKeys() {
     return false;
   }
 
-  processResult(r) {
-    return r;
+  useReturning() {
+    return false;
   }
 
   // TODO: pass query info to display some more metadata
@@ -26,7 +26,12 @@ class PostgresDialect extends Dialect {
   }
 
   initialize() {
-    this.db.connection.client.types.setTypeParser(1700, 'text', parseFloat);
+    // console.log(this.db.connection)
+    // this.db.connection.context.client.types.setTypeParser(1700, 'text', parseFloat);
+  }
+
+  usesForeignKeys() {
+    return false;
   }
 
   transformErrors(error) {
@@ -59,6 +64,10 @@ class MysqlDialect extends Dialect {
       }
       return next();
     };
+  }
+
+  usesForeignKeys() {
+    return false;
   }
 
   transformErrors(error) {

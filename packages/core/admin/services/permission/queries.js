@@ -39,13 +39,11 @@ const deleteByRolesIds = async rolesIds => {
  * @returns {Promise<array>}
  */
 const deleteByIds = async ids => {
-  await Promise.all(
-    ids.map(id => {
-      return strapi.query('strapi::permission').delete({ where: { id } });
-    })
-  );
-  
-  // TODO: find a way to do delete many with auto association deletes (FKs should do the job)
+  for (const id of ids) {
+    await strapi.query('strapi::permission').delete({ where: { id } });
+  }
+
+  // FIXME: find a way to do delete many with auto association deletes (FKs should do the job)$
   // await strapi.query('strapi::permission').deleteMany({ where: { id: ids } });
 };
 
@@ -55,13 +53,16 @@ const deleteByIds = async ids => {
  * @returns {Promise<*[]|*>}
  */
 const createMany = async permissions => {
-  const createdPermissions = await Promise.all(
-    permissions.map(permission => {
-      return strapi.query('strapi::permission').create({ data: permission });
-    })
-  );
+  const createdPermissions = [];
+  for (const permission of permissions) {
+    const newPerm = await strapi.query('strapi::permission').create({ data: permission });
+    createdPermissions.push(newPerm);
+  }
 
   return permissionDomain.toPermission(createdPermissions);
+
+  // FIXME:
+  // await strapi.query('strapi::permission').createMany({ data: permissions })
 };
 
 /**

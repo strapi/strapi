@@ -392,7 +392,7 @@ const applyJoins = (qb, joins) => joins.forEach(join => applyJoin(qb, join));
 const processPopulate = (populate, ctx) => {
   // TODO: Make sure to add the needed columns in the select statement for use in the next query (join columns)
 
-  const { db, uid } = ctx;
+  const { qb, db, uid } = ctx;
   const meta = db.metadata.get(uid);
 
   if (populate === true) {
@@ -434,6 +434,9 @@ const processPopulate = (populate, ctx) => {
 
     const value = populate[key];
 
+    // TODO: make sure necessary columns are present for future populate queries
+    qb.addSelect('id');
+
     finalPopulate[key] = value;
   }
 
@@ -441,11 +444,14 @@ const processPopulate = (populate, ctx) => {
 };
 
 const applyPopulate = async (results, populate, ctx) => {
-  // TODO: cleanup code
+  // TODO: cleanup code  -> factorise
   // TODO: create aliases for pivot columns
   // TODO: remove joinColumn
   // TODO: optimize depth to avoid overfetching
   // TODO: ⚠️ on join tables we might want to make one query to find all the xxx_id then one query instead of a join to avoid returning multiple times the same object
+
+  // TODO: do the mapResults after the aggregations
+  // TODO: order by / limit / offset is per result not for all results so we need ot loop and populate each result independently
 
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
@@ -468,7 +474,7 @@ const applyPopulate = async (results, populate, ctx) => {
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
           .where({ [referencedColumnName]: results.map(r => r[joinColumnName]) })
-          .execute();
+          .execute({ mapResults: false });
 
         const rrMap = _.groupBy(referencedColumnName, rr);
 
@@ -504,7 +510,7 @@ const applyPopulate = async (results, populate, ctx) => {
               r => r[joinTable.joinColumn.referencedColumn]
             ),
           })
-          .execute();
+          .execute({ mapResults: false });
 
         const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
 
@@ -529,7 +535,7 @@ const applyPopulate = async (results, populate, ctx) => {
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
           .where({ [referencedColumnName]: results.map(r => r[joinColumnName]) })
-          .execute();
+          .execute({ mapResults: false });
 
         const rrMap = _.groupBy(referencedColumnName, rr);
 
@@ -562,7 +568,7 @@ const applyPopulate = async (results, populate, ctx) => {
               r => r[joinTable.joinColumn.referencedColumn]
             ),
           })
-          .execute();
+          .execute({ mapResults: false });
 
         const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
 
@@ -597,7 +603,7 @@ const applyPopulate = async (results, populate, ctx) => {
             r => r[joinTable.joinColumn.referencedColumn]
           ),
         })
-        .execute();
+        .execute({ mapResults: false });
 
       const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
 

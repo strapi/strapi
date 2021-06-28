@@ -1,13 +1,14 @@
 'use strict';
 
-const { Database } = require('../lib/index');
+const _ = require('lodash');
 
+const { Database } = require('../lib/index');
 const models = require('./models');
 const connections = require('./connections');
 
-async function main() {
+async function main(connection) {
   const orm = await Database.init({
-    connection: connections.mysql,
+    connection,
     models: Database.transformContentTypes(models),
   });
 
@@ -17,18 +18,25 @@ async function main() {
 
     console.log(orm.connection.client.config.client);
 
+    await orm.schema.sync();
     await orm.schema.reset();
-    // await orm.schema.sync();
 
-    orm.query('article');
+    await tests(orm);
   } finally {
     orm.destroy();
   }
 }
 
-main().catch(err => {
-  console.error(err);
-});
+// (async function() {
+//   for (const key in connections) {
+//     await main(connections[key]);
+//   }
+// })().catch(err => {
+//   console.error(err);
+//   process.exit();
+// });
+
+main(connections.sqlite);
 
 // const entityService = uid => {
 //   // knows more about abstraction then the query layer
@@ -124,266 +132,266 @@ db.schema.removeCollection
 // });
 
 // console.log(JSON.stringify(article, null, 4));
+const tests = async orm => {
+  // await orm.query('category').createMany({
+  //   // select: {},
+  //   // populate: {},
+  //   data: Array(5)
+  //     .fill({})
+  //     .map((v, idx) => ({
+  //       title: `Category ${_.padStart(idx, 3, '0')}`,
+  //       articles: [idx + 1, idx + 2],
+  //     })),
+  // });
 
-// await orm.query('category').createMany({
-//   // select: {},
-//   // populate: {},
-//   data: Array(5)
-//     .fill({})
-//     .map((v, idx) => ({
-//       title: `Category ${_.padStart(idx, 3, '0')}`,
-//       articles: [idx + 1, idx + 2],
-//     })),
-// });
+  await orm.query('article').createMany({
+    // select: {},
+    // populate: {},
+    data: Array(5)
+      .fill({})
+      .map((v, idx) => ({
+        title: `Article ${_.padStart(idx, 3, '0')}`,
+        // category_id: idx + 1,
+        category: idx + 1,
+      })),
+  });
 
-// await orm.query('article').createMany({
-//   // select: {},
-//   // populate: {},
-//   data: Array(5)
-//     .fill({})
-//     .map((v, idx) => ({
-//       title: `Article ${_.padStart(idx, 3, '0')}`,
-//       // category_id: idx + 1,
-//       category: idx+1
-//     })),
-// });
+  const cat = await orm.query('category').create({
+    data: {
+      articles: [1, 2, 3, 4, 5],
+    },
+    populate: ['articles'],
+  });
 
-// const cat = await orm.query('category').create({
-//   data: {
-//     articles: [1, 2, 3, 4, 5],
-//   },
-//   populate: ['articles'],
-// });
+  console.log(cat);
 
-// console.log(cat);
+  const tag = await orm.query('tag').create({
+    data: {
+      articles: [1, 2, 3, 4, 5],
+    },
+    populate: ['articles'],
+  });
 
-// const tag = await orm.query('tag').create({
-//   data: {
-//     articles: [1, 2, 3, 4, 5],
-//   },
-//   populate: ['articles'],
-// });
+  console.log(tag);
 
-// console.log(tag);
+  const someArticles = await orm.query('article').findMany({
+    where: {
+      id: [1, 2, 3, 4, 5],
+    },
+    populate: ['tags', 'category'],
+  });
 
-// const someArticles = await orm.query('article').findMany({
-//   where: {
-//     id: [1, 2, 3, 4, 5],
-//   },
-//   populate: ['tags', 'category'],
-// });
+  console.log(someArticles);
 
-// console.log(someArticles);
+  await orm.query('category').updateMany({
+    where: {
+      // articles: {
+      //   title: {
+      //     $contains: 'Category',
+      //   },
+      // },
+    },
+    data: {
+      title: 'Category 007',
+    },
+  });
 
-// await orm.query('category').updateMany({
-//   where: {
-//     // articles: {
-//     //   title: {
-//     //     $contains: 'Category',
-//     //   },
-//     // },
-//   },
-//   data: {
-//     title: 'Category 007',
-//   },
-// });
+  let r = await orm.query('category').findMany({
+    where: {
+      $and: [
+        {
+          title: {
+            $ne: 'salut',
+          },
+        },
+      ],
+      title: 'test',
+      price: {
+        $gt: 12,
+      },
+      articles: {
+        title: {
+          $startsWith: 'Test',
+          // $mode: 'insensitive',
+        },
+      },
+      compo: {
+        key: 'x',
+      },
+    },
+  });
 
-// const r = await orm.query('category').findMany({
-//   where: {
-//     $and: [
-//       {
-//         title: {
-//           $ne: 'salut',
-//         },
-//       },
-//     ],
-//     title: 'test',
-//     price: {
-//       $gt: 12,
-//     },
-//     articles: {
-//       title: {
-//         $startsWith: 'Test',
-//         // $mode: 'insensitive',
-//       },
-//     },
-//     compo: {
-//       key: 'x',
-//     },
-//   },
-// });
+  // escape stuff
+  // const raw = (strings, )
 
-// // escape stuff
-// // const raw = (strings, )
+  const params = {
+    select: ['id', 'title'],
+    where: {
+      $not: {
+        $or: [
+          {
+            articles: {
+              category: {
+                title: 'Category 003',
+              },
+            },
+          },
+          {
+            title: {
+              $in: ['Category 001', 'Category 002'],
+            },
+          },
+          {
+            title: {
+              $not: 'Category 001',
+            },
+          },
+        ],
+      },
+    },
+    orderBy: [{ articles: { title: 'asc' } }],
+    limit: 10,
+    offset: 0,
+  };
 
-// const params = {
-//   select: ['id', 'title'],
-//   where: {
-//     $not: {
-//       $or: [
-//         {
-//           articles: {
-//             category: {
-//               title: 'Category 003',
-//             },
-//           },
-//         },
-//         {
-//           title: {
-//             $in: ['Category 001', 'Category 002'],
-//           },
-//         },
-//         {
-//           title: {
-//             $not: 'Category 001',
-//           },
-//         },
-//       ],
-//     },
-//   },
-//   orderBy: [{ articles: { title: 'asc' } }],
-//   limit: 10,
-//   offset: 0,
-// };
+  r = await orm.query('category').findMany(params);
 
-// const r = await orm.query('category').findMany(params);
+  console.log(r);
 
-// console.log(r);
+  r = await orm.query('category').findMany({
+    where: {
+      $or: [
+        {
+          compo: {
+            value: {
+              $gte: 3,
+            },
+          },
+        },
+        {
+          articles: {
+            title: {
+              $contains: 'test',
+            },
+          },
+        },
+      ],
+    },
+  });
 
-// const r = await orm.query('category').findMany({
-//   where: {
-//     $or: [
-//       {
-//         compo: {
-//           value: {
-//             $gte: 3,
-//           },
-//         },
-//       },
-//       {
-//         articles: {
-//           title: {
-//             $contains: 'test',
-//           },
-//         },
-//       },
-//     ],
-//   },
-// });
+  console.log(r);
 
-// console.log(r);
+  r = await orm.query('user').findMany({
+    where: {
+      address: {
+        name: 'A',
+      },
+    },
+  });
 
-// const r = await orm.query('user').findMany({
-//   where: {
-//     address: {
-//       name: 'A',
-//     },
-//   },
-// });
+  console.log(r);
 
-// console.log(r);
+  const [results, count] = await orm.query('category').findWithCount(params);
 
-// const [results, count] = await orm.query('category').findWithCount(params);
+  console.log({ results, count });
 
-// console.log({ results, count });
+  await orm.query('category', {
+    populate: ['articles'],
+  });
 
-// await orm.query('category', {
-//   populate: ['articles'],
-// });
+  const address = await orm.query('address').findMany({
+    populate: {
+      user: {
+        // select: ['id', 'address_id'],
+      },
+    },
+  });
 
-// const address = await orm.query('address').findMany({
-//   populate: {
-//     user: {
-//       // select: ['id', 'address_id'],
-//     },
-//   },
-// });
+  console.log(address);
 
-// console.log(address);
+  const user = await orm.query('user').findMany({
+    populate: {
+      address: {
+        // select: ['id', 'name'],
+      },
+    },
+  });
 
-// const user = await orm.query('user').findMany({
-//   populate: {
-//     address: {
-//       // select: ['id', 'name'],
-//     },
-//   },
-// });
+  console.log(user);
 
-// console.log(user);
+  const article = await orm.query('article').findMany({
+    populate: {
+      category: true,
+    },
+  });
 
-// const article = await orm.query('article').findMany({
-//   populate: {
-//     category: true,
-//   },
-// });
+  console.log(article);
 
-// console.log(article);
+  await orm.query('category').findMany({
+    populate: {
+      compo: true,
+      articles: {
+        select: ['title'],
+        populate: {
+          category: {
+            select: ['title'],
+          },
+        },
+      },
+    },
+    limit: 5,
+  });
 
-// await orm.query('category').findMany({
-//   populate: {
-//     compo: true,
-//     articles: {
-//       select: ['title'],
-//       populate: {
-//         category: {
-//           select: ['title'],
-//         },
-//       },
-//     },
-//   },
-//   limit: 5,
-// });
+  await orm.query('article').findMany({
+    populate: {
+      tags: true,
+    },
+    limit: 5,
+  });
 
-// await orm.query('article').findMany({
-//   populate: {
-//     tags: true,
-//   },
-//   limit: 5,
-// });
+  await orm.query('tag').findMany({
+    populate: {
+      articles: true,
+    },
+    limit: 5,
+  });
 
-// await orm.query('tag').findMany({
-//   populate: {
-//     articles: true,
-//   },
-//   limit: 5,
-// });
+  // const articleCategory = orm.query('article').load(article, 'category', {
+  //   select: ['id', 'title'],
+  //   limit: 5,
+  //   offset: 2,
+  //   orderBy: 'title',
+  //   where: {},
+  // });
 
-// const articleCategory = orm.query('article').load(article, 'category', {
-//   select: ['id', 'title'],
-//   limit: 5,
-//   offset: 2,
-//   orderBy: 'title',
-//   where: {},
-// });
+  // const article = await orm.query('article').populate(article, {
+  //   category: true,
+  //   tags: true,
+  // });
 
-// const article = await orm.query('article').populate(article, {
-//   category: true,
-//   tags: true
-// });
-
-// await orm.query('article').findMany({
-//   limit: 5,
-//   where: {
-//     compo: {
-//       key: 'xx',
-//     },
-
-//   },
-//   populate: {
-//     category: {
-//       select: ['id', 'title'],
-//       limit: 5,
-//       offset: 2,
-//       orderBy: 'title',
-//       populate: {
-//         articles: {
-//           populate: {
-//             tags: true,
-//           },
-//         },
-//       },
-//     },
-//     compo: true,
-//   },
-//   orderBy: { compo: { key: 'DESC' } },
-// });
+  await orm.query('article').findMany({
+    limit: 5,
+    where: {
+      compos: {
+        key: 'xx',
+      },
+    },
+    populate: {
+      category: {
+        select: ['id', 'title'],
+        limit: 5,
+        offset: 2,
+        orderBy: 'title',
+        populate: {
+          articles: {
+            populate: {
+              tags: true,
+            },
+          },
+        },
+      },
+      compos: true,
+    },
+    orderBy: { compos: { key: 'DESC' } },
+  });
+};

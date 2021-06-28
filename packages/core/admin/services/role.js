@@ -1,18 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const {
-  set,
-  omit,
-  isEqual,
-  pick,
-  prop,
-  isArray,
-  isObject,
-  mapValues,
-  differenceWith,
-  differenceBy,
-} = require('lodash/fp');
+const { set, omit, pick, prop, isArray, differenceWith, differenceBy } = require('lodash/fp');
+const deepEqual = require('fast-deep-equal');
 const {
   generateTimestampCode,
   stringIncludes,
@@ -33,35 +23,17 @@ const ACTIONS = {
 
 const sanitizeRole = omit(['users', 'permissions']);
 
-const fieldsToCompare = ['action', 'subject', 'properties', 'conditions'];
+const COMPARABLE_FIELDS = ['conditions', 'properties', 'subject', 'action'];
+const pickComparableFields = pick(COMPARABLE_FIELDS);
 
-const sortDeep = data => {
-  if (isArray(data)) {
-    return data.slice(0).sort();
-  }
-
-  if (isObject(data)) {
-    return mapValues(sortDeep, data);
-  }
-
-  return data;
-};
-
-const sortPermissionProperties = permission => {
-  return Object.entries(permission.properties).reduce(
-    (acc, [name, value]) => permissionDomain.setProperty(name, sortDeep(value), acc),
-    permission
-  );
-};
-
+/**
+ * Compare two permissions
+ * @param {Permission} p1
+ * @param {Permission} p2
+ * @returns {boolean}
+ */
 const arePermissionsEqual = (p1, p2) => {
-  const permissionsFields = [p1, p2]
-    // Sort the permissions' properties to remove false negatives
-    .map(sortPermissionProperties)
-    // Only keep comparison fields
-    .map(pick(fieldsToCompare));
-
-  return isEqual(...permissionsFields);
+  return deepEqual(pickComparableFields(p1), pickComparableFields(p2));
 };
 
 /**
@@ -364,13 +336,6 @@ const assignPermissions = async (roleId, permissions = []) => {
   );
 
   const permissionsToReturn = differenceBy('id', permissionsToDelete, existingPermissions);
-
-  console.log(
-    existingPermissions.length,
-    permissionsToAdd.length,
-    permissionsToDelete.length,
-    permissionsToReturn
-  );
 
   if (permissionsToDelete.length > 0) {
     await getService('permission').deleteByIds(permissionsToDelete.map(prop('id')));
