@@ -7,6 +7,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "scripts": {
+    "prepublishOnly": "node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
     "develop": "webpack serve --config webpack.config.dev.js --progress profile",
     "develop:ce": "STRAPI_DISABLE_EE=true webpack serve --config webpack.config.dev.js --progress profile",
