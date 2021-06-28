@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { getCommonBeginning } = require('./string-formatting');
+const { getCommonPath } = require('./string-formatting');
 
 const getConfigUrls = (serverConfig, forAdminBuild = false) => {
   // Defines serverUrl value
@@ -46,13 +46,6 @@ const getConfigUrls = (serverConfig, forAdminBuild = false) => {
     new URL(adminUrl).origin === new URL(serverUrl).origin &&
     !forAdminBuild
   ) {
-    const getCommonPath = (path, ...paths)=> {
-      const [segments, ...otherSegments] = [path, ...paths].map(it=>_.split(it, '/'));
-      return _.join(
-        _.takeWhile(segments, (str, index)=>otherSegments.every(it=>it[index] === str))
-        , '/');
-    }
-
     adminPath = adminUrl.replace(getCommonPath(serverUrl, adminUrl), '');
     adminPath = `/${_.trim(adminPath, '/')}`;
   } else if (adminUrl.startsWith('http')) {
