@@ -2,7 +2,7 @@
 
 const { objectType } = require('nexus');
 
-const { utils } = require('../../types/index');
+const { utils } = require('../../types');
 
 /**
  * Build a higher level type for a content type which contains both the attributes, the ID and the metadata

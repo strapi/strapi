@@ -2,7 +2,7 @@
 
 const { objectType } = require('nexus');
 
-const { utils } = require('../../types/index');
+const { utils } = require('../../types');
 
 /**
  * Build a type definition for a content API response for a given content type

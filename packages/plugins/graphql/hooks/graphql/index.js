@@ -73,11 +73,7 @@ module.exports = strapi => {
     },
 
     initialize() {
-      const nexusSchema = strapi.plugins.graphql.services.v2
-        .generators(strapi)
-        .generateContentAPISchema();
-
-      const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
+      const schema = strapi.plugins.graphql.services.schema(strapi).generateContentAPISchema();
 
       if (_.isEmpty(schema)) {
         strapi.log.warn('The GraphQL schema has not been generated because it is empty');
@@ -103,13 +99,13 @@ module.exports = strapi => {
       const apolloServerConfig = _.get(config, 'apolloServer', {});
 
       const serverParams = {
-        schema: nexusSchema,
+        schema,
         uploads: false,
         context: ({ ctx }) => {
           // Initialize loaders for this request.
           // TODO: set loaders in the context not globally
 
-          strapi.plugins.graphql.services['data-loaders'].initializeLoader();
+          strapi.plugins.graphql.services.old['data-loaders'].initializeLoader();
 
           return {
             context: ctx,

@@ -6,7 +6,7 @@ const { objectType } = require('nexus');
 const { contentTypes } = require('@strapi/utils');
 
 const { mappers, utils: typeUtils } = require('../../types');
-const { buildAssocResolvers } = require('../../../shadow-crud');
+const { buildAssocResolvers } = require('../../old/shadow-crud');
 
 /**
  * @typedef TypeBuildersOptions

@@ -3,9 +3,9 @@
 const { extendType } = require('nexus');
 const { set } = require('lodash/fp');
 
-const { buildQuery } = require('../../../../resolvers-builder');
-const { toSingular, toPlural } = require('../../../../naming');
-const { actionExists } = require('../../../../utils');
+const { buildQuery } = require('../../../old/resolvers-builder');
+const { toSingular, toPlural } = require('../../../old/naming');
+const { actionExists } = require('../../../old/utils');
 const { utils, mappers } = require('../../../types');
 
 const { args } = require('../../../types');

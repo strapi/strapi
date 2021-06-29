@@ -90,4 +90,6 @@ const createTypeRegistry = () => {
   };
 };
 
-module.exports = { createTypeRegistry };
+module.exports = {
+  create: createTypeRegistry,
+};

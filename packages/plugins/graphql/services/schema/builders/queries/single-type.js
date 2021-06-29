@@ -2,9 +2,9 @@
 
 const { extendType } = require('nexus');
 
-const { buildQuery } = require('../../../../resolvers-builder');
-const { toSingular } = require('../../../../naming');
-const { actionExists } = require('../../../../utils');
+const { buildQuery } = require('../../../old/resolvers-builder');
+const { toSingular } = require('../../../old/naming');
+const { actionExists } = require('../../../old/utils');
 
 const { args } = require('../../../types');
 

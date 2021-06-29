@@ -7,9 +7,10 @@ const { makeSchema, unionType, fieldAuthorizePlugin } = require('nexus');
 const createBuilders = require('../builders');
 const { utils, scalars, internals } = require('../../types');
 
-const { createTypeRegistry } = require('../type-registry');
+const { create: createTypeRegistry } = require('../../type-registry');
 
 module.exports = strapi => {
+  // todo[v4]: Get the service directly with something like strapi.plugin().service()
   const registry = createTypeRegistry();
   const builders = createBuilders({ strapi, registry });
 
@@ -276,8 +277,6 @@ module.exports = strapi => {
 
     // Generate and register polymorphic types' definitions
     registerMorphTypes(contentTypes);
-
-    console.log(registry.definitions.filter(d => !d));
 
     // Return a brand new Nexus schema
     return makeSchema({

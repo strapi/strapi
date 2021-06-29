@@ -2,7 +2,7 @@
 
 const { camelCase, propEq, upperFirst } = require('lodash/fp');
 
-const { toSingular } = require('../../naming');
+const { toSingular } = require('../old/naming');
 const { STRAPI_SCALARS } = require('./constants');
 
 /**
