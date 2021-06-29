@@ -131,9 +131,11 @@ const getComponentNameFromAttribute = attribute => {
  * @return {string}
  */
 const getDynamicZoneName = (contentType, attributeName) => {
-  const { modelName } = contentType;
+  const typeName = getTypeName(contentType);
+  const dzName = upperFirst(camelCase(attributeName));
+  const suffix = 'DynamicZone';
 
-  return `${modelName}${upperFirst(camelCase(attributeName))}DynamicZone`;
+  return `${typeName}${dzName}${suffix}`;
 };
 
 /**
