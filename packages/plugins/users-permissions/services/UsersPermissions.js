@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const request = require('request');
+const { getService } = require('../utils');
 
 /**
  * UsersPermissions.js service
@@ -252,16 +253,19 @@ module.exports = {
   },
 
   async updatePermissions() {
-    const { primaryKey } = strapi.query('permission', 'users-permissions');
-    const roles = await strapi.query('role', 'users-permissions').find({}, []);
-    const rolesMap = roles.reduce((map, role) => ({ ...map, [role[primaryKey]]: role }), {});
+    const roles = await strapi.query('plugins::users-permissions.role').findMany();
+
+    const rolesMap = _.groupBy(roles, 'id');
 
     const dbPermissions = await strapi
-      .query('permission', 'users-permissions')
-      .find({ _limit: -1 });
-    let permissionsFoundInDB = dbPermissions.map(
-      p => `${p.type}.${p.controller}.${p.action}.${p.role[primaryKey]}`
-    );
+      .query('plugins::users-permissions.permission')
+      .findMany({ populate: ['role'] });
+
+    let permissionsFoundInDB = dbPermissions.map(permission => {
+      const { type, controller, action, role } = permission;
+      return `${type}.${controller}.${action}.${role.id}`;
+    });
+
     permissionsFoundInDB = _.uniq(permissionsFoundInDB);
 
     // Aggregate first level actions.
@@ -292,12 +296,13 @@ module.exports = {
 
     const actionsFoundInFiles = appActions.concat(pluginsActions);
 
-    // create permissions for each role
-    let permissionsFoundInFiles = actionsFoundInFiles.reduce(
-      (acc, action) => [...acc, ...roles.map(role => `${action}.${role[primaryKey]}`)],
-      []
-    );
-    permissionsFoundInFiles = _.uniq(permissionsFoundInFiles);
+    const permissionsFoundInFiles = [];
+
+    for (const role of roles) {
+      actionsFoundInFiles.forEach(action => {
+        permissionsFoundInFiles.push(`${action}.${role.id}`);
+      });
+    }
 
     // Compare to know if actions have been added or removed from controllers.
     if (!_.isEqual(permissionsFoundInDB.sort(), permissionsFoundInFiles.sort())) {
@@ -311,49 +316,55 @@ module.exports = {
       const toRemove = _.difference(permissionsFoundInDB, permissionsFoundInFiles).map(splitted);
       const toAdd = _.difference(permissionsFoundInFiles, permissionsFoundInDB).map(splitted);
 
-      const query = strapi.query('permission', 'users-permissions');
+      const query = strapi.query('plugins::users-permissions.permission');
 
       // Execute request to update entries in database for each role.
       await Promise.all(
         toAdd.map(permission =>
           query.create({
-            type: permission.type,
-            controller: permission.controller,
-            action: permission.action,
-            enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
-            policy: '',
-            role: permission.roleId,
+            data: {
+              type: permission.type,
+              controller: permission.controller,
+              action: permission.action,
+              enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
+              policy: '',
+              role: permission.roleId,
+            },
           })
         )
       );
 
       await Promise.all(
         toRemove.map(permission => {
-          const { type, controller, action, roleId: role } = permission;
-          return query.delete({ type, controller, action, role });
+          const { type, controller, action, roleId } = permission;
+          return query.delete({ type, controller, action, role: { id: roleId } });
         })
       );
     }
   },
 
   async initialize() {
-    const roleCount = await strapi.query('role', 'users-permissions').count();
+    const roleCount = await strapi.query('plugins::users-permissions.role').count();
 
     if (roleCount === 0) {
-      await strapi.query('role', 'users-permissions').create({
-        name: 'Authenticated',
-        description: 'Default role given to authenticated user.',
-        type: 'authenticated',
+      await strapi.query('plugins::users-permissions.role').create({
+        data: {
+          name: 'Authenticated',
+          description: 'Default role given to authenticated user.',
+          type: 'authenticated',
+        },
       });
 
-      await strapi.query('role', 'users-permissions').create({
-        name: 'Public',
-        description: 'Default role given to unauthenticated user.',
-        type: 'public',
+      await strapi.query('plugins::users-permissions.role').create({
+        data: {
+          name: 'Public',
+          description: 'Default role given to unauthenticated user.',
+          type: 'public',
+        },
       });
     }
 
-    return this.updatePermissions();
+    return getService('userspermissions').updatePermissions();
   },
 
   async updateRole(roleID, body) {

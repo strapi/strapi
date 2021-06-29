@@ -25,10 +25,7 @@ const cleanTestApp = appName => {
  */
 const generateTestApp = async ({ appName, database }) => {
   const scope = {
-    database: {
-      settings: database,
-      options: {},
-    },
+    database,
     rootPath: path.resolve(appName),
     name: appName,
     // disable quickstart run app after creation

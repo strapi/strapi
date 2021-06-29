@@ -219,7 +219,7 @@ describe('Role CRUD End to End', () => {
             newPermissions
               .slice(3, 6)
               .map(p => ({ ...p, conditions: [] }))
-              .map(expect.objectContaining)
+              .map(perm => expect.objectContaining(perm))
           ),
         });
 

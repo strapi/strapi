@@ -185,9 +185,24 @@ const findOne = async (where = {}, populate) => {
  * @param query
  * @returns {Promise<user>}
  */
-// FIXME: to impl
 const findPage = async query => {
-  return strapi.query('strapi::user').findPage(query);
+  const { page = 1, pageSize = 10 } = query;
+
+  const limit = pageSize;
+  const offset = (page - 1) * pageSize;
+  const [results, total] = await strapi
+    .query('strapi::user')
+    .findWithCount({ where: query.filters, limit, offset });
+
+  return {
+    results,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      pageCount: Math.ceil(total / pageSize),
+    },
+  };
 };
 
 /** Search for many users (paginated)
@@ -196,7 +211,23 @@ const findPage = async query => {
  */
 // FIXME: to impl
 const searchPage = async query => {
-  return strapi.query('strapi::user').searchPage(query);
+  const { page = 1, pageSize = 10 } = query;
+
+  const limit = pageSize;
+  const offset = (page - 1) * pageSize;
+  const [results, total] = await strapi
+    .query('strapi::user')
+    .findWithCount({ where: query.filters, limit, offset });
+
+  return {
+    results,
+    pagination: {
+      page,
+      pageSize,
+      total,
+      pageCount: Math.ceil(total / pageSize),
+    },
+  };
 };
 
 /** Delete a user
@@ -210,6 +241,10 @@ const deleteById = async id => {
     populate: ['roles'],
   });
 
+  if (!userToDelete) {
+    return null;
+  }
+
   if (userToDelete) {
     if (userToDelete.roles.some(r => r.code === SUPER_ADMIN_CODE)) {
       const superAdminRole = await strapi.admin.services.role.getSuperAdminWithUsersCount();
@@ -220,8 +255,6 @@ const deleteById = async id => {
         );
       }
     }
-  } else {
-    return null;
   }
 
   return strapi.query('strapi::user').delete({ where: { id } });
@@ -248,9 +281,16 @@ const deleteByIds = async ids => {
     );
   }
 
-  return strapi.query('strapi::user').delete({
-    where: { id: ids },
-  });
+  const deletedUsers = [];
+  for (const id of ids) {
+    const deletedUser = await strapi.query('strapi::user').delete({
+      where: { id },
+    });
+
+    deletedUsers.push(deletedUser);
+  }
+
+  return deletedUsers;
 };
 
 /** Count the users that don't have any associated roles

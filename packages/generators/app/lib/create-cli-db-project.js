@@ -11,7 +11,7 @@ module.exports = async scope => {
   console.log('Creating a project from the database CLI arguments.');
   await trackUsage({ event: 'didChooseCustomDatabase', scope });
 
-  const client = scope.database.settings.client;
+  const client = scope.database.client;
   const configuration = {
     client,
     connection: merge({}, defaultConfigs[client] || {}, scope.database),

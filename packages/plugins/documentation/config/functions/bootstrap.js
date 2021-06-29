@@ -4,8 +4,35 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
+// Add permissions
+const RBAC_ACTIONS = [
+  {
+    section: 'plugins',
+    displayName: 'Access the Documentation',
+    uid: 'read',
+    pluginName: 'documentation',
+  },
+  {
+    section: 'plugins',
+    displayName: 'Update and delete',
+    uid: 'settings.update',
+    subCategory: 'settings',
+    pluginName: 'documentation',
+  },
+  {
+    section: 'plugins',
+    displayName: 'Regenerate',
+    uid: 'settings.regenerate',
+    subCategory: 'settings',
+    pluginName: 'documentation',
+  },
+];
+
 module.exports = async () => {
+  await strapi.admin.services.permission.actionProvider.registerMany(RBAC_ACTIONS);
+
   return;
+
   // Check if the plugin users-permissions is installed because the documentation needs it
   if (Object.keys(strapi.plugins).indexOf('users-permissions') === -1) {
     throw new Error(
@@ -111,30 +138,4 @@ module.exports = async () => {
       'utf8'
     );
   }
-
-  // Add permissions
-  const actions = [
-    {
-      section: 'plugins',
-      displayName: 'Access the Documentation',
-      uid: 'read',
-      pluginName: 'documentation',
-    },
-    {
-      section: 'plugins',
-      displayName: 'Update and delete',
-      uid: 'settings.update',
-      subCategory: 'settings',
-      pluginName: 'documentation',
-    },
-    {
-      section: 'plugins',
-      displayName: 'Regenerate',
-      uid: 'settings.regenerate',
-      subCategory: 'settings',
-      pluginName: 'documentation',
-    },
-  ];
-
-  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

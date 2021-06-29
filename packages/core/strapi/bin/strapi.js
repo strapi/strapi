@@ -89,13 +89,11 @@ program
   .option('--quickstart', 'Quickstart app creation')
   .option('--dbclient <dbclient>', 'Database client')
   .option('--dbhost <dbhost>', 'Database host')
-  .option('--dbsrv <dbsrv>', 'Database srv')
   .option('--dbport <dbport>', 'Database port')
   .option('--dbname <dbname>', 'Database name')
   .option('--dbusername <dbusername>', 'Database username')
   .option('--dbpassword <dbpassword>', 'Database password')
   .option('--dbssl <dbssl>', 'Database SSL')
-  .option('--dbauth <dbauth>', 'Authentication Database')
   .option('--dbfile <dbfile>', 'Database file path for sqlite')
   .option('--dbforce', 'Overwrite database content if any')
   .description('Create a new application')
@@ -165,7 +163,6 @@ program
   .command('generate:service <id>')
   .option('-a, --api <api>', 'API name')
   .option('-p, --plugin <api>', 'plugin name')
-  .option('-t, --tpl <template>', 'template name')
   .description('Generate a service for an API')
   .action(getLocalScript('generate'));
 

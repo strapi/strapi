@@ -20,12 +20,10 @@ class Database {
     // this.metadata.validate();
 
     // this.connector = resolveConnector(this.config);
-
-    this.connection = knex(config.connection);
+    this.config = config;
     this.dialect = getDialect(this);
 
     this.schema = createSchemaProvider(this);
-
     // TODO: migrations -> allow running them through cli before startup
 
     this.entityManager = createEntityManager(this);
@@ -33,6 +31,7 @@ class Database {
 
   async initialize() {
     await this.dialect.initialize();
+    this.connection = knex(this.config.connection);
   }
 
   query(uid) {

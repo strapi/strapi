@@ -297,7 +297,7 @@ const createQueryBuilder = (uid, db) => {
           results = Array.isArray(rows) ? rows.map(row => fromRow(meta, row)) : fromRow(meta, rows);
         }
 
-        if (state.populate) {
+        if (state.populate && !_.isNil(results)) {
           // TODO: hanlde populate
           await helpers.applyPopulate(_.castArray(results), state.populate, { qb: this, uid, db });
         }

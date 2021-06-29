@@ -367,7 +367,11 @@ class Strapi {
       models: Database.transformContentTypes(contentTypes),
     });
 
-    await this.db.schema.sync();
+    if (process.env.NODE_ENV === 'test') {
+      await this.db.schema.reset();
+    } else {
+      await this.db.schema.sync();
+    }
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     // await this.db.initialize();

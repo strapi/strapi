@@ -44,9 +44,7 @@ const createJoinColum = (metadata, { attribute /*attributeName, meta */ }) => {
 const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   const targetMeta = metadata.get(attribute.target);
 
-  const joinTableName = _.snakeCase(
-    `${meta.tableName}_${targetMeta.tableName}_${attributeName}_links`
-  );
+  const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
 
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
   const inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
@@ -71,14 +69,14 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     },
     foreignKeys: [
       {
-        name: `${joinTableName}_join_column_fk`,
+        name: `${joinTableName}_fk`,
         columns: [joinColumnName],
         referencedColumns: ['id'],
         referencedTable: meta.tableName,
         onDelete: 'CASCADE',
       },
       {
-        name: `${joinTableName}_inverse_join_column_fk`,
+        name: `${joinTableName}_inv_fk`,
         columns: [inverseJoinColumnName],
         referencedColumns: ['id'],
         referencedTable: targetMeta.tableName,

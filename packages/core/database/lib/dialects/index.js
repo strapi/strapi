@@ -1,5 +1,8 @@
 'use strict';
 
+const path = require('path');
+const fse = require('fs-extra');
+
 const errors = require('../errors');
 
 class Dialect {
@@ -48,9 +51,9 @@ class PostgresDialect extends Dialect {
 
 class MysqlDialect extends Dialect {
   initialize() {
-    this.db.connection.supportBigNumbers = true;
-    this.db.connection.bigNumberStrings = true;
-    this.db.connection.typeCast = (field, next) => {
+    this.db.config.connection.connection.supportBigNumbers = true;
+    this.db.config.connection.connection.bigNumberStrings = true;
+    this.db.config.connection.connection.typeCast = (field, next) => {
       if (field.type == 'DECIMAL' || field.type === 'NEWDECIMAL') {
         var value = field.string();
         return value === null ? null : Number(value);
@@ -77,9 +80,16 @@ class SqliteDialect extends Dialect {
   async initialize() {
     // Create the directory if it does not exist.
 
-    // options.connection.filename = path.resolve(strapi.config.appPath, options.connection.filename);
+    // TODO: get strapi.dir from somewhere else
 
-    await this.db.connection.raw('PRAGMA foreign_keys = ON');
+    this.db.config.connection.connection.filename = path.resolve(
+      strapi.dir,
+      this.db.config.connection.connection.filename
+    );
+
+    const dbDir = path.dirname(this.db.config.connection.connection.filename);
+
+    await fse.ensureDir(dbDir);
   }
 
   transformErrors(error) {
@@ -95,7 +105,7 @@ class SqliteDialect extends Dialect {
 }
 
 const getDialect = db => {
-  const { client } = db.connection.client.config;
+  const { client } = db.config.connection;
 
   switch (client) {
     case 'postgres':
@@ -105,7 +115,7 @@ const getDialect = db => {
     case 'sqlite':
       return new SqliteDialect(db);
     default:
-      return new Dialect(db);
+      throw new Error(`Unknow dialect ${client}`);
   }
 };
 

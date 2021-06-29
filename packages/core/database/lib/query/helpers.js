@@ -230,6 +230,7 @@ const processWhere = (where, ctx, depth = 0) => {
 
     if (types.isScalar(attribute.type)) {
       // TODO: convert attribute name to column name
+      // TODO: cast to DB type
       filters[`${alias || qb.alias}.${key}`] = processNested(value, ctx);
       continue;
     }

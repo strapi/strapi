@@ -113,7 +113,7 @@ const getColumnType = attribute => {
       };
     }
     case 'json': {
-      return { type: 'json' };
+      return { type: 'jsonb' };
     }
     case 'enumeration': {
       return {
