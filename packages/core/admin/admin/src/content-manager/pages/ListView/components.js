@@ -1,44 +1,8 @@
 import styled from 'styled-components';
-import { Button, FilterIcon as Filter } from '@strapi/helper-plugin';
 import RemoveIcon from '../../assets/images/icon-cross-blue.svg';
 
 const Wrapper = styled.div`
   padding-top: 1px;
-`;
-
-const FilterIcon = styled(Filter)`
-  padding: 0 !important;
-  margin: auto !important;
-  > g {
-    stroke: #282b2c;
-  }
-`;
-
-const AddFilterCta = styled(Button)`
-  display: flex;
-  height: 30px;
-  margin-right: 10px;
-  padding: 0 10px;
-  text-align: center;
-  background-color: #ffffff;
-  border: 1px solid #e3e9f3;
-  border-radius: 2px;
-  line-height: 28px;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: Lato;
-  -webkit-font-smoothing: antialiased;
-  cursor: pointer;
-  &:hover {
-    background: #f7f8f8;
-  }
-  &:focus,
-  &:active {
-    outline: 0;
-  }
-  > span {
-    margin-left: 10px;
-  }
 `;
 
 const Img = styled.img`
@@ -124,15 +88,4 @@ const Remove = styled.span`
   }
 `;
 
-export {
-  AddFilterCta,
-  FilterIcon,
-  FooterWrapper,
-  Img,
-  Label,
-  SelectWrapper,
-  FilterWrapper,
-  Separator,
-  Remove,
-  Wrapper,
-};
+export { FooterWrapper, Img, Label, SelectWrapper, FilterWrapper, Separator, Remove, Wrapper };
