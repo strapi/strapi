@@ -30,6 +30,7 @@ function parseShorthand(starter) {
  */
 async function getDefaultBranch(repo) {
   const response = await fetch(`https://api.github.com/repos/${repo}`);
+
   if (!response.ok) {
     stopProcess(
       `Could not find the starter information for ${chalk.yellow(
@@ -80,9 +81,9 @@ async function getRepoInfo(starter) {
 async function downloadGitHubRepo(repoInfo, tmpDir) {
   const { fullName, branch, usedShorthand } = repoInfo;
 
-  // Download from GitHub
   const codeload = `https://codeload.github.com/${fullName}/tar.gz/${branch}`;
   const response = await fetch(codeload);
+
   if (!response.ok) {
     const message = usedShorthand ? `using the shorthand` : `using the url`;
     stopProcess(`Could not download the repository ${message}: ${chalk.yellow(fullName)}.`);
