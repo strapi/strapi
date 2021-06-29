@@ -54,9 +54,10 @@ const AttributeFilter = ({ contentType, slug, metaData }) => {
           /**
            * Pushing the filter in the URL for later refreshes or fast access
            */
-          const _where = query._where || [];
+          const actualQuery = query || {};
+          const _where = actualQuery._where || [];
           _where.push(newFilter);
-          setQuery({ ...query, _where, page: 1 });
+          setQuery({ ...actualQuery, _where, page: 1 });
 
           /**
            * Tracking stuff

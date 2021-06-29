@@ -51,6 +51,8 @@ const AuthenticatedApp = () => {
     return <div>error...</div>;
   }
 
+  console.log('lol', permissions);
+
   return (
     <AppInfosContext.Provider
       value={{ ...appInfos, latestStrapiReleaseTag: tag_name, shouldUpdateStrapi }}
