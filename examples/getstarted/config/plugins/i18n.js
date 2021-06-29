@@ -1,4 +1,1 @@
-module.exports = ({ env }) => ({
-  pouet: 'maybe',
-  souper: 'oui',
-});
+module.exports = ({ env }) => ({});

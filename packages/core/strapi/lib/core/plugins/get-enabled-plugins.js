@@ -5,6 +5,7 @@ const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
 const { nameToSlug } = require('@strapi/utils');
+const loadConfigFile = require('../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
 
@@ -36,7 +37,7 @@ const toDetailedDeclaration = declaration => {
 
 const getEnabledPlugins = async strapi => {
   const installedPlugins = {};
-  for (const dep in strapi.config.info.dependencies) {
+  for (const dep in strapi.config.get('info.dependencies', {})) {
     const packagePath = join(dep, 'package.json');
     const packageInfo = require(packagePath);
 
@@ -50,7 +51,8 @@ const getEnabledPlugins = async strapi => {
   }
 
   const declaredPlugins = {};
-  _.forEach(strapi.config.plugins, (declaration, pluginName) => {
+  const userPluginsConfig = loadConfigFile(join(strapi.dir, 'config', 'plugins.js'));
+  _.forEach(userPluginsConfig, (declaration, pluginName) => {
     const cleanPluginName = nameToSlug(pluginName);
     declaredPlugins[cleanPluginName] = toDetailedDeclaration(declaration);
   });

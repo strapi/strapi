@@ -15,6 +15,6 @@ module.exports = (/* strapi, config */) => {
     policies: {},
     middlewares: {},
     contentTypes: [],
-    hooks: {},
+    // hooks: {},
   };
 };

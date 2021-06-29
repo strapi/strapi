@@ -4,7 +4,16 @@ const { cloneDeep } = require('lodash/fp');
 const { validateContentTypeDefinition } = require('./validator');
 
 const createContentType = (definition, { apiName, pluginName } = {}) => {
-  validateContentTypeDefinition(definition);
+  try {
+    validateContentTypeDefinition(definition);
+  } catch (e) {
+    throw new Error(
+      `
+Content Type Definition is invalid in ${apiName || pluginName || 'the core'}.
+${e.errors}
+    `.trim()
+    );
+  }
 
   const createdContentType = cloneDeep(definition);
 

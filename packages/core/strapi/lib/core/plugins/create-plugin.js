@@ -3,11 +3,10 @@
 const { join } = require('path');
 const { defaultsDeep } = require('lodash/fp');
 const { env } = require('@strapi/utils');
+const createServiceProvider = require('../base-providers/service-provider');
+const createContentTypeProvider = require('../base-providers/content-type-provider');
+const createPolicyProvider = require('../base-providers/policy-provider');
 const { validateStrapiServer, validateContentTypesUnicity } = require('./validation');
-const createConfigProvider = require('./config-provider');
-const createServiceProvider = require('./service-provider');
-const createContentTypeProvider = require('./content-type-provider');
-const createPolicyProvider = require('./policy-provider');
 
 const defaultPlugin = {
   bootstrap: () => {},
@@ -22,25 +21,41 @@ const defaultPlugin = {
   services: () => {},
   policies: {},
   middlewares: {},
-  hooks: {},
   contentTypes: [],
 };
 
-const createPlugin = async (strapi, name, pluginDefinition) => {
+const registerPluginConfig = async (pluginName, userPluginConfig, pluginConfig, strapi) => {
+  const config = defaultsDeep(pluginConfig.default, userPluginConfig);
+  try {
+    await pluginConfig.validator(pluginConfig);
+  } catch (e) {
+    throw new Error(`Error regarding ${pluginName} config: ${e.message}`);
+  }
+
+  strapi.config.set(`plugins.${pluginName}`, config);
+};
+
+const createPlugin = async (strapi, name, pluginDefinition, userPluginConfig) => {
   const loadPluginServer = require(join(pluginDefinition.pathToPlugin, 'strapi-server.js'));
   const pluginServer = await loadPluginServer({ env });
   const cleanPluginServer = defaultsDeep(defaultPlugin, pluginServer);
 
-  validateStrapiServer(cleanPluginServer);
+  try {
+    validateStrapiServer(cleanPluginServer);
+  } catch (e) {
+    throw new Error(
+      `
+strapi-server.js is invalid for plugin ${name}.
+${e.errors.join('\n')}
+    `.trim()
+    );
+  }
 
-  const configProvider = await createConfigProvider(
-    name,
-    cleanPluginServer.config,
-    pluginDefinition.userConfig
-  );
-  const contentTypeProvider = await createContentTypeProvider(name, cleanPluginServer.contentTypes);
-  const policyProvider = await createPolicyProvider(name, cleanPluginServer.policies);
-  const serviceProvider = await createServiceProvider(cleanPluginServer.services, { strapi });
+  registerPluginConfig(name, userPluginConfig, cleanPluginServer.config, strapi);
+
+  const contentTypeProvider = createContentTypeProvider(cleanPluginServer.contentTypes, { name });
+  const policyProvider = createPolicyProvider(cleanPluginServer.policies);
+  const serviceProvider = createServiceProvider(cleanPluginServer.services, { strapi });
 
   validateContentTypesUnicity(contentTypeProvider.getAll());
 
@@ -48,10 +63,12 @@ const createPlugin = async (strapi, name, pluginDefinition) => {
     bootstrap: cleanPluginServer.bootstrap,
     register: cleanPluginServer.register,
     destroy: cleanPluginServer.destroy,
-    config: configProvider,
-    service: serviceProvider,
-    policy: policyProvider,
-    contentType: contentTypeProvider,
+    service: (...args) => this.services.get(...args),
+    services: serviceProvider,
+    contentType: (...args) => this.contentTypes.get(...args),
+    contentTypes: contentTypeProvider,
+    policy: (...args) => policyProvider.get(...args),
+    policies: policyProvider,
   };
 };
 

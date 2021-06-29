@@ -1,29 +1,125 @@
 'use strict';
 
-// const { reduce } = require('lodash/fp');
+const { join } = require('path');
+const { flatMap, getOr, mapValues, reduce, split } = require('lodash/fp');
+const loadConfigFile = require('../app-configuration/load-config-file');
 const getEnabledPlugins = require('./get-enabled-plugins');
 const createPlugin = require('./create-plugin');
 
-const createPluginProvider = async strapi => {
-  const enabledPlugins = await getEnabledPlugins(strapi);
+const parseUID = split('.');
+
+const createPluginProvider = strapi => {
+  let loaded = false;
   const plugins = {};
-  for (const pluginName in enabledPlugins) {
-    const enabledPlugin = enabledPlugins[pluginName];
-    plugins[pluginName] = await createPlugin(strapi, pluginName, enabledPlugin);
-  }
+  const userPluginsConfig = loadConfigFile(join(strapi.dir, 'config', 'plugins.js'));
+  const pluginProvider = {};
 
-  const provider = pluginName => provider.get(pluginName);
-
-  Object.assign(provider, {
+  Object.assign(pluginProvider, {
+    async load() {
+      if (loaded) {
+        throw new Error('This plugin provider has already been loaded.');
+      }
+      const enabledPlugins = await getEnabledPlugins(strapi);
+      for (const pluginName in enabledPlugins) {
+        const enabledPlugin = enabledPlugins[pluginName];
+        const userPluginConfig = getOr({}, `${pluginName}.config`, userPluginsConfig);
+        plugins[pluginName] = await createPlugin(
+          strapi,
+          pluginName,
+          enabledPlugin,
+          userPluginConfig
+        );
+      }
+      loaded = true;
+    },
     get(pluginName) {
       return plugins[pluginName];
     },
     getAll() {
       return Object.values(plugins);
     },
+    async bootstrap() {
+      for (const plugin of this.getAll()) {
+        await plugin.bootstrap();
+      }
+    },
+    async register() {
+      for (const plugin of this.getAll()) {
+        await plugin.register();
+      }
+    },
+    async destroy() {
+      for (const plugin of this.getAll()) {
+        await plugin.destroy();
+      }
+    },
+    service: (...args) => this.services.get(...args),
+    services: {
+      has(uid) {
+        const [pluginName, service] = parseUID(uid);
+        const plugin = pluginProvider.get(pluginName);
+        return plugin && plugin.services.has(service);
+      },
+      get(uid) {
+        const [pluginName, service] = parseUID(uid);
+        const plugin = pluginProvider.get(pluginName);
+        return plugin ? plugin.services.get(service) : undefined;
+      },
+      getAll() {
+        return mapValues(plugin => plugin.services.getAll())(plugins);
+      },
+      get size() {
+        return reduce((count, plugin) => count + plugin.size(), 0)(plugins);
+      },
+    },
+    contentType: (...args) => this.contentTypes.get(...args),
+    contentTypes: {
+      has(uid) {
+        const [pluginName, contentType] = parseUID(uid);
+        const plugin = pluginProvider.get(pluginName);
+
+        return plugin && plugin.contentTypes.has(contentType);
+      },
+      get(uid) {
+        const [pluginName, contentType] = parseUID(uid);
+        const plugin = pluginProvider.get(pluginName);
+
+        return plugin ? plugin.contentTypes.get(contentType) : undefined;
+      },
+      getAll() {
+        return flatMap(p => p.contentTypes.getAll(), plugins);
+      },
+      forEach(fn) {
+        this.getAll().forEach(fn);
+      },
+      get size() {
+        return this.getAll().length;
+      },
+    },
+    policy: (...args) => this.policies.get(...args),
+    policies: {
+      has(uid) {
+        const [pluginName, policy] = parseUID(uid);
+        const plugin = pluginProvider.get(pluginName);
+
+        return plugin && plugin.policies.has(policy);
+      },
+      get(uid) {
+        const [pluginName, policy] = parseUID(uid);
+        const plugin = pluginProvider.get(pluginName);
+
+        return plugin ? plugin.policies.get(policy) : undefined;
+      },
+      getAll() {
+        return mapValues(plugin => plugin.policies.getAll())(plugins);
+      },
+      get size() {
+        return this.keys().length;
+      },
+    },
   });
 
-  return provider;
+  return pluginProvider;
 };
 
 module.exports = createPluginProvider;

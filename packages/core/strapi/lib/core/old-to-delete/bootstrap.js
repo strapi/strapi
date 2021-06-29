@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const { getConfigUrls, contentTypes: contentTypesUtils } = require('@strapi/utils');
 
-const { createCoreApi } = require('../core-api');
+const { createCoreApi } = require('../../core-api');
 
 module.exports = function(strapi) {
   // Set connections.

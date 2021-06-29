@@ -19,7 +19,7 @@ const strapiServerSchema = yup
       .isFunction()
       .required(),
     config: yup.object().required(),
-    routes: yup.array().requiredAllowEmpty(), // may be removed later
+    routes: yup.array().required(), // may be removed later
     controllers: yup.object().required(), // may be removed later
     services: yup
       .mixed()
@@ -27,8 +27,7 @@ const strapiServerSchema = yup
       .required(),
     policies: yup.object().required(),
     middlewares: yup.object().required(), // may be removed later
-    hooks: yup.object().required(), // may be removed later
-    contentTypes: yup.array().requiredAllowEmpty(),
+    contentTypes: yup.array().required(),
   })
   .noUnknown();
 

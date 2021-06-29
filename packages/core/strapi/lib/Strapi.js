@@ -28,7 +28,9 @@ const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
-const createPluginProvider = require('./core/plugins/plugin-provider');
+// const createPluginProvider = require('./core/plugins/plugin-provider');
+const createContainer = require('./core/container');
+const createConfigProvider = require('./core/base-providers/config-provider');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -59,14 +61,11 @@ class Strapi {
 
     this.admin = {};
     this.plugins = {};
-    this.config = loadConfiguration(this.dir, opts);
+
+    const appConfig = loadConfiguration(this.dir, opts);
+    this.config = createConfigProvider(appConfig);
+    this.container = createContainer(this);
     this.app.proxy = this.config.get('server.proxy');
-
-    // this.pluginProvider = new CreatePluginProvider();
-    // this.plugin = pluginProvider.get
-
-    // this.pluginProvider.load() à mettre dans la fonction load
-    //
 
     // Logger.
     const loggerUserConfiguration = this.config.get('logger', {});
@@ -335,13 +334,7 @@ class Strapi {
       }
     });
 
-    try {
-      const pluginProvider = await createPluginProvider(this);
-      this.plugin = pluginProvider;
-      console.log(this.plugin('i18n').contentType.getAll());
-    } catch (e) {
-      console.log(e);
-    }
+    await this.container.load();
 
     // const modules = await loadModules(this);
 
