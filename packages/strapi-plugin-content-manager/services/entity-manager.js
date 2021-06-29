@@ -61,7 +61,10 @@ module.exports = {
   },
 
   findWithRelationCounts(params, model, populate) {
-    return strapi.entityService.findWithRelationCounts({ params, populate }, { model });
+    return strapi.entityService.findWithRelationCounts(
+      { params, populate: forceAutoPopulate(populate, model) },
+      { model }
+    );
   },
 
   search(params, model, populate) {
