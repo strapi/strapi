@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { useUserPermissions, request, useNotification } from '@strapi/helper-plugin';
+import { useRBAC, request, useNotification } from '@strapi/helper-plugin';
 import { getRequestURL } from '../../utils';
 import reducer, { initialState } from './reducer';
 
 const useUserForm = (endPoint, permissions) => {
-  const { isLoading: isLoadingForPermissions, allowedActions } = useUserPermissions(permissions);
+  const { isLoading: isLoadingForPermissions, allowedActions } = useRBAC(permissions);
   const [{ formErrors, initialData, isLoading, modifiedData }, dispatch] = useReducer(
     reducer,
     initialState

@@ -43,6 +43,28 @@ module.exports = () => {
 
   return {
     ...config,
+    snapshot: {
+      managedPaths: [
+        path.resolve(__dirname, '../content-manager'),
+        path.resolve(__dirname, '../content-type-builder'),
+        path.resolve(__dirname, '../upload'),
+        path.resolve(__dirname, '../helper-plugin'),
+      ],
+      buildDependencies: {
+        hash: true,
+        timestamp: true,
+      },
+      module: {
+        timestamp: true,
+      },
+      resolve: {
+        timestamp: true,
+      },
+      resolveBuildDependencies: {
+        hash: true,
+        timestamp: true,
+      },
+    },
     devServer: {
       port: 4000,
       clientLogLevel: 'none',

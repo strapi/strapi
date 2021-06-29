@@ -1,17 +1,16 @@
-import React from 'react';
 import get from 'lodash/get';
 import * as yup from 'yup';
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
-import Initializer from './containers/Initializer';
-import SettingsPage from './containers/SettingsPage';
+import Initializer from './components/Initializer';
+import SettingsPage from './pages/SettingsPage';
 import LocalePicker from './components/LocalePicker';
 import middlewares from './middlewares';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import trads from './translations';
 import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
@@ -35,29 +34,23 @@ export default {
       initializer: Initializer,
       isReady: false,
       isRequired: pluginPkg.strapi.required || false,
-      mainComponent: null,
       name,
       pluginLogo,
-      settings: {
-        global: {
-          links: [
-            {
-              title: {
-                id: getTrad('plugin.name'),
-                defaultMessage: 'Internationalization',
-              },
-              name: 'internationalization',
-              to: '/settings/internationalization',
-              Component: () => <SettingsPage />,
-              permissions: pluginPermissions.accessMain,
-            },
-          ],
-        },
-      },
-      trads,
     });
   },
   boot(app) {
+    // Add the settings link
+    app.addSettingsLink('global', {
+      intlLabel: {
+        id: getTrad('plugin.name'),
+        defaultMessage: 'Internationalization',
+      },
+      id: 'internationalization',
+      to: '/settings/internationalization',
+      Component: SettingsPage,
+      permissions: pluginPermissions.accessMain,
+    });
+
     const ctbPlugin = app.getPlugin('content-type-builder');
     const cmPlugin = app.getPlugin('content-manager');
 
@@ -165,5 +158,28 @@ export default {
         },
       });
     }
+  },
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "i18n-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: prefixPluginTranslations(data, pluginId),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
   },
 };

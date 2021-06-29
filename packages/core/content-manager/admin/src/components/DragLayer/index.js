@@ -1,6 +1,6 @@
 import React from 'react';
 import { useDragLayer } from 'react-dnd';
-import LayoutDndProvider from '../../containers/LayoutDndProvider';
+import LayoutDndProvider from '../LayoutDndProvider';
 
 import ItemTypes from '../../utils/ItemTypes';
 

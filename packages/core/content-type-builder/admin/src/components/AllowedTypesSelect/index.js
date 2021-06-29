@@ -1,13 +1,13 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { upperFirst } from 'lodash';
 import MenuList from './MenuList';
 import getTrad from '../../utils/getTrad';
 
 const AllowedTypesSelect = ({ name, changeMediaAllowedTypes, styles, value }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   // Create a ref in order to access the StateManager
   // So we can close the menu after clicking on a menu item
   // This allows us to get rid of the menuIsOpen state management

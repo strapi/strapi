@@ -135,6 +135,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
               isSearchable={false}
               defaultValue={options[0]}
               onChange={handleChange}
+              options={options}
               styles={{
                 ...styles,
                 control: (base, state) => ({

@@ -91,7 +91,8 @@ module.exports = ({
       rules: [
         {
           test: /\.m?js$/,
-          exclude: /node_modules/,
+          // TODO remove when plugins are built separately
+          exclude: /node_modules\/(?!(@strapi\/plugin-content-manager|@strapi\/plugin-content-type-builder|@strapi\/plugin-upload)\/).*/,
           use: {
             loader: require.resolve('babel-loader'),
             options: {
@@ -119,6 +120,7 @@ module.exports = ({
             },
           },
         },
+
         {
           test: /\.css$/i,
           use: ['style-loader', 'css-loader'],

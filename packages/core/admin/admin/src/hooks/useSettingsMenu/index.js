@@ -1,15 +1,16 @@
-import { useContext, useEffect, useReducer } from 'react';
-import { useGlobalContext, hasPermissions, UserContext } from '@strapi/helper-plugin';
+import { useEffect, useReducer } from 'react';
+import { hasPermissions, useRBACProvider, useStrapiApp } from '@strapi/helper-plugin';
 
 import reducer, { initialState } from './reducer';
 import init from './init';
 
 const useSettingsMenu = (noCheck = false) => {
-  const { userPermissions: permissions } = useContext(UserContext);
-  const { plugins } = useGlobalContext();
+  const { allPermissions: permissions } = useRBACProvider();
+
+  const { settings } = useStrapiApp();
 
   const [{ isLoading, menu }, dispatch] = useReducer(reducer, initialState, () =>
-    init(initialState, plugins)
+    init(initialState, settings)
   );
 
   useEffect(() => {

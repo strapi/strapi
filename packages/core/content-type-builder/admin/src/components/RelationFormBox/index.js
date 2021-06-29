@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Inputs } from '@buffetjs/custom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import getTrad from '../../utils/getTrad';
 import RelationTargetPicker from '../RelationTargetPicker';
 import Wrapper from './Wrapper';
@@ -18,7 +18,7 @@ const RelationFormBox = ({
   target,
   value,
 }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
 
   return (
     <Wrapper>

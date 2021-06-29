@@ -9,7 +9,7 @@ import {
   BaselineAlignment,
   CheckPagePermissions,
   request,
-  useGlobalContext,
+  useTracking,
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
@@ -32,7 +32,7 @@ const CreatePage = () => {
   const [isSubmiting, setIsSubmiting] = useState(false);
   const { replace } = useHistory();
   const permissionsRef = useRef();
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const params = useRouteMatch('/settings/roles/duplicate/:id');
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
@@ -68,9 +68,9 @@ const CreatePage = () => {
     setIsSubmiting(true);
 
     if (id) {
-      emitEvent('willDuplicateRole');
+      trackUsage('willDuplicateRole');
     } else {
-      emitEvent('willCreateNewRole');
+      trackUsage('willCreateNewRole');
     }
 
     Promise.resolve(
@@ -83,9 +83,9 @@ const CreatePage = () => {
         const { permissionsToSend } = permissionsRef.current.getPermissions();
 
         if (id) {
-          emitEvent('didDuplicateRole');
+          trackUsage('didDuplicateRole');
         } else {
-          emitEvent('didCreateNewRole');
+          trackUsage('didCreateNewRole');
         }
 
         if (res.data.id && !isEmpty(permissionsToSend)) {

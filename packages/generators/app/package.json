@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "Generate a new Strapi application.",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -17,12 +17,12 @@
     "chalk": "^4.1.1",
     "execa": "^1.0.0",
     "fs-extra": "^9.1.0",
-    "hosted-git-info": "3.0.8",
+    "git-url-parse": "^11.4.4",
     "inquirer": "^6.3.1",
     "lodash": "4.17.21",
     "node-fetch": "^2.6.1",
     "node-machine-id": "^1.1.10",
-    "ora": "^3.4.0",
+    "ora": "^5.4.0",
     "tar": "6.1.0",
     "uuid": "^3.3.2"
   },
@@ -49,7 +49,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

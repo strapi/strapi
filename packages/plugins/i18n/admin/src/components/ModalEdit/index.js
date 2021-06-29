@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, TabPanel, useGlobalContext } from '@strapi/helper-plugin';
+import { Modal, ModalFooter, TabPanel } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
@@ -14,7 +14,6 @@ import SettingsModal from '../SettingsModal';
 const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   const { isEditing, editLocale } = useEditLocale();
   const shouldUpdateMenu = useRef(false);
-  const { updateMenu } = useGlobalContext();
   const { formatMessage } = useIntl();
   const isOpened = Boolean(localeToEdit);
 
@@ -29,14 +28,6 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
       .then(onClose);
   };
 
-  const handleClose = () => {
-    if (shouldUpdateMenu.current) {
-      updateMenu();
-    }
-
-    shouldUpdateMenu.current = false;
-  };
-
   let options = [];
   let defaultOption;
 
@@ -46,7 +37,7 @@ const ModalEdit = ({ localeToEdit, onClose, locales }) => {
   }
 
   return (
-    <Modal isOpen={isOpened} onToggle={onClose} onClosed={handleClose}>
+    <Modal isOpen={isOpened} onToggle={onClose}>
       <Formik
         initialValues={{
           displayName: localeToEdit ? localeToEdit.name : '',

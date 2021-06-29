@@ -1,4 +1,4 @@
 const selectCollectionTypesRelatedPermissions = state =>
-  state.permissionsManager.collectionTypesRelatedPermissions;
+  state.rbacProvider.collectionTypesRelatedPermissions;
 
 export default selectCollectionTypesRelatedPermissions;

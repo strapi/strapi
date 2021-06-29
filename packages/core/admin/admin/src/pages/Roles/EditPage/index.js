@@ -3,10 +3,10 @@ import { useRouteMatch } from 'react-router-dom';
 import get from 'lodash/get';
 import {
   BaselineAlignment,
-  useGlobalContext,
   request,
   useNotification,
   useOverlayBlocker,
+  useTracking,
 } from '@strapi/helper-plugin';
 import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
@@ -21,13 +21,13 @@ import schema from './utils/schema';
 const EditPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
-  const { emitEvent } = useGlobalContext();
   const {
     params: { id },
   } = useRouteMatch('/settings/roles/:id');
   const [isSubmiting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { trackUsage } = useTracking();
 
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout(id);
   const {
@@ -90,7 +90,7 @@ const EditPage = () => {
         });
 
         if (didUpdateConditions) {
-          emitEvent('didUpdateConditions');
+          trackUsage('didUpdateConditions');
         }
       }
 

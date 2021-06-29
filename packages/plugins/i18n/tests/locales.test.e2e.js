@@ -235,7 +235,7 @@ describe('CRUD locales', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         data: {
-          undefined: ['this field has unspecified keys: code'],
+          '': ['this field has unspecified keys: code'],
         },
         error: 'Bad Request',
         message: 'ValidationError',
@@ -258,7 +258,7 @@ describe('CRUD locales', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         data: {
-          undefined: ['this field has unspecified keys: code'],
+          '': ['this field has unspecified keys: code'],
         },
         error: 'Bad Request',
         message: 'ValidationError',

@@ -4,12 +4,12 @@ import PropTypes from 'prop-types';
 
 import favicon from '../../favicon.png';
 
-const PageTitle = ({ title }) => (
-  <Helmet title={title} link={[{ rel: 'icon', type: 'image/png', href: favicon }]} />
-);
+const PageTitle = ({ title }) => {
+  return <Helmet title={title} link={[{ rel: 'icon', type: 'image/png', href: favicon }]} />;
+};
 
 PageTitle.propTypes = {
-  title: PropTypes.string.isRequired,
+  title: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]).isRequired,
 };
 
 export default memo(PageTitle);

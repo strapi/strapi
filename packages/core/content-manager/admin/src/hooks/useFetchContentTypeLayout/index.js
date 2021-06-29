@@ -3,7 +3,7 @@ import { useSelector, shallowEqual } from 'react-redux';
 import { request } from '@strapi/helper-plugin';
 import formatLayouts from './utils/formatLayouts';
 import reducer, { initialState } from './reducer';
-import { makeSelectModelAndComponentSchemas } from '../../containers/Main/selectors';
+import { makeSelectModelAndComponentSchemas } from '../../pages/App/selectors';
 
 const useFetchContentTypeLayout = contentTypeUID => {
   const [{ error, isLoading, layout, layouts }, dispatch] = useReducer(reducer, initialState);

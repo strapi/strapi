@@ -2,9 +2,9 @@ import adminPermissions from '../../../permissions';
 
 const defaultGlobalLinks = [
   {
-    title: { id: 'Settings.webhooks.title' },
+    intlLabel: { id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' },
     to: '/settings/webhooks',
-    name: 'webhooks',
+    id: 'webhooks',
     isDisplayed: false,
     permissions: adminPermissions.settings.webhooks.main,
   },

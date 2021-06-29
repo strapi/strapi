@@ -1,26 +1,26 @@
 import React, { useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { get, isEqual, upperFirst } from 'lodash';
-import { withRouter } from 'react-router-dom';
-import { FormattedMessage } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import { stringify } from 'qs';
+import { useIntl } from 'react-intl';
 import { Inputs as Input, Header } from '@buffetjs/custom';
 import {
-  BackHeader,
   LoadingIndicatorPage,
   ModalConfirm,
   PopUpWarning,
-  // contexts
-  useGlobalContext,
+  useTracking,
 } from '@strapi/helper-plugin';
 import pluginId from '../../pluginId';
 import Block from '../Block';
 import Container from '../Container';
 import SectionTitle from '../SectionTitle';
 import Separator from '../Separator';
+import BackHeader from '../BackHeader';
+import { usePluginsQueryParams } from '../../hooks';
 
 const SettingsViewWrapper = ({
   children,
-  history: { goBack },
   displayedFields,
   inputs,
   initialData,
@@ -33,9 +33,12 @@ const SettingsViewWrapper = ({
   onConfirmSubmit,
   onModalConfirmClosed,
 }) => {
-  const { emitEvent, formatMessage } = useGlobalContext();
+  const { trackUsage } = useTracking();
+  const { formatMessage } = useIntl();
+  const history = useHistory();
   const [showWarningCancel, setWarningCancel] = useState(false);
   const [showWarningSubmit, setWarningSubmit] = useState(false);
+  const pluginsQueryParams = usePluginsQueryParams();
 
   const attributes = useMemo(() => {
     return get(modifiedData, ['attributes'], {});
@@ -133,7 +136,30 @@ const SettingsViewWrapper = ({
   const handleSubmit = e => {
     e.preventDefault();
     toggleWarningSubmit();
-    emitEvent('willSaveContentTypeLayout');
+    trackUsage('willSaveContentTypeLayout');
+  };
+
+  const goBack = () => {
+    if (isEditSettings) {
+      history.goBack();
+    } else {
+      const {
+        settings: { pageSize, defaultSortBy, defaultSortOrder },
+        kind,
+        uid,
+      } = modifiedData;
+      const _sort = `${defaultSortBy}:${defaultSortOrder}`;
+      const goBackSearch = `${stringify(
+        {
+          page: 1,
+          pageSize,
+          _sort,
+        },
+        { encode: false }
+      )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;
+
+      history.replace(`/plugins/${pluginId}/${kind}/${uid}?${goBackSearch}`);
+    }
   };
 
   if (isLoading) {
@@ -161,30 +187,26 @@ const SettingsViewWrapper = ({
             >
               <SectionTitle isSettings />
               <div className="row">
-                {inputs.map(input => {
-                  return (
-                    <FormattedMessage key={input.name} id={input.label.id}>
-                      {label => (
-                        <div className={input.customBootstrapClass}>
-                          <FormattedMessage
-                            id={get(input, 'description.id', 'app.utils.defaultMessage')}
-                          >
-                            {description => (
-                              <Input
-                                {...input}
-                                description={description}
-                                label={label === ' ' ? null : label}
-                                onChange={onChange}
-                                options={getSelectOptions(input)}
-                                value={get(modifiedData, input.name, '')}
-                              />
-                            )}
-                          </FormattedMessage>
-                        </div>
-                      )}
-                    </FormattedMessage>
-                  );
-                })}
+                {inputs.map(input => (
+                  <div key={input.name} className={input.customBootstrapClass}>
+                    <Input
+                      {...input}
+                      description={formatMessage({
+                        id: get(input, 'description.id', 'app.utils.defaultMessage'),
+                      })}
+                      label={
+                        input.label
+                          ? formatMessage({
+                              id: input.label.id,
+                            })
+                          : ''
+                      }
+                      onChange={onChange}
+                      options={getSelectOptions(input)}
+                      value={get(modifiedData, input.name, '')}
+                    />
+                  </div>
+                ))}
                 <div className="col-12">
                   <Separator style={{ marginBottom: 20 }} />
                 </div>
@@ -254,9 +276,6 @@ SettingsViewWrapper.defaultProps = {
 SettingsViewWrapper.propTypes = {
   children: PropTypes.node.isRequired,
   displayedFields: PropTypes.array,
-  history: PropTypes.shape({
-    goBack: PropTypes.func.isRequired,
-  }).isRequired,
   initialData: PropTypes.object,
   inputs: PropTypes.array,
   isEditSettings: PropTypes.bool,
@@ -280,4 +299,4 @@ SettingsViewWrapper.propTypes = {
   }),
 };
 
-export default withRouter(SettingsViewWrapper);
+export default SettingsViewWrapper;

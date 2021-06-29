@@ -1,23 +1,25 @@
+import { fixtures } from '../../../../../../admin-test-utils';
 import addLocaleToSingleTypesMiddleware from '../addLocaleToSingleTypesMiddleware';
 
 describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   let getState;
+  let store;
 
   beforeEach(() => {
-    const store = {
+    store = {
+      ...fixtures.store.state,
       i18n_locales: { locales: [] },
-      permissionsManager: {
-        userPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
+    };
+    store.rbacProvider.allPermissions = [];
+
+    store.rbacProvider.collectionTypesRelatedPermissions = {
+      test: {
+        'plugins::content-manager.explorer.read': [],
+        'plugins::content-manager.explorer.create': [],
       },
     };
 
-    getState = () => store;
+    getState = jest.fn(() => store);
   });
 
   it('should forward the action when the type is undefined', () => {
@@ -31,7 +33,7 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
     expect(next).toBeCalledWith(action);
   });
 
-  it('should forward the action when the type is not StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS', () => {
+  it('should forward the action when the type is not ContentManager/App/SET_CONTENT_TYPE_LINKS', () => {
     const action = { test: true, type: 'TEST' };
 
     const next = jest.fn();
@@ -44,7 +46,7 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
 
   it('should forward when the authorizedStLinks array is empty', () => {
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedStLinks: [],
       },
@@ -60,9 +62,9 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
 
   it('should not add the search key to a single type link when i18n is not enabled on the single type', () => {
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test' }],
+        authorizedStLinks: [{ to: 'cm/singleType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: false } } }],
       },
     };
@@ -76,38 +78,28 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   });
 
   it('should add a search key with the default locale when the user has the right to read it', () => {
-    const tempStore = {
-      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      permissionsManager: {
-        userPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
-      },
-    };
+    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.rbacProvider.collectionTypesRelatedPermissions.test[
+      'plugins::content-manager.explorer.read'
+    ] = [{ properties: { locales: ['en'] } }];
 
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test' }],
+        authorizedStLinks: [{ to: 'cm/singleType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
-    const middleware = addLocaleToSingleTypesMiddleware()({ getState: () => tempStore });
+    const middleware = addLocaleToSingleTypesMiddleware()({ getState });
 
     const next = jest.fn();
 
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [
-          { destination: 'cm/singleType/test', search: 'plugins[i18n][locale]=en' },
-        ],
+        authorizedStLinks: [{ to: 'cm/singleType/test', search: 'plugins[i18n][locale]=en' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -116,45 +108,28 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   });
 
   it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
-    const tempStore = {
-      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      permissionsManager: {
-        userPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
-      },
-    };
-    // tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    // tempStore.set('permissionsManager', { userPermissions: [] });
-    // tempStore.set('permissionsManager', {
-    //   collectionTypesRelatedPermissions: {
-    //     test: {
-    //       'plugins::content-manager.explorer.read': [{ properties: { locales: [] } }],
-    //       'plugins::content-manager.explorer.create': [],
-    //     },
-    //   },
-    // });
+    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.rbacProvider.collectionTypesRelatedPermissions.test[
+      'plugins::content-manager.explorer.read'
+    ] = [{ properties: { locales: [] } }];
+
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test' }],
+        authorizedStLinks: [{ to: 'cm/singleType/test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
-    const middleware = addLocaleToSingleTypesMiddleware()({ getState: () => tempStore });
+    const middleware = addLocaleToSingleTypesMiddleware()({ getState });
 
     const next = jest.fn();
 
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [{ destination: 'cm/singleType/test', isDisplayed: false }],
+        authorizedStLinks: [{ to: 'cm/singleType/test', isDisplayed: false }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
@@ -163,49 +138,30 @@ describe('i18n | middlewares | addLocaleToSingleTypesMiddleware', () => {
   });
 
   it('should keep the previous search', () => {
-    const tempStore = {
-      i18n_locales: { locales: [{ code: 'en', isDefault: true }] },
-      permissionsManager: {
-        userPermissions: [],
-        collectionTypesRelatedPermissions: {
-          test: {
-            'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-            'plugins::content-manager.explorer.create': [],
-          },
-        },
-      },
-    };
-    // tempStore.set('i18n_locales', { locales: [{ code: 'en', isDefault: true }] });
-    // tempStore.set('permissionsManager', { userPermissions: [] });
-    // tempStore.set('permissionsManager', {
-    //   collectionTypesRelatedPermissions: {
-    //     test: {
-    //       'plugins::content-manager.explorer.read': [{ properties: { locales: ['en'] } }],
-    //       'plugins::content-manager.explorer.create': [],
-    //     },
-    //   },
-    // });
+    store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
+    store.rbacProvider.collectionTypesRelatedPermissions.test[
+      'plugins::content-manager.explorer.read'
+    ] = [{ properties: { locales: ['en'] } }];
+
     const action = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
-        authorizedStLinks: [
-          { destination: 'cm/singleType/test', search: 'plugins[plugin][test]=test' },
-        ],
+        authorizedStLinks: [{ to: 'cm/singleType/test', search: 'plugins[plugin][test]=test' }],
         contentTypeSchemas: [{ uid: 'test', pluginOptions: { i18n: { localized: true } } }],
       },
     };
-    const middleware = addLocaleToSingleTypesMiddleware()({ getState: () => tempStore });
+    const middleware = addLocaleToSingleTypesMiddleware()({ getState });
 
     const next = jest.fn();
 
     middleware(next)(action);
 
     const expected = {
-      type: 'StrapiAdmin/LeftMenu/SET_CT_OR_ST_LINKS',
+      type: 'ContentManager/App/SET_CONTENT_TYPE_LINKS',
       data: {
         authorizedStLinks: [
           {
-            destination: 'cm/singleType/test',
+            to: 'cm/singleType/test',
             search: 'plugins[plugin][test]=test&plugins[i18n][locale]=en',
           },
         ],

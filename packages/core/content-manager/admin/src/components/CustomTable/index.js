@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { useLocation, useHistory } from 'react-router-dom';
 import { FormattedMessage, useIntl } from 'react-intl';
 import { upperFirst, isEmpty } from 'lodash';
-import { LoadingIndicator, useGlobalContext } from '@strapi/helper-plugin';
-import { parse, stringify } from 'qs';
+import { LoadingIndicator, useTracking } from '@strapi/helper-plugin';
 import useListView from '../../hooks/useListView';
 import { getTrad } from '../../utils';
 import State from '../State';
@@ -12,6 +11,7 @@ import { LoadingContainer, LoadingWrapper, Table, TableEmpty, TableRow } from '.
 import ActionCollapse from './ActionCollapse';
 import Headers from './Headers';
 import Row from './Row';
+import { usePluginsQueryParams } from '../../hooks';
 
 const CustomTable = ({
   canCreate,
@@ -25,13 +25,10 @@ const CustomTable = ({
 }) => {
   const { formatMessage } = useIntl();
   const { entriesToDelete, label, filters, _q } = useListView();
-  const { emitEvent } = useGlobalContext();
-  const { pathname, search } = useLocation();
-  const query = search ? parse(search.substring(1)) : {};
+  const { trackUsage } = useTracking();
+  const { pathname } = useLocation();
   const { push } = useHistory();
-  const searchToPersist = query.plugins
-    ? stringify({ plugins: query.plugins }, { encode: false })
-    : '';
+  const pluginsQueryParams = usePluginsQueryParams();
 
   const headers = useMemo(() => {
     if (hasDraftAndPublish) {
@@ -63,19 +60,19 @@ const CustomTable = ({
   const colSpanLength = isBulkable && canDelete ? headers.length + 2 : headers.length + 1;
 
   const handleRowGoTo = id => {
-    emitEvent('willEditEntryFromList');
+    trackUsage('willEditEntryFromList');
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
-      search: searchToPersist,
+      search: pluginsQueryParams,
     });
   };
   const handleEditGoTo = id => {
-    emitEvent('willEditEntryFromButton');
+    trackUsage('willEditEntryFromButton');
     push({
       pathname: `${pathname}/${id}`,
       state: { from: pathname },
-      search: searchToPersist,
+      search: pluginsQueryParams,
     });
   };
 

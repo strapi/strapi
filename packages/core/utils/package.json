@@ -1,6 +1,6 @@
 {
   "name": "@strapi/utils",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "Shared utilities for the Strapi packages",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -19,7 +19,7 @@
     "lodash": "4.17.21",
     "pino": "^4.7.1",
     "pluralize": "^8.0.0",
-    "yup": "0.29.3"
+    "yup": "^0.32.9"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -41,7 +41,7 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

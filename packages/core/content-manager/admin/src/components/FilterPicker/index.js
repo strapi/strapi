@@ -7,9 +7,9 @@ import { FormattedMessage } from 'react-intl';
 import {
   PluginHeader,
   getFilterType,
-  useUser,
+  useRBACProvider,
   findMatchingPermissions,
-  useGlobalContext,
+  useTracking,
 } from '@strapi/helper-plugin';
 
 import pluginId from '../../pluginId';
@@ -32,11 +32,11 @@ function FilterPicker({
   setQuery,
   slug,
 }) {
-  const { emitEvent } = useGlobalContext();
-  const emitEventRef = useRef(emitEvent);
-  const { userPermissions } = useUser();
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
+  const { allPermissions } = useRBACProvider();
   const readActionAllowedFields = useMemo(() => {
-    const matchingPermissions = findMatchingPermissions(userPermissions, [
+    const matchingPermissions = findMatchingPermissions(allPermissions, [
       {
         action: 'plugins::content-manager.explorer.read',
         subject: slug,
@@ -44,7 +44,7 @@ function FilterPicker({
     ]);
 
     return get(matchingPermissions, ['0', 'properties', 'fields'], []);
-  }, [userPermissions, slug]);
+  }, [allPermissions, slug]);
 
   let timestamps = get(contentType, ['options', 'timestamps']);
 
@@ -167,7 +167,7 @@ function FilterPicker({
       const nextFilters = formatFiltersToQuery(modifiedData, metadatas);
       const useRelation = nextFilters._where.some(obj => Object.keys(obj)[0].includes('.'));
 
-      emitEventRef.current('didFilterEntries', { useRelation });
+      trackUsageRef.current('didFilterEntries', { useRelation });
       setQuery({ ...nextFilters, page: 1 });
       toggleFilterPickerState();
     },

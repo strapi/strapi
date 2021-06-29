@@ -4,11 +4,9 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
-
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
-import App from './containers/App';
-import trads from './translations';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import reducers from './reducers';
@@ -21,30 +19,24 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addReducers(reducers);
+    app.addCorePluginMenuLink({
+      to: `/plugins/${pluginId}`,
+      icon,
+      intlLabel: {
+        id: `${pluginId}.plugin.name`,
+        defaultMessage: 'Content-Types Builder',
+      },
+      permissions: pluginPermissions.main,
+    });
+
     app.registerPlugin({
       description: pluginDescription,
       icon,
       id: pluginId,
       isRequired: pluginPkg.strapi.required || false,
       isReady: true,
-      mainComponent: App,
       name,
       pluginLogo,
-      trads,
-      menu: {
-        pluginsSectionLinks: [
-          {
-            destination: `/plugins/${pluginId}`,
-            icon,
-            label: {
-              id: `${pluginId}.plugin.name`,
-              defaultMessage: 'Content-Types Builder',
-            },
-            name,
-            permissions: pluginPermissions.main,
-          },
-        ],
-      },
       // Internal APIs exposed by the CTB for the other plugins to use
       apis: {
         forms: formsAPI,
@@ -52,4 +44,27 @@ export default {
     });
   },
   boot() {},
+  async registerTrads({ locales }) {
+    const importedTrads = await Promise.all(
+      locales.map(locale => {
+        return import(
+          /* webpackChunkName: "content-type-builder-translation-[request]" */ `./translations/${locale}.json`
+        )
+          .then(({ default: data }) => {
+            return {
+              data: prefixPluginTranslations(data, pluginId),
+              locale,
+            };
+          })
+          .catch(() => {
+            return {
+              data: {},
+              locale,
+            };
+          });
+      })
+    );
+
+    return Promise.resolve(importedTrads);
+  },
 };

@@ -15,7 +15,7 @@ import {
   request,
   ListButton,
   PopUpWarning,
-  useUserPermissions,
+  useRBAC,
   LoadingIndicatorPage,
   EmptyState,
   useNotification,
@@ -30,7 +30,7 @@ function ListView() {
   const {
     isLoading,
     allowedActions: { canCreate, canRead, canUpdate, canDelete },
-  } = useUserPermissions(adminPermissions.settings.webhooks);
+  } = useRBAC(adminPermissions.settings.webhooks);
   const toggleNotification = useNotification();
   const isMounted = useRef(true);
   const { formatMessage } = useIntl();
@@ -303,7 +303,7 @@ function ListView() {
             <EmptyState
               title={formatMessage({ id: 'Settings.webhooks.list.empty.title' })}
               description={formatMessage({ id: 'Settings.webhooks.list.empty.description' })}
-              link="https://strapi.io/documentation/developer-docs/latest/concepts/webhooks.html"
+              link="https://strapi.io/documentation/developer-docs/latest/development/backend-customization.html#webhooks"
               linkText={formatMessage({ id: 'Settings.webhooks.list.empty.link' })}
             />
           )}

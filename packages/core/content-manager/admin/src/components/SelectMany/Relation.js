@@ -72,7 +72,7 @@ const Relation = ({
           <Span>{formattedValue}&nbsp;</Span>
         )}
       </div>
-      <div style={{ cursor }}>
+      <div style={{ cursor, width: 'auto' }}>
         <img src={IconRemove} alt="Remove Icon" onClick={onRemove} />
       </div>
     </>

@@ -3,7 +3,7 @@ import { Router, Route, Switch } from 'react-router-dom';
 // import { render, cleanup } from '@testing-library/react';
 import { shallow } from 'enzyme';
 import { createMemoryHistory } from 'history';
-import { GlobalContextProvider, UserProvider } from '@strapi/helper-plugin';
+import { GlobalContextProvider } from '@strapi/helper-plugin';
 import { IntlProvider } from 'react-intl';
 
 import translationMessages from '../../../../translations/en.json';
@@ -30,17 +30,15 @@ describe('Admin | containers | EditView', () => {
         messages={translationMessages}
         textComponent="span"
       >
-        <UserProvider permissions={[]}>
-          <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
-            <Router history={history}>
-              <Switch>
-                <Route path="/settings/webhooks/create">
-                  <EditView />
-                </Route>
-              </Switch>
-            </Router>
-          </GlobalContextProvider>
-        </UserProvider>
+        <GlobalContextProvider formatMessage={originalIntl.formatMessage}>
+          <Router history={history}>
+            <Switch>
+              <Route path="/settings/webhooks/create">
+                <EditView />
+              </Route>
+            </Switch>
+          </Router>
+        </GlobalContextProvider>
       </IntlProvider>
     );
   });

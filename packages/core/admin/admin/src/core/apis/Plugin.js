@@ -1,27 +1,18 @@
 class Plugin {
   constructor(pluginConf) {
     this.apis = pluginConf.apis || {};
-    // TODO
     this.description = pluginConf.description;
-    // TODO
     this.icon = pluginConf.icon;
-    // TODO
     this.initializer = pluginConf.initializer || null;
     this.injectionZones = pluginConf.injectionZones || {};
     this.isReady = pluginConf.isReady !== undefined ? pluginConf.isReady : true;
-    // TODO
     this.isRequired = pluginConf.isRequired;
+    // this.mainComponent = pluginConf.mainComponent || null;
     // TODO
-    this.mainComponent = pluginConf.mainComponent || null;
-    // TODO
-    this.menu = pluginConf.menu || null;
-    // TODO
+    // this.menu = pluginConf.menu || null;
     this.name = pluginConf.name;
     this.pluginId = pluginConf.id;
-    // TODO
     this.pluginLogo = pluginConf.pluginLogo;
-    // TODO
-    this.settings = pluginConf.settings || null;
   }
 
   getInjectedComponents(containerName, blockName) {

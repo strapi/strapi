@@ -1,6 +1,6 @@
 import generatePageFromStart from '../generatePageFromStart';
 
-describe('MEDIA LIBRARY | containers | HomePage | utils', () => {
+describe('MEDIA LIBRARY | utils', () => {
   describe('generatePageFromStart', () => {
     it('should return 1 if start is 0 and limit is 10', () => {
       const start = 0;

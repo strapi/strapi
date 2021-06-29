@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { components } from 'react-select';
-import { useGlobalContext } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { CheckboxWrapper, Label } from '@buffetjs/styles';
 import getTrad from '../../utils/getTrad';
 import SelectCheckbox from '../SelectCheckbox';
@@ -11,7 +11,7 @@ import Ul from '../SelectMenuUl';
 import Text from './Text';
 
 const MenuList = ({ selectProps: { changeMediaAllowedTypes, value }, ...rest }) => {
-  const { formatMessage } = useGlobalContext();
+  const { formatMessage } = useIntl();
   const Component = components.MenuList;
   const areAllAllowedTypesSelected = value.value && value.value.length === 3;
   const someChecked = value.value && !areAllAllowedTypesSelected && value.value.length > 0;

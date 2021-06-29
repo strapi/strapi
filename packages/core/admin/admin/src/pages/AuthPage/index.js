@@ -6,7 +6,7 @@ import { BaselineAlignment, auth, useNotification, useQuery } from '@strapi/help
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
-
+import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
 import PageTitle from '../../components/PageTitle';
 import LocaleToggle from '../../components/LocaleToggle';
@@ -14,12 +14,11 @@ import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
-import useChangeLanguage from '../../components/LanguageProvider/hooks/useChangeLanguage';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   const toggleNotification = useNotification();
   const { push } = useHistory();
-  const changeLocale = useChangeLanguage();
+  const { changeLocale } = useLocalesProvider();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');

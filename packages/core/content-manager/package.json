@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "3.6.0",
+  "version": "3.6.5",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -9,13 +9,15 @@
     "required": true
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.5",
-    "@buffetjs/custom": "3.3.5",
-    "@buffetjs/hooks": "3.3.5",
-    "@buffetjs/icons": "3.3.5",
-    "@buffetjs/styles": "3.3.5",
-    "@buffetjs/utils": "3.3.5",
+    "@buffetjs/core": "3.3.6",
+    "@buffetjs/custom": "3.3.6",
+    "@buffetjs/hooks": "3.3.6",
+    "@buffetjs/icons": "3.3.6",
+    "@buffetjs/styles": "3.3.6",
+    "@buffetjs/utils": "3.3.6",
     "@sindresorhus/slugify": "1.1.0",
+    "@strapi/helper-plugin": "3.6.5",
+    "@strapi/utils": "3.6.5",
     "classnames": "^2.3.1",
     "codemirror": "^5.61.0",
     "draft-js": "^0.11.5",
@@ -36,7 +38,7 @@
     "react": "^16.14.0",
     "react-dom": "^16.9.0",
     "react-fast-compare": "^3.2.0",
-    "react-intl": "4.5.0",
+    "react-intl": "5.20.2",
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.0.0",
@@ -45,9 +47,7 @@
     "redux-immutable": "^4.0.0",
     "reselect": "^4.0.0",
     "sanitize-html": "2.3.3",
-    "@strapi/helper-plugin": "3.6.0",
-    "@strapi/utils": "3.6.0",
-    "yup": "^0.27.0"
+    "yup": "^0.32.9"
   },
   "author": {
     "name": "Strapi team",
@@ -66,7 +66,7 @@
     "url": "git://github.com/strapi/strapi.git"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

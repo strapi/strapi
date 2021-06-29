@@ -5,11 +5,13 @@
  */
 
 import React from 'react';
-import { PropTypes } from 'prop-types';
+
+import { useAppInfos } from '@strapi/helper-plugin';
 import Wrapper, { A } from './Wrapper';
 
-function LeftMenuFooter({ version }) {
+function LeftMenuFooter() {
   const projectType = process.env.STRAPI_ADMIN_PROJECT_TYPE;
+  const { strapiVersion } = useAppInfos();
 
   return (
     <Wrapper>
@@ -19,12 +21,12 @@ function LeftMenuFooter({ version }) {
         </A>
         &nbsp;
         <A
-          href={`https://github.com/strapi/strapi/releases/tag/v${version}`}
+          href={`https://github.com/strapi/strapi/releases/tag/v${strapiVersion}`}
           key="github"
           target="_blank"
           rel="noopener noreferrer"
         >
-          v{version}
+          v{strapiVersion}
         </A>
         &nbsp;
         <A href="https://strapi.io" target="_blank" rel="noopener noreferrer">
@@ -34,9 +36,5 @@ function LeftMenuFooter({ version }) {
     </Wrapper>
   );
 }
-
-LeftMenuFooter.propTypes = {
-  version: PropTypes.string.isRequired,
-};
 
 export default LeftMenuFooter;

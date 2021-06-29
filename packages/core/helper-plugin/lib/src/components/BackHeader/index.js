@@ -9,11 +9,11 @@ import React from 'react';
 import { get } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { useGlobalContext } from '../../contexts/GlobalContext';
+import useTracking from '../../hooks/useTracking';
 import StyledBackHeader from './StyledBackHeader';
 
 const BackHeader = props => {
-  const { emitEvent } = useGlobalContext();
+  const { trackUsage } = useTracking();
   const pluginsParams = useRouteMatch('/plugins/:pluginId');
   const settingsParams = useRouteMatch('/settings/:settingType');
   const pluginId = get(pluginsParams, ['params', 'pluginId'], null);
@@ -22,7 +22,7 @@ const BackHeader = props => {
 
   const handleClick = e => {
     if (location) {
-      emitEvent('didGoBack', { location });
+      trackUsage('didGoBack', { location });
     }
 
     props.onClick(e);

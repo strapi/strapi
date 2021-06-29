@@ -6,7 +6,7 @@ module.exports = async () => {
   const { sendDidInitializeEvent } = getService('metrics');
   const { decorator } = getService('entity-service-decorator');
   const { initDefaultLocale } = getService('locales');
-  const { sectionsBuilder, actions, conditions, engine } = getService('permissions');
+  const { sectionsBuilder, actions, engine } = getService('permissions');
 
   // Entity Service
   strapi.entityService.decorate(decorator);
@@ -21,9 +21,6 @@ module.exports = async () => {
   await actions.registerI18nActions();
   actions.registerI18nActionsHooks();
   actions.updateActionsProperties();
-
-  // Conditions
-  await conditions.registerI18nConditions();
 
   // Engine/Permissions
   engine.registerI18nPermissionsHandlers();

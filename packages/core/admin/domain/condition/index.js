@@ -4,7 +4,7 @@ const { pipe, merge, set, pick } = require('lodash/fp');
 
 /**
  * The handler of a {@link Condition}
- * @typedef {Object | (function(user: Object, options: Object): Object | boolean)} ConditionHandler
+ * @typedef {(function(user: Object, options: Object): Object | boolean)} ConditionHandler
  */
 /**
  * Domain representation of a Condition (RBAC)

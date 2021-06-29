@@ -16,10 +16,6 @@ function isNotNull(msg = '${path} cannot be null.') {
   return this.test('defined', msg, isNotNullTest);
 }
 
-function arrayRequiredAllowEmpty(message = '${path} is required') {
-  return this.test('field is required', message, value => _.isArray(value));
-}
-
 function isFunction(message = '${path} is not a function') {
   return this.test('is a function', message, value => _.isFunction(value));
 }
@@ -38,7 +34,6 @@ function onlyContainsFunctions(message = '${path} contains values that are not f
 
 yup.addMethod(yup.mixed, 'notNil', isNotNill);
 yup.addMethod(yup.mixed, 'notNull', isNotNull);
-yup.addMethod(yup.array, 'requiredAllowEmpty', arrayRequiredAllowEmpty);
 yup.addMethod(yup.mixed, 'isFunction', isFunction);
 yup.addMethod(yup.string, 'isCamelCase', isCamelCase);
 yup.addMethod(yup.object, 'onlyContainsFunctions', onlyContainsFunctions);
