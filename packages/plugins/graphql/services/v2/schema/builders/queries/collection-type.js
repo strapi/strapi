@@ -8,13 +8,13 @@ const { toSingular, toPlural } = require('../../../../naming');
 const { actionExists } = require('../../../../utils');
 const { utils, mappers } = require('../../../types');
 
-const { SortArg, PublicationStateArg } = require('../args');
+const { args } = require('../../../types');
 
 const getFindOneQueryName = contentType => toSingular(utils.getEntityName(contentType));
 
 const getFindQueryName = contentType => toPlural(utils.getEntityName(contentType));
 
-const buildCollectionTypeQueries = contentType => {
+function buildCollectionTypeQueries(contentType) {
   return extendType({
     type: 'Query',
 
@@ -23,7 +23,7 @@ const buildCollectionTypeQueries = contentType => {
       addFindQuery(t, contentType);
     },
   });
-};
+}
 
 /**
  * Register a "find one" query field to the nexus type definition
@@ -100,10 +100,10 @@ const addFindQuery = (t, contentType) => {
     type: responseCollectionTypeName,
 
     args: {
-      publicationState: PublicationStateArg,
+      publicationState: args.PublicationStateArg,
       // todo[v4]: to add through i18n plugin
       locale: 'String',
-      sort: SortArg,
+      sort: args.SortArg,
       filters: utils.getFiltersInputTypeName(contentType),
     },
 

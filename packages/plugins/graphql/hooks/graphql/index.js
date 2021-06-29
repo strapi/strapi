@@ -73,7 +73,10 @@ module.exports = strapi => {
     },
 
     initialize() {
-      const nexusSchema = strapi.plugins.graphql.services.v2.generateSchema();
+      const nexusSchema = strapi.plugins.graphql.services.v2
+        .generators(strapi)
+        .generateContentAPISchema();
+
       const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
 
       if (_.isEmpty(schema)) {

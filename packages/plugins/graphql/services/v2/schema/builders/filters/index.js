@@ -2,6 +2,6 @@
 
 const contentType = require('./content-type');
 
-module.exports = {
+module.exports = () => ({
   ...contentType,
-};
+});

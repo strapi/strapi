@@ -7,7 +7,7 @@ const operators = require('./operators');
 
 const rootLevelOperators = [operators.AND, operators.OR, operators.NOT];
 
-const buildContentTypeFilters = contentType => {
+function buildContentTypeFilters(contentType) {
   const { attributes } = contentType;
 
   const filtersTypeName = utils.getFiltersInputTypeName(contentType);
@@ -35,7 +35,7 @@ const buildContentTypeFilters = contentType => {
       }
     },
   });
-};
+}
 
 const addScalarAttribute = (builder, attributeName, attribute) => {
   const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);

@@ -25,4 +25,6 @@ const buildEntityDefinition = (name, contentType) => {
   });
 };
 
-module.exports = { buildEntityDefinition };
+module.exports = () => ({
+  buildEntityDefinition,
+});

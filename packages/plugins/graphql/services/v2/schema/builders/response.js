@@ -22,4 +22,6 @@ const buildResponseDefinition = (name, contentType) => {
   });
 };
 
-module.exports = { buildResponseDefinition };
+module.exports = () => ({
+  buildResponseDefinition,
+});

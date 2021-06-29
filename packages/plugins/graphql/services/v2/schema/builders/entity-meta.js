@@ -1,5 +1,7 @@
 'use strict';
 
-const buildEntityMetaDefinition = (/*contentType*/) => {};
+function buildEntityMetaDefinition(/*contentType*/) {}
 
-module.exports = { buildEntityMetaDefinition };
+module.exports = () => ({
+  buildEntityMetaDefinition,
+});

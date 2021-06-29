@@ -26,4 +26,6 @@ const buildEnumTypeDefinition = (definition, defaultName) => {
   });
 };
 
-module.exports = { buildEnumTypeDefinition };
+module.exports = () => ({
+  buildEnumTypeDefinition,
+});

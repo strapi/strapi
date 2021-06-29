@@ -6,11 +6,11 @@ const { buildQuery } = require('../../../../resolvers-builder');
 const { toSingular } = require('../../../../naming');
 const { actionExists } = require('../../../../utils');
 
-const { PublicationStateArg } = require('../args');
+const { args } = require('../../../types');
 
 const { utils } = require('../../../types');
 
-const buildSingleTypeQueries = contentType => {
+function buildSingleTypeQueries(contentType) {
   return extendType({
     type: 'Query',
 
@@ -18,7 +18,7 @@ const buildSingleTypeQueries = contentType => {
       addFindQuery(t, contentType);
     },
   });
-};
+}
 
 const addFindQuery = (t, contentType) => {
   const { uid, modelName } = contentType;
@@ -38,7 +38,7 @@ const addFindQuery = (t, contentType) => {
     type: responseTypeName,
 
     args: {
-      publicationState: PublicationStateArg,
+      publicationState: args.PublicationStateArg,
     },
 
     async resolve(...params) {

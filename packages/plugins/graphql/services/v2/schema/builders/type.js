@@ -9,93 +9,112 @@ const { mappers, utils: typeUtils } = require('../../types');
 const { buildAssocResolvers } = require('../../../shadow-crud');
 
 /**
- * Create a type definition for a given content type
- * @param name - The name of the type
- * @param contentType - The content type used to created the definition
- * @return {NexusObjectTypeDef}
+ * @typedef TypeBuildersOptions
+ *
+ * @property {ObjectDefinitionBlock} builder
+ * @property {string} attributeName
+ * @property {object} attribute
+ * @property {object} contentType
+ * @property {object} context
+ * @property {object} context.strapi
+ * @property {object} context.registry
  */
-const buildTypeDefinition = (name, contentType) => {
-  const { attributes, primaryKey, options = {} } = contentType;
 
-  const attributesKey = Object.keys(attributes);
+module.exports = context => ({
+  /**
+   * Create a type definition for a given content type
+   * @param name - The name of the type
+   * @param contentType - The content type used to created the definition
+   * @return {NexusObjectTypeDef}
+   */
+  buildTypeDefinition(name, contentType) {
+    const { attributes, primaryKey, options = {} } = contentType;
 
-  const hasTimestamps = isArray(options.timestamps);
+    const attributesKey = Object.keys(attributes);
 
-  return objectType({
-    name,
+    const hasTimestamps = isArray(options.timestamps);
 
-    definition(t) {
-      // 1. ID & Primary key
-      // Always add the ID as a required attribute
-      // Also, add the primary key of the content type as a required ID attribute
-      t.nonNull.id('id');
-      t.nonNull.id(primaryKey);
+    return objectType({
+      name,
 
-      // 2. Timestamps
-      // If the content type has timestamps enabled
-      // then we should add the corresponding attributes in the definition
-      if (hasTimestamps) {
-        const [createdAtKey, updatedAtKey] = contentType.options.timestamps;
+      definition(t) {
+        // 1. ID & Primary key
+        // Always add the ID as a required attribute
+        // Also, add the primary key of the content type as a required ID attribute
+        t.nonNull.id('id');
+        t.nonNull.id(primaryKey);
 
-        t.nonNull.dateTime(createdAtKey);
-        t.nonNull.dateTime(updatedAtKey);
-      }
+        // 2. Timestamps
+        // If the content type has timestamps enabled
+        // then we should add the corresponding attributes in the definition
+        if (hasTimestamps) {
+          const [createdAtKey, updatedAtKey] = contentType.options.timestamps;
 
-      /** 3. Attributes
-       *
-       * Attributes can be of 5 different kind:
-       * - Scalar
-       * - Component
-       * - Dynamic Zone
-       * - Enum
-       * - Relation
-       *
-       * Here, we iterate over each non-private attribute
-       * and add it to the type definition based on its type
-       */
-      attributesKey
-        // Ignore private attributes
-        .filter(isNotPrivate(contentType))
-        // Add each attribute to the type definition
-        .forEach(attributeName => {
-          const attribute = attributes[attributeName];
+          t.nonNull.dateTime(createdAtKey);
+          t.nonNull.dateTime(updatedAtKey);
+        }
 
-          // We create a copy of the builder (t) to apply custom
-          // rules only on the current attribute (eg: nonNull, list, ...)
-          let builder = t;
+        /** 3. Attributes
+         *
+         * Attributes can be of 5 different kind:
+         * - Scalar
+         * - Component
+         * - Dynamic Zone
+         * - Enum
+         * - Relation
+         *
+         * Here, we iterate over each non-private attribute
+         * and add it to the type definition based on its type
+         */
+        attributesKey
+          // Ignore private attributes
+          .filter(isNotPrivate(contentType))
+          // Add each attribute to the type definition
+          .forEach(attributeName => {
+            const attribute = attributes[attributeName];
 
-          if (attribute.required) {
-            builder = builder.nonNull;
-          }
+            // We create a copy of the builder (t) to apply custom
+            // rules only on the current attribute (eg: nonNull, list, ...)
+            let builder = t;
 
-          // Scalars
-          if (typeUtils.isScalar(attribute)) {
-            addScalarAttribute(builder, attributeName, attribute);
-          }
+            if (attribute.required) {
+              builder = builder.nonNull;
+            }
 
-          // Components
-          else if (typeUtils.isComponent(attribute)) {
-            addComponentAttribute(builder, attributeName, attribute);
-          }
+            /**
+             * @type {TypeBuildersOptions}
+             */
+            const options = { builder, attributeName, attribute, contentType, context };
 
-          // Dynamic Zones
-          else if (typeUtils.isDynamicZone(attribute) && attribute.components.length > 0) {
-            addDynamicZoneAttribute(builder, attributeName, attribute, contentType);
-          }
+            // Scalars
+            if (typeUtils.isScalar(attribute)) {
+              addScalarAttribute(options);
+            }
 
-          // Enums
-          else if (typeUtils.isEnumeration(attribute)) {
-            addEnumAttribute(builder, attributeName, attribute, contentType);
-          }
+            // Components
+            else if (typeUtils.isComponent(attribute)) {
+              addComponentAttribute(options);
+            }
 
-          // Relations
-          else if (typeUtils.isRelation(attribute)) {
-            addRelationalAttribute(builder, attributeName, attribute, contentType);
-          }
-        });
-    },
-  });
-};
+            // Dynamic Zones
+            else if (typeUtils.isDynamicZone(attribute) && attribute.components.length > 0) {
+              addDynamicZoneAttribute(options);
+            }
+
+            // Enums
+            else if (typeUtils.isEnumeration(attribute)) {
+              addEnumAttribute(options);
+            }
+
+            // Relations
+            else if (typeUtils.isRelation(attribute)) {
+              addRelationalAttribute(options);
+            }
+          });
+      },
+    });
+  },
+});
 
 /**
  * Add a scalar attribute to the type definition
@@ -103,12 +122,9 @@ const buildTypeDefinition = (name, contentType) => {
  * The attribute is added based on a simple association between a Strapi
  * type and a GraphQL type (the map is defined in `strapiTypeToGraphQLScalar`)
  *
- * @param {ObjectDefinitionBlock} builder - Nexus type builder
- * @param {string} attributeName - The name of the attribute
- * @param {object} attribute - The attribute object
- * @param {string} attribute.type - The Strapi type of the attribute
+ * @param {TypeBuildersOptions} options
  */
-const addScalarAttribute = (builder, attributeName, attribute) => {
+const addScalarAttribute = ({ builder, attributeName, attribute }) => {
   const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
   builder.field(attributeName, { type: gqlType });
@@ -120,13 +136,9 @@ const addScalarAttribute = (builder, attributeName, attribute) => {
  * The attribute is added by fetching the component's type
  * name and using it as the attribute's type
  *
- * @param {ObjectDefinitionBlock} builder - Nexus type builder
- * @param {string} attributeName - The name of the attribute
- * @param {object} attribute - The attribute object
- * @param {string} attribute.component - The UID of the component to use
- * @param {boolean} attribute.repeatable - Whether the component is repeatable or not
+ * @param {TypeBuildersOptions} options
  */
-const addComponentAttribute = (builder, attributeName, attribute) => {
+const addComponentAttribute = ({ builder, attributeName, attribute }) => {
   const type = typeUtils.getComponentNameFromAttribute(attribute);
 
   if (attribute.repeatable) {
@@ -142,12 +154,9 @@ const addComponentAttribute = (builder, attributeName, attribute) => {
  * The attribute is added by fetching the dynamic zone's
  * type name and using it as the attribute's type
  *
- * @param {ObjectDefinitionBlock} builder - Nexus type builder
- * @param {string} attributeName - The name of the attribute
- * @param {object} attribute - The attribute object
- * @param {object} contentType - The content type we're building the definition for
+ * @param {TypeBuildersOptions} options
  */
-const addDynamicZoneAttribute = (builder, attributeName, attribute, contentType) => {
+const addDynamicZoneAttribute = ({ builder, attributeName, contentType }) => {
   const type = typeUtils.getDynamicZoneName(contentType, attributeName);
 
   builder.field(attributeName, { type });
@@ -159,12 +168,9 @@ const addDynamicZoneAttribute = (builder, attributeName, attribute, contentType)
  * The attribute is added by fetching the enum's type
  * name and using it as the attribute's type
  *
- * @param {ObjectDefinitionBlock} builder - Nexus type builder
- * @param {string} attributeName - The name of the attribute
- * @param {object} attribute - The attribute object
- * @param {object} contentType - The content type we're building the definition for
+ * @param {TypeBuildersOptions} options
  */
-const addEnumAttribute = (builder, attributeName, attribute, contentType) => {
+const addEnumAttribute = ({ builder, attributeName, contentType }) => {
   const type = typeUtils.getEnumName(contentType, attributeName);
 
   builder.field(attributeName, { type });
@@ -172,25 +178,29 @@ const addEnumAttribute = (builder, attributeName, attribute, contentType) => {
 
 /**
  * Add a relational attribute to the type definition
- *
- * @param {ObjectDefinitionBlock} builder - Nexus type builder
- * @param {string} attributeName - The name of the attribute
- * @param {object} attribute - The attribute object
- * @param {string} [attribute.model] - The model on which the relation is made
- * @param {string} [attribute.collection] - The collection on which the relation is made
- * @param {string} attribute.plugin - The plugin of the attribute's model
- * @param {object} contentType - The content type we're building the definition for
- * @param {string[]} contentType.associations - The list of associations defined for the content type
+ * @param {TypeBuildersOptions} options
  */
-const addRelationalAttribute = (builder, attributeName, attribute, contentType) => {
+const addRelationalAttribute = options => {
+  let { builder } = options;
+  const {
+    attributeName,
+    attribute,
+    contentType,
+    context: { registry, strapi },
+  } = options;
+
   const { associations = [] } = contentType;
 
   // Polymorphic relations
   if (typeUtils.isMorphRelation(attribute)) {
-    builder.field(attributeName, {
-      type: typeUtils.getMorphRelationTypeName(contentType, attributeName),
-      resolve: buildAssocResolvers(contentType)[attributeName],
-    });
+    const morphType = typeUtils.getMorphRelationTypeName(contentType, attributeName);
+
+    if (registry.has(morphType)) {
+      builder.field(attributeName, {
+        type: morphType,
+        resolve: buildAssocResolvers(contentType)[attributeName],
+      });
+    }
 
     return;
   }
@@ -222,5 +232,3 @@ const addRelationalAttribute = (builder, attributeName, attribute, contentType) 
 const isNotPrivate = contentType => attributeName => {
   return !contentTypes.isPrivateAttribute(contentType, attributeName);
 };
-
-module.exports = { buildTypeDefinition };
