@@ -23,7 +23,7 @@ function buildSingleTypeQueries(contentType) {
 const addFindQuery = (t, contentType) => {
   const { uid, modelName } = contentType;
 
-  const findQueryName = toSingular(utils.getEntityName(contentType));
+  const findQueryName = utils.getFindOneQueryName(contentType);
   const responseTypeName = utils.getEntityResponseName(contentType);
 
   const resolverOptions = { resolver: `${uid}.find` };

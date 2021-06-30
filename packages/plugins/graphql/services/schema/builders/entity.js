@@ -6,11 +6,11 @@ const { utils } = require('../../types');
 
 /**
  * Build a higher level type for a content type which contains both the attributes, the ID and the metadata
- * @param {string} name - The type name of the entity
  * @param {object} contentType The content type which will be used to build its entity type
  * @return {NexusObjectTypeDef}
  */
-const buildEntityDefinition = (name, contentType) => {
+const buildEntityDefinition = contentType => {
+  const name = utils.getEntityName(contentType);
   const typeName = utils.getTypeName(contentType);
 
   return objectType({

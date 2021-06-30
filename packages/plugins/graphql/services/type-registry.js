@@ -56,6 +56,14 @@ const createTypeRegistry = () => {
     },
 
     /**
+     * Get the type definition for `name`
+     * @param {string} name - The name of the type
+     */
+    get(name) {
+      return registry.get(name);
+    },
+
+    /**
      * Transform and return the registry as an object
      * @return {Object<string, RegisteredTypeDef>}
      */

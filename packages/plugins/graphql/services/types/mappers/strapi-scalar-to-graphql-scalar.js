@@ -27,7 +27,7 @@ if (missingStrapiScalars.length > 0) {
 /**
  * Used to transform a Strapi scalar type into its GraphQL equivalent
  * @param {string} strapiScalar
- * @return {string}
+ * @return {NexusGenScalars}
  */
 const strapiScalarToGraphQLScalar = strapiScalar => get(strapiScalar, associations);
 

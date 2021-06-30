@@ -13,7 +13,10 @@ const response = require('./response');
 const responseCollection = require('./response-collection');
 
 const queries = require('./queries');
+const mutations = require('./mutations');
+
 const filters = require('./filters');
+const inputs = require('./input');
 
 const buildersFactories = [
   enums,
@@ -24,7 +27,9 @@ const buildersFactories = [
   response,
   responseCollection,
   queries,
+  mutations,
   filters,
+  inputs,
 ];
 
 /**

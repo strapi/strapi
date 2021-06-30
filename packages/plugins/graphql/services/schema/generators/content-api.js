@@ -2,7 +2,7 @@
 
 const { join } = require('path');
 const { prop } = require('lodash/fp');
-const { makeSchema, unionType, fieldAuthorizePlugin } = require('nexus');
+const { makeSchema, unionType } = require('nexus');
 
 const createBuilders = require('../builders');
 const { utils, scalars, internals } = require('../../types');
@@ -22,6 +22,7 @@ module.exports = strapi => {
       registerEnumsDefinition(contentType);
       registerDynamicZonesDefinition(contentType);
       registerFiltersDefinition(contentType);
+      registerInputsDefinition(contentType);
 
       // Generate & register component's definition
       if (modelType === 'component') {
@@ -109,7 +110,7 @@ module.exports = strapi => {
 
   const registerComponent = contentType => {
     const name = utils.getComponentName(contentType);
-    const definition = builders.buildTypeDefinition(name, contentType);
+    const definition = builders.buildTypeDefinition(contentType);
 
     registry.register(name, definition, { kind: 'components', contentType });
   };
@@ -120,28 +121,25 @@ module.exports = strapi => {
       entity: utils.getEntityName(contentType),
       response: utils.getEntityResponseName(contentType),
       queries: utils.getEntityQueriesTypeName(contentType),
+      mutations: utils.getEntityMutationsTypeName(contentType),
     };
 
     const getConfig = kind => ({ kind, contentType });
 
     // Single type's definition
-    registry.register(
-      types.base,
-      builders.buildTypeDefinition(types.base, contentType),
-      getConfig('types')
-    );
+    registry.register(types.base, builders.buildTypeDefinition(contentType), getConfig('types'));
 
     // Higher level entity definition
     registry.register(
       types.entity,
-      builders.buildEntityDefinition(types.entity, contentType),
+      builders.buildEntityDefinition(contentType),
       getConfig('entities')
     );
 
     // Responses definition
     registry.register(
       types.response,
-      builders.buildResponseDefinition(types.response, contentType),
+      builders.buildResponseDefinition(contentType),
       getConfig('entitiesResponses')
     );
 
@@ -150,6 +148,12 @@ module.exports = strapi => {
       types.queries,
       builders.buildSingleTypeQueries(contentType),
       getConfig('queries')
+    );
+
+    registry.register(
+      types.mutations,
+      builders.buildSingleTypeMutations(contentType),
+      getConfig('mutations')
     );
   };
 
@@ -161,34 +165,31 @@ module.exports = strapi => {
       response: utils.getEntityResponseName(contentType),
       responseCollection: utils.getEntityResponseCollectionName(contentType),
       queries: utils.getEntityQueriesTypeName(contentType),
+      mutations: utils.getEntityMutationsTypeName(contentType),
     };
 
     const getConfig = kind => ({ kind, contentType });
 
     // Type definition
-    registry.register(
-      types.base,
-      builders.buildTypeDefinition(types.base, contentType),
-      getConfig('types')
-    );
+    registry.register(types.base, builders.buildTypeDefinition(contentType), getConfig('types'));
 
     // Higher level entity definition
     registry.register(
       types.entity,
-      builders.buildEntityDefinition(types.entity, contentType),
+      builders.buildEntityDefinition(contentType),
       getConfig('entities')
     );
 
     // Responses definition
     registry.register(
       types.response,
-      builders.buildResponseDefinition(types.response, contentType),
+      builders.buildResponseDefinition(contentType),
       getConfig('entitiesResponses')
     );
 
     registry.register(
       types.responseCollection,
-      builders.buildResponseCollectionDefinition(types.responseCollection, contentType),
+      builders.buildResponseCollectionDefinition(contentType),
       getConfig('entitiesResponsesCollection')
     );
 
@@ -197,6 +198,13 @@ module.exports = strapi => {
       types.queries,
       builders.buildCollectionTypeQueries(contentType),
       getConfig('queries')
+    );
+
+    // Mutation extensions
+    registry.register(
+      types.mutations,
+      builders.buildCollectionTypeMutations(contentType),
+      getConfig('mutations')
     );
   };
 
@@ -244,7 +252,7 @@ module.exports = strapi => {
         };
 
         registry.register(dzName, type, { kind: 'dynamic-zones', ...baseConfig });
-        registry.register(dzInputName, input, { kind: 'input', ...baseConfig });
+        registry.register(dzInputName, input, { kind: 'inputs', ...baseConfig });
       }
     }
   };
@@ -256,10 +264,23 @@ module.exports = strapi => {
     registry.register(type, definition, { kind: 'filters-inputs', contentType });
   };
 
+  const registerInputsDefinition = contentType => {
+    const { modelType } = contentType;
+
+    const type = (modelType === 'component'
+      ? utils.getComponentInputName
+      : utils.getContentTypeInputName
+    ).call(null, contentType);
+
+    const definition = builders.buildInputType(contentType);
+
+    registry.register(type, definition, { kind: 'inputs', contentType });
+  };
+
   return () => {
     const contentTypes = [
-      ...Object.values(strapi.contentTypes),
       ...Object.values(strapi.components),
+      ...Object.values(strapi.contentTypes),
     ];
 
     // Register needed scalar types
@@ -284,8 +305,7 @@ module.exports = strapi => {
       types: registry.definitions,
 
       // Plugins
-      // todo[v4]: Might try to implement RBAC for gql using this plugin (field granularity)
-      plugins: [fieldAuthorizePlugin()],
+      plugins: [],
 
       // Auto-gen tools configuration (.graphql, .ts)
       shouldGenerateArtifacts: process.env.NODE_ENV === 'development',

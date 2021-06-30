@@ -1,8 +1,8 @@
 'use strict';
 
-const { camelCase, propEq, upperFirst } = require('lodash/fp');
+const { camelCase, propEq, upperFirst, pipe } = require('lodash/fp');
 
-const { toSingular } = require('../old/naming');
+const { toSingular, toPlural } = require('../old/naming');
 const { STRAPI_SCALARS } = require('./constants');
 
 /**
@@ -151,11 +151,40 @@ const getDynamicZoneInputName = (contentType, attributeName) => {
 };
 
 /**
+ * Build a component input type name based on a content type and an attribute name
+ * @param {object} contentType
+ * @return {string}
+ */
+const getComponentInputName = contentType => {
+  const componentName = getComponentName(contentType);
+
+  return `${componentName}Input`;
+};
+
+/**
+ * Build a content type input name based on a content type and an attribute name
+ * @param {object} contentType
+ * @return {string}
+ */
+const getContentTypeInputName = contentType => {
+  const typeName = getTypeName(contentType);
+
+  return `${typeName}Input`;
+};
+
+/**
  * Build the queries type name for a given content type
  * @param {object} contentType
  * @return {string}
  */
 const getEntityQueriesTypeName = contentType => `${getEntityName(contentType)}Queries`;
+
+/**
+ * Build the mutations type name for a given content type
+ * @param {object} contentType
+ * @return {string}
+ */
+const getEntityMutationsTypeName = contentType => `${getEntityName(contentType)}Mutations`;
 
 /**
  * Build the filters type name for a given content type
@@ -184,6 +213,41 @@ const getMorphRelationTypeName = (contentType, attributeName) => {
   return `${typeName}${formattedAttr}Morph`;
 };
 
+/**
+ * Build a custom type name generator with different customization options
+ * @param {object} options
+ * @param {string} [options.prefix]
+ * @param {string} [options.suffix]
+ * @param {'plural' | 'singular'} [options.plurality]
+ * @return {function(*=): string}
+ */
+const buildCustomTypeNameGenerator = (options = {}) => {
+  const { prefix = '', suffix = '', plurality = 'singular' } = options;
+
+  if (!['plural', 'singular'].includes(plurality)) {
+    throw new Error(
+      `"plurality" param must be either "plural" or "singular", but got: "${plurality}"`
+    );
+  }
+
+  const getCustomTypeName = pipe(
+    getTypeName,
+    plurality === 'plural' ? toPlural : toSingular,
+    upperFirst
+  );
+  return contentType => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
+};
+
+const getFindQueryName = buildCustomTypeNameGenerator({ plurality: 'plural' });
+
+const getFindOneQueryName = buildCustomTypeNameGenerator();
+
+const getCreateMutationTypeName = buildCustomTypeNameGenerator({ prefix: 'create' });
+
+const getUpdateMutationTypeName = buildCustomTypeNameGenerator({ prefix: 'update' });
+
+const getDeleteMutationTypeName = buildCustomTypeNameGenerator({ prefix: 'delete' });
+
 module.exports = {
   isMorphRelation,
   isEnumeration,
@@ -203,7 +267,16 @@ module.exports = {
   getEntityResponseName,
   getEntityResponseCollectionName,
   getEntityQueriesTypeName,
+  getEntityMutationsTypeName,
+  getComponentInputName,
+  getContentTypeInputName,
   getFiltersInputTypeName,
   getScalarFilterInputTypeName,
   getMorphRelationTypeName,
+  buildCustomTypeNameGenerator,
+  getFindQueryName,
+  getFindOneQueryName,
+  getCreateMutationTypeName,
+  getUpdateMutationTypeName,
+  getDeleteMutationTypeName,
 };

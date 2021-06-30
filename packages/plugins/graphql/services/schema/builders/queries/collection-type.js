@@ -1,20 +1,22 @@
 'use strict';
 
 const { extendType } = require('nexus');
-const { set } = require('lodash/fp');
+const { pipe } = require('lodash/fp');
 
 const { buildQuery } = require('../../../old/resolvers-builder');
 const { toSingular, toPlural } = require('../../../old/naming');
 const { actionExists } = require('../../../old/utils');
 const { utils, mappers } = require('../../../types');
+const builderUtils = require('../utils');
 
 const { args } = require('../../../types');
 
-const getFindOneQueryName = contentType => toSingular(utils.getEntityName(contentType));
+const getUniqueAttributesFiltersMap = pipe(
+  builderUtils.getUniqueScalarAttributes,
+  builderUtils.scalarAttributesToFiltersMap
+);
 
-const getFindQueryName = contentType => toPlural(utils.getEntityName(contentType));
-
-function buildCollectionTypeQueries(contentType) {
+const buildCollectionTypeQueries = contentType => {
   return extendType({
     type: 'Query',
 
@@ -23,7 +25,7 @@ function buildCollectionTypeQueries(contentType) {
       addFindQuery(t, contentType);
     },
   });
-}
+};
 
 /**
  * Register a "find one" query field to the nexus type definition
@@ -33,7 +35,7 @@ function buildCollectionTypeQueries(contentType) {
 const addFindOneQuery = (t, contentType) => {
   const { uid, modelName, attributes } = contentType;
 
-  const findOneQueryName = getFindOneQueryName(contentType);
+  const findOneQueryName = utils.getFindOneQueryName(contentType);
   const responseTypeName = utils.getEntityResponseName(contentType);
 
   const resolverOptions = { resolver: `${uid}.findOne` };
@@ -45,17 +47,8 @@ const addFindOneQuery = (t, contentType) => {
 
   const resolver = buildQuery(toSingular(modelName), resolverOptions);
 
-  // Only authorize filtering using unique fields for findOne queries
-  const uniqueAttributes = Object.entries(attributes)
-    // Only keep unique scalar attributes
-    .filter(([, attribute]) => utils.isScalar(attribute) && attribute.unique)
-    // Create a map with the name of the attribute & its filters type
-    .reduce((acc, [name, attribute]) => {
-      const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
-      const filtersType = utils.getScalarFilterInputTypeName(gqlType);
-
-      return set(name, filtersType, acc);
-    }, {});
+  // Only authorize filtering using unique scalar fields for findOne queries
+  const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
 
   t.field(findOneQueryName, {
     type: responseTypeName,
@@ -84,7 +77,7 @@ const addFindOneQuery = (t, contentType) => {
 const addFindQuery = (t, contentType) => {
   const { uid, modelName } = contentType;
 
-  const findQueryName = getFindQueryName(contentType);
+  const findQueryName = utils.getFindQueryName(contentType);
   const responseCollectionTypeName = utils.getEntityResponseCollectionName(contentType);
 
   const resolverOptions = { resolver: `${uid}.find` };

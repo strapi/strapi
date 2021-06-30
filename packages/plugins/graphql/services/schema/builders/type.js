@@ -23,16 +23,19 @@ const { buildAssocResolvers } = require('../../old/shadow-crud');
 module.exports = context => ({
   /**
    * Create a type definition for a given content type
-   * @param name - The name of the type
    * @param contentType - The content type used to created the definition
    * @return {NexusObjectTypeDef}
    */
-  buildTypeDefinition(name, contentType) {
-    const { attributes, primaryKey, options = {} } = contentType;
+  buildTypeDefinition(contentType) {
+    const { attributes, primaryKey, modelType, options = {} } = contentType;
 
     const attributesKey = Object.keys(attributes);
-
     const hasTimestamps = isArray(options.timestamps);
+
+    const name = (modelType === 'component'
+      ? typeUtils.getComponentName
+      : typeUtils.getTypeName
+    ).call(null, contentType);
 
     return objectType({
       name,

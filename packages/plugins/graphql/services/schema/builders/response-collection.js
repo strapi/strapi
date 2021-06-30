@@ -4,7 +4,8 @@ const { objectType, nonNull } = require('nexus');
 
 const { utils, constants } = require('../../types');
 
-const buildResponseCollectionDefinition = (name, contentType) => {
+const buildResponseCollectionDefinition = contentType => {
+  const name = utils.getEntityResponseCollectionName(contentType);
   const entityName = utils.getEntityName(contentType);
 
   return objectType({
