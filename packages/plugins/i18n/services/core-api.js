@@ -132,10 +132,10 @@ const createLocalizationHandler = contentType => {
 
     const sanitizedFiles = sanitizeInputFiles(files);
 
-    const newEntry = await strapi.entityService.create(
-      { data: sanitizedData, files: sanitizedFiles },
-      { model: contentType.uid }
-    );
+    const newEntry = await strapi.entityService.create(contentType.uid, {
+      data: sanitizedData,
+      files: sanitizedFiles,
+    });
 
     ctx.body = sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
   };

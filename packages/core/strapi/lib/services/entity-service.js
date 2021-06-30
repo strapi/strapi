@@ -1,6 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
+const { pick } = require('lodash/fp');
 const delegate = require('delegates');
 
 const {
@@ -36,115 +36,130 @@ module.exports = ctx => {
   return service;
 };
 
+const defaultLimit = 10;
+const transformParamsToQuery = (params = {}) => {
+  const query = {};
+
+  // TODO: check invalid values add defaults ....
+  if (params.pagination) {
+    const { pagination } = params;
+    if (pagination.start || pagination.limit) {
+      query.limit = Number(pagination.limit) || defaultLimit;
+      query.offset = Number(pagination.start) || 0;
+    }
+
+    if (pagination.page || pagination.pageSize) {
+      query.limit = Number(pagination.pageSize) || defaultLimit;
+      query.offset = (Number(pagination.page) - 1) * query.limit;
+    }
+  }
+
+  if (params.sort) {
+    // TODO: impl
+    query.orderBy = params.sort;
+  }
+
+  if (params.filters) {
+    query.where = params.filters;
+  }
+
+  if (params.fields) {
+    query.select = params.fields;
+  }
+
+  if (params.populate) {
+    const { populate } = params;
+    query.populate = populate;
+  }
+
+  return query;
+};
+
+const pickSelectionParams = pick(['fields', 'populate']);
+
 const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
-  /**
-   * expose some utils so the end users can use them
-   */
   uploadFiles,
 
-  /**
-   * Returns default opt
-   * it is async so decorators can do async processing
-   * @param {object} params - query params to extend
-   * @param {object=} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
   async wrapOptions(options = {}) {
     return options;
   },
 
-  /**
-   * Returns a list of entries
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async find(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model, action: 'find' });
+  async find(uid, opts) {
+    const { kind } = strapi.getModel(uid);
 
-    const { kind } = db.getModel(model);
+    const { params } = await this.wrapOptions(opts, { uid, action: 'find' });
+
+    const query = transformParamsToQuery(params);
 
     // return first element and ignore filters
     if (kind === 'singleType') {
-      const results = await db.query(model).find({ ...params, _limit: 1 }, populate);
-      return _.first(results) || null;
+      return db.query(uid).findOne({});
     }
 
-    return db.query(model).find(params, populate);
+    return db.query(uid).findMany(query);
   },
 
-  /**
-   * Returns a paginated list of entries
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async findPage(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model, action: 'findPage' });
+  async findPage(uid, opts) {
+    const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
 
-    return db.query(model).findPage(params, populate);
+    const query = transformParamsToQuery(params);
+
+    const [results, total] = await db.query(uid).findWithCount(query);
+
+    // TODO: cleanup
+    return {
+      results,
+      pagination: {
+        total,
+      },
+    };
   },
 
-  /**
-   * Returns a list of entries with relation counters
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async findWithRelationCounts(opts, { model }) {
+  async findWithRelationCounts(uid, opts) {
     const { params, populate } = await this.wrapOptions(opts, {
-      model,
+      uid,
       action: 'findWithRelationCounts',
     });
 
-    return db.query(model).findWithRelationCounts(params, populate);
+    // TODO: to impl
+    return db.query(uid).findWithRelationCounts(params, populate);
   },
 
-  /**
-   * Returns one entry
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async findOne(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model, action: 'findOne' });
+  async findOne(uid, entityId, opts) {
+    const { params } = await this.wrapOptions(opts, { uid, action: 'findOne' });
 
-    return db.query(model).findOne(params, populate);
+    const query = transformParamsToQuery(pickSelectionParams(params));
+
+    return db.query(uid).findOne({ ...query, where: { id: entityId } });
   },
 
-  /**
-   * Returns a count of entries
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async count(opts, { model }) {
-    const { params } = await this.wrapOptions(opts, { model, action: 'count' });
+  async count(uid, opts) {
+    const { params } = await this.wrapOptions(opts, { uid, action: 'count' });
 
-    return db.query(model).count(params);
+    const query = transformParamsToQuery(params);
+
+    return db.query(uid).count(query);
   },
 
-  /**
-   * Creates & returns a new entry
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async create(opts, { model }) {
-    const { data, files } = await this.wrapOptions(opts, { model, action: 'create' });
+  async create(uid, opts) {
+    const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'create' });
 
-    const modelDef = db.getModel(model);
+    const modelDef = strapi.getModel(uid);
 
     const isDraft = contentTypesUtils.isDraft(data, modelDef);
 
     const validData = await entityValidator.validateEntityCreation(modelDef, data, { isDraft });
 
-    let entry = await db.query(model).create(validData);
+    // select / populate
+    const query = transformParamsToQuery(pickSelectionParams(params));
 
-    if (files && Object.keys(files).length > 0) {
-      await this.uploadFiles(entry, files, { model });
-      entry = await this.findOne({ params: { id: entry.id } }, { model });
-    }
+    const entry = await db.query(uid).create({ ...query, data: validData });
+
+    // TODO: implement files
+    // if (files && Object.keys(files).length > 0) {
+    //   await this.uploadFiles(entry, files, { model });
+    //   entry = await this.findOne({ params: { id: entry.id } }, { model });
+    // }
 
     eventHub.emit(ENTRY_CREATE, {
       model: modelDef.modelName,
@@ -154,30 +169,30 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     return entry;
   },
 
-  /**
-   * Updates & returns an existing entry
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async update(opts, { model }) {
-    const { params, data, files } = await this.wrapOptions(opts, { model, action: 'update' });
+  async update(uid, entityId, opts) {
+    const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'update' });
 
-    const modelDef = db.getModel(model);
-    const existingEntry = await db.query(model).findOne(params);
+    const modelDef = strapi.getModel(uid);
 
-    const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
+    // const existingEntry = await db.query(uid).findOne({ where: { id: entityId } });
 
-    const validData = await entityValidator.validateEntityUpdate(modelDef, data, {
-      isDraft,
-    });
+    // const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
 
-    let entry = await db.query(model).update(params, validData);
+    // TODO: validate
+    // // const validData = await entityValidator.validateEntityUpdate(modelDef, data, {
+    // //   isDraft,
+    // // });
 
-    if (files && Object.keys(files).length > 0) {
-      await this.uploadFiles(entry, files, { model });
-      entry = await this.findOne({ params: { id: entry.id } }, { model });
-    }
+    // select / populate
+    const query = transformParamsToQuery(pickSelectionParams(params));
+
+    let entry = await db.query(uid).update({ ...query, where: { id: entityId }, data });
+
+    // TODO: implement files
+    // if (files && Object.keys(files).length > 0) {
+    //   await this.uploadFiles(entry, files, { model });
+    //   entry = await this.findOne({ params: { id: entry.id } }, { model });
+    // }
 
     eventHub.emit(ENTRY_UPDATE, {
       model: modelDef.modelName,
@@ -187,18 +202,15 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     return entry;
   },
 
-  /**
-   * Deletes & returns the entry that was deleted
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async delete(opts, { model }) {
-    const { params } = await this.wrapOptions(opts, { model, action: 'delete' });
+  async delete(uid, entityId, opts) {
+    const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
 
-    const entry = await db.query(model).delete(params);
+    // select / populate
+    const query = transformParamsToQuery(pickSelectionParams(params));
 
-    const modelDef = db.getModel(model);
+    const entry = await db.query(uid).delete({ ...query, where: { id: entityId } });
+
+    const modelDef = strapi.getModel(uid);
     eventHub.emit(ENTRY_DELETE, {
       model: modelDef.modelName,
       entry: sanitizeEntity(entry, { model: modelDef }),
@@ -207,54 +219,40 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     return entry;
   },
 
-  /**
-   * Returns a list of matching entries
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async search(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model, action: 'search' });
+  // TODO: Implement search features
 
-    return db.query(model).search(params, populate);
+  async search(uid, opts) {
+    const { params, populate } = await this.wrapOptions(opts, { uid, action: 'search' });
+
+    return [];
+
+    // return db.query(uid).search(params, populate);
   },
 
-  /**
-   * Returns a list of matching entries with relations counters
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async searchWithRelationCounts(opts, { model }) {
+  async searchWithRelationCounts(uid, opts) {
     const { params, populate } = await this.wrapOptions(opts, {
-      model,
+      uid,
       action: 'searchWithRelationCounts',
     });
 
-    return db.query(model).searchWithRelationCounts(params, populate);
+    return [];
+
+    // return db.query(uid).searchWithRelationCounts(params, populate);
   },
 
-  /**
-   * Returns a paginated list of matching entries
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async searchPage(opts, { model }) {
-    const { params, populate } = await this.wrapOptions(opts, { model, action: 'searchPage' });
+  async searchPage(uid, opts) {
+    const { params, populate } = await this.wrapOptions(opts, { uid, action: 'searchPage' });
 
-    return db.query(model).searchPage(params, populate);
+    return [];
+
+    // return db.query(uid).searchPage(params, populate);
   },
 
-  /**
-   * Promise to count searched records
-   * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
-   */
-  async countSearch(opts, { model }) {
-    const { params } = await this.wrapOptions(opts, { model, action: 'countSearch' });
+  async countSearch(uid, opts) {
+    const { params } = await this.wrapOptions(opts, { uid, action: 'countSearch' });
 
-    return db.query(model).countSearch(params);
+    return [];
+
+    // return db.query(uid).countSearch(params);
   },
 });

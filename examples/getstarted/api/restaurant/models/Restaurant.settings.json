@@ -46,8 +46,8 @@
         }
       }
     },
-    "closing_period": {
-      "component": "default.closingperiod",
+    "category_compo": {
+      "component": "application::category.category",
       "type": "component",
       "pluginOptions": {
         "i18n": {

@@ -84,19 +84,12 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate(input);
 
-        expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
-          {
-            model: 'testModel',
-          }
-        );
+        expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
+          populate: undefined,
+          params: { _publicationState: 'live', _limit: defaultLimit },
+        });
 
-        expect(strapi.entityService.create).toHaveBeenCalledWith(
-          { data: input },
-          {
-            model: 'testModel',
-          }
-        );
+        expect(strapi.entityService.create).toHaveBeenCalledWith('testModel', { data: input });
       });
 
       test('Updates data when entity is found', async () => {
@@ -120,22 +113,15 @@ describe('Default Service', () => {
         const input = {};
         await service.createOrUpdate(input);
 
-        expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
-          {
-            model: 'testModel',
-          }
-        );
+        expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
+          populate: undefined,
+          params: { _publicationState: 'live', _limit: defaultLimit },
+        });
 
-        expect(strapi.entityService.update).toHaveBeenCalledWith(
-          {
-            params: { id: 1 },
-            data: input,
-          },
-          {
-            model: 'testModel',
-          }
-        );
+        expect(strapi.entityService.update).toHaveBeenCalledWith('testModel', {
+          params: { id: 1 },
+          data: input,
+        });
       });
 
       test('Delete data when entity is found', async () => {
@@ -155,21 +141,14 @@ describe('Default Service', () => {
 
         await service.delete();
 
-        expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
-          {
-            model: 'testModel',
-          }
-        );
+        expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
+          populate: undefined,
+          params: { _publicationState: 'live', _limit: defaultLimit },
+        });
 
-        expect(strapi.entityService.delete).toHaveBeenCalledWith(
-          {
-            params: { id: 1 },
-          },
-          {
-            model: 'testModel',
-          }
-        );
+        expect(strapi.entityService.delete).toHaveBeenCalledWith('testModel', {
+          params: { id: 1 },
+        });
       });
     });
   });

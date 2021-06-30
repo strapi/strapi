@@ -121,10 +121,10 @@ const sanitizeEntity = (dataSource, options) => {
 const parseOriginalData = data => (_.isFunction(data.toJSON) ? data.toJSON() : data);
 
 const COMPONENT_FIELDS = ['__component'];
-const STATIC_FIELDS = [ID_ATTRIBUTE, '__v'];
+const STATIC_FIELDS = [ID_ATTRIBUTE];
 
 const getAllowedFields = ({ includeFields, model, isOutput }) => {
-  const { options, primaryKey } = model;
+  const { options } = model;
   const nonWritableAttributes = getNonWritableAttributes(model);
   const nonVisibleAttributes = getNonVisibleAttributes(model);
 
@@ -138,18 +138,19 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
     includeFields || [],
     ...(isOutput
       ? [
-          primaryKey,
           timestamps,
           STATIC_FIELDS,
           COMPONENT_FIELDS,
           ...nonWritableAttributes,
           ...nonVisibleAttributes,
         ]
-      : [primaryKey, STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
+      : [STATIC_FIELDS, COMPONENT_FIELDS, ...nonVisibleWritableAttributes])
   );
 };
 
 const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
+  console.log(fields);
+
   const searchStr = `${key}.`;
 
   const transformedFields = (fields || [])

@@ -17,13 +17,13 @@ const toRow = (metadata, data = {}) => {
 
     if (types.isScalar(attribute.type) && _.has(attributeName, data)) {
       // TODO: we convert to column name
-      // TODO: handle default value too
-      // TODO: format data & use dialect to know which type they support (json particularly)
+      // TODO: handle default value
 
       const field = createField(attribute.type, attribute);
 
       // TODO: validate data on creation
       // field.validate(data[attributeName]);
+
       const val = data[attributeName] === null ? null : field.toDB(data[attributeName]);
 
       obj[attributeName] = val;
@@ -143,6 +143,10 @@ const createEntityManager = db => {
     async update(uid, params = {}) {
       const { where, data } = params;
       const metadata = db.metadata.get(uid);
+
+      if (!_.isPlainObject(data)) {
+        throw new Error('Update requires a data object');
+      }
 
       if (_.isEmpty(where)) {
         throw new Error('Update requires a where parameter');

@@ -21,6 +21,7 @@ const paramsContain = (key, params) => {
  * Adds default locale or replaces _locale by locale in query params
  * @param {object} params - query params
  */
+// TODO: fix
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 
@@ -75,11 +76,10 @@ const decorator = service => ({
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-
   async wrapOptions(opts = {}, ctx = {}) {
     const wrappedOptions = await service.wrapOptions.call(this, opts, ctx);
 
-    const model = strapi.db.getModel(ctx.model);
+    const model = strapi.getModel(ctx.uid);
 
     const { isLocalizedContentType } = getService('content-types');
 
@@ -87,9 +87,11 @@ const decorator = service => ({
       return wrappedOptions;
     }
 
+    const { params } = opts;
+
     return {
       ...wrappedOptions,
-      params: await wrapParams(wrappedOptions.params, ctx),
+      params: await wrapParams(params, ctx),
     };
   },
 
@@ -99,19 +101,19 @@ const decorator = service => ({
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-  async create(opts, ctx) {
-    const model = strapi.db.getModel(ctx.model);
+  async create(uid, opts) {
+    const model = strapi.getModel(uid);
 
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {
-      return service.create.call(this, opts, ctx);
+      return service.create.call(this, uid, opts);
     }
 
     const { data } = opts;
     await assignValidLocale(data);
 
-    const entry = await service.create.call(this, opts, ctx);
+    const entry = await service.create.call(this, uid, opts);
 
     await syncLocalizations(entry, { model });
     await syncNonLocalizedAttributes(entry, { model });
@@ -124,25 +126,21 @@ const decorator = service => ({
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-  async update(opts, ctx) {
-    const model = strapi.db.getModel(ctx.model);
+  async update(uid, entityId, opts) {
+    const model = strapi.getModel(uid);
 
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {
-      return service.update.call(this, opts, ctx);
+      return service.update.call(this, uid, entityId, opts);
     }
 
     const { data, ...restOptions } = opts;
 
-    const entry = await service.update.call(
-      this,
-      {
-        data: omit(['locale', 'localizations'], data),
-        ...restOptions,
-      },
-      ctx
-    );
+    const entry = await service.update.call(this, uid, entityId, {
+      ...restOptions,
+      data: omit(['locale', 'localizations'], data),
+    });
 
     await syncNonLocalizedAttributes(entry, { model });
     return entry;

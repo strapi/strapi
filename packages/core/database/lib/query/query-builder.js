@@ -2,51 +2,7 @@
 
 const _ = require('lodash/fp');
 
-const types = require('../types');
-const { createField } = require('../fields');
 const helpers = require('./helpers');
-
-const fromRow = (metadata, row) => {
-  const { attributes } = metadata;
-
-  if (_.isNil(row)) {
-    return null;
-  }
-
-  const obj = {};
-
-  for (const column in row) {
-    // to field Name
-    const attributeName = column;
-
-    if (!attributes[attributeName]) {
-      // ignore value that are not related to an attribute (join columns ...)
-      continue;
-    }
-
-    const attribute = attributes[attributeName];
-
-    if (types.isScalar(attribute.type)) {
-      // TODO: we convert to column name
-      // TODO: handle default value too
-      // TODO: format data & use dialect to know which type they support (json particularly)
-
-      const field = createField(attribute.type, attribute);
-
-      // TODO: validate data on creation
-      // field.validate(data[attributeName]);
-      const val = row[column] === null ? null : field.fromDB(row[column]);
-
-      obj[attributeName] = val;
-    }
-
-    if (types.isRelation(attribute.type)) {
-      obj[attributeName] = row[column];
-    }
-  }
-
-  return obj;
-};
 
 const createQueryBuilder = (uid, db) => {
   const meta = db.metadata.get(uid);
@@ -211,7 +167,6 @@ const createQueryBuilder = (uid, db) => {
       return this.alias + '.' + columnName;
     },
 
-    // TODO: trigger result processing to allow 100% sql queries
     async execute({ mapResults = true } = {}) {
       const aliasedTableName = state.type === 'insert' ? tableName : { [this.alias]: tableName };
 
@@ -225,9 +180,9 @@ const createQueryBuilder = (uid, db) => {
             }
 
             if (state.joins.length > 0) {
-              // TODO: check implementation
               // add ordered columns to distinct in case of joins
               qb.distinct();
+              // TODO: add column if they aren't there already
               state.select.unshift(...state.orderBy.map(({ column }) => column));
             }
 
@@ -288,18 +243,18 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyJoins(qb, state.joins);
         }
 
-        // console.log('Running query: ', qb.toQuery());
-
         const rows = await qb;
+
+        if (state.populate && !_.isNil(rows)) {
+          // TODO: hanlde populate
+          await helpers.applyPopulate(_.castArray(rows), state.populate, { qb: this, uid, db });
+        }
 
         let results = rows;
         if (mapResults && state.type === 'select') {
-          results = Array.isArray(rows) ? rows.map(row => fromRow(meta, row)) : fromRow(meta, rows);
-        }
-
-        if (state.populate && !_.isNil(results)) {
-          // TODO: hanlde populate
-          await helpers.applyPopulate(_.castArray(results), state.populate, { qb: this, uid, db });
+          results = Array.isArray(rows)
+            ? rows.map(row => helpers.fromRow(meta, row))
+            : helpers.fromRow(meta, rows);
         }
 
         return results;

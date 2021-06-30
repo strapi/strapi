@@ -43,7 +43,7 @@ class PostgresDialect extends Dialect {
         throw new errors.NotNullConstraint({ column: error.column });
       }
       default: {
-        throw error;
+        super.transformErrors(error);
       }
     }
   }
@@ -72,7 +72,7 @@ class MysqlDialect extends Dialect {
   }
 
   transformErrors(error) {
-    throw error;
+    super.transformErrors(error);
   }
 }
 
@@ -98,7 +98,7 @@ class SqliteDialect extends Dialect {
         throw new errors.NotNullConstraint();
       }
       default: {
-        throw error;
+        super.transformErrors(error);
       }
     }
   }

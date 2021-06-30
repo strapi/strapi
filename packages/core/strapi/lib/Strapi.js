@@ -34,11 +34,6 @@ const LIFECYCLES = {
   BOOTSTRAP: 'bootstrap',
 };
 
-/**
- * Construct an Strapi instance.
- *
- * @constructor
- */
 class Strapi {
   constructor(opts = {}) {
     this.reload = this.reload();
@@ -501,11 +496,11 @@ class Strapi {
 
   /**
    * Binds queries with a specific model
-   * @param {string} entity - entity name
-   * @param {string} plugin - plugin name or null
+   * @param {string} uid
+   * @returns {}
    */
-  query(entity, plugin) {
-    return this.db.query(entity, plugin);
+  query(uid) {
+    return this.db.query(uid);
   }
 }
 
@@ -514,3 +509,5 @@ module.exports = options => {
   global.strapi = strapi;
   return strapi;
 };
+
+module.exports.Strapi = Strapi;

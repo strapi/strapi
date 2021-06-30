@@ -47,6 +47,9 @@ module.exports = function createComponentBuilder() {
 
     /**
      * create a component in the tmpComponent map
+     *
+     * @param {object} infos content type info
+     * @returns {object} new content type
      */
     createContentType(infos) {
       const uid = createContentTypeUID(infos);
@@ -216,8 +219,10 @@ module.exports = function createComponentBuilder() {
 
 /**
  * Returns a uid from a content type infos
- * @param {Object} options options
+ *
+ * @param {object} options options
  * @param {string} options.name component name
+ * @returns {string} uid
  */
 const createContentTypeUID = ({ name }) => `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 

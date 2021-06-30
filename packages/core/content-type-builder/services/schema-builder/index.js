@@ -10,6 +10,11 @@ const createContentTypeBuilder = require('./content-type-builder');
 const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
 const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
 
+/**
+ * Creates a content type schema builder instance
+ *
+ * @returns {object} content type schema builder
+ */
 module.exports = function createBuilder() {
   const components = Object.keys(strapi.components).map(key => {
     const compo = strapi.components[key];
@@ -53,6 +58,10 @@ module.exports = function createBuilder() {
 
 /**
  * Schema builder
+ *
+ * @param {object} opts options
+ * @param {object} opts.contentTypes contentTypes
+ * @returns {object} schema builder
  */
 function createSchemaBuilder({ components, contentTypes }) {
   const tmpComponents = new Map();
@@ -76,6 +85,12 @@ function createSchemaBuilder({ components, contentTypes }) {
       return tmpContentTypes;
     },
 
+    /**
+     * Convert Attributes received from the API to the right syntaxt
+     *
+     * @param {object} attributes input attributes
+     * @returns {object} transformed attributes
+     */
     convertAttributes(attributes) {
       return Object.keys(attributes).reduce((acc, key) => {
         const attribute = attributes[key];
@@ -83,26 +98,10 @@ function createSchemaBuilder({ components, contentTypes }) {
         const { configurable } = attribute;
 
         if (_.has(attribute, 'type')) {
-          if (attribute.type === 'media') {
-            const fileModel = strapi.getModel('file', 'upload');
-            if (!fileModel) return acc;
-
-            const via = _.findKey(fileModel.attributes, { collection: '*' });
-            acc[key] = {
-              [attribute.multiple ? 'collection' : 'model']: 'file',
-              via,
-              allowedTypes: attribute.allowedTypes,
-              plugin: 'upload',
-              required: !!attribute.required,
-              configurable: configurable === false ? false : undefined,
-              pluginOptions: attribute.pluginOptions || {},
-            };
-          } else {
-            acc[key] = {
-              ...attribute,
-              configurable: configurable === false ? false : undefined,
-            };
-          }
+          acc[key] = {
+            ...attribute,
+            configurable: configurable === false ? false : undefined,
+          };
 
           return acc;
         }
@@ -158,6 +157,8 @@ function createSchemaBuilder({ components, contentTypes }) {
 
     /**
      * Write all type to files
+     *
+     * @returns {void}
      */
     writeFiles() {
       return Promise.all(
@@ -183,6 +184,8 @@ function createSchemaBuilder({ components, contentTypes }) {
 
     /**
      * rollback all files
+     *
+     * @returns {void}
      */
     rollback() {
       return Promise.all(

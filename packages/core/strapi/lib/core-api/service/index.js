@@ -38,7 +38,7 @@ const getLimitConfigDefaults = () => ({
 const getLimitParam = params => {
   const { defaultLimit, maxLimit } = getLimitConfigDefaults();
 
-  if (params._limit === undefined) {
+  if (params.limit === undefined) {
     return defaultLimit;
   }
 
@@ -58,9 +58,9 @@ const getLimitParam = params => {
  */
 const getFetchParams = (params = {}) => {
   return {
-    _publicationState: DP_PUB_STATE_LIVE,
+    // _publicationState: DP_PUB_STATE_LIVE,
     ...params,
-    _limit: getLimitParam(params),
+    // limit: getLimitParam(params),
   };
 };
 

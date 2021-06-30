@@ -45,14 +45,19 @@ describe('Create Strapi API End to End', () => {
       };
     });
 
-    test('Create tag1', async () => {
+    test.only('Create tag1', async () => {
       const { body } = await rq({
         url: '/tags',
         method: 'POST',
         body: {
           name: 'tag1',
         },
+        qs: {
+          populate: ['articles']
+        }
       });
+
+      console.log(body)
 
       data.tags.push(body);
 
@@ -139,7 +144,7 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 add tag2', async () => {
       const entry = Object.assign({}, data.articles[0], {
-        tags: [data.tags[1]],
+        tags: [data.tags[1].id],
       });
 
       cleanDate(entry);
@@ -162,8 +167,8 @@ describe('Create Strapi API End to End', () => {
 
     test('Update article1 add tag1 and tag3', async () => {
       const entry = Object.assign({}, data.articles[0]);
-      entry.tags.push(data.tags[0]);
-      entry.tags.push(data.tags[2]);
+      entry.tags.push(data.tags[0].id);
+      entry.tags.push(data.tags[2].id);
 
       cleanDate(entry);
 

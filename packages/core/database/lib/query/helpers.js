@@ -3,6 +3,7 @@
 const _ = require('lodash/fp');
 
 const types = require('../types');
+const { createField } = require('../fields');
 
 const GROUP_OPERATORS = ['$and', '$or'];
 const OPERATORS = [
@@ -386,43 +387,47 @@ const applyJoin = (qb, join) => {
 
 const applyJoins = (qb, joins) => joins.forEach(join => applyJoin(qb, join));
 
-/*
-  Populate
-*/
-
+/**
+ * Converts and prepares the query for populate
+ *
+ * @param {boolean|string[]|object} populate populate param
+ * @param {object} ctx query context
+ * @param {object} ctx.db database instance
+ * @param {object} ctx.qb query builder instance
+ * @param {string} ctx.uid model uid
+ */
 const processPopulate = (populate, ctx) => {
-  // TODO: Make sure to add the needed columns in the select statement for use in the next query (join columns)
-
   const { qb, db, uid } = ctx;
   const meta = db.metadata.get(uid);
 
-  if (populate === true) {
-    // TODO: transform to full object populate
+  let populateMap = {};
+
+  if (populate === false) {
+    return null;
   }
 
-  if (Array.isArray(populate)) {
-    return populate.reduce((acc, attributeName) => {
-      if (typeof attributeName !== 'string') {
-        throw new Error(`Expected a string receveid ${typeof attributeName}.`);
+  if (typeof populate === 'string' && Boolean(populate)) {
+    for (const key in meta.attributes) {
+      const attribute = meta.attributes[key];
+
+      if (attribute.type === 'relation') {
+        populateMap[key] = true;
       }
-
-      const attribute = meta.attributes[attributeName];
-
-      if (!attribute) {
-        throw new Error(`Cannot populate unknown field ${attributeName}`);
-      }
-
-      return { ...acc, [attributeName]: true };
-    }, {});
+    }
+  } else if (Array.isArray(populate)) {
+    for (const key of populate) {
+      populateMap[key] = true;
+    }
+  } else {
+    populateMap = populate;
   }
 
-  if (!_.isPlainObject(populate)) {
-    // TODO: link to the doc
+  if (!_.isPlainObject(populateMap)) {
     throw new Error('Populate must be an object');
   }
 
   const finalPopulate = {};
-  for (const key in populate) {
+  for (const key in populateMap) {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
@@ -433,12 +438,10 @@ const processPopulate = (populate, ctx) => {
       throw new Error(`Invalid populate field. Expected a relation, got ${attribute.type}`);
     }
 
-    const value = populate[key];
-
     // TODO: make sure necessary columns are present for future populate queries
     qb.addSelect('id');
 
-    finalPopulate[key] = value;
+    finalPopulate[key] = populateMap[key];
   }
 
   return finalPopulate;
@@ -452,13 +455,16 @@ const applyPopulate = async (results, populate, ctx) => {
   // TODO: ⚠️ on join tables we might want to make one query to find all the xxx_id then one query instead of a join to avoid returning multiple times the same object
 
   // TODO: do the mapResults after the aggregations
-  // TODO: order by / limit / offset is per result not for all results so we need ot loop and populate each result independently
+
+  // TODO: limit / offset is per result not for all results so we need ot loop and populate each result independently
 
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 
   for (const key in populate) {
-    const populateValue = populate[key];
+    // TODO: Disable limit & offset in v1 to avoid needing a query per result (too many queries would ipact the performances a lot)
+    const populateValue = _.pick(['select', 'where', 'populate', 'orderBy'], populate[key]);
+
     const attribute = meta.attributes[key];
 
     const targetMeta = db.metadata.get(attribute.target);
@@ -480,7 +486,9 @@ const applyPopulate = async (results, populate, ctx) => {
         const rrMap = _.groupBy(referencedColumnName, rr);
 
         results.forEach(r => {
-          Object.assign(r, { [key]: _.first(rrMap[r[joinColumnName]]) || null });
+          Object.assign(r, {
+            [key]: fromRow(targetMeta, _.first(rrMap[r[joinColumnName]])) || null,
+          });
         });
 
         continue;
@@ -517,7 +525,8 @@ const applyPopulate = async (results, populate, ctx) => {
 
         results.forEach(r => {
           Object.assign(r, {
-            [key]: _.first(rrMap[r[joinTable.joinColumn.referencedColumn]]) || null,
+            [key]:
+              fromRow(targetMeta, _.first(rrMap[r[joinTable.joinColumn.referencedColumn]])) || null,
           });
         });
         continue;
@@ -541,7 +550,9 @@ const applyPopulate = async (results, populate, ctx) => {
         const rrMap = _.groupBy(referencedColumnName, rr);
 
         results.forEach(r => {
-          Object.assign(r, { [key]: rrMap[r[joinColumnName]] }) || [];
+          Object.assign(r, {
+            [key]: (rrMap[r[joinColumnName]] || []).map(entry => fromRow(targetMeta, entry)),
+          });
         });
 
         continue;
@@ -575,7 +586,9 @@ const applyPopulate = async (results, populate, ctx) => {
 
         results.forEach(r => {
           Object.assign(r, {
-            [key]: rrMap[r[joinTable.joinColumn.referencedColumn]] || [],
+            [key]: (rrMap[r[joinTable.joinColumn.referencedColumn]] || []).map(entry =>
+              fromRow(targetMeta, entry)
+            ),
           });
         });
         continue;
@@ -610,13 +623,57 @@ const applyPopulate = async (results, populate, ctx) => {
 
       results.forEach(r => {
         Object.assign(r, {
-          [key]: rrMap[r[joinTable.joinColumn.referencedColumn]] || [],
+          [key]: (rrMap[r[joinTable.joinColumn.referencedColumn]] || []).map(entry =>
+            fromRow(targetMeta, entry)
+          ),
         });
       });
 
       continue;
     }
   }
+};
+
+const fromRow = (metadata, row) => {
+  const { attributes } = metadata;
+
+  if (_.isNil(row)) {
+    return null;
+  }
+
+  const obj = {};
+
+  for (const column in row) {
+    // to field Name
+    const attributeName = column;
+
+    if (!attributes[attributeName]) {
+      // ignore value that are not related to an attribute (join columns ...)
+      continue;
+    }
+
+    const attribute = attributes[attributeName];
+
+    if (types.isScalar(attribute.type)) {
+      // TODO: we convert to column name
+      // TODO: handle default value too
+      // TODO: format data & use dialect to know which type they support (json particularly)
+
+      const field = createField(attribute.type, attribute);
+
+      // TODO: validate data on creation
+      // field.validate(data[attributeName]);
+      const val = row[column] === null ? null : field.fromDB(row[column]);
+
+      obj[attributeName] = val;
+    }
+
+    if (types.isRelation(attribute.type)) {
+      obj[attributeName] = row[column];
+    }
+  }
+
+  return obj;
 };
 
 module.exports = {
@@ -627,4 +684,5 @@ module.exports = {
   processOrderBy,
   processPopulate,
   applyPopulate,
+  fromRow,
 };

@@ -7,7 +7,7 @@ module.exports = {
     'plugin:import/errors',
     'plugin:import/warnings',
     'plugin:node/recommended',
-    'plugin:jsdoc/recommended',
+    // 'plugin:jsdoc/recommended',
   ],
   plugins: ['jsdoc'],
   env: {
@@ -19,6 +19,20 @@ module.exports = {
     strapi: false,
   },
   rules: {
+    // 'jsdoc/require-jsdoc': [
+    //   'warn',
+    //   {
+    //     publicOnly: true,
+    //     require: {
+    //       ArrowFunctionExpression: true,
+    //       ClassDeclaration: true,
+    //       ClassExpression: true,
+    //       FunctionDeclaration: true,
+    //       FunctionExpression: true,
+    //       MethodDefinition: true,
+    //     },
+    //   },
+    // ],
     'node/no-unpublished-require': 'off',
     'require-atomic-updates': 'off',
     'no-process-exit': 'off',

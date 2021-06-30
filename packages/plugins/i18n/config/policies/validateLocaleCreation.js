@@ -36,10 +36,9 @@ const validateLocaleCreation = async (ctx, next) => {
   body.locale = entityLocale;
 
   if (modelDef.kind === 'singleType') {
-    const entity = await strapi.entityService.find(
-      { params: { _locale: entityLocale } },
-      { model }
-    );
+    const entity = await strapi.entityService.find(modelDef.uid, {
+      params: { _locale: entityLocale },
+    });
 
     ctx.request.query._locale = body.locale;
 
