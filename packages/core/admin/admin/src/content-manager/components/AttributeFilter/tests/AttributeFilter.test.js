@@ -1,10 +1,15 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
-
 import AttributeFilter from '..';
 import addressCt from '../../../../../../../../admin-test-utils/lib/fixtures/collectionTypes/address';
 import addressMetaData from '../../../../../../../../admin-test-utils/lib/fixtures/metaData/address';
+
+class MockDate extends Date {
+  constructor() {
+    super(1992, 5, 21);
+  }
+}
 
 jest.mock('react-intl', () => ({
   // eslint-disable-next-line react/prop-types
@@ -111,6 +116,17 @@ const renderComponent = () =>
   );
 
 describe('AttributeFilter', () => {
+  let realDate;
+
+  beforeEach(() => {
+    realDate = global.Date;
+    global.Date = MockDate;
+  });
+
+  afterEach(() => {
+    global.Date = realDate;
+  });
+
   it('snapshots the filter dropdown with a set of valid fields', () => {
     const { container } = renderComponent();
 
@@ -339,7 +355,7 @@ describe('AttributeFilter', () => {
         name="start_date"
         tabindex="0"
         type="text"
-        value="June 29, 2021"
+        value="June 21, 1992"
       />
     `);
   });
