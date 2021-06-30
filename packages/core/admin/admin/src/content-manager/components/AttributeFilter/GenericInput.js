@@ -32,7 +32,11 @@ function GenericInput({ type, onChange, value, ...rest }) {
       return (
         <DateWrapper type={type}>
           <DateTime
-            onChange={e => onChange(e.target.value.format('YYYY-MM-DD'))}
+            onChange={e => {
+              if (e.target.value) {
+                onChange(e.target.value.toISOString());
+              }
+            }}
             value={momentValue}
             {...rest}
           />
