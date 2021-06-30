@@ -263,7 +263,7 @@ const createEntityManager = db => {
 
     /**
      * Attach relations to a new entity
-     * TODO: Link to documentation
+     *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
@@ -326,7 +326,7 @@ const createEntityManager = db => {
 
     /**
      * Updates relations of an existing entity
-     * TODO: [Link to the documentation]
+     *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
@@ -397,7 +397,7 @@ const createEntityManager = db => {
      * Delete relations of an existing entity
      * This removes associations but doesn't do cascade deletions for components for example. This will be handled on the entity service layer instead
      * NOTE: Most of the deletion should be handled by ON DELETE CASCADE for dialect that have FKs
-     * TODO: link to documentation
+     *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
@@ -444,11 +444,6 @@ const createEntityManager = db => {
       }
     },
 
-    // method to work with relations
-    attachRelation() {},
-    detachRelation() {},
-    setRelation() {},
-
     // cascading
     // aggregations
     // -> avg
@@ -469,6 +464,7 @@ const createEntityManager = db => {
     // extra features
     // -> virtuals
     // -> private
+
     createQueryBuilder(uid) {
       return createQueryBuilder(uid, db);
     },

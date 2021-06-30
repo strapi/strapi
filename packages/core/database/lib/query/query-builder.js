@@ -181,7 +181,8 @@ const createQueryBuilder = (uid, db) => {
 
             if (state.joins.length > 0) {
               // add ordered columns to distinct in case of joins
-              qb.distinct();
+              // TODO: make sure we return the right data
+              qb.distinct(`${this.alias}.id`);
               // TODO: add column if they aren't there already
               state.select.unshift(...state.orderBy.map(({ column }) => column));
             }
@@ -243,18 +244,17 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyJoins(qb, state.joins);
         }
 
+        // console.log(qb.toQuery());
+
         const rows = await qb;
 
         if (state.populate && !_.isNil(rows)) {
-          // TODO: hanlde populate
           await helpers.applyPopulate(_.castArray(rows), state.populate, { qb: this, uid, db });
         }
 
         let results = rows;
         if (mapResults && state.type === 'select') {
-          results = Array.isArray(rows)
-            ? rows.map(row => helpers.fromRow(meta, row))
-            : helpers.fromRow(meta, rows);
+          results = helpers.fromRow(meta, rows);
         }
 
         return results;

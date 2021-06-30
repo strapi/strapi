@@ -149,6 +149,8 @@ const processOrderBy = (orderBy, ctx) => {
   throw new Error('Invalid orderBy syntax');
 };
 
+const isOperator = key => OPERATORS.includes(key);
+
 const processWhere = (where, ctx, depth = 0) => {
   if (depth === 0 && !_.isPlainObject(where)) {
     throw new Error('Where must be an object');
@@ -182,7 +184,7 @@ const processWhere = (where, ctx, depth = 0) => {
       continue;
     }
 
-    if (OPERATORS.includes(key)) {
+    if (isOperator(key)) {
       if (depth == 0) {
         throw new Error(
           `Only $and, $or and $not can by used as root level operators. Found ${key}.`
@@ -217,15 +219,20 @@ const processWhere = (where, ctx, depth = 0) => {
 
       const subAlias = createJoin(ctx, { alias, uid, attributeName: key, attribute });
 
-      const nestedWhere = processNested(value, {
+      let nestedWhere = processNested(value, {
         db,
         qb,
         alias: subAlias,
         uid: attribute.target,
       });
 
+      if (!_.isPlainObject(nestedWhere) || isOperator(_.keys(nestedWhere)[0])) {
+        nestedWhere = { [`${subAlias}.id`]: nestedWhere };
+      }
+
       // TODO: use a better merge logic (push to $and when collisions)
       Object.assign(filters, nestedWhere);
+
       continue;
     }
 
@@ -448,26 +455,22 @@ const processPopulate = (populate, ctx) => {
 };
 
 const applyPopulate = async (results, populate, ctx) => {
-  // TODO: cleanup code  -> factorise
+  // TODO: cleanup code
   // TODO: create aliases for pivot columns
-  // TODO: remove joinColumn
   // TODO: optimize depth to avoid overfetching
-  // TODO: ⚠️ on join tables we might want to make one query to find all the xxx_id then one query instead of a join to avoid returning multiple times the same object
-
-  // TODO: do the mapResults after the aggregations
-
-  // TODO: limit / offset is per result not for all results so we need ot loop and populate each result independently
 
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 
   for (const key in populate) {
-    // TODO: Disable limit & offset in v1 to avoid needing a query per result (too many queries would ipact the performances a lot)
+    // TODO: Omit limit & offset in v1 to avoid needing a query per result (too many queries would ipact the performances a lot)
     const populateValue = _.pick(['select', 'where', 'populate', 'orderBy'], populate[key]);
 
     const attribute = meta.attributes[key];
 
     const targetMeta = db.metadata.get(attribute.target);
+
+    const fromTargetRow = rowOrRows => fromRow(targetMeta, rowOrRows);
 
     if (attribute.relation === 'oneToOne' || attribute.relation === 'manyToOne') {
       if (attribute.joinColumn) {
@@ -476,19 +479,17 @@ const applyPopulate = async (results, populate, ctx) => {
           referencedColumn: referencedColumnName,
         } = attribute.joinColumn;
 
-        const rr = await db.entityManager
+        const rows = await db.entityManager
           .createQueryBuilder(targetMeta.uid)
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
           .where({ [referencedColumnName]: results.map(r => r[joinColumnName]) })
           .execute({ mapResults: false });
 
-        const rrMap = _.groupBy(referencedColumnName, rr);
+        const map = _.groupBy(referencedColumnName, rows);
 
-        results.forEach(r => {
-          Object.assign(r, {
-            [key]: fromRow(targetMeta, _.first(rrMap[r[joinColumnName]])) || null,
-          });
+        results.forEach(result => {
+          result[key] = fromTargetRow(_.first(map[result[joinColumnName]]));
         });
 
         continue;
@@ -496,14 +497,18 @@ const applyPopulate = async (results, populate, ctx) => {
 
       if (attribute.joinTable) {
         const { joinTable } = attribute;
-        // query the target through the join table
 
         const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
+
+        const {
+          name: joinColumnName,
+          referencedColumn: referencedColumnName,
+        } = joinTable.joinColumn;
 
         // TODO: create aliases for the columns
 
         const alias = qb.getAlias();
-        const rr = await qb
+        const rows = await qb
           .init(populateValue)
           .join({
             alias: alias,
@@ -513,21 +518,16 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
-          .addSelect(`${alias}.${joinTable.joinColumn.name}`)
+          .addSelect(`${alias}.${joinColumnName}`)
           .where({
-            [`${alias}.${joinTable.joinColumn.name}`]: results.map(
-              r => r[joinTable.joinColumn.referencedColumn]
-            ),
+            [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
           })
           .execute({ mapResults: false });
 
-        const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
+        const map = _.groupBy(joinColumnName, rows);
 
-        results.forEach(r => {
-          Object.assign(r, {
-            [key]:
-              fromRow(targetMeta, _.first(rrMap[r[joinTable.joinColumn.referencedColumn]])) || null,
-          });
+        results.forEach(result => {
+          result[key] = fromTargetRow(_.first(map[result[referencedColumnName]]));
         });
         continue;
       }
@@ -540,19 +540,17 @@ const applyPopulate = async (results, populate, ctx) => {
           referencedColumn: referencedColumnName,
         } = attribute.joinColumn;
 
-        const rr = await db.entityManager
+        const rows = await db.entityManager
           .createQueryBuilder(targetMeta.uid)
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
           .where({ [referencedColumnName]: results.map(r => r[joinColumnName]) })
           .execute({ mapResults: false });
 
-        const rrMap = _.groupBy(referencedColumnName, rr);
+        const map = _.groupBy(referencedColumnName, rows);
 
-        results.forEach(r => {
-          Object.assign(r, {
-            [key]: (rrMap[r[joinColumnName]] || []).map(entry => fromRow(targetMeta, entry)),
-          });
+        results.forEach(result => {
+          result[key] = fromTargetRow(map[result[joinColumnName]] || []);
         });
 
         continue;
@@ -563,8 +561,13 @@ const applyPopulate = async (results, populate, ctx) => {
 
         const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
 
+        const {
+          name: joinColumnName,
+          referencedColumn: referencedColumnName,
+        } = joinTable.joinColumn;
+
         const alias = qb.getAlias();
-        const rr = await qb
+        const rows = await qb
           .init(populateValue)
           .join({
             alias: alias,
@@ -574,22 +577,16 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
-          .addSelect(`${alias}.${joinTable.joinColumn.name}`)
+          .addSelect(`${alias}.${joinColumnName}`)
           .where({
-            [`${alias}.${joinTable.joinColumn.name}`]: results.map(
-              r => r[joinTable.joinColumn.referencedColumn]
-            ),
+            [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
           })
           .execute({ mapResults: false });
 
-        const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
+        const map = _.groupBy(joinColumnName, rows);
 
         results.forEach(r => {
-          Object.assign(r, {
-            [key]: (rrMap[r[joinTable.joinColumn.referencedColumn]] || []).map(entry =>
-              fromRow(targetMeta, entry)
-            ),
-          });
+          r[key] = fromTargetRow(map[r[referencedColumnName]] || []);
         });
         continue;
       }
@@ -600,8 +597,10 @@ const applyPopulate = async (results, populate, ctx) => {
 
       const qb = db.entityManager.createQueryBuilder(targetMeta.uid);
 
+      const { name: joinColumnName, referencedColumn: referencedColumnName } = joinTable.joinColumn;
+
       const alias = qb.getAlias();
-      const rr = await qb
+      const rows = await qb
         .init(populateValue)
         .join({
           alias: alias,
@@ -611,22 +610,16 @@ const applyPopulate = async (results, populate, ctx) => {
           rootTable: qb.alias,
           on: joinTable.on,
         })
-        .addSelect(`${alias}.${joinTable.joinColumn.name}`)
+        .addSelect(`${alias}.${joinColumnName}`)
         .where({
-          [`${alias}.${joinTable.joinColumn.name}`]: results.map(
-            r => r[joinTable.joinColumn.referencedColumn]
-          ),
+          [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
         })
         .execute({ mapResults: false });
 
-      const rrMap = _.groupBy(joinTable.joinColumn.name, rr);
+      const map = _.groupBy(joinColumnName, rows);
 
-      results.forEach(r => {
-        Object.assign(r, {
-          [key]: (rrMap[r[joinTable.joinColumn.referencedColumn]] || []).map(entry =>
-            fromRow(targetMeta, entry)
-          ),
-        });
+      results.forEach(result => {
+        result[key] = fromTargetRow(map[result[referencedColumnName]] || []);
       });
 
       continue;
@@ -635,6 +628,10 @@ const applyPopulate = async (results, populate, ctx) => {
 };
 
 const fromRow = (metadata, row) => {
+  if (Array.isArray(row)) {
+    return row.map(row => fromRow(metadata, row));
+  }
+
   const { attributes } = metadata;
 
   if (_.isNil(row)) {
