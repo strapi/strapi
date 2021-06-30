@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
-
+const { getService } = require('../utils');
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -20,7 +20,7 @@ module.exports = {
       return ctx.send({ error }, 400);
     }
 
-    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+    const contentTypeService = getService('content-types');
 
     const contentTypes = Object.keys(strapi.contentTypes)
       .filter(uid => !kind || _.get(strapi.contentTypes[uid], 'kind', 'collectionType') === kind)
@@ -40,7 +40,7 @@ module.exports = {
       return ctx.send({ error: 'contentType.notFound' }, 404);
     }
 
-    const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+    const contentTypeService = getService('content-types');
 
     ctx.send({ data: contentTypeService.formatContentType(contentType) });
   },
@@ -57,7 +57,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = getService('content-types');
 
       const contentType = await contentTypeService.createContentType({
         contentType: body.contentType,
@@ -102,7 +102,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = getService('content-types');
 
       const component = await contentTypeService.editContentType(uid, {
         contentType: body.contentType,
@@ -128,7 +128,7 @@ module.exports = {
     try {
       strapi.reload.isWatching = false;
 
-      const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+      const contentTypeService = getService('content-types');
 
       const component = await contentTypeService.deleteContentType(uid);
 

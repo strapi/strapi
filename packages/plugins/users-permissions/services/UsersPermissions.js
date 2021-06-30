@@ -337,7 +337,7 @@ module.exports = {
       await Promise.all(
         toRemove.map(permission => {
           const { type, controller, action, roleId } = permission;
-          return query.delete({ type, controller, action, role: { id: roleId } });
+          return query.delete({ where: { type, controller, action, role: { id: roleId } } });
         })
       );
     }

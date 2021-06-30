@@ -57,42 +57,39 @@ const formatAttributes = model => {
  * @param {Object} context.component - the associated component
  */
 const formatAttribute = (key, attribute, { model }) => {
-  if (_.has(attribute, 'type')) return attribute;
-
+  // FIXME: remove
   // format relations
-  const relation = (model.associations || []).find(assoc => assoc.alias === key);
-  const { plugin, configurable } = attribute;
-  let targetEntity = attribute.model || attribute.collection;
 
-  if (isMediaAttribute(attribute)) {
+  const { configurable, required, autoPopulate, pluginOptions } = attribute;
+
+  if (attribute.type === 'media') {
     return {
       type: 'media',
-      multiple: attribute.collection ? true : false,
-      required: attribute.required ? true : false,
+      multiple: attribute.multiple ? true : false,
+      required: required ? true : false,
       configurable: configurable === false ? false : undefined,
       allowedTypes: attribute.allowedTypes,
-      pluginOptions: attribute.pluginOptions,
-    };
-  } else {
-    return {
-      nature: relation.nature,
-      target: targetEntity === '*' ? targetEntity : toUID(targetEntity, plugin),
-      plugin: plugin || undefined,
-      dominant: attribute.dominant ? true : false,
-      targetAttribute: attribute.via || undefined,
-      columnName: attribute.columnName || undefined,
-      configurable: configurable === false ? false : undefined,
-      targetColumnName: _.get(
-        strapi.getModel(targetEntity, plugin),
-        ['attributes', attribute.via, 'columnName'],
-        undefined
-      ),
-      private: attribute.private ? true : false,
-      unique: attribute.unique ? true : false,
-      autoPopulate: attribute.autoPopulate,
-      pluginOptions: attribute.pluginOptions,
+      pluginOptions,
     };
   }
+
+  if (attribute.type === 'relation') {
+    return {
+      ...attribute,
+      type: 'relation',
+      nature: attribute.relation,
+      target: attribute.target,
+      required: required ? true : false,
+      configurable: configurable === false ? false : undefined,
+      private: attribute.private ? true : false,
+      unique: attribute.unique ? true : false,
+      // FIXME: remove
+      autoPopulate,
+      pluginOptions,
+    };
+  }
+
+  return attribute;
 };
 
 // TODO: move to schema builder

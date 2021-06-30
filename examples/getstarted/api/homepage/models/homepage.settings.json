@@ -35,17 +35,14 @@
       }
     },
     "single": {
-      "model": "file",
-      "via": "related",
+      "type": "media",
       "allowedTypes": ["images", "files", "videos"],
-      "plugin": "upload",
       "required": false
     },
     "multiple": {
-      "collection": "file",
-      "via": "related",
+      "type": "media",
+      "multiple": true,
       "allowedTypes": ["images", "videos"],
-      "plugin": "upload",
       "required": false
     }
   }

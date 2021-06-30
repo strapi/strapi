@@ -46,8 +46,8 @@
         }
       }
     },
-    "category_compo": {
-      "component": "application::category.category",
+    "closing_period": {
+      "component": "default.closingperiod",
       "type": "component",
       "pluginOptions": {
         "i18n": {
@@ -80,18 +80,15 @@
       "target": "application::address.address"
     },
     "cover": {
-      "model": "file",
-      "via": "related",
-      "plugin": "upload",
+      "type": "media",
       "required": false
     },
     "timestamp": {
       "type": "timestamp"
     },
     "images": {
-      "collection": "file",
-      "via": "related",
-      "plugin": "upload",
+      "type": "media",
+      "multiple": true,
       "required": false
     },
     "short_description": {

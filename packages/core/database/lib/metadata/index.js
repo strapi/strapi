@@ -44,6 +44,10 @@ const createJoinColum = (metadata, { attribute /*attributeName, meta */ }) => {
 const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   const targetMeta = metadata.get(attribute.target);
 
+  if (!targetMeta) {
+    throw new Error(`Unknow target ${attribute.target}`);
+  }
+
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
 
   const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
@@ -155,7 +159,7 @@ const createMetadata = (models = []) => {
   const metadata = new Metadata();
 
   // init pass
-  for (const model of models) {
+  for (const model of _.cloneDeep(models)) {
     metadata.add({
       singularName: model.singularName,
       uid: model.uid,
@@ -218,6 +222,7 @@ const createMetadata = (models = []) => {
           continue;
         }
       } catch (error) {
+        console.error(error);
         throw new Error(
           `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
         );

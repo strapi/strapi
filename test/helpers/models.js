@@ -5,7 +5,7 @@ const { createStrapiInstance } = require('./strapi');
 
 const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {
   const strapi = strapiInstance || (await createStrapiInstance(options));
-  const contentTypeService = strapi.plugins['content-type-builder'].services.contenttypes;
+  const contentTypeService = strapi.plugins['content-type-builder'].services['content-types'];
   const componentsService = strapi.plugins['content-type-builder'].services.components;
 
   const cleanup = async () => {

@@ -6,9 +6,9 @@ const transformAttribute = attribute => {
       // convert to relation
       return {
         type: 'relation',
-        relation: attribute.single === true ? 'morphOne' : 'morphMany',
-        target: 'file',
-        morphOn: 'related',
+        relation: attribute.single === true ? 'manyToOne' : 'manyToMany', //'morphOne' : 'morphMany',
+        target: 'plugins::upload.file',
+        // morphOn: 'related',
       };
     }
     // case 'component': {
@@ -30,11 +30,11 @@ const transformContentTypes = contentTypes => {
       singularName: contentType.modelName,
       tableName: contentType.collectionName,
       attributes: {
-        created_at: {
+        createdAt: {
           type: 'datetime',
-          default: () => new Date(),
+          // default: () => new Date(),
         },
-        updated_at: {
+        updatedAt: {
           type: 'datetime',
         },
         ...Object.keys(contentType.attributes).reduce((attrs, attrName) => {

@@ -22,6 +22,10 @@ module.exports = {
   toContentManagerModel(contentType) {
     return {
       ...contentType,
+      options: {
+        ...contentType.options,
+        timestamps: [],
+      },
       apiID: contentType.modelName,
       isDisplayed: isVisible(contentType),
       info: {
@@ -30,7 +34,7 @@ module.exports = {
       },
       attributes: {
         id: {
-          type: contentType.primaryKeyType,
+          type: 'integer',
         },
         ...formatAttributes(contentType),
         ...contentTypesUtils.getTimestampsAttributes(contentType),
@@ -66,8 +70,11 @@ const formatAttributes = model => {
 
 // FIXME: not needed
 const formatAttribute = (key, attribute, { model }) => {
-  return attribute;
+  if (attribute.type === 'relation') {
+    return toRelation(attribute);
+  }
 
+  return attribute;
 
   // if (has('type', attribute)) return attribute;
 
@@ -91,12 +98,12 @@ const toMedia = attribute => {
 };
 
 // FIXME: not needed
-const toRelation = (attribute, relation) => {
+const toRelation = attribute => {
   return {
     ...attribute,
     type: 'relation',
-    targetModel: relation.targetUid,
-    relationType: relation.nature,
+    targetModel: attribute.target,
+    relationType: attribute.relation,
     pluginOptions: attribute.pluginOptions,
   };
 };

@@ -1,5 +1,6 @@
 'use strict';
 
+const { getService } = require('../utils');
 const validateComponentCategory = require('./validation/component-category');
 
 module.exports = {
@@ -16,8 +17,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const componentCategoryService =
-      strapi.plugins['content-type-builder'].services.componentcategories;
+    const componentCategoryService = getService('component-categories');
 
     const newName = await componentCategoryService.editCategory(name, body);
 
@@ -31,8 +31,7 @@ module.exports = {
 
     strapi.reload.isWatching = false;
 
-    const componentCategoryService =
-      strapi.plugins['content-type-builder'].services.componentcategories;
+    const componentCategoryService = getService('component-categories');
 
     await componentCategoryService.deleteCategory(name);
 

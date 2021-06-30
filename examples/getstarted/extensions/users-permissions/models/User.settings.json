@@ -60,9 +60,7 @@
       "configurable": false
     },
     "picture": {
-      "model": "file",
-      "via": "related",
-      "plugin": "upload"
+      "type": "media"
     }
   }
 }

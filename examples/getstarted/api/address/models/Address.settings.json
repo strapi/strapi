@@ -32,10 +32,8 @@
       "inversedBy": "addresses"
     },
     "cover": {
-      "model": "file",
-      "via": "related",
+      "type": "media",
       "allowedTypes": ["files", "images", "videos"],
-      "plugin": "upload",
       "required": false,
       "pluginOptions": {
         "i18n": {
@@ -44,10 +42,9 @@
       }
     },
     "images": {
-      "collection": "file",
-      "via": "related",
+      "type": "media",
+      "multiple": true,
       "allowedTypes": ["images"],
-      "plugin": "upload",
       "required": false,
       "pluginOptions": {
         "i18n": {
