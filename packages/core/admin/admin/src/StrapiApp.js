@@ -1,36 +1,26 @@
 import React from 'react';
-import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { QueryClientProvider, QueryClient } from 'react-query';
-import { ThemeProvider } from 'styled-components';
-import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import pick from 'lodash/pick';
-import createHook from '@strapi/hooks';
 import invariant from 'invariant';
+import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
-import basename from './utils/basename';
 import App from './pages/App';
-import LanguageProvider from './components/LanguageProvider';
-import AutoReloadOverlayBlockerProvider from './components/AutoReloadOverlayBlockerProvider';
-import OverlayBlocker from './components/OverlayBlocker';
-import Fonts from './components/Fonts';
-import GlobalStyle from './components/GlobalStyle';
-import Notifications from './components/Notifications';
-import themes from './themes';
+import Providers from './components/Providers';
+import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
+import {
+  INJECT_COLUMN_IN_TABLE,
+  MUTATE_COLLECTION_TYPES_LINKS,
+  MUTATE_EDIT_VIEW_LAYOUT,
+  MUTATE_SINGLE_TYPES_LINKS,
+} from './exposedHooks';
+import injectionZones from './injectionZones';
+import themes from './themes';
 
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
 };
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-    },
-  },
-});
 
 class StrapiApp {
   constructor({ appPlugins, library, locales, middlewares, reducers }) {
@@ -42,6 +32,10 @@ class StrapiApp {
     this.reducers = reducers;
     this.translations = {};
     this.hooksDict = {};
+    this.admin = {
+      injectionZones,
+    };
+
     this.menu = [];
     this.settings = {
       global: {
@@ -72,9 +66,7 @@ class StrapiApp {
       `Expected link.to to be a string instead received ${typeof link.to}`
     );
     invariant(
-      ['/plugins/content-manager', '/plugins/content-type-builder', '/plugins/upload'].includes(
-        link.to
-      ),
+      ['/plugins/content-type-builder', '/plugins/upload'].includes(link.to),
       'This method is not available for your plugin'
     );
     invariant(
@@ -153,21 +145,6 @@ class StrapiApp {
     });
   };
 
-  async initialize() {
-    Object.keys(this.appPlugins).forEach(plugin => {
-      this.appPlugins[plugin].register({
-        addComponents: this.addComponents,
-        addCorePluginMenuLink: this.addCorePluginMenuLink,
-        addFields: this.addFields,
-        addMenuLink: this.addMenuLink,
-        addMiddlewares: this.addMiddlewares,
-        addReducers: this.addReducers,
-        createSettingSection: this.createSettingSection,
-        registerPlugin: this.registerPlugin,
-      });
-    });
-  }
-
   async boot() {
     Object.keys(this.appPlugins).forEach(plugin => {
       const boot = this.appPlugins[plugin].boot;
@@ -177,10 +154,27 @@ class StrapiApp {
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
+          injectContentManagerComponent: this.injectContentManagerComponent,
+          registerHook: this.registerHook,
         });
       }
     });
   }
+
+  bootstrapAdmin = async () => {
+    this.createHook(INJECT_COLUMN_IN_TABLE);
+    this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
+    this.createHook(MUTATE_SINGLE_TYPES_LINKS);
+    this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
+
+    await this.loadAdminTrads();
+
+    return Promise.resolve();
+  };
+
+  createHook = name => {
+    this.hooksDict[name] = createHook();
+  };
 
   createSettingSection = (section, links) => {
     invariant(section.id, 'section.id should be defined');
@@ -205,8 +199,44 @@ class StrapiApp {
     return store;
   };
 
+  getAdminInjectedComponents = (moduleName, containerName, blockName) => {
+    try {
+      return this.admin.injectionZones[moduleName][containerName][blockName] || [];
+    } catch (err) {
+      console.error('Cannot get injected component', err);
+
+      return err;
+    }
+  };
+
   getPlugin = pluginId => {
     return this.plugins[pluginId];
+  };
+
+  async initialize() {
+    Object.keys(this.appPlugins).forEach(plugin => {
+      this.appPlugins[plugin].register({
+        addComponents: this.addComponents,
+        addCorePluginMenuLink: this.addCorePluginMenuLink,
+        addFields: this.addFields,
+        addMenuLink: this.addMenuLink,
+        addMiddlewares: this.addMiddlewares,
+        addReducers: this.addReducers,
+        createHook: this.createHook,
+        createSettingSection: this.createSettingSection,
+        registerPlugin: this.registerPlugin,
+      });
+    });
+  }
+
+  injectContentManagerComponent = (containerName, blockName, component) => {
+    invariant(
+      this.admin.injectionZones.contentManager[containerName]?.[blockName],
+      `The ${containerName} ${blockName} zone is not defined in the content manager`
+    );
+    invariant(component, 'A Component must be provided');
+
+    this.admin.injectionZones.contentManager[containerName][blockName].push(component);
   };
 
   async loadAdminTrads() {
@@ -270,27 +300,28 @@ class StrapiApp {
     return Promise.resolve();
   }
 
+  registerHook = (name, fn) => {
+    invariant(
+      this.hooksDict[name],
+      `The hook ${name} is not defined. You are trying to register a hook that does not exist in the application.`
+    );
+    this.hooksDict[name].register(fn);
+  };
+
   registerPlugin = pluginConf => {
     const plugin = Plugin(pluginConf);
 
     this.plugins[plugin.pluginId] = plugin;
   };
 
-  createHook = name => {
-    this.hooksDict[name] = createHook();
-  };
-
-  registerHook = (name, fn) => {
-    this.hooksDict[name].register(fn);
-  };
-
   runHookSeries = (name, asynchronous = false) =>
     asynchronous ? this.hooksDict[name].runSeriesAsync() : this.hooksDict[name].runSeries();
 
-  runHookWaterfall = (name, initialValue, asynchronous = false) =>
-    asynchronous
-      ? this.hooksDict[name].runWaterfallAsync(initialValue)
-      : this.hooksDict[name].runWaterfall(initialValue);
+  runHookWaterfall = (name, initialValue, asynchronous = false, store) => {
+    return asynchronous
+      ? this.hooksDict[name].runWaterfallAsync(initialValue, store)
+      : this.hooksDict[name].runWaterfall(initialValue, store);
+  };
 
   runHookParallel = name => this.hooksDict[name].runParallel();
 
@@ -304,37 +335,29 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <QueryClientProvider client={queryClient}>
-        <ThemeProvider theme={themes}>
-          <GlobalStyle />
-          <Fonts />
-          <Provider store={store}>
-            <StrapiAppProvider
-              getPlugin={this.getPlugin}
-              menu={this.menu}
-              plugins={this.plugins}
-              runHookParallel={this.runHookParallel}
-              runHookWaterfall={this.runHookWaterfall}
-              runHookSeries={this.runHookSeries}
-              settings={this.settings}
-            >
-              <LibraryProvider components={components} fields={fields}>
-                <LanguageProvider messages={this.translations} localeNames={localeNames}>
-                  <AutoReloadOverlayBlockerProvider>
-                    <OverlayBlocker>
-                      <Notifications>
-                        <BrowserRouter basename={basename}>
-                          <App store={store} />
-                        </BrowserRouter>
-                      </Notifications>
-                    </OverlayBlocker>
-                  </AutoReloadOverlayBlockerProvider>
-                </LanguageProvider>
-              </LibraryProvider>
-            </StrapiAppProvider>
-          </Provider>
-        </ThemeProvider>
-      </QueryClientProvider>
+      <Theme theme={themes}>
+        <Providers
+          components={components}
+          fields={fields}
+          localeNames={localeNames}
+          getAdminInjectedComponents={this.getAdminInjectedComponents}
+          getPlugin={this.getPlugin}
+          messages={this.translations}
+          menu={this.menu}
+          plugins={this.plugins}
+          runHookParallel={this.runHookParallel}
+          runHookWaterfall={(name, initialValue, async = false) => {
+            return this.runHookWaterfall(name, initialValue, async, store);
+          }}
+          runHookSeries={this.runHookSeries}
+          settings={this.settings}
+          store={store}
+        >
+          <BrowserRouter basename={basename}>
+            <App store={store} />
+          </BrowserRouter>
+        </Providers>
+      </Theme>
     );
   }
 }

@@ -122,8 +122,6 @@
   "form.button.select-component": "เลือกคอมโพเนนต์",
   "form.button.single-type.description": "ที่ดีที่สุดสำหรับอินสแตนซ์เดี่ยวเช่น เกี่ยวกับเรา, โฮมเพจ, เป็นต้น",
   "from": "จาก",
-  "injected-components.content-manager.edit-settings-view.link.components": "แก้ไขคอมโพเนนต์",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "แก้ไขชนิดเนื้อหา",
   "menu.section.components.name.plural": "คอมโพเนนต์",
   "menu.section.components.name.singular": "คอมโพเนนต์",
   "menu.section.models.name.plural": "ชนิดของคอลเล็กชัน",

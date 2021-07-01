@@ -28,7 +28,7 @@ const app = StrapiApp({
 const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
-  await app.loadAdminTrads();
+  await app.bootstrapAdmin();
   await app.initialize();
   await app.boot();
   await app.loadTrads();

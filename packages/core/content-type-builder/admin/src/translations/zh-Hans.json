@@ -103,8 +103,6 @@
   "form.button.save": "保存",
   "form.button.select-component": "选择一个组件",
   "from": "来自",
-  "injected-components.content-manager.edit-settings-view.link.components": "编辑这个组件",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "编辑这个 Content Type",
   "menu.section.components.name.plural": "组件",
   "menu.section.components.name.singular": "组件",
   "menu.section.models.name.plural": "Collection Types",
