@@ -1,21 +1,7 @@
 'use strict';
 
-// use some middleware stack or "use" to add extensions to the db layer somehow
-const wrapDebug = obj => {
-  const nOjb = {};
-  for (const key in obj) {
-    nOjb[key] = async function(...args) {
-      const result = await obj[key](...args);
-      // console.log(`[${key}]:`, result);
-      return result;
-    };
-  }
-
-  return nOjb;
-};
-
-const createRepository = (uid, db) =>
-  wrapDebug({
+const createRepository = (uid, db) => {
+  return {
     findOne(params) {
       return db.entityManager.findOne(uid, params);
     },
@@ -56,26 +42,12 @@ const createRepository = (uid, db) =>
       return db.entityManager.count(uid, params);
     },
 
+    // TODO: add relation API
+
     populate() {},
     load() {},
-
-    // TODO: TBD
-    aggregates: {
-      sum() {},
-      min() {},
-      max() {},
-      avg() {},
-      count() {},
-      groupBy() {},
-    },
-
-    // TODO: TBD
-    relations: {
-      attach() {},
-      detach() {},
-      set() {},
-    },
-  });
+  };
+};
 
 module.exports = {
   createRepository,

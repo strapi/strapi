@@ -1,119 +1,14 @@
+/**
+ * @module metadata
+ *
+ */
+
 'use strict';
 
 const _ = require('lodash/fp');
+
 const types = require('../types');
-
-const hasComponentsOrDz = model => {
-  return Object.values(model.attributes).some(
-    ({ type }) => types.isComponent(type) || types.isDynamicZone(type)
-  );
-};
-
-const hasInversedBy = _.has('inversedBy');
-const hasMappedBy = _.has('mappedBy');
-
-const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
-const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
-const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
-
-// TODO: how do we make sure this column is created ? should it be added in the attributes ? should the schema layer do the conversion ?
-const createJoinColum = (metadata, { attribute /*attributeName, meta */ }) => {
-  const targetMeta = metadata.get(attribute.target);
-
-  const joinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
-  const joinColumn = {
-    name: joinColumnName,
-    referencedColumn: 'id',
-    referencedTable: targetMeta.tableName,
-  };
-
-  Object.assign(attribute, { owner: true, joinColumn });
-
-  if (isBidirectional(attribute)) {
-    const inverseAttribute = targetMeta.attributes[attribute.inversedBy];
-    // NOTE: do not invert here but invert in the query ?
-    Object.assign(inverseAttribute, {
-      joinColumn: {
-        name: joinColumn.referencedColumn,
-        referencedColumn: joinColumn.name,
-      },
-    });
-  }
-};
-
-const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
-  const targetMeta = metadata.get(attribute.target);
-
-  if (!targetMeta) {
-    throw new Error(`Unknow target ${attribute.target}`);
-  }
-
-  const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
-
-  const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
-  const inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
-
-  metadata.add({
-    uid: joinTableName,
-    tableName: joinTableName,
-    attributes: {
-      [joinColumnName]: {
-        type: 'integer',
-        column: {
-          unsigned: true,
-        },
-      },
-      [inverseJoinColumnName]: {
-        type: 'integer',
-        column: {
-          unsigned: true,
-        },
-      },
-      // TODO: add extra pivot attributes -> user should use an intermediate entity
-    },
-    foreignKeys: [
-      {
-        name: `${joinTableName}_fk`,
-        columns: [joinColumnName],
-        referencedColumns: ['id'],
-        referencedTable: meta.tableName,
-        onDelete: 'CASCADE',
-      },
-      {
-        name: `${joinTableName}_inv_fk`,
-        columns: [inverseJoinColumnName],
-        referencedColumns: ['id'],
-        referencedTable: targetMeta.tableName,
-        onDelete: 'CASCADE',
-      },
-    ],
-  });
-
-  const joinTable = {
-    name: joinTableName,
-    joinColumn: {
-      name: joinColumnName,
-      referencedColumn: 'id',
-    },
-    inverseJoinColumn: {
-      name: inverseJoinColumnName,
-      referencedColumn: 'id',
-    },
-  };
-
-  Object.assign(attribute, { joinTable });
-
-  if (isBidirectional(attribute)) {
-    const inverseAttribute = targetMeta.attributes[attribute.inversedBy];
-    Object.assign(inverseAttribute, {
-      joinTable: {
-        name: joinTableName,
-        joinColumn: joinTable.inverseJoinColumn,
-        inverseJoinColumn: joinTable.joinColumn,
-      },
-    });
-  }
-};
+const { createRelation } = require('./relations');
 
 class Metadata extends Map {
   add(meta) {
@@ -121,38 +16,40 @@ class Metadata extends Map {
   }
 }
 
+/**
+ * Create Metadata from models configurations
+ *
+ * timestamps => not optional anymore but auto added. Auto added on the content type or in the db layer ?
+ *
+ * options => options are handled on the layer above. Options convert to fields on the CT
+ *
+ * filters => not in v1
+ *
+ * attributes
+ *
+ * - type
+ * - mapping field name - column name
+ * - mapping field type - column type
+ * - formatter / parser => coming from field type so no
+ * - indexes / checks / contstraints
+ * - relations => reference to the target model (function or string to avoid circular deps ?)
+ *   - name of the LEFT/RIGHT side foreign keys
+ *   - name of join table
+ *
+ * - compo/dz => reference to the components
+ * - validators
+ * - hooks
+ * - default value
+ * - required -> should add a not null option instead of the API required
+ * - unique -> should add a DB unique option instead of the unique in the API (Unique by locale or something else for example)
+ *
+ * lifecycles
+ *
+ * private fields ? => handled on a different layer
+ * @param {object[]} models
+ * @returns {Metadata}
+ */
 const createMetadata = (models = []) => {
-  /*
-
-    timestamps => not optional anymore but auto added. Auto added on the content type or in the db layer ?
-
-    options => options are handled on the layer above. Options convert to fields on the CT
-
-    filters => not in v1
-
-    attributes
-
-      - type
-      - mapping field name - column name
-      - mapping field type - column type
-      - formatter / parser => coming from field type so no
-      - indexes / checks / contstraints
-      - relations => reference to the target model (function or string to avoid circular deps ?)
-        - name of the LEFT/RIGHT side foreign keys
-        - name of join table
-
-      - compo/dz => reference to the components
-      - validators
-      - hooks
-      - default value
-      - required -> should add a not null option instead of the API required
-      - unique -> should add a DB unique option instead of the unique in the API (Unique by locale or something else for example)
-
-    lifecycles
-
-    private fields ? => handled on a different layer
-  */
-
   // TODO: reorder to make sure we can create everything or delete everything in the right order
   // TODO: allow passing the join config in the attribute
   // TODO: allow passing column config in the attribute
@@ -233,158 +130,10 @@ const createMetadata = (models = []) => {
   return metadata;
 };
 
-const createRelation = (attributeName, attribute, meta, metadata) => {
-  switch (attribute.relation) {
-    case 'oneToOne': {
-      /*
-        if one to one then
-          if owner then
-            if with join table then
-              create join table
-            else
-              create joinColumn
-            if bidirectional then
-              set inverse attribute joinCol or joinTable info correctly
-          else
-            this property must be set by the owner side
-            verify the owner side is valid // should be done before or at the same time ?
-      */
-
-      if (isOwner(attribute)) {
-        if (shouldUseJoinTable(attribute)) {
-          createJoinTable(metadata, {
-            attribute,
-            attributeName,
-            meta,
-          });
-        } else {
-          createJoinColum(metadata, {
-            attribute,
-            attributeName,
-            meta,
-          });
-        }
-      } else {
-        // verify other side is valid
-      }
-      break;
-    }
-
-    case 'oneToMany': {
-      /*
-       if one to many then
-        if unidirectional then
-          create join table
-        if bidirectional then
-          cannot be owning side
-          do nothing
-      */
-
-      if (!isBidirectional(attribute)) {
-        createJoinTable(metadata, {
-          attribute,
-          attributeName,
-          meta,
-        });
-      } else {
-        if (isOwner(attribute)) {
-          throw new Error(
-            'one side of a oneToMany cannot be the owner side in a bidirectional relation'
-          );
-        }
-      }
-
-      break;
-    }
-
-    case 'manyToOne': {
-      /*
-        if many to one then
-          if unidirectional then
-            if with join table then
-              create join table
-            else
-              create join column
-          else
-            must be the owner side
-            if with join table then
-              create join table
-            else
-              create join column
-            set inverse attribute joinCol or joinTable info correctly
-      */
-
-      if (isBidirectional(attribute) && !isOwner(attribute)) {
-        throw new Error('The many side of a manyToOne must be the owning side');
-      }
-
-      if (shouldUseJoinTable(attribute)) {
-        createJoinTable(metadata, {
-          attribute,
-          attributeName,
-          meta,
-        });
-      } else {
-        createJoinColum(metadata, {
-          attribute,
-          attributeName,
-          meta,
-        });
-      }
-
-      break;
-    }
-
-    case 'manyToMany': {
-      /*
-        if many to many then
-          if unidirectional
-            create join table
-          else
-            if owner then
-              if with join table then
-                create join table
-            else
-              do nothing
-      */
-
-      if (!isBidirectional(attribute) || isOwner(attribute)) {
-        createJoinTable(metadata, {
-          attribute,
-          attributeName,
-          meta,
-        });
-      }
-
-      break;
-    }
-
-    default: {
-      throw new Error(`Unknow relation ${attribute.relation}`);
-    }
-  }
-
-  /*
-
-
-
-
-      polymorphic relations
-
-      OneToOneX
-      ManyToOneX
-      OnetoManyX
-      ManytoManyX
-      XOneToOne
-      XManyToOne
-      XOnetoMany
-      XManytoMany
-
-      XOneToOneX
-      XManyToOneX
-      XOnetoManyX
-      XManytoManyX
-  */
+const hasComponentsOrDz = model => {
+  return Object.values(model.attributes).some(
+    ({ type }) => types.isComponent(type) || types.isDynamicZone(type)
+  );
 };
 
 // NOTE: we might just move the compo logic outside this layer too at some point

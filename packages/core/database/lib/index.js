@@ -9,8 +9,6 @@ const { createEntityManager } = require('./entity-manager');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
-// const Configuration = require('./configuration');
-// const { resolveConnector } = require('./connector');
 
 class Database {
   constructor(config) {
@@ -19,7 +17,6 @@ class Database {
     // TODO: validate meta
     // this.metadata.validate();
 
-    // this.connector = resolveConnector(this.config);
     this.config = config;
     this.dialect = getDialect(this);
 
@@ -47,6 +44,7 @@ class Database {
   }
 }
 
+// TODO: move into strapi
 Database.transformContentTypes = transformContentTypes;
 Database.init = async config => {
   const db = new Database(config);

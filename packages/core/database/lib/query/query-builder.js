@@ -8,9 +8,7 @@ const createQueryBuilder = (uid, db) => {
   const meta = db.metadata.get(uid);
   const { tableName } = meta;
 
-  // TODO: we could use a state to track the entire query instead of using knex directly
-
-  let state = {
+  const state = {
     type: 'select',
     select: [],
     count: null,
@@ -27,9 +25,6 @@ const createQueryBuilder = (uid, db) => {
 
   let counter = 0;
   const getAlias = () => `t${counter++}`;
-
-  // TODO: actually rename columns to attributes then pick them
-  // const pickAttributes = _.pick(Object.keys(meta.attributes));
 
   return {
     alias: getAlias(),
@@ -62,7 +57,6 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    // TODO: convert where into aliases where & nested joins
     where(where = {}) {
       const processedWhere = helpers.processWhere(where, { qb: this, uid, db });
 
@@ -71,7 +65,6 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    // TODO: handle aliasing logic
     select(args) {
       state.type = 'select';
       state.select = _.castArray(args).map(col => this.aliasColumn(col));
@@ -94,7 +87,6 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    // TODO: map to column name
     orderBy(orderBy) {
       state.orderBy = helpers.processOrderBy(orderBy, { qb: this, uid, db });
       return this;
@@ -106,10 +98,6 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    // TODO: implement
-    having() {},
-
-    // TODO: add necessary joins to make populate easier / faster
     populate(populate) {
       state.populate = helpers.processPopulate(populate, { qb: this, uid, db });
 
@@ -239,7 +227,6 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyWhere(qb, state.where);
         }
 
-        // TODO: apply joins
         if (state.joins.length > 0) {
           helpers.applyJoins(qb, state.joins);
         }

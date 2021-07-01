@@ -49,7 +49,6 @@ const createPivotJoin = (qb, joinTable, alias, tragetMeta) => {
   return subAlias;
 };
 
-// TODO: cleanup & implement real joins
 const createJoin = (ctx, { alias, attributeName, attribute }) => {
   const { db, qb } = ctx;
 
@@ -59,8 +58,8 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
 
   const tragetMeta = db.metadata.get(attribute.target);
 
-  // TODO: inmplement joinColumn
   const joinColumn = attribute.joinColumn;
+
   if (joinColumn) {
     const subAlias = qb.getAlias();
     qb.join({
