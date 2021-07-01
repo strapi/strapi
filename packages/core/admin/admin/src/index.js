@@ -1,15 +1,16 @@
-/* eslint-disable import/first */
-window.strapi = {
-  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
-  isEE: true,
-};
-
 import ReactDOM from 'react-dom';
+
 import StrapiApp from './StrapiApp';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
+import { axiosInstance } from './core/utils';
 import appCustomisations from './admin.config';
 import plugins from './plugins';
 import appReducers from './reducers';
+
+window.strapi = {
+  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
+  isEE: false,
+};
 
 const appConfig = {
   locales: [],
@@ -34,7 +35,19 @@ const app = StrapiApp({
 const MOUNT_NODE = document.getElementById('app');
 
 const run = async () => {
-  await app.bootstrapAdmin();
+  try {
+    const {
+      data: {
+        data: { isEE },
+      },
+    } = await axiosInstance.get('/admin/project-type');
+
+    window.strapi.isEE = isEE;
+  } catch (err) {
+    console.error(err);
+  }
+
+  await await app.bootstrapAdmin();
   await app.initialize();
   await app.boot();
   await app.loadTrads();

@@ -18,12 +18,15 @@
     },
     {
       "method": "GET",
+      "path": "/project-type",
+      "handler": "admin.getProjectType"
+    },
+    {
+      "method": "GET",
       "path": "/information",
       "handler": "admin.information",
       "config": {
-        "policies": [
-          "admin::isAuthenticatedAdmin"
-        ]
+        "policies": ["admin::isAuthenticatedAdmin"]
       }
     },
     {
@@ -230,9 +233,7 @@
       "path": "/users/:id",
       "handler": "user.deleteOne",
       "config": {
-        "policies": [
-          ["admin::hasPermissions", ["admin::users.delete"]]
-        ]
+        "policies": [["admin::hasPermissions", ["admin::users.delete"]]]
       }
     },
     {
@@ -240,9 +241,7 @@
       "path": "/users/batch-delete",
       "handler": "user.deleteMany",
       "config": {
-        "policies": [
-          ["admin::hasPermissions", ["admin::users.delete"]]
-        ]
+        "policies": [["admin::hasPermissions", ["admin::users.delete"]]]
       }
     },
     {
