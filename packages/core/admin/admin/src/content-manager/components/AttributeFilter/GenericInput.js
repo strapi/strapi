@@ -18,7 +18,11 @@ function GenericInput({ type, onChange, value, ...rest }) {
       return (
         <DateWrapper type={type}>
           <DatePicker
-            onChange={e => onChange(e.target.value.format('YYYY-MM-DD'))}
+            onChange={e => {
+              if (e.target.value) {
+                onChange(e.target.value.format('YYYY-MM-DD'));
+              }
+            }}
             value={momentValue}
             {...rest}
           />
