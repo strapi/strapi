@@ -244,8 +244,6 @@ const createQueryBuilder = (uid, db) => {
           helpers.applyJoins(qb, state.joins);
         }
 
-        // console.log(qb.toQuery());
-
         const rows = await qb;
 
         if (state.populate && !_.isNil(rows)) {

@@ -9,7 +9,7 @@ const GROUP_OPERATORS = ['$and', '$or'];
 const OPERATORS = [
   '$not',
   '$in',
-  '$nin',
+  '$notIn',
   '$eq',
   '$ne',
   '$gt',
@@ -17,9 +17,10 @@ const OPERATORS = [
   '$lt',
   '$lte',
   '$null',
+  '$notNull',
   '$between',
-  '$like',
-  '$regexp',
+  // '$like',
+  // '$regexp',
   '$startsWith',
   '$endsWith',
   '$contains',
@@ -264,66 +265,96 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
 
     switch (operator) {
       case '$not': {
-        return qb.whereNot(qb => applyWhereToColumn(qb, column, value));
+        qb.whereNot(qb => applyWhereToColumn(qb, column, value));
+        break;
       }
 
       case '$in': {
-        return qb.whereIn(column, value);
+        qb.whereIn(column, value);
+        break;
       }
 
-      case '$nin': {
-        return qb.whereNotIn(column, value);
+      case '$notIn': {
+        qb.whereNotIn(column, value);
+        break;
       }
 
       case '$eq': {
         if (value === null) {
-          return qb.whereNull(column);
+          qb.whereNull(column);
+          break;
         }
 
-        return qb.where(column, value);
+        qb.where(column, value);
+        break;
       }
       case '$ne': {
         if (value === null) {
-          return qb.whereNotNull(column);
+          qb.whereNotNull(column);
+          break;
         }
 
-        return qb.where(column, '<>', value);
+        qb.where(column, '<>', value);
+        break;
       }
       case '$gt': {
-        return qb.where(column, '>', value);
+        qb.where(column, '>', value);
+        break;
       }
       case '$gte': {
-        return qb.where(column, '>=', value);
+        qb.where(column, '>=', value);
+        break;
       }
       case '$lt': {
-        return qb.where(column, '<', value);
+        qb.where(column, '<', value);
+        break;
       }
       case '$lte': {
-        return qb.where(column, '<=', value);
+        qb.where(column, '<=', value);
+        break;
       }
       case '$null': {
-        return value === true ? qb.whereNull(column) : qb.whereNotNull(column);
+        // TODO: make this better
+        if (value) {
+          qb.whereNull(column);
+        }
+        break;
+      }
+      case '$notNull': {
+        if (value) {
+          qb.whereNotNull(column);
+        }
+
+        break;
       }
       case '$between': {
-        return qb.whereBetween(column, value);
+        qb.whereBetween(column, value);
+        break;
       }
-      case '$regexp': {
-        // TODO:
-        return;
-      }
-      // string
-      // TODO: use $case to make it case insensitive
-      case '$like': {
-        return qb.where(column, 'like', value);
-      }
+      // case '$regexp': {
+      //   // TODO:
+      //
+      // break;
+      // }
+      // // string
+      // // TODO: use $case to make it case insensitive
+      // case '$like': {
+      //   qb.where(column, 'like', value);
+      // break;
+      // }
+
+      // TODO: add casting logic
       case '$startsWith': {
-        return qb.where(column, 'like', `${value}%`);
+        qb.where(column, 'like', `${value}%`);
+        break;
       }
       case '$endsWith': {
-        return qb.where(column, 'like', `%${value}`);
+        qb.where(column, 'like', `%${value}`);
+        break;
       }
       case '$contains': {
-        return qb.where(column, 'like', `%${value}%`);
+        qb.where(column, 'like', `%${value}%`);
+        break;
       }
 
       // TODO: json operators
@@ -413,15 +444,7 @@ const processPopulate = (populate, ctx) => {
     return null;
   }
 
-  if (typeof populate === 'string' && Boolean(populate)) {
-    for (const key in meta.attributes) {
-      const attribute = meta.attributes[key];
-
-      if (attribute.type === 'relation') {
-        populateMap[key] = true;
-      }
-    }
-  } else if (Array.isArray(populate)) {
+  if (Array.isArray(populate)) {
     for (const key of populate) {
       populateMap[key] = true;
     }

@@ -83,7 +83,8 @@ class SqliteDialect extends Dialect {
     // TODO: get strapi.dir from somewhere else
 
     this.db.config.connection.connection.filename = path.resolve(
-      strapi.dir,
+      // TODO: do this somewhere else
+      // global.strapi ? gstrapi.dir : process.cwd(),
       this.db.config.connection.connection.filename
     );
 

@@ -491,7 +491,7 @@ class Strapi {
   }
 
   getModel(uid) {
-    return this.contentTypes[uid];
+    return this.contentTypes[uid] || this.components[uid];
   }
 
   /**

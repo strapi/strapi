@@ -21,7 +21,24 @@ async function main(connection) {
     await orm.schema.sync();
     await orm.schema.reset();
 
-    await tests(orm);
+    await orm.query('article').createMany({
+      // select: {},
+      // populate: {},
+      data: Array(5)
+        .fill({})
+        .map((v, idx) => ({
+          title: `Article ${_.padStart(idx, 3, '0')}`,
+        })),
+    });
+
+    const articles = await orm.query('article').findMany({
+      limit: 5,
+      where: { title: 'Article 001', createdAt: { $null: true } },
+    });
+
+    console.log(articles);
+
+    // await tests(orm);
   } finally {
     orm.destroy();
   }
