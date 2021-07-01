@@ -10,6 +10,8 @@ import appReducers from './reducers';
 window.strapi = {
   backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
   isEE: false,
+  features: [],
+  projectType: 'Community',
 };
 
 const appConfig = {
@@ -38,11 +40,13 @@ const run = async () => {
   try {
     const {
       data: {
-        data: { isEE },
+        data: { isEE, features },
       },
     } = await axiosInstance.get('/admin/project-type');
 
     window.strapi.isEE = isEE;
+    window.strapi.features = features;
+    window.strapi.projectType = isEE ? 'Enterprise' : 'Community';
   } catch (err) {
     console.error(err);
   }

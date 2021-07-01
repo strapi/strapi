@@ -12,7 +12,6 @@ const alias = require('./webpack.alias');
 const getClientEnvironment = require('./env');
 
 module.exports = ({
-  useEE,
   entry,
   dest,
   env,
@@ -29,7 +28,7 @@ module.exports = ({
 }) => {
   const isProduction = env === 'production';
 
-  const envVariables = getClientEnvironment(useEE, { ...options, env });
+  const envVariables = getClientEnvironment({ ...options, env });
 
   const webpackPlugins = isProduction
     ? [

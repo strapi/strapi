@@ -1,6 +1,6 @@
 import baseForm from '../../../../../../admin/src/components/Users/ModalCreateBody/utils/roleSettingsForm';
 
-const ssoInputs = process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES.includes('sso')
+const ssoInputs = strapi.features.includes('sso')
   ? {
       useSSORegistration: {
         label: 'Settings.permissions.users.form.sso',
