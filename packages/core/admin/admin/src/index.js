@@ -1,3 +1,9 @@
+/* eslint-disable import/first */
+window.strapi = {
+  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
+  isEE: true,
+};
+
 import ReactDOM from 'react-dom';
 import StrapiApp from './StrapiApp';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';

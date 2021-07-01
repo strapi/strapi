@@ -22,6 +22,10 @@ module.exports = ({
     adminPath: '/admin/',
     features: [],
   },
+  roots = {
+    eeRoot: './ee/admin',
+    ceRoot: './admin/src',
+  },
 }) => {
   const isProduction = env === 'production';
 
@@ -92,7 +96,7 @@ module.exports = ({
         {
           test: /\.m?js$/,
           // TODO remove when plugins are built separately
-          exclude: /node_modules\/(?!(@strapi\/plugin-content-manager|@strapi\/plugin-content-type-builder|@strapi\/plugin-upload)\/).*/,
+          exclude: /node_modules\/(?!(@strapi\/plugin-content-type-builder|@strapi\/plugin-upload)\/).*/,
           use: {
             loader: require.resolve('babel-loader'),
             options: {
@@ -104,13 +108,22 @@ module.exports = ({
                 require.resolve('@babel/preset-react'),
               ],
               plugins: [
+                [
+                  require.resolve('@strapi/babel-plugin-switch-ee-ce'),
+                  {
+                    // Imported this tells the custom plugin where to look for the ee folder
+                    roots,
+                  },
+                ],
                 require.resolve('@babel/plugin-proposal-class-properties'),
                 require.resolve('@babel/plugin-syntax-dynamic-import'),
                 require.resolve('@babel/plugin-transform-modules-commonjs'),
                 require.resolve('@babel/plugin-proposal-async-generator-functions'),
+
                 [
                   require.resolve('@babel/plugin-transform-runtime'),
                   {
+                    // absoluteRuntime: true,s
                     helpers: true,
                     regenerator: true,
                   },
@@ -164,21 +177,7 @@ module.exports = ({
         // favicon: path.resolve(__dirname, 'admin/src/favicon.ico'),
       }),
       new webpack.DefinePlugin(envVariables),
-      new webpack.NormalModuleReplacementPlugin(/ee_else_ce(\.*)/, function(resource) {
-        let wantedPath = path.join(
-          resource.context.substr(0, resource.context.lastIndexOf(`${path.sep}src${path.sep}`)),
-          'src'
-        );
 
-        if (useEE) {
-          resource.request = resource.request.replace(
-            /ee_else_ce/,
-            path.join(wantedPath, '../..', 'ee/admin')
-          );
-        } else {
-          resource.request = resource.request.replace(/ee_else_ce/, path.join(wantedPath));
-        }
-      }),
       new NodePolyfillPlugin(),
       ...webpackPlugins,
     ],

@@ -43,37 +43,38 @@ async function build({ dir, env, options, optimize }) {
   const cacheDir = path.resolve(dir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src');
   const dest = path.resolve(dir, 'build');
-  const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize });
+
+  // Roots for the @strapi/babel-plugin-switch-ee-ce
+  const roots = {
+    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
+    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
+  };
+
+  const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize, roots });
 
   const compiler = webpack(config);
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
-      let messages;
       if (err) {
-        if (!err.message) {
-          return reject(err);
+        console.error(err.stack || err);
+
+        if (err.details) {
+          console.error(err.details);
         }
-        messages = {
-          errors: [err.message],
-          warnings: [],
-        };
-      } else {
-        messages = stats.toJson({ all: false, warnings: true, errors: true });
+        return reject(err);
       }
 
-      if (messages.errors.length) {
-        // Only keep the first error. Others are often indicative
-        // of the same problem, but confuse the reader with noise.
-        if (messages.errors.length > 1) {
-          messages.errors.length = 1;
-        }
-        return reject(new Error(messages.errors.join('\n\n')));
+      const info = stats.toJson();
+
+      if (stats.hasErrors()) {
+        console.error(info.errors);
       }
 
       return resolve({
         stats,
-        warnings: messages.warnings,
+
+        warnings: info.warnings,
       });
     });
   });

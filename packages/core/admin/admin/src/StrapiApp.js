@@ -18,10 +18,6 @@ import {
 import injectionZones from './injectionZones';
 import themes from './themes';
 
-window.strapi = {
-  backendURL: process.env.STRAPI_ADMIN_BACKEND_URL,
-};
-
 class StrapiApp {
   constructor({ appPlugins, library, locales, middlewares, reducers }) {
     this.appLocales = ['en', ...locales.filter(loc => loc !== 'en')];
