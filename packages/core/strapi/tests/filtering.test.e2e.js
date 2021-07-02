@@ -106,7 +106,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name: 'Product 1',
+            filters: {
+              name: 'Product 1',
+            },
           },
         });
 
@@ -120,7 +122,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_eq: 'Product 1',
+            filters: {
+              name: {
+                $eq: 'Product 1',
+              },
+            },
           },
         });
 
@@ -134,7 +140,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_eq: 'Product non existant',
+            filters: {
+              name: {
+                $eq: 'Product non existant',
+              },
+            },
           },
         });
 
@@ -148,7 +158,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_ne: 'Non existent product ',
+            filters: {
+              name: {
+                $ne: 'Non existent product ',
+              },
+            },
           },
         });
 
@@ -162,7 +176,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_ne: 'Product 1',
+            filters: {
+              name: {
+                $ne: 'Product 1',
+              },
+            },
           },
         });
 
@@ -176,7 +194,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            price_null: true,
+            filters: {
+              price: { $null: true },
+            },
           },
         });
 
@@ -192,7 +212,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            price_null: false,
+            filters: {
+              price: {
+                $notNull: true,
+              },
+            },
           },
         });
 
@@ -207,7 +231,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_contains: 'product',
+            filters: {
+              name: {
+                $contains: 'product',
+              },
+            },
           },
         });
 
@@ -219,7 +247,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_contains: 'PrOdUct',
+            filters: {
+              name: {
+                $contains: 'PrOdUct',
+              },
+            },
           },
         });
 
@@ -231,7 +263,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_contains: 'production',
+            filters: {
+              name: {
+                $contains: 'production',
+              },
+            },
           },
         });
 
@@ -241,7 +277,11 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_contains: 'ProdUctIon',
+            filters: {
+              name: {
+                $contains: 'ProdUctIon',
+              },
+            },
           },
         });
 
@@ -255,7 +295,13 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_ncontains: 'production',
+            filters: {
+              name: {
+                $not: {
+                  $contains: 'production',
+                },
+              },
+            },
           },
         });
 
@@ -267,7 +313,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_ncontains: 'ProdUctIon',
+            filters: {
+              name: { $not: { $contains: 'ProdUctIon' } },
+            },
           },
         });
 
@@ -279,7 +327,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_ncontains: 'product',
+            filters: {
+              name: { $not: { $contains: 'product' } },
+            },
           },
         });
 
@@ -289,7 +339,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            name_ncontains: 'ProDuCt',
+            filters: {
+              name: { $not: { $contains: 'ProDuCt' } },
+            },
           },
         });
 
@@ -298,58 +350,62 @@ describe('Filtering API', () => {
     });
 
     // FIXME: Not working on sqlite due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
-    describe('Filter contains sensitive', () => {
-      test.skip('Should return empty if the case does not match', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: '/products',
-          qs: {
-            name_containss: 'product',
-          },
-        });
+    // describe('Filter contains sensitive', () => {
+    //   test.skip('Should return empty if the case does not match', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
 
-        expect(res.body).toEqual([]);
-      });
+    //         name_containss: 'product',
+    //       },
+    //     });
 
-      test('Should return the entities if the case matches', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: '/products',
-          qs: {
-            name_containss: 'Product',
-          },
-        });
+    //     expect(res.body).toEqual([]);
+    //   });
 
-        expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-      });
-    });
+    //   test('Should return the entities if the case matches', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
 
-    // FIXME: Not working on sqlite due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
-    describe('Filter not contains sensitive', () => {
-      test.skip('Should return the entities if the case does not match', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: '/products',
-          qs: {
-            name_ncontainss: 'product',
-          },
-        });
+    //         name_containss: 'Product',
+    //       },
+    //     });
 
-        expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-      });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
+    // });
 
-      test('Should return an empty array if the case matches', async () => {
-        const res = await rq({
-          method: 'GET',
-          url: '/products',
-          qs: {
-            name_ncontainss: 'Product',
-          },
-        });
+    // // FIXME: Not working on sqlite due to https://www.sqlite.org/draft/pragma.html#pragma_case_sensitive_like
+    // describe('Filter not contains sensitive', () => {
+    //   test.skip('Should return the entities if the case does not match', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
 
-        expect(res.body).toEqual([]);
-      });
-    });
+    //         name_ncontainss: 'product',
+    //       },
+    //     });
+
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
+
+    //   test('Should return an empty array if the case matches', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+
+    //         name_ncontainss: 'Product',
+    //       },
+    //     });
+
+    //     expect(res.body).toEqual([]);
+    //   });
+    // });
 
     describe('Filter in', () => {
       test('Should return the Product with a single value', async () => {
@@ -357,7 +413,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_in: 42,
+            filters: {
+              rank: { $in: 42 },
+            },
           },
         });
 
@@ -369,7 +427,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_in: [42, 12],
+            filters: {
+              rank: { $in: [42, 12] },
+            },
           },
         });
 
@@ -381,7 +441,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_in: [43, 12],
+            filters: {
+              rank: { $in: [43, 12] },
+            },
           },
         });
 
@@ -395,7 +457,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_nin: 42,
+            filters: {
+              rank: { $notIn: 42 },
+            },
           },
         });
 
@@ -407,7 +471,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_nin: [42, 12],
+            filters: {
+              rank: { $notIn: [42, 12] },
+            },
           },
         });
 
@@ -419,7 +485,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_nin: [43, 12],
+            filters: {
+              rank: { $notIn: [43, 12] },
+            },
           },
         });
 
@@ -433,7 +501,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_gt: 42,
+            filters: {
+              rank: { $gt: 42 },
+            },
           },
         });
 
@@ -443,7 +513,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_gt: 40,
+            filters: {
+              rank: { $gt: 40 },
+            },
           },
         });
 
@@ -455,7 +527,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_gt: 40,
+            filters: {
+              rank: { $gt: 40 },
+            },
           },
         });
 
@@ -467,7 +541,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            price_gt: 9.3,
+            filters: {
+              price: { $gt: 9.3 },
+            },
           },
         });
 
@@ -479,7 +555,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            decimal_field_gt: 1.23,
+            filters: {
+              decimal_field: { $gt: 1.23 },
+            },
           },
         });
 
@@ -491,7 +569,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            big_rank_gt: 34567891298,
+            filters: {
+              big_rank: { $gt: 34567891298 },
+            },
           },
         });
 
@@ -505,7 +585,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_gte: 42,
+            filters: {
+              rank: { $gte: 42 },
+            },
           },
         });
 
@@ -515,7 +597,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_gte: 43,
+            filters: {
+              rank: { $gte: 43 },
+            },
           },
         });
 
@@ -527,7 +611,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_gte: 40,
+            filters: {
+              rank: { $gte: 40 },
+            },
           },
         });
 
@@ -539,7 +625,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            price_gte: 10.99,
+            filters: {
+              price: { $gte: 10.99 },
+            },
           },
         });
 
@@ -551,7 +639,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            decimal_field_gte: 42.43,
+            filters: {
+              decimal_field: { $gte: 42.43 },
+            },
           },
         });
 
@@ -563,7 +653,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            big_rank_gte: '345678912983',
+            filters: {
+              big_rank: { $gte: '345678912983' },
+            },
           },
         });
 
@@ -577,7 +669,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_lt: 42,
+            filters: {
+              rank: { $lt: 42 },
+            },
           },
         });
 
@@ -587,7 +681,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_lt: 43,
+            filters: {
+              rank: { $lt: 43 },
+            },
           },
         });
 
@@ -599,7 +695,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_lt: 45,
+            filters: {
+              rank: { $lt: 45 },
+            },
           },
         });
 
@@ -611,7 +709,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            price_lt: 21.3,
+            filters: {
+              price: { $lt: 21.3 },
+            },
           },
         });
 
@@ -623,7 +723,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            decimal_field_lt: 46.23,
+            filters: {
+              decimal_field: { $lt: 46.23 },
+            },
           },
         });
 
@@ -635,7 +737,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            big_rank_lt: 3456789129812,
+            filters: {
+              big_rank: { $lt: 3456789129812 },
+            },
           },
         });
 
@@ -649,7 +753,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_lte: 52,
+            filters: {
+              rank: { $lte: 52 },
+            },
           },
         });
 
@@ -659,7 +765,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_lte: 21,
+            filters: {
+              rank: { $lte: 21 },
+            },
           },
         });
 
@@ -671,7 +779,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            rank_lte: 42,
+            filters: {
+              rank: { $lte: 42 },
+            },
           },
         });
 
@@ -683,7 +793,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            price_lte: 10.99,
+            filters: {
+              price: { $lte: 10.99 },
+            },
           },
         });
 
@@ -695,7 +807,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            decimal_field_lte: 42.43,
+            filters: {
+              decimal_field: { $lte: 42.43 },
+            },
           },
         });
 
@@ -707,7 +821,9 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            big_rank_lte: '345678912983',
+            filters: {
+              big_rank: { $lte: '345678912983' },
+            },
           },
         });
 
@@ -717,14 +833,14 @@ describe('Filtering API', () => {
   });
 
   describe('Or filtering', () => {
-    describe('_or filter', () => {
+    describe('$or filter', () => {
       test('Supports simple or', async () => {
         const res = await rq({
           method: 'GET',
           url: '/products',
           qs: {
-            _where: {
-              _or: [
+            filters: {
+              $or: [
                 {
                   rank: 42,
                 },
@@ -744,13 +860,13 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            _where: {
-              _or: [
+            filters: {
+              $or: [
                 {
                   rank: 42,
                 },
                 {
-                  price_gt: 28,
+                  price: { $gt: 28 },
                 },
               ],
             },
@@ -767,14 +883,14 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            _where: {
-              _or: [
+            filters: {
+              $or: [
                 {
                   rank: 42,
                 },
                 [
                   {
-                    price_gt: 28,
+                    price: { $gt: 28 },
                   },
                   {
                     rank: 91,
@@ -793,17 +909,17 @@ describe('Filtering API', () => {
           method: 'GET',
           url: '/products',
           qs: {
-            _where: {
-              _or: [
+            filters: {
+              $or: [
                 {
                   rank: 42,
                 },
                 [
                   {
-                    price_gt: 28,
+                    price: { $gt: 28 },
                   },
                   {
-                    _or: [
+                    $or: [
                       {
                         rank: 91,
                       },
@@ -824,7 +940,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          rank: [42, 43],
+          filters: {
+            rank: [42, 43],
+          },
         },
       });
 
@@ -836,342 +954,374 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          rank_ne: [41, 43],
+          filters: {
+            rank: { $ne: [41, 43] },
+          },
         },
       });
 
       expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
     });
 
-    test('Filter contains insensitive', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_contains: ['Product', '1'],
-        },
-      });
+    // test('Filter contains insensitive', async () => {
+    //   const res = await rq({
+    //     method: 'GET',
+    //     url: '/products',
+    //     qs: {
+    //       filters: {
+    //         name_contains: ['Product', '1'],
+    //       },
+    //     },
+    //   });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //   expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    // });
 
-    test('Filter not contains insensitive', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_ncontains: ['Product', 'Non existent'],
-        },
-      });
+    // test('Filter not contains insensitive', async () => {
+    //   const res = await rq({
+    //     method: 'GET',
+    //     url: '/products',
+    //     qs: {
+    //       filters: {
+    //         name_ncontains: ['Product', 'Non existent'],
+    //       },
+    //     },
+    //   });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //   expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    // });
 
-    test('Filter contains sensitive', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_containss: ['Product', 'Non existent'],
-        },
-      });
+    // test('Filter contains sensitive', async () => {
+    //   const res = await rq({
+    //     method: 'GET',
+    //     url: '/products',
+    //     qs: {
+    //       filters: {
+    //         name_containss: ['Product', 'Non existent'],
+    //       },
+    //     },
+    //   });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //   expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    // });
 
-    test('Filter not contains sensitive', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_ncontainss: ['product', 'Non existent'],
-        },
-      });
+    // test('Filter not contains sensitive', async () => {
+    //   const res = await rq({
+    //     method: 'GET',
+    //     url: '/products',
+    //     qs: {
+    //       filters: {
+    //         name_ncontainss: ['product', 'Non existent'],
+    //       },
+    //     },
+    //   });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //   expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    // });
 
-    test('Filter greater than', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_gt: [12, 56],
-        },
-      });
+    //   test('Filter greater than', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_gt: [12, 56],
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
 
-    test('Filter greater than or equal', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_gte: [42, 56],
-        },
-      });
+    //   test('Filter greater than or equal', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_gte: [42, 56],
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
 
-    test('Filter less than', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_lt: [56, 12],
-        },
-      });
+    //   test('Filter less than', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_lt: [56, 12],
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
 
-    test('Filter less than or equal', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_lte: [12, 42],
-        },
-      });
+    //   test('Filter less than or equal', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_lte: [12, 42],
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
-  });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
+    // });
 
-  describe('Complexe filtering', () => {
-    test('Greater than and less than at the same time', async () => {
-      let res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_lte: 42,
-          rank_gte: 42,
-        },
-      });
+    // describe('Complexe filtering', () => {
+    //   test('Greater than and less than at the same time', async () => {
+    //     let res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_lte: 42,
+    //           rank_gte: 42,
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
 
-      res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_lt: 43,
-          rank_gt: 41,
-        },
-      });
+    //     res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_lt: 43,
+    //           rank_gt: 41,
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
 
-      res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          rank_lt: 43,
-          rank_gt: 431,
-        },
-      });
+    //     res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           rank_lt: 43,
+    //           rank_gt: 431,
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual([]);
-    });
+    //     expect(res.body).toEqual([]);
+    //   });
 
-    test('Contains and Not contains on same column', async () => {
-      let res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_contains: 'Product',
-          name_ncontains: '1',
-        },
-      });
+    //   test('Contains and Not contains on same column', async () => {
+    //     let res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           name_contains: 'Product',
+    //           name_ncontains: '1',
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining(data.product.slice(1)));
+    //     expect(res.body).toEqual(expect.arrayContaining(data.product.slice(1)));
 
-      res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_contains: 'Product 1',
-          name_ncontains: ['2', '3'],
-        },
-      });
+    //     res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           name_contains: 'Product 1',
+    //           name_ncontains: ['2', '3'],
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.not.arrayContaining([data.product[1], data.product[2]]));
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //     expect(res.body).toEqual(expect.not.arrayContaining([data.product[1], data.product[2]]));
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
 
-      res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_contains: '2',
-          name_ncontains: 'Product',
-        },
-      });
+    //     res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           name_contains: '2',
+    //           name_ncontains: 'Product',
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual([]);
-    });
+    //     expect(res.body).toEqual([]);
+    //   });
 
-    test('Combined filters', async () => {
-      let res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          name_contains: 'Product',
-          rank_lt: 45,
-        },
-      });
+    //   test('Combined filters', async () => {
+    //     let res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         filters: {
+    //           name_contains: 'Product',
+    //           rank_lt: 45,
+    //         },
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
-  });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
+    // });
 
-  describe('Sorting', () => {
-    test('Default sorting is asc', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _sort: 'rank',
-        },
-      });
+    // describe('Sorting', () => {
+    //   test('Default sorting is asc', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _sort: 'rank',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(
-        expect.arrayContaining(data.product.slice(0).sort((a, b) => a.rank - b.rank))
-      );
-    });
+    //     expect(res.body).toEqual(
+    //       expect.arrayContaining(data.product.slice(0).sort((a, b) => a.rank - b.rank))
+    //     );
+    //   });
 
-    test('Simple sorting', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _sort: 'rank:asc',
-        },
-      });
+    //   test('Simple sorting', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _sort: 'rank:asc',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(
-        expect.arrayContaining(data.product.slice(0).sort((a, b) => a.rank - b.rank))
-      );
+    //     expect(res.body).toEqual(
+    //       expect.arrayContaining(data.product.slice(0).sort((a, b) => a.rank - b.rank))
+    //     );
 
-      const res2 = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _sort: 'rank:desc',
-        },
-      });
+    //     const res2 = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _sort: 'rank:desc',
+    //       },
+    //     });
 
-      expect(res2.body).toEqual(
-        expect.arrayContaining(data.product.slice(0).sort((a, b) => b.rank - a.rank))
-      );
-    });
+    //     expect(res2.body).toEqual(
+    //       expect.arrayContaining(data.product.slice(0).sort((a, b) => b.rank - a.rank))
+    //     );
+    //   });
 
-    test('Multi column sorting', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _sort: 'price:asc,rank:desc',
-        },
-      });
+    //   test('Multi column sorting', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _sort: 'price:asc,rank:desc',
+    //       },
+    //     });
 
-      [data.product[3], data.product[0], data.product[2], data.product[1]].forEach(expectedPost => {
-        expect(res.body).toEqual(expect.arrayContaining([expectedPost]));
-      });
-    });
-  });
+    //     [data.product[3], data.product[0], data.product[2], data.product[1]].forEach(expectedPost => {
+    //       expect(res.body).toEqual(expect.arrayContaining([expectedPost]));
+    //     });
+    //   });
+    // });
 
-  describe('Limit and offset', () => {
-    test('Limit', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _limit: 1,
-          _sort: 'rank:asc',
-        },
-      });
+    // describe('Limit and offset', () => {
+    //   test('Limit', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _limit: 1,
+    //         _sort: 'rank:asc',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
 
-    test('Limit with sorting', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _limit: 1,
-          _sort: 'rank:desc',
-        },
-      });
+    //   test('Limit with sorting', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _limit: 1,
+    //         _sort: 'rank:desc',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[data.product.length - 1]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[data.product.length - 1]]));
+    //   });
 
-    test('Offset', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _start: 1,
-          _sort: 'rank:asc',
-        },
-      });
+    //   test('Offset', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _start: 1,
+    //         _sort: 'rank:asc',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining(data.product.slice(1)));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining(data.product.slice(1)));
+    //   });
 
-    test('Offset with limit', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _limit: 1,
-          _start: 1,
-          _sort: 'rank:asc',
-        },
-      });
+    //   test('Offset with limit', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _limit: 1,
+    //         _start: 1,
+    //         _sort: 'rank:asc',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining(data.product.slice(1, 2)));
-    });
-  });
+    //     expect(res.body).toEqual(expect.arrayContaining(data.product.slice(1, 2)));
+    //   });
+    // });
 
-  describe('Text query', () => {
-    test('Cyrillic query', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _q: 'Опис',
-        },
-      });
+    // describe('Text query', () => {
+    //   test('Cyrillic query', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _q: 'Опис',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[4]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[4]]));
+    //   });
 
-    test('Multi word query', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _q: 'Product description',
-        },
-      });
+    //   test('Multi word query', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _q: 'Product description',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[0]]));
+    //   });
 
-    test('Multi word cyrillic query', async () => {
-      const res = await rq({
-        method: 'GET',
-        url: '/products',
-        qs: {
-          _q: 'Опис на продукт',
-        },
-      });
+    //   test('Multi word cyrillic query', async () => {
+    //     const res = await rq({
+    //       method: 'GET',
+    //       url: '/products',
+    //       qs: {
+    //         _q: 'Опис на продукт',
+    //       },
+    //     });
 
-      expect(res.body).toEqual(expect.arrayContaining([data.product[4]]));
-    });
+    //     expect(res.body).toEqual(expect.arrayContaining([data.product[4]]));
+    //   });
   });
 });

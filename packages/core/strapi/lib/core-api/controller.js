@@ -34,9 +34,7 @@ const createSingleTypeController = ({ model, service }) => {
     async find(ctx) {
       const { query } = ctx;
       const entity = await service.find({ params: query });
-      return {
-        data: sanitize(entity),
-      };
+      return sanitize(entity);
     },
 
     /**
@@ -55,18 +53,14 @@ const createSingleTypeController = ({ model, service }) => {
         entity = await service.createOrUpdate({ params: query, data: body });
       }
 
-      return {
-        data: sanitize(entity),
-      };
+      return sanitize(entity);
     },
 
     async delete(ctx) {
       const { query } = ctx;
 
       const entity = await service.delete({ params: query });
-      return {
-        data: sanitize(entity),
-      };
+      return sanitize(entity);
     },
   };
 };
@@ -92,10 +86,7 @@ const createCollectionTypeController = ({ model, service }) => {
         ? await service.search({ params: query })
         : await service.find({ params: query });
 
-      return {
-        data: sanitize(entities),
-        meta: {},
-      };
+      return sanitize(entities);
     },
 
     /**
@@ -109,9 +100,7 @@ const createCollectionTypeController = ({ model, service }) => {
 
       const entity = await service.findOne(id, { params: query });
 
-      return {
-        data: sanitize(entity),
-      };
+      return sanitize(entity);
     },
 
     /**
@@ -127,9 +116,7 @@ const createCollectionTypeController = ({ model, service }) => {
         ? await service.countSearch({ params: query })
         : await service.count({ params: query });
 
-      return {
-        data: count,
-      };
+      return count;
     },
 
     /**
@@ -146,11 +133,10 @@ const createCollectionTypeController = ({ model, service }) => {
       // }
 
       const { body, query } = ctx.request;
+
       const entity = await service.create({ params: query, data: body });
 
-      return {
-        data: sanitize(entity),
-      };
+      return sanitize(entity);
     },
 
     /**
@@ -171,9 +157,7 @@ const createCollectionTypeController = ({ model, service }) => {
       const { body, query } = ctx.request;
 
       const entity = await service.update(id, { params: query, data: body });
-      return {
-        data: sanitize(entity),
-      };
+      return sanitize(entity);
     },
 
     /**
@@ -186,7 +170,7 @@ const createCollectionTypeController = ({ model, service }) => {
       const { query } = ctx;
 
       const entity = await service.delete(id, { params: query });
-      return { data: sanitize(entity) };
+      return sanitize(entity);
     },
   };
 };

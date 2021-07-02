@@ -276,7 +276,13 @@ const createEntityManager = db => {
         const attribute = attributes[attributeName];
 
         if (attribute.joinColumn && attribute.owner) {
-          // nothing to do => relation already added on the table
+          if (attribute.relation === 'oneToOne' && data[attributeName]) {
+            await this.createQueryBuilder(metadata.uid)
+              .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
+              .update({ [attribute.joinColumn.name]: null })
+              .execute();
+          }
+
           continue;
         }
 
@@ -287,6 +293,11 @@ const createEntityManager = db => {
 
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
           if (data[attributeName]) {
+            await this.createQueryBuilder(target)
+              .where({ [attribute.joinColumn.referencedColumn]: id })
+              .update({ [attribute.joinColumn.referencedColumn]: null })
+              .execute();
+
             await this.createQueryBuilder(target)
               .update({ [attribute.joinColumn.referencedColumn]: id })
               // NOTE: works if it is an array or a single id
@@ -301,8 +312,17 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn } = joinTable;
 
+          // TODO: redefine
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
           if (data[attributeName]) {
+            if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
+                .where(joinTable.on ? joinTable.on : {})
+                .execute();
+            }
+
             const insert = _.castArray(data[attributeName]).map(datum => {
               return {
                 [joinColumn.name]: id,
@@ -339,9 +359,15 @@ const createEntityManager = db => {
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
 
-        // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
         if (attribute.joinColumn && attribute.owner) {
-          // nothing to do => relation already added on the table
+          // TODO: redefine
+          if (attribute.relation === 'oneToOne' && _.has(attributeName, data)) {
+            await this.createQueryBuilder(metadata.uid)
+              .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
+              .update({ [attribute.joinColumn.name]: null })
+              .execute();
+          }
+
           continue;
         }
 
@@ -351,12 +377,19 @@ const createEntityManager = db => {
           // need to set the column on the target
           const { target } = attribute;
 
-          if (data[attributeName]) {
+          if (_.has(attributeName, data)) {
             await this.createQueryBuilder(target)
-              .update({ [attribute.joinColumn.referencedColumn]: id })
-              // NOTE: works if it is an array or a single id
-              .where({ id: data[attributeName] })
+              .where({ [attribute.joinColumn.referencedColumn]: id })
+              .update({ [attribute.joinColumn.referencedColumn]: null })
               .execute();
+
+            if (data[attributeName]) {
+              await this.createQueryBuilder(target)
+                // NOTE: works if it is an array or a single id
+                .where({ id: data[attributeName] })
+                .update({ [attribute.joinColumn.referencedColumn]: id })
+                .execute();
+            }
           }
         }
 
@@ -364,7 +397,7 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn } = joinTable;
 
-          if (data[attributeName]) {
+          if (_.has(attributeName, data)) {
             // clear previous associations in the joinTable
             await this.createQueryBuilder(joinTable.name)
               .delete()
@@ -372,22 +405,32 @@ const createEntityManager = db => {
               .where(joinTable.on ? joinTable.on : {})
               .execute();
 
-            const insert = _.castArray(data[attributeName]).map(datum => {
-              return {
-                [joinColumn.name]: id,
-                [inverseJoinColumn.name]: datum,
-                ...(joinTable.on || {}),
-              };
-            });
-
-            // if there is nothing to insert
-            if (insert.length === 0) {
-              return;
+            if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
+              await this.createQueryBuilder(joinTable.name)
+                .delete()
+                .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
+                .where(joinTable.on ? joinTable.on : {})
+                .execute();
             }
 
-            await this.createQueryBuilder(joinTable.name)
-              .insert(insert)
-              .execute();
+            if (data[attributeName]) {
+              const insert = _.castArray(data[attributeName]).map(datum => {
+                return {
+                  [joinColumn.name]: id,
+                  [inverseJoinColumn.name]: datum,
+                  ...(joinTable.on || {}),
+                };
+              });
+
+              // if there is nothing to insert
+              if (insert.length === 0) {
+                return;
+              }
+
+              await this.createQueryBuilder(joinTable.name)
+                .insert(insert)
+                .execute();
+            }
           }
         }
       }
@@ -420,14 +463,13 @@ const createEntityManager = db => {
         }
 
         // oneToOne oneToMany on the non owning side.
-        // Since it is a join column no need to remove previous relations
         if (attribute.joinColumn && !attribute.owner) {
           // need to set the column on the target
           const { target } = attribute;
 
           await this.createQueryBuilder(target)
             .where({ [attribute.joinColumn.referencedColumn]: id })
-            .delete()
+            .update({ [attribute.joinColumn.referencedColumn]: null })
             .execute();
         }
 

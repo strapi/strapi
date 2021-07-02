@@ -112,15 +112,17 @@ function createSchemaBuilder({ components, contentTypes }) {
             nature,
             unique,
             targetAttribute,
-            columnName,
-            dominant,
+
+            // dominant,
             private: isPrivate,
             ...restOfOptions
           } = attribute;
 
           const attr = {
+            type: 'relation',
+            relation: nature,
+            target,
             unique: unique === true ? true : undefined,
-            columnName: columnName || undefined,
             configurable: configurable === false ? false : undefined,
             private: isPrivate === true ? true : undefined,
             ...restOfOptions,
@@ -130,22 +132,18 @@ function createSchemaBuilder({ components, contentTypes }) {
             throw new Error(`target: ${target} does not exist`);
           }
 
-          const { modelName, plugin } = this.contentTypes.get(target);
-
-          attr.plugin = plugin;
-
-          if (MODEL_RELATIONS.includes(nature)) {
-            attr.model = modelName;
-          } else if (COLLECTION_RELATIONS.includes(nature)) {
-            attr.collection = modelName;
-          }
-
-          if (!['manyWay', 'oneWay'].includes(nature)) {
-            attr.via = targetAttribute;
-            attr.dominant = dominant || undefined;
+          if (nature === 'manyWay') {
+            attr.relation = 'oneToMany';
+          } else if (nature === 'oneWay') {
+            attr.relation = 'oneToOne';
+          } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(nature)) {
+            attr.inversedBy = targetAttribute;
+          } else if (['oneToMany'].includes(nature)) {
+            attr.mappedBy = targetAttribute;
           }
 
           acc[key] = attr;
+          return acc;
         }
 
         return acc;

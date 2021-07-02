@@ -286,7 +286,7 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       throw new Error(`inversedBy attribute ${attribute.inversedBy} not found target`);
     }
 
-    inverseAttribute[joinTable] = {
+    inverseAttribute.joinTable = {
       name: joinTableName,
       joinColumn: joinTable.inverseJoinColumn,
       inverseJoinColumn: joinTable.joinColumn,

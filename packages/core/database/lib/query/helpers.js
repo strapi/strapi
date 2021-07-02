@@ -250,10 +250,6 @@ const processWhere = (where, ctx, depth = 0) => {
 };
 
 const applyWhereToColumn = (qb, column, columnWhere) => {
-  if (Array.isArray(columnWhere)) {
-    return qb.whereIn(column, columnWhere);
-  }
-
   if (!_.isPlainObject(columnWhere)) {
     return qb.where(column, columnWhere);
   }
@@ -269,16 +265,20 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
       }
 
       case '$in': {
-        qb.whereIn(column, value);
+        qb.whereIn(column, _.castArray(value));
         break;
       }
 
       case '$notIn': {
-        qb.whereNotIn(column, value);
+        qb.whereNotIn(column, _.castArray(value));
         break;
       }
 
       case '$eq': {
+        if (Array.isArray(value)) {
+          return qb.whereIn(column, value);
+        }
+
         if (value === null) {
           qb.whereNull(column);
           break;
@@ -288,6 +288,10 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
         break;
       }
       case '$ne': {
+        if (Array.isArray(value)) {
+          return qb.whereNotIn(column, value);
+        }
+
         if (value === null) {
           qb.whereNotNull(column);
           break;
@@ -501,11 +505,21 @@ const applyPopulate = async (results, populate, ctx) => {
           referencedColumn: referencedColumnName,
         } = attribute.joinColumn;
 
+        const referencedValues = _.uniq(
+          results.map(r => r[joinColumnName]).filter(value => !_.isNull(value))
+        );
+
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = null;
+          });
+        }
+
         const rows = await db.entityManager
           .createQueryBuilder(targetMeta.uid)
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
-          .where({ [referencedColumnName]: results.map(r => r[joinColumnName]) })
+          .where({ [referencedColumnName]: referencedValues })
           .execute({ mapResults: false });
 
         const map = _.groupBy(referencedColumnName, rows);
@@ -562,11 +576,21 @@ const applyPopulate = async (results, populate, ctx) => {
           referencedColumn: referencedColumnName,
         } = attribute.joinColumn;
 
+        const referencedValues = _.uniq(
+          results.map(r => r[joinColumnName]).filter(value => !_.isNull(value))
+        );
+
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = null;
+          });
+        }
+
         const rows = await db.entityManager
           .createQueryBuilder(targetMeta.uid)
           .init(populateValue)
           .addSelect(`${qb.alias}.${referencedColumnName}`)
-          .where({ [referencedColumnName]: results.map(r => r[joinColumnName]) })
+          .where({ [referencedColumnName]: referencedValues })
           .execute({ mapResults: false });
 
         const map = _.groupBy(referencedColumnName, rows);

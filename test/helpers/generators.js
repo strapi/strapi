@@ -73,7 +73,7 @@ module.exports = {
     },
     name: 'reference',
     description: '',
-    collectionName: '',
+    collectionName: 'refs',
   },
   product: {
     attributes: {

@@ -122,14 +122,14 @@ const deleteContentTypes = async (modelsName, { strapi } = {}) => {
 
 async function cleanupModels(models, { strapi } = {}) {
   for (const model of models) {
-    await cleanupModel(model, { strapi });
+    await cleanupModel(`application::${model}.${model}`, { strapi });
   }
 }
 
 async function cleanupModel(model, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  await strapi.query(model).delete();
+  await strapi.query(`application::${model}.${model}`).deleteMany();
 
   await cleanup();
 }
@@ -143,7 +143,7 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
     const entries = [];
 
     for (const data of dataMap[model]) {
-      entries.push(await strapi.query(model).create(data));
+      entries.push(await strapi.query(`application::${model}.${model}`).create({ data }));
     }
 
     resultMap[model] = entries;
@@ -160,7 +160,9 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   for (const entry of entries) {
     const dataToCreate = isFunction(entry) ? entry(results) : entry;
-    results.push(await strapi.query(model).create(dataToCreate));
+    results.push(
+      await strapi.query(`application::${model}.${model}`).create({ data: dataToCreate })
+    );
   }
 
   await cleanup();
@@ -171,7 +173,9 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  await strapi.query(model).delete({ id_in: entries.map(prop('id')) });
+  await strapi
+    .query(`application::${model}.${model}`)
+    .delete({ where: { id: entries.map(prop('id')) } });
 
   await cleanup();
 }

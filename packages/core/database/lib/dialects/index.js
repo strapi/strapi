@@ -20,7 +20,7 @@ class Dialect {
 
   // TODO: pass query info to display some more metadata
   transformErrors(error) {
-    throw error;
+    throw new Error(error.message);
   }
 }
 class PostgresDialect extends Dialect {
@@ -84,7 +84,7 @@ class SqliteDialect extends Dialect {
 
     this.db.config.connection.connection.filename = path.resolve(
       // TODO: do this somewhere else
-      // global.strapi ? gstrapi.dir : process.cwd(),
+      global.strapi ? global.strapi.dir : process.cwd(),
       this.db.config.connection.connection.filename
     );
 

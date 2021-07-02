@@ -4,22 +4,6 @@ const _ = require('lodash');
 const utils = require('@strapi/utils');
 const { isMediaAttribute } = require('@strapi/utils').contentTypes;
 
-const toUID = (name, plugin) => {
-  const modelUID = Object.keys(strapi.contentTypes).find(key => {
-    const ct = strapi.contentTypes[key];
-    if (ct.modelName === name && ct.plugin === plugin) return true;
-  });
-
-  return modelUID;
-};
-
-const fromUID = uid => {
-  const contentType = strapi.contentTypes[uid];
-  const { modelName, plugin } = contentType;
-
-  return { modelName, plugin };
-};
-
 const hasComponent = model => {
   const compoKeys = Object.keys(model.attributes || {}).filter(key => {
     return model.attributes[key].type === 'component';
@@ -30,8 +14,7 @@ const hasComponent = model => {
 
 const isConfigurable = attribute => _.get(attribute, 'configurable', true);
 
-const isRelation = attribute =>
-  _.has(attribute, 'target') || _.has(attribute, 'model') || _.has(attribute, 'collection');
+const isRelation = attribute => _.has(attribute, 'target');
 
 /**
  * Formats a component's attributes
@@ -140,8 +123,6 @@ const replaceTemporaryUIDs = uidMap => schema => {
 };
 
 module.exports = {
-  fromUID,
-  toUID,
   hasComponent,
   isRelation,
   isConfigurable,

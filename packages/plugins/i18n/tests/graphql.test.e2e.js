@@ -51,7 +51,7 @@ describe('Test Graphql API create localization', () => {
 
   afterAll(async () => {
     await strapi.query('plugins::i18n.locale').delete({ where: { id: localeId } });
-    await strapi.query('recipes').delete();
+    await strapi.query('recipes').deleteMany();
     await strapi.destroy();
     await builder.cleanup();
   });

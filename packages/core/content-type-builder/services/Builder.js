@@ -3,7 +3,10 @@
 module.exports = {
   // TODO: Implement
   getReservedNames() {
-    return [];
+    return {
+      models: [],
+      attributes: [],
+    };
     // strapi.db.getReservedNames();
   },
 };

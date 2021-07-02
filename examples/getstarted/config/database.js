@@ -3,7 +3,7 @@ const sqlite = {
   connection: {
     filename: '.tmp/data.db',
   },
-  // debug: true,
+  debug: true,
   useNullAsDefault: true,
 };
 
