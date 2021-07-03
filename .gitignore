@@ -119,7 +119,7 @@ dist
 # Builds
 ############################
 
-packages/strapi-generate-new/files/public/
+packages/generators/app/files/public/
 
 ############################
 # Example app

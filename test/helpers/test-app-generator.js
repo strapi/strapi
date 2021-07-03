@@ -2,7 +2,7 @@
 
 const path = require('path');
 const rimraf = require('rimraf');
-const generateNew = require('../../packages/strapi-generate-new/lib/generate-new');
+const generateNew = require('../../packages/generators/app/lib/generate-new');
 
 /**
  * Delete the testApp folder
@@ -34,7 +34,7 @@ const generateTestApp = async ({ appName, database }) => {
     // disable quickstart run app after creation
     runQuickstartApp: false,
     // use package version as strapiVersion (all packages have the same version);
-    strapiVersion: require('../../packages/strapi/package.json').version,
+    strapiVersion: require('../../packages/core/strapi/package.json').version,
     debug: false,
     quick: false,
     uuid: undefined,
@@ -43,16 +43,17 @@ const generateTestApp = async ({ appName, database }) => {
     useYarn: true,
     installDependencies: false,
     strapiDependencies: [
-      'strapi',
-      'strapi-admin',
-      'strapi-utils',
-      'strapi-plugin-content-type-builder',
-      'strapi-plugin-content-manager',
-      'strapi-plugin-users-permissions',
-      'strapi-plugin-email',
-      'strapi-plugin-upload',
-      'strapi-plugin-graphql',
-      'strapi-plugin-documentation',
+      '@strapi/strapi',
+      '@strapi/admin',
+      '@strapi/utils',
+      '@strapi/plugin-content-type-builder',
+      '@strapi/plugin-content-manager',
+      '@strapi/plugin-users-permissions',
+      '@strapi/plugin-email',
+      '@strapi/plugin-upload',
+      '@strapi/plugin-graphql',
+      '@strapi/plugin-documentation',
+      '@strapi/plugin-i18n',
     ],
     additionalsDependencies: {},
   };

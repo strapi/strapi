@@ -1,5 +1,6 @@
 'use strict';
 
+// FIXME: needs udpate after package rename
 const { join } = require('path');
 const { promisify } = require('util');
 const fs = require('fs-extra');

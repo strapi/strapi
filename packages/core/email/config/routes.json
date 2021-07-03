@@ -1,0 +1,49 @@
+{
+  "routes": [
+    {
+      "method": "POST",
+      "path": "/",
+      "handler": "Email.send",
+      "config": {
+        "policies": [],
+        "description": "Send an email",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/test",
+      "handler": "Email.test",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["plugins::email.settings.read"]]
+        ],
+        "description": "Send an test email",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/settings",
+      "handler": "Email.getSettings",
+      "config": {
+        "policies": [
+          "admin::isAuthenticatedAdmin",
+          ["admin::hasPermissions", ["plugins::email.settings.read"]]
+        ],
+        "description": "Get the email settings",
+        "tag": {
+          "plugin": "email",
+          "name": "Email"
+        }
+      }
+    }
+  ]
+}
