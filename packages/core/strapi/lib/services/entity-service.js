@@ -215,6 +215,15 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     return entry;
   },
 
+  async deleteMany(uid, opts) {
+    const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
+
+    // select / populate
+    const query = transformParamsToQuery(pickSelectionParams(params));
+
+    return db.query(uid).deleteMany(query);
+  },
+
   // TODO: Implement search features
 
   async search(uid, opts) {

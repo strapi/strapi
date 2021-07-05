@@ -87,8 +87,8 @@ module.exports = {
   },
 
   async findOne(id, uid, populate) {
-    const params = { filters: { id }, populate };
-    return strapi.entityService.findOne(uid, { params });
+    const params = { populate };
+    return strapi.entityService.findOne(uid, id, { params });
   },
 
   async findOneWithCreatorRoles(id, uid, populate) {
@@ -113,20 +113,19 @@ module.exports = {
   },
 
   update(entity, body, uid) {
-    const params = { id: entity.id };
     const publishData = omitPublishedAtField(body);
 
-    return strapi.entityService.update(uid, { params, data: publishData });
+    return strapi.entityService.update(uid, entity.id, { data: publishData });
   },
 
   delete(entity, uid) {
     return strapi.entityService.delete(uid, entity.id);
   },
 
-  findAndDelete(opts, uid) {
+  deleteMany(opts, uid) {
     const params = { ...opts };
 
-    return strapi.entityService.delete(uid, { params });
+    return strapi.entityService.deleteMany(uid, { params });
   },
 
   publish: emitEvent(ENTRY_PUBLISH, async (entity, uid) => {

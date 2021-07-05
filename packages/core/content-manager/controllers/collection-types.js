@@ -210,17 +210,20 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    // TODO: fix
     const permissionQuery = permissionChecker.buildDeleteQuery(query);
 
-    const idsWhereClause = { [`id_in`]: ids };
+    const idsWhereClause = { id: { $in: ids } };
     const params = {
       ...permissionQuery,
-      _where: [idsWhereClause].concat(permissionQuery._where || {}),
+      filters: {
+        $and: [idsWhereClause, permissionQuery._where || {}],
+      },
     };
 
-    const results = await entityManager.findAndDelete(params, model);
+    const { count } = await entityManager.deleteMany(params, model);
 
-    ctx.body = results.map(result => permissionChecker.sanitizeOutput(result));
+    ctx.body = { count };
   },
 
   async previewManyRelations(ctx) {
