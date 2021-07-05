@@ -1,5 +1,7 @@
 'use strict';
 
+// Widely inspired from https://github.com/tleunen/babel-plugin-module-resolver/tree/master/src
+
 const transformImport = require('./transformers/import');
 const normalizeOptions = require('./normalizeOptions');
 

@@ -1,5 +1,7 @@
 'use strict';
 
+// Adapted from https://github.com/tleunen/babel-plugin-module-resolver/blob/master/src/normalizeOptions.js
+
 const path = require('path');
 const { createSelector } = require('reselect');
 

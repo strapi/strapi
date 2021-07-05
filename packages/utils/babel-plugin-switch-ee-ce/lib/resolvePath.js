@@ -1,5 +1,7 @@
 'use strict';
 
+// Adapted from https://github.com/tleunen/babel-plugin-module-resolver/blob/master/src/resolvePath.js
+
 const path = require('path');
 const normalizeOptions = require('./normalizeOptions');
 const mapToRelative = require('./mapToRelative');

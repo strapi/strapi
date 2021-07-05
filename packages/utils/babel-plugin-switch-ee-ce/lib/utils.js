@@ -1,5 +1,7 @@
 'use strict';
 
+// From https://github.com/tleunen/babel-plugin-module-resolver/blob/master/src/utils.js
+
 const path = require('path');
 const resolve = require('resolve');
 
@@ -48,7 +50,6 @@ const isRelativePath = nodePath => {
 
 module.exports = {
   nodeResolvePath,
-
   replaceExtension,
   stripExtension,
   toPosixPath,

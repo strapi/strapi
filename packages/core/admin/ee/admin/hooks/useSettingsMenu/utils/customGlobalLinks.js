@@ -1,6 +1,6 @@
 import adminPermissions from '../../../../../admin/src/permissions';
 
-const ssoGlobalRoutes = strapi.features.includes('sso')
+const ssoGlobalRoutes = strapi.features.isEnabled(strapi.features.SSO)
   ? [
       {
         intlLabel: { id: 'Settings.sso.title', defaultMessage: 'Single Sign-On' },
