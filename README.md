@@ -33,11 +33,8 @@
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
   </a>
-  <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
-  </a>
-  <a href="https://slack.strapi.io">
-    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
+  <a href="https://discord.strapi.io">
+    <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
   </a>
 </p>
 
@@ -105,11 +102,11 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Database:**
 
-- MongoDB >= 3.6 ([dropping MongoDB support](https://forum.strapi.io/t/dropping-mongodb-support/) in next major version)
 - MySQL >= 5.6
 - MariaDB >= 10.1
 - PostgreSQL >= 10
 - SQLite >= 3
+- MongoDB >= 3.6 ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108))
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 
@@ -121,7 +118,7 @@ Complete installation requirements can be found in the documentation under <a hr
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL & NoSQL databases:** Works with MongoDB ([dropping MongoDB support](https://forum.strapi.io/t/dropping-mongodb-support/) in next major version), PostgreSQL, MySQL, MariaDB, and SQLite.
+- **SQL & NoSQL databases:** Works with MongoDB ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108)), PostgreSQL, MySQL, MariaDB, and SQLite.
 
 **[See more on our website](https://strapi.io/overview)**.
 
