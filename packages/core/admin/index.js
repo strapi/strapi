@@ -240,12 +240,21 @@ async function watchAdmin({ dir, host, port, browser, options }) {
   const dest = path.join(dir, 'build');
   const env = 'development';
 
+  const cacheDir = path.join(dir, '.cache');
+
+  // Roots for the @strapi/babel-plugin-switch-ee-ce
+  const roots = {
+    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
+    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
+  };
+
   const args = {
     entry,
     dest,
     env,
     port,
     options,
+    roots,
   };
 
   const opts = {
