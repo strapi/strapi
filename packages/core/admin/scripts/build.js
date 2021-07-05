@@ -16,9 +16,7 @@ const buildAdmin = async () => {
     options: {
       backend: 'http://localhost:1337',
       adminPath: '/admin/',
-      features: [],
     },
-    useEE: false,
   };
 
   const compiler = webpack(webpackConfig(args));
