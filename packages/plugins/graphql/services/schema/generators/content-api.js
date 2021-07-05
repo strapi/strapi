@@ -1,6 +1,5 @@
 'use strict';
 
-const { join } = require('path');
 const { prop } = require('lodash/fp');
 const { makeSchema, unionType } = require('nexus');
 
@@ -308,12 +307,12 @@ module.exports = strapi => {
       plugins: [],
 
       // Auto-gen tools configuration (.graphql, .ts)
-      shouldGenerateArtifacts: process.env.NODE_ENV === 'development',
-
-      outputs: {
-        typegen: join(__dirname, '..', 'nexus-typegen.ts'),
-        schema: join(__dirname, '..', 'schema.graphql'),
-      },
+      // shouldGenerateArtifacts: process.env.NODE_ENV === 'development',
+      //
+      // outputs: {
+      //   typegen: join(__dirname, '..', 'nexus-typegen.ts'),
+      //   schema: join(__dirname, '..', 'schema.graphql'),
+      // },
     });
   };
 };
