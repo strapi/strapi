@@ -82,6 +82,7 @@ const syncSuperAdminPermissionsWithLocales = async () => {
     return;
   }
 
+  // TODO: fix
   const superAdminPermissions = await permissionService.findUserPermissions({
     roles: [superAdminRole],
   });

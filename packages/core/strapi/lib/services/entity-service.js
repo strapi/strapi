@@ -103,28 +103,10 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   async findPage(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
 
-    const { page = 1, pageSize = 100 } = params;
-
-    const pagination = {
-      page: parseInt(page),
-      pageSize: parseInt(pageSize),
-    };
-
+    // TODO: transform page pageSize
     const query = transformParamsToQuery(params);
 
-    query.limit = pagination.pageSize;
-    query.offset = pagination.page * pagination.pageSize;
-
-    const [results, total] = await db.query(uid).findWithCount(query);
-
-    return {
-      results,
-      pagination: {
-        ...pagination,
-        pageCount: Math.ceil(total / pageSize),
-        total,
-      },
-    };
+    return db.query(uid).findPage(query);
   },
 
   async findWithRelationCounts(uid, opts) {

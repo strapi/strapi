@@ -1,5 +1,15 @@
 'use strict';
 
+const withDefaultPagination = params => {
+  const { page = 1, pageSize = 100, ...rest } = params;
+
+  return {
+    page: parseInt(page),
+    pageSize: parseInt(pageSize),
+    ...rest,
+  };
+};
+
 const createRepository = (uid, db) => {
   return {
     findOne(params) {
@@ -11,7 +21,38 @@ const createRepository = (uid, db) => {
     },
 
     findWithCount(params) {
-      return db.entityManager.findWithCount(uid, params);
+      return Promise.all([
+        db.entityManager.findMany(uid, params),
+        db.entityManager.count(uid, params),
+      ]);
+    },
+
+    async findPage(params) {
+      const { page, pageSize, ...rest } = withDefaultPagination(params);
+
+      const offset = Math.max(page - 1, 0) * pageSize;
+      const limit = pageSize;
+
+      const query = {
+        ...rest,
+        limit,
+        offset,
+      };
+
+      const [results, total] = await Promise.all([
+        db.entityManager.findMany(uid, query),
+        db.entityManager.count(uid, query),
+      ]);
+
+      return {
+        results,
+        pagination: {
+          page,
+          pageSize,
+          pageCount: Math.ceil(total / pageSize),
+          total,
+        },
+      };
     },
 
     create(params) {

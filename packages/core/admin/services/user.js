@@ -185,24 +185,10 @@ const findOne = async (where = {}, populate) => {
  * @param query
  * @returns {Promise<user>}
  */
-const findPage = async query => {
-  const { page = 1, pageSize = 10 } = query;
+const findPage = async (query = {}) => {
+  const { page = 1, pageSize = 100 } = query;
 
-  const limit = pageSize;
-  const offset = (page - 1) * pageSize;
-  const [results, total] = await strapi
-    .query('strapi::user')
-    .findWithCount({ where: query.filters, limit, offset });
-
-  return {
-    results,
-    pagination: {
-      page,
-      pageSize,
-      total,
-      pageCount: Math.ceil(total / pageSize),
-    },
-  };
+  return strapi.query('strapi::user').findPage({ where: query.filters, page, pageSize });
 };
 
 /** Search for many users (paginated)
@@ -210,24 +196,10 @@ const findPage = async query => {
  * @returns {Promise<user>}
  */
 // FIXME: to impl
-const searchPage = async query => {
-  const { page = 1, pageSize = 10 } = query;
+const searchPage = async (query = {}) => {
+  const { page = 1, pageSize = 100 } = query;
 
-  const limit = pageSize;
-  const offset = (page - 1) * pageSize;
-  const [results, total] = await strapi
-    .query('strapi::user')
-    .findWithCount({ where: query.filters, limit, offset });
-
-  return {
-    results,
-    pagination: {
-      page,
-      pageSize,
-      total,
-      pageCount: Math.ceil(total / pageSize),
-    },
-  };
+  return strapi.query('strapi::user').findPage({ where: query.filters, page, pageSize });
 };
 
 /** Delete a user

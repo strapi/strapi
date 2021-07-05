@@ -70,12 +70,6 @@ const createEntityManager = db => {
       return await qb.execute();
     },
 
-    // support search directly in find & count -> a search param ? a different feature with a search tables rather
-
-    async findWithCount(uid, params) {
-      return await Promise.all([this.findMany(uid, params), this.count(uid, params)]);
-    },
-
     async count(uid, params = {}) {
       const qb = this.createQueryBuilder(uid).where(params.where);
 

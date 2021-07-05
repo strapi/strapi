@@ -66,7 +66,7 @@ const create = async attributes => {
  * @param populate
  * @returns {Promise<role>}
  */
-const findOne = (params = {}, populate = []) => {
+const findOne = (params = {}, populate) => {
   return strapi.query('strapi::role').findOne({ where: params, populate });
 };
 
@@ -76,7 +76,7 @@ const findOne = (params = {}, populate = []) => {
  * @param populate
  * @returns {Promise<role>}
  */
-const findOneWithUsersCount = async (params = {}, populate = []) => {
+const findOneWithUsersCount = async (params = {}, populate) => {
   const role = await strapi.query('strapi::role').findOne({ where: params, populate });
 
   if (role) {
@@ -92,7 +92,7 @@ const findOneWithUsersCount = async (params = {}, populate = []) => {
  * @param populate
  * @returns {Promise<array>}
  */
-const find = (params = {}, populate = []) => {
+const find = (params = {}, populate) => {
   return strapi.query('strapi::role').findMany({ where: params, populate });
 };
 
@@ -100,7 +100,7 @@ const find = (params = {}, populate = []) => {
  * Find all roles in database
  * @returns {Promise<array>}
  */
-const findAllWithUsersCount = async (populate = []) => {
+const findAllWithUsersCount = async populate => {
   const roles = await strapi.query('strapi::role').findMany({ populate });
   for (let role of roles) {
     role.usersCount = await getUsersCount(role.id);
@@ -184,10 +184,10 @@ const deleteByIds = async (ids = []) => {
 
   await getService('permission').deleteByRolesIds(ids);
 
-  let deletedRoles = await strapi.query('strapi::role').delete({ where: { id: ids } });
-
-  if (!Array.isArray(deletedRoles)) {
-    deletedRoles = [deletedRoles];
+  const deletedRoles = [];
+  for (const id of ids) {
+    const deletedRole = await strapi.query('strapi::role').delete({ where: { id } });
+    deletedRoles.push(deletedRole);
   }
 
   return deletedRoles;
