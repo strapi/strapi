@@ -6,6 +6,13 @@
 
 const _ = require('lodash/fp');
 
+const hasInversedBy = _.has('inversedBy');
+const hasMappedBy = _.has('mappedBy');
+
+const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
+const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
+const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
+
 /**
  * Creates a relation metadata
  *
@@ -186,13 +193,6 @@ const relationFactoryMap = {
   manyToMany: createManyToMany,
 };
 
-const hasInversedBy = _.has('inversedBy');
-const hasMappedBy = _.has('mappedBy');
-
-const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
-const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
-const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
-
 const createJoinColum = (metadata, { attribute /*attributeName, meta */ }) => {
   const targetMeta = metadata.get(attribute.target);
 
@@ -226,8 +226,13 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
 
   const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_links`);
 
-  const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
-  const inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
+  let joinColumnName = _.snakeCase(`${meta.singularName}_id`);
+  let inverseJoinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
+
+  // if relation is slef referencing
+  if (joinColumnName === inverseJoinColumnName) {
+    inverseJoinColumnName = `inv_${inverseJoinColumnName}`;
+  }
 
   metadata.add({
     uid: joinTableName,
@@ -296,4 +301,6 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
 
 module.exports = {
   createRelation,
+
+  isBidirectional,
 };

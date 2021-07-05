@@ -93,6 +93,8 @@ const convertSortQueryParams = sortQuery => {
     throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
   }
 
+  // TODO: handle array input
+
   const sortKeys = [];
 
   sortQuery.split(',').forEach(part => {
@@ -107,12 +109,10 @@ const convertSortQueryParams = sortQuery => {
       throw new Error('order can only be one of asc|desc|ASC|DESC');
     }
 
-    sortKeys.push({ field, order: order.toLowerCase() });
+    sortKeys.push({ [field]: order.toLowerCase() });
   });
 
-  return {
-    sort: sortKeys,
-  };
+  return sortKeys;
 };
 
 /**
@@ -126,9 +126,7 @@ const convertStartQueryParams = startQuery => {
     throw new Error(`convertStartQueryParams expected a positive integer got ${startAsANumber}`);
   }
 
-  return {
-    start: startAsANumber,
-  };
+  return startAsANumber;
 };
 
 /**
@@ -142,9 +140,7 @@ const convertLimitQueryParams = limitQuery => {
     throw new Error(`convertLimitQueryParams expected a positive integer got ${limitAsANumber}`);
   }
 
-  return {
-    limit: limitAsANumber,
-  };
+  return limitAsANumber;
 };
 
 /**
@@ -239,6 +235,9 @@ const convertWhereClause = (whereClause, value) => {
 
 module.exports = {
   convertRestQueryParams,
+  convertSortQueryParams,
+  convertStartQueryParams,
+  convertLimitQueryParams,
   VALID_REST_OPERATORS,
   QUERY_OPERATORS,
 };

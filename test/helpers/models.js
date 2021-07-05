@@ -122,7 +122,7 @@ const deleteContentTypes = async (modelsName, { strapi } = {}) => {
 
 async function cleanupModels(models, { strapi } = {}) {
   for (const model of models) {
-    await cleanupModel(`application::${model}.${model}`, { strapi });
+    await cleanupModel(model, { strapi });
   }
 }
 

@@ -312,7 +312,7 @@ class Strapi {
     }
 
     // Kill process
-    process.exit(exitCode);
+    // process.exit(exitCode);
   }
 
   async load() {
@@ -362,11 +362,7 @@ class Strapi {
       models: Database.transformContentTypes(contentTypes),
     });
 
-    if (process.env.NODE_ENV === 'test') {
-      await this.db.schema.reset();
-    } else {
-      await this.db.schema.sync();
-    }
+    await this.db.schema.sync();
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
     // await this.db.initialize();

@@ -34,7 +34,7 @@ describe('Create Strapi API End to End', () => {
 
   afterAll(async () => {
     await strapi.destroy();
-    // await builder.cleanup();
+    await builder.cleanup();
   });
 
   describe('Test manyToMany relation (article - tag) with Content Manager', () => {

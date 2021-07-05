@@ -1,6 +1,6 @@
 'use strict';
 
-const { formatContentType } = require('../ContentTypes');
+const { formatContentType } = require('../content-types');
 
 describe('Content types service', () => {
   describe('format ContentType', () => {

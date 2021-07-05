@@ -4,6 +4,12 @@ const { pick } = require('lodash/fp');
 const delegate = require('delegates');
 
 const {
+  convertSortQueryParams,
+  convertLimitQueryParams,
+  convertStartQueryParams,
+} = require('@strapi/utils/lib/convert-rest-query-params');
+
+const {
   sanitizeEntity,
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
@@ -36,27 +42,22 @@ module.exports = ctx => {
   return service;
 };
 
-const defaultLimit = 10;
+// TODO: move to Controller ?
 const transformParamsToQuery = (params = {}) => {
   const query = {};
 
   // TODO: check invalid values add defaults ....
-  if (params.pagination) {
-    const { pagination } = params;
-    if (pagination.start || pagination.limit) {
-      query.limit = Number(pagination.limit) || defaultLimit;
-      query.offset = Number(pagination.start) || 0;
-    }
 
-    if (pagination.page || pagination.pageSize) {
-      query.limit = Number(pagination.pageSize) || defaultLimit;
-      query.offset = (Number(pagination.page) - 1) * query.limit;
-    }
+  if (params.start) {
+    query.offset = convertStartQueryParams(params.start);
+  }
+
+  if (params.limit) {
+    query.limit = convertLimitQueryParams(params.limit);
   }
 
   if (params.sort) {
-    // TODO: impl
-    query.orderBy = params.sort;
+    query.orderBy = convertSortQueryParams(params.sort);
   }
 
   if (params.filters) {
@@ -102,14 +103,25 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   async findPage(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
 
+    const { page = 1, pageSize = 100 } = params;
+
+    const pagination = {
+      page: parseInt(page),
+      pageSize: parseInt(pageSize),
+    };
+
     const query = transformParamsToQuery(params);
+
+    query.limit = pagination.pageSize;
+    query.offset = pagination.page * pagination.pageSize;
 
     const [results, total] = await db.query(uid).findWithCount(query);
 
-    // TODO: cleanup
     return {
       results,
       pagination: {
+        ...pagination,
+        pageCount: Math.ceil(total / pageSize),
         total,
       },
     };
@@ -160,6 +172,8 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     //   await this.uploadFiles(entry, files, { model });
     //   entry = await this.findOne({ params: { id: entry.id } }, { model });
     // }
+
+    // TODO: Implement components CRUD ?
 
     eventHub.emit(ENTRY_CREATE, {
       model: modelDef.modelName,

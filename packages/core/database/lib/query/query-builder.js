@@ -155,81 +155,87 @@ const createQueryBuilder = (uid, db) => {
       return this.alias + '.' + columnName;
     },
 
-    async execute({ mapResults = true } = {}) {
+    getKnexQuery() {
       const aliasedTableName = state.type === 'insert' ? tableName : { [this.alias]: tableName };
 
+      const qb = db.connection(aliasedTableName);
+
+      switch (state.type) {
+        case 'select': {
+          if (state.select.length === 0) {
+            state.select = [this.aliasColumn('*')];
+          }
+
+          if (state.joins.length > 0) {
+            // add ordered columns to distinct in case of joins
+            // TODO: make sure we return the right data
+            qb.distinct(`${this.alias}.id`);
+            // TODO: add column if they aren't there already
+            state.select.unshift(...state.orderBy.map(({ column }) => column));
+          }
+
+          qb.select(state.select);
+          break;
+        }
+        case 'count': {
+          qb.count({ count: state.count });
+          break;
+        }
+        case 'insert': {
+          qb.insert(state.data);
+
+          if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
+            qb.returning('id');
+          }
+
+          break;
+        }
+        case 'update': {
+          qb.update(state.data);
+
+          break;
+        }
+        case 'delete': {
+          qb.del();
+
+          break;
+        }
+      }
+
+      if (state.limit) {
+        qb.limit(state.limit);
+      }
+
+      if (state.offset) {
+        qb.offset(state.offset);
+      }
+
+      if (state.orderBy.length > 0) {
+        qb.orderBy(state.orderBy);
+      }
+
+      if (state.first) {
+        qb.first();
+      }
+
+      if (state.groupBy.length > 0) {
+        qb.groupBy(state.groupBy);
+      }
+
+      if (state.where) {
+        helpers.applyWhere(qb, state.where);
+      }
+
+      if (state.joins.length > 0) {
+        helpers.applyJoins(qb, state.joins);
+      }
+
+      return qb;
+    },
+
+    async execute({ mapResults = true } = {}) {
       try {
-        const qb = db.connection(aliasedTableName);
-
-        switch (state.type) {
-          case 'select': {
-            if (state.select.length === 0) {
-              state.select = [this.aliasColumn('*')];
-            }
-
-            if (state.joins.length > 0) {
-              // add ordered columns to distinct in case of joins
-              // TODO: make sure we return the right data
-              qb.distinct(`${this.alias}.id`);
-              // TODO: add column if they aren't there already
-              state.select.unshift(...state.orderBy.map(({ column }) => column));
-            }
-
-            qb.select(state.select);
-            break;
-          }
-          case 'count': {
-            qb.count({ count: state.count });
-            break;
-          }
-          case 'insert': {
-            qb.insert(state.data);
-
-            if (db.dialect.useReturning() && _.has('id', meta.attributes)) {
-              qb.returning('id');
-            }
-
-            break;
-          }
-          case 'update': {
-            qb.update(state.data);
-
-            break;
-          }
-          case 'delete': {
-            qb.del();
-
-            break;
-          }
-        }
-
-        if (state.limit) {
-          qb.limit(state.limit);
-        }
-
-        if (state.offset) {
-          qb.offset(state.offset);
-        }
-
-        if (state.orderBy.length > 0) {
-          qb.orderBy(state.orderBy);
-        }
-
-        if (state.first) {
-          qb.first();
-        }
-
-        if (state.groupBy.length > 0) {
-          qb.groupBy(state.groupBy);
-        }
-
-        if (state.where) {
-          helpers.applyWhere(qb, state.where);
-        }
-
-        if (state.joins.length > 0) {
-          helpers.applyJoins(qb, state.joins);
-        }
+        const qb = this.getKnexQuery();
 
         const rows = await qb;
 

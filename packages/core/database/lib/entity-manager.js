@@ -5,6 +5,7 @@ const types = require('./types');
 const { createField } = require('./fields');
 const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
+const { isBidirectional } = require('./metadata/relations');
 
 // TODO: move to query layer
 const toRow = (metadata, data = {}) => {
@@ -269,6 +270,7 @@ const createEntityManager = db => {
      * @param {ID} id - entity ID
      * @param {object} data - data received for creation
      */
+    // TODO: wrap Transaction
     async attachRelations(metadata, id, data) {
       const { attributes } = metadata;
 
@@ -276,7 +278,11 @@ const createEntityManager = db => {
         const attribute = attributes[attributeName];
 
         if (attribute.joinColumn && attribute.owner) {
-          if (attribute.relation === 'oneToOne' && data[attributeName]) {
+          if (
+            attribute.relation === 'oneToOne' &&
+            isBidirectional(attribute) &&
+            data[attributeName]
+          ) {
             await this.createQueryBuilder(metadata.uid)
               .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
               .update({ [attribute.joinColumn.name]: null })
@@ -315,7 +321,10 @@ const createEntityManager = db => {
           // TODO: redefine
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
           if (data[attributeName]) {
-            if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
+            if (
+              ['oneToOne', 'oneToMany'].includes(attribute.relation) &&
+              isBidirectional(attribute)
+            ) {
               await this.createQueryBuilder(joinTable.name)
                 .delete()
                 .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
@@ -333,7 +342,7 @@ const createEntityManager = db => {
 
             // if there is nothing to insert
             if (insert.length === 0) {
-              return;
+              continue;
             }
 
             await this.createQueryBuilder(joinTable.name)
@@ -353,6 +362,7 @@ const createEntityManager = db => {
      * @param {object} data - data received for creation
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
+    // TODO: wrap Transaction
     async updateRelations(metadata, id, data) {
       const { attributes } = metadata;
 
@@ -424,7 +434,7 @@ const createEntityManager = db => {
 
               // if there is nothing to insert
               if (insert.length === 0) {
-                return;
+                continue;
               }
 
               await this.createQueryBuilder(joinTable.name)
@@ -445,6 +455,7 @@ const createEntityManager = db => {
      * @param {Metadata} metadata - model metadta
      * @param {ID} id - entity ID
      */
+    // TODO: wrap Transaction
     async deleteRelations(metadata, id) {
       // TODO: Implement correctly
       if (db.dialect.usesForeignKeys()) {

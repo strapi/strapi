@@ -24,7 +24,10 @@ const OPERATORS = [
   '$startsWith',
   '$endsWith',
   '$contains',
+  '$notContains',
 ];
+
+const ARRAY_OPERATORS = ['$in', '$notIn', '$between'];
 
 const createPivotJoin = (qb, joinTable, alias, tragetMeta) => {
   const joinAlias = qb.getAlias();
@@ -249,8 +252,135 @@ const processWhere = (where, ctx, depth = 0) => {
   return filters;
 };
 
+const applyOperator = (qb, column, operator, value) => {
+  if (Array.isArray(value) && !ARRAY_OPERATORS.includes(operator)) {
+    return qb.where(subQB => {
+      value.forEach(subValue =>
+        subQB.orWhere(innerQB => {
+          applyOperator(innerQB, column, operator, subValue);
+        })
+      );
+    });
+  }
+
+  switch (operator) {
+    case '$not': {
+      qb.whereNot(qb => applyWhereToColumn(qb, column, value));
+      break;
+    }
+
+    case '$in': {
+      qb.whereIn(column, _.castArray(value));
+      break;
+    }
+
+    case '$notIn': {
+      qb.whereNotIn(column, _.castArray(value));
+      break;
+    }
+
+    case '$eq': {
+      if (value === null) {
+        qb.whereNull(column);
+        break;
+      }
+
+      qb.where(column, value);
+      break;
+    }
+    case '$ne': {
+      if (value === null) {
+        qb.whereNotNull(column);
+        break;
+      }
+
+      qb.where(column, '<>', value);
+      break;
+    }
+    case '$gt': {
+      qb.where(column, '>', value);
+      break;
+    }
+    case '$gte': {
+      qb.where(column, '>=', value);
+      break;
+    }
+    case '$lt': {
+      qb.where(column, '<', value);
+      break;
+    }
+    case '$lte': {
+      qb.where(column, '<=', value);
+      break;
+    }
+    case '$null': {
+      // TODO: make this better
+      if (value) {
+        qb.whereNull(column);
+      }
+      break;
+    }
+    case '$notNull': {
+      if (value) {
+        qb.whereNotNull(column);
+      }
+
+      break;
+    }
+    case '$between': {
+      qb.whereBetween(column, value);
+      break;
+    }
+    // case '$regexp': {
+    //   // TODO:
+    //
+    // break;
+    // }
+    // // string
+    // // TODO: use $case to make it case insensitive
+    // case '$like': {
+    //   qb.where(column, 'like', value);
+    // break;
+    // }
+
+    // TODO: add casting logic
+    case '$startsWith': {
+      qb.where(column, 'like', `${value}%`);
+      break;
+    }
+    case '$endsWith': {
+      qb.where(column, 'like', `%${value}`);
+      break;
+    }
+    case '$contains': {
+      // TODO: handle insensitive
+
+      qb.where(column, 'like', `%${value}%`);
+      break;
+    }
+
+    case '$notContains': {
+      // TODO: handle insensitive
+      qb.whereNot(column, 'like', `%${value}%`);
+      break;
+    }
+
+    // TODO: json operators
+
+    // TODO: relational operators every/some/exists/size ...
+
+    default: {
+      throw new Error(`Undefined operator ${operator}`);
+    }
+  }
+};
+
 const applyWhereToColumn = (qb, column, columnWhere) => {
   if (!_.isPlainObject(columnWhere)) {
+    if (Array.isArray(columnWhere)) {
+      return qb.whereIn(column, columnWhere);
+    }
+
     return qb.where(column, columnWhere);
   }
 
@@ -258,122 +388,13 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
   Object.keys(columnWhere).forEach(operator => {
     const value = columnWhere[operator];
 
-    switch (operator) {
-      case '$not': {
-        qb.whereNot(qb => applyWhereToColumn(qb, column, value));
-        break;
-      }
-
-      case '$in': {
-        qb.whereIn(column, _.castArray(value));
-        break;
-      }
-
-      case '$notIn': {
-        qb.whereNotIn(column, _.castArray(value));
-        break;
-      }
-
-      case '$eq': {
-        if (Array.isArray(value)) {
-          return qb.whereIn(column, value);
-        }
-
-        if (value === null) {
-          qb.whereNull(column);
-          break;
-        }
-
-        qb.where(column, value);
-        break;
-      }
-      case '$ne': {
-        if (Array.isArray(value)) {
-          return qb.whereNotIn(column, value);
-        }
-
-        if (value === null) {
-          qb.whereNotNull(column);
-          break;
-        }
-
-        qb.where(column, '<>', value);
-        break;
-      }
-      case '$gt': {
-        qb.where(column, '>', value);
-        break;
-      }
-      case '$gte': {
-        qb.where(column, '>=', value);
-        break;
-      }
-      case '$lt': {
-        qb.where(column, '<', value);
-        break;
-      }
-      case '$lte': {
-        qb.where(column, '<=', value);
-        break;
-      }
-      case '$null': {
-        // TODO: make this better
-        if (value) {
-          qb.whereNull(column);
-        }
-        break;
-      }
-      case '$notNull': {
-        if (value) {
-          qb.whereNotNull(column);
-        }
-
-        break;
-      }
-      case '$between': {
-        qb.whereBetween(column, value);
-        break;
-      }
-      // case '$regexp': {
-      //   // TODO:
-      //
-      // break;
-      // }
-      // // string
-      // // TODO: use $case to make it case insensitive
-      // case '$like': {
-      //   qb.where(column, 'like', value);
-      // break;
-      // }
-
-      // TODO: add casting logic
-      case '$startsWith': {
-        qb.where(column, 'like', `${value}%`);
-        break;
-      }
-      case '$endsWith': {
-        qb.where(column, 'like', `%${value}`);
-        break;
-      }
-      case '$contains': {
-        qb.where(column, 'like', `%${value}%`);
-        break;
-      }
-
-      // TODO: json operators
-
-      // TODO: relational operators every/some/exists/size ...
-
-      default: {
-        throw new Error(`Undefined operator ${operator}`);
-      }
-    }
+    applyOperator(qb, column, operator, value);
   });
 };
 
 const applyWhere = (qb, where) => {
   if (Array.isArray(where)) {
-    return where.forEach(subWhere => applyWhere(qb, subWhere));
+    return qb.where(subQB => where.forEach(subWhere => applyWhere(subQB, subWhere)));
   }
 
   if (!_.isPlainObject(where)) {
@@ -384,14 +405,14 @@ const applyWhere = (qb, where) => {
     const value = where[key];
 
     if (key === '$and') {
-      return qb.where(qb => {
-        value.forEach(v => applyWhere(qb, v));
+      return qb.where(subQB => {
+        value.forEach(v => applyWhere(subQB, v));
       });
     }
 
     if (key === '$or') {
-      return qb.where(qb => {
-        value.forEach(v => qb.orWhere(inner => applyWhere(inner, v)));
+      return qb.where(subQB => {
+        value.forEach(v => subQB.orWhere(inner => applyWhere(inner, v)));
       });
     }
 
@@ -513,6 +534,8 @@ const applyPopulate = async (results, populate, ctx) => {
           results.forEach(result => {
             result[key] = null;
           });
+
+          continue;
         }
 
         const rows = await db.entityManager
@@ -540,8 +563,6 @@ const applyPopulate = async (results, populate, ctx) => {
           name: joinColumnName,
           referencedColumn: referencedColumnName,
         } = joinTable.joinColumn;
-
-        // TODO: create aliases for the columns
 
         const alias = qb.getAlias();
         const rows = await qb
@@ -584,6 +605,7 @@ const applyPopulate = async (results, populate, ctx) => {
           results.forEach(result => {
             result[key] = null;
           });
+          continue;
         }
 
         const rows = await db.entityManager
@@ -675,7 +697,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
 const fromRow = (metadata, row) => {
   if (Array.isArray(row)) {
-    return row.map(row => fromRow(metadata, row));
+    return row.map(singleRow => fromRow(metadata, singleRow));
   }
 
   const { attributes } = metadata;
