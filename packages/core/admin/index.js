@@ -7,8 +7,6 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
-// eslint-disable-next-line node/no-extraneous-require
-const hasEE = require('@strapi/strapi/lib/utils/ee');
 const getWebpackConfig = require('./webpack.config');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
@@ -16,7 +14,7 @@ const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`))
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
 
-  let webpackConfig = getWebpackConfig({ useEE: hasEE({ dir }), ...config });
+  let webpackConfig = getWebpackConfig(config);
 
   if (fs.existsSync(adminConfigPath)) {
     const adminConfig = require(path.resolve(adminConfigPath));
@@ -242,12 +240,21 @@ async function watchAdmin({ dir, host, port, browser, options }) {
   const dest = path.join(dir, 'build');
   const env = 'development';
 
+  const cacheDir = path.join(dir, '.cache');
+
+  // Roots for the @strapi/babel-plugin-switch-ee-ce
+  const roots = {
+    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
+    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
+  };
+
   const args = {
     entry,
     dest,
     env,
     port,
     options,
+    roots,
   };
 
   const opts = {

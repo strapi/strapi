@@ -1,6 +1,6 @@
 import SingleSignOn from '../SingleSignOn';
 
-const ssoRoutes = process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES.includes('sso')
+const ssoRoutes = strapi.features.isEnabled(strapi.features.SSO)
   ? [
       {
         Component: SingleSignOn,

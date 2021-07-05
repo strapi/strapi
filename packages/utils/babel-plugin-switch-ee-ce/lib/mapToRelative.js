@@ -1,5 +1,7 @@
 'use strict';
 
+// From https://github.com/tleunen/babel-plugin-module-resolver/blob/master/src/mapToRelative.js
+
 const path = require('path');
 
 const { toPosixPath } = require('./utils');

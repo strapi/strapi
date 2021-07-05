@@ -3,6 +3,10 @@
 const execa = require('execa');
 const _ = require('lodash');
 
+// FIXME
+// eslint-disable-next-line node/no-extraneous-require
+const { features } = require('@strapi/strapi/lib/utils/ee');
+
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 
 /**
@@ -21,7 +25,7 @@ module.exports = {
   // When removing this we need to update the /admin/src/index.js file
   // where we set the strapi.window.isEE value
   async getProjectType() {
-    return { data: { isEE: strapi.EE } };
+    return { data: { isEE: strapi.EE, features: features.getEnabled() } };
   },
 
   async init() {
