@@ -16,13 +16,13 @@ const loadConfiguration = require('./core/app-configuration');
 const utils = require('./utils');
 // const loadModules = require('./core/load-modules');
 // const bootstrap = require('./core/bootstrap');
-const initializeMiddlewares = require('./middlewares');
-const initializeHooks = require('./hooks');
+// const initializeMiddlewares = require('./middlewares');
+// const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
-const { webhookModel, createWebhookStore } = require('./services/webhook-store');
-const { createCoreStore, coreStoreModel } = require('./services/core-store');
+// const { webhookModel, createWebhookStore } = require('./services/webhook-store');
+// const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
@@ -120,7 +120,7 @@ class Strapi {
       [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
       [chalk.blue('Environment'), this.config.environment],
       [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
+      [chalk.blue('Version'), `${this.config.get('info.strapi')} (node ${process.version})`],
       [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
     );
 
@@ -302,6 +302,7 @@ class Strapi {
   }
 
   stopWithError(err, customMessage) {
+    console.log(err);
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
       this.log.error(customMessage);
@@ -355,22 +356,22 @@ class Strapi {
     });
 
     // Init core store
-    this.models['core_store'] = coreStoreModel(this.config);
-    this.models['strapi_webhooks'] = webhookModel(this.config);
+    // this.models['core_store'] = coreStoreModel(this.config);
+    // this.models['strapi_webhooks'] = webhookModel(this.config);
 
     this.db = createDatabaseManager(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
-    await this.db.initialize();
+    // await this.db.initialize();
 
-    this.store = createCoreStore({
-      environment: this.config.environment,
-      db: this.db,
-    });
+    // this.store = createCoreStore({
+    //   environment: this.config.environment,
+    //   db: this.db,
+    // });
+    //
+    // this.webhookStore = createWebhookStore({ db: this.db });
 
-    this.webhookStore = createWebhookStore({ db: this.db });
-
-    await this.startWebhooks();
+    // await this.startWebhooks();
 
     this.entityValidator = entityValidator;
 
@@ -383,8 +384,8 @@ class Strapi {
     this.telemetry = createTelemetry(this);
 
     // Initialize hooks and middlewares.
-    await initializeMiddlewares.call(this);
-    await initializeHooks.call(this);
+    // await initializeMiddlewares.call(this);
+    // await initializeHooks.call(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
     await this.freeze();
@@ -393,10 +394,10 @@ class Strapi {
     return this;
   }
 
-  async startWebhooks() {
-    const webhooks = await this.webhookStore.findWebhooks();
-    webhooks.forEach(webhook => this.webhookRunner.add(webhook));
-  }
+  // async startWebhooks() {
+  //   const webhooks = await this.webhookStore.findWebhooks();
+  //   webhooks.forEach(webhook => this.webhookRunner.add(webhook));
+  // }
 
   reload() {
     const state = {
