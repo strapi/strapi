@@ -62,6 +62,7 @@ const formatAttribute = (key, attribute, { model }) => {
       type: 'relation',
       nature: attribute.relation,
       target: attribute.target,
+      targetAttribute: attribute.inversedBy || attribute.mappedBy,
       required: required ? true : false,
       configurable: configurable === false ? false : undefined,
       private: attribute.private ? true : false,
