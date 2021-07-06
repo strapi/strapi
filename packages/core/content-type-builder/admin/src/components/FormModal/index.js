@@ -12,7 +12,6 @@ import {
   useNotification,
   useQuery,
   useStrapiApp,
-  InputsIndex,
 } from '@strapi/helper-plugin';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { Button, Text, Padded } from '@buffetjs/core';
@@ -1341,21 +1340,6 @@ const FormModal = () => {
                               value = false;
                             } else {
                               value = retrievedValue;
-                            }
-
-                            // The addon input is not present in @buffetjs so we are using the old lib
-                            // for the moment that's why we don't want them be passed to buffet
-                            // like the other created inputs
-                            if (input.type === 'addon') {
-                              return (
-                                <InputsIndex
-                                  key={input.name}
-                                  {...input}
-                                  type="string"
-                                  onChange={handleChange}
-                                  value={value}
-                                />
-                              );
                             }
 
                             return (

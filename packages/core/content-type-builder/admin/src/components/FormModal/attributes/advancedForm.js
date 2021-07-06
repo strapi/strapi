@@ -1,6 +1,6 @@
 import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { get, isEmpty } from 'lodash';
+import isEmpty from 'lodash/isEmpty';
 import getTrad from '../../../utils/getTrad';
 import { componentForm } from '../component';
 import options from './attributeOptions';
@@ -194,41 +194,9 @@ const advancedForm = {
       ],
     };
   },
-  relation: data => {
-    const targetAttributeValue = get(data, 'targetAttribute', null);
-    const nameValue = get(data, 'name', null);
-
+  relation: () => {
     return {
-      items: [
-        [uiHelpers.divider],
-        [options.private],
-        [options.unique],
-        [
-          {
-            autoFocus: false,
-            disabled: nameValue === null,
-            name: 'columnName',
-            type: 'addon',
-            addon: nameValue,
-            label: {
-              id: getTrad('form.attribute.item.customColumnName'),
-            },
-            inputDescription: {
-              id: getTrad('form.attribute.item.customColumnName.description'),
-            },
-            validations: {},
-          },
-          {
-            autoFocus: false,
-            disabled: targetAttributeValue === null || targetAttributeValue === '-',
-            name: 'targetColumnName',
-            label: '',
-            type: 'addon',
-            addon: targetAttributeValue,
-            validations: {},
-          },
-        ],
-      ],
+      items: [[uiHelpers.divider], [options.private]],
     };
   },
   richtext: () => {
