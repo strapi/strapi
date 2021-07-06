@@ -98,9 +98,8 @@ const deleteComponents = async (componentsUID, { strapi } = {}) => {
   return deletedComponents;
 };
 
-const deleteContentType = async (modelName, { strapi } = {}) => {
+const deleteContentType = async (uid, { strapi } = {}) => {
   const { contentTypeService, cleanup } = await createHelpers({ strapi });
-  const uid = `application::${modelName}.${modelName}`;
 
   const contentType = await contentTypeService.deleteContentType(uid);
 
@@ -109,11 +108,10 @@ const deleteContentType = async (modelName, { strapi } = {}) => {
   return contentType;
 };
 
-const deleteContentTypes = async (modelsName, { strapi } = {}) => {
+const deleteContentTypes = async (modelsUIDs, { strapi } = {}) => {
   const { contentTypeService, cleanup } = await createHelpers({ strapi });
-  const toUID = name => `application::${name}.${name}`;
 
-  const contentTypes = await contentTypeService.deleteContentTypes(modelsName.map(toUID));
+  const contentTypes = await contentTypeService.deleteContentTypes(modelsUIDs);
 
   await cleanup();
 
@@ -126,10 +124,10 @@ async function cleanupModels(models, { strapi } = {}) {
   }
 }
 
-async function cleanupModel(model, { strapi: strapiIst } = {}) {
+async function cleanupModel(uid, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  await strapi.query(`application::${model}.${model}`).deleteMany();
+  await strapi.query(uid).deleteMany();
 
   await cleanup();
 }

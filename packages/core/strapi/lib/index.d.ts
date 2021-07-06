@@ -1,8 +1,6 @@
 import { Database } from '@strapi/database';
 import { Strapi } from './Strapi';
 
-type StrapiInstance = InstanceType<typeof Strapi>;
-
 type ID = number | string;
 
 interface Options<T> {
@@ -36,12 +34,10 @@ interface EntityService {
   countSearch<T extends keyof AllTypes>(uid: T): Promise<any>;
 }
 
-interface StrapiInterface {
+interface StrapiInterface extends Strapi {
   query: Database['query'];
   entityService: EntityService;
 }
-
-type StrapiGlobal = StrapiInterface | StrapiInstance;
 
 declare global {
   interface AllTypes {}
@@ -49,8 +45,8 @@ declare global {
 
 declare global {
   export interface Global {
-    strapi: StrapiGlobal;
+    strapi: StrapiInterface;
   }
 
-  const strapi: StrapiGlobal;
+  const strapi: StrapiInterface;
 }

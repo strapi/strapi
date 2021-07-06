@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
+const { has, pick } = require('lodash/fp');
 const delegate = require('delegates');
 
 const {
@@ -147,22 +147,29 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     // select / populate
     const query = transformParamsToQuery(pickSelectionParams(params));
 
-    const entry = await db.query(uid).create({ ...query, data: validData });
+    // TODO: wrap into transaction
 
-    // TODO: implement files
+    const componentData = await createComponents(uid, validData);
+
+    const entity = await db.query(uid).create({
+      ...query,
+      data: Object.assign(validData, componentData),
+    });
+
+    // TODO: Implement components CRUD
+
+    // TODO: implement files outside of the entity service
     // if (files && Object.keys(files).length > 0) {
     //   await this.uploadFiles(entry, files, { model });
     //   entry = await this.findOne({ params: { id: entry.id } }, { model });
     // }
 
-    // TODO: Implement components CRUD ?
-
     eventHub.emit(ENTRY_CREATE, {
       model: modelDef.modelName,
-      entry: sanitizeEntity(entry, { model: modelDef }),
+      entry: sanitizeEntity(entity, { model: modelDef }),
     });
 
-    return entry;
+    return entity;
   },
 
   async update(uid, entityId, opts) {
@@ -182,7 +189,15 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     // select / populate
     const query = transformParamsToQuery(pickSelectionParams(params));
 
-    let entry = await db.query(uid).update({ ...query, where: { id: entityId }, data });
+    // TODO: wrap in transaction
+
+    const componentData = await updateComponents(uid, data);
+
+    let entry = await db.query(uid).update({
+      ...query,
+      where: { id: entityId },
+      data: Object.assign(data, componentData),
+    });
 
     // TODO: implement files
     // if (files && Object.keys(files).length > 0) {
@@ -261,3 +276,150 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     // return db.query(uid).countSearch(params);
   },
 });
+
+// TODO: Generalize the logic to CRUD relation directly in the DB layer
+const createComponents = async (uid, data) => {
+  const { attributes } = strapi.getModel(uid);
+
+  for (const attributeName in attributes) {
+    const attribute = attributes[attributeName];
+
+    if (!has(attributeName, data)) {
+      continue;
+    }
+
+    if (attribute.type === 'component') {
+      const { component: componentUID, repeatable = false } = attribute;
+
+      const componentValue = data[attributeName];
+
+      if (componentValue === null) {
+        continue;
+      }
+
+      if (repeatable === true) {
+        if (!Array.isArray(componentValue)) {
+          throw new Error('Expected an array to create repeatable component');
+        }
+
+        const components = await Promise.all(
+          componentValue.map(value => {
+            return strapi.query(componentUID).create({ data: value });
+          })
+        );
+
+        return {
+          [attributeName]: components.map(({ id }, idx) => {
+            // TODO: add & support pivot data in DB
+            return id;
+          }),
+        };
+      } else {
+        const component = await strapi.query(componentUID).create({ data: componentValue });
+
+        return {
+          // TODO: add & support pivot data in DB
+          [attributeName]: component.id,
+        };
+      }
+    }
+
+    if (attribute.type === 'dynamiczone') {
+      const dynamiczoneValues = data[attributeName];
+
+      if (!Array.isArray(dynamiczoneValues)) {
+        throw new Error('Expected an array to create repeatable component');
+      }
+
+      const components = await Promise.all(
+        dynamiczoneValues.map(value => {
+          return strapi.query(value.__component).create({ data: value });
+        })
+      );
+
+      return {
+        [attributeName]: components.map(({ id }, idx) => {
+          // TODO: add & support pivot data in DB
+          return id;
+        }),
+      };
+    }
+  }
+};
+
+const updateOrCreateComponent = (componentUID, value) => {
+  // update
+  if (has('id', value)) {
+    return strapi.query(componentUID).update({ where: { id: value.id }, data: value });
+  }
+
+  // create
+  return strapi.query(componentUID).create({ data: value });
+};
+
+const updateComponents = async (uid, data) => {
+  // TODO: clear old -> done in the updateRelation
+
+  const { attributes } = strapi.getModel(uid);
+
+  for (const attributeName in attributes) {
+    const attribute = attributes[attributeName];
+
+    if (!has(attributeName, data)) {
+      continue;
+    }
+
+    if (attribute.type === 'component') {
+      const { component: componentUID, repeatable = false } = attribute;
+
+      const componentValue = data[attributeName];
+
+      if (componentValue === null) {
+        continue;
+      }
+
+      if (repeatable === true) {
+        if (!Array.isArray(componentValue)) {
+          throw new Error('Expected an array to create repeatable component');
+        }
+
+        const components = await Promise.all(
+          componentValue.map(value => updateOrCreateComponent(componentUID, value))
+        );
+
+        return {
+          [attributeName]: components.map(({ id }, idx) => {
+            // TODO: add & support pivot data in DB
+            return id;
+          }),
+        };
+      } else {
+        const component = await updateOrCreateComponent(componentUID, componentValue);
+
+        return {
+          // TODO: add & support pivot data in DB
+          [attributeName]: component.id,
+        };
+      }
+    }
+
+    if (attribute.type === 'dynamiczone') {
+      const dynamiczoneValues = data[attributeName];
+
+      if (!Array.isArray(dynamiczoneValues)) {
+        throw new Error('Expected an array to create repeatable component');
+      }
+
+      const components = await Promise.all(
+        dynamiczoneValues.map(value => updateOrCreateComponent(value.__component, value))
+      );
+
+      return {
+        [attributeName]: components.map(({ id }, idx) => {
+          // TODO: add & support pivot data in DB
+          return id;
+        }),
+      };
+    }
+  }
+};

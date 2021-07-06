@@ -21,14 +21,18 @@ async function main(connection) {
     await orm.schema.sync();
     await orm.schema.reset();
 
-    await orm.query('article').createMany({
+    await orm.query('article').create({
       // select: {},
       // populate: {},
-      data: Array(5)
-        .fill({})
-        .map((v, idx) => ({
-          title: `Article ${_.padStart(idx, 3, '0')}`,
-        })),
+      data: {
+        compo: {
+          id: 1,
+          __pivot: {
+            order: 1,
+            field: 'compo',
+          },
+        },
+      },
     });
 
     const articles = await orm.query('article').findMany({

@@ -77,7 +77,7 @@ const createTestBuilder = (options = {}) => {
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
-          await modelsUtils.cleanupModel(model.modelName);
+          await modelsUtils.cleanupModel(model.uid);
         }
       }
 

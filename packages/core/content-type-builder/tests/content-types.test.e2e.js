@@ -27,15 +27,15 @@ describe('Content Type Builder - Content types', () => {
   });
 
   afterAll(async () => {
-    const modelsName = [
-      'test-collection-type',
-      'test-collection',
-      'test-single-type',
-      'ct-with-dp',
+    const modelsUIDs = [
+      'application::test-collection-type.test-collection-type',
+      'application::test-collection.test-collection',
+      'application::test-single-type.test-single-type',
+      'application::ct-with-dp.ct-with-dp',
     ];
 
-    await modelsUtils.cleanupModels(modelsName, { strapi });
-    await modelsUtils.deleteContentTypes(modelsName, { strapi });
+    await modelsUtils.cleanupModels(modelsUIDs, { strapi });
+    await modelsUtils.deleteContentTypes(modelsUIDs, { strapi });
 
     await strapi.destroy();
   });

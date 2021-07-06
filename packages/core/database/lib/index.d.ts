@@ -43,11 +43,33 @@ interface CreateManyParams<T> {
   data: T[keyof T][];
 }
 
+interface Pagination {
+  page: number;
+  pageSize: number;
+  pageCount: number;
+  total: number;
+}
+
 interface QueryFromContentType<T extends keyof AllTypes> {
-  findOne(params: FindParams<AllTypes[T]>): AllTypes[T];
-  findMany(params: FindParams<AllTypes[T]>): AllTypes[T][];
-  create(params: CreateParams<AllTypes[T]>): AllTypes[T][];
-  createMany(params: CreateManyParams<AllTypes[T]>): AllTypes[T][];
+  findOne(params: FindParams<AllTypes[T]>): any;
+  findMany(params: FindParams<AllTypes[T]>): any[];
+  findWithCount(params: FindParams<AllTypes[T]>): [any[], number];
+  findPage(params: FindParams<AllTypes[T]>): { results: any[]; pagination: Pagination };
+
+  create(params: CreateParams<AllTypes[T]>): any;
+  createMany(params: CreateManyParams<AllTypes[T]>): { count: number };
+
+  update(params: any): any;
+  updateMany(params: any): { count: number };
+
+  delete(params: any): any;
+  deleteMany(params: any): { count: number };
+
+  count(params: any): number;
+
+  attachRelations(id: ID, data: any): any;
+  updateRelations(id: ID, data: any): any;
+  deleteRelations(id: ID): any;
 }
 
 interface ModelConfig {

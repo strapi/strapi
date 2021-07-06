@@ -244,7 +244,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await modelsUtils.cleanupModels(['article', 'category'], { strapi });
+      await modelsUtils.cleanupModels([form.article.uid, form.category.uid], { strapi });
     });
 
     test('Create cat1', async () => {
@@ -497,7 +497,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await modelsUtils.cleanupModels(['article', 'reference'], { strapi });
+      await modelsUtils.cleanupModels([form.article.uid, form.reference.uid], { strapi });
     });
 
     test('Create ref1', async () => {
@@ -592,7 +592,7 @@ describe('Create Strapi API End to End', () => {
     });
 
     afterAll(async () => {
-      await modelsUtils.cleanupModels(['reference', 'tag'], { strapi });
+      await modelsUtils.cleanupModels([form.reference.uid, form.tag.uid], { strapi });
     });
 
     test('Attach Tag to a Reference', async () => {

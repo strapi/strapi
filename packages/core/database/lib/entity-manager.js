@@ -105,7 +105,7 @@ const createEntityManager = db => {
         .execute();
 
       // create relation associations or move this to the entity service & call attach on the repo instead
-      await this.attachRelations(metadata, id, data);
+      await this.attachRelations(uid, id, data);
 
       // TODO: in case there is not select or populate specified return the inserted data ?
 
@@ -169,7 +169,7 @@ const createEntityManager = db => {
           .execute();
       }
 
-      await this.updateRelations(metadata, id, data);
+      await this.updateRelations(uid, id, data);
 
       return this.findOne(uid, { where: { id }, select: params.select, populate: params.populate });
     },
@@ -218,7 +218,7 @@ const createEntityManager = db => {
         .delete()
         .execute();
 
-      await this.deleteRelations(metadata, id);
+      await this.deleteRelations(uid, id);
 
       return entity;
     },
@@ -265,8 +265,14 @@ const createEntityManager = db => {
      * @param {object} data - data received for creation
      */
     // TODO: wrap Transaction
-    async attachRelations(metadata, id, data) {
-      const { attributes } = metadata;
+    async attachRelations(uid, id, data) {
+      const { attributes } = db.metadata.get(uid);
+
+      /*
+        TODO:
+        if data[attributeName] is a single value (ID) => assign
+        if data[attributeName] is an object with an id => assign & use the other props as join column values
+      */
 
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
@@ -277,7 +283,7 @@ const createEntityManager = db => {
             isBidirectional(attribute) &&
             data[attributeName]
           ) {
-            await this.createQueryBuilder(metadata.uid)
+            await this.createQueryBuilder(uid)
               .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
               .update({ [attribute.joinColumn.name]: null })
               .execute();
@@ -357,8 +363,8 @@ const createEntityManager = db => {
      */
     // TODO: check relation exists (handled by FKs except for polymorphics)
     // TODO: wrap Transaction
-    async updateRelations(metadata, id, data) {
-      const { attributes } = metadata;
+    async updateRelations(uid, id, data) {
+      const { attributes } = db.metadata.get(uid);
 
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
@@ -366,7 +372,7 @@ const createEntityManager = db => {
         if (attribute.joinColumn && attribute.owner) {
           // TODO: redefine
           if (attribute.relation === 'oneToOne' && _.has(attributeName, data)) {
-            await this.createQueryBuilder(metadata.uid)
+            await this.createQueryBuilder(uid)
               .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
               .update({ [attribute.joinColumn.name]: null })
               .execute();
@@ -450,13 +456,13 @@ const createEntityManager = db => {
      * @param {ID} id - entity ID
      */
     // TODO: wrap Transaction
-    async deleteRelations(metadata, id) {
+    async deleteRelations(uid, id) {
       // TODO: Implement correctly
       if (db.dialect.usesForeignKeys()) {
         return;
       }
 
-      const { attributes } = metadata;
+      const { attributes } = db.metadata.get(uid);
 
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];

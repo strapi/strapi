@@ -83,6 +83,17 @@ const createRepository = (uid, db) => {
       return db.entityManager.count(uid, params);
     },
 
+    attachRelations(id, data) {
+      console.log(id, data)
+      return db.entityManager.attachRelations(uid, id, data);
+    },
+    updateRelations(id, data) {
+      return db.entityManager.updateRelations(uid, id, data);
+    },
+    deleteRelations(id) {
+      return db.entityManager.deleteRelations(uid, id);
+    },
+
     // TODO: add relation API
 
     populate() {},
