@@ -7,9 +7,6 @@ const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
 const createContentTypeBuilder = require('./content-type-builder');
 
-const MODEL_RELATIONS = ['oneWay', 'oneToOne', 'manyToOne'];
-const COLLECTION_RELATIONS = ['manyWay', 'manyToMany', 'oneToMany'];
-
 /**
  * Creates a content type schema builder instance
  *
@@ -97,52 +94,40 @@ function createSchemaBuilder({ components, contentTypes }) {
 
         const { configurable } = attribute;
 
-        if (_.has(attribute, 'type')) {
-          acc[key] = {
-            ...attribute,
-            configurable: configurable === false ? false : undefined,
-          };
-
-          return acc;
-        }
-
-        if (_.has(attribute, 'target')) {
-          const {
-            target,
-            nature,
-            unique,
-            targetAttribute,
-
-            // dominant,
-            private: isPrivate,
-            ...restOfOptions
-          } = attribute;
+        if (attribute.type === 'relation') {
+          const { target, relation, targetAttribute, private: isPrivate } = attribute;
 
           const attr = {
             type: 'relation',
-            relation: nature,
+            relation,
             target,
-            unique: unique === true ? true : undefined,
             configurable: configurable === false ? false : undefined,
             private: isPrivate === true ? true : undefined,
-            ...restOfOptions,
           };
 
           if (!this.contentTypes.has(target)) {
             throw new Error(`target: ${target} does not exist`);
           }
 
-          if (nature === 'manyWay') {
-            attr.relation = 'oneToMany';
-          } else if (nature === 'oneWay') {
-            attr.relation = 'oneToOne';
-          } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(nature)) {
+          if (
+            ['oneToOne', 'manyToOne', 'manyToMany'].includes(relation) &&
+            !_.isNil(targetAttribute)
+          ) {
             attr.inversedBy = targetAttribute;
-          } else if (['oneToMany'].includes(nature)) {
+          } else if (['oneToMany'].includes(relation) && !_.isNil(targetAttribute)) {
             attr.mappedBy = targetAttribute;
           }
 
           acc[key] = attr;
+          return acc;
+        }
+
+        if (_.has(attribute, 'type')) {
+          acc[key] = {
+            ...attribute,
+            configurable: configurable === false ? false : undefined,
+          };
+
           return acc;
         }
 

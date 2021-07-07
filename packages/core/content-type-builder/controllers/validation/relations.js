@@ -4,8 +4,7 @@ const yup = require('yup');
 const { typeKinds, coreUids } = require('../../services/constants');
 const { validators, isValidName } = require('./common');
 
-const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
-const STRAPI_USER_RELATIONS = ['oneWay', 'manyWay'];
+const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
 const isValidNature = validNatures =>
   function(value) {
@@ -31,25 +30,15 @@ module.exports = (obj, validNatures) => {
       .string()
       .oneOf(contentTypesUIDs)
       .required(),
-    nature: yup
+    relation: yup
       .string()
       .test('isValidNature', isValidNature(validNatures))
       .required(),
-    unique: validators.unique.nullable(),
     configurable: yup.boolean().nullable(),
-    autoPopulate: yup.boolean().nullable(),
-    dominant: yup.boolean().nullable(),
-    columnName: yup.string().nullable(),
-    targetAttribute: REVERSE_RELATIONS.includes(obj.nature)
-      ? yup
-          .string()
-          .test(isValidName)
-          .required()
-      : yup
-          .string()
-          .test(isValidName)
-          .nullable(),
-    targetColumnName: yup.string().nullable(),
+    targetAttribute: yup
+      .string()
+      .test(isValidName)
+      .nullable(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
   };

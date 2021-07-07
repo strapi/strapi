@@ -17,6 +17,7 @@ const isContentTypeVisible = model =>
 const getRestrictRelationsTo = (contentType = {}) => {
   const { uid } = contentType;
   if (uid === coreUids.STRAPI_USER) {
+    // TODO: replace with an obj { relation: 'x', bidirectional: true|false }
     return ['oneWay', 'manyWay'];
   }
 

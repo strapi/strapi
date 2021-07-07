@@ -11,6 +11,7 @@ import Wrapper from './Wrapper';
 const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother, target }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { contentTypes, sortedContentTypesList } = useDataManager();
+  // TODO: replace with an obj { relation: 'x', bidirctional: true|false }
   const allowedContentTypesForRelation = useMemo(
     () =>
       sortedContentTypesList

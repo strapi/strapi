@@ -47,91 +47,6 @@ const reducer = (state = initialState, action) => {
           }
         }
 
-        // TODO
-        // if (keys.length === 1 && keys.includes('nature')) {
-        //   return obj
-        //     .update('nature', () => value)
-        //     .update('dominant', () => {
-        //       if (value === 'manyToMany') {
-        //         return true;
-        //       }
-
-        //       return null;
-        //     })
-        //     .update('name', oldValue => {
-        //       return pluralize(snakeCase(oldValue), shouldPluralizeName(value));
-        //     })
-        //     .update('targetAttribute', oldValue => {
-        //       if (['oneWay', 'manyWay'].includes(value)) {
-        //         return '-';
-        //       }
-
-        //       return pluralize(
-        //         oldValue === '-' ? snakeCase(oneThatIsCreatingARelationWithAnother) : oldValue,
-        //         shouldPluralizeTargetAttribute(value)
-        //       );
-        //     })
-        //     .update('targetColumnName', oldValue => {
-        //       if (['oneWay', 'manyWay'].includes(value)) {
-        //         return null;
-        //       }
-
-        //       return oldValue;
-        //     });
-        // }
-
-        // if (keys.length === 1 && keys.includes('target')) {
-        //   const { targetContentTypeAllowedRelations } = action;
-        //   let didChangeNatureBecauseOfRestrictedRelation = false;
-
-        //   return obj
-        //     .update('target', () => value)
-        //     .update('nature', currentNature => {
-        //       if (targetContentTypeAllowedRelations === null) {
-        //         return currentNature;
-        //       }
-
-        //       if (!targetContentTypeAllowedRelations.includes(currentNature)) {
-        //         didChangeNatureBecauseOfRestrictedRelation = true;
-
-        //         return targetContentTypeAllowedRelations[0];
-        //       }
-
-        //       return currentNature;
-        //     })
-        //     .update('name', () => {
-        //       if (didChangeNatureBecauseOfRestrictedRelation) {
-        //         return pluralize(
-        //           snakeCase(selectedContentTypeFriendlyName),
-        //           shouldPluralizeName(targetContentTypeAllowedRelations[0])
-        //         );
-        //       }
-
-        //       return pluralize(
-        //         snakeCase(selectedContentTypeFriendlyName),
-
-        //         shouldPluralizeName(obj.get('nature'))
-        //       );
-        //     })
-        //     .update('targetAttribute', () => {
-        //       if (['oneWay', 'manyWay'].includes(obj.get('nature'))) {
-        //         return '-';
-        //       }
-
-        //       if (
-        //         didChangeNatureBecauseOfRestrictedRelation &&
-        //         ['oneWay', 'manyWay'].includes(targetContentTypeAllowedRelations[0])
-        //       ) {
-        //         return '-';
-        //       }
-
-        //       return pluralize(
-        //         snakeCase(oneThatIsCreatingARelationWithAnother),
-        //         shouldPluralizeTargetAttribute(obj.get('nature'))
-        //       );
-        //     });
-        // }
-
         return obj.updateIn(keys, () => value);
       });
 
@@ -153,6 +68,7 @@ const reducer = (state = initialState, action) => {
           .update('target', () => value)
           .update('relation', currentRelation => {
             // Don't change the relation type if the allowed relations are not restricted
+            // TODO: replace with an obj { relation: 'x', bidirctional: true|false } when BE ready
             if (targetContentTypeAllowedRelations === null) {
               return currentRelation;
             }
