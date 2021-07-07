@@ -20,11 +20,11 @@ const transformAttribute = attribute => {
   }
 };
 
-// TODO: add published_at for D&P
 // TODO: add locale & localizations for I18N
+// TODO: model logic outside DB
 const transformContentTypes = contentTypes => {
   return contentTypes.map(contentType => {
-    return {
+    const model = {
       ...contentType,
       // reuse new model def
       singularName: contentType.modelName,
@@ -44,6 +44,8 @@ const transformContentTypes = contentTypes => {
         }, {}),
       },
     };
+
+    return model;
   });
 };
 

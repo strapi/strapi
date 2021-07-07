@@ -26,6 +26,7 @@ const permissionDomain = require('../../domain/permission/index');
  * @returns {Promise<array>}
  */
 const deleteByRolesIds = async rolesIds => {
+  // FIXME: need to delete associations in delete many
   await strapi.query('strapi::permission').deleteMany({
     where: {
       role: { id: rolesIds },

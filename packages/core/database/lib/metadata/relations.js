@@ -193,10 +193,10 @@ const relationFactoryMap = {
   manyToMany: createManyToMany,
 };
 
-const createJoinColum = (metadata, { attribute /*attributeName, meta */ }) => {
+const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
   const targetMeta = metadata.get(attribute.target);
 
-  const joinColumnName = _.snakeCase(`${targetMeta.singularName}_id`);
+  const joinColumnName = _.snakeCase(`${attributeName}_id`);
   const joinColumn = {
     name: joinColumnName,
     referencedColumn: 'id',

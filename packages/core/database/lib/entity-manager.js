@@ -55,19 +55,19 @@ const createEntityManager = db => {
   const repoMap = {};
 
   return {
-    async findOne(uid, params) {
+    findOne(uid, params) {
       const qb = this.createQueryBuilder(uid)
         .init(params)
         .first();
 
-      return await qb.execute();
+      return qb.execute();
     },
 
     // should we name it findOne because people are used to it ?
-    async findMany(uid, params) {
+    findMany(uid, params) {
       const qb = this.createQueryBuilder(uid).init(params);
 
-      return await qb.execute();
+      return qb.execute();
     },
 
     async count(uid, params = {}) {
@@ -195,15 +195,14 @@ const createEntityManager = db => {
 
     async delete(uid, params = {}) {
       const { where, select, populate } = params;
-      const metadata = db.metadata.get(uid);
 
       if (_.isEmpty(where)) {
         throw new Error('Delete requires a where parameter');
       }
 
       const entity = await this.findOne(uid, {
-        where,
         select: select && ['id'].concat(select),
+        where,
         populate,
       });
 
@@ -233,27 +232,6 @@ const createEntityManager = db => {
         .execute();
 
       return { count: deletedRows };
-    },
-
-    // populate already loaded entry
-    async populate(uid, entry, name, params) {
-      return {
-        ...entry,
-        relation: await this.load(entry, name, params),
-      };
-    },
-
-    // loads a relation
-    load(uid, entry, name, params) {
-      const { attributes } = db.metadata.get(uid);
-
-      return this.getRepository(attributes[name].target.uid).findMany({
-        ...params,
-        where: {
-          ...params.where,
-          // [parent]: entry.id,
-        },
-      });
     },
 
     /**
@@ -495,6 +473,35 @@ const createEntityManager = db => {
             .execute();
         }
       }
+    },
+
+    // populate already loaded entry
+    async populate(uid, entry, name, params) {
+      return {
+        ...entry,
+        relation: await this.load(entry, name, params),
+      };
+    },
+
+    // loads a relation
+    async load(uid, id, field, params) {
+      const { attributes } = db.metadata.get(uid);
+
+      const attribute = attributes[field];
+
+      if (!attribute || attribute.type !== 'relation') {
+        throw new Error('Invalid load expected a relational attribute');
+      }
+
+      const entry = await this.findOne(uid, {
+        select: ['id'],
+        where: { id },
+        populate: {
+          [field]: params || true,
+        },
+      });
+
+      return entry[field];
     },
 
     // cascading

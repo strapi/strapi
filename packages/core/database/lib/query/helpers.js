@@ -470,7 +470,15 @@ const processPopulate = (populate, ctx) => {
 
   if (Array.isArray(populate)) {
     for (const key of populate) {
-      populateMap[key] = true;
+      const [root, ...rest] = key.split('.');
+
+      if (rest.length > 0) {
+        populateMap[root] = {
+          populate: rest,
+        };
+      } else {
+        populateMap[root] = true;
+      }
     }
   } else {
     populateMap = populate;

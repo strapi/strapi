@@ -21,26 +21,28 @@ async function main(connection) {
     await orm.schema.sync();
     await orm.schema.reset();
 
+    await orm.query('compo').create({
+      data: {
+        key: 'A',
+        value: 1,
+      },
+    });
+
     await orm.query('article').create({
       // select: {},
       // populate: {},
       data: {
-        compo: {
-          id: 1,
-          __pivot: {
-            order: 1,
-            field: 'compo',
-          },
-        },
+        compo: 1,
       },
     });
 
-    const articles = await orm.query('article').findMany({
-      limit: 5,
-      where: { title: 'Article 001', createdAt: { $null: true } },
+    await orm.query('article').findMany({
+      populate: ['category.compo'],
     });
 
-    console.log(articles);
+    // console.log(await orm.query('article').load(1, 'compo'));
+
+    // await orm.query('article').delete({ where: { id: 1 } });
 
     // await tests(orm);
   } finally {
@@ -391,28 +393,40 @@ const tests = async orm => {
   // });
 
   await orm.query('article').findMany({
-    limit: 5,
     where: {
-      compos: {
-        key: 'xx',
+      $not: {
+        $or: [
+          {
+            category: {
+              title: 'Article 003',
+            },
+          },
+          {
+            title: {
+              $in: ['Article 001', 'Article 002'],
+            },
+          },
+        ],
+        title: {
+          $not: 'Article 007',
+        },
       },
     },
+    orderBy: [{ category: { name: 'asc' } }],
+    offset: 0,
+    limit: 10,
     populate: {
       category: {
-        select: ['id', 'title'],
-        limit: 5,
-        offset: 2,
         orderBy: 'title',
         populate: {
-          articles: {
+          categories: {
             populate: {
               tags: true,
             },
           },
         },
       },
-      compos: true,
+      seo: true,
     },
-    orderBy: { compos: { key: 'DESC' } },
   });
 };

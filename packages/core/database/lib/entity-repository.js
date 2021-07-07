@@ -84,12 +84,13 @@ const createRepository = (uid, db) => {
     },
 
     attachRelations(id, data) {
-      console.log(id, data)
       return db.entityManager.attachRelations(uid, id, data);
     },
+
     updateRelations(id, data) {
       return db.entityManager.updateRelations(uid, id, data);
     },
+
     deleteRelations(id) {
       return db.entityManager.deleteRelations(uid, id);
     },
@@ -97,7 +98,9 @@ const createRepository = (uid, db) => {
     // TODO: add relation API
 
     populate() {},
-    load() {},
+    load(id, field, params) {
+      return db.entityManager.load(uid, id, field, params);
+    },
   };
 };
 

@@ -168,9 +168,42 @@ const createContentType = (model, { modelName }, { apiName, pluginName } = {}) =
     get() {
       // FIXME: to fix
       // return strapi.getModel(model.uid).privateAttributes;
-      return []
+      return [];
     },
   });
+
+  if (hasDraftAndPublish(model)) {
+    model.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+      type: 'datetime',
+      configurable: false,
+      writable: true,
+      visible: false,
+    };
+  }
+
+  const isPrivate = !_.get(model, 'options.populateCreatorFields', false);
+
+  model.attributes[CREATED_BY_ATTRIBUTE] = {
+    type: 'relation',
+    relation: 'oneToOne',
+    target: 'strapi::user',
+    configurable: false,
+    writable: false,
+    visible: false,
+    useJoinTable: false,
+    private: isPrivate,
+  };
+
+  model.attributes[UPDATED_BY_ATTRIBUTE] = {
+    type: 'relation',
+    relation: 'oneToOne',
+    target: 'strapi::user',
+    configurable: false,
+    writable: false,
+    visible: false,
+    useJoinTable: false,
+    private: isPrivate,
+  };
 };
 
 const getGlobalId = (model, modelName, prefix) => {

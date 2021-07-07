@@ -38,24 +38,24 @@ const article = {
     title: {
       type: 'string',
     },
-    // category: {
-    //   type: 'relation',
-    //   relation: 'manyToOne',
-    //   target: 'category',
-    //   inversedBy: 'articles',
-    //   // useJoinTable: false,
-    // },
+    category: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'category',
+      inversedBy: 'articles',
+      // useJoinTable: false,
+    },
     // tags: {
     //   type: 'relation',
     //   relation: 'manyToMany',
     //   target: 'tag',
     //   inversedBy: 'articles',
     // },
-    compo: {
-      type: 'component',
-      component: 'compo',
-      // repeatable: true,
-    },
+    // compo: {
+    //   type: 'component',
+    //   component: 'compo',
+    //   // repeatable: true,
+    // },
     // cover: {
     //   type: 'media',
     //   single: true,

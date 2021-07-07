@@ -1,5 +1,6 @@
 'use strict';
 
+const _ = require('lodash');
 const { has, pick } = require('lodash/fp');
 const delegate = require('delegates');
 
@@ -43,34 +44,59 @@ module.exports = ctx => {
 };
 
 // TODO: move to Controller ?
-const transformParamsToQuery = (params = {}) => {
-  const query = {};
+const transformParamsToQuery = (uid, params = {}) => {
+  const model = strapi.getModel(uid);
+
+  const query = {
+    populate: [],
+  };
 
   // TODO: check invalid values add defaults ....
 
-  if (params.start) {
-    query.offset = convertStartQueryParams(params.start);
+  const { start, limit, sort, filters, fields, populate, publicationState } = params;
+
+  if (start) {
+    query.offset = convertStartQueryParams(start);
   }
 
-  if (params.limit) {
-    query.limit = convertLimitQueryParams(params.limit);
+  if (limit) {
+    query.limit = convertLimitQueryParams(limit);
   }
 
-  if (params.sort) {
-    query.orderBy = convertSortQueryParams(params.sort);
+  if (sort) {
+    query.orderBy = convertSortQueryParams(sort);
   }
 
-  if (params.filters) {
-    query.where = params.filters;
+  if (filters) {
+    query.where = filters;
   }
 
-  if (params.fields) {
-    query.select = params.fields;
+  if (fields) {
+    query.select = _.castArray(fields);
   }
 
-  if (params.populate) {
+  if (populate) {
     const { populate } = params;
-    query.populate = populate;
+    query.populate = _.castArray(populate);
+  }
+
+  // TODO: move to layer above ?
+  if (publicationState && contentTypesUtils.hasDraftAndPublish(model)) {
+    const { publicationState = 'live' } = params;
+
+    const liveClause = {
+      published_at: {
+        $notNull: true,
+      },
+    };
+
+    if (publicationState === 'live') {
+      query.where = {
+        $and: [liveClause, query.where || {}],
+      };
+
+      // TODO: propagate nested publicationState filter somehow
+    }
   }
 
   return query;
@@ -85,12 +111,21 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     return options;
   },
 
+  emitEvent(uid, event, entity) {
+    const model = strapi.getModel(uid);
+
+    eventHub.emit(event, {
+      model: model.modelName,
+      entry: sanitizeEntity(entity, { model }),
+    });
+  },
+
   async find(uid, opts) {
     const { kind } = strapi.getModel(uid);
 
     const { params } = await this.wrapOptions(opts, { uid, action: 'find' });
 
-    const query = transformParamsToQuery(params);
+    const query = transformParamsToQuery(uid, params);
 
     // return first element and ignore filters
     if (kind === 'singleType') {
@@ -103,26 +138,21 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   async findPage(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
 
-    // TODO: transform page pageSize
-    const query = transformParamsToQuery(params);
+    const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).findPage(query);
   },
 
   async findWithRelationCounts(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, {
-      uid,
-      action: 'findWithRelationCounts',
-    });
+    const { params } = await this.wrapOptions(opts, { uid, action: 'findWithRelationCounts' });
 
-    // TODO: to impl
-    return db.query(uid).findWithRelationCounts(params, populate);
+    return db.query(uid).findWithRelationCounts(params);
   },
 
   async findOne(uid, entityId, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'findOne' });
 
-    const query = transformParamsToQuery(pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
     return db.query(uid).findOne({ ...query, where: { id: entityId } });
   },
@@ -130,7 +160,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   async count(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'count' });
 
-    const query = transformParamsToQuery(params);
+    const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).count(query);
   },
@@ -138,25 +168,19 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   async create(uid, opts) {
     const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'create' });
 
-    const modelDef = strapi.getModel(uid);
-
-    const isDraft = contentTypesUtils.isDraft(data, modelDef);
-
-    const validData = await entityValidator.validateEntityCreation(modelDef, data, { isDraft });
+    const model = strapi.getModel(uid);
+    const isDraft = contentTypesUtils.isDraft(data, model);
+    const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
-    const query = transformParamsToQuery(pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
     // TODO: wrap into transaction
-
     const componentData = await createComponents(uid, validData);
-
     const entity = await db.query(uid).create({
       ...query,
       data: Object.assign(validData, componentData),
     });
-
-    // TODO: Implement components CRUD
 
     // TODO: implement files outside of the entity service
     // if (files && Object.keys(files).length > 0) {
@@ -164,10 +188,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     //   entry = await this.findOne({ params: { id: entry.id } }, { model });
     // }
 
-    eventHub.emit(ENTRY_CREATE, {
-      model: modelDef.modelName,
-      entry: sanitizeEntity(entity, { model: modelDef }),
-    });
+    this.emitEvent(uid, ENTRY_CREATE, entity);
 
     return entity;
   },
@@ -175,72 +196,71 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   async update(uid, entityId, opts) {
     const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'update' });
 
-    const modelDef = strapi.getModel(uid);
+    const model = strapi.getModel(uid);
 
-    // const existingEntry = await db.query(uid).findOne({ where: { id: entityId } });
+    const existingEntry = await db.query(uid).findOne({ where: { id: entityId } });
 
-    // const isDraft = contentTypesUtils.isDraft(existingEntry, modelDef);
+    const isDraft = contentTypesUtils.isDraft(existingEntry, model);
 
-    // TODO: validate
-    // // const validData = await entityValidator.validateEntityUpdate(modelDef, data, {
-    // //   isDraft,
-    // // });
-
-    // select / populate
-    const query = transformParamsToQuery(pickSelectionParams(params));
-
-    // TODO: wrap in transaction
-
-    const componentData = await updateComponents(uid, data);
-
-    let entry = await db.query(uid).update({
-      ...query,
-      where: { id: entityId },
-      data: Object.assign(data, componentData),
+    const validData = await entityValidator.validateEntityUpdate(model, data, {
+      isDraft,
     });
 
-    // TODO: implement files
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+
+    // TODO: wrap in transaction
+    const componentData = await updateComponents(uid, entityId, validData);
+
+    const entity = await db.query(uid).update({
+      ...query,
+      where: { id: entityId },
+      data: Object.assign(validData, componentData),
+    });
+
+    // TODO: implement files outside of the entity service
     // if (files && Object.keys(files).length > 0) {
     //   await this.uploadFiles(entry, files, { model });
     //   entry = await this.findOne({ params: { id: entry.id } }, { model });
     // }
 
-    eventHub.emit(ENTRY_UPDATE, {
-      model: modelDef.modelName,
-      entry: sanitizeEntity(entry, { model: modelDef }),
-    });
+    this.emitEvent(uid, ENTRY_UPDATE, entity);
 
-    return entry;
+    return entity;
   },
 
   async delete(uid, entityId, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
-    const entry = await db.query(uid).delete({ ...query, where: { id: entityId } });
-
-    const modelDef = strapi.getModel(uid);
-    eventHub.emit(ENTRY_DELETE, {
-      model: modelDef.modelName,
-      entry: sanitizeEntity(entry, { model: modelDef }),
+    const entity = await db.query(uid).findOne({
+      ...query,
+      where: { id: entityId },
     });
 
-    return entry;
+    if (!entity) {
+      throw new Error('Entity not found');
+    }
+
+    await deleteComponents(uid, entityId);
+    await db.query(uid).delete({ where: { id: entity.id } });
+
+    this.emitEvent(uid, ENTRY_DELETE, entity);
+
+    return entity;
   },
 
   async deleteMany(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
     return db.query(uid).deleteMany(query);
   },
 
   // TODO: Implement search features
-
   async search(uid, opts) {
     const { params, populate } = await this.wrapOptions(opts, { uid, action: 'search' });
 
@@ -350,6 +370,7 @@ const createComponents = async (uid, data) => {
 const updateOrCreateComponent = (componentUID, value) => {
   // update
   if (has('id', value)) {
+    // TODO: verify the compo is associated with the entity
     return strapi.query(componentUID).update({ where: { id: value.id }, data: value });
   }
 
@@ -357,9 +378,8 @@ const updateOrCreateComponent = (componentUID, value) => {
   return strapi.query(componentUID).create({ data: value });
 };
 
-const updateComponents = async (uid, data) => {
-  // TODO: clear old -> done in the updateRelation
-
+// TODO: delete old components
+const updateComponents = async (uid, entityId, data) => {
   const { attributes } = strapi.getModel(uid);
 
   for (const attributeName in attributes) {
@@ -372,8 +392,12 @@ const updateComponents = async (uid, data) => {
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
+      const previousValue = await strapi.query(uid).load(entityId, attributeName);
       const componentValue = data[attributeName];
 
+      // TODO: diff prev & new
+
+      // make diff between prev ids & data ids
       if (componentValue === null) {
         continue;
       }
@@ -420,6 +444,42 @@ const updateComponents = async (uid, data) => {
           return id;
         }),
       };
+    }
+  }
+};
+
+const deleteComponents = async (uid, entityId) => {
+  const { attributes } = strapi.getModel(uid);
+
+  // TODO:  find components and then delete them
+  for (const attributeName in attributes) {
+    const attribute = attributes[attributeName];
+
+    if (attribute.type === 'component') {
+      const { component: componentUID } = attribute;
+
+      // TODO: need to load before deleting the entry then delete the components then the entry
+      const value = await strapi.query(uid).load(entityId, attributeName);
+
+      if (!value) {
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        await Promise.all(
+          value.map(subValue => {
+            return strapi.query(componentUID).delete({ where: { id: subValue.id } });
+          })
+        );
+      } else {
+        await strapi.query(componentUID).delete({ where: { id: value.id } });
+      }
+
+      continue;
+    }
+
+    if (attribute.type === 'dynamiczone') {
+      continue;
     }
   }
 };

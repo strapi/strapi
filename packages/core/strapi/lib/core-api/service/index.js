@@ -42,7 +42,7 @@ const getLimitParam = params => {
     return defaultLimit;
   }
 
-  const limit = _.toNumber(params._limit);
+  const limit = _.toNumber(params.limit);
   // if there is max limit set and params._limit exceeds this number, return configured max limit
   if (maxLimit && (limit === -1 || limit > maxLimit)) {
     return maxLimit;
@@ -58,9 +58,9 @@ const getLimitParam = params => {
  */
 const getFetchParams = (params = {}) => {
   return {
-    // _publicationState: DP_PUB_STATE_LIVE,
+    publicationState: DP_PUB_STATE_LIVE,
     ...params,
-    // limit: getLimitParam(params),
+    limit: getLimitParam(params),
   };
 };
 

@@ -122,7 +122,7 @@ const lengthFor = (name, { mode = 'live' } = {}) => {
 
 const getQueryFromMode = mode => {
   if (['live', 'preview'].includes(mode)) {
-    return `?_publicationState=${mode}`;
+    return `?publicationState=${mode}`;
   }
 
   return '';
@@ -188,7 +188,10 @@ describe('Publication State', () => {
       beforeEach(async () => {
         const res = await rq({
           method: 'GET',
-          url: `/${pluralizedModelName}?_publicationState=live`,
+          url: `/${pluralizedModelName}?publicationState=live`,
+          qs: {
+            populate: ['categories', 'comp.countries'],
+          },
         });
         products = res.body;
       });
