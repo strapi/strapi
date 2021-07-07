@@ -339,13 +339,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'categories',
-          nature: 'oneToMany',
+          relation: 'oneToMany',
           targetAttribute: 'address',
           target: targetContentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         },
         forTarget: 'contentType',
         targetUid: contentTypeUID,
@@ -362,13 +359,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'categories'],
         fromJS({
-          nature: 'oneToMany',
+          relation: 'oneToMany',
           targetAttribute: 'address',
           target: targetContentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         })
       );
 
@@ -382,13 +376,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'address',
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: targetContentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         },
         forTarget: 'component',
         targetUid: componentUID,
@@ -407,13 +398,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const expected = state.setIn(
         ['modifiedData', 'component', 'schema', 'attributes', 'address'],
         fromJS({
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: targetContentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         })
       );
 
@@ -427,13 +415,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         type: ADD_ATTRIBUTE,
         attributeToSet: {
           name: 'address',
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: targetContentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
+          private: true,
         },
         forTarget: 'components',
         targetUid: componentUID,
@@ -456,13 +442,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const expected = state.setIn(
         ['modifiedData', 'components', componentUID, 'schema', 'attributes', 'address'],
         fromJS({
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: targetContentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
+          private: true,
         })
       );
 
@@ -479,13 +463,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         targetUid: contentTypeUID,
         attributeToSet: {
           name: 'address',
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: contentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         },
         shouldAddComponentToData: false,
       };
@@ -498,13 +479,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
         fromJS({
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: contentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         })
       );
 
@@ -519,13 +497,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         targetUid: contentTypeUID,
         attributeToSet: {
           name: 'address',
-          nature: 'manyWay',
-          targetAttribute: '-',
+          relation: 'oneToMany',
+          targetAttribute: null,
           target: contentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         },
         shouldAddComponentToData: false,
       };
@@ -538,13 +513,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const expected = state.setIn(
         ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
         fromJS({
-          nature: 'manyWay',
-          targetAttribute: '-',
+          relation: 'oneToMany',
+          targetAttribute: null,
           target: contentTypeUID,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         })
       );
 
@@ -555,16 +527,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const contentTypeUID = 'application::address.address';
       const name = 'address_left_side';
       const targetAttribute = 'address_right_side';
-      const columnName = 'left_side';
-      const targetColumnName = 'right_side';
       const attribute = {
-        nature: 'oneToOne',
+        relation: 'oneToOne',
         targetAttribute,
         target: contentTypeUID,
-        unique: false,
-        dominant: null,
-        columnName,
-        targetColumnName,
+        type: 'relation',
       };
       const action = {
         type: ADD_ATTRIBUTE,
@@ -577,13 +544,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         shouldAddComponentToData: false,
       };
       const oppositeAttribute = {
-        nature: 'oneToOne',
+        relation: 'oneToOne',
         target: contentTypeUID,
-        unique: false,
         targetAttribute: name,
-        dominant: null,
-        columnName: targetColumnName,
-        targetColumnName: columnName,
+        type: 'relation',
       };
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
@@ -606,16 +570,12 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const contentTypeUID = 'application::address.address';
       const name = 'address_left_side';
       const targetAttribute = 'address_right_side';
-      const columnName = 'left_side';
-      const targetColumnName = 'right_side';
+
       const attribute = {
-        nature: 'oneToMany',
+        relation: 'oneToMany',
         targetAttribute,
         target: contentTypeUID,
-        unique: false,
-        dominant: null,
-        columnName,
-        targetColumnName,
+        type: 'relation',
       };
       const action = {
         type: ADD_ATTRIBUTE,
@@ -628,14 +588,12 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         shouldAddComponentToData: false,
       };
       const oppositeAttribute = {
-        nature: 'manyToOne',
+        relation: 'manyToOne',
         target: contentTypeUID,
-        unique: false,
         targetAttribute: name,
-        dominant: null,
-        columnName: targetColumnName,
-        targetColumnName: columnName,
+        type: 'relation',
       };
+
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
         .set('components', fromJS(testData.components))
@@ -657,16 +615,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const contentTypeUID = 'application::address.address';
       const name = 'address_left_side';
       const targetAttribute = 'address_right_side';
-      const columnName = 'left_side';
-      const targetColumnName = 'right_side';
       const attribute = {
-        nature: 'manyToOne',
+        relation: 'manyToOne',
         targetAttribute,
         target: contentTypeUID,
-        unique: false,
-        dominant: null,
-        columnName,
-        targetColumnName,
+        type: 'relation',
       };
       const action = {
         type: ADD_ATTRIBUTE,
@@ -679,13 +632,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         shouldAddComponentToData: false,
       };
       const oppositeAttribute = {
-        nature: 'oneToMany',
+        relation: 'oneToMany',
         target: contentTypeUID,
-        unique: false,
         targetAttribute: name,
-        dominant: null,
-        columnName: targetColumnName,
-        targetColumnName: columnName,
+        type: 'relation',
       };
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))
@@ -708,16 +658,11 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
       const contentTypeUID = 'application::address.address';
       const name = 'address_left_side';
       const targetAttribute = 'address_right_side';
-      const columnName = 'left_side';
-      const targetColumnName = 'right_side';
       const attribute = {
-        nature: 'manyToMany',
+        relation: 'manyToMany',
         targetAttribute,
         target: contentTypeUID,
-        unique: false,
-        dominant: true,
-        columnName,
-        targetColumnName,
+        type: 'relation',
       };
       const action = {
         type: ADD_ATTRIBUTE,
@@ -730,13 +675,10 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         shouldAddComponentToData: false,
       };
       const oppositeAttribute = {
-        nature: 'manyToMany',
+        relation: 'manyToMany',
         target: contentTypeUID,
-        unique: false,
         targetAttribute: name,
-        dominant: false,
-        columnName: targetColumnName,
-        targetColumnName: columnName,
+        type: 'relation',
       };
       const state = initialState
         .set('contentTypes', fromJS(testData.contentTypes))

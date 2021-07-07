@@ -36,6 +36,7 @@ yup.strapiID = () => new StrapiIDSchema();
  * @param {Object} validationError - a Yup ValidationError
  */
 const formatYupErrors = validationError => {
+  console.log(validationError);
   if (!validationError.inner) {
     throw new Error('invalid.input');
   }

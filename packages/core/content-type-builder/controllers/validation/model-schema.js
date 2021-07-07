@@ -45,14 +45,14 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
             return forbiddenValidator();
           }
 
+          if (attribute.type === 'relation') {
+            return yup.object(getRelationValidator(attribute, relations)).test(isValidKey(key));
+          }
+
           if (_.has(attribute, 'type')) {
             return getTypeValidator(attribute, { types, modelType, attributes }).test(
               isValidKey(key)
             );
-          }
-
-          if (_.has(attribute, 'target')) {
-            return yup.object(getRelationValidator(attribute, relations)).test(isValidKey(key));
           }
 
           return typeOrRelationValidator;

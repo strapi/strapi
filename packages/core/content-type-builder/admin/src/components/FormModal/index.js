@@ -12,7 +12,6 @@ import {
   useNotification,
   useQuery,
   useStrapiApp,
-  InputsIndex,
 } from '@strapi/helper-plugin';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { Button, Text, Padded } from '@buffetjs/core';
@@ -358,9 +357,9 @@ const FormModal = () => {
           }
         }
 
-        if (attributeType === 'relation' && !has(attributeToEdit, ['targetAttribute'])) {
-          set(attributeToEdit, ['targetAttribute'], '-');
-        }
+        // if (attributeType === 'relation' && !has(attributeToEdit, ['targetAttribute'])) {
+        //   set(attributeToEdit, ['targetAttribute'], '-');
+        // }
 
         dispatch({
           type: SET_ATTRIBUTE_DATA_SCHEMA,
@@ -1098,11 +1097,19 @@ const FormModal = () => {
   };
 
   const shouldDisableAdvancedTab = () => {
-    return (
-      ((state.attributeType === 'component' || state.modalType === 'addComponentToDynamicZone') &&
-        get(modifiedData, ['createComponent'], null) === false) ||
-      state.modalType === 'editCategory'
-    );
+    if (state.modalType === 'editCategory') {
+      return true;
+    }
+
+    if (state.modalType === 'component') {
+      return true;
+    }
+
+    if (has(modifiedData, 'createComponent')) {
+      return true;
+    }
+
+    return false;
   };
 
   // Display data for the attributes picker modal
@@ -1341,21 +1348,6 @@ const FormModal = () => {
                               value = false;
                             } else {
                               value = retrievedValue;
-                            }
-
-                            // The addon input is not present in @buffetjs so we are using the old lib
-                            // for the moment that's why we don't want them be passed to buffet
-                            // like the other created inputs
-                            if (input.type === 'addon') {
-                              return (
-                                <InputsIndex
-                                  key={input.name}
-                                  {...input}
-                                  type="string"
-                                  onChange={handleChange}
-                                  value={value}
-                                />
-                              );
                             }
 
                             return (

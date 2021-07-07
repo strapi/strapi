@@ -60,16 +60,13 @@ const formatAttribute = (key, attribute, { model }) => {
     return {
       ...attribute,
       type: 'relation',
-      nature: attribute.relation,
       target: attribute.target,
-      targetAttribute: attribute.inversedBy || attribute.mappedBy,
-      required: required ? true : false,
+      targetAttribute: attribute.inversedBy || attribute.mappedBy || null,
       configurable: configurable === false ? false : undefined,
       private: attribute.private ? true : false,
-      unique: attribute.unique ? true : false,
+      pluginOptions,
       // FIXME: remove
       autoPopulate,
-      pluginOptions,
     };
   }
 

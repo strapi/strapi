@@ -69,6 +69,7 @@ const DataManagerProvider = ({
   const dispatch = useDispatch();
   const toggleNotification = useNotification();
   const { lockAppWithAutoreload, unlockAppWithAutoreload } = useAutoReloadOverlayBlocker();
+  console.log({ modifiedData });
 
   const { getPlugin } = useStrapiApp();
 

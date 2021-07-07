@@ -14,6 +14,11 @@ module.exports = function createComponentBuilder() {
     setRelation({ key, uid, attribute }) {
       const targetCT = this.contentTypes.get(attribute.target);
       const targetAttribute = targetCT.getAttribute(attribute.targetAttribute);
+
+      if (!attribute.targetAttribute) {
+        return;
+      }
+
       targetCT.setAttribute(
         attribute.targetAttribute,
         generateRelation({
@@ -160,6 +165,8 @@ module.exports = function createComponentBuilder() {
             this.unsetRelation(oldAttribute);
           }
 
+          // TODO: handle edition to keep the direction
+
           // keep extra options that were set manually on oldAttribute
           _.defaults(newAttribute, oldAttribute);
 
@@ -227,18 +234,11 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
   const opts = {
     type: 'relation',
     target: uid,
-
-    // plugin,
-    // columnName: attribute.targetColumnName || undefined,
     autoPopulate: targetAttribute.autoPopulate,
     private: targetAttribute.private || undefined,
   };
 
-  switch (attribute.nature) {
-    case 'manyWay':
-    case 'oneWay': {
-      return;
-    }
+  switch (attribute.relation) {
     case 'oneToOne': {
       opts.relation = 'oneToOne';
       opts.mappedBy = key;

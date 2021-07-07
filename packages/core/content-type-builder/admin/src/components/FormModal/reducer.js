@@ -35,12 +35,7 @@ const reducer = (state = initialState, action) => {
     }
     case actions.ON_CHANGE:
       return state.update('modifiedData', obj => {
-        const {
-          selectedContentTypeFriendlyName,
-          keys,
-          value,
-          oneThatIsCreatingARelationWithAnother,
-        } = action;
+        const { keys, value } = action;
         const hasDefaultValue = Boolean(obj.getIn(['default']));
 
         // There is no need to remove the default key if the default value isn't defined
@@ -52,92 +47,123 @@ const reducer = (state = initialState, action) => {
           }
         }
 
-        if (keys.length === 1 && keys.includes('nature')) {
-          return obj
-            .update('nature', () => value)
-            .update('dominant', () => {
-              if (value === 'manyToMany') {
-                return true;
+        return obj.updateIn(keys, () => value);
+      });
+
+    case actions.ON_CHANGE_RELATION_TARGET: {
+      return state.update('modifiedData', obj => {
+        const {
+          target: {
+            oneThatIsCreatingARelationWithAnother,
+            selectedContentTypeFriendlyName,
+            targetContentTypeAllowedRelations,
+            value,
+          },
+        } = action;
+        // Special case for the admin user...
+        let didChangeNatureBecauseOfRestrictedRelation = false;
+        let changedRelationType = null;
+
+        return obj
+          .update('target', () => value)
+          .update('relation', currentRelation => {
+            // Don't change the relation type if the allowed relations are not restricted
+            // TODO: replace with an obj { relation: 'x', bidirctional: true|false } when BE ready
+            if (targetContentTypeAllowedRelations === null) {
+              return currentRelation;
+            }
+
+            if (!targetContentTypeAllowedRelations.includes(currentRelation)) {
+              const relationToSet = targetContentTypeAllowedRelations[0];
+              didChangeNatureBecauseOfRestrictedRelation = true;
+              changedRelationType = relationToSet;
+
+              if (relationToSet === 'oneWay') {
+                // TODO change targetAttribute
+                return 'oneToOne';
               }
 
+              if (relationToSet === 'manyWay') {
+                // TODO change targetAttribute
+                return 'oneToMany';
+              }
+
+              return relationToSet;
+            }
+
+            return currentRelation;
+          })
+          .update('name', () => {
+            if (didChangeNatureBecauseOfRestrictedRelation) {
+              return pluralize(
+                snakeCase(selectedContentTypeFriendlyName),
+                shouldPluralizeName(changedRelationType)
+              );
+            }
+
+            return pluralize(
+              snakeCase(selectedContentTypeFriendlyName),
+
+              shouldPluralizeName(obj.get('relation'))
+            );
+          })
+          .update('targetAttribute', oldValue => {
+            // Changing the target and the relation is either oneWay or manyWay
+            // Doing !oldValue will change the relation type if the target attribute is an empty string
+            if (oldValue === null) {
               return null;
-            })
+            }
+
+            // Case when we need to change the relation to oneWay (ex: admin user)
+            if (
+              didChangeNatureBecauseOfRestrictedRelation &&
+              ['oneWay', 'manyWay'].includes(changedRelationType)
+            ) {
+              return null;
+            }
+
+            return pluralize(
+              snakeCase(oneThatIsCreatingARelationWithAnother),
+              shouldPluralizeTargetAttribute(obj.get('nature'))
+            );
+          });
+      });
+    }
+    case actions.ON_CHANGE_RELATION_TYPE: {
+      const {
+        target: { oneThatIsCreatingARelationWithAnother, value },
+      } = action;
+
+      return state.update('modifiedData', obj => {
+        // Switching from oneWay
+        if (!['oneWay', 'manyWay'].includes(value)) {
+          return obj
+            .update('relation', () => value)
             .update('name', oldValue => {
               return pluralize(snakeCase(oldValue), shouldPluralizeName(value));
             })
             .update('targetAttribute', oldValue => {
-              if (['oneWay', 'manyWay'].includes(value)) {
-                return '-';
-              }
-
               return pluralize(
-                oldValue === '-' ? snakeCase(oneThatIsCreatingARelationWithAnother) : oldValue,
+                oldValue || snakeCase(oneThatIsCreatingARelationWithAnother),
                 shouldPluralizeTargetAttribute(value)
               );
-            })
-            .update('targetColumnName', oldValue => {
-              if (['oneWay', 'manyWay'].includes(value)) {
-                return null;
-              }
-
-              return oldValue;
             });
         }
 
-        if (keys.length === 1 && keys.includes('target')) {
-          const { targetContentTypeAllowedRelations } = action;
-          let didChangeNatureBecauseOfRestrictedRelation = false;
-
+        if (value === 'oneWay') {
           return obj
-            .update('target', () => value)
-            .update('nature', currentNature => {
-              if (targetContentTypeAllowedRelations === null) {
-                return currentNature;
-              }
-
-              if (!targetContentTypeAllowedRelations.includes(currentNature)) {
-                didChangeNatureBecauseOfRestrictedRelation = true;
-
-                return targetContentTypeAllowedRelations[0];
-              }
-
-              return currentNature;
-            })
-            .update('name', () => {
-              if (didChangeNatureBecauseOfRestrictedRelation) {
-                return pluralize(
-                  snakeCase(selectedContentTypeFriendlyName),
-                  shouldPluralizeName(targetContentTypeAllowedRelations[0])
-                );
-              }
-
-              return pluralize(
-                snakeCase(selectedContentTypeFriendlyName),
-
-                shouldPluralizeName(obj.get('nature'))
-              );
-            })
-            .update('targetAttribute', () => {
-              if (['oneWay', 'manyWay'].includes(obj.get('nature'))) {
-                return '-';
-              }
-
-              if (
-                didChangeNatureBecauseOfRestrictedRelation &&
-                ['oneWay', 'manyWay'].includes(targetContentTypeAllowedRelations[0])
-              ) {
-                return '-';
-              }
-
-              return pluralize(
-                snakeCase(oneThatIsCreatingARelationWithAnother),
-                shouldPluralizeTargetAttribute(obj.get('nature'))
-              );
-            });
+            .update('relation', () => 'oneToOne')
+            .update('targetAttribute', () => null)
+            .update('name', oldValue => pluralize(snakeCase(oldValue), 1));
         }
 
-        return obj.updateIn(keys, () => value);
+        // manyWay
+        return obj
+          .update('relation', () => 'oneToMany')
+          .update('targetAttribute', () => null)
+          .update('name', oldValue => pluralize(snakeCase(oldValue), 2));
       });
+    }
     case actions.ON_CHANGE_ALLOWED_TYPE: {
       if (action.name === 'all') {
         return state.updateIn(['modifiedData', 'allowedTypes'], () => {
@@ -262,13 +288,10 @@ const reducer = (state = initialState, action) => {
       } else if (attributeType === 'relation') {
         dataToSet = {
           name: snakeCase(nameToSetForRelation),
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: targetUid,
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         };
       } else {
         dataToSet = { ...options, type: attributeType, default: null };
