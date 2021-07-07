@@ -244,8 +244,6 @@ const types = {
       name: validators.name(usedAttributeNames, reservedNames),
       target: yup.string().required(errorsTrads.required),
       nature: yup.string().required(),
-      dominant: yup.boolean().nullable(),
-      unique: yup.boolean().nullable(),
       targetAttribute: yup.lazy(() => {
         let schema = yup.string().test(isNameAllowed(reservedNames));
         const initialForbiddenName = [...alreadyTakenTargetAttributes, modifiedData.name];
