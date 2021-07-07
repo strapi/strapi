@@ -104,10 +104,13 @@ const reducer = (state = initialState, action) => {
             const oppositeAttribute = {
               relation: getOppositeRelation(relationType),
               target,
-              private: rest.private,
               targetAttribute: name,
               type: 'relation',
             };
+
+            if (rest.private) {
+              oppositeAttribute.private = rest.private;
+            }
 
             return obj.update(rest.targetAttribute, () => {
               return fromJS(oppositeAttribute);
