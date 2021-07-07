@@ -1097,11 +1097,19 @@ const FormModal = () => {
   };
 
   const shouldDisableAdvancedTab = () => {
-    return (
-      ((state.attributeType === 'component' || state.modalType === 'addComponentToDynamicZone') &&
-        get(modifiedData, ['createComponent'], null) === false) ||
-      state.modalType === 'editCategory'
-    );
+    if (state.modalType === 'editCategory') {
+      return true;
+    }
+
+    if (state.modalType === 'component') {
+      return true;
+    }
+
+    if (has(modifiedData, 'createComponent')) {
+      return true;
+    }
+
+    return false;
   };
 
   // Display data for the attributes picker modal
