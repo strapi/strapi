@@ -79,8 +79,12 @@ const RelationTargetPicker = ({ onChange, oneThatIsCreatingARelationWithAnother,
   );
 };
 
+RelationTargetPicker.defaultProps = {
+  onChange: () => {},
+};
+
 RelationTargetPicker.propTypes = {
-  onChange: PropTypes.func.isRequired,
+  onChange: PropTypes.func,
   oneThatIsCreatingARelationWithAnother: PropTypes.string.isRequired,
   target: PropTypes.string.isRequired,
 };

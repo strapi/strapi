@@ -357,9 +357,9 @@ const FormModal = () => {
           }
         }
 
-        if (attributeType === 'relation' && !has(attributeToEdit, ['targetAttribute'])) {
-          set(attributeToEdit, ['targetAttribute'], '-');
-        }
+        // if (attributeType === 'relation' && !has(attributeToEdit, ['targetAttribute'])) {
+        //   set(attributeToEdit, ['targetAttribute'], '-');
+        // }
 
         dispatch({
           type: SET_ATTRIBUTE_DATA_SCHEMA,

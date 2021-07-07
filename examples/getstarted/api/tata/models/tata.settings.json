@@ -1,0 +1,38 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tatas",
+  "info": {
+    "name": "tata"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    },
+    "address": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "application::address.address"
+    },
+    "left_test": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "application::tata.tata",
+      "inversedBy": "right_test"
+    },
+    "right_test": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "application::tata.tata",
+      "inversedBy": "left_test"
+    },
+    "test": {
+      "type": "string"
+    }
+  }
+}
