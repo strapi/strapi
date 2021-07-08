@@ -1,9 +1,9 @@
 import produce from 'immer';
 import unset from 'lodash/unset';
-import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import take from 'lodash/take';
+import { moveFields } from './utils';
 import { getMaxTempKey } from '../../utils';
 
 const initialState = {
@@ -21,19 +21,21 @@ const reducer = (state, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD': {
-        const defaultDataStructure = get(state, ['componentsDataStructure', action.componentUid]);
-
-        set(draftState, ['modifiedData', ...action.keys], defaultDataStructure);
+        set(
+          draftState,
+          ['modifiedData', ...action.keys],
+          state.componentsDataStructure[action.componentUid]
+        );
 
         break;
       }
       case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-        const defaultDataStructure = cloneDeep(
-          get(state, ['componentsDataStructure', action.componentUid], {})
-        );
         let currentValue = get(state, ['modifiedData', ...action.keys], []).slice();
 
-        set(defaultDataStructure, '__temp_key__', getMaxTempKey(currentValue) + 1);
+        const defaultDataStructure = {
+          ...state.componentsDataStructure[action.componentUid],
+          __temp_key__: getMaxTempKey(currentValue) + 1,
+        };
 
         if (Array.isArray(currentValue)) {
           currentValue.push(defaultDataStructure);
@@ -98,68 +100,52 @@ const reducer = (state, action) =>
         break;
       }
       case 'MOVE_COMPONENT_FIELD': {
-        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]).slice();
+        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]);
         const valueToInsert = get(state, [
           'modifiedData',
           ...action.pathToComponent,
           action.dragIndex,
         ]);
 
-        currentValue.splice(action.dragIndex, 1);
+        const updatedValue = moveFields(
+          currentValue,
+          action.dragIndex,
+          action.hoverIndex,
+          valueToInsert
+        );
 
-        currentValue.splice(action.hoverIndex, 0, valueToInsert);
-
-        set(draftState, ['modifiedData', ...action.pathToComponent], currentValue);
-
-        break;
-      }
-      case 'MOVE_COMPONENT_UP': {
-        if (action.shouldCheckErrors) {
-          draftState.shouldCheckErrors = !state.shouldCheckErrors;
-        }
-
-        const currentValue = get(state, ['modifiedData', action.dynamicZoneName], []).slice();
-
-        currentValue.splice(action.currentIndex, 1);
-        const valueToInsert = get(state, [
-          'modifiedData',
-          action.dynamicZoneName,
-          action.currentIndex,
-        ]);
-        currentValue.splice(action.currentIndex - 1, 0, valueToInsert);
-
-        set(draftState, ['modifiedData', action.dynamicZoneName], currentValue);
+        set(draftState, ['modifiedData', ...action.pathToComponent], updatedValue);
 
         break;
       }
+      case 'MOVE_COMPONENT_UP':
       case 'MOVE_COMPONENT_DOWN': {
-        if (action.shouldCheckErrors) {
+        const { currentIndex, dynamicZoneName, shouldCheckErrors } = action;
+
+        if (shouldCheckErrors) {
           draftState.shouldCheckErrors = !state.shouldCheckErrors;
         }
 
-        const currentValue = get(state, ['modifiedData', action.dynamicZoneName], []).slice();
+        const currentValue = state.modifiedData[dynamicZoneName];
+        const nextIndex = action.type === 'MOVE_COMPONENT_UP' ? currentIndex - 1 : currentIndex + 1;
+        const valueToInsert = state.modifiedData[dynamicZoneName][currentIndex];
+        const updatedValue = moveFields(currentValue, currentIndex, nextIndex, valueToInsert);
 
-        currentValue.splice(action.currentIndex, 1);
-        const valueToInsert = get(state, [
-          'modifiedData',
-          action.dynamicZoneName,
-          action.currentIndex,
-        ]);
-        currentValue.splice(action.currentIndex + 1, 0, valueToInsert);
-
-        set(draftState, ['modifiedData', action.dynamicZoneName], currentValue);
+        set(draftState, ['modifiedData', action.dynamicZoneName], updatedValue);
 
         break;
       }
       case 'MOVE_FIELD': {
         const currentValue = get(state, ['modifiedData', ...action.keys], []).slice();
-
         const valueToInsert = get(state, ['modifiedData', ...action.keys, action.dragIndex]);
+        const updatedValue = moveFields(
+          currentValue,
+          action.dragIndex,
+          action.overIndex,
+          valueToInsert
+        );
 
-        currentValue.splice(action.dragIndex, 1);
-        currentValue.splice(action.overIndex, 0, valueToInsert);
-
-        set(draftState, ['modifiedData', ...action.keys], currentValue);
+        set(draftState, ['modifiedData', ...action.keys], updatedValue);
 
         break;
       }
