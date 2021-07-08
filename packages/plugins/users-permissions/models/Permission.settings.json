@@ -1,7 +1,10 @@
 {
   "info": {
     "name": "permission",
-    "description": ""
+    "description": "",
+    "singularName": "permission",
+    "pluralName": "permissions",
+    "displayName": "Permission"
   },
   "pluginOptions": {
     "content-manager": {

@@ -39,7 +39,7 @@ module.exports = strapi => {
         _.forEach(strapi.plugins, (plugin, pluginName) => {
           const router = new Router({ prefix: `/${pluginName}` });
 
-          (plugin.config.routes || []).forEach(route => {
+          (plugin.routes || []).forEach(route => {
             const hasPrefix = _.has(route.config, 'prefix');
             composeEndpoint(route, {
               plugin: pluginName,

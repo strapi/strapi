@@ -3,9 +3,10 @@
 const _ = require('lodash');
 
 module.exports = (initialConfig = {}) => {
-  const _config = _.cloneDeep(initialConfig);
+  const _config = Object.assign({}, initialConfig); // not deep clone because it would break some config
 
   return {
+    ..._config,
     get(path, defaultValue) {
       return _.get(_config, path, defaultValue);
     },

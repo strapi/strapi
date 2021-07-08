@@ -9,13 +9,13 @@ const entityServiceDecorator = require('./entity-service-decorator');
 const coreApi = require('./core-api');
 const contentTypes = require('./content-types');
 
-module.exports = () => ({
+module.exports = {
   permissions,
   metrics,
   localizations,
   locales,
-  isoLocales,
-  entityServiceDecorator,
-  coreApi,
-  contentTypes,
-});
+  'iso-locales': isoLocales,
+  'entity-service-decorator': entityServiceDecorator,
+  'core-api': coreApi,
+  'content-types': contentTypes,
+};

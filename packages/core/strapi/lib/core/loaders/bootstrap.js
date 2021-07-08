@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { getConfigUrls, contentTypes: contentTypesUtils } = require('@strapi/utils');
+const { getConfigUrls } = require('@strapi/utils');
+const { createContentType } = require('../domain/content-type');
 
 const { createCoreApi } = require('../../core-api');
 
@@ -24,9 +25,18 @@ module.exports = function(strapi) {
       let model = strapi.api[apiName].models[modelName];
 
       // mutate model
-      contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { apiName });
+      const ct = {
+        schema: model,
+        actions: {},
+        lifecycles: {},
+      };
+      ct.schema.info = {};
+      ct.schema.info.displayName = _.camelCase(modelName);
+      ct.schema.info.singularName = _.camelCase(modelName);
+      ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
 
-      strapi.contentTypes[model.uid] = model;
+      strapi.contentTypes[model.uid] = createContentType(ct, { apiName });
+      Object.assign(model, strapi.contentTypes[model.uid].schema);
 
       const { service, controller } = createCoreApi({ model, api, strapi });
 
@@ -48,7 +58,7 @@ module.exports = function(strapi) {
   strapi.controllers = Object.keys(strapi.api || []).reduce((acc, key) => {
     for (let index in strapi.api[key].controllers) {
       let controller = strapi.api[key].controllers[index];
-      controller.identity = controller.identity || _.upperFirst(index);
+      // controller.identity = controller.identity || _.upperFirst(index);
       acc[index] = controller;
     }
 
@@ -70,47 +80,80 @@ module.exports = function(strapi) {
   }, []);
 
   // Init admin controllers.
-  Object.keys(strapi.admin.controllers || []).forEach(key => {
-    if (!strapi.admin.controllers[key].identity) {
-      strapi.admin.controllers[key].identity = key;
-    }
-  });
+  // Object.keys(strapi.admin.controllers || []).forEach(key => {
+  //   if (!strapi.admin.controllers[key].identity) {
+  //     strapi.admin.controllers[key].identity = key;
+  //   }
+  // });
 
   // Init admin models.
   Object.keys(strapi.admin.models || []).forEach(modelName => {
     let model = strapi.admin.models[modelName];
 
     // mutate model
-    contentTypesUtils.createContentType(model, { modelName, defaultConnection });
+    const ct = { schema: model, actions: {}, lifecycles: {} };
+    ct.schema.info = {};
+    ct.schema.info.displayName = _.camelCase(modelName);
+    ct.schema.info.singularName = _.camelCase(modelName);
+    ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
 
-    strapi.contentTypes[model.uid] = model;
+    strapi.contentTypes[model.uid] = createContentType(ct);
+    Object.assign(model, strapi.contentTypes[model.uid].schema);
   });
 
-  Object.keys(strapi.plugins).forEach(pluginName => {
-    let plugin = strapi.plugins[pluginName];
-    Object.assign(plugin, {
-      controllers: plugin.controllers || [],
-      services: plugin.services || [],
-      models: plugin.models || [],
-    });
+  // Object.keys(strapi.plugins).forEach(pluginName => {
+  //   let plugin = strapi.plugins[pluginName];
+  // Object.assign(plugin, {
+  //   controllers: plugin.controllers || [],
+  //   services: plugin.services || [],
+  //   models: plugin.models || [],
+  // // });
 
-    Object.keys(plugin.controllers).forEach(key => {
-      let controller = plugin.controllers[key];
+  // Object.keys(plugin.controllers).forEach(key => {
+  //   let controller = plugin.controllers[key];
 
-      Object.assign(controller, {
-        identity: controller.identity || key,
-      });
-    });
+  //   Object.assign(controller, {
+  //     identity: controller.identity || key,
+  //   });
+  // });
 
-    Object.keys(plugin.models || []).forEach(modelName => {
-      let model = plugin.models[modelName];
+  // Object.keys(plugin.models || []).forEach(modelName => {
+  //   let model = plugin.models[modelName];
 
-      // mutate model
-      contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { pluginName });
+  //   // mutate model
+  //   contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { pluginName });
 
-      strapi.contentTypes[model.uid] = model;
-    });
+  //   strapi.contentTypes[model.uid] = model;
+  // });
+
+  for (const plugin in strapi.container.plugins.getAll()) {
+    strapi.plugins[plugin].models = {};
+  }
+
+  strapi.container.plugins.contentTypes.forEach(ct => {
+    strapi.contentTypes[ct.schema.uid] = ct.schema;
+    strapi.plugins[ct.schema.plugin] = strapi.plugins[ct.schema.plugin] || {};
+    strapi.plugins[ct.schema.plugin][ct.schema.modelName] = ct.schema;
+    strapi.plugins[ct.schema.plugin].models[ct.schema.modelName] = ct.schema;
   });
+
+  // const policies = strapi.container.plugins.policies.getAll();
+  // console.log('policies', policies);
+  // Object.assign(strapi.container.plugins, policies);
+  // for (const plugin in policies) {
+  //   console.log('plugin policies', plugin);
+  //   strapi.plugins[plugin].config = strapi.plugins[plugin].config || {};
+  //   strapi.plugins[plugin].config.policies = strapi.plugins[plugin].config.policies || {};
+  //   Object.assign(strapi.plugins[plugin].config.policies, policies[plugin]);
+  // }
+
+  // const pluginServices = strapi.container.plugins.services.getAll();
+  // for (const plugin in pluginServices) {
+  //   strapi.plugins[plugin] = strapi.plugins[plugin] || {};
+  //   strapi.plugins[plugin].services = pluginServices[plugin];
+  // }
+
+  // });
 
   // Preset config in alphabetical order.
   strapi.config.middleware.settings = Object.keys(strapi.middleware).reduce((acc, current) => {
@@ -157,7 +200,7 @@ module.exports = function(strapi) {
   // check if we should serve admin panel
   const shouldServeAdmin = strapi.config.get(
     'server.admin.serveAdminPanel',
-    strapi.config.serveAdminPanel
+    strapi.config.get('serveAdminPanel')
   );
 
   if (!shouldServeAdmin) {

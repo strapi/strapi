@@ -4,14 +4,16 @@
 const path = require('path');
 const fs = require('fs-extra');
 const _ = require('lodash');
-const glob = require('../load/glob');
-const findPackagePath = require('../load/package-path');
+const glob = require('../../load/glob');
+const findPackagePath = require('../../load/package-path');
 
 /**
  * Load hooks
  */
-module.exports = async function({ installedHooks, appPath }) {
+module.exports = async function() {
   let hooks = {};
+  const installedHooks = strapi.config.get('installedHooks');
+  const appPath = strapi.config.get('appPath');
 
   await Promise.all([
     loadHookDependencies(installedHooks, hooks),

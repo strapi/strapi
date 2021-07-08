@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 
 const { sanitizeEntity, getAbsoluteServerUrl } = require('@strapi/utils');
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   /**
    * Promise to count users
    *
@@ -164,4 +164,4 @@ module.exports = {
       html: settings.message,
     });
   },
-};
+});

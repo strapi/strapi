@@ -2,7 +2,10 @@
   "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
-    "description": ""
+    "description": "",
+    "singularName": "user",
+    "pluralName": "users",
+    "displayName": "User"
   },
   "options": {
     "draftAndPublish": false,

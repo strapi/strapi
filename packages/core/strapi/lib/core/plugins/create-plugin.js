@@ -18,7 +18,7 @@ const defaultPlugin = {
   },
   routes: [],
   controllers: {},
-  services: () => {},
+  services: {},
   policies: {},
   middlewares: {},
   contentTypes: [],
@@ -53,18 +53,29 @@ ${e.errors.join('\n')}
 
   registerPluginConfig(name, userPluginConfig, cleanPluginServer.config, strapi);
 
-  const contentTypeProvider = createContentTypeProvider(cleanPluginServer.contentTypes, { name });
+  const contentTypeProvider = createContentTypeProvider(cleanPluginServer.contentTypes, {
+    pluginName: name,
+  });
   const policyProvider = createPolicyProvider(cleanPluginServer.policies);
   const serviceProvider = createServiceProvider(cleanPluginServer.services, { strapi });
 
   validateContentTypesUnicity(contentTypeProvider.getAll());
 
   return {
-    bootstrap: cleanPluginServer.bootstrap,
-    register: cleanPluginServer.register,
+    bootstrap: () => cleanPluginServer.bootstrap(strapi),
+    register: () => cleanPluginServer.register(strapi),
     destroy: cleanPluginServer.destroy,
+    controllers: cleanPluginServer.controllers,
+    routes: cleanPluginServer.routes,
     service: (...args) => this.services.get(...args),
-    services: serviceProvider,
+    services: new Proxy(
+      {},
+      {
+        get(target, key) {
+          return serviceProvider.get(key);
+        },
+      }
+    ),
     contentType: (...args) => this.contentTypes.get(...args),
     contentTypes: contentTypeProvider,
     policy: (...args) => policyProvider.get(...args),

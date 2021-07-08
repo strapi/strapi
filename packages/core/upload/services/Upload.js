@@ -50,7 +50,7 @@ const combineFilters = params => {
   }
 };
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   formatFileInfo({ filename, type, size }, fileInfo = {}, metas = {}) {
     const ext = path.extname(filename);
     const basename = path.basename(fileInfo.name || filename, ext);
@@ -400,4 +400,4 @@ module.exports = {
       })
       .set({ value });
   },
-};
+});

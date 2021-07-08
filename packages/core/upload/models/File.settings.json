@@ -1,6 +1,9 @@
 {
   "info": {
-    "name": "file",
+    "description": "",
+    "singularName": "file",
+    "pluralName": "files",
+    "displayName": "File",
     "description": ""
   },
   "options": {

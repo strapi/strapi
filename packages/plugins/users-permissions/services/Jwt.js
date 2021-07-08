@@ -9,7 +9,7 @@
 const _ = require('lodash');
 const jwt = require('jsonwebtoken');
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   getToken(ctx) {
     const params = _.assign({}, ctx.request.body, ctx.request.query);
 
@@ -62,4 +62,4 @@ module.exports = {
       );
     });
   },
-};
+});

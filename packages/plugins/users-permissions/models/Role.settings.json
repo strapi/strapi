@@ -1,7 +1,10 @@
 {
   "info": {
     "name": "role",
-    "description": ""
+    "description": "",
+    "singularName": "role",
+    "pluralName": "roles",
+    "displayName": "Role"
   },
   "pluginOptions": {
     "content-manager": {

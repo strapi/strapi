@@ -8,7 +8,7 @@ const fieldMigration = require('./migrations/field');
 const enableContentTypeMigration = require('./migrations/content-type/enable');
 const disableContentTypeMigration = require('./migrations/content-type/disable');
 
-module.exports = () => {
+module.exports = strapi => {
   const contentTypeService = getService('content-types');
   const coreApiService = getService('core-api');
 

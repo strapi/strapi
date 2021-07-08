@@ -1,6 +1,7 @@
 'use strict';
 
 const { cloneDeep } = require('lodash/fp');
+const _ = require('lodash');
 const { validateContentTypeDefinition } = require('./validator');
 
 const createContentType = (definition, { apiName, pluginName } = {}) => {
@@ -40,6 +41,10 @@ ${e.errors}
 
   Object.assign(createdContentType.schema, {
     kind: createdContentType.schema.kind || 'collectionType',
+    __schema__: pickSchema(definition.schema),
+    modelType: 'contentType',
+    modelName: definition.schema.info.singularName,
+    connection: 'default',
   });
   Object.defineProperty(createdContentType.schema, 'privateAttributes', {
     get() {
@@ -48,6 +53,22 @@ ${e.errors}
   });
 
   return createdContentType;
+};
+
+const pickSchema = model => {
+  const schema = _.cloneDeep(
+    _.pick(model, [
+      'connection',
+      'collectionName',
+      'info',
+      'options',
+      'pluginOptions',
+      'attributes',
+    ])
+  );
+
+  schema.kind = model.kind || 'collectionType';
+  return schema;
 };
 
 module.exports = {

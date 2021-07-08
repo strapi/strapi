@@ -36,20 +36,20 @@ const createPluginProvider = strapi => {
       return plugins[pluginName];
     },
     getAll() {
-      return Object.values(plugins);
+      return plugins;
     },
     async bootstrap() {
-      for (const plugin of this.getAll()) {
+      for (const plugin of Object.values(plugins)) {
         await plugin.bootstrap();
       }
     },
     async register() {
-      for (const plugin of this.getAll()) {
+      for (const plugin of Object.values(plugins)) {
         await plugin.register();
       }
     },
     async destroy() {
-      for (const plugin of this.getAll()) {
+      for (const plugin of Object.values(plugins)) {
         await plugin.destroy();
       }
     },

@@ -3,7 +3,6 @@
   "version": "3.6.5",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
-    "name": "Content Manager",
     "icon": "plug",
     "description": "content-manager.plugin.description",
     "required": true

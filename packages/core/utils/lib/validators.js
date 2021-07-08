@@ -17,7 +17,7 @@ function isNotNull(msg = '${path} cannot be null.') {
 }
 
 function isFunction(message = '${path} is not a function') {
-  return this.test('is a function', message, value => _.isFunction(value));
+  return this.test('is a function', message, value => _.isUndefined(value) || _.isFunction(value));
 }
 
 function isCamelCase(message = '${path} is not in camel case (anExampleOfCamelCase)') {
@@ -28,7 +28,7 @@ function onlyContainsFunctions(message = '${path} contains values that are not f
   return this.test(
     'only contains functions',
     message,
-    value => value && Object.values(value).every(_.isFunction)
+    value => _.isUndefined(value) || (value && Object.values(value).every(_.isFunction))
   );
 }
 

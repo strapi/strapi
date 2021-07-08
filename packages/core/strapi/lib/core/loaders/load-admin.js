@@ -2,9 +2,9 @@
 
 const _ = require('lodash');
 
-const findPackagePath = require('../load/package-path');
-const loadFiles = require('../load/load-files');
-const loadConfig = require('../load/load-config-files');
+const findPackagePath = require('../../load/package-path');
+const loadFiles = require('../../load/load-files');
+const loadConfig = require('../../load/load-config-files');
 
 const mergeRoutes = (a, b, key) =>
   _.isArray(a) && _.isArray(b) && key === 'routes' ? a.concat(b) : undefined;

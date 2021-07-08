@@ -21,10 +21,7 @@ const strapiServerSchema = yup
     config: yup.object().required(),
     routes: yup.array().required(), // may be removed later
     controllers: yup.object().required(), // may be removed later
-    services: yup
-      .mixed()
-      .isFunction()
-      .required(),
+    services: yup.object().required(),
     policies: yup.object().required(),
     middlewares: yup.object().required(), // may be removed later
     contentTypes: yup.array().required(),

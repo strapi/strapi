@@ -24,6 +24,7 @@ module.exports = strapi => {
      */
 
     async initialize() {
+      console.log('INITIAILIZE');
       const { defaultIndex, maxAge, path: publicPath } = strapi.config.middleware.settings.public;
       const staticDir = path.resolve(strapi.dir, publicPath || strapi.config.paths.static);
 

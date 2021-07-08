@@ -22,6 +22,12 @@ const createContainer = strapi => {
     config: strapi.config,
     plugin: pluginProvider.get,
     plugins: pluginProvider,
+    async bootstrap() {
+      await this.plugins.bootstrap();
+    },
+    async register() {
+      await this.plugins.register();
+    },
     contentType: (...args) => this.contentTypes.get(...args),
     contentTypes: {
       has(uid) {

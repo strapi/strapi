@@ -24,7 +24,7 @@ const jwt = require('jsonwebtoken');
  * @return  {*}
  */
 
-const connect = (provider, query) => {
+const connect = ({ strapi }) => (provider, query) => {
   const access_token = query.access_token || query.code || query.oauth_token;
 
   return new Promise((resolve, reject) => {
@@ -587,10 +587,10 @@ const getProfile = async (provider, query, callback) => {
   }
 };
 
-const buildRedirectUri = (provider = '') =>
+const buildRedirectUri = strapi => (provider = '') =>
   `${getAbsoluteServerUrl(strapi.config)}/connect/${provider}/callback`;
 
-module.exports = {
-  connect,
-  buildRedirectUri,
-};
+module.exports = strapi => ({
+  connect: connect(strapi),
+  buildRedirectUri: buildRedirectUri(strapi),
+});

@@ -10,7 +10,7 @@ dotenv.config({ path: process.env.ENV_PATH });
 
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
-// const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
+const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 // const loadPolicies = require('../load-policies');
 // const loadFunctions = require('../load-functions');
 const loadConfigDir = require('./config-loader');
@@ -50,6 +50,15 @@ const defaultConfig = {
     },
     settings: {},
   },
+  hook: {
+    timeout: 1000,
+    load: {
+      before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
+      order: [],
+      after: ['parser', 'router'],
+    },
+    settings: {},
+  },
 };
 
 module.exports = (dir, initialConfig = {}) => {
@@ -73,8 +82,8 @@ module.exports = (dir, initialConfig = {}) => {
       strapi: strapiVersion,
     },
     // installedPlugins: getPrefixedDeps('@strapi/plugin', pkgJSON),
-    // installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
-    // installedHooks: getPrefixedDeps('@strapi/hook', pkgJSON),
+    installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
+    installedHooks: getPrefixedDeps('@strapi/hook', pkgJSON),
     // installedProviders: getPrefixedDeps('@strapi/provider', pkgJSON),
   };
 

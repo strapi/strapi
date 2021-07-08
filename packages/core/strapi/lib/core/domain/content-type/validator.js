@@ -5,7 +5,12 @@ const { yup } = require('@strapi/utils');
 
 // To replace by directly using implemented lifecycles
 const lifecycles = ['beforeCreate', 'afterCreate'];
-const lifecyclesShape = mapValues(keyBy(lifecycles), () => yup.mixed().isFunction());
+const lifecyclesShape = mapValues(keyBy(lifecycles), () =>
+  yup
+    .mixed()
+    .nullable()
+    .isFunction()
+);
 
 const contentTypeSchemaValidator = yup.object().shape({
   schema: yup.object().shape({

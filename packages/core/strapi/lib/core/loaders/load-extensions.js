@@ -4,15 +4,17 @@ const path = require('path');
 const { existsSync } = require('fs-extra');
 const fse = require('fs-extra');
 const _ = require('lodash');
-const loadConfig = require('../load/load-config-files');
-const loadFiles = require('../load/load-files');
-const glob = require('../load/glob');
-const filePathToPath = require('../load/filepath-to-prop-path');
+const loadConfig = require('../../load/load-config-files');
+const loadFiles = require('../../load/load-files');
+const glob = require('../../load/glob');
+const filePathToPath = require('../../load/filepath-to-prop-path');
 
 /**
  * Loads the extensions folder
  */
-module.exports = async function({ appPath }) {
+module.exports = async function(strapi) {
+  const appPath = strapi.config.get('appPath');
+
   const extensionsDir = path.resolve(appPath, 'extensions');
 
   if (!existsSync(extensionsDir)) {
