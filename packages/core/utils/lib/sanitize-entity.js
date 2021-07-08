@@ -149,8 +149,6 @@ const getAllowedFields = ({ includeFields, model, isOutput }) => {
 };
 
 const getNextFields = (fields, key, { allowedFieldsHasKey }) => {
-  console.log(fields);
-
   const searchStr = `${key}.`;
 
   const transformedFields = (fields || [])

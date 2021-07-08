@@ -8,12 +8,13 @@
 
 const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
+const { getService } = require('../utils');
 const adminUserController = require('./user/admin');
 const apiUserController = require('./user/api');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
-    model: strapi.query('user', 'users-permissions').model,
+    model: strapi.getModel('plugins::users-permissions.user'),
   });
 
 const resolveController = ctx => {
@@ -48,9 +49,10 @@ module.exports = {
 
     if (_.has(ctx.query, '_q')) {
       // use core strapi query to search for users
-      users = await strapi.query('user', 'users-permissions').search(ctx.query, populate);
+      // FIXME:
+      users = await strapi.query('plugins::users-permissions.user').search(ctx.query, populate);
     } else {
-      users = await strapi.plugins['users-permissions'].services.user.fetchAll(ctx.query, populate);
+      users = await getService('user').fetchAll(ctx.query, populate);
     }
 
     ctx.body = users.map(sanitizeUser);
@@ -62,7 +64,7 @@ module.exports = {
    */
   async findOne(ctx) {
     const { id } = ctx.params;
-    let data = await strapi.plugins['users-permissions'].services.user.fetch({
+    let data = await getService('user').fetch({
       id,
     });
 
@@ -80,9 +82,9 @@ module.exports = {
    */
   async count(ctx) {
     if (_.has(ctx.query, '_q')) {
-      return await strapi.plugins['users-permissions'].services.user.countSearch(ctx.query);
+      return await getService('user').countSearch(ctx.query);
     }
-    ctx.body = await strapi.plugins['users-permissions'].services.user.count(ctx.query);
+    ctx.body = await getService('user').count(ctx.query);
   },
 
   /**
@@ -91,7 +93,9 @@ module.exports = {
    */
   async destroy(ctx) {
     const { id } = ctx.params;
-    const data = await strapi.plugins['users-permissions'].services.user.remove({ id });
+
+    const data = await getService('user').remove({ id });
+
     ctx.send(sanitizeUser(data));
   },
 
@@ -101,10 +105,11 @@ module.exports = {
     } = ctx;
 
     const toRemove = Object.values(_.omit(query, 'source'));
-    const { primaryKey } = strapi.query('user', 'users-permissions');
-    const finalQuery = { [`${primaryKey}_in`]: toRemove, _limit: 100 };
 
-    const data = await strapi.plugins['users-permissions'].services.user.removeAll(finalQuery);
+    // FIXME: delete many
+    const finalQuery = { id: toRemove };
+
+    const data = await getService('user').removeAll(finalQuery);
 
     ctx.send(data);
   },

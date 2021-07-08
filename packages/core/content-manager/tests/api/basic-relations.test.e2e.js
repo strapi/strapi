@@ -34,33 +34,32 @@ const collector = {
       type: 'integer',
     },
     stamps: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: 'application::stamp.stamp',
-      unique: false,
     },
     stamps_one_way: {
-      nature: 'oneWay',
+      type: 'relation',
+      relation: 'oneToOne',
       target: 'application::stamp.stamp',
-      unique: false,
     },
     stamps_m2m: {
-      nature: 'manyToMany',
+      type: 'relation',
+      relation: 'manyToMany',
       targetAttribute: 'collectors',
       target: 'application::stamp.stamp',
-      unique: false,
-      dominant: true,
     },
     stamps_one_many: {
-      nature: 'oneToMany',
+      type: 'relation',
+      relation: 'oneToMany',
       targetAttribute: 'collector',
       target: 'application::stamp.stamp',
-      unique: false,
     },
     stamps_one_one: {
-      nature: 'oneToOne',
+      type: 'relation',
+      relation: 'oneToOne',
       targetAttribute: 'collector_one_one',
       target: 'application::stamp.stamp',
-      unique: false,
     },
   },
 };
@@ -305,7 +304,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::stamp.stamp',
         qs: {
-          _sort: 'collector.name:ASC',
+          sort: 'collector.name:ASC',
         },
       });
 
@@ -320,7 +319,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::stamp.stamp',
         qs: {
-          _sort: 'collector.name:DESC',
+          sort: 'collector.name:DESC',
         },
       });
 
@@ -337,7 +336,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _sort: 'stamps_one_way.name:ASC',
+          sort: 'stamps_one_way.name:ASC',
         },
       });
 
@@ -352,7 +351,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _sort: 'stamps_one_way.name:DESC',
+          sort: 'stamps_one_way.name:DESC',
         },
       });
 
@@ -369,7 +368,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _sort: 'stamps_one_one.name:ASC',
+          sort: 'stamps_one_one.name:ASC',
         },
       });
 
@@ -384,7 +383,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _sort: 'stamps_one_one.name:DESC',
+          sort: 'stamps_one_one.name:DESC',
         },
       });
 

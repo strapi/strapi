@@ -44,8 +44,8 @@ const shopModel = {
       type: 'string',
     },
     products: {
-      dominant: true,
-      nature: 'manyToMany',
+      type: 'relation',
+      relation: 'manyToMany',
       target: 'application::product.product',
       targetAttribute: 'shops',
     },

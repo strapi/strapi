@@ -37,7 +37,7 @@ const databases = {
 };
 
 const runAllTests = async args => {
-  return execa('yarn', ['-s', 'test:e2e', ...args], {
+  return execa('yarn', ['test:e2e', ...args], {
     stdio: 'inherit',
     cwd: path.resolve(__dirname, '..'),
     env: {

@@ -475,27 +475,30 @@ const createEntityManager = db => {
       }
     },
 
-    // populate already loaded entry
-    async populate(uid, entry, name, params) {
-      return {
-        ...entry,
-        relation: await this.load(entry, name, params),
-      };
+    // TODO: support multiple relations at once with the populate syntax
+    async populate(uid, entity, populate) {
+      const entry = await this.findOne(uid, {
+        select: ['id'],
+        where: { id: entity.id },
+        populate: populate,
+      });
+
+      return Object.assign({}, entity, entry);
     },
 
-    // loads a relation
-    async load(uid, id, field, params) {
+    // TODO: support multiple relations at once with the populate syntax
+    async load(uid, entity, field, params) {
       const { attributes } = db.metadata.get(uid);
 
       const attribute = attributes[field];
 
       if (!attribute || attribute.type !== 'relation') {
-        throw new Error('Invalid load expected a relational attribute');
+        throw new Error('Invalid load. Expected a relational attribute');
       }
 
       const entry = await this.findOne(uid, {
         select: ['id'],
-        where: { id },
+        where: { id: entity.id },
         populate: {
           [field]: params || true,
         },

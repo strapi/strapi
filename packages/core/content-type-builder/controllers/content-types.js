@@ -51,7 +51,6 @@ module.exports = {
     try {
       await validateContentTypeInput(body);
     } catch (error) {
-      console.log(error)
       return ctx.send({ error }, 400);
     }
 

@@ -14,7 +14,12 @@ const {
   sanitizeEntity,
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
+  relations: relationsUtils,
 } = require('@strapi/utils');
+
+const { MANY_RELATIONS } = relationsUtils.constants;
+const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
+
 const uploadFiles = require('./utils/upload-files');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
@@ -47,13 +52,29 @@ module.exports = ctx => {
 const transformParamsToQuery = (uid, params = {}) => {
   const model = strapi.getModel(uid);
 
-  const query = {
-    populate: [],
-  };
+  const query = {};
 
   // TODO: check invalid values add defaults ....
 
-  const { start, limit, sort, filters, fields, populate, publicationState } = params;
+  const {
+    start,
+    page,
+    pageSize,
+    limit,
+    sort,
+    filters,
+    fields,
+    populate,
+    publicationState,
+  } = params;
+
+  if (page) {
+    query.page = Number(page);
+  }
+
+  if (pageSize) {
+    query.pageSize = Number(pageSize);
+  }
 
   if (start) {
     query.offset = convertStartQueryParams(start);
@@ -85,7 +106,7 @@ const transformParamsToQuery = (uid, params = {}) => {
     const { publicationState = 'live' } = params;
 
     const liveClause = {
-      published_at: {
+      [PUBLISHED_AT_ATTRIBUTE]: {
         $notNull: true,
       },
     };
@@ -144,9 +165,45 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
   },
 
   async findWithRelationCounts(uid, opts) {
+    const model = strapi.getModel(uid);
+
     const { params } = await this.wrapOptions(opts, { uid, action: 'findWithRelationCounts' });
 
-    return db.query(uid).findWithRelationCounts(params);
+    const query = transformParamsToQuery(uid, params);
+
+    const { attributes } = model;
+
+    const populate = Object.keys(attributes)
+      .filter(attributeName => {
+        return attributes[attributeName].type === 'relation';
+      })
+      .filter(attributeName => {
+        return !query.populate || query.populate.includes(attributeName);
+      })
+      .reduce((populate, attributeName) => {
+        const attribute = attributes[attributeName];
+
+        if (
+          MANY_RELATIONS.includes(attribute.relation) &&
+          contentTypesUtils.isVisibleAttribute(model, attributeName)
+        ) {
+          populate[attributeName] = { count: true };
+        } else {
+          populate[attributeName] = true;
+        }
+
+        return populate;
+      }, {});
+
+    const { results, pagination } = await db.query(uid).findPage({
+      ...query,
+      populate,
+    });
+
+    return {
+      results,
+      pagination,
+    };
   },
 
   async findOne(uid, entityId, opts) {
@@ -169,6 +226,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'create' });
 
     const model = strapi.getModel(uid);
+
     const isDraft = contentTypesUtils.isDraft(data, model);
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
@@ -198,9 +256,9 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
 
     const model = strapi.getModel(uid);
 
-    const existingEntry = await db.query(uid).findOne({ where: { id: entityId } });
+    const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
 
-    const isDraft = contentTypesUtils.isDraft(existingEntry, model);
+    const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
 
     const validData = await entityValidator.validateEntityUpdate(model, data, {
       isDraft,
@@ -209,7 +267,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
     // TODO: wrap in transaction
-    const componentData = await updateComponents(uid, entityId, validData);
+    const componentData = await updateComponents(uid, entityToUpdate, validData);
 
     const entity = await db.query(uid).update({
       ...query,
@@ -234,21 +292,21 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     // select / populate
     const query = transformParamsToQuery(uid, pickSelectionParams(params));
 
-    const entity = await db.query(uid).findOne({
+    const entityToDelete = await db.query(uid).findOne({
       ...query,
       where: { id: entityId },
     });
 
-    if (!entity) {
+    if (!entityToDelete) {
       throw new Error('Entity not found');
     }
 
-    await deleteComponents(uid, entityId);
-    await db.query(uid).delete({ where: { id: entity.id } });
+    await deleteComponents(uid, entityToDelete);
+    await db.query(uid).delete({ where: { id: entityToDelete.id } });
 
-    this.emitEvent(uid, ENTRY_DELETE, entity);
+    this.emitEvent(uid, ENTRY_DELETE, entityToDelete);
 
-    return entity;
+    return entityToDelete;
   },
 
   async deleteMany(uid, opts) {
@@ -301,6 +359,8 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
 const createComponents = async (uid, data) => {
   const { attributes } = strapi.getModel(uid);
 
+  const componentBody = {};
+
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
@@ -328,20 +388,18 @@ const createComponents = async (uid, data) => {
           })
         );
 
-        return {
-          [attributeName]: components.map(({ id }, idx) => {
-            // TODO: add & support pivot data in DB
-            return id;
-          }),
-        };
+        componentBody[attributeName] = components.map(({ id }, idx) => {
+          // TODO: add & support pivot data in DB
+          return id;
+        });
       } else {
         const component = await strapi.query(componentUID).create({ data: componentValue });
 
-        return {
-          // TODO: add & support pivot data in DB
-          [attributeName]: component.id,
-        };
+        // TODO: add & support pivot data in DB
+        componentBody[attributeName] = component.id;
       }
+
+      continue;
     }
 
     if (attribute.type === 'dynamiczone') {
@@ -357,14 +415,16 @@ const createComponents = async (uid, data) => {
         })
       );
 
-      return {
-        [attributeName]: components.map(({ id }, idx) => {
-          // TODO: add & support pivot data in DB
-          return id;
-        }),
-      };
+      componentBody[attributeName] = components.map(({ id }, idx) => {
+        // TODO: add & support pivot data in DB
+        return id;
+      });
+
+      continue;
     }
   }
+
+  return componentBody;
 };
 
 const updateOrCreateComponent = (componentUID, value) => {
@@ -379,8 +439,10 @@ const updateOrCreateComponent = (componentUID, value) => {
 };
 
 // TODO: delete old components
-const updateComponents = async (uid, entityId, data) => {
+const updateComponents = async (uid, entityToUpdate, data) => {
   const { attributes } = strapi.getModel(uid);
+
+  const componentBody = {};
 
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
@@ -392,7 +454,7 @@ const updateComponents = async (uid, entityId, data) => {
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const previousValue = await strapi.query(uid).load(entityId, attributeName);
+      const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
       const componentValue = data[attributeName];
 
       // TODO: diff prev & new
@@ -407,24 +469,23 @@ const updateComponents = async (uid, entityId, data) => {
           throw new Error('Expected an array to create repeatable component');
         }
 
+        // FIXME: returns null sometimes
         const components = await Promise.all(
           componentValue.map(value => updateOrCreateComponent(componentUID, value))
         );
 
-        return {
-          [attributeName]: components.map(({ id }, idx) => {
-            // TODO: add & support pivot data in DB
-            return id;
-          }),
-        };
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
+          // TODO: add & support pivot data in DB
+          return id;
+        });
       } else {
         const component = await updateOrCreateComponent(componentUID, componentValue);
 
-        return {
-          // TODO: add & support pivot data in DB
-          [attributeName]: component.id,
-        };
+        // TODO: add & support pivot data in DB
+        componentBody[attributeName] = component && component.id;
       }
+
+      continue;
     }
 
     if (attribute.type === 'dynamiczone') {
@@ -438,17 +499,19 @@ const updateComponents = async (uid, entityId, data) => {
         dynamiczoneValues.map(value => updateOrCreateComponent(value.__component, value))
       );
 
-      return {
-        [attributeName]: components.map(({ id }, idx) => {
-          // TODO: add & support pivot data in DB
-          return id;
-        }),
-      };
+      componentBody[attributeName] = components.map(({ id }, idx) => {
+        // TODO: add & support pivot data in DB
+        return id;
+      });
+
+      continue;
     }
   }
+
+  return componentBody;
 };
 
-const deleteComponents = async (uid, entityId) => {
+const deleteComponents = async (uid, entityToDelete) => {
   const { attributes } = strapi.getModel(uid);
 
   // TODO:  find components and then delete them
@@ -459,7 +522,7 @@ const deleteComponents = async (uid, entityId) => {
       const { component: componentUID } = attribute;
 
       // TODO: need to load before deleting the entry then delete the components then the entry
-      const value = await strapi.query(uid).load(entityId, attributeName);
+      const value = await strapi.query(uid).load(entityToDelete, attributeName);
 
       if (!value) {
         continue;

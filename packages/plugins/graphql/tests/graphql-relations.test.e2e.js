@@ -52,8 +52,8 @@ const labelModel = {
       type: 'richtext',
     },
     documents: {
-      dominant: true,
-      nature: 'manyToMany',
+      type: 'relation',
+      relation: 'manyToMany',
       target: 'application::document.document',
       targetAttribute: 'labels',
     },
@@ -89,9 +89,9 @@ const personModel = {
       private: true,
     },
     privateCars: {
-      nature: 'oneToMany',
+      type: 'relation',
+      relation: 'oneToMany',
       target: 'application::car.car',
-      dominant: false,
       targetAttribute: 'person',
       private: true,
     },

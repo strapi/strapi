@@ -1,9 +1,9 @@
-import * as userspermissions from '../services/UsersPermissions';
-import * as user from '../services/User';
-import * as jwt from '../services/Jwt';
+import * as usersPermissions from '../services/users-permissions';
+import * as user from '../services/user';
+import * as jwt from '../services/jwt';
 
 type S = {
-  userspermissions: typeof userspermissions;
+  ['users-permissions']: typeof usersPermissions;
   user: typeof user;
   jwt: typeof jwt;
 };

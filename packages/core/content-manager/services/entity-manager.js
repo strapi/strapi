@@ -34,6 +34,15 @@ const findCreatorRoles = entity => {
   return [];
 };
 
+const getDefaultPopulate = (uid, populate) => {
+  if (populate) return populate;
+  const { attributes } = strapi.getModel(uid);
+
+  return Object.keys(attributes).filter(attributeName => {
+    return attributes[attributeName].type === 'relation';
+  });
+};
+
 module.exports = {
   async assocCreatorRoles(entity) {
     if (!entity) {
@@ -45,37 +54,37 @@ module.exports = {
   },
 
   find(opts, uid, populate) {
-    const params = { ...opts, populate };
+    const params = { ...opts, populate: getDefaultPopulate(uid, populate) };
 
     return strapi.entityService.find(uid, { params });
   },
 
   findPage(opts, uid, populate) {
-    const params = { ...opts, populate };
+    const params = { ...opts, populate: getDefaultPopulate(uid, populate) };
 
     return strapi.entityService.findPage(uid, { params });
   },
 
   findWithRelationCounts(opts, uid, populate) {
-    const params = { ...opts, populate };
+    const params = { ...opts, populate: getDefaultPopulate(uid, populate) };
 
     return strapi.entityService.findWithRelationCounts(uid, { params });
   },
 
   search(opts, uid, populate) {
-    const params = { ...opts, populate };
+    const params = { ...opts, populate: getDefaultPopulate(uid, populate) };
 
     return strapi.entityService.search(uid, { params });
   },
 
   searchPage(opts, uid, populate) {
-    const params = { ...opts, populate };
+    const params = { ...opts, populate: getDefaultPopulate(uid, populate) };
 
     return strapi.entityService.searchPage(uid, { params });
   },
 
   searchWithRelationCounts(opts, uid, populate) {
-    const params = { ...opts, populate };
+    const params = { ...opts, populate: getDefaultPopulate(uid, populate) };
 
     return strapi.entityService.searchWithRelationCounts(uid, { params });
   },
@@ -87,7 +96,8 @@ module.exports = {
   },
 
   async findOne(id, uid, populate) {
-    const params = { populate };
+    const params = { populate: getDefaultPopulate(uid, populate) };
+
     return strapi.entityService.findOne(uid, id, { params });
   },
 
@@ -109,19 +119,26 @@ module.exports = {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    return strapi.entityService.create(uid, { data: publishData });
+    const params = { populate: getDefaultPopulate(uid) };
+
+    return strapi.entityService.create(uid, { params, data: publishData });
   },
 
   update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
 
-    return strapi.entityService.update(uid, entity.id, { data: publishData });
+    const params = { populate: getDefaultPopulate(uid) };
+
+    return strapi.entityService.update(uid, entity.id, { params, data: publishData });
   },
 
   delete(entity, uid) {
-    return strapi.entityService.delete(uid, entity.id);
+    const params = { populate: getDefaultPopulate(uid) };
+
+    return strapi.entityService.delete(uid, entity.id, { params });
   },
 
+  // FIXME: handle relations
   deleteMany(opts, uid) {
     const params = { ...opts };
 
@@ -138,7 +155,9 @@ module.exports = {
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 
-    return strapi.entityService.update(uid, entity.id, { data });
+    const params = { populate: getDefaultPopulate(uid) };
+
+    return strapi.entityService.update(uid, entity.id, { params, data });
   }),
 
   unpublish: emitEvent(ENTRY_UNPUBLISH, (entity, uid) => {
@@ -148,6 +167,8 @@ module.exports = {
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
 
-    return strapi.entityService.update(uid, entity.id, { data });
+    const params = { populate: getDefaultPopulate(uid) };
+
+    return strapi.entityService.update(uid, entity.id, { params, data });
   }),
 };

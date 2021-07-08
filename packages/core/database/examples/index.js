@@ -19,28 +19,45 @@ async function main(connection) {
     console.log(orm.connection.client.config.client);
 
     await orm.schema.sync();
-    await orm.schema.reset();
+    // await orm.schema.reset();
 
-    await orm.query('compo').create({
-      data: {
-        key: 'A',
-        value: 1,
-      },
-    });
+    // await orm.query('compo').create({
+    //   data: {
+    //     key: 'A',
+    //     value: 1,
+    //   },
+    // });
 
-    await orm.query('article').create({
-      // select: {},
-      // populate: {},
-      data: {
-        compo: 1,
-      },
-    });
+    // await orm.query('article').create({
+    //   // select: {},
+    //   // populate: {},
+    //   data: {
+    //     compo: 1,
+    //   },
+    // });
 
-    await orm.query('article').findMany({
-      populate: ['category.compo'],
-    });
+    console.log(await orm.query('article').load({ id: 1 }, 'category'));
 
-    // console.log(await orm.query('article').load(1, 'compo'));
+    console.log(
+      await orm.query('category').populate(
+        { title: 'A', id: 2 },
+        {
+          articles: {
+            count: true,
+          },
+        }
+      )
+    );
+
+    console.log(
+      await orm.query('category').findMany({
+        populate: {
+          articles: {
+            count: true,
+          },
+        },
+      })
+    );
 
     // await orm.query('article').delete({ where: { id: 1 } });
 

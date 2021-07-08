@@ -15,18 +15,18 @@ module.exports = {
       return ctx.badRequest();
     }
 
-    const modelDef = _component ? strapi.db.getModel(_component) : strapi.db.getModel(model);
+    const modelDef = _component ? strapi.getModel(_component) : strapi.getModel(model);
 
     if (!modelDef) {
       return ctx.notFound('model.notFound');
     }
 
-    const attr = modelDef.attributes[targetField];
-    if (!attr) {
+    const attribute = modelDef.attributes[targetField];
+    if (!attribute || attribute.type !== 'relation') {
       return ctx.badRequest('targetField.invalid');
     }
 
-    const target = strapi.db.getModelByAssoc(attr);
+    const target = strapi.getModel(attribute.target);
 
     if (!target) {
       return ctx.notFound('target.notFound');

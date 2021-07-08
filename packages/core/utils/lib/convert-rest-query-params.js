@@ -109,7 +109,7 @@ const convertSortQueryParams = sortQuery => {
       throw new Error('order can only be one of asc|desc|ASC|DESC');
     }
 
-    sortKeys.push({ [field]: order.toLowerCase() });
+    sortKeys.push(_.set({}, field, order.toLowerCase()));
   });
 
   return sortKeys;

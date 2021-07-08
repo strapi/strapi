@@ -23,8 +23,8 @@
     },
     "restaurant": {
       "type": "relation",
-      "relation": "oneToOne",
       "target": "application::restaurant.restaurant",
+      "relation": "oneToOne",
       "mappedBy": "menu"
     }
   }

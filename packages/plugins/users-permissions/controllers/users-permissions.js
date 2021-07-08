@@ -16,7 +16,7 @@ module.exports = {
     }
 
     try {
-      await getService('users-permissions').createRole(ctx.request.body);
+      await getService('users-permission').createRole(ctx.request.body);
 
       ctx.send({ ok: true });
     } catch (err) {
@@ -45,7 +45,7 @@ module.exports = {
     }
 
     try {
-      await getService('users-permissions').deleteRole(roleID, publicRoleID);
+      await getService('users-permission').deleteRole(roleID, publicRoleID);
 
       ctx.send({ ok: true });
     } catch (err) {
@@ -76,8 +76,8 @@ module.exports = {
   async getRole(ctx) {
     const { id } = ctx.params;
     const { lang } = ctx.query;
-    const plugins = await getService('users-permissions').getPlugins(lang);
-    const role = await getService('users-permissions').getRole(id, plugins);
+    const plugins = await getService('users-permission').getPlugins(lang);
+    const role = await getService('users-permission').getRole(id, plugins);
 
     if (_.isEmpty(role)) {
       return ctx.badRequest(null, [{ messages: [{ id: `Role don't exist` }] }]);
@@ -88,7 +88,7 @@ module.exports = {
 
   async getRoles(ctx) {
     try {
-      const roles = await getService('users-permissions').getRoles();
+      const roles = await getService('users-permission').getRoles();
 
       ctx.send({ roles });
     } catch (err) {
@@ -129,7 +129,7 @@ module.exports = {
     }
 
     try {
-      await getService('users-permissions').updateRole(roleID, ctx.request.body);
+      await getService('users-permission').updateRole(roleID, ctx.request.body);
 
       ctx.send({ ok: true });
     } catch (err) {
@@ -188,7 +188,7 @@ module.exports = {
           key: 'advanced',
         })
         .get(),
-      roles: await getService('users-permissions').getRoles(),
+      roles: await getService('users-permission').getRoles(),
     });
   },
 

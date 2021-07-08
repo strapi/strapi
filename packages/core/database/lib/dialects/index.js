@@ -20,6 +20,10 @@ class Dialect {
 
   // TODO: pass query info to display some more metadata
   transformErrors(error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+
     throw new Error(error.message);
   }
 }

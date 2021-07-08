@@ -151,14 +151,26 @@ const createQueryBuilder = (uid, db) => {
     },
 
     aliasColumn(columnName) {
+      if (typeof columnName !== 'string') {
+        return columnName;
+      }
+
       if (columnName.indexOf('.') >= 0) return columnName;
       return this.alias + '.' + columnName;
+    },
+
+    raw(...args) {
+      return db.connection.raw(...args);
     },
 
     getKnexQuery() {
       const aliasedTableName = state.type === 'insert' ? tableName : { [this.alias]: tableName };
 
       const qb = db.connection(aliasedTableName);
+
+      if (!state.type) {
+        this.select('*');
+      }
 
       switch (state.type) {
         case 'select': {

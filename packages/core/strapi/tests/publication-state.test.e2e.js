@@ -56,9 +56,9 @@ const contentTypes = {
         type: 'string',
       },
       categories: {
-        nature: 'manyWay',
+        type: 'relation',
+        relation: 'oneToMany',
         target: 'application::category.category',
-        unique: false,
       },
       comp: {
         component: 'default.comp',
@@ -100,7 +100,8 @@ const components = {
     name: 'comp',
     attributes: {
       countries: {
-        nature: 'manyWay',
+        type: 'relation',
+        relation: 'oneToMany',
         target: 'application::country.country',
       },
     },

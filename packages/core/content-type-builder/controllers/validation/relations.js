@@ -2,11 +2,11 @@
 
 const yup = require('yup');
 const { typeKinds, coreUids } = require('../../services/constants');
-const { validators, isValidName } = require('./common');
+const { isValidName } = require('./common');
 
 const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
-const isValidNature = validNatures =>
+const isValidRelation = validNatures =>
   function(value) {
     const allowedRelations =
       this.parent.target === coreUids.STRAPI_USER ? STRAPI_USER_RELATIONS : validNatures;
@@ -19,20 +19,24 @@ const isValidNature = validNatures =>
         });
   };
 
-module.exports = (obj, validNatures) => {
+module.exports = ({ types, relations }) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter(key => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
     .filter(key => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 
-  return {
+  return yup.object({
+    type: yup
+      .string()
+      .oneOf(types)
+      .required(),
     target: yup
       .string()
       .oneOf(contentTypesUIDs)
       .required(),
     relation: yup
       .string()
-      .test('isValidNature', isValidNature(validNatures))
+      .test('isValidRelation', isValidRelation(relations))
       .required(),
     configurable: yup.boolean().nullable(),
     targetAttribute: yup
@@ -41,5 +45,5 @@ module.exports = (obj, validNatures) => {
       .nullable(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
-  };
+  });
 };

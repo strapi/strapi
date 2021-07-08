@@ -26,7 +26,7 @@ const createRelation = (attributeName, attribute, meta, metadata) => {
     return relationFactoryMap[attribute.relation](attributeName, attribute, meta, metadata);
   }
 
-  throw new Error(`Unknow relation ${attribute.relation}`);
+  throw new Error(`Unknown relation ${attribute.relation}`);
 
   /*
 
@@ -288,7 +288,9 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
     const inverseAttribute = targetMeta.attributes[attribute.inversedBy];
 
     if (!inverseAttribute) {
-      throw new Error(`inversedBy attribute ${attribute.inversedBy} not found target`);
+      throw new Error(
+        `inversedBy attribute ${attribute.inversedBy} not found target ${targetMeta.uid}`
+      );
     }
 
     inverseAttribute.joinTable = {

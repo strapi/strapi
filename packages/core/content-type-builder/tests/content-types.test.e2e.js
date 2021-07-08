@@ -182,7 +182,8 @@ describe('Content Type Builder - Content types', () => {
             name: 'test-st',
             attributes: {
               relation: {
-                nature: 'oneToOne',
+                type: 'relation',
+                relation: 'oneTo',
                 target: 'plugins::users-permissions.user',
                 targetAttribute: 'test',
               },
@@ -194,8 +195,8 @@ describe('Content Type Builder - Content types', () => {
       expect(res.statusCode).toBe(400);
       expect(res.body).toMatchObject({
         error: {
-          ['contentType.attributes.relation.nature']: expect.arrayContaining([
-            expect.stringMatching('must be one of the following values: oneWay, manyWay'),
+          ['contentType.attributes.relation.relation']: expect.arrayContaining([
+            expect.stringMatching('must be one of the following values: oneToOne, oneToMany'),
           ]),
         },
       });
@@ -272,9 +273,9 @@ describe('Content Type Builder - Content types', () => {
             attributes: {
               relation: {
                 private: true,
-                nature: 'oneWay',
+                type: 'relation',
+                relation: 'oneToOne',
                 target: 'plugins::users-permissions.user',
-                targetAttribute: 'test',
               },
             },
           },

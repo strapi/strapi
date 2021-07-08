@@ -16,7 +16,8 @@ module.exports = {
         type: 'richtext',
       },
       author: {
-        nature: 'manyToOne',
+        type: 'relation',
+        relation: 'manyToOne',
         target: 'plugins::users-permissions.user',
         targetAttribute: 'articles',
       },
@@ -32,8 +33,8 @@ module.exports = {
         type: 'string',
       },
       articles: {
-        dominant: true,
-        nature: 'manyToMany',
+        type: 'relation',
+        relation: 'manyToMany',
         target: 'application::article.article',
         targetAttribute: 'tags',
       },
@@ -49,7 +50,8 @@ module.exports = {
         type: 'string',
       },
       articles: {
-        nature: 'oneToMany',
+        type: 'relation',
+        relation: 'oneToMany',
         target: 'application::article.article',
         targetAttribute: 'category',
       },
@@ -65,12 +67,14 @@ module.exports = {
         type: 'string',
       },
       article: {
+        type: 'relation',
+        relation: 'oneToOne',
         target: 'application::article.article',
         targetAttribute: 'reference',
-        nature: 'oneToOne',
       },
       tag: {
-        nature: 'oneWay',
+        type: 'relation',
+        relation: 'oneToOne',
         target: 'application::tag.tag',
       },
     },
@@ -102,7 +106,8 @@ module.exports = {
         type: 'string',
       },
       tags: {
-        nature: 'manyWay',
+        type: 'relation',
+        relation: 'oneToMany',
         target: 'application::tag.tag',
       },
     },

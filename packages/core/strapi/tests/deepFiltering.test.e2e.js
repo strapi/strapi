@@ -35,14 +35,14 @@ const collector = {
       type: 'integer',
     },
     cards: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: 'application::card.card',
-      unique: false,
     },
     collector_friends: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: '__self__',
-      unique: false,
     },
   },
 };

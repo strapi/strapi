@@ -46,7 +46,7 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
           }
 
           if (attribute.type === 'relation') {
-            return yup.object(getRelationValidator(attribute, relations)).test(isValidKey(key));
+            return getRelationValidator({ types, relations }).test(isValidKey(key));
           }
 
           if (_.has(attribute, 'type')) {

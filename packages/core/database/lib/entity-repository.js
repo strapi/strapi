@@ -1,11 +1,11 @@
 'use strict';
 
 const withDefaultPagination = params => {
-  const { page = 1, pageSize = 100, ...rest } = params;
+  const { page = 1, pageSize = 10, ...rest } = params;
 
   return {
-    page: parseInt(page),
-    pageSize: parseInt(pageSize),
+    page: Number(page),
+    pageSize: Number(pageSize),
     ...rest,
   };
 };
@@ -96,10 +96,12 @@ const createRepository = (uid, db) => {
     },
 
     // TODO: add relation API
+    populate(entity, field, params) {
+      return db.entityManager.populate(uid, entity, field, params);
+    },
 
-    populate() {},
-    load(id, field, params) {
-      return db.entityManager.load(uid, id, field, params);
+    load(entity, field, params) {
+      return db.entityManager.load(uid, entity, field, params);
     },
   };
 };

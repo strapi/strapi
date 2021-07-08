@@ -80,7 +80,8 @@ const deleteAllLocalizedEntriesFor = async ({ locale }) => {
   const localizedModels = Object.values(strapi.contentTypes).filter(isLocalizedContentType);
 
   for (const model of localizedModels) {
-    await strapi.query(model.uid).delete({ locale }, { returning: false });
+    // FIXME: delete many content & their associations
+    await strapi.query(model.uid).deleteMany({ where: { locale } });
   }
 };
 
