@@ -121,7 +121,7 @@ const parseTime = value => {
   }
 
   const [, hours, minutes, seconds, fraction = '.000'] = result;
-  const fractionPart = _.padEnd(fraction.slice(1), 3, '0');
+  const fractionPart = _.padCharsEnd('0', 3, fraction.slice(1));
 
   return `${hours}:${minutes}:${seconds}.${fractionPart}`;
 };

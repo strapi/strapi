@@ -5,8 +5,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
-    "timestamps": false
+    "draftAndPublish": false
   },
   "attributes": {
     "name": {

@@ -7,8 +7,6 @@
   },
   "options": {
     "draftAndPublish": true,
-    "increments": true,
-    "timestamps": true,
     "comment": ""
   },
   "attributes": {

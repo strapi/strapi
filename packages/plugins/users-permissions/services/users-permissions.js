@@ -364,7 +364,7 @@ module.exports = {
       });
     }
 
-    return getService('userspermissions').updatePermissions();
+    return getService('users-permissions').updatePermissions();
   },
 
   async updateRole(roleID, body) {

@@ -321,22 +321,22 @@ module.exports = {
 
   fetchAll(params, populate) {
     combineFilters(params);
-    return strapi.query('plugins::upload.file').findMany({ where: params, populate });
+    return strapi.query('plugins::upload.file').findMany({ ...params, populate });
   },
 
   // FIXME: to impl
   search(params, populate) {
-    return strapi.query('plugins::upload.file').search({ where: params, populate });
+    return strapi.query('plugins::upload.file').search({ ...params, populate });
   },
 
   // FIXME: to impl
   countSearch(params) {
-    return strapi.query('plugins::upload.file').countSearch({ where: params });
+    return strapi.query('plugins::upload.file').countSearch({ ...params });
   },
 
   count(params) {
     combineFilters(params);
-    return strapi.query('plugins::upload.file').count({ where: params });
+    return strapi.query('plugins::upload.file').count({ ...params });
   },
 
   async remove(file) {
@@ -356,7 +356,7 @@ module.exports = {
     }
 
     const media = await strapi.query('plugins::upload.file').findOne({
-      id: file.id,
+      where: { id: file.id },
     });
 
     this.emitEvent(MEDIA_DELETE, media);

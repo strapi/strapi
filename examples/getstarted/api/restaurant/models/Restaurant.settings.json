@@ -7,11 +7,6 @@
   },
   "options": {
     "draftAndPublish": true,
-    "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
     "comment": ""
   },
   "pluginOptions": {},
@@ -29,13 +24,7 @@
       "pluginOptions": {}
     },
     "price_range": {
-      "enum": [
-        "very_cheap",
-        "cheap",
-        "average",
-        "expensive",
-        "very_expensive"
-      ],
+      "enum": ["very_cheap", "cheap", "average", "expensive", "very_expensive"],
       "type": "enumeration",
       "pluginOptions": {}
     },

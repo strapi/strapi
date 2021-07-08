@@ -5,9 +5,7 @@
     "name": "Homepage"
   },
   "options": {
-    "draftAndPublish": true,
-    "increments": true,
-    "timestamps": true
+    "draftAndPublish": true
   },
   "pluginOptions": {
     "i18n": {

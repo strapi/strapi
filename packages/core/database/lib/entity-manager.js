@@ -93,12 +93,7 @@ const createEntityManager = db => {
 
       // transform value to storage value
       // apply programatic defaults if any -> I think this should be handled outside of this layer as we might have some applicative rules in the entity service
-
       const dataToInsert = toRow(metadata, data);
-
-      // if (_.isEmpty(dataToInsert)) {
-      //   throw new Error('Create requires data');
-      // }
 
       const [id] = await this.createQueryBuilder(uid)
         .insert(dataToInsert)

@@ -43,7 +43,7 @@ const getLimitParam = params => {
   }
 
   const limit = _.toNumber(params.limit);
-  // if there is max limit set and params._limit exceeds this number, return configured max limit
+  // if there is max limit set and params.limit exceeds this number, return configured max limit
   if (maxLimit && (limit === -1 || limit > maxLimit)) {
     return maxLimit;
   }

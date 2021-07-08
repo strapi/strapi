@@ -126,8 +126,6 @@ module.exports = (scope, cb) => {
       },
       options: {
         draftAndPublish: scope.args.draftAndPublish === 'true',
-        timestamps: true,
-        increments: true,
         comment: '',
       },
       attributes: scope.attributes,

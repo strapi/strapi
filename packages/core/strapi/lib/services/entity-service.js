@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, pick } = require('lodash/fp');
+const { has, pick, omit } = require('lodash/fp');
 const delegate = require('delegates');
 
 const {
@@ -24,6 +24,15 @@ const uploadFiles = require('./utils/upload-files');
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
+
+const omitComponentData = (contentType, data) => {
+  const { attributes } = contentType;
+  const componentAttributes = Object.keys(attributes).filter(attributeName =>
+    contentTypesUtils.isComponentAttribute(attributes[attributeName])
+  );
+
+  return omit(componentAttributes, data);
+};
 
 module.exports = ctx => {
   const implementation = createDefaultImplementation(ctx);
@@ -173,27 +182,20 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
 
     const { attributes } = model;
 
-    const populate = Object.keys(attributes)
-      .filter(attributeName => {
-        return attributes[attributeName].type === 'relation';
-      })
-      .filter(attributeName => {
-        return !query.populate || query.populate.includes(attributeName);
-      })
-      .reduce((populate, attributeName) => {
-        const attribute = attributes[attributeName];
+    const populate = (query.populate || []).reduce((populate, attributeName) => {
+      const attribute = attributes[attributeName];
 
-        if (
-          MANY_RELATIONS.includes(attribute.relation) &&
-          contentTypesUtils.isVisibleAttribute(model, attributeName)
-        ) {
-          populate[attributeName] = { count: true };
-        } else {
-          populate[attributeName] = true;
-        }
+      if (
+        MANY_RELATIONS.includes(attribute.relation) &&
+        contentTypesUtils.isVisibleAttribute(model, attributeName)
+      ) {
+        populate[attributeName] = { count: true };
+      } else {
+        populate[attributeName] = true;
+      }
 
-        return populate;
-      }, {});
+      return populate;
+    }, {});
 
     const { results, pagination } = await db.query(uid).findPage({
       ...query,
@@ -235,9 +237,10 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
+
     const entity = await db.query(uid).create({
       ...query,
-      data: Object.assign(validData, componentData),
+      data: Object.assign(omitComponentData(model, validData), componentData),
     });
 
     // TODO: implement files outside of the entity service
@@ -272,7 +275,7 @@ const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
     const entity = await db.query(uid).update({
       ...query,
       where: { id: entityId },
-      data: Object.assign(validData, componentData),
+      data: Object.assign(omitComponentData(model, validData), componentData),
     });
 
     // TODO: implement files outside of the entity service

@@ -10,9 +10,7 @@ module.exports = {
     name: 'Role',
     description: '',
   },
-  options: {
-    timestamps: true,
-  },
+  options: {},
   pluginOptions: {
     'content-manager': {
       visible: false,

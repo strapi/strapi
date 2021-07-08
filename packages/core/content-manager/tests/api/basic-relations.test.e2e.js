@@ -193,7 +193,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _where: { 'stamps.name': '1946' },
+          filters: { stamps: { name: '1946' } },
         },
       });
 
@@ -209,7 +209,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _where: { 'stamps_m2m.name': '1946' },
+          filters: { stamps_m2m: { name: '1946' } },
         },
       });
 
@@ -225,7 +225,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::stamp.stamp',
         qs: {
-          _where: { 'collectors.name': 'Emma' },
+          filters: { collectors: { name: 'Emma' } },
         },
       });
 
@@ -241,7 +241,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _where: { 'stamps_one_many.name': '1947' },
+          filters: { stamps_one_many: { name: '1947' } },
         },
       });
 
@@ -256,7 +256,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::stamp.stamp',
         qs: {
-          _where: { 'collector.name': 'Isabelle' },
+          filters: { collector: { name: 'Isabelle' } },
         },
       });
 
@@ -272,7 +272,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _where: { 'stamps_one_way.name': '1947' },
+          filters: { stamps_one_way: { name: '1947' } },
         },
       });
 
@@ -287,7 +287,7 @@ describe('CM API', () => {
         method: 'GET',
         url: '/content-manager/collection-types/application::collector.collector',
         qs: {
-          _where: { 'stamps_one_one.name': '1947' },
+          filters: { stamps_one_one: { name: '1947' } },
         },
       });
 

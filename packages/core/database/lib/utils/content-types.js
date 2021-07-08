@@ -30,13 +30,6 @@ const transformContentTypes = contentTypes => {
       singularName: contentType.modelName,
       tableName: contentType.collectionName,
       attributes: {
-        createdAt: {
-          type: 'datetime',
-          // default: () => new Date(),
-        },
-        updatedAt: {
-          type: 'datetime',
-        },
         ...Object.keys(contentType.attributes).reduce((attrs, attrName) => {
           return Object.assign(attrs, {
             [attrName]: transformAttribute(contentType.attributes[attrName]),

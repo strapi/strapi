@@ -191,7 +191,12 @@ module.exports = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
+
+  console.log('la')
+
   const file = await strapi.plugins.upload.services.upload.fetch({ id }, []);
+
+  console.log('laa')
 
   if (_.isNil(file)) {
     throw strapi.errors.notFound();

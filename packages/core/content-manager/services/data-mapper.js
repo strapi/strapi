@@ -37,7 +37,6 @@ module.exports = {
           type: 'integer',
         },
         ...formatAttributes(contentType),
-        ...contentTypesUtils.getTimestampsAttributes(contentType),
       },
     };
   },

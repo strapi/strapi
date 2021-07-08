@@ -86,8 +86,6 @@ module.exports = function createComponentBuilder() {
           description: infos.description,
         })
         .set('options', {
-          increments: true,
-          timestamps: true,
           draftAndPublish: infos.draftAndPublish || false,
         })
         .set('pluginOptions', infos.pluginOptions)

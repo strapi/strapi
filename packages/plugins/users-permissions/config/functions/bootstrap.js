@@ -28,7 +28,7 @@ module.exports = async () => {
     usersPermissionsActions.actions
   );
 
-  await getService('userspermissions').initialize();
+  await getService('users-permissions').initialize();
 
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     const jwtSecret = uuid();

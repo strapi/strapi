@@ -39,7 +39,7 @@ const getDefaultPopulate = (uid, populate) => {
   const { attributes } = strapi.getModel(uid);
 
   return Object.keys(attributes).filter(attributeName => {
-    return attributes[attributeName].type === 'relation';
+    return ['relation', 'component', 'dynamiczone'].includes(attributes[attributeName].type);
   });
 };
 
