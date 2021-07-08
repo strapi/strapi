@@ -38,13 +38,7 @@ const EditViewDataManagerProvider = ({
   updateActionAllowedFields,
 }) => {
   const [reducerState, dispatch] = useReducer(reducer, initialState);
-  const {
-    formErrors,
-    initialData,
-    modifiedData,
-    modifiedDZName,
-    shouldCheckErrors,
-  } = reducerState.toJS();
+  const { formErrors, initialData, modifiedData, modifiedDZName, shouldCheckErrors } = reducerState;
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
 

@@ -1,7 +1,4 @@
-import { fromJS } from 'immutable';
-import reducer, { initialState as immutableInitialState } from '../reducer';
-
-const initialState = immutableInitialState.toJS();
+import reducer, { initialState } from '../reducer';
 
 describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer', () => {
   describe('ADD_NON_REPEATABLE_COMPONENT_TO_FIELD', () => {
@@ -39,7 +36,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         keys: ['component_field', 'sub_component'],
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -82,7 +79,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: false,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should add a repeatable field with the correct __temp_key__ to the modifiedData when the leaf is not an empty Array', () => {
@@ -127,7 +124,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should add a repeatable field to the modifiedData when the leaf is not defined', () => {
@@ -165,7 +162,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: false,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -208,7 +205,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: false,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should add a component to a DZ to the modifiedData when the DZ is defined', () => {
@@ -256,7 +253,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -291,7 +288,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         value: [{ label: 'ezrraez', value: { id: 1 } }],
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should add a relation in the modifiedData when it is not an empty array', () => {
@@ -326,7 +323,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         value: [{ value: { id: 3 } }],
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should not add a relation in the modifiedData when the value is empty', () => {
@@ -361,7 +358,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         value: [],
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -389,7 +386,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         initialValues: { ok: true },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -432,7 +429,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -459,7 +456,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should not change the shouldCheckError state when the action does specify so', () => {
@@ -485,7 +482,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -512,7 +509,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should not change the shouldCheckError state when the action does specify so', () => {
@@ -538,7 +535,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -571,7 +568,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -594,7 +591,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedData: { name: 'soup' },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     // NOT sure this is needed
@@ -616,7 +613,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedData: { compo: { name: 'soup' } },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should set the modifiedData and the initialData correctly for the uid type', () => {
@@ -639,7 +636,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         modifiedData: { name: 'soup' },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -668,7 +665,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should remove the component from the dz.modifiedData and change the shouldCheckError state when the action specifies so', () => {
@@ -695,7 +692,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: false,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -704,6 +701,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const state = {
         ...initialState,
         modifiedData: {
+          name: 'test',
           compo: {
             subCompo: { name: 'test' },
           },
@@ -718,13 +716,14 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
       const expected = {
         ...initialState,
         modifiedData: {
+          name: 'test',
           compo: {
             subCompo: null,
           },
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -753,7 +752,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -786,7 +785,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: false,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should remove a repeatable field and change the shouldCheckErrors state when the formErrors value is not empty', () => {
@@ -819,7 +818,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -844,7 +843,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -868,7 +867,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         contentTypeDataStructure: { ok: false },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -891,7 +890,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         formErrors: { ok: true },
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 
@@ -913,7 +912,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: true,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should change the shouldCheckErrors when the formErrors state is not an empty object', () => {
@@ -933,7 +932,7 @@ describe('CONTENT MANAGER | COMPONENTS | EditViewDataManagerProvider | reducer',
         shouldCheckErrors: false,
       };
 
-      expect(reducer(fromJS(state), action).toJS()).toEqual(expected);
+      expect(reducer(state, action)).toEqual(expected);
     });
   });
 });
