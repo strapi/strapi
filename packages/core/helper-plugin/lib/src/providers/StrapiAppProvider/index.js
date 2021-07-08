@@ -40,7 +40,7 @@ StrapiAppProvider.propTypes = {
   menu: PropTypes.arrayOf(
     PropTypes.shape({
       to: PropTypes.string.isRequired,
-      icon: PropTypes.array,
+      icon: PropTypes.string,
       intlLabel: PropTypes.shape({
         id: PropTypes.string.isRequired,
         defaultMessage: PropTypes.string.isRequired,

@@ -11,7 +11,7 @@ const useTracking = () => {
       try {
         axios.post('https://analytics.strapi.io/track', {
           event,
-          properties: { ...properties, projectType: process.env.STRAPI_ADMIN_PROJECT_TYPE },
+          properties: { ...properties, projectType: strapi.projectType },
           uuid,
         });
       } catch (err) {

@@ -7,6 +7,8 @@
 // Node.js core.
 const path = require('path');
 
+// FIXME
+/* eslint-disable import/extensions */
 // Local dependencies.
 const packageJSON = require('../json/package.json.js');
 const routesJSON = require('../json/routes.json.js');

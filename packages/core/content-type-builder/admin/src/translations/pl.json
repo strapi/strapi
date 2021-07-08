@@ -103,8 +103,6 @@
   "form.button.save": "Zapisz",
   "form.button.select-component": "Wybierz komponent",
   "from": "z",
-  "injected-components.content-manager.edit-settings-view.link.components": "Edytuj komponent",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Edytuj typ zawartości",
   "menu.section.components.name.plural": "Komponenty",
   "menu.section.components.name.singular": "Komponent",
   "menu.section.models.name.plural": "Modele",
