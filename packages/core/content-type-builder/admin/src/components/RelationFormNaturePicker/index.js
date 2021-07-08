@@ -26,7 +26,6 @@ const relations = {
 };
 
 const RelationFormNaturePicker = ({
-  // nature,
   naturePickerType,
   oneThatIsCreatingARelationWithAnother,
   relationType,

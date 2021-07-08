@@ -260,10 +260,6 @@ const types = {
           val => val !== initialData.targetAttribute
         );
 
-        // if (!['oneWay', 'manyWay'].includes(relationType)) {
-        //   schema = schema
-        // }
-
         return schema
           .matches(NAME_REGEX, errorsTrads.regex)
           .test({

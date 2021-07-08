@@ -109,7 +109,7 @@ const FormModal = () => {
     initialData,
     isCreatingComponentWhileAddingAField,
     modifiedData,
-  } = reducerState.toJS();
+  } = reducerState;
 
   useEffect(() => {
     if (!isEmpty(search)) {
@@ -356,10 +356,6 @@ const FormModal = () => {
             set(attributeToEdit, 'repeatable', false);
           }
         }
-
-        // if (attributeType === 'relation' && !has(attributeToEdit, ['targetAttribute'])) {
-        //   set(attributeToEdit, ['targetAttribute'], '-');
-        // }
 
         dispatch({
           type: SET_ATTRIBUTE_DATA_SCHEMA,
