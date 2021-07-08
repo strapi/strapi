@@ -1,0 +1,22 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tatas",
+  "info": {
+    "name": "tata"
+  },
+  "options": {
+    "increments": true,
+    "timestamps": true,
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "dz": {
+      "type": "dynamiczone",
+      "components": [
+        "blog.test-como",
+        "default.dish"
+      ]
+    }
+  }
+}

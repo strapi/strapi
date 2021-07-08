@@ -144,6 +144,7 @@ const reducer = (state, action) => {
         });
       }
 
+      // FIXME: not sure this is needed...
       if (
         action.keys.length === 2 &&
         state.getIn(['modifiedData', nonRepeatableComponentKey]) === null
