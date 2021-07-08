@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
+const { getService } = require('../../utils');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
@@ -82,7 +83,7 @@ module.exports = {
     }
 
     try {
-      const data = await strapi.plugins['users-permissions'].services.user.add(user);
+      const data = await getService('user').add(user);
 
       ctx.created(sanitizeUser(data));
     } catch (error) {
@@ -107,7 +108,7 @@ module.exports = {
     const { id } = ctx.params;
     const { email, username, password } = ctx.request.body;
 
-    const user = await strapi.plugins['users-permissions'].services.user.fetch({
+    const user = await getService('user').fetch({
       id,
     });
 
@@ -166,7 +167,7 @@ module.exports = {
       delete updateData.password;
     }
 
-    const data = await strapi.plugins['users-permissions'].services.user.edit({ id }, updateData);
+    const data = await getService('user').edit({ id }, updateData);
 
     ctx.send(sanitizeUser(data));
   },

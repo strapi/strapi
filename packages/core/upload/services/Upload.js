@@ -193,7 +193,7 @@ module.exports = {
   },
 
   async updateFileInfo(id, { name, alternativeText, caption }, { user } = {}) {
-    const dbFile = await this.fetch({ id });
+    const dbFile = await this.findOne({ id });
 
     if (!dbFile) {
       throw strapi.errors.notFound('file not found');
@@ -217,7 +217,7 @@ module.exports = {
       generateResponsiveFormats,
     } = strapi.plugins.upload.services['image-manipulation'];
 
-    const dbFile = await this.fetch({ id });
+    const dbFile = await this.findOne({ id });
 
     if (!dbFile) {
       throw strapi.errors.notFound('file not found');
@@ -315,7 +315,7 @@ module.exports = {
     return res;
   },
 
-  fetch(params, populate) {
+  findOne(params, populate) {
     return strapi.query('plugins::upload.file').findOne({ where: params, populate });
   },
 
