@@ -1,6 +1,7 @@
 import { fromJS, List } from 'immutable';
 import pluralize from 'pluralize';
 import { snakeCase } from 'lodash';
+import getRelationType from '../../utils/getRelationType';
 import makeUnique from '../../utils/makeUnique';
 import { createComponentUid } from './utils/createUid';
 import { shouldPluralizeName, shouldPluralizeTargetAttribute } from './utils/relations';
@@ -61,30 +62,33 @@ const reducer = (state = initialState, action) => {
           },
         } = action;
         // Special case for the admin user...
-        let didChangeNatureBecauseOfRestrictedRelation = false;
+        let didChangeRelationTypeBecauseOfRestrictedRelation = false;
         let changedRelationType = null;
 
         return obj
           .update('target', () => value)
           .update('relation', currentRelation => {
+            const currentRelationType = getRelationType(
+              currentRelation,
+              obj.get('targetAttribute')
+            );
+
             // Don't change the relation type if the allowed relations are not restricted
             // TODO: replace with an obj { relation: 'x', bidirctional: true|false } when BE ready
             if (targetContentTypeAllowedRelations === null) {
               return currentRelation;
             }
 
-            if (!targetContentTypeAllowedRelations.includes(currentRelation)) {
+            if (!targetContentTypeAllowedRelations.includes(currentRelationType)) {
               const relationToSet = targetContentTypeAllowedRelations[0];
-              didChangeNatureBecauseOfRestrictedRelation = true;
+              didChangeRelationTypeBecauseOfRestrictedRelation = true;
               changedRelationType = relationToSet;
 
               if (relationToSet === 'oneWay') {
-                // TODO change targetAttribute
                 return 'oneToOne';
               }
 
               if (relationToSet === 'manyWay') {
-                // TODO change targetAttribute
                 return 'oneToMany';
               }
 
@@ -94,7 +98,7 @@ const reducer = (state = initialState, action) => {
             return currentRelation;
           })
           .update('name', () => {
-            if (didChangeNatureBecauseOfRestrictedRelation) {
+            if (didChangeRelationTypeBecauseOfRestrictedRelation) {
               return pluralize(
                 snakeCase(selectedContentTypeFriendlyName),
                 shouldPluralizeName(changedRelationType)
@@ -116,7 +120,7 @@ const reducer = (state = initialState, action) => {
 
             // Case when we need to change the relation to oneWay (ex: admin user)
             if (
-              didChangeNatureBecauseOfRestrictedRelation &&
+              didChangeRelationTypeBecauseOfRestrictedRelation &&
               ['oneWay', 'manyWay'].includes(changedRelationType)
             ) {
               return null;
@@ -124,7 +128,7 @@ const reducer = (state = initialState, action) => {
 
             return pluralize(
               snakeCase(oneThatIsCreatingARelationWithAnother),
-              shouldPluralizeTargetAttribute(obj.get('nature'))
+              shouldPluralizeTargetAttribute(obj.get('relation'))
             );
           });
       });
