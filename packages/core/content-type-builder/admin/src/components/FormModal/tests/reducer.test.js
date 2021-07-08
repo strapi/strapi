@@ -1,4 +1,3 @@
-import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
 import * as actions from '../constants';
 
@@ -12,22 +11,23 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         name: 'components',
       };
 
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        initialData: {},
+        modifiedData: {
           type: 'dynamiczone',
           name: 'dz',
           components: ['default.test'],
-        })
-      );
-      const expected = state.setIn(
-        ['modifiedData'],
-        fromJS({
+        },
+      };
+
+      const expected = {
+        initialData: {},
+        modifiedData: {
           type: 'dynamiczone',
           name: 'dz',
           components: ['default.test', 'default.test2', 'default.test3'],
-        })
-      );
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -40,22 +40,23 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         name: 'components',
       };
 
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        initialData: {},
+        modifiedData: {
           type: 'dynamiczone',
           name: 'dz',
           components: ['default.test', 'default.test2', 'default.test3'],
-        })
-      );
-      const expected = state.setIn(
-        ['modifiedData'],
-        fromJS({
+        },
+      };
+
+      const expected = {
+        initialData: {},
+        modifiedData: {
           type: 'dynamiczone',
           name: 'dz',
           components: ['default.test'],
-        })
-      );
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -68,51 +69,73 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         keys: ['name'],
         value: 'test',
       };
-      const state = initialState.setIn(['modifiedData', 'type'], 'string');
-      const expected = state.setIn(['modifiedData', 'name'], 'test');
+
+      const state = {
+        ...initialState,
+        modifiedData: {
+          type: 'string',
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'test',
+          type: 'string',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should remove the default value if the type of date input type has been changed', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'short_movie_time',
           type: 'time',
           default: '00:30:00',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE,
         keys: ['type'],
         value: 'datetime',
       };
-      const expected = state
-        .setIn(['modifiedData', 'name'], 'short_movie_time')
-        .setIn(['modifiedData', 'type'], 'datetime')
-        .removeIn(['modifiedData', 'default']);
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'short_movie_time',
+          type: 'datetime',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('should not remove the default value if the type of another input type has been changed', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'number_of_movies',
           type: 'integer',
           default: '0',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE,
         keys: ['type'],
         value: 'biginteger',
       };
-      const expected = state
-        .setIn(['modifiedData', 'name'], 'number_of_movies')
-        .setIn(['modifiedData', 'type'], 'biginteger');
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'number_of_movies',
+          type: 'biginteger',
+          default: '0',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -120,79 +143,117 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('ON_CHANGE_ALLOWED_TYPE', () => {
     it('Should add the missing types', () => {
-      const state = initialState.setIn(
-        ['modifiedData', 'allowedTypes'],
-        fromJS(['images', 'videos'])
-      );
+      const state = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['images', 'videos'],
+        },
+      };
       const action = {
         name: 'all',
         value: true,
         type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
-      const expected = state.setIn(
-        ['modifiedData', 'allowedTypes'],
-        fromJS(['images', 'videos', 'files'])
-      );
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['images', 'videos', 'files'],
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should remove the missing types', () => {
-      const state = initialState.setIn(
-        ['modifiedData', 'allowedTypes'],
-        fromJS(['images', 'videos', 'files'])
-      );
+      const state = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['images', 'videos', 'files'],
+        },
+      };
       const action = {
         name: 'all',
         value: false,
         type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
-      const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: null,
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Shoul add the missing type', () => {
-      const state = initialState.setIn(
-        ['modifiedData', 'allowedTypes'],
-        fromJS(['videos', 'files'])
-      );
+      const state = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['videos', 'files'],
+        },
+      };
+
       const action = {
         name: 'images',
         value: null,
         type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
-      const expected = state.setIn(
-        ['modifiedData', 'allowedTypes'],
-        fromJS(['videos', 'files', 'images'])
-      );
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['videos', 'files', 'images'],
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should remove the type', () => {
-      const state = initialState.setIn(
-        ['modifiedData', 'allowedTypes'],
-        fromJS(['videos', 'images', 'files'])
-      );
+      const state = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['videos', 'images', 'files'],
+        },
+      };
+
       const action = {
         name: 'images',
         value: null,
         type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
-      const expected = state.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos', 'files']));
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['videos', 'files'],
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should remove set the allowedTypes to null if removing the last type', () => {
-      const state = initialState.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos']));
+      const state = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: ['videos'],
+        },
+      };
       const action = {
         name: 'videos',
         value: null,
         type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
-      const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          allowedTypes: null,
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -200,16 +261,16 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('ON_CHANGE_RELATION_TARGET', () => {
     it('Should handle the target change correctly for a one side relation (oneWay, manyWay)', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'category test',
           relation: 'oneToOne',
           targetAttribute: null,
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TARGET,
         target: {
@@ -219,24 +280,32 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           targetContentTypeAllowedRelations: null,
         },
       };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::address.address')
-        .setIn(['modifiedData', 'name'], 'address');
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'address',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: 'application::address.address',
+          type: 'relation',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should handle the target change correctly for the manyToMany relation', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'categories',
           relation: 'manyToMany',
           targetAttribute: 'addresses',
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TARGET,
         target: {
@@ -246,24 +315,31 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           targetContentTypeAllowedRelations: null,
         },
       };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::country.country')
-        .setIn(['modifiedData', 'name'], 'countries');
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'countries',
+          relation: 'manyToMany',
+          targetAttribute: 'addresses',
+          target: 'application::country.country',
+          type: 'relation',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should handle the target change correctly if the target has restricted relations and the relation type is not correct', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'categories',
           relation: 'manyToMany',
           targetAttribute: 'addresses',
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TARGET,
         target: {
@@ -273,26 +349,32 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           targetContentTypeAllowedRelations: ['oneWay'],
         },
       };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::country.country')
-        .setIn(['modifiedData', 'name'], 'country')
-        .setIn(['modifiedData', 'targetAttribute'], null)
-        .setIn(['modifiedData', 'relation'], 'oneToOne');
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'country',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: 'application::country.country',
+          type: 'relation',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should handle the target change correctly if the target has restricted relations and the relation type is correct', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'categories',
           relation: 'oneToMany',
           targetAttribute: null,
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TARGET,
         target: {
@@ -302,10 +384,17 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           targetContentTypeAllowedRelations: ['oneWay', 'manyWay'],
         },
       };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::country.country')
-        .setIn(['modifiedData', 'name'], 'countries')
-        .setIn(['modifiedData', 'targetAttribute'], null);
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'countries',
+          relation: 'oneToMany',
+          targetAttribute: null,
+          target: 'application::country.country',
+          type: 'relation',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -313,16 +402,16 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('ON_CHANGE_RELATION_TYPE', () => {
     it('Should handle the relation type change correctly from oneWay to manyToMany', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'category test',
           relation: 'oneToOne',
           targetAttribute: null,
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TYPE,
         target: {
@@ -331,25 +420,32 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           oneThatIsCreatingARelationWithAnother: 'address',
         },
       };
-      const expected = state
-        .setIn(['modifiedData', 'relation'], 'manyToMany')
-        .setIn(['modifiedData', 'name'], 'category_tests')
-        .setIn(['modifiedData', 'targetAttribute'], 'addresses');
 
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the relation type change correctly from manyToMany to oneWay', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const expected = {
+        ...initialState,
+        modifiedData: {
           name: 'category_tests',
           relation: 'manyToMany',
           targetAttribute: 'addresses',
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the relation type change correctly from manyToMany to oneWay', () => {
+      const state = {
+        ...initialState,
+        modifiedData: {
+          name: 'category_tests',
+          relation: 'manyToMany',
+          targetAttribute: 'addresses',
+          target: 'application::category.category',
+          type: 'relation',
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TYPE,
         target: {
@@ -358,25 +454,31 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         },
       };
 
-      const expected = state
-        .setIn(['modifiedData', 'relation'], 'oneToOne')
-        .setIn(['modifiedData', 'name'], 'category_test')
-        .setIn(['modifiedData', 'targetAttribute'], null);
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'category_test',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: 'application::category.category',
+          type: 'relation',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
 
     it('Should handle the relation type change correctly from oneToOne to oneToMany', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           name: 'category_test',
           relation: 'oneToOne',
           targetAttribute: 'address',
           target: 'application::category.category',
           type: 'relation',
-        })
-      );
+        },
+      };
       const action = {
         type: actions.ON_CHANGE_RELATION_TYPE,
         target: {
@@ -384,9 +486,17 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           oneThatIsCreatingARelationWithAnother: 'address',
         },
       };
-      const expected = state
-        .setIn(['modifiedData', 'relation'], 'oneToMany')
-        .setIn(['modifiedData', 'name'], 'category_tests');
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          name: 'category_tests',
+          relation: 'oneToMany',
+          targetAttribute: 'address',
+          target: 'application::category.category',
+          type: 'relation',
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -394,7 +504,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('RESET_PROPS', () => {
     it('Should return the initialState', () => {
-      const state = initialState.setIn(['modifiedData'], 'test');
+      const state = { ...initialState, modifiedData: 'test' };
       const action = { type: actions.RESET_PROPS };
 
       expect(reducer(state, action)).toEqual(initialState);
@@ -406,11 +516,14 @@ describe('CTB | components | FormModal | reducer | actions', () => {
       const action = {
         type: actions.RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
       };
-      const state = initialState.setIn(['modifiedData'], 'test');
-      const expected = state.setIn(
-        ['modifiedData'],
-        fromJS({ type: 'component', repeatable: true })
-      );
+      const state = { ...initialState, modifiedData: 'test' };
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          type: 'component',
+          repeatable: true,
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -420,9 +533,9 @@ describe('CTB | components | FormModal | reducer | actions', () => {
     it('Should reset the state and update the modifiedData and componentToCreate objects correctly', () => {
       const action = { type: actions.RESET_PROPS_AND_SAVE_CURRENT_DATA };
 
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const state = {
+        ...initialState,
+        modifiedData: {
           type: 'component',
           createComponent: true,
           componentToCreate: {
@@ -431,29 +544,25 @@ describe('CTB | components | FormModal | reducer | actions', () => {
             icon: 'air-freshener',
             category: 'default',
           },
-        })
-      );
+        },
+      };
 
-      const expected = initialState
-        .set(
-          'componentToCreate',
-          fromJS({
-            type: 'component',
-            name: 'compo',
-            icon: 'air-freshener',
-            category: 'default',
-          })
-        )
-        .set(
-          'modifiedData',
-          fromJS({
-            name: 'compo',
-            type: 'component',
-            repeatable: false,
-            component: 'default.compo',
-          })
-        )
-        .set('isCreatingComponentWhileAddingAField', true);
+      const expected = {
+        ...initialState,
+        componentToCreate: {
+          type: 'component',
+          name: 'compo',
+          icon: 'air-freshener',
+          category: 'default',
+        },
+        modifiedData: {
+          name: 'compo',
+          type: 'component',
+          repeatable: false,
+          component: 'default.compo',
+        },
+        isCreatingComponentWhileAddingAField: true,
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -465,24 +574,26 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         type: actions.RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
       };
 
-      const state = initialState.set('initialData', 'test').set(
-        'modifiedData',
-        fromJS({
+      const state = {
+        ...initialState,
+        initialData: 'test',
+        modifiedData: {
           type: 'dynamiczone',
           components: [],
           name: 'dz',
-        })
-      );
-      const expected = initialState.set(
-        'modifiedData',
-        fromJS({
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
           type: 'dynamiczone',
           components: [],
           name: 'dz',
           createComponent: true,
-          componentToCreate: fromJS({ type: 'component' }),
-        })
-      );
+          componentToCreate: { type: 'component' },
+        },
+      };
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -496,9 +607,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           test: true,
         },
       };
-      const expected = initialState
-        .set('modifiedData', fromJS(action.data))
-        .set('initialData', fromJS(action.data));
+      const expected = { ...initialState, modifiedData: action.data, initialData: action.data };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -506,9 +615,11 @@ describe('CTB | components | FormModal | reducer | actions', () => {
 
   describe('SET_ATTRIBUTE_DATA_SCHEMA', () => {
     it('Should handle the edition correcty', () => {
-      const expected = initialState
-        .setIn(['modifiedData'], fromJS({ test: true }))
-        .setIn(['initialData'], fromJS({ test: true }));
+      const expected = {
+        ...initialState,
+        initialData: { test: true },
+        modifiedData: { test: true },
+      };
       const action = {
         type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         isEditing: true,
@@ -530,14 +641,14 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: '1',
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const expected = {
+        ...initialState,
+        modifiedData: {
           type: 'component',
           createComponent: true,
           componentToCreate: { type: 'component' },
-        })
-      );
+        },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -552,13 +663,13 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: '2',
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const expected = {
+        ...initialState,
+        modifiedData: {
           type: 'component',
           repeatable: true,
-        })
-      );
+        },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -573,13 +684,13 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: '2',
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const expected = {
+        ...initialState,
+        modifiedData: {
           type: 'dynamiczone',
           components: [],
-        })
-      );
+        },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -594,12 +705,12 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
+      const expected = {
+        ...initialState,
+        modifiedData: {
           type: 'string',
-        })
-      );
+        },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -614,7 +725,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.setIn(['modifiedData'], fromJS({}));
+      const expected = { ...initialState, modifiedData: {} };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -629,7 +740,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.setIn(['modifiedData'], fromJS({}));
+      const expected = { ...initialState, modifiedData: {} };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -644,10 +755,14 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({ type: 'media', multiple: true, allowedTypes: ['images', 'files', 'videos'] })
-      );
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          type: 'media',
+          multiple: true,
+          allowedTypes: ['images', 'files', 'videos'],
+        },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -662,10 +777,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({ type: 'enumeration', enum: [] })
-      );
+      const expected = { ...initialState, modifiedData: { type: 'enumeration', enum: [] } };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -680,16 +792,16 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.set(
-        'modifiedData',
-        fromJS({
+      const expected = {
+        ...initialState,
+        modifiedData: {
           name: 'address_test',
           relation: 'oneToOne',
           targetAttribute: null,
           target: 'application::address.address',
           type: 'relation',
-        })
-      );
+        },
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -704,10 +816,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         modifiedDataToSetForEditing: { name: null },
         step: null,
       };
-      const expected = initialState.setIn(
-        ['modifiedData'],
-        fromJS({ type: 'json', default: null })
-      );
+      const expected = { ...initialState, modifiedData: { type: 'json', default: null } };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -725,9 +834,11 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           componentToCreate: { type: 'component' },
         },
       };
-      const expected = initialState
-        .setIn(['modifiedData'], fromJS(action.attributeToEdit))
-        .setIn(['initialData'], fromJS(action.attributeToEdit));
+      const expected = {
+        ...initialState,
+        modifiedData: action.attributeToEdit,
+        initialData: action.attributeToEdit,
+      };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
@@ -741,7 +852,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
           test: 'this is required',
         },
       };
-      const expected = initialState.set('formErrors', fromJS(action.errors));
+      const expected = { ...initialState, formErrors: action.errors };
 
       expect(reducer(initialState, action)).toEqual(expected);
     });
