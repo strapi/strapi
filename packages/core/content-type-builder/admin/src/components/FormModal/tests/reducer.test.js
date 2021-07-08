@@ -62,7 +62,7 @@ describe('CTB | components | FormModal | reducer | actions', () => {
   });
 
   describe(actions.ON_CHANGE, () => {
-    it('Should update the modifiedData object correctly if it is not relation', () => {
+    it('Should update the modifiedData object correctly', () => {
       const action = {
         type: actions.ON_CHANGE,
         keys: ['name'],
@@ -70,214 +70,6 @@ describe('CTB | components | FormModal | reducer | actions', () => {
       };
       const state = initialState.setIn(['modifiedData', 'type'], 'string');
       const expected = state.setIn(['modifiedData', 'name'], 'test');
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the nature change correctly from oneWay to manyToMany', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'category test',
-          nature: 'oneWay',
-          targetAttribute: '-',
-          target: 'application::category.category',
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['nature'],
-        value: 'manyToMany',
-        targetContentType: 'application::category.category',
-        oneThatIsCreatingARelationWithAnother: 'address',
-      };
-      const expected = state
-        .setIn(['modifiedData', 'nature'], 'manyToMany')
-        .setIn(['modifiedData', 'dominant'], true)
-        .setIn(['modifiedData', 'name'], 'category_tests')
-        .setIn(['modifiedData', 'targetAttribute'], 'addresses');
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the nature change correctly from manyToMany to oneWay', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'category_tests',
-          nature: 'manyToMany',
-          targetAttribute: 'addresses',
-          target: 'application::category.category',
-          unique: false,
-          dominant: true,
-          columnName: null,
-          targetColumnName: 'test',
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['nature'],
-        value: 'oneWay',
-        targetContentType: 'application::category.category',
-        oneThatIsCreatingARelationWithAnother: 'address',
-      };
-      const expected = state
-        .setIn(['modifiedData', 'nature'], 'oneWay')
-        .setIn(['modifiedData', 'dominant'], null)
-        .setIn(['modifiedData', 'name'], 'category_test')
-        .setIn(['modifiedData', 'targetAttribute'], '-')
-        .setIn(['modifiedData', 'targetColumnName'], null);
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the nature change correctly from oneToOne to oneToMany', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'category_test',
-          nature: 'oneToOne',
-          targetAttribute: 'address',
-          target: 'application::category.category',
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: 'test',
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['nature'],
-        value: 'oneToMany',
-        targetContentType: 'application::category.category',
-        oneThatIsCreatingARelationWithAnother: 'address',
-      };
-      const expected = state
-        .setIn(['modifiedData', 'nature'], 'oneToMany')
-        .setIn(['modifiedData', 'name'], 'category_tests');
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the target change correctly for a one side relation (oneWay, manyWay)', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'category test',
-          nature: 'oneWay',
-          targetAttribute: '-',
-          target: 'application::category.category',
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['target'],
-        value: 'application::address.address',
-        oneThatIsCreatingARelationWithAnother: 'address',
-        selectedContentTypeFriendlyName: 'address',
-        targetContentTypeAllowedRelations: null,
-      };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::address.address')
-        .setIn(['modifiedData', 'name'], 'address');
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the target change correctly for the manyToMany relation', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'categories',
-          nature: 'manyToMany',
-          targetAttribute: 'addresses',
-          target: 'application::category.category',
-          unique: false,
-          dominant: true,
-          columnName: null,
-          targetColumnName: null,
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['target'],
-        value: 'application::country.country',
-        oneThatIsCreatingARelationWithAnother: 'address',
-        selectedContentTypeFriendlyName: 'country',
-        targetContentTypeAllowedRelations: null,
-      };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::country.country')
-        .setIn(['modifiedData', 'name'], 'countries');
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the target change correctly if the target has restricted relations and the nature is not correct', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'categories',
-          nature: 'manyToMany',
-          targetAttribute: 'addresses',
-          target: 'application::category.category',
-          unique: false,
-          dominant: true,
-          columnName: null,
-          targetColumnName: null,
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['target'],
-        value: 'application::country.country',
-        oneThatIsCreatingARelationWithAnother: 'address',
-        selectedContentTypeFriendlyName: 'country',
-        targetContentTypeAllowedRelations: ['oneWay'],
-      };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::country.country')
-        .setIn(['modifiedData', 'name'], 'country')
-        .setIn(['modifiedData', 'targetAttribute'], '-')
-        .setIn(['modifiedData', 'nature'], 'oneWay');
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-
-    it('Should handle the target change correctly if the target has restricted relations and the nature is correct', () => {
-      const state = initialState.setIn(
-        ['modifiedData'],
-        fromJS({
-          name: 'categories',
-          nature: 'manyWay',
-          targetAttribute: 'addresses',
-          target: 'application::category.category',
-          unique: false,
-          dominant: true,
-          columnName: null,
-          targetColumnName: null,
-        })
-      );
-      const action = {
-        type: actions.ON_CHANGE,
-        keys: ['target'],
-        value: 'application::country.country',
-        oneThatIsCreatingARelationWithAnother: 'address',
-        selectedContentTypeFriendlyName: 'country',
-        targetContentTypeAllowedRelations: ['oneWay', 'manyWay'],
-      };
-      const expected = state
-        .setIn(['modifiedData', 'target'], 'application::country.country')
-        .setIn(['modifiedData', 'name'], 'countries')
-        .setIn(['modifiedData', 'targetAttribute'], '-');
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -401,6 +193,200 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
       const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_RELATION_TARGET', () => {
+    it('Should handle the target change correctly for a one side relation (oneWay, manyWay)', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'category test',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TARGET,
+        target: {
+          value: 'application::address.address',
+          oneThatIsCreatingARelationWithAnother: 'address',
+          selectedContentTypeFriendlyName: 'address',
+          targetContentTypeAllowedRelations: null,
+        },
+      };
+      const expected = state
+        .setIn(['modifiedData', 'target'], 'application::address.address')
+        .setIn(['modifiedData', 'name'], 'address');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the target change correctly for the manyToMany relation', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'categories',
+          relation: 'manyToMany',
+          targetAttribute: 'addresses',
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TARGET,
+        target: {
+          value: 'application::country.country',
+          oneThatIsCreatingARelationWithAnother: 'address',
+          selectedContentTypeFriendlyName: 'country',
+          targetContentTypeAllowedRelations: null,
+        },
+      };
+      const expected = state
+        .setIn(['modifiedData', 'target'], 'application::country.country')
+        .setIn(['modifiedData', 'name'], 'countries');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the target change correctly if the target has restricted relations and the relation type is not correct', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'categories',
+          relation: 'manyToMany',
+          targetAttribute: 'addresses',
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TARGET,
+        target: {
+          value: 'application::country.country',
+          oneThatIsCreatingARelationWithAnother: 'address',
+          selectedContentTypeFriendlyName: 'country',
+          targetContentTypeAllowedRelations: ['oneWay'],
+        },
+      };
+      const expected = state
+        .setIn(['modifiedData', 'target'], 'application::country.country')
+        .setIn(['modifiedData', 'name'], 'country')
+        .setIn(['modifiedData', 'targetAttribute'], null)
+        .setIn(['modifiedData', 'relation'], 'oneToOne');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the target change correctly if the target has restricted relations and the relation type is correct', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'categories',
+          relation: 'oneToMany',
+          targetAttribute: null,
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TARGET,
+        target: {
+          value: 'application::country.country',
+          oneThatIsCreatingARelationWithAnother: 'address',
+          selectedContentTypeFriendlyName: 'country',
+          targetContentTypeAllowedRelations: ['oneWay', 'manyWay'],
+        },
+      };
+      const expected = state
+        .setIn(['modifiedData', 'target'], 'application::country.country')
+        .setIn(['modifiedData', 'name'], 'countries')
+        .setIn(['modifiedData', 'targetAttribute'], null);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('ON_CHANGE_RELATION_TYPE', () => {
+    it('Should handle the relation type change correctly from oneWay to manyToMany', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'category test',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TYPE,
+        target: {
+          value: 'manyToMany',
+
+          oneThatIsCreatingARelationWithAnother: 'address',
+        },
+      };
+      const expected = state
+        .setIn(['modifiedData', 'relation'], 'manyToMany')
+        .setIn(['modifiedData', 'name'], 'category_tests')
+        .setIn(['modifiedData', 'targetAttribute'], 'addresses');
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the relation type change correctly from manyToMany to oneWay', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'category_tests',
+          relation: 'manyToMany',
+          targetAttribute: 'addresses',
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TYPE,
+        target: {
+          value: 'oneWay',
+          oneThatIsCreatingARelationWithAnother: 'address',
+        },
+      };
+
+      const expected = state
+        .setIn(['modifiedData', 'relation'], 'oneToOne')
+        .setIn(['modifiedData', 'name'], 'category_test')
+        .setIn(['modifiedData', 'targetAttribute'], null);
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the relation type change correctly from oneToOne to oneToMany', () => {
+      const state = initialState.setIn(
+        ['modifiedData'],
+        fromJS({
+          name: 'category_test',
+          relation: 'oneToOne',
+          targetAttribute: 'address',
+          target: 'application::category.category',
+          type: 'relation',
+        })
+      );
+      const action = {
+        type: actions.ON_CHANGE_RELATION_TYPE,
+        target: {
+          value: 'oneToMany',
+          oneThatIsCreatingARelationWithAnother: 'address',
+        },
+      };
+      const expected = state
+        .setIn(['modifiedData', 'relation'], 'oneToMany')
+        .setIn(['modifiedData', 'name'], 'category_tests');
 
       expect(reducer(state, action)).toEqual(expected);
     });
@@ -691,20 +677,17 @@ describe('CTB | components | FormModal | reducer | actions', () => {
         nameToSetForRelation: 'address test',
         targetUid: 'application::address.address',
         isEditing: false,
-        modifiedDataToSetForEditing: { name: null, targetAttribute: '-' },
+        modifiedDataToSetForEditing: { name: null },
         step: null,
       };
       const expected = initialState.set(
         'modifiedData',
         fromJS({
           name: 'address_test',
-          nature: 'oneWay',
-          targetAttribute: '-',
+          relation: 'oneToOne',
+          targetAttribute: null,
           target: 'application::address.address',
-          unique: false,
-          dominant: null,
-          columnName: null,
-          targetColumnName: null,
+          type: 'relation',
         })
       );
 
