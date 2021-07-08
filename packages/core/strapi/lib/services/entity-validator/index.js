@@ -134,6 +134,7 @@ const createScalarAttributeValidator = createOrUpdate => (attr, { isDraft }) => 
 
 const createAttributeValidator = createOrUpdate => (attr, data, { isDraft }) => {
   let validator;
+
   if (isMediaAttribute(attr)) {
     validator = yup.mixed();
   } else if (isScalarAttribute(attr)) {

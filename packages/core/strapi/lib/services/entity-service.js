@@ -405,26 +405,27 @@ const createComponents = async (uid, data) => {
       continue;
     }
 
-    if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = data[attributeName];
+    // if (attribute.type === 'dynamiczone') {
 
-      if (!Array.isArray(dynamiczoneValues)) {
-        throw new Error('Expected an array to create repeatable component');
-      }
+    //   const dynamiczoneValues = data[attributeName];
 
-      const components = await Promise.all(
-        dynamiczoneValues.map(value => {
-          return strapi.query(value.__component).create({ data: value });
-        })
-      );
+    //   if (!Array.isArray(dynamiczoneValues)) {
+    //     throw new Error('Expected an array to create repeatable component');
+    //   }
 
-      componentBody[attributeName] = components.map(({ id }, idx) => {
-        // TODO: add & support pivot data in DB
-        return id;
-      });
+    //   const components = await Promise.all(
+    //     dynamiczoneValues.map(value => {
+    //       return strapi.query(value.__component).create({ data: value });
+    //     })
+    //   );
 
-      continue;
-    }
+    //   componentBody[attributeName] = components.map(({ id }, idx) => {
+    //     // TODO: add & support pivot data in DB
+    //     return id;
+    //   });
+
+    //   continue;
+    // }
   }
 
   return componentBody;
@@ -491,24 +492,24 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       continue;
     }
 
-    if (attribute.type === 'dynamiczone') {
-      const dynamiczoneValues = data[attributeName];
+    // if (attribute.type === 'dynamiczone') {
+    //   const dynamiczoneValues = data[attributeName];
 
-      if (!Array.isArray(dynamiczoneValues)) {
-        throw new Error('Expected an array to create repeatable component');
-      }
+    //   if (!Array.isArray(dynamiczoneValues)) {
+    //     throw new Error('Expected an array to create repeatable component');
+    //   }
 
-      const components = await Promise.all(
-        dynamiczoneValues.map(value => updateOrCreateComponent(value.__component, value))
-      );
+    //   const components = await Promise.all(
+    //     dynamiczoneValues.map(value => updateOrCreateComponent(value.__component, value))
+    //   );
 
-      componentBody[attributeName] = components.map(({ id }, idx) => {
-        // TODO: add & support pivot data in DB
-        return id;
-      });
+    //   componentBody[attributeName] = components.map(({ id }, idx) => {
+    //     // TODO: add & support pivot data in DB
+    //     return id;
+    //   });
 
-      continue;
-    }
+    //   continue;
+    // }
   }
 
   return componentBody;

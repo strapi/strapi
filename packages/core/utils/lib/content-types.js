@@ -94,7 +94,7 @@ const isPrivateAttribute = (model = {}, attributeName) => {
 };
 
 const isScalarAttribute = attribute => {
-  return ['component', 'relation', 'dynamiczone'].includes(attribute.type);
+  return !['component', 'relation', 'dynamiczone'].includes(attribute.type);
 };
 
 const isMediaAttribute = attr => {
