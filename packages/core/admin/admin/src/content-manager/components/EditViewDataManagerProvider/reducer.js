@@ -1,7 +1,12 @@
-import { fromJS } from 'immutable';
+import produce from 'immer';
+import unset from 'lodash/unset';
+import get from 'lodash/get';
+import set from 'lodash/set';
+import take from 'lodash/take';
+import { moveFields } from './utils';
 import { getMaxTempKey } from '../../utils';
 
-const initialState = fromJS({
+const initialState = {
   componentsDataStructure: {},
   contentTypeDataStructure: {},
   formErrors: {},
@@ -9,210 +14,243 @@ const initialState = fromJS({
   modifiedData: {},
   shouldCheckErrors: false,
   modifiedDZName: null,
-});
+};
 
-const reducer = (state, action) => {
-  switch (action.type) {
-    case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD':
-      return state.updateIn(['modifiedData', ...action.keys], () => {
-        const defaultDataStructure = state.getIn(['componentsDataStructure', action.componentUid]);
+const reducer = (state, action) =>
+  // eslint-disable-next-line consistent-return
+  produce(state, draftState => {
+    switch (action.type) {
+      case 'ADD_NON_REPEATABLE_COMPONENT_TO_FIELD': {
+        set(
+          draftState,
+          ['modifiedData', ...action.keys],
+          state.componentsDataStructure[action.componentUid]
+        );
 
-        return fromJS(defaultDataStructure);
-      });
-    case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
-      return state
-        .updateIn(['modifiedData', ...action.keys], list => {
-          const defaultDataStructure = state
-            .getIn(['componentsDataStructure', action.componentUid])
-            .set('__temp_key__', getMaxTempKey(list ? list.toJS() : []) + 1);
+        break;
+      }
+      case 'ADD_REPEATABLE_COMPONENT_TO_FIELD': {
+        let currentValue = get(state, ['modifiedData', ...action.keys], []).slice();
 
-          if (list) {
-            return list.push(defaultDataStructure);
-          }
+        const defaultDataStructure = {
+          ...state.componentsDataStructure[action.componentUid],
+          __temp_key__: getMaxTempKey(currentValue) + 1,
+        };
 
-          return fromJS([defaultDataStructure]);
-        })
-        .update('shouldCheckErrors', v => {
-          if (action.shouldCheckErrors === true) {
-            return !v;
-          }
+        if (Array.isArray(currentValue)) {
+          currentValue.push(defaultDataStructure);
+        } else {
+          currentValue = [defaultDataStructure];
+        }
 
-          return v;
-        });
-    }
-    case 'ADD_COMPONENT_TO_DYNAMIC_ZONE':
-      return state
-        .updateIn(['modifiedData', ...action.keys], list => {
-          const defaultDataStructure = state
-            .getIn(['componentsDataStructure', action.componentUid])
-            .set('__component', action.componentUid);
+        set(draftState, ['modifiedData', ...action.keys], currentValue);
 
-          if (list) {
-            return list.push(defaultDataStructure);
-          }
+        if (action.shouldCheckErrors) {
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        }
 
-          return fromJS([defaultDataStructure]);
-        })
-        .update('modifiedDZName', () => action.keys[0])
-        .update('shouldCheckErrors', v => {
-          if (action.shouldCheckErrors === true) {
-            return !v;
-          }
+        break;
+      }
+      case 'ADD_COMPONENT_TO_DYNAMIC_ZONE': {
+        draftState.modifiedDZName = action.keys[0];
 
-          return v;
-        });
-    case 'ADD_RELATION':
-      return state.updateIn(['modifiedData', ...action.keys], list => {
+        if (action.shouldCheckErrors) {
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        }
+
+        const defaultDataStructure = {
+          ...state.componentsDataStructure[action.componentUid],
+          __component: action.componentUid,
+        };
+
+        const currentValue = get(state, ['modifiedData', ...action.keys], null);
+        const updatedValue = currentValue
+          ? [...currentValue, defaultDataStructure]
+          : [defaultDataStructure];
+
+        set(draftState, ['modifiedData', ...action.keys], updatedValue);
+
+        break;
+      }
+      case 'ADD_RELATION': {
         if (!Array.isArray(action.value) || !action.value.length) {
-          return list;
+          break;
         }
 
         const el = action.value[0].value;
 
-        if (list) {
-          return list.push(fromJS(el));
+        const currentValue = get(state, ['modifiedData', ...action.keys], null);
+
+        if (!currentValue) {
+          set(draftState, ['modifiedData', ...action.keys], [el]);
+
+          break;
         }
 
-        return fromJS([el]);
-      });
-    case 'INIT_FORM': {
-      return state
-        .update('formErrors', () => fromJS({}))
-        .update('initialData', () => fromJS(action.initialValues))
-        .update('modifiedData', () => fromJS(action.initialValues))
-        .update('modifiedDZName', () => null)
-        .update('shouldCheckErrors', () => false);
-    }
-    case 'MOVE_COMPONENT_FIELD':
-      return state.updateIn(['modifiedData', ...action.pathToComponent], list => {
-        return list
-          .delete(action.dragIndex)
-          .insert(
-            action.hoverIndex,
-            state.getIn(['modifiedData', ...action.pathToComponent, action.dragIndex])
-          );
-      });
-    case 'MOVE_COMPONENT_UP':
-      return state
-        .update('shouldCheckErrors', v => {
-          if (action.shouldCheckErrors) {
-            return !v;
-          }
+        set(draftState, ['modifiedData', ...action.keys], [...currentValue, el]);
 
-          return v;
-        })
-        .updateIn(['modifiedData', action.dynamicZoneName], list => {
-          return list
-            .delete(action.currentIndex)
-            .insert(
-              action.currentIndex - 1,
-              state.getIn(['modifiedData', action.dynamicZoneName, action.currentIndex])
-            );
-        });
-    case 'MOVE_COMPONENT_DOWN':
-      return state
-        .update('shouldCheckErrors', v => {
-          if (action.shouldCheckErrors) {
-            return !v;
-          }
-
-          return v;
-        })
-        .updateIn(['modifiedData', action.dynamicZoneName], list => {
-          return list
-            .delete(action.currentIndex)
-            .insert(
-              action.currentIndex + 1,
-              state.getIn(['modifiedData', action.dynamicZoneName, action.currentIndex])
-            );
-        });
-    case 'MOVE_FIELD':
-      return state.updateIn(['modifiedData', ...action.keys], list => {
-        return list.delete(action.dragIndex).insert(action.overIndex, list.get(action.dragIndex));
-      });
-    case 'ON_CHANGE': {
-      let newState = state;
-      const [nonRepeatableComponentKey] = action.keys;
-
-      // This is used to set the initialData for inputs
-      // that needs an asynchronous initial value like the UID field
-      // This is just a temporary patch.
-      // TODO : Refactor the default form creation (workflow) to accept async default values.
-      if (action.shouldSetInitialValue) {
-        newState = state.updateIn(['initialData', ...action.keys], () => {
-          return action.value;
-        });
+        break;
       }
-
-      if (
-        action.keys.length === 2 &&
-        state.getIn(['modifiedData', nonRepeatableComponentKey]) === null
-      ) {
-        newState = newState.updateIn(['modifiedData', nonRepeatableComponentKey], () => fromJS({}));
+      case 'INIT_FORM': {
+        draftState.formErrors = {};
+        draftState.initialData = action.initialValues;
+        draftState.modifiedData = action.initialValues;
+        draftState.modifiedDZName = null;
+        draftState.shouldCheckErrors = false;
+        break;
       }
+      case 'MOVE_COMPONENT_FIELD': {
+        const currentValue = get(state, ['modifiedData', ...action.pathToComponent]);
+        const valueToInsert = get(state, [
+          'modifiedData',
+          ...action.pathToComponent,
+          action.dragIndex,
+        ]);
 
-      return newState.updateIn(['modifiedData', ...action.keys], () => {
-        return action.value;
-      });
-    }
-    case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE':
-      return state
-        .update('shouldCheckErrors', v => {
-          if (action.shouldCheckErrors) {
-            return !v;
-          }
+        const updatedValue = moveFields(
+          currentValue,
+          action.dragIndex,
+          action.hoverIndex,
+          valueToInsert
+        );
 
-          return v;
-        })
-        .deleteIn(['modifiedData', action.dynamicZoneName, action.index]);
-    case 'REMOVE_COMPONENT_FROM_FIELD': {
-      const componentPathToRemove = ['modifiedData', ...action.keys];
+        set(draftState, ['modifiedData', ...action.pathToComponent], updatedValue);
 
-      return state.updateIn(componentPathToRemove, () => null);
-    }
-    case 'REMOVE_PASSWORD_FIELD': {
-      return state.removeIn(['modifiedData', ...action.keys]);
-    }
-    case 'REMOVE_REPEATABLE_FIELD': {
-      const componentPathToRemove = ['modifiedData', ...action.keys];
+        break;
+      }
+      case 'MOVE_COMPONENT_UP':
+      case 'MOVE_COMPONENT_DOWN': {
+        const { currentIndex, dynamicZoneName, shouldCheckErrors } = action;
 
-      return state
-        .update('shouldCheckErrors', v => {
-          const hasErrors = state.get('formErrors').keySeq().size > 0;
+        if (shouldCheckErrors) {
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        }
 
-          if (hasErrors) {
-            return !v;
-          }
+        const currentValue = state.modifiedData[dynamicZoneName];
+        const nextIndex = action.type === 'MOVE_COMPONENT_UP' ? currentIndex - 1 : currentIndex + 1;
+        const valueToInsert = state.modifiedData[dynamicZoneName][currentIndex];
+        const updatedValue = moveFields(currentValue, currentIndex, nextIndex, valueToInsert);
 
-          return v;
-        })
-        .deleteIn(componentPathToRemove);
-    }
-    case 'REMOVE_RELATION':
-      return state.removeIn(['modifiedData', ...action.keys.split('.')]);
-    case 'SET_DEFAULT_DATA_STRUCTURES':
-      return state
-        .update('componentsDataStructure', () => fromJS(action.componentsDataStructure))
-        .update('contentTypeDataStructure', () => fromJS(action.contentTypeDataStructure));
-    case 'SET_FORM_ERRORS': {
-      return state
-        .update('modifiedDZName', () => null)
-        .update('formErrors', () => fromJS(action.errors));
-    }
-    case 'TRIGGER_FORM_VALIDATION':
-      return state.update('shouldCheckErrors', v => {
-        const hasErrors = state.get('formErrors').keySeq().size > 0;
+        set(draftState, ['modifiedData', action.dynamicZoneName], updatedValue);
+
+        break;
+      }
+      case 'MOVE_FIELD': {
+        const currentValue = get(state, ['modifiedData', ...action.keys], []).slice();
+        const valueToInsert = get(state, ['modifiedData', ...action.keys, action.dragIndex]);
+        const updatedValue = moveFields(
+          currentValue,
+          action.dragIndex,
+          action.overIndex,
+          valueToInsert
+        );
+
+        set(draftState, ['modifiedData', ...action.keys], updatedValue);
+
+        break;
+      }
+      case 'ON_CHANGE': {
+        const [nonRepeatableComponentKey] = action.keys;
+
+        // This is used to set the initialData for inputs
+        // that needs an asynchronous initial value like the UID field
+        // This is just a temporary patch.
+        // TODO : Refactor the default form creation (workflow) to accept async default values.
+        if (action.shouldSetInitialValue) {
+          set(draftState, ['initialData', ...action.keys], action.value);
+        }
+
+        // FIXME: not sure this is needed...
+        if (
+          action.keys.length === 2 &&
+          get(state, ['modifiedData', nonRepeatableComponentKey]) === null
+        ) {
+          set(draftState, ['modifiedData', nonRepeatableComponentKey], {
+            [action.keys[1]]: action.value,
+          });
+
+          break;
+        }
+
+        set(draftState, ['modifiedData', ...action.keys], action.value);
+
+        break;
+      }
+      case 'REMOVE_COMPONENT_FROM_DYNAMIC_ZONE': {
+        if (action.shouldCheckErrors) {
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        }
+
+        draftState.modifiedData[action.dynamicZoneName].splice(action.index, 1);
+
+        break;
+      }
+      case 'REMOVE_COMPONENT_FROM_FIELD': {
+        const componentPathToRemove = ['modifiedData', ...action.keys];
+
+        set(draftState, componentPathToRemove, null);
+
+        break;
+      }
+      case 'REMOVE_PASSWORD_FIELD': {
+        unset(draftState, ['modifiedData', ...action.keys]);
+
+        break;
+      }
+      case 'REMOVE_REPEATABLE_FIELD': {
+        const keysLength = action.keys.length - 1;
+        const pathToComponentData = ['modifiedData', ...take(action.keys, keysLength)];
+        const hasErrors = Object.keys(state.formErrors).length > 0;
 
         if (hasErrors) {
-          return !v;
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
         }
 
-        return v;
-      });
-    default:
-      return state;
-  }
-};
+        const currentValue = get(state, pathToComponentData).slice();
+        currentValue.splice(parseInt(action.keys[keysLength], 10), 1);
+
+        set(draftState, pathToComponentData, currentValue);
+
+        break;
+      }
+      case 'REMOVE_RELATION': {
+        const pathArray = action.keys.split('.');
+        const pathArrayLength = pathArray.length - 1;
+        const pathToData = ['modifiedData', ...take(pathArray, pathArrayLength)];
+        const currentValue = get(state, pathToData).slice();
+        const indexToRemove = parseInt(pathArray[pathArrayLength], 10);
+
+        currentValue.splice(indexToRemove, 1);
+
+        set(draftState, pathToData, currentValue);
+
+        break;
+      }
+      case 'SET_DEFAULT_DATA_STRUCTURES': {
+        draftState.componentsDataStructure = action.componentsDataStructure;
+        draftState.contentTypeDataStructure = action.contentTypeDataStructure;
+
+        break;
+      }
+      case 'SET_FORM_ERRORS': {
+        draftState.modifiedDZName = null;
+        draftState.formErrors = action.errors;
+        break;
+      }
+      case 'TRIGGER_FORM_VALIDATION': {
+        const hasErrors = Object.keys(state.formErrors).length > 0;
+
+        if (hasErrors) {
+          draftState.shouldCheckErrors = !state.shouldCheckErrors;
+        }
+
+        break;
+      }
+
+      default:
+        return draftState;
+    }
+  });
 
 export default reducer;
 export { initialState };
