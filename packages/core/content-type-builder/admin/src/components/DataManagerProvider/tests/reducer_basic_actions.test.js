@@ -1,81 +1,99 @@
-import { fromJS } from 'immutable';
-// import { get } from 'lodash';
-import reducer, { initialState as immutableInitialState } from '../reducer';
-// import testData from './data';
+import get from 'lodash/get';
+import reducer, { initialState } from '../reducer';
+import testData from './data';
 import * as actions from '../constants';
-
-const initialState = immutableInitialState.toJS();
 
 describe('CTB | components | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
     const state = { ...initialState };
 
-    expect(reducer(fromJS(state), { type: 'TEST' }).toJS()).toEqual(initialState);
+    expect(reducer(state, { type: 'TEST' })).toEqual(initialState);
   });
 
-  // describe('ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE', () => {
-  //   it('should add the created component to the dynamic zone', () => {
-  //     const createdComponent = fromJS({
-  //       uid: 'default.test',
-  //       category: 'default',
-  //       isTemporary: true,
-  //       schema: {
-  //         icon: 'book',
-  //         name: 'test',
-  //         collectionName: '',
-  //         attributes: {},
-  //       },
-  //     });
-  //     const components = fromJS({
-  //       'default.test': createdComponent,
-  //       'default.other': {
-  //         uid: 'default.other',
-  //         category: 'default',
+  describe('ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE', () => {
+    it('should add the created component to the dynamic zone', () => {
+      const createdComponent = {
+        uid: 'default.test',
+        category: 'default',
+        isTemporary: true,
+        schema: {
+          icon: 'book',
+          name: 'test',
+          collectionName: '',
+          attributes: [],
+        },
+      };
 
-  //         schema: {
-  //           icon: 'book',
-  //           name: 'test',
-  //           collectionName: '',
-  //           attributes: {},
-  //         },
-  //       },
-  //     });
-  //     const contentType = fromJS({
-  //       uid: 'application::test',
-  //       schema: {
-  //         name: 'test',
-  //         attributes: {
-  //           dz: {
-  //             type: 'dynamiczone',
-  //             components: ['default.other'],
-  //           },
-  //         },
-  //       },
-  //     });
-  //     const state = immutableInitialState
-  //       .setIn(['components'], components)
-  //       .setIn(['modifiedData', 'components'], components)
+      const components = {
+        'default.test': createdComponent,
+        'default.other': {
+          uid: 'default.other',
+          category: 'default',
+          schema: {
+            icon: 'book',
+            name: 'test',
+            collectionName: '',
+            attributes: [],
+          },
+        },
+      };
+      const contentType = {
+        uid: 'application::test',
+        schema: {
+          name: 'test',
+          attributes: [
+            {
+              name: 'dz',
+              type: 'dynamiczone',
+              components: ['default.other'],
+            },
+          ],
+        },
+      };
 
-  //       .setIn(['modifiedData', 'contentType'], contentType);
+      const state = {
+        ...initialState,
+        components,
+        modifiedData: {
+          components,
+          contentType,
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'dz', 'components'],
-  //       fromJS(['default.other', 'default.test'])
-  //     );
+      const expected = {
+        ...initialState,
+        components,
+        modifiedData: {
+          components,
+          contentType: {
+            uid: 'application::test',
+            schema: {
+              name: 'test',
+              attributes: [
+                {
+                  name: 'dz',
+                  type: 'dynamiczone',
+                  components: ['default.other', 'default.test'],
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //     expect(
-  //       reducer(state, {
-  //         type: actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
-  //         dynamicZoneTarget: 'dz',
-  //         componentsToAdd: ['default.test'],
-  //       })
-  //     ).toEqual(expected);
-  //   });
-  // });
+      const action = {
+        type: actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
+        dynamicZoneTarget: 'dz',
+        componentsToAdd: ['default.test'],
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
   describe('CANCEL_CHANGES', () => {
     it('Should set the modifiedData and the components object with the initial ones', () => {
-      const state = fromJS({
+      const state = {
         components: {
           test: {
             something: true,
@@ -120,9 +138,9 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             name: 'something',
           },
         },
-      });
+      };
 
-      const expected = fromJS({
+      const expected = {
         components: {
           test: {
             something: false,
@@ -167,180 +185,319 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             name: 'something',
           },
         },
-      });
+      };
 
       expect(reducer(state, { type: actions.CANCEL_CHANGES })).toEqual(expected);
     });
   });
 
-  // describe('CHANGE_DYNAMIC_ZONE_COMPONENTS', () => {
-  //   it('Should add the component to the dz field and to the modifiedData.components if the added component is not already in the modifiedData.components', () => {
-  //     const componentUID = 'default.openingtimes';
-  //     const component = get(testData, ['components', componentUID]);
-  //     const contentType = fromJS(testData.contentTypes['application::address.address']).setIn(
-  //       ['schema', 'attributes', 'dz'],
-  //       fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
-  //     );
-  //     const state = immutableInitialState
-  //       .setIn(['components'], fromJS(testData.components))
-  //       .setIn(['modifiedData', 'components', componentUID], fromJS(component))
-  //       .setIn(['modifiedData', 'contentType'], contentType);
+  describe('CHANGE_DYNAMIC_ZONE_COMPONENTS', () => {
+    it('Should add the component to the dz field and to the modifiedData.components if the added component is not already in the modifiedData.components', () => {
+      const componentUID = 'default.openingtimes';
+      const component = testData.components[componentUID];
 
-  //     const expected = state
-  //       .setIn(
-  //         ['modifiedData', 'components', 'default.dish'],
-  //         fromJS(get(testData, ['components', 'default.dish']))
-  //       )
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', 'dz', 'components'],
-  //         fromJS([componentUID, 'default.dish'])
-  //       );
+      const ct = testData.contentTypes['application::address.address'];
 
-  //     expect(
-  //       reducer(state, {
-  //         type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
-  //         dynamicZoneTarget: 'dz',
-  //         newComponents: ['default.dish'],
-  //       })
-  //     ).toEqual(expected);
-  //   });
+      const contentType = {
+        ...ct,
+        schema: {
+          ...ct.schema,
+          attributes: [
+            {
+              name: 'price_range',
+              enum: ['very_cheap', 'cheap', 'average', 'expensive', 'very_expensive'],
+              type: 'enumeration',
+            },
+            {
+              name: 'opening_times',
+              component: 'default.openingtimes',
+              type: 'component',
+              repeatable: true,
+              min: 1,
+              max: 10,
+            },
+            {
+              name: 'dz',
+              type: 'dynamiczone',
+              components: ['default.openingtimes'],
+            },
+          ],
+        },
+      };
 
-  //   it('Should add the component to the dz field and not to the modifiedData.components if the added component is already in the modifiedData.components', () => {
-  //     const componentUID = 'default.openingtimes';
-  //     const component = get(testData, ['components', componentUID]);
-  //     const contentType = fromJS(testData.contentTypes['application::address.address']).setIn(
-  //       ['schema', 'attributes', 'dz'],
-  //       fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
-  //     );
-  //     const state = immutableInitialState
-  //       .setIn(['components'], fromJS(testData.components))
-  //       .setIn(['modifiedData', 'components', componentUID], fromJS(component))
-  //       .setIn(
-  //         ['modifiedData', 'components', 'default.dish'],
-  //         fromJS(get(testData, ['components', 'default.dish']))
-  //       )
-  //       .setIn(['modifiedData', 'contentType'], contentType);
+      const state = {
+        ...initialState,
+        components: testData.components,
+        modifiedData: {
+          components: {
+            [componentUID]: component,
+          },
+          contentType,
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'dz', 'components'],
-  //       fromJS([componentUID, 'default.dish'])
-  //     );
+      const expected = {
+        ...initialState,
+        components: testData.components,
+        modifiedData: {
+          components: {
+            [componentUID]: component,
+            'default.dish': testData.components['default.dish'],
+          },
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                {
+                  name: 'price_range',
+                  enum: ['very_cheap', 'cheap', 'average', 'expensive', 'very_expensive'],
+                  type: 'enumeration',
+                },
+                {
+                  name: 'opening_times',
+                  component: 'default.openingtimes',
+                  type: 'component',
+                  repeatable: true,
+                  min: 1,
+                  max: 10,
+                },
+                {
+                  name: 'dz',
+                  type: 'dynamiczone',
+                  components: ['default.openingtimes', 'default.dish'],
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //     expect(
-  //       reducer(state, {
-  //         type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
-  //         dynamicZoneTarget: 'dz',
-  //         newComponents: ['default.dish'],
-  //       })
-  //     ).toEqual(expected);
-  //   });
-  // });
+      const action = {
+        type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
+        dynamicZoneTarget: 'dz',
+        newComponents: ['default.dish'],
+      };
 
-  // describe('CREATE_COMPONENT_SCHEMA', () => {
-  //   it('Should add the created component schema to the components object when creating a component using the left menu link', () => {
-  //     const action = {
-  //       type: actions.CREATE_COMPONENT_SCHEMA,
-  //       data: { name: 'new component', icon: 'arrow-alt-circle-down' },
-  //       componentCategory: 'test',
-  //       schemaType: 'component',
-  //       uid: 'test.new-component',
-  //       shouldAddComponentToData: false,
-  //     };
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     const state = immutableInitialState
-  //       .setIn(['components', fromJS(testData.components)])
-  //       .setIn(['initialComponents', fromJS(testData.components)]);
+    // it('Should add the component to the dz field and not to the modifiedData.components if the added component is already in the modifiedData.components', () => {
+    it('Should add the component to the dz field and the nestedComponents the modifiedData.components', () => {
+      const componentUID = 'default.openingtimes';
+      const component = get(testData, ['components', componentUID]);
 
-  //     const expected = state.setIn(
-  //       ['components', action.uid],
-  //       fromJS({
-  //         uid: action.uid,
-  //         isTemporary: true,
-  //         category: action.componentCategory,
-  //         schema: {
-  //           ...action.data,
-  //           attributes: {},
-  //         },
-  //       })
-  //     );
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'dz', type: 'dynamiczone', components: [componentUID] }],
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const state = {
+        ...initialState,
+        components: testData.components,
+        modifiedData: {
+          components: {
+            [componentUID]: component,
+          },
+          contentType,
+        },
+      };
 
-  //   it('Should add the created component schema to the components object, create the attribute and also add the created component to modifiedData.components when using the add attribute modal', () => {
-  //     const action = {
-  //       type: actions.CREATE_COMPONENT_SCHEMA,
-  //       data: { name: 'new component', icon: 'arrow-alt-circle-down' },
-  //       componentCategory: 'test',
-  //       schemaType: 'component',
-  //       uid: 'test.new-component',
-  //       shouldAddComponentToData: true,
-  //     };
-  //     const compoToCreate = {
-  //       uid: action.uid,
-  //       isTemporary: true,
-  //       category: action.componentCategory,
-  //       schema: {
-  //         ...action.data,
-  //         attributes: {},
-  //       },
-  //     };
+      const componentToAddUid = 'default.closingperiod';
 
-  //     const state = immutableInitialState
-  //       .setIn(['components', fromJS(testData.components)])
-  //       .setIn(['initialComponents', fromJS(testData.components)]);
+      const action = {
+        type: actions.CHANGE_DYNAMIC_ZONE_COMPONENTS,
+        dynamicZoneTarget: 'dz',
+        newComponents: [componentToAddUid],
+      };
 
-  //     const expected = state
-  //       .setIn(['components', action.uid], fromJS(compoToCreate))
-  //       .setIn(['modifiedData', 'components', action.uid], fromJS(compoToCreate));
+      const expected = {
+        ...initialState,
+        components: testData.components,
+        modifiedData: {
+          components: {
+            [componentUID]: component,
+            'default.dish': testData.components['default.dish'],
+            [componentToAddUid]: testData.components[componentToAddUid],
+          },
+          contentType: {
+            uid: 'application::address.address',
+            schema: {
+              name: 'address',
+              description: '',
+              connection: 'default',
+              collectionName: '',
+              attributes: [
+                { name: 'dz', type: 'dynamiczone', components: [componentUID, componentToAddUid] },
+              ],
+            },
+          },
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
-  // describe('CREATE_SCHEMA', () => {
-  //   it('Should create a content type schema correctly', () => {
-  //     const uid = 'application::test';
-  //     const data = {
-  //       collectionName: 'test',
-  //       name: 'test',
-  //     };
-  //     const expected = immutableInitialState.setIn(
-  //       ['contentTypes', uid],
-  //       fromJS({
-  //         uid,
-  //         isTemporary: true,
-  //         schema: {
-  //           collectionName: data.collectionName,
-  //           name: data.name,
-  //           attributes: {},
-  //         },
-  //       })
-  //     );
+  describe('CREATE_COMPONENT_SCHEMA', () => {
+    it('Should add the created component schema to the components object when creating a component using the left menu link', () => {
+      const action = {
+        type: actions.CREATE_COMPONENT_SCHEMA,
+        data: { name: 'new component', icon: 'arrow-alt-circle-down' },
+        componentCategory: 'test',
+        schemaType: 'component',
+        uid: 'test.new-component',
+        shouldAddComponentToData: false,
+      };
 
-  //     expect(reducer(immutableInitialState, { type: actions.CREATE_SCHEMA, uid, data })).toEqual(
-  //       expected
-  //     );
-  //   });
-  // });
+      const state = {
+        ...initialState,
+        components: testData.components,
+        initialComponents: testData.components,
+      };
 
-  // describe('DELETE_NOT_SAVED_TYPE', () => {
-  //   it('Should reset the components and and contentTypes object', () => {
-  //     const state = immutableInitialState
-  //       .setIn(['components'], fromJS({ foo: {}, bar: {} }))
-  //       .setIn(['initialComponents'], fromJS({ foo: {} }))
-  //       .setIn(['contentTypes'], fromJS({ baz: {}, bat: {} }))
-  //       .setIn(['initialContentTypes'], fromJS({ baz: {} }));
+      const expected = {
+        ...initialState,
+        components: {
+          ...testData.components,
+          [action.uid]: {
+            uid: action.uid,
+            isTemporary: true,
+            category: action.componentCategory,
+            schema: {
+              ...action.data,
+              attributes: [],
+            },
+          },
+        },
+        initialComponents: testData.components,
+      };
 
-  //     const expected = immutableInitialState
-  //       .setIn(['components'], fromJS({ foo: {} }))
-  //       .setIn(['initialComponents'], fromJS({ foo: {} }))
-  //       .setIn(['contentTypes'], fromJS({ baz: {} }))
-  //       .setIn(['initialContentTypes'], fromJS({ baz: {} }));
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     expect(reducer(state, { type: actions.DELETE_NOT_SAVED_TYPE })).toEqual(expected);
-  //   });
-  // });
+    it('Should add the created component schema to the components object, create the attribute and also add the created component to modifiedData.components when using the add attribute modal', () => {
+      const action = {
+        type: actions.CREATE_COMPONENT_SCHEMA,
+        data: { name: 'new component', icon: 'arrow-alt-circle-down' },
+        componentCategory: 'test',
+        schemaType: 'component',
+        uid: 'test.new-component',
+        shouldAddComponentToData: true,
+      };
+      const compoToCreate = {
+        uid: action.uid,
+        isTemporary: true,
+        category: action.componentCategory,
+        schema: {
+          ...action.data,
+          attributes: [],
+        },
+      };
+
+      const state = {
+        ...initialState,
+        components: testData.components,
+        initialComponents: testData.components,
+        modifiedData: {
+          components: {},
+          contentType: { ok: true },
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        components: {
+          ...testData.components,
+          [action.uid]: compoToCreate,
+        },
+        initialComponents: testData.components,
+        modifiedData: {
+          components: {
+            [action.uid]: compoToCreate,
+          },
+          contentType: { ok: true },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('CREATE_SCHEMA', () => {
+    it('Should create a content type schema correctly', () => {
+      const uid = 'application::test';
+      const data = {
+        collectionName: 'test',
+        name: 'test',
+      };
+
+      const state = { ...initialState };
+
+      const action = { type: actions.CREATE_SCHEMA, uid, data };
+
+      const expected = {
+        ...initialState,
+        contentTypes: {
+          [uid]: {
+            uid,
+            isTemporary: true,
+            schema: {
+              collectionName: data.collectionName,
+              name: data.name,
+              attributes: [],
+            },
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
+
+  describe('DELETE_NOT_SAVED_TYPE', () => {
+    it('Should reset the components and and contentTypes object', () => {
+      const state = {
+        ...initialState,
+        components: {
+          foo: {},
+          bar: {},
+        },
+        initialComponents: { foo: {} },
+        contentTypes: {
+          baz: {},
+          bat: {},
+        },
+        initialContentTypes: {
+          baz: {},
+        },
+      };
+
+      const expected = {
+        ...initialState,
+        components: {
+          foo: {},
+        },
+        initialComponents: { foo: {} },
+        contentTypes: {
+          baz: {},
+        },
+        initialContentTypes: {
+          baz: {},
+        },
+      };
+
+      const action = { type: actions.DELETE_NOT_SAVED_TYPE };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
   describe('GET_DATA_SUCCEEDED', () => {
     it('should add api data for the content type builder (content type, components and reserved names)', () => {
@@ -349,7 +506,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           uid: 'default.test',
           category: 'default',
           schema: {
-            // attributes: {},
             attributes: [],
           },
         },
@@ -358,7 +514,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         'application::test.test': {
           uid: 'application::test.test',
           schema: {
-            // attributes: {},
             attributes: [],
           },
         },
@@ -380,23 +535,25 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       };
 
       expect(
-        reducer(fromJS(state), {
+        reducer(state, {
           type: actions.GET_DATA_SUCCEEDED,
           components,
           contentTypes,
           reservedNames,
-        }).toJS()
+        })
       ).toEqual(expected);
     });
   });
 
   describe('RELOAD_PLUGIN', () => {
     it('Should return the initial state constant', () => {
+      const state = { ...initialState, component: { foo: {} } };
+
       expect(
-        reducer(immutableInitialState.setIn(['components', 'foo'], {}), {
+        reducer(state, {
           type: actions.RELOAD_PLUGIN,
         })
-      ).toEqual(immutableInitialState);
+      ).toEqual(initialState);
     });
   });
 
@@ -772,17 +929,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         isLoadingForDataToBeSet: false,
       };
 
-      // const expected = immutableInitialState
-      //   .set('modifiedData', schemaToSet)
-      //   .set('initialData', schemaToSet)
-      //   .set('isLoadingForDataToBeSet', false);
-
       expect(
-        reducer(fromJS(state), {
+        reducer(state, {
           type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: true,
-        }).toJS()
+        })
       ).toEqual(expected);
     });
 
@@ -812,17 +964,12 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         isLoadingForDataToBeSet: false,
       };
 
-      // const expected = immutableInitialState
-      //   .set('modifiedData', schemaToSet)
-      //   .set('initialData', schemaToSet)
-      //   .set('isLoadingForDataToBeSet', false);
-
       expect(
-        reducer(fromJS(state), {
+        reducer(state, {
           type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: false,
-        }).toJS()
+        })
       ).toEqual(expected);
     });
   });
