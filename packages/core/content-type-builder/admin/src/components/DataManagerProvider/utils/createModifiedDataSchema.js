@@ -1,4 +1,4 @@
-import { fromJS, OrderedMap } from 'immutable';
+// import { fromJS, OrderedMap } from 'immutable';
 import get from 'lodash/get';
 
 const createModifiedDataSchema = (
@@ -23,52 +23,52 @@ const createModifiedDataSchema = (
   return schema;
 };
 
-const orderAllDataAttributesWithImmutable = (allDataSchema, isInContentTypeView) => {
-  const attributesPath = ['schema', 'attributes'];
-  const componentsSchema = allDataSchema.components;
-  const componentsWithImmutableSchema = Object.keys(componentsSchema).reduce((acc, current) => {
-    const currentSchema = get(componentsSchema, [current], {});
+// const orderAllDataAttributesWithImmutable = (allDataSchema, isInContentTypeView) => {
+//   const attributesPath = ['schema', 'attributes'];
+//   const componentsSchema = allDataSchema.components;
+//   const componentsWithImmutableSchema = Object.keys(componentsSchema).reduce((acc, current) => {
+//     const currentSchema = get(componentsSchema, [current], {});
 
-    const currentAttributes = get(currentSchema, attributesPath, {});
+//     const currentAttributes = get(currentSchema, attributesPath, {});
 
-    const fromJSAttributes = Object.keys(currentAttributes).reduce((acc, current) => {
-      acc[current] = fromJS(currentAttributes[current]);
+//     const fromJSAttributes = Object.keys(currentAttributes).reduce((acc, current) => {
+//       acc[current] = fromJS(currentAttributes[current]);
 
-      return acc;
-    }, {});
+//       return acc;
+//     }, {});
 
-    // TODO refacto
-    const currentImmutableSchemas = fromJS(currentSchema).setIn(
-      ['schema', 'attributes'],
-      fromJS(OrderedMap(fromJSAttributes))
-    );
+//     // TODO refacto
+//     const currentImmutableSchemas = fromJS(currentSchema).setIn(
+//       ['schema', 'attributes'],
+//       fromJS(OrderedMap(fromJSAttributes))
+//     );
 
-    acc[current] = fromJS(currentImmutableSchemas);
+//     acc[current] = fromJS(currentImmutableSchemas);
 
-    return acc;
-  }, {});
-  const keyName = isInContentTypeView ? 'contentType' : 'component';
-  const mainSchema = get(allDataSchema, [keyName], {});
-  const mainImmutableSchema = fromJS(mainSchema).setIn(
-    attributesPath,
-    fromJS(
-      OrderedMap(
-        Object.keys(get(mainSchema, attributesPath, {})).reduce((acc, current) => {
-          acc[current] = fromJS(get(mainSchema, [...attributesPath, current], {}));
+//     return acc;
+//   }, {});
+//   const keyName = isInContentTypeView ? 'contentType' : 'component';
+//   const mainSchema = get(allDataSchema, [keyName], {});
+//   const mainImmutableSchema = fromJS(mainSchema).setIn(
+//     attributesPath,
+//     fromJS(
+//       OrderedMap(
+//         Object.keys(get(mainSchema, attributesPath, {})).reduce((acc, current) => {
+//           acc[current] = fromJS(get(mainSchema, [...attributesPath, current], {}));
 
-          return acc;
-        }, {})
-      )
-    )
-  );
+//           return acc;
+//         }, {})
+//       )
+//     )
+//   );
 
-  const immutableData = fromJS({
-    components: componentsWithImmutableSchema,
-    [keyName]: mainImmutableSchema,
-  });
+//   const immutableData = fromJS({
+//     components: componentsWithImmutableSchema,
+//     [keyName]: mainImmutableSchema,
+//   });
 
-  return immutableData;
-};
+//   return immutableData;
+// };
 
 export default createModifiedDataSchema;
-export { orderAllDataAttributesWithImmutable };
+// export { orderAllDataAttributesWithImmutable };

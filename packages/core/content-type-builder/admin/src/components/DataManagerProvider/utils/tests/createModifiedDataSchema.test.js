@@ -5,9 +5,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
     const dataSchema = {
       apiID: 'test',
       schema: {
-        attributes: {
-          name: { type: 'string' },
-        },
+        attributes: [{ type: 'string', name: 'name' }],
       },
     };
 
@@ -29,9 +27,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
     const dataSchema = {
       apiID: 'test',
       schema: {
-        attributes: {
-          name: { type: 'string' },
-        },
+        attributes: [{ type: 'string', name: 'name' }],
       },
     };
 
@@ -53,20 +49,20 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
     const dataSchema = {
       apiID: 'test',
       schema: {
-        attributes: {
-          name: { type: 'string' },
-          compo: { type: 'component', component: 'blog.dish' },
-        },
+        attributes: [
+          { type: 'string', name: 'name' },
+          { type: 'component', component: 'blog.dish', name: 'compo' },
+        ],
       },
     };
 
     const retrievedComponents = ['blog.dish'];
     const components = {
       'blog.dish': {
-        schema: { attributes: { name: { type: 'string' } } },
+        schema: { attributes: [{ name: 'name', type: 'string' }] },
       },
       'blog.test': {
-        schema: { attributes: { name: { type: 'string' } } },
+        schema: { attributes: [{ type: 'string', name: 'name' }] },
       },
     };
     const isInContentTypeView = true;
@@ -75,7 +71,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | cre
       contentType: dataSchema,
       components: {
         'blog.dish': {
-          schema: { attributes: { name: { type: 'string' } } },
+          schema: { attributes: [{ type: 'string', name: 'name' }] },
         },
       },
     };

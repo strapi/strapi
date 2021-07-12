@@ -22,9 +22,10 @@ import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
 import FormModal from '../FormModal';
 import createDataObject from './utils/createDataObject';
-import createModifiedDataSchema, {
-  orderAllDataAttributesWithImmutable,
-} from './utils/createModifiedDataSchema';
+// import createModifiedDataSchema, {
+//   orderAllDataAttributesWithImmutable,
+// } from './utils/createModifiedDataSchema';
+import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
 import retrieveComponentsFromSchema from './utils/retrieveComponentsFromSchema';
 import retrieveNestedComponents from './utils/retrieveNestedComponents';
@@ -54,6 +55,7 @@ import {
   UPDATE_SCHEMA,
 } from './constants';
 import makeSelectDataManagerProvider from './selectors';
+import formatSchemas from './utils/formatSchemas';
 
 const DataManagerProvider = ({
   allIcons,
@@ -116,18 +118,22 @@ const DataManagerProvider = ({
       );
 
       const components = createDataObject(componentsArray);
+      const formattedComponents = formatSchemas(components);
       const contentTypes = createDataObject(contentTypesArray);
-      const orderedComponents = orderAllDataAttributesWithImmutable({
-        components,
-      });
-      const orderedContenTypes = orderAllDataAttributesWithImmutable({
-        components: contentTypes,
-      });
+      const formattedContentTypes = formatSchemas(contentTypes);
+      // const orderedComponents = orderAllDataAttributesWithImmutable({
+      //   components,
+      // });
+      // const orderedContenTypes = orderAllDataAttributesWithImmutable({
+      //   components: contentTypes,
+      // });
 
       dispatch({
         type: GET_DATA_SUCCEEDED,
-        components: orderedComponents.get('components'),
-        contentTypes: orderedContenTypes.get('components'),
+        // components: orderedComponents.get('components'),
+        // contentTypes: orderedContenTypes.get('components'),
+        components: formattedComponents,
+        contentTypes: formattedContentTypes,
         reservedNames,
       });
     } catch (err) {
@@ -356,6 +362,7 @@ const DataManagerProvider = ({
     }
   };
 
+  // TODO
   const getAllComponentsThatHaveAComponentInTheirAttributes = () => {
     // We need to create an object with all the non modified compos
     // plus the ones that are created on the fly
@@ -373,13 +380,17 @@ const DataManagerProvider = ({
 
     return makeUnique(composWithCompos);
   };
+  console.log(getAllComponentsThatHaveAComponentInTheirAttributes());
 
+  // TODO
   const getAllNestedComponents = () => {
     const appNestedCompo = retrieveNestedComponents(components);
     const editingDataNestedCompos = retrieveNestedComponents(modifiedData.components || {});
 
     return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
   };
+
+  console.log({ g: getAllNestedComponents() });
 
   const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
     dispatch({
@@ -392,13 +403,14 @@ const DataManagerProvider = ({
   const setModifiedData = () => {
     const currentSchemas = isInContentTypeView ? contentTypes : components;
     const schemaToSet = get(currentSchemas, currentUid, {
-      schema: { attributes: {} },
+      schema: { attributes: [] },
     });
 
     const retrievedComponents = retrieveComponentsFromSchema(
       schemaToSet.schema.attributes,
       components
     );
+
     const newSchemaToSet = createModifiedDataSchema(
       schemaToSet,
       retrievedComponents,
@@ -406,15 +418,16 @@ const DataManagerProvider = ({
       isInContentTypeView
     );
 
-    const dataShape = orderAllDataAttributesWithImmutable(newSchemaToSet, isInContentTypeView);
+    // const dataShape = orderAllDataAttributesWithImmutable(newSchemaToSet, isInContentTypeView);
 
     const hasJustCreatedSchema =
       get(schemaToSet, 'isTemporary', false) &&
-      size(get(schemaToSet, 'schema.attributes', {})) === 0;
+      size(get(schemaToSet, 'schema.attributes', [])) === 0;
 
     dispatch({
       type: SET_MODIFIED_DATA,
-      schemaToSet: dataShape,
+      // schemaToSet: dataShape,
+      schemaToSet: newSchemaToSet,
       hasJustCreatedSchema,
     });
   };

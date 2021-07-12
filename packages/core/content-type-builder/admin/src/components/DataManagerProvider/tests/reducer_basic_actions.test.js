@@ -1,12 +1,14 @@
 import { fromJS } from 'immutable';
 import { get } from 'lodash';
-import reducer, { initialState } from '../reducer';
+import reducer, { initialState as immutableInitialState } from '../reducer';
 import testData from './data';
 import * as actions from '../constants';
 
+const initialState = immutableInitialState.toJS();
+
 describe('CTB | components | DataManagerProvider | reducer | basics actions ', () => {
   it('Should return the initial state', () => {
-    expect(reducer(initialState, { type: 'TEST' })).toEqual(initialState);
+    expect(reducer(immutableInitialState, { type: 'TEST' })).toEqual(immutableInitialState);
   });
 
   describe('ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE', () => {
@@ -48,7 +50,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           },
         },
       });
-      const state = initialState
+      const state = immutableInitialState
         .setIn(['components'], components)
         .setIn(['modifiedData', 'components'], components)
 
@@ -177,7 +179,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         ['schema', 'attributes', 'dz'],
         fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
       );
-      const state = initialState
+      const state = immutableInitialState
         .setIn(['components'], fromJS(testData.components))
         .setIn(['modifiedData', 'components', componentUID], fromJS(component))
         .setIn(['modifiedData', 'contentType'], contentType);
@@ -208,7 +210,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         ['schema', 'attributes', 'dz'],
         fromJS({ type: 'dynamiczone', components: ['default.openingtimes'] })
       );
-      const state = initialState
+      const state = immutableInitialState
         .setIn(['components'], fromJS(testData.components))
         .setIn(['modifiedData', 'components', componentUID], fromJS(component))
         .setIn(
@@ -243,7 +245,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         shouldAddComponentToData: false,
       };
 
-      const state = initialState
+      const state = immutableInitialState
         .setIn(['components', fromJS(testData.components)])
         .setIn(['initialComponents', fromJS(testData.components)]);
 
@@ -282,7 +284,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
 
-      const state = initialState
+      const state = immutableInitialState
         .setIn(['components', fromJS(testData.components)])
         .setIn(['initialComponents', fromJS(testData.components)]);
 
@@ -301,7 +303,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         collectionName: 'test',
         name: 'test',
       };
-      const expected = initialState.setIn(
+      const expected = immutableInitialState.setIn(
         ['contentTypes', uid],
         fromJS({
           uid,
@@ -314,19 +316,21 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         })
       );
 
-      expect(reducer(initialState, { type: actions.CREATE_SCHEMA, uid, data })).toEqual(expected);
+      expect(reducer(immutableInitialState, { type: actions.CREATE_SCHEMA, uid, data })).toEqual(
+        expected
+      );
     });
   });
 
   describe('DELETE_NOT_SAVED_TYPE', () => {
     it('Should reset the components and and contentTypes object', () => {
-      const state = initialState
+      const state = immutableInitialState
         .setIn(['components'], fromJS({ foo: {}, bar: {} }))
         .setIn(['initialComponents'], fromJS({ foo: {} }))
         .setIn(['contentTypes'], fromJS({ baz: {}, bat: {} }))
         .setIn(['initialContentTypes'], fromJS({ baz: {} }));
 
-      const expected = initialState
+      const expected = immutableInitialState
         .setIn(['components'], fromJS({ foo: {} }))
         .setIn(['initialComponents'], fromJS({ foo: {} }))
         .setIn(['contentTypes'], fromJS({ baz: {} }))
@@ -343,7 +347,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           uid: 'default.test',
           category: 'default',
           schema: {
-            attributes: {},
+            // attributes: {},
+            attributes: [],
           },
         },
       };
@@ -351,7 +356,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         'application::test.test': {
           uid: 'application::test.test',
           schema: {
-            attributes: {},
+            // attributes: {},
+            attributes: [],
           },
         },
       };
@@ -359,21 +365,25 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         models: ['admin', 'ctb'],
         attributes: ['attributes', 'length'],
       };
-      const expected = initialState
-        .set('components', fromJS(components))
-        .set('contentTypes', fromJS(contentTypes))
-        .set('reservedNames', fromJS(reservedNames))
-        .set('initialContentTypes', fromJS(contentTypes))
-        .set('initialComponents', fromJS(components))
-        .set('isLoading', false);
+
+      const state = { ...initialState };
+      const expected = {
+        ...initialState,
+        components,
+        contentTypes,
+        initialComponents: components,
+        initialContentTypes: contentTypes,
+        reservedNames,
+        isLoading: false,
+      };
 
       expect(
-        reducer(initialState, {
+        reducer(fromJS(state), {
           type: actions.GET_DATA_SUCCEEDED,
           components,
           contentTypes,
           reservedNames,
-        })
+        }).toJS()
       ).toEqual(expected);
     });
   });
@@ -381,10 +391,10 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
   describe('RELOAD_PLUGIN', () => {
     it('Should return the initial state constant', () => {
       expect(
-        reducer(initialState.setIn(['components', 'foo'], {}), {
+        reducer(immutableInitialState.setIn(['components', 'foo'], {}), {
           type: actions.RELOAD_PLUGIN,
         })
-      ).toEqual(initialState);
+      ).toEqual(immutableInitialState);
     });
   });
 
@@ -745,13 +755,13 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           uid: 'test',
         },
       });
-      const expected = initialState
+      const expected = immutableInitialState
         .set('modifiedData', schemaToSet)
         .set('initialData', schemaToSet)
         .set('isLoadingForDataToBeSet', false);
 
       expect(
-        reducer(initialState, {
+        reducer(immutableInitialState, {
           type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: true,
@@ -766,13 +776,13 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
           uid: 'test',
         },
       });
-      const expected = initialState
+      const expected = immutableInitialState
         .set('modifiedData', schemaToSet)
         .set('initialData', schemaToSet)
         .set('isLoadingForDataToBeSet', false);
 
       expect(
-        reducer(initialState, {
+        reducer(immutableInitialState, {
           type: actions.SET_MODIFIED_DATA,
           schemaToSet,
           hasJustCreatedSchema: false,
