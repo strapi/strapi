@@ -1,5 +1,5 @@
 import { fromJS, OrderedMap } from 'immutable';
-import { get } from 'lodash';
+import get from 'lodash/get';
 
 const createModifiedDataSchema = (
   contentTypeSchema,
