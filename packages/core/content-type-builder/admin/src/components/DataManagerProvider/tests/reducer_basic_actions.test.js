@@ -282,7 +282,6 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       expect(reducer(state, action)).toEqual(expected);
     });
 
-    // it('Should add the component to the dz field and not to the modifiedData.components if the added component is already in the modifiedData.components', () => {
     it('Should add the component to the dz field and the nestedComponents the modifiedData.components', () => {
       const componentUID = 'default.openingtimes';
       const component = get(testData, ['components', componentUID]);

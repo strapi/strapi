@@ -118,6 +118,7 @@ const reducer = (state = initialState, action) =>
         ].components = updatedComponents;
 
         // Retrieve all the components that needs to be added to the modifiedData.components
+        // TODO check if it works
         const nestedComponents = retrieveComponentsFromSchema(
           current(draftState.modifiedData.contentType.schema.attributes),
           state.components
@@ -216,6 +217,76 @@ const reducer = (state = initialState, action) =>
           action.componentToRemoveIndex,
           1
         );
+
+        break;
+      }
+      case actions.REMOVE_FIELD: {
+        const { mainDataKey, attributeToRemoveName } = action;
+        const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
+        const attributeToRemoveIndex = findAttributeIndex(
+          state.modifiedData[mainDataKey],
+          attributeToRemoveName
+        );
+
+        const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveIndex];
+        const attributeToRemoveData = get(state, pathToAttributeToRemove);
+        const isRemovingRelationAttribute = attributeToRemoveData.type === 'relation';
+        // Only content types can have relations with themselves since
+        // components can only have oneWay or manyWay relations
+        const canTheAttributeToRemoveHaveARelationWithItself = mainDataKey === 'contentType';
+
+        if (isRemovingRelationAttribute && canTheAttributeToRemoveHaveARelationWithItself) {
+          const { target, relation, targetAttribute } = attributeToRemoveData;
+          const relationType = getRelationType(relation, targetAttribute);
+
+          const uid = state.modifiedData.contentType.uid;
+          const shouldRemoveOppositeAttribute =
+            target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
+
+          if (shouldRemoveOppositeAttribute) {
+            const attributes = state.modifiedData[mainDataKey].schema.attributes.slice();
+            const nextAttributes = attributes.filter(attribute => {
+              if (attribute.name === attributeToRemoveName) {
+                return false;
+              }
+
+              if (attribute.target === uid && attribute.targetAttribute === attributeToRemoveName) {
+                return false;
+              }
+
+              return true;
+            });
+
+            draftState.modifiedData[mainDataKey].schema.attributes = nextAttributes;
+
+            break;
+          }
+        }
+
+        // Find all uid fields that have the targetField set to the field we are removing
+        const uidFieldsToUpdate = state.modifiedData[mainDataKey].schema.attributes
+          .slice()
+          .reduce((acc, current) => {
+            if (current.type !== 'uid') {
+              return acc;
+            }
+
+            if (current.targetField !== attributeToRemoveName) {
+              return acc;
+            }
+
+            acc.push(current.name);
+
+            return acc;
+          }, []);
+
+        uidFieldsToUpdate.forEach(fieldName => {
+          const fieldIndex = findAttributeIndex(state.modifiedData[mainDataKey], fieldName);
+
+          delete draftState.modifiedData[mainDataKey].schema.attributes[fieldIndex].targetField;
+        });
+
+        draftState.modifiedData[mainDataKey].schema.attributes.splice(attributeToRemoveIndex, 1);
 
         break;
       }
@@ -478,42 +549,6 @@ const reducer = (state = initialState, action) =>
 //     }
 
 //
-//     case actions.REMOVE_FIELD: {
-//       const { mainDataKey, attributeToRemoveName } = action;
-//       const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
-//       const pathToAttributeToRemove = [...pathToAttributes, attributeToRemoveName];
-
-//       const attributeToRemoveData = state.getIn(pathToAttributeToRemove);
-
-//       const isRemovingRelationAttribute = attributeToRemoveData.get('type') === 'relation';
-//       // Only content types can have relations with themselves since
-//       // components can only have oneWay or manyWay relations
-//       const canTheAttributeToRemoveHaveARelationWithItself = mainDataKey === 'contentType';
-
-//       if (isRemovingRelationAttribute && canTheAttributeToRemoveHaveARelationWithItself) {
-//         const { target, relation, targetAttribute } = attributeToRemoveData.toJS();
-//         const relationType = getRelationType(relation, targetAttribute);
-//         const uid = state.getIn(['modifiedData', 'contentType', 'uid']);
-//         const shouldRemoveOppositeAttribute =
-//           target === uid && !ONE_SIDE_RELATIONS.includes(relationType);
-
-//         if (shouldRemoveOppositeAttribute) {
-//           return state
-//             .removeIn(pathToAttributeToRemove)
-//             .removeIn([...pathToAttributes, targetAttribute]);
-//         }
-//       }
-
-//       return state.removeIn(pathToAttributeToRemove).updateIn([...pathToAttributes], attributes => {
-//         return attributes.keySeq().reduce((acc, current) => {
-//           if (acc.getIn([current, 'targetField']) === attributeToRemoveName) {
-//             return acc.removeIn([current, 'targetField']);
-//           }
-
-//           return acc;
-//         }, attributes);
-//       });
-//     }
 
 //     default:
 //       return state;
