@@ -34,8 +34,6 @@ const getOppositeRelation = originalRelation => {
   return originalRelation;
 };
 
-// const addComponentsToState = (state, componentToAddUid, )
-
 const addComponentsToState = (state, componentToAddUid, objToUpdate) => {
   let newObj = objToUpdate;
   const componentToAdd = state.getIn(['components', componentToAddUid]);
@@ -207,6 +205,55 @@ const reducer = (state = initialState, action) =>
           draftState.components = state.initialComponents;
           draftState.contentTypes = state.initialContentTypes;
         }
+
+        break;
+      }
+
+      case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE: {
+        const dzAttributeIndex = findAttributeIndex(state.modifiedData.contentType, action.dzName);
+
+        draftState.modifiedData.contentType.schema.attributes[dzAttributeIndex].components.splice(
+          action.componentToRemoveIndex,
+          1
+        );
+
+        break;
+      }
+      case actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT: {
+        const { attributeToRemoveName, componentUid } = action;
+
+        const attributeToRemoveIndex = findAttributeIndex(
+          state.modifiedData.components[componentUid],
+          attributeToRemoveName
+        );
+
+        draftState.modifiedData.components[componentUid].schema.attributes.splice(
+          attributeToRemoveIndex,
+          1
+        );
+
+        break;
+      }
+      case actions.UPDATE_SCHEMA: {
+        const {
+          data: { name, collectionName, category, icon, kind },
+          schemaType,
+          uid,
+        } = action;
+
+        draftState.modifiedData[schemaType].schema.collectionName = collectionName;
+        draftState.modifiedData[schemaType].schema.name = name;
+
+        if (action.schemaType === 'component') {
+          draftState.modifiedData.component.category = category;
+          draftState.modifiedData.component.schema.icon = icon;
+          const addedComponent = current(draftState.modifiedData.component);
+          draftState.components[uid] = addedComponent;
+
+          break;
+        }
+
+        draftState.modifiedData.contentType.schema.kind = kind;
 
         break;
       }
@@ -430,30 +477,7 @@ const reducer = (state = initialState, action) =>
 //       });
 //     }
 
-//     case actions.REMOVE_FIELD_FROM_DISPLAYED_COMPONENT: {
-//       const { attributeToRemoveName, componentUid } = action;
-
-//       return state.removeIn([
-//         'modifiedData',
-//         'components',
-//         componentUid,
-//         'schema',
-//         'attributes',
-//         attributeToRemoveName,
-//       ]);
-//     }
-//     case actions.REMOVE_COMPONENT_FROM_DYNAMIC_ZONE:
-//       return state.removeIn([
-//         'modifiedData',
-//         'contentType',
-//         'schema',
-//         'attributes',
-//         action.dzName,
-//         'components',
-//         action.componentToRemoveIndex,
-//       ]);
-
-//     // TODO
+//
 //     case actions.REMOVE_FIELD: {
 //       const { mainDataKey, attributeToRemoveName } = action;
 //       const pathToAttributes = ['modifiedData', mainDataKey, 'schema', 'attributes'];
@@ -491,38 +515,6 @@ const reducer = (state = initialState, action) =>
 //       });
 //     }
 
-//     case actions.UPDATE_SCHEMA: {
-//       const {
-//         data: { name, collectionName, category, icon, kind },
-//         schemaType,
-//         uid,
-//       } = action;
-
-//       let newState = state.updateIn(['modifiedData', schemaType], obj => {
-//         let updatedObj = obj
-//           .updateIn(['schema', 'name'], () => name)
-//           .updateIn(['schema', 'collectionName'], () => collectionName);
-
-//         if (action.schemaType === 'component') {
-//           updatedObj = updatedObj
-//             .update('category', () => category)
-//             .updateIn(['schema', 'icon'], () => icon);
-//         }
-//         if (action.schemaType === 'contentType') {
-//           updatedObj = updatedObj.updateIn(['schema', 'kind'], () => kind);
-//         }
-
-//         return updatedObj;
-//       });
-
-//       if (schemaType === 'component') {
-//         newState = newState.updateIn(['components'], obj => {
-//           return obj.update(uid, () => newState.getIn(['modifiedData', 'component']));
-//         });
-//       }
-
-//       return newState;
-//     }
 //     default:
 //       return state;
 //   }
