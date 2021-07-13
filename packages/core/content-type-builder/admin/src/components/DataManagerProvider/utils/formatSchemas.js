@@ -1,3 +1,8 @@
+/**
+ * Format the attributes to array instead of an object
+ * @params {Object} schemas The content types schema
+ * @returns {Object} The formatted content types
+ */
 const formatSchemas = schemas => {
   return Object.keys(schemas).reduce((acc, current) => {
     const schema = schemas[current].schema;
@@ -11,6 +16,11 @@ const formatSchemas = schemas => {
   }, {});
 };
 
+/**
+ *
+ * @params {Object} Object of attributes
+ * @returns {Object[]} An array of attributes
+ */
 const toAttributesArray = attributes => {
   return Object.keys(attributes).reduce((acc, current) => {
     acc.push({ ...attributes[current], name: current });

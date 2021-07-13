@@ -25,19 +25,6 @@ const data = {
           max: 5,
         },
       ],
-      // attributes: {
-      //   title: {
-      //     type: 'string',
-      //     required: true,
-      //   },
-      //   slide: {
-      //     component: 'default.slide',
-      //     type: 'component',
-      //     repeatable: true,
-      //     min: 1,
-      //     max: 5,
-      //   },
-      // },
     },
   },
   'default.dish': {

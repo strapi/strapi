@@ -9,7 +9,6 @@ import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import List from '../List';
 import useDataManager from '../../hooks/useDataManager';
-// import convertAttrObjToArray from '../../utils/convertAttrObjToArray';
 import Td from '../Td';
 
 function ComponentList({
@@ -35,7 +34,6 @@ function ComponentList({
         <List
           customRowComponent={customRowComponent}
           dzName={dzName}
-          // items={convertAttrObjToArray(attributes)}
           items={attributes}
           targetUid={component}
           mainTypeName={mainTypeName}
