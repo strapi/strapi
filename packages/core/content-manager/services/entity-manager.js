@@ -34,7 +34,7 @@ const findCreatorRoles = entity => {
   return [];
 };
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   async assocCreatorRoles(entity) {
     if (!entity) {
       return entity;
@@ -137,4 +137,4 @@ module.exports = {
 
     return strapi.entityService.update({ params, data }, { model });
   }),
-};
+});

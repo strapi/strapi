@@ -1,7 +1,7 @@
 'use strict';
 
 const { join } = require('path');
-const { defaultsDeep } = require('lodash/fp');
+const { defaultsDeep, mapKeys, toLower } = require('lodash/fp');
 const { env } = require('@strapi/utils');
 const createServiceProvider = require('../base-providers/service-provider');
 const createContentTypeProvider = require('../base-providers/content-type-provider');
@@ -65,7 +65,7 @@ ${e.errors.join('\n')}
     bootstrap: () => cleanPluginServer.bootstrap(strapi),
     register: () => cleanPluginServer.register(strapi),
     destroy: cleanPluginServer.destroy,
-    controllers: cleanPluginServer.controllers,
+    controllers: mapKeys(toLower)(cleanPluginServer.controllers),
     routes: cleanPluginServer.routes,
     service: (...args) => this.services.get(...args),
     services: new Proxy(

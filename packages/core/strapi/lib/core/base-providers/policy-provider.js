@@ -12,7 +12,7 @@ module.exports = policiesDefinition => {
       return policies.get(policyName);
     },
     getAll() {
-      return Array.from(policies.values());
+      return Object.fromEntries(policies);
     },
     get size() {
       return policies.size;

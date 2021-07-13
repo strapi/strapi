@@ -23,6 +23,7 @@ ${e.errors}
       uid: `application::${apiName}.${definition.schema.info.singularName}`,
       apiName,
       collectionName: definition.schema.collectionName || definition.schema.info.singularName,
+      globalId: getGlobalId(definition.schema, definition.schema.info.singularName),
     });
   } else if (pluginName) {
     Object.assign(createdContentType.schema, {
@@ -31,11 +32,13 @@ ${e.errors}
       collectionName:
         createdContentType.schema.collectionName ||
         `${pluginName}_${definition.schema.info.singularName}`.toLowerCase(),
+      globalId: getGlobalId(definition.schema, definition.schema.info.singularName, pluginName),
     });
   } else {
     Object.assign(createdContentType.schema, {
       uid: `strapi::${definition.schema.info.singularName}`,
       plugin: 'admin',
+      globalId: getGlobalId(definition.schema, definition.schema.info.singularName, 'admin'),
     });
   }
 
@@ -53,6 +56,12 @@ ${e.errors}
   });
 
   return createdContentType;
+};
+
+const getGlobalId = (model, modelName, prefix) => {
+  let globalId = prefix ? `${prefix}-${modelName}` : modelName;
+
+  return model.globalId || _.upperFirst(_.camelCase(globalId));
 };
 
 const pickSchema = model => {

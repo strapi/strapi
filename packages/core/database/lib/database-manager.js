@@ -154,7 +154,6 @@ class DatabaseManager {
     if (!pluginName) {
       return strapi.models;
     }
-    console.log('pluginName', pluginName);
     return pluginName === 'admin' ? strapi.admin.models : strapi.plugins[pluginName].models;
   }
 

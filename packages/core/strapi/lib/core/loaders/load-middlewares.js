@@ -12,7 +12,6 @@ const findPackagePath = require('../../load/package-path');
  */
 module.exports = async function(strapi) {
   const installedMiddlewares = strapi.config.get('installedMiddlewares');
-  console.log('installedMiddlewares', installedMiddlewares);
   const appPath = strapi.config.get('appPath');
 
   let middlewares = {};
@@ -38,7 +37,6 @@ module.exports = async function(strapi) {
  */
 const createLoaders = strapi => {
   const loadMiddlewaresInDir = async (dir, middlewares) => {
-    console.log('dir', dir);
     const files = await glob('*/*(index|defaults).*(js|json)', {
       cwd: dir,
     });

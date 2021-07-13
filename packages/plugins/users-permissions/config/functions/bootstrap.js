@@ -211,7 +211,6 @@ module.exports = async () => {
     await pluginStore.set({ key: 'advanced', value });
   }
 
-  console.log(strapi.plugins['users-permissions'].services);
   await strapi.plugins['users-permissions'].services['users-permissions'].initialize();
 
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {

@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { mapKeys, toLower } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 const { createContentType } = require('../domain/content-type');
 
@@ -35,8 +36,9 @@ module.exports = function(strapi) {
       ct.schema.info.singularName = _.camelCase(modelName);
       ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
 
-      strapi.contentTypes[model.uid] = createContentType(ct, { apiName });
-      Object.assign(model, strapi.contentTypes[model.uid].schema);
+      const createdContentType = createContentType(ct, { apiName });
+      Object.assign(model, createdContentType.schema);
+      strapi.contentTypes[model.uid] = model;
 
       const { service, controller } = createCoreApi({ model, api, strapi });
 
@@ -97,8 +99,10 @@ module.exports = function(strapi) {
     ct.schema.info.singularName = _.camelCase(modelName);
     ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
 
-    strapi.contentTypes[model.uid] = createContentType(ct);
-    Object.assign(model, strapi.contentTypes[model.uid].schema);
+    const createdContentType = createContentType(ct);
+
+    Object.assign(model, createdContentType.schema);
+    strapi.contentTypes[model.uid] = model;
   });
 
   // Object.keys(strapi.plugins).forEach(pluginName => {
@@ -107,7 +111,7 @@ module.exports = function(strapi) {
   //   controllers: plugin.controllers || [],
   //   services: plugin.services || [],
   //   models: plugin.models || [],
-  // // });
+  // });
 
   // Object.keys(plugin.controllers).forEach(key => {
   //   let controller = plugin.controllers[key];
@@ -137,15 +141,16 @@ module.exports = function(strapi) {
     strapi.plugins[ct.schema.plugin].models[ct.schema.modelName] = ct.schema;
   });
 
-  // const policies = strapi.container.plugins.policies.getAll();
-  // console.log('policies', policies);
-  // Object.assign(strapi.container.plugins, policies);
-  // for (const plugin in policies) {
-  //   console.log('plugin policies', plugin);
-  //   strapi.plugins[plugin].config = strapi.plugins[plugin].config || {};
-  //   strapi.plugins[plugin].config.policies = strapi.plugins[plugin].config.policies || {};
-  //   Object.assign(strapi.plugins[plugin].config.policies, policies[plugin]);
-  // }
+  strapi.plugins.i18n;
+  strapi.plugins.get;
+
+  const policies = strapi.container.plugins.policies.getAll();
+  Object.assign(strapi.container.plugins, policies);
+  for (const plugin in policies) {
+    strapi.plugins[plugin].config = strapi.plugins[plugin].config || {};
+    strapi.plugins[plugin].config.policies = strapi.plugins[plugin].config.policies || {};
+    Object.assign(strapi.plugins[plugin].config.policies, mapKeys(toLower, policies[plugin]));
+  }
 
   // const pluginServices = strapi.container.plugins.services.getAll();
   // for (const plugin in pluginServices) {

@@ -337,7 +337,6 @@ module.exports = ({ strapi }) => ({
   },
 
   async initialize() {
-    console.log('strapi', strapi.app);
     const roleCount = await strapi.query('role', 'users-permissions').count();
 
     if (roleCount === 0) {

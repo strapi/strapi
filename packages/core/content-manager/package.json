@@ -4,8 +4,11 @@
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "icon": "plug",
+    "name": "content-manager",
+    "displayName": "Content Manager",
     "description": "content-manager.plugin.description",
-    "required": true
+    "required": true,
+    "kind": "plugin"
   },
   "dependencies": {
     "@buffetjs/core": "3.3.6",

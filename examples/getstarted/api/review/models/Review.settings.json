@@ -25,10 +25,6 @@
       "via": "review",
       "collection": "like"
     },
-    "author": {
-      "model": "user",
-      "plugin": "users-permissions"
-    },
     "restaurant": {
       "model": "restaurant"
     }

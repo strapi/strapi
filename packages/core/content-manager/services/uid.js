@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const slugify = require('@sindresorhus/slugify');
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   async generateUIDField({ contentTypeUID, field, data }) {
     const contentType = strapi.contentTypes[contentTypeUID];
     const { attributes } = contentType;
@@ -60,4 +60,4 @@ module.exports = {
     if (count > 0) return false;
     return true;
   },
-};
+});
