@@ -380,7 +380,6 @@ const DataManagerProvider = ({
 
     return makeUnique(composWithCompos);
   };
-  console.log(getAllComponentsThatHaveAComponentInTheirAttributes());
 
   // TODO
   const getAllNestedComponents = () => {
@@ -389,8 +388,6 @@ const DataManagerProvider = ({
 
     return makeUnique([...editingDataNestedCompos, ...appNestedCompo]);
   };
-
-  console.log({ g: getAllNestedComponents() });
 
   const removeComponentFromDynamicZone = (dzName, componentToRemoveIndex) => {
     dispatch({

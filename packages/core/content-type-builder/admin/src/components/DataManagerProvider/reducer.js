@@ -1,6 +1,5 @@
 // import { fromJS, OrderedMap } from 'immutable';
 import produce, { current } from 'immer';
-import cloneDeep from 'lodash/cloneDeep';
 import get from 'lodash/get';
 import set from 'lodash/set';
 import makeUnique from '../../utils/makeUnique';
@@ -78,6 +77,111 @@ const reducer = (state = initialState, action) =>
   // eslint-disable-next-line consistent-return
   produce(state, draftState => {
     switch (action.type) {
+      case actions.ADD_ATTRIBUTE: {
+        const {
+          attributeToSet: { name, ...rest },
+          forTarget,
+          targetUid,
+        } = action;
+        delete rest.createComponent;
+
+        const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
+          ? [forTarget]
+          : [forTarget, targetUid];
+
+        const currentAttributes = get(
+          state,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          []
+        ).slice();
+
+        // Add the createdAttribute
+        const updatedAttributes = [...currentAttributes, { ...rest, name }];
+
+        set(
+          draftState,
+          ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+          updatedAttributes
+        );
+
+        if (action.shouldAddComponentToData) {
+          const componentToAddUID = rest.component;
+          const componentToAdd = state.components[componentToAddUID];
+          const isTemporaryComponent = componentToAdd.isTemporary;
+          const hasComponentAlreadyBeenAdded =
+            state.modifiedData.components[componentToAddUID] !== undefined;
+
+          if (isTemporaryComponent || hasComponentAlreadyBeenAdded) {
+            break;
+          }
+
+          // Add the added component to the modifiedData.components
+          draftState.modifiedData.components[componentToAddUID] = componentToAdd;
+
+          const nestedComponents = retrieveComponentsFromSchema(
+            componentToAdd.schema.attributes,
+            state.components
+          );
+
+          // We dont' need to set the already added components otherwise all modifications will be lost so we need to only add the not modified ones
+          const nestedComponentsToAddInModifiedData = nestedComponents.filter(compoUID => {
+            return get(state, ['modifiedData', 'components', compoUID]) === undefined;
+          });
+
+          nestedComponentsToAddInModifiedData.forEach(compoUID => {
+            const compoSchema = get(state, ['components', compoUID], {});
+            const isTemporary = compoSchema.isTemporary || false;
+
+            // If the nested component has not been saved we don't need to add them as they are already in the state
+            if (!isTemporary) {
+              draftState.modifiedData.components[compoUID] = compoSchema;
+            }
+          });
+
+          break;
+        }
+
+        const isCreatingRelationAttribute = rest.type === 'relation';
+
+        if (isCreatingRelationAttribute) {
+          const target = rest.target;
+          const targetAttribute = rest.targetAttribute || null;
+          const relation = rest.relation;
+          const relationType = getRelationType(relation, targetAttribute);
+          const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
+
+          // When the user in creating a relation with the same content type we need to create another attribute
+          // that is the opposite of the created one
+          if (
+            rest.type === 'relation' &&
+            relationType !== 'oneWay' &&
+            relationType !== 'manyWay' &&
+            target === currentUid
+          ) {
+            const oppositeAttribute = {
+              name: targetAttribute,
+              relation: getOppositeRelation(relationType),
+              target,
+              targetAttribute: name,
+              type: 'relation',
+            };
+
+            if (rest.private) {
+              oppositeAttribute.private = rest.private;
+            }
+
+            const attributesToSet = [...updatedAttributes, oppositeAttribute];
+
+            set(
+              draftState,
+              ['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'],
+              attributesToSet
+            );
+          }
+        }
+
+        break;
+      }
       case actions.ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE: {
         const { dynamicZoneTarget, componentsToAdd } = action;
 
@@ -335,64 +439,6 @@ const reducer = (state = initialState, action) =>
 
 // const reducer = (state = initialState, action) => {
 //   switch (action.type) {
-//     case actions.ADD_ATTRIBUTE: {
-//       const {
-//         attributeToSet: { name, ...rest },
-//         forTarget,
-//         targetUid,
-//       } = action;
-//       delete rest.createComponent;
-
-//       const pathToDataToEdit = ['component', 'contentType'].includes(forTarget)
-//         ? [forTarget]
-//         : [forTarget, targetUid];
-
-//       return state
-//         .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes', name], () => {
-//           return fromJS(rest);
-//         })
-//         .updateIn(['modifiedData', ...pathToDataToEdit, 'schema', 'attributes'], obj => {
-//           const type = rest.type;
-//           const target = get(rest, 'target', null);
-//           const targetAttribute = get(rest, 'targetAttribute', null);
-//           const relation = get(rest, 'relation', null);
-//           const relationType = getRelationType(relation, targetAttribute);
-//           const currentUid = state.getIn(['modifiedData', ...pathToDataToEdit, 'uid']);
-
-//           // When the user in creating a relation with the same content type we need to create another attribute
-//           // that is the opposite of the created one
-//           if (
-//             type === 'relation' &&
-//             relationType !== 'oneWay' &&
-//             relationType !== 'manyWay' &&
-//             target === currentUid
-//           ) {
-//             const oppositeAttribute = {
-//               relation: getOppositeRelation(relationType),
-//               target,
-//               targetAttribute: name,
-//               type: 'relation',
-//             };
-
-//             if (rest.private) {
-//               oppositeAttribute.private = rest.private;
-//             }
-
-//             return obj.update(rest.targetAttribute, () => {
-//               return fromJS(oppositeAttribute);
-//             });
-//           }
-
-//           return obj;
-//         })
-//         .updateIn(['modifiedData', 'components'], existingCompos => {
-//           if (action.shouldAddComponentToData) {
-//             return addComponentsToState(state, rest.component, existingCompos);
-//           }
-
-//           return existingCompos;
-//         });
-//     }
 
 //     case actions.EDIT_ATTRIBUTE: {
 //       const {

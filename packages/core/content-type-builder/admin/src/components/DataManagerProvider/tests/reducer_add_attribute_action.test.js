@@ -1,703 +1,1545 @@
-// import { fromJS } from 'immutable';
-// import { get } from 'lodash';
-// import reducer, { initialState } from '../reducer';
-// import testData from './data';
-// import { ADD_ATTRIBUTE } from '../constants';
+import reducer, { initialState } from '../reducer';
+import { ADD_ATTRIBUTE } from '../constants';
 
 describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () => {
-  it('should have unit tests', () => {
-    expect(true).toBe(true);
+  describe('Adding a common field that is not a relation', () => {
+    it('Should add a text field to a content type correctly', () => {
+      const contentType = {
+        uid: 'application::category.category',
+        schema: {
+          name: 'category',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'test', type: 'string' }],
+        },
+      };
+      const state = {
+        ...initialState,
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
+
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          type: 'string',
+          name: 'name',
+          default: 'something',
+          private: true,
+          required: true,
+          unique: true,
+          maxLength: 3,
+          minLength: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: 'application::address.address',
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
+
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'name',
+                  type: 'string',
+                  default: 'something',
+                  private: true,
+                  required: true,
+                  unique: true,
+                  maxLength: 3,
+                  minLength: 1,
+                },
+              ],
+            },
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should add an integer field to a component that is an attribute of a content type', () => {
+      const compoSchema = {
+        uid: 'default.dish',
+        category: 'default',
+        schema: {
+          icon: 'book',
+          name: 'dish',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_dishes',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+              default: 'My super dish',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+            {
+              name: 'price',
+              type: 'float',
+            },
+            {
+              name: 'picture',
+              type: 'media',
+              multiple: false,
+              required: false,
+            },
+            {
+              name: 'very_long_description',
+              type: 'richtext',
+            },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+          ],
+        },
+      };
+      const contentType = {
+        uid: 'application::country.country',
+        schema: {
+          name: 'country',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'name', type: 'string', required: true, minLength: 3 },
+            { name: 'code', type: 'string', maxLength: 3, unique: true, minLength: 2 },
+            { name: 'compo_field', type: 'component', component: 'default.dish' },
+          ],
+        },
+      };
+
+      const state = {
+        ...initialState,
+        components: {
+          'default.dish': compoSchema,
+        },
+        modifiedData: {
+          components: {
+            'default.dish': compoSchema,
+          },
+          contentType,
+        },
+      };
+
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          name: 'test',
+          type: 'integer',
+          default: 2,
+          private: true,
+          required: true,
+          min: null,
+        },
+        forTarget: 'components',
+        targetUid: 'default.dish',
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
+
+      const expected = {
+        ...initialState,
+        components: {
+          'default.dish': compoSchema,
+        },
+        modifiedData: {
+          components: {
+            'default.dish': {
+              ...compoSchema,
+
+              schema: {
+                ...compoSchema.schema,
+                attributes: [
+                  ...compoSchema.schema.attributes,
+                  {
+                    name: 'test',
+                    type: 'integer',
+                    default: 2,
+                    private: true,
+                    required: true,
+                    min: null,
+                  },
+                ],
+              },
+            },
+          },
+          contentType,
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
   });
-  // describe('Adding a common field that is not a relation', () => {
-  //   it('Should add a text field to a content type correctly', () => {
-  //     const state = initialState.setIn(
-  //       ['modifiedData', 'contentType'],
-  //       fromJS(get(testData, ['contentTypes', 'application::address.address']))
-  //     );
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
 
-  //       attributeToSet: {
-  //         type: 'string',
-  //         name: 'name',
-  //         default: 'something',
-  //         private: true,
-  //         required: true,
-  //         unique: true,
-  //         maxLength: 3,
-  //         minLength: 1,
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: 'application::address.address',
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: false,
-  //     };
+  describe('Adding a component field attribute', () => {
+    it('Should create the component attribute and add the component to the modifiedData.components if the component is not in the object', () => {
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'geolocation', type: 'json', required: true },
+            { name: 'city', type: 'string', required: true },
+            { name: 'postal_coder', type: 'string' },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+            { name: 'cover', type: 'media', multiple: false, required: false },
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
+      const componentToAddUID = 'default.dish';
+      const componentSchema = {
+        uid: 'default.dish',
+        category: 'default',
+        schema: {
+          icon: 'book',
+          name: 'dish',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_dishes',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+              default: 'My super dish',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+            {
+              name: 'price',
+              type: 'float',
+            },
+            {
+              name: 'picture',
+              type: 'media',
+              multiple: false,
+              required: false,
+            },
+            {
+              name: 'very_long_description',
+              type: 'richtext',
+            },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+          ],
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'name'],
-  //       fromJS({
-  //         type: 'string',
-  //         default: 'something',
-  //         private: true,
-  //         required: true,
-  //         unique: true,
-  //         maxLength: 3,
-  //         minLength: 1,
-  //       })
-  //     );
+      const state = {
+        ...initialState,
+        components: {
+          [componentToAddUID]: componentSchema,
+        },
+        initialComponents: {
+          [componentToAddUID]: componentSchema,
+        },
+        contentTypes: {},
+        initialContentTypes: {},
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          type: 'component',
+          repeatable: true,
+          name: 'compoField',
+          component: componentToAddUID,
+          required: true,
+          max: 2,
+          min: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: 'application::address.address',
+        initialAttribute: {},
+        shouldAddComponentToData: true,
+      };
 
-  //   it('Should add a integer field to a component that is an attribute of a content type', () => {
-  //     const compoUID = 'default.dish';
-  //     const compoSchema = fromJS(get(testData, ['components', compoUID]));
-  //     const state = initialState
-  //       .setIn(
-  //         ['modifiedData', 'contentType'],
-  //         fromJS(get(testData, ['contentTypes', 'application::address.address'])).setIn(
-  //           ['schema', 'attributes', 'compo_field'],
-  //           fromJS({
-  //             type: 'component',
-  //             component: compoUID,
-  //           })
-  //         )
-  //       )
-  //       .setIn(['modifiedData', 'components', compoUID], compoSchema)
-  //       .setIn(['components', compoUID], compoSchema);
+      const expected = {
+        ...initialState,
+        components: {
+          [componentToAddUID]: componentSchema,
+        },
+        initialComponents: {
+          [componentToAddUID]: componentSchema,
+        },
+        contentTypes: {},
+        initialContentTypes: {},
+        modifiedData: {
+          components: {
+            [componentToAddUID]: componentSchema,
+          },
+          contentType: {
+            ...contentType,
 
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         name: 'test',
-  //         type: 'integer',
-  //         default: 2,
-  //         private: true,
-  //         required: true,
-  //         min: null,
-  //       },
-  //       forTarget: 'components',
-  //       targetUid: 'default.dish',
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: false,
-  //     };
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'compoField',
+                  type: 'component',
+                  repeatable: true,
+                  component: componentToAddUID,
+                  required: true,
+                  max: 2,
+                  min: 1,
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'components', compoUID, 'schema', 'attributes', 'test'],
-  //       fromJS({
-  //         type: 'integer',
-  //         default: 2,
-  //         private: true,
-  //         required: true,
-  //         min: null,
-  //       })
-  //     );
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+    it('Should create the component attribute and add the component to the modifiedData.components and its nested components if none of the added components are in the object', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'geolocation', type: 'json', required: true },
+            { name: 'city', type: 'string', required: true },
+            { name: 'postal_coder', type: 'string' },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+            { name: 'cover', type: 'media', multiple: false, required: false },
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
+      const componentToAddUID = 'default.closingperiod';
+      const componentSchema = {
+        uid: 'default.closingperiod',
+        category: '',
+        schema: {
+          icon: 'angry',
+          name: 'closingperiod',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_closingperiods',
+          attributes: [
+            {
+              name: 'label',
+              type: 'string',
+            },
+            {
+              name: 'start_date',
+              type: 'date',
+              required: true,
+            },
+            {
+              name: 'end_date',
+              type: 'date',
+              required: true,
+            },
+            {
+              name: 'media',
+              type: 'media',
+              multiple: false,
+              required: false,
+            },
+            { name: 'dish', component: 'default.dish', type: 'component' },
+          ],
+        },
+      };
 
-  // describe('Adding a component field attribute', () => {
-  //   it('Should create the component attribute and add the component to the modifiedData.components if the component is not in the object', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const contentType = get(testData, ['contentTypes', contentTypeUID]);
-  //     const componentToAddUID = 'default.dish';
+      const dishComponentSchema = {
+        uid: 'default.dish',
+        category: 'default',
+        schema: {
+          icon: 'book',
+          name: 'dish',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_dishes',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+              default: 'My super dish',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+            {
+              name: 'price',
+              type: 'float',
+            },
+            {
+              name: 'picture',
+              type: 'media',
+              multiple: false,
+              required: false,
+            },
+            {
+              name: 'very_long_description',
+              type: 'richtext',
+            },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+          ],
+        },
+      };
 
-  //     const state = initialState
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(contentType))
-  //       .setIn(['modifiedData', 'components'], fromJS({}));
+      const state = {
+        ...initialState,
+        components: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialComponents: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialContentTypes: {
+          [contentTypeUID]: contentType,
+        },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         type: 'component',
-  //         repeatable: true,
-  //         name: 'compoField',
-  //         component: componentToAddUID,
-  //         required: true,
-  //         max: 2,
-  //         min: 1,
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: 'application::address.address',
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: true,
-  //     };
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          type: 'component',
+          repeatable: true,
+          name: 'compoField',
+          component: componentToAddUID,
+          required: true,
+          max: 2,
+          min: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: 'application::address.address',
+        initialAttribute: {},
+        shouldAddComponentToData: true,
+      };
 
-  //     const expected = state
-  //       .setIn(
-  //         ['modifiedData', 'components', componentToAddUID],
-  //         fromJS(testData.components[componentToAddUID])
-  //       )
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', 'compoField'],
-  //         fromJS({
-  //           type: 'component',
-  //           repeatable: true,
+      const expected = {
+        ...initialState,
+        components: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialComponents: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialContentTypes: {
+          [contentTypeUID]: contentType,
+        },
+        modifiedData: {
+          components: {
+            [componentToAddUID]: componentSchema,
+            'default.dish': dishComponentSchema,
+          },
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'compoField',
+                  type: 'component',
+                  repeatable: true,
+                  component: componentToAddUID,
+                  required: true,
+                  max: 2,
+                  min: 1,
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //           component: componentToAddUID,
-  //           required: true,
-  //           max: 2,
-  //           min: 1,
-  //         })
-  //       );
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+    it('Should create the component attribute and add the component to the modifiedData.components and only add the nested components that are not in the modifiedData.components object to keep previous the modifications', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'geolocation', type: 'json', required: true },
+            { name: 'city', type: 'string', required: true },
+            { name: 'postal_coder', type: 'string' },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+            { name: 'cover', type: 'media', multiple: false, required: false },
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
+      const componentToAddUID = 'default.closingperiod';
+      const componentSchema = {
+        uid: 'default.closingperiod',
+        category: '',
+        schema: {
+          icon: 'angry',
+          name: 'closingperiod',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_closingperiods',
+          attributes: [
+            {
+              name: 'label',
+              type: 'string',
+            },
 
-  //   it('Should create the component attribute and add the component to the modifiedData.components and its nested components if none of the added components are in the object', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const contentType = get(testData, ['contentTypes', contentTypeUID]);
-  //     const componentToAddUID = 'default.closingperiod';
+            {
+              name: 'start_date',
+              type: 'date',
+              required: true,
+            },
+            {
+              name: 'end_date',
+              type: 'date',
+              required: true,
+            },
+            {
+              name: 'media',
+              type: 'media',
+              multiple: false,
+              required: false,
+            },
+            { name: 'dish', component: 'default.dish', type: 'component' },
+          ],
+        },
+      };
 
-  //     const state = initialState
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(contentType))
-  //       .setIn(['modifiedData', 'components'], fromJS({}));
+      const dishComponentSchema = {
+        uid: 'default.dish',
+        category: 'default',
+        schema: {
+          icon: 'book',
+          name: 'dish',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_dishes',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+              default: 'My super dish',
+            },
+            {
+              name: 'description',
+              type: 'text',
+            },
+            {
+              name: 'price',
+              type: 'float',
+            },
+            {
+              name: 'picture',
+              type: 'media',
+              multiple: false,
+              required: false,
+            },
+            {
+              name: 'very_long_description',
+              type: 'richtext',
+            },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+          ],
+        },
+      };
 
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         type: 'component',
-  //         repeatable: true,
-  //         name: 'compoField',
-  //         component: componentToAddUID,
-  //         required: true,
-  //         max: 2,
-  //         min: 1,
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: 'application::address.address',
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: true,
-  //     };
+      const state = {
+        ...initialState,
+        components: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialComponents: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialContentTypes: {
+          [contentTypeUID]: contentType,
+        },
+        modifiedData: {
+          components: {
+            'default.dish': {
+              ...dishComponentSchema,
+              schema: {
+                ...dishComponentSchema.schema,
+                attributes: [
+                  ...dishComponentSchema.schema.attributes,
+                  { name: 'test', type: 'string' },
+                ],
+              },
+            },
+          },
+          contentType,
+        },
+      };
 
-  //     const expected = state
-  //       .setIn(
-  //         ['modifiedData', 'components', componentToAddUID],
-  //         fromJS(testData.components[componentToAddUID])
-  //       )
-  //       .setIn(
-  //         ['modifiedData', 'components', 'default.dish'],
-  //         fromJS(testData.components['default.dish'])
-  //       )
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', 'compoField'],
-  //         fromJS({
-  //           type: 'component',
-  //           repeatable: true,
-  //           component: componentToAddUID,
-  //           required: true,
-  //           max: 2,
-  //           min: 1,
-  //         })
-  //       );
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          type: 'component',
+          repeatable: true,
+          name: 'compoField',
+          component: componentToAddUID,
+          required: true,
+          max: 2,
+          min: 1,
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: {},
+        shouldAddComponentToData: true,
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const expected = {
+        ...initialState,
+        components: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialComponents: {
+          [componentToAddUID]: componentSchema,
+          'default.dish': dishComponentSchema,
+        },
+        initialContentTypes: {
+          [contentTypeUID]: contentType,
+        },
+        modifiedData: {
+          components: {
+            'default.dish': {
+              ...dishComponentSchema,
+              schema: {
+                ...dishComponentSchema.schema,
+                attributes: [
+                  ...dishComponentSchema.schema.attributes,
+                  { name: 'test', type: 'string' },
+                ],
+              },
+            },
+            [componentToAddUID]: componentSchema,
+          },
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'compoField',
+                  type: 'component',
+                  repeatable: true,
+                  component: componentToAddUID,
+                  required: true,
+                  max: 2,
+                  min: 1,
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //   it('Should create the component attribute and add the component to the modifiedData.components and only add the nested components that are not in the modifiedData.components object to keep previous the modifications', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const contentType = get(testData, ['contentTypes', contentTypeUID]);
-  //     const componentToAddUID = 'default.closingperiod';
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     const state = initialState
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(contentType))
-  //       .setIn(
-  //         ['modifiedData', 'components', 'default.dish'],
-  //         fromJS(testData.components['default.dish'])
-  //       );
+    it('Should create the component correctly in case of creating the component on the fly', () => {
+      const componentToCreateUID = 'default.new-compo';
+      const componentToCreate = {
+        uid: componentToCreateUID,
+        isTemporary: true,
+        category: 'default',
+        schema: {
+          name: 'newCompo',
+          icon: 'ad',
+          attributes: {},
+        },
+      };
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
 
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         type: 'component',
-  //         repeatable: true,
-  //         name: 'compoField',
-  //         component: componentToAddUID,
-  //         required: true,
-  //         max: 2,
-  //         min: 1,
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: true,
-  //     };
+      const state = {
+        ...initialState,
+        components: {
+          [componentToCreateUID]: componentToCreate,
+        },
+        modifiedData: {
+          components: {
+            [componentToCreateUID]: componentToCreate,
+          },
+          contentType,
+        },
+      };
 
-  //     const expected = state
-  //       .setIn(
-  //         ['modifiedData', 'components', componentToAddUID],
-  //         fromJS(testData.components[componentToAddUID])
-  //       )
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          name: 'newCompo',
+          type: 'component',
+          repeatable: false,
+          component: componentToCreateUID,
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: undefined,
+        shouldAddComponentToData: false,
+      };
 
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', 'compoField'],
-  //         fromJS({
-  //           type: 'component',
-  //           repeatable: true,
-  //           component: componentToAddUID,
-  //           required: true,
-  //           max: 2,
-  //           min: 1,
-  //         })
-  //       );
+      const expected = {
+        ...initialState,
+        components: {
+          [componentToCreateUID]: componentToCreate,
+        },
+        modifiedData: {
+          components: {
+            [componentToCreateUID]: componentToCreate,
+          },
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'newCompo',
+                  type: 'component',
+                  repeatable: false,
+                  component: componentToCreateUID,
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
-  //   it('Should create the component correctly in case of creating the component on the fly', () => {
-  //     const componentToCreateUID = 'default.new-compo';
-  //     const componentToCreate = {
-  //       uid: componentToCreateUID,
-  //       isTemporary: true,
-  //       category: 'default',
-  //       schema: {
-  //         name: 'newCompo',
-  //         icon: 'ad',
-  //         attributes: {},
-  //       },
-  //     };
-  //     const contentTypeUID = 'application::address.address';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         name: 'newCompo',
-  //         type: 'component',
-  //         repeatable: false,
-  //         component: componentToCreateUID,
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       initialAttribute: undefined,
-  //       shouldAddComponentToData: false,
-  //     };
+  describe('Adding a dynamic zone', () => {
+    it('Should create the dynamiczone attribute correctly', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
 
-  //     const state = initialState
-  //       .setIn(['components', componentToCreateUID], fromJS(componentToCreate))
-  //       .setIn(['modifiedData', 'components', componentToCreateUID], fromJS(componentToCreate))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
+      const state = {
+        ...initialState,
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'newCompo'],
-  //       fromJS({
-  //         type: 'component',
-  //         repeatable: false,
-  //         component: componentToCreateUID,
-  //       })
-  //     );
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          type: 'dynamiczone',
+          components: [],
+          name: 'dz',
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      const expected = {
+        ...initialState,
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                { name: 'dz', type: 'dynamiczone', components: [] },
+              ],
+            },
+          },
+        },
+      };
 
-  // describe('Adding a dynamic zone', () => {
-  //   it('Should create the dynamiczone attribute correctly', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         type: 'dynamiczone',
-  //         components: [],
-  //         name: 'dz',
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const state = initialState.setIn(
-  //       ['modifiedData', 'contentType'],
-  //       fromJS(testData.contentTypes[contentTypeUID])
-  //     );
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'dz'],
-  //       fromJS({
-  //         type: 'dynamiczone',
-  //         components: [],
-  //       })
-  //     );
+  describe('Adding a relation with another content type', () => {
+    it('Should add the relation attribute correctly for a content type', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'geolocation', type: 'json', required: true },
+            { name: 'city', type: 'string', required: true },
+            { name: 'postal_coder', type: 'string' },
+            {
+              name: 'category',
+              relation: 'oneToOne',
+              target: 'application::category.category',
+              targetAttribute: null,
+              type: 'relation',
+            },
+            { name: 'cover', type: 'media', multiple: false, required: false },
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
+      const targetContentTypeUID = 'application::category.category';
+      const targetContentTypeSchema = {
+        uid: 'application::category.category',
+        schema: {
+          name: 'category',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'name', type: 'string' }],
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      const state = {
+        ...initialState,
+        contentTypes: {
+          [contentTypeUID]: contentType,
+          [targetContentTypeUID]: targetContentTypeSchema,
+        },
+        initialContentTypes: {
+          [contentTypeUID]: contentType,
+          [targetContentTypeUID]: targetContentTypeSchema,
+        },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  // describe('Adding a relation with another content type', () => {
-  //   it('Should add the relation attribute correctly for a content type', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const targetContentTypeUID = 'application::category.category';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         name: 'categories',
-  //         relation: 'oneToMany',
-  //         targetAttribute: 'address',
-  //         target: targetContentTypeUID,
-  //         type: 'relation',
-  //       },
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: false,
-  //     };
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          name: 'categories',
+          relation: 'oneToMany',
+          targetAttribute: 'address',
+          target: targetContentTypeUID,
+          type: 'relation',
+        },
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
 
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]))
-  //       .setIn(['modifiedData', 'components'], fromJS({}));
+      const expected = {
+        ...initialState,
+        contentTypes: {
+          [contentTypeUID]: contentType,
+          [targetContentTypeUID]: targetContentTypeSchema,
+        },
+        initialContentTypes: {
+          [contentTypeUID]: contentType,
+          [targetContentTypeUID]: targetContentTypeSchema,
+        },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'categories',
+                  relation: 'oneToMany',
+                  targetAttribute: 'address',
+                  target: targetContentTypeUID,
+                  type: 'relation',
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'categories'],
-  //       fromJS({
-  //         relation: 'oneToMany',
-  //         targetAttribute: 'address',
-  //         target: targetContentTypeUID,
-  //         type: 'relation',
-  //       })
-  //     );
+      // const expected = state.setIn(
+      //   ['modifiedData', 'contentType', 'schema', 'attributes', 'categories'],
+      //   fromJS({
+      //     relation: 'oneToMany',
+      //     targetAttribute: 'address',
+      //     target: targetContentTypeUID,
+      //     type: 'relation',
+      //   })
+      // );
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //   it('Should add the relation attribute correctly for a component', () => {
-  //     const componentUID = 'default.dish';
-  //     const targetContentTypeUID = 'application::category.category';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         name: 'address',
-  //         relation: 'oneToOne',
-  //         targetAttribute: null,
-  //         target: targetContentTypeUID,
-  //         type: 'relation',
-  //       },
-  //       forTarget: 'component',
-  //       targetUid: componentUID,
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: false,
-  //     };
+    it('Should add the relation attribute correctly for a component', () => {
+      const componentUID = 'default.dish';
+      const targetContentTypeUID = 'application::category.category';
+      const compoSchema = {
+        uid: 'default.dish',
+        category: 'default',
+        schema: {
+          icon: 'book',
+          name: 'dish',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_dishes',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+              default: 'My super dish',
+            },
+          ],
+        },
+      };
 
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'component'], fromJS(testData.components[componentUID]))
-  //       .setIn(['modifiedData', 'components'], fromJS({}));
+      const state = {
+        ...initialState,
+        components: { [componentUID]: compoSchema },
+        initialComponents: { [componentUID]: compoSchema },
+        modifiedData: {
+          components: {},
+          component: compoSchema,
+        },
+      };
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'component', 'schema', 'attributes', 'address'],
-  //       fromJS({
-  //         relation: 'oneToOne',
-  //         targetAttribute: null,
-  //         target: targetContentTypeUID,
-  //         type: 'relation',
-  //       })
-  //     );
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          name: 'address',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: targetContentTypeUID,
+          type: 'relation',
+        },
+        forTarget: 'component',
+        targetUid: componentUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const expected = {
+        ...initialState,
+        components: { [componentUID]: compoSchema },
+        initialComponents: { [componentUID]: compoSchema },
+        modifiedData: {
+          components: {},
+          component: {
+            ...compoSchema,
+            schema: {
+              ...compoSchema.schema,
+              attributes: [
+                ...compoSchema.schema.attributes,
+                {
+                  name: 'address',
+                  relation: 'oneToOne',
+                  targetAttribute: null,
+                  target: targetContentTypeUID,
+                  type: 'relation',
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //   it('Should add the relation attribute correctly for a component from the modifiedData.components object', () => {
-  //     const componentUID = 'default.dish';
-  //     const targetContentTypeUID = 'application::category.category';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       attributeToSet: {
-  //         name: 'address',
-  //         relation: 'oneToOne',
-  //         targetAttribute: null,
-  //         target: targetContentTypeUID,
-  //         type: 'relation',
-  //         private: true,
-  //       },
-  //       forTarget: 'components',
-  //       targetUid: componentUID,
-  //       initialAttribute: {},
-  //       shouldAddComponentToData: false,
-  //     };
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[targetContentTypeUID]))
-  //       .setIn(
-  //         ['modifiedData', 'components', componentUID],
-  //         fromJS(testData.components[componentUID])
-  //       )
-  //       .setIn(['modifiedData', 'components'], fromJS({}));
+    it('Should add the relation attribute correctly for a component from the modifiedData.components object', () => {
+      const componentUID = 'default.dish';
+      const targetContentTypeUID = 'application::category.category';
 
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'components', componentUID, 'schema', 'attributes', 'address'],
-  //       fromJS({
-  //         relation: 'oneToOne',
-  //         targetAttribute: null,
-  //         target: targetContentTypeUID,
-  //         type: 'relation',
-  //         private: true,
-  //       })
-  //     );
+      const compoSchema = {
+        uid: 'default.dish',
+        category: 'default',
+        schema: {
+          icon: 'book',
+          name: 'dish',
+          description: '',
+          connection: 'default',
+          collectionName: 'components_dishes',
+          attributes: [
+            {
+              name: 'name',
+              type: 'string',
+              required: true,
+              default: 'My super dish',
+            },
+          ],
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      const state = {
+        ...initialState,
+        components: { [componentUID]: compoSchema },
+        initialComponents: { [componentUID]: compoSchema },
+        modifiedData: {
+          components: { [componentUID]: compoSchema },
+          contenType: {},
+        },
+      };
 
-  // describe('Adding a relation with the same content type', () => {
-  //   it('Should not create an opposite attribute if the relation is oneWay', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       attributeToSet: {
-  //         name: 'address',
-  //         relation: 'oneToOne',
-  //         targetAttribute: null,
-  //         target: contentTypeUID,
-  //         type: 'relation',
-  //       },
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
-  //       fromJS({
-  //         relation: 'oneToOne',
-  //         targetAttribute: null,
-  //         target: contentTypeUID,
-  //         type: 'relation',
-  //       })
-  //     );
+      const action = {
+        type: ADD_ATTRIBUTE,
+        attributeToSet: {
+          name: 'address',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: targetContentTypeUID,
+          type: 'relation',
+          private: true,
+        },
+        forTarget: 'components',
+        targetUid: componentUID,
+        initialAttribute: {},
+        shouldAddComponentToData: false,
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const expected = {
+        ...initialState,
+        components: { [componentUID]: compoSchema },
+        initialComponents: { [componentUID]: compoSchema },
+        modifiedData: {
+          components: {
+            [componentUID]: {
+              ...compoSchema,
+              schema: {
+                ...compoSchema.schema,
+                attributes: [
+                  ...compoSchema.schema.attributes,
+                  {
+                    name: 'address',
+                    relation: 'oneToOne',
+                    targetAttribute: null,
+                    target: targetContentTypeUID,
+                    type: 'relation',
+                    private: true,
+                  },
+                ],
+              },
+            },
+          },
+          contenType: {},
+        },
+      };
 
-  //   it('Should not create an opposite attribute if the relation is manyWay', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       attributeToSet: {
-  //         name: 'address',
-  //         relation: 'oneToMany',
-  //         targetAttribute: null,
-  //         target: contentTypeUID,
-  //         type: 'relation',
-  //       },
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
-  //     const expected = state.setIn(
-  //       ['modifiedData', 'contentType', 'schema', 'attributes', 'address'],
-  //       fromJS({
-  //         relation: 'oneToMany',
-  //         targetAttribute: null,
-  //         target: contentTypeUID,
-  //         type: 'relation',
-  //       })
-  //     );
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+  describe('Adding a relation with the same content type', () => {
+    it('Should not create an opposite attribute if the relation is oneWay', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'full_name', type: 'string', required: true }],
+        },
+      };
 
-  //   it('Should handle the oneToOne relation correctly and create the opposite attribute', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const name = 'address_left_side';
-  //     const targetAttribute = 'address_right_side';
-  //     const attribute = {
-  //       relation: 'oneToOne',
-  //       targetAttribute,
-  //       target: contentTypeUID,
-  //       type: 'relation',
-  //     };
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       attributeToSet: {
-  //         name,
-  //         ...attribute,
-  //       },
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const oppositeAttribute = {
-  //       relation: 'oneToOne',
-  //       target: contentTypeUID,
-  //       targetAttribute: name,
-  //       type: 'relation',
-  //     };
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
+      const state = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  //     const expected = state
-  //       .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
-  //         fromJS(oppositeAttribute)
-  //       );
+      const action = {
+        type: ADD_ATTRIBUTE,
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name: 'address',
+          relation: 'oneToOne',
+          targetAttribute: null,
+          target: contentTypeUID,
+          type: 'relation',
+        },
+        shouldAddComponentToData: false,
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const expected = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'address',
+                  relation: 'oneToOne',
+                  targetAttribute: null,
+                  target: contentTypeUID,
+                  type: 'relation',
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //   it('Should handle the oneToMany relation correctly and create the opposite attribute', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const name = 'address_left_side';
-  //     const targetAttribute = 'address_right_side';
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     const attribute = {
-  //       relation: 'oneToMany',
-  //       targetAttribute,
-  //       target: contentTypeUID,
-  //       type: 'relation',
-  //     };
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       attributeToSet: {
-  //         name,
-  //         ...attribute,
-  //       },
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const oppositeAttribute = {
-  //       relation: 'manyToOne',
-  //       target: contentTypeUID,
-  //       targetAttribute: name,
-  //       type: 'relation',
-  //     };
+    it('Should not create an opposite attribute if the relation is manyWay', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'full_name', type: 'string', required: true }],
+        },
+      };
 
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
+      const state = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  //     const expected = state
-  //       .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
-  //         fromJS(oppositeAttribute)
-  //       );
+      const action = {
+        type: ADD_ATTRIBUTE,
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: {
+          name: 'addresses',
+          relation: 'oneToMany',
+          targetAttribute: null,
+          target: contentTypeUID,
+          type: 'relation',
+        },
+        shouldAddComponentToData: false,
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const expected = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [
+                ...contentType.schema.attributes,
+                {
+                  name: 'addresses',
+                  relation: 'oneToMany',
+                  targetAttribute: null,
+                  target: contentTypeUID,
+                  type: 'relation',
+                },
+              ],
+            },
+          },
+        },
+      };
 
-  //   it('Should handle the manyToOne relation correctly and create the opposite attribute', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const name = 'address_left_side';
-  //     const targetAttribute = 'address_right_side';
-  //     const attribute = {
-  //       relation: 'manyToOne',
-  //       targetAttribute,
-  //       target: contentTypeUID,
-  //       type: 'relation',
-  //     };
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       attributeToSet: {
-  //         name,
-  //         ...attribute,
-  //       },
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const oppositeAttribute = {
-  //       relation: 'oneToMany',
-  //       target: contentTypeUID,
-  //       targetAttribute: name,
-  //       type: 'relation',
-  //     };
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
+      expect(reducer(state, action)).toEqual(expected);
+    });
 
-  //     const expected = state
-  //       .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
-  //         fromJS(oppositeAttribute)
-  //       );
+    it('Should handle the oneToOne relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [
+            { name: 'images', type: 'media', multiple: true, required: false },
+            { name: 'full_name', type: 'string', required: true },
+          ],
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
+      const state = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
 
-  //   it('Should handle the manyToMany relation correctly and create the opposite attribute', () => {
-  //     const contentTypeUID = 'application::address.address';
-  //     const name = 'address_left_side';
-  //     const targetAttribute = 'address_right_side';
-  //     const attribute = {
-  //       relation: 'manyToMany',
-  //       targetAttribute,
-  //       target: contentTypeUID,
-  //       type: 'relation',
-  //     };
-  //     const action = {
-  //       type: ADD_ATTRIBUTE,
-  //       forTarget: 'contentType',
-  //       targetUid: contentTypeUID,
-  //       attributeToSet: {
-  //         name,
-  //         ...attribute,
-  //       },
-  //       shouldAddComponentToData: false,
-  //     };
-  //     const oppositeAttribute = {
-  //       relation: 'manyToMany',
-  //       target: contentTypeUID,
-  //       targetAttribute: name,
-  //       type: 'relation',
-  //     };
-  //     const state = initialState
-  //       .set('contentTypes', fromJS(testData.contentTypes))
-  //       .set('components', fromJS(testData.components))
-  //       .set('initialComponents', fromJS(testData.components))
-  //       .set('initialContentTypes', fromJS(testData.contentTypes))
-  //       .setIn(['modifiedData', 'contentType'], fromJS(testData.contentTypes[contentTypeUID]));
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const attribute = {
+        name,
+        relation: 'oneToOne',
+        targetAttribute,
+        target: contentTypeUID,
+        type: 'relation',
+      };
+      const action = {
+        type: ADD_ATTRIBUTE,
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: attribute,
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        name: targetAttribute,
+        relation: 'oneToOne',
+        target: contentTypeUID,
+        targetAttribute: name,
+        type: 'relation',
+      };
 
-  //     const expected = state
-  //       .setIn(['modifiedData', 'contentType', 'schema', 'attributes', name], fromJS(attribute))
-  //       .setIn(
-  //         ['modifiedData', 'contentType', 'schema', 'attributes', targetAttribute],
-  //         fromJS(oppositeAttribute)
-  //       );
+      const expected = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [...contentType.schema.attributes, attribute, oppositeAttribute],
+            },
+          },
+        },
+      };
 
-  //     expect(reducer(state, action)).toEqual(expected);
-  //   });
-  // });
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the oneToMany relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'full_name', type: 'string', required: true }],
+        },
+      };
+
+      const state = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
+
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+
+      const attribute = {
+        name,
+        relation: 'oneToMany',
+        targetAttribute,
+        target: contentTypeUID,
+        type: 'relation',
+      };
+      const action = {
+        type: ADD_ATTRIBUTE,
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: attribute,
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        name: targetAttribute,
+        relation: 'manyToOne',
+        target: contentTypeUID,
+        targetAttribute: name,
+        type: 'relation',
+      };
+
+      const expected = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [...contentType.schema.attributes, attribute, oppositeAttribute],
+            },
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the manyToOne relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'full_name', type: 'string', required: true }],
+        },
+      };
+
+      const state = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
+
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const attribute = {
+        name,
+        relation: 'manyToOne',
+        targetAttribute,
+        target: contentTypeUID,
+        type: 'relation',
+      };
+      const action = {
+        type: ADD_ATTRIBUTE,
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: attribute,
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        name: targetAttribute,
+        relation: 'oneToMany',
+        target: contentTypeUID,
+        targetAttribute: name,
+        type: 'relation',
+      };
+
+      const expected = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [...contentType.schema.attributes, attribute, oppositeAttribute],
+            },
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+
+    it('Should handle the manyToMany relation correctly and create the opposite attribute', () => {
+      const contentTypeUID = 'application::address.address';
+      const contentType = {
+        uid: 'application::address.address',
+        schema: {
+          name: 'address',
+          description: '',
+          connection: 'default',
+          collectionName: '',
+          attributes: [{ name: 'full_name', type: 'string', required: true }],
+        },
+      };
+
+      const state = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType,
+        },
+      };
+
+      const name = 'address_left_side';
+      const targetAttribute = 'address_right_side';
+      const attribute = {
+        name,
+        relation: 'manyToMany',
+        targetAttribute,
+        target: contentTypeUID,
+        type: 'relation',
+      };
+      const action = {
+        type: ADD_ATTRIBUTE,
+        forTarget: 'contentType',
+        targetUid: contentTypeUID,
+        attributeToSet: attribute,
+        shouldAddComponentToData: false,
+      };
+      const oppositeAttribute = {
+        name: targetAttribute,
+        relation: 'manyToMany',
+        target: contentTypeUID,
+        targetAttribute: name,
+        type: 'relation',
+      };
+
+      const expected = {
+        ...initialState,
+        contentTypes: { [contentTypeUID]: contentType },
+        initialContentTypes: { [contentTypeUID]: contentType },
+        modifiedData: {
+          components: {},
+          contentType: {
+            ...contentType,
+            schema: {
+              ...contentType.schema,
+              attributes: [...contentType.schema.attributes, attribute, oppositeAttribute],
+            },
+          },
+        },
+      };
+
+      expect(reducer(state, action)).toEqual(expected);
+    });
+  });
 });
