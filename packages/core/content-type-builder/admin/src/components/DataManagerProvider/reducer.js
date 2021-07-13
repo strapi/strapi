@@ -271,130 +271,139 @@ const reducer = (state = initialState, action) =>
           break;
         }
 
-        let oppositeAttributeNameToRemove = null;
-        let oppositeAttributeNameToUpdate = null;
-        let oppositeAttributeToCreate = null;
-
-        const currentAttributes = get(state, [
+        const updatedAttributes = get(state, [
           'modifiedData',
           ...pathToDataToEdit,
           'schema',
           'attributes',
         ]).slice();
 
-        const updatedAttributes = currentAttributes.reduce((acc, current) => {
-          const isEditingCurrentAttribute = current.name === initialAttributeName;
+        // First create the current relation attribute updated
+        const toSet = {
+          name,
+          relation: rest.relation,
+          target: rest.target,
+          targetAttribute: rest.targetAttribute,
+          type: 'relation',
+        };
 
-          if (current.name === oppositeAttributeNameToRemove) {
-            return acc;
+        if (rest.private) {
+          toSet.private = rest.private;
+        }
+
+        const currentAttributeIndex = updatedAttributes.findIndex(
+          ({ name }) => name === initialAttribute.name
+        );
+
+        // First set it in the updatedAttributes
+        if (currentAttributeIndex !== -1) {
+          updatedAttributes.splice(currentAttributeIndex, 1, toSet);
+        }
+
+        let oppositeAttributeNameToRemove = null;
+        let oppositeAttributeNameToUpdate = null;
+        let oppositeAttributeToCreate = null;
+
+        const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
+        const didChangeTargetRelation = initialAttribute.target !== rest.target;
+        const didCreateInternalRelation = rest.target === currentUid;
+        const relationType = getRelationType(rest.relation, rest.targetAttribute);
+        const initialRelationType = getRelationType(
+          initialAttribute.relation,
+          initialAttribute.targetAttribute
+        );
+        const hadInternalRelation = initialAttribute.target === currentUid;
+        const didChangeRelationType = initialRelationType !== relationType;
+        const shouldRemoveOppositeAttributeBecauseOfTargetChange =
+          didChangeTargetRelation &&
+          !didCreateInternalRelation &&
+          hadInternalRelation &&
+          isEditingRelation;
+        const shouldRemoveOppositeAttributeBecauseOfRelationTypeChange =
+          didChangeRelationType &&
+          hadInternalRelation &&
+          ['oneWay', 'manyWay'].includes(relationType) &&
+          isEditingRelation;
+        const shouldUpdateOppositeAttributeBecauseOfRelationTypeChange =
+          !ONE_SIDE_RELATIONS.includes(initialRelationType) &&
+          !ONE_SIDE_RELATIONS.includes(relationType) &&
+          hadInternalRelation &&
+          didCreateInternalRelation &&
+          isEditingRelation;
+        const shouldCreateOppositeAttributeBecauseOfRelationTypeChange =
+          ONE_SIDE_RELATIONS.includes(initialRelationType) &&
+          !ONE_SIDE_RELATIONS.includes(relationType) &&
+          hadInternalRelation &&
+          didCreateInternalRelation &&
+          isEditingRelation;
+        const shouldCreateOppositeAttributeBecauseOfTargetChange =
+          didChangeTargetRelation &&
+          didCreateInternalRelation &&
+          !ONE_SIDE_RELATIONS.includes(relationType);
+
+        // Store opposite attribute name to remove at the end of the loop
+        if (
+          shouldRemoveOppositeAttributeBecauseOfTargetChange ||
+          shouldRemoveOppositeAttributeBecauseOfRelationTypeChange
+        ) {
+          oppositeAttributeNameToRemove = initialAttribute.targetAttribute;
+        }
+
+        // In case of oneWay or manyWay relation there isn't an opposite attribute
+        if (oppositeAttributeNameToRemove) {
+          const indexToRemove = updatedAttributes.findIndex(
+            ({ name }) => name === oppositeAttributeNameToRemove
+          );
+
+          updatedAttributes.splice(indexToRemove, 1);
+        }
+
+        // Create the opposite attribute
+        if (
+          shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
+          shouldCreateOppositeAttributeBecauseOfTargetChange
+        ) {
+          oppositeAttributeToCreate = {
+            name: rest.targetAttribute,
+            relation: getOppositeRelation(relationType),
+            target: rest.target,
+            targetAttribute: name,
+            type: 'relation',
+          };
+
+          if (rest.private) {
+            oppositeAttributeToCreate.private = rest.private;
           }
 
-          if (isEditingCurrentAttribute) {
-            const currentUid = get(state, ['modifiedData', ...pathToDataToEdit, 'uid']);
-            const isEditingRelation = initialAttribute.type === 'relation';
-            const didChangeTargetRelation = initialAttribute.target !== rest.target;
-            const didCreateInternalRelation = rest.target === currentUid;
-            const relationType = getRelationType(rest.relation, rest.targetAttribute);
-            const initialRelationType = getRelationType(
-              initialAttribute.relation,
-              initialAttribute.targetAttribute
+          const indexToInsert =
+            updatedAttributes.findIndex(({ name }) => name === initialAttribute.name) + 1;
+
+          updatedAttributes.splice(indexToInsert, 0, oppositeAttributeToCreate);
+        }
+
+        if (shouldUpdateOppositeAttributeBecauseOfRelationTypeChange) {
+          oppositeAttributeNameToUpdate = initialAttribute.targetAttribute;
+
+          oppositeAttributeToCreate = {
+            name: rest.targetAttribute,
+            relation: getOppositeRelation(relationType),
+            target: rest.target,
+            targetAttribute: name,
+            type: 'relation',
+          };
+
+          if (rest.private) {
+            oppositeAttributeToCreate.private = rest.private;
+          }
+
+          if (oppositeAttributeNameToUpdate) {
+            const indexToUpdate = updatedAttributes.findIndex(
+              ({ name }) => name === oppositeAttributeNameToUpdate
             );
-            const hadInternalRelation = initialAttribute.target === currentUid;
-            const didChangeRelationType = initialRelationType !== relationType;
-            const shouldRemoveOppositeAttributeBecauseOfTargetChange =
-              didChangeTargetRelation &&
-              !didCreateInternalRelation &&
-              hadInternalRelation &&
-              isEditingRelation;
-            const shouldRemoveOppositeAttributeBecauseOfRelationTypeChange =
-              didChangeRelationType &&
-              hadInternalRelation &&
-              ['oneWay', 'manyWay'].includes(relationType) &&
-              isEditingRelation;
-            const shouldUpdateOppositeAttributeBecauseOfRelationTypeChange =
-              !ONE_SIDE_RELATIONS.includes(initialRelationType) &&
-              !ONE_SIDE_RELATIONS.includes(relationType) &&
-              hadInternalRelation &&
-              didCreateInternalRelation &&
-              isEditingRelation;
-            const shouldCreateOppositeAttributeBecauseOfRelationTypeChange =
-              ONE_SIDE_RELATIONS.includes(initialRelationType) &&
-              !ONE_SIDE_RELATIONS.includes(relationType) &&
-              hadInternalRelation &&
-              didCreateInternalRelation &&
-              isEditingRelation;
-            const shouldCreateOppositeAttributeBecauseOfTargetChange =
-              didChangeTargetRelation &&
-              didCreateInternalRelation &&
-              !ONE_SIDE_RELATIONS.includes(relationType);
 
-            // Update the opposite attribute name so it is removed at the end of the loop
-            if (
-              shouldRemoveOppositeAttributeBecauseOfTargetChange ||
-              shouldRemoveOppositeAttributeBecauseOfRelationTypeChange
-            ) {
-              oppositeAttributeNameToRemove = initialAttribute.targetAttribute;
-            }
-
-            // Set the opposite attribute that will be updated when the loop attribute matches the name
-            if (
-              shouldUpdateOppositeAttributeBecauseOfRelationTypeChange ||
-              shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
-              shouldCreateOppositeAttributeBecauseOfTargetChange
-            ) {
-              oppositeAttributeNameToUpdate = initialAttribute.targetAttribute;
-
-              oppositeAttributeToCreate = {
-                name: rest.targetAttribute,
-                relation: getOppositeRelation(relationType),
-                target: rest.target,
-                targetAttribute: name,
-                type: 'relation',
-              };
-
-              if (rest.private) {
-                oppositeAttributeToCreate.private = rest.private;
-              }
-
-              // First update the current attribute with the value
-              const toSet = {
-                name,
-                relation: rest.relation,
-                target: rest.target,
-                targetAttribute: rest.targetAttribute,
-                type: 'relation',
-              };
-
-              if (rest.private) {
-                toSet.private = rest.private;
-              }
-
-              acc.push(toSet);
-
-              // Then (if needed) create the opposite attribute the case is changing the relation from
-              // We do it here so keep the order of the attributes
-              // oneWay || manyWay to something another relation
-              if (
-                shouldCreateOppositeAttributeBecauseOfRelationTypeChange ||
-                shouldCreateOppositeAttributeBecauseOfTargetChange
-              ) {
-                acc.push(oppositeAttributeToCreate);
-
-                oppositeAttributeToCreate = null;
-              }
-
-              return acc;
-            }
-
-            acc.push(action.attributeToSet);
-          } else if (current.name === oppositeAttributeNameToUpdate) {
-            acc.push(oppositeAttributeToCreate);
-          } else {
-            acc.push(current);
+            updatedAttributes.splice(indexToUpdate, 1, oppositeAttributeToCreate);
           }
-
-          return acc;
-        }, []);
+        }
 
         set(
           draftState,
