@@ -185,7 +185,6 @@ const reducer = (state = initialState, action) =>
         ].components = updatedComponents;
 
         // Retrieve all the components that needs to be added to the modifiedData.components
-        // TODO check if it works
         const nestedComponents = retrieveComponentsFromSchema(
           current(draftState.modifiedData.contentType.schema.attributes),
           state.components

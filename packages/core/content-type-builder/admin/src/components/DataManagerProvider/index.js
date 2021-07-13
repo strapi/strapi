@@ -351,7 +351,6 @@ const DataManagerProvider = ({
     }
   };
 
-  // TODO
   const getAllComponentsThatHaveAComponentInTheirAttributes = () => {
     // We need to create an object with all the non modified compos
     // plus the ones that are created on the fly
@@ -370,7 +369,6 @@ const DataManagerProvider = ({
     return makeUnique(composWithCompos);
   };
 
-  // TODO
   const getAllNestedComponents = () => {
     const appNestedCompo = retrieveNestedComponents(components);
     const editingDataNestedCompos = retrieveNestedComponents(modifiedData.components || {});
