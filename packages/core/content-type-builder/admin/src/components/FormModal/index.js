@@ -32,6 +32,7 @@ import HeaderModalNavContainer from '../HeaderModalNavContainer';
 import RelationForm from '../RelationForm';
 import HeaderNavLink from '../HeaderNavLink';
 import WrapperSelect from '../WrapperSelect';
+import findAttribute from '../../utils/findAttribute';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 import {
@@ -208,22 +209,24 @@ const FormModal = () => {
         trackUsage('willEditFieldOfContentType');
       }
 
+      const pathToAttributes = [...pathToSchema, 'schema', 'attributes'];
+
       // Case:
       // the user opens the modal chooseAttributes
       // selects dynamic zone => set the field name
       // then goes to step 1 (the modal is addComponentToDynamicZone) and finally reloads the app.
       // In this particular if the user tries to add components to the zone it will pop an error since the dz is unknown
+      const foundDynamicZoneTarget =
+        findAttribute(get(allDataSchema, pathToAttributes, []), dynamicZoneTarget) || null;
+
       const shouldCloseModalToPreventErrorWhenCreatingADZ =
-        get(allDataSchema, [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget], null) ===
-          null && modalType === 'addComponentToDynamicZone';
+        foundDynamicZoneTarget === null && modalType === 'addComponentToDynamicZone';
 
       // Similarly when creating a component on the fly if the user reloads the app
       // The previous data is lost
       // Since the modal uses the search it will still be opened
       const shouldCloseModalChooseAttribute =
-        get(allDataSchema, ['components', targetUid], null) === null &&
-        // modalType === 'chooseAttribute' &&
-        forTarget === 'components';
+        get(allDataSchema, ['components', targetUid], null) === null && forTarget === 'components';
 
       if (shouldCloseModalToPreventErrorWhenCreatingADZ || shouldCloseModalChooseAttribute) {
         push({ search: '' });
@@ -311,13 +314,8 @@ const FormModal = () => {
         state.modalType !== 'addComponentToDynamicZone' &&
         actionType === 'edit'
       ) {
-        const attributeToEditNotFormatted = get(
-          allDataSchema,
-          [...pathToSchema, 'schema', 'attributes', dynamicZoneTarget],
-          {}
-        );
         const attributeToEdit = {
-          ...attributeToEditNotFormatted,
+          ...foundDynamicZoneTarget,
           // We filter the available components
           // Because this modal is only used for adding components
           components: [],
@@ -339,10 +337,9 @@ const FormModal = () => {
         // This condition is added to prevent the reducer state to be cleared when navigating from the base tab to tha advanced one
         state.modalType !== 'attribute'
       ) {
-        const attributeToEditNotFormatted = get(
-          allDataSchema,
-          [...pathToSchema, 'schema', 'attributes', attributeName],
-          {}
+        const attributeToEditNotFormatted = findAttribute(
+          get(allDataSchema, pathToAttributes, []),
+          attributeName
         );
         const attributeToEdit = {
           ...attributeToEditNotFormatted,
@@ -444,17 +441,18 @@ const FormModal = () => {
 
       if (type === 'relation') {
         const targetContentTypeUID = get(modifiedData, ['target'], null);
+
         const targetContentTypeAttributes = get(
           contentTypes,
           [targetContentTypeUID, 'schema', 'attributes'],
-          {}
+          []
         );
 
         // Create an array with all the targetContentType attributes name
         // in order to prevent the user from creating a relation with a targetAttribute
         // that may exist in the other content type
-        alreadyTakenTargetContentTypeAttributes = Object.keys(targetContentTypeAttributes).filter(
-          attrName => {
+        alreadyTakenTargetContentTypeAttributes = targetContentTypeAttributes.filter(
+          ({ name: attrName }) => {
             // Keep all the target content type attributes when creating a relation
             if (state.actionType !== 'edit') {
               return true;

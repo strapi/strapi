@@ -1,4 +1,5 @@
-import { get, toLower } from 'lodash';
+import get from 'lodash/get';
+import toLower from 'lodash/toLower';
 import { nameToSlug } from '../utils/createUid';
 import { attributesForm, attributeTypes, commonBaseForm } from '../attributes';
 import { categoryForm, createCategorySchema } from '../category';
@@ -16,11 +17,13 @@ const forms = {
       options,
       extensions
     ) {
-      const attributes = get(currentSchema, ['schema', 'attributes'], {});
+      const attributes = get(currentSchema, ['schema', 'attributes'], []);
 
-      const usedAttributeNames = Object.keys(attributes).filter(attr => {
-        return attr !== options.initialData.name;
-      });
+      const usedAttributeNames = attributes
+        .filter(({ name }) => {
+          return name !== options.initialData.name;
+        })
+        .map(({ name }) => name);
 
       try {
         let attributeShape = attributeTypes[attributeType](
@@ -110,6 +113,7 @@ const forms = {
       isEditing = false,
       compoUid = null
     ) {
+      console.log({ alreadyTakenAttributes });
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;

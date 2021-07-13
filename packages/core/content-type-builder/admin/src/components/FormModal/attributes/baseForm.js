@@ -278,9 +278,12 @@ const baseForm = {
     };
   },
   uid: (data, step, attributes) => {
-    const options = Object.keys(attributes)
-      .filter(key => ['string', 'text'].includes(attributes[key].type))
-      .map(key => ({ id: key, value: key }));
+    const options = attributes
+      .filter(({ type }) => ['string', 'text'].includes(type))
+      .map(({ name }) => ({ id: name, value: name }));
+    // const options = Object.keys(attributes)
+    //   .filter(key => ['string', 'text'].includes(attributes[key].type))
+    //   .map(key => ({ id: key, value: key }));
 
     return {
       items: [
