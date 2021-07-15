@@ -1,6 +1,4 @@
 import ReactDOM from 'react-dom';
-
-import StrapiApp from './StrapiApp';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
 import { axiosInstance } from './core/utils';
 import appCustomisations from './admin.config';
@@ -28,13 +26,6 @@ const library = {
 };
 const middlewares = Middlewares();
 const reducers = Reducers({ appReducers });
-const app = StrapiApp({
-  appPlugins: plugins,
-  library,
-  locales: customConfig.locales,
-  middlewares,
-  reducers,
-});
 
 const MOUNT_NODE = document.getElementById('app');
 
@@ -58,7 +49,19 @@ const run = async () => {
     console.error(err);
   }
 
-  await await app.bootstrapAdmin();
+  // We need to make sure to fetch the project type before importing the StrapiApp
+  // otherwise the strapi-babel-plugin does not work correctly
+  const StrapiApp = await import('./StrapiApp');
+
+  const app = StrapiApp.default({
+    appPlugins: plugins,
+    library,
+    locales: customConfig.locales,
+    middlewares,
+    reducers,
+  });
+
+  await app.bootstrapAdmin();
   await app.initialize();
   await app.boot();
   await app.loadTrads();
