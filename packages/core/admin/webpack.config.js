@@ -49,6 +49,9 @@ module.exports = ({
     mode: isProduction ? 'production' : 'development',
     bail: isProduction ? true : false,
     devtool: false,
+    experiments: {
+      topLevelAwait: true,
+    },
     entry,
     output: {
       path: dest,
