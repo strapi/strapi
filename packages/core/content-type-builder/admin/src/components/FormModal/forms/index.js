@@ -113,7 +113,6 @@ const forms = {
       isEditing = false,
       compoUid = null
     ) {
-      console.log({ alreadyTakenAttributes });
       const takenNames = isEditing
         ? alreadyTakenAttributes.filter(uid => uid !== compoUid)
         : alreadyTakenAttributes;
