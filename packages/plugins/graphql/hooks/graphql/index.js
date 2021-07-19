@@ -36,7 +36,6 @@ module.exports = strapi => {
 
   return {
     async beforeInitialize() {
-      return;
       // Try to inject this hook just after the others hooks to skip the router processing.
       if (!strapi.config.get('hook.load.after')) {
         _.set(strapi.config.hook.load, 'after', []);
@@ -74,8 +73,6 @@ module.exports = strapi => {
     },
 
     initialize() {
-      // FIXME: connect new GQL API
-      return;
       const schema = strapi.plugins.graphql.services['schema-generator'].generateSchema();
 
       if (_.isEmpty(schema)) {

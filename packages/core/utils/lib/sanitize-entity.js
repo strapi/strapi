@@ -76,7 +76,7 @@ const sanitizeEntity = (dataSource, options) => {
           }
 
           return sanitizeEntity(entity, {
-            model: strapi.db.getModelByGlobalId(entity.__contentType),
+            model: strapi.getModel(entity.__contentType),
             ...baseOptions,
           });
         };

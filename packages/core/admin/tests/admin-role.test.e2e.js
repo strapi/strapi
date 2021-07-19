@@ -253,6 +253,7 @@ describe('Role CRUD End to End', () => {
         [{ name: 'new role 4', description: 'description' }],
         [{ name: 'new role 5', description: 'description' }],
       ];
+
       test.each(rolesToCreate)('can create %p', async role => {
         let res = await rq({
           url: '/admin/roles',

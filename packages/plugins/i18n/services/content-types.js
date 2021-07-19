@@ -135,7 +135,7 @@ const removeIdsMut = (model, entry) => {
         }
       });
     } else if (attr.type === 'component') {
-      const [model] = strapi.db.getModelsByAttribute(attr);
+      const model = strapi.components[attr.component];
       if (isArray(value)) {
         value.forEach(compo => removeIdsMut(model, compo));
       } else {
