@@ -54,9 +54,11 @@ const getAndValidateRelatedEntity = async (relatedEntityId, model, locale) => {
   let relatedEntity;
 
   if (kind === 'singleType') {
-    relatedEntity = await strapi.query(model).findOne({});
+    relatedEntity = await strapi.query(model).findOne({ populate: ['localizations'] });
   } else if (relatedEntityId) {
-    relatedEntity = await strapi.query(model).findOne({ id: relatedEntityId });
+    relatedEntity = await strapi
+      .query(model)
+      .findOne({ where: { id: relatedEntityId }, populate: ['localizations'] });
   }
 
   if (relatedEntityId && !relatedEntity) {

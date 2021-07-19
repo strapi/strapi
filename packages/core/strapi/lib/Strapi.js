@@ -345,15 +345,16 @@ class Strapi {
 
     // Init core store
 
+    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
+
+    // TODO: i18N must have added the new fileds before we init the DB
+
     const contentTypes = [
       // todo: move corestore and webhook to real models instead of content types to avoid adding extra attributes
       coreStoreModel,
       webhookModel,
-      ...Object.values(strapi.models),
+      ...Object.values(strapi.contentTypes),
       ...Object.values(strapi.components),
-      ...Object.values(strapi.admin.models),
-      ...Object.values(strapi.plugins).flatMap(plugin => Object.values(plugin.models)),
-      ...Object.values(strapi.api).flatMap(api => Object.values(api.models)),
     ];
 
     // TODO: create in RootProvider
@@ -363,9 +364,6 @@ class Strapi {
     });
 
     await this.db.schema.sync();
-
-    await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
-    // await this.db.initialize();
 
     this.store = createCoreStore({
       environment: this.config.environment,

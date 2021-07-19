@@ -82,9 +82,12 @@ const syncSuperAdminPermissionsWithLocales = async () => {
     return;
   }
 
-  // TODO: fix
-  const superAdminPermissions = await permissionService.findUserPermissions({
-    roles: [superAdminRole],
+  const superAdminPermissions = await permissionService.findMany({
+    where: {
+      role: {
+        id: superAdminRole.id,
+      },
+    },
   });
 
   const newSuperAdminPermissions = await addAllLocalesToPermissions(superAdminPermissions);

@@ -111,7 +111,7 @@ describe('i18n - Relation-list route', () => {
     const res = await rq({
       method: 'POST',
       url: '/content-manager/relations/application::shop.shop/products',
-      qs: { _locale: 'it' },
+      qs: { locale: 'it' },
     });
 
     expect(res.body).toHaveLength(1);

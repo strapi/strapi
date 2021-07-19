@@ -142,7 +142,7 @@ const createLocalizationHandler = contentType => {
 
   if (isSingleType(contentType)) {
     return async function(ctx) {
-      const entry = await strapi.query(contentType.uid).findOne();
+      const entry = await strapi.query(contentType.uid).findOne({ populate: ['localizations'] });
 
       if (!entry) {
         throw strapi.errors.notFound('baseEntryId.invalid');
@@ -155,7 +155,9 @@ const createLocalizationHandler = contentType => {
   return async function(ctx) {
     const { id: baseEntryId } = ctx.params;
 
-    const entry = await strapi.query(contentType.uid).findOne({ id: baseEntryId });
+    const entry = await strapi
+      .query(contentType.uid)
+      .findOne({ where: { id: baseEntryId }, populate: ['localizations'] });
 
     if (!entry) {
       throw strapi.errors.notFound('baseEntryId.invalid');

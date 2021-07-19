@@ -23,8 +23,10 @@ module.exports = () => {
         private: false,
         configurable: false,
         visible: false,
-        collection: modelName,
-        populate: ['_id', 'id', 'locale', PUBLISHED_AT_ATTRIBUTE],
+        type: 'relation',
+        relation: 'oneToMany',
+        target: contentType.uid,
+        // populate: ['_id', 'id', 'locale', PUBLISHED_AT_ATTRIBUTE],
       });
 
       _.set(attributes, 'locale', {

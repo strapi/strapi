@@ -5,20 +5,19 @@ const { getService } = require('../utils');
 
 const { syncLocalizations, syncNonLocalizedAttributes } = require('./localizations');
 
-const LOCALE_QUERY_FILTER = '_locale';
+const LOCALE_QUERY_FILTER = 'locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 const BULK_ACTIONS = ['delete'];
 
 const paramsContain = (key, params) => {
   return (
-    has(key, params) ||
-    has(key, params._where) ||
-    (isArray(params._where) && params._where.some(clause => has(key, clause)))
+    has(key, params.filters) ||
+    (isArray(params.filters) && params.filters.some(clause => has(key, clause)))
   );
 };
 
 /**
- * Adds default locale or replaces _locale by locale in query params
+ * Adds default locale or replaces locale by locale in query params
  * @param {object} params - query params
  */
 // TODO: fix
@@ -32,12 +31,14 @@ const wrapParams = async (params = {}, ctx = {}) => {
 
     return {
       ...omit(LOCALE_QUERY_FILTER, params),
-      locale: params[LOCALE_QUERY_FILTER],
+      filters: {
+        $and: [params.filters || {}, { locale: params[LOCALE_QUERY_FILTER] }],
+      },
     };
   }
 
   const entityDefinedById = paramsContain('id', params) && SINGLE_ENTRY_ACTIONS.includes(action);
-  const entitiesDefinedByIds = paramsContain('id_in', params) && BULK_ACTIONS.includes(action);
+  const entitiesDefinedByIds = paramsContain('id.$in', params) && BULK_ACTIONS.includes(action);
 
   if (entityDefinedById || entitiesDefinedByIds) {
     return params;
@@ -47,7 +48,9 @@ const wrapParams = async (params = {}, ctx = {}) => {
 
   return {
     ...params,
-    locale: await getDefaultLocale(),
+    filters: {
+      $and: [params.filters || {}, { locale: await getDefaultLocale() }],
+    },
   };
 };
 

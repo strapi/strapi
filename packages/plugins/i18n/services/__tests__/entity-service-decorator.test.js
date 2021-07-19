@@ -152,7 +152,7 @@ describe('Entity service decorator', () => {
 
       const input = {
         params: {
-          _locale: 'fr',
+          locale: 'fr',
         },
         populate: ['test'],
       };
