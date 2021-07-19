@@ -35,13 +35,12 @@ module.exports = {
     if (idsToOmit && Array.isArray(idsToOmit)) {
       query.filters = {
         $and: [
-          query.filters,
           {
             id: {
               $notIn: idsToOmit,
             },
           },
-        ],
+        ].concat(query.filters || []),
       };
     }
 

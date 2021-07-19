@@ -32,7 +32,7 @@ const wrapParams = async (params = {}, ctx = {}) => {
     return {
       ...omit(LOCALE_QUERY_FILTER, params),
       filters: {
-        $and: [params.filters || {}, { locale: params[LOCALE_QUERY_FILTER] }],
+        $and: [{ locale: params[LOCALE_QUERY_FILTER] }].concat(params.filters || []),
       },
     };
   }
@@ -49,7 +49,7 @@ const wrapParams = async (params = {}, ctx = {}) => {
   return {
     ...params,
     filters: {
-      $and: [params.filters || {}, { locale: await getDefaultLocale() }],
+      $and: [{ locale: await getDefaultLocale() }].concat(params.filters || []),
     },
   };
 };

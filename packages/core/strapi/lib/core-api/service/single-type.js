@@ -13,9 +13,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    find(opts) {
-      const params = getFetchParams(opts.params);
-      return strapi.entityService.find(uid, params);
+    find({ params } = {}) {
+      return strapi.entityService.find(uid, { params: getFetchParams(params) });
     },
 
     /**
@@ -23,7 +22,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async createOrUpdate({ params, data, files }) {
+    async createOrUpdate({ params, data, files } = {}) {
       const entity = await this.find({ params });
 
       const sanitizedData = sanitizeInput(data);
@@ -49,7 +48,7 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      *
      * @return {Promise}
      */
-    async delete({ params }) {
+    async delete({ params } = {}) {
       const entity = await this.find({ params });
 
       if (!entity) return;

@@ -5,6 +5,7 @@ const entityManager = require('../entity-manager');
 describe('Content-Manager', () => {
   const fakeModel = {
     modelName: 'fake model',
+    attributes: {},
   };
 
   describe('Publish', () => {
@@ -32,6 +33,9 @@ describe('Content-Manager', () => {
 
       expect(strapi.entityService.update).toBeCalledWith(uid, entity.id, {
         data: { published_at: expect.any(Date) },
+        params: {
+          populate: [],
+        },
       });
     });
   });
@@ -58,6 +62,9 @@ describe('Content-Manager', () => {
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(uid, entity.id, {
         data: { published_at: null },
+        params: {
+          populate: [],
+        },
       });
     });
   });

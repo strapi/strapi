@@ -122,7 +122,7 @@ const transformParamsToQuery = (uid, params = {}) => {
 
     if (publicationState === 'live') {
       query.where = {
-        $and: [liveClause, query.where || {}],
+        $and: [liveClause].concat(query.where || []),
       };
 
       // TODO: propagate nested publicationState filter somehow
@@ -134,7 +134,7 @@ const transformParamsToQuery = (uid, params = {}) => {
 
 const pickSelectionParams = pick(['fields', 'populate']);
 
-const createDefaultImplementation = ({ db, eventHub, entityValidator }) => ({
+const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) => ({
   uploadFiles,
 
   async wrapOptions(options = {}) {

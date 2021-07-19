@@ -220,7 +220,7 @@ module.exports = {
     const params = {
       ...permissionQuery,
       filters: {
-        $and: [idsWhereClause, permissionQuery._where || {}],
+        $and: [idsWhereClause].concat(permissionQuery._where || []),
       },
     };
 

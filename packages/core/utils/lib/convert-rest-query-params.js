@@ -32,15 +32,15 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
   }
 
   if (_.has(params, '_sort')) {
-    Object.assign(finalParams, convertSortQueryParams(params._sort));
+    finalParams.sort = convertSortQueryParams(params._sort);
   }
 
   if (_.has(params, '_start')) {
-    Object.assign(finalParams, convertStartQueryParams(params._start));
+    finalParams.start = convertStartQueryParams(params._start);
   }
 
   if (_.has(params, '_limit')) {
-    Object.assign(finalParams, convertLimitQueryParams(params._limit));
+    finalParams.limit = convertLimitQueryParams(params._limit);
   }
 
   if (_.has(params, '_publicationState')) {

@@ -312,7 +312,7 @@ class Strapi {
     }
 
     // Kill process
-    // process.exit(exitCode);
+    process.exit(exitCode);
   }
 
   async load() {
@@ -377,6 +377,7 @@ class Strapi {
     this.entityValidator = entityValidator;
 
     this.entityService = createEntityService({
+      strapi: this,
       db: this.db,
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
