@@ -65,14 +65,14 @@ describe('Locales', () => {
   describe('CRUD', () => {
     test('find', async () => {
       const locales = [{ name: 'French', code: 'fr' }];
-      const find = jest.fn(() => Promise.resolve(locales));
-      const query = jest.fn(() => ({ find }));
+      const findMany = jest.fn(() => Promise.resolve(locales));
+      const query = jest.fn(() => ({ findMany }));
       global.strapi = { query };
-      const params = { name_contains: 'en' };
+      const params = { name: { $contains: 'en' } };
 
       const localesFound = await localesService.find(params);
       expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
-      expect(find).toHaveBeenCalledWith(params);
+      expect(findMany).toHaveBeenCalledWith({ where: params });
       expect(localesFound).toMatchObject(locales);
     });
 
@@ -84,7 +84,7 @@ describe('Locales', () => {
 
       const localeFound = await localesService.findById(1);
       expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
-      expect(findOne).toHaveBeenCalledWith({ id: 1 });
+      expect(findOne).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(localeFound).toMatchObject(locale);
     });
 
@@ -96,7 +96,7 @@ describe('Locales', () => {
 
       const localeFound = await localesService.findByCode('fr');
       expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
-      expect(findOne).toHaveBeenCalledWith({ code: 'fr' });
+      expect(findOne).toHaveBeenCalledWith({ where: { code: 'fr' } });
       expect(localeFound).toMatchObject(locale);
     });
 
@@ -115,7 +115,7 @@ describe('Locales', () => {
 
       const createdLocale = await localesService.create(locale);
       expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
-      expect(create).toHaveBeenCalledWith(locale);
+      expect(create).toHaveBeenCalledWith({ data: locale });
       expect(createdLocale).toMatchObject(locale);
     });
 
@@ -134,16 +134,17 @@ describe('Locales', () => {
 
       const updatedLocale = await localesService.update({ code: 'fr' }, { name: 'French' });
       expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
-      expect(update).toHaveBeenCalledWith({ code: 'fr' }, { name: 'French' });
+      expect(update).toHaveBeenCalledWith({ where: { code: 'fr' }, data: { name: 'French' } });
       expect(updatedLocale).toMatchObject(locale);
     });
 
     test('delete', async () => {
       const locale = { name: 'French', code: 'fr' };
       const deleteFn = jest.fn(() => locale);
+      const deleteMany = jest.fn(() => []);
       const findOne = jest.fn(() => locale);
       const isLocalizedContentType = jest.fn(() => true);
-      const query = jest.fn(() => ({ delete: deleteFn, findOne }));
+      const query = jest.fn(() => ({ delete: deleteFn, findOne, deleteMany }));
       global.strapi = {
         query,
         plugins: {
@@ -156,7 +157,7 @@ describe('Locales', () => {
 
       const deletedLocale = await localesService.delete({ id: 1 });
       expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
-      expect(deleteFn).toHaveBeenCalledWith({ id: 1 });
+      expect(deleteFn).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(deletedLocale).toMatchObject(locale);
     });
 
@@ -207,8 +208,10 @@ describe('Locales', () => {
       await localesService.initDefaultLocale();
       expect(count).toHaveBeenCalledWith();
       expect(create).toHaveBeenCalledWith({
-        name: 'English (en)',
-        code: 'en',
+        data: {
+          name: 'English (en)',
+          code: 'en',
+        },
       });
       expect(set).toHaveBeenCalledWith({ key: 'default_locale', value: 'en' });
     });

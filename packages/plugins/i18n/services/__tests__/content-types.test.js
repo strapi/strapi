@@ -433,8 +433,8 @@ describe('content-types service', () => {
       };
 
       global.strapi = {
-        db: {
-          getModelsByAttribute: jest.fn(() => [compoModel]),
+        components: {
+          compo: compoModel,
         },
       };
 
