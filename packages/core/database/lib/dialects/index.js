@@ -33,7 +33,7 @@ class PostgresDialect extends Dialect {
   }
 
   initialize() {
-    // console.log(this.db.connection)
+    // FIXME:
     // this.db.connection.context.client.types.setTypeParser(1700, 'text', parseFloat);
   }
 

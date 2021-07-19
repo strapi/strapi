@@ -353,7 +353,7 @@ describe.each([
       expect(updateRes.statusCode).toBe(400);
     });
 
-    test('Updates component if previsous component id is sent', async () => {
+    test('Updates component if previous component id is sent', async () => {
       const res = await rq.post('/', {
         body: {
           field: {
@@ -388,7 +388,11 @@ describe.each([
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body).toMatchObject(expectedResult);
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject(expectedResult);
@@ -408,12 +412,20 @@ describe.each([
         },
       });
 
-      const deleteRes = await rq.delete(`/${res.body.id}`);
+      const deleteRes = await rq.delete(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.body).toMatchObject(res.body);
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(404);
     });

@@ -119,7 +119,6 @@ const createMetadata = (models = []) => {
           continue;
         }
       } catch (error) {
-        console.error(error);
         throw new Error(
           `Error on attribute ${attributeName} in model ${meta.singularName}(${meta.uid}): ${error.message}`
         );

@@ -358,7 +358,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 });
 
-// TODO: Generalize the logic to CRUD relation directly in the DB layer
+// NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
   const { attributes } = strapi.getModel(uid);
 
@@ -442,7 +442,10 @@ const updateOrCreateComponent = (componentUID, value) => {
   return strapi.query(componentUID).create({ data: value });
 };
 
-// TODO: delete old components
+/*
+  delete old components
+  create or update
+*/
 const updateComponents = async (uid, entityToUpdate, data) => {
   const { attributes } = strapi.getModel(uid);
 
