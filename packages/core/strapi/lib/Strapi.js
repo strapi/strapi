@@ -335,8 +335,6 @@ class Strapi {
       }
     });
 
-    console.log('this.config.autoReload', this.config.autoReload);
-
     await this.container.load();
 
     const modules = await loadModules(this);
@@ -521,7 +519,7 @@ class Strapi {
 }
 
 module.exports = options => {
-  const strapi = new Strapi({ ...options, autoReload: false });
+  const strapi = new Strapi(options);
   global.strapi = strapi;
   return strapi;
 };

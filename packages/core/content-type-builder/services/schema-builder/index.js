@@ -39,7 +39,7 @@ module.exports = function createBuilder() {
       modelName: contentType.modelName,
       plugin: contentType.plugin,
       uid: contentType.uid,
-      filename: contentType.__filename__,
+      filename: `${contentType.info.singularName}.json`,
       dir: path.join(strapi.dir, dir),
       schema: contentType.__schema__,
     };
@@ -159,12 +159,13 @@ function createSchemaBuilder({ components, contentTypes }) {
     /**
      * Write all type to files
      */
-    writeFiles() {
+    async writeFiles() {
       return Promise.all(
-        [
-          ...Array.from(tmpComponents.values()),
-          ...Array.from(tmpContentTypes.values()),
-        ].map(schema => schema.flush())
+        [...Array.from(tmpComponents.values()), ...Array.from(tmpContentTypes.values())].map(
+          schema => {
+            return schema.flush();
+          }
+        )
       )
         .catch(error => {
           strapi.log.error('Error writing schema files');

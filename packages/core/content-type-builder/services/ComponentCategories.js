@@ -82,7 +82,7 @@ const categoryExists = name => {
   return matchingIndex > -1;
 };
 
-module.exports = {
+module.exports = () => ({
   editCategory,
   deleteCategory,
-};
+});

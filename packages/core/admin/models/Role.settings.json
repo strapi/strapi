@@ -2,7 +2,10 @@
   "collectionName": "strapi_role",
   "info": {
     "name": "Role",
-    "description": ""
+    "description": "",
+    "singularName": "role",
+    "pluralName": "roles",
+    "displayName": "Role"
   },
   "options": {
     "timestamps": true

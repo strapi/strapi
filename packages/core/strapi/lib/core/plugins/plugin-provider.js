@@ -1,6 +1,7 @@
 'use strict';
 
 const { join } = require('path');
+const { existsSync } = require('fs');
 const { flatMap, getOr, mapValues, reduce, split } = require('lodash/fp');
 const loadConfigFile = require('../app-configuration/load-config-file');
 const getEnabledPlugins = require('./get-enabled-plugins');
@@ -11,7 +12,10 @@ const parseUID = split('.');
 const createPluginProvider = strapi => {
   let loaded = false;
   const plugins = {};
-  const userPluginsConfig = loadConfigFile(join(strapi.dir, 'config', 'plugins.js'));
+  const userPluginConfigPath = join(strapi.dir, 'config', 'plugins.js');
+  const userPluginsConfig = existsSync(userPluginConfigPath)
+    ? loadConfigFile(userPluginConfigPath)
+    : {};
   const pluginProvider = {};
 
   Object.assign(pluginProvider, {

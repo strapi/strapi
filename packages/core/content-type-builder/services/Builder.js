@@ -1,7 +1,7 @@
 'use strict';
 
-module.exports = {
+module.exports = () => ({
   getReservedNames() {
     return strapi.db.getReservedNames();
   },
-};
+});

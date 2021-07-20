@@ -253,11 +253,11 @@ const deleteContentType = async (uid, defaultBuilder = undefined) => {
   return contentType;
 };
 
-module.exports = {
+module.exports = () => ({
   createContentType,
   editContentType,
   deleteContentType,
   formatContentType,
   createContentTypes,
   deleteContentTypes,
-};
+});

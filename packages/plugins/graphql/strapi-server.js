@@ -2,12 +2,8 @@
 
 module.exports = (/* strapi, config */) => {
   return {
-    bootstrap: () => {
-      console.log('graphQL BOOTSTRAP');
-    },
-    destroy: () => {
-      console.log('graphQL DESTROY');
-    },
+    bootstrap: () => {},
+    destroy: () => {},
     config: {},
     routes: [],
     controllers: {},

@@ -5,7 +5,8 @@
   "strapi": {
     "name": "Content Type Builder",
     "icon": "paint-brush",
-    "description": "content-type-builder.plugin.description"
+    "description": "content-type-builder.plugin.description",
+    "kind": "plugin"
   },
   "dependencies": {
     "@buffetjs/core": "3.3.6",

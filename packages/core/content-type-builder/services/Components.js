@@ -94,10 +94,10 @@ const deleteComponent = async uid => {
   return deletedComponent;
 };
 
-module.exports = {
+module.exports = () => ({
   createComponent,
   editComponent,
   deleteComponent,
 
   formatComponent,
-};
+});

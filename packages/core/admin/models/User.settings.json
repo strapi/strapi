@@ -2,7 +2,10 @@
   "collectionName": "strapi_administrator",
   "info": {
     "name": "User",
-    "description": ""
+    "description": "",
+    "singularName": "user",
+    "pluralName": "users",
+    "displayName": "User"
   },
   "pluginOptions": {
     "content-manager": {

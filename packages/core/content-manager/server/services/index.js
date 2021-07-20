@@ -7,6 +7,7 @@ const metrics = require('../../services/metrics');
 const permissionChecker = require('../../services/permission-checker');
 const permission = require('../../services/permission');
 const uid = require('../../services/uid');
+const entityManager = require('../../services/entity-manager');
 
 module.exports = {
   components,
@@ -16,4 +17,5 @@ module.exports = {
   'permission-checker': permissionChecker,
   permission,
   uid,
+  'entity-manager': entityManager,
 };

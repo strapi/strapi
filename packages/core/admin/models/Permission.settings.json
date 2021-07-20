@@ -2,6 +2,9 @@
   "collectionName": "strapi_permission",
   "info": {
     "name": "Permission",
+    "singularName": "permission",
+    "pluralName": "permissions",
+    "displayName": "Permission",
     "description": ""
   },
   "options": {

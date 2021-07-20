@@ -51,7 +51,10 @@ const getEnabledPlugins = async strapi => {
   }
 
   const declaredPlugins = {};
-  const userPluginsConfig = loadConfigFile(join(strapi.dir, 'config', 'plugins.js'));
+  const userPluginConfigPath = join(strapi.dir, 'config', 'plugins.js');
+  const userPluginsConfig = existsSync(userPluginConfigPath)
+    ? loadConfigFile(userPluginConfigPath)
+    : {};
   _.forEach(userPluginsConfig, (declaration, pluginName) => {
     const cleanPluginName = nameToSlug(pluginName);
     declaredPlugins[cleanPluginName] = toDetailedDeclaration(declaration);
