@@ -8,12 +8,6 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.6",
-    "@buffetjs/custom": "3.3.6",
-    "@buffetjs/hooks": "3.3.6",
-    "@buffetjs/icons": "3.3.6",
-    "@buffetjs/styles": "3.3.6",
-    "@buffetjs/utils": "3.3.6",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/generate": "3.6.5",
     "@strapi/generate-api": "3.6.5",
