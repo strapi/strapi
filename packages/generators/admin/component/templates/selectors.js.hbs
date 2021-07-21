@@ -1,0 +1,9 @@
+import { createSelector } from 'reselect';
+import { initialState } from './reducer';
+import pluginId from '../../pluginId'
+
+/**
+ * Direct selector to the {{camelCase name}} state domain
+ */
+
+export const select{{name}}Domain = state => state[`${pluginId}_{{camelCase name}}`] || initialState;
