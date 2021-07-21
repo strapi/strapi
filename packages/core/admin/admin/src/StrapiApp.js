@@ -141,12 +141,12 @@ class StrapiApp {
     });
   };
 
-  async boot() {
+  async bootstrap() {
     Object.keys(this.appPlugins).forEach(plugin => {
-      const boot = this.appPlugins[plugin].boot;
+      const bootstrap = this.appPlugins[plugin].bootstrap;
 
-      if (boot) {
-        boot({
+      if (bootstrap) {
+        bootstrap({
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,

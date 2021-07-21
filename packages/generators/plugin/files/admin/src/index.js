@@ -36,7 +36,7 @@ export default {
       name,
     });
   },
-  boot(app) {},
+  bootstrap(app) {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {
