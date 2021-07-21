@@ -21,45 +21,21 @@ async function main(connection) {
     await orm.schema.sync();
     // await orm.schema.reset();
 
-    // await orm.query('compo').create({
-    //   data: {
-    //     key: 'A',
-    //     value: 1,
-    //   },
-    // });
+    const compoA = await orm.query('compo-test').create({
+      data: {
+        key: 'A',
+        value: 1,
+      },
+    });
 
-    // await orm.query('article').create({
-    //   // select: {},
-    //   // populate: {},
-    //   data: {
-    //     compo: 1,
-    //   },
-    // });
-
-    console.log(await orm.query('article').load({ id: 1 }, 'category'));
-
-    console.log(
-      await orm.query('category').populate(
-        { title: 'A', id: 2 },
-        {
-          articles: {
-            count: true,
-          },
-        }
-      )
-    );
-
-    console.log(
-      await orm.query('category').findMany({
-        populate: {
-          articles: {
-            count: true,
-          },
+    orm.query('article').findMany({
+      populate: {
+        comments: {
+          where: {},
+          populate: {},
         },
-      })
-    );
-
-    // await orm.query('article').delete({ where: { id: 1 } });
+      },
+    });
 
     // await tests(orm);
   } finally {

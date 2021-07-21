@@ -108,6 +108,30 @@ const createMetadata = (models = []) => {
         }
 
         if (types.isDynamicZone(attribute.type)) {
+          //
+
+          Object.assign(attribute, {
+            type: 'relation',
+            relation: 'oneToMany',
+            // NOTE: if target is an array then th erelation is polymorphic
+
+            target: attribute.components,
+            joinTable: {
+              name: meta.componentLink.tableName,
+              joinColumn: {
+                name: 'entity_id',
+                referencedColumn: 'id',
+              },
+              inverseJoinColumn: {
+                name: 'component_id',
+                referencedColumn: 'id',
+              },
+              on: {
+                field: attributeName,
+              },
+            },
+          });
+
           continue;
         }
 

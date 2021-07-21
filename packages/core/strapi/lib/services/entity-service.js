@@ -358,6 +358,17 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 });
 
+// components can have nested compos so this must be recursive
+const createComponent = async (uid, data) => {
+  const model = strapi.getModel(uid);
+
+  const componentData = await createComponents(uid, data);
+
+  return await strapi.query(uid).create({
+    data: Object.assign(omitComponentData(model, data), componentData),
+  });
+};
+
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
   const { attributes } = strapi.getModel(uid);
@@ -386,46 +397,43 @@ const createComponents = async (uid, data) => {
         }
 
         const components = await Promise.all(
-          componentValue.map(value => {
-            return strapi.query(componentUID).create({ data: value });
-          })
+          componentValue.map(value => createComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.map(({ id }, idx) => {
-          // TODO: add & support pivot data in DB
+        componentBody[attributeName] = components.map(({ id }) => {
+          // TODO: Add order in the relation
+          // NOTE: add & support pivot data in DB
           return id;
         });
       } else {
-        const component = await strapi.query(componentUID).create({ data: componentValue });
-
-        // TODO: add & support pivot data in DB
+        const component = await createComponent(componentUID, data);
+        // NOTE: add & support pivot data in DB
         componentBody[attributeName] = component.id;
       }
 
       continue;
     }
 
-    // if (attribute.type === 'dynamiczone') {
+    if (attribute.type === 'dynamiczone') {
+      const dynamiczoneValues = data[attributeName];
 
-    //   const dynamiczoneValues = data[attributeName];
+      if (!Array.isArray(dynamiczoneValues)) {
+        throw new Error('Expected an array to create repeatable component');
+      }
 
-    //   if (!Array.isArray(dynamiczoneValues)) {
-    //     throw new Error('Expected an array to create repeatable component');
-    //   }
+      componentBody[attributeName] = await Promise.all(
+        dynamiczoneValues.map(async value => {
+          const { id } = await createComponent(value.__component, value);
 
-    //   const components = await Promise.all(
-    //     dynamiczoneValues.map(value => {
-    //       return strapi.query(value.__component).create({ data: value });
-    //     })
-    //   );
+          return {
+            __type: value.__component,
+            id,
+          };
+        })
+      );
 
-    //   componentBody[attributeName] = components.map(({ id }, idx) => {
-    //     // TODO: add & support pivot data in DB
-    //     return id;
-    //   });
-
-    //   continue;
-    // }
+      continue;
+    }
   }
 
   return componentBody;

@@ -25,7 +25,7 @@ const category = {
     },
     compo: {
       type: 'component',
-      component: 'compo',
+      component: 'compo-test',
     },
   },
 };
@@ -53,7 +53,7 @@ const article = {
     // },
     // compo: {
     //   type: 'component',
-    //   component: 'compo',
+    //   component: 'compo-test',
     //   // repeatable: true,
     // },
     // cover: {
@@ -85,9 +85,9 @@ const tags = {
 };
 
 const compo = {
-  modelName: 'compo',
-  uid: 'compo',
-  collectionName: 'compos',
+  modelName: 'compoTest',
+  uid: 'compo-test',
+  collectionName: 'compo_tests',
   attributes: {
     key: {
       type: 'string',
@@ -265,4 +265,31 @@ const blogPost = {
   },
 };
 
-module.exports = [category, article, tags, compo, user, address, file, fileMorph, blogPost];
+// module.exports = [category, article, tags, compo, user, address, file, fileMorph, blogPost];
+
+const file = {
+  uid: 'file',
+  modelName: 'file',
+  collectionName: 'files',
+  attributes: {
+    related: {
+
+    }
+  },
+};
+
+const post = {
+  uid: 'post',
+  modelName: 'post',
+  collectionName: 'posts',
+  attributes: {
+    cover: {
+      type: 'relation',
+      relation: 'manyToOne',
+      target: 'file'
+      // inversedBy: 'related'
+    }
+  }
+}
+
+module.exports = [file, post];

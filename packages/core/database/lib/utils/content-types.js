@@ -20,7 +20,6 @@ const transformAttribute = attribute => {
   }
 };
 
-// TODO: add locale & localizations for I18N
 // TODO: model logic outside DB
 const transformContentTypes = contentTypes => {
   return contentTypes.map(contentType => {

@@ -518,13 +518,14 @@ const applyPopulate = async (results, populate, ctx) => {
   const meta = db.metadata.get(uid);
 
   for (const key in populate) {
-    // TODO: Omit limit & offset in v1 to avoid needing a query per result (too many queries would ipact the performances a lot)
+    // NOTE: Omit limit & offset to avoid needing a query per result to avoid making too many queries
     const populateValue = _.pick(
       ['select', 'count', 'where', 'populate', 'orderBy'],
       populate[key]
     );
 
     // TODO: handle count for join columns
+    // TODO: cleanup count
     const isCount = populateValue.count === true;
 
     const attribute = meta.attributes[key];
