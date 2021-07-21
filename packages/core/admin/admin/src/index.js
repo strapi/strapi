@@ -63,7 +63,7 @@ const run = async () => {
 
   await app.bootstrapAdmin();
   await app.initialize();
-  await app.boot();
+  await app.bootstrap();
   await app.loadTrads();
 
   ReactDOM.render(app.render(), MOUNT_NODE);

@@ -42,7 +42,7 @@ export default {
       pluginLogo,
     });
   },
-  boot(app) {
+  bootstrap(app) {
     // Hooks that mutate the collection types links in order to add the locale filter
     app.registerHook(
       'Admin/CM/pages/App/mutate-collection-types-links',
