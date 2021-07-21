@@ -12,15 +12,15 @@ const getWebpackConfig = require('./webpack.config');
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
-  const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
+  const adminConfigPath = path.join(dir, 'admin', 'admin.webpack.config.js');
 
   let webpackConfig = getWebpackConfig(config);
 
   if (fs.existsSync(adminConfigPath)) {
-    const adminConfig = require(path.resolve(adminConfigPath));
+    const webpackAdminConfig = require(path.resolve(adminConfigPath));
 
-    if (_.isFunction(adminConfig.webpack)) {
-      webpackConfig = adminConfig.webpack(webpackConfig, webpack);
+    if (_.isFunction(webpackAdminConfig)) {
+      webpackConfig = webpackAdminConfig(webpackConfig, webpack);
 
       if (!webpackConfig) {
         console.error(
