@@ -33,13 +33,13 @@
 
       const handleClick = () => dispatch(defaultAction())
     {{/if}}
-    {{#or useRedux useI18n}}
+    {{#if useI18n "||" useRedux}}
 
-    {{/or}}
+    {{/if}}
     return (
       <div>
         {{#if useRedux}}
-          <button onClick={handleClick}>{{titleCase name}}</button>
+          <button type="button" onClick={handleClick}>{{titleCase name}}</button>
         {{/if}}
         {{#if useI18n}}
           <p>{formatMessage({ id: getTrad('component.name'), defaultMessage: '{{titleCase name}}' })}</p>

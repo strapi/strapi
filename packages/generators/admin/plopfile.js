@@ -7,27 +7,62 @@ const componentGenerator = require('./component');
 // If it become a pain don't hesitate to remove it.
 const leftShift = str => str.replace(/^ {2}/gm, '');
 
+const evaluateExpression = (a, operator, b) => {
+  switch (operator) {
+    case '==':
+      return a == b;
+    case '===':
+      return a === b;
+    case '!=':
+      return a != b;
+    case '!==':
+      return a !== b;
+    case '<':
+      return a < b;
+    case '<=':
+      return a <= b;
+    case '>':
+      return a > b;
+    case '>=':
+      return a >= b;
+    case '&&':
+      return a && b;
+    case '||':
+      return a || b;
+    default:
+      return false;
+  }
+};
+
 // ! Don't use arrow functions to register Handlebars helpers
 module.exports = function(
   /** @type {import('plop').NodePlopAPI} */
   plop
 ) {
-  plop.setHelper('if', function(condition, { fn, inverse }) {
-    return leftShift(condition ? fn(this) : inverse(this));
+  plop.setHelper('if', function(/* ...args, options */) {
+    const end = arguments.length - 1;
+    const { fn, inverse } = arguments[end];
+    if (arguments.length === 2) {
+      const condition = arguments[0];
+      return leftShift(condition ? fn(this) : inverse(this));
+    } else {
+      const [a, operator, b] = Array.from(arguments).slice(0, end);
+      return leftShift(evaluateExpression(a, operator, b) ? fn(this) : inverse(this));
+    }
+  });
+  plop.setHelper('unless', function(/* ...args, options */) {
+    const end = arguments.length - 1;
+    const { fn, inverse } = arguments[end];
+    if (arguments.length === 2) {
+      const condition = arguments[0];
+      return leftShift(!condition ? fn(this) : inverse(this));
+    } else {
+      const [a, operator, b] = Array.from(arguments).slice(0, end);
+      return leftShift(!evaluateExpression(a, operator, b) ? fn(this) : inverse(this));
+    }
   });
   plop.setHelper('else', function(_, { fn }) {
     return leftShift(fn(this));
-  });
-  plop.setHelper('or', function(/* ...args, options */) {
-    const end = arguments.length - 1;
-    const { fn, inverse } = arguments[end];
-    return leftShift(
-      Array.from(arguments)
-        .slice(0, end)
-        .some(arg => Boolean(arg))
-        ? fn(this)
-        : inverse(this)
-    );
   });
   plop.setGenerator('component', componentGenerator);
 };

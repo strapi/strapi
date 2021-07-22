@@ -1,8 +1,8 @@
 'use strict';
 
-const fs = require('fs');
 const { join } = require('path');
 const glob = require('glob');
+const fileExistsInPackages = require('./fileExistsInPackages');
 
 const packagesFolder = join(__dirname, '../../../');
 
@@ -21,11 +21,7 @@ const getPluginList = () => {
           reject(err);
         }
 
-        const extendsAdmin = match =>
-          fs.promises
-            .access(join(packagesFolder, match, 'admin'), fs.constants.W_OK)
-            .then(() => true)
-            .catch(() => false);
+        const extendsAdmin = match => fileExistsInPackages(`${match}/admin/src`);
 
         resolve(await asyncFilter(matches, extendsAdmin));
       }

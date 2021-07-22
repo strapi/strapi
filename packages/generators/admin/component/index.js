@@ -1,6 +1,7 @@
 'use strict';
 
 const { flow, camelCase, upperFirst, lowerCase } = require('lodash');
+const fileExistsInPackages = require('../utils/fileExistsInPackages');
 const getPluginList = require('../utils/getPluginList');
 
 const pascalCase = flow(camelCase, upperFirst);
@@ -16,8 +17,15 @@ const prompts = [
     type: 'input',
     name: 'name',
     message: 'What should be the name of the component?',
-    // TODO: Verify that the requested name is available
-    validate: input => (!input ? 'The name cannot be empty.' : true),
+    validate: async (name, answers) => {
+      if (!name) {
+        return 'The name cannot be empty.';
+      }
+
+      return (await fileExistsInPackages(`${answers.plugin}/admin/src/components/${name}`))
+        ? 'This component already exists.'
+        : true;
+    },
     filter: pascalCase,
   },
   {
@@ -29,21 +37,21 @@ const prompts = [
     type: 'input',
     name: 'htmlTag',
     message: 'Which HTML tag should be used as a base?',
-    when: data => data.styled,
-    validate: input => (!input ? 'The HTML tag cannot be empty.' : true),
+    when: answers => answers.styled,
+    validate: htmlTag => (!htmlTag ? 'The HTML tag cannot be empty.' : true),
     filter: lowerCase,
   },
   {
     type: 'confirm',
     name: 'useI18n',
     message: 'Will it use i18n?',
-    when: data => !data.styled,
+    when: answers => !answers.styled,
   },
   {
     type: 'confirm',
     name: 'useRedux',
     message: 'Will it use Redux?',
-    when: data => !data.styled,
+    when: answers => !answers.styled,
   },
 ];
 
