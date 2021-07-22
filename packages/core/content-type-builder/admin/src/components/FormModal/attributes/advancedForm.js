@@ -38,11 +38,17 @@ const advancedForm = {
     }
 
     if (repeatable) {
-      return { items: [[options.required], [uiHelpers.divider], [options.max, options.min]] };
+      return {
+        items: [
+          [options.required, options.private],
+          [uiHelpers.divider],
+          [options.max, options.min],
+        ],
+      };
     }
 
     return {
-      items: [[options.required]],
+      items: [[options.required, options.private]],
     };
   },
   date: ({ type }) => {
