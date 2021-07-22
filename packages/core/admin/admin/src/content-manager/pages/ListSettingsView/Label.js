@@ -30,13 +30,15 @@ const Label = ({ count, index, label, move, name, onClick, onRemove, selectedIte
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
-    begin: () => {
-      setIsDraggingSibling(true);
-    },
+    type: ItemTypes.FIELD,
     end: () => {
       setIsDraggingSibling(false);
     },
-    item: { type: ItemTypes.FIELD, id: name, name, index },
+    item: () => {
+      setIsDraggingSibling(true);
+
+      return { id: name, name, index };
+    },
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),

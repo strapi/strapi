@@ -107,14 +107,15 @@ const DraggedItem = ({
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
-    item: {
-      type: ItemTypes.COMPONENT,
-      displayedValue,
-      originalPath: componentFieldName,
-    },
-    begin: () => {
+    type: ItemTypes.COMPONENT,
+    item: () => {
       // Close all collapses
       toggleCollapses(-1);
+
+      return {
+        displayedValue,
+        originalPath: componentFieldName,
+      };
     },
     end: () => {
       // Update the errors

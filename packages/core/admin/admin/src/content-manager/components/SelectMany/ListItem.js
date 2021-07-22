@@ -25,14 +25,14 @@ function ListItem({
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({
-    item: {
-      type: ItemTypes.RELATION,
+    type: ItemTypes.RELATION,
+    item: () => ({
       id: data.id,
       originalIndex,
       data,
       hasDraftAndPublish,
       mainField,
-    },
+    }),
     collect: monitor => ({
       isDragging: monitor.isDragging(),
     }),
