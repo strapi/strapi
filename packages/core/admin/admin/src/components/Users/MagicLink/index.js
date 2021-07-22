@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import LinkNotification from '../LinkNotification';
-import basename from '../../../utils/basename';
+import basename from '../../../core/utils/basename';
 
 const MagicLink = ({ registrationToken }) => {
   const { formatMessage } = useIntl();

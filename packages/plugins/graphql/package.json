@@ -27,7 +27,8 @@
     "koa-compose": "^4.1.0",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
-    "@strapi/utils": "3.6.5"
+    "@strapi/utils": "3.6.5",
+    "nexus": "1.0.0"
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -47,7 +48,7 @@
     }
   ],
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",

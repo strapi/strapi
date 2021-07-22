@@ -24,6 +24,9 @@ import Wrapper from './Wrapper';
 import Content from './Content';
 import { createRoute } from '../../utils';
 
+const CM = lazy(() =>
+  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
+);
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
@@ -39,12 +42,7 @@ const ProfilePage = lazy(() =>
 const SettingsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
 );
-// These are internal plugins
-const CM = lazy(() =>
-  import(
-    /* webpackChunkName: "content-manager" */ '@strapi/plugin-content-manager/admin/src/pages/App'
-  )
-);
+
 const CTB = lazy(() =>
   import(
     /* webpackChunkName: "content-type-builder" */ '@strapi/plugin-content-type-builder/admin/src/pages/App'
@@ -68,7 +66,6 @@ const Admin = () => {
   // Show a notification when the current version of Strapi is not the latest one
   useReleaseNotification();
   useTrackUsage();
-  // TODO
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
 
@@ -89,7 +86,6 @@ const Admin = () => {
         pluginsSectionLinks={pluginsSectionLinks}
       />
       <NavTopRightWrapper>
-        {/* Injection zone not ready yet */}
         <Logout />
       </NavTopRightWrapper>
       <div className="adminPageRightWrapper">
@@ -99,7 +95,8 @@ const Admin = () => {
             <Switch>
               <Route path="/" component={HomePage} exact />
               <Route path="/me" component={ProfilePage} exact />
-              <Route path="/plugins/content-manager" component={CM} />
+
+              <Route path="/content-manager" component={CM} />
               <Route path="/plugins/content-type-builder" component={CTB} />
               <Route path="/plugins/upload" component={Upload} />
               {routes}

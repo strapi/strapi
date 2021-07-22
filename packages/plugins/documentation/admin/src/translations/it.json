@@ -22,8 +22,8 @@
   "error.noVersion": "Una versione è richiesta",
   "error.regenerateDoc": "Si è verificato un errore durante la rigenerazione della documentazione",
   "error.regenerateDoc.versionMissing": "La versione che stai tentando di generare non esiste",
-  "notification.update.success": "Impostazioni aggiornate con successo",
   "notification.delete.success": "Doc eliminata",
   "notification.generate.success": "Doc generata",
+  "notification.update.success": "Impostazioni aggiornate con successo",
   "plugin.name": "Documentazione"
 }

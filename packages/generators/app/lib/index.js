@@ -6,7 +6,8 @@ const crypto = require('crypto');
 const { machineIdSync } = require('node-machine-id');
 const uuid = require('uuid/v4');
 const sentry = require('@sentry/node');
-
+// FIXME
+/* eslint-disable import/extensions */
 const hasYarn = require('./utils/has-yarn');
 const checkRequirements = require('./utils/check-requirements');
 const { trackError, captureException } = require('./utils/usage');

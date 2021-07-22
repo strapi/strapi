@@ -10,7 +10,7 @@ import { useAppInfos } from '@strapi/helper-plugin';
 import Wrapper, { A } from './Wrapper';
 
 function LeftMenuFooter() {
-  const projectType = process.env.STRAPI_ADMIN_PROJECT_TYPE;
+  const projectType = strapi.projectType;
   const { strapiVersion } = useAppInfos();
 
   return (

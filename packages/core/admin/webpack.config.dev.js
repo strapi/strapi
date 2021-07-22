@@ -4,7 +4,7 @@ const path = require('path');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const { DuplicateReporterPlugin } = require('duplicate-dependencies-webpack-plugin');
 
-const webpackConfig = require('./webpack.config.js');
+const webpackConfig = require('./webpack.config');
 
 module.exports = () => {
   const analyzeBundle = process.env.ANALYZE_BUNDLE;
@@ -18,17 +18,13 @@ module.exports = () => {
   const options = {
     backend: 'http://localhost:1337',
     adminPath: '/admin/',
-    features: process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES || ['sso'],
   };
-
-  const useEE = process.env.STRAPI_DISABLE_EE === 'true' ? false : true;
 
   const args = {
     entry,
     dest,
     env,
     options,
-    useEE,
   };
 
   const config = webpackConfig(args);
@@ -45,7 +41,6 @@ module.exports = () => {
     ...config,
     snapshot: {
       managedPaths: [
-        path.resolve(__dirname, '../content-manager'),
         path.resolve(__dirname, '../content-type-builder'),
         path.resolve(__dirname, '../upload'),
         path.resolve(__dirname, '../helper-plugin'),

@@ -43,7 +43,7 @@ export default {
       },
     });
   },
-  boot() {},
+  bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {

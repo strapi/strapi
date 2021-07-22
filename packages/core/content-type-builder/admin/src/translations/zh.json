@@ -120,8 +120,6 @@
   "form.button.select-component": "選擇一個元件",
   "form.button.single-type.description": "適用於單一實例，如首頁,關於 ...... 等",
   "from": "從",
-  "injected-components.content-manager.edit-settings-view.link.components": "編輯元件",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "編輯內容型別",
   "menu.section.components.name.plural": "複數元件",
   "menu.section.components.name.singular": "元件",
   "menu.section.models.name.plural": "資料結構",

@@ -53,7 +53,7 @@ export default {
       pluginLogo,
     });
   },
-  boot(app) {
+  bootstrap(app) {
     app.addSettingsLink('global', {
       id: 'media-library-settings',
       intlLabel: {

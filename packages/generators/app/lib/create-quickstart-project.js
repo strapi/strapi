@@ -1,7 +1,8 @@
 'use strict';
 
 const execa = require('execa');
-
+// FIXME
+/* eslint-disable import/extensions */
 const { trackUsage, captureStderr } = require('./utils/usage');
 const defaultConfigs = require('./utils/db-configs.js');
 const clientDependencies = require('./utils/db-client-dependencies.js');

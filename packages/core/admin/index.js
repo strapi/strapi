@@ -7,16 +7,14 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
 const chokidar = require('chokidar');
-// eslint-disable-next-line node/no-extraneous-require
-const hasEE = require('@strapi/strapi/lib/utils/ee');
-const getWebpackConfig = require('./webpack.config.js');
+const getWebpackConfig = require('./webpack.config');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
   const adminConfigPath = path.join(dir, 'admin', 'admin.config.js');
 
-  let webpackConfig = getWebpackConfig({ useEE: hasEE({ dir }), ...config });
+  let webpackConfig = getWebpackConfig(config);
 
   if (fs.existsSync(adminConfigPath)) {
     const adminConfig = require(path.resolve(adminConfigPath));
@@ -43,37 +41,38 @@ async function build({ dir, env, options, optimize }) {
   const cacheDir = path.resolve(dir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src');
   const dest = path.resolve(dir, 'build');
-  const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize });
+
+  // Roots for the @strapi/babel-plugin-switch-ee-ce
+  const roots = {
+    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
+    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
+  };
+
+  const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize, roots });
 
   const compiler = webpack(config);
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
-      let messages;
       if (err) {
-        if (!err.message) {
-          return reject(err);
+        console.error(err.stack || err);
+
+        if (err.details) {
+          console.error(err.details);
         }
-        messages = {
-          errors: [err.message],
-          warnings: [],
-        };
-      } else {
-        messages = stats.toJson({ all: false, warnings: true, errors: true });
+        return reject(err);
       }
 
-      if (messages.errors.length) {
-        // Only keep the first error. Others are often indicative
-        // of the same problem, but confuse the reader with noise.
-        if (messages.errors.length > 1) {
-          messages.errors.length = 1;
-        }
-        return reject(new Error(messages.errors.join('\n\n')));
+      const info = stats.toJson();
+
+      if (stats.hasErrors()) {
+        console.error(info.errors);
       }
 
       return resolve({
         stats,
-        warnings: messages.warnings,
+
+        warnings: info.warnings,
       });
     });
   });
@@ -241,12 +240,21 @@ async function watchAdmin({ dir, host, port, browser, options }) {
   const dest = path.join(dir, 'build');
   const env = 'development';
 
+  const cacheDir = path.join(dir, '.cache');
+
+  // Roots for the @strapi/babel-plugin-switch-ee-ce
+  const roots = {
+    eeRoot: path.resolve(cacheDir, 'ee', 'admin'),
+    ceRoot: path.resolve(cacheDir, 'admin', 'src'),
+  };
+
   const args = {
     entry,
     dest,
     env,
     port,
     options,
+    roots,
   };
 
   const opts = {
