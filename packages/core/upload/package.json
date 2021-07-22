@@ -12,12 +12,6 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.6",
-    "@buffetjs/custom": "3.3.6",
-    "@buffetjs/hooks": "3.3.6",
-    "@buffetjs/icons": "3.3.6",
-    "@buffetjs/styles": "3.3.6",
-    "@buffetjs/utils": "3.3.6",
     "@strapi/helper-plugin": "3.6.5",
     "@strapi/provider-upload-local": "3.6.5",
     "@strapi/utils": "3.6.5",
