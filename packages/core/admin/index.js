@@ -12,7 +12,7 @@ const getWebpackConfig = require('./webpack.config');
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
-  const adminConfigPath = path.join(dir, 'admin', 'admin.webpack.config.js');
+  const adminConfigPath = path.join(dir, 'admin', 'webpack.config.js');
 
   let webpackConfig = getWebpackConfig(config);
 
