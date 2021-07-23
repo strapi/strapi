@@ -6,7 +6,6 @@ const fs = require('fs-extra');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
-const chokidar = require('chokidar');
 const getWebpackConfig = require('./webpack.config');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
@@ -158,10 +157,6 @@ async function copyAdmin(dest) {
   await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
 }
 
-async function copyCustomAdmin(src, dest) {
-  await fs.copy(src, path.resolve(dest, 'admin'));
-}
-
 async function createCacheDir(dir) {
   const cacheDir = path.resolve(dir, '.cache');
 
@@ -182,8 +177,6 @@ async function createCacheDir(dir) {
       );
   }
 
-  // TODO: add logic to avoid copying files if not necessary
-
   // create .cache dir
   await fs.emptyDir(cacheDir);
 
@@ -192,11 +185,6 @@ async function createCacheDir(dir) {
 
   // copy plugins code
   await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
-
-  // override admin code with user customizations
-  if (fs.pathExistsSync(path.join(dir, 'admin'))) {
-    await copyCustomAdmin(path.join(dir, 'admin'), cacheDir);
-  }
 
   // Copy admin.config.js
   const customAdminConfigFilePath = path.join(dir, 'admin', 'admin.config.js');
@@ -210,26 +198,6 @@ async function createCacheDir(dir) {
 
   // create plugins.js with plugins requires
   await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
-
-  // override plugins' admin code with user customizations
-  const pluginsToOverride = pluginsToCopy.reduce((acc, current) => {
-    const pluginName = current.replace(/^@strapi\/plugin-/i, '');
-
-    if (fs.pathExistsSync(path.join(dir, 'extensions', pluginName, 'admin'))) {
-      acc.push(pluginName);
-    }
-
-    return acc;
-  }, []);
-
-  await Promise.all(
-    pluginsToOverride.map(plugin =>
-      copyCustomAdmin(
-        path.join(dir, 'extensions', plugin, 'admin'),
-        path.join(cacheDir, 'plugins', `@strapi/plugin-${plugin}`)
-      )
-    )
-  );
 }
 
 async function watchAdmin({ dir, host, port, browser, options }) {
@@ -279,97 +247,6 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     console.log(chalk.green('Starting the development server...'));
     console.log();
     console.log(chalk.green(`Admin development at http://${host}:${port}${opts.publicPath}`));
-  });
-
-  watchFiles(dir, options.watchIgnoreFiles);
-}
-
-async function watchFiles(dir, ignoreFiles = []) {
-  const cacheDir = path.join(dir, '.cache');
-  const pkgJSON = require(path.join(dir, 'package.json'));
-  const admin = path.join(dir, 'admin');
-  const extensionsPath = path.join(dir, 'extensions');
-
-  const appPlugins = Object.keys(pkgJSON.dependencies).filter(
-    dep =>
-      dep.startsWith('@strapi/plugin') &&
-      fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
-  );
-  const pluginsToWatch = appPlugins.map(plugin =>
-    path.join(extensionsPath, plugin.replace(/^@strapi\/plugin-/i, ''), 'admin')
-  );
-  const filesToWatch = [admin, ...pluginsToWatch];
-
-  const watcher = chokidar.watch(filesToWatch, {
-    ignoreInitial: true,
-    ignorePermissionErrors: true,
-    ignored: [...ignoreFiles],
-  });
-
-  watcher.on('all', async (event, filePath) => {
-    const isExtension = filePath.includes(extensionsPath);
-    const pluginName = isExtension ? filePath.replace(extensionsPath, '').split(path.sep)[1] : '';
-
-    const packageName = isExtension ? `@strapi/plugin-${pluginName}` : '@strapi/admin';
-
-    const targetPath = isExtension
-      ? path.normalize(filePath.split(extensionsPath)[1].replace(pluginName, ''))
-      : path.normalize(filePath.split(admin)[1]);
-
-    const destFolder = isExtension
-      ? path.join(cacheDir, 'plugins', packageName)
-      : path.join(cacheDir, 'admin');
-
-    if (event === 'unlink' || event === 'unlinkDir') {
-      const originalFilePathInNodeModules = path.join(
-        getPkgPath(packageName),
-        isExtension ? '' : 'admin',
-        targetPath
-      );
-
-      // Remove the file or folder
-      // We need to copy the original files when deleting an override one
-      try {
-        fs.removeSync(path.join(destFolder, targetPath));
-      } catch (err) {
-        console.log('An error occured while deleting the file', err);
-      }
-
-      // Check if the file or folder exists in node_modules
-      // If so copy the old one
-      if (fs.pathExistsSync(path.resolve(originalFilePathInNodeModules))) {
-        try {
-          await fs.copy(
-            path.resolve(originalFilePathInNodeModules),
-            path.join(destFolder, targetPath)
-          );
-
-          // The plugins.js file needs to be recreated
-          // when we delete either the admin folder
-          // the admin/src folder
-          // or the plugins.js file
-          // since the path are different when developing inside the monorepository or inside an app
-          const shouldCopyPluginsJSFile =
-            filePath.split('/admin/src').filter(p => !!p).length === 1;
-
-          if (
-            (event === 'unlinkDir' && !isExtension && shouldCopyPluginsJSFile) ||
-            (!isExtension && filePath.includes('plugins.js'))
-          ) {
-            await createPluginsJs(appPlugins, path.join(cacheDir));
-          }
-        } catch (err) {
-          // Do nothing
-        }
-      }
-    } else {
-      // In any other case just copy the file into the .cache folder
-      try {
-        await fs.copy(filePath, path.join(destFolder, targetPath));
-      } catch (err) {
-        console.log(err);
-      }
-    }
   });
 }
 
