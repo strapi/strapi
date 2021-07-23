@@ -9,8 +9,8 @@ import { render {{~#if useRedux}} as tlRender {{~/if}} } from '@testing-library/
 {{#if useRedux}}
   import { Provider } from 'react-redux';
   import { createStore, combineReducers } from 'redux';
-  import reducer, { initialState } from '../reducer';
-  import reducers from '../../reducers';
+  import { initialState } from '../reducer';
+  import reducers from '../../../reducers';
 {{/if}}
 {{#if useI18n}}
   import { IntlProvider } from 'react-intl';
@@ -28,6 +28,7 @@ import {{name}} from '../index';
       ...renderOptions
     } = {},
   ) => {
+    // eslint-disable-next-line react/prop-types
     const Wrapper = ({ children }) => (
       <Provider store={store}>{children}</Provider>
     );

@@ -1,5 +1,6 @@
 'use strict';
 
+const { ESLint } = require('eslint');
 const componentGenerator = require('./component');
 
 // This is used to be able to indent block inside Handlebars helpers and improve templates visibility.
@@ -63,6 +64,15 @@ module.exports = function(
   });
   plop.setHelper('else', function(_, { fn }) {
     return leftShift(fn(this));
+  });
+  plop.setActionType('lint', async function(answers, config, plopfileApi) {
+    const { files } = config;
+    const patterns = files.map(file => plopfileApi.renderString(file, answers));
+
+    const eslint = new ESLint({ fix: true });
+    const results = await eslint.lintFiles(patterns);
+    await ESLint.outputFixes(results);
+    return 'Linting errors autofixed.';
   });
   plop.setGenerator('component', componentGenerator);
 };

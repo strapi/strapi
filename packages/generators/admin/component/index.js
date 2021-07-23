@@ -1,8 +1,10 @@
 'use strict';
 
+const { join } = require('path');
 const { flow, camelCase, upperFirst, lowerCase } = require('lodash');
 const fileExistsInPackages = require('../utils/fileExistsInPackages');
 const getPluginList = require('../utils/getPluginList');
+const packagesFolder = require('../utils/packagesFolder');
 
 const pascalCase = flow(camelCase, upperFirst);
 
@@ -59,16 +61,21 @@ const actions = answers => {
   const { useRedux } = answers;
   const [pluginFolder, plugin] = answers.plugin.split('/');
   answers.plugin = plugin;
-  const templateFolder = 'component/templates';
+  const templatesFolder = 'component/templates';
   const pattern = useRedux ? '**/**.hbs' : '**/index.*.hbs';
+  const path = join(packagesFolder, pluginFolder, '{{plugin}}/admin/src/components/{{name}}');
   return [
     {
       type: 'addMany',
-      destination: `../../${pluginFolder}/{{plugin}}/admin/src/components/{{name}}`,
-      templateFiles: [`${templateFolder}/${pattern}`],
-      base: templateFolder,
+      destination: path,
+      templateFiles: [`${templatesFolder}/${pattern}`],
+      base: templatesFolder,
     },
     // TODO: If redux will be used then 'append' created reducer inside 'reducers.js'
+    {
+      type: 'lint',
+      files: [path],
+    },
   ];
 };
 

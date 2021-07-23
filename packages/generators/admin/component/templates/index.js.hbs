@@ -11,11 +11,13 @@
   import React from 'react';
   {{#if useI18n}}
     import { useIntl } from 'react-intl';
-    import { getTrad } from '../../utils';
+    {{#unless plugin "===" "admin"}}
+      import { getTrad } from '../../utils';
+    {{/unless}}
   {{/if}}
   {{#if useRedux}}
     import { useDispatch, useSelector } from 'react-redux';
-    import select{{name}}Domain from './selectors';
+    import { select{{name}}Domain } from './selectors';
     import { defaultAction } from './actions';
   {{/if}}
 {{/if}}
@@ -29,6 +31,7 @@
     {{/if}}
     {{#if useRedux}}
       const dispatch = useDispatch();
+      // eslint-disable-next-line no-unused-vars
       const state = useSelector(select{{name}}Domain);
 
       const handleClick = () => dispatch(defaultAction())
@@ -42,7 +45,11 @@
           <button type="button" onClick={handleClick}>{{titleCase name}}</button>
         {{/if}}
         {{#if useI18n}}
-          <p>{formatMessage({ id: getTrad('component.name'), defaultMessage: '{{titleCase name}}' })}</p>
+          <p>{formatMessage({ id: {{#if plugin "===" "admin"~}}
+            'component.name'
+          {{~else~}}
+            getTrad('component.name')
+          {{~/if}}, defaultMessage: '{{titleCase name}}' })}</p>
         {{/if}}
       </div>
     );

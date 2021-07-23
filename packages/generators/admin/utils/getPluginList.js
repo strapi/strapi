@@ -1,10 +1,8 @@
 'use strict';
 
-const { join } = require('path');
 const glob = require('glob');
 const fileExistsInPackages = require('./fileExistsInPackages');
-
-const packagesFolder = join(__dirname, '../../../');
+const packagesFolder = require('./packagesFolder');
 
 const asyncFilter = async (array, predicate) => {
   const results = await Promise.all(array.map(predicate));

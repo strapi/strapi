@@ -2,8 +2,7 @@
 
 const fs = require('fs');
 const { join } = require('path');
-
-const packagesFolder = join(__dirname, '../../../');
+const packagesFolder = require('./packagesFolder');
 
 const fileExistsInPackages = path =>
   fs.promises
