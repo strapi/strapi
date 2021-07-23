@@ -111,7 +111,7 @@
   "form.button.add-first-field-to-created-component": "Aggiungi un primo campo al componente",
   "form.button.add.field.to.collectionType": "Aggiungi un altro campo a questa Collezione",
   "form.button.add.field.to.component": "Aggiungi un altro campo a questo componente",
-  "form.button.add.field.to.contentType ": "Aggiungi un altro campo a questo Tipo di Contenuto",
+  "form.button.add.field.to.contentType": "Aggiungi un altro campo a questo Tipo di Contenuto",
   "form.button.add.field.to.singleType": "Aggiungi un altro campo a questa Entità singola",
   "form.button.cancel": "Annulla",
   "form.button.collection-type.description": "Utile per istanze multiple come articoli, prodotti, commenti, ecc...",

@@ -102,7 +102,7 @@ describe('Permissions Engine', () => {
         plugin: 'test',
         name: 'isContainedIn',
         category: 'default',
-        handler: { firstname: { $in: ['Alice', 'Foo'] } },
+        handler: () => ({ firstname: { $in: ['Alice', 'Foo'] } }),
       },
     ],
   };
@@ -268,7 +268,7 @@ describe('Permissions Engine', () => {
   });
 
   describe('Evaluate', () => {
-    test('It should register the permission (no conditions / true result)', async () => {
+    test('It should register the permission (no conditions)', async () => {
       const permission = { action: 'read', subject: 'article', properties: { fields: ['title'] } };
       const user = getUser('alice');
       const registerFn = jest.fn();
@@ -278,11 +278,10 @@ describe('Permissions Engine', () => {
       expect(registerFn).toHaveBeenCalledWith({
         ..._.pick(permission, ['action', 'subject']),
         fields: permission.properties.fields,
-        condition: true,
       });
     });
 
-    test('It should register the permission (conditions / true result)', async () => {
+    test('It should register the permission without a condition (non required true result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
@@ -297,7 +296,6 @@ describe('Permissions Engine', () => {
       const expected = {
         ..._.omit(permission, ['conditions', 'properties']),
         fields: permission.properties.fields,
-        condition: true,
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);
@@ -318,7 +316,7 @@ describe('Permissions Engine', () => {
       expect(registerFn).not.toHaveBeenCalled();
     });
 
-    test('It should register the permission (conditions / object result)', async () => {
+    test('It should register the permission (non required object result)', async () => {
       const permission = {
         action: 'read',
         subject: 'article',
@@ -338,10 +336,35 @@ describe('Permissions Engine', () => {
       const expected = {
         ..._.omit(permission, ['conditions', 'properties']),
         fields: permission.properties.fields,
-        condition: { created_by: user.firstname },
+        condition: {
+          $and: [
+            {
+              $or: [{ created_by: user.firstname }],
+            },
+          ],
+        },
       };
 
       expect(registerFn).toHaveBeenCalledWith(expected);
+    });
+  });
+
+  test('It should register the condition even if the subject is Nil', async () => {
+    const permission = {
+      action: 'read',
+      subject: null,
+      properties: {},
+      conditions: ['plugins::test.isCreatedBy'],
+    };
+
+    const user = getUser('alice');
+    const can = jest.fn();
+    const registerFn = engine.createRegisterFunction(can, {}, user);
+
+    await engine.evaluate({ permission, user, registerFn });
+
+    expect(can).toHaveBeenCalledWith('read', 'all', undefined, {
+      $and: [{ $or: [{ created_by: user.firstname }] }],
     });
   });
 
@@ -351,21 +374,38 @@ describe('Permissions Engine', () => {
 
     beforeEach(() => {
       can = jest.fn();
-      registerFn = engine.createRegisterFunction(can);
+      registerFn = engine.createRegisterFunction(can, {}, {});
     });
 
-    test('It should calls the can function without any condition', () => {
-      registerFn({ action: 'read', subject: 'article', fields: '*', condition: true });
+    test('It should calls the can function without any condition', async () => {
+      await registerFn({ action: 'read', subject: 'article', fields: '*', condition: true });
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', undefined);
     });
 
-    test('It should calls the can function with a condition', () => {
-      registerFn({ action: 'read', subject: 'article', fields: '*', condition: { created_by: 1 } });
+    test('It should calls the can function with a condition', async () => {
+      await registerFn({
+        action: 'read',
+        subject: 'article',
+        fields: '*',
+        condition: { created_by: 1 },
+      });
 
       expect(can).toHaveBeenCalledTimes(1);
       expect(can).toHaveBeenCalledWith('read', 'article', '*', { created_by: 1 });
+    });
+
+    test(`It should use 'all' as a subject if it's Nil`, async () => {
+      await registerFn({
+        action: 'read',
+        subject: null,
+        fields: null,
+        condition: { created_by: 1 },
+      });
+
+      expect(can).toHaveBeenCalledTimes(1);
+      expect(can).toHaveBeenCalledWith('read', 'all', null, { created_by: 1 });
     });
   });
 

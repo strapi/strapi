@@ -12,12 +12,12 @@ const generateNewApp = require('strapi-generate-new');
 
 const hasYarn = require('./has-yarn');
 const { runInstall, runApp, initGit } = require('./child-process');
-const { getRepoInfo, downloadGithubRepo } = require('./fetch-github');
+const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
 const logger = require('./logger');
 const stopProcess = require('./stop-process');
 
 /**
- * @param  {string} filePath Path to starter.json file
+ * @param  {string} - filePath Path to starter.json file
  */
 function readStarterJson(filePath, starterUrl) {
   try {
@@ -29,11 +29,11 @@ function readStarterJson(filePath, starterUrl) {
 }
 
 /**
- * @param  {string} rootPath Path to the project directory
- * @param  {string} projectName Name of the project
+ * @param  {string} rootPath - Path to the project directory
+ * @param  {string} projectName - Name of the project
  */
 async function initPackageJson(rootPath, projectName) {
-  const packageManager = hasYarn ? 'yarn --cwd' : 'npm run --prefix';
+  const packageManager = hasYarn() ? 'yarn --cwd' : 'npm run --prefix';
 
   try {
     await fse.writeJson(
@@ -63,7 +63,7 @@ async function initPackageJson(rootPath, projectName) {
 }
 
 /**
- * @param  {string} path The directory path for install
+ * @param  {string} path - The directory path for install
  */
 async function installWithLogs(path) {
   const installPrefix = chalk.yellow('Installing dependencies:');
@@ -86,20 +86,23 @@ async function installWithLogs(path) {
 }
 
 /**
- * @param  {object} projectArgs projectName and starterUrl for the project
- * @param  {object} program Commands for generating new application
+ * @param  {Object} projectArgs - The arguments for create a project
+ * @param {string|null} projectArgs.projectName - The name/path of project
+ * @param {string|null} projectArgs.starterUrl - The GitHub repo of the starter
+ * @param  {Object} program - Commands for generating new application
  */
-module.exports = async function buildStarter(projectArgs, program) {
-  const { projectName, starterUrl } = projectArgs;
+module.exports = async function buildStarter(programArgs, program) {
+  let { projectName, starterUrl } = programArgs;
+
+  // Fetch repo info
+  const repoInfo = await getRepoInfo(starterUrl);
+  const { fullName } = repoInfo;
 
   // Create temporary directory for starter
   const tmpDir = await fse.mkdtemp(join(os.tmpdir(), 'strapi-'));
 
-  // Fetch repo info
-  const { full_name } = await getRepoInfo(starterUrl);
-
-  // Download repo inside tmp dir
-  await downloadGithubRepo(starterUrl, tmpDir);
+  // Download repo inside temporary directory
+  await downloadGitHubRepo(repoInfo, tmpDir);
 
   const starterJson = readStarterJson(join(tmpDir, 'starter.json'), starterUrl);
 
@@ -130,14 +133,7 @@ module.exports = async function buildStarter(projectArgs, program) {
   // Delete temporary directory
   await fse.remove(tmpDir);
 
-  console.log(`Creating Strapi starter frontend at ${chalk.yellow(frontendPath)}.`);
-
-  // Install frontend dependencies
-  console.log(`Installing ${chalk.yellow(full_name)} starter`);
-
-  await installWithLogs(frontendPath);
-
-  const fullUrl = `https://github.com/${full_name}`;
+  const fullUrl = `https://github.com/${fullName}`;
   // Set command options for Strapi app
   const generateStrapiAppOptions = {
     ...program,
@@ -148,6 +144,11 @@ module.exports = async function buildStarter(projectArgs, program) {
 
   // Create strapi app using the template
   await generateNewApp(join(rootPath, 'backend'), generateStrapiAppOptions);
+
+  // Install frontend dependencies
+  console.log(`Creating Strapi starter frontend at ${chalk.green(frontendPath)}.`);
+  console.log(`Installing ${chalk.yellow(fullName)} starter`);
+  await installWithLogs(frontendPath);
 
   // Setup monorepo
   initPackageJson(rootPath, projectBasename);
