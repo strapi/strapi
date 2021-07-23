@@ -28,7 +28,6 @@ const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const ee = require('./utils/ee');
-// const createPluginProvider = require('./core/plugins/plugin-provider');
 const createContainer = require('./core/container');
 const createConfigProvider = require('./core/base-providers/config-provider');
 
@@ -62,7 +61,7 @@ class Strapi {
     this.admin = {};
     this.plugins = {};
 
-    const appConfig = loadConfiguration(this.dir, opts); //
+    const appConfig = loadConfiguration(this.dir, opts);
     this.config = createConfigProvider(appConfig);
     this.container = createContainer(this);
     this.app.proxy = this.config.get('server.proxy');
@@ -302,7 +301,6 @@ class Strapi {
   }
 
   stopWithError(err, customMessage) {
-    console.log(err);
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
       this.log.error(customMessage);
@@ -471,18 +469,6 @@ class Strapi {
     } else if (lifecycleName === LIFECYCLES.REGISTER) {
       await this.container.register();
     }
-    //
-    // await Promise.all(
-    //   Object.keys(this.plugins).map(plugin => {
-    //     const pluginFunc = _.get(this.plugins[plugin], `config.${configPath}`);
-    //
-    //     return execLifecycle(pluginFunc).catch(err => {
-    //       strapi.log.error(`${lifecycleName} function in plugin "${plugin}" failed`);
-    //       strapi.log.error(err);
-    //       strapi.stop();
-    //     });
-    //   })
-    // );
 
     // user
     await execLifecycle(this.config.get(configPath));

@@ -9,7 +9,6 @@ module.exports = fn => async (...args) => {
     }
 
     // these are errors like unique constraints
-    console.log(error);
     strapi.log.error(error);
     throw strapi.errors.badRequest('Invalid input data. Please verify unique constraints');
   }

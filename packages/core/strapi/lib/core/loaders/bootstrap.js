@@ -60,7 +60,6 @@ module.exports = function(strapi) {
   strapi.controllers = Object.keys(strapi.api || []).reduce((acc, key) => {
     for (let index in strapi.api[key].controllers) {
       let controller = strapi.api[key].controllers[index];
-      // controller.identity = controller.identity || _.upperFirst(index);
       acc[index] = controller;
     }
 
@@ -80,13 +79,6 @@ module.exports = function(strapi) {
   strapi.config.routes = Object.keys(strapi.api || []).reduce((acc, key) => {
     return acc.concat(_.get(strapi.api[key], 'config.routes') || {});
   }, []);
-
-  // Init admin controllers.
-  // Object.keys(strapi.admin.controllers || []).forEach(key => {
-  //   if (!strapi.admin.controllers[key].identity) {
-  //     strapi.admin.controllers[key].identity = key;
-  //   }
-  // });
 
   // Init admin models.
   Object.keys(strapi.admin.models || []).forEach(modelName => {
@@ -111,14 +103,6 @@ module.exports = function(strapi) {
   //   controllers: plugin.controllers || [],
   //   services: plugin.services || [],
   //   models: plugin.models || [],
-  // });
-
-  // Object.keys(plugin.controllers).forEach(key => {
-  //   let controller = plugin.controllers[key];
-
-  //   Object.assign(controller, {
-  //     identity: controller.identity || key,
-  //   });
   // });
 
   // Object.keys(plugin.models || []).forEach(modelName => {
@@ -151,14 +135,6 @@ module.exports = function(strapi) {
     strapi.plugins[plugin].config.policies = strapi.plugins[plugin].config.policies || {};
     Object.assign(strapi.plugins[plugin].config.policies, mapKeys(toLower, policies[plugin]));
   }
-
-  // const pluginServices = strapi.container.plugins.services.getAll();
-  // for (const plugin in pluginServices) {
-  //   strapi.plugins[plugin] = strapi.plugins[plugin] || {};
-  //   strapi.plugins[plugin].services = pluginServices[plugin];
-  // }
-
-  // });
 
   // Preset config in alphabetical order.
   strapi.config.middleware.settings = Object.keys(strapi.middleware).reduce((acc, current) => {

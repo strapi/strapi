@@ -52,13 +52,6 @@ const createContainer = strapi => {
             return false;
         }
       },
-
-      // on ne passe plus l'uid en entier
-      // on parse comme au dessus avec un saut de niveau
-      // on enlève keys
-      // eventuellement cache system
-      //
-
       getAll() {
         const pluginContentTypes = container.plugins.contentTypes.getAll();
         return [...pluginContentTypes];
