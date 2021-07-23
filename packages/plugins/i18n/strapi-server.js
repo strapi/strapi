@@ -1,6 +1,7 @@
 'use strict';
 
 const bootstrap = require('./server/bootstrap');
+const register = require('./server/register');
 const contentTypes = require('./server/content-types');
 const policies = require('./server/policies');
 const services = require('./server/services');
@@ -9,7 +10,7 @@ const controllers = require('./server/controllers');
 const middlewares = require('./server/middlewares');
 
 module.exports = () => ({
-  register: () => {},
+  register,
   bootstrap,
   routes,
   controllers,

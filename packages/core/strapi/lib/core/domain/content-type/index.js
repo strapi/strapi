@@ -49,11 +49,12 @@ ${e.errors}
     modelName: definition.schema.info.singularName,
     connection: 'default',
   });
-  Object.defineProperty(createdContentType.schema, 'privateAttributes', {
-    get() {
-      return strapi.getModel(createdContentType.schema.uid).privateAttributes;
-    },
-  });
+  // Object.defineProperty(createdContentType.schema, 'privateAttributes', {
+  //   get() {
+  //     console.log('createdContentType.privateAttributes', )
+  //     return strapi.getModel(createdContentType.schema.uid).privateAttributes;
+  //   },
+  // });
 
   return createdContentType;
 };
