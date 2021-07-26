@@ -140,10 +140,7 @@ const createMetadata = (models = []) => {
         }
 
         if (types.isRelation(attribute.type)) {
-          // NOTE: also validate
-
           createRelation(attributeName, attribute, meta, metadata);
-
           continue;
         }
       } catch (error) {

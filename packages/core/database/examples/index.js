@@ -19,131 +19,21 @@ async function main(connection) {
 
     await orm.schema.reset();
 
-    let res, articleA, articleB, c1, c2, f1, f2;
+    let res;
 
-    f1 = await orm.query('folder').create({ data: {} });
-    f2 = await orm.query('folder').create({ data: {} });
-
-    articleA = await orm.query('article').create({
-      data: {
-        reportables: [
-          {
-            __type: 'folder',
-            id: f1.id,
-          },
-          {
-            __type: 'folder',
-            id: f2.id,
-          },
-        ],
-      },
-    });
-
-    articleB = await orm.query('article').create({
-      data: {
-        reportables: {
-          __type: 'folder',
-          id: f2.id,
-        },
-      },
-    });
-
-    res = await orm.query('folder').findMany({
-      populate: {
-        articles: {
-          populate: {
-            reportables: true,
-          },
-        },
-      },
-    });
-
-    log(res);
-
-    // morph one
-
-    await orm.query('comment').create({
-      data: {
-        article: articleA.id,
-      },
-    });
-
-    res = await orm.query('comment').findMany({
-      populate: {
-        article: true,
-      },
-    });
-
-    log(res);
-
-    res = await orm.query('article').findMany({
-      populate: {
-        commentable: true,
-      },
-    });
-
-    log(res);
-    // morph many
-
-    await orm.query('video-comment').create({
-      data: {
-        articles: [articleA.id, articleB.id],
-      },
-    });
-
-    res = await orm.query('video-comment').findMany({
-      populate: {
-        articles: true,
-      },
-    });
-
-    log(res);
-
-    res = await orm.query('article').findMany({
-      populate: {
-        commentable: true,
-      },
-    });
-
-    log(res);
-
-    //----------
-
-    c1 = await orm.query('comment').create({
-      data: {
-        title: 'test',
-      },
-    });
-
-    c2 = await orm.query('video-comment').create({
+    const c1 = await orm.query('comment').create({
       data: {
         title: 'coucou',
-        articles: [articleA.id, articleB.id],
       },
     });
 
-    // morph to one
-
-    await orm.query('article').create({
+    const c2 = await orm.query('video-comment').create({
       data: {
-        commentable: {
-          __type: 'comment',
-          id: c1.id,
-        },
+        title: 'coucou',
       },
     });
 
-    res = await orm.query('article').findMany({
-      populate: {
-        commentable: true,
-      },
-    });
-
-    log(res);
-
-    // morph to many
-
-    await orm.query('article').create({
+    res = await orm.query('article').create({
       data: {
         dz: [
           {
@@ -156,7 +46,12 @@ async function main(connection) {
           },
         ],
       },
+      populate: {
+        dz: true,
+      },
     });
+
+    log(res);
 
     res = await orm.query('article').findMany({
       populate: {

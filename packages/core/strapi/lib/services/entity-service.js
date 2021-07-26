@@ -424,11 +424,7 @@ const createComponents = async (uid, data) => {
       componentBody[attributeName] = await Promise.all(
         dynamiczoneValues.map(async value => {
           const { id } = await createComponent(value.__component, value);
-
-          return {
-            __type: value.__component,
-            id,
-          };
+          return { id, __type: value.__component };
         })
       );
 
