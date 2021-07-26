@@ -493,6 +493,7 @@ const processPopulate = (populate, ctx) => {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
+      continue;
       throw new Error(`Cannot populate unknown field ${key}`);
     }
 
@@ -800,6 +801,227 @@ const applyPopulate = async (results, populate, ctx) => {
       });
 
       continue;
+    } else if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+      const { target, morphBy } = attribute;
+
+      const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+      if (targetAttribute.relation === 'morphToOne') {
+        const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+        const referencedValues = _.uniq(
+          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNull(value))
+        );
+
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = null;
+          });
+
+          continue;
+        }
+
+        const rows = await db.entityManager
+          .createQueryBuilder(target)
+          .init(populateValue)
+          // .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+          .where({ [idColumn.name]: referencedValues, [typeColumn.name]: uid })
+          .execute({ mapResults: false });
+
+        const map = _.groupBy(idColumn.name, rows);
+
+        results.forEach(result => {
+          const matchingRows = map[result[idColumn.referencedColumn]];
+
+          const matchingValue =
+            attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+
+          result[key] = fromTargetRow(matchingValue);
+        });
+      } else if (targetAttribute.relation === 'morphToMany') {
+        const { joinTable } = targetAttribute;
+
+        const { joinColumn, morphColumn } = joinTable;
+
+        const { idColumn, typeColumn } = morphColumn;
+
+        const referencedValues = _.uniq(
+          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNull(value))
+        );
+
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = [];
+          });
+
+          continue;
+        }
+
+        // find with join table
+        const qb = db.entityManager.createQueryBuilder(target);
+
+        const alias = qb.getAlias();
+
+        const rows = await qb
+          .init(populateValue)
+          .join({
+            alias: alias,
+            referencedTable: joinTable.name,
+            referencedColumn: joinColumn.name,
+            rootColumn: joinColumn.referencedColumn,
+            rootTable: qb.alias,
+            on: joinTable.on,
+          })
+          .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])
+          .where({
+            [`${alias}.${idColumn.name}`]: referencedValues,
+            [`${alias}.${typeColumn.name}`]: uid,
+          })
+          .execute({ mapResults: false });
+
+        const map = _.groupBy(idColumn.name, rows);
+
+        results.forEach(result => {
+          const matchingRows = map[result[idColumn.referencedColumn]];
+
+          const matchingValue =
+            attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+
+          result[key] = fromTargetRow(matchingValue);
+        });
+      }
+
+      continue;
+    } else if (attribute.relation === 'morphToMany') {
+      // find with join table
+      const { joinTable } = attribute;
+
+      const { joinColumn, morphColumn } = joinTable;
+      const { idColumn, typeColumn } = morphColumn;
+
+      // fetch join table to create the ids map then do the same as morphToOne without the first
+
+      const referencedValues = _.uniq(
+        results.map(r => r[joinColumn.referencedColumn]).filter(value => !_.isNull(value))
+      );
+
+      const qb = db.entityManager.createQueryBuilder(joinTable.name);
+
+      const joinRows = await qb
+        .where({
+          [joinColumn.name]: referencedValues,
+          ...(joinTable.on || {}),
+        })
+        .orderBy([joinColumn.name, 'order'])
+        .execute({ mapResults: false });
+
+      const joinMap = _.groupBy(joinColumn.name, joinRows);
+
+      const idsByType = joinRows.reduce((acc, result) => {
+        const idValue = result[morphColumn.idColumn.name];
+        const typeValue = result[morphColumn.typeColumn.name];
+
+        if (!idValue || !typeValue) {
+          return acc;
+        }
+
+        if (!_.has(typeValue, acc)) {
+          acc[typeValue] = [];
+        }
+
+        acc[typeValue].push(idValue);
+
+        return acc;
+      }, {});
+
+      const map = {};
+      for (const type in idsByType) {
+        const ids = idsByType[type];
+
+        const qb = db.entityManager.createQueryBuilder(type);
+
+        const rows = await qb
+          .init(populateValue)
+          .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+          .where({ [idColumn.referencedColumn]: ids })
+          .execute({ mapResults: false });
+
+        map[type] = _.groupBy(idColumn.referencedColumn, rows);
+      }
+
+      results.forEach(result => {
+        const joinResults = joinMap[result[joinColumn.referencedColumn]] || [];
+
+        const matchingRows = joinResults.flatMap(joinResult => {
+          const id = joinResult[idColumn.name];
+          const type = joinResult[typeColumn.name];
+
+          const fromTargetRow = rowOrRows => fromRow(db.metadata.get(type), rowOrRows);
+
+          return (map[type][id] || []).map(row => {
+            return {
+              __type: type,
+              ...fromTargetRow(row),
+            };
+          });
+        });
+
+        result[key] = matchingRows;
+      });
+    } else if (attribute.relation === 'morphToOne') {
+      const { morphColumn } = attribute;
+      const { idColumn, typeColumn } = morphColumn;
+
+      // make a map for each type what ids to return
+      // make a nested map per id
+
+      const idsByType = results.reduce((acc, result) => {
+        const idValue = result[morphColumn.idColumn.name];
+        const typeValue = result[morphColumn.typeColumn.name];
+
+        if (!idValue || !typeValue) {
+          return acc;
+        }
+
+        if (!_.has(typeValue, acc)) {
+          acc[typeValue] = [];
+        }
+
+        acc[typeValue].push(idValue);
+
+        return acc;
+      }, {});
+
+      const map = {};
+      for (const type in idsByType) {
+        const ids = idsByType[type];
+
+        const qb = db.entityManager.createQueryBuilder(type);
+
+        const rows = await qb
+          .init(populateValue)
+          .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+          .where({ [idColumn.referencedColumn]: ids })
+          .execute({ mapResults: false });
+
+        map[type] = _.groupBy(idColumn.referencedColumn, rows);
+      }
+
+      results.forEach(result => {
+        const id = result[idColumn.name];
+        const type = result[typeColumn.name];
+
+        if (!type || !id) {
+          result[key] = null;
+          return;
+        }
+
+        const matchingRows = map[type][id];
+
+        const fromTargetRow = rowOrRows => fromRow(db.metadata.get(type), rowOrRows);
+
+        result[key] = fromTargetRow(_.first(matchingRows));
+      });
     }
   }
 };

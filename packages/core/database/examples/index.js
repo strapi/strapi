@@ -1,5 +1,6 @@
 'use strict';
 
+const util = require('util');
 const _ = require('lodash');
 
 const { Database } = require('../lib/index');
@@ -16,31 +17,163 @@ async function main(connection) {
     // await orm.schema.drop();
     // await orm.schema.create();
 
-    console.log(orm.connection.client.config.client);
+    await orm.schema.reset();
 
-    await orm.schema.sync();
-    // await orm.schema.reset();
+    let res, articleA, articleB, c1, c2, f1, f2;
 
-    const compoA = await orm.query('compo-test').create({
+    f1 = await orm.query('folder').create({ data: {} });
+    f2 = await orm.query('folder').create({ data: {} });
+
+    articleA = await orm.query('article').create({
       data: {
-        key: 'A',
-        value: 1,
+        reportables: [
+          {
+            __type: 'folder',
+            id: f1.id,
+          },
+          {
+            __type: 'folder',
+            id: f2.id,
+          },
+        ],
       },
     });
 
-    orm.query('article').findMany({
-      populate: {
-        comments: {
-          where: {},
-          populate: {},
+    articleB = await orm.query('article').create({
+      data: {
+        reportables: {
+          __type: 'folder',
+          id: f2.id,
         },
       },
     });
+
+    res = await orm.query('folder').findMany({
+      populate: {
+        articles: {
+          populate: {
+            reportables: true,
+          },
+        },
+      },
+    });
+
+    log(res);
+
+    // morph one
+
+    await orm.query('comment').create({
+      data: {
+        article: articleA.id,
+      },
+    });
+
+    res = await orm.query('comment').findMany({
+      populate: {
+        article: true,
+      },
+    });
+
+    log(res);
+
+    res = await orm.query('article').findMany({
+      populate: {
+        commentable: true,
+      },
+    });
+
+    log(res);
+    // morph many
+
+    await orm.query('video-comment').create({
+      data: {
+        articles: [articleA.id, articleB.id],
+      },
+    });
+
+    res = await orm.query('video-comment').findMany({
+      populate: {
+        articles: true,
+      },
+    });
+
+    log(res);
+
+    res = await orm.query('article').findMany({
+      populate: {
+        commentable: true,
+      },
+    });
+
+    log(res);
+
+    //----------
+
+    c1 = await orm.query('comment').create({
+      data: {
+        title: 'test',
+      },
+    });
+
+    c2 = await orm.query('video-comment').create({
+      data: {
+        title: 'coucou',
+        articles: [articleA.id, articleB.id],
+      },
+    });
+
+    // morph to one
+
+    await orm.query('article').create({
+      data: {
+        commentable: {
+          __type: 'comment',
+          id: c1.id,
+        },
+      },
+    });
+
+    res = await orm.query('article').findMany({
+      populate: {
+        commentable: true,
+      },
+    });
+
+    log(res);
+
+    // morph to many
+
+    await orm.query('article').create({
+      data: {
+        dz: [
+          {
+            __type: 'comment',
+            id: c1.id,
+          },
+          {
+            __type: 'video-comment',
+            id: c2.id,
+          },
+        ],
+      },
+    });
+
+    res = await orm.query('article').findMany({
+      populate: {
+        dz: true,
+      },
+    });
+
+    log(res);
 
     // await tests(orm);
   } finally {
     orm.destroy();
   }
+}
+
+function log(res) {
+  console.log(util.inspect(res, null, null, true));
 }
 
 // (async function() {

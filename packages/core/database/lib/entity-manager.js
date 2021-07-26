@@ -44,6 +44,23 @@ const toRow = (metadata, data = {}) => {
         if (!_.isUndefined(attrValue)) {
           obj[joinColumnName] = attrValue;
         }
+
+        continue;
+      }
+
+      if (attribute.morphColumn && attribute.owner) {
+        const { idColumn, typeColumn } = attribute.morphColumn;
+
+        const value = data[attributeName];
+
+        if (!_.isUndefined(value)) {
+          if (!_.has('id', value) || !_.has('__type', value)) {
+            throw new Error('Expects properties `__type` an `id` to make a morph association');
+          }
+
+          obj[idColumn.name] = value.id;
+          obj[typeColumn.name] = value.__type;
+        }
       }
     }
   }
@@ -241,14 +258,83 @@ const createEntityManager = db => {
     async attachRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      /*
-        TODO:
-        if data[attributeName] is a single value (ID) => assign
-        if data[attributeName] is an object with an id => assign & use the other props as join column values
-      */
-
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
+
+        if (!_.has(attributeName, data)) {
+          continue;
+        }
+
+        // TODO: handle cleaning before creating the assocaitions
+        switch (attribute.relation) {
+          case 'morphOne':
+          case 'morphMany': {
+            const { target, morphBy } = attribute;
+
+            const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+            if (targetAttribute.relation === 'morphToOne') {
+              // set columns
+              const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+              await this.createQueryBuilder(target)
+                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+                .where({ id: data[attributeName] })
+                .execute();
+            } else if (targetAttribute.type === 'morphToMany') {
+              const { joinTable } = targetAttribute;
+              const { name, joinColumn, morphColumn } = joinTable;
+
+              const { idColumn, typeColumn } = morphColumn;
+
+              const rows = _.castArray(data[attributeName]).map((dataID, idx) => ({
+                [joinColumn.name]: dataID,
+                [idColumn.name]: id,
+                [typeColumn.name]: uid,
+                ...(joinTable.on || {}),
+                order: idx,
+              }));
+
+              if (_.isEmpty(rows)) {
+                continue;
+              }
+
+              await this.createQueryBuilder(name)
+                .insert(rows)
+                .execute();
+            }
+
+            continue;
+          }
+          case 'morphToOne': {
+            // handled on the entry itself
+            continue;
+          }
+          case 'morphToMany': {
+            const { joinTable } = attribute;
+            const { name, joinColumn, morphColumn } = joinTable;
+
+            const { idColumn, typeColumn } = morphColumn;
+
+            const rows = _.castArray(data[attributeName]).map((data, idx) => ({
+              [joinColumn.name]: id,
+              [idColumn.name]: data.id,
+              [typeColumn.name]: data.__type,
+              ...(joinTable.on || {}),
+              order: idx,
+            }));
+
+            if (_.isEmpty(rows)) {
+              continue;
+            }
+
+            await this.createQueryBuilder(name)
+              .insert(rows)
+              .execute();
+
+            continue;
+          }
+        }
 
         if (attribute.joinColumn && attribute.owner) {
           if (
@@ -342,8 +428,10 @@ const createEntityManager = db => {
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
 
+        // TODO: implement polymorphic
+
         if (attribute.joinColumn && attribute.owner) {
-          // TODO: redefine
+          // TODO: check edgecase
           if (attribute.relation === 'oneToOne' && _.has(attributeName, data)) {
             await this.createQueryBuilder(uid)
               .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
@@ -439,6 +527,8 @@ const createEntityManager = db => {
 
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
+
+        // TODO: implement polymorphic
 
         // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
         if (attribute.joinColumn && attribute.owner) {

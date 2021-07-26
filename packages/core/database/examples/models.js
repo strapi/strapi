@@ -1,4 +1,6 @@
 'use strict';
+
+/*
 const category = {
   modelName: 'category',
   uid: 'category',
@@ -25,7 +27,7 @@ const category = {
     },
     compo: {
       type: 'component',
-      component: 'compo-test',
+      component: 'compo',
     },
   },
 };
@@ -53,7 +55,7 @@ const article = {
     // },
     // compo: {
     //   type: 'component',
-    //   component: 'compo-test',
+    //   component: 'compo',
     //   // repeatable: true,
     // },
     // cover: {
@@ -85,9 +87,9 @@ const tags = {
 };
 
 const compo = {
-  modelName: 'compoTest',
-  uid: 'compo-test',
-  collectionName: 'compo_tests',
+  modelName: 'compo',
+  uid: 'compo',
+  collectionName: 'compos',
   attributes: {
     key: {
       type: 'string',
@@ -265,31 +267,75 @@ const blogPost = {
   },
 };
 
-// module.exports = [category, article, tags, compo, user, address, file, fileMorph, blogPost];
+module.exports = [category, article, tags, compo, user, address, file, fileMorph, blogPost];
+*/
 
-const file = {
-  uid: 'file',
-  modelName: 'file',
-  collectionName: 'files',
+const article = {
+  modelName: 'article',
+  uid: 'article',
+  collectionName: 'articles',
   attributes: {
-    related: {
-
-    }
+    commentable: {
+      type: 'relation',
+      relation: 'morphToOne',
+    },
+    reportables: {
+      type: 'relation',
+      relation: 'morphToMany',
+    },
+    dz: {
+      type: 'dynamiczone',
+      components: ['comment', 'video-comment'],
+    },
   },
 };
 
-const post = {
-  uid: 'post',
-  modelName: 'post',
-  collectionName: 'posts',
+const comment = {
+  modelName: 'comment',
+  uid: 'comment',
+  collectionName: 'comments',
   attributes: {
-    cover: {
+    article: {
       type: 'relation',
-      relation: 'manyToOne',
-      target: 'file'
-      // inversedBy: 'related'
-    }
-  }
-}
+      relation: 'morphOne',
+      target: 'article',
+      morphBy: 'commentable',
+    },
+    title: {
+      type: 'string',
+    },
+  },
+};
 
-module.exports = [file, post];
+const videoComment = {
+  modelName: 'video-comment',
+  uid: 'video-comment',
+  collectionName: 'video_comments',
+  attributes: {
+    articles: {
+      type: 'relation',
+      relation: 'morphMany',
+      target: 'article',
+      morphBy: 'commentable',
+    },
+    title: {
+      type: 'string',
+    },
+  },
+};
+
+const folder = {
+  modelName: 'folder',
+  uid: 'folder',
+  collectionName: 'folders',
+  attributes: {
+    articles: {
+      type: 'relation',
+      relation: 'morphMany',
+      target: 'article',
+      morphBy: 'reportables',
+    },
+  },
+};
+
+module.exports = [article, comment, videoComment, folder];

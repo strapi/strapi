@@ -82,10 +82,10 @@ module.exports = {
       type: 'json',
       configurable: false,
     },
-    // related: {
-    //   collection: '*',
-    //   filter: 'field',
-    //   configurable: false,
-    // },
+    related: {
+      type: 'relation',
+      relation: 'morphToMany',
+      configurable: false,
+    },
   },
 };

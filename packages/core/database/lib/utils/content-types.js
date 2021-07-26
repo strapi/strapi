@@ -6,9 +6,9 @@ const transformAttribute = attribute => {
       // convert to relation
       return {
         type: 'relation',
-        relation: attribute.single === true ? 'manyToOne' : 'manyToMany', //'morphOne' : 'morphMany',
+        relation: attribute.single === true ? 'morphOne' : 'morphMany',
         target: 'plugins::upload.file',
-        // morphOn: 'related',
+        morphBy: 'related',
       };
     }
     // case 'component': {
@@ -29,7 +29,7 @@ const transformContentTypes = contentTypes => {
       singularName: contentType.modelName,
       tableName: contentType.collectionName,
       attributes: {
-        ...Object.keys(contentType.attributes).reduce((attrs, attrName) => {
+        ...Object.keys(contentType.attributes || {}).reduce((attrs, attrName) => {
           return Object.assign(attrs, {
             [attrName]: transformAttribute(contentType.attributes[attrName]),
           });

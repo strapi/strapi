@@ -14,41 +14,6 @@ const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attrib
 const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
 
 /**
- * Creates a relation metadata
- *
- * @param {string} attributeName
- * @param {Attribute} attribute
- * @param {ModelMetadata} meta
- * @param {Metadata} metadata
- */
-const createRelation = (attributeName, attribute, meta, metadata) => {
-  if (_.has(attribute.relation, relationFactoryMap)) {
-    return relationFactoryMap[attribute.relation](attributeName, attribute, meta, metadata);
-  }
-
-  throw new Error(`Unknown relation ${attribute.relation}`);
-
-  /*
-
-      polymorphic relations
-
-      OneToOneX
-      ManyToOneX
-      OnetoManyX
-      ManytoManyX
-      XOneToOne
-      XManyToOne
-      XOnetoMany
-      XManytoMany
-
-      XOneToOneX
-      XManyToOneX
-      XOnetoManyX
-      XManytoManyX
-  */
-};
-
-/**
  * Creates a oneToOne relation metadata
  *
  * if owner then
@@ -186,11 +151,189 @@ const createManyToMany = (attributeName, attribute, meta, metadata) => {
   }
 };
 
+/**
+ * Creates a morphToOne relation metadata
+ *
+ * if with join table then
+ *   create join table
+ * else
+ *  create join columnsa
+ *
+ * if bidirectionnal
+ *  set info in the traget
+ *
+ *
+ * @param {string} attributeName
+ * @param {Attribute} attribute
+ * @param {ModelMetadata} meta
+ * @param {Metadata} metadata
+ */
+const createMorphToOne = (attributeName, attribute, meta, metadata) => {
+  const idColumnName = 'target_id';
+  const typeColumnName = 'target_type';
+
+  Object.assign(attribute, {
+    owner: true,
+    morphColumn: {
+      // TODO: add referenced column
+      typeColumn: {
+        name: typeColumnName,
+      },
+      idColumn: {
+        name: idColumnName,
+        referencedColumn: 'id',
+      },
+    },
+  });
+
+  // TODO: implement bidirectional
+};
+
+/**
+ * Creates a morphToMany relation metadata
+ *
+ * @param {string} attributeName
+ * @param {Attribute} attribute
+ * @param {ModelMetadata} meta
+ * @param {Metadata} metadata
+ */
+const createMorphToMany = (attributeName, attribute, meta, metadata) => {
+  const joinTableName = _.snakeCase(`${meta.tableName}_${attributeName}_morphs`);
+
+  const joinColumnName = _.snakeCase(`${meta.singularName}_id`);
+  const morphColumnName = _.snakeCase(`${attributeName}`);
+  const idColumnName = `${morphColumnName}_id`;
+  const typeColumnName = `${morphColumnName}_type`;
+
+  metadata.add({
+    uid: joinTableName,
+    tableName: joinTableName,
+    attributes: {
+      [joinColumnName]: {
+        type: 'integer',
+        column: {
+          unsigned: true,
+        },
+      },
+      [idColumnName]: {
+        type: 'integer',
+        column: {
+          unsigned: true,
+        },
+      },
+      [typeColumnName]: {
+        type: 'string',
+      },
+      order: {
+        type: 'integer',
+        column: {
+          unsigned: true,
+        },
+      },
+    },
+    foreignKeys: [
+      {
+        name: `${joinTableName}_fk`,
+        columns: [joinColumnName],
+        referencedColumns: ['id'],
+        referencedTable: meta.tableName,
+        onDelete: 'CASCADE',
+      },
+    ],
+  });
+
+  const joinTable = {
+    name: joinTableName,
+    joinColumn: {
+      name: joinColumnName,
+      referencedColumn: 'id',
+    },
+    morphColumn: {
+      typeColumn: {
+        name: typeColumnName,
+      },
+      idColumn: {
+        name: idColumnName,
+        referencedColumn: 'id',
+      },
+    },
+  };
+
+  attribute.joinTable = joinTable;
+
+  // TODO: implement bidirectional
+};
+
+/**
+ * Creates a morphOne relation metadata
+ *
+ * @param {string} attributeName
+ * @param {Attribute} attribute
+ * @param {ModelMetadata} meta
+ * @param {Metadata} metadata
+ */
+const createMorphOne = (attributeName, attribute, meta, metadata) => {
+  const targetMeta = metadata.get(attribute.target);
+
+  if (!targetMeta) {
+    throw new Error(`Morph target not found. Looking for ${attribute.target}`);
+  }
+
+  if (!_.has(attribute.morphBy, targetMeta.attributes)) {
+    throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
+  }
+
+  // TODO: why not
+  // Object.assign(attribute, {
+  //   morphReference: targetMeta.attributes[attribute.morphBy],
+  // });
+};
+
+/**
+ * Creates a morphMany relation metadata
+ *
+ * @param {string} attributeName
+ * @param {Attribute} attribute
+ * @param {ModelMetadata} meta
+ * @param {Metadata} metadata
+ */
+const createMorphMany = (attributeName, attribute, meta, metadata) => {
+  const targetMeta = metadata.get(attribute.target);
+
+  if (!targetMeta) {
+    throw new Error(`Morph target not found. Looking for ${attribute.target}`);
+  }
+
+  if (!_.has(attribute.morphBy, targetMeta.attributes)) {
+    throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
+  }
+};
+
 const relationFactoryMap = {
   oneToOne: createOneToOne,
   oneToMany: createOneToMany,
   manyToOne: createManyToOne,
   manyToMany: createManyToMany,
+  morphToOne: createMorphToOne,
+  morphToMany: createMorphToMany,
+  morphOne: createMorphOne,
+  morphMany: createMorphMany,
+};
+
+/**
+ * Creates a relation metadata
+ *
+ * @param {string} attributeName
+ * @param {Attribute} attribute
+ * @param {ModelMetadata} meta
+ * @param {Metadata} metadata
+ */
+const createRelation = (attributeName, attribute, meta, metadata) => {
+  if (_.has(attribute.relation, relationFactoryMap)) {
+    return relationFactoryMap[attribute.relation](attributeName, attribute, meta, metadata);
+  }
+
+  throw new Error(`Unknown relation ${attribute.relation}`);
 };
 
 const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
