@@ -49,17 +49,17 @@ const toRow = (metadata, data = {}) => {
       }
 
       if (attribute.morphColumn && attribute.owner) {
-        const { idColumn, typeColumn } = attribute.morphColumn;
+        const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
 
         const value = data[attributeName];
 
         if (!_.isUndefined(value)) {
-          if (!_.has('id', value) || !_.has('__type', value)) {
-            throw new Error('Expects properties `__type` an `id` to make a morph association');
+          if (!_.has('id', value) || !_.has(typeField, value)) {
+            throw new Error(`Expects properties ${typeField} an id to make a morph association`);
           }
 
           obj[idColumn.name] = value.id;
-          obj[typeColumn.name] = value.__type;
+          obj[typeColumn.name] = value[typeField];
         }
       }
     }
@@ -310,12 +310,12 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, morphColumn } = joinTable;
 
-          const { idColumn, typeColumn } = morphColumn;
+          const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
           const rows = _.castArray(data[attributeName]).map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
-            [typeColumn.name]: data.__type,
+            [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             order: idx,
           }));
@@ -511,7 +511,7 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, morphColumn } = joinTable;
 
-          const { idColumn, typeColumn } = morphColumn;
+          const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
           await this.createQueryBuilder(joinTable.name)
             .delete()
@@ -524,7 +524,7 @@ const createEntityManager = db => {
           const rows = _.castArray(data[attributeName]).map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
-            [typeColumn.name]: data.__type,
+            [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
             order: idx,
           }));

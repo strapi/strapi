@@ -424,7 +424,7 @@ const createComponents = async (uid, data) => {
       componentBody[attributeName] = await Promise.all(
         dynamiczoneValues.map(async value => {
           const { id } = await createComponent(value.__component, value);
-          return { id, __type: value.__component };
+          return { id, __component: value.__component };
         })
       );
 
@@ -462,13 +462,13 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       continue;
     }
 
+    // TODO: diff prev & new
+
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
       const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
       const componentValue = data[attributeName];
-
-      // TODO: diff prev & new
 
       // make diff between prev ids & data ids
       if (componentValue === null) {
@@ -499,24 +499,22 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       continue;
     }
 
-    // if (attribute.type === 'dynamiczone') {
-    //   const dynamiczoneValues = data[attributeName];
+    if (attribute.type === 'dynamiczone') {
+      const dynamiczoneValues = data[attributeName];
 
-    //   if (!Array.isArray(dynamiczoneValues)) {
-    //     throw new Error('Expected an array to create repeatable component');
-    //   }
+      if (!Array.isArray(dynamiczoneValues)) {
+        throw new Error('Expected an array to create repeatable component');
+      }
 
-    //   const components = await Promise.all(
-    //     dynamiczoneValues.map(value => updateOrCreateComponent(value.__component, value))
-    //   );
+      componentBody[attributeName] = await Promise.all(
+        dynamiczoneValues.map(async value => {
+          const { id } = await updateOrCreateComponent(value.__component, value);
+          return { id, __component: value.__component };
+        })
+      );
 
-    //   componentBody[attributeName] = components.map(({ id }, idx) => {
-    //     // TODO: add & support pivot data in DB
-    //     return id;
-    //   });
-
-    //   continue;
-    // }
+      continue;
+    }
   }
 
   return componentBody;
@@ -553,6 +551,20 @@ const deleteComponents = async (uid, entityToDelete) => {
     }
 
     if (attribute.type === 'dynamiczone') {
+      const value = await strapi.query(uid).load(entityToDelete, attributeName);
+
+      if (!value) {
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        await Promise.all(
+          value.map(subValue => {
+            return strapi.query(subValue.__component).delete({ where: { id: subValue.id } });
+          })
+        );
+      }
+
       continue;
     }
   }

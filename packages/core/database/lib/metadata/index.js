@@ -129,6 +129,7 @@ const createMetadata = (models = []) => {
                 typeColumn: {
                   name: 'component_type',
                 },
+                typeField: '__component',
               },
               on: {
                 field: attributeName,

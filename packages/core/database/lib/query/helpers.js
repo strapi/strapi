@@ -897,7 +897,7 @@ const applyPopulate = async (results, populate, ctx) => {
       const { joinTable } = attribute;
 
       const { joinColumn, morphColumn } = joinTable;
-      const { idColumn, typeColumn } = morphColumn;
+      const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
       // fetch join table to create the ids map then do the same as morphToOne without the first
 
@@ -960,7 +960,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
           return (map[type][id] || []).map(row => {
             return {
-              __type: type,
+              [typeField]: type,
               ...fromTargetRow(row),
             };
           });
