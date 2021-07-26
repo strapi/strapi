@@ -14,11 +14,7 @@ window.strapi = {
   projectType: 'Community',
 };
 
-const appConfig = {
-  locales: [],
-};
-
-const customConfig = appCustomisations.app(appConfig);
+const customConfig = appCustomisations.config;
 
 const library = {
   components: Components(),
@@ -56,7 +52,7 @@ const run = async () => {
   const app = StrapiApp.default({
     appPlugins: plugins,
     library,
-    locales: customConfig.locales,
+    adminConfig: customConfig,
     middlewares,
     reducers,
   });
