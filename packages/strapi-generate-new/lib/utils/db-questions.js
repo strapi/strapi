@@ -1,6 +1,6 @@
 'use strict';
 
-const database = ({ scope }) => ({
+const databaseMongo = ({ scope }) => ({
   type: 'input',
   name: 'database',
   message: 'Database name:',
@@ -12,6 +12,14 @@ const database = ({ scope }) => ({
 
     return true;
   },
+});
+
+const database = ({ scope }) => ({
+  type: 'input',
+  name: 'database',
+  message: 'Database name:',
+  default: scope.name,
+  validate: true,
 });
 
 const host = () => ({
@@ -80,5 +88,5 @@ module.exports = {
   sqlite: [filename],
   postgres: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
-  mongo: [database, host, srv, port, username, password, authenticationDatabase, ssl],
+  mongo: [databaseMongo, host, srv, port, username, password, authenticationDatabase, ssl],
 };
