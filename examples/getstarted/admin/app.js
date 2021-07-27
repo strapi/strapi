@@ -1,3 +1,5 @@
+// import MyCompo from './extensions/MyCompo';
+
 export default {
   config: {
     // Leaving this commented on purpose
@@ -16,7 +18,7 @@ export default {
     // },
     // theme: {
     //   main: {
-    //     colors: {},
+    //     colors: { ok: 't' },
     //   },
     // },
     // translations: {

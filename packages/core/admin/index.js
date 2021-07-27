@@ -6,6 +6,7 @@ const fs = require('fs-extra');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 const chalk = require('chalk');
+const chokidar = require('chokidar');
 const getWebpackConfig = require('./webpack.config');
 
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
@@ -193,6 +194,13 @@ async function createCacheDir(dir) {
     await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
   }
 
+  // Copy admin extensions folder
+  const adminExtensionFolder = path.join(dir, 'admin', 'extensions');
+
+  if (fs.existsSync(adminExtensionFolder)) {
+    await fs.copy(adminExtensionFolder, path.resolve(cacheDir, 'admin', 'src', 'extensions'));
+  }
+
   // create plugins.js with plugins requires
   await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
 }
@@ -244,6 +252,49 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     console.log(chalk.green('Starting the development server...'));
     console.log();
     console.log(chalk.green(`Admin development at http://${host}:${port}${opts.publicPath}`));
+  });
+
+  watchFiles(dir);
+}
+
+async function watchFiles(dir) {
+  await createCacheDir(dir);
+  const cacheDir = path.join(dir, '.cache');
+  const appExtensionFile = path.join(dir, 'admin', 'app.js');
+  const extensionsPath = path.join(dir, 'admin', 'extensions');
+
+  const filesToWatch = [appExtensionFile, extensionsPath];
+
+  const watcher = chokidar.watch(filesToWatch, {
+    ignoreInitial: true,
+    ignorePermissionErrors: true,
+  });
+
+  watcher.on('all', async (event, filePath) => {
+    const isAppFile = filePath.includes(appExtensionFile);
+
+    const targetPath = isAppFile
+      ? path.join(path.normalize(filePath.split(appExtensionFile)[1]), 'app.js')
+      : path.join('extensions', path.normalize(filePath.split(extensionsPath)[1]));
+
+    const destFolder = path.join(cacheDir, 'admin', 'src');
+
+    if (event === 'unlink' || event === 'unlinkDir') {
+      // Remove the file or folder
+      // We need to copy the original files when deleting an override one
+      try {
+        fs.removeSync(path.join(destFolder, targetPath));
+      } catch (err) {
+        console.log('An error occured while deleting the file', err);
+      }
+    } else {
+      // In any other case just copy the file into the .cache folder
+      try {
+        await fs.copy(filePath, path.join(destFolder, targetPath));
+      } catch (err) {
+        console.log(err);
+      }
+    }
   });
 }
 
