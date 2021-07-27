@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import merge from 'lodash/merge';
 import pick from 'lodash/pick';
 import invariant from 'invariant';
+import { Helmet } from 'react-helmet';
 import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
@@ -18,6 +20,7 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
+import favicon from './favicon.ico';
 import themes from './themes';
 
 class StrapiApp {
@@ -25,9 +28,13 @@ class StrapiApp {
     this.customConfigurations = adminConfig;
     this.configurations = {
       authLogo: AuthLogo,
+      head: { favicon },
       locales: ['en'],
       menuLogo: MenuLogo,
+      notifications: { releases: true },
+      theme: themes,
       translations: {},
+      tutorials: true,
     };
     this.appPlugins = appPlugins || {};
     this.library = library;
@@ -190,6 +197,22 @@ class StrapiApp {
 
     if (this.customConfigurations?.menu?.logo) {
       this.configurations.menuLogo = this.customConfigurations.menu.logo;
+    }
+
+    if (this.customConfigurations?.head?.favicon) {
+      this.configurations.head.favicon = this.customConfigurations.head.favicon;
+    }
+
+    if (this.customConfigurations?.theme) {
+      this.configurations.theme = merge(this.configurations.theme, this.customConfigurations.theme);
+    }
+
+    if (this.customConfigurations?.notifications?.releases !== undefined) {
+      this.configurations.notifications.releases = this.customConfigurations.notifications.releases;
+    }
+
+    if (this.customConfigurations?.tutorials !== undefined) {
+      this.configurations.tutorials = this.customConfigurations.tutorials;
     }
   };
 
@@ -372,7 +395,7 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Theme theme={themes}>
+      <Theme theme={this.configurations.theme}>
         <Providers
           authLogo={this.configurations.authLogo}
           components={components}
@@ -390,11 +413,24 @@ class StrapiApp {
           }}
           runHookSeries={this.runHookSeries}
           settings={this.settings}
+          showTutorials={this.configurations.tutorials}
+          showReleaseNotification={this.configurations.notifications.releases}
           store={store}
         >
-          <BrowserRouter basename={basename}>
-            <App store={store} />
-          </BrowserRouter>
+          <>
+            <Helmet
+              link={[
+                {
+                  rel: 'icon',
+                  type: 'image/png',
+                  href: this.configurations.head.favicon,
+                },
+              ]}
+            />
+            <BrowserRouter basename={basename}>
+              <App store={store} />
+            </BrowserRouter>
+          </>
         </Providers>
       </Theme>
     );
