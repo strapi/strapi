@@ -19,7 +19,7 @@ const database = ({ scope }) => ({
   name: 'database',
   message: 'Database name:',
   default: scope.name,
-  validate: true,
+  validate: true
 });
 
 const host = () => ({
