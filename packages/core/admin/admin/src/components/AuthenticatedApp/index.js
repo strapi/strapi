@@ -1,8 +1,8 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { LoadingIndicatorPage, AppInfosContext } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import packageJSON from '../../../../package.json';
-import { ConfigurationsContext } from '../../contexts';
+import { useConfigurations } from '../../hooks';
 import PluginsInitializer from '../PluginsInitializer';
 import RBACProvider from '../RBACProvider';
 import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } from './utils/api';
@@ -11,7 +11,7 @@ import checkLatestStrapiVersion from './utils/checkLatestStrapiVersion';
 const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
-  const { showReleaseNotification } = useContext(ConfigurationsContext);
+  const { showReleaseNotification } = useConfigurations();
   const [
     { data: appInfos, status },
     { data: tag_name, isLoading },

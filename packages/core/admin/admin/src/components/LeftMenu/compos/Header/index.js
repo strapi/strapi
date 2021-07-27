@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { MenuLogoContext } from '../../../../contexts';
+import { useConfigurations } from '../../../../hooks';
 import Wrapper from './Wrapper';
 
 const LeftMenuHeader = () => {
-  const { logo } = useContext(MenuLogoContext);
+  const { menuLogo } = useConfigurations();
 
   return (
-    <Wrapper logo={logo}>
+    <Wrapper logo={menuLogo}>
       <Link to="/" className="leftMenuHeaderLink">
         <span className="projectName" />
       </Link>

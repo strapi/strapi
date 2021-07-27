@@ -1,11 +1,11 @@
-import React, { useContext } from 'react';
-import { AuthLogoContext } from '../../../../contexts';
+import React from 'react';
+import { useConfigurations } from '../../../../hooks';
 import Img from './Img';
 
 const Logo = () => {
-  const { logo } = useContext(AuthLogoContext);
+  const { authLogo } = useConfigurations();
 
-  return <Img src={logo} alt="strapi-logo" />;
+  return <Img src={authLogo} alt="strapi" />;
 };
 
 export default Logo;

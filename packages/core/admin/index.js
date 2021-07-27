@@ -257,12 +257,18 @@ async function watchAdmin({ dir, host, port, browser, options }) {
   watchFiles(dir);
 }
 
+/**
+ * Listen to files change and copy the changed files in the .cache/admin folder
+ * when using the dev mode
+ * @param {string} dir
+ */
 async function watchFiles(dir) {
   await createCacheDir(dir);
   const cacheDir = path.join(dir, '.cache');
   const appExtensionFile = path.join(dir, 'admin', 'app.js');
   const extensionsPath = path.join(dir, 'admin', 'extensions');
 
+  // Only watch the admin/app.js file and the files that are in the ./admin/extensions/folder
   const filesToWatch = [appExtensionFile, extensionsPath];
 
   const watcher = chokidar.watch(filesToWatch, {
@@ -273,6 +279,8 @@ async function watchFiles(dir) {
   watcher.on('all', async (event, filePath) => {
     const isAppFile = filePath.includes(appExtensionFile);
 
+    // The app.js file needs to be copied in the .cache/admin/src/app.js and the other ones needs to
+    // be copied in the .cache/admin/src/extensions folder
     const targetPath = isAppFile
       ? path.join(path.normalize(filePath.split(appExtensionFile)[1]), 'app.js')
       : path.join('extensions', path.normalize(filePath.split(extensionsPath)[1]));
@@ -288,7 +296,7 @@ async function watchFiles(dir) {
         console.log('An error occured while deleting the file', err);
       }
     } else {
-      // In any other case just copy the file into the .cache folder
+      // In any other case just copy the file into the .cache/admin/src folder
       try {
         await fs.copy(filePath, path.join(destFolder, targetPath));
       } catch (err) {

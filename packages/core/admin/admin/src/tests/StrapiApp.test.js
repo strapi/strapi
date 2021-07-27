@@ -260,7 +260,7 @@ describe('ADMIN | StrapiApp', () => {
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.authLogo).toEqual('fr');
+      expect(app.configurations.authLogo).toBe('fr');
     });
 
     it('should override the menuLogo', () => {
@@ -271,7 +271,7 @@ describe('ADMIN | StrapiApp', () => {
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.menuLogo).toEqual('fr');
+      expect(app.configurations.menuLogo).toBe('fr');
     });
 
     it('should override the favicon', () => {
@@ -282,7 +282,7 @@ describe('ADMIN | StrapiApp', () => {
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.head.favicon).toEqual('fr');
+      expect(app.configurations.head.favicon).toBe('fr');
     });
 
     it('should override the theme', () => {
@@ -293,7 +293,7 @@ describe('ADMIN | StrapiApp', () => {
 
       app.createCustomConfigurations();
 
-      expect(app.configurations.theme.main.colors.red).toEqual('black');
+      expect(app.configurations.theme.main.colors.red).toBe('black');
     });
 
     it('should override the tutorials', () => {

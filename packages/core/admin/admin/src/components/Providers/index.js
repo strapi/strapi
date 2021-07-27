@@ -3,12 +3,7 @@ import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
-import {
-  AdminContext,
-  AuthLogoContext,
-  ConfigurationsContext,
-  MenuLogoContext,
-} from '../../contexts';
+import { AdminContext, ConfigurationsContext } from '../../contexts';
 import LanguageProvider from '../LanguageProvider';
 import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
 import Notifications from '../Notifications';
@@ -46,33 +41,31 @@ const Providers = ({
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <AuthLogoContext.Provider value={{ logo: authLogo }}>
-          <MenuLogoContext.Provider value={{ logo: menuLogo }}>
-            <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-              <ConfigurationsContext.Provider value={{ showReleaseNotification, showTutorials }}>
-                <StrapiAppProvider
-                  getPlugin={getPlugin}
-                  menu={menu}
-                  plugins={plugins}
-                  runHookParallel={runHookParallel}
-                  runHookWaterfall={runHookWaterfall}
-                  runHookSeries={runHookSeries}
-                  settings={settings}
-                >
-                  <LibraryProvider components={components} fields={fields}>
-                    <LanguageProvider messages={messages} localeNames={localeNames}>
-                      <AutoReloadOverlayBlockerProvider>
-                        <OverlayBlocker>
-                          <Notifications>{children}</Notifications>
-                        </OverlayBlocker>
-                      </AutoReloadOverlayBlockerProvider>
-                    </LanguageProvider>
-                  </LibraryProvider>
-                </StrapiAppProvider>
-              </ConfigurationsContext.Provider>
-            </AdminContext.Provider>
-          </MenuLogoContext.Provider>
-        </AuthLogoContext.Provider>
+        <AdminContext.Provider value={{ getAdminInjectedComponents }}>
+          <ConfigurationsContext.Provider
+            value={{ authLogo, menuLogo, showReleaseNotification, showTutorials }}
+          >
+            <StrapiAppProvider
+              getPlugin={getPlugin}
+              menu={menu}
+              plugins={plugins}
+              runHookParallel={runHookParallel}
+              runHookWaterfall={runHookWaterfall}
+              runHookSeries={runHookSeries}
+              settings={settings}
+            >
+              <LibraryProvider components={components} fields={fields}>
+                <LanguageProvider messages={messages} localeNames={localeNames}>
+                  <AutoReloadOverlayBlockerProvider>
+                    <OverlayBlocker>
+                      <Notifications>{children}</Notifications>
+                    </OverlayBlocker>
+                  </AutoReloadOverlayBlockerProvider>
+                </LanguageProvider>
+              </LibraryProvider>
+            </StrapiAppProvider>
+          </ConfigurationsContext.Provider>
+        </AdminContext.Provider>
       </Provider>
     </QueryClientProvider>
   );

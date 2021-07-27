@@ -323,7 +323,7 @@ class StrapiApp {
       return acc;
     }, {});
 
-    return Promise.resolve(translations);
+    return translations;
   }
 
   /**

@@ -1,11 +1,12 @@
-import React, { useContext, useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { FormattedMessage } from 'react-intl';
 import axios from 'axios';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
 import { useTracking } from '@strapi/helper-plugin';
-import { ConfigurationsContext } from '../../contexts';
+
+import { useConfigurations } from '../../hooks';
 import formatVideoArray from './utils/formatAndStoreVideoArray';
 import StaticLinks from './StaticLinks';
 import Video from './Video';
@@ -13,7 +14,7 @@ import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
 
 const Onboarding = () => {
-  const { showTutorials } = useContext(ConfigurationsContext);
+  const { showTutorials } = useConfigurations();
 
   if (!showTutorials) {
     return null;
