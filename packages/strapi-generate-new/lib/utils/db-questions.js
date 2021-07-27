@@ -89,5 +89,5 @@ module.exports = {
   sqlite: [filename],
   postgres: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
-  mongo: [database, host, srv, port, username, password, authenticationDatabase, ssl],
+  mongo: [databaseMongo, host, srv, port, username, password, authenticationDatabase, ssl],
 };
