@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, pick, omit } = require('lodash/fp');
+const { has, pick, omit, prop } = require('lodash/fp');
 const delegate = require('delegates');
 
 const {
@@ -369,6 +369,20 @@ const createComponent = async (uid, data) => {
   });
 };
 
+// components can have nested compos so this must be recursive
+const updateComponent = async (uid, componentToUpdate, data) => {
+  const model = strapi.getModel(uid);
+
+  const componentData = await updateComponents(uid, componentToUpdate, data);
+
+  return await strapi.query(uid).update({
+    where: {
+      id: componentToUpdate.id,
+    },
+    data: Object.assign(omitComponentData(model, data), componentData),
+  });
+};
+
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
   const { attributes } = strapi.getModel(uid);
@@ -400,14 +414,10 @@ const createComponents = async (uid, data) => {
           componentValue.map(value => createComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.map(({ id }) => {
-          // TODO: Add order in the relation
-          // NOTE: add & support pivot data in DB
-          return id;
-        });
+        // TODO: add order
+        componentBody[attributeName] = components.map(({ id }) => id);
       } else {
-        const component = await createComponent(componentUID, data);
-        // NOTE: add & support pivot data in DB
+        const component = await createComponent(componentUID, componentValue);
         componentBody[attributeName] = component.id;
       }
 
@@ -436,14 +446,18 @@ const createComponents = async (uid, data) => {
 };
 
 const updateOrCreateComponent = (componentUID, value) => {
+  if (value === null) {
+    return null;
+  }
+
   // update
   if (has('id', value)) {
     // TODO: verify the compo is associated with the entity
-    return strapi.query(componentUID).update({ where: { id: value.id }, data: value });
+    return updateComponent(componentUID, { id: value.id }, value);
   }
 
   // create
-  return strapi.query(componentUID).create({ data: value });
+  return createComponent(componentUID, value);
 };
 
 /*
@@ -462,37 +476,26 @@ const updateComponents = async (uid, entityToUpdate, data) => {
       continue;
     }
 
-    // TODO: diff prev & new
-
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
       const componentValue = data[attributeName];
 
-      // make diff between prev ids & data ids
-      if (componentValue === null) {
-        continue;
-      }
+      await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
 
       if (repeatable === true) {
         if (!Array.isArray(componentValue)) {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        // FIXME: returns null sometimes
         const components = await Promise.all(
           componentValue.map(value => updateOrCreateComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
-          // TODO: add & support pivot data in DB
-          return id;
-        });
+        // TODO: add order
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => id);
       } else {
         const component = await updateOrCreateComponent(componentUID, componentValue);
-
-        // TODO: add & support pivot data in DB
         componentBody[attributeName] = component && component.id;
       }
 
@@ -501,6 +504,8 @@ const updateComponents = async (uid, entityToUpdate, data) => {
 
     if (attribute.type === 'dynamiczone') {
       const dynamiczoneValues = data[attributeName];
+
+      await deleteOldDZComponents(uid, entityToUpdate, attributeName, dynamiczoneValues);
 
       if (!Array.isArray(dynamiczoneValues)) {
         throw new Error('Expected an array to create repeatable component');
@@ -518,6 +523,86 @@ const updateComponents = async (uid, entityToUpdate, data) => {
   }
 
   return componentBody;
+};
+
+const deleteOldComponents = async (
+  uid,
+  componentUID,
+  entityToUpdate,
+  attributeName,
+  componentValue
+) => {
+  const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
+
+  const idsToKeep = _.castArray(componentValue)
+    .filter(has('id'))
+    .map(prop('id'));
+
+  const allIds = _.castArray(previousValue).map(prop('id'));
+
+  idsToKeep.forEach(id => {
+    if (!allIds.includes(id)) {
+      const err = new Error(
+        `Some of the provided components in ${attributeName} are not related to the entity`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  const idsToDelete = _.difference(allIds, idsToKeep);
+
+  if (idsToDelete.length > 0) {
+    for (const idToDelete of idsToDelete) {
+      await deleteComponent(componentUID, { id: idToDelete });
+    }
+  }
+};
+
+const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamiczoneValues) => {
+  const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
+
+  const idsToKeep = _.castArray(dynamiczoneValues)
+    .filter(has('id'))
+    .map(({ id, __component }) => ({
+      id,
+      __component,
+    }));
+
+  const allIds = _.castArray(previousValue).map(({ id, __component }) => ({
+    id,
+    __component,
+  }));
+
+  idsToKeep.forEach(({ id, __component }) => {
+    if (!allIds.find(el => el.id === id && el.__component === __component)) {
+      const err = new Error(
+        `Some of the provided components in ${attributeName} are not related to the entity`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
+    if (!idsToKeep.find(el => el.id === id && el.__component === __component)) {
+      acc.push({ id, __component });
+    }
+
+    return acc;
+  }, []);
+
+  if (idsToDelete.length > 0) {
+    for (const idToDelete of idsToDelete) {
+      const { id, __component } = idToDelete;
+      await deleteComponent(__component, { id });
+    }
+  }
+};
+
+const deleteComponent = async (uid, componentToDelete) => {
+  await deleteComponents(uid, componentToDelete);
+  await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
 const deleteComponents = async (uid, entityToDelete) => {
@@ -538,13 +623,9 @@ const deleteComponents = async (uid, entityToDelete) => {
       }
 
       if (Array.isArray(value)) {
-        await Promise.all(
-          value.map(subValue => {
-            return strapi.query(componentUID).delete({ where: { id: subValue.id } });
-          })
-        );
+        await Promise.all(value.map(subValue => deleteComponent(componentUID, subValue)));
       } else {
-        await strapi.query(componentUID).delete({ where: { id: value.id } });
+        await deleteComponent(componentUID, value);
       }
 
       continue;
@@ -558,11 +639,7 @@ const deleteComponents = async (uid, entityToDelete) => {
       }
 
       if (Array.isArray(value)) {
-        await Promise.all(
-          value.map(subValue => {
-            return strapi.query(subValue.__component).delete({ where: { id: subValue.id } });
-          })
-        );
+        await Promise.all(value.map(subValue => deleteComponent(subValue.__component, subValue)));
       }
 
       continue;
