@@ -1,27 +1,19 @@
 'use strict';
 
-const databaseMongo = ({ scope }) => ({
+const database = ({ scope, client }) => ({
   type: 'input',
   name: 'database',
   message: 'Database name:',
   default: scope.name,
   validate: value => {
-    if (value.includes('.')) {
-      return `The database name can't contain a "."`;
+    if (client === 'mongo') {
+      if (value.includes('.')) {
+        return `The database name can't contain a "."`;
+      }
     }
-
     return true;
   }, 
 });
-
-
-const database = ({ scope }) => ({
-  type: 'input',
-  name: 'database',
-  message: 'Database name:',
-  default: scope.name,
-  validate: true,
-}); 
 
 const host = () => ({
   type: 'input',
@@ -89,5 +81,5 @@ module.exports = {
   sqlite: [filename],
   postgres: [database, host, port, username, password, ssl],
   mysql: [database, host, port, username, password, ssl],
-  mongo: [databaseMongo, host, srv, port, username, password, authenticationDatabase, ssl],
+  mongo: [database, host, srv, port, username, password, authenticationDatabase, ssl],
 };
