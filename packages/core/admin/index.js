@@ -186,14 +186,11 @@ async function createCacheDir(dir) {
   // copy plugins code
   await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
 
-  // Copy admin.config.js
-  const customAdminConfigFilePath = path.join(dir, 'admin', 'admin.config.js');
+  // Copy app.js
+  const customAdminConfigFilePath = path.join(dir, 'admin', 'app.js');
 
   if (fs.existsSync(customAdminConfigFilePath)) {
-    await fs.copy(
-      customAdminConfigFilePath,
-      path.resolve(cacheDir, 'admin', 'src', 'admin.config.js')
-    );
+    await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
   }
 
   // create plugins.js with plugins requires

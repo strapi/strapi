@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
+import isFunction from 'lodash/isFunction';
 import invariant from 'invariant';
 import { Helmet } from 'react-helmet';
 import { basename, createHook } from './core/utils';
@@ -25,7 +26,8 @@ import themes from './themes';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
-    this.customConfigurations = adminConfig;
+    this.customConfigurations = adminConfig.config;
+    this.customBootstrapConfiguration = adminConfig.bootstrap;
     this.configurations = {
       authLogo: AuthLogo,
       head: { favicon },
@@ -170,6 +172,20 @@ class StrapiApp {
         });
       }
     });
+
+    if (isFunction(this.customBootstrapConfiguration)) {
+      this.customBootstrapConfiguration({
+        addComponents: this.addComponents,
+        addFields: this.addFields,
+        addMenuLink: this.addMenuLink,
+        addReducers: this.addReducers,
+        addSettingsLink: this.addSettingsLink,
+        addSettingsLinks: this.addSettingsLinks,
+        getPlugin: this.getPlugin,
+        injectContentManagerComponent: this.injectContentManagerComponent,
+        registerHook: this.registerHook,
+      });
+    }
   }
 
   bootstrapAdmin = async () => {
