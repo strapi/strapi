@@ -1,4 +1,4 @@
-import { permissions } from './data';
+import testData, { permissions } from './data';
 
-export { default as testData } from './data';
+export { testData };
 export { permissions };

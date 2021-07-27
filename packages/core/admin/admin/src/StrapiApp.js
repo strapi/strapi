@@ -453,5 +453,5 @@ class StrapiApp {
   }
 }
 
-export default ({ adminConfig, appPlugins, library, middlewares, reducers }) =>
+export default ({ adminConfig = {}, appPlugins, library, middlewares, reducers }) =>
   new StrapiApp({ adminConfig, appPlugins, library, middlewares, reducers });

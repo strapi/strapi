@@ -239,4 +239,83 @@ describe('ADMIN | StrapiApp', () => {
       expect(app.menu[0]).toEqual(link);
     });
   });
+
+  describe('createCustomConfigurations', () => {
+    it('should add a locale', () => {
+      const adminConfig = {
+        config: { locales: ['fr'] },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.locales).toEqual(['en', 'fr']);
+    });
+
+    it('should override the authLogo', () => {
+      const adminConfig = {
+        config: { auth: { logo: 'fr' } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.authLogo).toEqual('fr');
+    });
+
+    it('should override the menuLogo', () => {
+      const adminConfig = {
+        config: { menu: { logo: 'fr' } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.menuLogo).toEqual('fr');
+    });
+
+    it('should override the favicon', () => {
+      const adminConfig = {
+        config: { head: { favicon: 'fr' } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.head.favicon).toEqual('fr');
+    });
+
+    it('should override the theme', () => {
+      const adminConfig = {
+        config: { theme: { main: { colors: { red: 'black' } } } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.theme.main.colors.red).toEqual('black');
+    });
+
+    it('should override the tutorials', () => {
+      const adminConfig = {
+        config: { tutorials: false },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.tutorials).toBeFalsy();
+    });
+
+    it('should override the release notification', () => {
+      const adminConfig = {
+        config: { notifications: { releases: false } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.notifications.releases).toBeFalsy();
+    });
+  });
 });
