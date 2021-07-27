@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom';
 import { Components, Fields, Middlewares, Reducers } from './core/apis';
 import { axiosInstance } from './core/utils';
-import appCustomisations from './admin.config';
+import appCustomisations from './app';
 import plugins from './plugins';
 import appReducers from './reducers';
 
@@ -14,11 +14,7 @@ window.strapi = {
   projectType: 'Community',
 };
 
-const appConfig = {
-  locales: [],
-};
-
-const customConfig = appCustomisations.app(appConfig);
+const customConfig = appCustomisations;
 
 const library = {
   components: Components(),
@@ -56,7 +52,8 @@ const run = async () => {
   const app = StrapiApp.default({
     appPlugins: plugins,
     library,
-    locales: customConfig.locales,
+    adminConfig: customConfig,
+    bootstrap: customConfig,
     middlewares,
     reducers,
   });
@@ -64,6 +61,7 @@ const run = async () => {
   await app.bootstrapAdmin();
   await app.initialize();
   await app.bootstrap();
+
   await app.loadTrads();
 
   ReactDOM.render(app.render(), MOUNT_NODE);

@@ -5,6 +5,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
 import { useTracking } from '@strapi/helper-plugin';
+
+import { useConfigurations } from '../../hooks';
 import formatVideoArray from './utils/formatAndStoreVideoArray';
 import StaticLinks from './StaticLinks';
 import Video from './Video';
@@ -12,7 +14,9 @@ import Wrapper from './Wrapper';
 import reducer, { initialState } from './reducer';
 
 const Onboarding = () => {
-  if (process.env.STRAPI_ADMIN_SHOW_TUTORIALS !== 'true') {
+  const { showTutorials } = useConfigurations();
+
+  if (!showTutorials) {
     return null;
   }
 
@@ -21,6 +25,7 @@ const Onboarding = () => {
 
 const OnboardingVideos = () => {
   const { trackUsage } = useTracking();
+
   const [{ isLoading, isOpen, videos }, dispatch] = useReducer(reducer, initialState);
 
   useEffect(() => {
