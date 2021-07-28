@@ -44,11 +44,9 @@ module.exports = {
   },
 
   async find(ctx) {
-    const method = _.has(ctx.query, '_q') ? 'searchPage' : 'findPage';
-
     const userService = getService('user');
 
-    const { results, pagination } = await userService[method](ctx.query);
+    const { results, pagination } = await userService.findPage(ctx.query);
 
     ctx.body = {
       data: {

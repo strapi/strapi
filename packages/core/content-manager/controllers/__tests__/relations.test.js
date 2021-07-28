@@ -220,7 +220,8 @@ describe('Relations', () => {
 
       expect(find).toHaveBeenCalledWith(
         { filters: { $and: [{ id: { $notIn: [3, 4] } }] } },
-        assocModel.uid
+        assocModel.uid,
+        []
       );
       expect(ctx.body).toEqual([
         {

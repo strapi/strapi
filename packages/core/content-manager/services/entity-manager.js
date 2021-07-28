@@ -114,24 +114,6 @@ module.exports = {
     return strapi.entityService.findWithRelationCounts(uid, { params });
   },
 
-  search(opts, uid, populate) {
-    const params = { ...opts, populate: getBasePopulate(uid, populate) };
-
-    return strapi.entityService.search(uid, { params });
-  },
-
-  searchPage(opts, uid, populate) {
-    const params = { ...opts, populate: getBasePopulate(uid, populate) };
-
-    return strapi.entityService.searchPage(uid, { params });
-  },
-
-  searchWithRelationCounts(opts, uid, populate) {
-    const params = { ...opts, populate: getBasePopulate(uid, populate) };
-
-    return strapi.entityService.searchWithRelationCounts(uid, { params });
-  },
-
   count(opts, uid) {
     const params = { ...opts };
 

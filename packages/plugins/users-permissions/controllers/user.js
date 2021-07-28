@@ -45,15 +45,7 @@ module.exports = {
    * @return {Object|Array}
    */
   async find(ctx, next, { populate } = {}) {
-    let users;
-
-    if (_.has(ctx.query, '_q')) {
-      // use core strapi query to search for users
-      // FIXME:
-      users = await strapi.query('plugins::users-permissions.user').search(ctx.query, populate);
-    } else {
-      users = await getService('user').fetchAll(ctx.query, populate);
-    }
+    const users = await getService('user').fetchAll(ctx.query, populate);
 
     ctx.body = users.map(sanitizeUser);
   },
@@ -79,9 +71,6 @@ module.exports = {
    * @return {Number}
    */
   async count(ctx) {
-    if (_.has(ctx.query, '_q')) {
-      return await getService('user').countSearch(ctx.query);
-    }
     ctx.body = await getService('user').count(ctx.query);
   },
 

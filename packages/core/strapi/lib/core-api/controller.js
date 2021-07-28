@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { parseMultipartData, sanitizeEntity } = require('@strapi/utils');
 
 const createSanitizeFn = model => data => {
@@ -81,10 +80,7 @@ const createCollectionTypeController = ({ model, service }) => {
     async find(ctx) {
       const { query } = ctx;
 
-      // TODO:  cleanup
-      const entities = _.has(ctx.query, '_q')
-        ? await service.search({ params: query })
-        : await service.find({ params: query });
+      const entities = await service.find({ params: query });
 
       return sanitize(entities);
     },
@@ -111,10 +107,7 @@ const createCollectionTypeController = ({ model, service }) => {
     async count(ctx) {
       const { query } = ctx;
 
-      // TODO:  impl
-      const count = _.has(ctx.query, '_q')
-        ? await service.countSearch({ params: query })
-        : await service.count({ params: query });
+      const count = await service.count({ params: query });
 
       return count;
     },
@@ -125,16 +118,15 @@ const createCollectionTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async create(ctx) {
-      // TODO:  impl
-      // if (ctx.is('multipart')) {
-      //   const { data, files } = parseMultipartData(ctx);
-      //   entity = await service.create({ data, files });
-      // } else {
-      // }
-
       const { body, query } = ctx.request;
 
-      const entity = await service.create({ params: query, data: body });
+      let entity;
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartData(ctx);
+        entity = await service.create({ params: query, data, files });
+      } else {
+        entity = await service.create({ params: query, data: body });
+      }
 
       return sanitize(entity);
     },
@@ -145,18 +137,17 @@ const createCollectionTypeController = ({ model, service }) => {
      * @return {Object}
      */
     async update(ctx) {
-      // TODO:  impl
-      // let entity;
-      // if (ctx.is('multipart')) {
-      //   const { data, files } = parseMultipartData(ctx);
-      //   entity = await service.update({ id: ctx.params.id }, { data, files });
-      // } else {
-      // }
-
       const { id } = ctx.params;
       const { body, query } = ctx.request;
 
-      const entity = await service.update(id, { params: query, data: body });
+      let entity;
+      if (ctx.is('multipart')) {
+        const { data, files } = parseMultipartData(ctx);
+        entity = await service.update(id, { params: query, data, files });
+      } else {
+        entity = await service.update(id, { params: query, data: body });
+      }
+
       return sanitize(entity);
     },
 

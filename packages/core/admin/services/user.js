@@ -195,22 +195,7 @@ const findPage = async (query = {}) => {
 
   return strapi.query('strapi::user').findPage({
     where: query.filters,
-    populate,
-    page,
-    pageSize,
-  });
-};
-
-/** Search for many users (paginated)
- * @param query
- * @returns {Promise<user>}
- */
-// FIXME: to impl
-const searchPage = async (query = {}) => {
-  const { page = 1, pageSize = 100, populate = ['roles'] } = query;
-
-  return strapi.query('strapi::user').findPage({
-    where: query.filters,
+    _q: query._q,
     populate,
     page,
     pageSize,
@@ -344,7 +329,6 @@ module.exports = {
   sanitizeUser,
   findOne,
   findPage,
-  searchPage,
   deleteById,
   deleteByIds,
   countUsersWithoutRole,

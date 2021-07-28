@@ -799,7 +799,7 @@ const applyPopulate = async (results, populate, ctx) => {
       });
 
       continue;
-    } else if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+    } else if (attribute.relation in ['morphOne', 'morphMany']) {
       const { target, morphBy } = attribute;
 
       const targetAttribute = db.metadata.get(target).attributes[morphBy];
@@ -1070,6 +1070,66 @@ const fromRow = (metadata, row) => {
   return obj;
 };
 
+const applySearch = (qb, query, ctx) => {
+  const { alias, uid, db } = ctx;
+
+  const { attributes } = db.metadata.get(uid);
+
+  const searchColumns = ['id'];
+
+  const stringColumns = Object.keys(attributes).filter(attributeName => {
+    const attribute = attributes[attributeName];
+    return types.isString(attribute.type) && attribute.searchable !== false;
+  });
+
+  searchColumns.push(...stringColumns);
+
+  if (!_.isNaN(_.toNumber(query))) {
+    const numberColumns = Object.keys(attributes).filter(attributeName => {
+      const attribute = attributes[attributeName];
+      return types.isNumber(attribute.type) && attribute.searchable !== false;
+    });
+
+    searchColumns.push(...numberColumns);
+  }
+
+  switch (db.dialect.client) {
+    case 'pg': {
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`"${alias}"."${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    }
+    case 'sqlite': {
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`"${alias}"."${attr}" LIKE ? ESCAPE '\\'`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    }
+    case 'mysql': {
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`\`${alias}\`.\`${attr}\` LIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    }
+    default: {
+      // do nothing
+    }
+  }
+};
+
+const escapeQuery = (query, charsToEscape, escapeChar = '\\') => {
+  return query
+    .split('')
+    .reduce(
+      (escapedQuery, char) =>
+        charsToEscape.includes(char)
+          ? `${escapedQuery}${escapeChar}${char}`
+          : `${escapedQuery}${char}`,
+      ''
+    );
+};
+
 module.exports = {
   applyWhere,
   processWhere,
@@ -1077,6 +1137,7 @@ module.exports = {
   applyJoin,
   processOrderBy,
   processPopulate,
+  applySearch,
   applyPopulate,
   fromRow,
 };

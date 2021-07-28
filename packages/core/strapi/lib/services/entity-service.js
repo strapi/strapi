@@ -77,6 +77,10 @@ const transformParamsToQuery = (uid, params = {}) => {
     publicationState,
   } = params;
 
+  if (params._q) {
+    query._q = params._q;
+  }
+
   if (page) {
     query.page = Number(page);
   }
@@ -238,16 +242,16 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
 
-    const entity = await db.query(uid).create({
+    let entity = await db.query(uid).create({
       ...query,
       data: Object.assign(omitComponentData(model, validData), componentData),
     });
 
-    // TODO: implement files outside of the entity service
-    // if (files && Object.keys(files).length > 0) {
-    //   await this.uploadFiles(entry, files, { model });
-    //   entry = await this.findOne({ params: { id: entry.id } }, { model });
-    // }
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, entity, files);
+      entity = await this.findOne(uid, entity.id, { params });
+    }
 
     this.emitEvent(uid, ENTRY_CREATE, entity);
 
@@ -272,17 +276,17 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap in transaction
     const componentData = await updateComponents(uid, entityToUpdate, validData);
 
-    const entity = await db.query(uid).update({
+    let entity = await db.query(uid).update({
       ...query,
       where: { id: entityId },
       data: Object.assign(omitComponentData(model, validData), componentData),
     });
 
-    // TODO: implement files outside of the entity service
-    // if (files && Object.keys(files).length > 0) {
-    //   await this.uploadFiles(entry, files, { model });
-    //   entry = await this.findOne({ params: { id: entry.id } }, { model });
-    // }
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, entity, files);
+      entity = await this.findOne(uid, entity.id, { params });
+    }
 
     this.emitEvent(uid, ENTRY_UPDATE, entity);
 
@@ -319,42 +323,6 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).deleteMany(query);
-  },
-
-  // TODO: Implement search features
-  async search(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, { uid, action: 'search' });
-
-    return [];
-
-    // return db.query(uid).search(params, populate);
-  },
-
-  async searchWithRelationCounts(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, {
-      uid,
-      action: 'searchWithRelationCounts',
-    });
-
-    return [];
-
-    // return db.query(uid).searchWithRelationCounts(params, populate);
-  },
-
-  async searchPage(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, { uid, action: 'searchPage' });
-
-    return [];
-
-    // return db.query(uid).searchPage(params, populate);
-  },
-
-  async countSearch(uid, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'countSearch' });
-
-    return [];
-
-    // return db.query(uid).countSearch(params);
   },
 });
 

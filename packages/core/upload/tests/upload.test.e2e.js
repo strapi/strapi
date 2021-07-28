@@ -27,6 +27,7 @@ describe('Upload plugin end to end tests', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toEqual({
         data: {
+          autoOrientation: false,
           sizeOptimization: true,
           responsiveDimensions: true,
         },
@@ -141,9 +142,9 @@ describe('Upload plugin end to end tests', () => {
     });
   });
 
-  describe('GET /upload/files => Find files', () => {});
-  describe('GET /upload/files/count => Count available files', () => {});
-  describe('GET /upload/files/:id => Find one file', () => {});
-  describe('GET /upload/search/:id => Search files', () => {});
-  describe('DELETE /upload/files/:id => Delete a file ', () => {});
+  test.todo('GET /upload/files => Find files');
+  test.todo('GET /upload/files/count => Count available files');
+  test.todo('GET /upload/files/:id => Find one file');
+  test.todo('GET /upload/search/:id => Search files');
+  test.todo('DELETE /upload/files/:id => Delete a file ');
 });

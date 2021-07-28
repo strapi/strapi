@@ -36,8 +36,6 @@ describe('Default Service', () => {
         find: expect.any(Function),
         findOne: expect.any(Function),
         count: expect.any(Function),
-        search: expect.any(Function),
-        countSearch: expect.any(Function),
         create: expect.any(Function),
         update: expect.any(Function),
         delete: expect.any(Function),

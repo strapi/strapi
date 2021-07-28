@@ -224,6 +224,7 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
       [typeColumnName]: {
         type: 'string',
       },
+      // TODO: add field
       order: {
         type: 'integer',
         column: {
@@ -260,8 +261,6 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
   };
 
   attribute.joinTable = joinTable;
-
-  // TODO: implement bidirectional
 };
 
 /**
@@ -282,11 +281,6 @@ const createMorphOne = (attributeName, attribute, meta, metadata) => {
   if (!_.has(attribute.morphBy, targetMeta.attributes)) {
     throw new Error(`Morph target attribute not found. Looking for ${attribute.morphBy}`);
   }
-
-  // TODO: why not
-  // Object.assign(attribute, {
-  //   morphReference: targetMeta.attributes[attribute.morphBy],
-  // });
 };
 
 /**

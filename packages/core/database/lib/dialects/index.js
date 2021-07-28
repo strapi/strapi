@@ -107,9 +107,7 @@ class SqliteDialect extends Dialect {
   }
 }
 
-const getDialect = db => {
-  const { client } = db.config.connection;
-
+const createDialect = (db, client) => {
   switch (client) {
     case 'postgres':
       return new PostgresDialect(db);
@@ -120,6 +118,15 @@ const getDialect = db => {
     default:
       throw new Error(`Unknow dialect ${client}`);
   }
+};
+
+const getDialect = db => {
+  const { client } = db.config.connection;
+
+  const dialect = createDialect(db, client);
+  dialect.client = client;
+
+  return dialect;
 };
 
 module.exports = {
