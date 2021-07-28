@@ -214,12 +214,9 @@ const processWhere = (where, ctx, depth = 0) => {
 
     // move to if else to check for scalar / relation / components & throw for other types
     if (attribute.type === 'relation') {
-      // TODO: support shortcut like { role: X } => {role: { id: X }}
-
       // TODO: pass down some filters (e.g published at)
 
       // attribute
-
       const subAlias = createJoin(ctx, { alias, uid, attributeName: key, attribute });
 
       let nestedWhere = processNested(value, {
@@ -493,8 +490,9 @@ const processPopulate = (populate, ctx) => {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
+      // NOTE: we could continue to allow having different populate depending on the type (polymorphic)
       continue;
-      throw new Error(`Cannot populate unknown field ${key}`);
+      // throw new Error(`Cannot populate unknown field ${key}`);
     }
 
     if (!types.isRelation(attribute.type)) {

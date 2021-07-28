@@ -107,7 +107,7 @@ const transformParamsToQuery = (uid, params = {}) => {
 
   if (populate) {
     const { populate } = params;
-    query.populate = _.castArray(populate);
+    query.populate = typeof populate === 'object' ? populate : _.castArray(populate);
   }
 
   // TODO: move to layer above ?
@@ -316,7 +316,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).deleteMany(query);
   },
@@ -538,7 +538,9 @@ const deleteOldComponents = async (
     .filter(has('id'))
     .map(prop('id'));
 
-  const allIds = _.castArray(previousValue).map(prop('id'));
+  const allIds = _.castArray(previousValue)
+    .filter(has('id'))
+    .map(prop('id'));
 
   idsToKeep.forEach(id => {
     if (!allIds.includes(id)) {
@@ -569,10 +571,12 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
       __component,
     }));
 
-  const allIds = _.castArray(previousValue).map(({ id, __component }) => ({
-    id,
-    __component,
-  }));
+  const allIds = _.castArray(previousValue)
+    .filter(has('id'))
+    .map(({ id, __component }) => ({
+      id,
+      __component,
+    }));
 
   idsToKeep.forEach(({ id, __component }) => {
     if (!allIds.find(el => el.id === id && el.__component === __component)) {
@@ -608,14 +612,12 @@ const deleteComponent = async (uid, componentToDelete) => {
 const deleteComponents = async (uid, entityToDelete) => {
   const { attributes } = strapi.getModel(uid);
 
-  // TODO:  find components and then delete them
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'component') {
       const { component: componentUID } = attribute;
 
-      // TODO: need to load before deleting the entry then delete the components then the entry
       const value = await strapi.query(uid).load(entityToDelete, attributeName);
 
       if (!value) {

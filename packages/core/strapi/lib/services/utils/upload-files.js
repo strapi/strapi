@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 
+// FIXME:
 module.exports = async (entry, files, { model, source }) => {
   const entity = strapi.getModel(model, source);
 

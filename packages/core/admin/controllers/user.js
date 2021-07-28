@@ -27,7 +27,7 @@ module.exports = {
       'preferedLanguage',
     ]);
 
-    const userAlreadyExists = await strapi.admin.services.user.exists({
+    const userAlreadyExists = await getService('user').exists({
       email: attributes.email,
     });
 
@@ -35,9 +35,9 @@ module.exports = {
       return ctx.badRequest('Email already taken');
     }
 
-    const createdUser = await strapi.admin.services.user.create(attributes);
+    const createdUser = await getService('user').create(attributes);
 
-    const userInfo = strapi.admin.services.user.sanitizeUser(createdUser);
+    const userInfo = getService('user').sanitizeUser(createdUser);
 
     // Send 201 created
     ctx.created({ data: userInfo });
@@ -46,11 +46,13 @@ module.exports = {
   async find(ctx) {
     const method = _.has(ctx.query, '_q') ? 'searchPage' : 'findPage';
 
-    const { results, pagination } = await strapi.admin.services.user[method](ctx.query);
+    const userService = getService('user');
+
+    const { results, pagination } = await userService[method](ctx.query);
 
     ctx.body = {
       data: {
-        results: results.map(strapi.admin.services.user.sanitizeUser),
+        results: results.map(user => userService.sanitizeUser(user)),
         pagination,
       },
     };
@@ -59,14 +61,14 @@ module.exports = {
   async findOne(ctx) {
     const { id } = ctx.params;
 
-    const user = await strapi.admin.services.user.findOne({ id });
+    const user = await getService('user').findOne({ id });
 
     if (!user) {
       return ctx.notFound('User does not exist');
     }
 
     ctx.body = {
-      data: strapi.admin.services.user.sanitizeUser(user),
+      data: getService('user').sanitizeUser(user),
     };
   },
 
@@ -81,7 +83,7 @@ module.exports = {
     }
 
     if (_.has(input, 'email')) {
-      const uniqueEmailCheck = await strapi.admin.services.user.exists({
+      const uniqueEmailCheck = await getService('user').exists({
         id: { $ne: id },
         email: input.email,
       });
@@ -91,28 +93,28 @@ module.exports = {
       }
     }
 
-    const updatedUser = await strapi.admin.services.user.updateById(id, input);
+    const updatedUser = await getService('user').updateById(id, input);
 
     if (!updatedUser) {
       return ctx.notFound('User does not exist');
     }
 
     ctx.body = {
-      data: strapi.admin.services.user.sanitizeUser(updatedUser),
+      data: getService('user').sanitizeUser(updatedUser),
     };
   },
 
   async deleteOne(ctx) {
     const { id } = ctx.params;
 
-    const deletedUser = await strapi.admin.services.user.deleteById(id);
+    const deletedUser = await getService('user').deleteById(id);
 
     if (!deletedUser) {
       return ctx.notFound('User not found');
     }
 
     return ctx.deleted({
-      data: strapi.admin.services.user.sanitizeUser(deletedUser),
+      data: getService('user').sanitizeUser(deletedUser),
     });
   },
 
@@ -130,7 +132,7 @@ module.exports = {
 
     const users = await getService('user').deleteByIds(body.ids);
 
-    const sanitizedUsers = users.map(strapi.admin.services.user.sanitizeUser);
+    const sanitizedUsers = users.map(getService('user').sanitizeUser);
 
     return ctx.deleted({
       data: sanitizedUsers,

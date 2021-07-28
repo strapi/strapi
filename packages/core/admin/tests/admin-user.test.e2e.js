@@ -112,6 +112,9 @@ describe('Admin User CRUD (e2e)', () => {
       url: '/admin/users',
       method: 'POST',
       body,
+      qs: {
+        populate: ['roles'],
+      },
     });
 
     expect(res.statusCode).toBe(201);

@@ -25,7 +25,7 @@ const syncAuthSettings = async () => {
   const adminAuthSettings = await adminStore.get({ key: 'auth' });
   const newAuthSettings = merge(defaultAdminAuthSettings, adminAuthSettings);
 
-  const roleExists = await strapi.admin.services.role.exists({
+  const roleExists = await getService('role').exists({
     id: newAuthSettings.providers.defaultRole,
   });
 
