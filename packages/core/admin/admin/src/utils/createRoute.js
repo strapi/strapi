@@ -4,7 +4,7 @@ import { Route } from 'react-router-dom';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 
 const LazyCompo = ({ loadComponent }) => {
-  const [C, setCompo] = useState(null);
+  const [Compo, setCompo] = useState(null);
 
   useEffect(() => {
     const loadCompo = async () => {
@@ -21,8 +21,8 @@ const LazyCompo = ({ loadComponent }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (C) {
-    return <C />;
+  if (Compo) {
+    return <Compo />;
   }
 
   return <LoadingIndicatorPage />;

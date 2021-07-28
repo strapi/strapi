@@ -39,12 +39,6 @@ export default {
 
             return component;
           },
-          // Component: () => (
-          //   <CheckPagePermissions permissions={pluginPermissions.settings}>
-          //     <SettingsPage />
-          //   </CheckPagePermissions>
-          // ),
-
           permissions: pluginPermissions.settings,
         },
       ]

@@ -18,7 +18,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: RolesCreatePage,
     Component: () => {
       return { default: RolesCreatePage };
     },
@@ -26,7 +25,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: RolesEditPage,
     Component: async () => {
       const component = await import(
         /* webpackChunkName: "admin-edit-roles-page" */ '../../Roles/ProtectedEditPage'
@@ -38,7 +36,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: UsersListPage,
     Component: async () => {
       const component = await import(
         /* webpackChunkName: "admin-users" */ '../../Users/ProtectedListPage'
@@ -50,7 +47,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: UsersEditPage,
     Component: async () => {
       const component = await import(
         /* webpackChunkName: "admin-edit-users" */ '../../Users/ProtectedEditPage'
@@ -62,7 +58,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: WebhooksCreateView,
     Component: async () => {
       const component = await import(
         /* webpackChunkName: "webhook-edit-page" */ '../../Webhooks/ProtectedCreateView'
@@ -74,7 +69,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: WebhooksEditView,
     Component: async () => {
       const component = await import(
         /* webpackChunkName: "webhook-edit-page" */ '../../Webhooks/ProtectedEditView'
@@ -86,7 +80,6 @@ const defaultRoutes = [
     exact: true,
   },
   {
-    // Component: WebhooksListView,
     Component: async () => {
       const component = await import(
         /* webpackChunkName: "webhook-list-page" */ '../../Webhooks/ProtectedListView'

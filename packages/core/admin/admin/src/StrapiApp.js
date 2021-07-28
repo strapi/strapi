@@ -305,7 +305,7 @@ class StrapiApp {
    */
   async loadAdminTrads() {
     const arrayOfPromises = this.configurations.locales.map(locale => {
-      return import(/* webpackChunkName: "ccc[request]" */ `./translations/${locale}.json`)
+      return import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`)
         .then(({ default: data }) => {
           return { data, locale };
         })
