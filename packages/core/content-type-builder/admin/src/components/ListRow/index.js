@@ -30,10 +30,11 @@ function ListRow({
   secondLoopComponentName,
   secondLoopComponentUid,
   isNestedInDZComponent,
+  relation,
 }) {
   const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
-  // TODO
-  const isMorph = target === '*';
+
+  const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
   let readableType = type;
@@ -300,6 +301,7 @@ ListRow.defaultProps = {
   isNestedInDZComponent: false,
   onClick: () => {},
   plugin: null,
+  relation: '',
   repeatable: false,
   secondLoopComponentName: null,
   secondLoopComponentUid: null,
@@ -320,6 +322,7 @@ ListRow.propTypes = {
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
+  relation: PropTypes.string,
   repeatable: PropTypes.bool,
   secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,
