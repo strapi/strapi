@@ -122,7 +122,6 @@
     "styled-components": "^5.2.3",
     "terser-webpack-plugin": "4.2.3",
     "url-loader": "4.1.1",
-    "video-react": "^0.13.2",
     "webpack": "5.36.2",
     "webpack-cli": "4.6.0",
     "webpack-dev-server": "3.11.2",
