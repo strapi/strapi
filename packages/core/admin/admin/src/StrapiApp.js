@@ -168,6 +168,7 @@ class StrapiApp {
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
           injectContentManagerComponent: this.injectContentManagerComponent,
+          injectAdminComponent: this.injectAdminComponent,
           registerHook: this.registerHook,
         });
       }
@@ -183,6 +184,7 @@ class StrapiApp {
         addSettingsLinks: this.addSettingsLinks,
         getPlugin: this.getPlugin,
         injectContentManagerComponent: this.injectContentManagerComponent,
+        injectAdminComponent: this.injectAdminComponent,
         registerHook: this.registerHook,
       });
     }
@@ -297,6 +299,16 @@ class StrapiApp {
     invariant(component, 'A Component must be provided');
 
     this.admin.injectionZones.contentManager[containerName][blockName].push(component);
+  };
+
+  injectAdminComponent = (containerName, blockName, component) => {
+    invariant(
+      this.admin.injectionZones.admin[containerName]?.[blockName],
+      `The ${containerName} ${blockName} zone is not defined in the admin`
+    );
+    invariant(component, 'A Component must be provided');
+
+    this.admin.injectionZones.admin[containerName][blockName].push(component);
   };
 
   /**
