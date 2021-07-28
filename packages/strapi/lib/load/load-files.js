@@ -19,7 +19,7 @@ const filePathToPath = require('./filepath-to-prop-path');
 const loadFiles = async (
   dir,
   pattern,
-  { requireFn = require, shouldUseFileNameAsKey = () => true, globArgs = {} } = {}
+  { requireFn = require, shouldUseFileNameAsKey = () => true, globArgs = { ignore: ['**/*.test.js'] } } = {}
 ) => {
   const root = {};
   const files = await glob(pattern, { cwd: dir, ...globArgs });
