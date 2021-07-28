@@ -9,7 +9,6 @@ import pluginPkg from '../../package.json';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
-import App from './pages/App';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -25,7 +24,11 @@ export default {
         defaultMessage: 'Documentation',
       },
       permissions: pluginPermissions.main,
-      Component: App,
+      Component: async () => {
+        const component = await import(/* webpackChunkName: "documentation" */ './pages/App');
+
+        return component;
+      },
     });
 
     app.registerPlugin({

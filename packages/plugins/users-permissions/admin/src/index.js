@@ -4,16 +4,11 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
-import React from 'react';
-import { CheckPagePermissions, prefixPluginTranslations } from '@strapi/helper-plugin';
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import RolesPage from './pages/Roles';
-import ProvidersPage from './pages/Providers';
-import EmailTemplatesPage from './pages/EmailTemplates';
-import AdvancedSettingsPage from './pages/AdvancedSettings';
 import getTrad from './utils/getTrad';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -39,11 +34,11 @@ export default {
           },
           id: 'roles',
           to: `/settings/${pluginId}/roles`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
-              <RolesPage />
-            </CheckPagePermissions>
-          ),
+          Component: async () => {
+            const component = await import(/* webpackChunkName: "users-roles" */ './pages/Roles');
+
+            return component;
+          },
           permissions: pluginPermissions.accessRoles,
         },
         {
@@ -53,11 +48,13 @@ export default {
           },
           id: 'providers',
           to: `/settings/${pluginId}/providers`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.readProviders}>
-              <ProvidersPage />
-            </CheckPagePermissions>
-          ),
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "users-providers" */ './pages/Providers'
+            );
+
+            return component;
+          },
           permissions: pluginPermissions.readProviders,
         },
         {
@@ -67,11 +64,13 @@ export default {
           },
           id: 'email-templates',
           to: `/settings/${pluginId}/email-templates`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
-              <EmailTemplatesPage />
-            </CheckPagePermissions>
-          ),
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "users-email" */ './pages/EmailTemplates'
+            );
+
+            return component;
+          },
           permissions: pluginPermissions.readEmailTemplates,
         },
         {
@@ -81,11 +80,13 @@ export default {
           },
           id: 'advanced-settings',
           to: `/settings/${pluginId}/advanced-settings`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
-              <AdvancedSettingsPage />
-            </CheckPagePermissions>
-          ),
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "users-advanced-settings" */ './pages/AdvancedSettings'
+            );
+
+            return component;
+          },
           permissions: pluginPermissions.readAdvancedSettings,
         },
       ]

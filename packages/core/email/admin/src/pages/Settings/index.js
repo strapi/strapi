@@ -20,6 +20,12 @@ import { AlignedButton, Text } from './components';
 import schema from '../../utils/schema';
 import pluginPermissions from '../../permissions';
 
+const ProtectedSettingsPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.settings}>
+    <SettingsPage />
+  </CheckPagePermissions>
+);
+
 const SettingsPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
@@ -205,4 +211,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+export default ProtectedSettingsPage;
