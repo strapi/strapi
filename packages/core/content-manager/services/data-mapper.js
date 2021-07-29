@@ -1,9 +1,8 @@
 'use strict';
 
-const { upperFirst, has, prop, pick, getOr } = require('lodash/fp');
+const { upperFirst, prop, pick, getOr } = require('lodash/fp');
 const pluralize = require('pluralize');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
-const { isMediaAttribute } = require('@strapi/utils').contentTypes;
 
 const dtoFields = [
   'uid',
@@ -57,43 +56,30 @@ const formatContentTypeLabel = contentType => {
   }
 };
 
-const formatAttributes = model => {
+const formatAttributes = contentType => {
   const { getVisibleAttributes } = contentTypesUtils;
 
   // only get attributes that can be seen in the auto generated Edit view or List view
-  return getVisibleAttributes(model).reduce((acc, key) => {
-    acc[key] = formatAttribute(key, model.attributes[key], { model });
+  return getVisibleAttributes(contentType).reduce((acc, key) => {
+    const attribute = contentType.attributes[key];
+
+    // ignore morph until they are handled in the front
+    if (attribute.type === 'relation' && attribute.relation.toLowerCase().includes('morph')) {
+      return acc;
+    }
+
+    acc[key] = formatAttribute(key, attribute);
     return acc;
   }, {});
 };
 
 // FIXME: not needed
-const formatAttribute = (key, attribute, { model }) => {
+const formatAttribute = (key, attribute) => {
   if (attribute.type === 'relation') {
     return toRelation(attribute);
   }
 
   return attribute;
-
-  // if (has('type', attribute)) return attribute;
-
-  // if (isMediaAttribute(attribute)) {
-  //   return toMedia(attribute);
-  // }
-
-  // const relation = (model.associations || []).find(assoc => assoc.alias === key);
-  // return toRelation(attribute, relation);
-};
-
-// FIXME: not needed
-const toMedia = attribute => {
-  return {
-    type: 'media',
-    multiple: attribute.collection ? true : false,
-    required: attribute.required ? true : false,
-    allowedTypes: attribute.allowedTypes,
-    pluginOptions: attribute.pluginOptions,
-  };
 };
 
 // FIXME: not needed
