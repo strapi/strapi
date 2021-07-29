@@ -17,12 +17,12 @@ const expectedData = {
       testContentTypes: {
         relation: 'oneToMany',
         targetAttribute: 'testContentType',
-        target: '__self__',
+        target: 'application::test-content-type.test-content-type',
         type: 'relation',
       },
       testContentType: {
         relation: 'manyToOne',
-        target: '__self__',
+        target: 'application::test-content-type.test-content-type',
         targetAttribute: 'testContentTypes',
         type: 'relation',
       },
@@ -142,7 +142,7 @@ const expectedData = {
         },
         testContentType: {
           relation: 'oneToOne',
-          target: '__contentType__',
+          target: 'application::test-content-type.test-content-type',
           type: 'relation',
         },
         subCompoField: {
@@ -255,7 +255,7 @@ const expectedData = {
         },
         testContentType: {
           relation: 'oneToOne',
-          target: '__contentType__',
+          target: 'application::test-content-type.test-content-type',
           type: 'relation',
         },
         subCompoField: {

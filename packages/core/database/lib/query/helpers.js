@@ -214,12 +214,9 @@ const processWhere = (where, ctx, depth = 0) => {
 
     // move to if else to check for scalar / relation / components & throw for other types
     if (attribute.type === 'relation') {
-      // TODO: support shortcut like { role: X } => {role: { id: X }}
-
       // TODO: pass down some filters (e.g published at)
 
       // attribute
-
       const subAlias = createJoin(ctx, { alias, uid, attributeName: key, attribute });
 
       let nestedWhere = processNested(value, {
@@ -493,7 +490,9 @@ const processPopulate = (populate, ctx) => {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
-      throw new Error(`Cannot populate unknown field ${key}`);
+      // NOTE: we could continue to allow having different populate depending on the type (polymorphic)
+      continue;
+      // throw new Error(`Cannot populate unknown field ${key}`);
     }
 
     if (!types.isRelation(attribute.type)) {
@@ -518,13 +517,14 @@ const applyPopulate = async (results, populate, ctx) => {
   const meta = db.metadata.get(uid);
 
   for (const key in populate) {
-    // TODO: Omit limit & offset in v1 to avoid needing a query per result (too many queries would ipact the performances a lot)
+    // NOTE: Omit limit & offset to avoid needing a query per result to avoid making too many queries
     const populateValue = _.pick(
       ['select', 'count', 'where', 'populate', 'orderBy'],
       populate[key]
     );
 
     // TODO: handle count for join columns
+    // TODO: cleanup count
     const isCount = populateValue.count === true;
 
     const attribute = meta.attributes[key];
@@ -799,6 +799,227 @@ const applyPopulate = async (results, populate, ctx) => {
       });
 
       continue;
+    } else if (attribute.relation in ['morphOne', 'morphMany']) {
+      const { target, morphBy } = attribute;
+
+      const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+      if (targetAttribute.relation === 'morphToOne') {
+        const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+        const referencedValues = _.uniq(
+          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNull(value))
+        );
+
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = null;
+          });
+
+          continue;
+        }
+
+        const rows = await db.entityManager
+          .createQueryBuilder(target)
+          .init(populateValue)
+          // .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+          .where({ [idColumn.name]: referencedValues, [typeColumn.name]: uid })
+          .execute({ mapResults: false });
+
+        const map = _.groupBy(idColumn.name, rows);
+
+        results.forEach(result => {
+          const matchingRows = map[result[idColumn.referencedColumn]];
+
+          const matchingValue =
+            attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+
+          result[key] = fromTargetRow(matchingValue);
+        });
+      } else if (targetAttribute.relation === 'morphToMany') {
+        const { joinTable } = targetAttribute;
+
+        const { joinColumn, morphColumn } = joinTable;
+
+        const { idColumn, typeColumn } = morphColumn;
+
+        const referencedValues = _.uniq(
+          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNull(value))
+        );
+
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = [];
+          });
+
+          continue;
+        }
+
+        // find with join table
+        const qb = db.entityManager.createQueryBuilder(target);
+
+        const alias = qb.getAlias();
+
+        const rows = await qb
+          .init(populateValue)
+          .join({
+            alias: alias,
+            referencedTable: joinTable.name,
+            referencedColumn: joinColumn.name,
+            rootColumn: joinColumn.referencedColumn,
+            rootTable: qb.alias,
+            on: joinTable.on,
+          })
+          .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])
+          .where({
+            [`${alias}.${idColumn.name}`]: referencedValues,
+            [`${alias}.${typeColumn.name}`]: uid,
+          })
+          .execute({ mapResults: false });
+
+        const map = _.groupBy(idColumn.name, rows);
+
+        results.forEach(result => {
+          const matchingRows = map[result[idColumn.referencedColumn]];
+
+          const matchingValue =
+            attribute.relation === 'morphOne' ? _.first(matchingRows) : matchingRows;
+
+          result[key] = fromTargetRow(matchingValue);
+        });
+      }
+
+      continue;
+    } else if (attribute.relation === 'morphToMany') {
+      // find with join table
+      const { joinTable } = attribute;
+
+      const { joinColumn, morphColumn } = joinTable;
+      const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
+
+      // fetch join table to create the ids map then do the same as morphToOne without the first
+
+      const referencedValues = _.uniq(
+        results.map(r => r[joinColumn.referencedColumn]).filter(value => !_.isNull(value))
+      );
+
+      const qb = db.entityManager.createQueryBuilder(joinTable.name);
+
+      const joinRows = await qb
+        .where({
+          [joinColumn.name]: referencedValues,
+          ...(joinTable.on || {}),
+        })
+        .orderBy([joinColumn.name, 'order'])
+        .execute({ mapResults: false });
+
+      const joinMap = _.groupBy(joinColumn.name, joinRows);
+
+      const idsByType = joinRows.reduce((acc, result) => {
+        const idValue = result[morphColumn.idColumn.name];
+        const typeValue = result[morphColumn.typeColumn.name];
+
+        if (!idValue || !typeValue) {
+          return acc;
+        }
+
+        if (!_.has(typeValue, acc)) {
+          acc[typeValue] = [];
+        }
+
+        acc[typeValue].push(idValue);
+
+        return acc;
+      }, {});
+
+      const map = {};
+      for (const type in idsByType) {
+        const ids = idsByType[type];
+
+        const qb = db.entityManager.createQueryBuilder(type);
+
+        const rows = await qb
+          .init(populateValue)
+          .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+          .where({ [idColumn.referencedColumn]: ids })
+          .execute({ mapResults: false });
+
+        map[type] = _.groupBy(idColumn.referencedColumn, rows);
+      }
+
+      results.forEach(result => {
+        const joinResults = joinMap[result[joinColumn.referencedColumn]] || [];
+
+        const matchingRows = joinResults.flatMap(joinResult => {
+          const id = joinResult[idColumn.name];
+          const type = joinResult[typeColumn.name];
+
+          const fromTargetRow = rowOrRows => fromRow(db.metadata.get(type), rowOrRows);
+
+          return (map[type][id] || []).map(row => {
+            return {
+              [typeField]: type,
+              ...fromTargetRow(row),
+            };
+          });
+        });
+
+        result[key] = matchingRows;
+      });
+    } else if (attribute.relation === 'morphToOne') {
+      const { morphColumn } = attribute;
+      const { idColumn, typeColumn } = morphColumn;
+
+      // make a map for each type what ids to return
+      // make a nested map per id
+
+      const idsByType = results.reduce((acc, result) => {
+        const idValue = result[morphColumn.idColumn.name];
+        const typeValue = result[morphColumn.typeColumn.name];
+
+        if (!idValue || !typeValue) {
+          return acc;
+        }
+
+        if (!_.has(typeValue, acc)) {
+          acc[typeValue] = [];
+        }
+
+        acc[typeValue].push(idValue);
+
+        return acc;
+      }, {});
+
+      const map = {};
+      for (const type in idsByType) {
+        const ids = idsByType[type];
+
+        const qb = db.entityManager.createQueryBuilder(type);
+
+        const rows = await qb
+          .init(populateValue)
+          .addSelect(`${qb.alias}.${idColumn.referencedColumn}`)
+          .where({ [idColumn.referencedColumn]: ids })
+          .execute({ mapResults: false });
+
+        map[type] = _.groupBy(idColumn.referencedColumn, rows);
+      }
+
+      results.forEach(result => {
+        const id = result[idColumn.name];
+        const type = result[typeColumn.name];
+
+        if (!type || !id) {
+          result[key] = null;
+          return;
+        }
+
+        const matchingRows = map[type][id];
+
+        const fromTargetRow = rowOrRows => fromRow(db.metadata.get(type), rowOrRows);
+
+        result[key] = fromTargetRow(_.first(matchingRows));
+      });
     }
   }
 };
@@ -849,6 +1070,66 @@ const fromRow = (metadata, row) => {
   return obj;
 };
 
+const applySearch = (qb, query, ctx) => {
+  const { alias, uid, db } = ctx;
+
+  const { attributes } = db.metadata.get(uid);
+
+  const searchColumns = ['id'];
+
+  const stringColumns = Object.keys(attributes).filter(attributeName => {
+    const attribute = attributes[attributeName];
+    return types.isString(attribute.type) && attribute.searchable !== false;
+  });
+
+  searchColumns.push(...stringColumns);
+
+  if (!_.isNaN(_.toNumber(query))) {
+    const numberColumns = Object.keys(attributes).filter(attributeName => {
+      const attribute = attributes[attributeName];
+      return types.isNumber(attribute.type) && attribute.searchable !== false;
+    });
+
+    searchColumns.push(...numberColumns);
+  }
+
+  switch (db.dialect.client) {
+    case 'pg': {
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`"${alias}"."${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    }
+    case 'sqlite': {
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`"${alias}"."${attr}" LIKE ? ESCAPE '\\'`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    }
+    case 'mysql': {
+      searchColumns.forEach(attr =>
+        qb.orWhereRaw(`\`${alias}\`.\`${attr}\` LIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
+      );
+      break;
+    }
+    default: {
+      // do nothing
+    }
+  }
+};
+
+const escapeQuery = (query, charsToEscape, escapeChar = '\\') => {
+  return query
+    .split('')
+    .reduce(
+      (escapedQuery, char) =>
+        charsToEscape.includes(char)
+          ? `${escapedQuery}${escapeChar}${char}`
+          : `${escapedQuery}${char}`,
+      ''
+    );
+};
+
 module.exports = {
   applyWhere,
   processWhere,
@@ -856,6 +1137,7 @@ module.exports = {
   applyJoin,
   processOrderBy,
   processPopulate,
+  applySearch,
   applyPopulate,
   fromRow,
 };

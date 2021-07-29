@@ -44,6 +44,23 @@ const toRow = (metadata, data = {}) => {
         if (!_.isUndefined(attrValue)) {
           obj[joinColumnName] = attrValue;
         }
+
+        continue;
+      }
+
+      if (attribute.morphColumn && attribute.owner) {
+        const { idColumn, typeColumn, typeField = '__type' } = attribute.morphColumn;
+
+        const value = data[attributeName];
+
+        if (!_.isUndefined(value)) {
+          if (!_.has('id', value) || !_.has(typeField, value)) {
+            throw new Error(`Expects properties ${typeField} an id to make a morph association`);
+          }
+
+          obj[idColumn.name] = value.id;
+          obj[typeColumn.name] = value[typeField];
+        }
       }
     }
   }
@@ -241,14 +258,79 @@ const createEntityManager = db => {
     async attachRelations(uid, id, data) {
       const { attributes } = db.metadata.get(uid);
 
-      /*
-        TODO:
-        if data[attributeName] is a single value (ID) => assign
-        if data[attributeName] is an object with an id => assign & use the other props as join column values
-      */
-
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
+
+        const isValidLink = _.has(attributeName, data) && !_.isNull(data[attributeName]);
+
+        if (attribute.type !== 'relation' || !isValidLink) {
+          continue;
+        }
+
+        if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+          const { target, morphBy } = attribute;
+
+          const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+          if (targetAttribute.relation === 'morphToOne') {
+            // set columns
+            const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+            await this.createQueryBuilder(target)
+              .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+              .where({ id: data[attributeName] })
+              .execute();
+          } else if (targetAttribute.type === 'morphToMany') {
+            const { joinTable } = targetAttribute;
+            const { joinColumn, morphColumn } = joinTable;
+
+            const { idColumn, typeColumn } = morphColumn;
+
+            const rows = _.castArray(data[attributeName]).map((dataID, idx) => ({
+              [joinColumn.name]: dataID,
+              [idColumn.name]: id,
+              [typeColumn.name]: uid,
+              ...(joinTable.on || {}),
+              order: idx,
+            }));
+
+            if (_.isEmpty(rows)) {
+              continue;
+            }
+
+            await this.createQueryBuilder(joinTable.name)
+              .insert(rows)
+              .execute();
+          }
+
+          continue;
+        } else if (attribute.relation === 'morphToOne') {
+          // handled on the entry itself
+          continue;
+        } else if (attribute.relation === 'morphToMany') {
+          const { joinTable } = attribute;
+          const { joinColumn, morphColumn } = joinTable;
+
+          const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
+
+          const rows = _.castArray(data[attributeName]).map((data, idx) => ({
+            [joinColumn.name]: id,
+            [idColumn.name]: data.id,
+            [typeColumn.name]: data[typeField],
+            ...(joinTable.on || {}),
+            order: idx,
+          }));
+
+          if (_.isEmpty(rows)) {
+            continue;
+          }
+
+          await this.createQueryBuilder(joinTable.name)
+            .insert(rows)
+            .execute();
+
+          continue;
+        }
 
         if (attribute.joinColumn && attribute.owner) {
           if (
@@ -271,18 +353,17 @@ const createEntityManager = db => {
           const { target } = attribute;
 
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
-          if (data[attributeName]) {
-            await this.createQueryBuilder(target)
-              .where({ [attribute.joinColumn.referencedColumn]: id })
-              .update({ [attribute.joinColumn.referencedColumn]: null })
-              .execute();
 
-            await this.createQueryBuilder(target)
-              .update({ [attribute.joinColumn.referencedColumn]: id })
-              // NOTE: works if it is an array or a single id
-              .where({ id: data[attributeName] })
-              .execute();
-          }
+          await this.createQueryBuilder(target)
+            .where({ [attribute.joinColumn.referencedColumn]: id })
+            .update({ [attribute.joinColumn.referencedColumn]: null })
+            .execute();
+
+          await this.createQueryBuilder(target)
+            .update({ [attribute.joinColumn.referencedColumn]: id })
+            // NOTE: works if it is an array or a single id
+            .where({ id: data[attributeName] })
+            .execute();
         }
 
         if (attribute.joinTable) {
@@ -293,18 +374,215 @@ const createEntityManager = db => {
 
           // TODO: redefine
           // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
-          if (data[attributeName]) {
-            if (
-              ['oneToOne', 'oneToMany'].includes(attribute.relation) &&
-              isBidirectional(attribute)
-            ) {
-              await this.createQueryBuilder(joinTable.name)
-                .delete()
-                .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
-                .where(joinTable.on ? joinTable.on : {})
-                .execute();
+
+          if (
+            ['oneToOne', 'oneToMany'].includes(attribute.relation) &&
+            isBidirectional(attribute)
+          ) {
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
+              .where(joinTable.on || {})
+              .execute();
+          }
+
+          const insert = _.castArray(data[attributeName]).map(datum => {
+            return {
+              [joinColumn.name]: id,
+              [inverseJoinColumn.name]: datum,
+              ...(joinTable.on || {}),
+            };
+          });
+
+          // if there is nothing to insert
+          if (insert.length === 0) {
+            continue;
+          }
+
+          await this.createQueryBuilder(joinTable.name)
+            .insert(insert)
+            .execute();
+        }
+      }
+    },
+
+    /**
+     * Updates relations of an existing entity
+     *
+     * @param {EntityManager} em - entity manager instance
+     * @param {Metadata} metadata - model metadta
+     * @param {ID} id - entity ID
+     * @param {object} data - data received for creation
+     */
+    // TODO: check relation exists (handled by FKs except for polymorphics)
+    // TODO: wrap Transaction
+    async updateRelations(uid, id, data) {
+      const { attributes } = db.metadata.get(uid);
+
+      for (const attributeName in attributes) {
+        const attribute = attributes[attributeName];
+
+        if (attribute.type !== 'relation' || !_.has(attributeName, data)) {
+          continue;
+        }
+
+        /*
+          if morphOne | morphMany
+            clear previous:
+            if morphBy is morphToOne
+              set null
+              set new
+
+            if morphBy is morphToMany
+              delete links
+              add links
+        */
+        if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+          const { target, morphBy } = attribute;
+
+          const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+          if (targetAttribute.relation === 'morphToOne') {
+            // set columns
+            const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+            await this.createQueryBuilder(target)
+              .update({ [idColumn.name]: null, [typeColumn.name]: null })
+              .where({ [idColumn.name]: id, [typeColumn.name]: uid })
+              .execute();
+
+            await this.createQueryBuilder(target)
+              .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+              .where({ id: data[attributeName] })
+              .execute();
+          } else if (targetAttribute.type === 'morphToMany') {
+            const { joinTable } = targetAttribute;
+            const { joinColumn, morphColumn } = joinTable;
+
+            const { idColumn, typeColumn } = morphColumn;
+
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({
+                [idColumn.name]: id,
+                [typeColumn.name]: uid,
+                ...(joinTable.on || {}),
+              })
+              .execute();
+
+            const rows = _.castArray(data[attributeName]).map((dataID, idx) => ({
+              [joinColumn.name]: dataID,
+              [idColumn.name]: id,
+              [typeColumn.name]: uid,
+              ...(joinTable.on || {}),
+              order: idx,
+            }));
+
+            if (_.isEmpty(rows)) {
+              continue;
             }
 
+            await this.createQueryBuilder(joinTable.name)
+              .insert(rows)
+              .execute();
+          }
+
+          continue;
+        }
+
+        /*
+          if morphToOne
+            set new values in morph columns
+        */
+        if (attribute.relation === 'morphToOne') {
+          // do nothing
+        }
+
+        /*
+
+          if morphToMany
+            delete old links
+            create new links
+
+        */
+        if (attribute.relation === 'morphToMany') {
+          const { joinTable } = attribute;
+          const { joinColumn, morphColumn } = joinTable;
+
+          const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
+
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({
+              [joinColumn.name]: id,
+              ...(joinTable.on || {}),
+            })
+            .execute();
+
+          const rows = _.castArray(data[attributeName]).map((data, idx) => ({
+            [joinColumn.name]: id,
+            [idColumn.name]: data.id,
+            [typeColumn.name]: data[typeField],
+            ...(joinTable.on || {}),
+            order: idx,
+          }));
+
+          if (_.isEmpty(rows)) {
+            continue;
+          }
+
+          await this.createQueryBuilder(joinTable.name)
+            .insert(rows)
+            .execute();
+
+          continue;
+        }
+
+        if (attribute.joinColumn && attribute.owner) {
+          // handled in the row itslef
+          continue;
+        }
+
+        // oneToOne oneToMany on the non owning side.
+        // Since it is a join column no need to remove previous relations
+        if (attribute.joinColumn && !attribute.owner) {
+          // need to set the column on the target
+          const { target } = attribute;
+
+          await this.createQueryBuilder(target)
+            .where({ [attribute.joinColumn.referencedColumn]: id })
+            .update({ [attribute.joinColumn.referencedColumn]: null })
+            .execute();
+
+          if (!_.isNull(data[attributeName])) {
+            await this.createQueryBuilder(target)
+              // NOTE: works if it is an array or a single id
+              .where({ id: data[attributeName] })
+              .update({ [attribute.joinColumn.referencedColumn]: id })
+              .execute();
+          }
+        }
+
+        if (attribute.joinTable) {
+          const { joinTable } = attribute;
+          const { joinColumn, inverseJoinColumn } = joinTable;
+
+          // clear previous associations in the joinTable
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({ [joinColumn.name]: id })
+            .where(joinTable.on || {})
+            .execute();
+
+          if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
+              .where(joinTable.on || {})
+              .execute();
+          }
+
+          if (!_.isNull(data[attributeName])) {
             const insert = _.castArray(data[attributeName]).map(datum => {
               return {
                 [joinColumn.name]: id,
@@ -327,99 +605,6 @@ const createEntityManager = db => {
     },
 
     /**
-     * Updates relations of an existing entity
-     *
-     * @param {EntityManager} em - entity manager instance
-     * @param {Metadata} metadata - model metadta
-     * @param {ID} id - entity ID
-     * @param {object} data - data received for creation
-     */
-    // TODO: check relation exists (handled by FKs except for polymorphics)
-    // TODO: wrap Transaction
-    async updateRelations(uid, id, data) {
-      const { attributes } = db.metadata.get(uid);
-
-      for (const attributeName in attributes) {
-        const attribute = attributes[attributeName];
-
-        if (attribute.joinColumn && attribute.owner) {
-          // TODO: redefine
-          if (attribute.relation === 'oneToOne' && _.has(attributeName, data)) {
-            await this.createQueryBuilder(uid)
-              .where({ [attribute.joinColumn.name]: data[attributeName], id: { $ne: id } })
-              .update({ [attribute.joinColumn.name]: null })
-              .execute();
-          }
-
-          continue;
-        }
-
-        // oneToOne oneToMany on the non owning side.
-        // Since it is a join column no need to remove previous relations
-        if (attribute.joinColumn && !attribute.owner) {
-          // need to set the column on the target
-          const { target } = attribute;
-
-          if (_.has(attributeName, data)) {
-            await this.createQueryBuilder(target)
-              .where({ [attribute.joinColumn.referencedColumn]: id })
-              .update({ [attribute.joinColumn.referencedColumn]: null })
-              .execute();
-
-            if (data[attributeName]) {
-              await this.createQueryBuilder(target)
-                // NOTE: works if it is an array or a single id
-                .where({ id: data[attributeName] })
-                .update({ [attribute.joinColumn.referencedColumn]: id })
-                .execute();
-            }
-          }
-        }
-
-        if (attribute.joinTable) {
-          const { joinTable } = attribute;
-          const { joinColumn, inverseJoinColumn } = joinTable;
-
-          if (_.has(attributeName, data)) {
-            // clear previous associations in the joinTable
-            await this.createQueryBuilder(joinTable.name)
-              .delete()
-              .where({ [joinColumn.name]: id })
-              .where(joinTable.on ? joinTable.on : {})
-              .execute();
-
-            if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
-              await this.createQueryBuilder(joinTable.name)
-                .delete()
-                .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
-                .where(joinTable.on ? joinTable.on : {})
-                .execute();
-            }
-
-            if (data[attributeName]) {
-              const insert = _.castArray(data[attributeName]).map(datum => {
-                return {
-                  [joinColumn.name]: id,
-                  [inverseJoinColumn.name]: datum,
-                  ...(joinTable.on || {}),
-                };
-              });
-
-              // if there is nothing to insert
-              if (insert.length === 0) {
-                continue;
-              }
-
-              await this.createQueryBuilder(joinTable.name)
-                .insert(insert)
-                .execute();
-            }
-          }
-        }
-      }
-    },
-
-    /**
      * Delete relations of an existing entity
      * This removes associations but doesn't do cascade deletions for components for example. This will be handled on the entity service layer instead
      * NOTE: Most of the deletion should be handled by ON DELETE CASCADE for dialect that have FKs
@@ -430,15 +615,84 @@ const createEntityManager = db => {
      */
     // TODO: wrap Transaction
     async deleteRelations(uid, id) {
-      // TODO: Implement correctly
-      if (db.dialect.usesForeignKeys()) {
-        return;
-      }
-
       const { attributes } = db.metadata.get(uid);
 
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
+
+        if (attribute.type !== 'relation') {
+          continue;
+        }
+
+        /*
+          if morphOne | morphMany
+            if morphBy is morphToOne
+              set null
+            if morphBy is morphToOne
+              delete links
+        */
+        if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
+          const { target, morphBy } = attribute;
+
+          const targetAttribute = db.metadata.get(target).attributes[morphBy];
+
+          if (targetAttribute.relation === 'morphToOne') {
+            // set columns
+            const { idColumn, typeColumn } = targetAttribute.morphColumn;
+
+            await this.createQueryBuilder(target)
+              .update({ [idColumn.name]: null, [typeColumn.name]: null })
+              .where({ [idColumn.name]: id, [typeColumn.name]: uid })
+              .execute();
+          } else if (targetAttribute.type === 'morphToMany') {
+            const { joinTable } = targetAttribute;
+            const { morphColumn } = joinTable;
+
+            const { idColumn, typeColumn } = morphColumn;
+
+            await this.createQueryBuilder(joinTable.name)
+              .delete()
+              .where({
+                [idColumn.name]: id,
+                [typeColumn.name]: uid,
+                ...(joinTable.on || {}),
+              })
+              .execute();
+          }
+
+          continue;
+        }
+
+        /*
+          if morphToOne
+            nothing to do
+        */
+        if (attribute.relation === 'morphToOne') {
+          // do nothing
+        }
+
+        /*
+            if morphToMany
+            delete links
+        */
+        if (attribute.relation === 'morphToMany') {
+          const { joinTable } = attribute;
+          const { joinColumn } = joinTable;
+
+          await this.createQueryBuilder(joinTable.name)
+            .delete()
+            .where({
+              [joinColumn.name]: id,
+              ...(joinTable.on || {}),
+            })
+            .execute();
+
+          continue;
+        }
+
+        if (db.dialect.usesForeignKeys()) {
+          return;
+        }
 
         // NOTE: we do not remove existing associations with the target as it should handled by unique FKs instead
         if (attribute.joinColumn && attribute.owner) {
@@ -464,7 +718,7 @@ const createEntityManager = db => {
           await this.createQueryBuilder(joinTable.name)
             .delete()
             .where({ [joinColumn.name]: id })
-            .where(joinTable.on ? joinTable.on : {})
+            .where(joinTable.on || {})
             .execute();
         }
       }

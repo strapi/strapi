@@ -21,10 +21,8 @@ describe('Entity service', () => {
       'find',
       'findOne',
       'delete',
-      'search',
       'count',
       'findPage',
-      'searchPage',
     ])('Can decorate', async method => {
       const instance = createEntityService({
         strapi: {},

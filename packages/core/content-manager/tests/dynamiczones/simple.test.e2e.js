@@ -118,6 +118,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -147,6 +150,9 @@ describe.each([
         url: '/',
         body: {
           field: [],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -193,7 +199,13 @@ describe.each([
       const createRes = await createEntry();
       const entryId = createRes.body.id;
 
-      const res = await rq({ method: 'GET', url: `/${entryId}` });
+      const res = await rq({
+        method: 'GET',
+        url: `/${entryId}`,
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.field)).toBe(true);
@@ -219,7 +231,13 @@ describe.each([
 
   describe('Listing entries', () => {
     test('The entries have their dynamic zones populated', async () => {
-      const res = await rq({ method: 'GET', url: '/' });
+      const res = await rq({
+        method: 'GET',
+        url: '/',
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(res.statusCode).toBe(200);
 
@@ -270,6 +288,9 @@ describe.each([
         body: {
           field: [],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -287,6 +308,9 @@ describe.each([
         method: 'PUT',
         url: `/${entryId}`,
         body: defaultBody,
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -330,6 +354,9 @@ describe.each([
               name: 'secondString',
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -401,7 +428,13 @@ describe.each([
       expect(createRes.statusCode).toBe(200);
       const entryId = createRes.body.id;
 
-      const res = await rq({ method: 'DELETE', url: `/${entryId}` });
+      const res = await rq({
+        method: 'DELETE',
+        url: `/${entryId}`,
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(res.statusCode).toBe(200);
       expect(Array.isArray(res.body.field)).toBe(true);

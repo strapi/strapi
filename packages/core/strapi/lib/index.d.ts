@@ -28,10 +28,6 @@ interface EntityService {
   create<T extends keyof AllTypes>(uid: T): Promise<any>;
   update<T extends keyof AllTypes>(uid: T): Promise<any>;
   delete<T extends keyof AllTypes>(uid: T): Promise<any>;
-  search<T extends keyof AllTypes>(uid: T): Promise<any>;
-  searchWithRelationCounts<T extends keyof AllTypes>(uid: T): Promise<any>;
-  searchPage<T extends keyof AllTypes>(uid: T): Promise<any>;
-  countSearch<T extends keyof AllTypes>(uid: T): Promise<any>;
 }
 
 interface StrapiInterface extends Strapi {

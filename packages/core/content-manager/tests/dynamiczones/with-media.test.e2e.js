@@ -116,6 +116,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -165,6 +168,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -188,6 +194,9 @@ describe.each([
               media: [newMediaId, newMediaId],
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -236,11 +245,21 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
 
-      const getRes = await rq({ method: 'GET', url: `/${res.body.id}` });
+      const getRes = await rq({
+        method: 'GET',
+        url: `/${res.body.id}`,
+        qs: {
+          populate: ['field'],
+        },
+      });
+
       expect(getRes.body).toMatchObject({
         field: [
           {
@@ -288,6 +307,9 @@ describe.each([
               },
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 

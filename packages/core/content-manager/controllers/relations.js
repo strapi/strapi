@@ -46,13 +46,7 @@ module.exports = {
 
     const entityManager = getService('entity-manager');
 
-    let entities = [];
-
-    if (has('_q', ctx.request.query)) {
-      entities = await entityManager.search(query, target.uid);
-    } else {
-      entities = await entityManager.find(query, target.uid);
-    }
+    const entities = await entityManager.find(query, target.uid, []);
 
     if (!entities) {
       return ctx.notFound();

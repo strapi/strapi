@@ -29,11 +29,6 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
 
-  // FIXME:
-  countSearch(params) {
-    return strapi.query('plugins::users-permissions.user').countSearch(params);
-  },
-
   /**
    * Promise to add a/an user.
    * @return {Promise}

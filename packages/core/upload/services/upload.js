@@ -72,15 +72,17 @@ module.exports = ({ strapi }) => ({
       size: bytesToKbytes(size),
     };
 
-    const { refId, ref, source, field } = metas;
+    const { refId, ref, field } = metas;
 
     if (refId && ref && field) {
       entity.related = [
         {
-          refId,
-          ref,
-          source,
-          field,
+          __type: ref,
+          id: refId,
+          // refId,
+          // ref,
+          // source,
+          // field,
         },
       ];
     }
@@ -319,19 +321,9 @@ module.exports = ({ strapi }) => ({
     return strapi.query('plugins::upload.file').findOne({ where: params, populate });
   },
 
-  fetchAll(params, populate) {
+  fetchAll(params) {
     combineFilters(params);
-    return strapi.query('plugins::upload.file').findMany({ ...params, populate });
-  },
-
-  // FIXME: to impl
-  search(params, populate) {
-    return strapi.query('plugins::upload.file').search({ ...params, populate });
-  },
-
-  // FIXME: to impl
-  countSearch(params) {
-    return strapi.query('plugins::upload.file').countSearch({ ...params });
+    return strapi.query('plugins::upload.file').findMany({ ...params });
   },
 
   count(params) {
@@ -364,7 +356,7 @@ module.exports = ({ strapi }) => ({
     return strapi.query('plugins::upload.file').delete({ where: { id: file.id } });
   },
 
-  async uploadToEntity(params, files, source) {
+  async uploadToEntity(params, files) {
     const { id, model, field } = params;
 
     const arr = Array.isArray(files) ? files : [files];
@@ -376,7 +368,6 @@ module.exports = ({ strapi }) => ({
           {
             refId: id,
             ref: model,
-            source,
             field,
           }
         );

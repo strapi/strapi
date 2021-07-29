@@ -92,7 +92,6 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    // TODO: add processing
     groupBy(groupBy) {
       state.groupBy = groupBy;
       return this;
@@ -100,15 +99,23 @@ const createQueryBuilder = (uid, db) => {
 
     populate(populate) {
       state.populate = helpers.processPopulate(populate, { qb: this, uid, db });
+      return this;
+    },
 
+    search(query) {
+      state.search = query;
       return this;
     },
 
     init(params = {}) {
-      const { where, select, limit, offset, orderBy, groupBy, populate } = params;
+      const { _q, where, select, limit, offset, orderBy, groupBy, populate } = params;
 
       if (where) {
         this.where(where);
+      }
+
+      if (_q) {
+        this.search(_q);
       }
 
       if (select) {
@@ -236,6 +243,12 @@ const createQueryBuilder = (uid, db) => {
 
       if (state.where) {
         helpers.applyWhere(qb, state.where);
+      }
+
+      if (state.search) {
+        qb.where(subQb => {
+          helpers.applySearch(subQb, state.search, { alias: this.alias, db, uid });
+        });
       }
 
       if (state.joins.length > 0) {

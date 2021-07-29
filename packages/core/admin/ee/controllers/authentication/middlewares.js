@@ -2,6 +2,7 @@
 
 const passport = require('koa-passport');
 
+const { getService } = require('../../../utils');
 const utils = require('./utils');
 
 const defaultConnectionError = () => new Error('Invalid connection payload');
@@ -26,7 +27,7 @@ const authenticate = async (ctx, next) => {
       return ctx.redirect(redirectUrls.error);
     }
 
-    const user = await strapi.admin.services.user.findOne({ email: profile.email });
+    const user = await getService('user').findOne({ email: profile.email });
     const scenario = user ? existingUserScenario : nonExistingUserScenario;
 
     return scenario(ctx, next)(user || profile, provider);
@@ -62,7 +63,7 @@ const nonExistingUserScenario = (ctx, next) => async (profile, provider) => {
     return ctx.redirect(redirectUrls.error);
   }
 
-  const defaultRole = await strapi.admin.services.role.findOne({ id: providers.defaultRole });
+  const defaultRole = await getService('role').findOne({ id: providers.defaultRole });
 
   // If the default role has been misconfigured, redirect with an error
   if (!defaultRole) {
@@ -71,7 +72,7 @@ const nonExistingUserScenario = (ctx, next) => async (profile, provider) => {
   }
 
   // Register a new user with the information given by the provider and login with it
-  ctx.state.user = await strapi.admin.services.user.create({
+  ctx.state.user = await getService('user').create({
     email,
     username,
     firstname,
@@ -96,7 +97,7 @@ const redirectWithAuth = ctx => {
   const redirectUrls = utils.getPrefixedRedirectUrls();
   const { user } = ctx.state;
 
-  const jwt = strapi.admin.services.token.createJwtToken(user);
+  const jwt = getService('token').createJwtToken(user);
 
   const isProduction = strapi.config.get('environment') === 'production';
 

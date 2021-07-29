@@ -148,7 +148,7 @@ describe('Deep Filtering API', () => {
     });
   });
 
-  describe.skip('With search', () => {
+  describe('With search', () => {
     describe('Filter on a manyWay relation', () => {
       test('cards.name + empty search', async () => {
         const res = await rq({
@@ -174,7 +174,11 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: {
+              cards: {
+                name: data.card[0].name,
+              },
+            },
             _q: 25,
           },
         });
@@ -191,7 +195,11 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: {
+              collector_friends: {
+                name: data.collector[0].name,
+              },
+            },
             _q: '',
           },
         });
@@ -200,12 +208,17 @@ describe('Deep Filtering API', () => {
         expect(res.body.length).toBe(2);
         expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
+
       test('collector_friends.name + search isa', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: {
+              collector_friends: {
+                name: data.collector[0].name,
+              },
+            },
             _q: 'isa',
           },
         });

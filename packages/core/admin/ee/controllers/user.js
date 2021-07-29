@@ -2,6 +2,7 @@
 
 const { pick } = require('lodash/fp');
 const { validateUserCreationInput } = require('../validation/user');
+const { getService } = require('../../utils');
 
 const pickUserCreationAttributes = pick(['firstname', 'lastname', 'email', 'roles']);
 
@@ -18,7 +19,7 @@ module.exports = {
     const attributes = pickUserCreationAttributes(body);
     const { useSSORegistration } = body;
 
-    const userAlreadyExists = await strapi.admin.services.user.exists({ email: attributes.email });
+    const userAlreadyExists = await getService('user').exists({ email: attributes.email });
 
     if (userAlreadyExists) {
       return ctx.badRequest('Email already taken');
@@ -28,8 +29,8 @@ module.exports = {
       Object.assign(attributes, { registrationToken: null, isActive: true });
     }
 
-    const createdUser = await strapi.admin.services.user.create(attributes);
-    const userInfo = strapi.admin.services.user.sanitizeUser(createdUser);
+    const createdUser = await getService('user').create(attributes);
+    const userInfo = getService('user').sanitizeUser(createdUser);
 
     ctx.created({ data: userInfo });
   },
