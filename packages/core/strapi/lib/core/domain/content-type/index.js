@@ -2,6 +2,14 @@
 
 const { cloneDeep } = require('lodash/fp');
 const _ = require('lodash');
+const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const {
+  CREATED_AT_ATTRIBUTE,
+  UPDATED_AT_ATTRIBUTE,
+  PUBLISHED_AT_ATTRIBUTE,
+  CREATED_BY_ATTRIBUTE,
+  UPDATED_BY_ATTRIBUTE,
+} = require('@strapi/utils').contentTypes.constants;
 const { validateContentTypeDefinition } = require('./validator');
 
 const createContentType = (definition, { apiName, pluginName } = {}) => {
@@ -17,6 +25,15 @@ ${e.errors}
   }
 
   const createdContentType = cloneDeep(definition);
+
+  // general info
+  Object.assign(createdContentType.schema, {
+    kind: createdContentType.schema.kind || 'collectionType',
+    __schema__: pickSchema(definition.schema),
+    modelType: 'contentType',
+    modelName: definition.schema.info.singularName,
+    connection: 'default',
+  });
 
   if (apiName) {
     Object.assign(createdContentType.schema, {
@@ -42,19 +59,57 @@ ${e.errors}
     });
   }
 
-  Object.assign(createdContentType.schema, {
-    kind: createdContentType.schema.kind || 'collectionType',
-    __schema__: pickSchema(definition.schema),
-    modelType: 'contentType',
-    modelName: definition.schema.info.singularName,
-    connection: 'default',
+  Object.defineProperty(createdContentType.schema, 'privateAttributes', {
+    get() {
+      // FIXME: to fix
+      // return strapi.getModel(model.uid).privateAttributes;
+      return [];
+    },
   });
-  // Object.defineProperty(createdContentType.schema, 'privateAttributes', {
-  //   get() {
-  //     console.log('createdContentType.privateAttributes', )
-  //     return strapi.getModel(createdContentType.schema.uid).privateAttributes;
-  //   },
-  // });
+
+  // attributes
+  Object.assign(createdContentType.schema.attributes, {
+    [CREATED_AT_ATTRIBUTE]: {
+      type: 'datetime',
+      // default: () => new Date(),
+    },
+    [UPDATED_AT_ATTRIBUTE]: {
+      type: 'datetime',
+    },
+  });
+
+  if (hasDraftAndPublish(createdContentType.schema)) {
+    createdContentType.schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+      type: 'datetime',
+      configurable: false,
+      writable: true,
+      visible: false,
+    };
+  }
+
+  const isPrivate = !_.get(createdContentType.schema, 'options.populateCreatorFields', false);
+
+  createdContentType.schema.attributes[CREATED_BY_ATTRIBUTE] = {
+    type: 'relation',
+    relation: 'oneToOne',
+    target: 'strapi::user',
+    configurable: false,
+    writable: false,
+    visible: false,
+    useJoinTable: false,
+    private: isPrivate,
+  };
+
+  createdContentType.schema.attributes[UPDATED_BY_ATTRIBUTE] = {
+    type: 'relation',
+    relation: 'oneToOne',
+    target: 'strapi::user',
+    configurable: false,
+    writable: false,
+    visible: false,
+    useJoinTable: false,
+    private: isPrivate,
+  };
 
   return createdContentType;
 };

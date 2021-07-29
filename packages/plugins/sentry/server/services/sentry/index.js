@@ -2,9 +2,8 @@
 // FIXME
 /* eslint-disable import/extensions */
 const Sentry = require('@sentry/node');
-const defaultSettings = require('../config/settings.json');
 
-const createSentryService = () => {
+const createSentryService = strapi => {
   let isReady = false;
   let instance = null;
   let settings = {};
@@ -20,10 +19,7 @@ const createSentryService = () => {
       }
 
       // Retrieve user settings and merge them with the default ones
-      settings = {
-        ...defaultSettings,
-        ...strapi.plugins.sentry.config,
-      };
+      settings = strapi.config.get('plugins.sentry');
 
       try {
         // Don't init Sentry if no DSN was provided
@@ -85,4 +81,4 @@ const createSentryService = () => {
   };
 };
 
-module.exports = createSentryService();
+module.exports = ({ strapi }) => createSentryService(strapi);

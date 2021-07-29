@@ -3,8 +3,6 @@
 const { has, omit, isArray } = require('lodash/fp');
 const { getService } = require('../utils');
 
-const { syncLocalizations, syncNonLocalizedAttributes } = require('./localizations');
-
 const LOCALE_QUERY_FILTER = 'locale';
 const SINGLE_ENTRY_ACTIONS = ['findOne', 'update', 'delete'];
 const BULK_ACTIONS = ['delete'];
@@ -107,6 +105,7 @@ const decorator = service => ({
   async create(uid, opts) {
     const model = strapi.getModel(uid);
 
+    const { syncLocalizations, syncNonLocalizedAttributes } = getService('localizations');
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {
@@ -132,6 +131,7 @@ const decorator = service => ({
   async update(uid, entityId, opts) {
     const model = strapi.getModel(uid);
 
+    const { syncNonLocalizedAttributes } = getService('localizations');
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {

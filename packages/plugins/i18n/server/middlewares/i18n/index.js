@@ -1,16 +1,16 @@
 'use strict';
 
-const { getOr, get, isMatch } = require('lodash/fp');
+const { getOr, isMatch } = require('lodash/fp');
 const _ = require('lodash');
 
-module.exports = strapi => {
-  return {
+module.exports = {
+  defaults: { i18n: { enabled: true } },
+  load: {
     beforeInitialize() {
       strapi.config.middleware.load.before.unshift('i18n');
     },
-
     initialize() {
-      const routes = get('plugins.content-manager.config.routes', strapi);
+      const routes = strapi.plugins['content-manager'].routes;
       const routesToAddPolicyTo = routes.filter(
         route =>
           isMatch({ method: 'POST', path: '/collection-types/:model' }, route) ||
@@ -24,5 +24,5 @@ module.exports = strapi => {
         _.set(route, 'config.policies', policies);
       });
     },
-  };
+  },
 };

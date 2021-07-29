@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const { getOr } = require('lodash/fp');
-const pluralize = require('pluralize');
 const generator = require('@strapi/generate');
 
 const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
@@ -29,8 +28,8 @@ const getRestrictRelationsTo = (contentType = {}) => {
 };
 
 const getformattedName = (contentType = {}) => {
-  const { uid, info } = contentType;
-  const name = _.get(info, 'name') || _.upperFirst(pluralize(uid));
+  const { info } = contentType;
+  const name = _.get(info, 'displayName');
 
   return name;
 };

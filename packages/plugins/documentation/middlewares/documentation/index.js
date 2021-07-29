@@ -1,29 +1,24 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Public node modules.
 const path = require('path');
 const _ = require('lodash');
 const swaggerUi = require('swagger-ui-dist');
 const koaStatic = require('koa-static');
 
-// Variables.
 const initialRoutes = [];
 
-module.exports = strapi => {
-  return {
+module.exports = {
+  defaults: { documentation: { enabled: true } },
+  load: {
     beforeInitialize() {
       strapi.config.middleware.load.before.push('documentation');
 
-      initialRoutes.push(..._.cloneDeep(strapi.plugins.documentation.config.routes));
+      initialRoutes.push(..._.cloneDeep(strapi.plugins.documentation.routes));
     },
 
     initialize() {
       // Find the plugins routes.
-      strapi.plugins.documentation.config.routes = strapi.plugins.documentation.config.routes.map(
+      strapi.plugins.documentation.routes = strapi.plugins.documentation.routes.map(
         (route, index) => {
           if (route.handler === 'Documentation.getInfos') {
             return route;
@@ -54,5 +49,5 @@ module.exports = strapi => {
         })(ctx, next);
       });
     },
-  };
+  },
 };

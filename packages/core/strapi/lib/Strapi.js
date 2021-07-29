@@ -332,9 +332,9 @@ class Strapi {
 
     await this.container.load();
 
-    const modules = await loadModules(this);
-
     this.plugins = this.container.plugins.getAll();
+
+    const modules = await loadModules(this);
 
     this.api = modules.api;
     this.admin = modules.admin;

@@ -20,7 +20,7 @@ jest.mock('@sentry/node', () => {
 });
 
 let sentryService = require('../sentry');
-const defaultConfig = require('../../config/settings.json');
+const defaultConfig = require('../../config').default;
 
 describe('Sentry service', () => {
   beforeEach(() => {
@@ -37,7 +37,7 @@ describe('Sentry service', () => {
         info: jest.fn(),
       },
     };
-    sentryService = require('../sentry');
+    sentryService = require('..');
   });
 
   afterEach(() => {

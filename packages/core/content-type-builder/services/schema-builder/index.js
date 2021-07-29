@@ -2,6 +2,7 @@
 
 const path = require('path');
 const _ = require('lodash');
+const { capitalize } = require('lodash/fp');
 
 const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
@@ -41,7 +42,7 @@ module.exports = function createBuilder() {
       modelName: contentType.modelName,
       plugin: contentType.plugin,
       uid: contentType.uid,
-      filename: `${contentType.info.singularName}.json`,
+      filename: capitalize(`${contentType.info.singularName}.settings.json`),
       dir: path.join(strapi.dir, dir),
       schema: contentType.__schema__,
     };

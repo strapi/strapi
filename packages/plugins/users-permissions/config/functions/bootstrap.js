@@ -30,6 +30,7 @@ module.exports = async () => {
 
   await getService('users-permissions').initialize();
 
+  // TODO: adapt with new extension system
   if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
     const jwtSecret = uuid();
     _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);

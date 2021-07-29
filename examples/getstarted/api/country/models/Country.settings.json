@@ -1,6 +1,10 @@
 {
+  "kind": "collectionType",
   "collectionName": "countries",
   "info": {
+    "displayName": "country",
+    "singularName": "country",
+    "pluralName": "countries",
     "name": "country",
     "description": ""
   },

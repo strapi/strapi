@@ -80,6 +80,7 @@ ${e.errors.join('\n')}
     contentTypes: contentTypeProvider,
     policy: (...args) => policyProvider.get(...args),
     policies: policyProvider,
+    middlewares: cleanPluginServer.middlewares,
   };
 };
 

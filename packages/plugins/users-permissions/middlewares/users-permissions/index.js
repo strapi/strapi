@@ -1,14 +1,10 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Public node modules.
 const _ = require('lodash');
 
-module.exports = strapi => {
-  return {
+module.exports = {
+  defaults: { 'users-permissions': { enabled: true } },
+  load: {
     beforeInitialize() {
       strapi.config.middleware.load.before.unshift('users-permissions');
     },
@@ -36,5 +32,5 @@ module.exports = strapi => {
         });
       }
     },
-  };
+  },
 };

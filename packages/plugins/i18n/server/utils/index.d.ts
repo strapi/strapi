@@ -18,4 +18,4 @@ type S = {
   ['core-api']: typeof coreAPI;
 };
 
-export function getService<T extends keyof S>(name: T): S[T];
+export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;
