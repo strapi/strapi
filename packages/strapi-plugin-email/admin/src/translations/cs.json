@@ -1,4 +1,22 @@
 {
-  "plugin.description.long": "Odeslat e-maily.",
-  "plugin.description.short": "Odeslat e-maily."
+  "plugin.description.long": "Odesílání e-mailů.",
+  "plugin.description.short": "Odesílání e-mailů.",
+  "SettingsNav.section-label": "E-mailový plugin",
+  "SettingsNav.link.settings": "Nastavení e-mailu",
+  "Settings.title": "Nastavení e-mailu",
+  "Settings.subTitle": "Otestujte nastavení e-mailového pluginu",
+  "Settings.button.test-email": "Otestovat e-mail",
+  "Settings.notification.test.success": "Test e-mailu byl úspěšný, zkontrolujte poštovní schránku {to}",
+  "Settings.notification.test.error": "Nepodařilo se odeslat zkušební e-mail na adresu {to}",
+  "Settings.notification.config.error": "Načtení konfigurace e-mailu se nezdařilo",
+  "Settings.form.title.config": "Konfigurace",
+  "Settings.form.title.test": "Odeslání testovacího e-mailu",
+  "Settings.form.label.provider": "Poskytovatel e-mailu",
+  "Settings.form.label.defaultFrom": "Výchozí e-mailová adresa odesílatele",
+  "Settings.form.label.defaultReplyTo": "Výchozí e-mailová adresa pro odpověď",
+  "Settings.form.label.testAddress": "E-mailová adresa k testu",
+  "Settings.form.placeholder.defaultFrom": "např.: Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.form.placeholder.defaultReplyTo": "např.: Strapi <example@strapi.io>",
+  "Settings.form.placeholder.testAddress": "např.: developer@example.com",
+  "Settings.form.text.configuration": "Plugin se konfiguruje prostřednictvím souboru {file}, dokumentaci naleznete na tomto odkazu {link}."
 }
