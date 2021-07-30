@@ -1,76 +1,83 @@
 'use strict';
 
-// FIXME: needs udpate after package rename
 const { join } = require('path');
 const { promisify } = require('util');
 const fs = require('fs-extra');
 const glob = promisify(require('glob').glob);
 
-async function orderTrads({ mainTranslationFile, translationFiles }) {
-  const data = await fs.readJSON(mainTranslationFile);
+const cleanFile = async filePath => {
+  try {
+    const mainTranslationFileArray = filePath.split('/');
+    mainTranslationFileArray.splice(-1, 1);
 
-  const orderedData = Object.keys(data)
-    .sort()
-    .reduce((acc, current) => {
-      acc[current] = data[current];
+    const mainTranslationFile = join(...mainTranslationFileArray, 'en.json');
+    const mainTranslationFileJSON = await fs.readJSON(mainTranslationFile);
+    const currentTranslationFileJSON = await fs.readJSON(filePath);
+
+    const cleanedFile = Object.keys(mainTranslationFileJSON).reduce((acc, current) => {
+      if (currentTranslationFileJSON[current]) {
+        acc[current] = currentTranslationFileJSON[current];
+      }
 
       return acc;
     }, {});
 
-  await fs.writeJSON(mainTranslationFile, orderedData, { spaces: 2 });
+    await fs.writeJson(filePath, cleanedFile, { spaces: 2 });
 
-  const cleanFile = async trad => {
-    const cleanedFile = {};
-    const orderedDataKeys = Object.keys(orderedData);
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject();
+  }
+};
 
-    for (let i in orderedDataKeys) {
-      try {
-        const currentTrad = await fs.readJson(trad);
-        const currentKey = orderedDataKeys[i];
+const reorderTrads = async filePath => {
+  try {
+    const data = await fs.readJSON(filePath);
 
-        if (currentTrad[currentKey]) {
-          cleanedFile[currentKey] = currentTrad[currentKey];
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
+    const orderedData = Object.keys(data)
+      .sort()
+      .reduce((acc, current) => {
+        acc[current] = data[current];
 
-    try {
-      await fs.writeJSON(trad, cleanedFile, { spaces: 2 });
-    } catch (err) {
-      console.error(err);
-    }
-  };
+        return acc;
+      }, {});
 
-  await Promise.all(translationFiles.map(trad => cleanFile(trad)));
-}
+    await fs.writeJSON(filePath, orderedData, { spaces: 2 });
+
+    return Promise.resolve();
+  } catch (err) {
+    return Promise.reject(err);
+  }
+};
 
 async function run() {
-  const packageDirs = await glob('packages/*');
+  const corePackageDirs = await glob('packages/core/*');
+  const pluginsPackageDirs = await glob('packages/plugins/*');
+  const packageDirs = [...corePackageDirs, ...pluginsPackageDirs];
   const pathToTranslationsFolder = ['admin', 'src', 'translations'];
 
-  const pluginsWithTranslationFiles = packageDirs
-    .filter(
-      dir =>
-        (dir.startsWith('packages/strapi-plugin') || dir.startsWith('packages/strapi-admin')) &&
-        fs.existsSync(join(dir, ...pathToTranslationsFolder, 'index.js'))
-    )
-    .map(dir => {
-      const translationFiles = fs
-        .readdirSync(join(dir, ...pathToTranslationsFolder))
-        .filter(
-          file => !file.includes('.js') && !file.includes('en.json') && !file.includes('test')
-        )
-        .map(file => join(dir, ...pathToTranslationsFolder, file));
+  const translationFiles = packageDirs
+    .filter(dir => {
+      return fs.existsSync(join(dir, ...pathToTranslationsFolder, 'en.json'));
+    })
+    .reduce((acc, dir) => {
+      const files = fs.readdirSync(join(dir, ...pathToTranslationsFolder));
+      const filePaths = files
+        .map(file => {
+          return join(dir, ...pathToTranslationsFolder, file);
+        })
+        .filter(file => {
+          return file.split('.')[1] !== 'js' && !fs.lstatSync(file).isDirectory();
+        });
 
-      return {
-        translationFiles,
-        mainTranslationFile: join(dir, 'admin', 'src', 'translations', 'en.json'),
-      };
-    });
+      return [...acc, ...filePaths];
+    }, []);
 
-  await Promise.all(pluginsWithTranslationFiles.map(t => orderTrads(t)));
+  // Reorder
+  await Promise.all(translationFiles.map(reorderTrads));
+
+  // CleanFiles
+  await Promise.all(translationFiles.map(cleanFile));
 }
 
 run().catch(err => console.error(err));

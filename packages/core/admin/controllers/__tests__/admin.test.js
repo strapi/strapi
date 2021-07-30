@@ -1,5 +1,22 @@
 'use strict';
 
+jest.mock('@strapi/strapi/lib/utils/ee', () => {
+  const eeModule = () => false;
+
+  Object.assign(eeModule, {
+    features: {
+      isEnabled() {
+        return false;
+      },
+      getEnabled() {
+        return [];
+      },
+    },
+  });
+
+  return eeModule;
+});
+
 const adminController = require('../admin');
 
 describe('Admin Controller', () => {

@@ -38,14 +38,15 @@ module.exports = {
     __webpack_public_path__: 'http://localhost:4000',
     strapi: {
       backendURL: 'http://localhost:1337',
+      isEE: false,
+      features: [],
+      projectType: 'Community',
     },
     BACKEND_URL: 'http://localhost:1337',
     ADMIN_PATH: '/admin',
     NODE_ENV: 'test',
-    'process.env.STRAPI_ADMIN_ENABLED_EE_FEATURES': [],
-    STRAPI_ADMIN_ENABLED_EE_FEATURES: [],
-    'process.env.STRAPI_ADMIN_SHOW_TUTORIALS': 'false',
-    'process.env.STRAPI_ADMIN_UPDATE_NOTIFICATION': 'false',
+
+    // FIXME create a clean config file
   },
   moduleDirectories: [
     'node_modules',

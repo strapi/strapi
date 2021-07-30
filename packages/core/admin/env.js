@@ -12,7 +12,7 @@ if (fs.existsSync(dotenvFilePath)) {
 
 const STRAPI_ADMIN = /^STRAPI_ADMIN_/i;
 
-const getClientEnvironment = (useEE, options) => {
+const getClientEnvironment = options => {
   const raw = Object.keys(process.env)
     .filter(key => STRAPI_ADMIN.test(key))
     .reduce(
@@ -25,10 +25,6 @@ const getClientEnvironment = (useEE, options) => {
         ADMIN_PATH: options.adminPath,
         NODE_ENV: options.env || 'development',
         STRAPI_ADMIN_BACKEND_URL: options.backend,
-        STRAPI_ADMIN_ENABLED_EE_FEATURES: options.features,
-        STRAPI_ADMIN_PROJECT_TYPE: useEE ? 'Enterprise' : 'Community',
-        STRAPI_ADMIN_SHOW_TUTORIALS: 'true',
-        STRAPI_ADMIN_UPDATE_NOTIFICATION: 'true',
       }
     );
 

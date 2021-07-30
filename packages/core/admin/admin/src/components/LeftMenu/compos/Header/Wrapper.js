@@ -1,8 +1,6 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-import Logo from '../../../../assets/images/logo-strapi.png';
-
 const Wrapper = styled.div`
   background-color: #007eff;
   padding-left: 2rem;
@@ -22,7 +20,7 @@ const Wrapper = styled.div`
     letter-spacing: 0.2rem;
     color: $white;
 
-    background-image: url(${Logo});
+    background-image: url(${props => props.logo});
     background-repeat: no-repeat;
     background-position: left center;
     background-size: auto 2.5rem;

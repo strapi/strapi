@@ -1,6 +1,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { QueryClientProvider, QueryClient } from 'react-query';
+import { ConfigurationsContext } from '../../../contexts';
 import { fetchAppInfo, fetchCurrentUserPermissions, fetchStrapiLatestRelease } from '../utils/api';
 import packageJSON from '../../../../../package.json';
 import AuthenticatedApp from '..';
@@ -27,7 +28,9 @@ const queryClient = new QueryClient({
 
 const app = (
   <QueryClientProvider client={queryClient}>
-    <AuthenticatedApp />
+    <ConfigurationsContext.Provider value={{ showReleaseNotification: false }}>
+      <AuthenticatedApp />
+    </ConfigurationsContext.Provider>
   </QueryClientProvider>
 );
 

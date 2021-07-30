@@ -1,3 +1,4 @@
+export { default as useConfigurations } from './useConfigurations';
 export { default as useModels } from './useModels';
 export { default as useFetchPermissionsLayout } from './useFetchPermissionsLayout';
 export { default as useFetchPluginsFromMarketPlace } from './useFetchPluginsFromMarketPlace';

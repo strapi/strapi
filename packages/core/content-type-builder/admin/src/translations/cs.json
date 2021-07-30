@@ -102,8 +102,6 @@
   "form.button.save": "Uložit",
   "form.button.select-component": "Vybrat komponent",
   "from": "od",
-  "injected-components.content-manager.edit-settings-view.link.components": "Upravit komponent",
-  "injected-components.content-manager.edit-settings-view.link.content-types": "Upravit Typ obsahu",
   "menu.section.components.name.plural": "Komponenty",
   "menu.section.components.name.singular": "Komponent",
   "menu.section.models.name.plural": "Typy obsahu",

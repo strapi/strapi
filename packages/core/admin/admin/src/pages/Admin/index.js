@@ -13,6 +13,8 @@ import {
   LoadingIndicatorPage,
   useStrapiApp,
 } from '@strapi/helper-plugin';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import adminPermissions from '../../permissions';
 import Header from '../../components/Header/index';
 import NavTopRightWrapper from '../../components/NavTopRightWrapper';
@@ -24,6 +26,9 @@ import Wrapper from './Wrapper';
 import Content from './Content';
 import { createRoute } from '../../utils';
 
+const CM = lazy(() =>
+  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
+);
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
@@ -39,12 +44,7 @@ const ProfilePage = lazy(() =>
 const SettingsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
 );
-// These are internal plugins
-const CM = lazy(() =>
-  import(
-    /* webpackChunkName: "content-manager" */ '@strapi/plugin-content-manager/admin/src/pages/App'
-  )
-);
+
 const CTB = lazy(() =>
   import(
     /* webpackChunkName: "content-type-builder" */ '@strapi/plugin-content-type-builder/admin/src/pages/App'
@@ -68,7 +68,6 @@ const Admin = () => {
   // Show a notification when the current version of Strapi is not the latest one
   useReleaseNotification();
   useTrackUsage();
-  // TODO
   const { isLoading, generalSectionLinks, pluginsSectionLinks } = useMenu();
   const { menu } = useStrapiApp();
 
@@ -83,46 +82,48 @@ const Admin = () => {
   }
 
   return (
-    <Wrapper>
-      <LeftMenu
-        generalSectionLinks={generalSectionLinks}
-        pluginsSectionLinks={pluginsSectionLinks}
-      />
-      <NavTopRightWrapper>
-        {/* Injection zone not ready yet */}
-        <Logout />
-      </NavTopRightWrapper>
-      <div className="adminPageRightWrapper">
-        <Header />
-        <Content>
-          <Suspense fallback={<LoadingIndicatorPage />}>
-            <Switch>
-              <Route path="/" component={HomePage} exact />
-              <Route path="/me" component={ProfilePage} exact />
-              <Route path="/plugins/content-manager" component={CM} />
-              <Route path="/plugins/content-type-builder" component={CTB} />
-              <Route path="/plugins/upload" component={Upload} />
-              {routes}
-              <Route path="/settings/:settingId" component={SettingsPage} />
-              <Route path="/settings" component={SettingsPage} exact />
-              <Route path="/marketplace">
-                <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                  <MarketplacePage />
-                </CheckPagePermissions>
-              </Route>
-              <Route path="/list-plugins" exact>
-                <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
-                  <InstalledPluginsPage />
-                </CheckPagePermissions>
-              </Route>
-              <Route path="/404" component={NotFoundPage} />
-              <Route path="" component={NotFoundPage} />
-            </Switch>
-          </Suspense>
-        </Content>
-      </div>
-      <Onboarding />
-    </Wrapper>
+    <DndProvider backend={HTML5Backend}>
+      <Wrapper>
+        <LeftMenu
+          generalSectionLinks={generalSectionLinks}
+          pluginsSectionLinks={pluginsSectionLinks}
+        />
+        <NavTopRightWrapper>
+          <Logout />
+        </NavTopRightWrapper>
+        <div className="adminPageRightWrapper">
+          <Header />
+          <Content>
+            <Suspense fallback={<LoadingIndicatorPage />}>
+              <Switch>
+                <Route path="/" component={HomePage} exact />
+                <Route path="/me" component={ProfilePage} exact />
+
+                <Route path="/content-manager" component={CM} />
+                <Route path="/plugins/content-type-builder" component={CTB} />
+                <Route path="/plugins/upload" component={Upload} />
+                {routes}
+                <Route path="/settings/:settingId" component={SettingsPage} />
+                <Route path="/settings" component={SettingsPage} exact />
+                <Route path="/marketplace">
+                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                    <MarketplacePage />
+                  </CheckPagePermissions>
+                </Route>
+                <Route path="/list-plugins" exact>
+                  <CheckPagePermissions permissions={adminPermissions.marketplace.main}>
+                    <InstalledPluginsPage />
+                  </CheckPagePermissions>
+                </Route>
+                <Route path="/404" component={NotFoundPage} />
+                <Route path="" component={NotFoundPage} />
+              </Switch>
+            </Suspense>
+          </Content>
+        </div>
+        <Onboarding />
+      </Wrapper>
+    </DndProvider>
   );
 };
 

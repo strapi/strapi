@@ -3,7 +3,8 @@
 const INVALID_DSN = 'an_invalid_dsn';
 const VALID_DSN = 'a_valid_dsn';
 const captureException = jest.fn();
-
+// FIXME
+/* eslint-disable import/extensions */
 jest.mock('@sentry/node', () => {
   return {
     init(options = {}) {

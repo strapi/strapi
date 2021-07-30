@@ -8,7 +8,7 @@
     "build"
   ],
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "author": {
@@ -32,7 +32,7 @@
     "test": "echo \"no tests yet\""
   },
   "peerDependencies": {
-    "immer": "^8.0.1",
+    "immer": "9.0.5",
     "qs": "6.10.1",
     "react-select": "^4.0.2"
   },
@@ -77,8 +77,8 @@
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "moment": "^2.29.1",
-    "react": "^16.14.0",
-    "react-dom": "^16.9.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",

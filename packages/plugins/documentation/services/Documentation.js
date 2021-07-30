@@ -10,6 +10,8 @@ const path = require('path');
 const _ = require('lodash');
 const moment = require('moment');
 const pathToRegexp = require('path-to-regexp');
+// FIXME
+/* eslint-disable import/extensions */
 const defaultSettings = require('../config/settings.json');
 const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');

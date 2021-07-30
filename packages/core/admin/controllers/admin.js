@@ -4,6 +4,10 @@ const execa = require('execa');
 const _ = require('lodash');
 const { getService } = require('../utils');
 
+// FIXME
+// eslint-disable-next-line node/no-extraneous-require
+const ee = require('@strapi/strapi/lib/utils/ee');
+
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 
 /**
@@ -18,6 +22,18 @@ const isValidPluginName = plugin => {
  */
 
 module.exports = {
+  // TODO very temporary to check the switch ee/ce
+  // When removing this we need to update the /admin/src/index.js file
+  // where we set the strapi.window.isEE value
+  async getProjectType() {
+    // FIXME
+    try {
+      return { data: { isEE: strapi.EE, features: ee.features.getEnabled() } };
+    } catch (err) {
+      return { data: { isEE: false, features: [] } };
+    }
+  },
+
   async init() {
     const uuid = strapi.config.get('uuid', false);
     const hasAdmin = await getService('user').exists();

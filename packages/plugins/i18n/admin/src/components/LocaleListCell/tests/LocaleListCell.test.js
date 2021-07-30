@@ -1,5 +1,6 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { useSelector } from 'react-redux';
 import LocaleListCell from '../LocaleListCell';
 
 jest.mock('@buffetjs/styles', () => ({
@@ -9,6 +10,10 @@ jest.mock('@buffetjs/styles', () => ({
 jest.mock('@buffetjs/core', () => ({
   Padded: props => <div {...props} />,
   Text: props => <p {...props} />,
+}));
+
+jest.mock('react-redux', () => ({
+  useSelector: jest.fn(() => []),
 }));
 
 describe('LocaleListCell', () => {
@@ -39,6 +44,8 @@ describe('LocaleListCell', () => {
         isDefault: false,
       },
     ];
+
+    useSelector.mockImplementation(() => locales);
 
     const locale = 'en';
     const localizations = [{ locale: 'fr-FR' }, { locale: 'ar' }];
@@ -78,6 +85,8 @@ describe('LocaleListCell', () => {
       },
     ];
 
+    useSelector.mockImplementation(() => locales);
+
     const locale = 'en';
     const localizations = [{ locale: 'ar' }];
 
@@ -115,6 +124,7 @@ describe('LocaleListCell', () => {
         isDefault: false,
       },
     ];
+    useSelector.mockImplementation(() => locales);
 
     const locale = 'fr-FR';
     const localizations = [{ locale: 'en' }, { locale: 'ar' }];

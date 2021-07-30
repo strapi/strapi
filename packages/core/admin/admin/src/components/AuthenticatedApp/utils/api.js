@@ -1,5 +1,5 @@
 import axios from 'axios';
-import axiosInstance from '../../../utils/axiosInstance';
+import { axiosInstance } from '../../../core/utils';
 import packageJSON from '../../../../../package.json';
 
 const strapiVersion = packageJSON.version;

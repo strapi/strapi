@@ -99,7 +99,8 @@
       }
     },
     "slug": {
-      "type": "uid"
+      "type": "uid",
+      "targetField": "city"
     },
     "notrepeat_req": {
       "type": "component",

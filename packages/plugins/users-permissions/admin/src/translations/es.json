@@ -31,8 +31,6 @@
   "Policies.InputSelect.label": "Permita que se realice esta acción para:",
   "Policies.header.hint": "Seleccione las acciones de la aplicación o las acciones del plugin y haga clic en el icono del engranaje para ver la ruta vinculada",
   "Policies.header.title": "Ajustes avanzados",
-  "PopUpForm.Email.email_confirmation.options.message.placeholder": "Haga clic en el siguiente enlace para confirmar su cuenta",
-  "PopUpForm.Email.email_confirmation.options.object.placeholder": "Confirma tu dirección de correo electrónico para %APP_NAME%",
   "PopUpForm.Email.email_templates.inputDescription": "Si no estás seguro de cómo usar las variables, {link}",
   "PopUpForm.Email.link.documentation": "consulte nuestra documentación.",
   "PopUpForm.Email.options.from.email.label": "Email del remitente",
