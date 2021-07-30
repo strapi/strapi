@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "3.6.5",
+  "version": "4.0.0-next.0",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "main": "./lib/index.js",
@@ -28,7 +28,7 @@
   },
   "license": "SEE LICENSE IN LICENSE",
   "dependencies": {
-    "winston": "3.3.3",
-    "lodash": "4.17.21"
+    "lodash": "4.17.21",
+    "winston": "3.3.3"
   }
 }
