@@ -37,6 +37,20 @@ const wrapParams = async (params = {}, ctx = {}) => {
     };
   }
 
+  // TODO: remove when the _locale is renamed to locale
+  if (has('_locale', params)) {
+    if (params['_locale'] === 'all') {
+      return omit('_locale', params);
+    }
+
+    return {
+      ...omit('_locale', params),
+      filters: {
+        $and: [{ locale: params['_locale'] }].concat(params.filters || []),
+      },
+    };
+  }
+
   const entityDefinedById = paramsContain('id', params) && SINGLE_ENTRY_ACTIONS.includes(action);
   const entitiesDefinedByIds = paramsContain('id.$in', params) && BULK_ACTIONS.includes(action);
 
