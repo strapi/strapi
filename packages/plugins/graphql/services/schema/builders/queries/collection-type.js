@@ -1,18 +1,11 @@
 'use strict';
 
 const { extendType } = require('nexus');
-const { pipe } = require('lodash/fp');
 
 const { actionExists } = require('../../../old/utils');
 const { utils, args } = require('../../../types');
-const {
-  getUniqueScalarAttributes,
-  scalarAttributesToFiltersMap,
-  transformArgs,
-} = require('../utils');
+const { transformArgs } = require('../utils');
 const { buildQueriesResolvers } = require('../../resolvers');
-
-const getUniqueAttributesFiltersMap = pipe(getUniqueScalarAttributes, scalarAttributesToFiltersMap);
 
 module.exports = ({ strapi }) => {
   const buildCollectionTypeQueries = contentType => {
@@ -32,7 +25,7 @@ module.exports = ({ strapi }) => {
    * @param contentType
    */
   const addFindOneQuery = (t, contentType) => {
-    const { uid, attributes } = contentType;
+    const { uid } = contentType;
 
     const findOneQueryName = utils.getFindOneQueryName(contentType);
     const responseTypeName = utils.getEntityResponseName(contentType);
@@ -42,15 +35,17 @@ module.exports = ({ strapi }) => {
       return;
     }
 
+    // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for findOne queries
-    const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
+    // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
 
     t.field(findOneQueryName, {
       type: responseTypeName,
 
       args: {
-        id: utils.getScalarFilterInputTypeName('ID'),
-        ...uniqueAttributes,
+        id: 'ID',
+        // todo[v4]: Don't allow to filter using every unique attributes for now
+        // ...uniqueAttributes,
       },
 
       async resolve(source, args) {
