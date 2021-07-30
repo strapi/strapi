@@ -101,7 +101,7 @@ export default {
       pluginLogo,
     });
   },
-  boot() {},
+  bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {

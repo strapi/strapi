@@ -3,7 +3,7 @@
 const transformAttribute = attribute => {
   switch (attribute.type) {
     case 'media': {
-      // convert to relation
+      // TODO: handle a filter on field
       return {
         type: 'relation',
         relation: attribute.single === true ? 'morphOne' : 'morphMany',
@@ -11,9 +11,6 @@ const transformAttribute = attribute => {
         morphBy: 'related',
       };
     }
-    // case 'component': {
-    // TODO: transform into relation here instead of in the meta ?
-    // }
     default: {
       return attribute;
     }

@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const utils = require('@strapi/utils');
-const { isMediaAttribute } = require('@strapi/utils').contentTypes;
 
 const hasComponent = model => {
   const compoKeys = Object.keys(model.attributes || {}).filter(key => {
@@ -14,7 +13,7 @@ const hasComponent = model => {
 
 const isConfigurable = attribute => _.get(attribute, 'configurable', true);
 
-const isRelation = attribute => _.has(attribute, 'target');
+const isRelation = attribute => attribute.type === 'relation';
 
 /**
  * Formats a component's attributes
@@ -39,10 +38,7 @@ const formatAttributes = model => {
  * @param {Object} context - function context
  * @param {Object} context.component - the associated component
  */
-const formatAttribute = (key, attribute, { model }) => {
-  // FIXME: remove
-  // format relations
-
+const formatAttribute = (key, attribute) => {
   const { configurable, required, autoPopulate, pluginOptions } = attribute;
 
   if (attribute.type === 'media') {
@@ -65,7 +61,7 @@ const formatAttribute = (key, attribute, { model }) => {
       configurable: configurable === false ? false : undefined,
       private: attribute.private ? true : false,
       pluginOptions,
-      // FIXME: remove
+      // TODO: remove
       autoPopulate,
     };
   }

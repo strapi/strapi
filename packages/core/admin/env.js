@@ -25,8 +25,6 @@ const getClientEnvironment = options => {
         ADMIN_PATH: options.adminPath,
         NODE_ENV: options.env || 'development',
         STRAPI_ADMIN_BACKEND_URL: options.backend,
-        STRAPI_ADMIN_SHOW_TUTORIALS: 'true',
-        STRAPI_ADMIN_UPDATE_NOTIFICATION: 'true',
       }
     );
 

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { QueryClientProvider, QueryClient } from 'react-query';
 import { LibraryProvider, StrapiAppProvider } from '@strapi/helper-plugin';
 import { Provider } from 'react-redux';
-import { AdminContext } from '../../contexts';
+import { AdminContext, ConfigurationsContext } from '../../contexts';
 import LanguageProvider from '../LanguageProvider';
 import AutoReloadOverlayBlockerProvider from '../AutoReloadOverlayBlockerProvider';
 import Notifications from '../Notifications';
@@ -18,6 +18,7 @@ const queryClient = new QueryClient({
 });
 
 const Providers = ({
+  authLogo,
   children,
   components,
   fields,
@@ -25,37 +26,45 @@ const Providers = ({
   getPlugin,
   localeNames,
   menu,
+  menuLogo,
   messages,
   plugins,
   runHookParallel,
   runHookSeries,
   runHookWaterfall,
   settings,
+  showReleaseNotification,
+  showTutorials,
+
   store,
 }) => {
   return (
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <AdminContext.Provider value={{ getAdminInjectedComponents }}>
-          <StrapiAppProvider
-            getPlugin={getPlugin}
-            menu={menu}
-            plugins={plugins}
-            runHookParallel={runHookParallel}
-            runHookWaterfall={runHookWaterfall}
-            runHookSeries={runHookSeries}
-            settings={settings}
+          <ConfigurationsContext.Provider
+            value={{ authLogo, menuLogo, showReleaseNotification, showTutorials }}
           >
-            <LibraryProvider components={components} fields={fields}>
-              <LanguageProvider messages={messages} localeNames={localeNames}>
-                <AutoReloadOverlayBlockerProvider>
-                  <OverlayBlocker>
-                    <Notifications>{children}</Notifications>
-                  </OverlayBlocker>
-                </AutoReloadOverlayBlockerProvider>
-              </LanguageProvider>
-            </LibraryProvider>
-          </StrapiAppProvider>
+            <StrapiAppProvider
+              getPlugin={getPlugin}
+              menu={menu}
+              plugins={plugins}
+              runHookParallel={runHookParallel}
+              runHookWaterfall={runHookWaterfall}
+              runHookSeries={runHookSeries}
+              settings={settings}
+            >
+              <LibraryProvider components={components} fields={fields}>
+                <LanguageProvider messages={messages} localeNames={localeNames}>
+                  <AutoReloadOverlayBlockerProvider>
+                    <OverlayBlocker>
+                      <Notifications>{children}</Notifications>
+                    </OverlayBlocker>
+                  </AutoReloadOverlayBlockerProvider>
+                </LanguageProvider>
+              </LibraryProvider>
+            </StrapiAppProvider>
+          </ConfigurationsContext.Provider>
         </AdminContext.Provider>
       </Provider>
     </QueryClientProvider>
@@ -63,6 +72,7 @@ const Providers = ({
 };
 
 Providers.propTypes = {
+  authLogo: PropTypes.oneOfType([PropTypes.string, PropTypes.any]).isRequired,
   children: PropTypes.element.isRequired,
   components: PropTypes.object.isRequired,
   fields: PropTypes.object.isRequired,
@@ -81,12 +91,15 @@ Providers.propTypes = {
       Component: PropTypes.func,
     })
   ).isRequired,
+  menuLogo: PropTypes.oneOfType([PropTypes.string, PropTypes.any]).isRequired,
   messages: PropTypes.object.isRequired,
   plugins: PropTypes.object.isRequired,
   runHookParallel: PropTypes.func.isRequired,
   runHookWaterfall: PropTypes.func.isRequired,
   runHookSeries: PropTypes.func.isRequired,
   settings: PropTypes.object.isRequired,
+  showReleaseNotification: PropTypes.bool.isRequired,
+  showTutorials: PropTypes.bool.isRequired,
   store: PropTypes.object.isRequired,
 };
 

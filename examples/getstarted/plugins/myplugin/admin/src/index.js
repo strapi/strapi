@@ -2,6 +2,8 @@ import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 
+import App from './pages/App';
+
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
@@ -15,7 +17,7 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'My plugin',
       },
-      Component: () => 'My plugin',
+      Component: App,
       permissions: [],
     });
     app.registerPlugin({
@@ -27,7 +29,7 @@ export default {
       name,
     });
   },
-  boot() {},
+  bootstrap() {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
       locales.map(locale => {

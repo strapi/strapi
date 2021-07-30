@@ -1,11 +1,16 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
+import merge from 'lodash/merge';
 import pick from 'lodash/pick';
+import isFunction from 'lodash/isFunction';
 import invariant from 'invariant';
+import { Helmet } from 'react-helmet';
 import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import App from './pages/App';
+import AuthLogo from './assets/images/logo_strapi_auth.png';
+import MenuLogo from './assets/images/logo_strapi_menu.png';
 import Providers from './components/Providers';
 import Theme from './components/Theme';
 import languageNativeNames from './translations/languageNativeNames';
@@ -16,11 +21,23 @@ import {
   MUTATE_SINGLE_TYPES_LINKS,
 } from './exposedHooks';
 import injectionZones from './injectionZones';
+import favicon from './favicon.ico';
 import themes from './themes';
 
 class StrapiApp {
-  constructor({ appPlugins, library, locales, middlewares, reducers }) {
-    this.appLocales = ['en', ...locales.filter(loc => loc !== 'en')];
+  constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
+    this.customConfigurations = adminConfig.config;
+    this.customBootstrapConfiguration = adminConfig.bootstrap;
+    this.configurations = {
+      authLogo: AuthLogo,
+      head: { favicon },
+      locales: ['en'],
+      menuLogo: MenuLogo,
+      notifications: { releases: true },
+      theme: themes,
+      translations: {},
+      tutorials: true,
+    };
     this.appPlugins = appPlugins || {};
     this.library = library;
     this.middlewares = middlewares;
@@ -141,31 +158,80 @@ class StrapiApp {
     });
   };
 
-  async boot() {
+  async bootstrap() {
     Object.keys(this.appPlugins).forEach(plugin => {
-      const boot = this.appPlugins[plugin].boot;
+      const bootstrap = this.appPlugins[plugin].bootstrap;
 
-      if (boot) {
-        boot({
+      if (bootstrap) {
+        bootstrap({
           addSettingsLink: this.addSettingsLink,
           addSettingsLinks: this.addSettingsLinks,
           getPlugin: this.getPlugin,
           injectContentManagerComponent: this.injectContentManagerComponent,
+          injectAdminComponent: this.injectAdminComponent,
           registerHook: this.registerHook,
         });
       }
     });
+
+    if (isFunction(this.customBootstrapConfiguration)) {
+      this.customBootstrapConfiguration({
+        addComponents: this.addComponents,
+        addFields: this.addFields,
+        addMenuLink: this.addMenuLink,
+        addReducers: this.addReducers,
+        addSettingsLink: this.addSettingsLink,
+        addSettingsLinks: this.addSettingsLinks,
+        getPlugin: this.getPlugin,
+        injectContentManagerComponent: this.injectContentManagerComponent,
+        injectAdminComponent: this.injectAdminComponent,
+        registerHook: this.registerHook,
+      });
+    }
   }
 
   bootstrapAdmin = async () => {
+    await this.createCustomConfigurations();
+
     this.createHook(INJECT_COLUMN_IN_TABLE);
     this.createHook(MUTATE_COLLECTION_TYPES_LINKS);
     this.createHook(MUTATE_SINGLE_TYPES_LINKS);
     this.createHook(MUTATE_EDIT_VIEW_LAYOUT);
 
-    await this.loadAdminTrads();
-
     return Promise.resolve();
+  };
+
+  createCustomConfigurations = async () => {
+    if (this.customConfigurations?.locales) {
+      this.configurations.locales = [
+        'en',
+        ...this.customConfigurations.locales?.filter(loc => loc !== 'en'),
+      ];
+    }
+
+    if (this.customConfigurations?.auth?.logo) {
+      this.configurations.authLogo = this.customConfigurations.auth.logo;
+    }
+
+    if (this.customConfigurations?.menu?.logo) {
+      this.configurations.menuLogo = this.customConfigurations.menu.logo;
+    }
+
+    if (this.customConfigurations?.head?.favicon) {
+      this.configurations.head.favicon = this.customConfigurations.head.favicon;
+    }
+
+    if (this.customConfigurations?.theme) {
+      this.configurations.theme = merge(this.configurations.theme, this.customConfigurations.theme);
+    }
+
+    if (this.customConfigurations?.notifications?.releases !== undefined) {
+      this.configurations.notifications.releases = this.customConfigurations.notifications.releases;
+    }
+
+    if (this.customConfigurations?.tutorials !== undefined) {
+      this.configurations.tutorials = this.customConfigurations.tutorials;
+    }
   };
 
   createHook = name => {
@@ -235,34 +301,57 @@ class StrapiApp {
     this.admin.injectionZones.contentManager[containerName][blockName].push(component);
   };
 
+  injectAdminComponent = (containerName, blockName, component) => {
+    invariant(
+      this.admin.injectionZones.admin[containerName]?.[blockName],
+      `The ${containerName} ${blockName} zone is not defined in the admin`
+    );
+    invariant(component, 'A Component must be provided');
+
+    this.admin.injectionZones.admin[containerName][blockName].push(component);
+  };
+
+  /**
+   * Load the admin translations
+   * @returns {Object} The imported admin translations
+   */
   async loadAdminTrads() {
-    const arrayOfPromises = this.appLocales.map(locale => {
+    const arrayOfPromises = this.configurations.locales.map(locale => {
       return import(/* webpackChunkName: "[request]" */ `./translations/${locale}.json`)
         .then(({ default: data }) => {
           return { data, locale };
         })
         .catch(() => {
-          return { data: {}, locale };
+          return { data: null, locale };
         });
     });
     const adminLocales = await Promise.all(arrayOfPromises);
 
-    this.translations = adminLocales.reduce((acc, current) => {
-      acc[current.locale] = current.data;
+    const translations = adminLocales.reduce((acc, current) => {
+      if (current.data) {
+        acc[current.locale] = current.data;
+      }
 
       return acc;
     }, {});
 
-    return Promise.resolve();
+    return translations;
   }
 
+  /**
+   * Load the application's translations and merged the custom translations
+   * with the default ones.
+   *
+   */
   async loadTrads() {
+    const adminTranslations = await this.loadAdminTrads();
+
     const arrayOfPromises = Object.keys(this.appPlugins)
       .map(plugin => {
         const registerTrads = this.appPlugins[plugin].registerTrads;
 
         if (registerTrads) {
-          return registerTrads({ locales: this.appLocales });
+          return registerTrads({ locales: this.configurations.locales });
         }
 
         return null;
@@ -284,14 +373,17 @@ class StrapiApp {
       return acc;
     }, {});
 
-    this.translations = Object.keys(this.translations).reduce((acc, current) => {
+    const translations = this.configurations.locales.reduce((acc, current) => {
       acc[current] = {
-        ...this.translations[current],
+        ...adminTranslations[current],
         ...(mergedTrads[current] || {}),
+        ...this.customConfigurations?.translations?.[current],
       };
 
       return acc;
     }, {});
+
+    this.configurations.translations = translations;
 
     return Promise.resolve();
   }
@@ -323,7 +415,7 @@ class StrapiApp {
 
   render() {
     const store = this.createStore();
-    const localeNames = pick(languageNativeNames, this.appLocales);
+    const localeNames = pick(languageNativeNames, this.configurations.locales || []);
 
     const {
       components: { components },
@@ -331,15 +423,17 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <Theme theme={themes}>
+      <Theme theme={this.configurations.theme}>
         <Providers
+          authLogo={this.configurations.authLogo}
           components={components}
           fields={fields}
           localeNames={localeNames}
           getAdminInjectedComponents={this.getAdminInjectedComponents}
           getPlugin={this.getPlugin}
-          messages={this.translations}
+          messages={this.configurations.translations}
           menu={this.menu}
+          menuLogo={this.configurations.menuLogo}
           plugins={this.plugins}
           runHookParallel={this.runHookParallel}
           runHookWaterfall={(name, initialValue, async = false) => {
@@ -347,16 +441,29 @@ class StrapiApp {
           }}
           runHookSeries={this.runHookSeries}
           settings={this.settings}
+          showTutorials={this.configurations.tutorials}
+          showReleaseNotification={this.configurations.notifications.releases}
           store={store}
         >
-          <BrowserRouter basename={basename}>
-            <App store={store} />
-          </BrowserRouter>
+          <>
+            <Helmet
+              link={[
+                {
+                  rel: 'icon',
+                  type: 'image/png',
+                  href: this.configurations.head.favicon,
+                },
+              ]}
+            />
+            <BrowserRouter basename={basename}>
+              <App store={store} />
+            </BrowserRouter>
+          </>
         </Providers>
       </Theme>
     );
   }
 }
 
-export default ({ appPlugins, library, locales, middlewares, reducers }) =>
-  new StrapiApp({ appPlugins, library, locales, middlewares, reducers });
+export default ({ adminConfig = {}, appPlugins, library, middlewares, reducers }) =>
+  new StrapiApp({ adminConfig, appPlugins, library, middlewares, reducers });

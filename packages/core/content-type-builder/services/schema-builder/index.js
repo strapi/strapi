@@ -106,10 +106,11 @@ function createSchemaBuilder({ components, contentTypes }) {
             private: isPrivate === true ? true : undefined,
           };
 
-          if (!this.contentTypes.has(target)) {
+          if (target && !this.contentTypes.has(target)) {
             throw new Error(`target: ${target} does not exist`);
           }
 
+          // FIXME: this will create inversion of inversedBy & mappedBy fields
           if (
             ['oneToOne', 'manyToOne', 'manyToMany'].includes(relation) &&
             !_.isNil(targetAttribute)

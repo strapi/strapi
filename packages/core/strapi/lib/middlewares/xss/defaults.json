@@ -1,6 +1,0 @@
-{
-  "xss": {
-    "enabled": false,
-    "mode": "block"
-  }
-}

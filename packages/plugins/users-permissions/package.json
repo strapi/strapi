@@ -14,12 +14,6 @@
     "test": "echo \"no tests yet\""
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.5",
-    "@buffetjs/custom": "3.3.5",
-    "@buffetjs/hooks": "3.3.5",
-    "@buffetjs/icons": "3.3.5",
-    "@buffetjs/styles": "3.3.5",
-    "@buffetjs/utils": "3.3.5",
     "@purest/providers": "^1.0.2",
     "@strapi/helper-plugin": "3.6.5",
     "@strapi/utils": "3.6.5",
@@ -29,8 +23,8 @@
     "koa2-ratelimit": "^0.9.0",
     "lodash": "4.17.21",
     "purest": "3.1.0",
-    "react": "^16.14.0",
-    "react-dom": "^16.9.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-intl": "5.20.2",
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",

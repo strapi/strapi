@@ -4,6 +4,8 @@ import { createStore, combineReducers } from 'redux';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { Provider } from 'react-redux';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
 import { render, screen } from '@testing-library/react';
 import ContentManagerApp from '..';
 import cmReducers from '../../../../reducers';
@@ -86,11 +88,13 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager');
 
     const { container } = render(
-      <Provider store={store}>
-        <Router history={history}>
-          <ContentManagerApp />
-        </Router>
-      </Provider>
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <Router history={history}>
+            <ContentManagerApp />
+          </Router>
+        </Provider>
+      </DndProvider>
     );
 
     expect(screen.getByText('Home page')).toBeVisible();
@@ -443,11 +447,13 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager');
 
     render(
-      <Provider store={store}>
-        <Router history={history}>
-          <ContentManagerApp />
-        </Router>
-      </Provider>
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <Router history={history}>
+            <ContentManagerApp />
+          </Router>
+        </Provider>
+      </DndProvider>
     );
 
     expect(history.location.pathname).toEqual('/content-manager/homepage');
@@ -480,11 +486,13 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager/collectionType/category');
 
     render(
-      <Provider store={store}>
-        <Router history={history}>
-          <ContentManagerApp />
-        </Router>
-      </Provider>
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <Router history={history}>
+            <ContentManagerApp />
+          </Router>
+        </Provider>
+      </DndProvider>
     );
 
     expect(history.location.pathname).toEqual('/content-manager/403');
@@ -510,11 +518,13 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager/collectionType/category');
 
     render(
-      <Provider store={store}>
-        <Router history={history}>
-          <ContentManagerApp />
-        </Router>
-      </Provider>
+      <DndProvider backend={HTML5Backend}>
+        <Provider store={store}>
+          <Router history={history}>
+            <ContentManagerApp />
+          </Router>
+        </Provider>
+      </DndProvider>
     );
 
     expect(history.location.pathname).toEqual('/content-manager/no-content-types');
