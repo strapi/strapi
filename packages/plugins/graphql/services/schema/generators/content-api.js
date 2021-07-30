@@ -57,9 +57,6 @@ module.exports = strapi => {
             .where(({ config: { kind } }) => ['types', 'components'].includes(kind))
             .map(prop('name'));
 
-          console.log('members for GenericMorph');
-          console.log(members);
-
           t.members(...members);
         },
       }),
@@ -94,9 +91,6 @@ module.exports = strapi => {
             definition(t) {
               // const members = backLinks.map(prop('definition'));
               const members = target || ['GenericMorph'];
-
-              console.log('members for ', contentType.uid, attributeName);
-              console.log(members);
 
               t.members(...members);
             },

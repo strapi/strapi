@@ -78,7 +78,6 @@ module.exports = () => {
           transformedArgs
         );
 
-        console.log(value);
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
     });
