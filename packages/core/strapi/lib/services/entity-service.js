@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { has, pick, omit } = require('lodash/fp');
+const { has, pick, omit, prop } = require('lodash/fp');
 const delegate = require('delegates');
 
 const {
@@ -78,6 +78,10 @@ const transformParamsToQuery = (uid, params = {}) => {
     publicationState,
   } = params;
 
+  if (params._q) {
+    query._q = params._q;
+  }
+
   if (page) {
     query.page = Number(page);
   }
@@ -108,7 +112,7 @@ const transformParamsToQuery = (uid, params = {}) => {
 
   if (populate) {
     const { populate } = params;
-    query.populate = _.castArray(populate);
+    query.populate = typeof populate === 'object' ? populate : _.castArray(populate);
   }
 
   // TODO: move to layer above ?
@@ -247,16 +251,16 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
 
-    const entity = await db.query(uid).create({
+    let entity = await db.query(uid).create({
       ...query,
       data: Object.assign(omitComponentData(model, validData), componentData),
     });
 
-    // TODO: implement files outside of the entity service
-    // if (files && Object.keys(files).length > 0) {
-    //   await this.uploadFiles(entry, files, { model });
-    //   entry = await this.findOne({ params: { id: entry.id } }, { model });
-    // }
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, entity, files);
+      entity = await this.findOne(uid, entity.id, { params });
+    }
 
     this.emitEvent(uid, ENTRY_CREATE, entity);
 
@@ -281,17 +285,17 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // TODO: wrap in transaction
     const componentData = await updateComponents(uid, entityToUpdate, validData);
 
-    const entity = await db.query(uid).update({
+    let entity = await db.query(uid).update({
       ...query,
       where: { id: entityId },
       data: Object.assign(omitComponentData(model, validData), componentData),
     });
 
-    // TODO: implement files outside of the entity service
-    // if (files && Object.keys(files).length > 0) {
-    //   await this.uploadFiles(entry, files, { model });
-    //   entry = await this.findOne({ params: { id: entry.id } }, { model });
-    // }
+    // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    if (files && Object.keys(files).length > 0) {
+      await this.uploadFiles(uid, entity, files);
+      entity = await this.findOne(uid, entity.id, { params });
+    }
 
     this.emitEvent(uid, ENTRY_UPDATE, entity);
 
@@ -325,47 +329,36 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).deleteMany(query);
   },
-
-  // TODO: Implement search features
-  async search(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, { uid, action: 'search' });
-
-    return [];
-
-    // return db.query(uid).search(params, populate);
-  },
-
-  async searchWithRelationCounts(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, {
-      uid,
-      action: 'searchWithRelationCounts',
-    });
-
-    return [];
-
-    // return db.query(uid).searchWithRelationCounts(params, populate);
-  },
-
-  async searchPage(uid, opts) {
-    const { params, populate } = await this.wrapOptions(opts, { uid, action: 'searchPage' });
-
-    return [];
-
-    // return db.query(uid).searchPage(params, populate);
-  },
-
-  async countSearch(uid, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'countSearch' });
-
-    return [];
-
-    // return db.query(uid).countSearch(params);
-  },
 });
+
+// components can have nested compos so this must be recursive
+const createComponent = async (uid, data) => {
+  const model = strapi.getModel(uid);
+
+  const componentData = await createComponents(uid, data);
+
+  return await strapi.query(uid).create({
+    data: Object.assign(omitComponentData(model, data), componentData),
+  });
+};
+
+// components can have nested compos so this must be recursive
+const updateComponent = async (uid, componentToUpdate, data) => {
+  const model = strapi.getModel(uid);
+
+  const componentData = await updateComponents(uid, componentToUpdate, data);
+
+  return await strapi.query(uid).update({
+    where: {
+      id: componentToUpdate.id,
+    },
+    data: Object.assign(omitComponentData(model, data), componentData),
+  });
+};
 
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
@@ -395,60 +388,53 @@ const createComponents = async (uid, data) => {
         }
 
         const components = await Promise.all(
-          componentValue.map(value => {
-            return strapi.query(componentUID).create({ data: value });
-          })
+          componentValue.map(value => createComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.map(({ id }, idx) => {
-          // TODO: add & support pivot data in DB
-          return id;
-        });
+        // TODO: add order
+        componentBody[attributeName] = components.map(({ id }) => id);
       } else {
-        const component = await strapi.query(componentUID).create({ data: componentValue });
-
-        // TODO: add & support pivot data in DB
+        const component = await createComponent(componentUID, componentValue);
         componentBody[attributeName] = component.id;
       }
 
       continue;
     }
 
-    // if (attribute.type === 'dynamiczone') {
+    if (attribute.type === 'dynamiczone') {
+      const dynamiczoneValues = data[attributeName];
 
-    //   const dynamiczoneValues = data[attributeName];
+      if (!Array.isArray(dynamiczoneValues)) {
+        throw new Error('Expected an array to create repeatable component');
+      }
 
-    //   if (!Array.isArray(dynamiczoneValues)) {
-    //     throw new Error('Expected an array to create repeatable component');
-    //   }
+      componentBody[attributeName] = await Promise.all(
+        dynamiczoneValues.map(async value => {
+          const { id } = await createComponent(value.__component, value);
+          return { id, __component: value.__component };
+        })
+      );
 
-    //   const components = await Promise.all(
-    //     dynamiczoneValues.map(value => {
-    //       return strapi.query(value.__component).create({ data: value });
-    //     })
-    //   );
-
-    //   componentBody[attributeName] = components.map(({ id }, idx) => {
-    //     // TODO: add & support pivot data in DB
-    //     return id;
-    //   });
-
-    //   continue;
-    // }
+      continue;
+    }
   }
 
   return componentBody;
 };
 
 const updateOrCreateComponent = (componentUID, value) => {
+  if (value === null) {
+    return null;
+  }
+
   // update
   if (has('id', value)) {
     // TODO: verify the compo is associated with the entity
-    return strapi.query(componentUID).update({ where: { id: value.id }, data: value });
+    return updateComponent(componentUID, { id: value.id }, value);
   }
 
   // create
-  return strapi.query(componentUID).create({ data: value });
+  return createComponent(componentUID, value);
 };
 
 /*
@@ -470,74 +456,145 @@ const updateComponents = async (uid, entityToUpdate, data) => {
     if (attribute.type === 'component') {
       const { component: componentUID, repeatable = false } = attribute;
 
-      const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
       const componentValue = data[attributeName];
 
-      // TODO: diff prev & new
-
-      // make diff between prev ids & data ids
-      if (componentValue === null) {
-        continue;
-      }
+      await deleteOldComponents(uid, componentUID, entityToUpdate, attributeName, componentValue);
 
       if (repeatable === true) {
         if (!Array.isArray(componentValue)) {
           throw new Error('Expected an array to create repeatable component');
         }
 
-        // FIXME: returns null sometimes
         const components = await Promise.all(
           componentValue.map(value => updateOrCreateComponent(componentUID, value))
         );
 
-        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }, idx) => {
-          // TODO: add & support pivot data in DB
-          return id;
-        });
+        // TODO: add order
+        componentBody[attributeName] = components.filter(_.negate(_.isNil)).map(({ id }) => id);
       } else {
         const component = await updateOrCreateComponent(componentUID, componentValue);
-
-        // TODO: add & support pivot data in DB
         componentBody[attributeName] = component && component.id;
       }
 
       continue;
     }
 
-    // if (attribute.type === 'dynamiczone') {
-    //   const dynamiczoneValues = data[attributeName];
+    if (attribute.type === 'dynamiczone') {
+      const dynamiczoneValues = data[attributeName];
 
-    //   if (!Array.isArray(dynamiczoneValues)) {
-    //     throw new Error('Expected an array to create repeatable component');
-    //   }
+      await deleteOldDZComponents(uid, entityToUpdate, attributeName, dynamiczoneValues);
 
-    //   const components = await Promise.all(
-    //     dynamiczoneValues.map(value => updateOrCreateComponent(value.__component, value))
-    //   );
+      if (!Array.isArray(dynamiczoneValues)) {
+        throw new Error('Expected an array to create repeatable component');
+      }
 
-    //   componentBody[attributeName] = components.map(({ id }, idx) => {
-    //     // TODO: add & support pivot data in DB
-    //     return id;
-    //   });
+      componentBody[attributeName] = await Promise.all(
+        dynamiczoneValues.map(async value => {
+          const { id } = await updateOrCreateComponent(value.__component, value);
+          return { id, __component: value.__component };
+        })
+      );
 
-    //   continue;
-    // }
+      continue;
+    }
   }
 
   return componentBody;
 };
 
+const deleteOldComponents = async (
+  uid,
+  componentUID,
+  entityToUpdate,
+  attributeName,
+  componentValue
+) => {
+  const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
+
+  const idsToKeep = _.castArray(componentValue)
+    .filter(has('id'))
+    .map(prop('id'));
+
+  const allIds = _.castArray(previousValue)
+    .filter(has('id'))
+    .map(prop('id'));
+
+  idsToKeep.forEach(id => {
+    if (!allIds.includes(id)) {
+      const err = new Error(
+        `Some of the provided components in ${attributeName} are not related to the entity`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  const idsToDelete = _.difference(allIds, idsToKeep);
+
+  if (idsToDelete.length > 0) {
+    for (const idToDelete of idsToDelete) {
+      await deleteComponent(componentUID, { id: idToDelete });
+    }
+  }
+};
+
+const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamiczoneValues) => {
+  const previousValue = await strapi.query(uid).load(entityToUpdate, attributeName);
+
+  const idsToKeep = _.castArray(dynamiczoneValues)
+    .filter(has('id'))
+    .map(({ id, __component }) => ({
+      id,
+      __component,
+    }));
+
+  const allIds = _.castArray(previousValue)
+    .filter(has('id'))
+    .map(({ id, __component }) => ({
+      id,
+      __component,
+    }));
+
+  idsToKeep.forEach(({ id, __component }) => {
+    if (!allIds.find(el => el.id === id && el.__component === __component)) {
+      const err = new Error(
+        `Some of the provided components in ${attributeName} are not related to the entity`
+      );
+      err.status = 400;
+      throw err;
+    }
+  });
+
+  const idsToDelete = allIds.reduce((acc, { id, __component }) => {
+    if (!idsToKeep.find(el => el.id === id && el.__component === __component)) {
+      acc.push({ id, __component });
+    }
+
+    return acc;
+  }, []);
+
+  if (idsToDelete.length > 0) {
+    for (const idToDelete of idsToDelete) {
+      const { id, __component } = idToDelete;
+      await deleteComponent(__component, { id });
+    }
+  }
+};
+
+const deleteComponent = async (uid, componentToDelete) => {
+  await deleteComponents(uid, componentToDelete);
+  await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
+};
+
 const deleteComponents = async (uid, entityToDelete) => {
   const { attributes } = strapi.getModel(uid);
 
-  // TODO:  find components and then delete them
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
     if (attribute.type === 'component') {
       const { component: componentUID } = attribute;
 
-      // TODO: need to load before deleting the entry then delete the components then the entry
       const value = await strapi.query(uid).load(entityToDelete, attributeName);
 
       if (!value) {
@@ -545,19 +602,25 @@ const deleteComponents = async (uid, entityToDelete) => {
       }
 
       if (Array.isArray(value)) {
-        await Promise.all(
-          value.map(subValue => {
-            return strapi.query(componentUID).delete({ where: { id: subValue.id } });
-          })
-        );
+        await Promise.all(value.map(subValue => deleteComponent(componentUID, subValue)));
       } else {
-        await strapi.query(componentUID).delete({ where: { id: value.id } });
+        await deleteComponent(componentUID, value);
       }
 
       continue;
     }
 
     if (attribute.type === 'dynamiczone') {
+      const value = await strapi.query(uid).load(entityToDelete, attributeName);
+
+      if (!value) {
+        continue;
+      }
+
+      if (Array.isArray(value)) {
+        await Promise.all(value.map(subValue => deleteComponent(subValue.__component, subValue)));
+      }
+
       continue;
     }
   }

@@ -158,7 +158,7 @@ describe('User Controller', () => {
 
     test('Search all users', async () => {
       const pagination = { page: 1, pageSize: 5, pageCount: 1, total: 2 };
-      const searchPage = jest.fn(() => ({
+      const findPage = jest.fn(() => ({
         results: users,
         pagination,
       }));
@@ -169,14 +169,14 @@ describe('User Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            user: { searchPage, sanitizeUser },
+            user: { findPage, sanitizeUser },
           },
         },
       };
 
       await userController.find(ctx);
 
-      expect(searchPage).toHaveBeenCalled();
+      expect(findPage).toHaveBeenCalled();
       expect(sanitizeUser).toHaveBeenCalledTimes(2);
       expect(ctx.body).toStrictEqual({ data: { results: users, pagination } });
     });

@@ -8,12 +8,6 @@
     "description": "content-type-builder.plugin.description"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.6",
-    "@buffetjs/custom": "3.3.6",
-    "@buffetjs/hooks": "3.3.6",
-    "@buffetjs/icons": "3.3.6",
-    "@buffetjs/styles": "3.3.6",
-    "@buffetjs/utils": "3.3.6",
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/generate": "3.6.5",
     "@strapi/generate-api": "3.6.5",
@@ -22,8 +16,8 @@
     "fs-extra": "^9.1.0",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
-    "react": "^16.14.0",
-    "react-dom": "^16.9.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-intl": "5.20.2",
     "react-redux": "7.2.3",
     "react-router": "^5.2.0",

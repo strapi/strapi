@@ -7,11 +7,10 @@ import appReducers from '../reducers';
 const library = { fields: Fields(), components: Components() };
 const middlewares = { middlewares: [] };
 const reducers = { reducers: appReducers };
-const locales = [];
 
 describe('ADMIN | StrapiApp', () => {
   it('should render the app without plugins', () => {
-    const app = StrapiApp({ middlewares, reducers, library, locales });
+    const app = StrapiApp({ middlewares, reducers, library });
     const { container } = render(app.render());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -45,7 +44,7 @@ describe('ADMIN | StrapiApp', () => {
   });
 
   it('should create a valid store', () => {
-    const app = StrapiApp({ middlewares, reducers, library, locales });
+    const app = StrapiApp({ middlewares, reducers, library });
 
     const store = app.createStore();
 
@@ -54,7 +53,7 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Hook api', () => {
     it('runs the "moto" hooks in series', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -72,7 +71,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in series asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -90,7 +89,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -106,7 +105,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in waterfall asynchronously', async () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -122,7 +121,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('runs the "moto" hooks in parallel', async () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       app.createHook('hello');
       app.createHook('moto');
@@ -142,14 +141,14 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Settings api', () => {
     it('the settings should be defined', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       expect(app.settings).toBeDefined();
       expect(app.settings.global).toBeDefined();
     });
 
     it('should creates a new section', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
       const section = { id: 'foo', intlLabel: { id: 'foo', defaultMessage: 'foo' } };
       const links = [
         {
@@ -166,7 +165,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add a link correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         Component: jest.fn(),
         to: '/bar',
@@ -181,7 +180,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('should add an array of links correctly to the global section', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
       const links = [
         {
           Component: jest.fn(),
@@ -200,14 +199,14 @@ describe('ADMIN | StrapiApp', () => {
 
   describe('Menu api', () => {
     it('the menu should be defined', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
 
       expect(app.menu).toBeDefined();
       expect(Array.isArray(app.menu)).toBe(true);
     });
 
     it('addMenuLink should add a link to the menu', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         Component: jest.fn(),
         to: '/plugins/bar',
@@ -223,7 +222,7 @@ describe('ADMIN | StrapiApp', () => {
     });
 
     it('addCorePluginMenuLink should add a link to the menu', () => {
-      const app = StrapiApp({ middlewares, reducers, library, locales });
+      const app = StrapiApp({ middlewares, reducers, library });
       const link = {
         to: '/plugins/content-type-builder',
         icon: 'book',
@@ -238,6 +237,85 @@ describe('ADMIN | StrapiApp', () => {
 
       expect(app.menu).toHaveLength(1);
       expect(app.menu[0]).toEqual(link);
+    });
+  });
+
+  describe('createCustomConfigurations', () => {
+    it('should add a locale', () => {
+      const adminConfig = {
+        config: { locales: ['fr'] },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.locales).toEqual(['en', 'fr']);
+    });
+
+    it('should override the authLogo', () => {
+      const adminConfig = {
+        config: { auth: { logo: 'fr' } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.authLogo).toBe('fr');
+    });
+
+    it('should override the menuLogo', () => {
+      const adminConfig = {
+        config: { menu: { logo: 'fr' } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.menuLogo).toBe('fr');
+    });
+
+    it('should override the favicon', () => {
+      const adminConfig = {
+        config: { head: { favicon: 'fr' } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.head.favicon).toBe('fr');
+    });
+
+    it('should override the theme', () => {
+      const adminConfig = {
+        config: { theme: { main: { colors: { red: 'black' } } } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.theme.main.colors.red).toBe('black');
+    });
+
+    it('should override the tutorials', () => {
+      const adminConfig = {
+        config: { tutorials: false },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.tutorials).toBeFalsy();
+    });
+
+    it('should override the release notification', () => {
+      const adminConfig = {
+        config: { notifications: { releases: false } },
+      };
+      const app = StrapiApp({ middlewares, reducers, library, adminConfig });
+
+      app.createCustomConfigurations();
+
+      expect(app.configurations.notifications.releases).toBeFalsy();
     });
   });
 });

@@ -3,24 +3,20 @@
 const transformAttribute = attribute => {
   switch (attribute.type) {
     case 'media': {
-      // convert to relation
+      // TODO: handle a filter on field
       return {
         type: 'relation',
-        relation: attribute.single === true ? 'manyToOne' : 'manyToMany', //'morphOne' : 'morphMany',
+        relation: attribute.single === true ? 'morphOne' : 'morphMany',
         target: 'plugins::upload.file',
-        // morphOn: 'related',
+        morphBy: 'related',
       };
     }
-    // case 'component': {
-    // TODO: transform into relation here instead of in the meta ?
-    // }
     default: {
       return attribute;
     }
   }
 };
 
-// TODO: add locale & localizations for I18N
 // TODO: model logic outside DB
 const transformContentTypes = contentTypes => {
   return contentTypes.map(contentType => {
@@ -30,7 +26,7 @@ const transformContentTypes = contentTypes => {
       singularName: contentType.modelName,
       tableName: contentType.collectionName,
       attributes: {
-        ...Object.keys(contentType.attributes).reduce((attrs, attrName) => {
+        ...Object.keys(contentType.attributes || {}).reduce((attrs, attrName) => {
           return Object.assign(attrs, {
             [attrName]: transformAttribute(contentType.attributes[attrName]),
           });

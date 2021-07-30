@@ -20,6 +20,7 @@ module.exports = async () => {
       value: {
         sizeOptimization: true,
         responsiveDimensions: true,
+        autoOrientation: false,
       },
     });
   }

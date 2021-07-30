@@ -108,14 +108,40 @@ const createMetadata = (models = []) => {
         }
 
         if (types.isDynamicZone(attribute.type)) {
+          //
+
+          Object.assign(attribute, {
+            type: 'relation',
+            relation: 'morphToMany',
+            // TODO: handle restrictions at some point
+            // target: attribute.components,
+            joinTable: {
+              name: meta.componentLink.tableName,
+              joinColumn: {
+                name: 'entity_id',
+                referencedColumn: 'id',
+              },
+              morphColumn: {
+                idColumn: {
+                  name: 'component_id',
+                  referencedColumn: 'id',
+                },
+                typeColumn: {
+                  name: 'component_type',
+                },
+                typeField: '__component',
+              },
+              on: {
+                field: attributeName,
+              },
+            },
+          });
+
           continue;
         }
 
         if (types.isRelation(attribute.type)) {
-          // NOTE: also validate
-
           createRelation(attributeName, attribute, meta, metadata);
-
           continue;
         }
       } catch (error) {

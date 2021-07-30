@@ -2,6 +2,7 @@
 
 const execa = require('execa');
 const _ = require('lodash');
+const { getService } = require('../utils');
 
 // FIXME
 // eslint-disable-next-line node/no-extraneous-require
@@ -35,7 +36,7 @@ module.exports = {
 
   async init() {
     const uuid = strapi.config.get('uuid', false);
-    const hasAdmin = await strapi.admin.services.user.exists();
+    const hasAdmin = await getService('user').exists();
 
     return { data: { uuid, hasAdmin } };
   },

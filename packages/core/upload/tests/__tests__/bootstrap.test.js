@@ -45,6 +45,7 @@ describe('Upload plugin bootstrap function', () => {
 
     expect(setStore).toHaveBeenCalledWith({
       value: {
+        autoOrientation: false,
         sizeOptimization: true,
         responsiveDimensions: true,
       },

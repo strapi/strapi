@@ -15,8 +15,24 @@ const { nestedComponentSchema } = require('./component');
  * Allowed relation per type kind
  */
 const VALID_RELATIONS = {
-  [typeKinds.SINGLE_TYPE]: ['oneToOne', 'oneToMany'],
-  [typeKinds.COLLECTION_TYPE]: ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'],
+  [typeKinds.SINGLE_TYPE]: [
+    'oneToOne',
+    'oneToMany',
+    'morphOne',
+    'morphMany',
+    'morphToOne',
+    'morphToMany',
+  ],
+  [typeKinds.COLLECTION_TYPE]: [
+    'oneToOne',
+    'oneToMany',
+    'manyToOne',
+    'manyToMany',
+    'morphOne',
+    'morphMany',
+    'morphToOne',
+    'morphToMany',
+  ],
 };
 
 /**

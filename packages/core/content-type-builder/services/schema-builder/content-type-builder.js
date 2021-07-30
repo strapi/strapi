@@ -47,7 +47,7 @@ module.exports = function createComponentBuilder() {
     },
 
     /**
-     * create a component in the tmpComponent map
+     * Creates a content type in memory to be written to files later on
      *
      * @param {object} infos content type info
      * @returns {object} new content type

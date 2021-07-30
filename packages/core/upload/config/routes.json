@@ -3,7 +3,7 @@
     {
       "method": "GET",
       "path": "/settings",
-      "handler": "Upload.getSettings",
+      "handler": "upload.getSettings",
       "config": {
         "policies": []
       }
@@ -11,7 +11,7 @@
     {
       "method": "PUT",
       "path": "/settings",
-      "handler": "Upload.updateSettings",
+      "handler": "upload.updateSettings",
       "config": {
         "policies": []
       }
@@ -19,10 +19,10 @@
     {
       "method": "POST",
       "path": "/",
-      "handler": "Upload.upload",
+      "handler": "upload.upload",
       "config": {
         "policies": [],
-        "description": "Upload a file",
+        "description": "upload a file",
         "tag": {
           "plugin": "upload",
           "name": "File"
@@ -32,7 +32,7 @@
     {
       "method": "GET",
       "path": "/files/count",
-      "handler": "Upload.count",
+      "handler": "upload.count",
       "config": {
         "policies": [],
         "description": "Retrieve the total number of uploaded files",
@@ -45,7 +45,7 @@
     {
       "method": "GET",
       "path": "/files",
-      "handler": "Upload.find",
+      "handler": "upload.find",
       "config": {
         "policies": [],
         "description": "Retrieve all file documents",
@@ -58,7 +58,7 @@
     {
       "method": "GET",
       "path": "/files/:id",
-      "handler": "Upload.findOne",
+      "handler": "upload.findOne",
       "config": {
         "policies": [],
         "description": "Retrieve a single file depending on its id",
@@ -71,7 +71,7 @@
     {
       "method": "GET",
       "path": "/search/:id",
-      "handler": "Upload.search",
+      "handler": "upload.search",
       "config": {
         "policies": [],
         "description": "Search for an uploaded file",
@@ -84,7 +84,7 @@
     {
       "method": "DELETE",
       "path": "/files/:id",
-      "handler": "Upload.destroy",
+      "handler": "upload.destroy",
       "config": {
         "policies": [],
         "description": "Delete an uploaded file",

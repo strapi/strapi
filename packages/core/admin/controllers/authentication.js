@@ -3,6 +3,7 @@
 const passport = require('koa-passport');
 const compose = require('koa-compose');
 
+const { getService } = require('../utils');
 const {
   validateRegistrationInput,
   validateAdminRegistrationInput,
@@ -40,8 +41,8 @@ module.exports = {
 
       ctx.body = {
         data: {
-          token: strapi.admin.services.token.createJwtToken(user),
-          user: strapi.admin.services.user.sanitizeUser(ctx.state.user), // TODO: fetch more detailed info
+          token: getService('token').createJwtToken(user),
+          user: getService('user').sanitizeUser(ctx.state.user), // TODO: fetch more detailed info
         },
       };
     },
@@ -54,7 +55,7 @@ module.exports = {
       return ctx.badRequest('Missing token');
     }
 
-    const { isValid, payload } = strapi.admin.services.token.decodeJwtToken(token);
+    const { isValid, payload } = getService('token').decodeJwtToken(token);
 
     if (!isValid) {
       return ctx.badRequest('Invalid token');
@@ -62,7 +63,7 @@ module.exports = {
 
     ctx.body = {
       data: {
-        token: strapi.admin.services.token.createJwtToken({ id: payload.id }),
+        token: getService('token').createJwtToken({ id: payload.id }),
       },
     };
   },
@@ -76,9 +77,7 @@ module.exports = {
 
     const { registrationToken } = ctx.request.query;
 
-    const registrationInfo = await strapi.admin.services.user.findRegistrationInfo(
-      registrationToken
-    );
+    const registrationInfo = await getService('user').findRegistrationInfo(registrationToken);
 
     if (!registrationInfo) {
       return ctx.badRequest('Invalid registrationToken');
@@ -96,12 +95,12 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const user = await strapi.admin.services.user.register(input);
+    const user = await getService('user').register(input);
 
     ctx.body = {
       data: {
-        token: strapi.admin.services.token.createJwtToken(user),
-        user: strapi.admin.services.user.sanitizeUser(user),
+        token: getService('token').createJwtToken(user),
+        user: getService('user').sanitizeUser(user),
       },
     };
   },
@@ -115,13 +114,13 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const hasAdmin = await strapi.admin.services.user.exists();
+    const hasAdmin = await getService('user').exists();
 
     if (hasAdmin) {
       return ctx.badRequest('You cannot register a new super admin');
     }
 
-    const superAdminRole = await strapi.admin.services.role.getSuperAdmin();
+    const superAdminRole = await getService('role').getSuperAdmin();
 
     if (!superAdminRole) {
       throw new Error(
@@ -129,7 +128,7 @@ module.exports = {
       );
     }
 
-    const user = await strapi.admin.services.user.create({
+    const user = await getService('user').create({
       ...input,
       registrationToken: null,
       isActive: true,
@@ -140,8 +139,8 @@ module.exports = {
 
     ctx.body = {
       data: {
-        token: strapi.admin.services.token.createJwtToken(user),
-        user: strapi.admin.services.user.sanitizeUser(user),
+        token: getService('token').createJwtToken(user),
+        user: getService('user').sanitizeUser(user),
       },
     };
   },
@@ -155,7 +154,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    strapi.admin.services.auth.forgotPassword(input);
+    getService('auth').forgotPassword(input);
 
     ctx.status = 204;
   },
@@ -169,12 +168,12 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    const user = await strapi.admin.services.auth.resetPassword(input);
+    const user = await getService('auth').resetPassword(input);
 
     ctx.body = {
       data: {
-        token: strapi.admin.services.token.createJwtToken(user),
-        user: strapi.admin.services.user.sanitizeUser(user),
+        token: getService('token').createJwtToken(user),
+        user: getService('user').sanitizeUser(user),
       },
     };
   },

@@ -37,8 +37,24 @@ const createTable = meta => {
     // TODO: if relation & has a joinColumn -> create it
 
     if (types.isRelation(attribute.type)) {
-      if (attribute.joinColumn && attribute.owner) {
-        // TODO: pass uniquness for oneToOne to avoid create more than one to one
+      if (attribute.morphColumn && attribute.owner) {
+        const { idColumn, typeColumn } = attribute.morphColumn;
+
+        table.columns.push(
+          createColumn(idColumn.name, {
+            type: 'integer',
+            unsigned: true,
+          })
+        );
+
+        table.columns.push(
+          createColumn(typeColumn.name, {
+            type: 'string',
+          })
+        );
+      } else if (attribute.joinColumn && attribute.owner) {
+        // NOTE: we could pass uniquness for oneToOne to avoid creating more than one to one
+
         const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
         table.columns.push(
           createColumn(columnName, {
@@ -53,12 +69,10 @@ const createTable = meta => {
           columns: [columnName],
           referencedTable,
           referencedColumns: [referencedColumn],
-          onDelete: 'SET NULL', // NOTE: could allow ocnifguration
+          onDelete: 'SET NULL', // NOTE: could allow configuration
         });
       }
     } else if (shouldCreateColumn(attribute)) {
-      // TODO: if column is unique then add a unique index outside so we can easily do the diff
-
       const column = createColumn(key, meta.attributes[key]);
 
       if (column.unique) {

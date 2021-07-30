@@ -1,4 +1,5 @@
 'use strict';
+
 const category = {
   modelName: 'category',
   uid: 'category',
@@ -9,12 +10,14 @@ const category = {
     },
     price: {
       type: 'integer',
-      //
+      required: true,
+      default: 12,
+
       column: {
-        // unique: true,
+        unique: true,
         nonNullable: true,
         unsigned: true,
-        defaultTo: 12.0,
+        defaultTo: 12,
       },
     },
     articles: {
@@ -266,3 +269,73 @@ const blogPost = {
 };
 
 module.exports = [category, article, tags, compo, user, address, file, fileMorph, blogPost];
+
+// const article = {
+//   modelName: 'article',
+//   uid: 'article',
+//   collectionName: 'articles',
+//   attributes: {
+//     commentable: {
+//       type: 'relation',
+//       relation: 'morphToOne',
+//     },
+//     reportables: {
+//       type: 'relation',
+//       relation: 'morphToMany',
+//     },
+//     dz: {
+//       type: 'dynamiczone',
+//       components: ['comment', 'video-comment'],
+//     },
+//   },
+// };
+
+// const comment = {
+//   modelName: 'comment',
+//   uid: 'comment',
+//   collectionName: 'comments',
+//   attributes: {
+//     article: {
+//       type: 'relation',
+//       relation: 'morphOne',
+//       target: 'article',
+//       morphBy: 'commentable',
+//     },
+//     title: {
+//       type: 'string',
+//     },
+//   },
+// };
+
+// const videoComment = {
+//   modelName: 'video-comment',
+//   uid: 'video-comment',
+//   collectionName: 'video_comments',
+//   attributes: {
+//     articles: {
+//       type: 'relation',
+//       relation: 'morphMany',
+//       target: 'article',
+//       morphBy: 'commentable',
+//     },
+//     title: {
+//       type: 'string',
+//     },
+//   },
+// };
+
+// const folder = {
+//   modelName: 'folder',
+//   uid: 'folder',
+//   collectionName: 'folders',
+//   attributes: {
+//     articles: {
+//       type: 'relation',
+//       relation: 'morphMany',
+//       target: 'article',
+//       morphBy: 'reportables',
+//     },
+//   },
+// };
+
+// module.exports = [article, comment, videoComment, folder];

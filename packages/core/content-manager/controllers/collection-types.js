@@ -20,14 +20,12 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    // FIXME: do search instead
-    const method = has('_q', query)
-      ? /*'searchWithRelationCounts'*/ 'findWithRelationCounts'
-      : 'findWithRelationCounts';
-
     const permissionQuery = permissionChecker.buildReadQuery(query);
 
-    const { results, pagination } = await entityManager[method](permissionQuery, model);
+    const { results, pagination } = await entityManager.findWithRelationCounts(
+      permissionQuery,
+      model
+    );
 
     ctx.body = {
       results: results.map(entity => permissionChecker.sanitizeOutput(entity)),

@@ -17,7 +17,7 @@
     "into-stream": "^5.1.0"
   },
   "peerDependencies": {
-    "@strapi/plugin-upload": "^3.1.6"
+    "@strapi/plugin-upload": "^4.0.0"
   },
   "strapi": {
     "isProvider": true

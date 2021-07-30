@@ -35,10 +35,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
-
     const query = pm.queryFrom(ctx.query);
-    const files = await getService('upload')[method](query, []);
+    const files = await getService('upload').fetchAll(query);
 
     ctx.body = pm.sanitize(files, { withPrivate: false });
   },
@@ -70,10 +68,8 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const method = _.has(ctx.query, '_q') ? 'countSearch' : 'count';
     const query = pm.queryFrom(ctx.query);
-
-    const count = await getService('upload')[method](query);
+    const count = await getService('upload').count(query);
 
     ctx.body = { count };
   },

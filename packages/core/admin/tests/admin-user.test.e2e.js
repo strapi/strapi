@@ -112,6 +112,9 @@ describe('Admin User CRUD (e2e)', () => {
       url: '/admin/users',
       method: 'POST',
       body,
+      qs: {
+        populate: ['roles'],
+      },
     });
 
     expect(res.statusCode).toBe(201);
@@ -223,7 +226,7 @@ describe('Admin User CRUD (e2e)', () => {
       expect(res.body.data.results).toContainEqual(testData.user);
     });
 
-    test('7.2. Using searchPage', async () => {
+    test('7.2. Using search', async () => {
       const res = await rq({
         url: `/admin/users?_q=${testData.user.email}`,
         method: 'GET',

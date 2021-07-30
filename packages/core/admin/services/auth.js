@@ -3,6 +3,7 @@
 const bcrypt = require('bcryptjs');
 const _ = require('lodash');
 const { getAbsoluteAdminUrl } = require('@strapi/utils');
+const { getService } = require('../utils');
 
 /**
  * hashes a password
@@ -57,8 +58,8 @@ const forgotPassword = async ({ email } = {}) => {
     return;
   }
 
-  const resetPasswordToken = strapi.admin.services.token.createToken();
-  await strapi.admin.services.user.updateById(user.id, { resetPasswordToken });
+  const resetPasswordToken = getService('token').createToken();
+  await getService('user').updateById(user.id, { resetPasswordToken });
 
   // Send an email to the admin.
   const url = `${getAbsoluteAdminUrl(
@@ -98,7 +99,7 @@ const resetPassword = async ({ resetPasswordToken, password } = {}) => {
     throw strapi.errors.badRequest();
   }
 
-  return strapi.admin.services.user.updateById(matchingUser.id, {
+  return getService('user').updateById(matchingUser.id, {
     password,
     resetPasswordToken: null,
   });

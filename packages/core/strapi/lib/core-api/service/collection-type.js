@@ -65,16 +65,6 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
 
       return strapi.entityService.delete(uid, entityId, { params });
     },
-
-    search(opts = {}) {
-      const params = getFetchParams(opts.params);
-      return strapi.entityService.search(uid, { params });
-    },
-
-    countSearch(opts = {}) {
-      const params = getFetchParams(opts.params);
-      return strapi.entityService.countSearch(uid, { params });
-    },
   };
 };
 

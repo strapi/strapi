@@ -64,11 +64,13 @@ const Item = ({ index, move, name, removeItem }) => {
     },
   });
   const [{ isDragging }, drag, preview] = useDrag({
-    item: { type: ItemTypes.EDIT_RELATION, id: name, name, index },
-    begin: () => {
+    type: ItemTypes.EDIT_RELATION,
+    item: () => {
       // Remove the over state from other components
       // Since it's a dynamic list where items are replaced on the fly we need to disable all the over state
       setIsDraggingSibling(true);
+
+      return { id: name, name, index };
     },
     end: () => {
       setIsDraggingSibling(false);
