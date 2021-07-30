@@ -8,42 +8,66 @@ const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
 const isValidRelation = validNatures =>
   function(value) {
-    const allowedRelations =
-      this.parent.target === coreUids.STRAPI_USER ? STRAPI_USER_RELATIONS : validNatures;
+    if (this.parent.target === coreUids.STRAPI_USER) {
+      if (!validNatures.includes(value) || typeof this.parent.targetAttribute !== undefined) {
+        return this.createError({
+          path: this.path,
+          message: `must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')}`,
+        });
+      }
+    }
 
-    return allowedRelations.includes(value)
+    return validNatures.includes(value)
       ? true
       : this.createError({
           path: this.path,
-          message: `must be one of the following values: ${allowedRelations.join(', ')}`,
+          message: `must be one of the following values: ${validNatures.join(', ')}`,
         });
   };
 
-module.exports = ({ types, relations }) => {
+module.exports = (attribute, allowedRelations) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter(key => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
     .filter(key => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 
-  return yup.object({
+  const base = {
     type: yup
       .string()
-      .oneOf(types)
-      .required(),
-    target: yup
-      .string()
-      .oneOf(contentTypesUIDs)
+      .oneOf(['relation'])
       .required(),
     relation: yup
       .string()
-      .test('isValidRelation', isValidRelation(relations))
+      .test('isValidRelation', isValidRelation(allowedRelations))
       .required(),
     configurable: yup.boolean().nullable(),
-    targetAttribute: yup
-      .string()
-      .test(isValidName)
-      .nullable(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
-  });
+  };
+
+  switch (attribute.relation) {
+    case 'oneToOne':
+    case 'oneToMany':
+    case 'manyToOne':
+    case 'manyToMany':
+    case 'morphOne':
+    case 'morphMany': {
+      return yup.object({
+        ...base,
+        target: yup
+          .string()
+          .oneOf(contentTypesUIDs)
+          .required(),
+        targetAttribute: yup
+          .string()
+          .test(isValidName)
+          .nullable(),
+      });
+    }
+    case 'morphToOne':
+    case 'morphToMany':
+    default: {
+      return yup.object({ ...base });
+    }
+  }
 };

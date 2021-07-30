@@ -89,7 +89,6 @@ const toRelation = attribute => {
     type: 'relation',
     targetModel: attribute.target,
     relationType: attribute.relation,
-    pluginOptions: attribute.pluginOptions,
   };
 };
 

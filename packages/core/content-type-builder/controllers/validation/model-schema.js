@@ -5,7 +5,7 @@ const yup = require('yup');
 
 const { modelTypes, FORBIDDEN_ATTRIBUTE_NAMES, typeKinds } = require('../../services/constants');
 const { getService } = require('../../utils');
-const { isValidCollectionName, isValidKey } = require('./common');
+const { isValidKey, isValidCollectionName } = require('./common');
 const getTypeValidator = require('./types');
 const getRelationValidator = require('./relations');
 
@@ -46,7 +46,7 @@ const createAttributesValidator = ({ types, modelType, relations }) => {
           }
 
           if (attribute.type === 'relation') {
-            return getRelationValidator({ types, relations }).test(isValidKey(key));
+            return getRelationValidator(attribute, relations).test(isValidKey(key));
           }
 
           if (_.has(attribute, 'type')) {
