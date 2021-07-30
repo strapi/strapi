@@ -45,8 +45,7 @@ module.exports = {
     BACKEND_URL: 'http://localhost:1337',
     ADMIN_PATH: '/admin',
     NODE_ENV: 'test',
-    'process.env.STRAPI_ADMIN_SHOW_TUTORIALS': 'false',
-    'process.env.STRAPI_ADMIN_UPDATE_NOTIFICATION': 'false',
+
     // FIXME create a clean config file
   },
   moduleDirectories: [
