@@ -7,6 +7,9 @@ const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
 const { isBidirectional } = require('./metadata/relations');
 
+const toId = value => value.id || value;
+const toIds = value => _.castArray(value || []).map(toId);
+
 // TODO: move to query layer
 const toRow = (metadata, data = {}) => {
   const { attributes } = metadata;
@@ -289,7 +292,7 @@ const createEntityManager = db => {
 
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: data[attributeName] })
+              .where({ id: toId(data[attributeName]) })
               .execute();
           } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
@@ -297,7 +300,7 @@ const createEntityManager = db => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = _.castArray(data[attributeName]).map((dataID, idx) => ({
+            const rows = toIds(data[attributeName]).map((dataID, idx) => ({
               [joinColumn.name]: dataID,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -324,7 +327,7 @@ const createEntityManager = db => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = _.castArray(data[attributeName]).map((data, idx) => ({
+          const rows = _.castArray(data[attributeName] || []).map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -454,7 +457,7 @@ const createEntityManager = db => {
             if (!_.isNull(data[attributeName])) {
               await this.createQueryBuilder(target)
                 .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-                .where({ id: data[attributeName] })
+                .where({ id: toId(data[attributeName]) })
                 .execute();
             }
           } else if (targetAttribute.relation === 'morphToMany') {
@@ -472,7 +475,7 @@ const createEntityManager = db => {
               })
               .execute();
 
-            const rows = _.castArray(data[attributeName] || []).map((dataID, idx) => ({
+            const rows = toIds(data[attributeName] || []).map((dataID, idx) => ({
               [joinColumn.name]: dataID,
               [idColumn.name]: id,
               [typeColumn.name]: uid,

@@ -94,17 +94,12 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url:
-        '/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp',
+      url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body.results)).toBe(true);
-    expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toMatchObject(data.productsWithDzAndDP[0]);
-    res.body.results.forEach(p => {
-      expect(p.published_at).toBeNull();
-    });
+    expect(res.body).toMatchObject(data.productsWithDzAndDP[0]);
+    expect(res.body.published_at).toBeNull();
   });
 
   test('Update product with compo', async () => {
