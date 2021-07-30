@@ -287,7 +287,7 @@
     {
       "method": "GET",
       "path": "/users/count",
-      "handler": "User.count",
+      "handler": "user.count",
       "config": {
         "prefix": "",
         "policies": []
@@ -296,7 +296,7 @@
     {
       "method": "GET",
       "path": "/users",
-      "handler": "User.find",
+      "handler": "user.find",
       "config": {
         "policies": [],
         "prefix": "",
@@ -311,7 +311,7 @@
     {
       "method": "GET",
       "path": "/users/me",
-      "handler": "User.me",
+      "handler": "user.me",
       "config": {
         "policies": [],
         "prefix": "",
@@ -326,7 +326,7 @@
     {
       "method": "GET",
       "path": "/users/:id",
-      "handler": "User.findOne",
+      "handler": "user.findOne",
       "config": {
         "policies": [],
         "prefix": "",
@@ -341,7 +341,7 @@
     {
       "method": "POST",
       "path": "/users",
-      "handler": "User.create",
+      "handler": "user.create",
       "config": {
         "policies": [],
         "prefix": ""
@@ -350,7 +350,7 @@
     {
       "method": "PUT",
       "path": "/users/:id",
-      "handler": "User.update",
+      "handler": "user.update",
       "config": {
         "policies": [],
         "prefix": "",
@@ -365,7 +365,7 @@
     {
       "method": "DELETE",
       "path": "/users/:id",
-      "handler": "User.destroy",
+      "handler": "user.destroy",
       "config": {
         "policies": [],
         "prefix": "",

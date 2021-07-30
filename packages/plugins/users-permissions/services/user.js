@@ -40,7 +40,9 @@ module.exports = {
       );
     }
 
-    return strapi.query('plugins::users-permissions.user').create({ data: values });
+    return strapi
+      .query('plugins::users-permissions.user')
+      .create({ data: values, populate: ['role'] });
   },
 
   /**
@@ -52,7 +54,9 @@ module.exports = {
       values.password = await getService('user').hashPassword(values);
     }
 
-    return strapi.query('plugins::users-permissions.user').update({ where: params, data: values });
+    return strapi
+      .query('plugins::users-permissions.user')
+      .update({ where: params, data: values, populate: ['role'] });
   },
 
   /**
