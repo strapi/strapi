@@ -1,1 +1,4 @@
-{}
+{
+  "plugin.description.short": "Odesílání chyb Strapi softwaru Sentry.",
+  "plugin.description.long": "Odesílání chyb Strapi softwaru Sentry."
+}
