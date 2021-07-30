@@ -541,7 +541,7 @@ const applyPopulate = async (results, populate, ctx) => {
         } = attribute.joinColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[joinColumnName]).filter(value => !_.isNull(value))
+          results.map(r => r[joinColumnName]).filter(value => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
@@ -644,7 +644,7 @@ const applyPopulate = async (results, populate, ctx) => {
         } = attribute.joinColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[joinColumnName]).filter(value => !_.isNull(value))
+          results.map(r => r[joinColumnName]).filter(value => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
@@ -808,7 +808,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const { idColumn, typeColumn } = targetAttribute.morphColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNull(value))
+          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
@@ -844,7 +844,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const { idColumn, typeColumn } = morphColumn;
 
         const referencedValues = _.uniq(
-          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNull(value))
+          results.map(r => r[idColumn.referencedColumn]).filter(value => !_.isNil(value))
         );
 
         if (_.isEmpty(referencedValues)) {
@@ -900,7 +900,7 @@ const applyPopulate = async (results, populate, ctx) => {
       // fetch join table to create the ids map then do the same as morphToOne without the first
 
       const referencedValues = _.uniq(
-        results.map(r => r[joinColumn.referencedColumn]).filter(value => !_.isNull(value))
+        results.map(r => r[joinColumn.referencedColumn]).filter(value => !_.isNil(value))
       );
 
       const qb = db.entityManager.createQueryBuilder(joinTable.name);
