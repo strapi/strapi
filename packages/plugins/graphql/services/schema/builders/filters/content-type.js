@@ -24,7 +24,7 @@ function buildContentTypeFilters(contentType) {
         }
 
         // Handle relations
-        else if (utils.isRelation(attribute)) {
+        else if (utils.isRelation(attribute) || utils.isMedia(attribute)) {
           addRelationalAttribute(t, attributeName, attribute);
         }
       }
@@ -44,11 +44,11 @@ const addScalarAttribute = (builder, attributeName, attribute) => {
 };
 
 const addRelationalAttribute = (builder, attributeName, attribute) => {
-  const model = strapi.getModel(attribute.model || attribute.collection, attribute.plugin);
+  const model = strapi.getModel(attribute.target);
 
   // If there is no model corresponding to the attribute configuration
-  // or if the attribute is a polymorphic relation, then ignore it
-  if (!model || utils.isMorphRelation(attribute)) return;
+  // or if the attribute is a polymorphic relation or a media, then ignore it
+  if (!model || utils.isMorphRelation(attribute) || utils.isMedia(attribute)) return;
 
   builder.field(attributeName, { type: utils.getFiltersInputTypeName(model) });
 };

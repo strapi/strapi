@@ -1,6 +1,7 @@
 'use strict';
 
 const { objectType } = require('nexus');
+const { prop } = require('lodash/fp');
 
 const { utils } = require('../../types');
 
@@ -17,8 +18,15 @@ const buildEntityDefinition = contentType => {
     name,
 
     definition(t) {
-      t.id('id');
-      t.field('attributes', { type: typeName });
+      // Keep the ID attribute at the top level
+      t.id('id', { resolve: prop('id') });
+
+      // Keep the fetched object into a dedicated `attributes` field
+      t.field('attributes', {
+        type: typeName,
+        resolve: source => source,
+      });
+
       // todo[v4]: add the meta field to the entity when there will be data in it
       // t.field('meta', { type: utils.getEntityMetaName(contentType) });
     },

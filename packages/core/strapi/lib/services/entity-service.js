@@ -15,6 +15,7 @@ const {
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
   relations: relationsUtils,
+  pagination: paginationUtils,
 } = require('@strapi/utils');
 
 const { MANY_RELATIONS } = relationsUtils.constants;
@@ -134,6 +135,14 @@ const transformParamsToQuery = (uid, params = {}) => {
 
 const pickSelectionParams = pick(['fields', 'populate']);
 
+const paginateAndTransformToQuery = (uid, opts) => {
+  // Paginate the opts
+  const paginatedOpts = paginationUtils.withDefaultPagination(opts);
+
+  // Transform the opts into a query & return it
+  return transformParamsToQuery(uid, paginatedOpts);
+};
+
 const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) => ({
   uploadFiles,
 
@@ -155,7 +164,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const { params } = await this.wrapOptions(opts, { uid, action: 'find' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = paginateAndTransformToQuery(uid, params);
 
     // return first element and ignore filters
     if (kind === 'singleType') {
@@ -168,7 +177,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async findPage(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = paginateAndTransformToQuery(uid, params);
 
     return db.query(uid).findPage(query);
   },
@@ -219,7 +228,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async count(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'count' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = paginateAndTransformToQuery(uid, params);
 
     return db.query(uid).count(query);
   },

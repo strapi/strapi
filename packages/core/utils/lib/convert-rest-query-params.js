@@ -6,6 +6,7 @@
  */
 
 const _ = require('lodash');
+const { isString } = require('lodash/fp');
 const {
   constants: { DP_PUB_STATES },
 } = require('./content-types');
@@ -86,20 +87,26 @@ const convertExtraRootParams = params => {
 
 /**
  * Sort query parser
- * @param {string} sortQuery - ex: id:asc,price:desc
+ * @param {string[]} sortQuery - ex: ["id:asc", "price:desc"]
  */
 const convertSortQueryParams = sortQuery => {
-  if (typeof sortQuery !== 'string') {
-    throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
+  if (!Array.isArray(sortQuery)) {
+    throw new Error(`convertSortQueryParams expected an array of string, got ${typeof sortQuery}`);
   }
 
-  // TODO: handle array input
+  const invalidClauseType = sortQuery.find(clause => !isString(clause));
+
+  if (invalidClauseType) {
+    throw new Error(
+      `convertSortQueryParams expected an array of string but found "${typeof invalidClauseType}"`
+    );
+  }
 
   const sortKeys = [];
 
-  sortQuery.split(',').forEach(part => {
+  sortQuery.forEach(clause => {
     // split field and order param with default order to ascending
-    const [field, order = 'asc'] = part.split(':');
+    const [field, order = 'asc'] = clause.split(':');
 
     if (field.length === 0) {
       throw new Error('Field cannot be empty');

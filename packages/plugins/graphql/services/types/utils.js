@@ -19,14 +19,23 @@ const isScalar = attribute => {
  * @param {object} attribute
  * @return {boolean}
  */
-const isMorphRelation = attribute => (attribute.model || attribute.collection) === '*';
+const isMorphRelation = attribute => {
+  return (isRelation(attribute) && attribute.relation.includes('morph')) || isMedia(attribute);
+};
+
+/**
+ * Check if the given attribute is a media
+ * @param {object} attribute
+ * @return {boolean}
+ */
+const isMedia = propEq('type', 'media');
 
 /**
  * Check if the given attribute is a relation
  * @param {object} attribute
  * @return {boolean}
  */
-const isRelation = attribute => !!attribute.model || !!attribute.collection;
+const isRelation = propEq('type', 'relation');
 
 /**
  * Check if the given attribute is an enum
@@ -253,6 +262,7 @@ module.exports = {
   isEnumeration,
   isScalar,
   isRelation,
+  isMedia,
   isDynamicZone,
   isComponent,
 

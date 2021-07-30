@@ -1,9 +1,9 @@
 'use strict';
 
-const { has, mapKeys } = require('lodash/fp');
+const { has, mapKeys, propEq, isNil } = require('lodash/fp');
 
 const operators = require('../../schema/builders/filters/operators');
-const { isRelation, isScalar } = require('../utils');
+const { isMedia, isRelation, isScalar } = require('../utils');
 
 const ROOT_LEVEL_OPERATORS = [operators.AND, operators.OR, operators.NOT];
 
@@ -16,7 +16,12 @@ const virtualScalarAttributes = ['id'];
  * @param {object} contentType
  * @return {object | object[]}
  */
-const graphQLFiltersToStrapiQuery = (filters, contentType) => {
+const graphQLFiltersToStrapiQuery = (filters, contentType = {}) => {
+  // Handle unwanted scenario where there is no filters defined
+  if (isNil(filters)) {
+    return {};
+  }
+
   // If filters is a collection, then apply the transformation to every item of the list
   if (Array.isArray(filters)) {
     return filters.map(filtersItem => graphQLFiltersToStrapiQuery(filtersItem, contentType));
@@ -36,14 +41,14 @@ const graphQLFiltersToStrapiQuery = (filters, contentType) => {
 
       // If it's a scalar attribute
       if (virtualScalarAttributes.includes(key) || isScalar(attribute)) {
-        // Then mapKeys over the filters object (`value`), replace GraphQL operators with Strapi's
+        // Then map over the filters object (`value`) and replace GraphQL operators (`key`) with Strapi's
         resultMap[key] = mapKeys(key => operators[key].strapiOperator, value);
       }
 
       // If it's a deep filter on a relation
-      else if (isRelation(attribute)) {
+      else if (isRelation(attribute) || isMedia(attribute)) {
         // Fetch the model from the relation
-        const relModel = strapi.getModel(attribute.model || attribute.collection, attribute.plugin);
+        const relModel = strapi.getModel(attribute.target);
 
         // Recursively apply the mapping to the value using the fetched model,
         // and update the value within `resultMap`
@@ -53,9 +58,7 @@ const graphQLFiltersToStrapiQuery = (filters, contentType) => {
 
     // Handle the case where the key is not an attribute (operator, ...)
     else {
-      const rootLevelOperator = ROOT_LEVEL_OPERATORS.find(op => {
-        return op.fieldName === key;
-      });
+      const rootLevelOperator = ROOT_LEVEL_OPERATORS.find(propEq('fieldName', key));
 
       // If it's a root level operator (AND, NOT, OR, ...)
       if (rootLevelOperator) {

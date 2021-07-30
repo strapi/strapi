@@ -1,40 +1,23 @@
 'use strict';
 
 const { extendType } = require('nexus');
-const { pipe } = require('lodash/fp');
-
 const { utils } = require('../../../types');
 const { actionExists } = require('../../../old/utils');
-const { toSingular } = require('../../../old/naming');
-const { buildMutation } = require('../../../old/resolvers-builder');
+const { buildMutationsResolvers } = require('../../resolvers');
 
 const builderUtils = require('../utils');
 
-const getUniqueAttributesFiltersMap = pipe(
-  builderUtils.getUniqueScalarAttributes,
-  builderUtils.scalarAttributesToFiltersMap
-);
-
 module.exports = () => {
-  /**
-   *
-   * @param {OutputDefinitionBlock} t
-   * @param contentType
-   */
   const addCreateMutation = (t, contentType) => {
-    const { uid, modelName } = contentType;
+    const { uid } = contentType;
 
     const createMutationName = utils.getCreateMutationTypeName(contentType);
     const responseTypeName = utils.getEntityResponseName(contentType);
 
-    const resolverOptions = { resolver: `${uid}.create` };
-
     // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists(resolverOptions)) {
+    if (!actionExists({ resolver: `${uid}.create` })) {
       return;
     }
-
-    const resolver = buildMutation(toSingular(modelName), resolverOptions);
 
     t.field(createMutationName, {
       type: responseTypeName,
@@ -44,87 +27,94 @@ module.exports = () => {
         data: utils.getContentTypeInputName(contentType),
       },
 
-      async resolve(parent, args, context, info) {
-        const res = await resolver(parent, args, context, info);
+      async resolve(source, args) {
+        // todo[v4]: what about media? (type === 'media')
 
-        return { data: { id: res.id, attributes: res } };
+        const transformedArgs = builderUtils.transformArgs(args, { contentType });
+
+        const value = await buildMutationsResolvers({ contentType, strapi }).create(
+          source,
+          transformedArgs
+        );
+
+        return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
     });
   };
 
   const addUpdateMutation = (t, contentType) => {
-    const { uid, attributes, modelName } = contentType;
+    const { uid } = contentType;
 
     const updateMutationName = utils.getUpdateMutationTypeName(contentType);
     const responseTypeName = utils.getEntityResponseName(contentType);
 
-    const resolverOptions = { resolver: `${uid}.update` };
-
     // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists(resolverOptions)) {
+    if (!actionExists({ resolver: `${uid}.update` })) {
       return;
     }
 
+    // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for updateOne queries
-    const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
-
-    const resolver = buildMutation(toSingular(modelName), resolverOptions);
+    // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
 
     t.field(updateMutationName, {
       type: responseTypeName,
 
       args: {
         // Query args
-        id: utils.getScalarFilterInputTypeName('ID'),
-        ...uniqueAttributes,
+        id: 'ID',
+        // todo[v4]: Don't allow to filter using every unique attributes for now
+        // ...uniqueAttributes,
 
         // Update payload
         data: utils.getContentTypeInputName(contentType),
       },
 
-      async resolve(parent, args, context, info) {
-        // const query = mappers.graphQLFiltersToStrapiQuery(args.params, contentType);
+      async resolve(source, args) {
+        const transformedArgs = builderUtils.transformArgs(args, { contentType });
 
-        const res = await resolver(parent, args, context, info);
+        const value = await buildMutationsResolvers({ contentType, strapi }).update(
+          source,
+          transformedArgs
+        );
 
-        return { data: { id: res.id, attributes: res } };
+        console.log(value);
+        return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
     });
   };
 
   const addDeleteMutation = (t, contentType) => {
-    const { uid, attributes, modelName } = contentType;
+    const { uid } = contentType;
 
     const deleteMutationName = utils.getDeleteMutationTypeName(contentType);
     const responseTypeName = utils.getEntityResponseName(contentType);
 
-    const resolverOptions = { resolver: `${uid}.delete` };
-
     // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists(resolverOptions)) {
+    if (!actionExists({ resolver: `${uid}.delete` })) {
       return;
     }
 
+    // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for updateOne queries
-    const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
-
-    const resolver = buildMutation(toSingular(modelName), resolverOptions);
+    // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
 
     t.field(deleteMutationName, {
       type: responseTypeName,
 
       args: {
         // Query args
-        id: utils.getScalarFilterInputTypeName('ID'),
-        ...uniqueAttributes,
+        id: 'ID',
+        // todo[v4]: Don't allow to filter using every unique attributes for now
+        // ...uniqueAttributes,
       },
 
-      async resolve(parent, args, context, info) {
-        // const query = mappers.graphQLFiltersToStrapiQuery(args.params, contentType);
+      async resolve(source, args) {
+        const transformedArgs = builderUtils.transformArgs(args, { contentType });
 
-        const res = await resolver(parent, args, context, info);
+        const value = await buildMutationsResolvers({ contentType, strapi }).delete(source, args);
 
-        return { data: { id: res.id, attributes: res } };
+        return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
     });
   };

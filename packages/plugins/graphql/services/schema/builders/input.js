@@ -4,6 +4,20 @@ const { inputObjectType, nonNull } = require('nexus');
 
 const { utils, mappers } = require('../../types');
 
+const {
+  getComponentInputName,
+  getContentTypeInputName,
+  getEnumName,
+  getDynamicZoneInputName,
+  isScalar,
+  isRelation,
+  isMorphRelation,
+  isMedia,
+  isEnumeration,
+  isComponent,
+  isDynamicZone,
+} = utils;
+
 module.exports = context => {
   const { strapi } = context;
 
@@ -12,8 +26,8 @@ module.exports = context => {
       const { attributes, modelType } = contentType;
 
       const name = (modelType === 'component'
-        ? utils.getComponentInputName
-        : utils.getContentTypeInputName
+        ? getComponentInputName
+        : getContentTypeInputName
       ).call(null, contentType);
 
       return inputObjectType({
@@ -22,28 +36,33 @@ module.exports = context => {
         definition(t) {
           for (const [attributeName, attribute] of Object.entries(attributes)) {
             // Scalars
-            if (utils.isScalar(attribute)) {
+            if (isScalar(attribute)) {
               const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
               t.field(attributeName, { type: gqlScalar });
             }
 
             // Relations
-            else if (utils.isRelation(attribute)) {
-              t.id(attributeName);
+            else if (isRelation(attribute) || isMorphRelation(attribute)) {
+              const isMultipleMedia = isMedia(attribute) && attribute.multiple;
+              const isToManyRelation = isRelation(attribute) && attribute.relation.endsWith('Many');
+
+              return isMultipleMedia || isToManyRelation
+                ? t.list.id(attributeName)
+                : t.id(attributeName);
             }
 
             // Enums
-            else if (utils.isEnumeration(attribute)) {
-              const enumTypeName = utils.getEnumName(contentType, attributeName);
+            else if (isEnumeration(attribute)) {
+              const enumTypeName = getEnumName(contentType, attributeName);
 
               t.field(attributeName, { type: enumTypeName });
             }
 
             // Components
-            else if (utils.isComponent(attribute)) {
+            else if (isComponent(attribute)) {
               const component = strapi.components[attribute.component];
-              const componentInputType = utils.getComponentInputName(component);
+              const componentInputType = getComponentInputName(component);
 
               if (attribute.repeatable) {
                 t.list.field(attributeName, { type: componentInputType });
@@ -53,8 +72,8 @@ module.exports = context => {
             }
 
             // Dynamic Zones
-            else if (utils.isDynamicZone(attribute)) {
-              const dzInputName = utils.getDynamicZoneInputName(contentType, attributeName);
+            else if (isDynamicZone(attribute)) {
+              const dzInputName = getDynamicZoneInputName(contentType, attributeName);
 
               t.list.field(attributeName, { type: nonNull(dzInputName) });
             }

@@ -4,7 +4,7 @@ const { arg, list } = require('nexus');
 
 const SortArg = arg({
   type: list('String'),
-  default: ['asc'],
+  default: [],
 });
 
 module.exports = { SortArg };

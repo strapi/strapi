@@ -1,11 +1,14 @@
 'use strict';
 
 const associationResolvers = require('./association');
-const queryResolvers = require('./query');
-const mutationResolvers = require('./mutation');
+const { buildQueriesResolvers } = require('./query');
+const { buildMutationsResolvers } = require('./mutation');
 
 module.exports = {
+  // Generics
   ...associationResolvers,
-  ...queryResolvers,
-  ...mutationResolvers,
+
+  // Builders
+  buildMutationsResolvers,
+  buildQueriesResolvers,
 };

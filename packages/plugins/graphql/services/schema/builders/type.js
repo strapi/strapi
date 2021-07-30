@@ -6,7 +6,7 @@ const { objectType } = require('nexus');
 const { contentTypes } = require('@strapi/utils');
 
 const { mappers, utils: typeUtils } = require('../../types');
-const { buildAssocResolvers } = require('../../old/shadow-crud');
+const { buildAssociationResolver } = require('../resolvers');
 
 /**
  * @typedef TypeBuildersOptions
@@ -27,7 +27,7 @@ module.exports = context => ({
    * @return {NexusObjectTypeDef}
    */
   buildTypeDefinition(contentType) {
-    const { attributes, primaryKey, modelType, options = {} } = contentType;
+    const { attributes, modelType, options = {} } = contentType;
 
     const attributesKey = Object.keys(attributes);
     const hasTimestamps = isArray(options.timestamps);
@@ -41,11 +41,9 @@ module.exports = context => ({
       name,
 
       definition(t) {
-        // 1. ID & Primary key
+        // 1. ID
         // Always add the ID as a required attribute
-        // Also, add the primary key of the content type as a required ID attribute
         t.nonNull.id('id');
-        t.nonNull.id(primaryKey);
 
         // 2. Timestamps
         // If the content type has timestamps enabled
@@ -110,7 +108,7 @@ module.exports = context => ({
             }
 
             // Relations
-            else if (typeUtils.isRelation(attribute)) {
+            else if (typeUtils.isRelation(attribute) || typeUtils.isMedia(attribute)) {
               addRelationalAttribute(options);
             }
           });
@@ -189,41 +187,50 @@ const addRelationalAttribute = options => {
     attributeName,
     attribute,
     contentType,
-    context: { registry, strapi },
+    context: { strapi },
   } = options;
 
-  const { associations = [] } = contentType;
+  // todo[V4]: Clean the logic below
 
-  // Polymorphic relations
-  if (typeUtils.isMorphRelation(attribute)) {
-    const morphType = typeUtils.getMorphRelationTypeName(contentType, attributeName);
+  const isMorphLike = typeUtils.isMorphRelation(attribute);
+  const isToManyRelation = typeUtils.isRelation(attribute) && attribute.relation.endsWith('Many');
 
-    if (registry.has(morphType)) {
-      builder.field(attributeName, {
-        type: morphType,
-        resolve: buildAssocResolvers(contentType)[attributeName],
-      });
-    }
-
-    return;
-  }
-
-  const rel = strapi.getModel(attribute.model || attribute.collection, attribute.plugin);
-
-  const relationType = associations.find(assoc => assoc.alias === attributeName).nature;
-  const type = typeUtils.getTypeName(rel);
-
-  // todo[v4]: directly map collection relations somewhere else
-  if (relationType.endsWith('Many')) {
+  if (isToManyRelation) {
     builder = builder.list;
   }
 
-  builder.field(attributeName, {
-    type,
-    resolve: buildAssocResolvers(contentType)[attributeName],
-    // todo: use new assoc resolver for relations
-    // resolve: buildAssociationResolver(contentType.uid, attributeName),
+  const associationResolver = buildAssociationResolver({
+    contentTypeUID: contentType.uid,
+    attributeName,
+    strapi,
   });
+
+  if (typeUtils.isMedia(attribute)) {
+    const fileContentType = strapi.getModel('plugins::upload.file');
+    const type = typeUtils.getTypeName(fileContentType);
+
+    builder.field(attributeName, { type, resolve: associationResolver });
+  } else if (isMorphLike) {
+    const { target } = attribute;
+
+    if (typeof target === 'string') {
+      const targetContentType = strapi.getModel(target);
+      const type = typeUtils.getTypeName(targetContentType);
+
+      builder.field(attributeName, { type, resolve: associationResolver });
+    } else if (Array.isArray(target)) {
+      const type = typeUtils.getMorphRelationTypeName(contentType, attributeName);
+
+      builder.field(attributeName, { type, resolve: associationResolver });
+    } else if (!target) {
+      builder.field(attributeName, { type: 'GenericMorph', resolve: associationResolver });
+    }
+  } else {
+    const targetContentType = strapi.getModel(attribute.target);
+    const type = typeUtils.getTypeName(targetContentType);
+
+    builder.field(attributeName, { type, resolve: associationResolver });
+  }
 };
 
 /**
