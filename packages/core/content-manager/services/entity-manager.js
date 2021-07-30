@@ -61,6 +61,10 @@ const getDeepPopulate = (uid, populate, depth = 0) => {
       };
     }
 
+    if (attribute.type === 'media') {
+      populateAcc[attributeName] = true;
+    }
+
     if (attribute.type === 'dynamiczone') {
       populateAcc[attributeName] = {
         populate: (attribute.components || []).reduce((acc, componentUID) => {
@@ -82,7 +86,9 @@ const getBasePopulate = (uid, populate) => {
   const { attributes } = strapi.getModel(uid);
 
   return Object.keys(attributes).filter(attributeName => {
-    return ['relation', 'component', 'dynamiczone'].includes(attributes[attributeName].type);
+    return ['relation', 'component', 'dynamiczone', 'media'].includes(
+      attributes[attributeName].type
+    );
   });
 };
 
@@ -121,7 +127,7 @@ module.exports = {
   },
 
   async findOne(id, uid, populate) {
-    const params = { populate: getBasePopulate(uid, populate) };
+    const params = { populate: getDeepPopulate(uid, populate) };
 
     return strapi.entityService.findOne(uid, id, { params });
   },
@@ -144,7 +150,7 @@ module.exports = {
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    const params = { populate: getBasePopulate(uid) };
+    const params = { populate: getDeepPopulate(uid) };
 
     return strapi.entityService.create(uid, { params, data: publishData });
   },
@@ -152,13 +158,13 @@ module.exports = {
   update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
 
-    const params = { populate: getBasePopulate(uid) };
+    const params = { populate: getDeepPopulate(uid) };
 
     return strapi.entityService.update(uid, entity.id, { params, data: publishData });
   },
 
   delete(entity, uid) {
-    const params = { populate: getBasePopulate(uid) };
+    const params = { populate: getDeepPopulate(uid) };
 
     return strapi.entityService.delete(uid, entity.id, { params });
   },
@@ -180,7 +186,7 @@ module.exports = {
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 
-    const params = { populate: getBasePopulate(uid) };
+    const params = { populate: getDeepPopulate(uid) };
 
     return strapi.entityService.update(uid, entity.id, { params, data });
   }),
@@ -192,7 +198,7 @@ module.exports = {
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
 
-    const params = { populate: getBasePopulate(uid) };
+    const params = { populate: getDeepPopulate(uid) };
 
     return strapi.entityService.update(uid, entity.id, { params, data });
   }),

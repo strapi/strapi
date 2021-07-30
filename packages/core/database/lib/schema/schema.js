@@ -56,6 +56,7 @@ const createTable = meta => {
         // NOTE: we could pass uniquness for oneToOne to avoid creating more than one to one
 
         const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
+
         table.columns.push(
           createColumn(columnName, {
             type: 'integer',

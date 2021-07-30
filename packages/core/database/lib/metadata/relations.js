@@ -168,7 +168,7 @@ const createManyToMany = (attributeName, attribute, meta, metadata) => {
  * @param {ModelMetadata} meta
  * @param {Metadata} metadata
  */
-const createMorphToOne = (attributeName, attribute, meta, metadata) => {
+const createMorphToOne = (attributeName, attribute /*meta, metadata*/) => {
   const idColumnName = 'target_id';
   const typeColumnName = 'target_type';
 
@@ -344,7 +344,7 @@ const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
 
   if (isBidirectional(attribute)) {
     const inverseAttribute = targetMeta.attributes[attribute.inversedBy];
-    // TODO: do not invert here but invert in the query ? => means we need to use owner info in the query layer
+
     Object.assign(inverseAttribute, {
       joinColumn: {
         name: joinColumn.referencedColumn,
