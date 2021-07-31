@@ -1,1 +1,4 @@
-{}
+{
+  "plugin.description.short": "Enviar eventos de erros do Strapi para Sentry.",
+  "plugin.description.long": "Enviar eventos de erros do Strapi para Sentry."
+}

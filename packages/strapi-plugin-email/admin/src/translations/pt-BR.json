@@ -1,4 +1,22 @@
 {
   "plugin.description.long": "Enviar emails.",
-  "plugin.description.short": "Enviar emails."
+  "plugin.description.short": "Enviar emails.",
+  "SettingsNav.section-label": "E-mail",
+  "SettingsNav.link.settings": "Configurações de E-mail",
+  "Settings.title": "Configurações de E-mail",
+  "Settings.subTitle": "Teste as configurações para a extensão de e-mail",
+  "Settings.button.test-email": "Testar e-mail",
+  "Settings.notification.test.success": "Teste de e-mail concluído, verifique a caixa de e-mail {to}",
+  "Settings.notification.test.error": "Falhou ao enviar o e-mail de teste para {to}",
+  "Settings.notification.config.error": "Falhou ao recuperar as configurações de e-mail",
+  "Settings.form.title.config": "Configurações",
+  "Settings.form.title.test": "Enviar e-mail de teste",
+  "Settings.form.label.provider": "Provedor do e-mail",
+  "Settings.form.label.defaultFrom": "Remetente (padrão)",
+  "Settings.form.label.defaultReplyTo": "Responder para (padrão)",
+  "Settings.form.label.testAddress": "Testar entrega para o endereço de e-mail",
+  "Settings.form.placeholder.defaultFrom": "ex: Strapi Não-Responder <nao-responder@strapi.io>",
+  "Settings.form.placeholder.defaultReplyTo": "ex: Strapi <exemplo@strapi.io>",
+  "Settings.form.placeholder.testAddress": "ex: developer@example.com",
+  "Settings.form.text.configuration": "A extensão é configurada através do arquivo {file}, verifique este {link} para a documentação."
 }
