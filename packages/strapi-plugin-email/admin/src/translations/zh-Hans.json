@@ -1,4 +1,22 @@
 {
   "plugin.description.long": "发送电子邮件。",
-  "plugin.description.short": "发送电子邮件。"
+  "plugin.description.short": "发送电子邮件。",
+  "SettingsNav.section-label": "邮件插件",
+  "SettingsNav.link.settings": "邮件设置",
+  "Settings.title": "邮件设置",
+  "Settings.subTitle": "邮件功能设置",
+  "Settings.button.test-email": "发送测试邮件",
+  "Settings.notification.test.success": "邮件测试成功，请查收 {to} 的收件箱。",
+  "Settings.notification.test.error": "给 {to} 的测试邮件发送失败。",
+  "Settings.notification.config.error": "获取邮件设置失败",
+  "Settings.form.title.config": "配置",
+  "Settings.form.title.test": "发送测试邮件",
+  "Settings.form.label.provider": "邮件发送方式（Provider）",
+  "Settings.form.label.defaultFrom": "默认发送邮箱",
+  "Settings.form.label.defaultReplyTo": "默认回复邮箱",
+  "Settings.form.label.testAddress": "请输入要接受测试邮件的邮箱地址",
+  "Settings.form.placeholder.defaultFrom": "如：Strapi No-Reply <no-reply@strapi.io>",
+  "Settings.form.placeholder.defaultReplyTo": "如：Strapi <example@strapi.io>",
+  "Settings.form.placeholder.testAddress": "如：developer@example.com",
+  "Settings.form.text.configuration": "插件配置文件：{file}，配置文档：{link}。"
 }

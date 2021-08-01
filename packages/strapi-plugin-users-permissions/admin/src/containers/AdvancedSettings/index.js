@@ -19,7 +19,10 @@ import reducer, { initialState } from './reducer';
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
   const [showModalWarning, setShowModalWarning] = useState(false);
-  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
+  const pageTitle = formatMessage({
+    id: getTrad('HeaderNav.link.advancedSettings'),
+    defaultMessage: 'Advanced Settings',
+  });
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateAdvancedSettings };
   }, []);

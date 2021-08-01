@@ -216,7 +216,15 @@ const ProvidersPage = () => {
                   lineHeight="18px"
                   color={provider.enabled ? 'green' : 'lightOrange'}
                 >
-                  {provider.enabled ? 'Enabled' : 'Disabled'}
+                  {provider.enabled
+                    ? formatMessage({
+                        id: getTrad('List.row.provider.enabled'),
+                        defaultMessage: 'Enabled',
+                      })
+                    : formatMessage({
+                        id: getTrad('List.row.provider.disabled'),
+                        defaultMessage: 'Disabled',
+                      })}
                 </Text>
               </td>
             </ListRow>
