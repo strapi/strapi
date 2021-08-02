@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@koa/cors": "^3.0.0",
+    "@strapi/admin": "3.6.5",
     "@strapi/database": "3.6.5",
     "@strapi/generate": "3.6.5",
     "@strapi/generate-api": "3.6.5",

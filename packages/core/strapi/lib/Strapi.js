@@ -51,7 +51,6 @@ class Strapi {
 
     this.dir = opts.dir || process.cwd();
 
-    this.admin = {};
     this.plugins = {};
     this.config = loadConfiguration(this.dir, opts);
     this.app.proxy = this.config.get('server.proxy');
@@ -327,8 +326,8 @@ class Strapi {
 
     const modules = await loadModules(this);
 
+    this.admin = require('@strapi/admin/strapi-server');
     this.api = modules.api;
-    this.admin = modules.admin;
     this.components = modules.components;
     this.plugins = modules.plugins;
     this.middleware = modules.middlewares;
