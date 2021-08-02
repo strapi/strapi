@@ -27,6 +27,7 @@
   "List.title.providers.disabled.singular": "{number} is disabled",
   "List.title.providers.enabled.plural": "{number} providers are enabled and",
   "List.title.providers.enabled.singular": "{number} provider is enabled and",
+  "List.button.roles": "Add new role",
   "List.row.provider.enabled": "Enabled",
   "List.row.provider.disabled": "Disabled",
   "Plugin.permissions.plugins.description": "Define all allowed actions for the {name} plugin.",

@@ -56,5 +56,6 @@
   "Settings.locales.modal.locales.displayName.error": "语言包展示名称最多只能包含50个字符",
   "Settings.locales.modal.locales.displayName.description":"管理面板中该语言包显示的名称",
   "Settings.locales.modal.create.tab.label":"Navigating between the I18N base settings and advanced settings",
-  "components.Select.locales.not-available": "暂无内容"
+  "components.Select.locales.not-available": "暂无内容",
+  "Content available in":"多语言版本"
 }

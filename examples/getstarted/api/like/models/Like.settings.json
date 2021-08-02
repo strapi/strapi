@@ -12,13 +12,13 @@
     "comment": ""
   },
   "attributes": {
-    "authore": {
+    "author": {
       "plugin": "users-permissions",
       "model": "user"
     },
     "review": {
-      "model": "review",
-      "via": "likes"
+      "via": "likes",
+      "model": "review"
     },
     "address": {
       "via": "likes",
