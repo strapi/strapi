@@ -10,6 +10,7 @@ const DEFAULT_PERMISSIONS = [
   { action: 'callback', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   { action: 'connect', controller: 'auth', type: 'users-permissions', roleType: null },
   { action: 'forgotpassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
+  { action: 'resetpassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   { action: 'register', controller: 'auth', type: 'users-permissions', roleType: 'public' },
   {
     action: 'emailconfirmation',
@@ -17,20 +18,18 @@ const DEFAULT_PERMISSIONS = [
     type: 'users-permissions',
     roleType: 'public',
   },
-  { action: 'resetpassword', controller: 'auth', type: 'users-permissions', roleType: 'public' },
-  { action: 'init', controller: 'userspermissions', type: null, roleType: null },
   { action: 'me', controller: 'user', type: 'users-permissions', roleType: null },
-  { action: 'autoreload', controller: null, type: null, roleType: null },
 ];
 
-const isPermissionEnabled = (permission, role) =>
-  DEFAULT_PERMISSIONS.some(
+const isEnabledByDefault = (permission, role) => {
+  return DEFAULT_PERMISSIONS.some(
     defaultPerm =>
       (defaultPerm.action === null || permission.action === defaultPerm.action) &&
       (defaultPerm.controller === null || permission.controller === defaultPerm.controller) &&
       (defaultPerm.type === null || permission.type === defaultPerm.type) &&
       (defaultPerm.roleType === null || role.type === defaultPerm.roleType)
   );
+};
 
 module.exports = ({ strapi }) => ({
   async createRole(params) {
@@ -254,7 +253,7 @@ module.exports = ({ strapi }) => ({
   async updatePermissions() {
     const roles = await strapi.query('plugins::users-permissions.role').findMany();
 
-    const rolesMap = _.groupBy(roles, 'id');
+    const rolesMap = _.keyBy(roles, 'id');
 
     const dbPermissions = await strapi
       .query('plugins::users-permissions.permission')
@@ -319,18 +318,18 @@ module.exports = ({ strapi }) => ({
 
       // Execute request to update entries in database for each role.
       await Promise.all(
-        toAdd.map(permission =>
-          query.create({
+        toAdd.map(permission => {
+          return query.create({
             data: {
               type: permission.type,
               controller: permission.controller,
               action: permission.action,
-              enabled: isPermissionEnabled(permission, rolesMap[permission.roleId]),
+              enabled: isEnabledByDefault(permission, rolesMap[permission.roleId]),
               policy: '',
               role: permission.roleId,
             },
-          })
-        )
+          });
+        })
       );
 
       await Promise.all(

@@ -174,7 +174,7 @@
     {
       "method": "GET",
       "path": "/connect/*",
-      "handler": "Auth.connect",
+      "handler": "auth.connect",
       "config": {
         "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
@@ -188,7 +188,7 @@
     {
       "method": "POST",
       "path": "/auth/local",
-      "handler": "Auth.callback",
+      "handler": "auth.callback",
       "config": {
         "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
@@ -202,7 +202,7 @@
     {
       "method": "POST",
       "path": "/auth/local/register",
-      "handler": "Auth.register",
+      "handler": "auth.register",
       "config": {
         "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
@@ -217,7 +217,7 @@
     {
       "method": "GET",
       "path": "/auth/:provider/callback",
-      "handler": "Auth.callback",
+      "handler": "auth.callback",
       "config": {
         "policies": [],
         "prefix": "",
@@ -231,7 +231,7 @@
     {
       "method": "POST",
       "path": "/auth/forgot-password",
-      "handler": "Auth.forgotPassword",
+      "handler": "auth.forgotPassword",
       "config": {
         "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
@@ -245,7 +245,7 @@
     {
       "method": "POST",
       "path": "/auth/reset-password",
-      "handler": "Auth.resetPassword",
+      "handler": "auth.resetPassword",
       "config": {
         "policies": ["plugins::users-permissions.ratelimit"],
         "prefix": "",
@@ -259,7 +259,7 @@
     {
       "method": "GET",
       "path": "/auth/email-confirmation",
-      "handler": "Auth.emailConfirmation",
+      "handler": "auth.emailConfirmation",
       "config": {
         "policies": [],
         "prefix": "",
@@ -273,7 +273,7 @@
     {
       "method": "POST",
       "path": "/auth/send-email-confirmation",
-      "handler": "Auth.sendEmailConfirmation",
+      "handler": "auth.sendEmailConfirmation",
       "config": {
         "policies": [],
         "prefix": "",
@@ -287,7 +287,7 @@
     {
       "method": "GET",
       "path": "/users/count",
-      "handler": "User.count",
+      "handler": "user.count",
       "config": {
         "prefix": "",
         "policies": []
@@ -296,7 +296,7 @@
     {
       "method": "GET",
       "path": "/users",
-      "handler": "User.find",
+      "handler": "user.find",
       "config": {
         "policies": [],
         "prefix": "",
@@ -311,7 +311,7 @@
     {
       "method": "GET",
       "path": "/users/me",
-      "handler": "User.me",
+      "handler": "user.me",
       "config": {
         "policies": [],
         "prefix": "",
@@ -326,7 +326,7 @@
     {
       "method": "GET",
       "path": "/users/:id",
-      "handler": "User.findOne",
+      "handler": "user.findOne",
       "config": {
         "policies": [],
         "prefix": "",
@@ -341,7 +341,7 @@
     {
       "method": "POST",
       "path": "/users",
-      "handler": "User.create",
+      "handler": "user.create",
       "config": {
         "policies": [],
         "prefix": ""
@@ -350,7 +350,7 @@
     {
       "method": "PUT",
       "path": "/users/:id",
-      "handler": "User.update",
+      "handler": "user.update",
       "config": {
         "policies": [],
         "prefix": "",
@@ -365,7 +365,7 @@
     {
       "method": "DELETE",
       "path": "/users/:id",
-      "handler": "User.destroy",
+      "handler": "user.destroy",
       "config": {
         "policies": [],
         "prefix": "",

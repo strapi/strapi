@@ -799,7 +799,7 @@ const applyPopulate = async (results, populate, ctx) => {
       });
 
       continue;
-    } else if (attribute.relation in ['morphOne', 'morphMany']) {
+    } else if (['morphOne', 'morphMany'].includes(attribute.relation)) {
       const { target, morphBy } = attribute;
 
       const targetAttribute = db.metadata.get(target).attributes[morphBy];
@@ -849,7 +849,7 @@ const applyPopulate = async (results, populate, ctx) => {
 
         if (_.isEmpty(referencedValues)) {
           results.forEach(result => {
-            result[key] = [];
+            result[key] = attribute.relation === 'morphOne' ? null : [];
           });
 
           continue;

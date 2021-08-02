@@ -91,17 +91,12 @@ describe('CM API - Basic + compo + draftAndPublish', () => {
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url:
-        '/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp',
+      url: `/content-manager/collection-types/application::product-with-compo-and-dp.product-with-compo-and-dp/${data.productsWithCompoAndDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body.results)).toBe(true);
-    expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toMatchObject(data.productsWithCompoAndDP[0]);
-    res.body.results.forEach(p => {
-      expect(p.published_at).toBeNull();
-    });
+    expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
+    expect(res.body.published_at).toBeNull();
   });
 
   test('Update product with compo', async () => {

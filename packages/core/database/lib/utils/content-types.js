@@ -6,7 +6,7 @@ const transformAttribute = attribute => {
       // TODO: handle a filter on field
       return {
         type: 'relation',
-        relation: attribute.single === true ? 'morphOne' : 'morphMany',
+        relation: attribute.multiple === true ? 'morphMany' : 'morphOne',
         target: 'plugins::upload.file',
         morphBy: 'related',
       };

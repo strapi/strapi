@@ -93,45 +93,51 @@ function createSchemaBuilder({ components, contentTypes }) {
       return Object.keys(attributes).reduce((acc, key) => {
         const attribute = attributes[key];
 
-        const { configurable } = attribute;
+        const { configurable, private: isPrivate } = attribute;
+
+        const baseProperties = {
+          private: isPrivate === true ? true : undefined,
+          configurable: configurable === false ? false : undefined,
+        };
 
         if (attribute.type === 'relation') {
-          const { target, relation, targetAttribute, private: isPrivate } = attribute;
+          const { target, relation, targetAttribute, dominant, ...restOfProperties } = attribute;
 
           const attr = {
             type: 'relation',
             relation,
             target,
-            configurable: configurable === false ? false : undefined,
-            private: isPrivate === true ? true : undefined,
+            ...restOfProperties,
+            ...baseProperties,
           };
+
+          acc[key] = attr;
 
           if (target && !this.contentTypes.has(target)) {
             throw new Error(`target: ${target} does not exist`);
           }
 
-          // FIXME: this will create inversion of inversedBy & mappedBy fields
-          if (
-            ['oneToOne', 'manyToOne', 'manyToMany'].includes(relation) &&
-            !_.isNil(targetAttribute)
-          ) {
+          if (_.isNil(targetAttribute)) {
+            return acc;
+          }
+
+          if (['oneToOne', 'manyToMany'].includes(relation) && dominant === true) {
             attr.inversedBy = targetAttribute;
-          } else if (['oneToMany'].includes(relation) && !_.isNil(targetAttribute)) {
+          } else if (['oneToOne', 'manyToMany'].includes(relation) && dominant === false) {
+            attr.mappedBy = targetAttribute;
+          } else if (['oneToOne', 'manyToOne', 'manyToMany'].includes(relation)) {
+            attr.inversedBy = targetAttribute;
+          } else if (['oneToMany'].includes(relation)) {
             attr.mappedBy = targetAttribute;
           }
 
-          acc[key] = attr;
           return acc;
         }
 
-        if (_.has(attribute, 'type')) {
-          acc[key] = {
-            ...attribute,
-            configurable: configurable === false ? false : undefined,
-          };
-
-          return acc;
-        }
+        acc[key] = {
+          ...attribute,
+          ...baseProperties,
+        };
 
         return acc;
       }, {});
