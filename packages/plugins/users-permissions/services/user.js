@@ -35,9 +35,7 @@ module.exports = {
    */
   async add(values) {
     if (values.password) {
-      values.password = await strapi.plugins['users-permissions'].services.user.hashPassword(
-        values
-      );
+      values.password = await getService('user').hashPassword(values);
     }
 
     return strapi
@@ -125,7 +123,7 @@ module.exports = {
   },
 
   async sendConfirmationEmail(user) {
-    const userPermissionService = strapi.plugins['users-permissions'].services.userspermissions;
+    const userPermissionService = getService('users-permissions');
     const pluginStore = await strapi.store({
       environment: '',
       type: 'plugin',
