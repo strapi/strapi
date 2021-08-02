@@ -11,7 +11,6 @@ import ContainerFluid from '../../../components/ContainerFluid';
 import { Permissions, RoleForm } from '../../../components/Roles';
 import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
 import schema from './utils/schema';
-import { getTrad } from '../../../../../../strapi-plugin-users-permissions/admin/src/utils';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -37,7 +36,7 @@ const EditPage = () => {
       : [
           {
             label: formatMessage({
-              id: getTrad('app.components.Button.reset'),
+              id: 'app.components.Button.reset',
               defaultMessage: 'Reset',
             }),
             disabled: role.code === 'strapi-super-admin',
@@ -50,7 +49,7 @@ const EditPage = () => {
           },
           {
             label: formatMessage({
-              id: getTrad('app.components.Button.save'),
+              id: 'app.components.Button.save',
               defaultMessage: 'Save',
             }),
             disabled: role.code === 'strapi-super-admin',
@@ -92,7 +91,7 @@ const EditPage = () => {
 
       strapi.notification.toggle({
         type: 'success',
-        message: { id: getTrad('notification.success.saved') },
+        message: { id: 'notification.success.saved' },
       });
     } catch (err) {
       console.error(err.response);
@@ -131,12 +130,12 @@ const EditPage = () => {
               <Header
                 title={{
                   label: formatMessage({
-                    id: getTrad('Settings.roles.edit.title'),
+                    id: 'Settings.roles.edit.title',
                     defaultMessage: 'Edit a role',
                   }),
                 }}
                 content={formatMessage({
-                  id: getTrad('Settings.roles.create.description'),
+                  id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
                 actions={headerActions(handleSubmit, handleReset)}

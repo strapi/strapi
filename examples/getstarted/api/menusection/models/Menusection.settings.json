@@ -8,10 +8,7 @@
   "options": {
     "draftAndPublish": false,
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -27,10 +24,8 @@
       "required": true
     },
     "menu": {
-      "columnName": "menu",
-      "targetColumnName": "menusection",
-      "via": "menusections",
-      "model": "menu"
+      "model": "menu",
+      "via": "menusections"
     }
   }
 }

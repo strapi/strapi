@@ -1,5 +1,4 @@
 {
-  "kind": "collectionType",
   "collectionName": "users-permissions_user",
   "info": {
     "name": "user",
@@ -7,10 +6,7 @@
   },
   "options": {
     "draftAndPublish": false,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ]
+    "timestamps": ["created_at", "updated_at"]
   },
   "attributes": {
     "username": {

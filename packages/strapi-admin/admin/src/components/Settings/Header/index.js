@@ -3,7 +3,6 @@ import { Header as PluginHeader } from '@buffetjs/custom';
 import { isEqual } from 'lodash';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { getTrad } from '../../../../../../strapi-plugin-users-permissions/admin/src/utils';
 
 const Header = ({
   content,
@@ -29,7 +28,7 @@ const Header = ({
             disabled: areButtonsDisabled,
             color: 'cancel',
             label: formatMessage({
-              id: getTrad('app.components.Button.reset'),
+              id: 'app.components.Button.reset',
               defaultMessage: 'Reset',
             }),
             type: 'button',
@@ -38,7 +37,7 @@ const Header = ({
             disabled: areButtonsDisabled,
             color: 'success',
             label: formatMessage({
-              id: getTrad('app.components.Button.save'),
+              id: 'app.components.Button.save',
               defaultMessage: 'Save',
             }),
             type: 'submit',

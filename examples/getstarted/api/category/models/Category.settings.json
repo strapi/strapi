@@ -6,12 +6,11 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": false,
+    "draftAndPublish": true,
     "increments": true,
     "timestamps": true,
     "comment": ""
   },
-  "pluginOptions": {},
   "attributes": {
     "name": {
       "type": "string"

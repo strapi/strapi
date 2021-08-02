@@ -17,16 +17,11 @@
     },
     "menusections": {
       "via": "menu",
-      "columnName": "menusection",
       "collection": "menusection"
     },
     "restaurant": {
       "via": "menu",
       "model": "restaurant"
-    },
-    "slug": {
-      "type": "uid",
-      "targetField": "description"
     }
   }
 }

@@ -1,5 +1,4 @@
 {
-  "kind": "collectionType",
   "collectionName": "reviews",
   "info": {
     "name": "review",
@@ -8,10 +7,7 @@
   "options": {
     "draftAndPublish": false,
     "increments": true,
-    "timestamps": [
-      "created_at",
-      "updated_at"
-    ],
+    "timestamps": ["created_at", "updated_at"],
     "comment": ""
   },
   "attributes": {
@@ -34,7 +30,6 @@
       "plugin": "users-permissions"
     },
     "restaurant": {
-      "columnName": "review",
       "model": "restaurant"
     }
   }
