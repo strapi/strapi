@@ -19,25 +19,21 @@ jest.mock('@sentry/node', () => {
   };
 });
 
-let sentryService = require('../sentry');
+const sentryServiceLoader = require('../sentry');
 const defaultConfig = require('../../config').default;
 
 describe('Sentry service', () => {
   beforeEach(() => {
     // Reset Strapi state
     global.strapi = {
-      config: {},
-      plugins: {
-        sentry: {
-          config: defaultConfig,
-        },
+      config: {
+        get: () => defaultConfig,
       },
       log: {
         warn: jest.fn(),
         info: jest.fn(),
       },
     };
-    sentryService = require('..');
   });
 
   afterEach(() => {
@@ -46,6 +42,7 @@ describe('Sentry service', () => {
   });
 
   it('disables Sentry when no DSN is provided', () => {
+    const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
     expect(strapi.log.info).toHaveBeenCalledWith(expect.stringMatching(/disabled/i));
 
@@ -54,9 +51,8 @@ describe('Sentry service', () => {
   });
 
   it('disables Sentry when an invalid DSN is provided', () => {
-    global.strapi.plugins.sentry.config = {
-      dsn: INVALID_DSN,
-    };
+    global.strapi.config.get = () => ({ dsn: INVALID_DSN });
+    const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
     expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringMatching(/could not set up sentry/i));
 
@@ -65,14 +61,14 @@ describe('Sentry service', () => {
   });
 
   it("doesn't send events before init", () => {
+    const sentryService = sentryServiceLoader({ strapi });
     sentryService.sendError(Error());
     expect(strapi.log.warn).toHaveBeenCalledWith(expect.stringMatching(/cannot send event/i));
   });
 
   it('initializes and sends errors', () => {
-    global.strapi.plugins.sentry.config = {
-      dsn: VALID_DSN,
-    };
+    global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: true });
+    const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
 
     // Saves the instance correctly
@@ -92,10 +88,8 @@ describe('Sentry service', () => {
 
   it('does not not send metadata when the option is disabled', () => {
     // Init with metadata option disabled
-    global.strapi.plugins.sentry.config = {
-      dsn: VALID_DSN,
-      sendMetadata: false,
-    };
+    global.strapi.config.get = () => ({ dsn: VALID_DSN, sendMetadata: false });
+    const sentryService = sentryServiceLoader({ strapi });
     sentryService.init();
 
     // Send error

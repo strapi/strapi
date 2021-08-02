@@ -1,7 +1,7 @@
 'use strict';
 
-const { sendDidUpdateI18nLocalesEvent, sendDidInitializeEvent } = require('../metrics');
-const { isLocalizedContentType } = require('../content-types');
+const metricsLoader = require('../metrics');
+const { isLocalizedContentType } = require('../content-types')();
 
 describe('Metrics', () => {
   test('sendDidInitializeEvent', async () => {
@@ -38,6 +38,8 @@ describe('Metrics', () => {
         send: jest.fn(),
       },
     };
+
+    const { sendDidInitializeEvent } = metricsLoader({ strapi });
 
     await sendDidInitializeEvent();
 
@@ -80,6 +82,8 @@ describe('Metrics', () => {
         send: jest.fn(),
       },
     };
+
+    const { sendDidUpdateI18nLocalesEvent } = metricsLoader({ strapi });
 
     await sendDidUpdateI18nLocalesEvent();
 

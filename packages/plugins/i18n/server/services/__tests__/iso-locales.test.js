@@ -1,6 +1,6 @@
 'use strict';
 
-const { getIsoLocales } = require('../iso-locales');
+const { getIsoLocales } = require('../iso-locales')();
 
 describe('ISO locales', () => {
   test('getIsoLocales', () => {

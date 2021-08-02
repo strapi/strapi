@@ -8,7 +8,7 @@ const {
   getNonLocalizedAttributes,
   copyNonLocalizedAttributes,
   fillNonLocalizedAttributes,
-} = require('../content-types');
+} = require('../content-types')();
 
 describe('content-types service', () => {
   describe('isLocalizedContentType', () => {

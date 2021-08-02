@@ -1,6 +1,8 @@
 'use strict';
 
-const entityManager = require('../entity-manager');
+const entityManagerLoader = require('../entity-manager');
+
+let entityManager;
 
 describe('Content-Manager', () => {
   const fakeModel = {
@@ -20,6 +22,7 @@ describe('Content-Manager', () => {
         eventHub: { emit: jest.fn() },
         getModel: jest.fn(() => fakeModel),
       };
+      entityManager = entityManagerLoader({ strapi });
     });
 
     afterEach(() => {
@@ -49,6 +52,7 @@ describe('Content-Manager', () => {
         eventHub: { emit: jest.fn() },
         getModel: jest.fn(() => fakeModel),
       };
+      entityManager = entityManagerLoader({ strapi });
     });
 
     afterEach(() => {

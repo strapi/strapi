@@ -1,5 +1,5 @@
 'use strict';
-const { createSanitizer } = require('../core-api');
+const { createSanitizer } = require('../core-api')();
 
 describe('Core API', () => {
   describe('sanitizer', () => {
