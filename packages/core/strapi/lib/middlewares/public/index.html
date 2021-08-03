@@ -16,7 +16,7 @@
   <body lang="en">
     <section class="wrapper">
       <h1><img class="logo" src="<%= strapi.config.server.url %>/assets/images/logo_login.png" /></h1>
-      <% if (strapi.config.environment === 'development' && isInitialised) { %>
+      <% if (strapi.config.environment === 'development' && isInitialized) { %>
         <div class="informations">
           <div>
             <span class="environment"><%= strapi.config.environment %></span>
@@ -31,7 +31,7 @@
             <% } %>
           </div>
         </div>
-      <% } else if (strapi.config.environment === 'development' && !isInitialised) { %>
+      <% } else if (strapi.config.environment === 'development' && !isInitialized) { %>
         <div class="lets-started">
           <h2>Let's get started!</h2>
           <p>To discover the power provided by Strapi, you need to create an administrator.</p>
@@ -55,7 +55,7 @@
       <% } %>
     </section>
 
-    <% if (strapi.config.environment === 'development' && !isInitialised) { %>
+    <% if (strapi.config.environment === 'development' && !isInitialized) { %>
       <script>
         var images=document.querySelectorAll('.people-saying-hello img');var nextIndex=0;setInterval(function(){var currentIndex=0;images.forEach(function(image,index){if(image.className==='visible'){currentIndex=index}});nextIndex=currentIndex+1;if(nextIndex===images.length){nextIndex=0}
         images.forEach(function(image){image.classList.remove('visible')})
