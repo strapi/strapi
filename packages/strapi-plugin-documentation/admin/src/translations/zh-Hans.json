@@ -10,7 +10,7 @@
   "containers.HomePage.PopUpWarning.confirm": "确定",
   "containers.HomePage.PopUpWarning.message": "您确定要删除此版本吗？",
   "containers.HomePage.copied": "令牌已被复制到粘贴板",
-  "containers.HomePage.form.jwtToken": "检索您的 JWT 令牌",
+  "containers.HomePage.form.jwtToken": "获取您的 JWT 令牌",
   "containers.HomePage.form.jwtToken.description": "复制此令牌，并用它在 Swagger 中发出请求",
   "containers.HomePage.form.password": "密码",
   "containers.HomePage.form.password.inputDescription": "设置访问所需的密码",

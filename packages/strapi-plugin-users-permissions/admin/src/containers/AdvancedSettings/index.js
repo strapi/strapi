@@ -179,7 +179,13 @@ const AdvancedSettingsPage = () => {
         <form onSubmit={handleSubmit}>
           <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
           <ListBaselineAlignment />
-          <FormBloc title="Settings" isLoading={showLoader}>
+          <FormBloc
+            title={formatMessage({
+              id: getTrad('Settings.advancedSettings.title'),
+              defaultMessage: 'Settings',
+            })}
+            isLoading={showLoader}
+          >
             {form.map(input => {
               return (
                 <SizedInput
