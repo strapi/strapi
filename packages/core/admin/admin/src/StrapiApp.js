@@ -11,7 +11,7 @@ import { basename, createHook } from './core/utils';
 import configureStore from './core/store/configureStore';
 import { Plugin } from './core/apis';
 import App from './pages/App';
-import AuthLogo from './assets/images/logo_strapi_auth.png';
+import AuthLogo from './assets/images/logo_strapi_auth_v4.png';
 import MenuLogo from './assets/images/strapi-img.png';
 import Providers from './components/Providers';
 import Theme from './components/Theme';

@@ -13,6 +13,7 @@ import {
   useNotification,
   TrackingContext,
 } from '@strapi/helper-plugin';
+import { SkipToContent } from '@strapi/parts';
 import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
@@ -105,6 +106,7 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
+      <SkipToContent>Skip to content</SkipToContent>
       <TrackingContext.Provider value={uuid}>
         <Switch>
           {authRoutes}

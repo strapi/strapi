@@ -1,84 +1,97 @@
 import React from 'react';
-import { Checkbox } from '@buffetjs/core';
-import { useIntl } from 'react-intl';
-import { get } from 'lodash';
+import { Box, Stack, H1, Text, Subtitle, Button, Checkbox, TextInput, Main } from '@strapi/parts';
 import PropTypes from 'prop-types';
-import { BaselineAlignment } from '@strapi/helper-plugin';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import { Formik } from 'formik';
 
-import Button from '../../../../components/FullWidthButton';
-import AuthLink from '../AuthLink';
-import Box from '../Box';
-import Input from '../Input';
-import Logo from '../Logo';
-import Section from '../Section';
+import { Column } from '../../../../layouts/UnauthenticatedLayout';
+import { useConfigurations } from '../../../../hooks';
 
-const Login = ({ children, formErrors, modifiedData, onChange, onSubmit, requestError }) => {
+const AuthButton = styled(Button)`
+  display: inline-block;
+  width: 100%;
+`;
+
+const Login = ({ onSubmit, schema }) => {
+  const { authLogo } = useConfigurations();
   const { formatMessage } = useIntl();
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground>
-        <BaselineAlignment top size="25px">
-          <Box errorMessage={get(requestError, 'errorMessage', null)}>
-            <form onSubmit={onSubmit}>
-              <Input
-                autoFocus
-                error={formErrors.email}
-                label="Auth.form.email.label"
+    <Main labelledBy="welcome">
+      <Formik
+        enableReinitialize
+        initialValues={{
+          email: '',
+          password: '',
+        }}
+        onSubmit={onSubmit}
+        validationSchema={schema}
+        validateOnChange={false}
+      >
+        {({ handleSubmit, values, errors, handleChange }) => (
+          <form noValidate onSubmit={handleSubmit}>
+            <Column>
+              <img src={authLogo} alt="strapi-app-logo" style={{ height: '72px' }} />
+              <Box paddingTop="6" paddingBottom="1">
+                <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+              </Box>
+              <Box paddingBottom="7">
+                <Subtitle textColor="neutral600">
+                  {formatMessage({ id: 'Auth.form.welcome.subtitle' })}
+                </Subtitle>
+              </Box>
+              {errors.errorMessage && <Text textColor="danger600">{errors.errorMessage}</Text>}
+            </Column>
+
+            <Stack size={6}>
+              <TextInput
+                error={errors.email ? formatMessage({ id: errors.email }) : ''}
+                value={values.email}
+                onChange={handleChange}
+                label={formatMessage({ id: 'Auth.form.email.label' })}
+                placeholder={formatMessage({ id: 'Auth.form.email.placeholder' })}
                 name="email"
-                onChange={onChange}
-                placeholder="Auth.form.email.placeholder"
-                type="email"
-                validations={{ required: true }}
-                value={modifiedData.email}
+                required
               />
-              <Input
-                error={formErrors.password}
-                label="Auth.form.password.label"
+              <TextInput
+                error={errors.password ? formatMessage({ id: errors.password }) : ''}
+                onChange={handleChange}
+                value={values.password}
+                label={formatMessage({ id: 'Auth.form.password.label' })}
                 name="password"
-                onChange={onChange}
                 type="password"
-                validations={{ required: true }}
-                value={modifiedData.password}
+                required
               />
               <Checkbox
-                type="checkbox"
-                message={formatMessage({ id: 'Auth.form.rememberMe.label' })}
+                onValueChange={checked => {
+                  handleChange({ target: { value: checked, name: 'rememberMe' } });
+                }}
+                value={values.rememberMe}
                 name="rememberMe"
-                onChange={onChange}
-                value={modifiedData.rememberMe}
-              />
-              <BaselineAlignment top size="27px">
-                <Button type="submit" color="primary" textTransform="uppercase">
-                  {formatMessage({ id: 'Auth.form.button.login' })}
-                </Button>
-              </BaselineAlignment>
-            </form>
-            {children}
-          </Box>
-        </BaselineAlignment>
-      </Section>
-      <AuthLink label="Auth.link.forgot-password" to="/auth/forgot-password" />
-    </>
+              >
+                {formatMessage({ id: 'Auth.form.rememberMe.label' })}
+              </Checkbox>
+              <AuthButton type="submit">
+                {formatMessage({ id: 'Auth.form.button.login' })}
+              </AuthButton>
+            </Stack>
+          </form>
+        )}
+      </Formik>
+    </Main>
   );
 };
 
 Login.defaultProps = {
-  children: null,
-  onSubmit: e => e.preventDefault(),
-  requestError: null,
+  onSubmit: () => {},
 };
 
 Login.propTypes = {
-  children: PropTypes.node,
-  formErrors: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
-  requestError: PropTypes.object,
+  schema: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Login;

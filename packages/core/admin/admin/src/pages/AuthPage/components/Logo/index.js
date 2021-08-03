@@ -1,11 +1,10 @@
 import React from 'react';
 import { useConfigurations } from '../../../../hooks';
-import Img from './Img';
 
 const Logo = () => {
   const { authLogo } = useConfigurations();
 
-  return <Img src={authLogo} alt="strapi" />;
+  return <img src={authLogo} alt="strapi" style={{ height: '72px' }} />;
 };
 
 export default Logo;
