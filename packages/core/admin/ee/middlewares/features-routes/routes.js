@@ -3,17 +3,17 @@
 module.exports = {
   sso: [
     {
+      method: 'GET',
+      path: '/providers',
+      handler: 'authentication.getProviders',
+    },
+    {
+      method: 'GET',
+      path: '/connect/:provider',
+      handler: 'authentication.providerLogin',
+    },
+    {
       method: 'POST',
-      path: '/providers',
-      handler: 'authentication.getProviders',
-    },
-    {
-      method: 'GET',
-      path: '/providers',
-      handler: 'authentication.getProviders',
-    },
-    {
-      method: 'GET',
       path: '/connect/:provider',
       handler: 'authentication.providerLogin',
     },
