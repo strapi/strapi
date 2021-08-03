@@ -327,6 +327,11 @@ class Strapi {
     const modules = await loadModules(this);
 
     this.admin = require('@strapi/admin/strapi-server');
+
+    // TODO: rename into just admin and ./config/admin.js
+    const userAdminConfig = strapi.config.get('server.admin');
+    this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
+
     this.api = modules.api;
     this.components = modules.components;
     this.plugins = modules.plugins;
