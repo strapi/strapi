@@ -1,12 +1,13 @@
 import styled from 'styled-components';
 
+// TODO : To migrate with @strapi/parts
 const Wrapper = styled.div`
   display: flex;
   align-items: center;
   margin-top: 2rem;
   border-radius: 4px;
-  border-left: 4px solid #317ff6;
-  box-shadow: 0 2px 4px #e3e9f3;
+  border-left: 4px solid ${({ theme }) => theme.main.colors.mediumBlue};
+  box-shadow: 0 2px 4px ${({ theme }) => theme.main.colors.darkGrey};
   padding: 8px 16px;
 
   .bannerImage {
@@ -17,8 +18,8 @@ const Wrapper = styled.div`
   }
 
   .bannerLink {
-    color: #317ff6;
-    font-weight: 700;
+    color: ${({ theme }) => theme.main.colors.mediumBlue};
+    font-weight: ${({ theme }) => theme.main.fontWeights.bold};
     svg {
       margin-left: 4px;
     }
