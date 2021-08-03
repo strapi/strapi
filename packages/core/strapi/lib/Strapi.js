@@ -5,7 +5,6 @@ const http = require('http');
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const { models } = require('@strapi/utils');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 
@@ -41,11 +40,6 @@ class Strapi {
     this.router = new Router();
 
     this.initServer();
-
-    // Utils.
-    this.utils = {
-      models,
-    };
 
     this.dir = opts.dir || process.cwd();
 
