@@ -6,6 +6,7 @@ const { getDialect } = require('./dialects');
 const createSchemaProvider = require('./schema');
 const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
+const { createLifecyclesManager } = require('./lifecycles');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -23,6 +24,7 @@ class Database {
     this.schema = createSchemaProvider(this);
     // TODO: migrations -> allow running them through cli before startup
 
+    this.lifecycles = createLifecyclesManager(this);
     this.entityManager = createEntityManager(this);
   }
 
