@@ -1,4 +1,5 @@
 import React from 'react';
+import { FormattedMessage } from 'react-intl';
 import Wrapper from './Wrapper';
 import LogoStrapi from '../../../assets/images/banner_strapi-rocket.png';
 
@@ -8,8 +9,7 @@ const PluginBanner = () => {
       <img className="bannerImage" src={LogoStrapi} alt="A strapi rocket logo" />
       <div>
         <div>
-          Discover plugins built by the community, and many more awesome things to kickstart your
-          project, on Strapi Awesome
+          <FormattedMessage id="app.components.PluginBanner" />
         </div>
         <a
           href="https://github.com/strapi/awesome-strapi"
