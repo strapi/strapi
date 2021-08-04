@@ -245,6 +245,7 @@ describe('Search query', () => {
       expect(res.body.length).toBe(2);
       expect(res.body).toEqual(expect.arrayContaining(data.bed.slice(0, 2)));
     });
+
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
         method: 'GET',
@@ -262,6 +263,24 @@ describe('Search query', () => {
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.bed[0]);
+    });
+
+    test('search with a backslash', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/beds',
+        qs: {
+          _q: 'Sleepy Bed',
+          filters: {
+            name: {
+              $contains: 'test\\',
+            },
+          },
+        },
+      });
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
     });
   });
 });
