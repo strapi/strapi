@@ -1,18 +1,14 @@
 'use strict';
 
 const http = require('http');
-const path = require('path');
-const fse = require('fs-extra');
+
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const chalk = require('chalk');
-const CLITable = require('cli-table3');
-const { models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
-const loadConfiguration = require('./core/app-configuration');
 
+const loadConfiguration = require('./core/app-configuration');
 const utils = require('./utils');
 const loadModules = require('./core/loaders/load-modules');
 const bootstrap = require('./core/loaders/bootstrap');
@@ -27,6 +23,7 @@ const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
+const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
 const createContainer = require('./core/container');
 const createConfigProvider = require('./core/base-providers/config-provider');
@@ -46,14 +43,8 @@ class Strapi {
 
     this.initServer();
 
-    // Utils.
-    this.utils = {
-      models,
-    };
-
     this.dir = opts.dir || process.cwd();
 
-    this.admin = {};
     this.plugins = {};
 
     const appConfig = loadConfiguration(this.dir, opts);
@@ -70,8 +61,7 @@ class Strapi {
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
-
-    this.requireProjectBootstrap();
+    this.startupLogger = createStartupLogger(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -86,78 +76,6 @@ class Strapi {
     }
 
     return this.requestHandler(req, res);
-  }
-
-  requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
-
-    if (fse.existsSync(bootstrapPath)) {
-      require(bootstrapPath);
-    }
-  }
-
-  logStats() {
-    const columns = Math.min(process.stderr.columns, 80) - 2;
-    console.log();
-    console.log(chalk.black.bgWhite(_.padEnd(' Project information', columns)));
-    console.log();
-
-    const infoTable = new CLITable({
-      colWidths: [20, 50],
-      chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
-    });
-
-    const isEE = strapi.EE === true && ee.isEE === true;
-
-    infoTable.push(
-      [chalk.blue('Time'), `${new Date()}`],
-      [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
-      [chalk.blue('Environment'), this.config.environment],
-      [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.get('info.strapi')} (node ${process.version})`],
-      [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
-    );
-
-    console.log(infoTable.toString());
-    console.log();
-    console.log(chalk.black.bgWhite(_.padEnd(' Actions available', columns)));
-    console.log();
-  }
-
-  logFirstStartupMessage() {
-    this.logStats();
-
-    console.log(chalk.bold('One more thing...'));
-    console.log(
-      chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
-    );
-    console.log();
-
-    const addressTable = new CLITable();
-
-    const adminUrl = getAbsoluteAdminUrl(strapi.config);
-    addressTable.push([chalk.bold(adminUrl)]);
-
-    console.log(`${addressTable.toString()}`);
-    console.log();
-  }
-
-  logStartupMessage() {
-    this.logStats();
-
-    console.log(chalk.bold('Welcome back!'));
-
-    if (this.config.serveAdminPanel === true) {
-      console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      const adminUrl = getAbsoluteAdminUrl(strapi.config);
-      console.log(chalk.bold(adminUrl));
-      console.log();
-    }
-
-    console.log(chalk.grey('To access the server ⚡️, go to:'));
-    const serverUrl = getAbsoluteServerUrl(strapi.config);
-    console.log(chalk.bold(serverUrl));
-    console.log();
   }
 
   initServer() {
@@ -243,7 +161,7 @@ class Strapi {
       if (err) return this.stopWithError(err);
 
       // Is the project initialised?
-      const isInitialised = await utils.isInitialised(this);
+      const isInitialized = await utils.isInitialized(this);
 
       // Should the startup message be displayed?
       const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
@@ -251,10 +169,10 @@ class Strapi {
         : false;
 
       if (hideStartupMessage === false) {
-        if (!isInitialised) {
-          this.logFirstStartupMessage();
+        if (!isInitialized) {
+          this.startupLogger.logFirstStartupMessage();
         } else {
-          this.logStartupMessage();
+          this.startupLogger.logStartupMessage();
         }
       }
 
@@ -272,13 +190,13 @@ class Strapi {
         cb();
       }
 
-      // if (
-      //   (this.config.environment === 'development' &&
-      //     this.config.get('server.admin.autoOpen', true) !== false) ||
-      //   !isInitialised
-      // ) {
-      //   await utils.openBrowser.call(this);
-      // }
+      const shouldOpenAdmin =
+        this.config.environment === 'development' &&
+        this.config.get('server.admin.autoOpen', true) !== false;
+
+      if (shouldOpenAdmin || !isInitialized) {
+        await utils.openBrowser(this.config);
+      }
     };
 
     const listenSocket = this.config.get('server.socket');
@@ -320,6 +238,14 @@ class Strapi {
     process.exit(exitCode);
   }
 
+  loadAdmin() {
+    this.admin = require('@strapi/admin/strapi-server');
+
+    // TODO: rename into just admin and ./config/admin.js
+    const userAdminConfig = strapi.config.get('server.admin');
+    this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
+  }
+
   async load() {
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
@@ -336,8 +262,9 @@ class Strapi {
 
     const modules = await loadModules(this);
 
+    this.loadAdmin();
+
     this.api = modules.api;
-    this.admin = modules.admin;
     this.components = modules.components;
 
     this.middleware = modules.middlewares;
@@ -399,8 +326,6 @@ class Strapi {
     await initializeHooks.call(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
-
-    await this.freeze();
 
     this.isLoaded = true;
     return this;
@@ -491,14 +416,6 @@ class Strapi {
       console.error(err);
       strapi.stop();
     });
-  }
-
-  async freeze() {
-    Object.freeze(this.config);
-    Object.freeze(this.dir);
-    Object.freeze(this.admin);
-    Object.freeze(this.plugins);
-    Object.freeze(this.api);
   }
 
   getModel(uid) {

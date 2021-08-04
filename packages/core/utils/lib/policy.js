@@ -12,8 +12,12 @@ const APPLICATION_PREFIX = 'application::';
 
 const isPolicyFactory = _.isArray;
 
-const getPolicyIn = (container, policy) =>
-  _.get(container, ['config', 'policies', _.toLower(policy)]);
+const getPolicyIn = (container, policy) => {
+  return (
+    _.get(container, ['config', 'policies', policy]) ||
+    _.get(container, ['config', 'policies', _.toLower(policy)])
+  );
+};
 
 const policyExistsIn = (container, policy) => !_.isUndefined(getPolicyIn(container, policy));
 
