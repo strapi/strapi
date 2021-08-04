@@ -2,11 +2,10 @@
 
 const execa = require('execa');
 const _ = require('lodash');
-const { getService } = require('../utils');
-
-// FIXME
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
+
+const { getService } = require('../utils');
 
 const PLUGIN_NAME_REGEX = /^[A-Za-z][A-Za-z0-9-_]+$/;
 
