@@ -11,10 +11,10 @@ const getCommonBeginning = (...strings) => _.takeWhile(
   (char, index) => strings.every(string => string[index] === char)
 ).join('');
 
-const getCommonPath = (...paths)=> {
-  const [segments, ...otherSegments] = paths.map(it=>_.split(it, '/'));
+const getCommonPath = (...paths) => {
+  const [segments, ...otherSegments] = paths.map(it => _.split(it, '/'));
   return _.join(
-    _.takeWhile(segments, (str, index)=>otherSegments.every(it=>it[index] === str))
+    _.takeWhile(segments, (str, index) => otherSegments.every(it => it[index] === str))
     , '/');
 };
 
