@@ -1,6 +1,6 @@
 'use strict';
 
-const localesService = require('../locales');
+const localesService = require('../locales')();
 
 const fakeMetricsService = {
   sendDidInitializeEvent() {},

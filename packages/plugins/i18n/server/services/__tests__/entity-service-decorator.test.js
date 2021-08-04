@@ -1,16 +1,18 @@
 'use strict';
 
 jest.mock('../localizations', () => {
-  return {
+  return () => ({
     syncLocalizations: jest.fn(async () => {}),
     syncNonLocalizedAttributes: jest.fn(async () => {}),
-  };
+  });
 });
 
-const { decorator } = require('../entity-service-decorator');
-const { syncLocalizations, syncNonLocalizedAttributes } = require('../localizations');
-const locales = require('../locales');
-const contentTypes = require('../content-types');
+const { decorator } = require('../entity-service-decorator')();
+const localizations = require('../localizations')();
+const locales = require('../locales')();
+const contentTypes = require('../content-types')();
+
+const { syncLocalizations, syncNonLocalizedAttributes } = localizations;
 
 const model = {
   pluginOptions: {
@@ -41,6 +43,7 @@ describe('Entity service decorator', () => {
           services: {
             locales,
             'content-types': contentTypes,
+            localizations,
           },
         },
       },

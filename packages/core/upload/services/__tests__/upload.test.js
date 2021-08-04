@@ -1,6 +1,6 @@
 'use strict';
 
-const uploadService = require('../Upload');
+const uploadService = require('../upload')({});
 
 describe('Upload service', () => {
   describe('formatFileInfo', () => {

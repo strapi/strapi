@@ -14,7 +14,7 @@ const createSentryService = strapi => {
      */
     init() {
       // Make sure there isn't a Sentry instance already running
-      if (instance != null) {
+      if (instance !== null) {
         return this;
       }
 

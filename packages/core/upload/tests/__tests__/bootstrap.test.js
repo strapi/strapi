@@ -16,20 +16,17 @@ describe('Upload plugin bootstrap function', () => {
         error() {},
       },
       config: {
-        get() {
-          return 'public';
-        },
+        get: jest
+          .fn()
+          .mockReturnValueOnce({ provider: 'local' })
+          .mockReturnValueOnce('public'),
         paths: {},
         info: {
           dependencies: {},
         },
       },
       plugins: {
-        upload: {
-          config: {
-            provider: 'local',
-          },
-        },
+        upload: {},
       },
       store() {
         return {

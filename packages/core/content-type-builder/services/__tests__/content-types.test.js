@@ -1,6 +1,6 @@
 'use strict';
 
-const { formatContentType } = require('../content-types');
+const { formatContentType } = require('../content-types')();
 
 describe('Content types service', () => {
   describe('format ContentType', () => {
@@ -11,7 +11,7 @@ describe('Content types service', () => {
       modelName: 'my-name',
       collectionName: 'tests',
       info: {
-        name: 'My name',
+        displayName: 'My name',
         description: 'My description',
       },
       options: {
@@ -42,21 +42,6 @@ describe('Content types service', () => {
       ).toMatchObject({
         schema: {
           kind: 'collectionType',
-        },
-      });
-    });
-
-    it('Generates a default name', () => {
-      expect(
-        formatContentType({
-          ...contentType,
-          info: {
-            name: undefined,
-          },
-        })
-      ).toMatchObject({
-        schema: {
-          name: 'Test-uids',
         },
       });
     });

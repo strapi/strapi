@@ -4,10 +4,10 @@ const {
   assignDefaultLocale,
   syncLocalizations,
   syncNonLocalizedAttributes,
-} = require('../localizations');
+} = require('../localizations')();
 
-const locales = require('../locales');
-const contentTypes = require('../content-types');
+const locales = require('../locales')();
+const contentTypes = require('../content-types')();
 
 const model = {
   uid: 'test-model',

@@ -1,7 +1,7 @@
 'use strict';
 
 const { getNonLocalizedAttributes } = require('../content-types');
-const ctService = require('../../services/content-types');
+const ctService = require('../../services/content-types')();
 
 describe('i18n - Controller - content-types', () => {
   describe('getNonLocalizedAttributes', () => {
