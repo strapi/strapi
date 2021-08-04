@@ -31,6 +31,45 @@ const LIFECYCLES = {
   BOOTSTRAP: 'bootstrap',
 };
 
+class HTTPServer {
+  constructor(strapi, listener) {
+    this.server = http.createServer(listener);
+
+    this.connections = new Set();
+
+    this.server.on('connection', connection => {
+      this.connections.add(connection);
+
+      connection.on('close', () => {
+        this.connections.delete(connection);
+      });
+    });
+
+    // handle port in use cleanly
+    this.server.on('error', err => {
+      if (err.code === 'EADDRINUSE') {
+        return strapi.stopWithError(`The port ${err.port} is already used by another application.`);
+      }
+
+      strapi.log.error(err);
+    });
+  }
+
+  listen(...args) {
+    this.server.listen(...args);
+  }
+
+  destroy(callback) {
+    for (const connection of this.connections) {
+      connection.destroy();
+
+      this.connections.delete(connection);
+    }
+
+    this.server.close(callback);
+  }
+}
+
 class Strapi {
   constructor(opts = {}) {
     this.reload = this.reload();
@@ -39,7 +78,7 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
 
-    this.initServer();
+    this.server = new HTTPServer(this, this.handleRequest.bind(this));
 
     this.dir = opts.dir || process.cwd();
 
@@ -71,38 +110,6 @@ class Strapi {
     }
 
     return this.requestHandler(req, res);
-  }
-
-  initServer() {
-    this.server = http.createServer(this.handleRequest.bind(this));
-    // handle port in use cleanly
-    this.server.on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(`The port ${err.port} is already used by another application.`);
-      }
-
-      this.log.error(err);
-    });
-
-    // Close current connections to fully destroy the server
-    const connections = {};
-
-    this.server.on('connection', conn => {
-      const key = conn.remoteAddress + ':' + conn.remotePort;
-      connections[key] = conn;
-
-      conn.on('close', function() {
-        delete connections[key];
-      });
-    });
-
-    this.server.destroy = cb => {
-      this.server.close(cb);
-
-      for (let key in connections) {
-        connections[key].destroy();
-      }
-    };
   }
 
   async start(cb) {
@@ -341,7 +348,7 @@ class Strapi {
       }
 
       if (this.config.autoReload) {
-        this.server.close();
+        this.server.destroy();
         process.send('reload');
       }
     };
