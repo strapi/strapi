@@ -7,6 +7,7 @@ import { useFetchPluginsFromMarketPlace } from '../../hooks';
 import PageTitle from '../../components/PageTitle';
 import PluginCard from './PluginCard';
 import Wrapper from './Wrapper';
+import PluginBanner from './PluginBanner';
 
 const MarketPlacePage = () => {
   const history = useHistory();
@@ -77,6 +78,7 @@ const MarketPlacePage = () => {
             id: 'app.components.InstallPluginPage.description',
           })}
         />
+        <PluginBanner />
         <div className="row" style={{ paddingTop: '4.1rem' }}>
           {data.map(plugin => {
             return (
