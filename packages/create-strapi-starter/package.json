@@ -27,7 +27,7 @@
     "node-fetch": "^2.6.1",
     "ora": "5.4.0",
     "strapi-generate-new": "3.6.5",
-    "tar": "6.1.0"
+    "tar": "6.1.2"
   },
   "scripts": {
     "test": "echo \"no tests yet\""
