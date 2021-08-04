@@ -44,7 +44,7 @@ function List({
   const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
   const onClickAddField = () => {
-    emitEvent('hasClickedOnButtonBanner');
+    emitEvent('hasClickedCTBAddFieldBanner');
     const firstComponentIcon = get(
       modifiedData,
       ['components', firstLoopComponentUid, 'schema', 'icon'],
