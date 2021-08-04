@@ -63,7 +63,7 @@ const connect = (provider, query) => {
           return resolve([
             null,
             [{ messages: [{ id: 'Auth.advanced.allow_register' }] }],
-            'Register action is actualy not available.',
+            'Register action is actually not available.',
           ]);
         }
 
