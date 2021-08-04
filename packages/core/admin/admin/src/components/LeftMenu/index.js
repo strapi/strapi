@@ -1,58 +1,84 @@
-import React, { memo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { BaselineAlignment } from '@strapi/helper-plugin';
-import { Footer, Header, LinksContainer, LinksSection, SectionTitle } from './compos';
-import LeftMenuLink from './compos/Link';
-
-import Wrapper from './Wrapper';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import get from 'lodash/get';
+import {
+  MainNav,
+  NavBrand,
+  NavSections,
+  NavLink,
+  NavSection,
+  NavUser,
+  NavCondense,
+  Divider,
+} from '@strapi/parts';
+import ContentIcon from '@strapi/icons/ContentIcon';
+import { auth, usePersistentState } from '@strapi/helper-plugin';
+import useConfigurations from '../../hooks/useConfigurations';
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
+  const { menuLogo } = useConfigurations();
+  const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
+
+  const userInfo = auth.getUserInfo();
+
+  let displayName;
+
+  if (userInfo && userInfo.firstname && userInfo.lastname) {
+    displayName = `${userInfo.firstname} ${userInfo.lastname}`;
+  } else {
+    displayName = get(userInfo, 'username', '');
+  }
+
   return (
-    <Wrapper>
-      <Header />
+    <MainNav condensed={condensed}>
+      <NavBrand
+        workplace="Workplace"
+        title="Strapi Dashboard"
+        icon={<img src={menuLogo} alt="" />}
+      />
 
-      <LinksContainer>
-        <BaselineAlignment top size="16px" />
-        <LeftMenuLink
-          to="/content-manager"
-          icon="book-open"
-          intlLabel={{
-            id: `content-manager.plugin.name`,
-            defaultMessage: 'Content manager',
-          }}
-        />
-        <BaselineAlignment bottom size="2px" />
+      <Divider />
 
-        {pluginsSectionLinks.length > 0 && (
-          <>
-            <SectionTitle>
-              <FormattedMessage
-                id="app.components.LeftMenuLinkContainer.listPlugins"
-                defaultMessage="Plugins"
-              />
-            </SectionTitle>
-            <LinksSection
-              links={pluginsSectionLinks}
-              searchable={false}
-              emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
-            />
-          </>
+      <NavSections>
+        <NavLink to="/content-manager" icon={<ContentIcon />}>
+          <FormattedMessage id="content-manager.plugin.name" defaultMessage="Content manager" />
+        </NavLink>
+
+        {pluginsSectionLinks.length > 0 ? (
+          <NavSection label="Plugins">
+            {pluginsSectionLinks.map(link => (
+              <NavLink to={link.to} key={link.to} icon={<FontAwesomeIcon icon={link.icon} />}>
+                <FormattedMessage {...link.intlLabel} />
+              </NavLink>
+            ))}
+          </NavSection>
+        ) : null}
+
+        {generalSectionLinks.length > 0 ? (
+          <NavSection label="General">
+            {generalSectionLinks.map(link => (
+              <NavLink to={link.to} key={link.to} icon={<FontAwesomeIcon icon={link.icon} />}>
+                <FormattedMessage {...link.intlLabel} />
+              </NavLink>
+            ))}
+          </NavSection>
+        ) : null}
+      </NavSections>
+
+      <NavUser src="https://avatars.githubusercontent.com/u/3874873?v=4" to="/me">
+        {displayName}
+      </NavUser>
+
+      <NavCondense onClick={() => setCondensed(s => !s)}>
+        {condensed ? (
+          <FormattedMessage id="app.components.LeftMenu.expand" />
+        ) : (
+          <FormattedMessage id="app.components.LeftMenu.collapse" />
         )}
-        {generalSectionLinks.length > 0 && (
-          <>
-            <SectionTitle>
-              <FormattedMessage
-                id="app.components.LeftMenuLinkContainer.general"
-                defaultMessage="General"
-              />
-            </SectionTitle>
-            <LinksSection links={generalSectionLinks} searchable={false} />
-          </>
-        )}
-      </LinksContainer>
-      <Footer key="footer" />
-    </Wrapper>
+      </NavCondense>
+    </MainNav>
   );
 };
 
@@ -61,4 +87,4 @@ LeftMenu.propTypes = {
   pluginsSectionLinks: PropTypes.array.isRequired,
 };
 
-export default memo(LeftMenu);
+export default LeftMenu;

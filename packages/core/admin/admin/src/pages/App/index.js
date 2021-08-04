@@ -18,7 +18,6 @@ import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 import { getUID } from './utils';
-import { Content, Wrapper } from './components';
 import routes from './utils/routes';
 
 const AuthenticatedApp = lazy(() =>
@@ -107,22 +106,18 @@ function App() {
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
       <TrackingContext.Provider value={uuid}>
-        <Wrapper>
-          <Content>
-            <Switch>
-              {authRoutes}
-              <Route
-                path="/auth/:authType"
-                render={routerProps => (
-                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
-                )}
-                exact
-              />
-              <PrivateRoute path="/" component={AuthenticatedApp} />
-              <Route path="" component={NotFoundPage} />
-            </Switch>
-          </Content>
-        </Wrapper>
+        <Switch>
+          {authRoutes}
+          <Route
+            path="/auth/:authType"
+            render={routerProps => (
+              <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+            )}
+            exact
+          />
+          <PrivateRoute path="/" component={AuthenticatedApp} />
+          <Route path="" component={NotFoundPage} />
+        </Switch>
       </TrackingContext.Provider>
     </Suspense>
   );

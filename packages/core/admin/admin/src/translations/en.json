@@ -219,6 +219,8 @@
   "app.components.LeftMenuLinkContainer.plugins": "Plugins",
   "app.components.LeftMenuLinkContainer.settings": "Settings",
   "app.components.LeftMenuLinkContainer.singleTypes": "Single Types",
+  "app.components.LeftMenu.expand": "Expanded the navbar",
+  "app.components.LeftMenu.collapse": "Collapse the navbar",
   "app.components.ListPluginsPage.deletePlugin.description": "It might take a few seconds to uninstall the plugin.",
   "app.components.ListPluginsPage.deletePlugin.title": "Uninstalling",
   "app.components.ListPluginsPage.description": "List of the installed plugins in the project.",
@@ -553,5 +555,6 @@
   "notification.version.update.link": "See more",
   "notification.version.update.message": "A new version of Strapi is available!",
   "or": "OR",
-  "request.error.model.unknown": "This model doesn't exist"
+  "request.error.model.unknown": "This model doesn't exist",
+  "skipToContent": "Skip to content"
 }
