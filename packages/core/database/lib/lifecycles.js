@@ -22,8 +22,14 @@ const createLifecyclesManager = db => {
         ...properties,
       };
     },
-    async emit(action, uid, properties) {
+
+    async run(action, uid, properties) {
       for (const subscriber of this._subscribers) {
+        if (typeof subscriber === 'function') {
+          const event = this.createEvent(action, uid, properties);
+          return await subscriber(event);
+        }
+
         const hasAction = action in subscriber;
         const hasModel = !subscriber.models || subscriber.models.includes(uid);
 
@@ -33,6 +39,10 @@ const createLifecyclesManager = db => {
           await subscriber[action](event);
         }
       }
+    },
+
+    clear() {
+      this._subscribers = [];
     },
   };
 
