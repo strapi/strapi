@@ -150,7 +150,7 @@ async function copyAdmin(dest) {
   await fs.ensureDir(path.resolve(dest, 'config'));
   await fs.copy(path.resolve(adminPath, 'admin'), path.resolve(dest, 'admin'));
   await fs.copy(
-    path.resolve(adminPath, 'config', 'layout.js'),
+    path.resolve(adminPath, 'server', 'config', 'layout.js'),
     path.resolve(dest, 'config', 'layout.js')
   );
 
