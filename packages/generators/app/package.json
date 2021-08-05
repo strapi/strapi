@@ -1,6 +1,6 @@
 {
   "name": "@strapi/generate-new",
-  "version": "3.6.5",
+  "version": "3.6.6",
   "description": "Generate a new Strapi application.",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -23,7 +23,7 @@
     "node-fetch": "^2.6.1",
     "node-machine-id": "^1.1.10",
     "ora": "^5.4.0",
-    "tar": "6.1.0",
+    "tar": "6.1.2",
     "uuid": "^3.3.2"
   },
   "scripts": {

@@ -6,53 +6,35 @@
 
 module.exports = {
   lifecycles: {
-    beforeCreate(...args) {
-      // console.log('beforeCreate', ...args);
+    beforeCreate(event) {
+      // console.log('beforeCreate');
     },
-    afterCreate(...args) {
-      // console.log('afterCreate', ...args);
+    afterCreate(event) {
+      // console.log('afterCreate');
     },
-    beforeUpdate(...args) {
-      // console.log('beforeUpdate', ...args);
+    beforeUpdate(event) {
+      // console.log('beforeUpdate');
     },
-    afterUpdate(...args) {
-      // console.log('afterUpdate', ...args);
+    afterUpdate(event) {
+      // console.log('afterUpdate');
     },
-    beforeDelete(...args) {
-      // console.log('beforeDelete', ...args);
+    beforeDelete(event) {
+      // console.log('beforeDelete');
     },
-    afterDelete(...args) {
-      // console.log('afterDelete', ...args);
+    afterDelete(event) {
+      // console.log('afterDelete');
     },
-    beforeFind(...args) {
-      // console.log('beforeFind', ...args);
+    beforeFindMany(event) {
+      // console.log('beforeFindMany');
     },
-    afterFind(...args) {
-      // console.log('afterFind', ...args);
+    afterFindMany(event) {
+      // console.log('afterFindMany');
     },
-    beforeFindOne(...args) {
-      // console.log('beforeFindOne', ...args);
+    beforeFindOne(event) {
+      // console.log('beforeFindOne');
     },
-    afterFindOne(...args) {
-      // console.log('afterFindOne', ...args);
-    },
-    beforeCount(...args) {
-      // console.log('beforeCount', ...args);
-    },
-    afterCount(...args) {
-      // console.log('afterCount', ...args);
-    },
-    beforeSearch(...args) {
-      // console.log('beforeSearch', ...args);
-    },
-    afterSearch(...args) {
-      // console.log('afterSearch', ...args);
-    },
-    beforeCountSearch(...args) {
-      // console.log('beforeCountSearch', ...args);
-    },
-    afterCountSearch(...args) {
-      // console.log('afterCountSearch', ...args);
+    afterFindOne(event) {
+      // console.log('afterFindOne');
     },
   },
 };

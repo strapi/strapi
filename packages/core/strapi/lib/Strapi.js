@@ -1,7 +1,5 @@
 'use strict';
 
-const http = require('http');
-
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
@@ -9,8 +7,11 @@ const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 
 const loadConfiguration = require('./core/app-configuration');
-const utils = require('./utils');
+
+const { createHTTPServer } = require('./server');
+const { createContainer } = require('./container');
 const loadModules = require('./core/loaders/load-modules');
+const utils = require('./utils');
 const bootstrap = require('./core/loaders/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -25,7 +26,7 @@ const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
-const createContainer = require('./core/container');
+// const createContainer = require('./core/container');
 const createConfigProvider = require('./core/base-providers/config-provider');
 
 const LIFECYCLES = {
@@ -35,15 +36,18 @@ const LIFECYCLES = {
 
 class Strapi {
   constructor(opts = {}) {
+    this.container = createContainer(this);
+
+    this.dir = opts.dir || process.cwd();
+    this.config = loadConfiguration(this.dir, opts);
+
     this.reload = this.reload();
 
     // Expose `koa`.
     this.app = new Koa();
     this.router = new Router();
 
-    this.initServer();
-
-    this.dir = opts.dir || process.cwd();
+    this.server = createHTTPServer(this, this.app);
 
     this.plugins = {};
 
@@ -70,46 +74,6 @@ class Strapi {
     return ee({ dir: this.dir, logger: this.log });
   }
 
-  handleRequest(req, res) {
-    if (!this.requestHandler) {
-      this.requestHandler = this.app.callback();
-    }
-
-    return this.requestHandler(req, res);
-  }
-
-  initServer() {
-    this.server = http.createServer(this.handleRequest.bind(this));
-    // handle port in use cleanly
-    this.server.on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(`The port ${err.port} is already used by another application.`);
-      }
-
-      this.log.error(err);
-    });
-
-    // Close current connections to fully destroy the server
-    const connections = {};
-
-    this.server.on('connection', conn => {
-      const key = conn.remoteAddress + ':' + conn.remotePort;
-      connections[key] = conn;
-
-      conn.on('close', function() {
-        delete connections[key];
-      });
-    });
-
-    this.server.destroy = cb => {
-      this.server.close(cb);
-
-      for (let key in connections) {
-        connections[key].destroy();
-      }
-    };
-  }
-
   async start(cb) {
     try {
       if (!this.isLoaded) {
@@ -126,9 +90,7 @@ class Strapi {
   }
 
   async destroy() {
-    if (_.has(this, 'server.destroy')) {
-      await new Promise(res => this.server.destroy(res));
-    }
+    await new Promise(res => this.server.destroy(res));
 
     await Promise.all(
       Object.values(this.plugins).map(plugin => {
@@ -214,7 +176,6 @@ class Strapi {
   }
 
   stopWithError(err, customMessage) {
-    console.log(err);
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
       this.log.error(customMessage);
@@ -225,10 +186,7 @@ class Strapi {
   }
 
   stop(exitCode = 1) {
-    // Destroy server and available connections.
-    if (_.has(this, 'server.destroy')) {
-      this.server.destroy();
-    }
+    this.server.destroy();
 
     if (this.config.get('autoReload')) {
       process.send('stop');
@@ -256,9 +214,9 @@ class Strapi {
       }
     });
 
-    await this.container.load();
+    // await this.container.load();
 
-    this.plugins = this.container.plugins.getAll();
+    // this.plugins = this.container.plugins.getAll();
 
     const modules = await loadModules(this);
 
@@ -279,21 +237,15 @@ class Strapi {
       configuration: this.config.get('server.webhooks', {}),
     });
 
-    // Init core store
-
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
 
-    // TODO: i18N must have added the new fileds before we init the DB
-
     const contentTypes = [
-      // todo: move corestore and webhook to real models instead of content types to avoid adding extra attributes
       coreStoreModel,
       webhookModel,
       ...Object.values(strapi.contentTypes),
       ...Object.values(strapi.components),
     ];
 
-    // TODO: create in RootProvider
     this.db = await Database.init({
       ...this.config.get('database'),
       models: Database.transformContentTypes(contentTypes),
@@ -350,7 +302,7 @@ class Strapi {
       }
 
       if (this.config.autoReload) {
-        this.server.close();
+        this.server.destroy();
         process.send('reload');
       }
     };
@@ -400,11 +352,11 @@ class Strapi {
     const configPath = `functions.${lifecycleName}`;
 
     // plugins
-    if (lifecycleName === LIFECYCLES.BOOTSTRAP) {
-      await this.container.bootstrap();
-    } else if (lifecycleName === LIFECYCLES.REGISTER) {
-      await this.container.register();
-    }
+    // if (lifecycleName === LIFECYCLES.BOOTSTRAP) {
+    //   await this.container.bootstrap();
+    // } else if (lifecycleName === LIFECYCLES.REGISTER) {
+    //   await this.container.register();
+    // }
 
     // user
     await execLifecycle(this.config.get(configPath));

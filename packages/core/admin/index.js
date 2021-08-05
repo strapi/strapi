@@ -230,6 +230,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     roots,
   };
 
+  const webpackConfig = getCustomWebpackConfig(dir, args);
   const opts = {
     clientLogLevel: 'silent',
     quiet: true,
@@ -239,9 +240,9 @@ async function watchAdmin({ dir, host, port, browser, options }) {
       index: options.adminPath,
       disableDotRule: true,
     },
+    ...webpack(webpackConfig).options.devServer,
   };
 
-  const webpackConfig = getCustomWebpackConfig(dir, args);
   const server = new WebpackDevServer(webpack(webpackConfig), opts);
 
   server.listen(port, host, function(err) {

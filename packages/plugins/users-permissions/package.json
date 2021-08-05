@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-users-permissions",
-  "version": "3.6.5",
+  "version": "3.6.6",
   "description": "Protect your API with a full-authentication process based on JWT",
   "strapi": {
     "displayName": "Roles & Permissions",
@@ -15,8 +15,8 @@
   },
   "dependencies": {
     "@purest/providers": "^1.0.2",
-    "@strapi/helper-plugin": "3.6.5",
-    "@strapi/utils": "3.6.5",
+    "@strapi/helper-plugin": "3.6.6",
+    "@strapi/utils": "3.6.6",
     "bcryptjs": "^2.4.3",
     "grant-koa": "5.4.8",
     "jsonwebtoken": "^8.1.0",

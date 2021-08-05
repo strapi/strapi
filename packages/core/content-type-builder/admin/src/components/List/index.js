@@ -8,7 +8,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { ListButton } from '@strapi/helper-plugin';
+import { ListButton, useTracking } from '@strapi/helper-plugin';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import { useIntl } from 'react-intl';
@@ -41,9 +41,11 @@ function List({
   dzName,
 }) {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const { isInDevelopmentMode, modifiedData } = useDataManager();
   const { openModalAddField } = useListView();
   const onClickAddField = () => {
+    trackUsage('hasClickedCTBAddFieldBanner');
     const firstComponentIcon = get(
       modifiedData,
       ['components', firstLoopComponentUid, 'schema', 'icon'],

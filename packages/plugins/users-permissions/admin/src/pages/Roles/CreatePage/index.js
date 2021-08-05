@@ -33,7 +33,7 @@ const CreatePage = () => {
     return [
       {
         label: formatMessage({
-          id: getTrad('app.components.Button.reset'),
+          id: 'app.components.Button.reset',
           defaultMessage: 'Reset',
         }),
         onClick: () => {

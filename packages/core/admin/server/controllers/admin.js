@@ -2,7 +2,6 @@
 
 const execa = require('execa');
 const _ = require('lodash');
-// FIXME
 // eslint-disable-next-line node/no-extraneous-require
 const ee = require('@strapi/strapi/lib/utils/ee');
 

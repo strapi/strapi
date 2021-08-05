@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, prop, pick } = require('lodash/fp');
+const { prop, pick } = require('lodash/fp');
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 
 const { getService } = require('../utils');

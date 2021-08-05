@@ -12,6 +12,7 @@ const parseUID = split('.');
 const createPluginProvider = strapi => {
   let loaded = false;
   const plugins = {};
+  console.log('strapi.dir', strapi.dir);
   const userPluginConfigPath = join(strapi.dir, 'config', 'plugins.js');
   const userPluginsConfig = existsSync(userPluginConfigPath)
     ? loadConfigFile(userPluginConfigPath)

@@ -1,3 +1,4 @@
+/* eslint-disable no-unreachable */
 'use strict';
 
 const fs = require('fs');
