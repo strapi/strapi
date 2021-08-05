@@ -8,6 +8,7 @@ const { Database } = require('@strapi/database');
 
 const loadConfiguration = require('./core/app-configuration');
 const { createHTTPServer } = require('./server');
+const { createContainer } = require('./container');
 const loadModules = require('./core/load-modules');
 const utils = require('./utils');
 const bootstrap = require('./core/bootstrap');
@@ -32,6 +33,8 @@ const LIFECYCLES = {
 
 class Strapi {
   constructor(opts = {}) {
+    this.container = createContainer(this);
+
     this.dir = opts.dir || process.cwd();
     this.config = loadConfiguration(this.dir, opts);
 
