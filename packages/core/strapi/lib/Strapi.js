@@ -1,7 +1,5 @@
 'use strict';
 
-const http = require('http');
-
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
@@ -9,8 +7,9 @@ const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 
 const loadConfiguration = require('./core/app-configuration');
-const utils = require('./utils');
+const { createHTTPServer } = require('./server');
 const loadModules = require('./core/load-modules');
+const utils = require('./utils');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const initializeHooks = require('./hooks');
@@ -31,59 +30,19 @@ const LIFECYCLES = {
   BOOTSTRAP: 'bootstrap',
 };
 
-class HTTPServer {
-  constructor(strapi, listener) {
-    this.server = http.createServer(listener);
-
-    this.connections = new Set();
-
-    this.server.on('connection', connection => {
-      this.connections.add(connection);
-
-      connection.on('close', () => {
-        this.connections.delete(connection);
-      });
-    });
-
-    // handle port in use cleanly
-    this.server.on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        return strapi.stopWithError(`The port ${err.port} is already used by another application.`);
-      }
-
-      strapi.log.error(err);
-    });
-  }
-
-  listen(...args) {
-    this.server.listen(...args);
-  }
-
-  destroy(callback) {
-    for (const connection of this.connections) {
-      connection.destroy();
-
-      this.connections.delete(connection);
-    }
-
-    this.server.close(callback);
-  }
-}
-
 class Strapi {
   constructor(opts = {}) {
+    this.dir = opts.dir || process.cwd();
+    this.config = loadConfiguration(this.dir, opts);
+
     this.reload = this.reload();
 
     // Expose `koa`.
     this.app = new Koa();
     this.router = new Router();
 
-    this.server = new HTTPServer(this, this.handleRequest.bind(this));
+    this.server = createHTTPServer(this, this.app);
 
-    this.dir = opts.dir || process.cwd();
-
-    this.plugins = {};
-    this.config = loadConfiguration(this.dir, opts);
     this.app.proxy = this.config.get('server.proxy');
 
     // Logger.
@@ -104,14 +63,6 @@ class Strapi {
     return ee({ dir: this.dir, logger: this.log });
   }
 
-  handleRequest(req, res) {
-    if (!this.requestHandler) {
-      this.requestHandler = this.app.callback();
-    }
-
-    return this.requestHandler(req, res);
-  }
-
   async start(cb) {
     try {
       if (!this.isLoaded) {
@@ -128,9 +79,7 @@ class Strapi {
   }
 
   async destroy() {
-    if (_.has(this, 'server.destroy')) {
-      await new Promise(res => this.server.destroy(res));
-    }
+    await new Promise(res => this.server.destroy(res));
 
     await Promise.all(
       Object.values(this.plugins).map(plugin => {
@@ -216,7 +165,6 @@ class Strapi {
   }
 
   stopWithError(err, customMessage) {
-    console.log(err);
     this.log.debug(`⛔️ Server wasn't able to start properly.`);
     if (customMessage) {
       this.log.error(customMessage);
@@ -227,10 +175,7 @@ class Strapi {
   }
 
   stop(exitCode = 1) {
-    // Destroy server and available connections.
-    if (_.has(this, 'server.destroy')) {
-      this.server.destroy();
-    }
+    this.server.destroy();
 
     if (this.config.autoReload) {
       process.send('stop');
@@ -277,21 +222,15 @@ class Strapi {
       configuration: this.config.get('server.webhooks', {}),
     });
 
-    // Init core store
-
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
 
-    // TODO: i18N must have added the new fileds before we init the DB
-
     const contentTypes = [
-      // todo: move corestore and webhook to real models instead of content types to avoid adding extra attributes
       coreStoreModel,
       webhookModel,
       ...Object.values(strapi.contentTypes),
       ...Object.values(strapi.components),
     ];
 
-    // TODO: create in RootProvider
     this.db = await Database.init({
       ...this.config.get('database'),
       models: Database.transformContentTypes(contentTypes),
