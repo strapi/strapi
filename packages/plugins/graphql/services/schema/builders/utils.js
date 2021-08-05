@@ -1,9 +1,12 @@
 'use strict';
 
-const { entries, mapValues } = require('lodash/fp');
+const { entries, mapValues, omit } = require('lodash/fp');
+const {
+  pagination: { withDefaultPagination },
+} = require('@strapi/utils');
 
 const {
-  mappers: { strapiScalarToGraphQLScalar },
+  mappers: { strapiScalarToGraphQLScalar, graphQLFiltersToStrapiQuery },
   utils: { isScalar, getScalarFilterInputTypeName },
 } = require('../../types');
 
@@ -31,7 +34,34 @@ const scalarAttributesToFiltersMap = mapValues(attribute => {
   return getScalarFilterInputTypeName(gqlScalar);
 });
 
+/**
+ * Apply basic transform to GQL args
+ */
+// todo[v4]: unify & move elsewhere
+const transformArgs = (args, { contentType, usePagination = false }) => {
+  const { pagination = {}, filters = {} } = args;
+
+  // Init
+  const newArgs = omit(['pagination', 'filters'], args);
+
+  // Pagination
+  if (usePagination) {
+    Object.assign(
+      newArgs,
+      withDefaultPagination(pagination /*, config.get(graphql.pagination.defaults)*/)
+    );
+  }
+
+  // Filters
+  if (args.filters) {
+    Object.assign(newArgs, { filters: graphQLFiltersToStrapiQuery(filters, contentType) });
+  }
+
+  return newArgs;
+};
+
 module.exports = {
   getUniqueScalarAttributes,
   scalarAttributesToFiltersMap,
+  transformArgs,
 };

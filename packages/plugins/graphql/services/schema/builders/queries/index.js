@@ -1,9 +1,9 @@
 'use strict';
 
-const collectionType = require('./collection-type');
-const singleType = require('./single-type');
+const createCollectionTypeQueriesBuilder = require('./collection-type');
+const createSingleTypeQueriesBuilder = require('./single-type');
 
-module.exports = () => ({
-  ...collectionType,
-  ...singleType,
+module.exports = context => ({
+  ...createCollectionTypeQueriesBuilder(context),
+  ...createSingleTypeQueriesBuilder(context),
 });

@@ -144,6 +144,8 @@ const createQueryBuilder = (uid, db) => {
         this.populate(populate);
       }
 
+      // todo: should we handle publication state on this layer ? Currently only handled in the entity service
+
       return this;
     },
 

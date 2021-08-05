@@ -120,12 +120,14 @@ dist
 ############################
 
 packages/generators/app/files/public/
+schema.graphql
 
 ############################
 # Example app
 ############################
 
 .dev
+.graphqlconfig
 # *.cache
 
 ############################

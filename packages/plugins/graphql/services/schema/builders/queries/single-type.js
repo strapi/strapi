@@ -1,52 +1,61 @@
 'use strict';
 
 const { extendType } = require('nexus');
+const { omit } = require('lodash/fp');
 
-const { buildQuery } = require('../../../old/resolvers-builder');
-const { toSingular } = require('../../../old/naming');
 const { actionExists } = require('../../../old/utils');
+const { buildQueriesResolvers } = require('../../resolvers');
 
-const { args } = require('../../../types');
+const { args, utils, mappers } = require('../../../types');
 
-const { utils } = require('../../../types');
+const { graphQLFiltersToStrapiQuery } = mappers;
 
-function buildSingleTypeQueries(contentType) {
-  return extendType({
-    type: 'Query',
-
-    definition(t) {
-      addFindQuery(t, contentType);
-    },
-  });
-}
-
-const addFindQuery = (t, contentType) => {
-  const { uid, modelName } = contentType;
-
-  const findQueryName = utils.getFindOneQueryName(contentType);
-  const responseTypeName = utils.getEntityResponseName(contentType);
-
-  const resolverOptions = { resolver: `${uid}.find` };
-
-  if (!actionExists(resolverOptions)) {
-    return;
-  }
-
-  const resolver = buildQuery(toSingular(modelName), resolverOptions);
-
-  t.field(findQueryName, {
-    type: responseTypeName,
-
-    args: {
-      publicationState: args.PublicationStateArg,
-    },
-
-    async resolve(...params) {
-      const res = await resolver(...params);
-
-      return { data: { id: res.id, attributes: res } };
-    },
-  });
+// todo[v4]: unify & move elsewhere
+const transformArgs = (args, contentType) => {
+  return {
+    ...omit(['pagination', 'filters'], args),
+    ...args.pagination,
+    where: graphQLFiltersToStrapiQuery(args.filters, contentType),
+  };
 };
 
-module.exports = { buildSingleTypeQueries };
+module.exports = () => {
+  const buildSingleTypeQueries = contentType => {
+    return extendType({
+      type: 'Query',
+
+      definition(t) {
+        addFindQuery(t, contentType);
+      },
+    });
+  };
+
+  const addFindQuery = (t, contentType) => {
+    const { uid } = contentType;
+
+    const findQueryName = utils.getFindOneQueryName(contentType);
+    const responseTypeName = utils.getEntityResponseName(contentType);
+
+    if (!actionExists({ resolver: `${uid}.find` })) {
+      return;
+    }
+
+    t.field(findQueryName, {
+      type: responseTypeName,
+
+      args: {
+        publicationState: args.PublicationStateArg,
+      },
+
+      async resolve(source, args) {
+        const transformedArgs = transformArgs(args, { contentType });
+
+        const value = buildQueriesResolvers({ contentType, strapi }).find();
+
+        return { value, info: { args: transformedArgs, resourceUID: uid } };
+      },
+    });
+  };
+
+  return { buildSingleTypeQueries };
+};

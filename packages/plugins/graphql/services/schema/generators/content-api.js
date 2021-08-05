@@ -4,7 +4,7 @@ const { prop } = require('lodash/fp');
 const { makeSchema, unionType } = require('nexus');
 
 const createBuilders = require('../builders');
-const { utils, scalars, internals } = require('../../types');
+const { utils, constants, scalars, buildInternals } = require('../../types');
 
 const { create: createTypeRegistry } = require('../../type-registry');
 
@@ -41,63 +41,47 @@ module.exports = strapi => {
   };
 
   const registerMorphTypes = contentTypes => {
-    contentTypes.forEach(contentType => {
-      const { attributes = {}, modelName, plugin } = contentType;
+    // Create & register a union type that includes every type or component registered
+    const genericMorphType = builders.buildGenericMorphDefinition();
+    registry.register(constants.GENERIC_MORPH_TYPENAME, genericMorphType, { kind: 'morphs' });
 
-      const morphAttributes = Object.keys(attributes).filter(attributeName =>
-        utils.isMorphRelation(attributes[attributeName])
+    // For every content type
+    contentTypes.forEach(contentType => {
+      const { attributes = {} } = contentType;
+
+      // Isolate its polymorphic attributes
+      const morphAttributes = Object.entries(attributes).filter(([, attribute]) =>
+        utils.isMorphRelation(attribute)
       );
 
-      for (const attributeName of morphAttributes) {
+      // For each one of those polymorphic attribute
+      for (const [attributeName, attribute] of morphAttributes) {
         const name = utils.getMorphRelationTypeName(contentType, attributeName);
+        const { target } = attribute;
 
-        /**
-         * Filter definitions from the types registry and return definitions
-         * which have a relation attribute to the current content type
-         *
-         * @param {object} config
-         * @param {string} config.kind
-         * @param {object} config.contentType
-         * @return {boolean}
-         */
-        const backlinksPredicate = ({ config }) => {
-          return (
-            // Only search for links in base types & components
-            ['types', 'components'].includes(config.kind) &&
-            // Keep any of the content type where some of its
-            // attributes have a relation to the current content type
-            Object.values(config.contentType.attributes)
-              .filter(utils.isRelation)
-              .some(attr => {
-                return (
-                  (attr.model || attr.collection) === modelName &&
-                  attr.plugin === plugin &&
-                  attr.via === attributeName
-                );
-              })
-          );
-        };
-
-        const backLinks = registry.where(backlinksPredicate);
-
-        // Don't register the morph type if there is no
-        // relation pointing to the current polymorphic attribute
-        if (backLinks.length === 0) {
+        // Ignore those whose target is not an array
+        if (!Array.isArray(target)) {
           continue;
         }
 
+        // Transform target UIDs into types names
+        const members = target
+          // Get content types definitions
+          .map(uid => strapi.getModel(uid))
+          // Resolve types names
+          .map(contentType => utils.getTypeName(contentType));
+
+        // Register the new polymorphic union type
         registry.register(
           name,
 
           unionType({
             name,
 
-            resolveType(obj) {
-              return obj.__typename;
-            },
+            resolveType: prop('__typename'),
 
             definition(t) {
-              t.members(...backLinks.map(prop('definition')));
+              t.members(...members);
             },
           }),
 
@@ -288,6 +272,8 @@ module.exports = strapi => {
     });
 
     // Register Strapi's internal types
+    const internals = buildInternals({ strapi });
+
     for (const [kind, definitions] of Object.entries(internals)) {
       registry.registerMany(Object.entries(definitions), { kind });
     }
@@ -309,10 +295,10 @@ module.exports = strapi => {
       // Auto-gen tools configuration (.graphql, .ts)
       // shouldGenerateArtifacts: process.env.NODE_ENV === 'development',
       //
-      // outputs: {
-      //   typegen: join(__dirname, '..', 'nexus-typegen.ts'),
-      //   schema: join(__dirname, '..', 'schema.graphql'),
-      // },
+      outputs: {
+        // typegen: join(__dirname, '..', 'nexus-typegen.ts'),
+        // schema: join(__dirname, '../../../../../..', 'schema.graphql'),
+      },
     });
   };
 };

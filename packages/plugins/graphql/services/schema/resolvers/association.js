@@ -1,10 +1,11 @@
 'use strict';
 
-const buildAssociationResolver = (contentTypeUID, attributeName, { type }) => {
-  return (/*root*/) => {
-    // const resourceID = root.id;
-    // return strapi.query(contentTypeUID).load(resourceID, attributeName, args);
-    return type ? [] : { name: 'foo', rating: 5 };
+const buildAssociationResolver = ({ contentTypeUID, attributeName, strapi }) => {
+  const { entityManager } = strapi.db;
+
+  return (parent, args = {}) => {
+    // todo[v4]: Should we be able to run policies here too?
+    return entityManager.load(contentTypeUID, parent, attributeName, args);
   };
 };
 
