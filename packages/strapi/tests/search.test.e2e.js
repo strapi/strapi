@@ -248,5 +248,18 @@ describe('Search query', () => {
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.bed[0]);
     });
+    test('search with a backslash', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/beds',
+        qs: {
+          _q: 'Sleepy Bed',
+          name_contains: 'test\\',
+        },
+      });
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
+    });
   });
 });
