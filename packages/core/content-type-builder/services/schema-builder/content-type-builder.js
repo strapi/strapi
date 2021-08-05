@@ -9,9 +9,28 @@ const { isRelation, isConfigurable } = require('../../utils/attributes');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
+const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
+  _.defaults(
+    newAttribute,
+    _.omit(oldAttribute, [
+      'configurable',
+      'required',
+      'private',
+      'unique',
+      'pluginOptions',
+      'inversedBy',
+      'mappedBy',
+    ])
+  );
+};
+
 module.exports = function createComponentBuilder() {
   return {
     setRelation({ key, uid, attribute }) {
+      if (!_.has(attribute, 'target')) {
+        return;
+      }
+
       const targetCT = this.contentTypes.get(attribute.target);
       const targetAttribute = targetCT.getAttribute(attribute.targetAttribute);
 
@@ -31,17 +50,16 @@ module.exports = function createComponentBuilder() {
     },
 
     unsetRelation(attribute) {
+      if (!_.has(attribute, 'target')) {
+        return;
+      }
+
       const targetCT = this.contentTypes.get(attribute.target);
 
       const targetAttributeName = attribute.inversedBy || attribute.mappedBy;
       const targetAttribute = targetCT.getAttribute(targetAttributeName);
 
       if (!targetAttribute) return;
-
-      // TODO: do not delete polymorphic relations
-      // if (false) {
-      //   return;
-      // }
 
       return targetCT.deleteAttribute(targetAttributeName);
     },
@@ -156,17 +174,21 @@ module.exports = function createComponentBuilder() {
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
           const oldTargetAttributeName = oldAttribute.inversedBy || oldAttribute.mappedBy;
 
-          if (
-            !_.isNil(oldTargetAttributeName) &&
-            oldTargetAttributeName !== newAttribute.targetAttribute
-          ) {
+          const sameRelation = oldAttribute.relation === newAttribute.relation;
+          const targetAttributeHasChanged = oldTargetAttributeName !== newAttribute.targetAttribute;
+
+          if (!sameRelation || targetAttributeHasChanged) {
             this.unsetRelation(oldAttribute);
           }
 
-          // TODO: handle edition to keep the direction
-
           // keep extra options that were set manually on oldAttribute
-          _.defaults(newAttribute, oldAttribute);
+          reuseUnsetPreviousProperties(newAttribute, oldAttribute);
+
+          if (oldAttribute.inversedBy) {
+            newAttribute.dominant = true;
+          } else if (oldAttribute.mappedBy) {
+            newAttribute.dominant = false;
+          }
 
           return this.setRelation({
             key,
@@ -239,7 +261,12 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
   switch (attribute.relation) {
     case 'oneToOne': {
       opts.relation = 'oneToOne';
-      opts.mappedBy = key;
+
+      if (attribute.dominant) {
+        opts.mappedBy = key;
+      } else {
+        opts.inversedBy = key;
+      }
       break;
     }
     case 'oneToMany': {
@@ -254,12 +281,25 @@ const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
     }
     case 'manyToMany': {
       opts.relation = 'manyToMany';
-      opts.mappedBy = key;
+
+      if (attribute.dominant) {
+        opts.mappedBy = key;
+      } else {
+        opts.inversedBy = key;
+      }
 
       break;
     }
     default:
   }
 
-  return opts;
+  // we do this just to make sure we have the same key order when writing to files
+  const { type, relation, target, ...restOptions } = opts;
+
+  return {
+    type,
+    relation,
+    target,
+    ...restOptions,
+  };
 };

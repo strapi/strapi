@@ -24,6 +24,11 @@ const AdvancedSettingsPage = () => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const [showModalWarning, setShowModalWarning] = useState(false);
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
+  const formTitle = formatMessage({
+    id: getTrad('Form.title.advancedSettings'),
+    defaultMessage: 'Settings',
+  });
+
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateAdvancedSettings };
   }, []);
@@ -180,7 +185,7 @@ const AdvancedSettingsPage = () => {
         <form onSubmit={handleSubmit}>
           <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
           <ListBaselineAlignment />
-          <FormBloc title="Settings" isLoading={showLoader}>
+          <FormBloc title={formTitle} isLoading={showLoader}>
             {form.map(input => {
               return (
                 <SizedInput

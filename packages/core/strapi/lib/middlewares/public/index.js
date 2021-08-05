@@ -36,10 +36,10 @@ module.exports = strapi => {
           if (ctx.body != null || ctx.status !== 404) return;
 
           ctx.url = 'index.html';
-          const isInitialised = await utils.isInitialised(strapi);
+          const isInitialized = await utils.isInitialized(strapi);
           const data = {
             serverTime: new Date().toUTCString(),
-            isInitialised,
+            isInitialized,
             ..._.pick(strapi, [
               'config.info.version',
               'config.info.name',

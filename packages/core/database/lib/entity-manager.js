@@ -7,7 +7,11 @@ const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
 const { isBidirectional } = require('./metadata/relations');
 
+const toId = value => value.id || value;
+const toIds = value => _.castArray(value || []).map(toId);
+
 // TODO: move to query layer
+// TODO: handle programmatic defaults
 const toRow = (metadata, data = {}) => {
   const { attributes } = metadata;
 
@@ -53,13 +57,24 @@ const toRow = (metadata, data = {}) => {
 
         const value = data[attributeName];
 
+        if (value === null) {
+          Object.assign(obj, {
+            [idColumn.name]: null,
+            [typeColumn.name]: null,
+          });
+
+          continue;
+        }
+
         if (!_.isUndefined(value)) {
           if (!_.has('id', value) || !_.has(typeField, value)) {
             throw new Error(`Expects properties ${typeField} an id to make a morph association`);
           }
 
-          obj[idColumn.name] = value.id;
-          obj[typeColumn.name] = value[typeField];
+          Object.assign(obj, {
+            [idColumn.name]: value.id,
+            [typeColumn.name]: value[typeField],
+          });
         }
       }
     }
@@ -72,67 +87,88 @@ const createEntityManager = db => {
   const repoMap = {};
 
   return {
-    findOne(uid, params) {
-      const qb = this.createQueryBuilder(uid)
-        .init(params)
-        .first();
+    async findOne(uid, params) {
+      await db.lifecycles.run('beforeFindOne', uid, { params });
 
-      return qb.execute();
+      const result = await this.createQueryBuilder(uid)
+        .init(params)
+        .first()
+        .execute();
+
+      await db.lifecycles.run('afterFindOne', uid, { params, result });
+
+      return result;
     },
 
     // should we name it findOne because people are used to it ?
-    findMany(uid, params) {
-      const qb = this.createQueryBuilder(uid).init(params);
+    async findMany(uid, params) {
+      await db.lifecycles.run('beforeFindMany', uid, { params });
 
-      return qb.execute();
+      const result = await this.createQueryBuilder(uid)
+        .init(params)
+        .execute();
+
+      await db.lifecycles.run('afterFindMany', uid, { params, result });
+
+      return result;
     },
 
     async count(uid, params = {}) {
-      const qb = this.createQueryBuilder(uid).where(params.where);
+      await db.lifecycles.run('beforeCount', uid, { params });
 
-      const res = await qb
+      const res = await this.createQueryBuilder(uid)
+        .where(params.where)
         .count()
         .first()
         .execute();
 
-      return Number(res.count);
+      const result = Number(res.count);
+
+      await db.lifecycles.run('afterCount', uid, { params, result });
+
+      return result;
     },
 
     async create(uid, params = {}) {
-      // create entry in DB
-      const metadata = db.metadata.get(uid);
+      await db.lifecycles.run('beforeCreate', uid, { params });
 
+      const metadata = db.metadata.get(uid);
       const { data } = params;
 
       if (!_.isPlainObject(data)) {
         throw new Error('Create expects a data object');
       }
 
-      // transform value to storage value
-      // apply programatic defaults if any -> I think this should be handled outside of this layer as we might have some applicative rules in the entity service
       const dataToInsert = toRow(metadata, data);
 
       const [id] = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
         .execute();
 
-      // create relation associations or move this to the entity service & call attach on the repo instead
       await this.attachRelations(uid, id, data);
 
       // TODO: in case there is not select or populate specified return the inserted data ?
+      // TODO: do not trigger the findOne lifecycles ?
+      const result = await this.findOne(uid, {
+        where: { id },
+        select: params.select,
+        populate: params.populate,
+      });
 
-      return this.findOne(uid, { where: { id }, select: params.select, populate: params.populate });
+      await db.lifecycles.run('afterCreate', uid, { params, result });
+
+      return result;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
     async createMany(uid, params = {}) {
+      await db.lifecycles.run('beforeCreateMany', uid, { params });
+
+      const metadata = db.metadata.get(uid);
       const { data } = params;
 
       if (!_.isArray(data)) {
-        throw new Error('CreateMany expecets data to be an array');
+        throw new Error('CreateMany expects data to be an array');
       }
-
-      const metadata = db.metadata.get(uid);
 
       const dataToInsert = data.map(datum => toRow(metadata, datum));
 
@@ -144,12 +180,18 @@ const createEntityManager = db => {
         .insert(dataToInsert)
         .execute();
 
-      return { count: data.length };
+      const result = { count: data.length };
+
+      await db.lifecycles.run('afterCreateMany', uid, { params, result });
+
+      return result;
     },
 
     async update(uid, params = {}) {
-      const { where, data } = params;
+      await db.lifecycles.run('beforeUpdate', uid, { params });
+
       const metadata = db.metadata.get(uid);
+      const { where, data } = params;
 
       if (!_.isPlainObject(data)) {
         throw new Error('Update requires a data object');
@@ -166,7 +208,6 @@ const createEntityManager = db => {
         .execute();
 
       if (!entity) {
-        // TODO: or throw ?
         return null;
       }
 
@@ -183,14 +224,24 @@ const createEntityManager = db => {
 
       await this.updateRelations(uid, id, data);
 
-      return this.findOne(uid, { where: { id }, select: params.select, populate: params.populate });
+      // TODO: do not trigger the findOne lifecycles ?
+      const result = await this.findOne(uid, {
+        where: { id },
+        select: params.select,
+        populate: params.populate,
+      });
+
+      await db.lifecycles.run('afterUpdate', uid, { params, result });
+
+      return result;
     },
 
-    // TODO: where do we handle relation processing for many queries ?
     async updateMany(uid, params = {}) {
-      const { where, data } = params;
+      await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
       const metadata = db.metadata.get(uid);
+      const { where, data } = params;
+
       const dataToUpdate = toRow(metadata, data);
 
       if (_.isEmpty(dataToUpdate)) {
@@ -202,16 +253,23 @@ const createEntityManager = db => {
         .update(dataToUpdate)
         .execute();
 
-      return { count: updatedRows };
+      const result = { count: updatedRows };
+
+      await db.lifecycles.run('afterUpdateMany', uid, { params, result });
+
+      return result;
     },
 
     async delete(uid, params = {}) {
+      await db.lifecycles.run('beforeDelete', uid, { params });
+
       const { where, select, populate } = params;
 
       if (_.isEmpty(where)) {
         throw new Error('Delete requires a where parameter');
       }
 
+      // TODO: avoid trigger the findOne lifecycles in the case ?
       const entity = await this.findOne(uid, {
         select: select && ['id'].concat(select),
         where,
@@ -231,11 +289,15 @@ const createEntityManager = db => {
 
       await this.deleteRelations(uid, id);
 
+      await db.lifecycles.run('afterDelete', uid, { params, result: entity });
+
       return entity;
     },
 
     // TODO: where do we handle relation processing for many queries ?
     async deleteMany(uid, params = {}) {
+      await db.lifecycles.run('beforeDeleteMany', uid, { params });
+
       const { where } = params;
 
       const deletedRows = await this.createQueryBuilder(uid)
@@ -243,7 +305,11 @@ const createEntityManager = db => {
         .delete()
         .execute();
 
-      return { count: deletedRows };
+      const result = { count: deletedRows };
+
+      await db.lifecycles.run('afterDelete', uid, { params, result });
+
+      return result;
     },
 
     /**
@@ -278,15 +344,15 @@ const createEntityManager = db => {
 
             await this.createQueryBuilder(target)
               .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: data[attributeName] })
+              .where({ id: toId(data[attributeName]) })
               .execute();
-          } else if (targetAttribute.type === 'morphToMany') {
+          } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
             const { joinColumn, morphColumn } = joinTable;
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = _.castArray(data[attributeName]).map((dataID, idx) => ({
+            const rows = toIds(data[attributeName]).map((dataID, idx) => ({
               [joinColumn.name]: dataID,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -313,7 +379,7 @@ const createEntityManager = db => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = _.castArray(data[attributeName]).map((data, idx) => ({
+          const rows = _.castArray(data[attributeName] || []).map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -426,17 +492,6 @@ const createEntityManager = db => {
           continue;
         }
 
-        /*
-          if morphOne | morphMany
-            clear previous:
-            if morphBy is morphToOne
-              set null
-              set new
-
-            if morphBy is morphToMany
-              delete links
-              add links
-        */
         if (attribute.relation === 'morphOne' || attribute.relation === 'morphMany') {
           const { target, morphBy } = attribute;
 
@@ -451,11 +506,13 @@ const createEntityManager = db => {
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
               .execute();
 
-            await this.createQueryBuilder(target)
-              .update({ [idColumn.name]: id, [typeColumn.name]: uid })
-              .where({ id: data[attributeName] })
-              .execute();
-          } else if (targetAttribute.type === 'morphToMany') {
+            if (!_.isNull(data[attributeName])) {
+              await this.createQueryBuilder(target)
+                .update({ [idColumn.name]: id, [typeColumn.name]: uid })
+                .where({ id: toId(data[attributeName]) })
+                .execute();
+            }
+          } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
             const { joinColumn, morphColumn } = joinTable;
 
@@ -470,7 +527,7 @@ const createEntityManager = db => {
               })
               .execute();
 
-            const rows = _.castArray(data[attributeName]).map((dataID, idx) => ({
+            const rows = toIds(data[attributeName] || []).map((dataID, idx) => ({
               [joinColumn.name]: dataID,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
@@ -490,21 +547,11 @@ const createEntityManager = db => {
           continue;
         }
 
-        /*
-          if morphToOne
-            set new values in morph columns
-        */
         if (attribute.relation === 'morphToOne') {
-          // do nothing
+          // handled on the entry itself
+          continue;
         }
 
-        /*
-
-          if morphToMany
-            delete old links
-            create new links
-
-        */
         if (attribute.relation === 'morphToMany') {
           const { joinTable } = attribute;
           const { joinColumn, morphColumn } = joinTable;
@@ -519,7 +566,7 @@ const createEntityManager = db => {
             })
             .execute();
 
-          const rows = _.castArray(data[attributeName]).map((data, idx) => ({
+          const rows = _.castArray(data[attributeName] || []).map((data, idx) => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
@@ -577,13 +624,13 @@ const createEntityManager = db => {
           if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
-              .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
+              .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName] || []) })
               .where(joinTable.on || {})
               .execute();
           }
 
           if (!_.isNull(data[attributeName])) {
-            const insert = _.castArray(data[attributeName]).map(datum => {
+            const insert = _.castArray(data[attributeName] || []).map(datum => {
               return {
                 [joinColumn.name]: id,
                 [inverseJoinColumn.name]: datum,
@@ -644,7 +691,7 @@ const createEntityManager = db => {
               .update({ [idColumn.name]: null, [typeColumn.name]: null })
               .where({ [idColumn.name]: id, [typeColumn.name]: uid })
               .execute();
-          } else if (targetAttribute.type === 'morphToMany') {
+          } else if (targetAttribute.relation === 'morphToMany') {
             const { joinTable } = targetAttribute;
             const { morphColumn } = joinTable;
 
@@ -725,6 +772,7 @@ const createEntityManager = db => {
     },
 
     // TODO: support multiple relations at once with the populate syntax
+    // TODO: add lifecycle events
     async populate(uid, entity, populate) {
       const entry = await this.findOne(uid, {
         select: ['id'],
@@ -736,6 +784,7 @@ const createEntityManager = db => {
     },
 
     // TODO: support multiple relations at once with the populate syntax
+    // TODO: add lifecycle events
     async load(uid, entity, field, params) {
       const { attributes } = db.metadata.get(uid);
 

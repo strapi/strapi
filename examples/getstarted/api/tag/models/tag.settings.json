@@ -2,7 +2,8 @@
   "kind": "collectionType",
   "collectionName": "tags",
   "info": {
-    "name": "tag"
+    "name": "tag",
+    "description": ""
   },
   "options": {
     "draftAndPublish": true
@@ -12,29 +13,29 @@
     "name": {
       "type": "string"
     },
-    "one_to_one_kitchensink": {
-      "type": "relation",
-      "target": "application::kitchensink.kitchensink",
-      "relation": "oneToOne",
-      "mappedBy": "one_to_one_tag"
-    },
     "many_to_one_kitchensink": {
       "type": "relation",
-      "target": "application::kitchensink.kitchensink",
       "relation": "manyToOne",
+      "target": "application::kitchensink.kitchensink",
       "inversedBy": "one_to_many_tags"
     },
     "one_to_many_kitchensinks": {
       "type": "relation",
-      "target": "application::kitchensink.kitchensink",
       "relation": "oneToMany",
+      "target": "application::kitchensink.kitchensink",
       "mappedBy": "many_to_one_tag"
     },
     "many_to_many_kitchensinks": {
       "type": "relation",
-      "target": "application::kitchensink.kitchensink",
       "relation": "manyToMany",
+      "target": "application::kitchensink.kitchensink",
       "mappedBy": "many_to_many_tags"
+    },
+    "one_to_one_kitchensink": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "application::kitchensink.kitchensink",
+      "mappedBy": "one_to_one_tag"
     }
   }
 }

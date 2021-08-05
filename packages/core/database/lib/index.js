@@ -6,6 +6,7 @@ const { getDialect } = require('./dialects');
 const createSchemaProvider = require('./schema');
 const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
+const { createLifecyclesManager } = require('./lifecycles');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -20,15 +21,26 @@ class Database {
     this.config = config;
     this.dialect = getDialect(this);
 
-    this.schema = createSchemaProvider(this);
     // TODO: migrations -> allow running them through cli before startup
+    this.schema = createSchemaProvider(this);
+
+    this.lifecycles = createLifecyclesManager(this);
 
     this.entityManager = createEntityManager(this);
   }
 
   async initialize() {
     await this.dialect.initialize();
+
     this.connection = knex(this.config.connection);
+
+    // register module lifeycles subscriber
+    this.lifecycles.subscribe(async event => {
+      const { model } = event;
+      if (event.action in model.lifecycles) {
+        await model.lifecycles[event.action](event);
+      }
+    });
   }
 
   query(uid) {
@@ -40,6 +52,7 @@ class Database {
   }
 
   async destroy() {
+    await this.lifecycles.clear();
     await this.connection.destroy();
   }
 }

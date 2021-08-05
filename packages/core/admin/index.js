@@ -150,7 +150,7 @@ async function copyAdmin(dest) {
   await fs.ensureDir(path.resolve(dest, 'config'));
   await fs.copy(path.resolve(adminPath, 'admin'), path.resolve(dest, 'admin'));
   await fs.copy(
-    path.resolve(adminPath, 'config', 'layout.js'),
+    path.resolve(adminPath, 'server', 'config', 'layout.js'),
     path.resolve(dest, 'config', 'layout.js')
   );
 
@@ -230,6 +230,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     roots,
   };
 
+  const webpackConfig = getCustomWebpackConfig(dir, args);
   const opts = {
     clientLogLevel: 'silent',
     quiet: true,
@@ -239,9 +240,9 @@ async function watchAdmin({ dir, host, port, browser, options }) {
       index: options.adminPath,
       disableDotRule: true,
     },
+    ...webpack(webpackConfig).options.devServer,
   };
 
-  const webpackConfig = getCustomWebpackConfig(dir, args);
   const server = new WebpackDevServer(webpack(webpackConfig), opts);
 
   server.listen(port, host, function(err) {

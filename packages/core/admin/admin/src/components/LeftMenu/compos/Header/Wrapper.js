@@ -2,7 +2,7 @@ import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
 const Wrapper = styled.div`
-  background-color: #007eff;
+  background-color: ${props => props.theme.main.colors.leftMenu['background-header-link']};
   padding-left: 2rem;
   height: ${props => props.theme.main.sizes.leftMenu.height};
 

@@ -58,6 +58,21 @@ module.exports = ctx => {
   return service;
 };
 
+// TODO: remove once the front is migrated
+const convertOldQuery = params => {
+  const obj = {};
+
+  Object.keys(params).forEach(key => {
+    if (key.startsWith('_')) {
+      obj[key.slice(1)] = params[key];
+    } else {
+      obj[key] = params[key];
+    }
+  });
+
+  return obj;
+};
+
 // TODO: move to Controller ?
 const transformParamsToQuery = (uid, params = {}) => {
   const model = strapi.getModel(uid);
@@ -76,10 +91,13 @@ const transformParamsToQuery = (uid, params = {}) => {
     fields,
     populate,
     publicationState,
+    _q,
+    _where,
+    ...rest
   } = params;
 
-  if (params._q) {
-    query._q = params._q;
+  if (_q) {
+    query._q = _q;
   }
 
   if (page) {
@@ -104,6 +122,12 @@ const transformParamsToQuery = (uid, params = {}) => {
 
   if (filters) {
     query.where = filters;
+  }
+
+  if (_where) {
+    query.where = {
+      $and: [_where].concat(query.where || []),
+    };
   }
 
   if (fields) {
@@ -134,7 +158,12 @@ const transformParamsToQuery = (uid, params = {}) => {
     }
   }
 
-  return query;
+  const finalQuery = {
+    ...convertOldQuery(rest),
+    ...query,
+  };
+
+  return finalQuery;
 };
 
 const pickSelectionParams = pick(['fields', 'populate']);

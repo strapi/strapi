@@ -97,7 +97,7 @@
         "basic.simple"
       ]
     },
-    "one_way_tag_edit": {
+    "one_way_tag": {
       "type": "relation",
       "relation": "oneToOne",
       "target": "application::tag.tag"
@@ -106,6 +106,7 @@
       "type": "relation",
       "relation": "oneToOne",
       "target": "application::tag.tag",
+      "private": true,
       "inversedBy": "one_to_one_kitchensink"
     },
     "one_to_many_tags": {
