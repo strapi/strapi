@@ -202,7 +202,9 @@ describe('Search query', () => {
         url: '/beds',
         qs: {
           _q: '',
-          peopleNumber_gt: 0,
+          filters: {
+            peopleNumber: { $gt: 0 },
+          },
         },
       });
 
@@ -216,7 +218,9 @@ describe('Search query', () => {
         url: '/beds',
         qs: {
           _q: '',
-          peopleNumber_gt: 1,
+          filters: {
+            peopleNumber: { $gt: 1 },
+          },
         },
       });
 
@@ -224,29 +228,59 @@ describe('Search query', () => {
       expect(res.body.length).toBe(2);
       expect(res.body).toEqual(expect.arrayContaining([data.bed[0], data.bed[4]]));
     });
+
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/beds?peopleNumber=1&peopleNumber=6&_q=',
+        url: '/beds',
+        qs: {
+          _q: '',
+          filters: {
+            peopleNumber: [1, 6],
+          },
+        },
       });
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(2);
       expect(res.body).toEqual(expect.arrayContaining(data.bed.slice(0, 2)));
     });
+
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
         method: 'GET',
         url: '/beds',
         qs: {
           _q: 'Sleepy Bed',
-          peopleNumber_lt: 7,
+          filters: {
+            peopleNumber: {
+              $lt: 7,
+            },
+          },
         },
       });
 
       expect(Array.isArray(res.body)).toBe(true);
       expect(res.body.length).toBe(1);
       expect(res.body[0]).toMatchObject(data.bed[0]);
+    });
+
+    test('search with a backslash', async () => {
+      const res = await rq({
+        method: 'GET',
+        url: '/beds',
+        qs: {
+          _q: 'Sleepy Bed',
+          filters: {
+            name: {
+              $contains: 'test\\',
+            },
+          },
+        },
+      });
+
+      expect(Array.isArray(res.body)).toBe(true);
+      expect(res.body.length).toBe(0);
     });
   });
 });

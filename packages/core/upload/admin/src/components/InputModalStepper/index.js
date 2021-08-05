@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useRBAC } from '@strapi/helper-plugin';
-import { DndProvider } from 'react-dnd';
-import HTML5Backend from 'react-dnd-html5-backend';
 import { omit } from 'lodash';
 import DragLayer from '../DragLayer';
 import pluginPermissions from '../../permissions';
@@ -31,7 +29,7 @@ const InputModal = ({
   }
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <>
       <DragLayer />
       <InputModalStepperProvider
         allowedActions={allowedActions}
@@ -53,7 +51,7 @@ const InputModal = ({
           onInputMediaChange={onInputMediaChange}
         />
       </InputModalStepperProvider>
-    </DndProvider>
+    </>
   );
 };
 

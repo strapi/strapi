@@ -20,6 +20,7 @@ jest.mock('../../../hooks', () => ({
   useMenu: jest.fn(() => ({ isLoading: true, generalSectionLinks: [], pluginsSectionLinks: [] })),
   useTrackUsage: jest.fn(),
   useReleaseNotification: jest.fn(),
+  useConfigurations: jest.fn(() => ({ showTutorials: false })),
 }));
 
 jest.mock('../../../components/LeftMenu', () => () => <div>menu</div>);

@@ -36,8 +36,6 @@ module.exports = {
     BACKEND_URL: true,
     PUBLIC_PATH: true,
     NODE_ENV: true,
-    STRAPI_ADMIN_SHOW_TUTORIALS: true,
-    STRAPI_ADMIN_UPDATE_NOTIFICATION: true,
   },
   settings: {
     react: {

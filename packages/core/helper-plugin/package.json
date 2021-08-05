@@ -1,6 +1,6 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "3.6.5",
+  "version": "3.6.6",
   "description": "Helper for Strapi plugins development",
   "main": "build/index.js",
   "module": "build/index.esm.js",
@@ -32,7 +32,7 @@
     "test": "echo \"no tests yet\""
   },
   "peerDependencies": {
-    "immer": "^8.0.1",
+    "immer": "9.0.5",
     "qs": "6.10.1",
     "react-select": "^4.0.2"
   },
@@ -57,12 +57,12 @@
     "rollup-plugin-terser": "7.0.2"
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.5",
-    "@buffetjs/custom": "3.3.5",
-    "@buffetjs/hooks": "3.3.5",
-    "@buffetjs/icons": "3.3.5",
-    "@buffetjs/styles": "3.3.5",
-    "@buffetjs/utils": "3.3.5",
+    "@buffetjs/core": "3.3.8",
+    "@buffetjs/custom": "3.3.8",
+    "@buffetjs/hooks": "3.3.8",
+    "@buffetjs/icons": "3.3.8",
+    "@buffetjs/styles": "3.3.8",
+    "@buffetjs/utils": "3.3.8",
     "@fortawesome/fontawesome-free": "^5.15.2",
     "@fortawesome/fontawesome-svg-core": "^1.2.35",
     "@fortawesome/free-brands-svg-icons": "^5.15.2",
@@ -77,8 +77,8 @@
     "invariant": "^2.2.1",
     "lodash": "4.17.21",
     "moment": "^2.29.1",
-    "react": "^16.14.0",
-    "react-dom": "^16.9.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
     "react-helmet": "^6.1.0",
     "react-intl": "5.20.2",
     "react-router": "^5.2.0",

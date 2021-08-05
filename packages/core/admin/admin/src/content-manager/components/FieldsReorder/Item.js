@@ -144,8 +144,16 @@ const Item = ({
     }),
   });
   const [{ isDragging, getItem }, drag, preview] = useDrag({
-    begin: () => {
+    type: ItemTypes.EDIT_FIELD,
+    item: () => {
       setIsDraggingSibling(true);
+
+      return {
+        itemIndex,
+        rowIndex,
+        name,
+        size,
+      };
     },
     canDrag() {
       // Each row of the layout has a max size of 12 (based on bootstrap grid system)
@@ -162,7 +170,6 @@ const Item = ({
     end: () => {
       setIsDraggingSibling(false);
     },
-    item: { type: ItemTypes.EDIT_FIELD, itemIndex, rowIndex, name, size },
   });
 
   // Remove the default preview when the item is being dragged

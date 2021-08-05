@@ -35,14 +35,14 @@ const collector = {
       type: 'integer',
     },
     cards: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: 'application::card.card',
-      unique: false,
     },
     collector_friends: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: '__self__',
-      unique: false,
     },
   },
 };
@@ -106,7 +106,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: { cards: { name: data.card[0].name } },
           },
         });
 
@@ -121,7 +121,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[1].name,
+            filters: { cards: { name: data.card[1].name } },
           },
         });
 
@@ -137,7 +137,7 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: { collector_friends: { name: data.collector[0].name } },
           },
         });
 
@@ -155,7 +155,11 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: {
+              cards: {
+                name: data.card[0].name,
+              },
+            },
             _q: '',
           },
         });
@@ -170,7 +174,11 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: {
+              cards: {
+                name: data.card[0].name,
+              },
+            },
             _q: 25,
           },
         });
@@ -187,7 +195,11 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: {
+              collector_friends: {
+                name: data.collector[0].name,
+              },
+            },
             _q: '',
           },
         });
@@ -196,12 +208,17 @@ describe('Deep Filtering API', () => {
         expect(res.body.length).toBe(2);
         expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
+
       test('collector_friends.name + search isa', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: {
+              collector_friends: {
+                name: data.collector[0].name,
+              },
+            },
             _q: 'isa',
           },
         });

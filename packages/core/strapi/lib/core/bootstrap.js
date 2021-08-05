@@ -6,14 +6,6 @@ const { getConfigUrls, contentTypes: contentTypesUtils } = require('@strapi/util
 const { createCoreApi } = require('../core-api');
 
 module.exports = function(strapi) {
-  // Set connections.
-  strapi.connections = {};
-
-  const defaultConnection = strapi.config.get('database.defaultConnection');
-
-  // Set current connections.
-  strapi.config.connections = strapi.config.get('database.connections', {});
-
   strapi.contentTypes = {};
 
   // Set models.
@@ -24,7 +16,7 @@ module.exports = function(strapi) {
       let model = strapi.api[apiName].models[modelName];
 
       // mutate model
-      contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { apiName });
+      contentTypesUtils.createContentType(model, { modelName }, { apiName });
 
       strapi.contentTypes[model.uid] = model;
 
@@ -37,12 +29,6 @@ module.exports = function(strapi) {
     }
     return acc;
   }, {});
-
-  // Set components
-  Object.keys(strapi.components).forEach(componentName => {
-    const component = strapi.components[componentName];
-    component.connection = component.connection || defaultConnection;
-  });
 
   // Set controllers.
   strapi.controllers = Object.keys(strapi.api || []).reduce((acc, key) => {
@@ -81,7 +67,7 @@ module.exports = function(strapi) {
     let model = strapi.admin.models[modelName];
 
     // mutate model
-    contentTypesUtils.createContentType(model, { modelName, defaultConnection });
+    contentTypesUtils.createContentType(model, { modelName });
 
     strapi.contentTypes[model.uid] = model;
   });
@@ -106,7 +92,7 @@ module.exports = function(strapi) {
       let model = plugin.models[modelName];
 
       // mutate model
-      contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { pluginName });
+      contentTypesUtils.createContentType(model, { modelName }, { pluginName });
 
       strapi.contentTypes[model.uid] = model;
     });

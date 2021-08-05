@@ -16,7 +16,6 @@ function ListRow({
   configurable,
   name,
   dzName,
-  nature,
   onClick,
   plugin,
   target,
@@ -31,9 +30,11 @@ function ListRow({
   secondLoopComponentName,
   secondLoopComponentUid,
   isNestedInDZComponent,
+  relation,
 }) {
   const { contentTypes, isInDevelopmentMode, modifiedData, removeAttribute } = useDataManager();
-  const isMorph = target === '*';
+
+  const isMorph = type === 'relation' && relation.includes('morph');
   const ico = ['integer', 'biginteger', 'float', 'decimal'].includes(type) ? 'number' : type;
 
   let readableType = type;
@@ -64,7 +65,7 @@ function ListRow({
         null
       );
 
-      const attrType = nature ? 'relation' : type;
+      const attrType = type;
       const icoType = getAttributeDisplayedType(attrType);
 
       let firstHeaderObject = {
@@ -298,9 +299,9 @@ ListRow.defaultProps = {
   firstLoopComponentUid: null,
   isFromDynamicZone: false,
   isNestedInDZComponent: false,
-  nature: null,
   onClick: () => {},
   plugin: null,
+  relation: '',
   repeatable: false,
   secondLoopComponentName: null,
   secondLoopComponentUid: null,
@@ -319,9 +320,9 @@ ListRow.propTypes = {
   isNestedInDZComponent: PropTypes.bool,
   mainTypeName: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  nature: PropTypes.string,
   onClick: PropTypes.func,
   plugin: PropTypes.string,
+  relation: PropTypes.string,
   repeatable: PropTypes.bool,
   secondLoopComponentName: PropTypes.string,
   secondLoopComponentUid: PropTypes.string,

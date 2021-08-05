@@ -2,20 +2,30 @@
 
 const _ = require('lodash');
 
-module.exports = async (entry, files, { model, source }) => {
-  const entity = strapi.getModel(model, source);
+/**
+ * Upload files and like them to an entity
+ * @param {string} uid model uid
+ * @param {object} entity entity created
+ * @param {object} files files to upload
+ * @returns {void}
+ */
+module.exports = async (uid, entity, files) => {
+  const modelDef = strapi.getModel(uid);
 
-  if (!_.has(strapi.plugins, 'upload')) return entry;
+  if (!_.has(strapi.plugins, 'upload')) {
+    return;
+  }
 
   const uploadService = strapi.plugins.upload.services.upload;
 
   const findModelFromUploadPath = path => {
-    if (path.length === 0) return { model, source };
+    if (path.length === 0) {
+      return uid;
+    }
 
     let currentPath = [];
-    let tmpModel = entity;
-    let modelName = model;
-    let sourceName;
+    let tmpModel = modelDef;
+    let modelUID = uid;
 
     for (let i = 0; i < path.length; i++) {
       if (!tmpModel) return {};
@@ -32,37 +42,36 @@ module.exports = async (entry, files, { model, source }) => {
       if (!attr) return {};
 
       if (attr.type === 'component') {
-        modelName = attr.component;
+        modelUID = attr.component;
         tmpModel = strapi.components[attr.component];
       } else if (attr.type === 'dynamiczone') {
         const entryIdx = path[i + 1]; // get component index
-        const value = _.get(entry, [...currentPath, entryIdx]);
+        const value = _.get(entity, [...currentPath, entryIdx]);
 
         if (!value) return {};
 
-        modelName = value.__component; // get component type
-        tmpModel = strapi.components[modelName];
-      } else if (_.has(attr, 'model') || _.has(attr, 'collection')) {
-        sourceName = attr.plugin;
-        modelName = attr.model || attr.collection;
-        tmpModel = strapi.getModel(attr.model || attr.collection, source);
+        modelUID = value.__component; // get component type
+        tmpModel = strapi.components[modelUID];
+      } else if (attr.type === 'relation') {
+        modelUID = attr.target;
+        tmpModel = strapi.getModel(modelUID);
       } else {
-        return {};
+        return;
       }
     }
 
-    return { model: modelName, source: sourceName };
+    return modelUID;
   };
 
   const doUpload = async (key, files) => {
     const parts = key.split('.');
     const [path, field] = [_.initial(parts), _.last(parts)];
 
-    const { model, source } = findModelFromUploadPath(path);
+    const modelUID = findModelFromUploadPath(path);
 
-    if (model) {
-      const id = _.get(entry, path.concat('id'));
-      return uploadService.uploadToEntity({ id, model, field }, files, source);
+    if (modelUID) {
+      const id = _.get(entity, path.concat('id'));
+      return uploadService.uploadToEntity({ id, model: modelUID, field }, files);
     }
   };
 

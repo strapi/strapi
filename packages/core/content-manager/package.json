@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-manager",
-  "version": "3.6.5",
+  "version": "3.6.6",
   "description": "A powerful UI to easily manage your data.",
   "strapi": {
     "name": "Content Manager",
@@ -9,15 +9,9 @@
     "required": true
   },
   "dependencies": {
-    "@buffetjs/core": "3.3.6",
-    "@buffetjs/custom": "3.3.6",
-    "@buffetjs/hooks": "3.3.6",
-    "@buffetjs/icons": "3.3.6",
-    "@buffetjs/styles": "3.3.6",
-    "@buffetjs/utils": "3.3.6",
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/helper-plugin": "3.6.5",
-    "@strapi/utils": "3.6.5",
+    "@strapi/helper-plugin": "3.6.6",
+    "@strapi/utils": "3.6.6",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",
     "yup": "^0.32.9"

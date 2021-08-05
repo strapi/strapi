@@ -2,55 +2,72 @@
 
 const yup = require('yup');
 const { typeKinds, coreUids } = require('../../services/constants');
-const { validators, isValidName } = require('./common');
+const { isValidName } = require('./common');
 
-const REVERSE_RELATIONS = ['oneToOne', 'oneToMany', 'manyToOne', 'manyToMany'];
-const STRAPI_USER_RELATIONS = ['oneWay', 'manyWay'];
+const STRAPI_USER_RELATIONS = ['oneToOne', 'oneToMany'];
 
-const isValidNature = validNatures =>
+const isValidRelation = validNatures =>
   function(value) {
-    const allowedRelations =
-      this.parent.target === coreUids.STRAPI_USER ? STRAPI_USER_RELATIONS : validNatures;
+    if (this.parent.target === coreUids.STRAPI_USER) {
+      if (!validNatures.includes(value) || typeof this.parent.targetAttribute !== undefined) {
+        return this.createError({
+          path: this.path,
+          message: `must be one of the following values: ${STRAPI_USER_RELATIONS.join(', ')}`,
+        });
+      }
+    }
 
-    return allowedRelations.includes(value)
+    return validNatures.includes(value)
       ? true
       : this.createError({
           path: this.path,
-          message: `must be one of the following values: ${allowedRelations.join(', ')}`,
+          message: `must be one of the following values: ${validNatures.join(', ')}`,
         });
   };
 
-module.exports = (obj, validNatures) => {
+module.exports = (attribute, allowedRelations) => {
   const contentTypesUIDs = Object.keys(strapi.contentTypes)
     .filter(key => strapi.contentTypes[key].kind === typeKinds.COLLECTION_TYPE)
     .filter(key => !key.startsWith(coreUids.PREFIX) || key === coreUids.STRAPI_USER)
     .concat(['__self__', '__contentType__']);
 
-  return {
-    target: yup
+  const base = {
+    type: yup
       .string()
-      .oneOf(contentTypesUIDs)
+      .oneOf(['relation'])
       .required(),
-    nature: yup
+    relation: yup
       .string()
-      .test('isValidNature', isValidNature(validNatures))
+      .test('isValidRelation', isValidRelation(allowedRelations))
       .required(),
-    unique: validators.unique.nullable(),
     configurable: yup.boolean().nullable(),
-    autoPopulate: yup.boolean().nullable(),
-    dominant: yup.boolean().nullable(),
-    columnName: yup.string().nullable(),
-    targetAttribute: REVERSE_RELATIONS.includes(obj.nature)
-      ? yup
-          .string()
-          .test(isValidName)
-          .required()
-      : yup
-          .string()
-          .test(isValidName)
-          .nullable(),
-    targetColumnName: yup.string().nullable(),
     private: yup.boolean().nullable(),
     pluginOptions: yup.object(),
   };
+
+  switch (attribute.relation) {
+    case 'oneToOne':
+    case 'oneToMany':
+    case 'manyToOne':
+    case 'manyToMany':
+    case 'morphOne':
+    case 'morphMany': {
+      return yup.object({
+        ...base,
+        target: yup
+          .string()
+          .oneOf(contentTypesUIDs)
+          .required(),
+        targetAttribute: yup
+          .string()
+          .test(isValidName)
+          .nullable(),
+      });
+    }
+    case 'morphToOne':
+    case 'morphToMany':
+    default: {
+      return yup.object({ ...base });
+    }
+  }
 };

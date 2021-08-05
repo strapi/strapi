@@ -1,10 +1,8 @@
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 
-import Logo from '../../../../assets/images/logo-strapi.png';
-
 const Wrapper = styled.div`
-  background-color: #007eff;
+  background-color: ${props => props.theme.main.colors.leftMenu['background-header-link']};
   padding-left: 2rem;
   height: ${props => props.theme.main.sizes.leftMenu.height};
 
@@ -22,7 +20,7 @@ const Wrapper = styled.div`
     letter-spacing: 0.2rem;
     color: $white;
 
-    background-image: url(${Logo});
+    background-image: url(${props => props.logo});
     background-repeat: no-repeat;
     background-position: left center;
     background-size: auto 2.5rem;

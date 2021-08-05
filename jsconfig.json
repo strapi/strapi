@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "rootDir": ".",
+    "module": "commonjs",
+    "target": "es6"
+  },
+  "include": ["packages/**/*.js"],
+  "exclude": ["node_modules", ".git", ".npm", ".cache", ".tmp", "dist", "build"]
+}

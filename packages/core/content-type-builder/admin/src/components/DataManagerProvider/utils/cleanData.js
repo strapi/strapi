@@ -1,4 +1,4 @@
-import { get, has, isEqual, omit, sortBy, camelCase } from 'lodash';
+import { get, isEqual, omit, sortBy, camelCase } from 'lodash';
 
 import pluginId from '../../../pluginId';
 import makeUnique from '../../../utils/makeUnique';
@@ -16,12 +16,10 @@ const getCreatedAndModifiedComponents = (allComponents, initialComponents) => {
   return makeUnique(componentUIDsToReturn);
 };
 
-const formatComponent = (component, mainDataUID, isCreatingData = false) => {
+const formatComponent = (component, mainDataUID) => {
   const formattedAttributes = formatAttributes(
-    get(component, 'schema.attributes', {}),
-    mainDataUID,
-    isCreatingData,
-    true
+    get(component, 'schema.attributes', []),
+    mainDataUID
   );
 
   // Set tmpUID if the component has just been created
@@ -44,15 +42,9 @@ const formatComponent = (component, mainDataUID, isCreatingData = false) => {
 };
 
 const formatMainDataType = (data, isComponent = false) => {
-  const isCreatingData = get(data, 'isTemporary', false);
   const mainDataUID = get(data, 'uid', null);
 
-  const formattedAttributes = formatAttributes(
-    get(data, 'schema.attributes', {}),
-    mainDataUID,
-    isCreatingData,
-    false
-  );
+  const formattedAttributes = formatAttributes(get(data, 'schema.attributes', []), mainDataUID);
   const initObj = isComponent ? { category: get(data, 'category', '') } : {};
 
   const formattedContentType = Object.assign(initObj, omit(data.schema, 'attributes'), {
@@ -71,14 +63,12 @@ const formatMainDataType = (data, isComponent = false) => {
  *
  * @param {Object} attributes
  * @param {String} mainDataUID uid of the main data type
- * @param {Boolean} isCreatingMainData
- * @param {Boolean} isComponent
  */
-const formatAttributes = (attributes, mainDataUID, isCreatingMainData, isComponent) => {
-  return Object.keys(attributes).reduce((acc, current) => {
-    const currentAttribute = get(attributes, current, {});
+const formatAttributes = (attributes, mainDataUID) => {
+  return attributes.reduce((acc, { name, ...rest }) => {
+    const currentAttribute = rest;
     const hasARelationWithMainDataUID = currentAttribute.target === mainDataUID;
-    const isRelationType = has(currentAttribute, 'nature');
+    const isRelationType = currentAttribute.type === 'relation';
     const currentTargetAttribute = get(currentAttribute, 'targetAttribute', null);
 
     if (!hasARelationWithMainDataUID) {
@@ -87,25 +77,21 @@ const formatAttributes = (attributes, mainDataUID, isCreatingMainData, isCompone
           targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
         });
 
-        acc[current] = removeNullKeys(relationAttr);
+        acc[name] = removeNullKeys(relationAttr);
       } else {
-        acc[current] = removeNullKeys(currentAttribute);
+        acc[name] = removeNullKeys(currentAttribute);
       }
     }
 
     if (hasARelationWithMainDataUID) {
-      let target = currentAttribute.target;
-
-      if (isCreatingMainData) {
-        target = isComponent ? '__contentType__' : '__self__';
-      }
+      const target = currentAttribute.target;
 
       const formattedRelationAttribute = Object.assign({}, currentAttribute, {
         target,
         targetAttribute: formatRelationTargetAttribute(currentTargetAttribute),
       });
 
-      acc[current] = removeNullKeys(formattedRelationAttribute);
+      acc[name] = removeNullKeys(formattedRelationAttribute);
     }
 
     return acc;

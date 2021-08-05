@@ -1,9 +1,9 @@
 'use strict';
 
-const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
+const { getService } = require('../../utils');
 
 const sanitize = (data, options = {}) => {
   return sanitizeEntity(data, {
@@ -14,9 +14,7 @@ const sanitize = (data, options = {}) => {
 
 module.exports = {
   async find(ctx) {
-    const method = _.has(ctx.query, '_q') ? 'search' : 'fetchAll';
-
-    const files = await strapi.plugins.upload.services.upload[method](ctx.query);
+    const files = await getService('upload').fetchAll(ctx.query);
 
     ctx.body = sanitize(files);
   },
@@ -26,7 +24,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await strapi.plugins.upload.services.upload.fetch({ id });
+    const file = await getService('upload').findOne({ id });
 
     if (!file) {
       return ctx.notFound('file.notFound');
@@ -36,9 +34,7 @@ module.exports = {
   },
 
   async count(ctx) {
-    const method = _.has(ctx.query, '_q') ? 'countSearch' : 'count';
-
-    ctx.body = await strapi.plugins.upload.services.upload[method](ctx.query);
+    ctx.body = await getService('upload').count(ctx.query);
   },
 
   async destroy(ctx) {
@@ -46,7 +42,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await strapi.plugins['upload'].services.upload.fetch({ id });
+    const file = await strapi.plugins['upload'].services.upload.findOne({ id });
 
     if (!file) {
       return ctx.notFound('file.notFound');
@@ -64,13 +60,13 @@ module.exports = {
 
     const data = await validateSettings(body);
 
-    await strapi.plugins.upload.services.upload.setSettings(data);
+    await getService('upload').setSettings(data);
 
     ctx.body = { data };
   },
 
   async getSettings(ctx) {
-    const data = await strapi.plugins.upload.services.upload.getSettings();
+    const data = await getService('upload').getSettings();
 
     ctx.body = { data };
   },
@@ -82,7 +78,7 @@ module.exports = {
     } = ctx;
     const data = await validateUploadBody(body);
 
-    const result = await strapi.plugins.upload.services.upload.updateFileInfo(id, data.fileInfo);
+    const result = await getService('upload').updateFileInfo(id, data.fileInfo);
 
     ctx.body = sanitize(result);
   },
@@ -102,7 +98,7 @@ module.exports = {
       });
     }
 
-    const replacedFiles = await strapi.plugins.upload.services.upload.replace(id, {
+    const replacedFiles = await getService('upload').replace(id, {
       data: await validateUploadBody(body),
       file: files,
     });
@@ -115,7 +111,7 @@ module.exports = {
       request: { body, files: { files } = {} },
     } = ctx;
 
-    const uploadedFiles = await strapi.plugins.upload.services.upload.upload({
+    const uploadedFiles = await getService('upload').upload({
       data: await validateUploadBody(body),
       files,
     });
