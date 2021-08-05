@@ -4,7 +4,7 @@ const { prop } = require('lodash/fp');
 const { makeSchema, unionType } = require('nexus');
 
 const createBuilders = require('../builders');
-const { utils, scalars, buildInternals } = require('../../types');
+const { utils, constants, scalars, buildInternals } = require('../../types');
 
 const { create: createTypeRegistry } = require('../../type-registry');
 
@@ -42,56 +42,45 @@ module.exports = strapi => {
 
   const registerMorphTypes = contentTypes => {
     // Create & register a union type that includes every type or component registered
-    registry.register(
-      'GenericMorph',
+    const genericMorphType = builders.buildGenericMorphDefinition();
+    registry.register(constants.GENERIC_MORPH_TYPENAME, genericMorphType, { kind: 'morphs' });
 
-      unionType({
-        name: 'GenericMorph',
-
-        resolveType(obj) {
-          return obj.__typename;
-        },
-
-        definition(t) {
-          const members = registry
-            .where(({ config: { kind } }) => ['types', 'components'].includes(kind))
-            .map(prop('name'));
-
-          t.members(...members);
-        },
-      }),
-      { kind: 'morphs' }
-    );
-
+    // For every content type
     contentTypes.forEach(contentType => {
       const { attributes = {} } = contentType;
 
+      // Isolate its polymorphic attributes
       const morphAttributes = Object.entries(attributes).filter(([, attribute]) =>
         utils.isMorphRelation(attribute)
       );
 
+      // For each one of those polymorphic attribute
       for (const [attributeName, attribute] of morphAttributes) {
         const name = utils.getMorphRelationTypeName(contentType, attributeName);
         const { target } = attribute;
 
+        // Ignore those whose target is not an array
         if (!Array.isArray(target)) {
           continue;
         }
 
+        // Transform target UIDs into types names
+        const members = target
+          // Get content types definitions
+          .map(uid => strapi.getModel(uid))
+          // Resolve types names
+          .map(contentType => utils.getTypeName(contentType));
+
+        // Register the new polymorphic union type
         registry.register(
           name,
 
           unionType({
             name,
 
-            resolveType(obj) {
-              return obj.__typename;
-            },
+            resolveType: prop('__typename'),
 
             definition(t) {
-              // const members = backLinks.map(prop('definition'));
-              const members = target || ['GenericMorph'];
-
               t.members(...members);
             },
           }),

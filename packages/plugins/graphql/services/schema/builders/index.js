@@ -18,6 +18,8 @@ const mutations = require('./mutations');
 const filters = require('./filters');
 const inputs = require('./input');
 
+const genericMorph = require('./generic-morph');
+
 const buildersFactories = [
   enums,
   dynamicZone,
@@ -30,6 +32,7 @@ const buildersFactories = [
   mutations,
   filters,
   inputs,
+  genericMorph,
 ];
 
 /**

@@ -1,11 +1,11 @@
 'use strict';
 
-const { isArray } = require('lodash/fp');
+const { isArray, isString, isUndefined } = require('lodash/fp');
 const { objectType } = require('nexus');
 
 const { contentTypes } = require('@strapi/utils');
 
-const { mappers, utils: typeUtils } = require('../../types');
+const { mappers, utils: typeUtils, constants } = require('../../types');
 const { buildAssociationResolver } = require('../resolvers');
 
 /**
@@ -62,7 +62,9 @@ module.exports = context => ({
          * - Component
          * - Dynamic Zone
          * - Enum
-         * - Relation
+         * - Media
+         * - Polymorphic Relations
+         * - Regular Relations
          *
          * Here, we iterate over each non-private attribute
          * and add it to the type definition based on its type
@@ -107,9 +109,19 @@ module.exports = context => ({
               addEnumAttribute(options);
             }
 
-            // Relations
+            // Media
+            else if (typeUtils.isMedia(attribute)) {
+              addMediaAttribute(options);
+            }
+
+            // Polymorphic Relations
+            else if (typeUtils.isMorphRelation(attribute)) {
+              addPolymorphicRelationalAttribute(options);
+            }
+
+            // Regular Relations
             else if (typeUtils.isRelation(attribute) || typeUtils.isMedia(attribute)) {
-              addRelationalAttribute(options);
+              addRegularRelationalAttribute(options);
             }
           });
       },
@@ -178,10 +190,10 @@ const addEnumAttribute = ({ builder, attributeName, contentType }) => {
 };
 
 /**
- * Add a relational attribute to the type definition
+ * Add a media attribute to the type definition
  * @param {TypeBuildersOptions} options
  */
-const addRelationalAttribute = options => {
+const addMediaAttribute = options => {
   let { builder } = options;
   const {
     attributeName,
@@ -190,10 +202,37 @@ const addRelationalAttribute = options => {
     context: { strapi },
   } = options;
 
-  // todo[V4]: Clean the logic below
+  if (attribute.multiple) {
+    builder = builder.list;
+  }
 
-  const isMorphLike = typeUtils.isMorphRelation(attribute);
-  const isToManyRelation = typeUtils.isRelation(attribute) && attribute.relation.endsWith('Many');
+  const fileContentType = strapi.getModel('plugins::upload.file');
+  const type = typeUtils.getTypeName(fileContentType);
+
+  const associationResolver = buildAssociationResolver({
+    contentTypeUID: contentType.uid,
+    attributeName,
+    strapi,
+  });
+
+  builder.field(attributeName, { type, resolve: associationResolver });
+};
+
+/**
+ * Add a polymorphic relational attribute to the type definition
+ * @param {TypeBuildersOptions} options
+ */
+const addPolymorphicRelationalAttribute = options => {
+  let { builder } = options;
+  const {
+    attributeName,
+    attribute,
+    contentType,
+    context: { strapi },
+  } = options;
+
+  const { target } = attribute;
+  const isToManyRelation = attribute.relation.endsWith('Many');
 
   if (isToManyRelation) {
     builder = builder.list;
@@ -205,32 +244,51 @@ const addRelationalAttribute = options => {
     strapi,
   });
 
-  if (typeUtils.isMedia(attribute)) {
-    const fileContentType = strapi.getModel('plugins::upload.file');
-    const type = typeUtils.getTypeName(fileContentType);
+  // If there is no specific target specified, then use the GenericMorph type
+  if (isUndefined(target)) {
+    builder.field(attributeName, {
+      type: constants.GENERIC_MORPH_TYPENAME,
+      resolve: associationResolver,
+    });
+  }
 
-    builder.field(attributeName, { type, resolve: associationResolver });
-  } else if (isMorphLike) {
-    const { target } = attribute;
-
-    if (typeof target === 'string') {
-      const targetContentType = strapi.getModel(target);
-      const type = typeUtils.getTypeName(targetContentType);
-
-      builder.field(attributeName, { type, resolve: associationResolver });
-    } else if (Array.isArray(target)) {
-      const type = typeUtils.getMorphRelationTypeName(contentType, attributeName);
-
-      builder.field(attributeName, { type, resolve: associationResolver });
-    } else if (!target) {
-      builder.field(attributeName, { type: 'GenericMorph', resolve: associationResolver });
-    }
-  } else {
-    const targetContentType = strapi.getModel(attribute.target);
-    const type = typeUtils.getTypeName(targetContentType);
+  // If the target is an array of string, resolve the associated morph type and use it
+  else if (isArray(target) && target.every(isString)) {
+    const type = typeUtils.getMorphRelationTypeName(contentType, attributeName);
 
     builder.field(attributeName, { type, resolve: associationResolver });
   }
+};
+
+/**
+ * Add a regular relational attribute to the type definition
+ * @param {TypeBuildersOptions} options
+ */
+const addRegularRelationalAttribute = options => {
+  let { builder } = options;
+  const {
+    attributeName,
+    attribute,
+    contentType,
+    context: { strapi },
+  } = options;
+
+  const isToManyRelation = attribute.relation.endsWith('Many');
+
+  if (isToManyRelation) {
+    builder = builder.list;
+  }
+
+  const associationResolver = buildAssociationResolver({
+    contentTypeUID: contentType.uid,
+    attributeName,
+    strapi,
+  });
+
+  const targetContentType = strapi.getModel(attribute.target);
+  const type = typeUtils.getTypeName(targetContentType);
+
+  builder.field(attributeName, { type, resolve: associationResolver });
 };
 
 /**
