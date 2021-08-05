@@ -23,6 +23,10 @@ const AdvancedSettingsPage = () => {
     id: getTrad('HeaderNav.link.advancedSettings'),
     defaultMessage: 'Advanced Settings',
   });
+  const formTitle = formatMessage({
+    id: getTrad('Settings.advancedSettings.title'),
+    defaultMessage: 'Settings',
+  });
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateAdvancedSettings };
   }, []);
@@ -179,13 +183,7 @@ const AdvancedSettingsPage = () => {
         <form onSubmit={handleSubmit}>
           <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
           <ListBaselineAlignment />
-          <FormBloc
-            title={formatMessage({
-              id: getTrad('Settings.advancedSettings.title'),
-              defaultMessage: 'Settings',
-            })}
-            isLoading={showLoader}
-          >
+          <FormBloc title={formTitle} isLoading={showLoader}>
             {form.map(input => {
               return (
                 <SizedInput

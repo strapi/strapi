@@ -25,7 +25,7 @@
   "notification.update.success": "设置更新成功",
   "notification.delete.success": "API文档已删除",
   "notification.generate.success": "API文档已生成",
-  "plugin.name": "API文档",
+  "plugin.name": "OpenAPI文档",
   "plugin.description.long": "创建一个 OpenAPI 文档，并通过 SWAGGER UI 直接查看。",
   "plugin.description.short": "创建一个 OpenAPI 文档，并通过 SWAGGER UI 直接查看。"
 }
