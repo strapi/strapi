@@ -14,7 +14,7 @@ const FormikFocusError = () => {
         return prev;
       }, []);
 
-      if (errorNames.length && typeof document !== 'undefined') {
+      if (errorNames.length) {
         let errorEl;
 
         errorNames.forEach(errorKey => {
@@ -25,11 +25,7 @@ const FormikFocusError = () => {
           }
         });
 
-        setTimeout(() => {
-          if (errorEl) {
-            errorEl.focus();
-          }
-        }, 100);
+        errorEl.focus();
       }
     }
   }, [errors, isSubmitting, isValidating, touched]);
