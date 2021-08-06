@@ -143,7 +143,7 @@ jobs:
     name: '[CE] E2E (sqlite, node: ${{ matrix.node }})'
     strategy:
       matrix:
-        node: [12, 14, 16]
+        node: [14]
       max-parallel: 2
     steps:
       - uses: actions/checkout@v2
