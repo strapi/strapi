@@ -3490,6 +3490,19 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
+"@strapi/icons@0.0.1-alpha.4":
+  version "0.0.1-alpha.4"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.4.tgz#f3e66f05b8aa0ae1615380e68cc0125fe405777e"
+  integrity sha512-Lnfam0vCD2PWNdvnyG9ZHtvTKgDdSc7AvqzqlxC3BlbvrNBMov3XtvCZFfW1TgXZ4iwGbCmuN+JDmiFtiAWygA==
+
+"@strapi/parts@0.0.1-alpha.4":
+  version "0.0.1-alpha.4"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.4.tgz#ffeeb856d2e4b0b6f5ae84f28e071e73e1c3d07e"
+  integrity sha512-1LBipdmZiCEdO6RC+YSsVEkHV3XxStTFxTKPz3bsorb5Rt52FchOB2CkHTjIK4+WmNvHdDJh1b98ZC0M0gJCEQ==
+  dependencies:
+    compute-scroll-into-view "^1.0.17"
+    prop-types "^15.7.2"
+
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.2"
   resolved "https://registry.yarnpkg.com/@stylelint/postcss-css-in-js/-/postcss-css-in-js-0.37.2.tgz#7e5a84ad181f4234a2480803422a47b8749af3d2"
@@ -6852,6 +6865,11 @@ compression@^1.7.4:
     on-headers "~1.0.2"
     safe-buffer "5.1.2"
     vary "~1.1.2"
+
+compute-scroll-into-view@^1.0.17:
+  version "1.0.17"
+  resolved "https://registry.yarnpkg.com/compute-scroll-into-view/-/compute-scroll-into-view-1.0.17.tgz#6a88f18acd9d42e9cf4baa6bec7e0522607ab7ab"
+  integrity sha512-j4dx+Fb0URmzbwwMUrhqWM2BEWHdFGx+qZ9qqASHRPqvTYdqvWnHg0H1hIbcyLnvgnoNAVMlwkepyqM3DaIFUg==
 
 concat-map@0.0.1:
   version "0.0.1"

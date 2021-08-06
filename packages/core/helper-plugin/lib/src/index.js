@@ -128,6 +128,7 @@ export { default as useOverlayBlocker } from './hooks/useOverlayBlocker';
 export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOverlayBlocker';
 export { default as useRBACProvider } from './hooks/useRBACProvider';
 export { default as useRBAC } from './hooks/useRBAC';
+export { default as usePersistentState } from './hooks/usePersistentState';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';
