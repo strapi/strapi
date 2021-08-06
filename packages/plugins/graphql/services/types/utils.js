@@ -20,7 +20,7 @@ const isScalar = attribute => {
  * @return {boolean}
  */
 const isMorphRelation = attribute => {
-  return (isRelation(attribute) && attribute.relation.includes('morph')) || isMedia(attribute);
+  return isRelation(attribute) && attribute.relation.includes('morph');
 };
 
 /**

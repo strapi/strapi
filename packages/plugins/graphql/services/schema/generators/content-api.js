@@ -1,6 +1,5 @@
 'use strict';
 
-const { prop } = require('lodash/fp');
 const { makeSchema, unionType } = require('nexus');
 
 const createBuilders = require('../builders');
@@ -78,7 +77,19 @@ module.exports = strapi => {
           unionType({
             name,
 
-            resolveType: prop('__typename'),
+            resolveType(obj) {
+              const contentType = strapi.getModel(obj.__type);
+
+              if (!contentType) {
+                return null;
+              }
+
+              if (contentType.modelType === 'component') {
+                return utils.getComponentName(contentType);
+              }
+
+              return utils.getTypeName(contentType);
+            },
 
             definition(t) {
               t.members(...members);

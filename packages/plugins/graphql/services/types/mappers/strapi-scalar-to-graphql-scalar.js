@@ -8,6 +8,7 @@ const associations = {
   boolean: 'Boolean',
   integer: 'Int',
   string: 'String',
+  richtext: 'String',
   biginteger: 'Long',
   float: 'Float',
   decimal: 'Float',

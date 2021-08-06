@@ -22,6 +22,7 @@ const STRAPI_SCALARS = [
   'boolean',
   'integer',
   'string',
+  'richtext',
   'biginteger',
   'float',
   'decimal',

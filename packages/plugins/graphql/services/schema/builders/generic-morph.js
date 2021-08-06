@@ -4,15 +4,28 @@ const { unionType } = require('nexus');
 const { prop } = require('lodash/fp');
 
 const {
+  utils,
   constants: { GENERIC_MORPH_TYPENAME },
 } = require('../../types');
 
-module.exports = ({ registry }) => ({
+module.exports = ({ strapi, registry }) => ({
   buildGenericMorphDefinition() {
     return unionType({
       name: GENERIC_MORPH_TYPENAME,
 
-      resolveType: prop('__typename'),
+      resolveType(obj) {
+        const contentType = strapi.getModel(obj.__type);
+
+        if (!contentType) {
+          return null;
+        }
+
+        if (contentType.modelType === 'component') {
+          return utils.getComponentName(contentType);
+        }
+
+        return utils.getTypeName(contentType);
+      },
 
       definition(t) {
         const members = registry

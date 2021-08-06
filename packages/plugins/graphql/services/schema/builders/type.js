@@ -151,14 +151,31 @@ const addScalarAttribute = ({ builder, attributeName, attribute }) => {
  *
  * @param {TypeBuildersOptions} options
  */
-const addComponentAttribute = ({ builder, attributeName, attribute }) => {
+const addComponentAttribute = ({ builder, attributeName, contentType, attribute, context }) => {
+  const { strapi } = context;
+
   const type = typeUtils.getComponentNameFromAttribute(attribute);
 
   if (attribute.repeatable) {
     builder = builder.list;
   }
 
-  builder.field(attributeName, { type });
+  builder.field(attributeName, {
+    type,
+
+    // Move resolver to /resolvers/component.js
+    async resolve(source) {
+      const { [attributeName]: component } = await strapi.db.entityManager.populate(
+        contentType.uid,
+        source,
+        {
+          [attributeName]: true,
+        }
+      );
+
+      return component;
+    },
+  });
 };
 
 /**

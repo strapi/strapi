@@ -42,14 +42,18 @@ module.exports = context => {
               t.field(attributeName, { type: gqlScalar });
             }
 
-            // Relations
-            else if (isRelation(attribute) || isMorphRelation(attribute)) {
-              const isMultipleMedia = isMedia(attribute) && attribute.multiple;
-              const isToManyRelation = isRelation(attribute) && attribute.relation.endsWith('Many');
+            // Media
+            else if (isMedia(attribute)) {
+              const isMultiple = attribute.multiple === true;
 
-              return isMultipleMedia || isToManyRelation
-                ? t.list.id(attributeName)
-                : t.id(attributeName);
+              isMultiple ? t.list.id(attributeName) : t.id(attributeName);
+            }
+
+            // Regular Relations (ignore polymorphic relations)
+            else if (isRelation(attribute) && !isMorphRelation(attribute)) {
+              const isToManyRelation = attribute.relation.endsWith('Many');
+
+              isToManyRelation ? t.list.id(attributeName) : t.id(attributeName);
             }
 
             // Enums
@@ -61,10 +65,11 @@ module.exports = context => {
 
             // Components
             else if (isComponent(attribute)) {
+              const isRepeatable = attribute.repeatable === true;
               const component = strapi.components[attribute.component];
               const componentInputType = getComponentInputName(component);
 
-              if (attribute.repeatable) {
+              if (isRepeatable) {
                 t.list.field(attributeName, { type: componentInputType });
               } else {
                 t.field(attributeName, { type: componentInputType });
