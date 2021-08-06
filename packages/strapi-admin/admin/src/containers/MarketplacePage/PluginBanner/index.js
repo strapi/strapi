@@ -1,9 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
 import Wrapper from './Wrapper';
 import LogoStrapi from '../../../assets/images/banner_strapi-rocket.png';
 
-const PluginBanner = () => {
+const PluginBanner = ({ emitEvent }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -22,6 +23,7 @@ const PluginBanner = () => {
           target="_blank"
           rel="noopener noreferrer"
           className="bannerLink"
+          onClick={() => emitEvent('didGoToStrapiAwesome')}
         >
           <FormattedMessage id="app.components.PluginBanner.link" />
           <i className="fa fa-external-link-alt" />
@@ -32,3 +34,7 @@ const PluginBanner = () => {
 };
 
 export default PluginBanner;
+
+PluginBanner.propTypes = {
+  emitEvent: PropTypes.func.isRequired,
+};

@@ -78,7 +78,7 @@ const MarketPlacePage = () => {
             id: 'app.components.InstallPluginPage.description',
           })}
         />
-        <PluginBanner />
+        <PluginBanner emitEvent={emitEvent} />
         <div className="row" style={{ paddingTop: '4.1rem' }}>
           {data.map(plugin => {
             return (
