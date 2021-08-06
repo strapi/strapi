@@ -57,7 +57,7 @@ module.exports = context => ({
 
         /** 3. Attributes
          *
-         * Attributes can be of 5 different kind:
+         * Attributes can be of 7 different kind:
          * - Scalar
          * - Component
          * - Dynamic Zone
