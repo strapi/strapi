@@ -6,13 +6,7 @@ const FormWithFocus = props => {
 
   useEffect(() => {
     if (isSubmitting && !isValidating) {
-      const errorNames = Object.keys(touched).reduce((prev, key) => {
-        if (getIn(errors, key)) {
-          prev.push(key);
-        }
-
-        return prev;
-      }, []);
+      const errorNames = Object.keys(touched).filter(error => getIn(errors, error));
 
       if (errorNames.length) {
         let errorEl;

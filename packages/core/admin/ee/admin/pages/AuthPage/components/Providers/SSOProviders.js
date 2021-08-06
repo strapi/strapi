@@ -84,7 +84,7 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
             })}
           >
             <SSOButton as={Link} to="/auth/providers">
-              <span aroa-hidden>•••</span>
+              <span aria-hidden>•••</span>
             </SSOButton>
           </Tooltip>
         </GridItem>
