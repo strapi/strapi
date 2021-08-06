@@ -1,5 +1,17 @@
-import React from 'react';
-import { Box, Stack, H1, Text, Subtitle, Button, Checkbox, TextInput, Main } from '@strapi/parts';
+import React, { useState } from 'react';
+import { Show, Hide } from '@strapi/icons';
+import {
+  Box,
+  Stack,
+  H1,
+  Text,
+  Subtitle,
+  Button,
+  Checkbox,
+  TextInput,
+  Main,
+  FieldAction,
+} from '@strapi/parts';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
@@ -13,8 +25,18 @@ const AuthButton = styled(Button)`
   display: inline-block;
   width: 100%;
 `;
+const FieldActionWrapper = styled(FieldAction)`
+  svg {
+    height: 16px;
+    width: 16px;
+    path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
 
 const Login = ({ onSubmit, schema }) => {
+  const [passwordShown, setPasswordShown] = useState(false);
   const { authLogo } = useConfigurations();
   const { formatMessage } = useIntl();
 
@@ -61,7 +83,23 @@ const Login = ({ onSubmit, schema }) => {
                 value={values.password}
                 label={formatMessage({ id: 'Auth.form.password.label' })}
                 name="password"
-                type="password"
+                type={passwordShown ? 'text' : 'password'}
+                endAction={
+                  // eslint-disable-next-line react/jsx-wrap-multilines
+                  <FieldActionWrapper
+                    onClick={e => {
+                      e.preventDefault();
+                      setPasswordShown(prev => !prev);
+                    }}
+                    label={formatMessage({
+                      id: passwordShown
+                        ? 'Auth.form.password.show-password'
+                        : 'Auth.form.password.hide-password',
+                    })}
+                  >
+                    {passwordShown ? <Show /> : <Hide />}
+                  </FieldActionWrapper>
+                }
                 required
               />
               <Checkbox
