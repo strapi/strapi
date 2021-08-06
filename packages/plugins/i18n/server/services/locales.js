@@ -6,16 +6,16 @@ const { getService } = require('../utils');
 
 const { getCoreStore } = require('../utils');
 
-const find = params => strapi.query('plugins::i18n.locale').findMany({ where: params });
+const find = params => strapi.query('plugin::i18n.locale').findMany({ where: params });
 
-const findById = id => strapi.query('plugins::i18n.locale').findOne({ where: { id } });
+const findById = id => strapi.query('plugin::i18n.locale').findOne({ where: { id } });
 
-const findByCode = code => strapi.query('plugins::i18n.locale').findOne({ where: { code } });
+const findByCode = code => strapi.query('plugin::i18n.locale').findOne({ where: { code } });
 
-const count = params => strapi.query('plugins::i18n.locale').count({ where: params });
+const count = params => strapi.query('plugin::i18n.locale').count({ where: params });
 
 const create = async locale => {
-  const result = await strapi.query('plugins::i18n.locale').create({ data: locale });
+  const result = await strapi.query('plugin::i18n.locale').create({ data: locale });
 
   getService('metrics').sendDidUpdateI18nLocalesEvent();
 
@@ -23,9 +23,7 @@ const create = async locale => {
 };
 
 const update = async (params, updates) => {
-  const result = await strapi
-    .query('plugins::i18n.locale')
-    .update({ where: params, data: updates });
+  const result = await strapi.query('plugin::i18n.locale').update({ where: params, data: updates });
 
   getService('metrics').sendDidUpdateI18nLocalesEvent();
 
@@ -37,7 +35,7 @@ const deleteFn = async ({ id }) => {
 
   if (localeToDelete) {
     await deleteAllLocalizedEntriesFor({ locale: localeToDelete.code });
-    const result = await strapi.query('plugins::i18n.locale').delete({ where: { id } });
+    const result = await strapi.query('plugin::i18n.locale').delete({ where: { id } });
 
     getService('metrics').sendDidUpdateI18nLocalesEvent();
 
@@ -67,7 +65,7 @@ const setIsDefault = async locales => {
 };
 
 const initDefaultLocale = async () => {
-  const existingLocalesNb = await strapi.query('plugins::i18n.locale').count();
+  const existingLocalesNb = await strapi.query('plugin::i18n.locale').count();
   if (existingLocalesNb === 0) {
     await create(DEFAULT_LOCALE);
     await setDefaultLocale({ code: DEFAULT_LOCALE.code });

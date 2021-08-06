@@ -17,7 +17,7 @@ module.exports = async (ctx, next) => {
 
     return ctx.redirect(
       `${strapi.config.server.url}${
-        strapi.config.get('plugins.documentation.x-strapi-config').path
+        strapi.config.get('plugin.documentation.x-strapi-config').path
       }/login${querystring}`
     );
   }

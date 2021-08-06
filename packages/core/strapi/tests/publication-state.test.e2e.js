@@ -58,7 +58,7 @@ const contentTypes = {
       categories: {
         type: 'relation',
         relation: 'oneToMany',
-        target: 'application::category.category',
+        target: 'api::category.category',
       },
       comp: {
         component: 'default.comp',
@@ -102,7 +102,7 @@ const components = {
       countries: {
         type: 'relation',
         relation: 'oneToMany',
-        target: 'application::country.country',
+        target: 'api::country.country',
       },
     },
   },

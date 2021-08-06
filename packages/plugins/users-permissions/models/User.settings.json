@@ -58,7 +58,7 @@
     "role": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "plugins::users-permissions.role",
+      "target": "plugin::users-permissions.role",
       "inversedBy": "users",
       "configurable": false
     }

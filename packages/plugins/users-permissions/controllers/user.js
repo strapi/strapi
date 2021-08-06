@@ -14,7 +14,7 @@ const apiUserController = require('./user/api');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
-    model: strapi.getModel('plugins::users-permissions.user'),
+    model: strapi.getModel('plugin::users-permissions.user'),
   });
 
 const resolveController = ctx => {

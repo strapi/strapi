@@ -27,7 +27,15 @@ const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
 // const createContainer = require('./core/container');
-const createConfigProvider = require('./core/base-providers/config-provider');
+// const createContainer = require('./core/container');
+const contentTypesRegistry = require('./core/registries/content-types');
+const servicesRegistry = require('./core/registries/services');
+const policiesRegistry = require('./core/registries/policies');
+const middlewaresRegistry = require('./core/registries/middlewares');
+const controllersRegistry = require('./core/registries/controllers');
+const modulesRegistry = require('./core/registries/modules');
+const createConfigProvider = require('./core/registries/config');
+const loadPlugins = require('./core/load-plugins');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -36,42 +44,47 @@ const LIFECYCLES = {
 
 class Strapi {
   constructor(opts = {}) {
-    this.container = createContainer(this);
-
     this.dir = opts.dir || process.cwd();
-    this.config = loadConfiguration(this.dir, opts);
-
-    this.reload = this.reload();
-
-    // Expose `koa`.
-    this.app = new Koa();
-    this.router = new Router();
-
-    this.server = createHTTPServer(this, this.app);
-
-    this.plugins = {};
-
     const appConfig = loadConfiguration(this.dir, opts);
-    this.config = createConfigProvider(appConfig);
     this.container = createContainer(this);
-    this.app.proxy = this.config.get('server.proxy');
-
-    // Logger.
-    const loggerUserConfiguration = this.config.get('logger', {});
-    this.log = createLogger(loggerUserConfiguration);
+    this.container.register('config', createConfigProvider(appConfig));
+    this.container.register('content-types', contentTypesRegistry(this));
+    this.container.register('services', servicesRegistry(this));
+    this.container.register('policies', policiesRegistry(this));
+    this.container.register('middlewares', middlewaresRegistry(this));
+    this.container.register('controllers', controllersRegistry(this));
+    this.container.register('modules', modulesRegistry(this));
 
     this.isLoaded = false;
-
-    // internal services.
+    this.reload = this.reload();
+    this.app = new Koa();
+    this.router = new Router();
+    this.server = createHTTPServer(this, this.app);
+    this.plugins = {}; // to remove V3
+    this.contentTypes = {}; // to remove V3
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
+    this.app.proxy = this.config.get('server.proxy');
+    this.log = createLogger(this.config.get('logger', {}));
 
     createUpdateNotifier(this).notify();
   }
 
+  get config() {
+    return this.container.get('config');
+  }
+
   get EE() {
     return ee({ dir: this.dir, logger: this.log });
+  }
+
+  plugin(name) {
+    return this.container.get('modules').get(`plugin::${name}`);
+  }
+
+  get pluginsV4() {
+    return this.container.get('modules').getAll('plugin::');
   }
 
   async start(cb) {
@@ -214,6 +227,13 @@ class Strapi {
       }
     });
 
+    const plugins = await loadPlugins(this);
+
+    for (const pluginName in plugins) {
+      const plugin = plugins[pluginName];
+      this.container.get('modules').add(`plugin::${pluginName}`, plugin);
+    }
+
     // await this.container.load();
 
     // this.plugins = this.container.plugins.getAll();
@@ -352,11 +372,11 @@ class Strapi {
     const configPath = `functions.${lifecycleName}`;
 
     // plugins
-    // if (lifecycleName === LIFECYCLES.BOOTSTRAP) {
-    //   await this.container.bootstrap();
-    // } else if (lifecycleName === LIFECYCLES.REGISTER) {
-    //   await this.container.register();
-    // }
+    if (lifecycleName === LIFECYCLES.BOOTSTRAP) {
+      await this.container.get('modules').bootstrap();
+    } else if (lifecycleName === LIFECYCLES.REGISTER) {
+      await this.container.get('modules').register();
+    }
 
     // user
     await execLifecycle(this.config.get(configPath));

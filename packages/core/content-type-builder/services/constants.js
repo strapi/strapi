@@ -37,7 +37,7 @@ const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 
 const PREFIX = 'strapi::';
 const STRAPI_USER = 'strapi::user';
-const UPLOAD_FILE = 'plugins::upload.file';
+const UPLOAD_FILE = 'plugin::upload.file';
 
 module.exports = {
   DEFAULT_TYPES,

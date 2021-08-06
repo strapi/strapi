@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { mapKeys, toLower } = require('lodash/fp');
+const { toLower } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 const { createContentType } = require('../domain/content-type');
 
@@ -28,7 +28,10 @@ module.exports = function(strapi) {
       ct.schema.info.singularName = _.camelCase(modelName);
       ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
 
-      const createdContentType = createContentType(ct, { apiName });
+      const createdContentType = createContentType(
+        `api::${apiName}.${ct.schema.info.singularName}`,
+        ct
+      );
       Object.assign(model, createdContentType.schema);
       strapi.contentTypes[model.uid] = model;
 
@@ -77,50 +80,50 @@ module.exports = function(strapi) {
     ct.schema.info.singularName = _.camelCase(modelName);
     ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
 
-    const createdContentType = createContentType(ct);
+    const createdContentType = createContentType(`strapi::${ct.schema.info.singularName}`, ct);
 
     Object.assign(model, createdContentType.schema);
     strapi.contentTypes[model.uid] = model;
   });
 
-  // Object.keys(strapi.plugins).forEach(pluginName => {
-  //   let plugin = strapi.plugins[pluginName];
-  // Object.assign(plugin, {
-  //   controllers: plugin.controllers || [],
-  //   services: plugin.services || [],
-  //   models: plugin.models || [],
-  // });
+  // TODO: delete v3 code
+  _.forEach(strapi.pluginsV4, (plugin, pluginUID) => {
+    const pluginName = pluginUID.split('::')[1];
+    strapi.plugins[pluginName] = {
+      models: {},
+      config: { policies: {} },
+      services: {},
+      middlewares: {},
+      controllers: {},
+      routes: plugin.routes,
+    };
 
-  // Object.keys(plugin.models || []).forEach(modelName => {
-  //   let model = plugin.models[modelName];
+    _.forEach(plugin.contentTypes, (ct, ctUID) => {
+      strapi.contentTypes[ctUID] = ct.schema;
+      strapi.plugins[pluginName][ct.schema.modelName] = ct.schema;
+      strapi.plugins[pluginName].models[ct.schema.modelName] = ct.schema;
+    });
 
-  //   // mutate model
-  //   contentTypesUtils.createContentType(model, { modelName, defaultConnection }, { pluginName });
+    _.forEach(plugin.policies, (policy, policyUID) => {
+      const policyName = toLower(policyUID.split('.')[1]);
+      strapi.plugins[pluginName].config.policies[policyName] = policy;
+    });
 
-  //   strapi.contentTypes[model.uid] = model;
-  // });
+    _.forEach(plugin.services, (service, serviceUID) => {
+      const serviceName = toLower(serviceUID.split('.')[1]);
+      strapi.plugins[pluginName].services[serviceName] = service;
+    });
 
-  for (const plugin in strapi.container.plugins.getAll()) {
-    strapi.plugins[plugin].models = {};
-  }
+    _.forEach(plugin.middlewares, (middleware, middlewareUID) => {
+      const middlewareName = toLower(middlewareUID.split('.')[1]);
+      strapi.plugins[pluginName].middlewares[middlewareName] = middleware;
+    });
 
-  strapi.container.plugins.contentTypes.forEach(ct => {
-    strapi.contentTypes[ct.schema.uid] = ct.schema;
-    strapi.plugins[ct.schema.plugin] = strapi.plugins[ct.schema.plugin] || {};
-    strapi.plugins[ct.schema.plugin][ct.schema.modelName] = ct.schema;
-    strapi.plugins[ct.schema.plugin].models[ct.schema.modelName] = ct.schema;
+    _.forEach(plugin.controllers, (controller, controllerUID) => {
+      const controllerName = toLower(controllerUID.split('.')[1]);
+      strapi.plugins[pluginName].controllers[controllerName] = controller;
+    });
   });
-
-  strapi.plugins.i18n;
-  strapi.plugins.get;
-
-  const policies = strapi.container.plugins.policies.getAll();
-  Object.assign(strapi.container.plugins, policies);
-  for (const plugin in policies) {
-    strapi.plugins[plugin].config = strapi.plugins[plugin].config || {};
-    strapi.plugins[plugin].config.policies = strapi.plugins[plugin].config.policies || {};
-    Object.assign(strapi.plugins[plugin].config.policies, mapKeys(toLower, policies[plugin]));
-  }
 
   // Preset config in alphabetical order.
   strapi.config.middleware.settings = Object.keys(strapi.middleware).reduce((acc, current) => {

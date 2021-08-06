@@ -100,37 +100,37 @@
     "one_way_tag": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "application::tag.tag"
+      "target": "api::tag.tag"
     },
     "one_to_one_tag": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "application::tag.tag",
+      "target": "api::tag.tag",
       "private": true,
       "inversedBy": "one_to_one_kitchensink"
     },
     "one_to_many_tags": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::tag.tag",
+      "target": "api::tag.tag",
       "mappedBy": "many_to_one_kitchensink"
     },
     "many_to_one_tag": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "application::tag.tag",
+      "target": "api::tag.tag",
       "inversedBy": "one_to_many_kitchensinks"
     },
     "many_to_many_tags": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "application::tag.tag",
+      "target": "api::tag.tag",
       "inversedBy": "many_to_many_kitchensinks"
     },
     "many_way_tags": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::tag.tag"
+      "target": "api::tag.tag"
     },
     "morph_to_one": {
       "type": "relation",

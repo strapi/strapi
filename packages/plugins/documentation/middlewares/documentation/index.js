@@ -31,7 +31,7 @@ module.exports = {
           // Set prefix to empty to be able to customise it.
           if (strapi.config.has('plugins.documentation.x-strapi-config.path')) {
             route.config.prefix = '';
-            route.path = `/${strapi.config.get('plugins.documentation.x-strapi-config').path}${
+            route.path = `/${strapi.config.get('plugin.documentation.x-strapi-config').path}${
               route.path
             }`.replace('//', '/');
           }

@@ -42,7 +42,7 @@ const shopModel = {
     products: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'application::product.product',
+      target: 'api::product.product',
       targetAttribute: 'shops',
     },
   },
@@ -100,7 +100,7 @@ describe('i18n - Relation-list route', () => {
   test('Can filter on default locale', async () => {
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/relations/application::shop.shop/products',
+      url: '/content-manager/relations/api::shop.shop/products',
     });
 
     expect(res.body).toHaveLength(1);
@@ -110,7 +110,7 @@ describe('i18n - Relation-list route', () => {
   test('Can filter on any locale', async () => {
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/relations/application::shop.shop/products',
+      url: '/content-manager/relations/api::shop.shop/products',
       qs: { locale: 'it' },
     });
 

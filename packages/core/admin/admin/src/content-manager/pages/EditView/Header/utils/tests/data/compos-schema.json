@@ -35,7 +35,7 @@
         "column": "id",
         "isVirtual": true,
         "type": "relation",
-        "targetModel": "application::category.category",
+        "targetModel": "api::category.category",
         "relationType": "manyWay"
       }
     }

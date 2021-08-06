@@ -4,7 +4,7 @@ const nameToSlug = name => slugify(name, { separator: '-' });
 
 const createUid = name => {
   const modelName = nameToSlug(name);
-  const uid = `application::${modelName}.${modelName}`;
+  const uid = `api::${modelName}.${modelName}`;
 
   return uid;
 };

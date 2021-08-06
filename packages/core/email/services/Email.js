@@ -3,7 +3,7 @@
 const _ = require('lodash');
 
 const getProviderSettings = () => {
-  return strapi.config.get('plugins.email');
+  return strapi.config.get('plugin.email');
 };
 
 const send = async options => {

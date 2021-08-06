@@ -25,7 +25,7 @@ const Initializer = ({ setPlugin }) => {
 
       try {
         const { data } = await request(requestURL, { method: 'GET' });
-        const fileModel = data.find(model => model.uid === 'plugins::upload.file');
+        const fileModel = data.find(model => model.uid === 'plugin::upload.file');
         const timestamps = get(fileModel, ['options', 'timestamps']);
 
         dispatch(setFileModelTimestamps(timestamps));

@@ -10,15 +10,15 @@ describe('getGeneralLinks', () => {
     const permissions = [
       {
         id: 458,
-        action: 'plugins::i18n.locale.read',
+        action: 'plugin::i18n.locale.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
         id: 459,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.create',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -27,8 +27,8 @@ describe('getGeneralLinks', () => {
       },
       {
         id: 460,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -37,8 +37,8 @@ describe('getGeneralLinks', () => {
       },
       {
         id: 461,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],
@@ -47,8 +47,8 @@ describe('getGeneralLinks', () => {
       },
       {
         id: 462,
-        action: 'plugins::content-manager.explorer.update',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.update',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],
@@ -172,15 +172,15 @@ describe('getGeneralLinks', () => {
     const permissions = [
       {
         id: 458,
-        action: 'plugins::i18n.locale.read',
+        action: 'plugin::i18n.locale.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
         id: 459,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.create',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -189,8 +189,8 @@ describe('getGeneralLinks', () => {
       },
       {
         id: 460,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -199,8 +199,8 @@ describe('getGeneralLinks', () => {
       },
       {
         id: 461,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],
@@ -209,8 +209,8 @@ describe('getGeneralLinks', () => {
       },
       {
         id: 462,
-        action: 'plugins::content-manager.explorer.update',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.update',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],

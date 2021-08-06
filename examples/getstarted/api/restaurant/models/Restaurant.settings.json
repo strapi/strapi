@@ -51,7 +51,7 @@
     "address": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "application::address.address"
+      "target": "api::address.address"
     },
     "cover": {
       "type": "media",
@@ -77,7 +77,7 @@
     "categories": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::category.category"
+      "target": "api::category.category"
     },
     "description": {
       "type": "richtext",
@@ -95,7 +95,7 @@
     "menu": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "application::menu.menu",
+      "target": "api::menu.menu",
       "inversedBy": "restaurant"
     },
     "opening_times": {

@@ -73,10 +73,7 @@ const createEmpty = () => {
 };
 
 describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/collection-types/application::withdynamiczone.withdynamiczone',
-  ],
+  ['CONTENT MANAGER', '/content-manager/collection-types/api::withdynamiczone.withdynamiczone'],
   ['GENERATED API', '/withdynamiczones'],
 ])('[%s] => Not required dynamiczone', (_, path) => {
   const builder = createTestBuilder();

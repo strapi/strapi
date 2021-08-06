@@ -12,16 +12,11 @@ const {
 } = require('@strapi/utils').contentTypes.constants;
 const { validateContentTypeDefinition } = require('./validator');
 
-const createContentType = (definition, { apiName, pluginName } = {}) => {
+const createContentType = (uid, definition) => {
   try {
     validateContentTypeDefinition(definition);
   } catch (e) {
-    throw new Error(
-      `
-Content Type Definition is invalid in ${apiName || pluginName || 'the core'}.
-${e.errors}
-    `.trim()
-    );
+    throw new Error(`Content Type Definition is invalid for ${uid}'.\n${e.errors}`);
   }
 
   const createdContentType = cloneDeep(definition);
@@ -35,28 +30,33 @@ ${e.errors}
     connection: 'default',
   });
 
-  if (apiName) {
+  if (uid.startsWith('api::')) {
     Object.assign(createdContentType.schema, {
-      uid: `application::${apiName}.${definition.schema.info.singularName}`,
-      apiName,
+      uid,
+      apiName: uid.split('::')[1].split('.')[0],
       collectionName: definition.schema.collectionName || definition.schema.info.singularName,
       globalId: getGlobalId(definition.schema, definition.schema.info.singularName),
     });
-  } else if (pluginName) {
+  } else if (uid.startsWith('plugin::')) {
+    const pluginName = uid.split('::')[1].split('.')[0];
     Object.assign(createdContentType.schema, {
-      uid: `plugins::${pluginName}.${definition.schema.info.singularName}`,
-      plugin: pluginName,
+      uid,
+      plugin: pluginName, // TODO: to be set in load-plugins.js
       collectionName:
         createdContentType.schema.collectionName ||
         `${pluginName}_${definition.schema.info.singularName}`.toLowerCase(),
       globalId: getGlobalId(definition.schema, definition.schema.info.singularName, pluginName),
     });
-  } else {
+  } else if (uid.startsWith('strapi::')) {
     Object.assign(createdContentType.schema, {
-      uid: `strapi::${definition.schema.info.singularName}`,
+      uid,
       plugin: 'admin',
       globalId: getGlobalId(definition.schema, definition.schema.info.singularName, 'admin'),
     });
+  } else {
+    throw new Error(
+      `Incorrect Content Type UID "${uid}". The UID should start with api::, plugin:: or strapi::.`
+    );
   }
 
   Object.defineProperty(createdContentType.schema, 'privateAttributes', {

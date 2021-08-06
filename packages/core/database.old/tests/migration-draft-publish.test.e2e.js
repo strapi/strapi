@@ -76,7 +76,7 @@ describe('Migration - draft and publish', () => {
     describe('Enabling D&P on a content-type', () => {
       test('No published_at before enabling the feature', async () => {
         let { body } = await rq({
-          url: '/content-manager/collection-types/application::dog.dog',
+          url: '/content-manager/collection-types/api::dog.dog',
           method: 'GET',
         });
 
@@ -106,7 +106,7 @@ describe('Migration - draft and publish', () => {
 
         let { body } = await rq({
           method: 'GET',
-          url: '/content-manager/collection-types/application::dog.dog',
+          url: '/content-manager/collection-types/api::dog.dog',
         });
 
         expect(body.results.length).toBe(2);
@@ -127,7 +127,7 @@ describe('Migration - draft and publish', () => {
       test('No published_at after disabling the feature + draft removed', async () => {
         const res = await rq({
           method: 'POST',
-          url: `/content-manager/collection-types/application::dog.dog/${data.dogs[1].id}/actions/unpublish`,
+          url: `/content-manager/collection-types/api::dog.dog/${data.dogs[1].id}/actions/unpublish`,
         });
 
         data.dogs[1] = res.body;
@@ -149,7 +149,7 @@ describe('Migration - draft and publish', () => {
         data.dogs = data.dogs.filter(dog => !_.isNil(dog.published_at));
 
         let { body } = await rq({
-          url: '/content-manager/collection-types/application::dog.dog',
+          url: '/content-manager/collection-types/api::dog.dog',
           method: 'GET',
         });
 
@@ -163,7 +163,7 @@ describe('Migration - draft and publish', () => {
 
         let res = await rq({
           method: 'POST',
-          url: `/content-manager/collection-types/application::dog.dog/`,
+          url: `/content-manager/collection-types/api::dog.dog/`,
           body: dogToCreate,
         });
 
@@ -174,7 +174,7 @@ describe('Migration - draft and publish', () => {
 
         res = await rq({
           method: 'POST',
-          url: `/content-manager/collection-types/application::dog.dog/`,
+          url: `/content-manager/collection-types/api::dog.dog/`,
           body: dogToCreate,
         });
 

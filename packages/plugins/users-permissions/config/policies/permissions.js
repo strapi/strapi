@@ -60,13 +60,13 @@ module.exports = async (ctx, next) => {
   // Retrieve `public` role.
   if (!role) {
     role = await strapi
-      .query('plugins::users-permissions.role')
+      .query('plugin::users-permissions.role')
       .findOne({ where: { type: 'public' } });
   }
 
   const route = ctx.request.route;
 
-  const permission = await strapi.query('plugins::users-permissions.permission').findOne({
+  const permission = await strapi.query('plugin::users-permissions.permission').findOne({
     where: {
       role: { id: role.id },
       type: route.plugin || 'application',

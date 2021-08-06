@@ -28,7 +28,7 @@ module.exports = {
   async deleteRole(ctx) {
     // Fetch public role.
     const publicRole = await strapi
-      .query('plugins::users-permissions.role')
+      .query('plugin::users-permissions.role')
       .findOne({ where: { type: 'public' } });
 
     const publicRoleID = publicRole.id;
@@ -114,7 +114,7 @@ module.exports = {
   async searchUsers(ctx) {
     const { id } = ctx.params;
 
-    const data = await strapi.query('plugins::users-permissions.user').custom(searchQueries)({
+    const data = await strapi.query('plugin::users-permissions.user').custom(searchQueries)({
       id,
     });
 

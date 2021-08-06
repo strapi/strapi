@@ -1,12 +1,12 @@
 'use strict';
 
 const ACTIONS = {
-  read: 'plugins::content-manager.explorer.read',
-  create: 'plugins::content-manager.explorer.create',
-  update: 'plugins::content-manager.explorer.update',
-  delete: 'plugins::content-manager.explorer.delete',
-  publish: 'plugins::content-manager.explorer.publish',
-  unpublish: 'plugins::content-manager.explorer.publish',
+  read: 'plugin::content-manager.explorer.read',
+  create: 'plugin::content-manager.explorer.create',
+  update: 'plugin::content-manager.explorer.update',
+  delete: 'plugin::content-manager.explorer.delete',
+  publish: 'plugin::content-manager.explorer.publish',
+  unpublish: 'plugin::content-manager.explorer.publish',
 };
 
 const createPermissionChecker = strapi => ({ userAbility, model }) => {

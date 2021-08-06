@@ -71,7 +71,7 @@ describe('Locales', () => {
       const params = { name: { $contains: 'en' } };
 
       const localesFound = await localesService.find(params);
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(findMany).toHaveBeenCalledWith({ where: params });
       expect(localesFound).toMatchObject(locales);
     });
@@ -83,7 +83,7 @@ describe('Locales', () => {
       global.strapi = { query };
 
       const localeFound = await localesService.findById(1);
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(findOne).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(localeFound).toMatchObject(locale);
     });
@@ -95,7 +95,7 @@ describe('Locales', () => {
       global.strapi = { query };
 
       const localeFound = await localesService.findByCode('fr');
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(findOne).toHaveBeenCalledWith({ where: { code: 'fr' } });
       expect(localeFound).toMatchObject(locale);
     });
@@ -114,7 +114,7 @@ describe('Locales', () => {
       };
 
       const createdLocale = await localesService.create(locale);
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(create).toHaveBeenCalledWith({ data: locale });
       expect(createdLocale).toMatchObject(locale);
     });
@@ -133,7 +133,7 @@ describe('Locales', () => {
       };
 
       const updatedLocale = await localesService.update({ code: 'fr' }, { name: 'French' });
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(update).toHaveBeenCalledWith({ where: { code: 'fr' }, data: { name: 'French' } });
       expect(updatedLocale).toMatchObject(locale);
     });
@@ -152,11 +152,11 @@ describe('Locales', () => {
             services: { metrics: fakeMetricsService, 'content-types': { isLocalizedContentType } },
           },
         },
-        contentTypes: { 'application::country.country': {} },
+        contentTypes: { 'api::country.country': {} },
       };
 
       const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(deleteFn).toHaveBeenCalledWith({ where: { id: 1 } });
       expect(deletedLocale).toMatchObject(locale);
     });
@@ -176,7 +176,7 @@ describe('Locales', () => {
       };
 
       const deletedLocale = await localesService.delete({ id: 1 });
-      expect(query).toHaveBeenCalledWith('plugins::i18n.locale');
+      expect(query).toHaveBeenCalledWith('plugin::i18n.locale');
       expect(deleteFn).not.toHaveBeenCalled();
       expect(deletedLocale).toBeUndefined();
     });

@@ -30,7 +30,7 @@ describe('Content-Manager', () => {
     });
 
     test('Publish a content-type', async () => {
-      const uid = 'application::test.test';
+      const uid = 'api::test.test';
       const entity = { id: 1, published_at: null };
       await entityManager.publish(entity, uid);
 
@@ -60,7 +60,7 @@ describe('Content-Manager', () => {
     });
 
     test('Unpublish a content-type', async () => {
-      const uid = 'application::test.test';
+      const uid = 'api::test.test';
       const entity = { id: 1, published_at: new Date() };
       await entityManager.unpublish(entity, uid);
 

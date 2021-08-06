@@ -151,8 +151,8 @@ const recursiveRemoveFiles = async (folder, deleteFn) => {
   }
 };
 
-module.exports = {
+module.exports = () => ({
   clear,
   backup,
   rollback,
-};
+});

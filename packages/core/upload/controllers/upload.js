@@ -67,8 +67,8 @@ module.exports = {
 
   async search(ctx) {
     const { id } = ctx.params;
-    const model = strapi.getModel('plugins::upload.file');
-    const entries = await strapi.query('plugins::upload.file').findMany({
+    const model = strapi.getModel('plugin::upload.file');
+    const entries = await strapi.query('plugin::upload.file').findMany({
       where: {
         $or: [{ hash: { $contains: id } }, { name: { $contains: id } }],
       },

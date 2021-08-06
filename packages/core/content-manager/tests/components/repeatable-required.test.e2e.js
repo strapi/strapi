@@ -29,7 +29,7 @@ const ct = {
 };
 
 describe.each([
-  ['CONTENT MANAGER', '/content-manager/collection-types/application::withcomponent.withcomponent'],
+  ['CONTENT MANAGER', '/content-manager/collection-types/api::withcomponent.withcomponent'],
   ['GENERATED API', '/withcomponents'],
 ])('[%s] => Non repeatable and Not required component', (_, path) => {
   const hasPagination = path.includes('/content-manager');

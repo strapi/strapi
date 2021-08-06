@@ -294,7 +294,7 @@ module.exports = ({ strapi }) => ({
 
     //
     const res = await strapi
-      .query('plugins::upload.file')
+      .query('plugin::upload.file')
       .update({ where: params, data: fileValues });
 
     this.emitEvent(MEDIA_UPDATE, res);
@@ -310,7 +310,7 @@ module.exports = ({ strapi }) => ({
     }
     sendMediaMetrics(fileValues);
 
-    const res = await strapi.query('plugins::upload.file').create({ data: fileValues });
+    const res = await strapi.query('plugin::upload.file').create({ data: fileValues });
 
     this.emitEvent(MEDIA_CREATE, res);
 
@@ -318,17 +318,17 @@ module.exports = ({ strapi }) => ({
   },
 
   findOne(params, populate) {
-    return strapi.query('plugins::upload.file').findOne({ where: params, populate });
+    return strapi.query('plugin::upload.file').findOne({ where: params, populate });
   },
 
   fetchAll(params) {
     combineFilters(params);
-    return strapi.query('plugins::upload.file').findMany({ ...params });
+    return strapi.query('plugin::upload.file').findMany({ ...params });
   },
 
   count(params) {
     combineFilters(params);
-    return strapi.query('plugins::upload.file').count({ ...params });
+    return strapi.query('plugin::upload.file').count({ ...params });
   },
 
   async remove(file) {
@@ -347,13 +347,13 @@ module.exports = ({ strapi }) => ({
       }
     }
 
-    const media = await strapi.query('plugins::upload.file').findOne({
+    const media = await strapi.query('plugin::upload.file').findOne({
       where: { id: file.id },
     });
 
     this.emitEvent(MEDIA_DELETE, media);
 
-    return strapi.query('plugins::upload.file').delete({ where: { id: file.id } });
+    return strapi.query('plugin::upload.file').delete({ where: { id: file.id } });
   },
 
   async uploadToEntity(params, files) {

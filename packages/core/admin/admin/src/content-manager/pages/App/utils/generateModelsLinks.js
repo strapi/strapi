@@ -6,11 +6,11 @@ const generateLinks = (links, type, configurations = []) => {
     .filter(link => link.isDisplayed)
     .map(link => {
       const collectionTypesPermissions = [
-        { action: 'plugins::content-manager.explorer.create', subject: link.uid },
-        { action: 'plugins::content-manager.explorer.read', subject: link.uid },
+        { action: 'plugin::content-manager.explorer.create', subject: link.uid },
+        { action: 'plugin::content-manager.explorer.read', subject: link.uid },
       ];
       const singleTypesPermissions = [
-        { action: 'plugins::content-manager.explorer.read', subject: link.uid },
+        { action: 'plugin::content-manager.explorer.read', subject: link.uid },
       ];
       const permissions =
         type === 'collectionTypes' ? collectionTypesPermissions : singleTypesPermissions;

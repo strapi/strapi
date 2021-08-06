@@ -6,9 +6,9 @@
 const _ = require('lodash');
 
 const GLOBAL_PREFIX = 'global::';
-const PLUGIN_PREFIX = 'plugins::';
+const PLUGIN_PREFIX = 'plugin::';
 const ADMIN_PREFIX = 'admin::';
-const APPLICATION_PREFIX = 'application::';
+const APPLICATION_PREFIX = 'api::';
 
 const isPolicyFactory = _.isArray;
 

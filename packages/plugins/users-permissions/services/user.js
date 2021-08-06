@@ -20,7 +20,7 @@ module.exports = ({ strapi }) => ({
    */
 
   count(params) {
-    return strapi.query('plugins::users-permissions.user').count({ where: params });
+    return strapi.query('plugin::users-permissions.user').count({ where: params });
   },
 
   /**
@@ -39,7 +39,7 @@ module.exports = ({ strapi }) => ({
     }
 
     return strapi
-      .query('plugins::users-permissions.user')
+      .query('plugin::users-permissions.user')
       .create({ data: values, populate: ['role'] });
   },
 
@@ -53,7 +53,7 @@ module.exports = ({ strapi }) => ({
     }
 
     return strapi
-      .query('plugins::users-permissions.user')
+      .query('plugin::users-permissions.user')
       .update({ where: params, data: values, populate: ['role'] });
   },
 
@@ -62,7 +62,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetch(params, populate) {
-    return strapi.query('plugins::users-permissions.user').findOne({ where: params, populate });
+    return strapi.query('plugin::users-permissions.user').findOne({ where: params, populate });
   },
 
   /**
@@ -71,7 +71,7 @@ module.exports = ({ strapi }) => ({
    */
   fetchAuthenticatedUser(id) {
     return strapi
-      .query('plugins::users-permissions.user')
+      .query('plugin::users-permissions.user')
       .findOne({ where: { id }, populate: ['role'] });
   },
 
@@ -80,7 +80,7 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   fetchAll(params, populate) {
-    return strapi.query('plugins::users-permissions.user').findMany({ where: params, populate });
+    return strapi.query('plugin::users-permissions.user').findMany({ where: params, populate });
   },
 
   hashPassword(user = {}) {
@@ -111,11 +111,11 @@ module.exports = ({ strapi }) => ({
    * @return {Promise}
    */
   async remove(params) {
-    return strapi.query('plugins::users-permissions.user').delete({ where: params });
+    return strapi.query('plugin::users-permissions.user').delete({ where: params });
   },
 
   async removeAll(params) {
-    return strapi.query('plugins::users-permissions.user').delete({ where: params });
+    return strapi.query('plugin::users-permissions.user').delete({ where: params });
   },
 
   validatePassword(password, hash) {
@@ -135,7 +135,7 @@ module.exports = ({ strapi }) => ({
       .then(storeEmail => storeEmail['email_confirmation'].options);
 
     const userInfo = sanitizeEntity(user, {
-      model: strapi.getModel('plugins::users-permissions.user'),
+      model: strapi.getModel('plugin::users-permissions.user'),
     });
 
     const confirmationToken = crypto.randomBytes(20).toString('hex');

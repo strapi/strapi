@@ -21,7 +21,7 @@ module.exports = {
     Query: {
       file: false,
       files: {
-        resolver: 'plugins::upload.upload.find',
+        resolver: 'plugin::upload.upload.find',
       },
     },
     Mutation: {
@@ -29,7 +29,7 @@ module.exports = {
       updateFile: false,
       upload: {
         description: 'Upload one file',
-        resolverOf: 'plugins::upload.upload.upload',
+        resolverOf: 'plugin::upload.upload.upload',
         resolver: async (obj, { file: upload, info, ...fields }) => {
           const file = await formatFile(upload, info, fields);
 
@@ -41,7 +41,7 @@ module.exports = {
       },
       multipleUpload: {
         description: 'Upload one file',
-        resolverOf: 'plugins::upload.upload.upload',
+        resolverOf: 'plugin::upload.upload.upload',
         resolver: async (obj, { files: uploads, ...fields }) => {
           const files = await Promise.all(uploads.map(upload => formatFile(upload, {}, fields)));
 
@@ -52,14 +52,14 @@ module.exports = {
       },
       updateFileInfo: {
         description: 'Update file information',
-        resolverOf: 'plugins::upload.upload.upload',
+        resolverOf: 'plugin::upload.upload.upload',
         resolver: async (obj, { id, info }) => {
           return await getService('upload').updateFileInfo(id, info);
         },
       },
       deleteFile: {
         description: 'Delete one file',
-        resolverOf: 'plugins::upload.upload.destroy',
+        resolverOf: 'plugin::upload.upload.destroy',
         resolver: async (obj, options, { context }) => {
           const file = await getService('upload').findOne({
             id: context.params.id,

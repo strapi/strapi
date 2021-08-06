@@ -7,8 +7,8 @@ const { getService } = require('../utils');
 module.exports = ({ strapi }) => ({
   canConfigureContentType({ userAbility, contentType }) {
     const action = contentTypesUtils.isSingleType(contentType)
-      ? 'plugins::content-manager.single-types.configure-view'
-      : 'plugins::content-manager.collection-types.configure-view';
+      ? 'plugin::content-manager.single-types.configure-view'
+      : 'plugin::content-manager.collection-types.configure-view';
 
     return userAbility.can(action);
   },

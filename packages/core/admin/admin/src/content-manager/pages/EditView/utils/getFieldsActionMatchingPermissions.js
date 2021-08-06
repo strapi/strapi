@@ -5,7 +5,7 @@ const getFieldsActionMatchingPermissions = (userPermissions, slug) => {
   const getMatchingPermissions = action => {
     const matched = findMatchingPermissions(userPermissions, [
       {
-        action: `plugins::content-manager.explorer.${action}`,
+        action: `plugin::content-manager.explorer.${action}`,
         subject: slug,
       },
     ]);

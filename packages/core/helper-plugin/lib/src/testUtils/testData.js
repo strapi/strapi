@@ -1,6 +1,6 @@
 const testData = {
   contentType: {
-    uid: 'application::test.test',
+    uid: 'api::test.test',
     apiID: 'test',
     attributes: {
       created_at: { type: 'timestamp' },
@@ -219,8 +219,8 @@ const testData = {
 const permissions = [
   {
     id: 11,
-    action: 'plugins::content-manager.explorer.read',
-    subject: 'application::article.article',
+    action: 'plugin::content-manager.explorer.read',
+    subject: 'api::article.article',
     properties: {
       fields: ['name', 'description'],
     },
@@ -228,8 +228,8 @@ const permissions = [
   },
   {
     id: 12,
-    action: 'plugins::content-manager.explorer.update',
-    subject: 'application::article.article',
+    action: 'plugin::content-manager.explorer.update',
+    subject: 'api::article.article',
     properties: {
       fields: ['name', 'description'],
     },
@@ -237,8 +237,8 @@ const permissions = [
   },
   {
     id: 22,
-    action: 'plugins::content-manager.explorer.read',
-    subject: 'plugins::users-permissions.user',
+    action: 'plugin::content-manager.explorer.read',
+    subject: 'plugin::users-permissions.user',
     properties: {
       fields: [
         'username',
@@ -255,8 +255,8 @@ const permissions = [
   },
   {
     id: 24,
-    action: 'plugins::content-manager.explorer.update',
-    subject: 'plugins::users-permissions.user',
+    action: 'plugin::content-manager.explorer.update',
+    subject: 'plugin::users-permissions.user',
     properties: {
       fields: [
         'username',
@@ -273,7 +273,7 @@ const permissions = [
   },
   {
     id: 28,
-    action: 'plugins::upload.read',
+    action: 'plugin::upload.read',
     subject: null,
     properties: {
       fields: null,
@@ -282,7 +282,7 @@ const permissions = [
   },
   {
     id: 39,
-    action: 'plugins::users-permissions.roles.update',
+    action: 'plugin::users-permissions.roles.update',
     subject: null,
     properties: {
       fields: null,
@@ -292,8 +292,8 @@ const permissions = [
 
   {
     id: 63,
-    action: 'plugins::content-manager.explorer.read',
-    subject: 'application::article.article',
+    action: 'plugin::content-manager.explorer.read',
+    subject: 'api::article.article',
     properties: {
       fields: ['name', 'description', 'test'],
     },

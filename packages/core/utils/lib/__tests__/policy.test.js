@@ -39,7 +39,7 @@ describe('Policy util', () => {
       };
 
       expect(() => policyUtils.get('test-plugin.test-policy')).toThrow();
-      expect(policyUtils.get('plugins::test-plugin.test-policy')).toBe(policyFn);
+      expect(policyUtils.get('plugin::test-plugin.test-policy')).toBe(policyFn);
     });
 
     test('Retrieves a plugin policy locally', () => {

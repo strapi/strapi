@@ -21,7 +21,7 @@ export default {
       permissions: [
         // Uncomment to set the permissions of the plugin here
         // {
-        //   action: '', // the action name should be plugins::plugin-name.actionType
+        //   action: '', // the action name should be plugin::plugin-name.actionType
         //   subject: null,
         // },
       ],

@@ -19,7 +19,7 @@ const createSentryService = strapi => {
       }
 
       // Retrieve user settings and merge them with the default ones
-      settings = strapi.config.get('plugins.sentry');
+      settings = strapi.config.get('plugin.sentry');
 
       try {
         // Don't init Sentry if no DSN was provided

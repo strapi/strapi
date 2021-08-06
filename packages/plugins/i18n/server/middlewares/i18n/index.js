@@ -19,7 +19,7 @@ module.exports = {
 
       routesToAddPolicyTo.forEach(route => {
         const policies = getOr([], 'config.policies', route).concat(
-          'plugins::i18n.validateLocaleCreation'
+          'plugin::i18n.validateLocaleCreation'
         );
         _.set(route, 'config.policies', policies);
       });

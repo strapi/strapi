@@ -24,7 +24,7 @@
     "menu": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "application::menu.menu",
+      "target": "api::menu.menu",
       "inversedBy": "menusections"
     }
   }

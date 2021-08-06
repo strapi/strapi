@@ -16,7 +16,7 @@
     "addresses": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "application::address.address",
+      "target": "api::address.address",
       "mappedBy": "categories"
     }
   }

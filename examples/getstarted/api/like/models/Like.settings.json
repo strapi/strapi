@@ -13,18 +13,18 @@
     "author": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugins::users-permissions.user"
+      "target": "plugin::users-permissions.user"
     },
     "review": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "application::review.review",
+      "target": "api::review.review",
       "inversedBy": "likes"
     },
     "address": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "application::address.address",
+      "target": "api::address.address",
       "inversedBy": "likes"
     }
   }

@@ -28,10 +28,10 @@ describe('Content Type Builder - Content types', () => {
 
   afterAll(async () => {
     const modelsUIDs = [
-      'application::test-collection-type.test-collection-type',
-      'application::test-collection.test-collection',
-      'application::test-single-type.test-single-type',
-      'application::ct-with-dp.ct-with-dp',
+      'api::test-collection-type.test-collection-type',
+      'api::test-collection.test-collection',
+      'api::test-single-type.test-single-type',
+      'api::ct-with-dp.ct-with-dp',
     ];
 
     await modelsUtils.cleanupModels(modelsUIDs, { strapi });
@@ -41,8 +41,8 @@ describe('Content Type Builder - Content types', () => {
   });
 
   describe('Collection Types', () => {
-    const testCollectionTypeUID = 'application::test-collection-type.test-collection-type';
-    const ctWithDpUID = 'application::ct-with-dp.ct-with-dp';
+    const testCollectionTypeUID = 'api::test-collection-type.test-collection-type';
+    const ctWithDpUID = 'api::ct-with-dp.ct-with-dp';
 
     test('Successful creation of a collection type', async () => {
       const res = await rq({
@@ -125,7 +125,7 @@ describe('Content Type Builder - Content types', () => {
   });
 
   describe('Single Types', () => {
-    const singleTypeUID = 'application::test-single-type.test-single-type';
+    const singleTypeUID = 'api::test-single-type.test-single-type';
 
     test('Successful creation of a single type', async () => {
       const res = await rq({
@@ -184,7 +184,7 @@ describe('Content Type Builder - Content types', () => {
               relation: {
                 type: 'relation',
                 relation: 'oneTo',
-                target: 'plugins::users-permissions.user',
+                target: 'plugin::users-permissions.user',
                 targetAttribute: 'test',
               },
             },
@@ -260,7 +260,7 @@ describe('Content Type Builder - Content types', () => {
   });
 
   describe('Private relation field', () => {
-    const singleTypeUID = 'application::test-single-type.test-single-type';
+    const singleTypeUID = 'api::test-single-type.test-single-type';
 
     test('should add a relation field', async () => {
       const res = await rq({
@@ -275,7 +275,7 @@ describe('Content Type Builder - Content types', () => {
                 private: true,
                 type: 'relation',
                 relation: 'oneToOne',
-                target: 'plugins::users-permissions.user',
+                target: 'plugin::users-permissions.user',
               },
             },
           },

@@ -248,7 +248,7 @@ module.exports = function createComponentBuilder() {
  * @param {string} options.name component name
  * @returns {string} uid
  */
-const createContentTypeUID = ({ name }) => `application::${nameToSlug(name)}.${nameToSlug(name)}`;
+const createContentTypeUID = ({ name }) => `api::${nameToSlug(name)}.${nameToSlug(name)}`;
 
 const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
   const opts = {

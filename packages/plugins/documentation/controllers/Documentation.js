@@ -25,7 +25,7 @@ module.exports = {
       ctx.send({
         docVersions,
         currentVersion: service.getDocumentationVersion(),
-        prefix: strapi.config.get('plugins.documentation.x-strapi-config').path,
+        prefix: strapi.config.get('plugin.documentation.x-strapi-config').path,
         form,
       });
     } catch (err) {
@@ -107,7 +107,7 @@ module.exports = {
       const layout = fs.readFileSync(path.join(__dirname, '..', 'public', 'login.html'));
       const filledLayout = _.template(layout)({
         actionUrl: `${strapi.config.server.url}${
-          strapi.config.get('plugins.documentation.x-strapi-config').path
+          strapi.config.get('plugin.documentation.x-strapi-config').path
         }/login`,
       });
       const $ = cheerio.load(filledLayout);
@@ -173,7 +173,7 @@ module.exports = {
 
     ctx.redirect(
       `${strapi.config.server.url}${
-        strapi.config.get('plugins.documentation.x-strapi-config').path
+        strapi.config.get('plugin.documentation.x-strapi-config').path
       }${querystring}`
     );
   },

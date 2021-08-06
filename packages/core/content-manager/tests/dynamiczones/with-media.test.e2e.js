@@ -67,7 +67,7 @@ const ct = {
 describe.each([
   [
     'CONTENT MANAGER',
-    '/content-manager/collection-types/application::withdynamiczonemedia.withdynamiczonemedia',
+    '/content-manager/collection-types/api::withdynamiczonemedia.withdynamiczonemedia',
   ],
   ['GENERATED API', '/withdynamiczonemedias'],
 ])('[%s] => Not required dynamiczone', (_, path) => {

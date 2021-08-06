@@ -43,7 +43,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
     it('should return an array of permissions containing only the enabled permissions', () => {
       const permissions = {
         settings: {
-          'plugins::documentation.settings.update': {
+          'plugin::documentation.settings.update': {
             properties: {
               enabled: false,
             },
@@ -52,7 +52,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
               'admin::has-same-role-as-creator': false,
             },
           },
-          'plugins::documentation.settings.regenerate': {
+          'plugin::documentation.settings.regenerate': {
             properties: {
               enabled: true,
             },
@@ -66,7 +66,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
 
       const expected = [
         {
-          action: 'plugins::documentation.settings.regenerate',
+          action: 'plugin::documentation.settings.regenerate',
           subject: null,
           conditions: [],
           properties: {},
@@ -86,7 +86,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
       const settingsPermissions = {
         'plugin::content-type-builder': {
           general: {
-            'plugins::content-type-builder.read': {
+            'plugin::content-type-builder.read': {
               properties: {
                 enabled: false,
               },
@@ -99,7 +99,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
         },
         'plugin::documentation': {
           general: {
-            'plugins::documentation.read': {
+            'plugin::documentation.read': {
               properties: {
                 enabled: false,
               },
@@ -110,7 +110,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
             },
           },
           settings: {
-            'plugins::documentation.settings.update': {
+            'plugin::documentation.settings.update': {
               properties: {
                 enabled: false,
               },
@@ -119,7 +119,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
                 'admin::has-same-role-as-creator': false,
               },
             },
-            'plugins::documentation.settings.regenerate': {
+            'plugin::documentation.settings.regenerate': {
               properties: {
                 enabled: false,
               },
@@ -139,7 +139,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
       const settingsPermissions = {
         'plugin::content-type-builder': {
           general: {
-            'plugins::content-type-builder.read': {
+            'plugin::content-type-builder.read': {
               properties: {
                 enabled: false,
               },
@@ -152,7 +152,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
         },
         'plugin::documentation': {
           general: {
-            'plugins::documentation.read': {
+            'plugin::documentation.read': {
               properties: {
                 enabled: true,
               },
@@ -163,7 +163,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
             },
           },
           settings: {
-            'plugins::documentation.settings.update': {
+            'plugin::documentation.settings.update': {
               properties: {
                 enabled: true,
               },
@@ -172,7 +172,7 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
                 'admin::has-same-role-as-creator': true,
               },
             },
-            'plugins::documentation.settings.regenerate': {
+            'plugin::documentation.settings.regenerate': {
               properties: {
                 enabled: true,
               },
@@ -187,19 +187,19 @@ describe('ADMIN | COMPONENTS | Roles | Permissions | utils', () => {
 
       const expected = [
         {
-          action: 'plugins::documentation.read',
+          action: 'plugin::documentation.read',
           conditions: ['admin::is-creator'],
           subject: null,
           properties: {},
         },
         {
-          action: 'plugins::documentation.settings.update',
+          action: 'plugin::documentation.settings.update',
           conditions: ['admin::is-creator', 'admin::has-same-role-as-creator'],
           subject: null,
           properties: {},
         },
         {
-          action: 'plugins::documentation.settings.regenerate',
+          action: 'plugin::documentation.settings.regenerate',
           conditions: [],
           subject: null,
           properties: {},

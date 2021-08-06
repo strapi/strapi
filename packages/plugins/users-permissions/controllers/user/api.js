@@ -6,7 +6,7 @@ const { getService } = require('../../utils');
 
 const sanitizeUser = user =>
   sanitizeEntity(user, {
-    model: strapi.getModel('plugins::users-permissions.user'),
+    model: strapi.getModel('plugin::users-permissions.user'),
   });
 
 const formatError = error => [
@@ -35,7 +35,7 @@ module.exports = {
     if (!password) return ctx.badRequest('missing.password');
 
     const userWithSameUsername = await strapi
-      .query('plugins::users-permissions.user')
+      .query('plugin::users-permissions.user')
       .findOne({ where: { username } });
 
     if (userWithSameUsername) {
@@ -51,7 +51,7 @@ module.exports = {
 
     if (advanced.unique_email) {
       const userWithSameEmail = await strapi
-        .query('plugins::users-permissions.user')
+        .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
       if (userWithSameEmail) {
@@ -76,7 +76,7 @@ module.exports = {
 
     if (!role) {
       const defaultRole = await strapi
-        .query('plugins::users-permissions.role')
+        .query('plugin::users-permissions.role')
         .findOne({ where: { type: advanced.default_role } });
 
       user.role = defaultRole.id;
@@ -126,7 +126,7 @@ module.exports = {
 
     if (_.has(ctx.request.body, 'username')) {
       const userWithSameUsername = await strapi
-        .query('plugins::users-permissions.user')
+        .query('plugin::users-permissions.user')
         .findOne({ where: { username } });
 
       if (userWithSameUsername && userWithSameUsername.id != id) {
@@ -143,7 +143,7 @@ module.exports = {
 
     if (_.has(ctx.request.body, 'email') && advancedConfigs.unique_email) {
       const userWithSameEmail = await strapi
-        .query('plugins::users-permissions.user')
+        .query('plugin::users-permissions.user')
         .findOne({ where: { email: email.toLowerCase() } });
 
       if (userWithSameEmail && userWithSameEmail.id != id) {

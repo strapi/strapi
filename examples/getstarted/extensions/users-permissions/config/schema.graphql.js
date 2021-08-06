@@ -11,7 +11,7 @@ module.exports = {
     },
     Query: {
       userCustomRoute: {
-        resolver: 'plugins::users-permissions.users-permissions.customRoute',
+        resolver: 'plugin::users-permissions.users-permissions.customRoute',
       },
     },
   },

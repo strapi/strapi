@@ -9,15 +9,15 @@ const { getService } = require('../../utils');
 const { CREATED_BY_ATTRIBUTE } = contentTypesUtils.constants;
 
 const ACTIONS = {
-  read: 'plugins::upload.read',
-  readSettings: 'plugins::upload.settings.read',
-  create: 'plugins::upload.assets.create',
-  update: 'plugins::upload.assets.update',
-  download: 'plugins::upload.assets.download',
-  copyLink: 'plugins::upload.assets.copy-link',
+  read: 'plugin::upload.read',
+  readSettings: 'plugin::upload.settings.read',
+  create: 'plugin::upload.assets.create',
+  update: 'plugin::upload.assets.update',
+  download: 'plugin::upload.assets.download',
+  copyLink: 'plugin::upload.assets.copy-link',
 };
 
-const fileModel = 'plugins::upload.file';
+const fileModel = 'plugin::upload.file';
 
 module.exports = {
   async find(ctx) {

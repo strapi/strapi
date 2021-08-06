@@ -202,7 +202,7 @@ describe('content-types service', () => {
     test("Throw if relatedEntity is provided but doesn't exist", async () => {
       const findOne = jest.fn(() => Promise.resolve(undefined));
       const relatedEntityId = 1;
-      const model = 'application::country.country';
+      const model = 'api::country.country';
       const locale = 'fr';
 
       global.strapi = {
@@ -234,7 +234,7 @@ describe('content-types service', () => {
         localizations: [],
       };
       const findOne = jest.fn(() => Promise.resolve(relatedEntity));
-      const model = 'application::country.country';
+      const model = 'api::country.country';
       const locale = 'en';
 
       global.strapi = {
@@ -271,7 +271,7 @@ describe('content-types service', () => {
         ],
       };
       const findOne = jest.fn(() => Promise.resolve(relatedEntity));
-      const model = 'application::country.country';
+      const model = 'api::country.country';
       const locale = 'en';
 
       global.strapi = {
@@ -308,7 +308,7 @@ describe('content-types service', () => {
         ],
       };
       const findOne = jest.fn(() => Promise.resolve(relatedEntity));
-      const model = 'application::country.country';
+      const model = 'api::country.country';
       const locale = 'it';
 
       global.strapi = {

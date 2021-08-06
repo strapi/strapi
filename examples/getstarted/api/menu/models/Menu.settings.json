@@ -16,12 +16,12 @@
     "menusections": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::menusection.menusection",
+      "target": "api::menusection.menusection",
       "mappedBy": "menu"
     },
     "restaurant": {
       "type": "relation",
-      "target": "application::restaurant.restaurant",
+      "target": "api::restaurant.restaurant",
       "relation": "oneToOne",
       "mappedBy": "menu"
     }

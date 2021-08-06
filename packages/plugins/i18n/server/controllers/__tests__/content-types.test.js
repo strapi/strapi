@@ -20,7 +20,7 @@ describe('i18n - Controller - content-types', () => {
         state: { user: {} },
         request: {
           body: {
-            model: 'application::country.country',
+            model: 'api::country.country',
             id: 1,
             locale: 'fr',
           },
@@ -43,7 +43,7 @@ describe('i18n - Controller - content-types', () => {
         state: { user: {} },
         request: {
           body: {
-            model: 'application::country.country',
+            model: 'api::country.country',
             id: 1,
             locale: 'fr',
           },
@@ -89,7 +89,7 @@ describe('i18n - Controller - content-types', () => {
         state: { user: { roles: [{ id: 1 }, { id: 2 }] } },
         request: {
           body: {
-            model: 'application::country.country',
+            model: 'api::country.country',
             id: 1,
             locale: 'fr',
           },
@@ -99,7 +99,7 @@ describe('i18n - Controller - content-types', () => {
       expect(findMany).toHaveBeenCalledWith({
         where: {
           action: ['read', 'create'],
-          subject: 'application::country.country',
+          subject: 'api::country.country',
           role: {
             id: [1, 2],
           },

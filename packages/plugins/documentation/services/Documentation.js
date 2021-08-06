@@ -879,7 +879,7 @@ module.exports = ({ strapi }) => ({
       },
     };
 
-    const { generateDefaultResponse } = strapi.config.get('plugins.documentation.x-strapi-config');
+    const { generateDefaultResponse } = strapi.config.get('plugin.documentation.x-strapi-config');
 
     if (generateDefaultResponse) {
       response.default = {
@@ -940,7 +940,7 @@ module.exports = ({ strapi }) => ({
       },
     };
 
-    const { generateDefaultResponse } = strapi.config.get('plugins.documentation.x-strapi-config');
+    const { generateDefaultResponse } = strapi.config.get('plugin.documentation.x-strapi-config');
 
     if (generateDefaultResponse) {
       response.default = {
@@ -1414,7 +1414,7 @@ module.exports = ({ strapi }) => ({
    * Retrieve the plugin's configuration version
    */
   getDocumentationVersion: () => {
-    const version = strapi.config.get('plugins.documentation.info.version');
+    const version = strapi.config.get('plugin.documentation.info.version');
 
     return version;
   },

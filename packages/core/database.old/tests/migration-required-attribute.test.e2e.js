@@ -63,7 +63,7 @@ describe('Migration - required attribute', () => {
     test('Can be null before migration', async () => {
       let { body } = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::dog.dog',
+        url: '/content-manager/collection-types/api::dog.dog',
       });
       expect(body.results.length).toBe(2);
       const dogWithNameNull = body.results.find(dog => dog.name === null);
@@ -75,7 +75,7 @@ describe('Migration - required attribute', () => {
 
       const { body } = await rq({
         method: 'PUT',
-        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
+        url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].id}`,
         body: { name: 'Nelson' },
       });
       data.dogs[0] = body;
@@ -90,7 +90,7 @@ describe('Migration - required attribute', () => {
       // Try to create an entry with null
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/application::dog.dog',
+        url: '/content-manager/collection-types/api::dog.dog',
         body: { name: null },
       });
       expect(res.body.message).toBe('ValidationError');
@@ -108,7 +108,7 @@ describe('Migration - required attribute', () => {
 
       // Try to create an entry with null
       const res = await rq({
-        url: `/content-manager/collection-types/application::dog.dog`,
+        url: `/content-manager/collection-types/api::dog.dog`,
         method: 'POST',
         body: { name: null },
       });

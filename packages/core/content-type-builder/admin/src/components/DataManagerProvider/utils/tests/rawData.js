@@ -68,7 +68,7 @@ const data = {
               name: 'testContentType',
               relation: 'oneToOne',
               targetAttribute: null,
-              target: 'application::test-content-type.test-content-type',
+              target: 'api::test-content-type.test-content-type',
               type: 'relation',
             },
             {
@@ -150,37 +150,37 @@ const data = {
       },
     },
     contentTypesToSort: {
-      'plugins::myplugins.test': {
-        uid: 'plugins::myplugins.test',
+      'plugin::myplugins.test': {
+        uid: 'plugin::myplugins.test',
         schema: {
-          name: 'plugins::myplugins.test',
+          name: 'plugin::myplugins.test',
           kind: 'singleType',
           visible: true,
           restrictRelationsTo: null,
         },
       },
-      'plugins::myplugins.btest': {
-        uid: 'plugins::myplugins.btest',
+      'plugin::myplugins.btest': {
+        uid: 'plugin::myplugins.btest',
         schema: {
-          name: 'plugins::myplugins.btest',
+          name: 'plugin::myplugins.btest',
           kind: 'collectionType',
           visible: true,
           restrictRelationsTo: null,
         },
       },
-      'plugins::myplugins.atest': {
-        uid: 'plugins::myplugins.atest',
+      'plugin::myplugins.atest': {
+        uid: 'plugin::myplugins.atest',
         schema: {
-          name: 'plugins::myplugins.atest',
+          name: 'plugin::myplugins.atest',
           kind: 'collectionType',
           visible: true,
           restrictRelationsTo: [],
         },
       },
-      'plugins::myplugins.ctest': {
-        uid: 'plugins::myplugins.ctest',
+      'plugin::myplugins.ctest': {
+        uid: 'plugin::myplugins.ctest',
         schema: {
-          name: 'plugins::myplugins.ctest',
+          name: 'plugin::myplugins.ctest',
           kind: 'collectionType',
           visible: true,
           restrictRelationsTo: ['oneWay'],
@@ -189,7 +189,7 @@ const data = {
     },
 
     contentTypeToCreate: {
-      uid: 'application::test-content-type.test-content-type',
+      uid: 'api::test-content-type.test-content-type',
       isTemporary: true,
       schema: {
         name: 'test content type',
@@ -205,20 +205,20 @@ const data = {
             name: 'address',
             relation: 'oneToOne',
             targetAttribute: null,
-            target: 'application::address.address',
+            target: 'api::address.address',
             type: 'relation',
           },
           {
             name: 'testContentTypes',
             relation: 'oneToMany',
             targetAttribute: 'testContentType',
-            target: 'application::test-content-type.test-content-type',
+            target: 'api::test-content-type.test-content-type',
             type: 'relation',
           },
           {
             name: 'testContentType',
             relation: 'manyToOne',
-            target: 'application::test-content-type.test-content-type',
+            target: 'api::test-content-type.test-content-type',
             targetAttribute: 'testContentTypes',
             type: 'relation',
           },
@@ -244,7 +244,7 @@ const data = {
       },
     },
     contentTypeToEdit: {
-      uid: 'application::test-content-type.test-content-type',
+      uid: 'api::test-content-type.test-content-type',
       schema: {
         name: 'test content type',
         collectionName: 'test-content-types',
@@ -259,20 +259,20 @@ const data = {
             name: 'address',
             relation: 'oneToOne',
             targetAttribute: null,
-            target: 'application::address.address',
+            target: 'api::address.address',
             type: 'relation',
           },
           {
             name: 'testContentTypes',
             relation: 'oneToMany',
             targetAttribute: 'testContentType',
-            target: 'application::test-content-type.test-content-type',
+            target: 'api::test-content-type.test-content-type',
             type: 'relation',
           },
           {
             name: 'testContentType',
             relation: 'manyToOne',
-            target: 'application::test-content-type.test-content-type',
+            target: 'api::test-content-type.test-content-type',
             targetAttribute: 'testContentTypes',
             type: 'relation',
           },

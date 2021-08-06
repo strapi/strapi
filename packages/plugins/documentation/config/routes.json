@@ -6,8 +6,8 @@
       "handler": "Documentation.index",
       "config": {
         "policies": [
-          "plugins::documentation.index",
-          ["admin::hasPermissions", ["plugins::documentation.read"]]
+          "plugin::documentation.index",
+          ["admin::hasPermissions", ["plugin::documentation.read"]]
         ]
       }
     },
@@ -17,8 +17,8 @@
       "handler": "Documentation.index",
       "config": {
         "policies": [
-          "plugins::documentation.index",
-          ["admin::hasPermissions", ["plugins::documentation.read"]]
+          "plugin::documentation.index",
+          ["admin::hasPermissions", ["plugin::documentation.read"]]
         ]
       }
     },
@@ -27,7 +27,7 @@
       "path": "/login",
       "handler": "Documentation.loginView",
       "config": {
-        "policies": [["admin::hasPermissions", ["plugins::documentation.read"]]]
+        "policies": [["admin::hasPermissions", ["plugin::documentation.read"]]]
       }
     },
     {
@@ -35,7 +35,7 @@
       "path": "/login",
       "handler": "Documentation.login",
       "config": {
-        "policies": [["admin::hasPermissions", ["plugins::documentation.read"]]]
+        "policies": [["admin::hasPermissions", ["plugin::documentation.read"]]]
       }
     },
     {
@@ -43,7 +43,7 @@
       "path": "/getInfos",
       "handler": "Documentation.getInfos",
       "config": {
-        "policies": [["admin::hasPermissions", ["plugins::documentation.read"]]]
+        "policies": [["admin::hasPermissions", ["plugin::documentation.read"]]]
       }
     },
     {
@@ -51,7 +51,7 @@
       "path": "/regenerateDoc",
       "handler": "Documentation.regenerateDoc",
       "config": {
-        "policies": [["admin::hasPermissions", ["plugins::documentation.settings.regenerate"]]]
+        "policies": [["admin::hasPermissions", ["plugin::documentation.settings.regenerate"]]]
       }
     },
     {
@@ -59,7 +59,7 @@
       "path": "/updateSettings",
       "handler": "Documentation.updateSettings",
       "config": {
-        "policies": [["admin::hasPermissions", ["plugins::documentation.settings.update"]]]
+        "policies": [["admin::hasPermissions", ["plugin::documentation.settings.update"]]]
       }
     },
     {

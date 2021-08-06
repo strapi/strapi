@@ -40,7 +40,7 @@
     "role": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "plugins::users-permissions.role",
+      "target": "plugin::users-permissions.role",
       "inversedBy": "permissions",
       "configurable": false
     }

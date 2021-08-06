@@ -69,7 +69,7 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi.query('plugins::users-permissions.user').findOne({ where: query });
+      const user = await strapi.query('plugin::users-permissions.user').findOne({ where: query });
 
       if (!user) {
         return ctx.badRequest(
@@ -134,7 +134,7 @@ module.exports = {
             id: user.id,
           }),
           user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-            model: strapi.getModel('plugins::users-permissions.user'),
+            model: strapi.getModel('plugin::users-permissions.user'),
           }),
         });
       }
@@ -170,7 +170,7 @@ module.exports = {
           id: user.id,
         }),
         user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-          model: strapi.getModel('plugins::users-permissions.user'),
+          model: strapi.getModel('plugin::users-permissions.user'),
         }),
       });
     }
@@ -186,7 +186,7 @@ module.exports = {
       params.code
     ) {
       const user = await strapi
-        .query('plugins::users-permissions.user')
+        .query('plugin::users-permissions.user')
         .findOne({ where: { resetPasswordToken: `${params.code}` } });
 
       if (!user) {
@@ -203,7 +203,7 @@ module.exports = {
 
       // Update the user.
       await strapi
-        .query('plugins::users-permissions.user')
+        .query('plugin::users-permissions.user')
         .update({ where: { id: user.id }, data: { resetPasswordToken: null, password } });
 
       ctx.send({
@@ -211,7 +211,7 @@ module.exports = {
           id: user.id,
         }),
         user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
-          model: strapi.getModel('plugins::users-permissions.user'),
+          model: strapi.getModel('plugin::users-permissions.user'),
         }),
       });
     } else if (
@@ -295,7 +295,7 @@ module.exports = {
 
     // Find the user by email.
     const user = await strapi
-      .query('plugins::users-permissions.user')
+      .query('plugin::users-permissions.user')
       .findOne({ where: { email: email.toLowerCase() } });
 
     // User not found.
@@ -325,7 +325,7 @@ module.exports = {
     });
 
     const userInfo = sanitizeEntity(user, {
-      model: strapi.getModel('plugins::users-permissions.user'),
+      model: strapi.getModel('plugin::users-permissions.user'),
     });
 
     settings.message = await getService('users-permissions').template(settings.message, {
@@ -357,7 +357,7 @@ module.exports = {
 
     // Update the user.
     await strapi
-      .query('plugins::users-permissions.user')
+      .query('plugin::users-permissions.user')
       .update({ where: { id: user.id }, data: { resetPasswordToken } });
 
     ctx.send({ ok: true });
@@ -424,7 +424,7 @@ module.exports = {
     }
 
     const role = await strapi
-      .query('plugins::users-permissions.role')
+      .query('plugin::users-permissions.role')
       .findOne({ where: { type: settings.default_role } });
 
     if (!role) {
@@ -455,7 +455,7 @@ module.exports = {
     params.role = role.id;
     params.password = await getService('user').hashPassword(params);
 
-    const user = await strapi.query('plugins::users-permissions.user').findOne({
+    const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
     });
 
@@ -484,10 +484,10 @@ module.exports = {
         params.confirmed = true;
       }
 
-      const user = await strapi.query('plugins::users-permissions.user').create({ data: params });
+      const user = await strapi.query('plugin::users-permissions.user').create({ data: params });
 
       const sanitizedUser = sanitizeEntity(user, {
-        model: strapi.getModel('plugins::users-permissions.user'),
+        model: strapi.getModel('plugin::users-permissions.user'),
       });
 
       if (settings.email_confirmation) {
@@ -539,7 +539,7 @@ module.exports = {
       ctx.send({
         jwt: jwtService.issue({ id: user.id }),
         user: sanitizeEntity(user, {
-          model: strapi.getModel('plugins::users-permissions.user'),
+          model: strapi.getModel('plugin::users-permissions.user'),
         }),
       });
     } else {
@@ -571,7 +571,7 @@ module.exports = {
       return ctx.badRequest('wrong.email');
     }
 
-    const user = await strapi.query('plugins::users-permissions.user').findOne({
+    const user = await strapi.query('plugin::users-permissions.user').findOne({
       where: { email: params.email },
     });
 

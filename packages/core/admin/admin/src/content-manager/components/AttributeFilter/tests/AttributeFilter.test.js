@@ -22,8 +22,8 @@ jest.mock('@strapi/helper-plugin', () => ({
     allPermissions: [
       {
         id: 198,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::address.address',
+        action: 'plugin::content-manager.explorer.create',
+        subject: 'api::address.address',
         properties: {
           fields: [
             'postal_coder',
@@ -44,8 +44,8 @@ jest.mock('@strapi/helper-plugin', () => ({
       },
       {
         id: 199,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::address.address',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::address.address',
         properties: {
           fields: [
             'postal_coder',
@@ -66,8 +66,8 @@ jest.mock('@strapi/helper-plugin', () => ({
       },
       {
         id: 200,
-        action: 'plugins::content-manager.explorer.update',
-        subject: 'application::address.address',
+        action: 'plugin::content-manager.explorer.update',
+        subject: 'api::address.address',
         properties: {
           fields: [
             'postal_coder',
@@ -88,15 +88,15 @@ jest.mock('@strapi/helper-plugin', () => ({
       },
       {
         id: 258,
-        action: 'plugins::content-manager.explorer.delete',
-        subject: 'application::address.address',
+        action: 'plugin::content-manager.explorer.delete',
+        subject: 'api::address.address',
         properties: { locales: ['en'] },
         conditions: [],
       },
       {
         id: 269,
-        action: 'plugins::content-manager.explorer.publish',
-        subject: 'application::address.address',
+        action: 'plugin::content-manager.explorer.publish',
+        subject: 'api::address.address',
         properties: { locales: ['en'] },
         conditions: [],
       },
@@ -110,7 +110,7 @@ const renderComponent = () =>
       <AttributeFilter
         contentType={addressCt}
         metaData={addressMetaData}
-        slug="application::address.address"
+        slug="api::address.address"
       />
     </BrowserRouter>
   );

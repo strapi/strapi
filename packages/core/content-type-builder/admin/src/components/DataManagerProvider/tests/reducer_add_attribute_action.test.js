@@ -5,7 +5,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
   describe('Adding a common field that is not a relation', () => {
     it('Should add a text field to a content type correctly', () => {
       const contentType = {
-        uid: 'application::category.category',
+        uid: 'api::category.category',
         schema: {
           name: 'category',
           description: '',
@@ -35,7 +35,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           minLength: 1,
         },
         forTarget: 'contentType',
-        targetUid: 'application::address.address',
+        targetUid: 'api::address.address',
         initialAttribute: {},
         shouldAddComponentToData: false,
       };
@@ -107,7 +107,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -115,7 +115,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
         },
       };
       const contentType = {
-        uid: 'application::country.country',
+        uid: 'api::country.country',
         schema: {
           name: 'country',
           description: '',
@@ -195,7 +195,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
   describe('Adding a component field attribute', () => {
     it('Should create the component attribute and add the component to the modifiedData.components if the component is not in the object', () => {
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -208,7 +208,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -256,7 +256,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -292,7 +292,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           min: 1,
         },
         forTarget: 'contentType',
-        targetUid: 'application::address.address',
+        targetUid: 'api::address.address',
         initialAttribute: {},
         shouldAddComponentToData: true,
       };
@@ -337,9 +337,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should create the component attribute and add the component to the modifiedData.components and its nested components if none of the added components are in the object', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -352,7 +352,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -435,7 +435,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -474,7 +474,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           min: 1,
         },
         forTarget: 'contentType',
-        targetUid: 'application::address.address',
+        targetUid: 'api::address.address',
         initialAttribute: {},
         shouldAddComponentToData: true,
       };
@@ -522,9 +522,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should create the component attribute and add the component to the modifiedData.components and only add the nested components that are not in the modifiedData.components object to keep previous the modifications', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -537,7 +537,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -621,7 +621,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -739,9 +739,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           attributes: {},
         },
       };
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -814,9 +814,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
   describe('Adding a dynamic zone', () => {
     it('Should create the dynamiczone attribute correctly', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -873,9 +873,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
   describe('Adding a relation with another content type', () => {
     it('Should add the relation attribute correctly for a content type', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -888,7 +888,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               type: 'relation',
             },
@@ -898,9 +898,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
           ],
         },
       };
-      const targetContentTypeUID = 'application::category.category';
+      const targetContentTypeUID = 'api::category.category';
       const targetContentTypeSchema = {
-        uid: 'application::category.category',
+        uid: 'api::category.category',
         schema: {
           name: 'category',
           description: '',
@@ -987,7 +987,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
     it('Should add the relation attribute correctly for a component', () => {
       const componentUID = 'default.dish';
-      const targetContentTypeUID = 'application::category.category';
+      const targetContentTypeUID = 'api::category.category';
       const compoSchema = {
         uid: 'default.dish',
         category: 'default',
@@ -1063,7 +1063,7 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
     it('Should add the relation attribute correctly for a component from the modifiedData.components object', () => {
       const componentUID = 'default.dish';
-      const targetContentTypeUID = 'application::category.category';
+      const targetContentTypeUID = 'api::category.category';
 
       const compoSchema = {
         uid: 'default.dish',
@@ -1145,9 +1145,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
 
   describe('Adding a relation with the same content type', () => {
     it('Should not create an opposite attribute if the relation is oneWay', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -1210,9 +1210,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should not create an opposite attribute if the relation is manyWay', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -1275,9 +1275,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should handle the oneToOne relation correctly and create the opposite attribute', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -1344,9 +1344,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should handle the oneToMany relation correctly and create the opposite attribute', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -1411,9 +1411,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should handle the manyToOne relation correctly and create the opposite attribute', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -1477,9 +1477,9 @@ describe('CTB | components | DataManagerProvider | reducer | ADD_ATTRIBUTE', () 
     });
 
     it('Should handle the manyToMany relation correctly and create the opposite attribute', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',

@@ -26,14 +26,14 @@
     "permissions": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "plugins::users-permissions.permission",
+      "target": "plugin::users-permissions.permission",
       "mappedBy": "role",
       "configurable": false
     },
     "users": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "plugins::users-permissions.user",
+      "target": "plugin::users-permissions.user",
       "mappedBy": "role",
       "configurable": false
     }
