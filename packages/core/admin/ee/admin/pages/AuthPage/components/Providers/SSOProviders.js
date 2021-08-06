@@ -1,7 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Text, Row, Grid, GridItem } from '@strapi/parts';
+import { Text, Row, Grid, GridItem, Tooltip } from '@strapi/parts';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import { Link } from 'react-router-dom';
 
 const SSOButton = styled.a`
@@ -12,7 +13,11 @@ const SSOButton = styled.a`
   height: ${48 / 16}rem;
   border: 1px solid ${({ theme }) => theme.colors.neutral150};
   border-radius: ${({ theme }) => theme.borderRadius};
-  text-decoration: none;
+  text-decoration: inherit;
+  &:link {
+    text-decoration: none;
+  }
+  color: ${({ theme }) => theme.colors.neutral600};
 `;
 
 const SSOProvidersWrapper = styled(Row)`
@@ -29,13 +34,15 @@ const SSOProvidersWrapper = styled(Row)`
 
 const SSOProviderButton = ({ provider }) => {
   return (
-    <SSOButton href={`${strapi.backendURL}/admin/connect/${provider.uid}`}>
-      {provider.icon ? (
-        <img src={provider.icon} alt={provider.displayName} height="32px" />
-      ) : (
-        <Text>{provider.displayName}</Text>
-      )}
-    </SSOButton>
+    <Tooltip label={provider.displayName}>
+      <SSOButton href={`${strapi.backendURL}/admin/connect/${provider.uid}`}>
+        {provider.icon ? (
+          <img src={provider.icon} aria-hidden alt="" height="32px" />
+        ) : (
+          <Text>{provider.displayName}</Text>
+        )}
+      </SSOButton>
+    </Tooltip>
   );
 };
 
@@ -48,6 +55,8 @@ SSOProviderButton.propTypes = {
 };
 
 const SSOProviders = ({ providers, displayAllProviders }) => {
+  const { formatMessage } = useIntl();
+
   if (displayAllProviders) {
     return (
       <Grid gap={4}>
@@ -69,9 +78,15 @@ const SSOProviders = ({ providers, displayAllProviders }) => {
           </GridItem>
         ))}
         <GridItem col={4}>
-          <SSOButton as={Link} to="/auth/providers">
-            <span>•••</span>
-          </SSOButton>
+          <Tooltip
+            label={formatMessage({
+              id: 'Auth.form.button.login.providers.see-more',
+            })}
+          >
+            <SSOButton as={Link} to="/auth/providers">
+              <span aroa-hidden>•••</span>
+            </SSOButton>
+          </Tooltip>
         </GridItem>
       </Grid>
     );

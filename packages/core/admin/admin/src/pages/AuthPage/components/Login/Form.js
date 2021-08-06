@@ -1,7 +1,7 @@
-import { useEffect } from 'react';
-import { useFormikContext, getIn } from 'formik';
+import React, { useEffect } from 'react';
+import { Form, useFormikContext, getIn } from 'formik';
 
-const FormikFocusError = () => {
+const FormWithFocus = props => {
   const { isSubmitting, isValidating, errors, touched } = useFormikContext();
 
   useEffect(() => {
@@ -30,7 +30,7 @@ const FormikFocusError = () => {
     }
   }, [errors, isSubmitting, isValidating, touched]);
 
-  return null;
+  return <Form {...props} noValidate />;
 };
 
-export default FormikFocusError;
+export default FormWithFocus;

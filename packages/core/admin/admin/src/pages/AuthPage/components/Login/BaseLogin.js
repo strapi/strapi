@@ -3,11 +3,11 @@ import { Box, Stack, H1, Text, Subtitle, Button, Checkbox, TextInput, Main } fro
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { Formik, Form } from 'formik';
+import { Formik } from 'formik';
 
 import { Column } from '../../../../layouts/UnauthenticatedLayout';
 import { useConfigurations } from '../../../../hooks';
-import FormikFocusError from './FormikFocusError';
+import Form from './Form';
 
 const AuthButton = styled(Button)`
   display: inline-block;
@@ -32,9 +32,8 @@ const Login = ({ onSubmit, schema }) => {
       >
         {({ values, errors, handleChange }) => (
           <Form noValidate>
-            <FormikFocusError />
             <Column>
-              <img src={authLogo} alt="strapi-app-logo" style={{ height: '72px' }} />
+              <img src={authLogo} alt="" aria-hidden style={{ height: '72px' }} />
               <Box paddingTop="6" paddingBottom="1">
                 <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
               </Box>
