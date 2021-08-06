@@ -10,7 +10,7 @@ const postgres = {
   client: 'postgres',
   connection: {
     database: 'strapi',
-    username: 'strapi',
+    user: 'strapi',
     password: 'strapi',
     port: 5432,
     host: 'localhost',
@@ -22,7 +22,7 @@ const mysql = {
   client: 'mysql',
   connection: {
     database: 'strapi',
-    username: 'strapi',
+    user: 'strapi',
     password: 'strapi',
     port: 3306,
     host: 'localhost',
