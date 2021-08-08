@@ -46,7 +46,14 @@ module.exports = async strapi => {
 
   // overwrite plugins with extensions overwrites
   extensions.overwrites.forEach(({ path, mod }) => {
-    _.assign(_.get(plugins, path), mod);
+    const pluginValue = _.get(plugins, path);
+    // If the overwite is not found on original plugin, add the property
+    // This covers the use case when a new model for a plugin is added.
+    if (pluginValue) {
+      _.assign(pluginValue, mod);
+    } else {
+      _.set(plugins, path, mod);
+    }
   });
 
   return {
