@@ -53,12 +53,14 @@ describe('Content Manager single types', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: expect.anything(),
-      title: 'Title',
+      attributes: {
+        title: 'Title',
+      },
     });
 
-    data.id = res.body.id;
+    data.id = res.body.data.id;
   });
 
   test('Update keeps the same data id', async () => {
@@ -71,9 +73,11 @@ describe('Content Manager single types', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: data.id,
-      title: 'Title',
+      attributes: {
+        title: 'Title',
+      },
     });
   });
 
@@ -84,9 +88,11 @@ describe('Content Manager single types', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: expect.anything(),
-      title: 'Title',
+      attributes: {
+        title: 'Title',
+      },
     });
   });
 
@@ -97,9 +103,11 @@ describe('Content Manager single types', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject({
+    expect(res.body.data).toMatchObject({
       id: expect.anything(),
-      title: 'Title',
+      attributes: {
+        title: 'Title',
+      },
     });
 
     const getRes = await rq({
