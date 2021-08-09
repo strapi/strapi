@@ -27,7 +27,8 @@ const createLifecyclesManager = db => {
       for (const subscriber of subscribers) {
         if (typeof subscriber === 'function') {
           const event = this.createEvent(action, uid, properties);
-          return await subscriber(event);
+          await subscriber(event);
+          continue;
         }
 
         const hasAction = action in subscriber;
