@@ -3,7 +3,7 @@
 const GraphQLJSON = require('graphql-type-json');
 const GraphQLLong = require('graphql-type-long');
 const { GraphQLDateTime, GraphQLDate } = require('graphql-iso-date/dist');
-const { GraphQLUpload } = require('apollo-server-koa');
+const { GraphQLUpload } = require('graphql-upload');
 const { asNexusMethod } = require('nexus');
 
 const TimeScalar = require('./time');

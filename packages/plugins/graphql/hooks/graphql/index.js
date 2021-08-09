@@ -143,9 +143,12 @@ module.exports = strapi => {
 
         return next();
       });
-      server.applyMiddleware({
-        app: strapi.app,
-        path: config.endpoint,
+
+      server.start().then(() => {
+        server.applyMiddleware({
+          app: strapi.app,
+          path: config.endpoint,
+        });
       });
 
       strapi.plugins.graphql.destroy = async () => {
