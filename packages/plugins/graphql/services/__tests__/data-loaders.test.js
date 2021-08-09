@@ -35,7 +35,7 @@ describe('dataloader', () => {
     test('makeQuery calls find', async () => {
       const uid = 'uid';
       const find = jest.fn(() => [{ id: 1 }]);
-      const filters = { _limit: 5, _sort: 'field' };
+      const filters = { limit: 5, sort: 'field' };
 
       global.strapi = {
         query() {

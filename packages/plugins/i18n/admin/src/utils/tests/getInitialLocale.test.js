@@ -5,7 +5,7 @@ describe('getInitialLocale', () => {
     const query = {
       page: '1',
       pageSize: '10',
-      _sort: 'Name:ASC',
+      sort: 'Name:ASC',
       plugins: {
         i18n: { locale: 'fr-FR' },
       },
@@ -47,7 +47,7 @@ describe('getInitialLocale', () => {
     const query = {
       page: '1',
       pageSize: '10',
-      _sort: 'Name:ASC',
+      sort: 'Name:ASC',
       plugins: {
         something: 'great',
       },
@@ -90,7 +90,7 @@ describe('getInitialLocale', () => {
     const query = {
       page: '1',
       pageSize: '10',
-      _sort: 'Name:ASC',
+      sort: 'Name:ASC',
       plugins: {
         something: 'great',
       },

@@ -10,7 +10,7 @@ const generateFiltersFromSearch = search => {
       x =>
         !x.includes('_limit') &&
         !x.includes('_page') &&
-        !x.includes('_sort') &&
+        !x.includes('sort') &&
         !x.includes('_start') &&
         !x.includes('_q=') &&
         x !== ''

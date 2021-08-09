@@ -30,7 +30,7 @@ const init = (initialState, settings) => {
         {
           intlLabel: { id: 'Settings.permissions.menu.link.users.label' },
           // Init the search params directly
-          to: '/settings/users?pageSize=10&page=1&_sort=firstname%3AASC',
+          to: '/settings/users?pageSize=10&page=1&sort=firstname',
           id: 'users',
           isDisplayed: false,
           permissions: adminPermissions.settings.users.main,

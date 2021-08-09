@@ -4,9 +4,9 @@ import { Carret, useTracking } from '@strapi/helper-plugin';
 import { useListView } from '../../../hooks';
 
 const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField }, name }) => {
-  const { _sort, firstSortableHeader, setQuery } = useListView();
+  const { sort, firstSortableHeader, setQuery } = useListView();
   const { trackUsage } = useTracking();
-  const [sortBy, sortOrder] = _sort.split(':');
+  const [sortBy, sortOrder] = sort.split(':');
 
   let sortField = name;
   let useRelation = false;
@@ -29,7 +29,7 @@ const Header = ({ fieldSchema: { type }, metadatas: { label, sortable, mainField
       }
 
       setQuery({
-        _sort: value,
+        sort: value,
       });
     }
   };

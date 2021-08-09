@@ -26,7 +26,7 @@ const createTestBuilder = (options = {}) => {
     },
 
     sanitizedFixturesFor(modelName, strapi) {
-      const model = strapi.getModel(`application::${modelName}.${modelName}`);
+      const model = strapi.getModel(modelsUtils.toUID(modelName));
       const fixtures = this.fixturesFor(modelName);
 
       return sanitizeEntity(fixtures, { model });
