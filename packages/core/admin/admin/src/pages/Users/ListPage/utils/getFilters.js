@@ -3,24 +3,24 @@ const getFilters = search => {
   const filters = [];
 
   // eslint-disable-next-line no-restricted-syntax
-  for (let pair of query.entries()) {
-    if (!['_sort', 'pageSize', 'page', '_q'].includes(pair[0])) {
-      const splitted = pair[0].split('_');
+  for (let [key, queryValue] of query.entries()) {
+    if (!['sort', 'pageSize', 'page', '_q'].includes(key)) {
+      const splitted = key.split('_');
       let filterName;
       let filterType;
 
       // Filter type === '=')
       if (splitted.length === 1) {
         filterType = '=';
-        filterName = pair[0];
+        filterName = key;
       } else {
         filterType = `_${splitted[1]}`;
         filterName = splitted[0];
       }
 
-      const value = decodeURIComponent(pair[1]);
+      const value = decodeURIComponent(queryValue);
 
-      filters.push({ displayName: filterName, name: pair[0], filter: filterType, value });
+      filters.push({ displayName: filterName, name: key, filter: filterType, value });
     }
   }
 

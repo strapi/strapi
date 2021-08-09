@@ -23,7 +23,7 @@ const generateLinks = (links, type, configurations = []) => {
         const searchParams = {
           page: 1,
           pageSize: currentContentTypeConfig.settings.pageSize,
-          _sort: `${currentContentTypeConfig.settings.defaultSortBy}:${currentContentTypeConfig.settings.defaultSortOrder}`,
+          sort: `${currentContentTypeConfig.settings.defaultSortBy}:${currentContentTypeConfig.settings.defaultSortOrder}`,
         };
 
         search = stringify(searchParams, { encode: false });

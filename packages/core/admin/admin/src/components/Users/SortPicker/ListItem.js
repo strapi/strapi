@@ -8,7 +8,7 @@ const ListItem = ({ onClick, selectedItem, label, value }) => {
   const { formatMessage } = useIntl();
 
   const handleClick = () => {
-    onClick({ target: { name: '_sort', value } });
+    onClick({ target: { name: 'sort', value } });
   };
 
   return (

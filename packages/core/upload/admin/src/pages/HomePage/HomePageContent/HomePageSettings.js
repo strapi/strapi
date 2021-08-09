@@ -72,7 +72,7 @@ const HomePageSettings = ({
               <Padded right />
             </>
           )}
-          <SortPicker onChange={onChange} value={query.get('_sort') || `${updated_at}:DESC`} />
+          <SortPicker onChange={onChange} value={query.get('sort') || `${updated_at}:DESC`} />
           <Padded right />
           <Filters onChange={onChange} filters={filters} onClick={onFilterDelete} />
         </ControlsWrapper>

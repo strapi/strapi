@@ -1725,7 +1725,7 @@ describe('UPLOAD | components | InputModalStepperProvider | reducer', () => {
           _start: 0,
           _q: '',
           filters: [],
-          _sort: null,
+          sort: null,
         },
         currentStep: 'list',
         isFormDisabled: false,
