@@ -342,18 +342,18 @@ describe('Content Manager End to End', () => {
 
       const articles = [article12, article13];
 
-      // expect(Array.isArray(articles[0].tags)).toBeTruthy();
-      // expect(articles[0].tags.length).toBe(1);
-      // expect(Array.isArray(articles[1].tags)).toBeTruthy();
-      // expect(articles[1].tags.length).toBe(1);
+      expect(Array.isArray(articles[0].tags)).toBeTruthy();
+      expect(articles[0].tags.length).toBe(1);
+      expect(Array.isArray(articles[1].tags)).toBeTruthy();
+      expect(articles[1].tags.length).toBe(1);
 
       let { body: foundTag } = await rq({
         url: `/content-manager/collection-types/application::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
 
-      // expect(Array.isArray(foundTag.articles)).toBeTruthy();
-      // expect(foundTag.articles.length).toBe(2);
+      expect(Array.isArray(foundTag.articles)).toBeTruthy();
+      expect(foundTag.articles.length).toBe(2);
 
       await rq({
         url: '/content-manager/collection-types/application::article.article/actions/bulkDelete',
@@ -368,8 +368,8 @@ describe('Content Manager End to End', () => {
         method: 'GET',
       });
 
-      // expect(Array.isArray(foundTag2.articles)).toBeTruthy();
-      // expect(foundTag2.articles.length).toBe(0);
+      expect(Array.isArray(foundTag2.articles)).toBeTruthy();
+      expect(foundTag2.articles.length).toBe(0);
     });
   });
 
@@ -803,11 +803,11 @@ describe('Content Manager End to End', () => {
         method: 'POST',
         body: {
           name: 'cat111',
-          tag: createdTag,
+          tag: createdTag.id,
         },
       });
 
-      // expect(createdReference.tag.id).toBe(createdTag.id);
+      expect(createdReference.tag.id).toBe(createdTag.id);
 
       const { body: referenceToUpdate } = await rq({
         url: `/content-manager/collection-types/application::reference.reference/${createdReference.id}`,
@@ -817,7 +817,7 @@ describe('Content Manager End to End', () => {
         },
       });
 
-      // expect(referenceToUpdate.tag).toBe(null);
+      expect(referenceToUpdate.tag).toBe(null);
     });
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {

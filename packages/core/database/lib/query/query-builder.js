@@ -30,6 +30,13 @@ const createQueryBuilder = (uid, db) => {
     alias: getAlias(),
     getAlias,
 
+    select(args) {
+      state.type = 'select';
+      state.select = _.castArray(args).map(col => this.aliasColumn(col));
+
+      return this;
+    },
+
     insert(data) {
       state.type = 'insert';
       state.data = data;
@@ -61,13 +68,6 @@ const createQueryBuilder = (uid, db) => {
       const processedWhere = helpers.processWhere(where, { qb: this, uid, db });
 
       state.where.push(processedWhere);
-
-      return this;
-    },
-
-    select(args) {
-      state.type = 'select';
-      state.select = _.castArray(args).map(col => this.aliasColumn(col));
 
       return this;
     },

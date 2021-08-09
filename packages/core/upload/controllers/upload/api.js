@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
 const validateSettings = require('../validation/settings');
 const validateUploadBody = require('../validation/upload');
