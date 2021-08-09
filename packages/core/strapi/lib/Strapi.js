@@ -138,8 +138,6 @@ class Strapi {
 
     this.sendStartupTelemetry();
     this.openAdmin({ isInitialized });
-
-    throw new Error('coucou');
   }
 
   /**

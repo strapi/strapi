@@ -41,6 +41,10 @@ const createHTTPServer = (strapi, koaApp) => {
       connections.delete(connection);
     }
 
+    if (!server.listening) {
+      return;
+    }
+
     return new Promise((resolve, reject) =>
       server.close(error => {
         if (error) {
