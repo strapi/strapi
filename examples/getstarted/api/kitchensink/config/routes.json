@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/kitchensinks/count",
-      "handler": "kitchensink.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/kitchensinks/:id",
       "handler": "kitchensink.findOne",
       "config": {

@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/restaurants/count",
-      "handler": "Restaurant.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/restaurants/:id",
       "handler": "Restaurant.findOne",
       "config": {

@@ -24,19 +24,13 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     find(opts = {}) {
       const params = getFetchParams(opts.params);
 
-      return strapi.entityService.find(uid, { params });
+      return strapi.entityService.findPage(uid, { params });
     },
 
     findOne(entityId, opts = {}) {
       const params = getFetchParams(opts.params);
 
       return strapi.entityService.findOne(uid, entityId, { params });
-    },
-
-    count(opts = {}) {
-      const params = getFetchParams(opts.params);
-
-      return strapi.entityService.count(uid, { params });
     },
 
     create({ params, data, files } = {}) {
