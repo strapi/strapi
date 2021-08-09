@@ -106,7 +106,7 @@ describe('checkPermissions', () => {
               subject: 'api::address.address',
             },
           ],
-          search: 'page=1&pageSize=10&_sort=name:ASC',
+          search: 'page=1&pageSize=10&sort=name:ASC',
         },
         {
           destination: '/content-manager/collectionType/api::article.article',

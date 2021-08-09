@@ -48,7 +48,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           to: '/content-manager/collectionType/api::address.address',
           isDisplayed: true,
-          search: `page=1&pageSize=2&_sort=name:ASC`,
+          search: `page=1&pageSize=2&sort=name:ASC`,
           permissions: [
             {
               action: 'plugin::content-manager.explorer.create',

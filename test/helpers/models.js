@@ -3,6 +3,10 @@
 const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 
+const toUID = name => {
+  return name.includes('::') ? name : `application::${name}.${name}`;
+};
+
 const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {
   const strapi = strapiInstance || (await createStrapiInstance(options));
   const contentTypeService = strapi.plugins['content-type-builder'].services['content-types'];
@@ -141,7 +145,7 @@ async function createFixtures(dataMap, { strapi: strapiIst } = {}) {
     const entries = [];
 
     for (const data of dataMap[model]) {
-      entries.push(await strapi.query(`application::${model}.${model}`).create({ data }));
+      entries.push(await strapi.entityService.create(toUID(model), { data }));
     }
 
     resultMap[model] = entries;
@@ -158,9 +162,7 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 
   for (const entry of entries) {
     const dataToCreate = isFunction(entry) ? entry(results) : entry;
-    results.push(
-      await strapi.query(`application::${model}.${model}`).create({ data: dataToCreate })
-    );
+    results.push(await strapi.entityService.create(toUID(model), { data: dataToCreate }));
   }
 
   await cleanup();
@@ -171,9 +173,7 @@ async function createFixturesFor(model, entries, { strapi: strapiIst } = {}) {
 async function deleteFixturesFor(model, entries, { strapi: strapiIst } = {}) {
   const { strapi, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  await strapi
-    .query(`application::${model}.${model}`)
-    .delete({ where: { id: entries.map(prop('id')) } });
+  await strapi.query(toUID(model)).deleteMany({ where: { id: entries.map(prop('id')) } });
 
   await cleanup();
 }
@@ -185,7 +185,7 @@ async function modifyContentType(data, { strapi } = {}) {
   delete sanitizedData.editable;
   delete sanitizedData.restrictRelationsTo;
 
-  const uid = `application::${sanitizedData.name}.${sanitizedData.name}`;
+  const uid = toUID(sanitizedData.name);
 
   const ct = await contentTypeService.editContentType(uid, {
     contentType: {
@@ -201,7 +201,7 @@ async function modifyContentType(data, { strapi } = {}) {
 async function getContentTypeSchema(modelName, { strapi: strapiIst } = {}) {
   const { strapi, contentTypeService, cleanup } = await createHelpers({ strapi: strapiIst });
 
-  const uid = `application::${modelName}.${modelName}`;
+  const uid = toUID(modelName);
   const ct = contentTypeService.formatContentType(strapi.contentTypes[uid]);
 
   await cleanup();
@@ -210,6 +210,7 @@ async function getContentTypeSchema(modelName, { strapi: strapiIst } = {}) {
 }
 
 module.exports = {
+  toUID,
   // Create Content-Types
   createContentType,
   createContentTypes,

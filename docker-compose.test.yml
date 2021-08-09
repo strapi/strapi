@@ -5,7 +5,7 @@ services:
     image: postgres
     restart: always
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - pgdata_test:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: strapi
       POSTGRES_PASSWORD: strapi
@@ -24,10 +24,10 @@ services:
       MYSQL_ROOT_HOST: '%'
       MYSQL_ROOT_PASSWORD: strapi
     volumes:
-      - mysqldata:/var/lib/mysql
+      - mysqldata_test:/var/lib/mysql
     ports:
       - '3306:3306'
 
 volumes:
-  pgdata:
-  mysqldata:
+  pgdata_test:
+  mysqldata_test:

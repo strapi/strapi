@@ -81,6 +81,12 @@ describe('i18n - Relation-list route', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([productModel, shopModel])
+      .addFixtures('plugin::i18n.locale', [
+        {
+          name: 'It',
+          code: 'it',
+        },
+      ])
       .addFixtures(shopModel.name, shops)
       .addFixtures(productModel.name, products)
       .build();

@@ -72,13 +72,18 @@ module.exports = db => ({
     await db.connection.transaction(async trx => {
       await this.createTables(schemaDiff.tables.added, trx);
 
-      // TODO: drop foreign keys targeting delete tables
+      // drop all delete table foreign keys then delete the tables
+      for (const table of schemaDiff.tables.removed) {
+        debug(`Removing table foreign keys: ${table.name}`);
+
+        const schemaBuilder = this.getSchemaBuilder(table, trx);
+        await dropTableForeignKeys(schemaBuilder, table);
+      }
 
       for (const table of schemaDiff.tables.removed) {
         debug(`Removing table: ${table.name}`);
 
         const schemaBuilder = this.getSchemaBuilder(table, trx);
-        // TODO: add cascading if possible
         await dropTable(schemaBuilder, table);
       }
 
@@ -288,6 +293,8 @@ const dropColumn = (tableBuilder, column) => {
 const createTable = async (schemaBuilder, table) => {
   if (await schemaBuilder.hasTable(table.name)) {
     throw new Error(`Table already exists ${table.name}`);
+
+    // TODO: alter the table instead
   }
 
   await schemaBuilder.createTable(table.name, tableBuilder => {
@@ -298,6 +305,13 @@ const createTable = async (schemaBuilder, table) => {
     (table.indexes || []).forEach(index => createIndex(tableBuilder, index));
   });
 };
+
+/**
+ * Drops a table from a database
+ * @param {Knex.SchemaBuilder} schemaBuilder
+ * @param {Table} table
+ */
+const dropTable = (schemaBuilder, table) => schemaBuilder.dropTableIfExists(table.name);
 
 /**
  * Creates a table foreign keys constraints
@@ -312,8 +326,13 @@ const createTableForeignKeys = async (schemaBuilder, table) => {
 };
 
 /**
- * Drops a table from a database
- * @param {Knex.SchemaBuilder} schemaBuilder
+ * Drops a table foreign keys constraints
+ * @param {SchemaBuilder} schemaBuilder
  * @param {Table} table
  */
-const dropTable = (schemaBuilder, table) => schemaBuilder.dropTableIfExists(table.name);
+const dropTableForeignKeys = async (schemaBuilder, table) => {
+  // foreign keys
+  await schemaBuilder.table(table.name, tableBuilder => {
+    (table.foreignKeys || []).forEach(foreignKey => dropForeignKey(tableBuilder, foreignKey));
+  });
+};

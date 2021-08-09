@@ -11,7 +11,6 @@ const Wrapper = styled.div`
   padding: 8px 16px;
 
   .bannerImage {
-    margin-right: 1rem;
     width: 48px;
     height: 48px;
     margin-right: 16px;

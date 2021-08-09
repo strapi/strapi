@@ -516,6 +516,10 @@ const applyPopulate = async (results, populate, ctx) => {
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 
+  if (_.isEmpty(results)) {
+    return results;
+  }
+
   for (const key in populate) {
     // NOTE: Omit limit & offset to avoid needing a query per result to avoid making too many queries
     const populateValue = _.pick(
@@ -579,34 +583,16 @@ const applyPopulate = async (results, populate, ctx) => {
         } = joinTable.joinColumn;
 
         const alias = qb.getAlias();
+        const joinColAlias = `${alias}.${joinColumnName}`;
 
-        if (isCount) {
-          const rows = await qb
-            .init(populateValue)
-            .join({
-              alias: alias,
-              referencedTable: joinTable.name,
-              referencedColumn: joinTable.inverseJoinColumn.name,
-              rootColumn: joinTable.inverseJoinColumn.referencedColumn,
-              rootTable: qb.alias,
-              on: joinTable.on,
-            })
-            .select([`${alias}.${joinColumnName}`, qb.raw('count(*) AS count')])
-            .where({
-              [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
-            })
-            .groupBy(`${alias}.${joinColumnName}`)
-            .execute({ mapResults: false });
+        const referencedValues = _.uniq(
+          results.map(r => r[referencedColumnName]).filter(value => !_.isNil(value))
+        );
 
-          const map = rows.reduce((map, row) => {
-            map[row[joinColumnName]] = { count: row.count };
-            return map;
-          }, {});
-
+        if (_.isEmpty(referencedValues)) {
           results.forEach(result => {
-            result[key] = map[result[referencedColumnName]] || { count: 0 };
+            result[key] = null;
           });
-
           continue;
         }
 
@@ -620,10 +606,8 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
-          .addSelect(`${alias}.${joinColumnName}`)
-          .where({
-            [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
-          })
+          .addSelect(joinColAlias)
+          .where({ [joinColAlias]: referencedValues })
           .execute({ mapResults: false });
 
         const map = _.groupBy(joinColumnName, rows);
@@ -681,8 +665,20 @@ const applyPopulate = async (results, populate, ctx) => {
         } = joinTable.joinColumn;
 
         const alias = qb.getAlias();
+        const joinColAlias = `${alias}.${joinColumnName}`;
+
+        const referencedValues = _.uniq(
+          results.map(r => r[referencedColumnName]).filter(value => !_.isNil(value))
+        );
 
         if (isCount) {
+          if (_.isEmpty(referencedValues)) {
+            results.forEach(result => {
+              result[key] = { count: 0 };
+            });
+            continue;
+          }
+
           const rows = await qb
             .init(populateValue)
             .join({
@@ -693,11 +689,9 @@ const applyPopulate = async (results, populate, ctx) => {
               rootTable: qb.alias,
               on: joinTable.on,
             })
-            .select([`${alias}.${joinColumnName}`, qb.raw('count(*) AS count')])
-            .where({
-              [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
-            })
-            .groupBy(`${alias}.${joinColumnName}`)
+            .select([joinColAlias, qb.raw('count(*) AS count')])
+            .where({ [joinColAlias]: referencedValues })
+            .groupBy(joinColAlias)
             .execute({ mapResults: false });
 
           const map = rows.reduce((map, row) => {
@@ -712,6 +706,13 @@ const applyPopulate = async (results, populate, ctx) => {
           continue;
         }
 
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = [];
+          });
+          continue;
+        }
+
         const rows = await qb
           .init(populateValue)
           .join({
@@ -722,10 +723,8 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
-          .addSelect(`${alias}.${joinColumnName}`)
-          .where({
-            [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
-          })
+          .addSelect(joinColAlias)
+          .where({ [joinColAlias]: referencedValues })
           .execute({ mapResults: false });
 
         const map = _.groupBy(joinColumnName, rows);
@@ -745,8 +744,19 @@ const applyPopulate = async (results, populate, ctx) => {
       const { name: joinColumnName, referencedColumn: referencedColumnName } = joinTable.joinColumn;
 
       const alias = qb.getAlias();
+      const joinColAlias = `${alias}.${joinColumnName}`;
+      const referencedValues = _.uniq(
+        results.map(r => r[referencedColumnName]).filter(value => !_.isNil(value))
+      );
 
       if (isCount) {
+        if (_.isEmpty(referencedValues)) {
+          results.forEach(result => {
+            result[key] = { count: 0 };
+          });
+          continue;
+        }
+
         const rows = await qb
           .init(populateValue)
           .join({
@@ -757,11 +767,9 @@ const applyPopulate = async (results, populate, ctx) => {
             rootTable: qb.alias,
             on: joinTable.on,
           })
-          .select([`${alias}.${joinColumnName}`, qb.raw('count(*) AS count')])
-          .where({
-            [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
-          })
-          .groupBy(`${alias}.${joinColumnName}`)
+          .select([joinColAlias, qb.raw('count(*) AS count')])
+          .where({ [joinColAlias]: referencedValues })
+          .groupBy(joinColAlias)
           .execute({ mapResults: false });
 
         const map = rows.reduce((map, row) => {
@@ -776,6 +784,13 @@ const applyPopulate = async (results, populate, ctx) => {
         continue;
       }
 
+      if (_.isEmpty(referencedValues)) {
+        results.forEach(result => {
+          result[key] = [];
+        });
+        continue;
+      }
+
       const rows = await qb
         .init(populateValue)
         .join({
@@ -786,10 +801,8 @@ const applyPopulate = async (results, populate, ctx) => {
           rootTable: qb.alias,
           on: joinTable.on,
         })
-        .addSelect(`${alias}.${joinColumnName}`)
-        .where({
-          [`${alias}.${joinColumnName}`]: results.map(r => r[referencedColumnName]),
-        })
+        .addSelect(joinColAlias)
+        .where({ [joinColAlias]: referencedValues })
         .execute({ mapResults: false });
 
       const map = _.groupBy(joinColumnName, rows);
