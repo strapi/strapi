@@ -13,7 +13,6 @@ const loadModules = require('./core/load-modules');
 const utils = require('./utils');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
-const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
@@ -261,9 +260,8 @@ class Strapi {
 
     this.telemetry = createTelemetry(this);
 
-    // Initialize hooks and middlewares.
+    // Initialize middlewares.
     await initializeMiddlewares.call(this);
-    await initializeHooks.call(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
