@@ -100,7 +100,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
 
     if (authType === 'register' || authType === 'register-admin') {
-      await registerRequest(body, requestURL);
+      await registerRequest(body, requestURL, { setSubmitting, setErrors });
     }
 
     if (authType === 'forgot-password') {
@@ -173,7 +173,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
   };
 
-  const registerRequest = async (body, requestURL) => {
+  const registerRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       const {
         data: {
@@ -214,7 +214,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           type: 'SET_ERRORS',
           errors: apiErrors,
         });
+
+        setErrors({ apiErrors });
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 

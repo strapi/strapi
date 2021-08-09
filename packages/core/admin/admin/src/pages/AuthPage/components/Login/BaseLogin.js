@@ -20,7 +20,7 @@ import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
-import Form from './Form';
+import Form from '../../../../components/Form';
 import Logo from '../Logo';
 
 const AuthButton = styled(Button)`
@@ -49,6 +49,7 @@ const Login = ({ onSubmit, schema, children }) => {
           initialValues={{
             email: '',
             password: '',
+            rememberMe: false,
           }}
           onSubmit={onSubmit}
           validationSchema={schema}

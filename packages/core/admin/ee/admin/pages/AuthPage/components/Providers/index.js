@@ -77,7 +77,7 @@ const Providers = () => {
               </Box>
               <DividerFull />
             </Row>
-            <AuthButton onClick={handleClick}>
+            <AuthButton size="L" onClick={handleClick}>
               {formatMessage({ id: 'Auth.form.button.login.strapi' })}
             </AuthButton>
           </Stack>

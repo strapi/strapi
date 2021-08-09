@@ -1,173 +1,228 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-/* eslint-disable jsx-a11y/no-static-element-interactions */
-import React from 'react';
-import { Checkbox, Flex, Padded, Text } from '@buffetjs/core';
-import { useIntl, FormattedMessage } from 'react-intl';
-import { get } from 'lodash';
+import React, { useState } from 'react';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import { Show, Hide } from '@strapi/icons';
+import {
+  Main,
+  Box,
+  H1,
+  Subtitle,
+  Stack,
+  TextInput,
+  Grid,
+  GridItem,
+  Checkbox,
+  Button,
+  FieldAction,
+  Link,
+  Row,
+} from '@strapi/parts';
 import PropTypes from 'prop-types';
-import Button from '../../../../components/FullWidthButton';
-import AuthLink from '../AuthLink';
-import Input from '../Input';
-import Logo from '../Logo';
-import Section from '../Section';
-import CustomLabel from './CustomLabel';
-import Box from '../Box';
-import InputWrapper from './InputWrapper';
-import Span from './Span';
+import { Formik } from 'formik';
+import Form from '../../../../components/Form';
+import UnauthenticatedLayout, {
+  Column,
+  LayoutContent,
+} from '../../../../layouts/UnauthenticatedLayout';
+import { useConfigurations } from '../../../../hooks';
 
-const Register = ({
-  fieldsToDisable,
-  formErrors,
-  inputsPrefix,
-  modifiedData,
-  noSignin,
-  onChange,
-  onSubmit,
-  requestError,
-}) => {
+const AuthButton = styled(Button)`
+  display: inline-block;
+  width: 100%;
+`;
+const CenteredBox = styled(Box)`
+  text-align: center;
+`;
+const FieldActionWrapper = styled(FieldAction)`
+  svg {
+    height: 16px;
+    width: 16px;
+    path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
+
+const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema }) => {
+  const [passwordShown, setPasswordShown] = useState(false);
+  const [confirmPasswordShown, setConfirmPasswordShown] = useState(false);
   const { formatMessage } = useIntl();
-
-  const handleClick = (e, to) => {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const win = window.open(`https://strapi.io/${to}`, '_blank');
-    win.focus();
-  };
-
-  const terms = (
-    <FormattedMessage id="Auth.privacy-policy-agreement.terms" key="1">
-      {content => <Span onClick={e => handleClick(e, 'terms')}>{content}</Span>}
-    </FormattedMessage>
-  );
-  const policy = (
-    <FormattedMessage id="Auth.privacy-policy-agreement.policy" key="2">
-      {content => <Span onClick={e => handleClick(e, 'privacy')}>{content}</Span>}
-    </FormattedMessage>
-  );
+  const { authLogo } = useConfigurations();
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground>
-        <Padded top size="25px">
-          <Box errorMessage={get(requestError, 'errorMessage', null)}>
-            <form onSubmit={onSubmit}>
-              <InputWrapper>
-                <Input
-                  autoFocus
-                  error={formErrors[`${inputsPrefix}firstname`]}
-                  label="Auth.form.firstname.label"
-                  name={`${inputsPrefix}firstname`}
-                  onChange={onChange}
-                  placeholder="Auth.form.firstname.placeholder"
-                  type="text"
-                  validations={{ required: true }}
-                  value={get(modifiedData, `${inputsPrefix}firstname`, '')}
-                />
-                <Input
-                  error={formErrors[`${inputsPrefix}lastname`]}
-                  label="Auth.form.lastname.label"
-                  name={`${inputsPrefix}lastname`}
-                  onChange={onChange}
-                  placeholder="Auth.form.lastname.placeholder"
-                  type="text"
-                  validations={{ required: true }}
-                  value={get(modifiedData, `${inputsPrefix}lastname`, '')}
-                />
-              </InputWrapper>
-              <Input
-                error={formErrors[`${inputsPrefix}email`]}
-                disabled={fieldsToDisable.includes('email')}
-                label="Auth.form.email.label"
-                name={`${inputsPrefix}email`}
-                onChange={onChange}
-                placeholder="Auth.form.email.placeholder"
-                type="email"
-                validations={{ required: true }}
-                value={get(modifiedData, `${inputsPrefix}email`, '')}
-              />
-              <Input
-                error={formErrors[`${inputsPrefix}password`]}
-                label="Auth.form.password.label"
-                name={`${inputsPrefix}password`}
-                onChange={onChange}
-                type="password"
-                validations={{ required: true }}
-                value={get(modifiedData, `${inputsPrefix}password`, '')}
-              />
-              <Input
-                error={formErrors[`${inputsPrefix}confirmPassword`]}
-                label="Auth.form.confirmPassword.label"
-                name={`${inputsPrefix}confirmPassword`}
-                onChange={onChange}
-                type="password"
-                validations={{ required: true }}
-                value={get(modifiedData, `${inputsPrefix}confirmPassword`, '')}
-              />
-              <Flex alignItems="flex-start">
-                <Checkbox
-                  name={`${inputsPrefix}news`}
-                  onChange={onChange}
-                  value={get(modifiedData, `${inputsPrefix}news`, false)}
-                />
-                <Padded left size="sm" />
-                <CustomLabel
-                  id="Auth.form.register.news.label"
-                  values={{ terms, policy }}
-                  onClick={() => {
-                    onChange({
-                      target: {
-                        name: `${inputsPrefix}news`,
-                        value: !get(modifiedData, `${inputsPrefix}news`, false),
-                      },
-                    });
-                  }}
-                />
-              </Flex>
-              <Padded top size="md">
-                <Button type="submit" color="primary" textTransform="uppercase">
-                  {formatMessage({ id: 'Auth.form.button.register' })}
-                </Button>
-              </Padded>
-            </form>
+    <UnauthenticatedLayout>
+      <LayoutContent>
+        <Formik
+          enableReinitialize
+          initialValues={{
+            // TODO: Fix the initial data during the clean of the AuthLogin codebase
+            firstname: modifiedData?.userInfo?.firstname || '',
+            lastname: modifiedData?.userInfo?.lastname || '',
+            email: modifiedData?.userInfo?.email || '',
+            password: modifiedData?.userInfo?.password || '',
+            confirmPassword: modifiedData?.userInfo?.confirmPassword || '',
+            news: false,
+          }}
+          onSubmit={onSubmit}
+          validationSchema={schema}
+          validateOnChange={false}
+        >
+          {({ values, errors, handleChange }) => (
+            <Form noValidate>
+              <Main labelledBy="welcome">
+                <Column>
+                  <img src={authLogo} alt="" aria-hidden style={{ height: '72px' }} />
+                  <Box paddingTop="6" paddingBottom="1">
+                    <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+                  </Box>
+                  <CenteredBox paddingBottom="7">
+                    <Subtitle style={{ textAlign: 'center' }} textColor="neutral600">
+                      {formatMessage({ id: 'Auth.form.register.subtitle' })}
+                    </Subtitle>
+                  </CenteredBox>
+                </Column>
+                <Stack size={7}>
+                  <Grid gap={4}>
+                    <GridItem col={6}>
+                      <TextInput
+                        name="firstname"
+                        required
+                        value={values.firstname}
+                        error={errors.firstname ? formatMessage({ id: errors.firstname }) : ''}
+                        onChange={handleChange}
+                        label={formatMessage({ id: 'Auth.form.firstname.label' })}
+                      />
+                    </GridItem>
+                    <GridItem col={6}>
+                      <TextInput
+                        name="lastname"
+                        error={errors.lastname ? formatMessage({ id: errors.lastname }) : ''}
+                        required
+                        value={values.lastname}
+                        onChange={handleChange}
+                        label={formatMessage({ id: 'Auth.form.lastname.label' })}
+                      />
+                    </GridItem>
+                  </Grid>
+                  <TextInput
+                    name="email"
+                    disabled={fieldsToDisable.includes('email')}
+                    value={values.email}
+                    onChange={handleChange}
+                    error={errors.email ? formatMessage({ id: errors.email }) : ''}
+                    required
+                    label={formatMessage({ id: 'Auth.form.email.label' })}
+                    type="email"
+                  />
+                  <TextInput
+                    name="password"
+                    onChange={handleChange}
+                    value={values.password}
+                    error={errors.password ? formatMessage({ id: errors.password }) : ''}
+                    endAction={
+                      // eslint-disable-next-line react/jsx-wrap-multilines
+                      <FieldActionWrapper
+                        onClick={e => {
+                          e.preventDefault();
+                          setPasswordShown(prev => !prev);
+                        }}
+                        label={formatMessage({
+                          id: passwordShown
+                            ? 'Auth.form.password.show-password'
+                            : 'Auth.form.password.hide-password',
+                        })}
+                      >
+                        {passwordShown ? <Show /> : <Hide />}
+                      </FieldActionWrapper>
+                    }
+                    required
+                    label={formatMessage({ id: 'Auth.form.password.label' })}
+                    type={passwordShown ? 'text' : 'password'}
+                  />
+                  <TextInput
+                    name="confirmPassword"
+                    onChange={handleChange}
+                    value={values.confirmPassword}
+                    error={
+                      errors.confirmPassword ? formatMessage({ id: errors.confirmPassword }) : ''
+                    }
+                    endAction={
+                      // eslint-disable-next-line react/jsx-wrap-multilines
+                      <FieldActionWrapper
+                        onClick={e => {
+                          e.preventDefault();
+                          setConfirmPasswordShown(prev => !prev);
+                        }}
+                        label={formatMessage({
+                          id: confirmPasswordShown
+                            ? 'Auth.form.password.show-password'
+                            : 'Auth.form.password.hide-password',
+                        })}
+                      >
+                        {confirmPasswordShown ? <Show /> : <Hide />}
+                      </FieldActionWrapper>
+                    }
+                    required
+                    label={formatMessage({ id: 'Auth.form.confirmPassword.label' })}
+                    type={confirmPasswordShown ? 'text' : 'password'}
+                  />
+                  <Checkbox
+                    onValueChange={checked => {
+                      handleChange({ target: { value: checked, name: 'news' } });
+                    }}
+                    value={values.news}
+                    name="news"
+                  >
+                    {formatMessage(
+                      { id: 'Auth.form.register.news.label' },
+                      {
+                        terms: (
+                          <a target="_blank" href="https://strapi.io/terms" rel="noreferrer">
+                            {formatMessage({ id: 'Auth.privacy-policy-agreement.terms' })}
+                          </a>
+                        ),
+                        policy: (
+                          <a target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
+                            {formatMessage({ id: 'Auth.privacy-policy-agreement.policy' })}
+                          </a>
+                        ),
+                      }
+                    )}
+                  </Checkbox>
+                  <AuthButton size="L" type="submit">
+                    {formatMessage({ id: 'Auth.form.button.register' })}
+                  </AuthButton>
+                </Stack>
+              </Main>
+            </Form>
+          )}
+        </Formik>
+        {!noSignin && (
+          <Box paddingTop={4}>
+            <Row justifyContent="center">
+              <Link label="Auth.link.signin" to="/auth/login">
+                {formatMessage({ id: 'Auth.link.signin.account' })}
+              </Link>
+            </Row>
           </Box>
-        </Padded>
-      </Section>
-      {!noSignin && (
-        <AuthLink label="Auth.link.signin" to="/auth/login">
-          <Text fontSize="md">
-            {formatMessage({ id: 'Auth.link.signin.account' })}
-            &nbsp;
-            <Text fontSize="md" color="#0097f7" as="span">
-              {formatMessage({ id: 'Auth.link.signin' })}
-            </Text>
-          </Text>
-        </AuthLink>
-      )}
-    </>
+        )}
+      </LayoutContent>
+    </UnauthenticatedLayout>
   );
 };
 
 Register.defaultProps = {
   fieldsToDisable: [],
-  inputsPrefix: '',
   noSignin: false,
   onSubmit: e => e.preventDefault(),
-  requestError: null,
 };
 
 Register.propTypes = {
   fieldsToDisable: PropTypes.array,
-  formErrors: PropTypes.object.isRequired,
-  inputsPrefix: PropTypes.string,
   modifiedData: PropTypes.object.isRequired,
   noSignin: PropTypes.bool,
-  onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
-  requestError: PropTypes.object,
+  schema: PropTypes.shape({ type: PropTypes.string.isRequired }).isRequired,
 };
 
 export default Register;
