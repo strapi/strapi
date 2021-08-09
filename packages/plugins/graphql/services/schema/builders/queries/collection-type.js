@@ -3,8 +3,8 @@
 const { extendType } = require('nexus');
 
 const { actionExists } = require('../../../old/utils');
-const { utils, args } = require('../../../types');
-const { transformArgs } = require('../utils');
+const { utils } = require('../../../types');
+const { transformArgs, getContentTypeArgs } = require('../utils');
 const { buildQueriesResolvers } = require('../../resolvers');
 
 module.exports = ({ strapi }) => {
@@ -35,18 +35,10 @@ module.exports = ({ strapi }) => {
       return;
     }
 
-    // todo[v4]: Don't allow to filter using every unique attributes for now
-    // Only authorize filtering using unique scalar fields for findOne queries
-    // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
-
     t.field(findOneQueryName, {
       type: responseTypeName,
 
-      args: {
-        id: 'ID',
-        // todo[v4]: Don't allow to filter using every unique attributes for now
-        // ...uniqueAttributes,
-      },
+      args: getContentTypeArgs(contentType, { multiple: false }),
 
       async resolve(source, args) {
         const transformedArgs = transformArgs(args, { contentType });
@@ -80,14 +72,7 @@ module.exports = ({ strapi }) => {
     t.field(findQueryName, {
       type: responseCollectionTypeName,
 
-      args: {
-        publicationState: args.PublicationStateArg,
-        // todo[v4]: to add through i18n plugin
-        locale: 'String',
-        sort: args.SortArg,
-        pagination: args.PaginationArg,
-        filters: utils.getFiltersInputTypeName(contentType),
-      },
+      args: getContentTypeArgs(contentType),
 
       async resolve(source, args) {
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });

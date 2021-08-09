@@ -6,8 +6,9 @@ const {
 } = require('@strapi/utils');
 
 const {
+  args,
   mappers: { strapiScalarToGraphQLScalar, graphQLFiltersToStrapiQuery },
-  utils: { isScalar, getScalarFilterInputTypeName },
+  utils: { isScalar, getScalarFilterInputTypeName, getFiltersInputTypeName },
 } = require('../../types');
 
 /**
@@ -38,7 +39,7 @@ const scalarAttributesToFiltersMap = mapValues(attribute => {
  * Apply basic transform to GQL args
  */
 // todo[v4]: unify & move elsewhere
-const transformArgs = (args, { contentType, usePagination = false }) => {
+const transformArgs = (args, { contentType, usePagination = false } = {}) => {
   const { pagination = {}, filters = {} } = args;
 
   // Init
@@ -60,7 +61,49 @@ const transformArgs = (args, { contentType, usePagination = false }) => {
   return newArgs;
 };
 
+/**
+ * Get every args for a given content type
+ * @param {object} contentType
+ * @param {object} options
+ * @param {boolean} options.multiple
+ * @return {object}
+ */
+const getContentTypeArgs = (contentType, { multiple = true } = {}) => {
+  const { kind, modelType } = contentType;
+
+  // Components
+  if (modelType === 'component') {
+    return {
+      sort: args.SortArg,
+      pagination: args.PaginationArg,
+      filters: getFiltersInputTypeName(contentType),
+    };
+  }
+
+  // Collection Types
+  else if (kind === 'collectionType') {
+    return multiple
+      ? {
+          publicationState: args.PublicationStateArg,
+          // todo[v4]: to add through i18n plugin
+          locale: 'String',
+          sort: args.SortArg,
+          pagination: args.PaginationArg,
+          filters: getFiltersInputTypeName(contentType),
+        }
+      : { id: 'ID' };
+  }
+
+  // Single Types
+  else if (kind === 'singleType') {
+    return {
+      id: 'ID',
+    };
+  }
+};
+
 module.exports = {
+  getContentTypeArgs,
   getUniqueScalarAttributes,
   scalarAttributesToFiltersMap,
   transformArgs,

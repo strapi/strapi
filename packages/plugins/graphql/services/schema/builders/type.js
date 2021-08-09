@@ -6,7 +6,8 @@ const { objectType } = require('nexus');
 const { contentTypes } = require('@strapi/utils');
 
 const { mappers, utils: typeUtils, constants } = require('../../types');
-const { buildAssociationResolver } = require('../resolvers');
+const { buildAssociationResolver, buildComponentResolver } = require('../resolvers');
+const { getContentTypeArgs } = require('./utils');
 
 /**
  * @typedef TypeBuildersOptions
@@ -160,22 +161,17 @@ const addComponentAttribute = ({ builder, attributeName, contentType, attribute,
     builder = builder.list;
   }
 
-  builder.field(attributeName, {
-    type,
+  const targetComponent = strapi.getModel(attribute.component);
 
-    // Move resolver to /resolvers/component.js
-    async resolve(source) {
-      const { [attributeName]: component } = await strapi.db.entityManager.populate(
-        contentType.uid,
-        source,
-        {
-          [attributeName]: true,
-        }
-      );
-
-      return component;
-    },
+  const resolve = buildComponentResolver({
+    contentTypeUID: contentType.uid,
+    attributeName,
+    strapi,
   });
+
+  const args = getContentTypeArgs(targetComponent);
+
+  builder.field(attributeName, { type, resolve, args });
 };
 
 /**
@@ -226,13 +222,15 @@ const addMediaAttribute = options => {
   const fileContentType = strapi.getModel('plugins::upload.file');
   const type = typeUtils.getTypeName(fileContentType);
 
-  const associationResolver = buildAssociationResolver({
+  const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
     attributeName,
     strapi,
   });
 
-  builder.field(attributeName, { type, resolve: associationResolver });
+  const args = attribute.multiple ? getContentTypeArgs(fileContentType) : undefined;
+
+  builder.field(attributeName, { type, resolve, args });
 };
 
 /**
@@ -255,7 +253,7 @@ const addPolymorphicRelationalAttribute = options => {
     builder = builder.list;
   }
 
-  const associationResolver = buildAssociationResolver({
+  const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
     attributeName,
     strapi,
@@ -265,7 +263,7 @@ const addPolymorphicRelationalAttribute = options => {
   if (isUndefined(target)) {
     builder.field(attributeName, {
       type: constants.GENERIC_MORPH_TYPENAME,
-      resolve: associationResolver,
+      resolve,
     });
   }
 
@@ -273,7 +271,7 @@ const addPolymorphicRelationalAttribute = options => {
   else if (isArray(target) && target.every(isString)) {
     const type = typeUtils.getMorphRelationTypeName(contentType, attributeName);
 
-    builder.field(attributeName, { type, resolve: associationResolver });
+    builder.field(attributeName, { type, resolve });
   }
 };
 
@@ -296,7 +294,7 @@ const addRegularRelationalAttribute = options => {
     builder = builder.list;
   }
 
-  const associationResolver = buildAssociationResolver({
+  const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
     attributeName,
     strapi,
@@ -305,7 +303,9 @@ const addRegularRelationalAttribute = options => {
   const targetContentType = strapi.getModel(attribute.target);
   const type = typeUtils.getTypeName(targetContentType);
 
-  builder.field(attributeName, { type, resolve: associationResolver });
+  const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
+
+  builder.field(attributeName, { type, resolve, args });
 };
 
 /**
