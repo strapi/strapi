@@ -110,37 +110,37 @@ const createQueryBuilder = (uid, db) => {
     init(params = {}) {
       const { _q, where, select, limit, offset, orderBy, groupBy, populate } = params;
 
-      if (where) {
+      if (!_.isNil(where)) {
         this.where(where);
       }
 
-      if (_q) {
+      if (!_.isNil(_q)) {
         this.search(_q);
       }
 
-      if (select) {
+      if (!_.isNil(select)) {
         this.select(select);
       } else {
         this.select('*');
       }
 
-      if (limit) {
+      if (!_.isNil(limit)) {
         this.limit(limit);
       }
 
-      if (offset) {
+      if (!_.isNil(offset)) {
         this.offset(offset);
       }
 
-      if (orderBy) {
+      if (!_.isNil(orderBy)) {
         this.orderBy(orderBy);
       }
 
-      if (groupBy) {
+      if (!_.isNil(groupBy)) {
         this.groupBy(groupBy);
       }
 
-      if (populate) {
+      if (!_.isNil(populate)) {
         this.populate(populate);
       }
 
