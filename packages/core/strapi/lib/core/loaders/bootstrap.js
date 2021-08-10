@@ -141,21 +141,6 @@ module.exports = function(strapi) {
     return acc;
   }, {});
 
-  strapi.config.hook.settings = Object.keys(strapi.hook).reduce((acc, current) => {
-    // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = _.merge(
-      _.cloneDeep(_.get(strapi.hook[current], ['defaults', current], {})),
-      strapi.config.get(['hook', 'settings', current], {})
-    );
-
-    acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
-
-    // Ensure that enabled key exist by forcing to false.
-    _.defaults(acc[current], { enabled: false });
-
-    return acc;
-  }, {});
-
   // default settings
   strapi.config.port = strapi.config.get('server.port') || strapi.config.port;
   strapi.config.host = strapi.config.get('server.host') || strapi.config.host;

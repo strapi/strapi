@@ -16,14 +16,12 @@ const loadApis = require('./load-apis');
 
 const loadMiddlewares = require('./load-middlewares');
 const loadExtensions = require('./load-extensions');
-const loadHooks = require('./load-hooks');
 const loadComponents = require('./load-components');
 
 module.exports = async strapi => {
-  const [api, middlewares, hook, extensions, components] = await Promise.all([
+  const [api, middlewares, extensions, components] = await Promise.all([
     loadApis(strapi),
     loadMiddlewares(strapi),
-    loadHooks(strapi.config),
     loadExtensions(strapi),
     loadComponents(strapi),
   ]);
@@ -49,7 +47,6 @@ module.exports = async strapi => {
   return {
     api,
     middlewares,
-    hook,
     extensions,
     components,
   };

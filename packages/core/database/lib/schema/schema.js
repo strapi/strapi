@@ -28,13 +28,8 @@ const createTable = meta => {
     columns: [],
   };
 
-  // TODO: handle indexes
-  // TODO: handle foreignKeys
-
   for (const key in meta.attributes) {
     const attribute = meta.attributes[key];
-
-    // TODO: if relation & has a joinColumn -> create it
 
     if (types.isRelation(attribute.type)) {
       if (attribute.morphColumn && attribute.owner) {
@@ -43,34 +38,34 @@ const createTable = meta => {
         table.columns.push(
           createColumn(idColumn.name, {
             type: 'integer',
-            unsigned: true,
+            column: {
+              unsigned: true,
+            },
           })
         );
 
-        table.columns.push(
-          createColumn(typeColumn.name, {
-            type: 'string',
-          })
-        );
+        table.columns.push(createColumn(typeColumn.name, { type: 'string' }));
       } else if (attribute.joinColumn && attribute.owner) {
         // NOTE: we could pass uniquness for oneToOne to avoid creating more than one to one
 
         const { name: columnName, referencedColumn, referencedTable } = attribute.joinColumn;
 
-        table.columns.push(
-          createColumn(columnName, {
-            type: 'integer',
+        const column = createColumn(columnName, {
+          type: 'integer',
+          column: {
             unsigned: true,
-          })
-        );
+          },
+        });
+
+        table.columns.push(column);
 
         table.foreignKeys.push({
-          // TODO: generate a name
-          name: `${columnName}_fk`,
+          name: `${table.name}_${columnName}_fk`,
           columns: [columnName],
           referencedTable,
           referencedColumns: [referencedColumn],
-          onDelete: 'SET NULL', // NOTE: could allow configuration
+          // NOTE: could allow configuration
+          onDelete: 'SET NULL',
         });
       }
     } else if (shouldCreateColumn(attribute)) {
