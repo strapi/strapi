@@ -1,5 +1,6 @@
 'use strict';
 
+const { isUndefined } = require('lodash/fp');
 const debug = require('debug')('@strapi/database');
 
 module.exports = db => ({
@@ -92,82 +93,7 @@ module.exports = db => ({
         // alter table
         const schemaBuilder = this.getSchemaBuilder(table, trx);
 
-        await schemaBuilder.alterTable(table.name, tableBuilder => {
-          // Delete indexes / fks / columns
-
-          for (const removedIndex of table.indexes.removed) {
-            debug(`Dropping index ${removedIndex.name}`);
-            dropIndex(tableBuilder, removedIndex);
-          }
-
-          for (const updateddIndex of table.indexes.updated) {
-            debug(`Dropping updated index ${updateddIndex.name}`);
-            dropIndex(tableBuilder, updateddIndex);
-          }
-
-          for (const removedForeignKey of table.foreignKeys.removed) {
-            debug(`Dropping foreign key ${removedForeignKey.name}`);
-            dropForeignKey(tableBuilder, removedForeignKey);
-          }
-
-          for (const updatedForeignKey of table.foreignKeys.updated) {
-            debug(`Dropping updated foreign key ${updatedForeignKey.name}`);
-            dropForeignKey(tableBuilder, updatedForeignKey);
-          }
-
-          for (const removedColumn of table.columns.removed) {
-            debug(`Dropping column ${removedColumn.name}`);
-            dropColumn(tableBuilder, removedColumn);
-          }
-
-          // Update existing columns / foreign keys / indexes
-
-          for (const updatedColumn of table.columns.updated) {
-            debug(`Updating column ${updatedColumn.name}`);
-
-            // TODO: cleanup diffs for columns
-            const { object } = updatedColumn;
-
-            /*
-              type -> recreate the type
-              args -> recreate the type
-              unsigned
-                if changed then recreate the type
-                if removed then check if old value was true -> recreate the type else do nothing
-              defaultTo
-                reapply the default to previous data
-              notNullable
-                if null to not null we need a default value to migrate the data
-            */
-
-            createColumn(tableBuilder, object).alter();
-          }
-
-          for (const updatedForeignKey of table.foreignKeys.updated) {
-            debug(`Recreating updated foreign key ${updatedForeignKey.name}`);
-            createForeignKey(tableBuilder, updatedForeignKey);
-          }
-
-          for (const updatedIndex of table.indexes.updated) {
-            debug(`Recreating updated index ${updatedIndex.name}`);
-            createIndex(tableBuilder, updatedIndex);
-          }
-
-          for (const addedColumn of table.columns.added) {
-            debug(`Creating column ${addedColumn.name}`);
-            createColumn(tableBuilder, addedColumn);
-          }
-
-          for (const addedForeignKey of table.foreignKeys.added) {
-            debug(`Creating foreign keys ${addedForeignKey.name}`);
-            createForeignKey(tableBuilder, addedForeignKey);
-          }
-
-          for (const addedIndex of table.indexes.added) {
-            debug(`Creating index ${addedIndex.name}`);
-            createIndex(tableBuilder, addedIndex);
-          }
-        });
+        await alterTable(schemaBuilder, table);
       }
     });
   },
@@ -262,7 +188,7 @@ const createColumn = (tableBuilder, column) => {
     col.unsigned();
   }
 
-  if (defaultTo) {
+  if (!isUndefined(defaultTo)) {
     // TODO: allow some raw default values
     col.defaultTo(...[].concat(defaultTo));
   }
@@ -292,9 +218,10 @@ const dropColumn = (tableBuilder, column) => {
  */
 const createTable = async (schemaBuilder, table) => {
   if (await schemaBuilder.hasTable(table.name)) {
-    throw new Error(`Table already exists ${table.name}`);
+    debug(`Table ${table.name} already exists trying to alter it`);
 
-    // TODO: alter the table instead
+    // TODO: implement a DB sync at some point
+    return;
   }
 
   await schemaBuilder.createTable(table.name, tableBuilder => {
@@ -303,6 +230,85 @@ const createTable = async (schemaBuilder, table) => {
 
     // indexes
     (table.indexes || []).forEach(index => createIndex(tableBuilder, index));
+  });
+};
+
+const alterTable = async (schemaBuilder, table) => {
+  await schemaBuilder.alterTable(table.name, tableBuilder => {
+    // Delete indexes / fks / columns
+
+    for (const removedIndex of table.indexes.removed) {
+      debug(`Dropping index ${removedIndex.name}`);
+      dropIndex(tableBuilder, removedIndex);
+    }
+
+    for (const updateddIndex of table.indexes.updated) {
+      debug(`Dropping updated index ${updateddIndex.name}`);
+      dropIndex(tableBuilder, updateddIndex);
+    }
+
+    for (const removedForeignKey of table.foreignKeys.removed) {
+      debug(`Dropping foreign key ${removedForeignKey.name}`);
+      dropForeignKey(tableBuilder, removedForeignKey);
+    }
+
+    for (const updatedForeignKey of table.foreignKeys.updated) {
+      debug(`Dropping updated foreign key ${updatedForeignKey.name}`);
+      dropForeignKey(tableBuilder, updatedForeignKey);
+    }
+
+    for (const removedColumn of table.columns.removed) {
+      debug(`Dropping column ${removedColumn.name}`);
+      dropColumn(tableBuilder, removedColumn);
+    }
+
+    // Update existing columns / foreign keys / indexes
+
+    for (const updatedColumn of table.columns.updated) {
+      debug(`Updating column ${updatedColumn.name}`);
+
+      // TODO: cleanup diffs for columns
+      const { object } = updatedColumn;
+
+      /*
+        type -> recreate the type
+        args -> recreate the type
+        unsigned
+          if changed then recreate the type
+          if removed then check if old value was true -> recreate the type else do nothing
+        defaultTo
+          reapply the default to previous data
+        notNullable
+          if null to not null we need a default value to migrate the data
+      */
+
+      createColumn(tableBuilder, object).alter();
+    }
+
+    for (const updatedForeignKey of table.foreignKeys.updated) {
+      debug(`Recreating updated foreign key ${updatedForeignKey.name}`);
+      createForeignKey(tableBuilder, updatedForeignKey);
+    }
+
+    for (const updatedIndex of table.indexes.updated) {
+      debug(`Recreating updated index ${updatedIndex.name}`);
+      createIndex(tableBuilder, updatedIndex);
+    }
+
+    for (const addedColumn of table.columns.added) {
+      debug(`Creating column ${addedColumn.name}`);
+      createColumn(tableBuilder, addedColumn);
+    }
+
+    for (const addedForeignKey of table.foreignKeys.added) {
+      debug(`Creating foreign keys ${addedForeignKey.name}`);
+      createForeignKey(tableBuilder, addedForeignKey);
+    }
+
+    for (const addedIndex of table.indexes.added) {
+      debug(`Creating index ${addedIndex.name}`);
+      createIndex(tableBuilder, addedIndex);
+    }
   });
 };
 
