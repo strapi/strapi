@@ -294,6 +294,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const entityToUpdate = await db.query(uid).findOne({ where: { id: entityId } });
 
+    if (!entityToUpdate) {
+      return null;
+    }
+
     const isDraft = contentTypesUtils.isDraft(entityToUpdate, model);
 
     const validData = await entityValidator.validateEntityUpdate(model, data, {
@@ -334,7 +338,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     });
 
     if (!entityToDelete) {
-      throw new Error('Entity not found');
+      return null;
     }
 
     await deleteComponents(uid, entityToDelete);
