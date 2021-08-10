@@ -87,10 +87,7 @@ const Login = ({ onSubmit, schema }) => {
                 endAction={
                   // eslint-disable-next-line react/jsx-wrap-multilines
                   <FieldActionWrapper
-                    onClick={e => {
-                      e.preventDefault();
-                      setPasswordShown(prev => !prev);
-                    }}
+                    onClick={() => setPasswordShown(prev => !prev)}
                     label={formatMessage({
                       id: passwordShown
                         ? 'Auth.form.password.show-password'
