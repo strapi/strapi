@@ -61,12 +61,14 @@ yargs
 
       return main({
         client: argv.dbclient,
-        host: argv.dbhost,
-        port: argv.dbport,
-        database: argv.dbname,
-        username: argv.dbusername,
-        password: argv.dbpassword,
-        filename: argv.dbfile,
+        connection: {
+          host: argv.dbhost,
+          port: argv.dbport,
+          database: argv.dbname,
+          username: argv.dbusername,
+          password: argv.dbpassword,
+          filename: argv.dbfile,
+        },
       });
     }
   )
