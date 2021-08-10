@@ -118,5 +118,6 @@ module.exports = {
     'react/state-in-constructor': 0,
     'react/static-property-placement': 0,
     'react/display-name': 0,
+    'react/jsx-wrap-multilines': 0,
   },
 };

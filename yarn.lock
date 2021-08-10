@@ -3490,15 +3490,15 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
-"@strapi/icons@0.0.1-alpha.6":
-  version "0.0.1-alpha.6"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.6.tgz#d714c4f0f44d5a53b813989f0c890af62278ce1b"
-  integrity sha512-QB5ghVyTh+vWlFAbDMmZGS//0+mZLWnB0ejxZfHjvT/d3ByVDycxsugLpk+jwALmD7pPdcqK66+3vR9o97Pl1g==
+"@strapi/icons@0.0.1-alpha.9":
+  version "0.0.1-alpha.9"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.9.tgz#de1ae8d8f67ad5bd60c3863d3e9db2ae3b70d411"
+  integrity sha512-FcWBIEuqCBxdo06mXTK5ydzU68KRO0aeVf3cVva1Z58E0748r/h0XVY1jIKxOS8+bVKU+M92qw9rbavQN8gpxw==
 
-"@strapi/parts@0.0.1-alpha.6":
-  version "0.0.1-alpha.6"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.6.tgz#7259e26edb7b4195352713a73f23d54dfefc79c8"
-  integrity sha512-4RhcguoPf41tJ6TbrHrUffOMEmWIJGgT9dxgqy5aFLZFHXnO1x1463Sw5hVSqdT+D05SiJLcBCO3zY+NhpEsDQ==
+"@strapi/parts@0.0.1-alpha.9":
+  version "0.0.1-alpha.9"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.9.tgz#c1ac11acbd7f45dcc53523a2e772ac36f20668c1"
+  integrity sha512-zZVJink71BZ4rduUtC/pMa5vyMSE9DKyQHKHnoSM2b/UMBKMK+VwvdHp3e31pvxPseBMhp1wGKKn8F9lMwPb/w==
   dependencies:
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
@@ -17320,7 +17320,7 @@ react-redux@7.2.3:
     prop-types "^15.7.2"
     react-is "^16.13.1"
 
-react-router-dom@^5.0.0, react-router-dom@^5.2.0:
+react-router-dom@5.2.0, react-router-dom@^5.0.0, react-router-dom@^5.2.0:
   version "5.2.0"
   resolved "https://registry.yarnpkg.com/react-router-dom/-/react-router-dom-5.2.0.tgz#9e65a4d0c45e13289e66c7b17c7e175d0ea15662"
   integrity sha512-gxAmfylo2QUjcwxI63RhQ5G85Qqt4voZpUXSEqCwykV0baaOTQDR1f0PmY8AELqIyVc0NEZUj0Gov5lNGcXgsA==
