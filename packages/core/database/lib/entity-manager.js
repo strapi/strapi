@@ -117,7 +117,7 @@ const createEntityManager = db => {
       await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .where(params.where)
+        .init(_.pick(['_q', 'where'], params))
         .count()
         .first()
         .execute();
