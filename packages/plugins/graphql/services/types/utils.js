@@ -1,6 +1,6 @@
 'use strict';
 
-const { camelCase, propEq, upperFirst, pipe } = require('lodash/fp');
+const { camelCase, propEq, upperFirst, lowerFirst, pipe } = require('lodash/fp');
 
 const { toSingular, toPlural } = require('../old/naming');
 const { STRAPI_SCALARS } = require('./constants');
@@ -81,7 +81,7 @@ const getEnumName = (contentType, attributeName) => {
 const getTypeName = contentType => {
   const { plugin, modelName } = contentType;
 
-  const transformedPlugin = upperFirst(camelCase(plugin));
+  const transformedPlugin = camelCase(plugin);
   const transformedModelName = upperFirst(toSingular(modelName));
 
   return `${transformedPlugin}${transformedModelName}`;
@@ -227,11 +227,12 @@ const getMorphRelationTypeName = (contentType, attributeName) => {
  * @param {object} options
  * @param {string} [options.prefix]
  * @param {string} [options.suffix]
+ * @param {'upper' | 'lower'} [options.firstLetterCase]
  * @param {'plural' | 'singular'} [options.plurality]
  * @return {function(*=): string}
  */
 const buildCustomTypeNameGenerator = (options = {}) => {
-  const { prefix = '', suffix = '', plurality = 'singular' } = options;
+  const { prefix = '', suffix = '', plurality = 'singular', firstLetterCase = 'upper' } = options;
 
   if (!['plural', 'singular'].includes(plurality)) {
     throw new Error(
@@ -242,20 +243,32 @@ const buildCustomTypeNameGenerator = (options = {}) => {
   const getCustomTypeName = pipe(
     getTypeName,
     plurality === 'plural' ? toPlural : toSingular,
-    upperFirst
+    firstLetterCase === 'upper' ? upperFirst : lowerFirst
   );
   return contentType => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
 };
 
-const getFindQueryName = buildCustomTypeNameGenerator({ plurality: 'plural' });
+const getFindQueryName = buildCustomTypeNameGenerator({
+  plurality: 'plural',
+  firstLetterCase: 'lower',
+});
 
-const getFindOneQueryName = buildCustomTypeNameGenerator();
+const getFindOneQueryName = buildCustomTypeNameGenerator({ firstLetterCase: 'lower' });
 
-const getCreateMutationTypeName = buildCustomTypeNameGenerator({ prefix: 'create' });
+const getCreateMutationTypeName = buildCustomTypeNameGenerator({
+  prefix: 'create',
+  firstLetterCase: 'lower',
+});
 
-const getUpdateMutationTypeName = buildCustomTypeNameGenerator({ prefix: 'update' });
+const getUpdateMutationTypeName = buildCustomTypeNameGenerator({
+  prefix: 'update',
+  firstLetterCase: 'lower',
+});
 
-const getDeleteMutationTypeName = buildCustomTypeNameGenerator({ prefix: 'delete' });
+const getDeleteMutationTypeName = buildCustomTypeNameGenerator({
+  prefix: 'delete',
+  firstLetterCase: 'lower',
+});
 
 module.exports = {
   isMorphRelation,
