@@ -10,13 +10,9 @@
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
 import React, { memo, useMemo, useState } from 'react';
-import {
-  BackHeader,
-  LeftMenuList,
-  LoadingIndicatorPage,
-  useStrapiApp,
-} from '@strapi/helper-plugin';
-import { Switch, Redirect, Route, useParams, useHistory } from 'react-router-dom';
+import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
+import { Switch, Redirect, Route, useParams } from 'react-router-dom';
+import { Layout } from '@strapi/parts/Layout';
 import { useIntl } from 'react-intl';
 import HeaderSearch from '../../components/HeaderSearch';
 import PageTitle from '../../components/PageTitle';
@@ -24,13 +20,11 @@ import SettingsSearchHeaderProvider from '../../components/SettingsHeaderSearchC
 import { useSettingsMenu } from '../../hooks';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import ApplicationInfosPage from '../ApplicationInfosPage';
-import { ApplicationDetailLink, MenuWrapper, StyledLeftMenu, Wrapper } from './components';
-
-import { createSectionsRoutes, getSectionsToDisplay, routes } from './utils';
+import { createSectionsRoutes, routes } from './utils';
+import SettingsNav from './components/SettingsNav';
 
 function SettingsPage() {
   const { settingId } = useParams();
-  const { goBack } = useHistory();
   const { settings } = useStrapiApp();
   const { formatMessage } = useIntl();
   // TODO
@@ -46,24 +40,6 @@ function SettingsPage() {
   }, []);
 
   const pluginsRoutes = useMemo(() => createSectionsRoutes(settings), [settings]);
-
-  // Only display accessible sections
-  const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
-
-  // Adapter until we refactor the helper-plugin/leftMenu
-  const menuAdapter = filteredMenu.map(section => {
-    return {
-      ...section,
-      title: section.intlLabel,
-      links: section.links.map(link => {
-        return {
-          ...link,
-          title: link.intlLabel,
-          name: link.id,
-        };
-      }),
-    };
-  });
 
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {
@@ -91,32 +67,17 @@ function SettingsPage() {
 
   return (
     <SettingsSearchHeaderProvider value={{ toggleHeaderSearch }}>
-      <PageTitle title={settingTitle} />
-      <Wrapper>
-        <BackHeader onClick={goBack} />
+      <Layout sideNav={<SettingsNav menu={menu} />}>
+        <PageTitle title={settingTitle} />
 
-        <div className="row">
-          <div className="col-md-3">
-            <MenuWrapper>
-              <ApplicationDetailLink />
-              <StyledLeftMenu>
-                {menuAdapter.map(item => {
-                  return <LeftMenuList {...item} key={item.id} />;
-                })}
-              </StyledLeftMenu>
-            </MenuWrapper>
-          </div>
+        <Switch>
+          <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
+          {adminRoutes}
+          {pluginsRoutes}
+        </Switch>
 
-          <div className="col-md-9">
-            <Switch>
-              <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />
-              {adminRoutes}
-              {pluginsRoutes}
-            </Switch>
-          </div>
-        </div>
         {headerSearchState.show && <HeaderSearch label={headerSearchState.label} />}
-      </Wrapper>
+      </Layout>
     </SettingsSearchHeaderProvider>
   );
 }
