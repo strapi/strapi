@@ -320,7 +320,7 @@ class Strapi {
         return;
       }
 
-      return fn();
+      return fn({ strapi: this });
     };
 
     const configPath = `functions.${lifecycleName}`;
