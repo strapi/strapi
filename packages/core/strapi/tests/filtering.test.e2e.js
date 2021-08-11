@@ -1318,7 +1318,7 @@ describe('Filtering API', () => {
     });
   });
 
-  describe.skip('Text query', () => {
+  describe('Text query', () => {
     test('Cyrillic query', async () => {
       const res = await rq({
         method: 'GET',

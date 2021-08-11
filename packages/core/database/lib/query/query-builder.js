@@ -32,7 +32,19 @@ const createQueryBuilder = (uid, db) => {
 
     select(args) {
       state.type = 'select';
-      state.select = _.castArray(args).map(col => this.aliasColumn(col));
+      state.select = _.uniq(_.castArray(args)).map(col => this.aliasColumn(col));
+
+      return this;
+    },
+
+    addSelect(args) {
+      _.uniq(_.castArray(args))
+        .map(col => this.aliasColumn(col))
+        .forEach(toSelect => {
+          if (!state.select.includes(toSelect)) {
+            state.select.push(toSelect);
+          }
+        });
 
       return this;
     },
@@ -69,11 +81,6 @@ const createQueryBuilder = (uid, db) => {
 
       state.where.push(processedWhere);
 
-      return this;
-    },
-
-    addSelect(args) {
-      state.select.push(..._.castArray(args).map(col => this.aliasColumn(col)));
       return this;
     },
 

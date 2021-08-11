@@ -75,10 +75,14 @@ describe('Core API - Basic + dz', () => {
         },
       ],
     };
+
     const res = await rq({
       method: 'POST',
       url: '/product-with-dzs',
       body: product,
+      qs: {
+        populate: ['dz'],
+      },
     });
 
     expect(res.statusCode).toBe(200);
@@ -91,6 +95,9 @@ describe('Core API - Basic + dz', () => {
     const res = await rq({
       method: 'GET',
       url: '/product-with-dzs',
+      qs: {
+        populate: ['dz'],
+      },
     });
 
     expect(res.statusCode).toBe(200);
@@ -112,10 +119,14 @@ describe('Core API - Basic + dz', () => {
         },
       ],
     };
+
     const res = await rq({
       method: 'PUT',
       url: `/product-with-dzs/${data.productWithDz[0].id}`,
       body: product,
+      qs: {
+        populate: ['dz'],
+      },
     });
 
     expect(res.statusCode).toBe(200);
@@ -129,6 +140,9 @@ describe('Core API - Basic + dz', () => {
     const res = await rq({
       method: 'DELETE',
       url: `/product-with-dzs/${data.productWithDz[0].id}`,
+      qs: {
+        populate: ['dz'],
+      },
     });
 
     expect(res.statusCode).toBe(200);
