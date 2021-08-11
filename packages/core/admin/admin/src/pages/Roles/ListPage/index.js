@@ -21,30 +21,16 @@ import { EmptyRole, RoleRow } from '../../../components/Roles';
 import PageTitle from '../../../components/SettingsPageTitle';
 import UpgradePlanModal from '../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../hooks';
-// import adminPermissions from '../../../permissions';
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const [isOpen, setIsOpen] = useState(false);
   const { trackUsage } = useTracking();
   const { roles, isLoading } = useRolesList();
-  // const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const { push } = useHistory();
-  // const {
-  //   allowedActions: { canUpdate },
-  // } = useRBAC(adminPermissions.settings.roles);
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
   const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
-
-  // useEffect(() => {
-  //   toggleHeaderSearch({ id: 'Settings.permissions.menu.link.roles.label' });
-
-  //   return () => {
-  //     toggleHeaderSearch();
-  //   };
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   const handleGoTo = useCallback(
     id => {
