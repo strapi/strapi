@@ -695,7 +695,7 @@ const applyPopulate = async (results, populate, ctx) => {
             .execute({ mapResults: false });
 
           const map = rows.reduce((map, row) => {
-            map[row[joinColumnName]] = { count: row.count };
+            map[row[joinColumnName]] = { count: Number(row.count) };
             return map;
           }, {});
 
@@ -773,7 +773,7 @@ const applyPopulate = async (results, populate, ctx) => {
           .execute({ mapResults: false });
 
         const map = rows.reduce((map, row) => {
-          map[row[joinColumnName]] = { count: row.count };
+          map[row[joinColumnName]] = { count: Number(row.count) };
           return map;
         }, {});
 
