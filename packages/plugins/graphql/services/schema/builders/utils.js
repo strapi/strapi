@@ -3,6 +3,7 @@
 const { entries, mapValues, omit } = require('lodash/fp');
 const {
   pagination: { withDefaultPagination },
+  contentTypes: { hasDraftAndPublish },
 } = require('@strapi/utils');
 
 const {
@@ -82,16 +83,23 @@ const getContentTypeArgs = (contentType, { multiple = true } = {}) => {
 
   // Collection Types
   else if (kind === 'collectionType') {
-    return multiple
-      ? {
-          publicationState: args.PublicationStateArg,
-          // todo[v4]: to add through i18n plugin
-          locale: 'String',
-          sort: args.SortArg,
-          pagination: args.PaginationArg,
-          filters: getFiltersInputTypeName(contentType),
-        }
-      : { id: 'ID' };
+    // hasDraftAndPublish
+
+    if (!multiple) {
+      return { id: 'ID' };
+    }
+
+    const params = {
+      pagination: args.PaginationArg,
+      sort: args.SortArg,
+      filters: getFiltersInputTypeName(contentType),
+    };
+
+    if (hasDraftAndPublish(contentType)) {
+      Object.assign(params, { publicationState: args.PublicationStateArg });
+    }
+
+    return params;
   }
 
   // Single Types
