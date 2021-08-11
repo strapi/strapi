@@ -1107,10 +1107,11 @@ const applySearch = (qb, query, ctx) => {
   }
 
   switch (db.dialect.client) {
-    case 'pg': {
+    case 'postgres': {
       searchColumns.forEach(attr =>
         qb.orWhereRaw(`"${alias}"."${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
       );
+
       break;
     }
     case 'sqlite': {
