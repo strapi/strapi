@@ -1,6 +1,6 @@
 'use strict';
 
-const { isNil } = require('lodash/fp');
+const { isNil, isPlainObject } = require('lodash/fp');
 
 const transformResponse = (resource, meta = {}) => {
   if (isNil(resource)) {
@@ -20,6 +20,10 @@ const transformEntry = entry => {
 
   if (Array.isArray(entry)) {
     return entry.map(singleEntry => transformEntry(singleEntry));
+  }
+
+  if (!isPlainObject(entry)) {
+    throw new Error('Entry must be an object');
   }
 
   const { id, ...attributes } = entry;

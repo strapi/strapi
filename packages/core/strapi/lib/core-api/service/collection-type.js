@@ -40,23 +40,16 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
         setPublishedAt(sanitizedData);
       }
 
-      // TODO: where to handle files ?
       return strapi.entityService.create(uid, { params, data: sanitizedData, files });
     },
 
     update(entityId, { params, data, files } = {}) {
       const sanitizedData = sanitizeInput(data);
 
-      // TODO: use get fetch params ?
-
-      // TODO: where to handle files ?
-
       return strapi.entityService.update(uid, entityId, { params, data: sanitizedData, files });
     },
 
     delete(entityId, { params } = {}) {
-      // TODO: use get fetch params ?
-
       return strapi.entityService.delete(uid, entityId, { params });
     },
   };
