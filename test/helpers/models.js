@@ -4,7 +4,7 @@ const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 
 const toUID = name => {
-  return name.includes('::') ? name : `application::${name}.${name}`;
+  return name.includes('::') ? name : `api::${name}.${name}`;
 };
 
 const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {

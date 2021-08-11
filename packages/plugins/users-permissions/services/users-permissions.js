@@ -232,7 +232,7 @@ module.exports = ({ strapi }) => ({
       return acc.concat(_.get(strapi.api[current].config, 'routes', []));
     }, []);
     const pluginsRoutes = Object.keys(strapi.plugins).reduce((acc, current) => {
-      const routes = strapi.container.plugin(current).routes.reduce((acc, curr) => {
+      const routes = strapi.plugin(current).routes.reduce((acc, curr) => {
         const prefix = curr.config.prefix;
         const path = prefix !== undefined ? `${prefix}${curr.path}` : `/${current}${curr.path}`;
         _.set(curr, 'path', path);

@@ -78,6 +78,10 @@ class Strapi {
     return ee({ dir: this.dir, logger: this.log });
   }
 
+  service(uid) {
+    return this.container.get('services').get(uid);
+  }
+
   plugin(name) {
     return this.container.get('modules').get(`plugin::${name}`);
   }

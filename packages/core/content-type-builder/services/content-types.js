@@ -7,7 +7,6 @@ const generator = require('@strapi/generate');
 const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
 const createBuilder = require('./schema-builder');
-const apiHandler = require('./api-handler');
 const { coreUids, pluginsUids } = require('./constants');
 
 const isContentTypeVisible = model =>
@@ -187,6 +186,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   });
 
   if (newKind !== previousKind) {
+    const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
     await apiHandler.backup(uid);
 
     try {
@@ -213,6 +213,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
 const deleteContentTypes = async uids => {
   const builder = createBuilder();
+  const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
 
   for (const uid of uids) {
     await deleteContentType(uid, builder);
@@ -237,6 +238,8 @@ const deleteContentTypes = async uids => {
 const deleteContentType = async (uid, defaultBuilder = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
+  const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+  await new Promise(resolve => setTimeout(resolve, 3000));
   await apiHandler.backup(uid);
 
   const contentType = builder.deleteContentType(uid);
