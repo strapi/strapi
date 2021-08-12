@@ -16,7 +16,7 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
     <Tr>
       {Boolean(onToggle) && (
         <Td>
-          <BaseCheckbox name="role-checkbox" onValueChange={() => onToggle(id)} value={isChecked} />
+          <BaseCheckbox name="role-checkbox" onValueChange={() => onToggle(id)} value={isChecked}  aria-label={`Select ${name} for bulk actions`} />
         </Td>
       )}
       <Td>
