@@ -27,21 +27,22 @@ const Login = loginProps => {
 
   return (
     <UnauthenticatedLayout>
-      <BaseLogin {...loginProps} />
-      <Box paddingTop={7}>
-        <Stack size={7}>
-          <Row>
-            <DividerFull />
-            <Box paddingLeft={3} paddingRight={3}>
-              <TableLabel textColor="neutral600">
-                {formatMessage({ id: 'Auth.login.sso.divider' })}
-              </TableLabel>
-            </Box>
-            <DividerFull />
-          </Row>
-          <SSOProviders providers={providers} displayAllProviders={false} />
-        </Stack>
-      </Box>
+      <BaseLogin {...loginProps}>
+        <Box paddingTop={7}>
+          <Stack size={7}>
+            <Row>
+              <DividerFull />
+              <Box paddingLeft={3} paddingRight={3}>
+                <TableLabel textColor="neutral600">
+                  {formatMessage({ id: 'Auth.login.sso.divider' })}
+                </TableLabel>
+              </Box>
+              <DividerFull />
+            </Row>
+            <SSOProviders providers={providers} displayAllProviders={false} />
+          </Stack>
+        </Box>
+      </BaseLogin>
     </UnauthenticatedLayout>
   );
 };
