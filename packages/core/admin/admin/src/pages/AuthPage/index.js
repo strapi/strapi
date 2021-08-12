@@ -91,6 +91,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   };
 
   const handleSubmit = async (e, { setSubmitting, setErrors }) => {
+    setSubmitting(true);
     const body = omit(e, fieldsToOmit);
     const requestURL = `/admin/${endPoint}`;
 

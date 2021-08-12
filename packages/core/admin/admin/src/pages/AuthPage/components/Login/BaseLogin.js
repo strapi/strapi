@@ -18,8 +18,8 @@ import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 
 import { Column } from '../../../../layouts/UnauthenticatedLayout';
-import { useConfigurations } from '../../../../hooks';
 import Form from './Form';
+import Logo from '../Logo';
 
 const AuthButton = styled(Button)`
   display: inline-block;
@@ -37,7 +37,6 @@ const FieldActionWrapper = styled(FieldAction)`
 
 const Login = ({ onSubmit, schema }) => {
   const [passwordShown, setPasswordShown] = useState(false);
-  const { authLogo } = useConfigurations();
   const { formatMessage } = useIntl();
 
   return (
@@ -55,7 +54,7 @@ const Login = ({ onSubmit, schema }) => {
         {({ values, errors, handleChange }) => (
           <Form noValidate>
             <Column>
-              <img src={authLogo} alt="" aria-hidden style={{ height: '72px' }} />
+              <Logo />
               <Box paddingTop="6" paddingBottom="1">
                 <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
               </Box>
@@ -64,7 +63,11 @@ const Login = ({ onSubmit, schema }) => {
                   {formatMessage({ id: 'Auth.form.welcome.subtitle' })}
                 </Subtitle>
               </Box>
-              {errors.errorMessage && <Text textColor="danger600">{errors.errorMessage}</Text>}
+              {errors.errorMessage && (
+                <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                  {errors.errorMessage}
+                </Text>
+              )}
             </Column>
 
             <Stack size={6}>
@@ -87,7 +90,10 @@ const Login = ({ onSubmit, schema }) => {
                 endAction={
                   // eslint-disable-next-line react/jsx-wrap-multilines
                   <FieldActionWrapper
-                    onClick={() => setPasswordShown(prev => !prev)}
+                    onClick={e => {
+                      e.stopPropagation();
+                      setPasswordShown(prev => !prev);
+                    }}
                     label={formatMessage({
                       id: passwordShown
                         ? 'Auth.form.password.show-password'

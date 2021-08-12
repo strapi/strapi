@@ -16,7 +16,7 @@ export const Column = styled(Row)`
 const UnauthenticatedLayout = ({ children }) => {
   return (
     <div>
-      <Row justifyContent="flex-end">
+      <Row as="header" justifyContent="flex-end">
         <Box paddingTop={6} paddingRight={8}>
           <LocaleToggle isLogged />
         </Box>

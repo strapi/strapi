@@ -28,6 +28,13 @@ const FormWithFocus = props => {
         errorEl.focus();
       }
     }
+    if (!isSubmitting && !isValidating && Object.keys(errors).length) {
+      const el = document.getElementById('global-form-error');
+
+      if (el) {
+        el.focus();
+      }
+    }
   }, [errors, isSubmitting, isValidating, touched]);
 
   return <Form {...props} noValidate />;
