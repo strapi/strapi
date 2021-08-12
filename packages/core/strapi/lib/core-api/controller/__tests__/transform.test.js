@@ -27,4 +27,12 @@ describe('Transforms', () => {
       meta: {},
     });
   });
+
+  test('Accepts any meta', () => {
+    const someMeta = { foo: 'bar' };
+    expect(transforms.transformResponse({ id: 1, title: 'Hello' }, someMeta)).toStrictEqual({
+      data: { id: 1, attributes: { title: 'Hello' } },
+      meta: someMeta,
+    });
+  });
 });
