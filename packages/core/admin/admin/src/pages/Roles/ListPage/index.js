@@ -114,7 +114,6 @@ const RoleListPage = () => {
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
-        as="h2"
       />
       <ContentLayout>
         <Table
