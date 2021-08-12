@@ -70,10 +70,12 @@ const transformParamsToQuery = (uid, params = {}) => {
   }
 
   if (fields) {
+    // TODO: handle *.* syntax
     query.select = _.castArray(fields);
   }
 
   if (populate) {
+    // TODO: handle *.* syntax
     const { populate } = params;
     query.populate = typeof populate === 'object' ? populate : _.castArray(populate);
   }

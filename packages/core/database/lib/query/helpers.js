@@ -431,6 +431,7 @@ const applyJoin = (qb, join) => {
     rootColumn,
     rootTable = this.alias,
     on,
+    orderBy,
   } = join;
 
   qb[method]({ [alias]: referencedTable }, inner => {
@@ -442,6 +443,13 @@ const applyJoin = (qb, join) => {
       }
     }
   });
+
+  if (orderBy) {
+    Object.keys(orderBy).forEach(column => {
+      const direction = orderBy[column];
+      qb.orderBy(`${alias}.${column}`, direction);
+    });
+  }
 };
 
 const applyJoins = (qb, joins) => joins.forEach(join => applyJoin(qb, join));
@@ -617,6 +625,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
             rootTable: qb.alias,
             on: joinTable.on,
+            orderBy: joinTable.orderBy,
           })
           .addSelect(joinColAlias)
           .where({ [joinColAlias]: referencedValues })
@@ -734,6 +743,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
             rootTable: qb.alias,
             on: joinTable.on,
+            orderBy: joinTable.orderBy,
           })
           .addSelect(joinColAlias)
           .where({ [joinColAlias]: referencedValues })
@@ -812,6 +822,7 @@ const applyPopulate = async (results, populate, ctx) => {
           rootColumn: joinTable.inverseJoinColumn.referencedColumn,
           rootTable: qb.alias,
           on: joinTable.on,
+          orderBy: joinTable.orderBy,
         })
         .addSelect(joinColAlias)
         .where({ [joinColAlias]: referencedValues })
@@ -894,6 +905,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootColumn: joinColumn.referencedColumn,
             rootTable: qb.alias,
             on: joinTable.on,
+            orderBy: joinTable.orderBy,
           })
           .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])
           .where({
@@ -1078,7 +1090,7 @@ const fromRow = (metadata, row) => {
       // TODO: handle default value too
       // TODO: format data & use dialect to know which type they support (json particularly)
 
-      const field = createField(attribute.type, attribute);
+      const field = createField(attribute);
 
       // TODO: validate data on creation
       // field.validate(data[attributeName]);

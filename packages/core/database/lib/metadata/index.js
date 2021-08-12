@@ -102,6 +102,9 @@ const createMetadata = (models = []) => {
               on: {
                 field: attributeName,
               },
+              orderBy: {
+                order: 'asc',
+              },
             },
           });
 
@@ -134,6 +137,9 @@ const createMetadata = (models = []) => {
               },
               on: {
                 field: attributeName,
+              },
+              orderBy: {
+                order: 'asc',
               },
             },
           });

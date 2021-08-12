@@ -9,6 +9,7 @@ const _ = require('lodash/fp');
 const hasInversedBy = _.has('inversedBy');
 const hasMappedBy = _.has('mappedBy');
 
+const isOneToAny = attribute => ['oneToOne', 'oneToMany'].includes(attribute.relation);
 const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
 const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
 const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
@@ -442,4 +443,5 @@ module.exports = {
   createRelation,
 
   isBidirectional,
+  isOneToAny,
 };

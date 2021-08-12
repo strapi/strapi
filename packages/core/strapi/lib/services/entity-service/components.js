@@ -14,31 +14,6 @@ const omitComponentData = (contentType, data) => {
   return omit(componentAttributes, data);
 };
 
-// components can have nested compos so this must be recursive
-const createComponent = async (uid, data) => {
-  const model = strapi.getModel(uid);
-
-  const componentData = await createComponents(uid, data);
-
-  return await strapi.query(uid).create({
-    data: Object.assign(omitComponentData(model, data), componentData),
-  });
-};
-
-// components can have nested compos so this must be recursive
-const updateComponent = async (uid, componentToUpdate, data) => {
-  const model = strapi.getModel(uid);
-
-  const componentData = await updateComponents(uid, componentToUpdate, data);
-
-  return await strapi.query(uid).update({
-    where: {
-      id: componentToUpdate.id,
-    },
-    data: Object.assign(omitComponentData(model, data), componentData),
-  });
-};
-
 // NOTE: we could generalize the logic to allow CRUD of relation directly in the DB layer
 const createComponents = async (uid, data) => {
   const { attributes } = strapi.getModel(uid);
@@ -48,7 +23,7 @@ const createComponents = async (uid, data) => {
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
-    if (!has(attributeName, data)) {
+    if (!has(attributeName, data) || !contentTypesUtils.isComponentAttribute(attribute)) {
       continue;
     }
 
@@ -71,10 +46,26 @@ const createComponents = async (uid, data) => {
         );
 
         // TODO: add order
-        componentBody[attributeName] = components.map(({ id }) => id);
+        componentBody[attributeName] = components.map(({ id }, idx) => {
+          return {
+            id,
+            __pivot: {
+              order: idx + 1,
+              field: attributeName,
+              component_type: componentUID,
+            },
+          };
+        });
       } else {
         const component = await createComponent(componentUID, componentValue);
-        componentBody[attributeName] = component.id;
+        componentBody[attributeName] = {
+          id: component.id,
+          __pivot: {
+            order: 1,
+            field: attributeName,
+            component_type: componentUID,
+          },
+        };
       }
 
       continue;
@@ -88,9 +79,16 @@ const createComponents = async (uid, data) => {
       }
 
       componentBody[attributeName] = await Promise.all(
-        dynamiczoneValues.map(async value => {
+        dynamiczoneValues.map(async (value, idx) => {
           const { id } = await createComponent(value.__component, value);
-          return { id, __component: value.__component };
+          return {
+            id,
+            __component: value.__component,
+            __pivot: {
+              order: idx + 1,
+              field: attributeName,
+            },
+          };
         })
       );
 
@@ -99,21 +97,6 @@ const createComponents = async (uid, data) => {
   }
 
   return componentBody;
-};
-
-const updateOrCreateComponent = (componentUID, value) => {
-  if (value === null) {
-    return null;
-  }
-
-  // update
-  if (has('id', value)) {
-    // TODO: verify the compo is associated with the entity
-    return updateComponent(componentUID, { id: value.id }, value);
-  }
-
-  // create
-  return createComponent(componentUID, value);
 };
 
 /*
@@ -260,11 +243,6 @@ const deleteOldDZComponents = async (uid, entityToUpdate, attributeName, dynamic
   }
 };
 
-const deleteComponent = async (uid, componentToDelete) => {
-  await deleteComponents(uid, componentToDelete);
-  await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
-};
-
 const deleteComponents = async (uid, entityToDelete) => {
   const { attributes } = strapi.getModel(uid);
 
@@ -303,6 +281,55 @@ const deleteComponents = async (uid, entityToDelete) => {
       continue;
     }
   }
+};
+
+/***************************
+    Component queries
+***************************/
+
+// components can have nested compos so this must be recursive
+const createComponent = async (uid, data) => {
+  const model = strapi.getModel(uid);
+
+  const componentData = await createComponents(uid, data);
+
+  return await strapi.query(uid).create({
+    data: Object.assign(omitComponentData(model, data), componentData),
+  });
+};
+
+// components can have nested compos so this must be recursive
+const updateComponent = async (uid, componentToUpdate, data) => {
+  const model = strapi.getModel(uid);
+
+  const componentData = await updateComponents(uid, componentToUpdate, data);
+
+  return await strapi.query(uid).update({
+    where: {
+      id: componentToUpdate.id,
+    },
+    data: Object.assign(omitComponentData(model, data), componentData),
+  });
+};
+
+const updateOrCreateComponent = (componentUID, value) => {
+  if (value === null) {
+    return null;
+  }
+
+  // update
+  if (has('id', value)) {
+    // TODO: verify the compo is associated with the entity
+    return updateComponent(componentUID, { id: value.id }, value);
+  }
+
+  // create
+  return createComponent(componentUID, value);
+};
+
+const deleteComponent = async (uid, componentToDelete) => {
+  await deleteComponents(uid, componentToDelete);
+  await strapi.query(uid).delete({ where: { id: componentToDelete.id } });
 };
 
 module.exports = {
