@@ -20,6 +20,7 @@ import {
   TableLabel,
   VisuallyHidden,
   BaseCheckbox,
+  Main,
 } from '@strapi/parts';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
@@ -299,9 +300,10 @@ const RoleListPage = () => {
   }
 
   return (
-    <>
+    <Main labelledBy="title">
       <PageTitle name="Roles" />
       <HeaderLayout
+        id="title"
         primaryAction={
           canCreate ? (
             <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
@@ -411,7 +413,7 @@ const RoleListPage = () => {
         toggleModal={handleToggleModal}
         isConfirmButtonLoading={showModalConfirmButtonLoading}
       />
-    </>
+    </Main>
   );
 };
 

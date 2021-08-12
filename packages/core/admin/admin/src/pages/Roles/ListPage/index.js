@@ -12,6 +12,7 @@ import {
   Thead,
   Tr,
   VisuallyHidden,
+  Main,
 } from '@strapi/parts';
 import matchSorter from 'match-sorter';
 import React, { useCallback, useState } from 'react';
@@ -100,17 +101,18 @@ const RoleListPage = () => {
   // ! TODO - Add the search input
 
   return (
-    <>
+    <Main labelledBy="title">
       <PageTitle name="Roles" />
       <HeaderLayout
-        primaryAction={
+        id="title"
+        primaryAction={(
           <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />}>
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',
             })}
           </Button>
-        }
+        )}
         title={formatMessage({
           id: 'Settings.roles.title',
           defaultMessage: 'roles',
@@ -124,14 +126,14 @@ const RoleListPage = () => {
         <Table
           colCount={colCount}
           rowCount={rowCount}
-          footer={
+          footer={(
             <TFooter onClick={handleToggleModalForCreatingRole} icon={<AddIcon />}>
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
               })}
             </TFooter>
-          }
+          )}
         >
           <Thead>
             <Tr>
@@ -185,7 +187,7 @@ const RoleListPage = () => {
         {!rowCount && !isLoading && <EmptyRole />}
       </ContentLayout>
       <UpgradePlanModal isOpen={isModalOpen} onToggle={handleToggle} />
-    </>
+    </Main>
   );
 };
 
