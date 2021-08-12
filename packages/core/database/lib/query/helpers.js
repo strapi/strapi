@@ -470,11 +470,23 @@ const processPopulate = (populate, ctx) => {
       const [root, ...rest] = key.split('.');
 
       if (rest.length > 0) {
-        populateMap[root] = {
-          populate: rest,
-        };
+        const subPopulate = rest.join('.');
+
+        if (populateMap[root]) {
+          if (populateMap[root] === true) {
+            populateMap[root] = {
+              populate: [subPopulate],
+            };
+          } else {
+            populateMap[root].populate = [subPopulate].concat(populateMap[root].populate || []);
+          }
+        } else {
+          populateMap[root] = {
+            populate: [subPopulate],
+          };
+        }
       } else {
-        populateMap[root] = true;
+        populateMap[root] = populateMap[root] ? populateMap[root] : true;
       }
     }
   } else {

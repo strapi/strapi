@@ -51,14 +51,6 @@ function generateCollectionTypeRoutes({ route, name }) {
     },
     {
       method: 'GET',
-      path: '/' + route + '/count',
-      handler: name + '.count',
-      config: {
-        policies: [],
-      },
-    },
-    {
-      method: 'GET',
       path: '/' + route + '/:id',
       handler: name + '.findOne',
       config: {
