@@ -32,7 +32,7 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
         <Row>
           {icons.map((icon, i) =>
             icon ? (
-              <Box key={icon.label} {...(i !== 0 && { paddingLeft: 1 })}>
+              <Box key={icon.label} paddingLeft={i===0 ? 0 : 1}>
                 <IconButton onClick={icon.onClick} label={icon.label} noBorder icon={icon.icon} />
               </Box>
             ) : null
