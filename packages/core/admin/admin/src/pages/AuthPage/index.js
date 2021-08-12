@@ -1,16 +1,11 @@
 import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
-import { camelCase, get, omit, upperFirst } from 'lodash';
+import { camelCase, get, omit } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { BaselineAlignment, auth, useNotification, useQuery } from '@strapi/helper-plugin';
-import { Padded } from '@buffetjs/core';
+import { auth, useNotification, useQuery } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
-import NavTopRightWrapper from '../../components/NavTopRightWrapper';
-import PageTitle from '../../components/PageTitle';
-import LocaleToggle from '../../components/LocaleToggle';
-import checkFormValidity from '../../utils/checkFormValidity';
 import formatAPIErrors from '../../utils/formatAPIErrors';
 import init from './init';
 import { initialState, reducer } from './reducer';
@@ -95,40 +90,25 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     });
   };
 
-  const handleSubmit = async e => {
-    e.preventDefault();
+  const handleSubmit = async (e, { setSubmitting, setErrors }) => {
+    setSubmitting(true);
+    const body = omit(e, fieldsToOmit);
+    const requestURL = `/admin/${endPoint}`;
 
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: {},
-    });
+    if (authType === 'login') {
+      await loginRequest(body, requestURL, { setSubmitting, setErrors });
+    }
 
-    const errors = await checkFormValidity(modifiedData, schema);
+    if (authType === 'register' || authType === 'register-admin') {
+      await registerRequest(body, requestURL);
+    }
 
-    dispatch({
-      type: 'SET_ERRORS',
-      errors: errors || {},
-    });
+    if (authType === 'forgot-password') {
+      await forgotPasswordRequest(body, requestURL);
+    }
 
-    if (!errors) {
-      const body = omit(modifiedData, fieldsToOmit);
-      const requestURL = `/admin/${endPoint}`;
-
-      if (authType === 'login') {
-        await loginRequest(body, requestURL);
-      }
-
-      if (authType === 'register' || authType === 'register-admin') {
-        await registerRequest(body, requestURL);
-      }
-
-      if (authType === 'forgot-password') {
-        await forgotPasswordRequest(body, requestURL);
-      }
-
-      if (authType === 'reset-password') {
-        await resetPasswordRequest(body, requestURL);
-      }
+    if (authType === 'reset-password') {
+      await resetPasswordRequest(body, requestURL);
     }
   };
 
@@ -152,7 +132,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     }
   };
 
-  const loginRequest = async (body, requestURL) => {
+  const loginRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       const {
         data: {
@@ -175,8 +155,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       push('/');
     } catch (err) {
       if (err.response) {
+        setSubmitting(false);
         const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
-        const errorStatus = get(err, ['response', 'data', 'statusCode'], 400);
 
         if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
           push('/auth/oops');
@@ -188,11 +168,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           return;
         }
 
-        dispatch({
-          type: 'SET_REQUEST_ERROR',
-          errorMessage,
-          errorStatus,
-        });
+        setErrors({ errorMessage });
       }
     }
   };
@@ -288,24 +264,17 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
   }
 
   return (
-    <Padded bottom size="md">
-      <PageTitle title={upperFirst(authType)} />
-      <NavTopRightWrapper>
-        <LocaleToggle isLogged className="localeDropdownMenuNotLogged" />
-      </NavTopRightWrapper>
-      <BaselineAlignment top size="78px">
-        <Component
-          {...rest}
-          fieldsToDisable={fieldsToDisable}
-          formErrors={formErrors}
-          inputsPrefix={inputsPrefix}
-          modifiedData={modifiedData}
-          onChange={handleChange}
-          onSubmit={handleSubmit}
-          requestError={requestError}
-        />
-      </BaselineAlignment>
-    </Padded>
+    <Component
+      {...rest}
+      fieldsToDisable={fieldsToDisable}
+      formErrors={formErrors}
+      inputsPrefix={inputsPrefix}
+      modifiedData={modifiedData}
+      onChange={handleChange}
+      onSubmit={handleSubmit}
+      requestError={requestError}
+      schema={schema}
+    />
   );
 };
 

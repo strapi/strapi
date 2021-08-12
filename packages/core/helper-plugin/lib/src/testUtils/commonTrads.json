@@ -109,7 +109,7 @@
   "components.Input.error.attribute.taken": "This field name already exists",
   "components.Input.error.contentTypeName.taken": "This name already exists",
   "components.Input.error.custom-error": "{errorMessage} ",
-  "components.Input.error.validation.email": "This is not an email",
+  "components.Input.error.validation.email": "This is an invalid email",
   "components.Input.error.validation.json": "This doesn't match the JSON format",
   "components.Input.error.validation.max": "The value is too high.",
   "components.Input.error.validation.maxLength": "The value is too long.",

@@ -13,6 +13,8 @@ import {
   useNotification,
   TrackingContext,
 } from '@strapi/helper-plugin';
+import { SkipToContent } from '@strapi/parts';
+import { useIntl } from 'react-intl';
 import PrivateRoute from '../../components/PrivateRoute';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import AuthPage from '../AuthPage';
@@ -26,6 +28,7 @@ const AuthenticatedApp = lazy(() =>
 
 function App() {
   const toggleNotification = useNotification();
+  const { formatMessage } = useIntl();
   const [{ isLoading, hasAdmin, uuid }, setState] = useState({ isLoading: true, hasAdmin: false });
 
   const authRoutes = useMemo(() => {
@@ -105,6 +108,7 @@ function App() {
 
   return (
     <Suspense fallback={<LoadingIndicatorPage />}>
+      <SkipToContent>{formatMessage({ id: 'skipToContent' })}</SkipToContent>
       <TrackingContext.Provider value={uuid}>
         <Switch>
           {authRoutes}

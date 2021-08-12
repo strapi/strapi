@@ -1,84 +1,139 @@
-import React from 'react';
-import { Checkbox } from '@buffetjs/core';
-import { useIntl } from 'react-intl';
-import { get } from 'lodash';
+import React, { useState } from 'react';
+import { Show, Hide } from '@strapi/icons';
+import {
+  Box,
+  Stack,
+  H1,
+  Text,
+  Subtitle,
+  Button,
+  Checkbox,
+  TextInput,
+  Main,
+  FieldAction,
+} from '@strapi/parts';
 import PropTypes from 'prop-types';
-import { BaselineAlignment } from '@strapi/helper-plugin';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import { Formik } from 'formik';
 
-import Button from '../../../../components/FullWidthButton';
-import AuthLink from '../AuthLink';
-import Box from '../Box';
-import Input from '../Input';
+import { Column } from '../../../../layouts/UnauthenticatedLayout';
+import Form from './Form';
 import Logo from '../Logo';
-import Section from '../Section';
 
-const Login = ({ children, formErrors, modifiedData, onChange, onSubmit, requestError }) => {
+const AuthButton = styled(Button)`
+  display: inline-block;
+  width: 100%;
+`;
+const FieldActionWrapper = styled(FieldAction)`
+  svg {
+    height: 16px;
+    width: 16px;
+    path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
+
+const Login = ({ onSubmit, schema }) => {
+  const [passwordShown, setPasswordShown] = useState(false);
   const { formatMessage } = useIntl();
 
   return (
-    <>
-      <Section textAlign="center">
-        <Logo />
-      </Section>
-      <Section withBackground>
-        <BaselineAlignment top size="25px">
-          <Box errorMessage={get(requestError, 'errorMessage', null)}>
-            <form onSubmit={onSubmit}>
-              <Input
-                autoFocus
-                error={formErrors.email}
-                label="Auth.form.email.label"
+    <Main labelledBy="welcome">
+      <Formik
+        enableReinitialize
+        initialValues={{
+          email: '',
+          password: '',
+        }}
+        onSubmit={onSubmit}
+        validationSchema={schema}
+        validateOnChange={false}
+      >
+        {({ values, errors, handleChange }) => (
+          <Form noValidate>
+            <Column>
+              <Logo />
+              <Box paddingTop="6" paddingBottom="1">
+                <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+              </Box>
+              <Box paddingBottom="7">
+                <Subtitle textColor="neutral600">
+                  {formatMessage({ id: 'Auth.form.welcome.subtitle' })}
+                </Subtitle>
+              </Box>
+              {errors.errorMessage && (
+                <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
+                  {errors.errorMessage}
+                </Text>
+              )}
+            </Column>
+
+            <Stack size={6}>
+              <TextInput
+                error={errors.email ? formatMessage({ id: errors.email }) : ''}
+                value={values.email}
+                onChange={handleChange}
+                label={formatMessage({ id: 'Auth.form.email.label' })}
+                placeholder={formatMessage({ id: 'Auth.form.email.placeholder' })}
                 name="email"
-                onChange={onChange}
-                placeholder="Auth.form.email.placeholder"
-                type="email"
-                validations={{ required: true }}
-                value={modifiedData.email}
+                required
               />
-              <Input
-                error={formErrors.password}
-                label="Auth.form.password.label"
+              <TextInput
+                error={errors.password ? formatMessage({ id: errors.password }) : ''}
+                onChange={handleChange}
+                value={values.password}
+                label={formatMessage({ id: 'Auth.form.password.label' })}
                 name="password"
-                onChange={onChange}
-                type="password"
-                validations={{ required: true }}
-                value={modifiedData.password}
+                type={passwordShown ? 'text' : 'password'}
+                endAction={
+                  // eslint-disable-next-line react/jsx-wrap-multilines
+                  <FieldActionWrapper
+                    onClick={e => {
+                      e.stopPropagation();
+                      setPasswordShown(prev => !prev);
+                    }}
+                    label={formatMessage({
+                      id: passwordShown
+                        ? 'Auth.form.password.show-password'
+                        : 'Auth.form.password.hide-password',
+                    })}
+                  >
+                    {passwordShown ? <Show /> : <Hide />}
+                  </FieldActionWrapper>
+                }
+                required
               />
               <Checkbox
-                type="checkbox"
-                message={formatMessage({ id: 'Auth.form.rememberMe.label' })}
+                onValueChange={checked => {
+                  handleChange({ target: { value: checked, name: 'rememberMe' } });
+                }}
+                value={values.rememberMe}
                 name="rememberMe"
-                onChange={onChange}
-                value={modifiedData.rememberMe}
-              />
-              <BaselineAlignment top size="27px">
-                <Button type="submit" color="primary" textTransform="uppercase">
-                  {formatMessage({ id: 'Auth.form.button.login' })}
-                </Button>
-              </BaselineAlignment>
-            </form>
-            {children}
-          </Box>
-        </BaselineAlignment>
-      </Section>
-      <AuthLink label="Auth.link.forgot-password" to="/auth/forgot-password" />
-    </>
+              >
+                {formatMessage({ id: 'Auth.form.rememberMe.label' })}
+              </Checkbox>
+              <AuthButton type="submit">
+                {formatMessage({ id: 'Auth.form.button.login' })}
+              </AuthButton>
+            </Stack>
+          </Form>
+        )}
+      </Formik>
+    </Main>
   );
 };
 
 Login.defaultProps = {
-  children: null,
-  onSubmit: e => e.preventDefault(),
-  requestError: null,
+  onSubmit: () => {},
 };
 
 Login.propTypes = {
-  children: PropTypes.node,
-  formErrors: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
-  requestError: PropTypes.object,
+  schema: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default Login;

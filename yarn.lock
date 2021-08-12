@@ -3490,15 +3490,15 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
-"@strapi/icons@0.0.1-alpha.5":
-  version "0.0.1-alpha.5"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.5.tgz#04f2d62a516e8da6b14f0b1bacc040b10c5f44db"
-  integrity sha512-PCTQXIkBxfV/qWQZPrbABEdkLSYO7w4+RWVHA7eNlSkcKPP/b5Q/ZEW+56GZ/o9DLexivsGdZaC/aVUzK7G7IA==
+"@strapi/icons@0.0.1-alpha.6":
+  version "0.0.1-alpha.6"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.6.tgz#d714c4f0f44d5a53b813989f0c890af62278ce1b"
+  integrity sha512-QB5ghVyTh+vWlFAbDMmZGS//0+mZLWnB0ejxZfHjvT/d3ByVDycxsugLpk+jwALmD7pPdcqK66+3vR9o97Pl1g==
 
-"@strapi/parts@0.0.1-alpha.5":
-  version "0.0.1-alpha.5"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.5.tgz#6abddbcf4ee58da506065aa49f736b0b51e9cbfa"
-  integrity sha512-Vb55oaD0G9N9OzsVM4SB3WG30w4Mo3oDITq9lCvwQT9uR0xKuN+GwYK1XdlBTItLcjnJOpRJ3vSoI7sgI1L8rQ==
+"@strapi/parts@0.0.1-alpha.6":
+  version "0.0.1-alpha.6"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.6.tgz#7259e26edb7b4195352713a73f23d54dfefc79c8"
+  integrity sha512-4RhcguoPf41tJ6TbrHrUffOMEmWIJGgT9dxgqy5aFLZFHXnO1x1463Sw5hVSqdT+D05SiJLcBCO3zY+NhpEsDQ==
   dependencies:
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"

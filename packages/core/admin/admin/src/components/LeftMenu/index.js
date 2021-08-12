@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import get from 'lodash/get';
+import { useHistory } from 'react-router-dom';
 import {
   MainNav,
   NavBrand,
@@ -12,6 +13,7 @@ import {
   NavUser,
   NavCondense,
   Divider,
+  Button,
 } from '@strapi/parts';
 import ContentIcon from '@strapi/icons/ContentIcon';
 import { auth, usePersistentState } from '@strapi/helper-plugin';
@@ -19,6 +21,7 @@ import useConfigurations from '../../hooks/useConfigurations';
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { menuLogo } = useConfigurations();
+  const { push } = useHistory();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
 
   const userInfo = auth.getUserInfo();
@@ -63,6 +66,16 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
                 <FormattedMessage {...link.intlLabel} />
               </NavLink>
             ))}
+            {/* This is temporary */}
+            <Button
+              type="button"
+              onClick={() => {
+                auth.clearAppStorage();
+                push('/auth/login');
+              }}
+            >
+              Logout
+            </Button>
           </NavSection>
         ) : null}
       </NavSections>
