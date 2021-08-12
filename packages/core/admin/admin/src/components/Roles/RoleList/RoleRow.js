@@ -1,10 +1,10 @@
-import { Box, Row, Td, Text, Tr, IconButton } from '@strapi/parts';
+import { Box, Row, Td, Text, Tr, IconButton, BaseCheckbox } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useIntl } from 'react-intl';
 import RoleDescription from './RoleDescription';
 
-const RoleRow = ({ name, description, usersCount, icons }) => {
+const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons }) => {
   const { formatMessage } = useIntl();
 
   const usersCountText = formatMessage(
@@ -14,6 +14,11 @@ const RoleRow = ({ name, description, usersCount, icons }) => {
 
   return (
     <Tr>
+      {!!onToggle && (
+        <Td>
+          <BaseCheckbox name="role-checkbox" onValueChange={() => onToggle(id)} value={isChecked} />
+        </Td>
+      )}
       <Td>
         <Text textColor="neutral800">{name}</Text>
       </Td>
@@ -38,13 +43,19 @@ const RoleRow = ({ name, description, usersCount, icons }) => {
   );
 };
 
-RoleRow.defaultProps = {};
+RoleRow.defaultProps = {
+  onToggle: undefined,
+  isChecked: undefined,
+};
 
 RoleRow.propTypes = {
+  id: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
   usersCount: PropTypes.number.isRequired,
   icons: PropTypes.array.isRequired,
+  onToggle: PropTypes.func,
+  isChecked: PropTypes.bool,
 };
 
 export default RoleRow;

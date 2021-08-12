@@ -22,51 +22,47 @@ import PageTitle from '../../../components/SettingsPageTitle';
 import UpgradePlanModal from '../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../hooks';
 
-const RoleListPage = () => {
-  const { formatMessage } = useIntl();
-  const [isOpen, setIsOpen] = useState(false);
-  const { trackUsage } = useTracking();
+const useResults = () => {
   const { roles, isLoading } = useRolesList();
-  const { push } = useHistory();
+
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
   const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
+
+  return { isLoading, results };
+};
+
+const useFuncs = () => {
+  const { formatMessage } = useIntl();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { trackUsage } = useTracking();
+  const { push } = useHistory();
 
   const handleGoTo = useCallback(
     id => {
       push(`/settings/roles/${id}`);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [push]
   );
 
-  const handleToggle = useCallback(e => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsOpen(prev => !prev);
+  const handleToggle = useCallback(() => {
+    setIsModalOpen(prev => !prev);
   }, []);
 
-  const handleToggleModalForCreatingRole = useCallback(e => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleToggleModalForCreatingRole = useCallback(() => {
     trackUsage('didShowRBACUpgradeModal');
-
-    setIsOpen(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const rowCount = results.length;
-  const colCount = results.length ? Object.keys(results[0]).length : 0;
+    setIsModalOpen(true);
+  }, [trackUsage]);
 
   const getIcons = useCallback(
-    id => [
+    role => [
       {
         onClick: handleToggle,
         label: formatMessage({ id: 'app.utils.duplicate', defaultMessage: 'Duplicate' }),
         icon: <Duplicate />,
       },
       {
-        onClick: () => handleGoTo(id),
+        onClick: () => handleGoTo(role.id),
         label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
         icon: <EditIcon />,
       },
@@ -78,6 +74,25 @@ const RoleListPage = () => {
     ],
     [formatMessage, handleToggle, handleGoTo]
   );
+
+  return {
+    isModalOpen,
+    handleToggleModalForCreatingRole,
+    handleToggle,
+    getIcons,
+  };
+};
+
+const RoleListPage = () => {
+  const { formatMessage } = useIntl();
+
+  const { results, isLoading } = useResults();
+  const { isModalOpen, handleToggle, handleToggleModalForCreatingRole, getIcons } = useFuncs();
+
+  const rowCount = results.length;
+  const colCount = results.length ? Object.keys(results[0]).length : 0;
+
+  // ! TODO - Add the search input
 
   return (
     <>
@@ -151,21 +166,21 @@ const RoleListPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {results.map(role => (
+            {results?.map(role => (
               <RoleRow
                 key={role.id}
                 id={role.id}
                 name={role.name}
                 description={role.description}
                 usersCount={role.usersCount}
-                icons={getIcons(role.id)}
+                icons={getIcons(role)}
               />
             ))}
           </Tbody>
         </Table>
         {!rowCount && !isLoading && <EmptyRole />}
       </ContentLayout>
-      <UpgradePlanModal isOpen={isOpen} onToggle={handleToggle} />
+      <UpgradePlanModal isOpen={isModalOpen} onToggle={handleToggle} />
     </>
   );
 };
