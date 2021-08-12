@@ -82,7 +82,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
-          params: { publicationState: 'live', limit: defaultLimit },
+          params: { publicationState: 'live', pagination: { limit: defaultLimit } },
         });
 
         expect(strapi.entityService.create).toHaveBeenCalledWith('testModel', { data: input });
@@ -111,7 +111,7 @@ describe('Default Service', () => {
 
         expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          params: { publicationState: 'live', limit: defaultLimit },
+          params: { publicationState: 'live', pagination: { limit: defaultLimit } },
         });
 
         expect(strapi.entityService.update).toHaveBeenCalledWith('testModel', 1, {
@@ -138,7 +138,7 @@ describe('Default Service', () => {
 
         expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          params: { publicationState: 'live', limit: defaultLimit },
+          params: { publicationState: 'live', pagination: { limit: defaultLimit } },
         });
 
         expect(strapi.entityService.delete).toHaveBeenCalledWith('testModel', 1);
@@ -172,8 +172,10 @@ describe('getFetchParams', () => {
     ['1000 if limit=1000 and no max allowed limit is set', { limit: 1000 }, 1000],
   ])('Sets limit parameter to %s', (description, input, expected) => {
     strapi.config.api.rest.maxLimit = input.maxLimit;
-    expect(getFetchParams({ limit: input.limit })).toMatchObject({
-      limit: expected,
+    expect(getFetchParams({ pagination: { limit: input.limit } })).toMatchObject({
+      pagination: {
+        limit: expected,
+      },
     });
   });
 });
