@@ -32,7 +32,7 @@ import { useRolesList } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import reducer, { initialState } from './reducer';
 
-const useResults = () => {
+const useSortedRoles = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
@@ -40,7 +40,7 @@ const useResults = () => {
   const { getData, roles, isLoading } = useRolesList(false);
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
-  const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
+  const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
   useEffect(() => {
     if (!isLoadingForPermissions && canRead) {
@@ -56,12 +56,12 @@ const useResults = () => {
     canUpdate,
     isLoading,
     getData,
-    results,
+    sortedRoles,
     roles,
   };
 };
 
-const useFuncs = ({ getData, canCreate, canDelete, canUpdate, roles, results }) => {
+const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
@@ -163,7 +163,7 @@ const useFuncs = ({ getData, canCreate, canDelete, canUpdate, roles, results }) 
   const onAllRolesToggle = () =>
     dispatch({
       type: 'TOGGLE_ALL',
-      ids: results.map(r => r.id),
+      ids: sortedRoles.map(r => r.id),
     });
 
   const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
@@ -266,9 +266,9 @@ const RoleListPage = () => {
     canUpdate,
     isLoading,
     getData,
-    results,
+    sortedRoles,
     roles,
-  } = useResults();
+  } = useSortedRoles();
 
   const {
     handleClosedModal,
@@ -281,13 +281,13 @@ const RoleListPage = () => {
     isWarningDeleteAllOpened,
     showModalConfirmButtonLoading,
     handleToggleModal,
-  } = useFuncs({ getData, canCreate, canDelete, canUpdate, roles, results });
+  } = useRoleActions({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles });
 
   // ! TODO - Show the search bar only if the user is allowed to read - add the search input
   // canRead
 
-  const rowCount = results.length;
-  const colCount = results.length ? Object.keys(results[0]).length : 0;
+  const rowCount = sortedRoles.length;
+  const colCount = sortedRoles.length ? Object.keys(sortedRoles[0]).length : 0;
 
   const isAllEntriesIndeterminate = selectedRoles.length
     ? selectedRoles.length !== rowCount
@@ -385,7 +385,7 @@ const RoleListPage = () => {
               </Tr>
             </Thead>
             <Tbody>
-              {results?.map(role => (
+              {sortedRoles?.map(role => (
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}

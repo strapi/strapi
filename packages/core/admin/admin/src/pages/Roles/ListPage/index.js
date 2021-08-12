@@ -22,17 +22,17 @@ import PageTitle from '../../../components/SettingsPageTitle';
 import UpgradePlanModal from '../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../hooks';
 
-const useResults = () => {
+const useSortedRoles = () => {
   const { roles, isLoading } = useRolesList();
 
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
-  const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
+  const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
-  return { isLoading, results };
+  return { isLoading, sortedRoles };
 };
 
-const useFuncs = () => {
+const useRoleActions = () => {
   const { formatMessage } = useIntl();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { trackUsage } = useTracking();
@@ -86,11 +86,16 @@ const useFuncs = () => {
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
 
-  const { results, isLoading } = useResults();
-  const { isModalOpen, handleToggle, handleToggleModalForCreatingRole, getIcons } = useFuncs();
+  const { sortedRoles, isLoading } = useSortedRoles();
+  const {
+    isModalOpen,
+    handleToggle,
+    handleToggleModalForCreatingRole,
+    getIcons,
+  } = useRoleActions();
 
-  const rowCount = results.length + 1;
-  const colCount = 5
+  const rowCount = sortedRoles.length + 1;
+  const colCount = 5;
 
   // ! TODO - Add the search input
 
@@ -98,14 +103,14 @@ const RoleListPage = () => {
     <>
       <PageTitle name="Roles" />
       <HeaderLayout
-        primaryAction={(
+        primaryAction={
           <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />}>
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',
             })}
           </Button>
-        )}
+        }
         title={formatMessage({
           id: 'Settings.roles.title',
           defaultMessage: 'roles',
@@ -119,14 +124,14 @@ const RoleListPage = () => {
         <Table
           colCount={colCount}
           rowCount={rowCount}
-          footer={(
+          footer={
             <TFooter onClick={handleToggleModalForCreatingRole} icon={<AddIcon />}>
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
               })}
             </TFooter>
-          )}
+          }
         >
           <Thead>
             <Tr>
@@ -165,7 +170,7 @@ const RoleListPage = () => {
             </Tr>
           </Thead>
           <Tbody>
-            {results?.map(role => (
+            {sortedRoles?.map(role => (
               <RoleRow
                 key={role.id}
                 id={role.id}

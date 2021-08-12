@@ -5,6 +5,8 @@ import moment from 'moment';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
 import { useIntl } from 'react-intl';
+import { HeaderLayout, Button } from '@strapi/parts';
+import { AddIcon, EditIcon } from '@strapi/icons';
 import {
   BaselineAlignment,
   CheckPagePermissions,
@@ -17,7 +19,6 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import adminPermissions from '../../../../../admin/src/permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
-import ContainerFluid from '../../../../../admin/src/components/ContainerFluid';
 import FormCard from '../../../../../admin/src/components/FormBloc';
 import { ButtonWithNumber } from '../../../../../admin/src/components/Roles';
 import SizedInput from '../../../../../admin/src/components/SizedInput';
@@ -142,7 +143,18 @@ const CreatePage = () => {
       >
         {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
           <form onSubmit={handleSubmit}>
-            <ContainerFluid padding="0">
+            <>
+              <HeaderLayout
+                primaryAction={<Button startIcon={<AddIcon />}>Add an entry</Button>}
+                secondaryAction={(
+                  <Button variant="tertiary" startIcon={<EditIcon />}>
+                    Edit
+                  </Button>
+                )}
+                title="Other CT"
+                subtitle="36 entries found"
+                as="h2"
+              />
               <Header
                 title={{
                   label: formatMessage({
@@ -202,7 +214,7 @@ const CreatePage = () => {
                   />
                 </Padded>
               )}
-            </ContainerFluid>
+            </>
           </form>
         )}
       </Formik>
