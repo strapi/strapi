@@ -90,7 +90,7 @@ const RoleListPage = () => {
   const { isModalOpen, handleToggle, handleToggleModalForCreatingRole, getIcons } = useFuncs();
 
   const rowCount = results.length + 1;
-  const colCount = results.length ? Object.keys(results[0]).length : 0;
+  const colCount = 5
 
   // ! TODO - Add the search input
 
