@@ -14,7 +14,7 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
 
   return (
     <Tr>
-      {!!onToggle && (
+      {Boolean(onToggle) && (
         <Td>
           <BaseCheckbox name="role-checkbox" onValueChange={() => onToggle(id)} value={isChecked} />
         </Td>
