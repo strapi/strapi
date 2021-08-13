@@ -39,13 +39,15 @@ async function getTemplateQuestion() {
     };
   }
 
-  const choices = content.map(option => {
-    const name = option.title.replace('Template', '');
-    return {
-      name,
-      value: `https://github.com/${option.repo}`,
-    };
-  });
+  const choices = content
+    .filter(template => template.verified)
+    .map(template => {
+      const name = template.title.replace('Template', '');
+      return {
+        name,
+        value: `https://github.com/${template.repo}`,
+      };
+    });
 
   return {
     name: 'template',
@@ -102,6 +104,7 @@ async function getTemplateData() {
   const response = await fetch(
     `https://api.github.com/repos/strapi/community-content/contents/templates/templates.yml`
   );
+
   if (!response.ok) {
     return null;
   }
