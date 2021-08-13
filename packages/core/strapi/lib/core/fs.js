@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('path');
+const fs = require('fs');
 const fse = require('fs-extra');
 
 /**
@@ -10,7 +11,7 @@ module.exports = strapi => {
   function normalizePath(optPath) {
     const filePath = Array.isArray(optPath) ? optPath.join('/') : optPath;
 
-    const normalizedPath = path.normalize(filePath).replace(/^(\/?\.\.?)+/, '');
+    const normalizedPath = path.normalize(filePath).replace(/^\/?(\.\/|\.\.\/)+/, '');
 
     return path.join(strapi.dir, normalizedPath);
   }
@@ -43,6 +44,14 @@ module.exports = strapi => {
     removeAppFile(optPath) {
       const removePath = normalizePath(optPath);
       return fse.remove(removePath);
+    },
+
+    /**
+     * Removes a file in strapi app
+     */
+    async appendFile(optPath, data) {
+      const writePath = normalizePath(optPath);
+      return fs.appendFileSync(writePath, data);
     },
   };
 

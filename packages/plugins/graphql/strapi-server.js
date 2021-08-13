@@ -10,6 +10,6 @@ module.exports = (/* strapi, config */) => {
     services: () => {},
     policies: {},
     middlewares: {},
-    contentTypes: [],
+    contentTypes: {},
   };
 };

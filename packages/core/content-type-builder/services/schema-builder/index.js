@@ -2,7 +2,6 @@
 
 const path = require('path');
 const _ = require('lodash');
-const { capitalize } = require('lodash/fp');
 
 const createSchemaHandler = require('./schema-handler');
 const createComponentBuilder = require('./component-builder');
@@ -33,7 +32,7 @@ module.exports = function createBuilder() {
 
     let dir;
     if (contentType.plugin) {
-      dir = `./extensions/${contentType.plugin}/models`;
+      dir = `./extensions/${contentType.plugin}/content-types/${contentType.info.singularName}`;
     } else {
       dir = `./api/${contentType.apiName}/models`;
     }
@@ -42,7 +41,7 @@ module.exports = function createBuilder() {
       modelName: contentType.modelName,
       plugin: contentType.plugin,
       uid: contentType.uid,
-      filename: capitalize(`${contentType.info.singularName}.settings.json`),
+      filename: 'schema.json',
       dir: path.join(strapi.dir, dir),
       schema: contentType.__schema__,
     };

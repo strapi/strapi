@@ -18,7 +18,7 @@ module.exports = {
       author: {
         type: 'relation',
         relation: 'manyToOne',
-        target: 'plugins::users-permissions.user',
+        target: 'plugin::users-permissions.user',
         targetAttribute: 'articles',
       },
     },

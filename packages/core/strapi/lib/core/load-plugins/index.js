@@ -1,10 +1,11 @@
 'use strict';
 
-const { join } = require('path');
+const { join, resolve } = require('path');
 const { existsSync } = require('fs');
-const { defaultsDeep, getOr } = require('lodash/fp');
+const { defaultsDeep, getOr, get } = require('lodash/fp');
 const { env } = require('@strapi/utils');
 const loadConfigFile = require('../app-configuration/load-config-file');
+const loadFiles = require('../../load/load-files');
 const getEnabledPlugins = require('./get-enabled-plugins');
 
 const defaultPlugin = {
@@ -20,7 +21,25 @@ const defaultPlugin = {
   services: {},
   policies: {},
   middlewares: {},
-  contentTypes: [],
+  contentTypes: {},
+};
+
+const applyUserExtension = async plugins => {
+  const extensionsDir = resolve(strapi.dir, 'extensions');
+  if (!existsSync(extensionsDir)) {
+    return;
+  }
+
+  const files = await loadFiles(extensionsDir, '**/content-types/**/schema.json');
+  for (const pluginName in plugins) {
+    const plugin = plugins[pluginName];
+    for (const ctName in plugin.contentTypes) {
+      const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], files);
+      if (extendedSchema) {
+        plugin.contentTypes[ctName].schema = extendedSchema;
+      }
+    }
+  }
 };
 
 const formatContentTypes = plugins => {
@@ -34,7 +53,7 @@ const formatContentTypes = plugins => {
   }
 };
 
-const formatConfig = plugins => {
+const applyUserConfig = plugins => {
   const userPluginConfigPath = join(strapi.dir, 'config', 'plugins.js');
   const userPluginsConfig = existsSync(userPluginConfigPath)
     ? loadConfigFile(userPluginConfigPath)
@@ -43,13 +62,18 @@ const formatConfig = plugins => {
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
     const userPluginConfig = getOr({}, `${pluginName}.config`, userPluginsConfig);
-    const formattedConfig = defaultsDeep(plugin.config.default, userPluginConfig);
+    const defaultConfig =
+      typeof plugin.config.default === 'function'
+        ? plugin.config.default({ env })
+        : plugin.config.default;
+
+    const config = defaultsDeep(defaultConfig, userPluginConfig);
     try {
-      plugin.config.validator(formattedConfig);
+      plugin.config.validator(config);
     } catch (e) {
       throw new Error(`Error regarding ${pluginName} config: ${e.message}`);
     }
-    plugin.config = formattedConfig;
+    plugin.config = config;
   }
 };
 
@@ -59,12 +83,12 @@ const loadPlugins = async strapi => {
 
   for (const pluginName in enabledPlugins) {
     const enabledPlugin = enabledPlugins[pluginName];
-    const loadPluginServer = require(join(enabledPlugin.pathToPlugin, 'strapi-server.js'));
-    const pluginServer = await loadPluginServer({ env });
+    const pluginServer = loadConfigFile(join(enabledPlugin.pathToPlugin, 'strapi-server.js'));
     plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
   }
   // TODO: validate plugin format
-  formatConfig(plugins);
+  applyUserConfig(plugins);
+  await applyUserExtension(plugins);
   formatContentTypes(plugins);
 
   return plugins;

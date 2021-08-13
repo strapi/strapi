@@ -37,11 +37,9 @@ module.exports = async () => {
 
     strapi.reload.isWatching = false;
 
-    await strapi.fs.writePluginFile(
-      'users-permissions',
-      'config/jwt.js',
-      `module.exports = {\n  jwtSecret: process.env.JWT_SECRET || '${jwtSecret}'\n};`
-    );
+    if (!process.env.JWT_SECRET) {
+      await strapi.fs.appendFile('.env', `JWT_SECRET=${jwtSecret}\n`);
+    }
 
     strapi.reload.isWatching = true;
   }

@@ -7,10 +7,11 @@ const services = require('./server/services');
 const routes = require('./server/routes');
 const controllers = require('./server/controllers');
 const middlewares = require('./server/middlewares');
+const config = require('./server/config');
 
 module.exports = () => ({
-  register: () => {},
   bootstrap,
+  config,
   routes,
   controllers,
   middlewares,

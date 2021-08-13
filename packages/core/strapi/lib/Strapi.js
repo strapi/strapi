@@ -321,7 +321,7 @@ class Strapi {
         return;
       }
 
-      if (this.config.autoReload) {
+      if (this.config.get('autoReload')) {
         this.server.destroy();
         process.send('reload');
       }

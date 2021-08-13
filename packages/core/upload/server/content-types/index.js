@@ -2,8 +2,6 @@
 
 const fileModel = require('../../models/File');
 
-module.exports = [
-  {
-    schema: fileModel,
-  },
-];
+module.exports = {
+  [fileModel.info.singularName]: { schema: fileModel },
+};

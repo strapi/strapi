@@ -2,4 +2,6 @@
 
 const localeModel = require('./locale');
 
-module.exports = [localeModel];
+module.exports = {
+  [localeModel.schema.info.singularName]: localeModel,
+};
