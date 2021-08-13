@@ -6,18 +6,17 @@
 
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { Plus } from '@buffetjs/icons';
 import { useIntl } from 'react-intl';
 import {
   request,
   PopUpWarning,
   useRBAC,
   LoadingIndicatorPage,
-  EmptyState,
   useNotification,
 } from '@strapi/helper-plugin';
 
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
+import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
 import { Row } from '@strapi/parts/Row';
 import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -30,6 +29,7 @@ import { Switch } from '@strapi/parts/Switch';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
+import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import reducer, { initialState } from './reducer';
 import PageTitle from '../../../components/SettingsPageTitle';
 import adminPermissions from '../../../permissions';
@@ -37,12 +37,7 @@ import adminPermissions from '../../../permissions';
 function ListView() {
   const {
     isLoading,
-    allowedActions: {
-      canCreate,
-      canRead,
-      // canUpdate,
-      // canDelete,
-    },
+    allowedActions: { canCreate, canRead, canUpdate, canDelete },
   } = useRBAC(adminPermissions.settings.webhooks);
   const toggleNotification = useNotification();
   const isMounted = useRef(true);
@@ -54,6 +49,8 @@ function ListView() {
   );
   const { push } = useHistory();
   const { pathname } = useLocation();
+  const rowsCount = webhooks.length;
+  const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
 
   useEffect(() => {
     isMounted.current = true;
@@ -70,74 +67,14 @@ function ListView() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
-  const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
-
-  // New button
-  const addBtnLabel = formatMessage({
-    id: 'Settings.webhooks.list.button.add',
-  });
-
-  const newButtonProps = {
-    label: addBtnLabel,
-    onClick: () => handleGoTo('create'),
-    color: 'primary',
-    type: 'button',
-    icon: <Plus fill="#007eff" width="11px" height="11px" />,
-    Component: props => {
-      if (canCreate) {
-        return <Button {...props} />;
-      }
-
-      return null;
-    },
-  };
-
-  // Header props
-  const actions = [
-    {
-      ...newButtonProps,
-      icon: true,
-      style: {
-        paddingLeft: 15,
-        paddingRight: 15,
-      },
-    },
-  ];
-
   const headerProps = {
     title: {
       label: formatMessage({ id: 'Settings.webhooks.title' }),
     },
     content: formatMessage({ id: 'Settings.webhooks.list.description' }),
-    actions,
+    addBtnLabel: formatMessage({ id: 'Settings.webhooks.list.button.add' }),
+    deleteBtmLabel: formatMessage({ id: 'app.utils.delete' }),
   };
-
-  // List props
-  const rowsCount = webhooks.length;
-  // const titleLabel = `${
-  //   rowsCount > 1
-  //     ? formatMessage({ id: 'Settings.webhooks.title' })
-  //     : formatMessage({ id: 'Settings.webhooks.singular' })
-  // }`;
-  // const title = `${rowsCount} ${titleLabel}`;
-
-  /* eslint-disable indent */
-  // const deleteButtonProps = canDelete
-  //   ? {
-  //       color: 'delete',
-  //       disabled: !(webhooksToDelete.length > 0),
-  //       label: formatMessage({ id: 'app.utils.delete' }),
-  //       onClick: () => setShowModal(true),
-  //       type: 'button',
-  //     }
-  //   : null;
-  /* eslint-enable indent */
-
-  // const listProps = {
-  //   title,
-  //   button: deleteButtonProps,
-  //   items: webhooks,
-  // };
 
   const fetchData = async () => {
     try {
@@ -161,15 +98,6 @@ function ListView() {
         }
       }
     }
-  };
-
-  const handleChange = (value, id) => {
-    // console.log(value, id);
-    dispatch({
-      type: 'SET_WEBHOOKS_TO_DELETE',
-      value,
-      id,
-    });
   };
 
   const handleConfirmDelete = () => {
@@ -238,9 +166,8 @@ function ListView() {
       id,
     });
   };
-  console.log(webhooks);
+
   const handleEnabledChange = async (value, id) => {
-    // console.log(!value)
     const webhookIndex = getWebhookIndex(id);
     const initialWebhookProps = webhooks[webhookIndex];
     const keys = [webhookIndex, 'isEnabled'];
@@ -281,6 +208,36 @@ function ListView() {
     }
   };
 
+  const handleCheckboxChange = (checkbox, value, id) => {
+    if (checkbox === 'secondary') {
+      dispatch({
+        type: 'SET_WEBHOOKS_TO_DELETE',
+        value,
+        id,
+      });
+    } else {
+      const webhooksIds = webhooks.map(webhook => webhook.id);
+
+      if (webhooksToDelete.length === 0) {
+        for (let i = 0; i < webhooksIds.length; i++) {
+          dispatch({
+            type: 'SET_WEBHOOKS_TO_DELETE',
+            value: true,
+            id: webhooksIds[i],
+          });
+        }
+      } else {
+        for (let i = 0; i < webhooksIds.length; i++) {
+          dispatch({
+            type: 'SET_WEBHOOKS_TO_DELETE',
+            value: false,
+            id: webhooksIds[i],
+          });
+        }
+      }
+    }
+  };
+
   const handleGoTo = to => {
     push(`${pathname}/${to}`);
   };
@@ -297,7 +254,7 @@ function ListView() {
         subtitle={headerProps.content}
         primaryAction={(
           <Button onClick={() => (canCreate ? handleGoTo('create') : {})} startIcon={<AddIcon />}>
-            {headerProps.actions[0].label}
+            {headerProps.addBtnLabel}
           </Button>
         )}
       />
@@ -317,7 +274,14 @@ function ListView() {
               <Thead>
                 <Tr>
                   <Th>
-                    <BaseCheckbox aria-label="Select all entries" />
+                    <BaseCheckbox
+                      aria-label="Select all entries"
+                      indeterminate={
+                        webhooksToDelete.length > 0 && webhooksToDelete.length < webhooks.length
+                      }
+                      value={webhooksToDelete.length === webhooks.length}
+                      onValueChange={value => handleCheckboxChange('main', value)}
+                    />
                   </Th>
                   <Th>
                     <TableLabel>name</TableLabel>
@@ -325,7 +289,7 @@ function ListView() {
                   <Th>
                     <TableLabel>url</TableLabel>
                   </Th>
-                  <Th>
+                  <Th width="30%">
                     <TableLabel>status</TableLabel>
                   </Th>
                   <Th>
@@ -339,7 +303,9 @@ function ListView() {
                     <Td>
                       <BaseCheckbox
                         aria-label={`Select ${webhook.name}`}
-                        onValueChange={value => handleChange(value, webhook.id)}
+                        value={webhooksToDelete?.includes(webhook.id)}
+                        onValueChange={value =>
+                          handleCheckboxChange('secondary', value, webhook.id)}
                         id={`Select ${webhook.id}`}
                         name={`Select ${webhook.name}`}
                       />
@@ -359,31 +325,33 @@ function ListView() {
                           offLabel="Not enabled"
                           label={`${webhook.name} status`}
                           selected={webhook.isEnabled}
-                          onChange={() => handleEnabledChange(webhook.isEnabled, webhook.id)}
+                          onChange={() => handleEnabledChange(!webhook.isEnabled, webhook.id)}
                           visibleLabels
                         />
                       </Row>
                     </Td>
                     <Td>
                       <Row justifyContent="flex-end">
-                        <IconButton
-                          onClick={() => {
-                            handleGoTo(webhook.id);
-                          }}
-                          label="Edit"
-                          icon={<EditIcon />}
-                          noBorder
-                        />
-                        <Box paddingLeft={1}>
+                        {canUpdate && (
                           <IconButton
                             onClick={() => {
-                              handleDeleteClick(webhook.id);
+                              handleGoTo(webhook.id);
                             }}
-                            label="Delete"
-                            icon={<DeleteIcon />}
+                            label="Edit"
+                            icon={<EditIcon />}
                             noBorder
                           />
-                        </Box>
+                        )}
+                        {canDelete && (
+                          <Box paddingLeft={1}>
+                            <IconButton
+                              onClick={() => handleDeleteClick(webhook.id)}
+                              label="Delete"
+                              icon={<DeleteIcon />}
+                              noBorder
+                            />
+                          </Box>
+                        )}
                       </Row>
                     </Td>
                   </Tr>
@@ -391,11 +359,18 @@ function ListView() {
               </Tbody>
             </Table>
           ) : (
-            <EmptyState
-              title={formatMessage({ id: 'Settings.webhooks.list.empty.title' })}
-              description={formatMessage({ id: 'Settings.webhooks.list.empty.description' })}
-              link="https://strapi.io/documentation/developer-docs/latest/development/backend-customization.html#webhooks"
-              linkText={formatMessage({ id: 'Settings.webhooks.list.empty.link' })}
+            <EmptyStateLayout
+              icon={<EmptyStateDocument width="160px" />}
+              content={formatMessage({ id: 'Settings.webhooks.list.empty.description' })}
+              action={(
+                <Button
+                  variant="secondary"
+                  startIcon={<AddIcon />}
+                  onClick={() => (canCreate ? handleGoTo('create') : {})}
+                >
+                  {formatMessage({ id: 'Settings.webhooks.list.button.add' })}
+                </Button>
+              )}
             />
           )}
         </>

@@ -1726,6 +1726,13 @@
     gud "^1.0.0"
     warning "^4.0.3"
 
+"@internationalized/number@^3.0.2":
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/@internationalized/number/-/number-3.0.2.tgz#432574e868713d01acbdd206d358fd59da01bad1"
+  integrity sha512-HKgKYBl5cF85iqFG0Gei+YPivWlFhdhPbMhAcVMsP+X2LCmIG9BvGJZ9oN11SUWknnVAXuLSiIx2SDvwQcdhpg==
+  dependencies:
+    "@babel/runtime" "^7.6.2"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.1.0.tgz#fd3db1d59ecf7cf121e80650bb86712f9b55eced"
@@ -3490,16 +3497,17 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
-"@strapi/icons@0.0.1-alpha.6":
-  version "0.0.1-alpha.6"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.6.tgz#d714c4f0f44d5a53b813989f0c890af62278ce1b"
-  integrity sha512-QB5ghVyTh+vWlFAbDMmZGS//0+mZLWnB0ejxZfHjvT/d3ByVDycxsugLpk+jwALmD7pPdcqK66+3vR9o97Pl1g==
+"@strapi/icons@0.0.1-alpha.10":
+  version "0.0.1-alpha.10"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.10.tgz#ec7424718abeb2d6680c91c7ba666ffbaa7f43e8"
+  integrity sha512-VbMDJuYl6xwG6COOF6BheXy1JIboWpyO8QqqfhJoJBLcAGVrouUeUMp+YGOsyi9nnGtPZSs8TNdtMkHkstRHqA==
 
-"@strapi/parts@0.0.1-alpha.6":
-  version "0.0.1-alpha.6"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.6.tgz#7259e26edb7b4195352713a73f23d54dfefc79c8"
-  integrity sha512-4RhcguoPf41tJ6TbrHrUffOMEmWIJGgT9dxgqy5aFLZFHXnO1x1463Sw5hVSqdT+D05SiJLcBCO3zY+NhpEsDQ==
+"@strapi/parts@0.0.1-alpha.10":
+  version "0.0.1-alpha.10"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.10.tgz#dfed27fc2fb73423af896109b2e3280c5473260a"
+  integrity sha512-WosaWkioUDucF5R1LC5qP76hAs2abKuL3HaiCUgvIudomItMrPRxman2LPYjGzFfFXPKu6aJwNy5CXMx6owRpw==
   dependencies:
+    "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
