@@ -30,9 +30,10 @@ const databases = {
   },
   sqlite: {
     client: 'sqlite',
-    connecton: {
+    connection: {
       filename: './tmp/data.db',
     },
+    useNullAsDefault: true,
   },
 };
 

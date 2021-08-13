@@ -60,7 +60,7 @@ describe('Roles API', () => {
       body: {
         ...internals.role,
         permissions: [],
-        users: [data.user],
+        users: [data.user.id],
       },
     });
 

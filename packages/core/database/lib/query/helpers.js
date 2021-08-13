@@ -431,6 +431,7 @@ const applyJoin = (qb, join) => {
     rootColumn,
     rootTable = this.alias,
     on,
+    orderBy,
   } = join;
 
   qb[method]({ [alias]: referencedTable }, inner => {
@@ -442,6 +443,13 @@ const applyJoin = (qb, join) => {
       }
     }
   });
+
+  if (orderBy) {
+    Object.keys(orderBy).forEach(column => {
+      const direction = orderBy[column];
+      qb.orderBy(`${alias}.${column}`, direction);
+    });
+  }
 };
 
 const applyJoins = (qb, joins) => joins.forEach(join => applyJoin(qb, join));
@@ -470,11 +478,23 @@ const processPopulate = (populate, ctx) => {
       const [root, ...rest] = key.split('.');
 
       if (rest.length > 0) {
-        populateMap[root] = {
-          populate: rest,
-        };
+        const subPopulate = rest.join('.');
+
+        if (populateMap[root]) {
+          if (populateMap[root] === true) {
+            populateMap[root] = {
+              populate: [subPopulate],
+            };
+          } else {
+            populateMap[root].populate = [subPopulate].concat(populateMap[root].populate || []);
+          }
+        } else {
+          populateMap[root] = {
+            populate: [subPopulate],
+          };
+        }
       } else {
-        populateMap[root] = true;
+        populateMap[root] = populateMap[root] ? populateMap[root] : true;
       }
     }
   } else {
@@ -605,6 +625,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
             rootTable: qb.alias,
             on: joinTable.on,
+            orderBy: joinTable.orderBy,
           })
           .addSelect(joinColAlias)
           .where({ [joinColAlias]: referencedValues })
@@ -695,7 +716,7 @@ const applyPopulate = async (results, populate, ctx) => {
             .execute({ mapResults: false });
 
           const map = rows.reduce((map, row) => {
-            map[row[joinColumnName]] = { count: row.count };
+            map[row[joinColumnName]] = { count: Number(row.count) };
             return map;
           }, {});
 
@@ -722,6 +743,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
             rootTable: qb.alias,
             on: joinTable.on,
+            orderBy: joinTable.orderBy,
           })
           .addSelect(joinColAlias)
           .where({ [joinColAlias]: referencedValues })
@@ -773,7 +795,7 @@ const applyPopulate = async (results, populate, ctx) => {
           .execute({ mapResults: false });
 
         const map = rows.reduce((map, row) => {
-          map[row[joinColumnName]] = { count: row.count };
+          map[row[joinColumnName]] = { count: Number(row.count) };
           return map;
         }, {});
 
@@ -800,6 +822,7 @@ const applyPopulate = async (results, populate, ctx) => {
           rootColumn: joinTable.inverseJoinColumn.referencedColumn,
           rootTable: qb.alias,
           on: joinTable.on,
+          orderBy: joinTable.orderBy,
         })
         .addSelect(joinColAlias)
         .where({ [joinColAlias]: referencedValues })
@@ -882,6 +905,7 @@ const applyPopulate = async (results, populate, ctx) => {
             rootColumn: joinColumn.referencedColumn,
             rootTable: qb.alias,
             on: joinTable.on,
+            orderBy: joinTable.orderBy,
           })
           .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])
           .where({
@@ -1066,7 +1090,7 @@ const fromRow = (metadata, row) => {
       // TODO: handle default value too
       // TODO: format data & use dialect to know which type they support (json particularly)
 
-      const field = createField(attribute.type, attribute);
+      const field = createField(attribute);
 
       // TODO: validate data on creation
       // field.validate(data[attributeName]);
@@ -1107,10 +1131,11 @@ const applySearch = (qb, query, ctx) => {
   }
 
   switch (db.dialect.client) {
-    case 'pg': {
+    case 'postgres': {
       searchColumns.forEach(attr =>
         qb.orWhereRaw(`"${alias}"."${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
       );
+
       break;
     }
     case 'sqlite': {

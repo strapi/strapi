@@ -4,4 +4,7 @@ interface Field {
   fromDB(value: any): any;
 }
 
-export function createField(type: string): Field;
+interface Attribute {
+  type: string
+}
+export function createField(attribute: Attribute): Field;

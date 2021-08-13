@@ -35,20 +35,43 @@ const getLimitConfigDefaults = () => ({
   maxLimit: _.toNumber(strapi.config.get('api.rest.maxLimit')) || null,
 });
 
-const getLimitParam = params => {
-  const { defaultLimit, maxLimit } = getLimitConfigDefaults();
-
-  if (params.limit === undefined) {
-    return defaultLimit;
-  }
-
-  const limit = _.toNumber(params.limit);
-  // if there is max limit set and params.limit exceeds this number, return configured max limit
+/**
+ * if there is max limit set and limit exceeds this number, return configured max limit
+ * @param {number} limit - limit you want to cap
+ * @param {number?} maxLimit - maxlimit used has capping
+ * @returns {number}
+ */
+const applyMaxLimit = (limit, maxLimit) => {
   if (maxLimit && (limit === -1 || limit > maxLimit)) {
     return maxLimit;
   }
 
   return limit;
+};
+
+const applyDefaultPagination = params => {
+  const { defaultLimit, maxLimit } = getLimitConfigDefaults();
+
+  if (_.isUndefined(params.pagination) || !_.isPlainObject(params.pagination)) {
+    return {
+      limit: defaultLimit,
+    };
+  }
+
+  const { pagination } = params;
+
+  if (!_.isUndefined(pagination.pageSize)) {
+    return {
+      page: pagination.page,
+      pageSize: applyMaxLimit(_.toNumber(pagination.pageSize), maxLimit),
+    };
+  }
+
+  const limit = _.isUndefined(pagination.limit) ? defaultLimit : _.toNumber(pagination.limit);
+  return {
+    start: pagination.start,
+    limit: applyMaxLimit(limit, maxLimit),
+  };
 };
 
 /**
@@ -60,7 +83,7 @@ const getFetchParams = (params = {}) => {
   return {
     publicationState: DP_PUB_STATE_LIVE,
     ...params,
-    limit: getLimitParam(params),
+    pagination: applyDefaultPagination(params),
   };
 };
 
