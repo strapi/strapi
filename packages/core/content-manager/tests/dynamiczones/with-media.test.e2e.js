@@ -64,13 +64,7 @@ const ct = {
   },
 };
 
-describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/collection-types/api::withdynamiczonemedia.withdynamiczonemedia',
-  ],
-  ['GENERATED API', '/withdynamiczonemedias'],
-])('[%s] => Not required dynamiczone', (_, path) => {
+describe('Not required dynamiczone', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -86,7 +80,9 @@ describe.each([
     baseRq = await createAuthRequest({ strapi });
 
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(path);
+    rq.setURLPrefix(
+      '/content-manager/collection-types/api::withdynamiczonemedia.withdynamiczonemedia'
+    );
   });
 
   afterAll(async () => {

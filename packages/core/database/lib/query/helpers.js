@@ -470,11 +470,23 @@ const processPopulate = (populate, ctx) => {
       const [root, ...rest] = key.split('.');
 
       if (rest.length > 0) {
-        populateMap[root] = {
-          populate: rest,
-        };
+        const subPopulate = rest.join('.');
+
+        if (populateMap[root]) {
+          if (populateMap[root] === true) {
+            populateMap[root] = {
+              populate: [subPopulate],
+            };
+          } else {
+            populateMap[root].populate = [subPopulate].concat(populateMap[root].populate || []);
+          }
+        } else {
+          populateMap[root] = {
+            populate: [subPopulate],
+          };
+        }
       } else {
-        populateMap[root] = true;
+        populateMap[root] = populateMap[root] ? populateMap[root] : true;
       }
     }
   } else {
@@ -695,7 +707,7 @@ const applyPopulate = async (results, populate, ctx) => {
             .execute({ mapResults: false });
 
           const map = rows.reduce((map, row) => {
-            map[row[joinColumnName]] = { count: row.count };
+            map[row[joinColumnName]] = { count: Number(row.count) };
             return map;
           }, {});
 
@@ -773,7 +785,7 @@ const applyPopulate = async (results, populate, ctx) => {
           .execute({ mapResults: false });
 
         const map = rows.reduce((map, row) => {
-          map[row[joinColumnName]] = { count: row.count };
+          map[row[joinColumnName]] = { count: Number(row.count) };
           return map;
         }, {});
 
@@ -1107,10 +1119,11 @@ const applySearch = (qb, query, ctx) => {
   }
 
   switch (db.dialect.client) {
-    case 'pg': {
+    case 'postgres': {
       searchColumns.forEach(attr =>
         qb.orWhereRaw(`"${alias}"."${attr}"::text ILIKE ?`, `%${escapeQuery(query, '*%\\')}%`)
       );
+
       break;
     }
     case 'sqlite': {

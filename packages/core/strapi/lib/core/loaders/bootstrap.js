@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { toLower } = require('lodash/fp');
+const { toLower, kebabCase, camelCase } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 const { createContentType } = require('../domain/content-type');
 
@@ -24,12 +24,12 @@ module.exports = function(strapi) {
         lifecycles: {},
       };
       ct.schema.info = {};
-      ct.schema.info.displayName = _.camelCase(modelName);
-      ct.schema.info.singularName = _.camelCase(modelName);
-      ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
+      ct.schema.info.displayName = camelCase(modelName);
+      ct.schema.info.singularName = camelCase(modelName);
+      ct.schema.info.pluralName = `${camelCase(modelName)}s`;
 
       const createdContentType = createContentType(
-        `api::${apiName}.${ct.schema.info.singularName}`,
+        `api::${apiName}.${kebabCase(ct.schema.info.singularName)}`,
         ct
       );
       Object.assign(model, createdContentType.schema);
@@ -78,11 +78,14 @@ module.exports = function(strapi) {
     // mutate model
     const ct = { schema: model, actions: {}, lifecycles: {} };
     ct.schema.info = {};
-    ct.schema.info.displayName = _.camelCase(modelName);
-    ct.schema.info.singularName = _.camelCase(modelName);
-    ct.schema.info.pluralName = `${_.camelCase(modelName)}s`;
+    ct.schema.info.displayName = camelCase(modelName);
+    ct.schema.info.singularName = camelCase(modelName);
+    ct.schema.info.pluralName = `${camelCase(modelName)}s`;
 
-    const createdContentType = createContentType(`strapi::${ct.schema.info.singularName}`, ct);
+    const createdContentType = createContentType(
+      `strapi::${kebabCase(ct.schema.info.singularName)}`,
+      ct
+    );
 
     Object.assign(model, createdContentType.schema);
     strapi.contentTypes[model.uid] = model;
@@ -133,21 +136,6 @@ module.exports = function(strapi) {
     const currentSettings = _.merge(
       _.cloneDeep(_.get(strapi.middleware[current], ['defaults', current], {})),
       strapi.config.get(['middleware', 'settings', current], {})
-    );
-
-    acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;
-
-    // Ensure that enabled key exist by forcing to false.
-    _.defaults(acc[current], { enabled: false });
-
-    return acc;
-  }, {});
-
-  strapi.config.hook.settings = Object.keys(strapi.hook).reduce((acc, current) => {
-    // Try to find the settings in the current environment, then in the main configurations.
-    const currentSettings = _.merge(
-      _.cloneDeep(_.get(strapi.hook[current], ['defaults', current], {})),
-      strapi.config.get(['hook', 'settings', current], {})
     );
 
     acc[current] = !_.isObject(currentSettings) ? {} : currentSettings;

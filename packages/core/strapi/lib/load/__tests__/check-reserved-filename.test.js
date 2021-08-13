@@ -8,7 +8,6 @@ describe('check-reserved-filename', () => {
     ['config/functions.json', true],
     ['config/functions/bootstrapi.js', true],
     ['config/layout.json', true],
-    ['config/hook.json', true],
     ['config/middleware.json', true],
     // dont match
     ['config/application.json', false],

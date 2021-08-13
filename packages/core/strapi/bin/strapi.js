@@ -52,7 +52,7 @@ const getLocalScript = name => (...args) => {
       return script(...args);
     })
     .catch(error => {
-      console.error(`Error while running command ${name}: ${error.message || error}`);
+      console.error(error);
       process.exit(1);
     });
 };

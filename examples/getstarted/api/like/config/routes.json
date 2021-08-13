@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/likes/count",
-      "handler": "Like.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/likes/:id",
       "handler": "Like.findOne",
       "config": {
