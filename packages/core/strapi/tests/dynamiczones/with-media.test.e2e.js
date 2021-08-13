@@ -80,9 +80,7 @@ describe('Not required dynamiczone', () => {
     baseRq = await createAuthRequest({ strapi });
 
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(
-      '/content-manager/collection-types/api::withdynamiczonemedia.withdynamiczonemedia'
-    );
+    rq.setURLPrefix('/withdynamiczonemedias');
   });
 
   afterAll(async () => {
@@ -113,33 +111,35 @@ describe('Not required dynamiczone', () => {
           ],
         },
         qs: {
-          populate: ['field'],
+          populate: ['field.media'],
         },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.single-media',
-            media: {
-              id: mediaId,
-              url: expect.any(String),
-            },
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.multiple-media',
-            media: expect.arrayContaining([
-              expect.objectContaining({
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
+              id: expect.anything(),
+              __component: 'default.single-media',
+              media: {
                 id: mediaId,
                 url: expect.any(String),
-              }),
-            ]),
-          },
-        ],
+              },
+            },
+            {
+              id: expect.anything(),
+              __component: 'default.multiple-media',
+              media: expect.arrayContaining([
+                expect.objectContaining({
+                  id: mediaId,
+                  url: expect.any(String),
+                }),
+              ]),
+            },
+          ],
+        },
       });
     });
 
@@ -170,7 +170,7 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
 
       const newImgRes = await uploadImg();
 
@@ -178,7 +178,7 @@ describe('Not required dynamiczone', () => {
       const newMediaId = newImgRes.body[0].id;
       const updateRes = await rq({
         method: 'PUT',
-        url: `/${res.body.id}`,
+        url: `/${res.body.data.id}`,
         body: {
           field: [
             {
@@ -192,31 +192,33 @@ describe('Not required dynamiczone', () => {
           ],
         },
         qs: {
-          populate: ['field'],
+          populate: ['field.media'],
         },
       });
 
-      expect(updateRes.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.single-media',
-            media: {
-              id: newMediaId,
-              url: expect.any(String),
-            },
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.multiple-media',
-            media: expect.arrayContaining([
-              expect.objectContaining({
+      expect(updateRes.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
+              id: expect.anything(),
+              __component: 'default.single-media',
+              media: {
                 id: newMediaId,
                 url: expect.any(String),
-              }),
-            ]),
-          },
-        ],
+              },
+            },
+            {
+              id: expect.anything(),
+              __component: 'default.multiple-media',
+              media: expect.arrayContaining([
+                expect.objectContaining({
+                  id: newMediaId,
+                  url: expect.any(String),
+                }),
+              ]),
+            },
+          ],
+        },
       });
     });
 
@@ -250,33 +252,35 @@ describe('Not required dynamiczone', () => {
 
       const getRes = await rq({
         method: 'GET',
-        url: `/${res.body.id}`,
+        url: `/${res.body.data.id}`,
         qs: {
-          populate: ['field'],
+          populate: ['field.media'],
         },
       });
 
-      expect(getRes.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.single-media',
-            media: {
-              id: mediaId,
-              url: expect.any(String),
-            },
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.multiple-media',
-            media: expect.arrayContaining([
-              expect.objectContaining({
+      expect(getRes.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
+              id: expect.anything(),
+              __component: 'default.single-media',
+              media: {
                 id: mediaId,
                 url: expect.any(String),
-              }),
-            ]),
-          },
-        ],
+              },
+            },
+            {
+              id: expect.anything(),
+              __component: 'default.multiple-media',
+              media: expect.arrayContaining([
+                expect.objectContaining({
+                  id: mediaId,
+                  url: expect.any(String),
+                }),
+              ]),
+            },
+          ],
+        },
       });
     });
   });
@@ -305,33 +309,35 @@ describe('Not required dynamiczone', () => {
           ],
         },
         qs: {
-          populate: ['field'],
+          populate: ['field.singleMedia.media', 'field.multipleMedia.media'],
         },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.with-nested',
-            singleMedia: {
-              media: {
-                id: mediaId,
-                url: expect.any(String),
-              },
-            },
-            multipleMedia: {
-              media: expect.arrayContaining([
-                expect.objectContaining({
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
+              id: expect.anything(),
+              __component: 'default.with-nested',
+              singleMedia: {
+                media: {
                   id: mediaId,
                   url: expect.any(String),
-                }),
-              ]),
+                },
+              },
+              multipleMedia: {
+                media: expect.arrayContaining([
+                  expect.objectContaining({
+                    id: mediaId,
+                    url: expect.any(String),
+                  }),
+                ]),
+              },
             },
-          },
-        ],
+          ],
+        },
       });
     });
   });

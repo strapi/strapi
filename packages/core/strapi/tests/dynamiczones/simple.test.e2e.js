@@ -84,7 +84,7 @@ describe('Not required dynamiczone', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix('/content-manager/collection-types/api::withdynamiczone.withdynamiczone');
+    rq.setURLPrefix('/withdynamiczones');
   });
 
   afterAll(async () => {
@@ -112,28 +112,30 @@ describe('Not required dynamiczone', () => {
           ],
         },
         qs: {
-          populate: ['field'],
+          populate: ['field.compo'],
         },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.simple-compo',
-            name: 'someString',
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.compo-with-other-compo',
-            compo: {
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
               id: expect.anything(),
+              __component: 'default.simple-compo',
               name: 'someString',
             },
-          },
-        ],
+            {
+              id: expect.anything(),
+              __component: 'default.compo-with-other-compo',
+              compo: {
+                id: expect.anything(),
+                name: 'someString',
+              },
+            },
+          ],
+        },
       });
     });
 
@@ -150,8 +152,8 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body.field.length).toBe(0);
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data.attributes.field.length).toBe(0);
     });
 
     test('Throw if min items is not respected', async () => {
@@ -190,34 +192,36 @@ describe('Not required dynamiczone', () => {
   describe('Getting one entry', () => {
     test('The entry has its dynamic zone populated', async () => {
       const createRes = await createEntry();
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'GET',
         url: `/${entryId}`,
         qs: {
-          populate: ['field'],
+          populate: ['field.compo'],
         },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.simple-compo',
-            name: 'someString',
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.compo-with-other-compo',
-            compo: {
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
               id: expect.anything(),
+              __component: 'default.simple-compo',
               name: 'someString',
             },
-          },
-        ],
+            {
+              id: expect.anything(),
+              __component: 'default.compo-with-other-compo',
+              compo: {
+                id: expect.anything(),
+                name: 'someString',
+              },
+            },
+          ],
+        },
       });
     });
   });
@@ -234,17 +238,18 @@ describe('Not required dynamiczone', () => {
 
       expect(res.statusCode).toBe(200);
 
-      expect(res.body.pagination).toBeDefined();
-      expect(Array.isArray(res.body.results)).toBe(true);
-      expect(res.body.results).toEqual(
+      expect(Array.isArray(res.body.data)).toBe(true);
+      expect(res.body.data).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
-            field: expect.arrayContaining([
-              expect.objectContaining({
-                id: expect.anything(),
-                __component: expect.any(String),
-              }),
-            ]),
+            attributes: expect.objectContaining({
+              field: expect.arrayContaining([
+                expect.objectContaining({
+                  id: expect.anything(),
+                  __component: expect.any(String),
+                }),
+              ]),
+            }),
           }),
         ])
       );
@@ -256,7 +261,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'PUT',
@@ -270,43 +275,45 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body.field).toEqual([]);
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data.attributes.field).toEqual([]);
     });
 
     test('Can add items to empty dynamic zone', async () => {
       const createRes = await createEmpty();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'PUT',
         url: `/${entryId}`,
         body: defaultBody,
         qs: {
-          populate: ['field'],
+          populate: ['field.compo'],
         },
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.simple-compo',
-            name: 'someString',
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.compo-with-other-compo',
-            compo: {
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
               id: expect.anything(),
+              __component: 'default.simple-compo',
               name: 'someString',
             },
-          },
-        ],
+            {
+              id: expect.anything(),
+              __component: 'default.compo-with-other-compo',
+              compo: {
+                id: expect.anything(),
+                name: 'someString',
+              },
+            },
+          ],
+        },
       });
     });
 
@@ -314,7 +321,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'PUT',
@@ -337,20 +344,22 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toMatchObject({
-        field: [
-          {
-            id: expect.anything(),
-            __component: 'default.simple-compo',
-            name: 'otherString',
-          },
-          {
-            id: expect.anything(),
-            __component: 'default.simple-compo',
-            name: 'secondString',
-          },
-        ],
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toMatchObject({
+        attributes: {
+          field: [
+            {
+              id: expect.anything(),
+              __component: 'default.simple-compo',
+              name: 'otherString',
+            },
+            {
+              id: expect.anything(),
+              __component: 'default.simple-compo',
+              name: 'secondString',
+            },
+          ],
+        },
       });
     });
 
@@ -358,7 +367,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'PUT',
@@ -380,7 +389,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'PUT',
@@ -402,7 +411,7 @@ describe('Not required dynamiczone', () => {
       const createRes = await createEntry();
 
       expect(createRes.statusCode).toBe(200);
-      const entryId = createRes.body.id;
+      const entryId = createRes.body.data.id;
 
       const res = await rq({
         method: 'DELETE',
@@ -413,15 +422,17 @@ describe('Not required dynamiczone', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(Array.isArray(res.body.field)).toBe(true);
-      expect(res.body).toEqual(
+      expect(Array.isArray(res.body.data.attributes.field)).toBe(true);
+      expect(res.body.data).toEqual(
         expect.objectContaining({
-          field: expect.arrayContaining([
-            expect.objectContaining({
-              id: expect.anything(),
-              __component: expect.any(String),
-            }),
-          ]),
+          attributes: expect.objectContaining({
+            field: expect.arrayContaining([
+              expect.objectContaining({
+                id: expect.anything(),
+                __component: expect.any(String),
+              }),
+            ]),
+          }),
         })
       );
     });

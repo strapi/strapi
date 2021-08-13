@@ -192,8 +192,8 @@ const createQueryBuilder = (uid, db) => {
             state.select = [this.aliasColumn('*')];
           }
 
-          if (state.joins.length > 0) {
-            // add ordered columns to distinct in case of joins
+          if (state.joins.length > 0 && !state.groupBy) {
+            // add a discting when making joins and if we don't have a groupBy
             // TODO: make sure we return the right data
             qb.distinct(`${this.alias}.id`);
             // TODO: add column if they aren't there already

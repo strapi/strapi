@@ -90,7 +90,7 @@ class Strapi {
     return this.container.get('modules').getAll('plugin::');
   }
 
-  async start(cb) {
+  async start() {
     try {
       if (!this.isLoaded) {
         await this.load();
@@ -99,14 +99,16 @@ class Strapi {
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.listen(cb);
-    } catch (err) {
-      this.stopWithError(err);
+      await this.listen();
+
+      return this;
+    } catch (error) {
+      return this.stopWithError(error.message);
     }
   }
 
   async destroy() {
-    await new Promise(res => this.server.destroy(res));
+    await this.server.destroy();
 
     await Promise.all(
       Object.values(this.plugins).map(plugin => {
@@ -131,64 +133,66 @@ class Strapi {
     delete global.strapi;
   }
 
+  sendStartupTelemetry() {
+    // Get database clients
+    const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
+
+    // Emit started event.
+    // do not await to avoid slower startup
+    this.telemetry.send('didStartServer', {
+      database: databaseClients,
+      plugins: this.config.installedPlugins,
+      providers: this.config.installedProviders,
+    });
+  }
+
+  async openAdmin({ isInitialized }) {
+    const shouldOpenAdmin =
+      this.config.environment === 'development' &&
+      this.config.get('server.admin.autoOpen', true) !== false;
+
+    if (shouldOpenAdmin || !isInitialized) {
+      await utils.openBrowser(this.config);
+    }
+  }
+
+  async postListen() {
+    const isInitialized = await utils.isInitialized(this);
+
+    this.startupLogger.logStartupMessage({ isInitialized });
+
+    this.sendStartupTelemetry();
+    this.openAdmin({ isInitialized });
+  }
+
   /**
    * Add behaviors to the server
    */
-  async listen(cb) {
-    const onListen = async err => {
-      if (err) return this.stopWithError(err);
-
-      // Is the project initialised?
-      const isInitialized = await utils.isInitialized(this);
-
-      // Should the startup message be displayed?
-      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
-        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
-        : false;
-
-      if (hideStartupMessage === false) {
-        if (!isInitialized) {
-          this.startupLogger.logFirstStartupMessage();
-        } else {
-          this.startupLogger.logStartupMessage();
+  async listen() {
+    return new Promise((resolve, reject) => {
+      const onListen = async error => {
+        if (error) {
+          return reject(error);
         }
+
+        try {
+          await this.postListen();
+
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      const listenSocket = this.config.get('server.socket');
+
+      if (listenSocket) {
+        return this.server.listen(listenSocket, onListen);
       }
 
-      // Get database clients
-      const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
-
-      // Emit started event.
-      await this.telemetry.send('didStartServer', {
-        database: databaseClients,
-        plugins: this.config.installedPlugins,
-        providers: this.config.installedProviders,
-      });
-
-      if (cb && typeof cb === 'function') {
-        cb();
-      }
-
-      const shouldOpenAdmin =
-        this.config.environment === 'development' &&
-        this.config.get('server.admin.autoOpen', true) !== false;
-
-      if (shouldOpenAdmin || !isInitialized) {
-        await utils.openBrowser(this.config);
-      }
-    };
-
-    const listenSocket = this.config.get('server.socket');
-    const listenErrHandler = err => onListen(err).catch(err => this.stopWithError(err));
-
-    if (listenSocket) {
-      this.server.listen(listenSocket, listenErrHandler);
-    } else {
-      this.server.listen(
-        this.config.get('server.port'),
-        this.config.get('server.host'),
-        listenErrHandler
-      );
-    }
+      const { host, port } = this.config.get('server');
+      return this.server.listen(port, host, onListen);
+    });
   }
 
   stopWithError(err, customMessage) {

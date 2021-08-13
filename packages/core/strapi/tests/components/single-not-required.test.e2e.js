@@ -23,12 +23,12 @@ const ct = {
       type: 'component',
       component: 'default.somecomponent',
       repeatable: false,
-      required: true,
+      required: false,
     },
   },
 };
 
-describe('Non repeatable and required component', () => {
+describe('Non repeatable and Not required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -39,7 +39,7 @@ describe('Non repeatable and required component', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix('/content-manager/collection-types/api::withcomponent.withcomponent');
+    rq.setURLPrefix('/withcomponents');
   });
 
   afterAll(async () => {
@@ -61,7 +61,7 @@ describe('Non repeatable and required component', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.field).toEqual(
+      expect(res.body.data.attributes.field).toEqual(
         expect.objectContaining({
           id: expect.anything(),
           name: 'someString',
@@ -69,7 +69,7 @@ describe('Non repeatable and required component', () => {
       );
     });
 
-    test('Creating a second entry works', async () => {
+    test('Creating second entry ', async () => {
       const res = await rq.post('/', {
         body: {
           field: {
@@ -82,7 +82,7 @@ describe('Non repeatable and required component', () => {
       });
 
       expect(res.statusCode).toBe(200);
-      expect(res.body.field).toEqual(
+      expect(res.body.data.attributes.field).toEqual(
         expect.objectContaining({
           id: expect.anything(),
           name: 'someValue',
@@ -97,16 +97,13 @@ describe('Non repeatable and required component', () => {
           body: {
             field: value,
           },
-          qs: {
-            populate: ['field'],
-          },
         });
 
         expect(res.statusCode).toBe(400);
       }
     );
 
-    test('Throws when sending a null value', async () => {
+    test('Can send a null value', async () => {
       const res = await rq.post('/', {
         body: {
           field: null,
@@ -116,10 +113,11 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.attributes.field).toBe(null);
     });
 
-    test('Throws when the component is not provided', async () => {
+    test('Can send input without the component field', async () => {
       const res = await rq.post('/', {
         body: {},
         qs: {
@@ -127,7 +125,8 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      expect(res.statusCode).toBe(400);
+      expect(res.statusCode).toBe(200);
+      expect(res.body.data.attributes.field).toBe(null);
     });
   });
 
@@ -141,12 +140,11 @@ describe('Non repeatable and required component', () => {
 
       expect(res.statusCode).toBe(200);
 
-      expect(res.body.pagination).toBeDefined();
-      expect(Array.isArray(res.body.results)).toBe(true);
-      res.body.results.forEach(entry => {
-        if (entry.field === null) return;
+      expect(Array.isArray(res.body.data)).toBe(true);
+      res.body.data.forEach(entry => {
+        if (entry.attributes.field === null) return;
 
-        expect(entry.field).toMatchObject({
+        expect(entry.attributes.field).toMatchObject({
           name: expect.any(String),
         });
       });
@@ -168,7 +166,7 @@ describe('Non repeatable and required component', () => {
           },
         });
 
-        const updateRes = await rq.put(`/${res.body.id}`, {
+        const updateRes = await rq.put(`/${res.body.data.id}`, {
           body: {
             field: value,
           },
@@ -180,16 +178,18 @@ describe('Non repeatable and required component', () => {
         expect(updateRes.statusCode).toBe(400);
 
         // shouldn't have been updated
-        const getRes = await rq.get(`/${res.body.id}`, {
+        const getRes = await rq.get(`/${res.body.data.id}`, {
           qs: {
             populate: ['field'],
           },
         });
 
         expect(getRes.statusCode).toBe(200);
-        expect(getRes.body).toMatchObject({
-          id: res.body.id,
-          field: res.body.field,
+        expect(getRes.body.data).toMatchObject({
+          id: res.body.data.id,
+          attributes: {
+            field: res.body.data.attributes.field,
+          },
         });
       }
     );
@@ -206,7 +206,7 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      const updateRes = await rq.put(`/${res.body.id}`, {
+      const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {},
         qs: {
           populate: ['field'],
@@ -214,25 +214,25 @@ describe('Non repeatable and required component', () => {
       });
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body).toMatchObject({
-        id: res.body.id,
-        field: res.body.field,
+      expect(updateRes.body.data).toMatchObject({
+        id: res.body.data.id,
+        attributes: { field: res.body.data.attributes.field },
       });
 
-      const getRes = await rq.get(`/${res.body.id}`, {
+      const getRes = await rq.get(`/${res.body.data.id}`, {
         qs: {
           populate: ['field'],
         },
       });
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toMatchObject({
-        id: res.body.id,
-        field: res.body.field,
+      expect(getRes.body.data).toMatchObject({
+        id: res.body.data.id,
+        attributes: { field: res.body.data.attributes.field },
       });
     });
 
-    test('Throws if component is null', async () => {
+    test('Removes previous component if null sent', async () => {
       const res = await rq.post('/', {
         body: {
           field: {
@@ -244,7 +244,7 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      const updateRes = await rq.put(`/${res.body.id}`, {
+      const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
           field: null,
         },
@@ -253,16 +253,22 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      expect(updateRes.statusCode).toBe(400);
+      const expectResult = {
+        id: res.body.data.id,
+        attributes: { field: null },
+      };
 
-      const getRes = await rq.get(`/${res.body.id}`, {
+      expect(updateRes.statusCode).toBe(200);
+      expect(updateRes.body.data).toMatchObject(expectResult);
+
+      const getRes = await rq.get(`/${res.body.data.id}`, {
         qs: {
           populate: ['field'],
         },
       });
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toMatchObject(res.body);
+      expect(getRes.body.data).toMatchObject(expectResult);
     });
 
     test('Replaces the previous component if sent without id', async () => {
@@ -277,7 +283,7 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      const updateRes = await rq.put(`/${res.body.id}`, {
+      const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
           field: {
             name: 'new String',
@@ -289,25 +295,29 @@ describe('Non repeatable and required component', () => {
       });
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body.field.id).not.toBe(res.body.field.id);
-      expect(updateRes.body).toMatchObject({
-        id: res.body.id,
-        field: {
-          name: 'new String',
+      expect(updateRes.body.data.attributes.field.id).not.toBe(res.body.data.attributes.field.id);
+      expect(updateRes.body.data).toMatchObject({
+        id: res.body.data.id,
+        attributes: {
+          field: {
+            name: 'new String',
+          },
         },
       });
 
-      const getRes = await rq.get(`/${res.body.id}`, {
+      const getRes = await rq.get(`/${res.body.data.id}`, {
         qs: {
           populate: ['field'],
         },
       });
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toMatchObject({
-        id: res.body.id,
-        field: {
-          name: 'new String',
+      expect(getRes.body.data).toMatchObject({
+        id: res.body.data.id,
+        attributes: {
+          field: {
+            name: 'new String',
+          },
         },
       });
     });
@@ -319,12 +329,9 @@ describe('Non repeatable and required component', () => {
             name: 'someString',
           },
         },
-        qs: {
-          populate: ['field'],
-        },
       });
 
-      const updateRes = await rq.put(`/${res.body.id}`, {
+      const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
           field: {
             id: 'invalid_id',
@@ -336,7 +343,7 @@ describe('Non repeatable and required component', () => {
       expect(updateRes.statusCode).toBe(400);
     });
 
-    test('Updates component if previous component id is sent', async () => {
+    test('Updates component if previsous component id is sent', async () => {
       const res = await rq.post('/', {
         body: {
           field: {
@@ -348,10 +355,10 @@ describe('Non repeatable and required component', () => {
         },
       });
 
-      const updateRes = await rq.put(`/${res.body.id}`, {
+      const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
           field: {
-            id: res.body.field.id, // send old id to update the previous component
+            id: res.body.data.attributes.field.id, // send old id to update the previous component
             name: 'new String',
           },
         },
@@ -361,24 +368,26 @@ describe('Non repeatable and required component', () => {
       });
 
       const expectedResult = {
-        id: res.body.id,
-        field: {
-          id: res.body.field.id,
-          name: 'new String',
+        id: res.body.data.id,
+        attributes: {
+          field: {
+            id: res.body.data.attributes.field.id,
+            name: 'new String',
+          },
         },
       };
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body).toMatchObject(expectedResult);
+      expect(updateRes.body.data).toMatchObject(expectedResult);
 
-      const getRes = await rq.get(`/${res.body.id}`, {
+      const getRes = await rq.get(`/${res.body.data.id}`, {
         qs: {
           populate: ['field'],
         },
       });
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body).toMatchObject(expectedResult);
+      expect(getRes.body.data).toMatchObject(expectedResult);
     });
   });
 
@@ -390,21 +399,18 @@ describe('Non repeatable and required component', () => {
             name: 'someString',
           },
         },
-        qs: {
-          populate: ['field'],
-        },
       });
 
-      const deleteRes = await rq.delete(`/${res.body.id}`, {
+      const deleteRes = await rq.delete(`/${res.body.data.id}`, {
         qs: {
           populate: ['field'],
         },
       });
 
       expect(deleteRes.statusCode).toBe(200);
-      expect(deleteRes.body).toMatchObject(res.body);
+      expect(deleteRes.body.data).toMatchObject(res.body.data);
 
-      const getRes = await rq.get(`/${res.body.id}`, {
+      const getRes = await rq.get(`/${res.body.data.id}`, {
         qs: {
           populate: ['field'],
         },
