@@ -17,6 +17,7 @@ import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import DropdownIcon from '@strapi/icons/FilterDropdown';
 import styled from 'styled-components';
+import orderBy from 'lodash/orderBy';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -42,13 +43,7 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
   const [sortingKey, setSortingKey] = useState(SortingKeys.id);
   const [sortingOrder, setSortingOrder] = useState(SortingOrder.asc);
 
-  const sortedLocales = [...locales].sort((a, b) => {
-    if (sortingOrder === SortingOrder.desc) {
-      return a[sortingKey] < b[sortingKey];
-    }
-
-    return a[sortingKey] > b[sortingKey];
-  });
+  const sortedLocales = orderBy([...locales], [sortingKey], [sortingOrder]);
 
   const handleSorting = key => {
     if (key === sortingKey) {
