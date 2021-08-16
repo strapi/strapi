@@ -5,7 +5,7 @@ const { prop } = require('lodash/fp');
 
 const {
   utils,
-  constants: { GENERIC_MORPH_TYPENAME },
+  constants: { GENERIC_MORPH_TYPENAME, KINDS },
 } = require('../../types');
 
 module.exports = ({ strapi, registry }) => ({
@@ -29,7 +29,9 @@ module.exports = ({ strapi, registry }) => ({
 
       definition(t) {
         const members = registry
-          .where(({ config }) => ['types', 'components'].includes(config.kind))
+          // Resolve every content-type or component
+          .where(({ config }) => [KINDS.type, KINDS.component].includes(config.kind))
+          // Only keep their name (the type's id)
           .map(prop('name'));
 
         t.members(...members);

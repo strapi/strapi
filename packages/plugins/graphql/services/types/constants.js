@@ -35,6 +35,23 @@ const STRAPI_SCALARS = [
 
 const GENERIC_MORPH_TYPENAME = 'GenericMorph';
 
+const KINDS = {
+  type: 'type',
+  component: 'component',
+  dynamicZone: 'dynamic-zone',
+  enum: 'enum',
+  entity: 'entity',
+  entityResponse: 'entity-response',
+  entityResponseCollection: 'entity-response-collection',
+  query: 'query',
+  mutation: 'mutation',
+  input: 'input',
+  filtersInput: 'filters-input',
+  scalar: 'scalar',
+  morph: 'polymorphic',
+  internal: 'internal',
+};
+
 module.exports = {
   PAGINATION_TYPE_NAME,
   RESPONSE_COLLECTION_META_TYPE_NAME,
@@ -42,4 +59,5 @@ module.exports = {
   GRAPHQL_SCALARS,
   STRAPI_SCALARS,
   GENERIC_MORPH_TYPENAME,
+  KINDS,
 };
