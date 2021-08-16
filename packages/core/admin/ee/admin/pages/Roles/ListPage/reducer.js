@@ -21,6 +21,15 @@ const reducer = (state, action) =>
         }
         break;
       }
+      case 'TOGGLE_ALL': {
+        if (state.selectedRoles.length) {
+          draftState.selectedRoles = [];
+        } else {
+          const { ids } = action;
+          draftState.selectedRoles = ids;
+        }
+        break;
+      }
       case 'ON_REMOVE_ROLES': {
         draftState.showModalConfirmButtonLoading = true;
         break;
