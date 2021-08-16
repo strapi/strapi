@@ -74,7 +74,9 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
               />
             }
           >
-            <TableLabel textColor="neutral600">ID</TableLabel>
+            <TableLabel textColor="neutral600">
+              {formatMessage({ id: getTrad('Settings.locales.row.id') })}
+            </TableLabel>
           </Th>
           <Th
             action={
@@ -90,7 +92,9 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
               />
             }
           >
-            <TableLabel textColor="neutral600">Display name </TableLabel>
+            <TableLabel textColor="neutral600">
+              {formatMessage({ id: getTrad('Settings.locales.row.displayName') })}
+            </TableLabel>
           </Th>
           <Th
             action={
@@ -106,7 +110,9 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
               />
             }
           >
-            <TableLabel textColor="neutral600">Default</TableLabel>
+            <TableLabel textColor="neutral600">
+              {formatMessage({ id: getTrad('Settings.locales.row.default-locale') })}
+            </TableLabel>
           </Th>
           <Th>
             <VisuallyHidden>Actions</VisuallyHidden>

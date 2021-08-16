@@ -41,35 +41,27 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
         subtitle={formatMessage({ id: getTrad('Settings.list.description') })}
       />
       <ContentLayout>
-        {locales?.length === 0 ? (
-          <>
-            <ContentLayout>
-              <EmptyStateLayout
-                icon={<EmptyStateDocument width={undefined} height={undefined} />}
-                content={formatMessage({ id: getTrad('Settings.list.empty.title') })}
-                action={
-                  onToggleCreateModal ? (
-                    <Button
-                      variant="secondary"
-                      startIcon={<AddIcon />}
-                      onClick={onToggleCreateModal}
-                    >
-                      {formatMessage({ id: getTrad('Settings.list.actions.add') })}
-                    </Button>
-                  ) : null
-                }
-              />
-            </ContentLayout>
-          </>
-        ) : null}
-
-        {locales.length > 0 ? (
+        {locales?.length > 0 ? (
           <LocaleTable
             locales={locales}
             onDeleteLocale={handleDeleteLocale}
             onEditLocale={handleEditLocale}
           />
-        ) : null}
+        ) : (
+          <ContentLayout>
+            <EmptyStateLayout
+              icon={<EmptyStateDocument width={undefined} height={undefined} />}
+              content={formatMessage({ id: getTrad('Settings.list.empty.title') })}
+              action={
+                onToggleCreateModal ? (
+                  <Button variant="secondary" startIcon={<AddIcon />} onClick={onToggleCreateModal}>
+                    {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+                  </Button>
+                ) : null
+              }
+            />
+          </ContentLayout>
+        )}
       </ContentLayout>
 
       <ModalCreate
