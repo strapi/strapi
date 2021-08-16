@@ -16,7 +16,12 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
     <Tr>
       {Boolean(onToggle) && (
         <Td>
-          <BaseCheckbox name="role-checkbox" onValueChange={() => onToggle(id)} value={isChecked}  aria-label={`Select ${name} for bulk actions`} />
+          <BaseCheckbox
+            name="role-checkbox"
+            onValueChange={() => onToggle(id)}
+            value={isChecked}
+            aria-label={formatMessage({ id: `Roles.RoleRow.select-all` }, { name })}
+          />
         </Td>
       )}
       <Td>
@@ -32,7 +37,7 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
         <Row>
           {icons.map((icon, i) =>
             icon ? (
-              <Box key={icon.label} paddingLeft={i===0 ? 0 : 1}>
+              <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>
                 <IconButton onClick={icon.onClick} label={icon.label} noBorder icon={icon.icon} />
               </Box>
             ) : null
