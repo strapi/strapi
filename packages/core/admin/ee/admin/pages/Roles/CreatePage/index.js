@@ -153,7 +153,7 @@ const CreatePage = () => {
                 )}
                 title="Other CT"
                 subtitle="36 entries found"
-                as="h2"
+                as="h1"
               />
               <Header
                 title={{
