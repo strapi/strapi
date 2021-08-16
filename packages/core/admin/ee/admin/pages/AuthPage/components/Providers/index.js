@@ -7,7 +7,6 @@ import {
   Row,
   Box,
   TableLabel,
-  Button,
   Main,
   Subtitle,
   H1,
@@ -23,13 +22,10 @@ import UnauthenticatedLayout, {
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import SSOProviders from './SSOProviders';
 import Logo from '../../../../../../admin/src/pages/AuthPage/components/Logo';
+import AuthButton from '../../../../../../admin/src/pages/AuthPage/components/AuthButton';
 
 const DividerFull = styled(Divider)`
   flex: 1;
-`;
-const AuthButton = styled(Button)`
-  display: inline-block;
-  width: 100%;
 `;
 
 const Providers = () => {

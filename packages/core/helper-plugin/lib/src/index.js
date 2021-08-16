@@ -23,6 +23,7 @@ export { default as HeaderSearch } from './components/HeaderSearch';
 export { default as IcoContainer } from './components/IcoContainer';
 export { default as InputAddon } from './components/InputAddon';
 export { default as EmptyState } from './components/EmptyState';
+export { default as Form } from './components/Form';
 export * from './components/Tabs';
 export * from './components/Select';
 

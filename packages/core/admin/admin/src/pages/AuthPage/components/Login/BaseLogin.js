@@ -6,36 +6,21 @@ import {
   H1,
   Text,
   Subtitle,
-  Button,
   Checkbox,
   TextInput,
   Main,
-  FieldAction,
   Row,
   Link,
 } from '@strapi/parts';
+import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
-import Form from '../../../../components/Form';
 import Logo from '../Logo';
-
-const AuthButton = styled(Button)`
-  display: inline-block;
-  width: 100%;
-`;
-const FieldActionWrapper = styled(FieldAction)`
-  svg {
-    height: 16px;
-    width: 16px;
-    path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
-`;
+import AuthButton from '../AuthButton';
+import FieldActionWrapper from '../FieldActionWrapper';
 
 const Login = ({ onSubmit, schema, children }) => {
   const [passwordShown, setPasswordShown] = useState(false);
@@ -92,7 +77,6 @@ const Login = ({ onSubmit, schema, children }) => {
                   name="password"
                   type={passwordShown ? 'text' : 'password'}
                   endAction={
-                    // eslint-disable-next-line react/jsx-wrap-multilines
                     <FieldActionWrapper
                       onClick={e => {
                         e.stopPropagation();

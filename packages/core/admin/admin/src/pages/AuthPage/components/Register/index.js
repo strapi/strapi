@@ -12,42 +12,31 @@ import {
   Grid,
   GridItem,
   Checkbox,
-  Button,
-  FieldAction,
   Link,
   Row,
 } from '@strapi/parts';
+import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
-import Form from '../../../../components/Form';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import { useConfigurations } from '../../../../hooks';
+import Logo from '../Logo';
+import AuthButton from '../AuthButton';
+import FieldActionWrapper from '../FieldActionWrapper';
 
-const AuthButton = styled(Button)`
-  display: inline-block;
-  width: 100%;
-`;
 const CenteredBox = styled(Box)`
   text-align: center;
 `;
-const FieldActionWrapper = styled(FieldAction)`
-  svg {
-    height: 16px;
-    width: 16px;
-    path {
-      fill: ${({ theme }) => theme.colors.neutral600};
-    }
-  }
+const A = styled.a`
+  color: ${({ theme }) => theme.colors.primary600};
 `;
 
 const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema }) => {
   const [passwordShown, setPasswordShown] = useState(false);
   const [confirmPasswordShown, setConfirmPasswordShown] = useState(false);
   const { formatMessage } = useIntl();
-  const { authLogo } = useConfigurations();
 
   return (
     <UnauthenticatedLayout>
@@ -71,12 +60,12 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
             <Form noValidate>
               <Main labelledBy="welcome">
                 <Column>
-                  <img src={authLogo} alt="" aria-hidden style={{ height: '72px' }} />
+                  <Logo />
                   <Box paddingTop="6" paddingBottom="1">
                     <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
                   </Box>
                   <CenteredBox paddingBottom="7">
-                    <Subtitle style={{ textAlign: 'center' }} textColor="neutral600">
+                    <Subtitle textColor="neutral600">
                       {formatMessage({ id: 'Auth.form.register.subtitle' })}
                     </Subtitle>
                   </CenteredBox>
@@ -88,7 +77,9 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
                         name="firstname"
                         required
                         value={values.firstname}
-                        error={errors.firstname ? formatMessage({ id: errors.firstname }) : ''}
+                        error={
+                          errors.firstname ? formatMessage({ id: errors.firstname }) : undefined
+                        }
                         onChange={handleChange}
                         label={formatMessage({ id: 'Auth.form.firstname.label' })}
                       />
@@ -96,7 +87,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
                     <GridItem col={6}>
                       <TextInput
                         name="lastname"
-                        error={errors.lastname ? formatMessage({ id: errors.lastname }) : ''}
+                        error={errors.lastname ? formatMessage({ id: errors.lastname }) : undefined}
                         required
                         value={values.lastname}
                         onChange={handleChange}
@@ -109,7 +100,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
                     disabled={fieldsToDisable.includes('email')}
                     value={values.email}
                     onChange={handleChange}
-                    error={errors.email ? formatMessage({ id: errors.email }) : ''}
+                    error={errors.email ? formatMessage({ id: errors.email }) : undefined}
                     required
                     label={formatMessage({ id: 'Auth.form.email.label' })}
                     type="email"
@@ -118,9 +109,8 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
                     name="password"
                     onChange={handleChange}
                     value={values.password}
-                    error={errors.password ? formatMessage({ id: errors.password }) : ''}
+                    error={errors.password ? formatMessage({ id: errors.password }) : undefined}
                     endAction={
-                      // eslint-disable-next-line react/jsx-wrap-multilines
                       <FieldActionWrapper
                         onClick={e => {
                           e.preventDefault();
@@ -144,10 +134,11 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
                     onChange={handleChange}
                     value={values.confirmPassword}
                     error={
-                      errors.confirmPassword ? formatMessage({ id: errors.confirmPassword }) : ''
+                      errors.confirmPassword
+                        ? formatMessage({ id: errors.confirmPassword })
+                        : undefined
                     }
                     endAction={
-                      // eslint-disable-next-line react/jsx-wrap-multilines
                       <FieldActionWrapper
                         onClick={e => {
                           e.preventDefault();
@@ -177,14 +168,14 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, modifiedData, schema })
                       { id: 'Auth.form.register.news.label' },
                       {
                         terms: (
-                          <a target="_blank" href="https://strapi.io/terms" rel="noreferrer">
+                          <A target="_blank" href="https://strapi.io/terms" rel="noreferrer">
                             {formatMessage({ id: 'Auth.privacy-policy-agreement.terms' })}
-                          </a>
+                          </A>
                         ),
                         policy: (
-                          <a target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
+                          <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
                             {formatMessage({ id: 'Auth.privacy-policy-agreement.policy' })}
-                          </a>
+                          </A>
                         ),
                       }
                     )}

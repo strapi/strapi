@@ -3497,15 +3497,15 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
-"@strapi/icons@0.0.1-alpha.10":
-  version "0.0.1-alpha.10"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.10.tgz#ec7424718abeb2d6680c91c7ba666ffbaa7f43e8"
-  integrity sha512-VbMDJuYl6xwG6COOF6BheXy1JIboWpyO8QqqfhJoJBLcAGVrouUeUMp+YGOsyi9nnGtPZSs8TNdtMkHkstRHqA==
+"@strapi/icons@0.0.1-alpha.11":
+  version "0.0.1-alpha.11"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.11.tgz#a92b27f8f3fd6081249c07c6acc6e4aefe38bd68"
+  integrity sha512-BTl/2bGzCaVqhwj/vcmicL4Ya19J6NZ4A3O8MDDogoRwaDfHceLT1RpzKsID4x4kfXasopbNST1GzrJ2pvz9mw==
 
-"@strapi/parts@0.0.1-alpha.10":
-  version "0.0.1-alpha.10"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.10.tgz#dfed27fc2fb73423af896109b2e3280c5473260a"
-  integrity sha512-WosaWkioUDucF5R1LC5qP76hAs2abKuL3HaiCUgvIudomItMrPRxman2LPYjGzFfFXPKu6aJwNy5CXMx6owRpw==
+"@strapi/parts@0.0.1-alpha.11":
+  version "0.0.1-alpha.11"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.11.tgz#ad42d40d979cabe73df4815faf2c65629a9b497d"
+  integrity sha512-tyPPZm0QIPh/hSMvtei0hum2S2XM3WmFALOXNGI8rSOyGLYnRzWf+phlyUNOYYuyxwEeNIR3vU+w3n7xpRpXiQ==
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"
@@ -9605,7 +9605,7 @@ formidable@^1.1.1, formidable@^1.2.2:
   resolved "https://registry.yarnpkg.com/formidable/-/formidable-1.2.2.tgz#bf69aea2972982675f00865342b982986f6b8dd9"
   integrity sha512-V8gLm+41I/8kguQ4/o1D3RIHRmhYFG4pnNyonvua+40rqcEmT4+V71yaZ3B457xbbgCsCfjSPi65u/W6vK1U5Q==
 
-formik@^2.2.6:
+formik@2.2.9, formik@^2.2.6:
   version "2.2.9"
   resolved "https://registry.yarnpkg.com/formik/-/formik-2.2.9.tgz#8594ba9c5e2e5cf1f42c5704128e119fc46232d0"
   integrity sha512-LQLcISMmf1r5at4/gyJigGn0gOwFbeEAlji+N9InZF6LIMXnFNkO42sCI8Jt84YZggpD4cPWObAZaxpEFtSzNA==
