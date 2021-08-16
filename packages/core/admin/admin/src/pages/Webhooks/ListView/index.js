@@ -27,7 +27,6 @@ import { Button } from '@strapi/parts/Button';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { Switch } from '@strapi/parts/Switch';
 import { Main } from '@strapi/parts/Main';
-// import { Link } from '@strapi/parts/Link';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
@@ -309,7 +308,7 @@ function ListView() {
                     <Tr key={webhook.id}>
                       <Td>
                         <BaseCheckbox
-                          aria-label={`${formatMessage({ id: 'Settings.webhooks.select' })} ${
+                          aria-label={`${formatMessage({ id: 'Settings.webhooks.list.select' })} ${
                             webhook.name
                           }`}
                           value={webhooksToDelete?.includes(webhook.id)}
