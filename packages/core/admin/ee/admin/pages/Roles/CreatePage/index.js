@@ -1,36 +1,33 @@
-import React, { useState, useRef } from 'react';
-import { Header } from '@buffetjs/custom';
 import { Padded } from '@buffetjs/core';
-import moment from 'moment';
-import { Formik } from 'formik';
-import { get, isEmpty } from 'lodash';
-import { useIntl } from 'react-intl';
-import { HeaderLayout, Button } from '@strapi/parts';
-import { AddIcon, EditIcon } from '@strapi/icons';
 import {
   BaselineAlignment,
   CheckPagePermissions,
   request,
-  useTracking,
   useNotification,
   useOverlayBlocker,
+  useTracking,
 } from '@strapi/helper-plugin';
+import { Button, HeaderLayout, Stack } from '@strapi/parts';
+import { Formik } from 'formik';
+import { get, isEmpty } from 'lodash';
+import moment from 'moment';
+import React, { useRef, useState } from 'react';
+import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import adminPermissions from '../../../../../admin/src/permissions';
-import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
-import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import FormCard from '../../../../../admin/src/components/FormBloc';
 import { ButtonWithNumber } from '../../../../../admin/src/components/Roles';
-import SizedInput from '../../../../../admin/src/components/SizedInput';
 import Permissions from '../../../../../admin/src/components/Roles/Permissions';
-
+import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
+import SizedInput from '../../../../../admin/src/components/SizedInput';
+import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
+import adminPermissions from '../../../../../admin/src/permissions';
 import schema from './utils/schema';
 
 const CreatePage = () => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
-  const [isSubmiting, setIsSubmiting] = useState(false);
+  const [, setIsSubmiting] = useState(false);
   const { replace } = useHistory();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
@@ -38,31 +35,6 @@ const CreatePage = () => {
   const id = get(params, 'params.id', null);
   const { isLoading: isLayoutLoading, data: permissionsLayout } = useFetchPermissionsLayout();
   const { permissions: rolePermissions, isLoading: isRoleLoading } = useFetchRole(id);
-
-  const headerActions = (handleSubmit, handleReset) => [
-    {
-      label: formatMessage({
-        id: 'app.components.Button.reset',
-        defaultMessage: 'Reset',
-      }),
-      onClick: () => {
-        handleReset();
-        permissionsRef.current.resetForm();
-      },
-      color: 'cancel',
-      type: 'button',
-    },
-    {
-      label: formatMessage({
-        id: 'app.components.Button.save',
-        defaultMessage: 'Save',
-      }),
-      onClick: handleSubmit,
-      color: 'success',
-      type: 'submit',
-      isLoading: isSubmiting,
-    },
-  ];
 
   const handleCreateRoleSubmit = data => {
     lockApp();
@@ -145,29 +117,36 @@ const CreatePage = () => {
           <form onSubmit={handleSubmit}>
             <>
               <HeaderLayout
-                primaryAction={<Button startIcon={<AddIcon />}>Add an entry</Button>}
-                secondaryAction={
-                  <Button variant="tertiary" startIcon={<EditIcon />}>
-                    Edit
-                  </Button>
+                primaryAction={
+                  <Stack horizontal size={2}>
+                    <Button
+                      onClick={() => {
+                        handleReset();
+                        permissionsRef.current.resetForm();
+                      }}
+                    >
+                      {formatMessage({
+                        id: 'app.components.Button.reset',
+                        defaultMessage: 'Reset',
+                      })}
+                    </Button>
+                    <Button onClick={handleSubmit}>
+                      {formatMessage({
+                        id: 'app.components.Button.save',
+                        defaultMessage: 'Save',
+                      })}
+                    </Button>
+                  </Stack>
                 }
-                title="Other CT"
-                subtitle="36 entries found"
-                as="h1"
-              />
-              <Header
-                title={{
-                  label: formatMessage({
-                    id: 'Settings.roles.create.title',
-                    defaultMessage: 'Create a role',
-                  }),
-                }}
-                content={formatMessage({
+                title={formatMessage({
+                  id: 'Settings.roles.create.title',
+                  defaultMessage: 'Create a role',
+                })}
+                subtitle={formatMessage({
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
-                actions={headerActions(handleSubmit, handleReset)}
-                isLoading={isLayoutLoading}
+                as="h1"
               />
               <BaselineAlignment top size="3px" />
               <FormCard
