@@ -81,7 +81,6 @@ const Admin = () => {
     <DndProvider backend={HTML5Backend}>
       <AppLayout
         sideNav={
-          // eslint-disable-next-line react/jsx-wrap-multilines
           <LeftMenu
             generalSectionLinks={generalSectionLinks}
             pluginsSectionLinks={pluginsSectionLinks}
