@@ -31,17 +31,20 @@ module.exports = function createBuilder() {
     const contentType = strapi.contentTypes[key];
 
     let dir;
+    let filename;
     if (contentType.plugin) {
       dir = `./extensions/${contentType.plugin}/content-types/${contentType.info.singularName}`;
+      filename = 'schema.json';
     } else {
       dir = `./api/${contentType.apiName}/models`;
+      filename = contentType.__filename__;
     }
 
     return {
       modelName: contentType.modelName,
       plugin: contentType.plugin,
       uid: contentType.uid,
-      filename: 'schema.json',
+      filename,
       dir: path.join(strapi.dir, dir),
       schema: contentType.__schema__,
     };

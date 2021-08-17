@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { toLower, kebabCase, camelCase } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
+const pluralize = require('pluralize');
 const { createContentType } = require('../domain/content-type');
 
 const { createCoreApi } = require('../../core-api');
@@ -23,10 +24,10 @@ module.exports = function(strapi) {
         actions: {},
         lifecycles: {},
       };
-      ct.schema.info = {};
-      ct.schema.info.displayName = camelCase(modelName);
+
+      ct.schema.info.displayName = model.info.name;
       ct.schema.info.singularName = camelCase(modelName);
-      ct.schema.info.pluralName = `${camelCase(modelName)}s`;
+      ct.schema.info.pluralName = pluralize(camelCase(modelName));
 
       const createdContentType = createContentType(
         `api::${apiName}.${kebabCase(ct.schema.info.singularName)}`,
@@ -122,6 +123,7 @@ module.exports = function(strapi) {
     _.forEach(plugin.middlewares, (middleware, middlewareUID) => {
       const middlewareName = toLower(middlewareUID.split('.')[1]);
       strapi.plugins[pluginName].middlewares[middlewareName] = middleware;
+      strapi.middleware[middlewareName] = middleware;
     });
 
     _.forEach(plugin.controllers, (controller, controllerUID) => {

@@ -47,7 +47,7 @@ module.exports = strapi => {
     },
 
     /**
-     * Removes a file in strapi app
+     * Appends a file in strapi app
      */
     async appendFile(optPath, data) {
       const writePath = normalizePath(optPath);

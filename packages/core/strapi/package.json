@@ -63,6 +63,7 @@
     "open": "8.2.1",
     "ora": "^5.4.0",
     "package-json": "6.5.0",
+    "pluralize": "8.0.0",
     "qs": "^6.10.1",
     "resolve-cwd": "^3.0.0",
     "rimraf": "^3.0.2",

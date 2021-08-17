@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
@@ -120,8 +119,8 @@ const isTypedAttribute = (attribute, type) => {
  */
 const getContentTypeRoutePrefix = contentType => {
   return isSingleType(contentType)
-    ? _.kebabCase(contentType.modelName)
-    : _.kebabCase(pluralize(contentType.modelName));
+    ? _.kebabCase(contentType.info.singularName)
+    : _.kebabCase(contentType.info.pluralName);
 };
 
 module.exports = {

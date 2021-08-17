@@ -30,14 +30,22 @@ const applyUserExtension = async plugins => {
     return;
   }
 
-  const files = await loadFiles(extensionsDir, '**/content-types/**/schema.json');
+  const extendedSchemas = await loadFiles(extensionsDir, '**/content-types/**/schema.json');
+  const strapiServers = await loadFiles(extensionsDir, '**/strapi-server.js');
+
   for (const pluginName in plugins) {
     const plugin = plugins[pluginName];
+    // first: load json schema
     for (const ctName in plugin.contentTypes) {
-      const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], files);
+      const extendedSchema = get([pluginName, 'content-types', ctName, 'schema'], extendedSchemas);
       if (extendedSchema) {
         plugin.contentTypes[ctName].schema = extendedSchema;
       }
+    }
+    // second: execute strapi-server extension
+    const strapiServer = get([pluginName, 'strapi-server'], strapiServers);
+    if (strapiServer) {
+      plugins[pluginName] = await strapiServer(plugin);
     }
   }
 };

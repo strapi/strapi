@@ -1,5 +1,4 @@
 {
-  "kind": "collectionType",
   "collectionName": "up_users",
   "info": {
     "name": "User",
@@ -9,8 +8,7 @@
     "displayName": "User"
   },
   "options": {
-    "draftAndPublish": false,
-    "timestamps": true
+    "draftAndPublish": false
   },
   "attributes": {
     "username": {
@@ -67,18 +65,6 @@
       "type": "media",
       "multiple": false,
       "required": false
-    },
-    "aaa": {
-      "type": "string"
-    },
-    "bbbb": {
-      "type": "string"
-    },
-    "ccc": {
-      "type": "string"
-    },
-    "dddd": {
-      "type": "string"
     }
   }
 }

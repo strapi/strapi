@@ -27,7 +27,7 @@ module.exports = async (ctx, next) => {
         prefixKey: `${ctx.request.path}:${ctx.request.ip}`,
         message,
       },
-      strapi.plugins['users-permissions'].config.ratelimit
+      strapi.config.get('plugin.users-permissions.ratelimit')
     )
   )(ctx, next);
 };

@@ -103,7 +103,7 @@ class Strapi {
 
       return this;
     } catch (error) {
-      return this.stopWithError(error.message);
+      return this.stopWithError(error);
     }
   }
 

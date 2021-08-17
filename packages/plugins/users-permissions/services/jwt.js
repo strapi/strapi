@@ -39,27 +39,25 @@ module.exports = ({ strapi }) => ({
   },
 
   issue(payload, jwtOptions = {}) {
-    _.defaults(jwtOptions, strapi.plugins['users-permissions'].config.jwt);
+    _.defaults(jwtOptions, strapi.config.get('plugin.users-permissions.jwt'));
     return jwt.sign(
       _.clone(payload.toJSON ? payload.toJSON() : payload),
-      _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
+      strapi.config.get('plugin.users-permissions.jwtSecret'),
       jwtOptions
     );
   },
 
   verify(token) {
     return new Promise(function(resolve, reject) {
-      jwt.verify(
-        token,
-        _.get(strapi.plugins, ['users-permissions', 'config', 'jwtSecret']),
-        {},
-        function(err, tokenPayload = {}) {
-          if (err) {
-            return reject(new Error('Invalid token.'));
-          }
-          resolve(tokenPayload);
+      jwt.verify(token, strapi.config.get('plugin.users-permissions.jwtSecret'), {}, function(
+        err,
+        tokenPayload = {}
+      ) {
+        if (err) {
+          return reject(new Error('Invalid token.'));
         }
-      );
+        resolve(tokenPayload);
+      });
     });
   },
 });
