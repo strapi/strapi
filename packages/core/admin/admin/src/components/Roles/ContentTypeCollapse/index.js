@@ -1,9 +1,9 @@
-import React, { useCallback, useMemo } from 'react';
+import { Box } from '@strapi/parts';
 import PropTypes from 'prop-types';
+import React, { useCallback, useMemo } from 'react';
 import Collapse from './Collapse';
 import CollapsePropertyMatrix from './CollapsePropertyMatrix';
 import { getAvailableActions } from './utils';
-import Wrapper from './Wrapper';
 
 const ContentTypeCollapse = ({
   allActions,
@@ -27,7 +27,7 @@ const ContentTypeCollapse = ({
   const isOdd = useMemo(() => index % 2 !== 0, [index]);
 
   return (
-    <Wrapper withMargin={isOdd}>
+    <Box>
       <Collapse
         availableActions={availableActions}
         isActive={isActive}
@@ -53,7 +53,7 @@ const ContentTypeCollapse = ({
             />
           );
         })}
-    </Wrapper>
+    </Box>
   );
 };
 

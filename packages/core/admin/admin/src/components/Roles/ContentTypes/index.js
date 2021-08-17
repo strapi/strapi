@@ -1,23 +1,20 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Padded } from '@buffetjs/core';
+import { Box } from '@strapi/parts';
 import ContentTypeCollapses from '../ContentTypeCollapses';
 import GlobalActions from '../GlobalActions';
-import Wrapper from './Wrapper';
 
 const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) => {
   return (
-    <Wrapper>
-      <Padded left right bottom size="md">
-        <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
-        <ContentTypeCollapses
-          actions={actions}
-          isFormDisabled={isFormDisabled}
-          pathToData={kind}
-          subjects={subjects}
-        />
-      </Padded>
-    </Wrapper>
+    <Box background="neutral0">
+      <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
+      <ContentTypeCollapses
+        actions={actions}
+        isFormDisabled={isFormDisabled}
+        pathToData={kind}
+        subjects={subjects}
+      />
+    </Box>
   );
 };
 

@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
 const Wrapper = styled.div`
-  padding-left: 165px;
-  padding-bottom: 25px;
-  padding-top: 26px;
+  padding-left: 200px;
+  padding-bottom: ${({ theme }) => theme.spaces[4]};
+  padding-top: ${({ theme }) => theme.spaces[6]};
   ${({ disabled, theme }) =>
     `
     input[type='checkbox'] {

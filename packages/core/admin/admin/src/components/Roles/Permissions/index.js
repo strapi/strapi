@@ -1,8 +1,9 @@
 import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
 import PropTypes from 'prop-types';
 import { difference } from '@strapi/helper-plugin';
+import { TabGroup, Tabs, TabPanels, Tab, TabPanel, Box } from '@strapi/parts';
+import { useIntl } from 'react-intl';
 import { has, isEmpty } from 'lodash';
-import Tabs from '../Tabs';
 import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
 import ContentTypes from '../ContentTypes';
 import PluginsAndSettings from '../PluginsAndSettings';
@@ -15,6 +16,7 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
   const [{ initialData, layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
     init(layout, permissions)
   );
+  const { formatMessage } = useIntl();
 
   useImperativeHandle(ref, () => {
     return {
@@ -106,28 +108,49 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
       }}
     >
-      <Tabs tabsLabel={TAB_LABELS}>
-        <ContentTypes
-          layout={layouts.collectionTypes}
-          kind="collectionTypes"
-          isFormDisabled={isFormDisabled}
-        />
-        <ContentTypes
-          layout={layouts.singleTypes}
-          kind="singleTypes"
-          isFormDisabled={isFormDisabled}
-        />
-        <PluginsAndSettings
-          layout={layouts.plugins}
-          kind="plugins"
-          isFormDisabled={isFormDisabled}
-        />
-        <PluginsAndSettings
-          layout={layouts.settings}
-          kind="settings"
-          isFormDisabled={isFormDisabled}
-        />
-      </Tabs>
+      <TabGroup label="Some stuff for the label" id="tabs">
+        <Tabs>
+          {TAB_LABELS.map(tabLabel => (
+            <Tab key={tabLabel.id}>{formatMessage({ id: tabLabel.labelId })}</Tab>
+          ))}
+        </Tabs>
+        <TabPanels>
+          <TabPanel>
+            <ContentTypes
+              layout={layouts.collectionTypes}
+              kind="collectionTypes"
+              isFormDisabled={isFormDisabled}
+            />
+          </TabPanel>
+          <TabPanel>
+            <Box padding={4} background="neutral0">
+              <ContentTypes
+                layout={layouts.singleTypes}
+                kind="singleTypes"
+                isFormDisabled={isFormDisabled}
+              />
+            </Box>
+          </TabPanel>
+          <TabPanel>
+            <Box padding={4} background="neutral0">
+              <PluginsAndSettings
+                layout={layouts.plugins}
+                kind="plugins"
+                isFormDisabled={isFormDisabled}
+              />
+            </Box>
+          </TabPanel>
+          <TabPanel>
+            <Box padding={4} background="neutral0">
+              <PluginsAndSettings
+                layout={layouts.settings}
+                kind="settings"
+                isFormDisabled={isFormDisabled}
+              />
+            </Box>
+          </TabPanel>
+        </TabPanels>
+      </TabGroup>
     </PermissionsDataManagerProvider>
   );
 });
