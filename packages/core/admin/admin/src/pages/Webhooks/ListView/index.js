@@ -265,7 +265,7 @@ function ListView() {
             {rowsCount > 0 ? (
               <Table
                 colCount={5}
-                rowCount={webhooks.length}
+                rowCount={rowsCount}
                 footer={(
                   <TFooter
                     onClick={() => (canCreate ? handleGoTo('create') : {})}
@@ -283,9 +283,9 @@ function ListView() {
                           id: 'Settings.webhooks.list.all-entries.select',
                         })}
                         indeterminate={
-                          webhooksToDelete.length > 0 && webhooksToDelete.length < webhooks.length
+                          webhooksToDelete.length > 0 && webhooksToDelete.length < rowsCount
                         }
-                        value={webhooksToDelete.length === webhooks.length}
+                        value={webhooksToDelete.length === rowsCount}
                         onValueChange={handleSelectAllCheckbox}
                       />
                     </Th>
@@ -319,12 +319,8 @@ function ListView() {
                           }`}
                           value={webhooksToDelete?.includes(webhook.id)}
                           onValueChange={value => handleSelectOneCheckbox(value, webhook.id)}
-                          id={`${formatMessage({ id: 'Settings.webhooks.list.select' })} ${
-                            webhook.id
-                          }`}
-                          name={`${formatMessage({ id: 'Settings.webhooks.list.select' })} ${
-                            webhook.name
-                          }`}
+                          id="select"
+                          name="select"
                         />
                       </Td>
                       <Td>
