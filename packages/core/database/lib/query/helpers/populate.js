@@ -5,6 +5,19 @@ const _ = require('lodash/fp');
 const types = require('../../types');
 const { fromRow } = require('./transform');
 
+const getRootLevelPopulate = meta => {
+  const populate = {};
+
+  for (const attributeName in meta.attributes) {
+    const attribute = meta.attributes[attributeName];
+    if (attribute.type === 'relation') {
+      populate[attributeName] = true;
+    }
+  }
+
+  return populate;
+};
+
 /**
  * Converts and prepares the query for populate
  *
@@ -25,12 +38,7 @@ const processPopulate = (populate, ctx) => {
   }
 
   if (populate === true) {
-    for (const attributeName in meta.attributes) {
-      const attribute = meta.attributes[attributeName];
-      if (attribute.type === 'relation') {
-        populateMap[attributeName] = true;
-      }
-    }
+    populateMap = getRootLevelPopulate(meta);
   } else if (Array.isArray(populate)) {
     for (const key of populate) {
       const [root, ...rest] = key.split('.');
@@ -68,17 +76,17 @@ const processPopulate = (populate, ctx) => {
     const attribute = meta.attributes[key];
 
     if (!attribute) {
-      // NOTE: we could continue to allow having different populate depending on the type (polymorphic)
       continue;
-      // throw new Error(`Cannot populate unknown field ${key}`);
     }
 
     if (!types.isRelation(attribute.type)) {
       throw new Error(`Invalid populate field. Expected a relation, got ${attribute.type}`);
     }
 
-    // TODO: make sure necessary columns are present for future populate queries
-    qb.addSelect('id');
+    // make sure id is present for future populate queries
+    if (_.has('id', meta.attributes)) {
+      qb.addSelect('id');
+    }
 
     finalPopulate[key] = populateMap[key];
   }
@@ -86,11 +94,15 @@ const processPopulate = (populate, ctx) => {
   return finalPopulate;
 };
 
-const applyPopulate = async (results, populate, ctx) => {
-  // TODO: cleanup code
-  // TODO: create aliases for pivot columns
-  // TODO: optimize depth to avoid overfetching
+//  Omit limit & offset to avoid needing a query per result to avoid making too many queries
+const pickPopulateParams = _.pick(['select', 'count', 'where', 'populate', 'orderBy']);
 
+// TODO: cleanup code
+// TODO: create aliases for pivot columns
+// TODO: optimize depth to avoid overfetching
+// TODO: handle count for join columns
+// TODO: cleanup count
+const applyPopulate = async (results, populate, ctx) => {
   const { db, uid, qb } = ctx;
   const meta = db.metadata.get(uid);
 
@@ -99,19 +111,11 @@ const applyPopulate = async (results, populate, ctx) => {
   }
 
   for (const key in populate) {
-    // NOTE: Omit limit & offset to avoid needing a query per result to avoid making too many queries
-    const populateValue = _.pick(
-      ['select', 'count', 'where', 'populate', 'orderBy'],
-      populate[key]
-    );
-
-    // TODO: handle count for join columns
-    // TODO: cleanup count
-    const isCount = populateValue.count === true;
-
     const attribute = meta.attributes[key];
-
     const targetMeta = db.metadata.get(attribute.target);
+
+    const populateValue = pickPopulateParams(populate[key]);
+    const isCount = populateValue.count === true;
 
     const fromTargetRow = rowOrRows => fromRow(targetMeta, rowOrRows);
 
@@ -462,7 +466,10 @@ const applyPopulate = async (results, populate, ctx) => {
             referencedColumn: joinColumn.name,
             rootColumn: joinColumn.referencedColumn,
             rootTable: qb.alias,
-            on: joinTable.on,
+            on: {
+              ...(joinTable.on || {}),
+              field: key,
+            },
             orderBy: joinTable.orderBy,
           })
           .addSelect([`${alias}.${idColumn.name}`, `${alias}.${typeColumn.name}`])

@@ -52,7 +52,6 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
   }
 
   // TODO: polymorphic relations
-  // NOTE: using the joinColumn / joinTable syntax we don't really care about the relation type here
 
   return alias;
 };

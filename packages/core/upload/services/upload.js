@@ -77,12 +77,9 @@ module.exports = {
     if (refId && ref && field) {
       entity.related = [
         {
-          __type: ref,
           id: refId,
-          // refId,
-          // ref,
-          // source,
-          // field,
+          __type: ref,
+          __pivot: { field },
         },
       ];
     }
