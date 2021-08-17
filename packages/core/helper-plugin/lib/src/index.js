@@ -129,6 +129,7 @@ export { default as useAutoReloadOverlayBlocker } from './hooks/useAutoReloadOve
 export { default as useRBACProvider } from './hooks/useRBACProvider';
 export { default as useRBAC } from './hooks/useRBAC';
 export { default as usePersistentState } from './hooks/usePersistentState';
+export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';

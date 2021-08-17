@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-wrap-multilines */
 import React, { useState, useEffect, useRef } from 'react';
 import { useIntl, FormattedMessage } from 'react-intl';
 import { get } from 'lodash';

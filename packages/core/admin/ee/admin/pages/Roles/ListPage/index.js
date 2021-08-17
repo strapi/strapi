@@ -1,68 +1,76 @@
-import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { Button } from '@buffetjs/core';
-import { List, Header } from '@buffetjs/custom';
-import { Plus } from '@buffetjs/icons';
-import matchSorter from 'match-sorter';
-import { get } from 'lodash';
 import {
-  useQuery,
-  ListButton,
+  LoadingIndicatorPage,
   PopUpWarning,
   request,
-  useRBAC,
   useNotification,
-  LoadingIndicatorPage,
+  useQuery,
+  useRBAC,
 } from '@strapi/helper-plugin';
+import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
+import {
+  Button,
+  ContentLayout,
+  HeaderLayout,
+  Table,
+  Tbody,
+  TFooter,
+  Thead,
+  Th,
+  Tr,
+  TableLabel,
+  VisuallyHidden,
+  BaseCheckbox,
+  Main,
+} from '@strapi/parts';
+import { get } from 'lodash';
+import matchSorter from 'match-sorter';
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useIntl } from 'react-intl';
-import adminPermissions from '../../../../../admin/src/permissions';
+import { useHistory } from 'react-router-dom';
+import { EmptyRole, RoleRow as BaseRoleRow } from '../../../../../admin/src/components/Roles';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
-import useSettingsHeaderSearchContext from '../../../../../admin/src/hooks/useSettingsHeaderSearchContext';
-import { EmptyRole, RoleListWrapper } from '../../../../../admin/src/components/Roles';
 import { useRolesList } from '../../../../../admin/src/hooks';
-import RoleRow from './RoleRow';
-import BaselineAlignment from './BaselineAlignment';
+import adminPermissions from '../../../../../admin/src/permissions';
 import reducer, { initialState } from './reducer';
 
-const RoleListPage = () => {
-  const toggleNotification = useNotification();
-  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
-  const { formatMessage } = useIntl();
-  const { push } = useHistory();
-  const [{ selectedRoles, showModalConfirmButtonLoading, shouldRefetchData }, dispath] = useReducer(
-    reducer,
-    initialState
-  );
+const useSortedRoles = () => {
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(adminPermissions.settings.roles);
   const { getData, roles, isLoading } = useRolesList(false);
-  const getDataRef = useRef(getData);
-  const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
-  const results = matchSorter(roles, _q, { keys: ['name', 'description'] });
-
-  useEffect(() => {
-    // Show the search bar only if the user is allowed to read
-    if (canRead) {
-      toggleHeaderSearch({ id: 'Settings.permissions.menu.link.roles.label' });
-    }
-
-    return () => {
-      if (canRead) {
-        toggleHeaderSearch();
-      }
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canRead]);
+  const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
   useEffect(() => {
     if (!isLoadingForPermissions && canRead) {
-      getDataRef.current();
+      getData();
     }
-  }, [isLoadingForPermissions, canRead]);
+  }, [isLoadingForPermissions, canRead, getData]);
+
+  return {
+    isLoadingForPermissions,
+    canCreate,
+    canDelete,
+    canRead,
+    canUpdate,
+    isLoading,
+    getData,
+    sortedRoles,
+    roles,
+  };
+};
+
+const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles }) => {
+  const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
+  const { push } = useHistory();
+  const [
+    { selectedRoles, showModalConfirmButtonLoading, shouldRefetchData },
+    dispatch,
+  ] = useReducer(reducer, initialState);
 
   const handleClosedModal = () => {
     if (shouldRefetchData) {
@@ -70,14 +78,14 @@ const RoleListPage = () => {
     }
 
     // Empty the selected ids when the modal closes
-    dispath({
+    dispatch({
       type: 'RESET_DATA_TO_DELETE',
     });
   };
 
   const handleConfirmDeleteData = async () => {
     try {
-      dispath({
+      dispatch({
         type: 'ON_REMOVE_ROLES',
       });
       const filteredRoles = selectedRoles.filter(currentId => {
@@ -103,7 +111,7 @@ const RoleListPage = () => {
 
         // Empty the selectedRolesId and set the shouldRefetchData to true so the
         // list is updated when closing the modal
-        dispath({
+        dispatch({
           type: 'ON_REMOVE_ROLES_SUCCEEDED',
         });
       }
@@ -128,123 +136,275 @@ const RoleListPage = () => {
     }
   };
 
-  const handleDuplicateRole = id => {
-    push(`/settings/roles/duplicate/${id}`);
-  };
+  const onRoleDuplicate = useCallback(
+    id => {
+      push(`/settings/roles/duplicate/${id}`);
+    },
+    [push]
+  );
 
   const handleNewRoleClick = () => push('/settings/roles/new');
 
-  const handleRemoveRole = roleId => {
-    dispath({
+  const onRoleRemove = useCallback(roleId => {
+    dispatch({
       type: 'SET_ROLE_TO_DELETE',
       id: roleId,
     });
 
     handleToggleModal();
-  };
+  }, []);
 
-  const handleRoleToggle = roleId => {
-    dispath({
+  const onRoleToggle = roleId => {
+    dispatch({
       type: 'ON_SELECTION',
       id: roleId,
     });
   };
 
+  const onAllRolesToggle = () =>
+    dispatch({
+      type: 'TOGGLE_ALL',
+      ids: sortedRoles.map(r => r.id),
+    });
+
   const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
 
-  /* eslint-disable indent */
-  const headerActions = canCreate
-    ? [
-        {
-          label: formatMessage({
-            id: 'Settings.roles.list.button.add',
-            defaultMessage: 'Add new role',
-          }),
-          onClick: handleNewRoleClick,
-          color: 'primary',
-          type: 'button',
-          icon: true,
-        },
-      ]
-    : [];
-  /* eslint-enable indent */
+  const handleGoTo = useCallback(
+    id => {
+      push(`/settings/roles/${id}`);
+    },
+    [push]
+  );
 
-  const resultsCount = results.length;
+  const handleClickDelete = useCallback(
+    (e, role) => {
+      e.preventDefault();
+      e.stopPropagation();
+
+      if (role.usersCount) {
+        toggleNotification({
+          type: 'info',
+          message: { id: 'Roles.ListPage.notification.delete-not-allowed' },
+        });
+      } else {
+        onRoleRemove(role.id);
+      }
+    },
+    [toggleNotification, onRoleRemove]
+  );
+
+  const handleClickDuplicate = useCallback(
+    (e, role) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onRoleDuplicate(role.id);
+    },
+    [onRoleDuplicate]
+  );
+
+  const getIcons = useCallback(
+    role => [
+      ...(canCreate
+        ? [
+            {
+              onClick: e => handleClickDuplicate(e, role),
+              label: formatMessage({ id: 'app.utils.duplicate', defaultMessage: 'Duplicate' }),
+              icon: <Duplicate />,
+            },
+          ]
+        : []),
+      ...(canUpdate
+        ? [
+            {
+              onClick: () => handleGoTo(role.id),
+              label: formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' }),
+              icon: <EditIcon />,
+            },
+          ]
+        : []),
+      ...(canDelete
+        ? [
+            {
+              onClick: e => handleClickDelete(e, role),
+              label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
+              icon: <DeleteIcon />,
+            },
+          ]
+        : []),
+    ],
+    [
+      formatMessage,
+      handleClickDelete,
+      handleClickDuplicate,
+      handleGoTo,
+      canCreate,
+      canUpdate,
+      canDelete,
+    ]
+  );
+
+  return {
+    handleClosedModal,
+    handleConfirmDeleteData,
+    handleNewRoleClick,
+    onRoleToggle,
+    onAllRolesToggle,
+    getIcons,
+    selectedRoles,
+    isWarningDeleteAllOpened,
+    showModalConfirmButtonLoading,
+    handleToggleModal,
+  };
+};
+
+const RoleListPage = () => {
+  const { formatMessage } = useIntl();
+  const {
+    isLoadingForPermissions,
+    canCreate,
+    canRead,
+    canDelete,
+    canUpdate,
+    isLoading,
+    getData,
+    sortedRoles,
+    roles,
+  } = useSortedRoles();
+
+  const {
+    handleClosedModal,
+    handleConfirmDeleteData,
+    handleNewRoleClick,
+    onRoleToggle,
+    onAllRolesToggle,
+    getIcons,
+    selectedRoles,
+    isWarningDeleteAllOpened,
+    showModalConfirmButtonLoading,
+    handleToggleModal,
+  } = useRoleActions({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles });
+
+  // ! TODO - Show the search bar only if the user is allowed to read - add the search input
+  // canRead
+
+  const rowCount = sortedRoles.length;
+  const colCount = sortedRoles.length ? Object.keys(sortedRoles[0]).length : 0;
+
+  const isAllEntriesIndeterminate = selectedRoles.length
+    ? selectedRoles.length !== rowCount
+    : false;
+  const isAllChecked = selectedRoles.length ? selectedRoles.length === rowCount : false;
 
   if (isLoadingForPermissions) {
     return <LoadingIndicatorPage />;
   }
 
   return (
-    <>
+    <Main labelledBy="title">
       <PageTitle name="Roles" />
-      <Header
-        title={{
-          label: formatMessage({
-            id: 'Settings.roles.title',
-            defaultMessage: 'roles',
-          }),
-        }}
-        content={formatMessage({
+      <HeaderLayout
+        id="title"
+        primaryAction={
+          canCreate ? (
+            <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
+              {formatMessage({
+                id: 'Settings.roles.list.button.add',
+                defaultMessage: 'Add new role',
+              })}
+            </Button>
+          ) : null
+        }
+        title={formatMessage({
+          id: 'Settings.roles.title',
+          defaultMessage: 'roles',
+        })}
+        subtitle={formatMessage({
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
-        actions={headerActions}
-        isLoading={isLoading}
+        as="h2"
       />
-      <BaselineAlignment />
       {canRead && (
-        <RoleListWrapper>
-          <List
-            title={formatMessage(
-              {
-                id: `Settings.roles.list.title${resultsCount > 1 ? '.plural' : '.singular'}`,
-                defaultMessage: `{number} ${resultsCount > 1 ? 'roles' : 'role'}`,
-              },
-              { number: resultsCount }
-            )}
-            isLoading={isLoading}
-            /* eslint-disable indent */
-            button={
-              canDelete
-                ? {
-                    color: 'delete',
-                    disabled: selectedRoles.length === 0,
-                    label: formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' }),
-                    onClick: handleToggleModal,
-                    type: 'button',
-                  }
-                : null
+        <ContentLayout>
+          <Table
+            colCount={colCount}
+            rowCount={rowCount}
+            footer={
+              canCreate ? (
+                <TFooter onClick={handleNewRoleClick} icon={<AddIcon />}>
+                  {formatMessage({
+                    id: 'Settings.roles.list.button.add',
+                    defaultMessage: 'Add new role',
+                  })}
+                </TFooter>
+              ) : null
             }
-            /* eslint-enable indent */
-            items={results}
-            customRowComponent={role => (
-              <RoleRow
-                canCreate={canCreate}
-                canDelete={canDelete}
-                canUpdate={canUpdate}
-                selectedRoles={selectedRoles}
-                onRoleDuplicate={handleDuplicateRole}
-                onRoleRemove={handleRemoveRole}
-                onRoleToggle={handleRoleToggle}
-                role={role}
-              />
-            )}
-          />
-          {!resultsCount && !isLoading && <EmptyRole />}
-          {canCreate && (
-            <ListButton>
-              <Button
-                onClick={handleNewRoleClick}
-                icon={<Plus fill="#007eff" width="11px" height="11px" />}
-                label={formatMessage({
-                  id: 'Settings.roles.list.button.add',
-                  defaultMessage: 'Add new role',
-                })}
-              />
-            </ListButton>
-          )}
-        </RoleListWrapper>
+          >
+            <Thead>
+              <Tr>
+                {!!onRoleToggle && (
+                  <Th>
+                    <BaseCheckbox
+                      aria-label="Select all entries"
+                      indeterminate={isAllEntriesIndeterminate}
+                      value={isAllChecked}
+                      onChange={onAllRolesToggle}
+                    />
+                  </Th>
+                )}
+                <Th>
+                  <TableLabel>
+                    {formatMessage({
+                      id: 'Settings.roles.list.header.name',
+                      defaultMessage: 'Name',
+                    })}
+                  </TableLabel>
+                </Th>
+                <Th>
+                  <TableLabel>
+                    {formatMessage({
+                      id: 'Settings.roles.list.header.description',
+                      defaultMessage: 'Description',
+                    })}
+                  </TableLabel>
+                </Th>
+                <Th>
+                  <TableLabel>
+                    {formatMessage({
+                      id: 'Settings.roles.list.header.users',
+                      defaultMessage: 'Users',
+                    })}
+                  </TableLabel>
+                </Th>
+                <Th>
+                  <VisuallyHidden>
+                    {formatMessage({
+                      id: 'Settings.roles.list.header.actions',
+                      defaultMessage: 'Actions',
+                    })}
+                  </VisuallyHidden>
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {sortedRoles?.map(role => (
+                <BaseRoleRow
+                  key={role.id}
+                  id={role.id}
+                  onToggle={onRoleToggle}
+                  isChecked={
+                    selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1
+                  }
+                  name={role.name}
+                  description={role.description}
+                  usersCount={role.usersCount}
+                  icons={getIcons(role)}
+                />
+              ))}
+            </Tbody>
+          </Table>
+          {!rowCount && !isLoading && <EmptyRole />}
+        </ContentLayout>
       )}
       <PopUpWarning
         isOpen={isWarningDeleteAllOpened}
@@ -253,7 +413,7 @@ const RoleListPage = () => {
         toggleModal={handleToggleModal}
         isConfirmButtonLoading={showModalConfirmButtonLoading}
       />
-    </>
+    </Main>
   );
 };
 

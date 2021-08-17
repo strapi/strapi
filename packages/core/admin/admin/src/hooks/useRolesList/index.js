@@ -1,4 +1,4 @@
-import { useEffect, useReducer } from 'react';
+import { useEffect, useReducer, useCallback } from 'react';
 import { request, useNotification } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
@@ -17,7 +17,7 @@ const useRolesList = (shouldFetchData = true) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shouldFetchData]);
 
-  const fetchRolesList = async () => {
+  const fetchRolesList = useCallback(async () => {
     try {
       dispatch({
         type: 'GET_DATA',
@@ -43,7 +43,7 @@ const useRolesList = (shouldFetchData = true) => {
         });
       }
     }
-  };
+  }, [toggleNotification]);
 
   return { roles, isLoading, getData: fetchRolesList };
 };
