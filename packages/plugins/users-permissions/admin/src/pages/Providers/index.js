@@ -1,8 +1,8 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { Header, List } from '@buffetjs/custom';
-import { Text } from '@buffetjs/core';
-import { Pencil } from '@buffetjs/icons';
+// import { Header, List } from '@buffetjs/custom';
+// import { Text } from '@buffetjs/core';
+// import { Pencil } from '@buffetjs/icons';
 import {
   SettingsPageTitle,
   SizedInput,
@@ -14,14 +14,29 @@ import {
 } from '@strapi/helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
-import pluginPermissions from '../../permissions';
-import { useForm } from '../../hooks';
-import { getRequestURL, getTrad } from '../../utils';
-import ListBaselineAlignment from '../../components/ListBaselineAlignment';
-import ListRow from '../../components/ListRow';
-import ModalForm from '../../components/ModalForm';
-import createProvidersArray from './utils/createProvidersArray';
+// import ListBaselineAlignment from '../../components/ListBaselineAlignment';
+// import ListRow from '../../components/ListRow';
+
+// DS INTEGRATION
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import { Stack } from '@strapi/parts/Stack';
+import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
+import { Text, TableLabel } from '@strapi/parts/Text';
+// import { Row as FlexRow } from '@strapi/parts/Row';
+import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
+// import { Box } from '@strapi/parts/Box';
+import { IconButton } from '@strapi/parts/IconButton';
+import EditIcon from '@strapi/icons/EditIcon';
 import forms from './utils/forms';
+import createProvidersArray from './utils/createProvidersArray';
+import ModalForm from '../../components/ModalForm';
+import { getRequestURL, getTrad } from '../../utils';
+import { useForm } from '../../hooks';
+import pluginPermissions from '../../permissions';
+// import Settings from '@strapi/icons/Settings';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -38,6 +53,7 @@ const ProvidersPage = () => {
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
   }, []);
+  console.log(updatePermissions);
 
   const {
     allowedActions: { canUpdate },
@@ -46,16 +62,18 @@ const ProvidersPage = () => {
     dispatchSubmitSucceeded,
     formErrors,
     handleChange,
-    isLoading,
-    isLoadingForPermissions,
+    // isLoading,
+    // isLoadingForPermissions,
     modifiedData,
   } = useForm('providers', updatePermissions);
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
-  const enabledProvidersCount = useMemo(
-    () => providers.filter(provider => provider.enabled).length,
-    [providers]
-  );
+
+  // const enabledProvidersCount = useMemo(
+  //   () => providers.filter(provider => provider.enabled).length,
+  //   [providers]
+  // );
+
   const isProviderWithSubdomain = useMemo(() => {
     if (!providerToEditName) {
       return false;
@@ -65,30 +83,31 @@ const ProvidersPage = () => {
 
     return has(providerToEdit, 'subdomain');
   }, [providers, providerToEditName]);
-  const disabledProvidersCount = useMemo(() => {
-    return providers.length - enabledProvidersCount;
-  }, [providers, enabledProvidersCount]);
 
-  const listTitle = useMemo(() => {
-    const enabledMessage = formatMessage(
-      {
-        id: getTrad(
-          `List.title.providers.enabled.${enabledProvidersCount > 1 ? 'plural' : 'singular'}`
-        ),
-      },
-      { number: enabledProvidersCount }
-    );
-    const disabledMessage = formatMessage(
-      {
-        id: getTrad(
-          `List.title.providers.disabled.${disabledProvidersCount > 1 ? 'plural' : 'singular'}`
-        ),
-      },
-      { number: disabledProvidersCount }
-    );
+  // const disabledProvidersCount = useMemo(() => {
+  //   return providers.length - enabledProvidersCount;
+  // }, [providers, enabledProvidersCount]);
 
-    return `${enabledMessage} ${disabledMessage}`;
-  }, [formatMessage, enabledProvidersCount, disabledProvidersCount]);
+  // const listTitle = useMemo(() => {
+  //   const enabledMessage = formatMessage(
+  //     {
+  //       id: getTrad(
+  //         `List.title.providers.enabled.${enabledProvidersCount > 1 ? 'plural' : 'singular'}`
+  //       ),
+  //     },
+  //     { number: enabledProvidersCount }
+  //   );
+  //   const disabledMessage = formatMessage(
+  //     {
+  //       id: getTrad(
+  //         `List.title.providers.disabled.${disabledProvidersCount > 1 ? 'plural' : 'singular'}`
+  //       ),
+  //     },
+  //     { number: disabledProvidersCount }
+  //   );
+
+  //   return `${enabledMessage} ${disabledMessage}`;
+  // }, [formatMessage, enabledProvidersCount, disabledProvidersCount]);
 
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
 
@@ -194,11 +213,67 @@ const ProvidersPage = () => {
   );
 
   return (
-    <>
+    <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <div>
-        <Header title={{ label: pageTitle }} isLoading={isLoadingForPermissions || isLoading} />
-        <ListBaselineAlignment />
+      <Main labelledBy="providers">
+        <HeaderLayout
+          as="h1"
+          id="providers"
+          title={formatMessage({ id: getTrad('HeaderNav.link.providers') })}
+        />
+        <ContentLayout>
+          <Table colCount={3} rowCount={2}>
+            <Thead>
+              <Tr>
+                <Th>
+                  <TableLabel>name</TableLabel>
+                </Th>
+                <Th>
+                  <TableLabel>status</TableLabel>
+                </Th>
+                <Th>
+                  <TableLabel>
+                    <VisuallyHidden>Settings</VisuallyHidden>
+                    {/* <Box hasRadius padding={2} shadow="filterShadow">
+                      <Settings />
+                    </Box> */}
+                  </TableLabel>
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {providers.map(provider => (
+                <Tr key={provider.name}>
+                  <Td width="40%">
+                    {/* <FlexRow alignItems='center'> */}
+                    <Stack horizontal size={5}>
+                      <FontAwesomeIcon icon={provider.icon} />
+                      <Text highlighted textColor="neutral800">
+                        {provider.name}
+                      </Text>
+                    </Stack>
+                    {/* </FlexRow> */}
+                  </Td>
+                  <Td width="60%">
+                    <Text textColor="neutral800">{provider.enabled ? 'enabled' : 'disabled'}</Text>
+                  </Td>
+                  <Td>
+                    {canUpdate && (
+                      <IconButton
+                        onClick={() => handleClickEdit(provider)}
+                        noBorder
+                        icon={<EditIcon />}
+                        label="Edit"
+                      />
+                    )}
+                  </Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        </ContentLayout>
+      </Main>
+      {/* <div>
         <List
           title={listTitle}
           items={providers}
@@ -229,7 +304,7 @@ const ProvidersPage = () => {
             </ListRow>
           )}
         />
-      </div>
+      </div> */}
       <ModalForm
         isOpen={isOpen}
         onClick={handleClick}
@@ -275,7 +350,7 @@ const ProvidersPage = () => {
           </form>
         )}
       </ModalForm>
-    </>
+    </Layout>
   );
 };
 
