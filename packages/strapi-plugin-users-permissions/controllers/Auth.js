@@ -512,7 +512,8 @@ module.exports = {
         user: sanitizedUser,
       });
     } catch (err) {
-      const adminError = _.includes(err.message, 'username')
+
+      const adminError = _.includes(err.message, 'username') || _.includes(err.message, 'Duplicate')
         ? {
             id: 'Auth.form.error.username.taken',
             message: 'Username already taken',
