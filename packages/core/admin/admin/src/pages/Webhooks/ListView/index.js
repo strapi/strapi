@@ -13,7 +13,7 @@ import {
   useRBAC,
   LoadingIndicatorPage,
   useNotification,
- useFocusWhenNavigate 
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
@@ -35,7 +35,6 @@ import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import reducer, { initialState } from './reducer';
 import PageTitle from '../../../components/SettingsPageTitle';
 import adminPermissions from '../../../permissions';
-
 
 function ListView() {
   const {
@@ -249,7 +248,7 @@ function ListView() {
                 {rowsCount > 0 ? (
                   <Table
                     colCount={5}
-                    rowCount={rowsCount}
+                    rowCount={rowsCount + 1}
                     footer={
                       <TFooter
                         onClick={() => (canCreate ? handleGoTo('create') : {})}
