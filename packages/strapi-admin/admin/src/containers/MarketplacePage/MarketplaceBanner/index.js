@@ -1,22 +1,23 @@
 import React from 'react';
-import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useGlobalContext } from 'strapi-helper-plugin';
 import Wrapper from './Wrapper';
 import LogoStrapi from '../../../assets/images/banner_strapi-rocket.png';
 
-const PluginBanner = ({ emitEvent }) => {
+const MarketplaceBanner = () => {
   const { formatMessage } = useIntl();
+  const { emitEvent } = useGlobalContext();
 
   return (
     <Wrapper>
       <img
         className="bannerImage"
         src={LogoStrapi}
-        alt={formatMessage({ id: 'app.components.PluginBanner.image.alt' })}
+        alt={formatMessage({ id: 'app.components.MarketplaceBanner.image.alt' })}
       />
       <div>
         <div>
-          <FormattedMessage id="app.components.PluginBanner" />
+          <FormattedMessage id="app.components.MarketplaceBanner" />
         </div>
         <a
           href="https://github.com/strapi/awesome-strapi"
@@ -25,7 +26,7 @@ const PluginBanner = ({ emitEvent }) => {
           className="bannerLink"
           onClick={() => emitEvent('didGoToStrapiAwesome')}
         >
-          <FormattedMessage id="app.components.PluginBanner.link" />
+          <FormattedMessage id="app.components.MarketplaceBanner.link" />
           <i className="fa fa-external-link-alt" />
         </a>
       </div>
@@ -33,8 +34,4 @@ const PluginBanner = ({ emitEvent }) => {
   );
 };
 
-export default PluginBanner;
-
-PluginBanner.propTypes = {
-  emitEvent: PropTypes.func.isRequired,
-};
+export default MarketplaceBanner;
