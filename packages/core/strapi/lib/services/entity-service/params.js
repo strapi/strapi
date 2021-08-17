@@ -77,7 +77,14 @@ const transformParamsToQuery = (uid, params = {}) => {
   if (populate) {
     // TODO: handle *.* syntax
     const { populate } = params;
-    query.populate = typeof populate === 'object' ? populate : _.castArray(populate);
+
+    if (populate === '*') {
+      query.populate = true;
+    } else if (typeof populate === 'object') {
+      query.populate = populate;
+    } else {
+      query.populate = _.castArray(populate);
+    }
   }
 
   // TODO: move to layer above ?
