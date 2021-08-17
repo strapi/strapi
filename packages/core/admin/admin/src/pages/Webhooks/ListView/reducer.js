@@ -34,6 +34,15 @@ const reducer = (state, action) =>
 
         break;
       }
+      case 'SET_ALL_WEBHOOKS_TO_DELETE': {
+        if (state.webhooksToDelete.length === 0) {
+          draftState.webhooksToDelete = state.webhooks.map(webhook => webhook.id);
+        } else {
+          draftState.webhooksToDelete = [];
+        }
+
+        break;
+      }
       case 'WEBHOOKS_DELETED': {
         draftState.webhooks = state.webhooks.filter(
           webhook => !state.webhooksToDelete.includes(webhook.id)
