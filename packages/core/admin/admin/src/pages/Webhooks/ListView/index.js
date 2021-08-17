@@ -200,28 +200,6 @@ function ListView() {
     }
   };
 
-  // const handleSelectAllCheckbox = () => {
-  //   const webhooksIds = webhooks.map(webhook => webhook.id);
-
-  //   if (webhooksToDelete.length === 0) {
-  //     webhooksIds.forEach(webhookId => {
-  //       dispatch({
-  //         type: 'SET_WEBHOOKS_TO_DELETE',
-  //         value: true,
-  //         id: webhookId,
-  //       });
-  //     });
-  //   } else {
-  //     webhooksIds.forEach(webhookId => {
-  //       dispatch({
-  //         type: 'SET_WEBHOOKS_TO_DELETE',
-  //         value: false,
-  //         id: webhookId,
-  //       });
-  //     });
-  //   }
-  // };
-
   const handleSelectAllCheckbox = () => {
     dispatch({
       type: 'SET_ALL_WEBHOOKS_TO_DELETE',
