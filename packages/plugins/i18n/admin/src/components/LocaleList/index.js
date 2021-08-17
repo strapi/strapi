@@ -48,27 +48,21 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
             onEditLocale={handleEditLocale}
           />
         ) : (
-          <ContentLayout>
-            <EmptyStateLayout
-              icon={<EmptyStateDocument width={undefined} height={undefined} />}
-              content={formatMessage({ id: getTrad('Settings.list.empty.title') })}
-              action={
-                onToggleCreateModal ? (
-                  <Button variant="secondary" startIcon={<AddIcon />} onClick={onToggleCreateModal}>
-                    {formatMessage({ id: getTrad('Settings.list.actions.add') })}
-                  </Button>
-                ) : null
-              }
-            />
-          </ContentLayout>
+          <EmptyStateLayout
+            icon={<EmptyStateDocument width={undefined} height={undefined} />}
+            content={formatMessage({ id: getTrad('Settings.list.empty.title') })}
+            action={
+              onToggleCreateModal ? (
+                <Button variant="secondary" startIcon={<AddIcon />} onClick={onToggleCreateModal}>
+                  {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+                </Button>
+              ) : null
+            }
+          />
         )}
       </ContentLayout>
 
-      <ModalCreate
-        isOpened={isCreating}
-        onClose={onToggleCreateModal}
-        alreadyUsedLocales={locales}
-      />
+      {isCreating && <ModalCreate onClose={onToggleCreateModal} />}
       <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
       <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
     </Main>

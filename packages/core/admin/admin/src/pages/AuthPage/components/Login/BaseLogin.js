@@ -17,7 +17,6 @@ import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
-
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
