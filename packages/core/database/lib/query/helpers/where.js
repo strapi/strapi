@@ -25,6 +25,8 @@ const OPERATORS = [
   '$endsWith',
   '$contains',
   '$notContains',
+  '$containsi',
+  '$notContainsi',
 ];
 
 const ARRAY_OPERATORS = ['$in', '$notIn', '$between'];
@@ -234,15 +236,22 @@ const applyOperator = (qb, column, operator, value) => {
       break;
     }
     case '$contains': {
-      // TODO: handle insensitive
-
       qb.where(column, 'like', `%${value}%`);
       break;
     }
 
     case '$notContains': {
-      // TODO: handle insensitive
       qb.whereNot(column, 'like', `%${value}%`);
+      break;
+    }
+
+    case '$containsi': {
+      qb.whereRaw(`${fieldLowerFn(qb)} LIKE LOWER(?)`, [column, `%${value}%`]);
+      break;
+    }
+
+    case '$notContainsi': {
+      qb.whereRaw(`${fieldLowerFn(qb)} NOT LIKE LOWER(?)`, [column, `%${value}%`]);
       break;
     }
 
@@ -265,7 +274,7 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
     return qb.where(column, columnWhere);
   }
 
-  // TODO: Transform into if has($in, value) then to handle cases with two keys doing one thing (like $contains with $case)
+  // TODO: handle casing
   Object.keys(columnWhere).forEach(operator => {
     const value = columnWhere[operator];
 
@@ -303,6 +312,14 @@ const applyWhere = (qb, where) => {
 
     applyWhereToColumn(qb, key, value);
   });
+};
+
+const fieldLowerFn = qb => {
+  // Postgres requires string to be passed
+  if (qb.client.config.client === 'pg') {
+    return 'LOWER(CAST(?? AS VARCHAR))';
+  }
+  return 'LOWER(??)';
 };
 
 module.exports = {
