@@ -17,8 +17,12 @@ const buildAssociationResolver = ({ contentTypeUID, attributeName, strapi }) => 
     );
   }
 
-  // todo[v4]: make sure polymorphic relations aren't breaking here
-  const targetUID = utils.isMedia(attribute) ? 'plugins::upload.file' : attribute.target;
+  const isMedia = utils.isMedia(attribute);
+  const isMorph = utils.isMorphRelation(attribute);
+
+  const targetUID = isMedia ? 'plugins::upload.file' : attribute.target;
+  const isToMany = isMedia ? attribute.multiple : attribute.relation.endsWith('Many');
+
   const targetContentType = strapi.getModel(targetUID);
 
   return async (parent, args = {}) => {
@@ -27,20 +31,30 @@ const buildAssociationResolver = ({ contentTypeUID, attributeName, strapi }) => 
       usePagination: true,
     });
 
-    // todo[v4]: move the .load to the entity service?
+    // Since we're using the entity-manager & not the entity-service to load the
+    // association, we need to apply some transformation to the transformed args object
     const entityManagerArgs = {
       ...omit(['start', 'filters'], transformedArgs),
       where: transformedArgs.filters,
       offset: transformedArgs.start,
     };
 
+    // todo[v4]: move the .load to the entity service so we can use the same args everywhere?
     const data = await entityManager.load(contentTypeUID, parent, attributeName, entityManagerArgs);
 
-    // todo[v4]: Replace with a check on the attribute (handle case where data is null but for an array
-    if (Array.isArray(data)) {
+    // If this a polymorphic association, it returns the raw data
+    if (isMorph) {
+      return data;
+    }
+
+    // If this is a to-many relation, it returns an object that
+    // matches what the entity-response-collection's resolvers expect
+    else if (isToMany) {
       return { nodes: data, info: { args: transformedArgs, resourceUID: targetUID } };
     }
 
+    // Else, it returns an object that matches
+    // what the entity-response's resolvers expect
     return { value: data };
   };
 };

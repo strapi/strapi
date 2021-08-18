@@ -246,6 +246,8 @@ const addPolymorphicRelationalAttribute = options => {
   if (isToManyRelation) {
     builder = builder.list;
   }
+  // todo[v4]: How to handle polymorphic relation w/ entity response collection types?
+  //            -> Currently return raw polymorphic entities
 
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
