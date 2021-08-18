@@ -68,9 +68,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const query = transformParamsToQuery(uid, params);
 
-    // return first element and ignore filters
     if (kind === 'singleType') {
-      return db.query(uid).findOne({});
+      return db.query(uid).findOne(query);
     }
 
     return db.query(uid).findMany(query);
