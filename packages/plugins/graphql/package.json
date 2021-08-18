@@ -31,6 +31,11 @@
     "nexus": "1.1.0",
     "pluralize": "^8.0.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-plugin-graphql"
+  },
   "devDependencies": {
     "cross-env": "^7.0.3",
     "koa": "^2.13.1"

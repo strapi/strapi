@@ -13,6 +13,11 @@
     "pkgcloud": "2.2.0",
     "streamifier": "0.1.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-provider-upload-rackspace"
+  },
   "engines": {
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
