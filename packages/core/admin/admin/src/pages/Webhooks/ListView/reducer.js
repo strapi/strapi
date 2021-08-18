@@ -5,6 +5,7 @@ const initialState = {
   webhooks: [],
   webhooksToDelete: [],
   webhookToDelete: null,
+  loadingWebhooks: true,
 };
 
 const reducer = (state, action) =>
@@ -13,6 +14,12 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
         draftState.webhooks = action.data;
+        draftState.loadingWebhooks = false;
+        break;
+      }
+
+      case 'TOGGLE_LOADING': {
+        draftState.loadingWebhooks = !state.loadingWebhooks;
         break;
       }
 

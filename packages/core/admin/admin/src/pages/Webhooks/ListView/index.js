@@ -45,11 +45,12 @@ function ListView() {
   const isMounted = useRef(true);
   const { formatMessage } = useIntl();
   const [showModal, setShowModal] = useState(false);
-  const [{ webhooks, webhooksToDelete, webhookToDelete }, dispatch] = useReducer(
+  const [{ webhooks, webhooksToDelete, webhookToDelete, loadingWebhooks }, dispatch] = useReducer(
     reducer,
     initialState
   );
-  useFocusWhenNavigate('main', [isLoading]);
+
+  useFocusWhenNavigate();
   const { push } = useHistory();
   const { pathname } = useLocation();
   const rowsCount = webhooks.length;
@@ -65,12 +66,12 @@ function ListView() {
 
   useEffect(() => {
     if (canRead) {
-      fetchData();
+      fetchWebHooks();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead]);
 
-  const fetchData = async () => {
+  const fetchWebHooks = async () => {
     try {
       const { data } = await request('/admin/webhooks', {
         method: 'GET',
@@ -90,6 +91,9 @@ function ListView() {
             message: { id: 'notification.error' },
           });
         }
+        dispatch({
+          type: 'TOGGLE_LOADING',
+        });
       }
     }
   };
@@ -223,26 +227,25 @@ function ListView() {
   return (
     <Layout>
       <PageTitle name="Webhooks" />
-      <Main labelledBy="webhooks">
-        {isLoading ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <>
-            <HeaderLayout
-              as="h1"
-              id="webhooks"
-              title={formatMessage({ id: 'Settings.webhooks.title' })}
-              subtitle={formatMessage({ id: 'Settings.webhooks.list.description' })}
-              primaryAction={
-                <Button
-                  onClick={() => (canCreate ? handleGoTo('create') : {})}
-                  startIcon={<AddIcon />}
-                >
-                  {formatMessage({ id: 'Settings.webhooks.list.button.add' })}
-                </Button>
-              }
-            />
-
+      <Main labelledBy="webhooks" aria-busy={isLoading || loadingWebhooks}>
+        <>
+          <HeaderLayout
+            as="h1"
+            id="webhooks"
+            title={formatMessage({ id: 'Settings.webhooks.title' })}
+            subtitle={formatMessage({ id: 'Settings.webhooks.list.description' })}
+            primaryAction={
+              <Button
+                onClick={() => (canCreate ? handleGoTo('create') : {})}
+                startIcon={<AddIcon />}
+              >
+                {formatMessage({ id: 'Settings.webhooks.list.button.add' })}
+              </Button>
+            }
+          />
+          {isLoading || loadingWebhooks ? (
+            <LoadingIndicatorPage />
+          ) : (
             <ContentLayout>
               <>
                 {rowsCount > 0 ? (
@@ -375,8 +378,8 @@ function ListView() {
                 )}
               </>
             </ContentLayout>
-          </>
-        )}
+          )}
+        </>
       </Main>
       <PopUpWarning
         isOpen={showModal}
