@@ -187,7 +187,10 @@ const deleteByIds = async (ids = []) => {
   const deletedRoles = [];
   for (const id of ids) {
     const deletedRole = await strapi.query('strapi::role').delete({ where: { id } });
-    deletedRoles.push(deletedRole);
+
+    if (deletedRole) {
+      deletedRoles.push(deletedRole);
+    }
   }
 
   return deletedRoles;
@@ -342,8 +345,8 @@ const assignPermissions = async (roleId, permissions = []) => {
   }
 
   if (permissionsToAdd.length > 0) {
-    await addPermissions(roleId, permissionsToAdd);
-    permissionsToReturn.push(...permissionsToAdd);
+    const newPermissions = await addPermissions(roleId, permissionsToAdd);
+    permissionsToReturn.push(...newPermissions);
   }
 
   if (!isSuperAdmin && (permissionsToAdd.length || permissionsToDelete.length)) {

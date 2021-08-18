@@ -26,12 +26,16 @@ const permissionDomain = require('../../domain/permission/index');
  * @returns {Promise<array>}
  */
 const deleteByRolesIds = async rolesIds => {
-  // FIXME: need to delete associations in delete many
-  await strapi.query('strapi::permission').deleteMany({
+  const permissionsToDelete = await strapi.query('strapi::permission').findMany({
+    select: ['id'],
     where: {
       role: { id: rolesIds },
     },
   });
+
+  if (permissionsToDelete.length > 0) {
+    await deleteByIds(permissionsToDelete.map(prop('id')));
+  }
 };
 
 /**
@@ -43,9 +47,6 @@ const deleteByIds = async ids => {
   for (const id of ids) {
     await strapi.query('strapi::permission').delete({ where: { id } });
   }
-
-  // FIXME: find a way to do delete many with auto association deletes (FKs should do the job)$
-  // await strapi.query('strapi::permission').deleteMany({ where: { id: ids } });
 };
 
 /**
@@ -61,9 +62,6 @@ const createMany = async permissions => {
   }
 
   return permissionDomain.toPermission(createdPermissions);
-
-  // FIXME:
-  // await strapi.query('strapi::permission').createMany({ data: permissions })
 };
 
 /**

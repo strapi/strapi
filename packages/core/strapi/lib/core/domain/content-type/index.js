@@ -71,10 +71,12 @@ const createContentType = (uid, definition) => {
   Object.assign(createdContentType.schema.attributes, {
     [CREATED_AT_ATTRIBUTE]: {
       type: 'datetime',
-      // default: () => new Date(),
+      default: () => new Date(),
     },
+    // TODO: handle on edit set to new date
     [UPDATED_AT_ATTRIBUTE]: {
       type: 'datetime',
+      default: () => new Date(),
     },
   });
 

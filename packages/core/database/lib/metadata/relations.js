@@ -9,6 +9,7 @@ const _ = require('lodash/fp');
 const hasInversedBy = _.has('inversedBy');
 const hasMappedBy = _.has('mappedBy');
 
+const isOneToAny = attribute => ['oneToOne', 'oneToMany'].includes(attribute.relation);
 const isBidirectional = attribute => hasInversedBy(attribute) || hasMappedBy(attribute);
 const isOwner = attribute => !isBidirectional(attribute) || hasInversedBy(attribute);
 const shouldUseJoinTable = attribute => attribute.useJoinTable !== false;
@@ -224,7 +225,9 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
       [typeColumnName]: {
         type: 'string',
       },
-      // TODO: add field
+      field: {
+        type: 'string',
+      },
       order: {
         type: 'integer',
         column: {
@@ -257,6 +260,9 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
         name: idColumnName,
         referencedColumn: 'id',
       },
+    },
+    orderBy: {
+      order: 'asc',
     },
   };
 
@@ -303,17 +309,6 @@ const createMorphMany = (attributeName, attribute, meta, metadata) => {
   }
 };
 
-const relationFactoryMap = {
-  oneToOne: createOneToOne,
-  oneToMany: createOneToMany,
-  manyToOne: createManyToOne,
-  manyToMany: createManyToMany,
-  morphToOne: createMorphToOne,
-  morphToMany: createMorphToMany,
-  morphOne: createMorphOne,
-  morphMany: createMorphMany,
-};
-
 /**
  * Creates a relation metadata
  *
@@ -323,13 +318,36 @@ const relationFactoryMap = {
  * @param {Metadata} metadata
  */
 const createRelation = (attributeName, attribute, meta, metadata) => {
-  if (_.has(attribute.relation, relationFactoryMap)) {
-    return relationFactoryMap[attribute.relation](attributeName, attribute, meta, metadata);
+  switch (attribute.relation) {
+    case 'oneToOne':
+      return createOneToOne(attributeName, attribute, meta, metadata);
+    case 'oneToMany':
+      return createOneToMany(attributeName, attribute, meta, metadata);
+    case 'manyToOne':
+      return createManyToOne(attributeName, attribute, meta, metadata);
+    case 'manyToMany':
+      return createManyToMany(attributeName, attribute, meta, metadata);
+    case 'morphToOne':
+      return createMorphToOne(attributeName, attribute, meta, metadata);
+    case 'morphToMany':
+      return createMorphToMany(attributeName, attribute, meta, metadata);
+    case 'morphOne':
+      return createMorphOne(attributeName, attribute, meta, metadata);
+    case 'morphMany':
+      return createMorphMany(attributeName, attribute, meta, metadata);
   }
 
   throw new Error(`Unknown relation ${attribute.relation}`);
 };
 
+/**
+ * Creates a join column info and add them to the attribute meta
+ * @param {Object} metadata metadata registry
+ * @param {Object} param
+ * @param {Object} param.attribute associated attribute
+ * @param {string} param.attributeName name of the associated attribute
+ * @param {Object} param.meta model metadata
+ */
 const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
   const targetMeta = metadata.get(attribute.target);
 
@@ -354,6 +372,14 @@ const createJoinColum = (metadata, { attribute, attributeName /*meta */ }) => {
   }
 };
 
+/**
+ * Creates a join table and add it to the attribute meta
+ * @param {Object} metadata metadata registry
+ * @param {Object} param
+ * @param {Object} param.attribute associated attribute
+ * @param {string} param.attributeName name of the associated attribute
+ * @param {Object} param.meta model metadata
+ */
 const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
   const targetMeta = metadata.get(attribute.target);
 
@@ -442,4 +468,5 @@ module.exports = {
   createRelation,
 
   isBidirectional,
+  isOneToAny,
 };
