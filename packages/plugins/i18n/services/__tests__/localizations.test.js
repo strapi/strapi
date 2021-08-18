@@ -173,9 +173,7 @@ describe('localizations service', () => {
       setGlobalStrapi();
 
       const update = jest.fn();
-      global.strapi.query = () => {
-        return { update };
-      };
+      global.strapi.entityService = { update };
 
       const entry = {
         id: 1,
@@ -188,7 +186,7 @@ describe('localizations service', () => {
       await syncNonLocalizedAttributes(entry, { model });
 
       expect(update).toHaveBeenCalledTimes(1);
-      expect(update).toHaveBeenCalledWith({ where: { id: 2 }, data: { stars: 1 } });
+      expect(update).toHaveBeenCalledWith(model.uid, 2, { data: { stars: 1 } });
     });
   });
 });
