@@ -1,11 +1,11 @@
 'use strict';
 
-const { has, mapKeys, propEq, isNil } = require('lodash/fp');
+const { has, propEq, isNil } = require('lodash/fp');
 
 const operators = require('../../schema/builders/filters/operators');
-const { isMedia, isRelation, isScalar } = require('../utils');
+const { isMedia, isRelation, isStrapiScalar } = require('../utils');
 
-const ROOT_LEVEL_OPERATORS = [operators.AND, operators.OR, operators.NOT];
+const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
 
 // todo[v4]: Find a way to get that dynamically
 const virtualScalarAttributes = ['id'];
@@ -40,9 +40,9 @@ const graphQLFiltersToStrapiQuery = (filters, contentType = {}) => {
       const attribute = attributes[key];
 
       // If it's a scalar attribute
-      if (virtualScalarAttributes.includes(key) || isScalar(attribute)) {
-        // Then map over the filters object (`value`) and replace GraphQL operators (`key`) with Strapi's
-        resultMap[key] = mapKeys(key => operators[key].strapiOperator, value);
+      if (virtualScalarAttributes.includes(key) || isStrapiScalar(attribute)) {
+        // Replace (recursively) every GraphQL scalar operator with the associated Strapi operator
+        resultMap[key] = recursivelyReplaceScalarOperators(value);
       }
 
       // If it's a deep filter on a relation
@@ -72,6 +72,28 @@ const graphQLFiltersToStrapiQuery = (filters, contentType = {}) => {
   }
 
   return resultMap;
+};
+
+const recursivelyReplaceScalarOperators = data => {
+  if (Array.isArray(data)) {
+    return data.map(recursivelyReplaceScalarOperators);
+  }
+
+  if (typeof data !== 'object') {
+    return data;
+  }
+
+  const result = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    const isOperator = !!operators[key];
+
+    const newKey = isOperator ? operators[key].strapiOperator : key;
+
+    result[newKey] = recursivelyReplaceScalarOperators(value);
+  }
+
+  return result;
 };
 
 module.exports = {

@@ -12,7 +12,6 @@ const { KINDS } = constants;
 module.exports = strapi => {
   // todo[v4]: Get the service directly with something like strapi.plugin().service()
   const registry = createTypeRegistry();
-  // const customAPI = strapi.plugins.graphql.services.custom.customAPIRegistry.get('content-api');
   const builders = createBuilders({ strapi, registry });
 
   const registerAPITypes = contentTypes => {

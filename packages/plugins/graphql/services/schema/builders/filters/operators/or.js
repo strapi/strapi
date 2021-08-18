@@ -2,7 +2,7 @@
 
 const { list } = require('nexus');
 
-const OR_FIELD_NAME = 'OR';
+const OR_FIELD_NAME = 'or';
 
 module.exports = {
   fieldName: OR_FIELD_NAME,

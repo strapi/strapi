@@ -3,15 +3,24 @@
 const { camelCase, propEq, upperFirst, lowerFirst, pipe } = require('lodash/fp');
 
 const { toSingular, toPlural } = require('../old/naming');
-const { STRAPI_SCALARS } = require('./constants');
+const { STRAPI_SCALARS, GRAPHQL_SCALARS } = require('./constants');
 
 /**
- * Check if the given attribute is scalar
+ * Check if the given attribute is a Strapi scalar
  * @param {object} attribute
  * @return {boolean}
  */
-const isScalar = attribute => {
+const isStrapiScalar = attribute => {
   return STRAPI_SCALARS.includes(attribute.type);
+};
+
+/**
+ * Check if the given attribute is a GraphQL scalar
+ * @param {object} attribute
+ * @return {boolean}
+ */
+const isGraphQLScalar = attribute => {
+  return GRAPHQL_SCALARS.includes(attribute.type);
 };
 
 /**
@@ -273,7 +282,8 @@ const getDeleteMutationTypeName = buildCustomTypeNameGenerator({
 module.exports = {
   isMorphRelation,
   isEnumeration,
-  isScalar,
+  isStrapiScalar,
+  isGraphQLScalar,
   isRelation,
   isMedia,
   isDynamicZone,

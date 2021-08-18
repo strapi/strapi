@@ -9,7 +9,7 @@ const {
   getContentTypeInputName,
   getEnumName,
   getDynamicZoneInputName,
-  isScalar,
+  isStrapiScalar,
   isRelation,
   isMorphRelation,
   isMedia,
@@ -36,7 +36,7 @@ module.exports = context => {
         definition(t) {
           for (const [attributeName, attribute] of Object.entries(attributes)) {
             // Scalars
-            if (isScalar(attribute)) {
+            if (isStrapiScalar(attribute)) {
               const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
               t.field(attributeName, { type: gqlScalar });

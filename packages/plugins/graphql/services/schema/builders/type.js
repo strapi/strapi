@@ -42,11 +42,7 @@ module.exports = context => ({
       name,
 
       definition(t) {
-        // 1. ID
-        // Always add the ID as a required attribute
-        t.nonNull.id('id');
-
-        // 2. Timestamps
+        // 1. Timestamps
         // If the content type has timestamps enabled
         // then we should add the corresponding attributes in the definition
         if (hasTimestamps) {
@@ -56,7 +52,7 @@ module.exports = context => ({
           t.nonNull.dateTime(updatedAtKey);
         }
 
-        /** 3. Attributes
+        /** 2. Attributes
          *
          * Attributes can be of 7 different kind:
          * - Scalar
@@ -91,7 +87,7 @@ module.exports = context => ({
             const options = { builder, attributeName, attribute, contentType, context };
 
             // Scalars
-            if (typeUtils.isScalar(attribute)) {
+            if (typeUtils.isStrapiScalar(attribute)) {
               addScalarAttribute(options);
             }
 
@@ -215,12 +211,7 @@ const addMediaAttribute = options => {
     context: { strapi },
   } = options;
 
-  if (attribute.multiple) {
-    builder = builder.list;
-  }
-
   const fileContentType = strapi.getModel('plugins::upload.file');
-  const type = typeUtils.getTypeName(fileContentType);
 
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
@@ -229,6 +220,9 @@ const addMediaAttribute = options => {
   });
 
   const args = attribute.multiple ? getContentTypeArgs(fileContentType) : undefined;
+  const type = attribute.multiple
+    ? typeUtils.getEntityResponseCollectionName(fileContentType)
+    : typeUtils.getEntityResponseName(fileContentType);
 
   builder.field(attributeName, { type, resolve, args });
 };
@@ -290,10 +284,6 @@ const addRegularRelationalAttribute = options => {
 
   const isToManyRelation = attribute.relation.endsWith('Many');
 
-  if (isToManyRelation) {
-    builder = builder.list;
-  }
-
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
     attributeName,
@@ -301,7 +291,11 @@ const addRegularRelationalAttribute = options => {
   });
 
   const targetContentType = strapi.getModel(attribute.target);
-  const type = typeUtils.getTypeName(targetContentType);
+
+  const type =
+    isToManyRelation && targetContentType.kind !== 'singleType'
+      ? typeUtils.getEntityResponseCollectionName(targetContentType)
+      : typeUtils.getEntityResponseName(targetContentType);
 
   const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
 

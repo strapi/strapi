@@ -1,7 +1,7 @@
 'use strict';
 
 const { objectType, nonNull } = require('nexus');
-const { prop } = require('lodash/fp');
+const { defaultTo, prop, pipe } = require('lodash/fp');
 
 const { utils, constants } = require('../../types');
 
@@ -22,7 +22,7 @@ module.exports = () => ({
         t.nonNull.list.field('data', {
           type: nonNull(entityName),
 
-          resolve: prop('nodes'),
+          resolve: pipe(prop('nodes'), defaultTo([])),
         });
 
         t.nonNull.field('meta', {

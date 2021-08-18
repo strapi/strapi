@@ -21,21 +21,27 @@ const buildAssociationResolver = ({ contentTypeUID, attributeName, strapi }) => 
   const targetUID = utils.isMedia(attribute) ? 'plugins::upload.file' : attribute.target;
   const targetContentType = strapi.getModel(targetUID);
 
-  return (parent, args = {}) => {
+  return async (parent, args = {}) => {
     const transformedArgs = transformArgs(args, {
       contentType: targetContentType,
       usePagination: true,
     });
 
     // todo[v4]: move the .load to the entity service?
-    const hotFixedArgs = {
+    const entityManagerArgs = {
       ...omit(['start', 'filters'], transformedArgs),
       where: transformedArgs.filters,
       offset: transformedArgs.start,
     };
 
-    // todo[v4]: Should we be able to run policies here too?
-    return entityManager.load(contentTypeUID, parent, attributeName, hotFixedArgs);
+    const data = await entityManager.load(contentTypeUID, parent, attributeName, entityManagerArgs);
+
+    // todo[v4]: Replace with a check on the attribute (handle case where data is null but for an array
+    if (Array.isArray(data)) {
+      return { nodes: data, info: { args: transformedArgs, resourceUID: targetUID } };
+    }
+
+    return { value: data };
   };
 };
 

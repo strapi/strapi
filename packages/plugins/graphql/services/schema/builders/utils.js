@@ -9,7 +9,7 @@ const {
 const {
   args,
   mappers: { strapiScalarToGraphQLScalar, graphQLFiltersToStrapiQuery },
-  utils: { isScalar, getScalarFilterInputTypeName, getFiltersInputTypeName },
+  utils: { isStrapiScalar, getScalarFilterInputTypeName, getFiltersInputTypeName },
 } = require('../../types');
 
 /**
@@ -19,7 +19,7 @@ const {
  */
 const getUniqueScalarAttributes = attributes => {
   const uniqueAttributes = entries(attributes).filter(
-    ([, attribute]) => isScalar(attribute) && attribute.unique
+    ([, attribute]) => isStrapiScalar(attribute) && attribute.unique
   );
 
   return Object.fromEntries(uniqueAttributes);

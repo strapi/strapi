@@ -5,7 +5,7 @@ const { inputObjectType } = require('nexus');
 const { utils, mappers } = require('../../../types');
 const operators = require('./operators');
 
-const rootLevelOperators = [operators.AND, operators.OR, operators.NOT];
+const rootLevelOperators = [operators.and, operators.or, operators.not];
 
 function buildContentTypeFilters(contentType) {
   const { attributes } = contentType;
@@ -19,7 +19,7 @@ function buildContentTypeFilters(contentType) {
       // Add every defined attribute
       for (const [attributeName, attribute] of Object.entries(attributes)) {
         // Handle scalars
-        if (utils.isScalar(attribute)) {
+        if (utils.isStrapiScalar(attribute)) {
           addScalarAttribute(t, attributeName, attribute);
         }
 

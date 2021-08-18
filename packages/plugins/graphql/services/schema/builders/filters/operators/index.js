@@ -1,8 +1,8 @@
 'use strict';
 
-const AND = require('./AND');
-const OR = require('./OR');
-const NOT = require('./NOT');
+const and = require('./and');
+const or = require('./or');
+const not = require('./not');
 const eq = require('./eq');
 const startsWith = require('./starts-with');
 const endsWith = require('./ends-with');
@@ -11,9 +11,9 @@ const gt = require('./gt');
 const lt = require('./lt');
 
 module.exports = {
-  AND,
-  OR,
-  NOT,
+  and,
+  or,
+  not,
   eq,
   startsWith,
   endsWith,

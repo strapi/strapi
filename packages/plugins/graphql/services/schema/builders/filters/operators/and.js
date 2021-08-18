@@ -2,7 +2,7 @@
 
 const { list } = require('nexus');
 
-const AND_FIELD_NAME = 'AND';
+const AND_FIELD_NAME = 'and';
 
 module.exports = {
   fieldName: AND_FIELD_NAME,

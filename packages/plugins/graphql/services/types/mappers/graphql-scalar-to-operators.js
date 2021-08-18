@@ -6,6 +6,7 @@ const {
   eq,
   gt,
   lt,
+  not,
   contains,
   endsWith,
   startsWith,
@@ -13,21 +14,21 @@ const {
 
 const associations = {
   // ID
-  ID: [eq],
+  ID: [eq, not],
   // Booleans
-  Boolean: [eq],
+  Boolean: [eq, not],
   // Strings
-  String: [eq, contains, startsWith, endsWith],
+  String: [eq, not, contains, startsWith, endsWith],
   // Numbers
-  Int: [eq, gt, lt],
-  Long: [eq, gt, lt],
-  Float: [eq, gt, lt],
+  Int: [eq, not, gt, lt],
+  Long: [eq, not, gt, lt],
+  Float: [eq, not, gt, lt],
   // Dates
-  Date: [eq, gt, lt],
-  Time: [eq, gt, lt],
-  DateTime: [eq, gt, lt],
+  Date: [eq, not, gt, lt],
+  Time: [eq, not, gt, lt],
+  DateTime: [eq, not, gt, lt],
   // Others
-  JSON: [eq],
+  JSON: [eq, not],
 };
 
 const enabledScalars = Object.keys(associations).filter(key => associations[key].length > 0);
