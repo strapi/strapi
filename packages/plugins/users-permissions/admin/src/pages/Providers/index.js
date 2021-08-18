@@ -22,12 +22,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
-import { Stack } from '@strapi/parts/Stack';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
 import { Text, TableLabel } from '@strapi/parts/Text';
-import { Row as FlexRow } from '@strapi/parts/Row';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import forms from './utils/forms';
@@ -36,7 +33,6 @@ import ModalForm from '../../components/ModalForm';
 import { getRequestURL, getTrad } from '../../utils';
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
-import Settings from '@strapi/icons/Settings';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -69,10 +65,6 @@ const ProvidersPage = () => {
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
   const rowCount = providers.length;
-  // const enabledProvidersCount = useMemo(
-  //   () => providers.filter(provider => provider.enabled).length,
-  //   [providers]
-  // );
 
   const isProviderWithSubdomain = useMemo(() => {
     if (!providerToEditName) {
@@ -83,31 +75,6 @@ const ProvidersPage = () => {
 
     return has(providerToEdit, 'subdomain');
   }, [providers, providerToEditName]);
-
-  // const disabledProvidersCount = useMemo(() => {
-  //   return providers.length - enabledProvidersCount;
-  // }, [providers, enabledProvidersCount]);
-
-  // const listTitle = useMemo(() => {
-  //   const enabledMessage = formatMessage(
-  //     {
-  //       id: getTrad(
-  //         `List.title.providers.enabled.${enabledProvidersCount > 1 ? 'plural' : 'singular'}`
-  //       ),
-  //     },
-  //     { number: enabledProvidersCount }
-  //   );
-  //   const disabledMessage = formatMessage(
-  //     {
-  //       id: getTrad(
-  //         `List.title.providers.disabled.${disabledProvidersCount > 1 ? 'plural' : 'singular'}`
-  //       ),
-  //     },
-  //     { number: disabledProvidersCount }
-  //   );
-
-  //   return `${enabledMessage} ${disabledMessage}`;
-  // }, [formatMessage, enabledProvidersCount, disabledProvidersCount]);
 
   const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
 
@@ -215,7 +182,7 @@ const ProvidersPage = () => {
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <Main labelledBy="providers">
+      <Main labelledBy={formatMessage({ id: getTrad('HeaderNav.link.providers') })}>
         <HeaderLayout
           as="h1"
           id="providers"
@@ -227,25 +194,28 @@ const ProvidersPage = () => {
               <Tr>
                 <Th>
                   <TableLabel>
-                    <VisuallyHidden>image</VisuallyHidden>
+                    <VisuallyHidden>
+                      {formatMessage({ id: getTrad('Providers.image') })}
+                    </VisuallyHidden>
                   </TableLabel>
                 </Th>
                 <Th>
-                  <TableLabel>name</TableLabel>
+                  <TableLabel>{formatMessage({ id: getTrad('Providers.name') })}</TableLabel>
                 </Th>
                 <Th>
-                  <TableLabel>status</TableLabel>
+                  <TableLabel>{formatMessage({ id: getTrad('Providers.status') })}</TableLabel>
                 </Th>
                 <Th>
                   <TableLabel>
-                    <VisuallyHidden>Settings</VisuallyHidden>
+                    <VisuallyHidden>
+                      {formatMessage({ id: getTrad('Providers.settings') })}
+                    </VisuallyHidden>
                   </TableLabel>
                 </Th>
               </Tr>
             </Thead>
             <Tbody>
               {providers.map(provider => (
-                
                 <Tr key={provider.name}>
                   <Td width="">
                     <FontAwesomeIcon icon={provider.icon} />
@@ -256,7 +226,11 @@ const ProvidersPage = () => {
                     </Text>
                   </Td>
                   <Td width="65%">
-                    <Text textColor={provider.enabled ? 'success600' : 'danger600'}>{provider.enabled ? 'enabled' : 'disabled'}</Text>
+                    <Text textColor={provider.enabled ? 'success600' : 'danger600'}>
+                      {provider.enabled
+                        ? formatMessage({ id: getTrad('Providers.enabled') })
+                        : formatMessage({ id: getTrad('Providers.disabled') })}
+                    </Text>
                   </Td>
                   <Td>
                     {canUpdate && (
@@ -274,38 +248,6 @@ const ProvidersPage = () => {
           </Table>
         </ContentLayout>
       </Main>
-      {/* <div>
-        <List
-          title={listTitle}
-          items={providers}
-          isLoading={isLoadingForPermissions || isLoading}
-          customRowComponent={provider => (
-            <ListRow
-              {...provider}
-              onClick={() => handleClickEdit(provider)}
-              links={[
-                {
-                  icon: canUpdate ? <Pencil fill="#0e1622" /> : null,
-                  onClick: e => {
-                    e.stopPropagation();
-                    handleClickEdit(provider);
-                  },
-                },
-              ]}
-            >
-              <td key="enabled">
-                <Text
-                  fontWeight="semiBold"
-                  lineHeight="18px"
-                  color={provider.enabled ? 'green' : 'lightOrange'}
-                >
-                  {provider.enabled ? 'Enabled' : 'Disabled'}
-                </Text>
-              </td>
-            </ListRow>
-          )}
-        />
-      </div> */}
       <ModalForm
         isOpen={isOpen}
         onClick={handleClick}
