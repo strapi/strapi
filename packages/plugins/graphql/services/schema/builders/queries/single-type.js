@@ -1,23 +1,11 @@
 'use strict';
 
 const { extendType } = require('nexus');
-const { omit } = require('lodash/fp');
 
 const { actionExists } = require('../../../old/utils');
 const { buildQueriesResolvers } = require('../../resolvers');
-
-const { args, utils, mappers } = require('../../../types');
-
-const { graphQLFiltersToStrapiQuery } = mappers;
-
-// todo[v4]: unify & move elsewhere
-const transformArgs = (args, contentType) => {
-  return {
-    ...omit(['pagination', 'filters'], args),
-    ...args.pagination,
-    where: graphQLFiltersToStrapiQuery(args.filters, contentType),
-  };
-};
+const { transformArgs } = require('../utils');
+const { args, utils } = require('../../../types');
 
 module.exports = () => {
   const buildSingleTypeQueries = contentType => {

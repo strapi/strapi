@@ -90,6 +90,11 @@ const convertExtraRootParams = params => {
  * @param {string[]} sortQuery - ex: ["id:asc", "price:desc"]
  */
 const convertSortQueryParams = sortQuery => {
+  // todo[v4]: Clean the convert-sort-query-param behaviour
+  if (typeof sortQuery === 'string') {
+    sortQuery = sortQuery.split(',');
+  }
+
   if (!Array.isArray(sortQuery)) {
     throw new Error(`convertSortQueryParams expected an array of string, got ${typeof sortQuery}`);
   }

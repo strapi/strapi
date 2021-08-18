@@ -39,7 +39,6 @@ const scalarAttributesToFiltersMap = mapValues(attribute => {
 /**
  * Apply basic transform to GQL args
  */
-// todo[v4]: unify & move elsewhere
 const transformArgs = (args, { contentType, usePagination = false } = {}) => {
   const { pagination = {}, filters = {} } = args;
 

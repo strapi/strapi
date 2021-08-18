@@ -8,14 +8,16 @@ const buildComponentResolver = ({ contentTypeUID, attributeName, strapi }) => {
     const contentType = strapi.getModel(contentTypeUID);
     const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
-    // todo[v4]: move the .load to the entity service?
-    const hotFixedArgs = {
+    // Since we're using the entity-manager & not the entity-service to load the
+    // association, we need to apply some transformation to the transformed args object
+    const entityManagerArgs = {
       ...omit(['start', 'filters'], transformedArgs),
       where: transformedArgs.filters,
       offset: transformedArgs.start,
     };
 
-    return strapi.db.entityManager.load(contentTypeUID, source, attributeName, hotFixedArgs);
+    // todo[v4]: should we move the .load to the entity service so we can use the same args everywhere?
+    return strapi.db.entityManager.load(contentTypeUID, source, attributeName, entityManagerArgs);
   };
 };
 

@@ -25,7 +25,7 @@ const buildAssociationResolver = ({ contentTypeUID, attributeName, strapi }) => 
 
   const targetContentType = strapi.getModel(targetUID);
 
-  return async (parent, args = {}) => {
+  return async (source, args = {}) => {
     const transformedArgs = transformArgs(args, {
       contentType: targetContentType,
       usePagination: true,
@@ -39,8 +39,8 @@ const buildAssociationResolver = ({ contentTypeUID, attributeName, strapi }) => 
       offset: transformedArgs.start,
     };
 
-    // todo[v4]: move the .load to the entity service so we can use the same args everywhere?
-    const data = await entityManager.load(contentTypeUID, parent, attributeName, entityManagerArgs);
+    // todo[v4]: should we move the .load to the entity service so we can use the same args everywhere?
+    const data = await entityManager.load(contentTypeUID, source, attributeName, entityManagerArgs);
 
     // If this a polymorphic association, it returns the raw data
     if (isMorph) {

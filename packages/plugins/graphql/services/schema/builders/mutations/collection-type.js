@@ -28,7 +28,7 @@ module.exports = () => {
       },
 
       async resolve(source, args) {
-        // todo[v4]: what about media? (type === 'media')
+        // todo[v4]: need to handle media too? (type === 'media')
 
         const transformedArgs = builderUtils.transformArgs(args, { contentType });
 

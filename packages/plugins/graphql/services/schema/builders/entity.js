@@ -27,7 +27,7 @@ const buildEntityDefinition = contentType => {
         resolve: source => source,
       });
 
-      // todo[v4]: add the meta field to the entity when there will be data in it
+      // todo[v4]: add the meta field to the entity when there will be data in it (can't add an empty type for now)
       // t.field('meta', { type: utils.getEntityMetaName(contentType) });
     },
   });
