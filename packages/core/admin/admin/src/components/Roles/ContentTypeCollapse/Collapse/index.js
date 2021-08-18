@@ -197,7 +197,8 @@ const Collapse = ({
                             name: checkboxName,
                             value,
                           },
-                        })}
+                        })
+                      }
                       indeterminate={hasSomeActionsSelected}
                       value={hasAllActionsSelected}
                     />
@@ -219,7 +220,8 @@ const Collapse = ({
                           name: checkboxName,
                           value,
                         },
-                      })}
+                      })
+                    }
                     value={hasAllActionsSelected}
                   />
                 </Cell>

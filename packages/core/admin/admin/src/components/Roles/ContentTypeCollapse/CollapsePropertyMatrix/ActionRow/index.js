@@ -149,7 +149,8 @@ const ActionRow = ({
                             name: checkboxName.join('..'),
                             value,
                           },
-                        })}
+                        })
+                      }
                       value={checkboxValue}
                     />
                   </Cell>
@@ -172,7 +173,8 @@ const ActionRow = ({
                           name: checkboxName.join('..'),
                           value,
                         },
-                      })}
+                      })
+                    }
                     aria-label={formatMessage(
                       {
                         id: `Settings.permissions.select-by-permission`,
