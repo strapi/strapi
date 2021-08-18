@@ -1,8 +1,11 @@
 {
   "collectionName": "up_users",
   "info": {
-    "name": "user",
-    "description": ""
+    "name": "User",
+    "description": "",
+    "singularName": "user",
+    "pluralName": "users",
+    "displayName": "User"
   },
   "options": {
     "draftAndPublish": false
@@ -59,7 +62,9 @@
       "configurable": false
     },
     "picture": {
-      "type": "media"
+      "type": "media",
+      "multiple": false,
+      "required": false
     }
   }
 }

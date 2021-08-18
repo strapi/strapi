@@ -31,17 +31,14 @@ module.exports = async () => {
   await getService('users-permissions').initialize();
 
   // TODO: adapt with new extension system
-  if (!_.get(strapi.plugins['users-permissions'], 'config.jwtSecret')) {
+  if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
     const jwtSecret = uuid();
-    _.set(strapi.plugins['users-permissions'], 'config.jwtSecret', jwtSecret);
+    strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret),
+      (strapi.reload.isWatching = false);
 
-    strapi.reload.isWatching = false;
-
-    await strapi.fs.writePluginFile(
-      'users-permissions',
-      'config/jwt.js',
-      `module.exports = {\n  jwtSecret: process.env.JWT_SECRET || '${jwtSecret}'\n};`
-    );
+    if (!process.env.JWT_SECRET) {
+      await strapi.fs.appendFile('.env', `JWT_SECRET=${jwtSecret}\n`);
+    }
 
     strapi.reload.isWatching = true;
   }

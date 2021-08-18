@@ -82,12 +82,11 @@ module.exports = async function({ build, watchAdmin, polling, browser }) {
         polling,
       });
 
-      process.on('message', message => {
+      process.on('message', async message => {
         switch (message) {
           case 'isKilled':
-            strapiInstance.server.destroy(() => {
-              process.send('kill');
-            });
+            await strapiInstance.server.destroy();
+            process.send('kill');
             break;
           default:
           // Do nothing.

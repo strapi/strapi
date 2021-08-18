@@ -150,7 +150,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async uploadFileAndPersist(fileData, { user } = {}) {
-    const config = strapi.plugins.upload.config;
+    const config = strapi.config.get('plugin.upload');
 
     const {
       getDimensions,

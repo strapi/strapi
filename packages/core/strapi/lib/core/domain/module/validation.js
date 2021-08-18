@@ -23,7 +23,7 @@ const strapiServerSchema = yup
     services: yup.object().required(),
     policies: yup.object().required(),
     middlewares: yup.object().required(), // may be removed later
-    contentTypes: yup.array().required(),
+    contentTypes: yup.object().required(),
   })
   .noUnknown();
 

@@ -103,7 +103,7 @@ class Strapi {
 
       return this;
     } catch (error) {
-      return this.stopWithError(error.message);
+      return this.stopWithError(error);
     }
   }
 
@@ -327,7 +327,7 @@ class Strapi {
         return;
       }
 
-      if (this.config.autoReload) {
+      if (this.config.get('autoReload')) {
         this.server.destroy();
         process.send('reload');
       }

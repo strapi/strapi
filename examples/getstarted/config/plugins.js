@@ -5,9 +5,12 @@ const path = require('path');
 module.exports = ({ env }) => ({
   graphql: {
     enabled: true,
-    config: require('./plugins/graphql')({ env }),
-  },
-  i18n: {
-    config: require('./plugins/i18n')({ env }),
+    config: {
+      amountLimit: 50,
+      depthLimit: 10,
+      apolloServer: {
+        tracing: true,
+      },
+    },
   },
 });
