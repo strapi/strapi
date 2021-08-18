@@ -1,20 +1,29 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Flex, Text } from '@buffetjs/core';
+import { Row, Box } from '@strapi/parts';
 import styled from 'styled-components';
+import { cellWidth, firstRowWidth } from '../../../Permissions/utils/constants';
 // Those styles are very specific.
 // so it is not a big problem to use custom paddings and widths.
 const HeaderLabel = styled.div`
-  width: 12rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
+  justify-content: center;
+  display: flex;
+  width: ${cellWidth};
 `;
 const PropertyLabelWrapper = styled.div`
-  width: 18rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-  padding-left: 3.5rem;
+  width: ${firstRowWidth};
+  display: flex;
+  align-items: center;
+  padding-left: ${({ theme }) => theme.spaces[6]};
+  height: 52px;
+`;
+
+const Label = styled(Box)`
+  font-size: ${11 / 16}rem;
+  text-transform: uppercase;
+  color: ${({ theme }) => theme.colors.neutral500};
+  font-weight: bold;
 `;
 
 const Header = ({ headers, label }) => {
@@ -28,9 +37,9 @@ const Header = ({ headers, label }) => {
   );
 
   return (
-    <Flex>
+    <Row>
       <PropertyLabelWrapper>
-        <Text fontWeight="bold">{translatedLabel}</Text>
+        <Label>{translatedLabel}</Label>
       </PropertyLabelWrapper>
       {headers.map(header => {
         if (!header.isActionRelatedToCurrentProperty) {
@@ -39,16 +48,16 @@ const Header = ({ headers, label }) => {
 
         return (
           <HeaderLabel key={header.label}>
-            <Text textTransform="capitalize" fontWeight="bold">
+            <Label>
               {formatMessage({
                 id: `Settings.roles.form.permissions.${header.label.toLowerCase()}`,
                 defaultMessage: header.label,
               })}
-            </Text>
+            </Label>
           </HeaderLabel>
         );
       })}
-    </Flex>
+    </Row>
   );
 };
 

@@ -1,8 +1,33 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox, Text } from '@buffetjs/core';
+import styled from 'styled-components';
+import { Checkbox, Text, Box } from '@strapi/parts';
 import CollapseLabel from '../CollapseLabel';
-import Wrapper from './Wrapper';
+import { firstRowWidth } from '../Permissions/utils/constants';
+
+const Wrapper = styled(Box)`
+  display: flex;
+  align-items: center;
+  width: ${firstRowWidth};
+  padding-left: ${({ theme }) => theme.spaces[6]};
+
+  ${({ disabled, theme }) =>
+    disabled &&
+    `
+    input[type='checkbox'] {
+    cursor: not-allowed;
+      &:after {
+        color: ${theme.main.colors.grey};
+      }
+    }
+  `};
+`;
+
+const StyledText = styled(Text)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 const RowLabelWithCheckbox = ({
   children,
@@ -13,17 +38,22 @@ const RowLabelWithCheckbox = ({
   onClick,
   checkboxName,
   someChecked,
-  textColor,
   value,
-  width,
 }) => {
   return (
-    <Wrapper width={width} disabled={isFormDisabled}>
+    <Wrapper disabled={isFormDisabled}>
       <Checkbox
         name={checkboxName}
         disabled={isFormDisabled}
-        onChange={onChange}
-        someChecked={someChecked}
+        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+        onValueChange={value =>
+          onChange({
+            target: {
+              name: checkboxName,
+              value,
+            },
+          })}
+        indeterminate={someChecked}
         value={value}
       />
       <CollapseLabel
@@ -32,16 +62,7 @@ const RowLabelWithCheckbox = ({
         isCollapsable={isCollapsable}
         onClick={onClick}
       >
-        <Text
-          color={textColor}
-          ellipsis
-          fontSize="xs"
-          fontWeight="bold"
-          lineHeight="20px"
-          textTransform="uppercase"
-        >
-          {label}
-        </Text>
+        <StyledText>{label.charAt(0).toUpperCase() + label.slice(1)}</StyledText>
         {children}
       </CollapseLabel>
     </Wrapper>
@@ -55,8 +76,6 @@ RowLabelWithCheckbox.defaultProps = {
   value: false,
   someChecked: false,
   isCollapsable: false,
-  textColor: 'grey',
-  width: '18rem',
 };
 
 RowLabelWithCheckbox.propTypes = {
@@ -68,9 +87,7 @@ RowLabelWithCheckbox.propTypes = {
   onChange: PropTypes.func,
   onClick: PropTypes.func.isRequired,
   someChecked: PropTypes.bool,
-  textColor: PropTypes.string,
   value: PropTypes.bool,
-  width: PropTypes.string,
 };
 
 export default memo(RowLabelWithCheckbox);

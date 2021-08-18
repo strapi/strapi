@@ -1,4 +1,3 @@
-import { Box } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import React, { useCallback, useMemo } from 'react';
 import Collapse from './Collapse';
@@ -24,10 +23,8 @@ const ContentTypeCollapse = ({
     return getAvailableActions(allActions, contentTypeName);
   }, [allActions, contentTypeName]);
 
-  const isOdd = useMemo(() => index % 2 !== 0, [index]);
-
   return (
-    <Box>
+    <>
       <Collapse
         availableActions={availableActions}
         isActive={isActive}
@@ -49,11 +46,10 @@ const ContentTypeCollapse = ({
               propertyName={value}
               key={value}
               isLast={i === properties.length - 1}
-              isOdd={isOdd}
             />
           );
         })}
-    </Box>
+    </>
   );
 };
 

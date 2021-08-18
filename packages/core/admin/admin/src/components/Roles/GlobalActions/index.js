@@ -6,8 +6,8 @@ import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../hooks';
+import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
 import { findDisplayedActions, getCheckboxesState } from './utils';
-import Wrapper from './Wrapper';
 
 const Label = styled(Box)`
   font-size: ${11 / 16}rem;
@@ -22,7 +22,22 @@ const CenteredStack = styled(Stack)`
   justify-content: center;
   display: flex;
   flex-direction: column;
-  width: 120px;
+  width: ${cellWidth};
+`;
+
+const Wrapper = styled.div`
+  padding-left: ${firstRowWidth};
+  padding-bottom: ${({ theme }) => theme.spaces[4]};
+  padding-top: ${({ theme }) => theme.spaces[6]};
+  ${({ disabled, theme }) =>
+    `
+    input[type='checkbox'] {
+      &:after {
+        color: ${!disabled ? theme.main.colors.mediumBlue : theme.main.colors.grey};
+      }
+    }
+    cursor: initial;
+    `}
 `;
 
 const GlobalActions = ({ actions, isFormDisabled, kind }) => {
@@ -39,7 +54,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
 
   return (
     <Wrapper disabled={isFormDisabled}>
-      <Stack horizontal size={4}>
+      <Stack horizontal>
         {displayedActions.map(({ label, actionId }) => {
           return (
             <CenteredStack key={actionId} size={3}>
