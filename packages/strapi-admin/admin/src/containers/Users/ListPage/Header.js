@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useGlobalContext } from 'strapi-helper-plugin';
 import { Button } from '@buffetjs/core';
 import { Header as HeaderCompo } from '@buffetjs/custom';
-import { Plus } from '@buffetjs/icons';
+import { Envelope } from '@buffetjs/icons';
 
 const Header = ({
   canCreate,
@@ -36,7 +36,7 @@ const Header = ({
 
           {
             color: 'primary',
-            icon: <Plus style={{ verticalAlign: 'middle' }} />,
+            icon: <Envelope style={{ verticalAlign: 'middle' }} />,
             label: formatMessage({ id: 'Settings.permissions.users.create' }),
             onClick: onClickAddUser,
             type: 'button',
