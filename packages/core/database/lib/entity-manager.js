@@ -382,13 +382,15 @@ const createEntityManager = db => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = toAssocs(data[attributeName]).map(data => {
+            const rows = toAssocs(data[attributeName]).map((data, idx) => {
               return {
                 [joinColumn.name]: data.id,
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
                 ...(joinTable.on || {}),
                 ...(data.__pivot || {}),
+                order: idx + 1,
+                field: attributeName,
               };
             });
 
@@ -552,15 +554,18 @@ const createEntityManager = db => {
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
                 ...(joinTable.on || {}),
+                field: attributeName,
               })
               .execute();
 
-            const rows = toAssocs(data[attributeName]).map(data => ({
+            const rows = toAssocs(data[attributeName]).map((data, idx) => ({
               [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
               ...(joinTable.on || {}),
               ...(data.__pivot || {}),
+              order: idx + 1,
+              field: attributeName,
             }));
 
             if (_.isEmpty(rows)) {
@@ -732,6 +737,7 @@ const createEntityManager = db => {
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
                 ...(joinTable.on || {}),
+                field: attributeName,
               })
               .execute();
           }

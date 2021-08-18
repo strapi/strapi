@@ -23,7 +23,7 @@ const uploadImg = () => {
 
 const components = {
   singleMedia: {
-    name: 'single-media',
+    name: 'one-media',
     attributes: {
       media: {
         type: 'media',
@@ -31,7 +31,7 @@ const components = {
     },
   },
   multipleMedia: {
-    name: 'multiple-media',
+    name: 'many-media',
     attributes: {
       media: {
         type: 'media',
@@ -44,11 +44,11 @@ const components = {
     attributes: {
       singleMedia: {
         type: 'component',
-        component: 'default.single-media',
+        component: 'default.one-media',
       },
       multipleMedia: {
         type: 'component',
-        component: 'default.multiple-media',
+        component: 'default.many-media',
       },
     },
   },
@@ -59,7 +59,7 @@ const ct = {
   attributes: {
     field: {
       type: 'dynamiczone',
-      components: ['default.single-media', 'default.multiple-media', 'default.with-nested'],
+      components: ['default.one-media', 'default.many-media', 'default.with-nested'],
     },
   },
 };
@@ -101,11 +101,11 @@ describe('Not required dynamiczone', () => {
         body: {
           field: [
             {
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: mediaId,
             },
             {
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: [mediaId, mediaId],
             },
           ],
@@ -122,7 +122,7 @@ describe('Not required dynamiczone', () => {
           field: [
             {
               id: expect.anything(),
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: {
                 id: mediaId,
                 url: expect.any(String),
@@ -130,7 +130,7 @@ describe('Not required dynamiczone', () => {
             },
             {
               id: expect.anything(),
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: expect.arrayContaining([
                 expect.objectContaining({
                   id: mediaId,
@@ -155,11 +155,11 @@ describe('Not required dynamiczone', () => {
         body: {
           field: [
             {
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: mediaId,
             },
             {
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: [mediaId, mediaId],
             },
           ],
@@ -182,11 +182,11 @@ describe('Not required dynamiczone', () => {
         body: {
           field: [
             {
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: newMediaId,
             },
             {
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: [newMediaId, newMediaId],
             },
           ],
@@ -201,7 +201,7 @@ describe('Not required dynamiczone', () => {
           field: [
             {
               id: expect.anything(),
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: {
                 id: newMediaId,
                 url: expect.any(String),
@@ -209,7 +209,7 @@ describe('Not required dynamiczone', () => {
             },
             {
               id: expect.anything(),
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: expect.arrayContaining([
                 expect.objectContaining({
                   id: newMediaId,
@@ -234,11 +234,11 @@ describe('Not required dynamiczone', () => {
         body: {
           field: [
             {
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: mediaId,
             },
             {
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: [mediaId, mediaId],
             },
           ],
@@ -263,7 +263,7 @@ describe('Not required dynamiczone', () => {
           field: [
             {
               id: expect.anything(),
-              __component: 'default.single-media',
+              __component: 'default.one-media',
               media: {
                 id: mediaId,
                 url: expect.any(String),
@@ -271,7 +271,7 @@ describe('Not required dynamiczone', () => {
             },
             {
               id: expect.anything(),
-              __component: 'default.multiple-media',
+              __component: 'default.many-media',
               media: expect.arrayContaining([
                 expect.objectContaining({
                   id: mediaId,

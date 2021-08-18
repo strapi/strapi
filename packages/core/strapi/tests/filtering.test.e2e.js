@@ -971,14 +971,14 @@ describe('Filtering API', () => {
       expect(res.body.data).toEqual(expect.arrayContaining([data.product[0]]));
     });
 
-    test.skip('Filter contains insensitive', async () => {
+    test('Filter contains insensitive', async () => {
       const res = await rq({
         method: 'GET',
         url: '/products',
         qs: {
           filters: {
             name: {
-              $contains: ['Product', '1'],
+              $containsi: ['Product', '1'],
             },
           },
         },
@@ -987,14 +987,14 @@ describe('Filtering API', () => {
       expect(res.body.data).toEqual(expect.arrayContaining([data.product[0]]));
     });
 
-    test.skip('Filter not contains insensitive', async () => {
+    test('Filter not contains insensitive', async () => {
       const res = await rq({
         method: 'GET',
         url: '/products',
         qs: {
           filters: {
             name: {
-              $notContains: ['Product', 'Non existent'],
+              $notContainsi: ['Product', 'Non existent'],
             },
           },
         },

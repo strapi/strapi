@@ -164,6 +164,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    // FIXME: upload in components
     if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(uid, entity, files);
       entity = await this.findOne(uid, entity.id, { params });
@@ -203,6 +204,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     });
 
     // TODO: upload the files then set the links in the entity like with compo to avoid making too many queries
+    // FIXME: upload in components
     if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(uid, entity, files);
       entity = await this.findOne(uid, entity.id, { params });

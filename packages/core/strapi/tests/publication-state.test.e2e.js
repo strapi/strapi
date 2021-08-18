@@ -154,6 +154,8 @@ describe('Publication State', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
+    console.log(JSON.stringify(builder.sanitizedFixtures(strapi), null, 2));
+
     Object.assign(data, builder.sanitizedFixtures(strapi));
   });
 

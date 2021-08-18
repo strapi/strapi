@@ -46,7 +46,8 @@ module.exports = {
     const roleService = getService('role');
 
     const roles = await roleService.deleteByIds([id]);
-    const sanitizedRole = roles.map(roleService.sanitizeRole)[0] || null;
+
+    const sanitizedRole = roles.map(role => roleService.sanitizeRole(role))[0] || null;
 
     return ctx.deleted({
       data: sanitizedRole,
@@ -107,6 +108,7 @@ module.exports = {
     }
 
     const permissions = await roleService.assignPermissions(role.id, input.permissions);
+
     const sanitizedPermissions = permissions.map(permissionService.sanitizePermission);
 
     ctx.body = {
