@@ -25,9 +25,9 @@ import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
 import { Text, TableLabel } from '@strapi/parts/Text';
-// import { Row as FlexRow } from '@strapi/parts/Row';
+import { Row as FlexRow } from '@strapi/parts/Row';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
-// import { Box } from '@strapi/parts/Box';
+import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import forms from './utils/forms';
@@ -36,7 +36,7 @@ import ModalForm from '../../components/ModalForm';
 import { getRequestURL, getTrad } from '../../utils';
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
-// import Settings from '@strapi/icons/Settings';
+import Settings from '@strapi/icons/Settings';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -68,7 +68,7 @@ const ProvidersPage = () => {
   } = useForm('providers', updatePermissions);
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
-
+  const rowCount = providers.length;
   // const enabledProvidersCount = useMemo(
   //   () => providers.filter(provider => provider.enabled).length,
   //   [providers]
@@ -222,9 +222,14 @@ const ProvidersPage = () => {
           title={formatMessage({ id: getTrad('HeaderNav.link.providers') })}
         />
         <ContentLayout>
-          <Table colCount={3} rowCount={2}>
+          <Table colCount={4} rowCount={rowCount + 1}>
             <Thead>
               <Tr>
+                <Th>
+                  <TableLabel>
+                    <VisuallyHidden>image</VisuallyHidden>
+                  </TableLabel>
+                </Th>
                 <Th>
                   <TableLabel>name</TableLabel>
                 </Th>
@@ -234,28 +239,24 @@ const ProvidersPage = () => {
                 <Th>
                   <TableLabel>
                     <VisuallyHidden>Settings</VisuallyHidden>
-                    {/* <Box hasRadius padding={2} shadow="filterShadow">
-                      <Settings />
-                    </Box> */}
                   </TableLabel>
                 </Th>
               </Tr>
             </Thead>
             <Tbody>
               {providers.map(provider => (
+                
                 <Tr key={provider.name}>
-                  <Td width="40%">
-                    {/* <FlexRow alignItems='center'> */}
-                    <Stack horizontal size={5}>
-                      <FontAwesomeIcon icon={provider.icon} />
-                      <Text highlighted textColor="neutral800">
-                        {provider.name}
-                      </Text>
-                    </Stack>
-                    {/* </FlexRow> */}
+                  <Td width="">
+                    <FontAwesomeIcon icon={provider.icon} />
                   </Td>
-                  <Td width="60%">
-                    <Text textColor="neutral800">{provider.enabled ? 'enabled' : 'disabled'}</Text>
+                  <Td width="45%">
+                    <Text highlighted textColor="neutral800">
+                      {provider.name}
+                    </Text>
+                  </Td>
+                  <Td width="65%">
+                    <Text textColor={provider.enabled ? 'success600' : 'danger600'}>{provider.enabled ? 'enabled' : 'disabled'}</Text>
                   </Td>
                   <Td>
                     {canUpdate && (
