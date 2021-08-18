@@ -14,6 +14,11 @@
     "pluralize": "8.0.0",
     "strapi-utils": "3.6.6"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-plugin-i18n"
+  },
   "author": {
     "name": "A Strapi developer",
     "email": "",

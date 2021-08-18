@@ -38,6 +38,11 @@
     "strapi-helper-plugin": "3.6.6",
     "swagger-ui-dist": "3.47.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-plugin-documentation"
+  },
   "author": {
     "name": "soupette",
     "email": "hi@strapi.io",

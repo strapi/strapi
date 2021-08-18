@@ -15,6 +15,11 @@
     "email": "hi@strapi.io",
     "url": "https://strapi.io"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/strapi/strapi.git",
+    "directory": "packages/strapi-plugin-sentry"
+  },
   "maintainers": [
     {
       "name": "Strapi team",
