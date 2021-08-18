@@ -319,9 +319,9 @@ function ListView() {
                           <Td>
                             <Row>
                               <Switch
-                                onLabel={formatMessage({ id: 'Settings.webhooks.list.switch.on' })}
+                                onLabel={formatMessage({ id: 'Settings.webhooks.enabled' })}
                                 offLabel={formatMessage({
-                                  id: 'Settings.webhooks.list.switch.off',
+                                  id: 'Settings.webhooks.disabled',
                                 })}
                                 label={`${webhook.name} ${formatMessage({
                                   id: 'Settings.webhooks.list.th.status',

@@ -174,8 +174,6 @@
   "Settings.webhooks.list.empty.title": "There are no webhooks yet",
   "Settings.webhooks.list.field.add": "Add another field to this collection type",
   "Settings.webhooks.list.select": "Select",
-  "Settings.webhooks.list.switch.on": "Enabled",
-  "Settings.webhooks.list.switch.off": "Not enabled",
   "Settings.webhooks.list.th.actions": "actions",
   "Settings.webhooks.list.th.status": "status",
   "Settings.webhooks.singular": "webhook",
