@@ -35,7 +35,9 @@ export default {
           id: 'roles',
           to: `/settings/${pluginId}/roles`,
           Component: async () => {
-            const component = await import(/* webpackChunkName: "users-roles" */ './pages/Roles');
+            const component = await import(
+              /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
+            );
 
             return component;
           },
@@ -50,7 +52,7 @@ export default {
           to: `/settings/${pluginId}/providers`,
           Component: async () => {
             const component = await import(
-              /* webpackChunkName: "users-providers" */ './pages/Providers'
+              /* webpackChunkName: "users-providers-settings-page" */ './pages/Providers'
             );
 
             return component;
@@ -66,7 +68,7 @@ export default {
           to: `/settings/${pluginId}/email-templates`,
           Component: async () => {
             const component = await import(
-              /* webpackChunkName: "users-email" */ './pages/EmailTemplates'
+              /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
             );
 
             return component;
@@ -82,7 +84,7 @@ export default {
           to: `/settings/${pluginId}/advanced-settings`,
           Component: async () => {
             const component = await import(
-              /* webpackChunkName: "users-advanced-settings" */ './pages/AdvancedSettings'
+              /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
             );
 
             return component;

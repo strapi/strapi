@@ -23,7 +23,7 @@ import { getRequestURL, getTrad } from '../../utils';
 import forms from './utils/forms';
 import schema from './utils/schema';
 
-const Protected = () => (
+const ProtectedEmailTemplatesPage = () => (
   <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
     <EmailTemplatesPage />
   </CheckPagePermissions>
@@ -239,4 +239,4 @@ const EmailTemplatesPage = () => {
   );
 };
 
-export default Protected;
+export default ProtectedEmailTemplatesPage;

@@ -18,8 +18,7 @@ const LazyCompo = ({ loadComponent }) => {
     };
 
     loadCompo();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [loadComponent]);
 
   if (Compo) {
     return <Compo />;

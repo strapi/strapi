@@ -66,7 +66,7 @@ export default {
 
       Component: async () => {
         const component = await import(
-          /* webpackChunkName: "i18n-settings" */ './pages/SettingsPage'
+          /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
         );
 
         return component;

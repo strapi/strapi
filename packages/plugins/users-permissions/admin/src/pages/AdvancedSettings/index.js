@@ -19,7 +19,7 @@ import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import form from './utils/form';
 import reducer, { initialState } from './reducer';
 
-const Protected = () => (
+const ProtectedAdvancedSettingsPage = () => (
   <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
     <AdvancedSettingsPage />
   </CheckPagePermissions>
@@ -224,4 +224,4 @@ const AdvancedSettingsPage = () => {
   );
 };
 
-export default Protected;
+export default ProtectedAdvancedSettingsPage;

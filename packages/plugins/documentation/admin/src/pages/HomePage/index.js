@@ -90,8 +90,15 @@ const HomePage = () => {
     setVersionToDelete(null);
   };
 
+  console.log(data);
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
+  }
+
+  // FIXME
+  if (!data) {
+    return null;
   }
 
   return (
