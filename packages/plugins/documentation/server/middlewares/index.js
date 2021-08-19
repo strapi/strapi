@@ -1,6 +1,6 @@
 'use strict';
 
-const documentation = require('../../middlewares/documentation');
+const documentation = require('./documentation');
 
 module.exports = {
   documentation,

@@ -1,7 +1,7 @@
 'use strict';
 
-const uploadService = require('../../services/upload');
-const imageManipulation = require('../../services/image-manipulation');
+const uploadService = require('./upload');
+const imageManipulation = require('./image-manipulation');
 
 module.exports = {
   upload: uploadService,

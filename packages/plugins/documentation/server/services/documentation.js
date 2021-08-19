@@ -12,7 +12,7 @@ const moment = require('moment');
 const pathToRegexp = require('path-to-regexp');
 // FIXME
 /* eslint-disable import/extensions */
-const defaultSettings = require('../config/settings.json');
+const defaultSettings = require('../config/default-config');
 const defaultComponents = require('./utils/components.json');
 const form = require('./utils/forms.json');
 const parametersOptions = require('./utils/parametersOptions.json');

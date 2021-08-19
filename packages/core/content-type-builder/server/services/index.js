@@ -1,10 +1,10 @@
 'use strict';
 
-const contentTypes = require('../../services/content-types');
-const components = require('../../services/components');
-const componentCategories = require('../../services/component-categories');
-const builder = require('../../services/builder');
-const apiHandler = require('../../services/api-handler');
+const contentTypes = require('./content-types');
+const components = require('./components');
+const componentCategories = require('./component-categories');
+const builder = require('./builder');
+const apiHandler = require('./api-handler');
 
 module.exports = {
   'content-types': contentTypes,

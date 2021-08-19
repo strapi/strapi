@@ -1,5 +1,14 @@
 'use strict';
 
-const bootstrap = require('../config/functions/bootstrap');
+module.exports = async () => {
+  const actions = [
+    {
+      section: 'plugins',
+      displayName: 'Read',
+      uid: 'read',
+      pluginName: 'content-type-builder',
+    },
+  ];
 
-module.exports = bootstrap;
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
+};

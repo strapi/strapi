@@ -1,8 +1,13 @@
 'use strict';
 
-const defaultConfig = require('../config/config');
-
 module.exports = {
-  default: defaultConfig,
+  default: {
+    enabled: true,
+    provider: 'local',
+    providerOptions: {
+      sizeLimit: 1000000,
+    },
+    actionOptions: {},
+  },
   validator: () => {},
 };

@@ -1,9 +1,9 @@
 'use strict';
 
-const builder = require('../../controllers/builder');
-const componentCategories = require('../../controllers/component-categories');
-const components = require('../../controllers/components');
-const contentTypes = require('../../controllers/content-types');
+const builder = require('./builder');
+const componentCategories = require('./component-categories');
+const components = require('./components');
+const contentTypes = require('./content-types');
 
 module.exports = {
   builder,

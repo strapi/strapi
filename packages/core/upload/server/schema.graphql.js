@@ -1,8 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const { streamToBuffer } = require('../utils/file');
-const { getService } = require('../utils');
+const { streamToBuffer } = require('./utils/file');
+const { getService } = require('./utils');
 
 module.exports = {
   definition: `

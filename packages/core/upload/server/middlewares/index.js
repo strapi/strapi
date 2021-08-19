@@ -1,7 +1,7 @@
 'use strict';
 
-const uploadMiddleware = require('../../middlewares/upload');
+const upload = require('./upload');
 
 module.exports = {
-  upload: uploadMiddleware,
+  upload,
 };

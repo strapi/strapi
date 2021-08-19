@@ -10,6 +10,14 @@ module.exports = {
       interval: 60000,
       max: 10,
     },
+    layout: {
+      user: {
+        actions: {
+          create: 'User.create', // Use the User plugin's controller.
+          update: 'User.update',
+        },
+      },
+    },
   }),
   validator: () => {},
 };

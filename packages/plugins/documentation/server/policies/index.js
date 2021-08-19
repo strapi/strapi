@@ -1,6 +1,6 @@
 'use strict';
 
-const index = require('../../config/policies/index');
+const index = require('./index-policy');
 
 module.exports = {
   index,

@@ -1,8 +1,12 @@
 'use strict';
 
-const settings = require('../config/settings');
-
 module.exports = {
-  default: { ...settings },
+  default: {
+    provider: 'sendmail',
+    providerOptions: {},
+    settings: {
+      defaultFrom: 'Strapi <no-reply@strapi.io>',
+    },
+  },
   validator: () => {},
 };

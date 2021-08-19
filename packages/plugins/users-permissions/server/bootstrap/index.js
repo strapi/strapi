@@ -9,9 +9,9 @@
  */
 const _ = require('lodash');
 const uuid = require('uuid/v4');
-const { getService } = require('../../utils');
+const { getService } = require('../utils');
 
-const usersPermissionsActions = require('../users-permissions-actions');
+const usersPermissionsActions = require('./users-permissions-actions');
 
 module.exports = async () => {
   const pluginStore = strapi.store({

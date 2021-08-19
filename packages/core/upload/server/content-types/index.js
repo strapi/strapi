@@ -1,7 +1,7 @@
 'use strict';
 
-const fileModel = require('../../models/File');
+const file = require('./file');
 
 module.exports = {
-  [fileModel.info.singularName]: { schema: fileModel },
+  [file.schema.info.singularName]: file,
 };

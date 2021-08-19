@@ -1,6 +1,6 @@
 'use strict';
 
-const usersPermissionsMiddleware = require('../../middlewares/users-permissions');
+const usersPermissionsMiddleware = require('./users-permissions');
 
 module.exports = {
   'users-permissions': usersPermissionsMiddleware,

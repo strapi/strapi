@@ -1,8 +1,8 @@
 'use strict';
 
-const isAuthenticated = require('../../config/policies/isAuthenticated');
-const permissions = require('../../config/policies/permissions');
-const rateLimit = require('../../config/policies/rateLimit');
+const isAuthenticated = require('./isAuthenticated');
+const permissions = require('./permissions');
+const rateLimit = require('./rateLimit');
 
 module.exports = {
   isAuthenticated,

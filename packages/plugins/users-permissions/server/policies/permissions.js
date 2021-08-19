@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { getService } = require('../../utils');
+const { getService } = require('../utils');
 
 module.exports = async (ctx, next) => {
   let role;

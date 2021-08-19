@@ -1,6 +1,6 @@
 'use strict';
 
-const email = require('../../controllers/Email');
+const email = require('./email');
 
 module.exports = {
   email,

@@ -1,5 +1,5 @@
 'use strict';
 
-const routes = require('../../config/routes');
+const routes = require('./routes');
 
 module.exports = routes.routes;
