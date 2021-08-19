@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
-import { ThemeProvider } from '@strapi/parts/ThemeProvider';
 import { lightTheme } from '@strapi/parts/themes';
 import merge from 'lodash/merge';
 import pick from 'lodash/pick';
@@ -24,7 +23,6 @@ import {
 } from './exposedHooks';
 import injectionZones from './injectionZones';
 import favicon from './favicon.ico';
-import themes from './themes';
 
 class StrapiApp {
   constructor({ adminConfig, appPlugins, library, middlewares, reducers }) {
@@ -36,7 +34,7 @@ class StrapiApp {
       locales: ['en'],
       menuLogo: MenuLogo,
       notifications: { releases: true },
-      theme: themes,
+      theme: lightTheme,
       translations: {},
       tutorials: true,
     };
@@ -425,46 +423,44 @@ class StrapiApp {
     } = this.library;
 
     return (
-      <ThemeProvider theme={lightTheme}>
-        <Theme theme={this.configurations.theme}>
-          <Providers
-            authLogo={this.configurations.authLogo}
-            components={components}
-            fields={fields}
-            localeNames={localeNames}
-            getAdminInjectedComponents={this.getAdminInjectedComponents}
-            getPlugin={this.getPlugin}
-            messages={this.configurations.translations}
-            menu={this.menu}
-            menuLogo={this.configurations.menuLogo}
-            plugins={this.plugins}
-            runHookParallel={this.runHookParallel}
-            runHookWaterfall={(name, initialValue, async = false) => {
-              return this.runHookWaterfall(name, initialValue, async, store);
-            }}
-            runHookSeries={this.runHookSeries}
-            settings={this.settings}
-            showTutorials={this.configurations.tutorials}
-            showReleaseNotification={this.configurations.notifications.releases}
-            store={store}
-          >
-            <>
-              <Helmet
-                link={[
-                  {
-                    rel: 'icon',
-                    type: 'image/png',
-                    href: this.configurations.head.favicon,
-                  },
-                ]}
-              />
-              <BrowserRouter basename={basename}>
-                <App store={store} />
-              </BrowserRouter>
-            </>
-          </Providers>
-        </Theme>
-      </ThemeProvider>
+      <Theme theme={this.configurations.theme}>
+        <Providers
+          authLogo={this.configurations.authLogo}
+          components={components}
+          fields={fields}
+          localeNames={localeNames}
+          getAdminInjectedComponents={this.getAdminInjectedComponents}
+          getPlugin={this.getPlugin}
+          messages={this.configurations.translations}
+          menu={this.menu}
+          menuLogo={this.configurations.menuLogo}
+          plugins={this.plugins}
+          runHookParallel={this.runHookParallel}
+          runHookWaterfall={(name, initialValue, async = false) => {
+            return this.runHookWaterfall(name, initialValue, async, store);
+          }}
+          runHookSeries={this.runHookSeries}
+          settings={this.settings}
+          showTutorials={this.configurations.tutorials}
+          showReleaseNotification={this.configurations.notifications.releases}
+          store={store}
+        >
+          <>
+            <Helmet
+              link={[
+                {
+                  rel: 'icon',
+                  type: 'image/png',
+                  href: this.configurations.head.favicon,
+                },
+              ]}
+            />
+            <BrowserRouter basename={basename}>
+              <App store={store} />
+            </BrowserRouter>
+          </>
+        </Providers>
+      </Theme>
     );
   }
 }

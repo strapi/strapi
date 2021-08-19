@@ -1,5 +1,5 @@
 import React from 'react';
-import { ThemeProvider } from 'styled-components';
+import { ThemeProvider } from '@strapi/parts/ThemeProvider';
 import PropTypes from 'prop-types';
 import GlobalStyle from '../GlobalStyle';
 import Fonts from '../Fonts';
