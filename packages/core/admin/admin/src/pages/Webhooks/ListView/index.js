@@ -28,6 +28,7 @@ import { Button } from '@strapi/parts/Button';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { Switch } from '@strapi/parts/Switch';
 import { Main } from '@strapi/parts/Main';
+import { LinkButton } from '@strapi/parts/LinkButton';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
@@ -235,12 +236,14 @@ function ListView() {
             title={formatMessage({ id: 'Settings.webhooks.title' })}
             subtitle={formatMessage({ id: 'Settings.webhooks.list.description' })}
             primaryAction={
-              <Button
-                onClick={() => (canCreate ? handleGoTo('create') : {})}
+              <LinkButton
+                disabled={!canCreate}
                 startIcon={<AddIcon />}
+                variant="default"
+                to={`${pathname  }/create`}
               >
                 {formatMessage({ id: 'Settings.webhooks.list.button.add' })}
-              </Button>
+              </LinkButton>
             }
           />
           {isLoading || loadingWebhooks ? (
