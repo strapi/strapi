@@ -1,8 +1,12 @@
 'use strict';
 
 const { join } = require('path');
+const fs = require('fs-extra');
 
 module.exports = function(plop) {
+  const rootDir = process.cwd();
+  plop.setWelcomeMessage('Strapi Generators');
+
   // Service generator
   plop.setGenerator('service', {
     description: 'Generate a service for an API',
@@ -16,7 +20,7 @@ module.exports = function(plop) {
     actions: [
       {
         type: 'add',
-        path: join(process.cwd(), 'api/{{id}}/services/{{id}}.js'),
+        path: join(rootDir, 'api/{{id}}/services/{{id}}.js'),
         templateFile: 'templates/service.js.hbs',
       },
     ],
@@ -24,7 +28,7 @@ module.exports = function(plop) {
 
   // Model generator
   plop.setGenerator('model', {
-    description: 'application model logic',
+    description: 'Generate a model for an API',
     prompts: [
       {
         type: 'input',
@@ -40,12 +44,12 @@ module.exports = function(plop) {
     actions: [
       {
         type: 'add',
-        path: join(process.cwd(), 'api/{{id}}/models/{{id}}.js'),
+        path: join(rootDir, 'api/{{id}}/models/{{id}}.js'),
         templateFile: 'templates/model.js.hbs',
       },
       {
         type: 'add',
-        path: join(process.cwd(), 'api/{{id}}/models/{{id}}.settings.json'),
+        path: join(rootDir, 'api/{{id}}/models/{{id}}.settings.json'),
         templateFile: 'templates/model.settings.json.hbs',
       },
     ],
@@ -64,7 +68,7 @@ module.exports = function(plop) {
     actions: [
       {
         type: 'add',
-        path: join(process.cwd(), 'api/{{id}}/controllers/{{id}}.js'),
+        path: join(rootDir, 'api/{{id}}/controllers/{{id}}.js'),
         templateFile: 'templates/controller.js.hbs',
       },
     ],
@@ -72,7 +76,7 @@ module.exports = function(plop) {
 
   // Policy generator
   plop.setGenerator('policy', {
-    description: 'Generate a policy',
+    description: 'Generate a policy for an API',
     prompts: [
       {
         type: 'input',
@@ -83,9 +87,60 @@ module.exports = function(plop) {
     actions: [
       {
         type: 'add',
-        path: join(process.cwd(), 'config/policies/{{id}}.js'),
+        path: join(rootDir, 'config/policies/{{id}}.js'),
         templateFile: 'templates/policy.js.hbs',
       },
     ],
+  });
+
+  // Plugin generator
+  plop.setGenerator('plugin', {
+    description: 'Generate a basic plugin',
+    prompts: [
+      {
+        type: 'input',
+        name: 'id',
+        message: 'Plugin name',
+      },
+    ],
+    actions: data => {
+      fs.copySync(join(__dirname, 'files', 'admin'), join(rootDir, 'plugins', data.id, 'admin'));
+
+      return [
+        {
+          type: 'add',
+          path: join(rootDir, 'plugins/{{id}}/services/{{id}}.js'),
+          templateFile: 'templates/service.js.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, 'plugins/{{id}}/controllers/{{id}}.js'),
+          templateFile: 'templates/controller.js.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, 'plugins/{{id}}/config/routes.json'),
+          templateFile: 'templates/routes.json.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, 'plugins/{{id}}/README.md'),
+          templateFile: 'templates/README.md.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, 'plugins/{{id}}/package.json'),
+          templateFile: 'templates/plugin-package.json.hbs',
+        },
+        {
+          destination: join(rootDir, 'plugins/{{id}}'),
+          type: 'addMany',
+          templateFiles: 'templates/.*',
+          globOptions: {
+            dot: true,
+          },
+        },
+      ];
+    },
   });
 };
