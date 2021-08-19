@@ -53,7 +53,7 @@ const syncNonLocalizedAttributes = async (entry, { model }) => {
     }
 
     const updateLocalization = id => {
-      return strapi.query(model.uid).update({ where: { id }, data: nonLocalizedAttributes });
+      return strapi.entityService.update(model.uid, id, { data: nonLocalizedAttributes });
     };
 
     await Promise.all(entry.localizations.map(({ id }) => updateLocalization(id)));
