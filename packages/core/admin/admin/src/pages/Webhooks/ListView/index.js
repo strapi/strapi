@@ -29,6 +29,7 @@ import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { Switch } from '@strapi/parts/Switch';
 import { Main } from '@strapi/parts/Main';
 import { LinkButton } from '@strapi/parts/LinkButton';
+import { notifyStatus } from '@strapi/parts/LiveRegions';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
@@ -83,6 +84,7 @@ function ListView() {
           type: 'GET_DATA_SUCCEEDED',
           data,
         });
+        notifyStatus('webhooks have been loaded');
       }
     } catch (err) {
       if (isMounted.current) {
@@ -236,14 +238,12 @@ function ListView() {
             title={formatMessage({ id: 'Settings.webhooks.title' })}
             subtitle={formatMessage({ id: 'Settings.webhooks.list.description' })}
             primaryAction={
-              <LinkButton
-                disabled={!canCreate}
-                startIcon={<AddIcon />}
-                variant="default"
-                to={`${pathname  }/create`}
-              >
-                {formatMessage({ id: 'Settings.webhooks.list.button.add' })}
-              </LinkButton>
+              canCreate &&
+              !loadingWebhooks && (
+                <LinkButton startIcon={<AddIcon />} variant="default" to={`${pathname}/create`}>
+                  {formatMessage({ id: 'Settings.webhooks.list.button.add' })}
+                </LinkButton>
+              )
             }
           />
           {isLoading || loadingWebhooks ? (
