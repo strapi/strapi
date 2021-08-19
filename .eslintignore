@@ -14,3 +14,6 @@ packages/plugins/users-permissions/admin/OLD/**
 .eslintrc.js
 .eslintrc.front.js
 .eslintrc.back.js
+
+bookshelf.old
+database.old

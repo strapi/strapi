@@ -16,105 +16,41 @@ const setPublishedAt = data => {
  * Returns a collection type service to handle default core-api actions
  */
 const createCollectionTypeService = ({ model, strapi, utils }) => {
-  const { modelName } = model;
+  const { uid } = model;
 
   const { sanitizeInput, getFetchParams } = utils;
 
   return {
-    /**
-     * Promise to fetch all records
-     *
-     * @return {Promise}
-     */
-    find(params, populate) {
-      return strapi.entityService.find(
-        { params: getFetchParams(params), populate },
-        { model: modelName }
-      );
+    find(opts = {}) {
+      const params = getFetchParams(opts.params);
+
+      return strapi.entityService.findPage(uid, { params });
     },
 
-    /**
-     * Promise to fetch record
-     *
-     * @return {Promise}
-     */
+    findOne(entityId, opts = {}) {
+      const params = getFetchParams(opts.params);
 
-    findOne(params, populate) {
-      return strapi.entityService.findOne(
-        { params: getFetchParams(params), populate },
-        { model: modelName }
-      );
+      return strapi.entityService.findOne(uid, entityId, { params });
     },
 
-    /**
-     * Promise to count record
-     *
-     * @return {Promise}
-     */
-
-    count(params) {
-      return strapi.entityService.count({ params: getFetchParams(params) }, { model: modelName });
-    },
-
-    /**
-     * Promise to add record
-     *
-     * @return {Promise}
-     */
-
-    create(data, { files } = {}) {
+    create({ params, data, files } = {}) {
       const sanitizedData = sanitizeInput(data);
+
       if (hasDraftAndPublish(model)) {
         setPublishedAt(sanitizedData);
       }
 
-      return strapi.entityService.create({ data: sanitizedData, files }, { model: modelName });
+      return strapi.entityService.create(uid, { params, data: sanitizedData, files });
     },
 
-    /**
-     * Promise to edit record
-     *
-     * @return {Promise}
-     */
-
-    update(params, data, { files } = {}) {
+    update(entityId, { params, data, files } = {}) {
       const sanitizedData = sanitizeInput(data);
-      return strapi.entityService.update(
-        { params, data: sanitizedData, files },
-        { model: modelName }
-      );
+
+      return strapi.entityService.update(uid, entityId, { params, data: sanitizedData, files });
     },
 
-    /**
-     * Promise to delete a record
-     *
-     * @return {Promise}
-     */
-
-    delete(params) {
-      return strapi.entityService.delete({ params }, { model: modelName });
-    },
-
-    /**
-     * Promise to search records
-     *
-     * @return {Promise}
-     */
-
-    search(params) {
-      return strapi.entityService.search({ params: getFetchParams(params) }, { model: modelName });
-    },
-
-    /**
-     * Promise to count searched records
-     *
-     * @return {Promise}
-     */
-    countSearch(params) {
-      return strapi.entityService.countSearch(
-        { params: getFetchParams(params) },
-        { model: modelName }
-      );
+    delete(entityId, { params } = {}) {
+      return strapi.entityService.delete(uid, entityId, { params });
     },
   };
 };

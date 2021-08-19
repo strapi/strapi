@@ -42,7 +42,6 @@ const productWithDz = {
       required: true,
     },
   },
-  connection: 'default',
   name: 'product-with-dz',
   description: '',
   collectionName: '',
@@ -76,29 +75,43 @@ describe('Core API - Basic + dz', () => {
         },
       ],
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-dzs',
       body: product,
+      qs: {
+        populate: ['dz'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeUndefined();
-    data.productWithDz.push(res.body);
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeUndefined();
+
+    data.productWithDz.push(body.data);
   });
 
   test('Read product with compo', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'GET',
       url: '/product-with-dzs',
+      qs: {
+        populate: ['dz'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productWithDz[0]);
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+    expect(statusCode).toBe(200);
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]).toMatchObject(data.productWithDz[0]);
+    body.data.forEach(p => {
+      expect(p.attributes.published_at).toBeUndefined();
+    });
   });
 
   test('Update product with compo', async () => {
@@ -113,29 +126,39 @@ describe('Core API - Basic + dz', () => {
         },
       ],
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-dzs/${data.productWithDz[0].id}`,
       body: product,
+      qs: {
+        populate: ['dz'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productWithDz[0].id);
-    expect(res.body.published_at).toBeUndefined();
-    data.productWithDz[0] = res.body;
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: data.productWithDz[0].id,
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeUndefined();
+    data.productWithDz[0] = body.data;
   });
 
   test('Delete product with compo', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'DELETE',
       url: `/product-with-dzs/${data.productWithDz[0].id}`,
+      qs: {
+        populate: ['dz'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productWithDz[0]);
-    expect(res.body.id).toEqual(data.productWithDz[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject(data.productWithDz[0]);
+    expect(body.data.attributes.published_at).toBeUndefined();
     data.productWithDz.shift();
   });
 

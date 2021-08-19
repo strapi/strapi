@@ -5,48 +5,70 @@ const _ = require('lodash');
 const pluralize = require('pluralize');
 
 const { nameToSlug, nameToCollectionName } = require('@strapi/utils');
-const { isRelation, toUID, isConfigurable } = require('../../utils/attributes');
+const { isRelation, isConfigurable } = require('../../utils/attributes');
 const { typeKinds } = require('../constants');
 const createSchemaHandler = require('./schema-handler');
 
+const reuseUnsetPreviousProperties = (newAttribute, oldAttribute) => {
+  _.defaults(
+    newAttribute,
+    _.omit(oldAttribute, [
+      'configurable',
+      'required',
+      'private',
+      'unique',
+      'pluginOptions',
+      'inversedBy',
+      'mappedBy',
+    ])
+  );
+};
+
 module.exports = function createComponentBuilder() {
   return {
-    setRelation({ key, modelName, plugin, attribute }) {
+    setRelation({ key, uid, attribute }) {
+      if (!_.has(attribute, 'target')) {
+        return;
+      }
+
       const targetCT = this.contentTypes.get(attribute.target);
       const targetAttribute = targetCT.getAttribute(attribute.targetAttribute);
+
+      if (!attribute.targetAttribute) {
+        return;
+      }
+
       targetCT.setAttribute(
         attribute.targetAttribute,
         generateRelation({
           key,
           attribute,
-          plugin,
-          modelName,
+          uid: uid,
           targetAttribute,
         })
       );
     },
 
     unsetRelation(attribute) {
-      const target = attribute.model || attribute.collection;
-      const plugin = attribute.plugin;
-
-      const uid = toUID(target, plugin);
-
-      const targetCT = this.contentTypes.get(uid);
-      const targetAttribute = targetCT.getAttribute(attribute.via);
-
-      if (!targetAttribute) return;
-
-      // do not delete polymorphic relations
-      if (targetAttribute.collection === '*' || targetAttribute.model === '*') {
+      if (!_.has(attribute, 'target')) {
         return;
       }
 
-      return targetCT.deleteAttribute(attribute.via);
+      const targetCT = this.contentTypes.get(attribute.target);
+
+      const targetAttributeName = attribute.inversedBy || attribute.mappedBy;
+      const targetAttribute = targetCT.getAttribute(targetAttributeName);
+
+      if (!targetAttribute) return;
+
+      return targetCT.deleteAttribute(targetAttributeName);
     },
 
     /**
-     * create a component in the tmpComponent map
+     * Creates a content type in memory to be written to files later on
+     *
+     * @param {object} infos content type info
+     * @returns {object} new content type
      */
     createContentType(infos) {
       const uid = createContentTypeUID(infos);
@@ -82,8 +104,6 @@ module.exports = function createComponentBuilder() {
           description: infos.description,
         })
         .set('options', {
-          increments: true,
-          timestamps: true,
           draftAndPublish: infos.draftAndPublish || false,
         })
         .set('pluginOptions', infos.pluginOptions)
@@ -95,8 +115,7 @@ module.exports = function createComponentBuilder() {
         if (isRelation(attribute)) {
           this.setRelation({
             key,
-            modelName: contentType.modelName,
-            plugin: contentType.plugin,
+            uid,
             attribute,
           });
         }
@@ -121,17 +140,17 @@ module.exports = function createComponentBuilder() {
       });
 
       const newKeys = _.difference(Object.keys(newAttributes), Object.keys(oldAttributes));
-
       const deletedKeys = _.difference(Object.keys(oldAttributes), Object.keys(newAttributes));
-
       const remainingKeys = _.intersection(Object.keys(oldAttributes), Object.keys(newAttributes));
 
       // remove old relations
       deletedKeys.forEach(key => {
         const attribute = oldAttributes[key];
 
-        // if the old relation has a target attribute. we need to remove it
-        if (isConfigurable(attribute) && isRelation(attribute) && _.has(attribute, 'via')) {
+        const targetAttributeName = attribute.inversedBy || attribute.mappedBy;
+
+        // if the old relation has a target attribute. we need to remove it in the target type
+        if (isConfigurable(attribute) && isRelation(attribute) && !_.isNil(targetAttributeName)) {
           this.unsetRelation(attribute);
         }
       });
@@ -143,8 +162,7 @@ module.exports = function createComponentBuilder() {
         if (!isRelation(oldAttribute) && isRelation(newAttribute)) {
           return this.setRelation({
             key,
-            modelName: contentType.modelName,
-            plugin: contentType.plugin,
+            uid,
             attribute: newAttributes[key],
           });
         }
@@ -154,17 +172,27 @@ module.exports = function createComponentBuilder() {
         }
 
         if (isRelation(oldAttribute) && isRelation(newAttribute)) {
-          if (_.has(oldAttribute, 'via') && oldAttribute.via !== newAttribute.targetAttribute) {
+          const oldTargetAttributeName = oldAttribute.inversedBy || oldAttribute.mappedBy;
+
+          const sameRelation = oldAttribute.relation === newAttribute.relation;
+          const targetAttributeHasChanged = oldTargetAttributeName !== newAttribute.targetAttribute;
+
+          if (!sameRelation || targetAttributeHasChanged) {
             this.unsetRelation(oldAttribute);
           }
 
           // keep extra options that were set manually on oldAttribute
-          _.defaults(newAttribute, oldAttribute);
+          reuseUnsetPreviousProperties(newAttribute, oldAttribute);
+
+          if (oldAttribute.inversedBy) {
+            newAttribute.dominant = true;
+          } else if (oldAttribute.mappedBy) {
+            newAttribute.dominant = false;
+          }
 
           return this.setRelation({
             key,
-            modelName: contentType.modelName,
-            plugin: contentType.plugin,
+            uid,
             attribute: newAttribute,
           });
         }
@@ -177,8 +205,7 @@ module.exports = function createComponentBuilder() {
         if (isRelation(attribute)) {
           this.setRelation({
             key,
-            modelName: contentType.modelName,
-            plugin: contentType.plugin,
+            uid,
             attribute,
           });
         }
@@ -216,41 +243,63 @@ module.exports = function createComponentBuilder() {
 
 /**
  * Returns a uid from a content type infos
- * @param {Object} options options
+ *
+ * @param {object} options options
  * @param {string} options.name component name
+ * @returns {string} uid
  */
 const createContentTypeUID = ({ name }) => `application::${nameToSlug(name)}.${nameToSlug(name)}`;
 
-const generateRelation = ({ key, attribute, plugin, modelName, targetAttribute = {} }) => {
+const generateRelation = ({ key, attribute, uid, targetAttribute = {} }) => {
   const opts = {
-    via: key,
-    plugin,
-    columnName: attribute.targetColumnName || undefined,
+    type: 'relation',
+    target: uid,
     autoPopulate: targetAttribute.autoPopulate,
     private: targetAttribute.private || undefined,
   };
 
-  switch (attribute.nature) {
-    case 'manyWay':
-    case 'oneWay':
-      return;
-    case 'oneToOne':
-    case 'oneToMany':
-      opts.model = modelName;
-      break;
-    case 'manyToOne':
-      opts.collection = modelName;
-      break;
-    case 'manyToMany': {
-      opts.collection = modelName;
+  switch (attribute.relation) {
+    case 'oneToOne': {
+      opts.relation = 'oneToOne';
 
-      if (!attribute.dominant) {
-        opts.dominant = true;
+      if (attribute.dominant) {
+        opts.mappedBy = key;
+      } else {
+        opts.inversedBy = key;
       }
+      break;
+    }
+    case 'oneToMany': {
+      opts.relation = 'manyToOne';
+      opts.inversedBy = key;
+      break;
+    }
+    case 'manyToOne': {
+      opts.relation = 'oneToMany';
+      opts.mappedBy = key;
+      break;
+    }
+    case 'manyToMany': {
+      opts.relation = 'manyToMany';
+
+      if (attribute.dominant) {
+        opts.mappedBy = key;
+      } else {
+        opts.inversedBy = key;
+      }
+
       break;
     }
     default:
   }
 
-  return opts;
+  // we do this just to make sure we have the same key order when writing to files
+  const { type, relation, target, ...restOptions } = opts;
+
+  return {
+    type,
+    relation,
+    target,
+    ...restOptions,
+  };
 };

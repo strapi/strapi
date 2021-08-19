@@ -20,11 +20,11 @@ module.exports = async () => {
       value: {
         sizeOptimization: true,
         responsiveDimensions: true,
+        autoOrientation: false,
       },
     });
   }
 
-  await pruneObsoleteRelations();
   await registerPermissionActions();
 };
 
@@ -67,31 +67,6 @@ const baseProvider = {
   delete() {
     throw new Error('Provider delete method is not implemented');
   },
-};
-
-const pruneObsoleteRelations = async () => {
-  const { upload: plugin } = strapi.plugins;
-  const modelIsNotDefined = !plugin || !plugin.models || !plugin.models.file;
-
-  if (modelIsNotDefined) {
-    return Promise.resolve();
-  }
-
-  await strapi.query('file', 'upload').custom(pruneObsoleteRelationsQuery)();
-};
-
-const pruneObsoleteRelationsQuery = ({ model }) => {
-  if (model.orm !== 'mongoose') {
-    return Promise.resolve();
-  }
-
-  const models = Array.from(strapi.db.models.values());
-  const modelsId = models.map(model => model.globalId);
-
-  return model.updateMany(
-    { related: { $elemMatch: { kind: { $nin: modelsId } } } },
-    { $pull: { related: { kind: { $nin: modelsId } } } }
-  );
 };
 
 const registerPermissionActions = async () => {

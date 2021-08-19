@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, pipe, prop, pick } = require('lodash/fp');
+const { pipe, prop, pick } = require('lodash/fp');
 const { MANY_RELATIONS } = require('@strapi/utils').relations.constants;
 const { setCreatorFields } = require('@strapi/utils');
 
@@ -20,11 +20,12 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const method = has('_q', query) ? 'searchWithRelationCounts' : 'findWithRelationCounts';
-
     const permissionQuery = permissionChecker.buildReadQuery(query);
 
-    const { results, pagination } = await entityManager[method](permissionQuery, model);
+    const { results, pagination } = await entityManager.findWithRelationCounts(
+      permissionQuery,
+      model
+    );
 
     ctx.body = {
       results: results.map(entity => permissionChecker.sanitizeOutput(entity)),
@@ -61,6 +62,8 @@ module.exports = {
     const { model } = ctx.params;
     const { body } = ctx.request;
 
+    const totalEntries = await strapi.query(model).count();
+
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -76,9 +79,12 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       const entity = await entityManager.create(sanitizeFn(body), model);
+
       ctx.body = permissionChecker.sanitizeOutput(entity);
 
-      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      if (totalEntries === 0) {
+        strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      }
     })();
   },
 
@@ -210,17 +216,20 @@ module.exports = {
       return ctx.forbidden();
     }
 
+    // TODO: fix
     const permissionQuery = permissionChecker.buildDeleteQuery(query);
 
-    const idsWhereClause = { [`id_in`]: ids };
+    const idsWhereClause = { id: { $in: ids } };
     const params = {
       ...permissionQuery,
-      _where: [idsWhereClause].concat(permissionQuery._where || {}),
+      filters: {
+        $and: [idsWhereClause].concat(permissionQuery._where || []),
+      },
     };
 
-    const results = await entityManager.findAndDelete(params, model);
+    const { count } = await entityManager.deleteMany(params, model);
 
-    ctx.body = results.map(result => permissionChecker.sanitizeOutput(result));
+    ctx.body = { count };
   },
 
   async previewManyRelations(ctx) {
@@ -239,9 +248,9 @@ module.exports = {
     }
 
     const modelDef = strapi.getModel(model);
-    const assoc = modelDef.associations.find(a => a.alias === targetField);
+    const assoc = modelDef.attributes[targetField];
 
-    if (!assoc || !MANY_RELATIONS.includes(assoc.nature)) {
+    if (!assoc || !MANY_RELATIONS.includes(assoc.relation)) {
       return ctx.badRequest('Invalid target field');
     }
 
@@ -256,18 +265,31 @@ module.exports = {
     }
 
     let relationList;
-    if (assoc.nature === 'manyWay') {
+    // FIXME: load relations using query.load
+    if (!assoc.inversedBy && !assoc.mappedBy) {
       const populatedEntity = await entityManager.findOne(id, model, [targetField]);
       const relationsListIds = populatedEntity[targetField].map(prop('id'));
+
       relationList = await entityManager.findPage(
-        { page, pageSize, id_in: relationsListIds },
-        assoc.targetUid
+        {
+          page,
+          pageSize,
+          filters: {
+            id: relationsListIds,
+          },
+        },
+        assoc.target
       );
     } else {
-      const assocModel = strapi.db.getModelByAssoc(assoc);
       relationList = await entityManager.findPage(
-        { page, pageSize, [`${assoc.via}.${assocModel.primaryKey}`]: entity.id },
-        assoc.targetUid
+        {
+          page,
+          pageSize,
+          filters: {
+            [assoc.inversedBy || assoc.mappedBy]: entity.id,
+          },
+        },
+        assoc.target
       );
     }
 
@@ -276,7 +298,7 @@ module.exports = {
 
     ctx.body = {
       pagination: relationList.pagination,
-      results: relationList.results.map(pick(['id', modelDef.primaryKey, mainField])),
+      results: relationList.results.map(pick(['id', mainField])),
     };
   },
 };

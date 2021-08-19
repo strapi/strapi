@@ -2,7 +2,8 @@ import produce from 'immer';
 import { SET_FILE_MODE_TIMESTAMPS } from './constants';
 
 const initialState = {
-  fileModelTimestamps: [],
+  // TODO: rename to camelCase
+  fileModelTimestamps: ['created_at', 'updated_at'],
 };
 
 const reducer = (state = initialState, action) =>
@@ -10,7 +11,7 @@ const reducer = (state = initialState, action) =>
   produce(state, draftState => {
     switch (action.type) {
       case SET_FILE_MODE_TIMESTAMPS: {
-        draftState.fileModelTimestamps = action.timestamps;
+        // draftState.fileModelTimestamps = action.timestamps;
         break;
       }
       default:

@@ -1,6 +1,6 @@
 'use strict';
 
-const { has, prop, pick, concat } = require('lodash/fp');
+const { prop, pick } = require('lodash/fp');
 const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 
 const { getService } = require('../utils');
@@ -15,37 +15,38 @@ module.exports = {
       return ctx.badRequest();
     }
 
-    const modelDef = _component ? strapi.db.getModel(_component) : strapi.db.getModel(model);
+    const modelDef = _component ? strapi.getModel(_component) : strapi.getModel(model);
 
     if (!modelDef) {
       return ctx.notFound('model.notFound');
     }
 
-    const attr = modelDef.attributes[targetField];
-    if (!attr) {
+    const attribute = modelDef.attributes[targetField];
+    if (!attribute || attribute.type !== 'relation') {
       return ctx.badRequest('targetField.invalid');
     }
 
-    const target = strapi.db.getModelByAssoc(attr);
+    const target = strapi.getModel(attribute.target);
 
     if (!target) {
       return ctx.notFound('target.notFound');
     }
 
     if (idsToOmit && Array.isArray(idsToOmit)) {
-      query._where = query._where || {};
-      query._where.id_nin = concat(query._where.id_nin || [], idsToOmit);
+      query.filters = {
+        $and: [
+          {
+            id: {
+              $notIn: idsToOmit,
+            },
+          },
+        ].concat(query.filters || []),
+      };
     }
 
     const entityManager = getService('entity-manager');
 
-    let entities = [];
-
-    if (has('_q', ctx.request.query)) {
-      entities = await entityManager.search(query, target.uid);
-    } else {
-      entities = await entityManager.find(query, target.uid);
-    }
+    const entities = await entityManager.find(query, target.uid, []);
 
     if (!entities) {
       return ctx.notFound();

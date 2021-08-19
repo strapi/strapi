@@ -1,23 +1,18 @@
 'use strict';
 
-const http = require('http');
-const path = require('path');
-const fse = require('fs-extra');
 const Koa = require('koa');
 const Router = require('koa-router');
 const _ = require('lodash');
-const chalk = require('chalk');
-const CLITable = require('cli-table3');
-const { models, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('@strapi/utils');
-const { createDatabaseManager } = require('@strapi/database');
 const { createLogger } = require('@strapi/logger');
-const loadConfiguration = require('./core/app-configuration');
+const { Database } = require('@strapi/database');
 
-const utils = require('./utils');
+const loadConfiguration = require('./core/app-configuration');
+const { createHTTPServer } = require('./server');
+const { createContainer } = require('./container');
 const loadModules = require('./core/load-modules');
+const utils = require('./utils');
 const bootstrap = require('./core/bootstrap');
 const initializeMiddlewares = require('./middlewares');
-const initializeHooks = require('./hooks');
 const createStrapiFs = require('./core/fs');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
@@ -27,6 +22,7 @@ const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
+const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
 
 const LIFECYCLES = {
@@ -34,31 +30,21 @@ const LIFECYCLES = {
   BOOTSTRAP: 'bootstrap',
 };
 
-/**
- * Construct an Strapi instance.
- *
- * @constructor
- */
 class Strapi {
   constructor(opts = {}) {
+    this.container = createContainer(this);
+
+    this.dir = opts.dir || process.cwd();
+    this.config = loadConfiguration(this.dir, opts);
+
     this.reload = this.reload();
 
     // Expose `koa`.
     this.app = new Koa();
     this.router = new Router();
 
-    this.initServer();
+    this.server = createHTTPServer(this, this.app);
 
-    // Utils.
-    this.utils = {
-      models,
-    };
-
-    this.dir = opts.dir || process.cwd();
-
-    this.admin = {};
-    this.plugins = {};
-    this.config = loadConfiguration(this.dir, opts);
     this.app.proxy = this.config.get('server.proxy');
 
     // Logger.
@@ -70,8 +56,7 @@ class Strapi {
     // internal services.
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
-
-    this.requireProjectBootstrap();
+    this.startupLogger = createStartupLogger(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -80,119 +65,7 @@ class Strapi {
     return ee({ dir: this.dir, logger: this.log });
   }
 
-  handleRequest(req, res) {
-    if (!this.requestHandler) {
-      this.requestHandler = this.app.callback();
-    }
-
-    return this.requestHandler(req, res);
-  }
-
-  requireProjectBootstrap() {
-    const bootstrapPath = path.resolve(this.dir, 'config/functions/bootstrap.js');
-
-    if (fse.existsSync(bootstrapPath)) {
-      require(bootstrapPath);
-    }
-  }
-
-  logStats() {
-    const columns = Math.min(process.stderr.columns, 80) - 2;
-    console.log();
-    console.log(chalk.black.bgWhite(_.padEnd(' Project information', columns)));
-    console.log();
-
-    const infoTable = new CLITable({
-      colWidths: [20, 50],
-      chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
-    });
-
-    const isEE = strapi.EE === true && ee.isEE === true;
-
-    infoTable.push(
-      [chalk.blue('Time'), `${new Date()}`],
-      [chalk.blue('Launched in'), Date.now() - this.config.launchedAt + ' ms'],
-      [chalk.blue('Environment'), this.config.environment],
-      [chalk.blue('Process PID'), process.pid],
-      [chalk.blue('Version'), `${this.config.info.strapi} (node ${process.version})`],
-      [chalk.blue('Edition'), isEE ? 'Enterprise' : 'Community']
-    );
-
-    console.log(infoTable.toString());
-    console.log();
-    console.log(chalk.black.bgWhite(_.padEnd(' Actions available', columns)));
-    console.log();
-  }
-
-  logFirstStartupMessage() {
-    this.logStats();
-
-    console.log(chalk.bold('One more thing...'));
-    console.log(
-      chalk.grey('Create your first administrator 💻 by going to the administration panel at:')
-    );
-    console.log();
-
-    const addressTable = new CLITable();
-
-    const adminUrl = getAbsoluteAdminUrl(strapi.config);
-    addressTable.push([chalk.bold(adminUrl)]);
-
-    console.log(`${addressTable.toString()}`);
-    console.log();
-  }
-
-  logStartupMessage() {
-    this.logStats();
-
-    console.log(chalk.bold('Welcome back!'));
-
-    if (this.config.serveAdminPanel === true) {
-      console.log(chalk.grey('To manage your project 🚀, go to the administration panel at:'));
-      const adminUrl = getAbsoluteAdminUrl(strapi.config);
-      console.log(chalk.bold(adminUrl));
-      console.log();
-    }
-
-    console.log(chalk.grey('To access the server ⚡️, go to:'));
-    const serverUrl = getAbsoluteServerUrl(strapi.config);
-    console.log(chalk.bold(serverUrl));
-    console.log();
-  }
-
-  initServer() {
-    this.server = http.createServer(this.handleRequest.bind(this));
-    // handle port in use cleanly
-    this.server.on('error', err => {
-      if (err.code === 'EADDRINUSE') {
-        return this.stopWithError(`The port ${err.port} is already used by another application.`);
-      }
-
-      this.log.error(err);
-    });
-
-    // Close current connections to fully destroy the server
-    const connections = {};
-
-    this.server.on('connection', conn => {
-      const key = conn.remoteAddress + ':' + conn.remotePort;
-      connections[key] = conn;
-
-      conn.on('close', function() {
-        delete connections[key];
-      });
-    });
-
-    this.server.destroy = cb => {
-      this.server.close(cb);
-
-      for (let key in connections) {
-        connections[key].destroy();
-      }
-    };
-  }
-
-  async start(cb) {
+  async start() {
     try {
       if (!this.isLoaded) {
         await this.load();
@@ -201,16 +74,16 @@ class Strapi {
       this.app.use(this.router.routes()).use(this.router.allowedMethods());
 
       // Launch server.
-      this.listen(cb);
-    } catch (err) {
-      this.stopWithError(err);
+      await this.listen();
+
+      return this;
+    } catch (error) {
+      return this.stopWithError(error.message);
     }
   }
 
   async destroy() {
-    if (_.has(this, 'server.destroy')) {
-      await new Promise(res => this.server.destroy(res));
-    }
+    await this.server.destroy();
 
     await Promise.all(
       Object.values(this.plugins).map(plugin => {
@@ -235,64 +108,66 @@ class Strapi {
     delete global.strapi;
   }
 
+  sendStartupTelemetry() {
+    // Get database clients
+    const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
+
+    // Emit started event.
+    // do not await to avoid slower startup
+    this.telemetry.send('didStartServer', {
+      database: databaseClients,
+      plugins: this.config.installedPlugins,
+      providers: this.config.installedProviders,
+    });
+  }
+
+  async openAdmin({ isInitialized }) {
+    const shouldOpenAdmin =
+      this.config.environment === 'development' &&
+      this.config.get('server.admin.autoOpen', true) !== false;
+
+    if (shouldOpenAdmin || !isInitialized) {
+      await utils.openBrowser(this.config);
+    }
+  }
+
+  async postListen() {
+    const isInitialized = await utils.isInitialized(this);
+
+    this.startupLogger.logStartupMessage({ isInitialized });
+
+    this.sendStartupTelemetry();
+    this.openAdmin({ isInitialized });
+  }
+
   /**
    * Add behaviors to the server
    */
-  async listen(cb) {
-    const onListen = async err => {
-      if (err) return this.stopWithError(err);
-
-      // Is the project initialised?
-      const isInitialised = await utils.isInitialised(this);
-
-      // Should the startup message be displayed?
-      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
-        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
-        : false;
-
-      if (hideStartupMessage === false) {
-        if (!isInitialised) {
-          this.logFirstStartupMessage();
-        } else {
-          this.logStartupMessage();
+  async listen() {
+    return new Promise((resolve, reject) => {
+      const onListen = async error => {
+        if (error) {
+          return reject(error);
         }
+
+        try {
+          await this.postListen();
+
+          resolve();
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      const listenSocket = this.config.get('server.socket');
+
+      if (listenSocket) {
+        return this.server.listen(listenSocket, onListen);
       }
 
-      // Get database clients
-      const databaseClients = _.map(this.config.get('connections'), _.property('settings.client'));
-
-      // Emit started event.
-      await this.telemetry.send('didStartServer', {
-        database: databaseClients,
-        plugins: this.config.installedPlugins,
-        providers: this.config.installedProviders,
-      });
-
-      if (cb && typeof cb === 'function') {
-        cb();
-      }
-
-      if (
-        (this.config.environment === 'development' &&
-          this.config.get('server.admin.autoOpen', true) !== false) ||
-        !isInitialised
-      ) {
-        await utils.openBrowser.call(this);
-      }
-    };
-
-    const listenSocket = this.config.get('server.socket');
-    const listenErrHandler = err => onListen(err).catch(err => this.stopWithError(err));
-
-    if (listenSocket) {
-      this.server.listen(listenSocket, listenErrHandler);
-    } else {
-      this.server.listen(
-        this.config.get('server.port'),
-        this.config.get('server.host'),
-        listenErrHandler
-      );
-    }
+      const { host, port } = this.config.get('server');
+      return this.server.listen(port, host, onListen);
+    });
   }
 
   stopWithError(err, customMessage) {
@@ -300,15 +175,13 @@ class Strapi {
     if (customMessage) {
       this.log.error(customMessage);
     }
+
     this.log.error(err);
     return this.stop();
   }
 
   stop(exitCode = 1) {
-    // Destroy server and available connections.
-    if (_.has(this, 'server.destroy')) {
-      this.server.destroy();
-    }
+    this.server.destroy();
 
     if (this.config.autoReload) {
       process.send('stop');
@@ -316,6 +189,14 @@ class Strapi {
 
     // Kill process
     process.exit(exitCode);
+  }
+
+  loadAdmin() {
+    this.admin = require('@strapi/admin/strapi-server');
+
+    // TODO: rename into just admin and ./config/admin.js
+    const userAdminConfig = strapi.config.get('server.admin');
+    this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
   }
 
   async load() {
@@ -330,8 +211,9 @@ class Strapi {
 
     const modules = await loadModules(this);
 
+    this.loadAdmin();
+
     this.api = modules.api;
-    this.admin = modules.admin;
     this.components = modules.components;
     this.plugins = modules.plugins;
     this.middleware = modules.middlewares;
@@ -346,14 +228,21 @@ class Strapi {
       configuration: this.config.get('server.webhooks', {}),
     });
 
-    // Init core store
-    this.models['core_store'] = coreStoreModel(this.config);
-    this.models['strapi_webhooks'] = webhookModel(this.config);
-
-    this.db = createDatabaseManager(this);
-
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
-    await this.db.initialize();
+
+    const contentTypes = [
+      coreStoreModel,
+      webhookModel,
+      ...Object.values(strapi.contentTypes),
+      ...Object.values(strapi.components),
+    ];
+
+    this.db = await Database.init({
+      ...this.config.get('database'),
+      models: Database.transformContentTypes(contentTypes),
+    });
+
+    await this.db.schema.sync();
 
     this.store = createCoreStore({
       environment: this.config.environment,
@@ -367,6 +256,7 @@ class Strapi {
     this.entityValidator = entityValidator;
 
     this.entityService = createEntityService({
+      strapi: this,
       db: this.db,
       eventHub: this.eventHub,
       entityValidator: this.entityValidator,
@@ -374,12 +264,10 @@ class Strapi {
 
     this.telemetry = createTelemetry(this);
 
-    // Initialize hooks and middlewares.
+    // Initialize middlewares.
     await initializeMiddlewares.call(this);
-    await initializeHooks.call(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
-    await this.freeze();
 
     this.isLoaded = true;
     return this;
@@ -404,7 +292,7 @@ class Strapi {
       }
 
       if (this.config.autoReload) {
-        this.server.close();
+        this.server.destroy();
         process.send('reload');
       }
     };
@@ -448,7 +336,7 @@ class Strapi {
 
         return execLifecycle(pluginFunc).catch(err => {
           strapi.log.error(`${lifecycleName} function in plugin "${plugin}" failed`);
-          strapi.log.error(err);
+          console.error(err);
           strapi.stop();
         });
       })
@@ -461,30 +349,22 @@ class Strapi {
     const adminFunc = _.get(this.admin.config, configPath);
     return execLifecycle(adminFunc).catch(err => {
       strapi.log.error(`${lifecycleName} function in admin failed`);
-      strapi.log.error(err);
+      console.error(err);
       strapi.stop();
     });
   }
 
-  async freeze() {
-    Object.freeze(this.config);
-    Object.freeze(this.dir);
-    Object.freeze(this.admin);
-    Object.freeze(this.plugins);
-    Object.freeze(this.api);
-  }
-
-  getModel(modelKey, plugin) {
-    return this.db.getModel(modelKey, plugin);
+  getModel(uid) {
+    return this.contentTypes[uid] || this.components[uid];
   }
 
   /**
    * Binds queries with a specific model
-   * @param {string} entity - entity name
-   * @param {string} plugin - plugin name or null
+   * @param {string} uid
+   * @returns {}
    */
-  query(entity, plugin) {
-    return this.db.query(entity, plugin);
+  query(uid) {
+    return this.db.query(uid);
   }
 }
 
@@ -493,3 +373,5 @@ module.exports = options => {
   global.strapi = strapi;
   return strapi;
 };
+
+module.exports.Strapi = Strapi;

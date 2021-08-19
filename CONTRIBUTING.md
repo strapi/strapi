@@ -141,7 +141,6 @@ You can run the test suites using different databases:
 
 ```bash
 $ node test/e2e.js --db=sqlite
-$ node test/e2e.js --db=mongo
 $ node test/e2e.js --db=postgres
 $ node test/e2e.js --db=mysql
 ```
@@ -164,7 +163,7 @@ Before submitting an issue you need to make sure:
 - You have already searched for related [issues](https://github.com/strapi/strapi/issues), and found none open (if you found a related _closed_ issue, please link to it from your post).
 - You are not asking a question about how to use Strapi or about whether or not Strapi has a certain feature. For general help using Strapi, you may:
   - Refer to [the official Strapi documentation](https://strapi.io).
-  - Ask a member of the community in the [Strapi Slack Community](https://slack.strapi.io/).
+  - Ask a member of the community in the [Strapi Discord Community](https://discord.strapi.io/).
   - Ask a question on [our community forum](https://forum.strapi.io).
 - Your issue title is concise, on-topic and polite.
 - You can and do provide steps to reproduce your issue.

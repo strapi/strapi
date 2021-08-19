@@ -64,6 +64,15 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c5 {
+        margin: 0;
+        line-height: 34px;
+        color: #292b2c;
+        font-size: 13px;
+        font-weight: 400;
+        text-transform: none;
+      }
+
       .c1 {
         position: fixed;
         top: 0;
@@ -103,15 +112,6 @@ describe('ADMIN | pages | SettingsPage', () => {
 
       .c6 > div {
         margin-bottom: 29px;
-      }
-
-      .c5 {
-        margin: 0;
-        line-height: 34px;
-        color: #292b2c;
-        font-size: 13px;
-        font-weight: 400;
-        text-transform: none;
       }
 
       .c4 {

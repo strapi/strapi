@@ -7,6 +7,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { InjectionZone } from '../../../shared/components';
 import StyledLink from './StyledLink';
 
 function StaticLinks() {
@@ -38,6 +39,7 @@ function StaticLinks() {
           </li>
         );
       })}
+      <InjectionZone area="admin.tutorials.links" />
     </ul>
   );
 }

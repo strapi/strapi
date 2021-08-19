@@ -42,7 +42,6 @@ const productWithDz = {
       required: true,
     },
   },
-  connection: 'default',
   name: 'product with dz',
   description: '',
   collectionName: '',
@@ -91,14 +90,12 @@ describe('Core API - Basic + dz', () => {
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/collection-types/application::product-with-dz.product-with-dz',
+      url: `/content-manager/collection-types/application::product-with-dz.product-with-dz/${data.productsWithDz[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body.results)).toBe(true);
-    expect(res.body.results).toHaveLength(1);
-    expect(res.body.results[0]).toMatchObject(data.productsWithDz[0]);
-    res.body.results.forEach(p => expect(p.published_at).toBeUndefined());
+    expect(res.body).toMatchObject(data.productsWithDz[0]);
+    expect(res.body.published_at).toBeUndefined();
   });
 
   test('Update product with compo', async () => {

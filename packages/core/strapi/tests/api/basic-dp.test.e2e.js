@@ -40,7 +40,6 @@ const productWithDP = {
       maxLength: 30,
     },
   },
-  connection: 'default',
   draftAndPublish: true,
   name: 'product-with-dp',
   description: '',
@@ -68,16 +67,22 @@ describe('Core API - Basic + draftAndPublish', () => {
       name: 'Product 1',
       description: 'Product description',
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-dps',
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeISODate();
-    data.products.push(res.body);
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+
+    data.products.push(body.data);
   });
 
   test('Create a product + can overwrite published_at', async () => {
@@ -86,38 +91,47 @@ describe('Core API - Basic + draftAndPublish', () => {
       description: 'Product description',
       published_at: '2020-08-20T10:27:55.000Z',
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-dps',
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, 'published_at'));
-    expect(res.body.published_at).toBeISODate();
-    expect(res.body.published_at).toBe(product.published_at);
-    data.products.push(res.body);
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+
+    data.products.push(body.data);
   });
 
   test('Read products', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'GET',
       url: '/product-with-dps',
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(2);
-    expect(res.body).toEqual(
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toHaveLength(2);
+    expect(body.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'Product 1',
-          description: 'Product description',
+          id: expect.anything(),
+          attributes: expect.objectContaining({
+            name: 'Product 1',
+            description: 'Product description',
+          }),
         }),
       ])
     );
-    res.body.forEach(p => {
-      expect(p.published_at).toBeISODate();
+
+    body.data.forEach(p => {
+      expect(p.attributes.published_at).toBeISODate();
     });
   });
 
@@ -126,17 +140,22 @@ describe('Core API - Basic + draftAndPublish', () => {
       name: 'Product 1 updated',
       description: 'Updated Product description',
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-dps/${data.products[0].id}`,
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, 'published_at'));
-    expect(res.body.id).toEqual(data.products[0].id);
-    expect(res.body.published_at).toBeISODate();
-    data.products[0] = res.body;
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: data.products[0].id,
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+
+    data.products[0] = body.data;
   });
 
   test('Update product + can overwrite published_at', async () => {
@@ -145,29 +164,35 @@ describe('Core API - Basic + draftAndPublish', () => {
       description: 'Updated Product description',
       published_at: '2020-08-27T09:50:50.000Z',
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-dps/${data.products[0].id}`,
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.pick(data.products[0], ['name', 'description']));
-    expect(res.body.published_at).toBeISODate();
-    expect(res.body.published_at).toBe(product.published_at);
-    data.products[0] = res.body;
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: data.products[0].id,
+      attributes: _.pick(data.products[0], ['name', 'description']),
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+    expect(body.data.attributes.published_at).toBe(product.published_at);
+    data.products[0] = body.data;
   });
 
   test('Delete product', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'DELETE',
       url: `/product-with-dps/${data.products[0].id}`,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.products[0]);
-    expect(res.body.id).toEqual(data.products[0].id);
-    expect(res.body.published_at).toBeISODate();
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject(data.products[0]);
+    expect(body.data.id).toEqual(data.products[0].id);
+    expect(body.data.attributes.published_at).toBeISODate();
     data.products.shift();
   });
 
@@ -177,6 +202,7 @@ describe('Core API - Basic + draftAndPublish', () => {
         name: 'Product 1',
         description: '',
       };
+
       const res = await rq({
         method: 'POST',
         url: '/product-with-dps',

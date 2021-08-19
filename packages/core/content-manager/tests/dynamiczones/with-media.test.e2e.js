@@ -64,13 +64,7 @@ const ct = {
   },
 };
 
-describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/collection-types/application::withdynamiczonemedia.withdynamiczonemedia',
-  ],
-  ['GENERATED API', '/withdynamiczonemedias'],
-])('[%s] => Not required dynamiczone', (_, path) => {
+describe('Not required dynamiczone', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -86,7 +80,9 @@ describe.each([
     baseRq = await createAuthRequest({ strapi });
 
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(path);
+    rq.setURLPrefix(
+      '/content-manager/collection-types/application::withdynamiczonemedia.withdynamiczonemedia'
+    );
   });
 
   afterAll(async () => {
@@ -115,6 +111,9 @@ describe.each([
               media: [mediaId, mediaId],
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -165,6 +164,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -188,6 +190,9 @@ describe.each([
               media: [newMediaId, newMediaId],
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -236,11 +241,21 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
 
-      const getRes = await rq({ method: 'GET', url: `/${res.body.id}` });
+      const getRes = await rq({
+        method: 'GET',
+        url: `/${res.body.id}`,
+        qs: {
+          populate: ['field'],
+        },
+      });
+
       expect(getRes.body).toMatchObject({
         field: [
           {
@@ -288,6 +303,9 @@ describe.each([
               },
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 

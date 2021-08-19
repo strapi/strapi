@@ -20,7 +20,6 @@ const product = {
       type: 'text',
     },
   },
-  connection: 'default',
   name: 'product',
   description: '',
   collectionName: '',
@@ -68,10 +67,18 @@ describe('Core API - Basic', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeUndefined();
-    data.product.push(res.body);
+    const { statusCode, body } = res;
+
+    expect(statusCode).toBe(200);
+    expect(body).toMatchObject({
+      data: {
+        id: expect.anything(),
+        attributes: product,
+      },
+    });
+    expect(body.data.attributes.published_at).toBeUndefined();
+
+    data.product.push(body.data);
   });
 
   test('Read product', async () => {
@@ -80,18 +87,26 @@ describe('Core API - Basic', () => {
       url: '/products',
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body).toEqual(
+    const { statusCode, body } = res;
+
+    expect(statusCode).toBe(200);
+    expect(Array.isArray(body.data)).toBe(true);
+    expect(body.data).toHaveLength(1);
+    expect(body.data).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          name: 'Product 1',
-          description: 'Product description',
+          id: expect.anything(),
+          attributes: expect.objectContaining({
+            name: 'Product 1',
+            description: 'Product description',
+          }),
         }),
       ])
     );
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+
+    body.data.forEach(p => {
+      expect(p.attributes.published_at).toBeUndefined();
+    });
   });
 
   test('Update product', async () => {
@@ -105,11 +120,17 @@ describe('Core API - Basic', () => {
       body: product,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.product[0].id);
-    expect(res.body.published_at).toBeUndefined();
-    data.product[0] = res.body;
+    const { statusCode, body } = res;
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      attributes: product,
+    });
+
+    expect(body.data.id).toEqual(data.product[0].id);
+    expect(body.data.attributes.published_at).toBeUndefined();
+
+    data.product[0] = res.body.data;
   });
 
   test('Delete product', async () => {
@@ -118,10 +139,12 @@ describe('Core API - Basic', () => {
       url: `/products/${data.product[0].id}`,
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.product[0]);
-    expect(res.body.id).toEqual(data.product[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    const { statusCode, body } = res;
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject(data.product[0]);
+    expect(body.data.id).toEqual(data.product[0].id);
+    expect(body.data.attributes.published_at).toBeUndefined();
     data.product.shift();
   });
 });

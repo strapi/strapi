@@ -32,19 +32,21 @@ module.exports = async () => {
 };
 
 const registerModelsHooks = () => {
-  Object.values(strapi.models)
-    .filter(model => getService('content-types').isLocalizedContentType(model))
-    .forEach(model => {
-      strapi.db.lifecycles.register({
-        model: model.uid,
-        async beforeCreate(data) {
-          await getService('localizations').assignDefaultLocale(data);
-        },
-      });
-    });
+  const i18nModelUIDs = Object.values(strapi.contentTypes)
+    .filter(contentType => getService('content-types').isLocalizedContentType(contentType))
+    .map(contentType => contentType.uid);
 
-  strapi.db.lifecycles.register({
-    model: 'plugins::i18n.locale',
+  if (i18nModelUIDs.length > 0) {
+    strapi.db.lifecycles.subscribe({
+      models: i18nModelUIDs,
+      async beforeCreate(event) {
+        await getService('localizations').assignDefaultLocale(event.params.data);
+      },
+    });
+  }
+
+  strapi.db.lifecycles.subscribe({
+    models: ['plugins::i18n.locale'],
 
     async afterCreate() {
       await getService('permissions').actions.syncSuperAdminPermissionsWithLocales();

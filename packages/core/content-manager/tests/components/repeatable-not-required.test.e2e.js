@@ -28,12 +28,8 @@ const ct = {
   },
 };
 
-describe.each([
-  ['CONTENT MANAGER', '/content-manager/collection-types/application::withcomponent.withcomponent'],
-  ['GENERATED API', '/withcomponents'],
-])('[%s] => Non repeatable and Not required component', (_, path) => {
+describe('Non repeatable and Not required component', () => {
   const builder = createTestBuilder();
-  const hasPagination = path.includes('/content-manager');
 
   beforeAll(async () => {
     await builder
@@ -43,7 +39,7 @@ describe.each([
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(path);
+    rq.setURLPrefix('/content-manager/collection-types/application::withcomponent.withcomponent');
   });
 
   afterAll(async () => {
@@ -60,6 +56,9 @@ describe.each([
               name: 'someString',
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -93,6 +92,9 @@ describe.each([
         body: {
           field: [],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -102,6 +104,9 @@ describe.each([
     test('Can send input without the component field', async () => {
       const res = await rq.post('/', {
         body: {},
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.statusCode).toBe(200);
@@ -122,9 +127,17 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
+
       expect(getRes.statusCode).toBe(200);
       expect(Array.isArray(getRes.body.field)).toBe(true);
 
@@ -137,31 +150,17 @@ describe.each([
     });
 
     test('Should return entries with their nested components', async () => {
-      const res = await rq.get('/');
+      const res = await rq.get('/', {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(res.statusCode).toBe(200);
 
-      if (hasPagination) {
-        expect(res.body.pagination).toBeDefined();
-        expect(Array.isArray(res.body.results)).toBe(true);
-        res.body.results.forEach(entry => {
-          expect(Array.isArray(entry.field)).toBe(true);
-
-          if (entry.field.length === 0) return;
-
-          expect(entry.field).toEqual(
-            expect.arrayContaining([
-              expect.objectContaining({
-                name: expect.any(String),
-              }),
-            ])
-          );
-        });
-        return;
-      }
-
-      expect(Array.isArray(res.body)).toBe(true);
-      res.body.forEach(entry => {
+      expect(res.body.pagination).toBeDefined();
+      expect(Array.isArray(res.body.results)).toBe(true);
+      res.body.results.forEach(entry => {
         expect(Array.isArray(entry.field)).toBe(true);
 
         if (entry.field.length === 0) return;
@@ -189,18 +188,28 @@ describe.each([
               },
             ],
           },
+          qs: {
+            populate: ['field'],
+          },
         });
 
         const updateRes = await rq.put(`/${res.body.id}`, {
           body: {
             field: value,
           },
+          qs: {
+            populate: ['field'],
+          },
         });
 
         expect(updateRes.statusCode).toBe(400);
 
         // shouldn't have been updated
-        const getRes = await rq.get(`/${res.body.id}`);
+        const getRes = await rq.get(`/${res.body.id}`, {
+          qs: {
+            populate: ['field'],
+          },
+        });
 
         expect(getRes.statusCode).toBe(200);
         expect(getRes.body).toMatchObject({
@@ -222,6 +231,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(res.body.field[0]).toMatchObject({
@@ -242,6 +254,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(updateRes.statusCode).toBe(200);
@@ -254,7 +269,11 @@ describe.each([
         name: 'someString',
       });
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(Array.isArray(getRes.body.field)).toBe(true);
@@ -279,10 +298,16 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {},
+        qs: {
+          populate: ['field'],
+        },
       });
 
       expect(updateRes.statusCode).toBe(200);
@@ -291,7 +316,11 @@ describe.each([
         field: res.body.field,
       });
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject({
@@ -309,11 +338,17 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
         body: {
           field: [],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -325,7 +360,11 @@ describe.each([
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body).toMatchObject(expectResult);
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject(expectResult);
@@ -340,6 +379,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
@@ -349,6 +391,9 @@ describe.each([
               name: 'new String',
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -368,7 +413,11 @@ describe.each([
         ],
       });
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject({
@@ -421,6 +470,9 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
       const updateRes = await rq.put(`/${res.body.id}`, {
@@ -441,6 +493,9 @@ describe.each([
               name: 'four',
             },
           ],
+        },
+        qs: {
+          populate: ['field'],
         },
       });
 
@@ -467,7 +522,11 @@ describe.each([
       expect(updateRes.statusCode).toBe(200);
       expect(updateRes.body).toMatchObject(expectedResult);
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(200);
       expect(getRes.body).toMatchObject(expectedResult);
@@ -490,14 +549,25 @@ describe.each([
             },
           ],
         },
+        qs: {
+          populate: ['field'],
+        },
       });
 
-      const deleteRes = await rq.delete(`/${res.body.id}`);
+      const deleteRes = await rq.delete(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(deleteRes.statusCode).toBe(200);
       expect(deleteRes.body).toMatchObject(res.body);
 
-      const getRes = await rq.get(`/${res.body.id}`);
+      const getRes = await rq.get(`/${res.body.id}`, {
+        qs: {
+          populate: ['field'],
+        },
+      });
 
       expect(getRes.statusCode).toBe(404);
     });

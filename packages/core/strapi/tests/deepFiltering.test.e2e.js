@@ -1,10 +1,10 @@
 'use strict';
 
 // Test an API with all the possible filed types and simple filterings (no deep filtering, no relations)
-
+const _ = require('lodash');
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createAuthRequest, transformToRESTResource } = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 const data = {
@@ -35,14 +35,14 @@ const collector = {
       type: 'integer',
     },
     cards: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: 'application::card.card',
-      unique: false,
     },
     collector_friends: {
-      nature: 'manyWay',
+      type: 'relation',
+      relation: 'oneToMany',
       target: '__self__',
-      unique: false,
     },
   },
 };
@@ -91,7 +91,10 @@ describe('Deep Filtering API', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    Object.assign(data, builder.sanitizedFixtures(strapi));
+    Object.assign(
+      data,
+      _.mapValues(builder.sanitizedFixtures(strapi), value => transformToRESTResource(value))
+    );
   });
 
   afterAll(async () => {
@@ -106,14 +109,14 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: { cards: { name: data.card[0].attributes.name } },
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(2);
-        expect(res.body[0]).toMatchObject(data.collector[0]);
-        expect(res.body[1]).toMatchObject(data.collector[1]);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data[0]).toMatchObject(data.collector[0]);
+        expect(res.body.data[1]).toMatchObject(data.collector[1]);
       });
 
       test('Should return 1 result', async () => {
@@ -121,13 +124,13 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[1].name,
+            filters: { cards: { name: data.card[1].attributes.name } },
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(1);
-        expect(res.body[0]).toMatchObject(data.collector[0]);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data[0]).toMatchObject(data.collector[0]);
       });
     });
 
@@ -137,13 +140,13 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: { collector_friends: { name: data.collector[0].attributes.name } },
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(2);
-        expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
     });
   });
@@ -155,14 +158,18 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: {
+              cards: {
+                name: data.card[0].attributes.name,
+              },
+            },
             _q: '',
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(2);
-        expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(0, 2)));
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(0, 2)));
       });
 
       test('cards.name + _q=25', async () => {
@@ -170,14 +177,18 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'cards.name': data.card[0].name,
+            filters: {
+              cards: {
+                name: data.card[0].attributes.name,
+              },
+            },
             _q: 25,
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(1);
-        expect(res.body[0]).toMatchObject(data.collector[0]);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data[0]).toMatchObject(data.collector[0]);
       });
     });
 
@@ -187,28 +198,37 @@ describe('Deep Filtering API', () => {
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: {
+              collector_friends: {
+                name: data.collector[0].attributes.name,
+              },
+            },
             _q: '',
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(2);
-        expect(res.body).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(2);
+        expect(res.body.data).toEqual(expect.arrayContaining(data.collector.slice(1, 3)));
       });
+
       test('collector_friends.name + search isa', async () => {
         const res = await rq({
           method: 'GET',
           url: '/collectors',
           qs: {
-            'collector_friends.name': data.collector[0].name,
+            filters: {
+              collector_friends: {
+                name: data.collector[0].attributes.name,
+              },
+            },
             _q: 'isa',
           },
         });
 
-        expect(Array.isArray(res.body)).toBe(true);
-        expect(res.body.length).toBe(1);
-        expect(res.body[0]).toMatchObject(data.collector[1]);
+        expect(Array.isArray(res.body.data)).toBe(true);
+        expect(res.body.data.length).toBe(1);
+        expect(res.body.data[0]).toMatchObject(data.collector[1]);
       });
     });
   });

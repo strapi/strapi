@@ -59,7 +59,7 @@ export default {
         },
         {
           intlLabel: {
-            id: getTrad('HeaderNav.link.email-templates'),
+            id: getTrad('HeaderNav.link.emailTemplates'),
             defaultMessage: 'Email templates',
           },
           id: 'email-templates',
@@ -75,7 +75,7 @@ export default {
         },
         {
           intlLabel: {
-            id: getTrad('HeaderNav.link.advanced-settings'),
+            id: getTrad('HeaderNav.link.advancedSettings'),
             defaultMessage: 'Advanced Settings',
           },
           id: 'advanced-settings',

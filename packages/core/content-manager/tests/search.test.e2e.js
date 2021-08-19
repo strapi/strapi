@@ -199,7 +199,9 @@ describe('Search query', () => {
         url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: '',
-          peopleNumber_gt: 0,
+          filters: {
+            peopleNumber: { $gt: 0 },
+          },
         },
       });
 
@@ -213,7 +215,9 @@ describe('Search query', () => {
         url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: '',
-          peopleNumber_gt: 1,
+          filters: {
+            peopleNumber: { $gt: 1 },
+          },
         },
       });
 
@@ -221,11 +225,17 @@ describe('Search query', () => {
       expect(res.body.results.length).toBe(2);
       expect(res.body.results).toMatchObject([data.beds[0], data.beds[4]]);
     });
+
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
         method: 'GET',
-        url:
-          '/content-manager/collection-types/application::bed.bed?peopleNumber=1&peopleNumber=6&_q=',
+        url: '/content-manager/collection-types/application::bed.bed',
+        qs: {
+          filters: {
+            peopleNumber: [1, 6],
+          },
+          _q: '',
+        },
       });
 
       expect(Array.isArray(res.body.results)).toBe(true);
@@ -238,7 +248,11 @@ describe('Search query', () => {
         url: '/content-manager/collection-types/application::bed.bed',
         qs: {
           _q: 'Sleepy Bed',
-          peopleNumber_lt: 7,
+          filters: {
+            peopleNumber: {
+              $lt: 7,
+            },
+          },
         },
       });
 

@@ -43,7 +43,6 @@ const productWithCompoAndDP = {
       repeatable: true,
     },
   },
-  connection: 'default',
   draftAndPublish: true,
   name: 'product-with-compo-and-dp',
   description: '',
@@ -77,30 +76,42 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
         },
       ],
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-compo-and-dps',
       body: product,
+      qs: {
+        populate: ['compo'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeISODate();
-    data.productsWithCompoAndDP.push(res.body);
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+    data.productsWithCompoAndDP.push(body.data);
   });
 
   test('Read product with compo', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'GET',
       url: '/product-with-compo-and-dps',
+      qs: {
+        populate: ['compo'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompoAndDP[0]);
-    res.body.forEach(p => {
-      expect(p.published_at).toBeISODate();
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]).toMatchObject(data.productsWithCompoAndDP[0]);
+    body.data.forEach(p => {
+      expect(p.attributes.published_at).toBeISODate();
     });
   });
 
@@ -115,29 +126,38 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
         },
       ],
     };
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
       body: product,
+      qs: {
+        populate: ['compo'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-    expect(res.body.published_at).toBeISODate();
-    data.productsWithCompoAndDP[0] = res.body;
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: data.productsWithCompoAndDP[0].id,
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+    data.productsWithCompoAndDP[0] = body.data;
   });
 
   test('Delete product with compo', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'DELETE',
       url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
+      qs: {
+        populate: ['compo'],
+      },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompoAndDP[0]);
-    expect(res.body.id).toEqual(data.productsWithCompoAndDP[0].id);
-    expect(res.body.published_at).toBeISODate();
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject(data.productsWithCompoAndDP[0]);
+    expect(body.data.attributes.published_at).toBeISODate();
     data.productsWithCompoAndDP.shift();
   });
 
