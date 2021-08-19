@@ -50,4 +50,42 @@ module.exports = function(plop) {
       },
     ],
   });
+
+  // Controller generator
+  plop.setGenerator('controller', {
+    description: 'Generate a controller for an API',
+    prompts: [
+      {
+        type: 'input',
+        name: 'id',
+        message: 'Controller name',
+      },
+    ],
+    actions: [
+      {
+        type: 'add',
+        path: join(process.cwd(), 'api/{{id}}/controllers/{{id}}.js'),
+        templateFile: 'templates/controller.js.hbs',
+      },
+    ],
+  });
+
+  // Policy generator
+  plop.setGenerator('policy', {
+    description: 'Generate a policy',
+    prompts: [
+      {
+        type: 'input',
+        name: 'id',
+        message: 'Policy name',
+      },
+    ],
+    actions: [
+      {
+        type: 'add',
+        path: join(process.cwd(), 'config/policies/{{id}}.js'),
+        templateFile: 'templates/policy.js.hbs',
+      },
+    ],
+  });
 };
