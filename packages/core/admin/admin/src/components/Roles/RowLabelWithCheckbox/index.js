@@ -60,7 +60,12 @@ const RowLabelWithCheckbox = ({
         title={label}
         alignItems="center"
         isCollapsable={isCollapsable}
-        onClick={onClick}
+        {...(isCollapsable && {
+          onClick,
+          onKeyDown: ({ key }) => (key === 'Enter' || key === ' ') && onClick(),
+          tabIndex: 0,
+          role: 'button',
+        })}
       >
         <StyledText>{label.charAt(0).toUpperCase() + label.slice(1)}</StyledText>
         {children}
