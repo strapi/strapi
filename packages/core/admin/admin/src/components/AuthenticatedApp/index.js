@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+//  TODO: DS add loader
 import { LoadingIndicatorPage, AppInfosContext } from '@strapi/helper-plugin';
 import { useQueries } from 'react-query';
 import packageJSON from '../../../../package.json';
