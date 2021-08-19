@@ -5,6 +5,7 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
     webhooks: [],
     webhooksToDelete: [],
     webhookToDelete: null,
+    loadingWebhooks: true,
   };
 
   describe('Load webhooks', () => {
@@ -34,7 +35,7 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
         data: receivedData,
       };
 
-      const expectedState = { ...state, webhooks: receivedData };
+      const expectedState = { ...state, webhooks: receivedData, loadingWebhooks: false };
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
