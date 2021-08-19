@@ -5,12 +5,12 @@ const { join } = require('path');
 module.exports = function(plop) {
   // Service generator
   plop.setGenerator('service', {
-    description: 'application service logic',
+    description: 'Generate a service for an API',
     prompts: [
       {
         type: 'input',
         name: 'id',
-        message: 'service name please',
+        message: 'Service name',
       },
     ],
     actions: [
