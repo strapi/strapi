@@ -125,8 +125,8 @@ module.exports = strapi => {
         ...apolloServerConfig,
       };
 
-      // Disable GraphQL Playground in production environment.
-      if (strapi.config.environment !== 'production' || config.playgroundAlways) {
+      // Disable GraphQL Playground in production and staging environment.
+      if (strapi.config.environment !== ('production' || 'staging') || config.playgroundAlways) {
         serverParams.playground = {
           endpoint: `${strapi.config.server.url}${config.endpoint}`,
           shareEnabled: config.shareEnabled,
