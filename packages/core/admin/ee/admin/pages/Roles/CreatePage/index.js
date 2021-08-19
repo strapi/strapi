@@ -146,11 +146,11 @@ const CreatePage = () => {
             <>
               <HeaderLayout
                 primaryAction={<Button startIcon={<AddIcon />}>Add an entry</Button>}
-                secondaryAction={(
+                secondaryAction={
                   <Button variant="tertiary" startIcon={<EditIcon />}>
                     Edit
                   </Button>
-                )}
+                }
                 title="Other CT"
                 subtitle="36 entries found"
                 as="h1"

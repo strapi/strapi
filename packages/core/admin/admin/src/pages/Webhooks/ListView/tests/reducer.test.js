@@ -287,5 +287,83 @@ describe('Admin | containers | Webhooks | ListView | reducer', () => {
 
       expect(reducer(state, action)).toEqual(expectedState);
     });
+
+    it('should clear webhooksToDelete when webhooksToDelete length > 0', () => {
+      const webhooks = [
+        {
+          id: 3,
+          name: 'webhook 1',
+          url: 'http://localhost:5000',
+          headers: {},
+          events: ['entry.create', 'entry.update', 'entry.delete'],
+          isEnabled: true,
+        },
+        {
+          id: 4,
+          name: 'webhook 2',
+          url: 'http://localhost:4000',
+          headers: {},
+          events: ['media.create', 'media.update'],
+          isEnabled: false,
+        },
+        {
+          id: 5,
+          name: 'webhook 2',
+          url: 'http://localhost:4000',
+          headers: {},
+          events: ['media.create', 'media.update'],
+          isEnabled: false,
+        },
+      ];
+
+      const state = { ...initialState, webhooks, webhooksToDelete: [3] };
+
+      const action = {
+        type: 'SET_ALL_WEBHOOKS_TO_DELETE',
+      };
+
+      const expectedState = { ...state, webhooks, webhooksToDelete: [] };
+
+      expect(reducer(state, action)).toEqual(expectedState);
+    });
+
+    it('should add all webhooks in webhooksToDelete when webhooksToDelete length === 0', () => {
+      const webhooks = [
+        {
+          id: 3,
+          name: 'webhook 1',
+          url: 'http://localhost:5000',
+          headers: {},
+          events: ['entry.create', 'entry.update', 'entry.delete'],
+          isEnabled: true,
+        },
+        {
+          id: 4,
+          name: 'webhook 2',
+          url: 'http://localhost:4000',
+          headers: {},
+          events: ['media.create', 'media.update'],
+          isEnabled: false,
+        },
+        {
+          id: 5,
+          name: 'webhook 2',
+          url: 'http://localhost:4000',
+          headers: {},
+          events: ['media.create', 'media.update'],
+          isEnabled: false,
+        },
+      ];
+
+      const state = { ...initialState, webhooks, webhooksToDelete: [] };
+
+      const action = {
+        type: 'SET_ALL_WEBHOOKS_TO_DELETE',
+      };
+
+      const expectedState = { ...state, webhooks, webhooksToDelete: [3, 4, 5] };
+
+      expect(reducer(state, action)).toEqual(expectedState);
+    });
   });
 });
