@@ -69,7 +69,7 @@ const createModule = (namespace, rawModule, strapi) => {
       return strapi.container.get('controllers').get(`${namespace}.${controllerName}`);
     },
     get controllers() {
-      return strapi.container.get('controllers').getAll(namespace);
+      return rawModule.controllers;
     },
   };
 };

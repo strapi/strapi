@@ -42,7 +42,7 @@ describe('CRUD locales', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    localeService = strapi.plugins.i18n.services.locales;
+    localeService = strapi.plugin('i18n').service('locales');
   });
 
   afterAll(async () => {

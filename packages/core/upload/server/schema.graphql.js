@@ -77,7 +77,7 @@ module.exports = {
 const formatFile = async (upload, extraInfo, metas) => {
   const { filename, mimetype, createReadStream } = await upload;
 
-  const { optimize } = strapi.plugins.upload.services['image-manipulation'];
+  const { optimize } = strapi.plugin('upload').service('image-manipulation');
   const readBuffer = await streamToBuffer(createReadStream());
 
   const { buffer, info } = await optimize(readBuffer);

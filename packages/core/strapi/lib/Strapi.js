@@ -59,7 +59,6 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
     this.server = createHTTPServer(this, this.app);
-    this.plugins = {}; // to remove V3
     this.contentTypes = {}; // to remove V3
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
@@ -83,11 +82,7 @@ class Strapi {
   }
 
   plugin(name) {
-    return this.container.get('modules').get(`plugin::${name}`);
-  }
-
-  get pluginsV4() {
-    return this.container.get('modules').getAll('plugin::');
+    return this.plugins[name];
   }
 
   async start() {
@@ -236,14 +231,13 @@ class Strapi {
 
     const plugins = await loadPlugins(this);
 
+    this.plugins = {};
+
     for (const pluginName in plugins) {
       const plugin = plugins[pluginName];
-      this.container.get('modules').add(`plugin::${pluginName}`, plugin);
+      const moduleInstance = this.container.get('modules').add(`plugin::${pluginName}`, plugin);
+      this.plugins[pluginName] = moduleInstance;
     }
-
-    // await this.container.load();
-
-    // this.plugins = this.container.plugins.getAll();
 
     const modules = await loadModules(this);
 

@@ -4,6 +4,7 @@
  */
 const sharp = require('sharp');
 
+const { getService } = require('../utils');
 const { bytesToKbytes } = require('../utils/file');
 
 const getMetadatas = buffer =>
@@ -60,10 +61,9 @@ const generateThumbnail = async file => {
 };
 
 const optimize = async buffer => {
-  const {
-    sizeOptimization = false,
-    autoOrientation = false,
-  } = await strapi.plugins.upload.services.upload.getSettings();
+  const { sizeOptimization = false, autoOrientation = false } = await getService(
+    'upload'
+  ).getSettings();
 
   if (!sizeOptimization || !(await canBeProccessed(buffer))) {
     return { buffer };
@@ -97,9 +97,7 @@ const DEFAULT_BREAKPOINTS = {
 const getBreakpoints = () => strapi.config.get('plugin.upload.breakpoints', DEFAULT_BREAKPOINTS);
 
 const generateResponsiveFormats = async file => {
-  const {
-    responsiveDimensions = false,
-  } = await strapi.plugins.upload.services.upload.getSettings();
+  const { responsiveDimensions = false } = await getService('upload').getSettings();
 
   if (!responsiveDimensions) return [];
 

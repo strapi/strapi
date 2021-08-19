@@ -16,7 +16,7 @@ module.exports = async (uid, entity, files) => {
     return;
   }
 
-  const uploadService = strapi.plugins.upload.services.upload;
+  const uploadService = strapi.plugin('upload').service('upload');
 
   const findModelFromUploadPath = path => {
     if (path.length === 0) {

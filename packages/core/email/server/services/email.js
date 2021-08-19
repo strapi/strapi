@@ -7,7 +7,7 @@ const getProviderSettings = () => {
 };
 
 const send = async options => {
-  return strapi.plugins.email.provider.send(options);
+  return strapi.plugin('email').provider.send(options);
 };
 
 /**
@@ -34,7 +34,7 @@ const sendTemplatedEmail = (emailOptions = {}, emailTemplate = {}, data = {}) =>
     {}
   );
 
-  return strapi.plugins.email.provider.send({ ...emailOptions, ...templatedAttributes });
+  return strapi.plugin('email').provider.send({ ...emailOptions, ...templatedAttributes });
 };
 
 module.exports = () => ({

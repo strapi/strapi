@@ -1,9 +1,7 @@
 'use strict';
 
-const { prop } = require('lodash/fp');
-
 const getService = name => {
-  return prop(`users-permissions.services.${name}`, strapi.plugins);
+  return strapi.plugin('users-permissions').service(name);
 };
 
 module.exports = {

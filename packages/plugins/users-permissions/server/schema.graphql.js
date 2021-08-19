@@ -79,9 +79,10 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.params = { ...context.params, ...options.input };
 
-          await strapi.plugins['users-permissions'].controllers['users-permissions'].getRole(
-            context
-          );
+          await strapi
+            .plugin('users-permissions')
+            .controller('users-permissions')
+            .getRole(context);
 
           return context.body.role;
         },
@@ -92,9 +93,10 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.params = { ...context.params, ...options.input };
 
-          await strapi.plugins['users-permissions'].controllers['users-permissions'].getRoles(
-            context
-          );
+          await strapi
+            .plugin('users-permissions')
+            .controller('users-permissions')
+            .getRoles(context);
 
           return context.body.roles;
         },
@@ -105,9 +107,10 @@ module.exports = {
         description: 'Create a new role',
         resolverOf: 'plugin::users-permissions.users-permissions.createRole',
         resolver: async (obj, options, { context }) => {
-          await strapi.plugins['users-permissions'].controllers['users-permissions'].createRole(
-            context
-          );
+          await strapi
+            .plugin('users-permissions')
+            .controller('users-permissions')
+            .createRole(context);
 
           return { ok: true };
         },
@@ -119,9 +122,10 @@ module.exports = {
           context.params = { ...context.params, ...options.input };
           context.params.role = context.params.id;
 
-          await strapi.plugins['users-permissions'].controllers['users-permissions'].updateRole(
-            context
-          );
+          await strapi
+            .plugin('users-permissions')
+            .controller('users-permissions')
+            .updateRole(context);
 
           return { ok: true };
         },
@@ -133,9 +137,10 @@ module.exports = {
           context.params = { ...context.params, ...options.input };
           context.params.role = context.params.id;
 
-          await strapi.plugins['users-permissions'].controllers['users-permissions'].deleteRole(
-            context
-          );
+          await strapi
+            .plugin('users-permissions')
+            .controller('users-permissions')
+            .deleteRole(context);
 
           return { ok: true };
         },
@@ -147,10 +152,13 @@ module.exports = {
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.create(context);
+          await strapi
+            .plugin('users-permissions')
+            .controller('user')
+            .create(context);
 
           return {
-            user: context.body.toJSON ? context.body.toJSON() : context.body,
+            user: context.body,
           };
         },
       },
@@ -161,10 +169,13 @@ module.exports = {
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
-          await strapi.plugins['users-permissions'].controllers.user.update(context);
+          await strapi
+            .plugin('users-permissions')
+            .controller('user')
+            .update(context);
 
           return {
-            user: context.body.toJSON ? context.body.toJSON() : context.body,
+            user: context.body,
           };
         },
       },
@@ -178,12 +189,18 @@ module.exports = {
 
           // Retrieve user to be able to return it because
           // Bookshelf doesn't return the row once deleted.
-          await strapi.plugins['users-permissions'].controllers.user.findOne(context);
+          await strapi
+            .plugin('users-permissions')
+            .controller('user')
+            .findOne(context);
           // Assign result to user.
-          const user = context.body.toJSON ? context.body.toJSON() : context.body;
+          const user = context.body;
 
           // Run destroy query.
-          await strapi.plugins['users-permissions'].controllers.user.destroy(context);
+          await strapi
+            .plugin('users-permissions')
+            .controller('user')
+            .destroy(context);
 
           return {
             user,
@@ -196,8 +213,12 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.request.body = _.toPlainObject(options.input);
 
-          await strapi.plugins['users-permissions'].controllers.auth.register(context);
-          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          await strapi
+            .plugin('users-permissions')
+            .controller('auth')
+            .register(context);
+
+          let output = context.body;
 
           checkBadRequest(output);
           return {
@@ -215,8 +236,12 @@ module.exports = {
           };
           context.request.body = _.toPlainObject(options.input);
 
-          await strapi.plugins['users-permissions'].controllers.auth.callback(context);
-          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          await strapi
+            .plugin('users-permissions')
+            .controller('auth')
+            .callback(context);
+
+          let output = context.body;
 
           checkBadRequest(output);
           return {
@@ -231,8 +256,12 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.request.body = _.toPlainObject(options);
 
-          await strapi.plugins['users-permissions'].controllers.auth.forgotPassword(context);
-          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          await strapi
+            .plugin('users-permissions')
+            .controller('auth')
+            .forgotPassword(context);
+
+          let output = context.body;
 
           checkBadRequest(output);
 
@@ -247,8 +276,12 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.request.body = _.toPlainObject(options);
 
-          await strapi.plugins['users-permissions'].controllers.auth.resetPassword(context);
-          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          await strapi
+            .plugin('users-permissions')
+            .controller('auth')
+            .resetPassword(context);
+
+          let output = context.body;
 
           checkBadRequest(output);
 
@@ -264,12 +297,12 @@ module.exports = {
         resolver: async (obj, options, { context }) => {
           context.query = _.toPlainObject(options);
 
-          await strapi.plugins['users-permissions'].controllers.auth.emailConfirmation(
-            context,
-            null,
-            true
-          );
-          let output = context.body.toJSON ? context.body.toJSON() : context.body;
+          await strapi
+            .plugin('users-permissions')
+            .controller('auth')
+            .emailConfirmation(context, null, true);
+
+          let output = context.body;
 
           checkBadRequest(output);
 
