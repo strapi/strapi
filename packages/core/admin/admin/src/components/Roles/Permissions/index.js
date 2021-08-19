@@ -1,16 +1,16 @@
-import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
-import PropTypes from 'prop-types';
 import { difference } from '@strapi/helper-plugin';
-import { TabGroup, Tabs, TabPanels, Tab, TabPanel, Box } from '@strapi/parts';
-import { useIntl } from 'react-intl';
+import { Tab, TabGroup, TabPanel, TabPanels, Tabs } from '@strapi/parts';
 import { has, isEmpty } from 'lodash';
-import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
+import PropTypes from 'prop-types';
+import React, { forwardRef, memo, useCallback, useImperativeHandle, useReducer } from 'react';
+import { useIntl } from 'react-intl';
 import ContentTypes from '../ContentTypes';
+import PermissionsDataManagerProvider from '../PermissionsDataManagerProvider';
 import PluginsAndSettings from '../PluginsAndSettings';
-import TAB_LABELS from './utils/tabLabels';
-import formatPermissionsToAPI from './utils/formatPermissionsToAPI';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import formatPermissionsToAPI from './utils/formatPermissionsToAPI';
+import TAB_LABELS from './utils/tabLabels';
 
 const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) => {
   const [{ initialData, layouts, modifiedData }, dispatch] = useReducer(reducer, initialState, () =>
@@ -108,7 +108,7 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
       }}
     >
-      <TabGroup label="Some stuff for the label" id="tabs">
+      <TabGroup id="tabs">
         <Tabs>
           {TAB_LABELS.map(tabLabel => (
             <Tab key={tabLabel.id}>{formatMessage({ id: tabLabel.labelId })}</Tab>
@@ -123,31 +123,25 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
             />
           </TabPanel>
           <TabPanel>
-            <Box padding={4} background="neutral0">
-              <ContentTypes
-                layout={layouts.singleTypes}
-                kind="singleTypes"
-                isFormDisabled={isFormDisabled}
-              />
-            </Box>
+            <ContentTypes
+              layout={layouts.singleTypes}
+              kind="singleTypes"
+              isFormDisabled={isFormDisabled}
+            />
           </TabPanel>
           <TabPanel>
-            <Box padding={4} background="neutral0">
-              <PluginsAndSettings
-                layout={layouts.plugins}
-                kind="plugins"
-                isFormDisabled={isFormDisabled}
-              />
-            </Box>
+            <PluginsAndSettings
+              layout={layouts.plugins}
+              kind="plugins"
+              isFormDisabled={isFormDisabled}
+            />
           </TabPanel>
           <TabPanel>
-            <Box padding={4} background="neutral0">
-              <PluginsAndSettings
-                layout={layouts.settings}
-                kind="settings"
-                isFormDisabled={isFormDisabled}
-              />
-            </Box>
+            <PluginsAndSettings
+              layout={layouts.settings}
+              kind="settings"
+              isFormDisabled={isFormDisabled}
+            />
           </TabPanel>
         </TabPanels>
       </TabGroup>

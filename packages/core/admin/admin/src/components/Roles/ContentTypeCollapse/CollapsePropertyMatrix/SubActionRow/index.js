@@ -2,6 +2,7 @@ import React, { memo, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { Flex, Text } from '@buffetjs/core';
+import { Box } from '@strapi/parts';
 import styled from 'styled-components';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../hooks';
@@ -14,7 +15,6 @@ import HiddenAction from '../../../HiddenAction';
 import RequiredSign from '../../../RequiredSign';
 import { RowStyle, RowWrapper } from './row';
 import { LeftBorderTimeline, TopTimeline } from './timeline';
-import Wrapper from './Wrapper';
 
 const SubLevelWrapper = styled.div`
   padding-bottom: 8px;
@@ -55,7 +55,7 @@ const SubActionRow = ({
   }, [rowToOpen, childrenForm]);
 
   return (
-    <Wrapper>
+    <Box>
       <TopTimeline />
       {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
         const isVisible = index + 1 < childrenForm.length;
@@ -159,7 +159,7 @@ const SubActionRow = ({
           </LeftBorderTimeline>
         );
       })}
-    </Wrapper>
+    </Box>
   );
 };
 

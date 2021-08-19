@@ -17,6 +17,7 @@ import {
   Text,
   Textarea,
   TextInput,
+  Main,
 } from '@strapi/parts';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
@@ -30,6 +31,16 @@ import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import schema from './utils/schema';
+
+const UsersRoleNumber = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.primary200};
+  background: ${({ theme }) => theme.colors.primary100};
+  padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
+  color: ${({ theme }) => theme.colors.primary600};
+  border-radius: ${({ theme }) => theme.borderRadius};
+  font-size: ${12 / 16}rem;
+  font-width: bold;
+`;
 
 const CreatePage = () => {
   const toggleNotification = useNotification();
@@ -99,26 +110,12 @@ const CreatePage = () => {
       });
   };
 
-  const UsersRoleNumber = styled.div`
-    border: 1px solid ${({ theme }) => theme.colors.primary200};
-    background: ${({ theme }) => theme.colors.primary100};
-    padding: ${({ theme }) => `${theme.spaces[2]} ${theme.spaces[4]}`};
-    color: ${({ theme }) => theme.colors.primary600};
-    border-radius: ${({ theme }) => theme.borderRadius};
-    font-size: ${12 / 16}rem;
-    font-width: bold;
-  `;
-
-  const FlexBox = styled(Box)`
-    flex: 1;
-  `;
-
   const defaultDescription = `${formatMessage({
     id: 'Settings.roles.form.created',
   })} ${moment().format('LL')}`;
 
   return (
-    <>
+    <Main labelledBy="title">
       <PageTitle name="Roles" />
       <Formik
         initialValues={{ name: '', description: defaultDescription }}
@@ -130,6 +127,7 @@ const CreatePage = () => {
           <form onSubmit={handleSubmit}>
             <>
               <HeaderLayout
+                id="title"
                 primaryAction={
                   <Stack horizontal size={2}>
                     <Button
@@ -165,8 +163,8 @@ const CreatePage = () => {
               <ContentLayout>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Stack size={4}>
-                    <Row>
-                      <FlexBox>
+                    <Row justifyContent="space-between">
+                      <Box>
                         <Box>
                           <Text highlighted>
                             {formatMessage({
@@ -181,7 +179,7 @@ const CreatePage = () => {
                             })}
                           </Text>
                         </Box>
-                      </FlexBox>
+                      </Box>
                       <UsersRoleNumber>
                         {formatMessage(
                           {
@@ -231,7 +229,7 @@ const CreatePage = () => {
           </form>
         )}
       </Formik>
-    </>
+    </Main>
   );
 };
 

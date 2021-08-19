@@ -7,6 +7,7 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
+  margin-left: auto;
   padding-right: ${({ theme }) => theme.spaces[6]};
 
   ${({ hasConditions, disabled, theme }) =>

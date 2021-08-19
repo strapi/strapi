@@ -1,4 +1,4 @@
-import { Box, Checkbox, Stack } from '@strapi/parts';
+import { Checkbox, Stack, TableLabel } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/GlobalActions/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -9,19 +9,9 @@ import { usePermissionsDataManager } from '../../../hooks';
 import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
 import { findDisplayedActions, getCheckboxesState } from './utils';
 
-const Label = styled(Box)`
-  font-size: ${11 / 16}rem;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.neutral500};
-  font-weight: bold;
-`;
-
-// ! TODO - Remove dflex, and fcolumn when strapi/parts is updated
 const CenteredStack = styled(Stack)`
   align-items: center;
   justify-content: center;
-  display: flex;
-  flex-direction: column;
   width: ${cellWidth};
 `;
 
@@ -58,12 +48,12 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
         {displayedActions.map(({ label, actionId }) => {
           return (
             <CenteredStack key={actionId} size={3}>
-              <Label>
+              <TableLabel textColor="neutral500">
                 {formatMessage({
                   id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
                   defaultMessage: label,
                 })}
-              </Label>
+              </TableLabel>
               <Checkbox
                 disabled={isFormDisabled || IS_DISABLED}
                 onValueChange={value => {

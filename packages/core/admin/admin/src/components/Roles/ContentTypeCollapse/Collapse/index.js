@@ -47,11 +47,8 @@ const Wrapper = styled.div`
   }
 `;
 
-const Cell = styled(Box)`
+const Cell = styled(Row)`
   width: ${cellWidth};
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
 `;
 
@@ -127,84 +124,82 @@ const Collapse = ({
 
   return (
     <Wrapper isActive={isActive} isGrey={isGrey}>
-      <Row style={{ flex: 1 }}>
-        <RowLabelWithCheckbox
-          isCollapsable
-          isFormDisabled={isFormDisabled}
-          label={label}
-          checkboxName={pathToData}
-          onChange={onChangeParentCheckbox}
-          onClick={onClickToggle}
-          someChecked={hasSomeActionsSelected}
-          value={hasAllActionsSelected}
-        >
-          <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
-        </RowLabelWithCheckbox>
+      <RowLabelWithCheckbox
+        isCollapsable
+        isFormDisabled={isFormDisabled}
+        label={label}
+        checkboxName={pathToData}
+        onChange={onChangeParentCheckbox}
+        onClick={onClickToggle}
+        someChecked={hasSomeActionsSelected}
+        value={hasAllActionsSelected}
+      >
+        <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
+      </RowLabelWithCheckbox>
 
-        <Row style={{ flex: 1 }}>
-          {checkboxesActions.map(
-            ({
-              actionId,
-              hasConditions,
-              hasAllActionsSelected,
-              hasSomeActionsSelected,
-              isDisplayed,
-              isParentCheckbox,
-              checkboxName,
-            }) => {
-              if (!isDisplayed) {
-                return <HiddenAction key={actionId} />;
-              }
+      <Row>
+        {checkboxesActions.map(
+          ({
+            actionId,
+            hasConditions,
+            hasAllActionsSelected,
+            hasSomeActionsSelected,
+            isDisplayed,
+            isParentCheckbox,
+            checkboxName,
+          }) => {
+            if (!isDisplayed) {
+              return <HiddenAction key={actionId} />;
+            }
 
-              if (isParentCheckbox) {
-                return (
-                  <Cell key={actionId}>
-                    {hasConditions && <TinyDot />}
-                    <Checkbox
-                      disabled={isFormDisabled || IS_DISABLED}
-                      name={checkboxName}
-                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={value =>
-                        onChangeParentCheckbox({
-                          target: {
-                            name: checkboxName,
-                            value,
-                          },
-                        })}
-                      indeterminate={hasSomeActionsSelected}
-                      value={hasAllActionsSelected}
-                    />
-                  </Cell>
-                );
-              }
-
+            if (isParentCheckbox) {
               return (
-                <Cell key={actionId}>
+                <Cell key={actionId} justifyContent="center" alignItems="center">
                   {hasConditions && <TinyDot />}
                   <Checkbox
                     disabled={isFormDisabled || IS_DISABLED}
-                    indeterminate={hasConditions}
                     name={checkboxName}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onValueChange={value =>
-                      onChangeSimpleCheckbox({
+                      onChangeParentCheckbox({
                         target: {
                           name: checkboxName,
                           value,
                         },
                       })}
+                    indeterminate={hasSomeActionsSelected}
                     value={hasAllActionsSelected}
                   />
                 </Cell>
               );
             }
-          )}
-        </Row>
-        <ConditionsButton
-          onClick={handleToggleModalIsOpen}
-          hasConditions={doesConditionButtonHasConditions}
-        />
+
+            return (
+              <Cell key={actionId} justifyContent="center" alignItems="center">
+                {hasConditions && <TinyDot />}
+                <Checkbox
+                  disabled={isFormDisabled || IS_DISABLED}
+                  indeterminate={hasConditions}
+                  name={checkboxName}
+                  // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                  onValueChange={value =>
+                    onChangeSimpleCheckbox({
+                      target: {
+                        name: checkboxName,
+                        value,
+                      },
+                    })}
+                  value={hasAllActionsSelected}
+                />
+              </Cell>
+            );
+          }
+        )}
       </Row>
+      <ConditionsButton
+        onClick={handleToggleModalIsOpen}
+        hasConditions={doesConditionButtonHasConditions}
+      />
       {modalState.isMounted && (
         <ConditionsModal
           headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}

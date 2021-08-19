@@ -1,6 +1,5 @@
-import { Flex } from '@buffetjs/core';
 import { Down, Up } from '@strapi/icons';
-import { Box, Checkbox } from '@strapi/parts';
+import { Box, Checkbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -34,7 +33,7 @@ const Chevron = styled(Box)`
   }
 `;
 
-const Wrapper = styled(Flex)`
+const Wrapper = styled(Row)`
   height: 52px;
   flex: 1;
   background: ${({ theme, isOdd }) => theme.colors[isOdd ? 'neutral100' : 'neutral0']};
@@ -109,7 +108,7 @@ const ActionRow = ({
   return (
     <>
       <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive} isOdd={isOdd}>
-        <Flex style={{ flex: 1 }}>
+        <Row>
           <RowLabelWithCheckbox
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
@@ -122,7 +121,7 @@ const ActionRow = ({
             {required && <RequiredSign />}
             <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
           </RowLabelWithCheckbox>
-          <Flex style={{ flex: 1 }}>
+          <Row>
             {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
               if (!isActionRelatedToCurrentProperty) {
                 return <HiddenAction key={label} />;
@@ -148,7 +147,7 @@ const ActionRow = ({
                       onValueChange={value =>
                         onChangeSimpleCheckbox({
                           target: {
-                            name: checkboxName,
+                            name: checkboxName.join('..'),
                             value,
                           },
                         })}
@@ -171,7 +170,7 @@ const ActionRow = ({
                     onValueChange={value =>
                       onChangeParentCheckbox({
                         target: {
-                          name: checkboxName,
+                          name: checkboxName.join('..'),
                           value,
                         },
                       })}
@@ -181,8 +180,8 @@ const ActionRow = ({
                 </Cell>
               );
             })}
-          </Flex>
-        </Flex>
+          </Row>
+        </Row>
       </Wrapper>
       {isActive && (
         <SubActionRow
