@@ -104,7 +104,7 @@ module.exports = function(plop) {
       },
     ],
     actions: data => {
-      fs.copySync(join(__dirname, 'files', 'admin'), join(rootDir, 'plugins', data.id, 'admin'));
+      fs.copySync(join(__dirname, 'files', 'plugin'), join(rootDir, 'plugins', data.id));
 
       return [
         {
@@ -131,14 +131,6 @@ module.exports = function(plop) {
           type: 'add',
           path: join(rootDir, 'plugins/{{id}}/package.json'),
           templateFile: 'templates/plugin-package.json.hbs',
-        },
-        {
-          destination: join(rootDir, 'plugins/{{id}}'),
-          type: 'addMany',
-          templateFiles: 'templates/.*',
-          globOptions: {
-            dot: true,
-          },
         },
       ];
     },
