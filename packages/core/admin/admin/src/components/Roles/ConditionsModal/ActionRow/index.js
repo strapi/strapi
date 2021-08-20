@@ -1,10 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Text, Padded, Flex } from '@buffetjs/core';
+import { Row, TableLabel } from '@strapi/parts';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
 import ConditionsSelect from '../ConditionsSelect';
-import Wrapper from './Wrapper';
+
+const RowWrapper = styled(Row)`
+  height: 52px;
+`;
 
 const ActionRow = ({
   arrayOfOptionsGroupedByCategory,
@@ -19,50 +23,27 @@ const ActionRow = ({
   const { formatMessage } = useIntl();
 
   return (
-    <Wrapper isGrey={isGrey}>
-      <Padded style={{ width: 200 }} top left right bottom size="sm">
-        <Flex>
-          <Text
-            lineHeight="19px"
-            color="grey"
-            fontSize="xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-          >
-            {formatMessage({
-              id: 'Settings.permissions.conditions.can',
-            })}
-            &nbsp;
-          </Text>
-          <Text
-            title={label}
-            lineHeight="19px"
-            fontWeight="bold"
-            fontSize="xs"
-            textTransform="uppercase"
-            color="mediumBlue"
-            style={{ maxWidth: '60%' }}
-            ellipsis
-          >
-            {formatMessage({
-              id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-              defaultMessage: label,
-            })}
-          </Text>
-          <Text
-            lineHeight="19px"
-            color="grey"
-            fontSize="xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-          >
-            &nbsp;
-            {formatMessage({
-              id: 'Settings.permissions.conditions.when',
-            })}
-          </Text>
-        </Flex>
-      </Padded>
+    <RowWrapper background={isGrey ? 'neutral100' : 'neutral0'}>
+      <Row paddingLeft={6} style={{ width: 180 }}>
+        <TableLabel textColor="neutral500">
+          {formatMessage({
+            id: 'Settings.permissions.conditions.can',
+          })}
+          &nbsp;
+        </TableLabel>
+        <TableLabel title={label} textColor="primary600">
+          {formatMessage({
+            id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+            defaultMessage: label,
+          })}
+        </TableLabel>
+        <TableLabel textColor="neutral500">
+          &nbsp;
+          {formatMessage({
+            id: 'Settings.permissions.conditions.when',
+          })}
+        </TableLabel>
+      </Row>
       <ConditionsSelect
         arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
         name={name}
@@ -71,7 +52,7 @@ const ActionRow = ({
         onChange={onChange}
         value={value}
       />
-    </Wrapper>
+    </RowWrapper>
   );
 };
 

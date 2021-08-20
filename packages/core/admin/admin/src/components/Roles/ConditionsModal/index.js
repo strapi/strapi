@@ -1,14 +1,38 @@
-import React, { useMemo, useState } from 'react';
+import { After } from '@strapi/icons';
+import {
+  Box,
+  Button,
+  H2,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+  Stack,
+  Text,
+  TextButton,
+} from '@strapi/parts';
+import { cloneDeep, get, groupBy, set, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, groupBy, set } from 'lodash';
-import { Modal, ModalHeader, ModalFooter } from '@strapi/helper-plugin';
-import { Button, Text, Padded } from '@buffetjs/core';
-import { useIntl } from 'react-intl';
+import React, { useMemo, useState } from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../hooks';
-import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
-import ActionRow from './ActionRow';
-import Separator from './Separator';
 import updateValues from '../Permissions/utils/updateValues';
+import ActionRow from './ActionRow';
+import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
+
+// ! Something needs to be done in the DS parts to avoid doing this
+const Icon = styled(Box)`
+  svg {
+    width: 6px;
+  }
+  * {
+    fill: ${({ theme }) => theme.colors.neutral300};
+  }
+`;
+
+const Separator = styled.div`
+  border-bottom: 1px solid ${({ theme }) => theme.main.colors.brightGrey};
+`;
 
 const ConditionsModal = ({
   actions,
@@ -20,6 +44,11 @@ const ConditionsModal = ({
 }) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
+
+  const translatedHeaders = headerBreadCrumbs.map(headerTrad => ({
+    key: headerTrad,
+    element: <FormattedMessage id={headerTrad} defaultMessage={upperFirst(headerTrad)} />,
+  }));
 
   const arrayOfOptionsGroupedByCategory = useMemo(() => {
     return Object.entries(groupBy(availableConditions, 'category'));
@@ -79,53 +108,77 @@ const ConditionsModal = ({
     onToggle();
   };
 
-  return (
-    <Modal withoverflow="true" onClosed={onClosed} isOpen={isOpen} onToggle={onToggle}>
-      <ModalHeader headerBreadcrumbs={headerBreadCrumbs} />
-      <Padded top left right bottom size="md">
-        <Text fontSize="lg" fontWeight="bold">
-          {formatMessage({
-            id: 'Settings.permissions.conditions.define-conditions',
-          })}
-        </Text>
-        <Separator />
-        {actionsToDisplay.length === 0 && (
-          <Text fontSize="md" color="grey">
-            {formatMessage({ id: 'Settings.permissions.conditions.no-actions' })}
-          </Text>
-        )}
-        {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
-          const name = pathToConditionsObject.join('..');
+  if (!isOpen) return null;
 
-          return (
-            <ActionRow
-              key={actionId}
-              arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-              label={label}
-              isFormDisabled={isFormDisabled}
-              isGrey={index % 2 === 0}
-              name={name}
-              onCategoryChange={handleCategoryChange}
-              onChange={handleChange}
-              value={get(state, name, {})}
-            />
-          );
-        })}
-      </Padded>
-      <ModalFooter>
-        <section>
-          <Button type="button" color="cancel" onClick={onToggle}>
+  return (
+    <ModalLayout onClose={onClosed}>
+      <ModalHeader>
+        <Stack horizontal size={3}>
+          {translatedHeaders.map(({ key, element }, index) => {
+            const shouldDisplayChevron = index < translatedHeaders.length - 1;
+
+            return (
+              <>
+                <TextButton textColor="neutral800" key={key}>
+                  {element}
+                </TextButton>
+                {shouldDisplayChevron && (
+                  <Icon>
+                    <After />
+                  </Icon>
+                )}
+              </>
+            );
+          })}
+        </Stack>
+      </ModalHeader>
+      <Box padding={8}>
+        <Stack size={6}>
+          <H2>
+            {formatMessage({
+              id: 'Settings.permissions.conditions.define-conditions',
+            })}
+          </H2>
+          <Separator />
+          <Box>
+            {actionsToDisplay.length === 0 && (
+              <Text>{formatMessage({ id: 'Settings.permissions.conditions.no-actions' })}</Text>
+            )}
+            {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
+              const name = pathToConditionsObject.join('..');
+
+              return (
+                <ActionRow
+                  key={actionId}
+                  arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
+                  label={label}
+                  isFormDisabled={isFormDisabled}
+                  isGrey={index % 2 === 0}
+                  name={name}
+                  onCategoryChange={handleCategoryChange}
+                  onChange={handleChange}
+                  value={get(state, name, {})}
+                />
+              );
+            })}
+          </Box>
+        </Stack>
+      </Box>
+      <ModalFooter
+        startActions={
+          <Button variant="tertiary" onClick={onToggle}>
             {formatMessage({ id: 'app.components.Button.cancel' })}
           </Button>
-
-          <Button type="button" color="success" onClick={handleSubmit}>
+        }
+        endActions={
+          <Button onClick={handleSubmit}>
             {formatMessage({
               id: 'Settings.permissions.conditions.apply',
             })}
           </Button>
-        </section>
-      </ModalFooter>
-    </Modal>
+        }
+      />
+    </ModalLayout>
   );
 };
 

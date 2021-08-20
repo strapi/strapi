@@ -64,8 +64,8 @@ const Chevron = styled(Box)`
 
 const TinyDot = styled(Box)`
   position: absolute;
-  top: 0;
-  left: 35px;
+  top: -6px;
+  left: 37px;
   width: 6px;
   height: 6px;
   border-radius: 20px;

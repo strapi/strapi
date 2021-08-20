@@ -23,6 +23,7 @@ const Cell = styled(Box)`
   position: relative;
 `;
 
+// ! Something needs to be done in the DS parts to avoid doing this
 const Chevron = styled(Box)`
   display: none;
   svg {
