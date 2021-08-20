@@ -2,10 +2,13 @@
 
 const { join } = require('path');
 const fs = require('fs-extra');
+const pluralize = require('pluralize');
 
 module.exports = function(plop) {
   const rootDir = process.cwd();
   plop.setWelcomeMessage('Strapi Generators');
+
+  plop.addHelper('pluralize', text => pluralize(text));
 
   // Service generator
   plop.setGenerator('service', {
@@ -93,6 +96,50 @@ module.exports = function(plop) {
     ],
   });
 
+  // API generator
+  plop.setGenerator('api', {
+    description: 'Generate a basic API',
+    prompts: [
+      {
+        type: 'input',
+        name: 'id',
+        message: 'API name',
+      },
+      {
+        type: 'confirm',
+        name: 'useDraftAndPublish',
+        message: 'Use draft and publish?',
+      },
+    ],
+    actions: [
+      {
+        type: 'add',
+        path: join(rootDir, 'api/{{id}}/config/routes.json'),
+        templateFile: 'templates/api-routes.json.hbs',
+      },
+      {
+        type: 'add',
+        path: join(rootDir, 'api/{{id}}/controllers/{{id}}.js'),
+        templateFile: 'templates/controller.js.hbs',
+      },
+      {
+        type: 'add',
+        path: join(rootDir, 'api/{{id}}/models/{{id}}.js'),
+        templateFile: 'templates/model.js.hbs',
+      },
+      {
+        type: 'add',
+        path: join(rootDir, 'api/{{id}}/models/{{id}}.settings.json'),
+        templateFile: 'templates/model.settings.json.hbs',
+      },
+      {
+        type: 'add',
+        path: join(rootDir, 'api/{{id}}/services/{{id}}.js'),
+        templateFile: 'templates/service.js.hbs',
+      },
+    ],
+  });
+
   // Plugin generator
   plop.setGenerator('plugin', {
     description: 'Generate a basic plugin',
@@ -105,7 +152,6 @@ module.exports = function(plop) {
     ],
     actions: data => {
       fs.copySync(join(__dirname, 'files', 'plugin'), join(rootDir, 'plugins', data.id));
-
       return [
         {
           type: 'add',
@@ -120,7 +166,7 @@ module.exports = function(plop) {
         {
           type: 'add',
           path: join(rootDir, 'plugins/{{id}}/config/routes.json'),
-          templateFile: 'templates/routes.json.hbs',
+          templateFile: 'templates/plugin-routes.json.hbs',
         },
         {
           type: 'add',
