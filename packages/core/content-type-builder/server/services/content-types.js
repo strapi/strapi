@@ -49,7 +49,6 @@ const formatContentType = contentType => {
       description: _.get(info, 'description', ''),
       draftAndPublish: contentTypesUtils.hasDraftAndPublish({ options }),
       pluginOptions: contentType.pluginOptions,
-      // connection,
       kind: kind || 'collectionType',
       collectionName,
       attributes: formatAttributes(contentType),
@@ -239,7 +238,6 @@ const deleteContentType = async (uid, defaultBuilder = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
   const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
-  await new Promise(resolve => setTimeout(resolve, 3000));
   await apiHandler.backup(uid);
 
   const contentType = builder.deleteContentType(uid);

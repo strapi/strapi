@@ -49,7 +49,7 @@ const createConnectorRegistry = ({ defaultConnection, connections }) => {
       return _connectors.get(defaultConnector);
     },
 
-    getByConnection(connection = 'default') {
+    getByConnection(connection) {
       if (!_.has(connections, connection)) {
         throw new Error('Trying to access a connector for an unknown connection');
       }

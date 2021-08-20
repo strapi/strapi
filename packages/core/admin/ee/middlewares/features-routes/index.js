@@ -6,7 +6,7 @@ const routes = require('./routes');
 
 module.exports = strapi => ({
   beforeInitialize() {
-    strapi.config.middleware.load.before.unshift('features-routes'); // TODO
+    strapi.config.middleware.load.before.unshift('features-routes');
   },
 
   initialize() {

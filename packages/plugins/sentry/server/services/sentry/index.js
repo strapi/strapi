@@ -26,7 +26,7 @@ const createSentryService = strapi => {
         if (settings.dsn) {
           Sentry.init({
             dsn: settings.dsn,
-            environment: strapi.config.environment,
+            environment: strapi.config.get('environment'),
             ...settings.init,
           });
           // Store the successfully initialized Sentry instance

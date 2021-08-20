@@ -1,6 +1,6 @@
 'use strict';
 
-const { cloneDeep, kebabCase } = require('lodash/fp');
+const { cloneDeep } = require('lodash/fp');
 const _ = require('lodash');
 const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
 const {
@@ -26,7 +26,7 @@ const createContentType = (uid, definition) => {
     kind: createdContentType.schema.kind || 'collectionType',
     __schema__: pickSchema(definition.schema),
     modelType: 'contentType',
-    modelName: kebabCase(definition.schema.info.singularName),
+    modelName: definition.schema.info.singularName,
     connection: 'default',
   });
 

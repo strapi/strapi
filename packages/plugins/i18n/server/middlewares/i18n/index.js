@@ -7,6 +7,7 @@ module.exports = {
   defaults: { i18n: { enabled: true } },
   load: {
     beforeInitialize() {
+      console.log('beforeInitialize i18n');
       strapi.config.middleware.load.before.unshift('i18n');
     },
     initialize() {

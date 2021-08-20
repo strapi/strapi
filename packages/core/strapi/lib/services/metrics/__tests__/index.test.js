@@ -12,7 +12,9 @@ describe('metrics', () => {
 
     metrics({
       config: {
-        get: get(this),
+        get(path) {
+          return get(path, this);
+        },
         uuid: 'test',
         environment: 'dev',
         info: {
@@ -32,7 +34,9 @@ describe('metrics', () => {
 
     metrics({
       config: {
-        get: get(this),
+        get(path) {
+          return get(path, this);
+        },
         uuid: false,
         environment: 'dev',
         info: {
@@ -50,7 +54,9 @@ describe('metrics', () => {
   test('Send payload with meta', () => {
     const { send } = metrics({
       config: {
-        get: get(this),
+        get(path) {
+          return get(path, this);
+        },
         uuid: 'test',
         environment: 'dev',
         info: {
@@ -80,7 +86,9 @@ describe('metrics', () => {
   test('Does not send payload when disabled', () => {
     const { send } = metrics({
       config: {
-        get: get(this),
+        get(path) {
+          return get(path, this);
+        },
         uuid: false,
         packageJsonStrapi: {},
         environment: 'dev',

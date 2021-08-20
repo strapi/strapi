@@ -4,10 +4,16 @@ const { dirname, join } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
-const { nameToSlug } = require('@strapi/utils');
+const { isKebabCase } = require('@strapi/utils');
 const loadConfigFile = require('../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
+
+const validatePluginName = pluginName => {
+  if (!isKebabCase(pluginName)) {
+    throw new Error(`Plugin name "${pluginName}" is not in kebab (an-example-of-kebab-case)`);
+  }
+};
 
 const toDetailedDeclaration = declaration => {
   if (typeof declaration === 'boolean') {
@@ -42,8 +48,8 @@ const getEnabledPlugins = async strapi => {
     const packageInfo = require(packagePath);
 
     if (isStrapiPlugin(packageInfo)) {
-      const cleanPluginName = nameToSlug(packageInfo.strapi.name);
-      installedPlugins[cleanPluginName] = toDetailedDeclaration({
+      validatePluginName(packageInfo.strapi.name);
+      installedPlugins[packageInfo.strapi.name] = toDetailedDeclaration({
         enabled: true,
         resolve: packagePath,
       });
@@ -56,8 +62,8 @@ const getEnabledPlugins = async strapi => {
     ? loadConfigFile(userPluginConfigPath)
     : {};
   _.forEach(userPluginsConfig, (declaration, pluginName) => {
-    const cleanPluginName = nameToSlug(pluginName);
-    declaredPlugins[cleanPluginName] = toDetailedDeclaration(declaration);
+    validatePluginName(pluginName);
+    declaredPlugins[pluginName] = toDetailedDeclaration(declaration);
   });
 
   const declaredPluginsResolves = map(prop('pathToPlugin'), declaredPlugins);

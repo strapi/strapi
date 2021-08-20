@@ -3,7 +3,8 @@
   "version": "3.6.6",
   "description": "Easily configure your Strapi application to send emails.",
   "strapi": {
-    "name": "Email",
+    "name": "email",
+    "displayName": "Email",
     "icon": "paper-plane",
     "description": "email.plugin.description",
     "required": true,

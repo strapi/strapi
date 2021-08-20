@@ -9,27 +9,27 @@ const createModule = (namespace, rawModule, strapi) => {
     throw new Error(`strapi-server.js is invalid for plugin ${namespace}.\n${e.errors.join('\n')}`);
   }
 
-  const loaded = [];
+  const called = {};
   return {
     async bootstrap() {
-      if (loaded.includes('bootstrap')) {
+      if (called.bootstrap) {
         throw new Error(`Bootstrap for ${namespace} has already been called`);
       }
-      loaded.push('bootstrap');
+      called.bootstrap = true;
       await rawModule.bootstrap(strapi);
     },
     async register() {
-      if (loaded.includes('register')) {
+      if (called.register) {
         throw new Error(`Register for ${namespace} has already been called`);
       }
-      loaded.push('register');
+      called.register = true;
       await rawModule.register(strapi);
     },
     async destroy() {
-      if (loaded.includes('destroy')) {
+      if (called.destroy) {
         throw new Error(`Destroy for ${namespace} has already been called`);
       }
-      loaded.push('destroy');
+      called.destroy = true;
       await rawModule.destroy(strapi);
     },
     load() {

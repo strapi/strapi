@@ -1,7 +1,7 @@
 'use strict';
 
-const localeModel = require('./locale');
+const locale = require('./locale');
 
 module.exports = {
-  [localeModel.schema.info.singularName]: localeModel,
+  locale,
 };

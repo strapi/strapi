@@ -8,4 +8,4 @@ type S = {
   jwt: typeof jwt;
 };
 
-export function getService<T extends keyof S>(name: T): S[T];
+export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;

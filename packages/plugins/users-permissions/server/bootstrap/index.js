@@ -33,8 +33,8 @@ module.exports = async () => {
   // TODO: adapt with new extension system
   if (!strapi.config.get('plugin.users-permissions.jwtSecret')) {
     const jwtSecret = uuid();
-    strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret),
-      (strapi.reload.isWatching = false);
+    strapi.config.set('plugin.users-permissions.jwtSecret', jwtSecret);
+    strapi.reload.isWatching = false;
 
     if (!process.env.JWT_SECRET) {
       await strapi.fs.appendFile('.env', `JWT_SECRET=${jwtSecret}\n`);

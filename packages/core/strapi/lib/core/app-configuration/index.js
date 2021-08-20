@@ -11,8 +11,6 @@ dotenv.config({ path: process.env.ENV_PATH });
 process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
-// const loadPolicies = require('../load-policies');
-// const loadFunctions = require('../load-functions');
 const loadConfigDir = require('./config-loader');
 
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
@@ -81,10 +79,8 @@ module.exports = (dir, initialConfig = {}) => {
       ...pkgJSON,
       strapi: strapiVersion,
     },
-    // installedPlugins: getPrefixedDeps('@strapi/plugin', pkgJSON),
     installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
     installedHooks: getPrefixedDeps('@strapi/hook', pkgJSON),
-    // installedProviders: getPrefixedDeps('@strapi/provider', pkgJSON),
   };
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later

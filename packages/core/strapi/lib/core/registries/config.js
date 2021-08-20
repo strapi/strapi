@@ -6,7 +6,7 @@ module.exports = (initialConfig = {}) => {
   const _config = Object.assign({}, initialConfig); // not deep clone because it would break some config
 
   return {
-    ..._config, // to remove
+    ..._config, // TODO: to remove
     get(path, defaultValue) {
       return _.get(_config, path, defaultValue);
     },

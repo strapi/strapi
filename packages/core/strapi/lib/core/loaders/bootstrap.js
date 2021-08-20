@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { toLower, kebabCase, camelCase } = require('lodash/fp');
+const { toLower } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 const pluralize = require('pluralize');
 const { createContentType } = require('../domain/content-type');
@@ -26,13 +26,34 @@ module.exports = function(strapi) {
       };
 
       ct.schema.info.displayName = model.info.name;
-      ct.schema.info.singularName = camelCase(modelName);
-      ct.schema.info.pluralName = pluralize(camelCase(modelName));
+      ct.schema.info.singularName = modelName;
+      ct.schema.info.pluralName = pluralize(modelName);
 
-      const createdContentType = createContentType(
-        `api::${apiName}.${kebabCase(ct.schema.info.singularName)}`,
-        ct
-      );
+      strapi.container.get('content-types').add(`api::${apiName}`, {
+        [ct.schema.info.singularName]: ct,
+      });
+      // TODO: check unicity of pluralName and singularName amongs user's CT
+      // const validateContentTypesUnicity = (...contentTypesMaps) => {
+      //   const names = [];
+      //   const arrayOfAllContentTypes = flatten(contentTypesMaps.map(values));
+      //   console.log('arrayOfAllContentTypes', arrayOfAllContentTypes.map(ct => ct.schema.info.singularName));
+      //   arrayOfAllContentTypes.forEach(ct => {
+      //     const singularName = kebabCase(ct.schema.info.singularName);
+      //     const pluralName = kebabCase(ct.schema.info.pluralName);
+      //     if (names.includes(singularName)) {
+      //       throw new Error(`The singular name "${ct.schema.info.singularName}" should be unique`);
+      //     }
+      //     names.push(singularName);
+      //     if (names.includes(pluralName)) {
+      //       throw new Error(`The plural name "${ct.schema.info.pluralName}" should be unique`);
+      //     }
+      //     names.push(pluralName);
+      //   });
+      // };
+
+      const createdContentType = strapi.container
+        .get('content-types')
+        .get(`api::${apiName}.${ct.schema.info.singularName}`);
       Object.assign(model, createdContentType.schema);
       strapi.contentTypes[model.uid] = model;
 
@@ -75,18 +96,13 @@ module.exports = function(strapi) {
   // Init admin models.
   Object.keys(strapi.admin.models || []).forEach(modelName => {
     let model = strapi.admin.models[modelName];
-
     // mutate model
     const ct = { schema: model, actions: {}, lifecycles: {} };
-    ct.schema.info = {};
-    ct.schema.info.displayName = camelCase(modelName);
-    ct.schema.info.singularName = camelCase(modelName);
-    ct.schema.info.pluralName = `${camelCase(modelName)}s`;
+    ct.schema.info.displayName = model.info.name;
+    ct.schema.info.singularName = modelName;
+    ct.schema.info.pluralName = pluralize(modelName);
 
-    const createdContentType = createContentType(
-      `strapi::${kebabCase(ct.schema.info.singularName)}`,
-      ct
-    );
+    const createdContentType = createContentType(`strapi::${ct.schema.info.singularName}`, ct);
 
     Object.assign(model, createdContentType.schema);
     strapi.contentTypes[model.uid] = model;

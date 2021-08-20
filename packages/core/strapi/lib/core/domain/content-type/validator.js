@@ -19,11 +19,11 @@ const contentTypeSchemaValidator = yup.object().shape({
       .shape({
         singularName: yup
           .string()
-          .isCamelCase()
+          .isKebabCase()
           .required(),
         pluralName: yup
           .string()
-          .isCamelCase()
+          .isKebabCase()
           .required(),
         displayName: yup.string().required(),
       })

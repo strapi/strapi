@@ -8,4 +8,4 @@ type S = {
   builder: typeof builder;
 };
 
-export function getService<T extends keyof S>(name: T): S[T];
+export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;

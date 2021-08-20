@@ -25,8 +25,6 @@ const createTelemetry = require('./services/metrics');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
-// const createContainer = require('./core/container');
-// const createContainer = require('./core/container');
 const contentTypesRegistry = require('./core/registries/content-types');
 const servicesRegistry = require('./core/registries/services');
 const policiesRegistry = require('./core/registries/policies');
@@ -241,10 +239,6 @@ class Strapi {
       this.container.get('modules').add(`plugin::${pluginName}`, plugin);
     }
 
-    // await this.container.load();
-
-    // this.plugins = this.container.plugins.getAll();
-
     const modules = await loadModules(this);
 
     this.loadAdmin();
@@ -354,18 +348,6 @@ class Strapi {
     return reload;
   }
 
-  async runBootstraps() {
-    for (const plugin of this.plugin.getAll()) {
-      await plugin.bootstrap(this);
-    }
-  }
-
-  async runRegisters() {
-    for (const plugin of this.plugin.getAll()) {
-      await plugin.register(this);
-    }
-  }
-
   async runLifecyclesFunctions(lifecycleName) {
     const execLifecycle = async fn => {
       if (!fn) {
@@ -378,11 +360,7 @@ class Strapi {
     const configPath = `functions.${lifecycleName}`;
 
     // plugins
-    if (lifecycleName === LIFECYCLES.BOOTSTRAP) {
-      await this.container.get('modules').bootstrap();
-    } else if (lifecycleName === LIFECYCLES.REGISTER) {
-      await this.container.get('modules').register();
-    }
+    await this.container.get('modules')[lifecycleName]();
 
     // user
     await execLifecycle(this.config.get(configPath));

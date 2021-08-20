@@ -153,14 +153,12 @@ function createSchemaBuilder({ components, contentTypes }) {
      *
      * @returns {void}
      */
-    async writeFiles() {
-      return Promise.all(
-        [...Array.from(tmpComponents.values()), ...Array.from(tmpContentTypes.values())].map(
-          schema => {
-            return schema.flush();
-          }
-        )
-      )
+    writeFiles() {
+      const schemas = [
+        ...Array.from(tmpComponents.values()),
+        ...Array.from(tmpContentTypes.values()),
+      ];
+      return Promise.all(schemas.map(schema => schema.flush()))
         .catch(error => {
           strapi.log.error('Error writing schema files');
           strapi.log.error(error);
