@@ -7,8 +7,6 @@ import styled from 'styled-components';
 
 const Wrapper = styled.div`
   position: relative;
-  margin-left: auto;
-  padding-right: ${({ theme }) => theme.spaces[6]};
 
   ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
@@ -26,12 +24,12 @@ const Wrapper = styled.div`
   `}
 `;
 
-const ConditionsButton = ({ onClick, className, hasConditions }) => {
+const ConditionsButton = ({ onClick, className, hasConditions, variant }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Wrapper hasConditions={hasConditions} className={className}>
-      <Button variant="secondary" startIcon={<Settings />} onClick={onClick}>
+      <Button variant={variant} startIcon={<Settings />} onClick={onClick}>
         {formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' })}
       </Button>
     </Wrapper>
@@ -41,11 +39,13 @@ const ConditionsButton = ({ onClick, className, hasConditions }) => {
 ConditionsButton.defaultProps = {
   className: null,
   hasConditions: false,
+  variant: 'secondary',
 };
 ConditionsButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   className: PropTypes.string,
   hasConditions: PropTypes.bool,
+  variant: PropTypes.string,
 };
 
 // This is a styled component advanced usage :

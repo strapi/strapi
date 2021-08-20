@@ -137,7 +137,7 @@ const Collapse = ({
         <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
       </RowLabelWithCheckbox>
 
-      <Row>
+      <Row style={{ flex: 1 }}>
         {checkboxesActions.map(
           ({
             actionId,
@@ -196,10 +196,12 @@ const Collapse = ({
           }
         )}
       </Row>
-      <ConditionsButton
-        onClick={handleToggleModalIsOpen}
-        hasConditions={doesConditionButtonHasConditions}
-      />
+      <Box paddingRight={6}>
+        <ConditionsButton
+          onClick={handleToggleModalIsOpen}
+          hasConditions={doesConditionButtonHasConditions}
+        />
+      </Box>
       {modalState.isMounted && (
         <ConditionsModal
           headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}

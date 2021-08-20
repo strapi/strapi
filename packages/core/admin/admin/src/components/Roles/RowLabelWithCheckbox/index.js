@@ -1,7 +1,8 @@
-import React, { memo } from 'react';
+import { Box, Checkbox, Text } from '@strapi/parts';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
+import React, { memo } from 'react';
 import styled from 'styled-components';
-import { Checkbox, Text, Box } from '@strapi/parts';
 import CollapseLabel from '../CollapseLabel';
 import { firstRowWidth } from '../Permissions/utils/constants';
 
@@ -67,7 +68,7 @@ const RowLabelWithCheckbox = ({
           role: 'button',
         })}
       >
-        <StyledText>{label.charAt(0).toUpperCase() + label.slice(1)}</StyledText>
+        <StyledText>{upperFirst(label)}</StyledText>
         {children}
       </CollapseLabel>
     </Wrapper>
