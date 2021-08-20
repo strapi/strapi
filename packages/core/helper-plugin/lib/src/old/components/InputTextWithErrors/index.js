@@ -1,26 +1,20 @@
-/**
- *
- * InputAddonWithErrors
- *
- */
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Utils
-import validateInput from '../../utils/inputsValidations';
+import validateInput from '../../../utils/inputsValidations';
 
 // Design
 import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
-import InputAddon from '../InputAddon';
+import InputText from '../InputText';
 import InputSpacer from '../InputSpacer';
 import InputWrapper from '../InputWrapper';
 
-class InputAddonWithErrors extends React.Component {
+class InputTextWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
@@ -66,7 +60,6 @@ class InputAddonWithErrors extends React.Component {
 
   render() {
     const {
-      addon,
       autoFocus,
       className,
       customBootstrapClass,
@@ -106,8 +99,7 @@ class InputAddonWithErrors extends React.Component {
         style={style}
       >
         <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
-        <InputAddon
-          addon={addon}
+        <InputText
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -139,8 +131,7 @@ class InputAddonWithErrors extends React.Component {
   }
 }
 
-InputAddonWithErrors.defaultProps = {
-  addon: 'app.utils.placeholder.defaultMessage',
+InputTextWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
@@ -167,8 +158,7 @@ InputAddonWithErrors.defaultProps = {
   validations: {},
 };
 
-InputAddonWithErrors.propTypes = {
-  addon: PropTypes.string,
+InputTextWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -212,4 +202,4 @@ InputAddonWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputAddonWithErrors;
+export default InputTextWithErrors;

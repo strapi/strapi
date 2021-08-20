@@ -2,10 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
-
-import hasPermissions from '../../utils/hasPermissions';
-import LoadingIndicatorPage from '../LoadingIndicatorPage';
 import useRBACProvider from '../../hooks/useRBACProvider';
+import hasPermissions from '../../utils/hasPermissions';
+import LoadingIndicatorPage from '../../old/components/LoadingIndicatorPage';
 
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();

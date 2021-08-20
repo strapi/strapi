@@ -1,21 +1,26 @@
+/**
+ *
+ * InputPasswordWithErrors
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Utils
-import validateInput from '../../utils/inputsValidations';
+import validateInput from '../../../utils/inputsValidations';
 
 // Design
 import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
-import InputTextArea from '../InputTextArea';
+import InputPassword from '../InputPassword';
 import InputSpacer from '../InputSpacer';
-import Container from './Container';
+import InputWrapper from '../InputWrapper';
 
-class InputTextAreaWithErrors extends React.Component {
-  // eslint-disable-line react/prefer-stateless-function
+class InputPasswordWithErrors extends React.Component {
   state = { errors: [], hasInitialValue: false };
 
   componentDidMount() {
@@ -61,8 +66,6 @@ class InputTextAreaWithErrors extends React.Component {
   render() {
     const {
       autoFocus,
-      className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
@@ -72,12 +75,10 @@ class InputTextAreaWithErrors extends React.Component {
       inputDescriptionClassName,
       inputDescriptionStyle,
       inputStyle,
-      label,
       labelClassName,
       labelStyle,
       name,
       noErrorsDescription,
-      onBlur,
       onChange,
       onFocus,
       placeholder,
@@ -85,7 +86,7 @@ class InputTextAreaWithErrors extends React.Component {
       tabIndex,
       value,
     } = this.props;
-    const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
+    const handleBlur = isFunction(this.props.onBlur) ? this.props.onBlur : this.handleBlur;
 
     let spacer = !isEmpty(inputDescription) ? <InputSpacer /> : <div />;
 
@@ -94,12 +95,20 @@ class InputTextAreaWithErrors extends React.Component {
     }
 
     return (
-      <Container
-        className={cn(customBootstrapClass, !isEmpty(className) && className)}
+      <InputWrapper
+        className={cn(
+          this.props.customBootstrapClass,
+          !isEmpty(this.props.className) && this.props.className
+        )}
         style={style}
       >
-        <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
-        <InputTextArea
+        <Label
+          className={labelClassName}
+          htmlFor={name}
+          message={this.props.label}
+          style={labelStyle}
+        />
+        <InputPassword
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -126,18 +135,20 @@ class InputTextAreaWithErrors extends React.Component {
           style={errorsStyle}
         />
         {spacer}
-      </Container>
+      </InputWrapper>
     );
   }
 }
 
-InputTextAreaWithErrors.defaultProps = {
+InputPasswordWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
+  onBlur: false,
+  onFocus: () => {},
   errors: [],
   errorsClassName: '',
   errorsStyle: {},
@@ -150,15 +161,13 @@ InputTextAreaWithErrors.defaultProps = {
   labelClassName: '',
   labelStyle: {},
   noErrorsDescription: false,
-  onBlur: false,
-  onFocus: () => {},
   placeholder: 'app.utils.placeholder.defaultMessage',
   style: {},
   tabIndex: '0',
   validations: {},
 };
 
-InputTextAreaWithErrors.propTypes = {
+InputPasswordWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -202,4 +211,4 @@ InputTextAreaWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputTextAreaWithErrors;
+export default InputPasswordWithErrors;
