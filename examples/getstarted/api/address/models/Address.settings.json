@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "addresses",
   "info": {
-    "name": "address",
+    "displayName": "Address",
+    "singularName": "address",
+    "pluralName": "addresses",
     "description": ""
   },
   "options": {

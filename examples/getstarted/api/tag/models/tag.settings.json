@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "tags",
   "info": {
-    "name": "tag",
+    "displayName": "Tag",
+    "singularName": "tag",
+    "pluralName": "tags",
     "description": ""
   },
   "options": {

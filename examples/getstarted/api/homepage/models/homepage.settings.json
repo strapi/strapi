@@ -2,7 +2,8 @@
   "kind": "singleType",
   "collectionName": "homepages",
   "info": {
-    "name": "Homepage"
+    "displayName": "Homepage",
+    "singularName": "homepage"
   },
   "options": {
     "draftAndPublish": true

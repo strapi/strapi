@@ -1,7 +1,9 @@
 {
   "collectionName": "reviews",
   "info": {
-    "name": "review",
+    "displayName": "Review",
+    "singularName": "review",
+    "pluralName": "reviews",
     "description": ""
   },
   "options": {

@@ -17,6 +17,7 @@ const contentTypeSchemaValidator = yup.object().shape({
     info: yup
       .object()
       .shape({
+        displayName: yup.string().required(),
         singularName: yup
           .string()
           .isKebabCase()
@@ -25,7 +26,6 @@ const contentTypeSchemaValidator = yup.object().shape({
           .string()
           .isKebabCase()
           .required(),
-        displayName: yup.string().required(),
       })
       .required(),
   }),
