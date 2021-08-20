@@ -364,7 +364,7 @@ module.exports = async ({ models, target }, ctx, { selfFinalize = false } = {}) 
             : strapi.models[details.collection];
 
           const globalId = `${collection.collectionName}_morph`;
-          const filter = _.get(model, ['attributes', details.via, 'filter'], 'field');
+          const filter = _.get(collection, ['attributes', details.via, 'filter'], 'field');
 
           loadedModel[name] = function() {
             return this.morphMany(
