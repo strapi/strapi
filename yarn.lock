@@ -4079,6 +4079,7 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
+<<<<<<< HEAD
 "@storybook/addon-actions@6.3.7", "@storybook/addon-actions@^6.3.7":
   version "6.3.7"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-6.3.7.tgz#b25434972bef351aceb3f7ec6fd66e210f256aac"
@@ -4915,6 +4916,8 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
+=======
+>>>>>>> ade0a8767 (Fix conflicts with yarn lock)
 "@strapi/icons@0.0.1-alpha.15":
   version "0.0.1-alpha.15"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.15.tgz#32fc824b732b4a21d5282f84696d6207ac5cbea1"
