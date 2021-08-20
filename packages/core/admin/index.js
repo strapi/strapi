@@ -264,7 +264,6 @@ async function watchAdmin({ dir, host, port, browser, options }) {
  * @param {string} dir
  */
 async function watchFiles(dir) {
-  await createCacheDir(dir);
   const cacheDir = path.join(dir, '.cache');
   const appExtensionFile = path.join(dir, 'admin', 'app.js');
   const extensionsPath = path.join(dir, 'admin', 'extensions');
