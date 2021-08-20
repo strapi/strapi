@@ -166,7 +166,7 @@ module.exports = function(plop) {
         {
           type: 'add',
           path: join(rootDir, 'plugins/{{id}}/config/routes.json'),
-          templateFile: 'templates/routes.json.hbs',
+          templateFile: 'templates/plugin-routes.json.hbs',
         },
         {
           type: 'add',
