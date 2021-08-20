@@ -1,21 +1,13 @@
-import React, { useState, useRef } from 'react';
-import { useRouteMatch } from 'react-router-dom';
-import get from 'lodash/get';
-import {
-  BaselineAlignment,
-  request,
-  useNotification,
-  useOverlayBlocker,
-  useTracking,
-} from '@strapi/helper-plugin';
-import { Header } from '@buffetjs/custom';
-import { Padded } from '@buffetjs/core';
+import { request, useNotification, useOverlayBlocker, useTracking } from '@strapi/helper-plugin';
+import { Box, Button, HeaderLayout, Main, Stack, ContentLayout } from '@strapi/parts';
 import { Formik } from 'formik';
+import get from 'lodash/get';
+import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import PageTitle from '../../../components/SettingsPageTitle';
-import ContainerFluid from '../../../components/ContainerFluid';
+import { useRouteMatch } from 'react-router-dom';
 import { Permissions, RoleForm } from '../../../components/Roles';
-import { useFetchRole, useFetchPermissionsLayout } from '../../../hooks';
+import PageTitle from '../../../components/SettingsPageTitle';
+import { useFetchPermissionsLayout, useFetchRole } from '../../../hooks';
 import schema from './utils/schema';
 
 const EditPage = () => {
@@ -24,7 +16,7 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/roles/:id');
-  const [isSubmiting, setIsSubmiting] = useState(false);
+  const [, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
@@ -36,38 +28,6 @@ const EditPage = () => {
     isLoading: isRoleLoading,
     onSubmitSucceeded,
   } = useFetchRole(id);
-
-  /* eslint-disable indent */
-  const headerActions = (handleSubmit, handleReset) =>
-    isLayoutLoading && isRoleLoading
-      ? []
-      : [
-          {
-            label: formatMessage({
-              id: 'app.components.Button.reset',
-              defaultMessage: 'Reset',
-            }),
-            disabled: role.code === 'strapi-super-admin',
-            onClick: () => {
-              handleReset();
-              permissionsRef.current.resetForm();
-            },
-            color: 'cancel',
-            type: 'button',
-          },
-          {
-            label: formatMessage({
-              id: 'app.components.Button.save',
-              defaultMessage: 'Save',
-            }),
-            disabled: role.code === 'strapi-super-admin',
-            onClick: handleSubmit,
-            color: 'success',
-            type: 'submit',
-            isLoading: isSubmiting,
-          },
-        ];
-  /* eslint-enable indent */
 
   const handleEditRoleSubmit = async data => {
     try {
@@ -120,7 +80,7 @@ const EditPage = () => {
   const isFormDisabled = role.code === 'strapi-super-admin';
 
   return (
-    <>
+    <Main labelledBy="title">
       <PageTitle name="Roles" />
       <Formik
         enableReinitialize
@@ -134,46 +94,68 @@ const EditPage = () => {
       >
         {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
           <form onSubmit={handleSubmit}>
-            <ContainerFluid padding="0">
-              <Header
-                title={{
-                  label: formatMessage({
-                    id: 'Settings.roles.edit.title',
-                    defaultMessage: 'Edit a role',
-                  }),
-                }}
-                content={formatMessage({
+            <>
+              <HeaderLayout
+                id="title"
+                primaryAction={
+                  <Stack horizontal size={2}>
+                    <Button
+                      variant="secondary"
+                      disabled={role.code === 'strapi-super-admin'}
+                      onClick={() => {
+                        handleReset();
+                        permissionsRef.current.resetForm();
+                      }}
+                    >
+                      {formatMessage({
+                        id: 'app.components.Button.reset',
+                        defaultMessage: 'Reset',
+                      })}
+                    </Button>
+                    <Button disabled={role.code === 'strapi-super-admin'} onClick={handleSubmit}>
+                      {formatMessage({
+                        id: 'app.components.Button.save',
+                        defaultMessage: 'Save',
+                      })}
+                    </Button>
+                  </Stack>
+                }
+                title={formatMessage({
+                  id: 'Settings.roles.edit.title',
+                  defaultMessage: 'Edit a role',
+                })}
+                subtitle={formatMessage({
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
-                actions={headerActions(handleSubmit, handleReset)}
-                isLoading={isLayoutLoading || isRoleLoading}
+                as="h1"
               />
-              <BaselineAlignment top size="3px" />
-              <RoleForm
-                isLoading={isRoleLoading}
-                disabled={isFormDisabled}
-                errors={errors}
-                values={values}
-                onChange={handleChange}
-                onBlur={handleBlur}
-                role={role}
-              />
-              {!isLayoutLoading && !isRoleLoading && (
-                <Padded top bottom size="md">
-                  <Permissions
-                    isFormDisabled={isFormDisabled}
-                    permissions={rolePermissions}
-                    ref={permissionsRef}
-                    layout={permissionsLayout}
-                  />
-                </Padded>
-              )}
-            </ContainerFluid>
+              <ContentLayout>
+                <RoleForm
+                  isLoading={isRoleLoading}
+                  disabled={isFormDisabled}
+                  errors={errors}
+                  values={values}
+                  onChange={handleChange}
+                  onBlur={handleBlur}
+                  role={role}
+                />
+                {!isLayoutLoading && !isRoleLoading && (
+                  <Box paddingTop={6} paddingBottom={6}>
+                    <Permissions
+                      isFormDisabled={isFormDisabled}
+                      permissions={rolePermissions}
+                      ref={permissionsRef}
+                      layout={permissionsLayout}
+                    />
+                  </Box>
+                )}
+              </ContentLayout>
+            </>
           </form>
         )}
       </Formik>
-    </>
+    </Main>
   );
 };
 
