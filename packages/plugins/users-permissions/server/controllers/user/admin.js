@@ -133,7 +133,7 @@ module.exports = {
     }
 
     try {
-      const data = await strapi.plugins['users-permissions'].services.user.add(user);
+      const data = await getService('user').add(user);
 
       ctx.created(pm.sanitize(data, { action: ACTIONS.read }));
     } catch (error) {

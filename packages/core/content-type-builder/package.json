@@ -1,6 +1,6 @@
 {
   "name": "@strapi/plugin-content-type-builder",
-  "version": "3.6.6",
+  "version": "3.6.7",
   "description": "Strapi plugin to create content type (API).",
   "strapi": {
     "name": "content-type-builder",
@@ -11,10 +11,10 @@
   },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "@strapi/generate": "3.6.6",
-    "@strapi/generate-api": "3.6.6",
-    "@strapi/helper-plugin": "3.6.6",
-    "@strapi/utils": "3.6.6",
+    "@strapi/generate": "3.6.7",
+    "@strapi/generate-api": "3.6.7",
+    "@strapi/helper-plugin": "3.6.7",
+    "@strapi/utils": "3.6.7",
     "fs-extra": "^9.1.0",
     "lodash": "4.17.21",
     "pluralize": "^8.0.0",

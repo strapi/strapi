@@ -12,9 +12,9 @@ const middlewaresRegistry = () => {
     getAll(prefix = '') {
       return pickBy((middleware, middlewareUID) => middlewareUID.startsWith(prefix))(middlewares);
     },
-    add(namespace, middlewares) {
-      for (const middlewareName in middlewares) {
-        const middleware = middlewares[middlewareName];
+    add(namespace, rawMiddlewares) {
+      for (const middlewareName in rawMiddlewares) {
+        const middleware = rawMiddlewares[middlewareName];
         const uid = `${namespace}.${middlewareName}`;
 
         if (has(uid, middlewares)) {

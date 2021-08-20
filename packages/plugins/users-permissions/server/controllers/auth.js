@@ -116,9 +116,10 @@ module.exports = {
         );
       }
 
-      const validPassword = await strapi.plugins[
-        'users-permissions'
-      ].services.user.validatePassword(params.password, user.password);
+      const validPassword = await getService('user').validatePassword(
+        params.password,
+        user.password
+      );
 
       if (!validPassword) {
         return ctx.badRequest(
@@ -130,10 +131,10 @@ module.exports = {
         );
       } else {
         ctx.send({
-          jwt: strapi.plugins['users-permissions'].services.jwt.issue({
+          jwt: getService('jwt').issue({
             id: user.id,
           }),
-          user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+          user: sanitizeEntity(user, {
             model: strapi.getModel('plugin::users-permissions.user'),
           }),
         });
@@ -153,10 +154,7 @@ module.exports = {
       let user;
       let error;
       try {
-        [user, error] = await strapi.plugins['users-permissions'].services.providers.connect(
-          provider,
-          ctx.query
-        );
+        [user, error] = await getService('providers').connect(provider, ctx.query);
       } catch ([user, error]) {
         return ctx.badRequest(null, error === 'array' ? error[0] : error);
       }
@@ -166,10 +164,8 @@ module.exports = {
       }
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue({
-          id: user.id,
-        }),
-        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: sanitizeEntity(user, {
           model: strapi.getModel('plugin::users-permissions.user'),
         }),
       });
@@ -207,10 +203,8 @@ module.exports = {
         .update({ where: { id: user.id }, data: { resetPasswordToken: null, password } });
 
       ctx.send({
-        jwt: strapi.plugins['users-permissions'].services.jwt.issue({
-          id: user.id,
-        }),
-        user: sanitizeEntity(user.toJSON ? user.toJSON() : user, {
+        jwt: getService('jwt').issue({ id: user.id }),
+        user: sanitizeEntity(user, {
           model: strapi.getModel('plugin::users-permissions.user'),
         }),
       });
@@ -262,9 +256,7 @@ module.exports = {
 
     // Ability to pass OAuth callback dynamically
     grantConfig[provider].callback = _.get(ctx, 'query.callback') || grantConfig[provider].callback;
-    grantConfig[provider].redirect_uri = strapi.plugins[
-      'users-permissions'
-    ].services.providers.buildRedirectUri(provider);
+    grantConfig[provider].redirect_uri = getService('providers').buildRedirectUri(provider);
 
     return grant(grantConfig)(ctx, next);
   },
@@ -340,17 +332,20 @@ module.exports = {
 
     try {
       // Send an email to the user.
-      await strapi.plugins['email'].services.email.send({
-        to: user.email,
-        from:
-          settings.from.email || settings.from.name
-            ? `${settings.from.name} <${settings.from.email}>`
-            : undefined,
-        replyTo: settings.response_email,
-        subject: settings.object,
-        text: settings.message,
-        html: settings.message,
-      });
+      await strapi
+        .plugin('email')
+        .service('email')
+        .send({
+          to: user.email,
+          from:
+            settings.from.email || settings.from.name
+              ? `${settings.from.name} <${settings.from.email}>`
+              : undefined,
+          replyTo: settings.response_email,
+          subject: settings.object,
+          text: settings.message,
+          html: settings.message,
+        });
     } catch (err) {
       return ctx.badRequest(null, err);
     }
@@ -500,7 +495,7 @@ module.exports = {
         return ctx.send({ user: sanitizedUser });
       }
 
-      const jwt = strapi.plugins['users-permissions'].services.jwt.issue(_.pick(user, ['id']));
+      const jwt = getService('jwt').issue(_.pick(user, ['id']));
 
       return ctx.send({
         jwt,
@@ -521,7 +516,8 @@ module.exports = {
   async emailConfirmation(ctx, next, returnUser) {
     const { confirmation: confirmationToken } = ctx.query;
 
-    const { user: userService, jwt: jwtService } = strapi.plugins['users-permissions'].services;
+    const userService = getService('user');
+    const jwtService = getService('jwt');
 
     if (_.isEmpty(confirmationToken)) {
       return ctx.badRequest('token.invalid');

@@ -1,29 +1,32 @@
 import React from 'react';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { useTracking } from '@strapi/helper-plugin';
 import Wrapper from './Wrapper';
 import LogoStrapi from '../../../assets/images/banner_strapi-rocket.png';
 
-const PluginBanner = () => {
+const MarketplaceBanner = () => {
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   return (
     <Wrapper>
       <img
         className="bannerImage"
         src={LogoStrapi}
-        alt={formatMessage({ id: 'app.components.PluginBanner.image.alt' })}
+        alt={formatMessage({ id: 'app.components.MarketplaceBanner.image.alt' })}
       />
       <div>
         <div>
-          <FormattedMessage id="app.components.PluginBanner" />
+          <FormattedMessage id="app.components.MarketplaceBanner" />
         </div>
         <a
           href="https://github.com/strapi/awesome-strapi"
           target="_blank"
           rel="noopener noreferrer"
           className="bannerLink"
+          onClick={() => trackUsage('didGoToStrapiAwesome')}
         >
-          <FormattedMessage id="app.components.PluginBanner.link" />
+          <FormattedMessage id="app.components.MarketplaceBanner.link" />
           <i className="fa fa-external-link-alt" />
         </a>
       </div>
@@ -31,4 +34,4 @@ const PluginBanner = () => {
   );
 };
 
-export default PluginBanner;
+export default MarketplaceBanner;

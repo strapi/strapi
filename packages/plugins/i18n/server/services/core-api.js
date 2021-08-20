@@ -228,7 +228,7 @@ const mergeCustomizer = (dest, src) => {
  */
 // TODO: to replace with V4 config getter
 const addGraphqlSchema = schema => {
-  _.mergeWith(strapi.plugins.i18n.config.schema.graphql, schema, mergeCustomizer);
+  _.mergeWith(strapi.config.get('plugin.i18n.schema.graphql'), schema, mergeCustomizer);
 };
 
 /**
@@ -242,7 +242,7 @@ const addGraphqlLocalizationAction = contentType => {
     return;
   }
 
-  const { toSingular, toPlural } = strapi.plugins.graphql.services.naming;
+  const { toSingular, toPlural } = strapi.plugin('graphql').service('naming');
 
   // We use a string instead of an enum as the locales can be changed in the admin
   // NOTE: We could use a custom scalar so the validation becomes dynamic

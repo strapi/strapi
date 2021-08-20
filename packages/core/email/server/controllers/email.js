@@ -11,7 +11,10 @@ module.exports = {
   async send(ctx) {
     let options = ctx.request.body;
     try {
-      await strapi.plugins.email.services.email.send(options);
+      await strapi
+        .plugin('email')
+        .service('email')
+        .send(options);
     } catch (e) {
       if (e.statusCode === 400) {
         return ctx.badRequest(e.message);
@@ -36,11 +39,16 @@ module.exports = {
     const email = {
       to: to,
       subject: `Strapi test mail to: ${to}`,
-      text: `Great! You have correctly configured the Strapi email plugin with the ${strapi.plugins.email.config.provider} provider. \r\nFor documentation on how to use the email plugin checkout: https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html`,
+      text: `Great! You have correctly configured the Strapi email plugin with the ${strapi.config.get(
+        'plugin.email.provider'
+      )} provider. \r\nFor documentation on how to use the email plugin checkout: https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html`,
     };
 
     try {
-      await strapi.plugins.email.services.email.send(email);
+      await strapi
+        .plugin('email')
+        .service('email')
+        .send(email);
     } catch (e) {
       if (e.statusCode === 400) {
         return ctx.badRequest(e.message);
@@ -54,7 +62,10 @@ module.exports = {
   },
 
   async getSettings(ctx) {
-    const config = strapi.plugins.email.services.email.getProviderSettings();
+    const config = strapi
+      .plugin('email')
+      .service('email')
+      .getProviderSettings();
 
     ctx.send({
       config: pick(

@@ -49,7 +49,7 @@ module.exports = ({ env }) => ({
 You can access a Sentry service throughout your app.
 
 ```js
-const sentryService = strapi.plugins.sentry.services.sentry;
+const sentryService = strapi.plugin('sentry').service('sentry');
 ```
 
 This service exposes the following methods:
@@ -65,13 +65,19 @@ try {
   // Your code here
 } catch (error) {
   // Either send a simple error
-  strapi.plugins.sentry.services.sentry.sendError(error);
+  strapi
+    .plugin('sentry')
+    .service('sentry')
+    .sendError(error);
 
   // Or send an error with a customized Sentry scope
-  strapi.plugins.sentry.services.sentry.sendError(error, (scope, sentryInstance) => {
-    // Customize the scope here
-    scope.setTag('my_custom_tag', 'Tag value');
-  });
+  strapi
+    .plugin('sentry')
+    .service('sentry')
+    .sendError(error, (scope, sentryInstance) => {
+      // Customize the scope here
+      scope.setTag('my_custom_tag', 'Tag value');
+    });
   throw error;
 }
 ```
@@ -83,7 +89,10 @@ Use it if you need direct access to the Sentry instance, which should already al
 **Example**
 
 ```js
-const sentryInstance = strapi.plugins.sentry.services.sentry.getInstance();
+const sentryInstance = strapi
+  .plugin('sentry')
+  .service('sentry')
+  .getInstance();
 ```
 
 ## Disabling

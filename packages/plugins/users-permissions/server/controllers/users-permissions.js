@@ -65,11 +65,10 @@ module.exports = {
   },
 
   async getPolicies(ctx) {
+    const policies = _.keys(strapi.plugin('users-permissions').policies);
+
     ctx.send({
-      policies: _.without(
-        _.keys(strapi.plugins['users-permissions'].config.policies),
-        'permissions'
-      ),
+      policies: _.without(policies, 'permissions'),
     });
   },
 
@@ -221,9 +220,10 @@ module.exports = {
 
     for (const provider in providers) {
       if (provider !== 'email') {
-        providers[provider].redirectUri = strapi.plugins[
-          'users-permissions'
-        ].services.providers.buildRedirectUri(provider);
+        providers[provider].redirectUri = strapi
+          .plugin('users-permissions')
+          .service('providers')
+          .buildRedirectUri(provider);
       }
     }
 

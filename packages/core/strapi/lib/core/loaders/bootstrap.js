@@ -109,42 +109,14 @@ module.exports = function(strapi) {
   });
 
   // TODO: delete v3 code
-  _.forEach(strapi.pluginsV4, (plugin, pluginUID) => {
-    const pluginName = pluginUID.split('::')[1];
-    strapi.plugins[pluginName] = {
-      models: {},
-      config: { policies: {} },
-      services: {},
-      middlewares: {},
-      controllers: {},
-      routes: plugin.routes,
-    };
-
+  _.forEach(strapi.plugins, plugin => {
     _.forEach(plugin.contentTypes, (ct, ctUID) => {
       strapi.contentTypes[ctUID] = ct.schema;
-      strapi.plugins[pluginName][ct.schema.modelName] = ct.schema;
-      strapi.plugins[pluginName].models[ct.schema.modelName] = ct.schema;
-    });
-
-    _.forEach(plugin.policies, (policy, policyUID) => {
-      const policyName = toLower(policyUID.split('.')[1]);
-      strapi.plugins[pluginName].config.policies[policyName] = policy;
-    });
-
-    _.forEach(plugin.services, (service, serviceUID) => {
-      const serviceName = toLower(serviceUID.split('.')[1]);
-      strapi.plugins[pluginName].services[serviceName] = service;
     });
 
     _.forEach(plugin.middlewares, (middleware, middlewareUID) => {
       const middlewareName = toLower(middlewareUID.split('.')[1]);
-      strapi.plugins[pluginName].middlewares[middlewareName] = middleware;
       strapi.middleware[middlewareName] = middleware;
-    });
-
-    _.forEach(plugin.controllers, (controller, controllerUID) => {
-      const controllerName = toLower(controllerUID.split('.')[1]);
-      strapi.plugins[pluginName].controllers[controllerName] = controller;
     });
   });
 
