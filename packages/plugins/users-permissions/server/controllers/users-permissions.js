@@ -65,11 +65,10 @@ module.exports = {
   },
 
   async getPolicies(ctx) {
+    const policies = _.keys(strapi.plugin('users-permissions').policies);
+
     ctx.send({
-      policies: _.without(
-        _.keys(strapi.plugin('users-permissions').policies),
-        'plugin::users-permissions.permissions'
-      ),
+      policies: _.without(policies, 'permissions'),
     });
   },
 
