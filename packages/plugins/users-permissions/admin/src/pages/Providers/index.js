@@ -1,8 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-// import { Header, List } from '@buffetjs/custom';
-// import { Text } from '@buffetjs/core';
-// import { Pencil } from '@buffetjs/icons';
 import {
   SettingsPageTitle,
   SizedInput,
@@ -11,11 +8,12 @@ import {
   request,
   useNotification,
   useOverlayBlocker,
+ LoadingIndicatorPage 
 } from '@strapi/helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
-// import ListBaselineAlignment from '../../components/ListBaselineAlignment';
-// import ListRow from '../../components/ListRow';
+
+
 
 // DS INTEGRATION
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -49,7 +47,6 @@ const ProvidersPage = () => {
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
   }, []);
-  console.log(updatePermissions);
 
   const {
     allowedActions: { canUpdate },
@@ -58,8 +55,8 @@ const ProvidersPage = () => {
     dispatchSubmitSucceeded,
     formErrors,
     handleChange,
-    // isLoading,
-    // isLoadingForPermissions,
+    isLoading,
+    isLoadingForPermissions,
     modifiedData,
   } = useForm('providers', updatePermissions);
 
@@ -186,67 +183,87 @@ const ProvidersPage = () => {
         <HeaderLayout
           as="h1"
           id="providers"
-          title={formatMessage({ id: getTrad('HeaderNav.link.providers') })}
+          title={formatMessage({
+            id: getTrad('HeaderNav.link.providers'),
+            defaultMessage: 'Providers',
+          })}
         />
-        <ContentLayout>
-          <Table colCount={4} rowCount={rowCount + 1}>
-            <Thead>
-              <Tr>
-                <Th>
-                  <TableLabel>
-                    <VisuallyHidden>
-                      {formatMessage({ id: getTrad('Providers.image') })}
-                    </VisuallyHidden>
-                  </TableLabel>
-                </Th>
-                <Th>
-                  <TableLabel>{formatMessage({ id: getTrad('Providers.name') })}</TableLabel>
-                </Th>
-                <Th>
-                  <TableLabel>{formatMessage({ id: getTrad('Providers.status') })}</TableLabel>
-                </Th>
-                <Th>
-                  <TableLabel>
-                    <VisuallyHidden>
-                      {formatMessage({ id: getTrad('Providers.settings') })}
-                    </VisuallyHidden>
-                  </TableLabel>
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {providers.map(provider => (
-                <Tr key={provider.name}>
-                  <Td width="">
-                    <FontAwesomeIcon icon={provider.icon} />
-                  </Td>
-                  <Td width="45%">
-                    <Text highlighted textColor="neutral800">
-                      {provider.name}
-                    </Text>
-                  </Td>
-                  <Td width="65%">
-                    <Text textColor={provider.enabled ? 'success600' : 'danger600'}>
-                      {provider.enabled
-                        ? formatMessage({ id: getTrad('Providers.enabled') })
-                        : formatMessage({ id: getTrad('Providers.disabled') })}
-                    </Text>
-                  </Td>
-                  <Td>
-                    {canUpdate && (
-                      <IconButton
-                        onClick={() => handleClickEdit(provider)}
-                        noBorder
-                        icon={<EditIcon />}
-                        label="Edit"
-                      />
-                    )}
-                  </Td>
+        {isLoading || isLoadingForPermissions ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <ContentLayout>
+            <Table colCount={4} rowCount={rowCount + 1}>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <TableLabel>
+                      <VisuallyHidden>
+                        {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
+                      </VisuallyHidden>
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel>
+                      {formatMessage({ id: getTrad('Providers.name'), defaultMessage: 'Name' })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel>
+                      {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel>
+                      <VisuallyHidden>
+                        {formatMessage({
+                          id: getTrad('Providers.settings'),
+                          defaultMessage: 'Settings',
+                        })}
+                      </VisuallyHidden>
+                    </TableLabel>
+                  </Th>
                 </Tr>
-              ))}
-            </Tbody>
-          </Table>
-        </ContentLayout>
+              </Thead>
+              <Tbody>
+                {providers.map(provider => (
+                  <Tr key={provider.name}>
+                    <Td width="">
+                      <FontAwesomeIcon icon={provider.icon} />
+                    </Td>
+                    <Td width="45%">
+                      <Text highlighted textColor="neutral800">
+                        {provider.name}
+                      </Text>
+                    </Td>
+                    <Td width="65%">
+                      <Text textColor={provider.enabled ? 'success600' : 'danger600'}>
+                        {provider.enabled
+                          ? formatMessage({
+                              id: getTrad('Providers.enabled'),
+                              defaultMessage: 'Enabled',
+                            })
+                          : formatMessage({
+                              id: getTrad('Providers.disabled'),
+                              defaultMessage: 'Disabled',
+                            })}
+                      </Text>
+                    </Td>
+                    <Td>
+                      {canUpdate && (
+                        <IconButton
+                          onClick={() => handleClickEdit(provider)}
+                          noBorder
+                          icon={<EditIcon />}
+                          label="Edit"
+                        />
+                      )}
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </ContentLayout>
+        )}
       </Main>
       <ModalForm
         isOpen={isOpen}
@@ -257,7 +274,10 @@ const ProvidersPage = () => {
         onClosed={handleClosed}
         onToggle={handleToggle}
         headerBreadcrumbs={[
-          getTrad('PopUpForm.header.edit.providers'),
+          formatMessage({
+            id: getTrad('PopUpForm.header.edit.providers'),
+            defaultMessage: 'Edit Provider',
+          }),
           upperFirst(providerToEditName),
         ]}
       >
