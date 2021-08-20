@@ -42,13 +42,13 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await strapi.plugins['upload'].services.upload.findOne({ id });
+    const file = await getService('upload').findOne({ id });
 
     if (!file) {
       return ctx.notFound('file.notFound');
     }
 
-    await strapi.plugins['upload'].services.upload.remove(file);
+    await getService('upload').remove(file);
 
     ctx.body = sanitize(file);
   },

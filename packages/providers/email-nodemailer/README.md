@@ -111,13 +111,16 @@ module.exports = ({ env }) => ({
 To send an email from anywhere inside Strapi:
 
 ```js
-await strapi.plugins['email'].services.email.send({
-  to: 'someone@example.com',
-  from: 'someone2@example.com',
-  subject: 'Hello world',
-  text: 'Hello world',
-  html: `<h4>Hello world</h4>`,
-});
+await strapi
+  .plugin('email')
+  .service('email')
+  .send({
+    to: 'someone@example.com',
+    from: 'someone2@example.com',
+    subject: 'Hello world',
+    text: 'Hello world',
+    html: `<h4>Hello world</h4>`,
+  });
 ```
 
 The following fields are supported:

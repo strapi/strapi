@@ -29,10 +29,8 @@ describe('Policy util', () => {
       global.strapi = {
         plugins: {
           'test-plugin': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
+            policies: {
+              'test-policy': policyFn,
             },
           },
         },
@@ -48,10 +46,8 @@ describe('Policy util', () => {
       global.strapi = {
         plugins: {
           'test-plugin': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
+            policies: {
+              'test-policy': policyFn,
             },
           },
         },

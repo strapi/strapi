@@ -110,7 +110,7 @@ const policyResolvers = [
     },
     get(policy) {
       const [plugin = '', policyName = ''] = stripPolicy(policy, PLUGIN_PREFIX).split('.');
-      const foundPolicy = getPolicyIn(_.get(strapi, ['plugins', plugin]), policyName);
+      const foundPolicy = strapi.plugin(plugin).policy(policyName);
       return foundPolicy;
     },
   },

@@ -151,16 +151,19 @@ module.exports = ({ strapi }) => ({
     settings.object = await userPermissionService.template(settings.object, { USER: userInfo });
 
     // Send an email to the user.
-    await strapi.plugins['email'].services.email.send({
-      to: user.email,
-      from:
-        settings.from.email && settings.from.name
-          ? `${settings.from.name} <${settings.from.email}>`
-          : undefined,
-      replyTo: settings.response_email,
-      subject: settings.object,
-      text: settings.message,
-      html: settings.message,
-    });
+    await strapi
+      .plugin('email')
+      .service('email')
+      .send({
+        to: user.email,
+        from:
+          settings.from.email && settings.from.name
+            ? `${settings.from.name} <${settings.from.email}>`
+            : undefined,
+        replyTo: settings.response_email,
+        subject: settings.object,
+        text: settings.message,
+        html: settings.message,
+      });
   },
 });

@@ -20,6 +20,8 @@ const modulesRegistry = strapi => {
 
       modules[namespace] = createModule(namespace, rawModule, strapi);
       modules[namespace].load();
+
+      return modules[namespace];
     },
     async bootstrap() {
       for (const mod of Object.values(modules)) {

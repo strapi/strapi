@@ -167,8 +167,9 @@ module.exports = ({ strapi }) => ({
         controllers: {},
       };
 
-      acc[key] = Object.keys(strapi.plugins[key].controllers).reduce((obj, k) => {
-        obj.controllers[k] = generateActions(strapi.plugins[key].controllers[k]);
+      const pluginControllers = strapi.plugin(key).controllers;
+      acc[key] = Object.keys(pluginControllers).reduce((obj, k) => {
+        obj.controllers[k] = generateActions(pluginControllers[k]);
 
         return obj;
       }, initialState);
@@ -279,9 +280,13 @@ module.exports = ({ strapi }) => ({
 
     // Aggregate plugins' actions.
     const pluginsActions = Object.keys(strapi.plugins).reduce((acc, plugin) => {
-      Object.keys(strapi.plugins[plugin].controllers).forEach(controller => {
-        const actions = Object.keys(strapi.plugins[plugin].controllers[controller])
-          .filter(action => _.isFunction(strapi.plugins[plugin].controllers[controller][action]))
+      const pluginControllers = strapi.plugin(plugin).controllers;
+
+      Object.keys(pluginControllers).forEach(controller => {
+        const controllerActions = pluginControllers[controller];
+
+        const actions = Object.keys(controllerActions)
+          .filter(action => _.isFunction(controllerActions[action]))
           .map(action => `${plugin}.${controller}.${action.toLowerCase()}`);
 
         acc = acc.concat(actions);

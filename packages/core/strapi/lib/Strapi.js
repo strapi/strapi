@@ -33,8 +33,10 @@ const policiesRegistry = require('./core/registries/policies');
 const middlewaresRegistry = require('./core/registries/middlewares');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
+const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
 const loadPlugins = require('./core/load-plugins');
+// const { nameToSlug } = require('../../utils/lib');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -53,13 +55,13 @@ class Strapi {
     this.container.register('middlewares', middlewaresRegistry(this));
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
+    this.container.register('plugins', pluginsRegistry(this));
 
     this.isLoaded = false;
     this.reload = this.reload();
     this.app = new Koa();
     this.router = new Router();
     this.server = createHTTPServer(this, this.app);
-    this.plugins = {}; // to remove V3
     this.contentTypes = {}; // to remove V3
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
@@ -83,11 +85,11 @@ class Strapi {
   }
 
   plugin(name) {
-    return this.container.get('modules').get(`plugin::${name}`);
+    return this.container.get('plugins').get(name);
   }
 
-  get pluginsV4() {
-    return this.container.get('modules').getAll('plugin::');
+  get plugins() {
+    return this.container.get('plugins').getAll();
   }
 
   async start() {
@@ -224,6 +226,14 @@ class Strapi {
     this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
   }
 
+  async loadPlugins() {
+    const loadedPlugins = await loadPlugins(this);
+
+    for (const pluginName in loadedPlugins) {
+      this.container.get('plugins').add(pluginName, loadedPlugins[pluginName]);
+    }
+  }
+
   async load() {
     this.app.use(async (ctx, next) => {
       if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
@@ -234,20 +244,11 @@ class Strapi {
       }
     });
 
-    const plugins = await loadPlugins(this);
-
-    for (const pluginName in plugins) {
-      const plugin = plugins[pluginName];
-      this.container.get('modules').add(`plugin::${pluginName}`, plugin);
-    }
-
-    // await this.container.load();
-
-    // this.plugins = this.container.plugins.getAll();
+    await this.loadPlugins();
 
     const modules = await loadModules(this);
 
-    this.loadAdmin();
+    await this.loadAdmin();
 
     this.api = modules.api;
     this.components = modules.components;

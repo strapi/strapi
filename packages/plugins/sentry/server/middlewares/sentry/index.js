@@ -5,7 +5,8 @@ module.exports = strapi => ({
     strapi.config.middleware.load.after.unshift('sentry');
   },
   initialize() {
-    const { sentry } = strapi.plugins.sentry.services;
+    const sentry = strapi.plugin('sentry').service('sentry');
+
     sentry.init();
 
     strapi.app.use(async (ctx, next) => {
