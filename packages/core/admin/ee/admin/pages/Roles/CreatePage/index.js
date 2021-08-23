@@ -236,7 +236,7 @@ const CreatePage = () => {
                   </Box>
                 ) : (
                   // ! TODO : Switch to the DS component when done
-                  <Row alignItems="center" justifyContent="center" style={{ height: 400 }}>
+                  <Row alignItems="center" justifyContent="center" padding={11}>
                     <Loader />
                   </Row>
                 )}
