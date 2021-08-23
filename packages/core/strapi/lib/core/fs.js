@@ -1,7 +1,6 @@
 'use strict';
 
 const path = require('path');
-const fs = require('fs');
 const fse = require('fs-extra');
 
 /**
@@ -49,9 +48,9 @@ module.exports = strapi => {
     /**
      * Appends a file in strapi app
      */
-    async appendFile(optPath, data) {
+    appendFile(optPath, data) {
       const writePath = normalizePath(optPath);
-      return fs.appendFileSync(writePath, data);
+      return fse.appendFileSync(writePath, data);
     },
   };
 
