@@ -22,7 +22,7 @@ module.exports = async strapi => {
     return;
   }
 
-  const config = getOr({}, 'config', strapi.plugins.graphql);
+  const config = getOr({}, 'config', strapi.plugin('graphql'));
   const apolloServerConfig = getOr({}, 'apolloServer', config);
 
   const serverParams = {
@@ -84,6 +84,7 @@ module.exports = async strapi => {
   });
 
   // Register destroy behavior
+  // todo[v4]: expose this in strapi-server.js (destroy attribute)
   strapi.plugins.graphql.destroy = async () => {
     await server.stop();
   };
