@@ -130,23 +130,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * @param {string} name
  */
 const generateAPI = ({ name, kind = 'collectionType' }) => {
-  return new Promise((resolve, reject) => {
-    const scope = {
-      generatorType: 'api',
-      id: nameToSlug(name),
-      name: nameToSlug(name),
-      rootPath: strapi.dir,
-      args: {
-        attributes: {},
-        kind,
-      },
-    };
-
-    generator(scope, {
-      success: () => resolve(),
-      error: err => reject(err),
-    });
-  });
+  return generator.generate('api', { id: nameToSlug(name), kind });
 };
 
 /**
