@@ -211,9 +211,7 @@ const addMediaAttribute = options => {
     context: { strapi },
   } = options;
 
-  // todo[v4]: we shouldn't have to handle differently cts fetched
-  //  with the .contentType() & those fetched using .contentTypes
-  const fileContentType = strapi.plugin('upload').contentType('file').schema;
+  const fileContentType = strapi.contentTypes['plugin::upload.file'];
 
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
