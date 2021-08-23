@@ -2,7 +2,6 @@ import { Box, Row, Td, Text, Tr, IconButton, BaseCheckbox } from '@strapi/parts'
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useIntl } from 'react-intl';
-import RoleDescription from './RoleDescription';
 
 const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons }) => {
   const { formatMessage } = useIntl();
@@ -28,7 +27,7 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
         <Text textColor="neutral800">{name}</Text>
       </Td>
       <Td>
-        <RoleDescription textColor="neutral800">{description}</RoleDescription>
+        <Text textColor="neutral800">{description}</Text>
       </Td>
       <Td>
         <Text textColor="neutral800">{usersCountText}</Text>
