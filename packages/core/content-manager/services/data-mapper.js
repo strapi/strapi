@@ -17,7 +17,7 @@ const dtoFields = [
   'pluginOptions',
 ];
 
-module.exports = {
+module.exports = () => ({
   toContentManagerModel(contentType) {
     return {
       ...contentType,
@@ -41,7 +41,7 @@ module.exports = {
   },
 
   toDto: pick(dtoFields),
-};
+});
 
 const formatContentTypeLabel = contentType => {
   const name = prop('info.name', contentType) || contentType.modelName;

@@ -28,6 +28,6 @@ module.exports = createPolicyFactory(
   },
   {
     validator: validateHasPermissionsInput,
-    name: 'plugins::content-manager.hasPermissions',
+    name: 'plugin::content-manager.hasPermissions',
   }
 );

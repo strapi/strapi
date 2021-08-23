@@ -20,4 +20,4 @@ type S = {
   uid: typeof uid;
 };
 
-export function getService<T extends keyof S>(name: T): S[T];
+export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;

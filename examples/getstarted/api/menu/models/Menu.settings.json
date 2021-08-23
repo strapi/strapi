@@ -2,8 +2,10 @@
   "kind": "collectionType",
   "collectionName": "menus",
   "info": {
-    "name": "menu",
-    "description": ""
+    "description": "",
+    "displayName": "Menu",
+    "singularName": "menu",
+    "pluralName": "menus"
   },
   "options": {
     "draftAndPublish": false,
@@ -16,12 +18,12 @@
     "menusections": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::menusection.menusection",
+      "target": "api::menusection.menusection",
       "mappedBy": "menu"
     },
     "restaurant": {
       "type": "relation",
-      "target": "application::restaurant.restaurant",
+      "target": "api::restaurant.restaurant",
       "relation": "oneToOne",
       "mappedBy": "menu"
     }

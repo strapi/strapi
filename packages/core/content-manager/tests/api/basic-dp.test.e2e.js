@@ -69,7 +69,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
+      url: '/content-manager/collection-types/api::product-with-dp.product-with-dp',
       body: product,
     });
 
@@ -87,7 +87,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
+      url: '/content-manager/collection-types/api::product-with-dp.product-with-dp',
       body: product,
     });
 
@@ -100,7 +100,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Read all products', async () => {
     const res = await rq({
       method: 'GET',
-      url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
+      url: '/content-manager/collection-types/api::product-with-dp.product-with-dp',
     });
 
     expect(res.statusCode).toBe(200);
@@ -126,7 +126,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       body: product,
     });
 
@@ -145,7 +145,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
       body: product,
     });
 
@@ -160,7 +160,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
 
@@ -173,7 +173,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/publish`,
       method: 'POST',
     });
 
@@ -185,7 +185,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });
 
@@ -198,7 +198,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${entry.id}/actions/unpublish`,
       method: 'POST',
     });
 
@@ -209,7 +209,7 @@ describe('CM API - Basic + draftAndPublish', () => {
   test('Delete a draft', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/application::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dp.product-with-dp/${data.productsWithDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -227,7 +227,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
+        url: '/content-manager/collection-types/api::product-with-dp.product-with-dp',
         body: product,
       });
 
@@ -242,7 +242,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
+        url: '/content-manager/collection-types/api::product-with-dp.product-with-dp',
         body: product,
       });
 
@@ -261,7 +261,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       };
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/application::product-with-dp.product-with-dp',
+        url: '/content-manager/collection-types/api::product-with-dp.product-with-dp',
         body: product,
       });
 

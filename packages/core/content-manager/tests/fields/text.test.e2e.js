@@ -31,7 +31,7 @@ describe('Test type text', () => {
   });
 
   test('Creates an entry with JSON', async () => {
-    const res = await rq.post('/content-manager/collection-types/application::withtext.withtext', {
+    const res = await rq.post('/content-manager/collection-types/api::withtext.withtext', {
       body: {
         field: 'Some\ntext',
       },
@@ -44,7 +44,7 @@ describe('Test type text', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get('/content-manager/collection-types/application::withtext.withtext');
+    const res = await rq.get('/content-manager/collection-types/api::withtext.withtext');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
@@ -55,12 +55,12 @@ describe('Test type text', () => {
   });
 
   test('Updating entry with JSON sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/collection-types/application::withtext.withtext', {
+    const res = await rq.post('/content-manager/collection-types/api::withtext.withtext', {
       body: { field: 'Some \ntext' },
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/application::withtext.withtext/${res.body.id}`,
+      `/content-manager/collection-types/api::withtext.withtext/${res.body.id}`,
       {
         body: { field: 'Updated \nstring' },
       }

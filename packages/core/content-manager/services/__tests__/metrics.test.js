@@ -1,6 +1,8 @@
 'use strict';
 
-const metricsService = require('../metrics');
+const metricsServiceLoader = require('../metrics');
+
+let metricsService;
 
 describe('metrics', () => {
   describe('sendDidConfigureListView', () => {
@@ -62,6 +64,7 @@ describe('metrics', () => {
     test.each(testData)('%s', async (list, expectedResult) => {
       const send = jest.fn(() => Promise.resolve());
       global.strapi = { telemetry: { send } };
+      metricsService = metricsServiceLoader({ strapi });
       const [containsRelationalFields, displayedFields, displayedRelationalFields] = expectedResult;
 
       await metricsService.sendDidConfigureListView(contentType, { layouts: { list } });

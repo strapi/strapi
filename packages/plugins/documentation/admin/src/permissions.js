@@ -4,16 +4,16 @@ const pluginPermissions = {
   // And also if the plugin is accessible. This use case is found when a user types the url of the
   // plugin directly in the browser
   main: [
-    { action: 'plugins::documentation.read', subject: null },
-    { action: 'plugins::documentation.settings.regenerate', subject: null },
-    { action: 'plugins::documentation.settings.update', subject: null },
+    { action: 'plugin::documentation.read', subject: null },
+    { action: 'plugin::documentation.settings.regenerate', subject: null },
+    { action: 'plugin::documentation.settings.update', subject: null },
   ],
   open: [
-    { action: 'plugins::documentation.read', subject: null },
-    { action: 'plugins::documentation.settings.regenerate', subject: null },
+    { action: 'plugin::documentation.read', subject: null },
+    { action: 'plugin::documentation.settings.regenerate', subject: null },
   ],
-  regenerate: [{ action: 'plugins::documentation.settings.regenerate', subject: null }],
-  update: [{ action: 'plugins::documentation.settings.update', subject: null }],
+  regenerate: [{ action: 'plugin::documentation.settings.regenerate', subject: null }],
+  update: [{ action: 'plugin::documentation.settings.update', subject: null }],
 };
 
 export default pluginPermissions;

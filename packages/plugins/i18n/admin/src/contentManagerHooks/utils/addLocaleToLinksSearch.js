@@ -17,8 +17,8 @@ const addLocaleToLinksSearch = (links, kind, contentTypeSchemas, locales, permis
     const contentTypePermissions = permissions[contentTypeUID];
     const requiredPermissionsToViewALink =
       kind === 'collectionType'
-        ? ['plugins::content-manager.explorer.read', 'plugins::content-manager.explorer.create']
-        : ['plugins::content-manager.explorer.read'];
+        ? ['plugin::content-manager.explorer.read', 'plugin::content-manager.explorer.create']
+        : ['plugin::content-manager.explorer.read'];
 
     const contentTypeNeededPermissions = Object.keys(contentTypePermissions).reduce(
       (acc, current) => {

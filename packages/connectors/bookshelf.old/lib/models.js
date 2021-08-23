@@ -56,7 +56,7 @@ module.exports = {
         types.current = 'morphTo';
       }
 
-      // We have to find if they are a model linked to this key
+      // We have to find if there is a model linked to this key
       _.forEach(allModels, model => {
         _.forIn(model.attributes, attribute => {
           if (_.has(attribute, 'via') && attribute.via === attributeName) {
@@ -126,7 +126,7 @@ module.exports = {
     } else if (_.has(attribute, 'via') && _.has(attribute, 'model')) {
       types.current = 'modelD';
 
-      // We have to find if they are a model linked to this attributeName
+      // We have to find if there is a model linked to this attributeName
       if (!_.has(models, attribute.model)) {
         throw new Error(
           `The model \`${_.upperFirst(

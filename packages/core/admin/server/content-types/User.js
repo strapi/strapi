@@ -9,6 +9,9 @@ module.exports = {
   info: {
     name: 'User',
     description: '',
+    singularName: 'user',
+    pluralName: 'users',
+    displayName: 'User',
   },
   pluginOptions: {
     'content-manager': {

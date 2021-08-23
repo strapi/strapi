@@ -29,17 +29,15 @@ describe('Policy util', () => {
       global.strapi = {
         plugins: {
           'test-plugin': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
+            policies: {
+              'test-policy': policyFn,
             },
           },
         },
       };
 
       expect(() => policyUtils.get('test-plugin.test-policy')).toThrow();
-      expect(policyUtils.get('plugins::test-plugin.test-policy')).toBe(policyFn);
+      expect(policyUtils.get('plugin::test-plugin.test-policy')).toBe(policyFn);
     });
 
     test('Retrieves a plugin policy locally', () => {
@@ -48,10 +46,8 @@ describe('Policy util', () => {
       global.strapi = {
         plugins: {
           'test-plugin': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
+            policies: {
+              'test-policy': policyFn,
             },
           },
         },

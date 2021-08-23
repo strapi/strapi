@@ -18,7 +18,7 @@ const hooks = {
 };
 
 const ACTIONS = {
-  publish: 'plugins::content-manager.explorer.publish',
+  publish: 'plugin::content-manager.explorer.publish',
 };
 
 const sanitizeRole = omit(['users', 'permissions']);
@@ -253,7 +253,7 @@ const createRolesIfNoneExist = async () => {
   const editorPermissions = getService('content-type').getPermissionsWithNestedFields(
     contentTypesActions,
     {
-      restrictedSubjects: ['plugins::users-permissions.user'],
+      restrictedSubjects: ['plugin::users-permissions.user'],
     }
   );
 
@@ -276,11 +276,11 @@ const getDefaultPluginPermissions = ({ isAuthor = false } = {}) => {
 
   // add plugin permissions for each role
   return [
-    { action: 'plugins::upload.read', conditions },
-    { action: 'plugins::upload.assets.create' },
-    { action: 'plugins::upload.assets.update', conditions },
-    { action: 'plugins::upload.assets.download' },
-    { action: 'plugins::upload.assets.copy-link' },
+    { action: 'plugin::upload.read', conditions },
+    { action: 'plugin::upload.assets.create' },
+    { action: 'plugin::upload.assets.update', conditions },
+    { action: 'plugin::upload.assets.download' },
+    { action: 'plugin::upload.assets.copy-link' },
   ].map(permissionDomain.create);
 };
 

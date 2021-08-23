@@ -53,14 +53,14 @@ const computeConditionId = condition => {
   const { name, plugin } = condition;
 
   if (!plugin) {
-    return `application::${name}`;
+    return `api::${name}`;
   }
 
   if (plugin === 'admin') {
     return `admin::${name}`;
   }
 
-  return `plugins::${plugin}.${name}`;
+  return `plugin::${plugin}.${name}`;
 };
 
 /**

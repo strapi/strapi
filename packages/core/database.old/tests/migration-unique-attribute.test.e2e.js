@@ -62,7 +62,7 @@ describe('Migration - unique attribute', () => {
   describe('Unique: false -> true', () => {
     test('Can have duplicates before migration', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::dog.dog',
+        url: '/content-manager/collection-types/api::dog.dog',
         method: 'GET',
       });
       expect(body.results.length).toBe(2);
@@ -72,7 +72,7 @@ describe('Migration - unique attribute', () => {
     test('Cannot create a duplicated entry after migration', async () => {
       // remove duplicated values otherwise the migration would fail
       const { body } = await rq({
-        url: `/content-manager/collection-types/application::dog.dog/${data.dogs[0].id}`,
+        url: `/content-manager/collection-types/api::dog.dog/${data.dogs[0].id}`,
         method: 'PUT',
         body: { name: 'Nelson' },
       });
@@ -88,7 +88,7 @@ describe('Migration - unique attribute', () => {
       // Try to create a duplicated entry
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/collection-types/application::dog.dog',
+        url: '/content-manager/collection-types/api::dog.dog',
         body: { name: data.dogs[0].name },
       });
       expect(res.statusCode).toBe(400);
@@ -106,7 +106,7 @@ describe('Migration - unique attribute', () => {
 
       // Try to create a duplicated entry
       const res = await rq({
-        url: `/content-manager/collection-types/application::dog.dog`,
+        url: `/content-manager/collection-types/api::dog.dog`,
         method: 'POST',
         body: { name: data.dogs[0].name },
       });

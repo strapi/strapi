@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "tags",
   "info": {
-    "name": "tag",
+    "displayName": "Tag",
+    "singularName": "tag",
+    "pluralName": "tags",
     "description": ""
   },
   "options": {
@@ -16,25 +18,25 @@
     "many_to_one_kitchensink": {
       "type": "relation",
       "relation": "manyToOne",
-      "target": "application::kitchensink.kitchensink",
+      "target": "api::kitchensink.kitchensink",
       "inversedBy": "one_to_many_tags"
     },
     "one_to_many_kitchensinks": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::kitchensink.kitchensink",
+      "target": "api::kitchensink.kitchensink",
       "mappedBy": "many_to_one_tag"
     },
     "many_to_many_kitchensinks": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "application::kitchensink.kitchensink",
+      "target": "api::kitchensink.kitchensink",
       "mappedBy": "many_to_many_tags"
     },
     "one_to_one_kitchensink": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "application::kitchensink.kitchensink",
+      "target": "api::kitchensink.kitchensink",
       "mappedBy": "one_to_one_tag"
     }
   }

@@ -54,7 +54,7 @@ const labelModel = {
     documents: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'application::document.document',
+      target: 'api::document.document',
       targetAttribute: 'labels',
     },
     color: {
@@ -91,7 +91,7 @@ const personModel = {
     privateCars: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'application::car.car',
+      target: 'api::car.car',
       targetAttribute: 'person',
       private: true,
     },

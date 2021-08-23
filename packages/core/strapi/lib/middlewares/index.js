@@ -46,7 +46,6 @@ module.exports = async function() {
         () => reject(`(middleware: ${middlewareKey}) is taking too long to load.`),
         middlewareConfig.timeout || 1000
       );
-
       this.middleware[middlewareKey] = merge(this.middleware[middlewareKey], module);
 
       Promise.resolve()

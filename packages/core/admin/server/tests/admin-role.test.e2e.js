@@ -84,7 +84,7 @@ describe('Role CRUD End to End', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data).toHaveLength(5);
       res.body.data
-        .filter(p => !p.action.includes('plugins::upload'))
+        .filter(p => !p.action.includes('plugin::upload'))
         .forEach(permission => {
           expect(permission.conditions).toEqual(['admin::is-creator']);
         });
@@ -100,7 +100,7 @@ describe('Role CRUD End to End', () => {
       expect(Array.isArray(res.body.data)).toBe(true);
       expect(res.body.data).toHaveLength(5);
       res.body.data
-        .filter(p => !p.action.includes('plugins::upload'))
+        .filter(p => !p.action.includes('plugin::upload'))
         .forEach(permission => {
           expect(permission.conditions).toEqual([]);
         });
@@ -109,11 +109,11 @@ describe('Role CRUD End to End', () => {
     if (edition === 'EE') {
       const newPermissions = [
         {
-          action: 'plugins::users-permissions.roles.update',
+          action: 'plugin::users-permissions.roles.update',
         },
         {
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'plugins::users-permissions.user',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'plugin::users-permissions.user',
           properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
@@ -131,14 +131,14 @@ describe('Role CRUD End to End', () => {
         expect(res.body).toEqual({
           data: expect.arrayContaining([
             expect.objectContaining({
-              action: 'plugins::users-permissions.roles.update',
+              action: 'plugin::users-permissions.roles.update',
               properties: {},
               conditions: [],
               subject: null,
             }),
             expect.objectContaining({
-              action: 'plugins::content-manager.explorer.create',
-              subject: 'plugins::users-permissions.user',
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'plugin::users-permissions.user',
               properties: { fields: ['username'], locales: [] },
               conditions: ['admin::is-creator'],
             }),
@@ -156,14 +156,14 @@ describe('Role CRUD End to End', () => {
         expect(res.body).toEqual({
           data: expect.arrayContaining([
             expect.objectContaining({
-              action: 'plugins::users-permissions.roles.update',
+              action: 'plugin::users-permissions.roles.update',
               properties: {},
               conditions: [],
               subject: null,
             }),
             expect.objectContaining({
-              action: 'plugins::content-manager.explorer.create',
-              subject: 'plugins::users-permissions.user',
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'plugin::users-permissions.user',
               properties: { fields: ['username'], locales: [] },
               conditions: ['admin::is-creator'],
             }),
@@ -173,33 +173,33 @@ describe('Role CRUD End to End', () => {
     } else if (edition === 'CE') {
       const newPermissions = [
         {
-          action: 'plugins::users-permissions.roles.update',
+          action: 'plugin::users-permissions.roles.update',
         },
         {
-          action: 'plugins::users-permissions.roles.read',
+          action: 'plugin::users-permissions.roles.read',
           conditions: ['admin::is-creator'],
         },
         {
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'plugins::users-permissions.user',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'plugin::users-permissions.user',
           properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
-          action: 'plugins::content-manager.explorer.update',
-          subject: 'plugins::users-permissions.user',
+          action: 'plugin::content-manager.explorer.update',
+          subject: 'plugin::users-permissions.user',
           properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
-          action: 'plugins::content-manager.explorer.delete',
-          subject: 'plugins::users-permissions.user',
+          action: 'plugin::content-manager.explorer.delete',
+          subject: 'plugin::users-permissions.user',
           properties: { locales: [] },
           conditions: ['admin::is-creator'],
         },
         {
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'plugins::users-permissions.user',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'plugin::users-permissions.user',
           properties: { fields: ['username'], locales: [] },
           conditions: ['admin::is-creator'],
         },
@@ -613,11 +613,11 @@ describe('Role CRUD End to End', () => {
           body: {
             permissions: [
               {
-                action: 'plugins::users-permissions.roles.update',
+                action: 'plugin::users-permissions.roles.update',
               },
               {
-                action: 'plugins::content-manager.explorer.create',
-                subject: 'plugins::users-permissions.user',
+                action: 'plugin::content-manager.explorer.create',
+                subject: 'plugin::users-permissions.user',
                 properties: { fields: ['username'], locales: [] },
                 conditions: ['admin::is-creator'],
               },
@@ -646,11 +646,11 @@ describe('Role CRUD End to End', () => {
       test('assign permissions on role with an unknown condition', async () => {
         const permissions = [
           {
-            action: 'plugins::users-permissions.roles.update',
+            action: 'plugin::users-permissions.roles.update',
           },
           {
-            action: 'plugins::content-manager.explorer.create',
-            subject: 'plugins::users-permissions.user',
+            action: 'plugin::content-manager.explorer.create',
+            subject: 'plugin::users-permissions.user',
             properties: { fields: ['username'], locales: [] },
             conditions: ['admin::is-creator'],
           },

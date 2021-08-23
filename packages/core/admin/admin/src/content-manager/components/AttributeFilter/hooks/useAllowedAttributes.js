@@ -14,7 +14,7 @@ const useAllowedAttributes = (contentType, slug) => {
 
   const readPermissionsForSlug = findMatchingPermissions(allPermissions, [
     {
-      action: 'plugins::content-manager.explorer.read',
+      action: 'plugin::content-manager.explorer.read',
       subject: slug,
     },
   ]);
