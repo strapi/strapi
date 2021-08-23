@@ -19,27 +19,34 @@ describe('ADMIN | StrapiApp', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
-        position: fixed;
-        top: 72px;
-        left: 0;
-        right: 0;
-        z-index: 1100;
-        list-style: none;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
         width: 100%;
-        overflow-y: hidden;
-        pointer-events: none;
+        height: 100vh;
+      }
+
+      .c0 > div {
+        margin: auto;
+        width: 50px;
+        height: 50px;
+        border: 6px solid #f3f3f3;
+        border-top: 6px solid #1c91e7;
+        border-radius: 50%;
+        -webkit-animation: fEWCgj 2s linear infinite;
+        animation: fEWCgj 2s linear infinite;
       }
 
       <div
         class="c0"
-      />
+        data-testid="loader"
+      >
+        <div />
+      </div>
     `);
   });
 

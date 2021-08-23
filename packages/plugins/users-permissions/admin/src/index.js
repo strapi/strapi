@@ -10,10 +10,10 @@ import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import pluginId from './pluginId';
-import RolesPage from './pages/Roles';
+// import RolesPage from './pages/Roles';
 import ProvidersPage from './pages/Providers';
-import EmailTemplatesPage from './pages/EmailTemplates';
-import AdvancedSettingsPage from './pages/AdvancedSettings';
+// import EmailTemplatesPage from './pages/EmailTemplates';
+// import AdvancedSettingsPage from './pages/AdvancedSettings';
 import getTrad from './utils/getTrad';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
@@ -32,20 +32,20 @@ export default {
         },
       },
       [
-        {
-          intlLabel: {
-            id: getTrad('HeaderNav.link.roles'),
-            defaultMessage: 'Roles',
-          },
-          id: 'roles',
-          to: `/settings/${pluginId}/roles`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
-              <RolesPage />
-            </CheckPagePermissions>
-          ),
-          permissions: pluginPermissions.accessRoles,
-        },
+        // {
+        //   intlLabel: {
+        //     id: getTrad('HeaderNav.link.roles'),
+        //     defaultMessage: 'Roles',
+        //   },
+        //   id: 'roles',
+        //   to: `/settings/${pluginId}/roles`,
+        //   Component: () => (
+        //     <CheckPagePermissions permissions={pluginPermissions.accessRoles}>
+        //       <RolesPage />
+        //     </CheckPagePermissions>
+        //   ),
+        //   permissions: pluginPermissions.accessRoles,
+        // },
         {
           intlLabel: {
             id: getTrad('HeaderNav.link.providers'),
@@ -60,34 +60,34 @@ export default {
           ),
           permissions: pluginPermissions.readProviders,
         },
-        {
-          intlLabel: {
-            id: getTrad('HeaderNav.link.emailTemplates'),
-            defaultMessage: 'Email templates',
-          },
-          id: 'email-templates',
-          to: `/settings/${pluginId}/email-templates`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
-              <EmailTemplatesPage />
-            </CheckPagePermissions>
-          ),
-          permissions: pluginPermissions.readEmailTemplates,
-        },
-        {
-          intlLabel: {
-            id: getTrad('HeaderNav.link.advancedSettings'),
-            defaultMessage: 'Advanced Settings',
-          },
-          id: 'advanced-settings',
-          to: `/settings/${pluginId}/advanced-settings`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
-              <AdvancedSettingsPage />
-            </CheckPagePermissions>
-          ),
-          permissions: pluginPermissions.readAdvancedSettings,
-        },
+        // {
+        //   intlLabel: {
+        //     id: getTrad('HeaderNav.link.emailTemplates'),
+        //     defaultMessage: 'Email templates',
+        //   },
+        //   id: 'email-templates',
+        //   to: `/settings/${pluginId}/email-templates`,
+        //   Component: () => (
+        //     <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+        //       <EmailTemplatesPage />
+        //     </CheckPagePermissions>
+        //   ),
+        //   permissions: pluginPermissions.readEmailTemplates,
+        // },
+        // {
+        //   intlLabel: {
+        //     id: getTrad('HeaderNav.link.advancedSettings'),
+        //     defaultMessage: 'Advanced Settings',
+        //   },
+        //   id: 'advanced-settings',
+        //   to: `/settings/${pluginId}/advanced-settings`,
+        //   Component: () => (
+        //     <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
+        //       <AdvancedSettingsPage />
+        //     </CheckPagePermissions>
+        //   ),
+        //   permissions: pluginPermissions.readAdvancedSettings,
+        // },
       ]
     );
 
