@@ -12,7 +12,7 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
   );
 
   return (
-    <Tr>
+    <Tr key={id}>
       {Boolean(onToggle) && (
         <Td>
           <BaseCheckbox

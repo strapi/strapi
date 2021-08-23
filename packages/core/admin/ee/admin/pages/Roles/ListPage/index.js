@@ -287,8 +287,8 @@ const RoleListPage = () => {
   // ! TODO - Show the search bar only if the user is allowed to read - add the search input
   // canRead
 
-  const rowCount = sortedRoles.length;
-  const colCount = sortedRoles.length ? Object.keys(sortedRoles[0]).length : 0;
+  const rowCount = sortedRoles.length + 1;
+  const colCount = 6;
 
   const isAllEntriesIndeterminate = selectedRoles.length
     ? selectedRoles.length !== rowCount
