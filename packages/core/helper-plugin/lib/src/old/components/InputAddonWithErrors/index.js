@@ -1,20 +1,26 @@
+/**
+ *
+ * InputAddonWithErrors
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Utils
-import validateInput from '../../utils/inputsValidations';
+import validateInput from '../../../utils/inputsValidations';
 
 // Design
 import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
-import InputText from '../InputText';
+import InputAddon from '../InputAddon';
 import InputSpacer from '../InputSpacer';
 import InputWrapper from '../InputWrapper';
 
-class InputTextWithErrors extends React.Component {
+class InputAddonWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
@@ -60,6 +66,7 @@ class InputTextWithErrors extends React.Component {
 
   render() {
     const {
+      addon,
       autoFocus,
       className,
       customBootstrapClass,
@@ -99,7 +106,8 @@ class InputTextWithErrors extends React.Component {
         style={style}
       >
         <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
-        <InputText
+        <InputAddon
+          addon={addon}
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -131,7 +139,8 @@ class InputTextWithErrors extends React.Component {
   }
 }
 
-InputTextWithErrors.defaultProps = {
+InputAddonWithErrors.defaultProps = {
+  addon: 'app.utils.placeholder.defaultMessage',
   autoFocus: false,
   className: '',
   customBootstrapClass: 'col-md-6',
@@ -158,7 +167,8 @@ InputTextWithErrors.defaultProps = {
   validations: {},
 };
 
-InputTextWithErrors.propTypes = {
+InputAddonWithErrors.propTypes = {
+  addon: PropTypes.string,
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -202,4 +212,4 @@ InputTextWithErrors.propTypes = {
   value: PropTypes.string.isRequired,
 };
 
-export default InputTextWithErrors;
+export default InputAddonWithErrors;

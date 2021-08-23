@@ -1,20 +1,26 @@
+/**
+ *
+ * InputSearchWithErrors
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
 import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Utils
-import validateInput from '../../utils/inputsValidations';
+import validateInput from '../../../utils/inputsValidations';
 
 // Design
 import Label from '../Label';
 import InputDescription from '../InputDescription';
 import InputErrors from '../InputErrors';
-import InputNumber from '../InputNumber';
+import InputSearch from '../InputSearch';
 import InputSpacer from '../InputSpacer';
 import InputWrapper from '../InputWrapper';
 
-class InputNumberWithErrors extends React.Component {
+class InputSearchWithErrors extends React.Component {
   // eslint-disable-line react/prefer-stateless-function
   state = { errors: [], hasInitialValue: false };
 
@@ -61,8 +67,6 @@ class InputNumberWithErrors extends React.Component {
   render() {
     const {
       autoFocus,
-      className,
-      customBootstrapClass,
       deactivateErrorHighlight,
       disabled,
       errorsClassName,
@@ -83,7 +87,6 @@ class InputNumberWithErrors extends React.Component {
       placeholder,
       style,
       tabIndex,
-      step,
       value,
     } = this.props;
     const handleBlur = isFunction(onBlur) ? onBlur : this.handleBlur;
@@ -96,11 +99,14 @@ class InputNumberWithErrors extends React.Component {
 
     return (
       <InputWrapper
-        className={cn(customBootstrapClass, !isEmpty(className) && className)}
+        className={cn(
+          this.props.customBootstrapClass,
+          !isEmpty(this.props.className) && this.props.className
+        )}
         style={style}
       >
         <Label className={labelClassName} htmlFor={name} message={label} style={labelStyle} />
-        <InputNumber
+        <InputSearch
           autoFocus={autoFocus}
           className={inputClassName}
           disabled={disabled}
@@ -113,7 +119,6 @@ class InputNumberWithErrors extends React.Component {
           placeholder={placeholder}
           style={inputStyle}
           tabIndex={tabIndex}
-          step={step}
           value={value}
         />
         <InputDescription
@@ -133,10 +138,10 @@ class InputNumberWithErrors extends React.Component {
   }
 }
 
-InputNumberWithErrors.defaultProps = {
+InputSearchWithErrors.defaultProps = {
   autoFocus: false,
   className: '',
-  customBootstrapClass: 'col-md-4',
+  customBootstrapClass: 'col-md-6',
   deactivateErrorHighlight: false,
   didCheckErrors: false,
   disabled: false,
@@ -155,14 +160,12 @@ InputNumberWithErrors.defaultProps = {
   labelStyle: {},
   noErrorsDescription: false,
   placeholder: 'app.utils.placeholder.defaultMessage',
-  step: 'any',
   style: {},
   tabIndex: '0',
   validations: {},
-  value: 0,
 };
 
-InputNumberWithErrors.propTypes = {
+InputSearchWithErrors.propTypes = {
   autoFocus: PropTypes.bool,
   className: PropTypes.string,
   customBootstrapClass: PropTypes.string,
@@ -200,11 +203,10 @@ InputNumberWithErrors.propTypes = {
   onChange: PropTypes.func.isRequired,
   onFocus: PropTypes.func,
   placeholder: PropTypes.string,
-  step: PropTypes.number,
   style: PropTypes.object,
   tabIndex: PropTypes.string,
   validations: PropTypes.object,
-  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  value: PropTypes.string.isRequired,
 };
 
-export default InputNumberWithErrors;
+export default InputSearchWithErrors;
