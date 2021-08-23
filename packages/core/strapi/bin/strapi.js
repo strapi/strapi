@@ -118,7 +118,7 @@ program
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
-// Plop generator
+// $ strapi generate
 program.command('generate').action(() => {
   require('@strapi/generator-cli')();
 });
