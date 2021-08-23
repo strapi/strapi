@@ -88,6 +88,7 @@ describe('Admin | components | AuthenticatedApp', () => {
 
       <div
         class="c0"
+        data-testid="loader"
       >
         <div />
       </div>

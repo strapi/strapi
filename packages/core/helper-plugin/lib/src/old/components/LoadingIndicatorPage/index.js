@@ -9,7 +9,7 @@ import Loader from './Loader';
 
 const LoadingIndicatorPage = () => {
   return (
-    <Loader>
+    <Loader data-testid="loader">
       <div />
     </Loader>
   );

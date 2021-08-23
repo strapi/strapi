@@ -19,7 +19,7 @@ import {
 // import has from 'lodash/has';
 // import { Row } from 'reactstrap';
 
-// DS INTEGRATION
+// // DS INTEGRATION
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
@@ -41,6 +41,7 @@ import pluginPermissions from '../../permissions';
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
+
   // const { trackUsage } = useTracking();
   // const trackUsageRef = useRef(trackUsage);
   // const [isOpen, setIsOpen] = useState(false);
@@ -70,6 +71,7 @@ const ProvidersPage = () => {
   } = useForm('providers', updatePermissions);
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
+
   const rowCount = providers.length;
 
   // const isProviderWithSubdomain = useMemo(() => {
@@ -82,7 +84,10 @@ const ProvidersPage = () => {
   //   return has(providerToEdit, 'subdomain');
   // }, [providers, providerToEditName]);
 
-  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.providers') });
+  const pageTitle = formatMessage({
+    id: getTrad('HeaderNav.link.providers'),
+    defaultMessage: 'Providers',
+  });
 
   // const formToRender = useMemo(() => {
   //   if (providerToEditName === 'email') {
@@ -189,7 +194,12 @@ const ProvidersPage = () => {
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <Main labelledBy={formatMessage({ id: getTrad('HeaderNav.link.providers') })}>
+      <Main
+        labelledBy={formatMessage({
+          id: getTrad('HeaderNav.link.providers'),
+          defaultMessage: 'Providers',
+        })}
+      >
         <HeaderLayout
           as="h1"
           id="providers"
@@ -246,7 +256,10 @@ const ProvidersPage = () => {
                       </Text>
                     </Td>
                     <Td width="65%">
-                      <Text textColor={provider.enabled ? 'success600' : 'danger600'}>
+                      <Text
+                        textColor={provider.enabled ? 'success600' : 'danger600'}
+                        data-testid={`enable-${provider.name}`}
+                      >
                         {provider.enabled
                           ? formatMessage({
                               id: getTrad('Providers.enabled'),

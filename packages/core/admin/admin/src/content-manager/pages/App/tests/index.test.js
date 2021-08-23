@@ -401,6 +401,7 @@ describe('Content manager | App | main', () => {
           >
             <div
               class="c3"
+              data-testid="loader"
             >
               <div />
             </div>
