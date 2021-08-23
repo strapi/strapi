@@ -10,7 +10,6 @@
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/generate": "3.6.7",
-    "@strapi/generate-api": "3.6.7",
     "@strapi/helper-plugin": "3.6.7",
     "@strapi/utils": "3.6.7",
     "fs-extra": "^9.1.0",
