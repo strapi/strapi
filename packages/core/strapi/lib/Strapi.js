@@ -234,11 +234,7 @@ class Strapi {
   loadAdmin() {
     this.admin = require('@strapi/admin/strapi-server');
 
-    // TODO: move to simpler code without needing mapValues
-    strapi.container.get('content-types').add(
-      `strapi::`,
-      _.mapValues(strapi.admin.models, model => ({ schema: model }))
-    );
+    strapi.container.get('content-types').add(`strapi::`, strapi.admin.contentTypes);
 
     // TODO: rename into just admin and ./config/admin.js
     const userAdminConfig = strapi.config.get('server.admin');
@@ -391,12 +387,7 @@ class Strapi {
     await execLifecycle(this.config.get(configPath));
 
     // admin
-    const adminFunc = _.get(this.admin.config, configPath);
-    return execLifecycle(adminFunc).catch(err => {
-      strapi.log.error(`${lifecycleName} function in admin failed`);
-      console.error(err);
-      strapi.stop();
-    });
+    await this.admin[lifecycleName]();
   }
 
   getModel(uid) {

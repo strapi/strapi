@@ -1,9 +1,9 @@
 'use strict';
 
 const { merge } = require('lodash/fp');
-const { getService } = require('../../utils');
-const adminActions = require('../admin-actions');
-const adminConditions = require('../admin-conditions');
+const { getService } = require('./utils');
+const adminActions = require('./config/admin-actions');
+const adminConditions = require('./config/admin-conditions');
 
 const defaultAdminAuthSettings = {
   providers: {
