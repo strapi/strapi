@@ -32,7 +32,10 @@ module.exports = async strapi => {
     // Initialize loaders for this request.
     context: ({ ctx }) => {
       // TODO: set loaders in the context not globally
-      strapi.plugins.graphql.services.old['data-loaders'].initializeLoader();
+      strapi
+        .plugin('graphql')
+        .service('old')
+        ['data-loaders'].initializeLoader();
 
       return {
         context: ctx,
@@ -79,8 +82,6 @@ module.exports = async strapi => {
     app: strapi.app,
     path: config.endpoint,
   });
-
-  console.log(config.endpoint);
 
   // Register destroy behavior
   strapi.plugins.graphql.destroy = async () => {

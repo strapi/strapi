@@ -211,7 +211,7 @@ const addMediaAttribute = options => {
     context: { strapi },
   } = options;
 
-  const fileContentType = strapi.plugin('upload').contentType('file');
+  const fileContentType = strapi.plugin('upload').contentType('file').schema;
 
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,

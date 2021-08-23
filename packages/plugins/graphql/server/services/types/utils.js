@@ -90,9 +90,9 @@ const getEnumName = (contentType, attributeName) => {
 const getTypeName = contentType => {
   const plugin = get('plugin', contentType);
   const modelName = get('modelName', contentType);
-  const singularName = get('schema.info.singularName', contentType);
+  const singularName = get('info.singularName', contentType);
 
-  const transformedPlugin = camelCase(plugin);
+  const transformedPlugin = upperFirst(camelCase(plugin));
   const transformedModelName = upperFirst(singularName || toSingular(modelName));
 
   return `${transformedPlugin}${transformedModelName}`;
@@ -243,6 +243,7 @@ const getMorphRelationTypeName = (contentType, attributeName) => {
  * @return {function(*=): string}
  */
 const buildCustomTypeNameGenerator = (options = {}) => {
+  // todo[v4]: use singularName & pluralName is available
   const { prefix = '', suffix = '', plurality = 'singular', firstLetterCase = 'upper' } = options;
 
   if (!['plural', 'singular'].includes(plurality)) {
