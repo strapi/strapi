@@ -3,7 +3,8 @@
   "collectionName": "homepages",
   "info": {
     "displayName": "Homepage",
-    "singularName": "homepage"
+    "singularName": "homepage",
+    "pluralName": "homepages"
   },
   "options": {
     "draftAndPublish": true
