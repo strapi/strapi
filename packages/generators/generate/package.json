@@ -1,7 +1,7 @@
 {
   "name": "@strapi/generate",
   "version": "3.6.6",
-  "description": "Generate a service for a Strapi API.",
+  "description": "Interactive API generator.",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
