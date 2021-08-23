@@ -32,6 +32,7 @@ module.exports = async strapi => {
         __schema__: _.cloneDeep(schema),
         uid,
         category,
+        modelType: 'component',
         modelName: key,
         globalId: schema.globalId || _.upperFirst(_.camelCase(`component_${uid}`)),
       });
