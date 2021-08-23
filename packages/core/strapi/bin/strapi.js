@@ -123,19 +123,6 @@ program.command('generate').action(() => {
   require('@strapi/generator-cli')();
 });
 
-// `$ strapi generate:api`
-program
-  .command('generate:api <id> [attributes...]')
-  .option('-a, --api <api>', 'API name to generate the files in')
-  .option('-p, --plugin <api>', 'Name of the local plugin')
-  .option('-e, --extend <api>', 'Name of the plugin to extend')
-  .option('--draft-and-publish', 'Enable draft/publish', false)
-  .description('Generate a basic API')
-  .action((id, attributes, cliArguments) => {
-    cliArguments.attributes = attributes;
-    getLocalScript('generate')(id, cliArguments);
-  });
-
 // `$ strapi generate:template <directory>`
 program
   .command('generate:template <directory>')
