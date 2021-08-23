@@ -1,6 +1,6 @@
 'use strict';
 
-const { camelCase, propEq, upperFirst, lowerFirst, pipe } = require('lodash/fp');
+const { camelCase, propEq, upperFirst, lowerFirst, pipe, get } = require('lodash/fp');
 
 const { toSingular, toPlural } = require('../old/naming');
 const { STRAPI_SCALARS, GRAPHQL_SCALARS } = require('./constants');
@@ -88,10 +88,12 @@ const getEnumName = (contentType, attributeName) => {
  * @return {string}
  */
 const getTypeName = contentType => {
-  const { plugin, modelName } = contentType;
+  const plugin = get('plugin', contentType);
+  const modelName = get('modelName', contentType);
+  const singularName = get('schema.info.singularName', contentType);
 
   const transformedPlugin = camelCase(plugin);
-  const transformedModelName = upperFirst(toSingular(modelName));
+  const transformedModelName = upperFirst(singularName || toSingular(modelName));
 
   return `${transformedPlugin}${transformedModelName}`;
 };

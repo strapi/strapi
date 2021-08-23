@@ -9,9 +9,12 @@ const {
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
 
-module.exports = async ({ strapi }) => {
+module.exports = async strapi => {
   // Generate the GraphQL schema for the content API
-  const schema = strapi.plugins.graphql.services.schema(strapi).generateContentAPISchema();
+  const schema = strapi
+    .plugin('graphql')
+    .service('schema')
+    .generateContentAPISchema();
 
   if (isEmpty(schema)) {
     strapi.log.warn('The GraphQL schema has not been generated because it is empty');
@@ -76,6 +79,8 @@ module.exports = async ({ strapi }) => {
     app: strapi.app,
     path: config.endpoint,
   });
+
+  console.log(config.endpoint);
 
   // Register destroy behavior
   strapi.plugins.graphql.destroy = async () => {

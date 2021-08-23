@@ -9,7 +9,7 @@ const { create: createTypeRegistry } = require('../../type-registry');
 
 const { KINDS } = constants;
 
-module.exports = strapi => {
+module.exports = ({ strapi }) => {
   // todo[v4]: Get the type-registry service directly with something like strapi.plugin().service()
   //          (waiting for the plugin API to be merged)
   const registry = createTypeRegistry();
