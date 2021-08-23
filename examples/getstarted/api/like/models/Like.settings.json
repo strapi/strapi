@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "likes",
   "info": {
-    "name": "like",
+    "displayName": "Like",
+    "singularName": "like",
+    "pluralName": "likes",
     "description": ""
   },
   "options": {

@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "kitchensinks",
   "info": {
-    "name": "kitchensink",
+    "displayName": "Kitchen Sink",
+    "singularName": "kitchensink",
+    "pluralName": "kitchensinks",
     "description": ""
   },
   "options": {

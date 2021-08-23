@@ -2,8 +2,10 @@
   "kind": "collectionType",
   "collectionName": "menus",
   "info": {
-    "name": "menu",
-    "description": ""
+    "description": "",
+    "displayName": "Menu",
+    "singularName": "menu",
+    "pluralName": "menus"
   },
   "options": {
     "draftAndPublish": false,

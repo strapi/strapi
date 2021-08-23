@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "restaurants",
   "info": {
-    "name": "restaurant",
+    "displayName": "Restaurant",
+    "singularName": "restaurant",
+    "pluralName": "restaurants",
     "description": ""
   },
   "options": {

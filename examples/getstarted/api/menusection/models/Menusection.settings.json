@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "menusections",
   "info": {
-    "name": "menusection",
+    "displayName": "Menu Section",
+    "singularName": "menusection",
+    "pluralName": "menusections",
     "description": ""
   },
   "options": {

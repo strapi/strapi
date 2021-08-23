@@ -1,73 +1,90 @@
 'use strict';
 
 const _ = require('lodash');
-const { toLower } = require('lodash/fp');
+const { toLower, kebabCase } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 const pluralize = require('pluralize');
 const { createContentType } = require('../domain/content-type');
 
 const { createCoreApi } = require('../../core-api');
 
+// TODO: function to be moved next to where the api will be loaded
+const validateContentTypesUnicity = schemas => {
+  const names = [];
+  schemas.forEach(schema => {
+    if (schema.info.singularName) {
+      const singularName = kebabCase(schema.info.singularName);
+      if (names.includes(singularName)) {
+        throw new Error(`The singular name "${schema.info.singularName}" should be unique`);
+      }
+      names.push(singularName);
+    }
+    if (schema.info.pluralName) {
+      const pluralName = kebabCase(schema.info.pluralName);
+      if (names.includes(pluralName)) {
+        throw new Error(`The plural name "${schema.info.pluralName}" should be unique`);
+      }
+      names.push(pluralName);
+    }
+  });
+};
+
 module.exports = function(strapi) {
   strapi.contentTypes = {};
 
-  // Set models.
-  strapi.models = Object.keys(strapi.api || []).reduce((acc, apiName) => {
+  // validate Content-Types unicity
+  const allApisSchemas = Object.values(strapi.api).flatMap(api => Object.values(api.models));
+  validateContentTypesUnicity(allApisSchemas);
+
+  // TODO: to change with new loading system
+  // Register api content types
+  for (const apiName in strapi.api) {
     const api = strapi.api[apiName];
 
-    for (let modelName in api.models) {
-      let model = strapi.api[apiName].models[modelName];
+    const v4ContentTypes = _.mapValues(api.models, (model, modelName) => {
+      model.info.displayName = model.info.displayName || model.info.name;
+      model.info.singularName = model.info.singularName || modelName;
+      model.info.pluralName = model.info.pluralName || pluralize(modelName);
 
-      // mutate model
-      const ct = {
+      return {
         schema: model,
         actions: {},
         lifecycles: {},
       };
+    });
 
-      ct.schema.info.displayName = model.info.name;
-      ct.schema.info.singularName = modelName;
-      ct.schema.info.pluralName = pluralize(modelName);
+    strapi.container.get('content-types').add(`api::${apiName}`, v4ContentTypes);
+  }
 
-      strapi.container.get('content-types').add(`api::${apiName}`, {
-        [ct.schema.info.singularName]: ct,
-      });
-      // TODO: check unicity of pluralName and singularName amongs user's CT
-      // const validateContentTypesUnicity = (...contentTypesMaps) => {
-      //   const names = [];
-      //   const arrayOfAllContentTypes = flatten(contentTypesMaps.map(values));
-      //   console.log('arrayOfAllContentTypes', arrayOfAllContentTypes.map(ct => ct.schema.info.singularName));
-      //   arrayOfAllContentTypes.forEach(ct => {
-      //     const singularName = kebabCase(ct.schema.info.singularName);
-      //     const pluralName = kebabCase(ct.schema.info.pluralName);
-      //     if (names.includes(singularName)) {
-      //       throw new Error(`The singular name "${ct.schema.info.singularName}" should be unique`);
-      //     }
-      //     names.push(singularName);
-      //     if (names.includes(pluralName)) {
-      //       throw new Error(`The plural name "${ct.schema.info.pluralName}" should be unique`);
-      //     }
-      //     names.push(pluralName);
-      //   });
-      // };
-
-      const createdContentType = strapi.container
+  // TODO: remove v3
+  // Set models.
+  strapi.models = {};
+  for (const apiName in strapi.api) {
+    const api = strapi.api[apiName];
+    for (let modelName in api.models) {
+      let model = api.models[modelName];
+      const contentType = strapi.container
         .get('content-types')
-        .get(`api::${apiName}.${ct.schema.info.singularName}`);
-      Object.assign(model, createdContentType.schema);
-      strapi.contentTypes[model.uid] = model;
+        .get(`api::${apiName}.${model.info.singularName}`);
+      Object.assign(model, contentType.schema);
+      strapi.contentTypes[model.uid] = contentType.schema;
 
+      strapi.models[modelName] = model;
+    }
+  }
+
+  // set default services and default controllers
+  for (const apiName in strapi.api) {
+    const api = strapi.api[apiName];
+    for (const modelName in api.models) {
+      const model = api.models[modelName];
       const { service, controller } = createCoreApi({ model, api, strapi });
-
       _.set(strapi.api[apiName], ['services', modelName], service);
       _.set(strapi.api[apiName], ['controllers', modelName], controller);
-
-      acc[modelName] = model;
     }
-    return acc;
-  }, {});
+  }
 
-  // Set controllers.
+  // Set user's controllers.
   strapi.controllers = Object.keys(strapi.api || []).reduce((acc, apiName) => {
     strapi.container.get('controllers').add(`api::${apiName}`, strapi.api[apiName].controllers);
     for (let controllerName in strapi.api[apiName].controllers) {
@@ -78,7 +95,7 @@ module.exports = function(strapi) {
     return acc;
   }, {});
 
-  // Set services.
+  // Set user's services.
   strapi.services = Object.keys(strapi.api || []).reduce((acc, apiName) => {
     strapi.container.get('services').add(`api::${apiName}`, strapi.api[apiName].services);
     for (let serviceName in strapi.api[apiName].services) {
