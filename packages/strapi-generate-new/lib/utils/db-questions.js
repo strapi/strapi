@@ -1,15 +1,16 @@
 'use strict';
 
-const database = ({ scope }) => ({
+const database = ({ scope, client }) => ({
   type: 'input',
   name: 'database',
   message: 'Database name:',
   default: scope.name,
   validate: value => {
-    if (value.includes('.')) {
+    if (client === 'mongo') {
+      if (value.includes('.')) {
       return `The database name can't contain a "."`;
+      }
     }
-
     return true;
   },
 });
