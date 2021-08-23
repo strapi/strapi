@@ -32,7 +32,16 @@ const ActionRow = ({
           })}
           &nbsp;
         </TableLabel>
-        <TableLabel title={label} textColor="primary600">
+        <TableLabel
+          title={label}
+          textColor="primary600"
+          // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
+          style={{
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
           {formatMessage({
             id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
             defaultMessage: label,

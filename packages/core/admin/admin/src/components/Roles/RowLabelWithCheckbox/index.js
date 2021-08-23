@@ -24,6 +24,7 @@ const Wrapper = styled(Box)`
   `};
 `;
 
+// ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
 const StyledText = styled(Text)`
   white-space: nowrap;
   overflow: hidden;
