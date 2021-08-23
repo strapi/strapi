@@ -24,8 +24,6 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     find(opts = {}) {
       const params = getFetchParams(opts.params);
 
-      console.log({ uid });
-
       return strapi.entityService.findPage(uid, { params });
     },
 

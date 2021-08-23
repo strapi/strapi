@@ -5,7 +5,6 @@ module.exports = {
     hasPermissions: require('./policies/hasPermissions'),
     isAuthenticatedAdmin: require('./policies/isAuthenticatedAdmin'),
   },
-  routes: require('./routes').routes,
   layout: require('./layout'),
   ...require('./settings'),
 };

@@ -10,6 +10,7 @@ module.exports = {
   bootstrap,
   destroy,
   config: require('./config'),
+  routes: require('./routes'),
   services: require('./services'),
   controllers: require('./controllers'),
   contentTypes: require('./content-types'),

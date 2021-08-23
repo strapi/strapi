@@ -4,13 +4,31 @@
 const { features } = require('@strapi/strapi/lib/utils/ee');
 const executeCEBootstrap = require('../../server/bootstrap');
 const { getService } = require('../../server/utils');
-const { sso: ssoActions } = require('./config/admin-actions').features;
+
+const SSO_ACTIONS = [
+  {
+    uid: 'provider-login.read',
+    displayName: 'Read',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'single sign on',
+    subCategory: 'options',
+  },
+  {
+    uid: 'provider-login.update',
+    displayName: 'Update',
+    pluginName: 'admin',
+    section: 'settings',
+    category: 'single sign on',
+    subCategory: 'options',
+  },
+];
 
 module.exports = async () => {
   const { actionProvider } = getService('permission');
 
   if (features.isEnabled('sso')) {
-    await actionProvider.registerMany(ssoActions);
+    await actionProvider.registerMany(SSO_ACTIONS);
   }
 
   await executeCEBootstrap();
