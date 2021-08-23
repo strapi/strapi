@@ -123,6 +123,7 @@ program
   .command('generate')
   .description('Launch interactive API generator')
   .action(() => {
+    checkCwdIsStrapiApp('generate');
     require('@strapi/generate')();
   });
 
