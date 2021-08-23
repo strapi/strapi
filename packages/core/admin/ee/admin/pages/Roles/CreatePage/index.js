@@ -18,6 +18,7 @@ import {
   Textarea,
   TextInput,
   Main,
+  Loader,
 } from '@strapi/parts';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
@@ -224,7 +225,7 @@ const CreatePage = () => {
                     </Grid>
                   </Stack>
                 </Box>
-                {!isLayoutLoading && !isRoleLoading && (
+                {!isLayoutLoading && !isRoleLoading ? (
                   <Box paddingTop={6} paddingBottom={6}>
                     <Permissions
                       isFormDisabled={false}
@@ -233,6 +234,11 @@ const CreatePage = () => {
                       layout={permissionsLayout}
                     />
                   </Box>
+                ) : (
+                  // ! TODO : Switch to the DS component when done
+                  <Row alignItems="center" justifyContent="center" style={{ height: 400 }}>
+                    <Loader />
+                  </Row>
                 )}
               </ContentLayout>
             </>
