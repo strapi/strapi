@@ -91,7 +91,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
               indeterminate={hasSomeActionsSelected}
               value={hasAllActionsSelected}
             >
-              {formatMessage({ id: 'app.utils.select-all' })}
+              {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
             </Checkbox>
           </Box>
         </Row>

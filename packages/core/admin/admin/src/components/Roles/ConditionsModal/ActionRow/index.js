@@ -28,6 +28,7 @@ const ActionRow = ({
         <TableLabel textColor="neutral500">
           {formatMessage({
             id: 'Settings.permissions.conditions.can',
+            defaultMessage: 'Can',
           })}
           &nbsp;
         </TableLabel>
@@ -41,6 +42,7 @@ const ActionRow = ({
           &nbsp;
           {formatMessage({
             id: 'Settings.permissions.conditions.when',
+            defaultMessage: 'When',
           })}
         </TableLabel>
       </Row>

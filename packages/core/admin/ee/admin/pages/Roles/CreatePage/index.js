@@ -169,6 +169,7 @@ const CreatePage = () => {
                           <Text highlighted>
                             {formatMessage({
                               id: 'Settings.roles.form.title',
+                              defaultMessage: 'Details',
                             })}
                           </Text>
                         </Box>
@@ -176,6 +177,7 @@ const CreatePage = () => {
                           <Text textColor="neutral500" small>
                             {formatMessage({
                               id: 'Settings.roles.form.description',
+                              defaultMessage: 'Name and description of the role',
                             })}
                           </Text>
                         </Box>
@@ -184,6 +186,8 @@ const CreatePage = () => {
                         {formatMessage(
                           {
                             id: 'Settings.roles.form.button.users-with-role',
+                            defaultMessage:
+                              '{number, plural, =0 {# users} one {# user} other {# users}} with this role',
                           },
                           { number: 0 }
                         )}
@@ -194,7 +198,10 @@ const CreatePage = () => {
                         <TextInput
                           name="name"
                           error={errors.name && formatMessage({ id: errors.name })}
-                          label={formatMessage({ id: 'Settings.roles.form.input.name' })}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.name',
+                            defaultMessage: 'Name',
+                          })}
                           onChange={handleChange}
                           onBlur={handleBlur}
                           value={values.name}
@@ -202,7 +209,10 @@ const CreatePage = () => {
                       </GridItem>
                       <GridItem col={6}>
                         <Textarea
-                          label={formatMessage({ id: 'Settings.roles.form.input.description' })}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.description',
+                            defaultMessage: 'Description',
+                          })}
                           name="description"
                           error={errors.name && formatMessage({ id: errors.name })}
                           onChange={handleChange}

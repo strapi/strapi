@@ -111,7 +111,9 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
       <TabGroup id="tabs">
         <Tabs>
           {TAB_LABELS.map(tabLabel => (
-            <Tab key={tabLabel.id}>{formatMessage({ id: tabLabel.labelId })}</Tab>
+            <Tab key={tabLabel.id}>
+              {formatMessage({ id: tabLabel.labelId, defaultMessage: tabLabel.defaultMessage })}
+            </Tab>
           ))}
         </Tabs>
         <TabPanels>

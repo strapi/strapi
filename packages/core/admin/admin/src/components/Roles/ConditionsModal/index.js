@@ -118,16 +118,14 @@ const ConditionsModal = ({
             const shouldDisplayChevron = index < translatedHeaders.length - 1;
 
             return (
-              <>
-                <TextButton textColor="neutral800" key={key}>
-                  {element}
-                </TextButton>
+              <React.Fragment key={key}>
+                <TextButton textColor="neutral800">{element}</TextButton>
                 {shouldDisplayChevron && (
                   <Icon>
                     <After />
                   </Icon>
                 )}
-              </>
+              </React.Fragment>
             );
           })}
         </Stack>
@@ -137,12 +135,19 @@ const ConditionsModal = ({
           <H2>
             {formatMessage({
               id: 'Settings.permissions.conditions.define-conditions',
+              defaultMessage: 'Define conditions',
             })}
           </H2>
           <Separator />
           <Box>
             {actionsToDisplay.length === 0 && (
-              <Text>{formatMessage({ id: 'Settings.permissions.conditions.no-actions' })}</Text>
+              <Text>
+                {formatMessage({
+                  id: 'Settings.permissions.conditions.no-actions',
+                  defaultMessage:
+                    'You first need to select actions (create, read, update, ...) before defining conditions on them.',
+                })}
+              </Text>
             )}
             {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
               const name = pathToConditionsObject.join('..');
@@ -167,13 +172,14 @@ const ConditionsModal = ({
       <ModalFooter
         startActions={
           <Button variant="tertiary" onClick={onToggle}>
-            {formatMessage({ id: 'app.components.Button.cancel' })}
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
           </Button>
         }
         endActions={
           <Button onClick={handleSubmit}>
             {formatMessage({
               id: 'Settings.permissions.conditions.apply',
+              defaultMessage: 'Apply',
             })}
           </Button>
         }

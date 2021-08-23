@@ -127,7 +127,7 @@
   "Settings.roles.create.title": "Create a role",
   "Settings.roles.created": "Role created",
   "Settings.roles.edit.title": "Edit a role",
-  "Settings.roles.form.button.users-with-role": "{number} users with this role",
+  "Settings.roles.form.button.users-with-role": "{number, plural, =0 {# users} one {# user} other {# users}} with this role",
   "Settings.roles.form.created": "Created",
   "Settings.roles.form.description": "Name and description of the role",
   "Settings.roles.form.input.description": "Description",

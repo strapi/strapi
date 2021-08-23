@@ -30,7 +30,10 @@ const ConditionsButton = ({ onClick, className, hasConditions, variant }) => {
   return (
     <Wrapper hasConditions={hasConditions} className={className}>
       <Button variant={variant} startIcon={<Settings />} onClick={onClick}>
-        {formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' })}
+        {formatMessage({
+          id: 'app.components.LeftMenuLinkContainer.settings',
+          defaultMessage: 'Settings',
+        })}
       </Button>
     </Wrapper>
   );
