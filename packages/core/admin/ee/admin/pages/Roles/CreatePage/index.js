@@ -46,7 +46,7 @@ const CreatePage = () => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { formatMessage } = useIntl();
-  const [, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmiting] = useState(false);
   const { replace } = useHistory();
   const permissionsRef = useRef();
   const { trackUsage } = useTracking();
@@ -142,7 +142,7 @@ const CreatePage = () => {
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button onClick={handleSubmit}>
+                    <Button onClick={handleSubmit} loading={isSubmitting}>
                       {formatMessage({
                         id: 'app.components.Button.save',
                         defaultMessage: 'Save',
