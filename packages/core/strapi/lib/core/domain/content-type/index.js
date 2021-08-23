@@ -19,11 +19,11 @@ const createContentType = (uid, definition) => {
     throw new Error(`Content Type Definition is invalid for ${uid}'.\n${e.errors}`);
   }
 
-  const createdContentType = cloneDeep(definition);
+  const { schema, actions, lifecycles } = cloneDeep(definition);
 
   // general info
-  Object.assign(createdContentType.schema, {
-    kind: createdContentType.schema.kind || 'collectionType',
+  Object.assign(schema, {
+    kind: schema.kind || 'collectionType',
     __schema__: pickSchema(definition.schema),
     modelType: 'contentType',
     modelName: definition.schema.info.singularName,
@@ -31,27 +31,26 @@ const createContentType = (uid, definition) => {
   });
 
   if (uid.startsWith('api::')) {
-    Object.assign(createdContentType.schema, {
+    Object.assign(schema, {
       uid,
       apiName: uid.split('::')[1].split('.')[0],
-      collectionName: definition.schema.collectionName || definition.schema.info.singularName,
-      globalId: getGlobalId(definition.schema, definition.schema.info.singularName),
+      collectionName: schema.collectionName || schema.info.singularName,
+      globalId: getGlobalId(schema, schema.info.singularName),
     });
   } else if (uid.startsWith('plugin::')) {
     const pluginName = uid.split('::')[1].split('.')[0];
-    Object.assign(createdContentType.schema, {
+    Object.assign(schema, {
       uid,
       plugin: pluginName, // TODO: to be set in load-plugins.js
       collectionName:
-        createdContentType.schema.collectionName ||
-        `${pluginName}_${definition.schema.info.singularName}`.toLowerCase(),
-      globalId: getGlobalId(definition.schema, definition.schema.info.singularName, pluginName),
+        schema.collectionName || `${pluginName}_${schema.info.singularName}`.toLowerCase(),
+      globalId: getGlobalId(schema, schema.info.singularName, pluginName),
     });
-  } else if (uid.startsWith('strapi::')) {
-    Object.assign(createdContentType.schema, {
+  } else if (uid.startsWith('admin::')) {
+    Object.assign(schema, {
       uid,
       plugin: 'admin',
-      globalId: getGlobalId(definition.schema, definition.schema.info.singularName, 'admin'),
+      globalId: getGlobalId(schema, schema.info.singularName, 'admin'),
     });
   } else {
     throw new Error(
@@ -59,7 +58,7 @@ const createContentType = (uid, definition) => {
     );
   }
 
-  Object.defineProperty(createdContentType.schema, 'privateAttributes', {
+  Object.defineProperty(schema, 'privateAttributes', {
     get() {
       // FIXME: to fix
       // return strapi.getModel(model.uid).privateAttributes;
@@ -68,7 +67,7 @@ const createContentType = (uid, definition) => {
   });
 
   // attributes
-  Object.assign(createdContentType.schema.attributes, {
+  Object.assign(schema.attributes, {
     [CREATED_AT_ATTRIBUTE]: {
       type: 'datetime',
       default: () => new Date(),
@@ -80,8 +79,8 @@ const createContentType = (uid, definition) => {
     },
   });
 
-  if (hasDraftAndPublish(createdContentType.schema)) {
-    createdContentType.schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
+  if (hasDraftAndPublish(schema)) {
+    schema.attributes[PUBLISHED_AT_ATTRIBUTE] = {
       type: 'datetime',
       configurable: false,
       writable: true,
@@ -89,12 +88,12 @@ const createContentType = (uid, definition) => {
     };
   }
 
-  const isPrivate = !_.get(createdContentType.schema, 'options.populateCreatorFields', false);
+  const isPrivate = !_.get(schema, 'options.populateCreatorFields', false);
 
-  createdContentType.schema.attributes[CREATED_BY_ATTRIBUTE] = {
+  schema.attributes[CREATED_BY_ATTRIBUTE] = {
     type: 'relation',
     relation: 'oneToOne',
-    target: 'strapi::user',
+    target: 'admin::user',
     configurable: false,
     writable: false,
     visible: false,
@@ -102,10 +101,10 @@ const createContentType = (uid, definition) => {
     private: isPrivate,
   };
 
-  createdContentType.schema.attributes[UPDATED_BY_ATTRIBUTE] = {
+  schema.attributes[UPDATED_BY_ATTRIBUTE] = {
     type: 'relation',
     relation: 'oneToOne',
-    target: 'strapi::user',
+    target: 'admin::user',
     configurable: false,
     writable: false,
     visible: false,
@@ -113,7 +112,11 @@ const createContentType = (uid, definition) => {
     private: isPrivate,
   };
 
-  return createdContentType;
+  return {
+    ...schema,
+    actions: actions,
+    lifecycles: lifecycles,
+  };
 };
 
 const getGlobalId = (model, modelName, prefix) => {

@@ -85,15 +85,11 @@ class Strapi {
   }
 
   contentType(name) {
-    // TODO: expose a CT with a cleaner api to access attributes etc directly
-    return this.container.get('content-types').get(name).schema;
+    return this.container.get('content-types').get(name);
   }
 
   get contentTypes() {
-    // TODO: expose a CT with a cleaner api to access attributes etc directly
-
-    const cts = this.container.get('content-types').getAll();
-    return _.mapValues(cts, value => value.schema);
+    return this.container.get('content-types').getAll();
   }
 
   plugin(name) {
@@ -233,7 +229,7 @@ class Strapi {
   loadAdmin() {
     this.admin = require('@strapi/admin/strapi-server');
 
-    strapi.container.get('content-types').add(`strapi::`, strapi.admin.contentTypes);
+    strapi.container.get('content-types').add(`admin::`, strapi.admin.contentTypes);
 
     // TODO: rename into just admin and ./config/admin.js
     const userAdminConfig = strapi.config.get('server.admin');

@@ -28,7 +28,7 @@ const findCreatorRoles = entity => {
 
   if (has(createdByPath, entity)) {
     const creatorId = prop(createdByPath, entity);
-    return strapi.query('strapi::role').findMany({ where: { users: { id: creatorId } } });
+    return strapi.query('admin::role').findMany({ where: { users: { id: creatorId } } });
   }
 
   return [];

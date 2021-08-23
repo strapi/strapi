@@ -2,12 +2,9 @@
 
 // eslint-disable-next-line node/no-extraneous-require
 const { features } = require('@strapi/strapi/lib/utils/ee');
-const executeCEBootstrap = require('../../../../server/config/functions/bootstrap');
-const {
-  features: { sso: ssoActions },
-} = require('../admin-actions');
-
-const { getService } = require('../../../../server/utils');
+const executeCEBootstrap = require('../../server/bootstrap');
+const { getService } = require('../../server/utils');
+const { sso: ssoActions } = require('./config/admin-actions').features;
 
 module.exports = async () => {
   const { actionProvider } = getService('permission');

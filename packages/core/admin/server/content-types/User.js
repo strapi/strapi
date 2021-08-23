@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-  collectionName: 'strapi_users',
+  collectionName: 'admin_users',
   info: {
     name: 'User',
     description: '',
@@ -79,7 +79,7 @@ module.exports = {
       type: 'relation',
       relation: 'manyToMany',
       inversedBy: 'users',
-      target: 'strapi::role',
+      target: 'admin::role',
       // FIXME: Allow setting this
       collectionName: 'strapi_users_roles',
     },
