@@ -4,6 +4,7 @@ import {
   useNotification,
   useOverlayBlocker,
   useTracking,
+  Form,
 } from '@strapi/helper-plugin';
 import {
   Box,
@@ -124,8 +125,8 @@ const CreatePage = () => {
         validationSchema={schema}
         validateOnChange={false}
       >
-        {({ handleSubmit, values, errors, handleReset, handleChange, handleBlur }) => (
-          <form onSubmit={handleSubmit}>
+        {({ handleSubmit, values, errors, handleReset, handleChange }) => (
+          <Form noValidate>
             <>
               <HeaderLayout
                 id="title"
@@ -162,87 +163,86 @@ const CreatePage = () => {
                 as="h1"
               />
               <ContentLayout>
-                <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-                  <Stack size={4}>
-                    <Row justifyContent="space-between">
-                      <Box>
+                <Stack size={6}>
+                  <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                    <Stack size={4}>
+                      <Row justifyContent="space-between">
                         <Box>
-                          <Text highlighted>
-                            {formatMessage({
-                              id: 'Settings.roles.form.title',
-                              defaultMessage: 'Details',
-                            })}
-                          </Text>
+                          <Box>
+                            <Text highlighted>
+                              {formatMessage({
+                                id: 'Settings.roles.form.title',
+                                defaultMessage: 'Details',
+                              })}
+                            </Text>
+                          </Box>
+                          <Box>
+                            <Text textColor="neutral600" small>
+                              {formatMessage({
+                                id: 'Settings.roles.form.description',
+                                defaultMessage: 'Name and description of the role',
+                              })}
+                            </Text>
+                          </Box>
                         </Box>
-                        <Box>
-                          <Text textColor="neutral500" small>
-                            {formatMessage({
-                              id: 'Settings.roles.form.description',
-                              defaultMessage: 'Name and description of the role',
+                        <UsersRoleNumber>
+                          {formatMessage(
+                            {
+                              id: 'Settings.roles.form.button.users-with-role',
+                              defaultMessage:
+                                '{number, plural, =0 {# users} one {# user} other {# users}} with this role',
+                            },
+                            { number: 0 }
+                          )}
+                        </UsersRoleNumber>
+                      </Row>
+                      <Grid gap={4}>
+                        <GridItem col={6}>
+                          <TextInput
+                            name="name"
+                            error={errors.name && formatMessage({ id: errors.name })}
+                            label={formatMessage({
+                              id: 'Settings.roles.form.input.name',
+                              defaultMessage: 'Name',
                             })}
-                          </Text>
-                        </Box>
-                      </Box>
-                      <UsersRoleNumber>
-                        {formatMessage(
-                          {
-                            id: 'Settings.roles.form.button.users-with-role',
-                            defaultMessage:
-                              '{number, plural, =0 {# users} one {# user} other {# users}} with this role',
-                          },
-                          { number: 0 }
-                        )}
-                      </UsersRoleNumber>
-                    </Row>
-                    <Grid gap={4}>
-                      <GridItem col={6}>
-                        <TextInput
-                          name="name"
-                          error={errors.name && formatMessage({ id: errors.name })}
-                          label={formatMessage({
-                            id: 'Settings.roles.form.input.name',
-                            defaultMessage: 'Name',
-                          })}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                          value={values.name}
-                        />
-                      </GridItem>
-                      <GridItem col={6}>
-                        <Textarea
-                          label={formatMessage({
-                            id: 'Settings.roles.form.input.description',
-                            defaultMessage: 'Description',
-                          })}
-                          name="description"
-                          error={errors.name && formatMessage({ id: errors.name })}
-                          onChange={handleChange}
-                          onBlur={handleBlur}
-                        >
-                          {values.description}
-                        </Textarea>
-                      </GridItem>
-                    </Grid>
-                  </Stack>
-                </Box>
-                {!isLayoutLoading && !isRoleLoading ? (
-                  <Box paddingTop={6} paddingBottom={6}>
-                    <Permissions
-                      isFormDisabled={false}
-                      ref={permissionsRef}
-                      permissions={rolePermissions}
-                      layout={permissionsLayout}
-                    />
+                            onChange={handleChange}
+                            value={values.name}
+                          />
+                        </GridItem>
+                        <GridItem col={6}>
+                          <Textarea
+                            label={formatMessage({
+                              id: 'Settings.roles.form.input.description',
+                              defaultMessage: 'Description',
+                            })}
+                            name="description"
+                            error={errors.name && formatMessage({ id: errors.name })}
+                            onChange={handleChange}
+                          >
+                            {values.description}
+                          </Textarea>
+                        </GridItem>
+                      </Grid>
+                    </Stack>
                   </Box>
-                ) : (
-                  // ! TODO : Switch to the DS component when done
-                  <Row alignItems="center" justifyContent="center" padding={11}>
-                    <Loader />
-                  </Row>
-                )}
+                  {!isLayoutLoading && !isRoleLoading ? (
+                    <Box shadow="filterShadow" hasRadius>
+                      <Permissions
+                        isFormDisabled={false}
+                        ref={permissionsRef}
+                        permissions={rolePermissions}
+                        layout={permissionsLayout}
+                      />
+                    </Box>
+                  ) : (
+                    <Row alignItems="center" justifyContent="center" padding={11}>
+                      <Loader />
+                    </Row>
+                  )}
+                </Stack>
               </ContentLayout>
             </>
-          </form>
+          </Form>
         )}
       </Formik>
     </Main>

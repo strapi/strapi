@@ -1,29 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Row, Box } from '@strapi/parts';
+import { Row, TableLabel } from '@strapi/parts';
 import styled from 'styled-components';
 import { cellWidth, firstRowWidth } from '../../../Permissions/utils/constants';
-// Those styles are very specific.
-// so it is not a big problem to use custom paddings and widths.
-const HeaderLabel = styled.div`
-  justify-content: center;
-  display: flex;
+
+const HeaderLabel = styled(Row)`
   width: ${cellWidth};
 `;
-const PropertyLabelWrapper = styled.div`
+const PropertyLabelWrapper = styled(Row)`
   width: ${firstRowWidth};
-  display: flex;
-  align-items: center;
-  padding-left: ${({ theme }) => theme.spaces[6]};
-  height: 52px;
-`;
-
-const Label = styled(Box)`
-  font-size: ${11 / 16}rem;
-  text-transform: uppercase;
-  color: ${({ theme }) => theme.colors.neutral500};
-  font-weight: bold;
+  height: ${52 / 16}rem;
 `;
 
 const Header = ({ headers, label }) => {
@@ -38,8 +25,8 @@ const Header = ({ headers, label }) => {
 
   return (
     <Row>
-      <PropertyLabelWrapper>
-        <Label>{translatedLabel}</Label>
+      <PropertyLabelWrapper alignItems="center" paddingLeft={6}>
+        <TableLabel textColor="neutral500">{translatedLabel}</TableLabel>
       </PropertyLabelWrapper>
       {headers.map(header => {
         if (!header.isActionRelatedToCurrentProperty) {
@@ -47,13 +34,13 @@ const Header = ({ headers, label }) => {
         }
 
         return (
-          <HeaderLabel key={header.label}>
-            <Label>
+          <HeaderLabel justifyContent="center" key={header.label}>
+            <TableLabel textColor="neutral500">
               {formatMessage({
                 id: `Settings.roles.form.permissions.${header.label.toLowerCase()}`,
                 defaultMessage: header.label,
               })}
-            </Label>
+            </TableLabel>
           </HeaderLabel>
         );
       })}

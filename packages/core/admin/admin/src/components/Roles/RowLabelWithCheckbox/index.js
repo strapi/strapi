@@ -1,28 +1,10 @@
-import { Box, Checkbox, Text } from '@strapi/parts';
+import { Row, Checkbox, Text } from '@strapi/parts';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import React, { memo } from 'react';
 import styled from 'styled-components';
 import CollapseLabel from '../CollapseLabel';
 import { firstRowWidth } from '../Permissions/utils/constants';
-
-const Wrapper = styled(Box)`
-  display: flex;
-  align-items: center;
-  width: ${firstRowWidth};
-  padding-left: ${({ theme }) => theme.spaces[6]};
-
-  ${({ disabled, theme }) =>
-    disabled &&
-    `
-    input[type='checkbox'] {
-    cursor: not-allowed;
-      &:after {
-        color: ${theme.main.colors.grey};
-      }
-    }
-  `};
-`;
 
 // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
 const StyledText = styled(Text)`
@@ -34,6 +16,7 @@ const StyledText = styled(Text)`
 const RowLabelWithCheckbox = ({
   children,
   isCollapsable,
+  isActive,
   isFormDisabled,
   label,
   onChange,
@@ -43,9 +26,10 @@ const RowLabelWithCheckbox = ({
   value,
 }) => {
   return (
-    <Wrapper disabled={isFormDisabled}>
+    <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth }}>
       <Checkbox
         name={checkboxName}
+        aria-label={checkboxName}
         disabled={isFormDisabled}
         // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
         onValueChange={value =>
@@ -64,6 +48,7 @@ const RowLabelWithCheckbox = ({
         isCollapsable={isCollapsable}
         {...(isCollapsable && {
           onClick,
+          'aria-expanded': isActive,
           onKeyDown: ({ key }) => (key === 'Enter' || key === ' ') && onClick(),
           tabIndex: 0,
           role: 'button',
@@ -72,7 +57,7 @@ const RowLabelWithCheckbox = ({
         <StyledText>{upperFirst(label)}</StyledText>
         {children}
       </CollapseLabel>
-    </Wrapper>
+    </Row>
   );
 };
 
@@ -95,6 +80,7 @@ RowLabelWithCheckbox.propTypes = {
   onClick: PropTypes.func.isRequired,
   someChecked: PropTypes.bool,
   value: PropTypes.bool,
+  isActive: PropTypes.bool.isRequired,
 };
 
 export default memo(RowLabelWithCheckbox);

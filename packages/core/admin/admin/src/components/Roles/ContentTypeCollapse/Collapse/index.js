@@ -34,7 +34,7 @@ const activeRowStyle = (theme, isActive, isClicked) => `
 const Wrapper = styled.div`
   display: flex;
   align-items: center;
-  height: 52px;
+  height: ${52 / 16}rem;
   background-color: ${({ isGrey, theme }) =>
     isGrey ? theme.colors.neutral100 : theme.colors.neutral0};
   border: 1px solid transparent;
@@ -43,6 +43,10 @@ const Wrapper = styled.div`
   }
   ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive, true)}
   &:hover {
+    ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
+  }
+
+  &:focus-within {
     ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
   }
 `;
@@ -81,7 +85,7 @@ const Collapse = ({
   onClickToggle,
   pathToData,
 }) => {
-  const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
+  const [isModalOpen, setModalOpen] = useState(false);
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -89,11 +93,11 @@ const Collapse = ({
   } = usePermissionsDataManager();
 
   const handleToggleModalIsOpen = () => {
-    setModalState(prevState => ({ isMounted: true, isOpen: !prevState.isOpen }));
+    setModalOpen(s => !s);
   };
 
   const handleModalClose = () => {
-    setModalState(prevState => ({ ...prevState, isMounted: false }));
+    setModalOpen(false);
   };
 
   // This corresponds to the data related to the CT left checkbox
@@ -133,6 +137,7 @@ const Collapse = ({
         onClick={onClickToggle}
         someChecked={hasSomeActionsSelected}
         value={hasAllActionsSelected}
+        isActive={isActive}
       >
         <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
       </RowLabelWithCheckbox>
@@ -159,6 +164,7 @@ const Collapse = ({
                   <Checkbox
                     disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName}
+                    aria-label={checkboxName}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onValueChange={value =>
                       onChangeParentCheckbox({
@@ -202,16 +208,14 @@ const Collapse = ({
           hasConditions={doesConditionButtonHasConditions}
         />
       </Box>
-      {modalState.isMounted && (
-        <ConditionsModal
-          headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
-          actions={checkboxesActions}
-          isOpen={modalState.isOpen}
-          isFormDisabled={isFormDisabled}
-          onClosed={handleModalClose}
-          onToggle={handleToggleModalIsOpen}
-        />
-      )}
+      <ConditionsModal
+        headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+        actions={checkboxesActions}
+        isOpen={isModalOpen}
+        isFormDisabled={isFormDisabled}
+        onClosed={handleModalClose}
+        onToggle={handleToggleModalIsOpen}
+      />
     </Wrapper>
   );
 };

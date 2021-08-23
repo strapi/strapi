@@ -27,7 +27,7 @@ const Cell = styled(Box)`
 const Chevron = styled(Box)`
   display: none;
   svg {
-    width: 11px;
+    width: ${11 / 16}rem;
   }
   * {
     fill: ${({ theme }) => theme.colors.primary600};
@@ -39,7 +39,7 @@ const Wrapper = styled(Row)`
   flex: 1;
   background: ${({ theme, isOdd }) => theme.colors[isOdd ? 'neutral100' : 'neutral0']};
   ${Chevron} {
-    width: 13px;
+    width: ${13 / 16}rem;
   }
   ${({ isCollapsable, theme }) =>
     isCollapsable &&
@@ -118,6 +118,7 @@ const ActionRow = ({
             label={label}
             someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
+            isActive={isActive}
           >
             {required && <RequiredSign />}
             <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
@@ -144,6 +145,7 @@ const ActionRow = ({
                     <Checkbox
                       disabled={isFormDisabled || IS_DISABLED}
                       name={checkboxName.join('..')}
+                      aria-label={checkboxName.join('..')}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onValueChange={value =>
                         onChangeSimpleCheckbox({

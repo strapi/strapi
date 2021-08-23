@@ -7,7 +7,7 @@ import styled from 'styled-components';
 import ConditionsSelect from '../ConditionsSelect';
 
 const RowWrapper = styled(Row)`
-  height: 52px;
+  height: ${52 / 16}rem;
 `;
 
 const ActionRow = ({
@@ -23,9 +23,9 @@ const ActionRow = ({
   const { formatMessage } = useIntl();
 
   return (
-    <RowWrapper background={isGrey ? 'neutral100' : 'neutral0'}>
+    <RowWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
       <Row paddingLeft={6} style={{ width: 180 }}>
-        <TableLabel textColor="neutral500">
+        <TableLabel textColor="neutral600">
           {formatMessage({
             id: 'Settings.permissions.conditions.can',
             defaultMessage: 'Can',
@@ -47,7 +47,7 @@ const ActionRow = ({
             defaultMessage: label,
           })}
         </TableLabel>
-        <TableLabel textColor="neutral500">
+        <TableLabel textColor="neutral600">
           &nbsp;
           {formatMessage({
             id: 'Settings.permissions.conditions.when',

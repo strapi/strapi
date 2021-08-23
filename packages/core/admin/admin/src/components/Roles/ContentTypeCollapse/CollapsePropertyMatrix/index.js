@@ -16,7 +16,6 @@ const Wrapper = styled.div`
 
     return `none`;
   }};
-  border-radius: 0px 0px 2px 2px;
 `;
 
 Wrapper.defaultProps = {

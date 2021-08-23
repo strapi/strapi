@@ -26,18 +26,18 @@ const CheckboxWrapper = styled.div`
     &:before {
       content: '';
       position: absolute;
-      top: -4px;
-      left: -8px;
-      width: 6px;
-      height: 6px;
-      border-radius: 20px;
+      top: ${-4 / 16}rem;
+      left: ${-8 / 16}rem;
+      width: ${6 / 16}rem;
+      height: ${6 / 16}rem;
+      border-radius: ${20 / 16}rem;
       background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
     }
   `}
 `;
 
 const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, pathToData }) => {
-  const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
+  const [isModalOpen, setModalOpen] = useState(false);
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -57,13 +57,12 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
   const handleToggleModalIsOpen = () => {
-    setModalState(prevState => ({ isMounted: true, isOpen: !prevState.isOpen }));
+    setModalOpen(s => !s);
   };
 
   const handleModalClose = () => {
-    setModalState(prevState => ({ ...prevState, isMounted: false }));
+    setModalOpen(false);
   };
-
   // We need to format the actions so it matches the shape of the ConditionsModal actions props
   const formattedActions = formatActions(actions, modifiedData, pathToData);
   const doesButtonHasCondition = getConditionsButtonState(get(modifiedData, [...pathToData], {}));
@@ -79,6 +78,7 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           <Box paddingLeft={4}>
             <Checkbox
               name={pathToData.join('..')}
+              aria-label={pathToData.join('..')}
               disabled={isFormDisabled || IS_DISABLED}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
               onValueChange={value =>
@@ -131,16 +131,14 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           />
         </Row>
       </Box>
-      {modalState.isMounted && (
-        <ConditionsModal
-          headerBreadCrumbs={[categoryName, subCategoryName]}
-          actions={formattedActions}
-          isOpen={modalState.isOpen}
-          isFormDisabled={isFormDisabled}
-          onClosed={handleModalClose}
-          onToggle={handleToggleModalIsOpen}
-        />
-      )}
+      <ConditionsModal
+        headerBreadCrumbs={[categoryName, subCategoryName]}
+        actions={formattedActions}
+        isOpen={isModalOpen}
+        isFormDisabled={isFormDisabled}
+        onClosed={handleModalClose}
+        onToggle={handleToggleModalIsOpen}
+      />
     </>
   );
 };

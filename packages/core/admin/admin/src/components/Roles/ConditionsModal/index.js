@@ -1,38 +1,24 @@
-import { After } from '@strapi/icons';
 import {
   Box,
+  Breadcrumbs,
   Button,
+  Crumb,
   H2,
   ModalFooter,
   ModalHeader,
   ModalLayout,
   Stack,
   Text,
-  TextButton,
+  Divider,
 } from '@strapi/parts';
 import { cloneDeep, get, groupBy, set, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
-import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../hooks';
 import updateValues from '../Permissions/utils/updateValues';
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
-
-// ! Something needs to be done in the DS parts to avoid doing this
-const Icon = styled(Box)`
-  svg {
-    width: 6px;
-  }
-  * {
-    fill: ${({ theme }) => theme.colors.neutral300};
-  }
-`;
-
-const Separator = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.main.colors.brightGrey};
-`;
 
 const ConditionsModal = ({
   actions,
@@ -44,11 +30,6 @@ const ConditionsModal = ({
 }) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
-
-  const translatedHeaders = headerBreadCrumbs.map(headerTrad => ({
-    key: headerTrad,
-    element: <FormattedMessage id={headerTrad} defaultMessage={upperFirst(headerTrad)} />,
-  }));
 
   const arrayOfOptionsGroupedByCategory = useMemo(() => {
     return Object.entries(groupBy(availableConditions, 'category'));
@@ -113,22 +94,18 @@ const ConditionsModal = ({
   return (
     <ModalLayout onClose={onClosed}>
       <ModalHeader>
-        <Stack horizontal size={3}>
-          {translatedHeaders.map(({ key, element }, index) => {
-            const shouldDisplayChevron = index < translatedHeaders.length - 1;
-
-            return (
-              <React.Fragment key={key}>
-                <TextButton textColor="neutral800">{element}</TextButton>
-                {shouldDisplayChevron && (
-                  <Icon>
-                    <After />
-                  </Icon>
-                )}
-              </React.Fragment>
-            );
-          })}
-        </Stack>
+        <Breadcrumbs label={headerBreadCrumbs.join(', ')}>
+          {headerBreadCrumbs.map(label => (
+            <Crumb key={label}>
+              {upperFirst(
+                formatMessage({
+                  id: label,
+                  defaultMessage: label,
+                })
+              )}
+            </Crumb>
+          ))}
+        </Breadcrumbs>
       </ModalHeader>
       <Box padding={8}>
         <Stack size={6}>
@@ -138,7 +115,8 @@ const ConditionsModal = ({
               defaultMessage: 'Define conditions',
             })}
           </H2>
-          <Separator />
+          {/* ! Need to force margin here - Remove this when Divider is updated in parts */}
+          <Divider style={{ marginTop: `${24 / 16}rem` }} />
           <Box>
             {actionsToDisplay.length === 0 && (
               <Text>
@@ -149,23 +127,25 @@ const ConditionsModal = ({
                 })}
               </Text>
             )}
-            {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
-              const name = pathToConditionsObject.join('..');
+            <ul>
+              {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
+                const name = pathToConditionsObject.join('..');
 
-              return (
-                <ActionRow
-                  key={actionId}
-                  arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-                  label={label}
-                  isFormDisabled={isFormDisabled}
-                  isGrey={index % 2 === 0}
-                  name={name}
-                  onCategoryChange={handleCategoryChange}
-                  onChange={handleChange}
-                  value={get(state, name, {})}
-                />
-              );
-            })}
+                return (
+                  <ActionRow
+                    key={actionId}
+                    arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
+                    label={label}
+                    isFormDisabled={isFormDisabled}
+                    isGrey={index % 2 === 0}
+                    name={name}
+                    onCategoryChange={handleCategoryChange}
+                    onChange={handleChange}
+                    value={get(state, name, {})}
+                  />
+                );
+              })}
+            </ul>
           </Box>
         </Stack>
       </Box>

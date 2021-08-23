@@ -18,7 +18,7 @@ const Wrapper = styled.div`
       left: -10px;
       width: 6px;
       height: 6px;
-      border-radius: 20px;
+      border-radius: ${20 / 16}rem;;
       background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
     }
   `}

@@ -1,4 +1,4 @@
-import { Checkbox, Stack, TableLabel } from '@strapi/parts';
+import { Checkbox, Stack, TableLabel, Box } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/GlobalActions/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -15,21 +15,6 @@ const CenteredStack = styled(Stack)`
   width: ${cellWidth};
 `;
 
-const Wrapper = styled.div`
-  padding-left: ${firstRowWidth};
-  padding-bottom: ${({ theme }) => theme.spaces[4]};
-  padding-top: ${({ theme }) => theme.spaces[6]};
-  ${({ disabled, theme }) =>
-    `
-    input[type='checkbox'] {
-      &:after {
-        color: ${!disabled ? theme.main.colors.mediumBlue : theme.main.colors.grey};
-      }
-    }
-    cursor: initial;
-    `}
-`;
-
 const GlobalActions = ({ actions, isFormDisabled, kind }) => {
   const { formatMessage } = useIntl();
   const { modifiedData, onChangeCollectionTypeGlobalActionCheckbox } = usePermissionsDataManager();
@@ -43,7 +28,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
   }, [modifiedData, displayedActions, kind]);
 
   return (
-    <Wrapper disabled={isFormDisabled}>
+    <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
       <Stack horizontal>
         {displayedActions.map(({ label, actionId }) => {
           return (
@@ -60,6 +45,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}
                 name={actionId}
+                aria-label={actionId}
                 value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
                 indeterminate={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}
               />
@@ -67,7 +53,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
           );
         })}
       </Stack>
-    </Wrapper>
+    </Box>
   );
 };
 
