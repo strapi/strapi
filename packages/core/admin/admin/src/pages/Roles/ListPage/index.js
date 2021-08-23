@@ -105,14 +105,14 @@ const RoleListPage = () => {
       <PageTitle name="Roles" />
       <HeaderLayout
         id="title"
-        primaryAction={(
+        primaryAction={
           <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />}>
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',
             })}
           </Button>
-        )}
+        }
         title={formatMessage({
           id: 'Settings.roles.title',
           defaultMessage: 'roles',
@@ -126,14 +126,14 @@ const RoleListPage = () => {
         <Table
           colCount={colCount}
           rowCount={rowCount}
-          footer={(
+          footer={
             <TFooter onClick={handleToggleModalForCreatingRole} icon={<AddIcon />}>
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
               })}
             </TFooter>
-          )}
+          }
         >
           <Thead>
             <Tr>

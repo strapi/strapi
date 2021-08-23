@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import { Inputs } from '@buffetjs/custom';
 import PropTypes from 'prop-types';
 import { isObject } from 'lodash';
-import translatedErrors from '../../utils/translatedErrors';
+import translatedErrors from '../../../utils/translatedErrors';
 
 const IntlInput = ({
   description,

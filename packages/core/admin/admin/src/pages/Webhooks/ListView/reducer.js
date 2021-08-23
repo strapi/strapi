@@ -5,6 +5,7 @@ const initialState = {
   webhooks: [],
   webhooksToDelete: [],
   webhookToDelete: null,
+  loadingWebhooks: true,
 };
 
 const reducer = (state, action) =>
@@ -13,6 +14,12 @@ const reducer = (state, action) =>
     switch (action.type) {
       case 'GET_DATA_SUCCEEDED': {
         draftState.webhooks = action.data;
+        draftState.loadingWebhooks = false;
+        break;
+      }
+
+      case 'TOGGLE_LOADING': {
+        draftState.loadingWebhooks = !state.loadingWebhooks;
         break;
       }
 
@@ -30,6 +37,15 @@ const reducer = (state, action) =>
           draftState.webhooksToDelete.push(action.id);
         } else {
           draftState.webhooksToDelete = state.webhooksToDelete.filter(id => id !== action.id);
+        }
+
+        break;
+      }
+      case 'SET_ALL_WEBHOOKS_TO_DELETE': {
+        if (state.webhooksToDelete.length === 0) {
+          draftState.webhooksToDelete = state.webhooks.map(webhook => webhook.id);
+        } else {
+          draftState.webhooksToDelete = [];
         }
 
         break;

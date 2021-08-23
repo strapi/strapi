@@ -9,7 +9,7 @@ import React from 'react';
 import { get } from 'lodash';
 import { useRouteMatch } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import useTracking from '../../hooks/useTracking';
+import useTracking from '../../../hooks/useTracking';
 import StyledBackHeader from './StyledBackHeader';
 
 const BackHeader = props => {
