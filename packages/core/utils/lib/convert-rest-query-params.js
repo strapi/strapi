@@ -31,8 +31,8 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     return finalParams;
   }
 
-  if (_.has(params, '_sort')) {
-    finalParams.sort = convertSortQueryParams(params._sort);
+  if (_.has(params, 'sort')) {
+    finalParams.sort = convertSortQueryParams(params.sort);
   }
 
   if (_.has(params, '_start')) {
@@ -48,7 +48,7 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
   }
 
   const whereParams = convertExtraRootParams(
-    _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState'])
+    _.omit(params, ['sort', '_start', '_limit', '_where', '_publicationState'])
   );
 
   const whereClauses = [];
@@ -89,11 +89,13 @@ const convertExtraRootParams = params => {
  * @param {string} sortQuery - ex: id:asc,price:desc
  */
 const convertSortQueryParams = sortQuery => {
+  if (Array.isArray(sortQuery)) {
+    return sortQuery.flatMap(sortValue => convertSortQueryParams(sortValue));
+  }
+
   if (typeof sortQuery !== 'string') {
     throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
   }
-
-  // TODO: handle array input
 
   const sortKeys = [];
 
