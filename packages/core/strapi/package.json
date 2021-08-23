@@ -16,7 +16,6 @@
     "@strapi/admin": "3.6.6",
     "@strapi/database": "3.6.6",
     "@strapi/generate": "3.6.6",
-    "@strapi/generator-cli": "3.6.6",    
     "@strapi/generate-new": "3.6.6",
     "@strapi/logger": "3.6.6",
     "@strapi/utils": "3.6.6",

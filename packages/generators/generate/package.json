@@ -1,5 +1,5 @@
 {
-  "name": "@strapi/generator-cli",
+  "name": "@strapi/generate",
   "version": "3.6.6",
   "description": "Generate a service for a Strapi API.",
   "main": "index.js",

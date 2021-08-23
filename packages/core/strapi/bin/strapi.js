@@ -119,9 +119,12 @@ program
   .action(getLocalScript('develop'));
 
 // $ strapi generate
-program.command('generate').action(() => {
-  require('@strapi/generator-cli')();
-});
+program
+  .command('generate')
+  .description('Launch interactive API generator')
+  .action(() => {
+    require('@strapi/generate')();
+  });
 
 // `$ strapi generate:template <directory>`
 program
