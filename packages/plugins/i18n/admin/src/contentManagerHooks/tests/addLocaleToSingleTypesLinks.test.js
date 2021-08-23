@@ -13,8 +13,8 @@ describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
 
     store.rbacProvider.collectionTypesRelatedPermissions = {
       test: {
-        'plugins::content-manager.explorer.read': [],
-        'plugins::content-manager.explorer.create': [],
+        'plugin::content-manager.explorer.read': [],
+        'plugin::content-manager.explorer.create': [],
       },
     };
 
@@ -48,7 +48,7 @@ describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
   it('should add a search key with the default locale when the user has the right to read it', () => {
     store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
-      'plugins::content-manager.explorer.read'
+      'plugin::content-manager.explorer.read'
     ] = [{ properties: { locales: ['en'] } }];
 
     const data = {
@@ -69,7 +69,7 @@ describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
   it('should set the isDisplayed key to false when the user does not have the right to read any locale', () => {
     store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
-      'plugins::content-manager.explorer.read'
+      'plugin::content-manager.explorer.read'
     ] = [{ properties: { locales: [] } }];
 
     const data = {
@@ -89,7 +89,7 @@ describe('i18n | contentManagerHooks | addLocaleToSingleTypesLinks', () => {
   it('should keep the previous search', () => {
     store.i18n_locales.locales = [{ code: 'en', isDefault: true }];
     store.rbacProvider.collectionTypesRelatedPermissions.test[
-      'plugins::content-manager.explorer.read'
+      'plugin::content-manager.explorer.read'
     ] = [{ properties: { locales: ['en'] } }];
 
     const data = {

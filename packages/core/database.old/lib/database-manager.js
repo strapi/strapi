@@ -61,7 +61,7 @@ class DatabaseManager {
     });
 
     Object.keys(this.strapi.plugins).forEach(pluginKey => {
-      Object.keys(this.strapi.plugins[pluginKey].models).forEach(modelKey => {
+      Object.keys(this.strapi.plugins[pluginKey].models || {}).forEach(modelKey => {
         const model = this.strapi.plugins[pluginKey].models[modelKey];
         this.models.set(model.uid, model);
       });
@@ -154,7 +154,6 @@ class DatabaseManager {
     if (!pluginName) {
       return strapi.models;
     }
-
     return pluginName === 'admin' ? strapi.admin.models : strapi.plugins[pluginName].models;
   }
 

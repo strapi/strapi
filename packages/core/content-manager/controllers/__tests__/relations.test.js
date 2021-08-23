@@ -182,7 +182,7 @@ describe('Relations', () => {
           },
         },
       };
-      const assocModel = { uid: 'application::test.test', attributes: {} };
+      const assocModel = { uid: 'api::test.test', attributes: {} };
       const notFound = jest.fn();
       const find = jest.fn(() => Promise.resolve(result));
       const findConfiguration = jest.fn(() => Promise.resolve(configuration));

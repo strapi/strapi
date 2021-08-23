@@ -9,6 +9,9 @@ module.exports = {
   info: {
     name: 'Permission',
     description: '',
+    singularName: 'permission',
+    pluralName: 'permissions',
+    displayName: 'Permission',
   },
   options: {},
   pluginOptions: {

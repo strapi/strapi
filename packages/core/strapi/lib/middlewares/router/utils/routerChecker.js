@@ -25,10 +25,11 @@ module.exports = strapi =>
     let controller;
 
     if (plugin) {
-      controller =
-        plugin === 'admin'
-          ? strapi.admin.controllers[controllerKey]
-          : strapi.plugins[plugin].controllers[controllerKey];
+      if (plugin === 'admin') {
+        controller = strapi.admin.controllers[controllerKey];
+      } else {
+        controller = strapi.plugin(plugin).controller(controllerKey);
+      }
     } else {
       controller = strapi.controllers[controllerKey];
     }
@@ -43,7 +44,10 @@ module.exports = strapi =>
 
     // Retrieve the API's name where the controller is located
     // to access to the right validators
-    const currentApiName = finder(strapi.plugins[plugin] || strapi.api || strapi.admin, controller);
+    const currentApiName = finder(
+      strapi.plugin(plugin) || strapi.api || strapi.admin,
+      controllerKey
+    );
 
     // Add the `globalPolicy`.
     const globalPolicy = policyUtils.globalPolicy({

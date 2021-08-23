@@ -22,11 +22,11 @@ describe('getDefaultLocale', () => {
     ];
 
     const ctPermissions = {
-      'plugins::content-manager.explorer.create': [
+      'plugin::content-manager.explorer.create': [
         {
           id: 1325,
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'api::address.address',
           properties: {
             fields: [
               'postal_coder',
@@ -43,11 +43,11 @@ describe('getDefaultLocale', () => {
           conditions: [],
         },
       ],
-      'plugins::content-manager.explorer.read': [
+      'plugin::content-manager.explorer.read': [
         {
           id: 1326,
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::address.address',
           properties: {
             fields: [],
             locales: ['en', 'fr-FR'],
@@ -84,11 +84,11 @@ describe('getDefaultLocale', () => {
     ];
 
     const ctPermissions = {
-      'plugins::content-manager.explorer.create': [
+      'plugin::content-manager.explorer.create': [
         {
           id: 1325,
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'api::address.address',
           properties: {
             fields: [
               'postal_coder',
@@ -105,11 +105,11 @@ describe('getDefaultLocale', () => {
           conditions: [],
         },
       ],
-      'plugins::content-manager.explorer.read': [
+      'plugin::content-manager.explorer.read': [
         {
           id: 1326,
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::address.address',
           properties: {
             fields: [],
             locales: ['en'],
@@ -154,11 +154,11 @@ describe('getDefaultLocale', () => {
     ];
 
     const ctPermissions = {
-      'plugins::content-manager.explorer.create': [
+      'plugin::content-manager.explorer.create': [
         {
           id: 1325,
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'api::address.address',
           properties: {
             fields: [
               'postal_coder',
@@ -175,11 +175,11 @@ describe('getDefaultLocale', () => {
           conditions: [],
         },
       ],
-      'plugins::content-manager.explorer.read': [
+      'plugin::content-manager.explorer.read': [
         {
           id: 1326,
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::address.address',
           properties: {
             fields: [],
             locales: ['en', 'de'],
@@ -224,11 +224,11 @@ describe('getDefaultLocale', () => {
     ];
 
     const ctPermissions = {
-      'plugins::content-manager.explorer.create': [
+      'plugin::content-manager.explorer.create': [
         {
           id: 1325,
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'api::address.address',
           properties: {
             fields: [
               'postal_coder',
@@ -245,11 +245,11 @@ describe('getDefaultLocale', () => {
           conditions: [],
         },
       ],
-      'plugins::content-manager.explorer.read': [
+      'plugin::content-manager.explorer.read': [
         {
           id: 1326,
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::address.address',
           properties: {
             fields: [],
             locales: [],
@@ -294,11 +294,11 @@ describe('getDefaultLocale', () => {
     ];
 
     const ctPermissions = {
-      'plugins::content-manager.explorer.create': [
+      'plugin::content-manager.explorer.create': [
         {
           id: 1325,
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'api::address.address',
           properties: {
             fields: [
               'postal_coder',
@@ -315,11 +315,11 @@ describe('getDefaultLocale', () => {
           conditions: [],
         },
       ],
-      'plugins::content-manager.explorer.read': [
+      'plugin::content-manager.explorer.read': [
         {
           id: 1326,
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'application::address.address',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::address.address',
           properties: {
             fields: [],
             locales: [],

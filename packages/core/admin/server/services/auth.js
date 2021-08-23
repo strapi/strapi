@@ -65,7 +65,9 @@ const forgotPassword = async ({ email } = {}) => {
   const url = `${getAbsoluteAdminUrl(
     strapi.config
   )}/auth/reset-password?code=${resetPasswordToken}`;
-  return strapi.plugins.email.services.email
+  return strapi
+    .plugin('email')
+    .service('email')
     .sendTemplatedEmail(
       {
         to: user.email,

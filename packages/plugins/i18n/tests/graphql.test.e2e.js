@@ -42,7 +42,7 @@ describe('Test Graphql API create localization', () => {
       });
     };
 
-    const locale = await strapi.query('plugins::i18n.locale').create({
+    const locale = await strapi.query('plugin::i18n.locale').create({
       data: { code: 'fr', name: 'French' },
     });
 
@@ -50,8 +50,8 @@ describe('Test Graphql API create localization', () => {
   });
 
   afterAll(async () => {
-    await strapi.query('plugins::i18n.locale').delete({ where: { id: localeId } });
-    await strapi.query('application::recipes.recipes').deleteMany();
+    await strapi.query('plugin::i18n.locale').delete({ where: { id: localeId } });
+    await strapi.query('api::recipes.recipes').deleteMany();
     await strapi.destroy();
     await builder.cleanup();
   });

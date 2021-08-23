@@ -39,7 +39,7 @@ describe('CONTENT TYPE BUILDER | COMPONENTS | DataManagerProvider | utils | retr
             {
               type: 'relation',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               private: false,
               name: 'categories',

@@ -82,10 +82,10 @@
         "policies": [
           "admin::isAuthenticatedAdmin",
           [
-            "plugins::content-manager.hasPermissions",
+            "plugin::content-manager.hasPermissions",
             [
-              "plugins::content-manager.explorer.create",
-              "plugins::content-manager.explorer.update"
+              "plugin::content-manager.explorer.create",
+              "plugin::content-manager.explorer.update"
             ],
             { "hasAtLeastOne": true }
           ]
@@ -100,7 +100,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.read"]]
         ]
       }
     },
@@ -113,10 +113,10 @@
           "routing",
           "admin::isAuthenticatedAdmin",
           [
-            "plugins::content-manager.hasPermissions",
+            "plugin::content-manager.hasPermissions",
             [
-              "plugins::content-manager.explorer.create",
-              "plugins::content-manager.explorer.update"
+              "plugin::content-manager.explorer.create",
+              "plugin::content-manager.explorer.update"
             ],
             { "hasAtLeastOne": true }
           ]
@@ -131,7 +131,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.delete"]]
         ]
       }
     },
@@ -142,9 +142,9 @@
       "config": {
         "policies": [
           "routing",
-          "plugins::content-manager.has-draft-and-publish",
+          "plugin::content-manager.has-draft-and-publish",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.publish"]]
         ]
       }
     },
@@ -155,9 +155,9 @@
       "config": {
         "policies": [
           "routing",
-          "plugins::content-manager.has-draft-and-publish",
+          "plugin::content-manager.has-draft-and-publish",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.publish"]]
         ]
       }
     },
@@ -169,7 +169,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.read"]]
         ]
       }
     },
@@ -181,7 +181,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.read"]]
         ]
       }
     },
@@ -193,7 +193,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.create"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.create"]]
         ]
       }
     },
@@ -205,7 +205,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.read"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.read"]]
         ]
       }
     },
@@ -217,7 +217,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.update"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.update"]]
         ]
       }
     },
@@ -229,7 +229,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.delete"]]
         ]
       }
     },
@@ -240,9 +240,9 @@
       "config": {
         "policies": [
           "routing",
-          "plugins::content-manager.has-draft-and-publish",
+          "plugin::content-manager.has-draft-and-publish",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.publish"]]
         ]
       }
     },
@@ -253,9 +253,9 @@
       "config": {
         "policies": [
           "routing",
-          "plugins::content-manager.has-draft-and-publish",
+          "plugin::content-manager.has-draft-and-publish",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.publish"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.publish"]]
         ]
       }
     },
@@ -267,7 +267,7 @@
         "policies": [
           "routing",
           "admin::isAuthenticatedAdmin",
-          ["plugins::content-manager.hasPermissions", ["plugins::content-manager.explorer.delete"]]
+          ["plugin::content-manager.hasPermissions", ["plugin::content-manager.explorer.delete"]]
         ]
       }
     }

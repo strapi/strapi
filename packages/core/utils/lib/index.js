@@ -23,6 +23,8 @@ const {
   escapeQuery,
   stringIncludes,
   stringEquals,
+  isKebabCase,
+  isCamelCase,
 } = require('./string-formatting');
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
@@ -61,6 +63,8 @@ module.exports = {
   generateTimestampCode,
   stringIncludes,
   stringEquals,
+  isKebabCase,
+  isCamelCase,
   contentTypes,
   webhook,
   env,

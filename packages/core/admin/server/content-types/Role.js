@@ -9,6 +9,9 @@ module.exports = {
   info: {
     name: 'Role',
     description: '',
+    singularName: 'role',
+    pluralName: 'roles',
+    displayName: 'Role',
   },
   options: {},
   pluginOptions: {

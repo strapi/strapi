@@ -152,14 +152,14 @@ const getActionFn = details => {
 };
 
 const getActionDetails = resolver => {
-  if (resolver.startsWith('plugins::')) {
+  if (resolver.startsWith('plugin::')) {
     const [, path] = resolver.split('::');
     const [plugin, controller, action] = path.split('.');
 
     return { plugin, controller, action };
   }
 
-  if (resolver.startsWith('application::')) {
+  if (resolver.startsWith('api::')) {
     const [, path] = resolver.split('::');
     const [api, controller, action] = path.split('.');
 

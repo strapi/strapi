@@ -6,7 +6,6 @@
  */
 
 const _ = require('lodash');
-const { isString } = require('lodash/fp');
 const {
   constants: { DP_PUB_STATES },
 } = require('./content-types');
@@ -32,8 +31,8 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
     return finalParams;
   }
 
-  if (_.has(params, '_sort')) {
-    finalParams.sort = convertSortQueryParams(params._sort);
+  if (_.has(params, 'sort')) {
+    finalParams.sort = convertSortQueryParams(params.sort);
   }
 
   if (_.has(params, '_start')) {
@@ -49,7 +48,7 @@ const convertRestQueryParams = (params = {}, defaults = {}) => {
   }
 
   const whereParams = convertExtraRootParams(
-    _.omit(params, ['_sort', '_start', '_limit', '_where', '_publicationState'])
+    _.omit(params, ['sort', '_start', '_limit', '_where', '_publicationState'])
   );
 
   const whereClauses = [];
@@ -87,31 +86,22 @@ const convertExtraRootParams = params => {
 
 /**
  * Sort query parser
- * @param {string[]} sortQuery - ex: ["id:asc", "price:desc"]
+ * @param {string} sortQuery - ex: id:asc,price:desc
  */
 const convertSortQueryParams = sortQuery => {
-  // todo[v4]: Clean the convert-sort-query-param behaviour
-  if (typeof sortQuery === 'string') {
-    sortQuery = sortQuery.split(',');
+  if (Array.isArray(sortQuery)) {
+    return sortQuery.flatMap(sortValue => convertSortQueryParams(sortValue));
   }
 
-  if (!Array.isArray(sortQuery)) {
-    throw new Error(`convertSortQueryParams expected an array of string, got ${typeof sortQuery}`);
-  }
-
-  const invalidClauseType = sortQuery.find(clause => !isString(clause));
-
-  if (invalidClauseType) {
-    throw new Error(
-      `convertSortQueryParams expected an array of string but found "${typeof invalidClauseType}"`
-    );
+  if (typeof sortQuery !== 'string') {
+    throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
   }
 
   const sortKeys = [];
 
-  sortQuery.forEach(clause => {
+  sortQuery.split(',').forEach(part => {
     // split field and order param with default order to ascending
-    const [field, order = 'asc'] = clause.split(':');
+    const [field, order = 'asc'] = part.split(':');
 
     if (field.length === 0) {
       throw new Error('Field cannot be empty');

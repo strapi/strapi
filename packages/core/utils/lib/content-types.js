@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const pluralize = require('pluralize');
 
 const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
@@ -101,108 +100,6 @@ const isMediaAttribute = attr => {
   return attr.type === 'media';
 };
 
-const getKind = obj => obj.kind || 'collectionType';
-
-const pickSchema = model => {
-  const schema = _.cloneDeep(
-    _.pick(model, ['collectionName', 'info', 'options', 'pluginOptions', 'attributes'])
-  );
-
-  schema.kind = getKind(model);
-  return schema;
-};
-
-const createContentType = (model, { modelName }, { apiName, pluginName } = {}) => {
-  if (apiName) {
-    Object.assign(model, {
-      uid: `application::${apiName}.${modelName}`,
-      apiName,
-      collectionName: model.collectionName || modelName.toLocaleLowerCase(),
-      globalId: getGlobalId(model, modelName),
-    });
-  } else if (pluginName) {
-    Object.assign(model, {
-      uid: `plugins::${pluginName}.${modelName}`,
-      plugin: pluginName,
-      collectionName: model.collectionName || `${pluginName}_${modelName}`.toLowerCase(),
-      globalId: getGlobalId(model, modelName, pluginName),
-    });
-  } else {
-    Object.assign(model, {
-      uid: `strapi::${modelName}`,
-      plugin: 'admin',
-      globalId: getGlobalId(model, modelName, 'admin'),
-    });
-  }
-
-  Object.assign(model, {
-    __schema__: pickSchema(model),
-    kind: getKind(model),
-    modelType: 'contentType',
-    modelName,
-  });
-
-  Object.defineProperty(model, 'privateAttributes', {
-    get() {
-      // FIXME: to fix
-      // return strapi.getModel(model.uid).privateAttributes;
-      return [];
-    },
-    configurable: true,
-  });
-
-  Object.assign(model.attributes, {
-    [CREATED_AT_ATTRIBUTE]: {
-      type: 'datetime',
-      default: () => new Date(),
-    },
-    // TODO: handle on edit set to new date
-    [UPDATED_AT_ATTRIBUTE]: {
-      type: 'datetime',
-      default: () => new Date(),
-    },
-  });
-
-  if (hasDraftAndPublish(model)) {
-    model.attributes[PUBLISHED_AT_ATTRIBUTE] = {
-      type: 'datetime',
-      configurable: false,
-      writable: true,
-      visible: false,
-    };
-  }
-
-  const isPrivate = !_.get(model, 'options.populateCreatorFields', false);
-
-  model.attributes[CREATED_BY_ATTRIBUTE] = {
-    type: 'relation',
-    relation: 'oneToOne',
-    target: 'strapi::user',
-    configurable: false,
-    writable: false,
-    visible: false,
-    useJoinTable: false,
-    private: isPrivate,
-  };
-
-  model.attributes[UPDATED_BY_ATTRIBUTE] = {
-    type: 'relation',
-    relation: 'oneToOne',
-    target: 'strapi::user',
-    configurable: false,
-    writable: false,
-    visible: false,
-    useJoinTable: false,
-    private: isPrivate,
-  };
-};
-
-const getGlobalId = (model, modelName, prefix) => {
-  let globalId = prefix ? `${prefix}-${modelName}` : modelName;
-
-  return model.globalId || _.upperFirst(_.camelCase(globalId));
-};
-
 const isRelationalAttribute = attribute => attribute.type === 'relation';
 const isComponentAttribute = attribute => ['component', 'dynamiczone'].includes(attribute.type);
 
@@ -222,8 +119,8 @@ const isTypedAttribute = (attribute, type) => {
  */
 const getContentTypeRoutePrefix = contentType => {
   return isSingleType(contentType)
-    ? _.kebabCase(contentType.modelName)
-    : _.kebabCase(pluralize(contentType.modelName));
+    ? _.kebabCase(contentType.info.singularName)
+    : _.kebabCase(contentType.info.pluralName);
 };
 
 module.exports = {
@@ -246,7 +143,5 @@ module.exports = {
   isSingleType,
   isCollectionType,
   isKind,
-  createContentType,
-  getGlobalId,
   getContentTypeRoutePrefix,
 };

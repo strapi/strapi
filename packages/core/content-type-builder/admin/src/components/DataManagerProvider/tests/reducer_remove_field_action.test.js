@@ -19,7 +19,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         modifiedData: {
           components: {},
           contentType: {
-            uid: 'application::address.address',
+            uid: 'api::address.address',
             schema: {
               name: 'address',
               description: '',
@@ -32,7 +32,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -50,7 +50,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         modifiedData: {
           components: {},
           contentType: {
-            uid: 'application::address.address',
+            uid: 'api::address.address',
             schema: {
               name: 'address',
               description: '',
@@ -63,7 +63,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -97,7 +97,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         modifiedData: {
           components: {},
           contentType: {
-            uid: 'application::menusection.menusection',
+            uid: 'api::menusection.menusection',
             schema: {
               name: 'menusection',
               description: '',
@@ -114,7 +114,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
                 {
                   name: 'menu',
                   relation: 'manyToOne',
-                  target: 'application::menu.menu',
+                  target: 'api::menu.menu',
                   targetAttribute: 'menusections',
                   type: 'relation',
                 },
@@ -131,7 +131,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         modifiedData: {
           components: {},
           contentType: {
-            uid: 'application::menusection.menusection',
+            uid: 'api::menusection.menusection',
             schema: {
               name: 'menusection',
               description: '',
@@ -157,7 +157,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
 
   describe('Removing a relation attribute with the same content type', () => {
     it('Should handle the removal of the one side (oneWay or manyWay) nature correctly', () => {
-      const contentTypeUID = 'application::dummy.dummy';
+      const contentTypeUID = 'api::dummy.dummy';
 
       const action = {
         type: REMOVE_FIELD,
@@ -193,7 +193,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
             {
               name: 'one_to_many_right',
               relation: 'manyToOne',
-              target: 'application::dummy.dummy',
+              target: 'api::dummy.dummy',
               targetAttribute: 'one_to_many_left',
               type: 'relation',
             },
@@ -223,7 +223,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
             {
               name: 'one_to_many_right',
               relation: 'manyToOne',
-              target: 'application::dummy.dummy',
+              target: 'api::dummy.dummy',
               targetAttribute: 'one_to_many_left',
               type: 'relation',
             },
@@ -257,7 +257,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
     });
 
     it('Should handle the removal of the two sides (oneToOne, oneToMany, manyToOne, manyToMany) nature correctly', () => {
-      const contentTypeUID = 'application::dummy.dummy';
+      const contentTypeUID = 'api::dummy.dummy';
       const action = {
         type: REMOVE_FIELD,
         mainDataKey: 'contentType',
@@ -292,7 +292,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
             {
               name: 'one_to_many_right',
               relation: 'manyToOne',
-              target: 'application::dummy.dummy',
+              target: 'api::dummy.dummy',
               targetAttribute: 'one_to_many_left',
               type: 'relation',
             },
@@ -367,7 +367,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         modifiedData: {
           components: {},
           contentType: {
-            uid: 'application::homepage.homepage',
+            uid: 'api::homepage.homepage',
             schema: {
               name: 'homepage',
               attributes: [
@@ -388,7 +388,7 @@ describe('CTB | components | DataManagerProvider | reducer | REMOVE_FIELD', () =
         modifiedData: {
           components: {},
           contentType: {
-            uid: 'application::homepage.homepage',
+            uid: 'api::homepage.homepage',
             schema: {
               name: 'homepage',
               attributes: [

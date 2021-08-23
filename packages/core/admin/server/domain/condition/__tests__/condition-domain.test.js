@@ -13,14 +13,14 @@ describe('Condition Domain', () => {
       expect(condition).not.toHaveProperty('id');
       // The new condition should match the original one and add a new conditionId attribute
       expect(newCondition).toMatchObject(condition);
-      expect(newCondition).toHaveProperty('id', 'application::foobar');
+      expect(newCondition).toHaveProperty('id', 'api::foobar');
     });
   });
 
   describe('computeConditionId', () => {
-    test('Should return a condition ID prefixed with "application::" when there is no plugin', () => {
+    test('Should return a condition ID prefixed with "api::" when there is no plugin', () => {
       const attributes = { name: 'foobar' };
-      const expected = 'application::foobar';
+      const expected = 'api::foobar';
 
       const id = domain.computeConditionId(attributes);
 
@@ -36,9 +36,9 @@ describe('Condition Domain', () => {
       expect(id).toBe(expected);
     });
 
-    test('Should return a condition id prefixed with "plugins::" when there is a plugin (other than admin)', () => {
+    test('Should return a condition id prefixed with "plugin::" when there is a plugin (other than admin)', () => {
       const attributes = { name: 'foobar', plugin: 'myPlugin' };
-      const expected = 'plugins::myPlugin.foobar';
+      const expected = 'plugin::myPlugin.foobar';
 
       const id = domain.computeConditionId(attributes);
 
@@ -56,7 +56,7 @@ describe('Condition Domain', () => {
       };
       const expected = {
         handler,
-        id: 'application::foo',
+        id: 'api::foo',
         displayName: 'Foo',
         category: 'default',
       };
@@ -77,7 +77,7 @@ describe('Condition Domain', () => {
       };
 
       const expected = {
-        id: 'plugins::bar.foo',
+        id: 'plugin::bar.foo',
         category: 'default',
         plugin: 'bar',
         displayName: 'Foo',

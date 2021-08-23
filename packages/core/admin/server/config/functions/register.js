@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 'use strict';
 
-const permissionsFieldsToPropertiesMigration = require('../migrations/permissions-fields-to-properties');
+// const permissionsFieldsToPropertiesMigration = require('../migrations/permissions-fields-to-properties');
 
 module.exports = () => {
   // FIXME: to implement

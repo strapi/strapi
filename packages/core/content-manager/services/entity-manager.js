@@ -92,7 +92,7 @@ const getBasePopulate = (uid, populate) => {
   });
 };
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   async assocCreatorRoles(entity) {
     if (!entity) {
       return entity;
@@ -202,4 +202,4 @@ module.exports = {
 
     return strapi.entityService.update(uid, entity.id, { params, data });
   }),
-};
+});

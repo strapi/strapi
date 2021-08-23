@@ -17,7 +17,7 @@ module.exports = strapi => ({
 const loadFeaturesRoutes = () => {
   for (const [feature, getFeatureRoutes] of Object.entries(routes)) {
     if (features.isEnabled(feature)) {
-      strapi.admin.config.routes.push(...getFeatureRoutes);
+      strapi.admin.config.routes.push(...getFeatureRoutes); // TODO
     }
   }
 };
