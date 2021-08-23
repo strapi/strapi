@@ -310,6 +310,11 @@ module.exports = {
       );
     }
 
+    // User blocked
+    if (user.blocked) {
+      return ctx.badRequest('blocked.user');
+    }
+
     // Generate random token.
     const resetPasswordToken = crypto.randomBytes(64).toString('hex');
 
