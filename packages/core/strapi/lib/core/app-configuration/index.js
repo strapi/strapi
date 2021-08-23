@@ -16,17 +16,8 @@ const loadConfigDir = require('./config-loader');
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
 
 const CONFIG_PATHS = {
-  admin: 'admin',
-  api: 'api',
   config: 'config',
-  controllers: 'controllers',
-  models: 'models',
-  plugins: 'plugins',
-  policies: 'policies',
-  tmp: '.tmp',
-  services: 'services',
   static: 'public',
-  validators: 'validators',
   views: 'views',
 };
 

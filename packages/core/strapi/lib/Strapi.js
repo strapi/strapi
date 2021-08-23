@@ -14,7 +14,7 @@ const loadModules = require('./core/loaders/load-modules');
 const utils = require('./utils');
 const bootstrap = require('./core/loaders/bootstrap');
 const initializeMiddlewares = require('./middlewares');
-const createStrapiFs = require('./core/fs');
+const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
@@ -34,7 +34,6 @@ const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
 const loadPlugins = require('./core/load-plugins');
-// const { nameToSlug } = require('../../utils/lib');
 
 const LIFECYCLES = {
   REGISTER: 'register',
