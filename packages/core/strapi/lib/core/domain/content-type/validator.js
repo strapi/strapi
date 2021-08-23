@@ -3,9 +3,28 @@
 const { keyBy, mapValues } = require('lodash');
 const { yup } = require('@strapi/utils');
 
-// To replace by directly using implemented lifecycles
-const lifecycles = ['beforeCreate', 'afterCreate'];
-const lifecyclesShape = mapValues(keyBy(lifecycles), () =>
+const LIFECYCLES = [
+  'beforeCreate',
+  'afterCreate',
+  'beforeFindOne',
+  'afterFindOne',
+  'beforeFindMany',
+  'afterFindMany',
+  'beforeCount',
+  'afterCount',
+  'beforeCreateMany',
+  'afterCreateMany',
+  'beforeUpdate',
+  'afterUpdate',
+  'beforeUpdateMany',
+  'afterUpdateMany',
+  'beforeDelete',
+  'afterDelete',
+  'beforeDeleteMany',
+  'afterDeleteMany',
+];
+
+const lifecyclesShape = mapValues(keyBy(LIFECYCLES), () =>
   yup
     .mixed()
     .nullable()

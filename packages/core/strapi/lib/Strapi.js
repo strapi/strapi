@@ -60,7 +60,6 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
     this.server = createHTTPServer(this, this.app);
-    this.contentTypes = {}; // to remove V3
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
@@ -80,6 +79,22 @@ class Strapi {
 
   service(uid) {
     return this.container.get('services').get(uid);
+  }
+
+  controller(uid) {
+    return this.container.get('controllers').get(uid);
+  }
+
+  contentType(name) {
+    // TODO: expose a CT with a cleaner api to access attributes etc directly
+    return this.container.get('content-types').get(name).schema;
+  }
+
+  get contentTypes() {
+    // TODO: expose a CT with a cleaner api to access attributes etc directly
+
+    const cts = this.container.get('content-types').getAll();
+    return _.mapValues(cts, value => value.schema);
   }
 
   plugin(name) {
@@ -219,6 +234,12 @@ class Strapi {
   loadAdmin() {
     this.admin = require('@strapi/admin/strapi-server');
 
+    // TODO: move to simpler code without needing mapValues
+    strapi.container.get('content-types').add(
+      `strapi::`,
+      _.mapValues(strapi.admin.models, model => ({ schema: model }))
+    );
+
     // TODO: rename into just admin and ./config/admin.js
     const userAdminConfig = strapi.config.get('server.admin');
     this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
@@ -252,7 +273,6 @@ class Strapi {
     this.components = modules.components;
 
     this.middleware = modules.middlewares;
-    this.hook = modules.hook;
 
     await bootstrap(this);
 

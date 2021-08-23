@@ -48,15 +48,6 @@ const defaultConfig = {
     },
     settings: {},
   },
-  hook: {
-    timeout: 1000,
-    load: {
-      before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
-      order: [],
-      after: ['parser', 'router'],
-    },
-    settings: {},
-  },
 };
 
 module.exports = (dir, initialConfig = {}) => {
@@ -80,7 +71,6 @@ module.exports = (dir, initialConfig = {}) => {
       strapi: strapiVersion,
     },
     installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
-    installedHooks: getPrefixedDeps('@strapi/hook', pkgJSON),
   };
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later

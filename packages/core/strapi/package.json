@@ -37,7 +37,7 @@
     "cross-spawn": "^7.0.3",
     "debug": "^4.1.1",
     "delegates": "^1.0.0",
-    "dotenv": "8.2.0",
+    "dotenv": "10.0.0",
     "execa": "^1.0.0",
     "fs-extra": "^9.1.0",
     "glob": "^7.1.2",
