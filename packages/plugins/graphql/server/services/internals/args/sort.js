@@ -7,4 +7,4 @@ const SortArg = arg({
   default: [],
 });
 
-module.exports = { SortArg };
+module.exports = SortArg;

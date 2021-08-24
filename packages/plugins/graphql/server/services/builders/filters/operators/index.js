@@ -1,5 +1,7 @@
 'use strict';
 
+const { mapValues } = require('lodash/fp');
+
 const and = require('./and');
 const or = require('./or');
 const not = require('./not');
@@ -10,7 +12,7 @@ const contains = require('./contains');
 const gt = require('./gt');
 const lt = require('./lt');
 
-module.exports = {
+const operators = {
   and,
   or,
   not,
@@ -21,3 +23,6 @@ module.exports = {
   gt,
   lt,
 };
+
+// Instantiate every operator with the Strapi instance
+module.exports = context => mapValues(opCtor => opCtor(context), operators);

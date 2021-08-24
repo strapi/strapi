@@ -52,7 +52,26 @@ const KINDS = {
   internal: 'internal',
 };
 
-module.exports = {
+const GRAPHQL_SCALAR_OPERATORS = {
+  // ID
+  ID: ['eq', 'not'],
+  // Booleans
+  Boolean: ['eq', 'not'],
+  // Strings
+  String: ['eq', 'not', 'contains', 'startsWith', 'endsWith'],
+  // Numbers
+  Int: ['eq', 'not', 'gt', 'lt'],
+  Long: ['eq', 'not', 'gt', 'lt'],
+  Float: ['eq', 'not', 'gt', 'lt'],
+  // Dates
+  Date: ['eq', 'not', 'gt', 'lt'],
+  Time: ['eq', 'not', 'gt', 'lt'],
+  DateTime: ['eq', 'not', 'gt', 'lt'],
+  // Others
+  JSON: ['eq', 'not'],
+};
+
+module.exports = () => ({
   PAGINATION_TYPE_NAME,
   RESPONSE_COLLECTION_META_TYPE_NAME,
   PUBLICATION_STATE_TYPE_NAME,
@@ -60,4 +79,5 @@ module.exports = {
   STRAPI_SCALARS,
   GENERIC_MORPH_TYPENAME,
   KINDS,
-};
+  GRAPHQL_SCALAR_OPERATORS,
+});

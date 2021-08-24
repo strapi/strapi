@@ -2,7 +2,7 @@
 
 const LT_FIELD_NAME = 'lt';
 
-module.exports = {
+module.exports = () => ({
   fieldName: LT_FIELD_NAME,
 
   strapiOperator: '$lt',
@@ -10,4 +10,4 @@ module.exports = {
   add(t, type) {
     t.field(LT_FIELD_NAME, { type });
   },
-};
+});

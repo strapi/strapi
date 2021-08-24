@@ -3,10 +3,18 @@
 const { extendType } = require('nexus');
 
 const { actionExists } = require('../../old/utils');
-const { utils } = require('../../types');
-const { transformArgs, getContentTypeArgs } = require('../utils');
 
 module.exports = ({ strapi }) => {
+  const { naming } = strapi.plugin('graphql').service('utils');
+  const { transformArgs, getContentTypeArgs } = strapi.plugin('graphql').service('builders').utils;
+
+  const {
+    getFindOneQueryName,
+    getEntityResponseName,
+    getFindQueryName,
+    getEntityResponseCollectionName,
+  } = naming;
+
   const buildCollectionTypeQueries = contentType => {
     return extendType({
       type: 'Query',
@@ -26,8 +34,8 @@ module.exports = ({ strapi }) => {
   const addFindOneQuery = (t, contentType) => {
     const { uid } = contentType;
 
-    const findOneQueryName = utils.getFindOneQueryName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const findOneQueryName = getFindOneQueryName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     // If the action doesn't exist, return early and don't add the query
     if (!actionExists({ resolver: `${uid}.findOne` })) {
@@ -63,8 +71,8 @@ module.exports = ({ strapi }) => {
   const addFindQuery = (t, contentType) => {
     const { uid } = contentType;
 
-    const findQueryName = utils.getFindQueryName(contentType);
-    const responseCollectionTypeName = utils.getEntityResponseCollectionName(contentType);
+    const findQueryName = getFindQueryName(contentType);
+    const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
 
     // If the action doesn't exist, return early and don't add the query
     if (!actionExists({ resolver: `${uid}.find` })) {

@@ -4,7 +4,7 @@ const { list } = require('nexus');
 
 const AND_FIELD_NAME = 'and';
 
-module.exports = {
+module.exports = () => ({
   fieldName: AND_FIELD_NAME,
 
   strapiOperator: '$and',
@@ -12,4 +12,4 @@ module.exports = {
   add(t, type) {
     t.field(AND_FIELD_NAME, { type: list(type) });
   },
-};
+});

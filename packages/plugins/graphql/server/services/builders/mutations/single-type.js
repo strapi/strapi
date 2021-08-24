@@ -2,17 +2,25 @@
 
 const { extendType } = require('nexus');
 
-const { utils } = require('../../types');
 const { actionExists } = require('../../old/utils');
 const { toSingular } = require('../../old/naming');
 const { buildMutation } = require('../../old/resolvers-builder');
 
-module.exports = () => {
+module.exports = ({ strapi }) => {
+  const { naming } = strapi.plugin('graphql').service('utils');
+
+  const {
+    getUpdateMutationTypeName,
+    getEntityResponseName,
+    getContentTypeInputName,
+    getDeleteMutationTypeName,
+  } = naming;
+
   const addUpdateMutation = (t, contentType) => {
     const { uid, modelName } = contentType;
 
-    const updateMutationName = utils.getUpdateMutationTypeName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const updateMutationName = getUpdateMutationTypeName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     const resolverOptions = { resolver: `${uid}.update` };
 
@@ -28,7 +36,7 @@ module.exports = () => {
 
       args: {
         // Update payload
-        data: utils.getContentTypeInputName(contentType),
+        data: getContentTypeInputName(contentType),
       },
 
       async resolve(parent, args, context, info) {
@@ -44,8 +52,8 @@ module.exports = () => {
   const addDeleteMutation = (t, contentType) => {
     const { uid, modelName } = contentType;
 
-    const deleteMutationName = utils.getDeleteMutationTypeName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const deleteMutationName = getDeleteMutationTypeName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     const resolverOptions = { resolver: `${uid}.delete` };
 

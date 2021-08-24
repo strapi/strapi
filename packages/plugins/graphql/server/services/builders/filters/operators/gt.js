@@ -2,7 +2,7 @@
 
 const GT_FIELD_NAME = 'gt';
 
-module.exports = {
+module.exports = () => ({
   fieldName: GT_FIELD_NAME,
 
   strapiOperator: '$gt',
@@ -10,4 +10,4 @@ module.exports = {
   add(t, type) {
     t.field(GT_FIELD_NAME, { type });
   },
-};
+});

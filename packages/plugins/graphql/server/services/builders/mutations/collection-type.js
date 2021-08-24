@@ -1,17 +1,25 @@
 'use strict';
 
 const { extendType } = require('nexus');
-const { utils } = require('../../types');
 const { actionExists } = require('../../old/utils');
 
-const builderUtils = require('../utils');
-
 module.exports = ({ strapi }) => {
+  const { naming } = strapi.plugin('graphql').service('utils');
+  const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
+
+  const {
+    getCreateMutationTypeName,
+    getUpdateMutationTypeName,
+    getDeleteMutationTypeName,
+    getEntityResponseName,
+    getContentTypeInputName,
+  } = naming;
+
   const addCreateMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const createMutationName = utils.getCreateMutationTypeName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const createMutationName = getCreateMutationTypeName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     // If the action doesn't exist, return early and don't add the mutation
     if (!actionExists({ resolver: `${uid}.create` })) {
@@ -23,16 +31,16 @@ module.exports = ({ strapi }) => {
 
       args: {
         // Create payload
-        data: utils.getContentTypeInputName(contentType),
+        data: getContentTypeInputName(contentType),
       },
 
       async resolve(source, args) {
         // todo[v4]: need to handle media too? (type === 'media')
 
-        const transformedArgs = builderUtils.transformArgs(args, { contentType });
+        const transformedArgs = transformArgs(args, { contentType });
 
         const { create } = strapi
-          .plugin('strapi')
+          .plugin('graphql')
           .service('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
@@ -47,8 +55,8 @@ module.exports = ({ strapi }) => {
   const addUpdateMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const updateMutationName = utils.getUpdateMutationTypeName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const updateMutationName = getUpdateMutationTypeName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     // If the action doesn't exist, return early and don't add the mutation
     if (!actionExists({ resolver: `${uid}.update` })) {
@@ -69,14 +77,14 @@ module.exports = ({ strapi }) => {
         // ...uniqueAttributes,
 
         // Update payload
-        data: utils.getContentTypeInputName(contentType),
+        data: getContentTypeInputName(contentType),
       },
 
       async resolve(source, args) {
-        const transformedArgs = builderUtils.transformArgs(args, { contentType });
+        const transformedArgs = transformArgs(args, { contentType });
 
         const { update } = strapi
-          .plugin('strapi')
+          .plugin('graphql')
           .service('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
@@ -91,8 +99,8 @@ module.exports = ({ strapi }) => {
   const addDeleteMutation = (t, contentType) => {
     const { uid } = contentType;
 
-    const deleteMutationName = utils.getDeleteMutationTypeName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const deleteMutationName = getDeleteMutationTypeName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     // If the action doesn't exist, return early and don't add the mutation
     if (!actionExists({ resolver: `${uid}.delete` })) {
@@ -114,10 +122,10 @@ module.exports = ({ strapi }) => {
       },
 
       async resolve(source, args) {
-        const transformedArgs = builderUtils.transformArgs(args, { contentType });
+        const transformedArgs = transformArgs(args, { contentType });
 
         const { delete: deleteResolver } = strapi
-          .plugin('strapi')
+          .plugin('graphql')
           .service('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });

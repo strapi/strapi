@@ -2,7 +2,7 @@
 
 const STARTS_WITH_FIELD_NAME = 'startsWith';
 
-module.exports = {
+module.exports = () => ({
   fieldName: STARTS_WITH_FIELD_NAME,
 
   strapiOperator: '$startsWith',
@@ -10,4 +10,4 @@ module.exports = {
   add(t, type) {
     t.field(STARTS_WITH_FIELD_NAME, { type });
   },
-};
+});

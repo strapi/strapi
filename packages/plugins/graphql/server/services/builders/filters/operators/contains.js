@@ -2,7 +2,7 @@
 
 const CONTAINS_FIELD_NAME = 'contains';
 
-module.exports = {
+module.exports = () => ({
   fieldName: CONTAINS_FIELD_NAME,
 
   strapiOperator: '$contains',
@@ -10,4 +10,4 @@ module.exports = {
   add(t, type) {
     t.field(CONTAINS_FIELD_NAME, { type });
   },
-};
+});

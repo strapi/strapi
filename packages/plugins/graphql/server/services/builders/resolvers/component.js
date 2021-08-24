@@ -1,12 +1,13 @@
 'use strict';
 
 const { omit } = require('lodash/fp');
-const { transformArgs } = require('../utils');
 
 module.exports = ({ strapi }) => ({
   buildComponentResolver: ({ contentTypeUID, attributeName }) => {
+    const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
+
     return async (source, args = {}) => {
-      const contentType = strapi.getModel(contentTypeUID);
+      const contentType = strapi.contentTypes[contentTypeUID];
       const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
       // Since we're using the entity-manager & not the entity-service to load the

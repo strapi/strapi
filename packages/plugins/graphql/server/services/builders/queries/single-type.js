@@ -3,10 +3,14 @@
 const { extendType } = require('nexus');
 
 const { actionExists } = require('../../old/utils');
-const { transformArgs } = require('../utils');
-const { args, utils } = require('../../types');
 
 module.exports = ({ strapi }) => {
+  const { naming } = strapi.plugin('graphql').service('utils');
+  const { args } = strapi.plugin('graphql').service('internals');
+  const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
+
+  const { getFindOneQueryName, getEntityResponseName } = naming;
+
   const buildSingleTypeQueries = contentType => {
     return extendType({
       type: 'Query',
@@ -20,8 +24,8 @@ module.exports = ({ strapi }) => {
   const addFindQuery = (t, contentType) => {
     const { uid } = contentType;
 
-    const findQueryName = utils.getFindOneQueryName(contentType);
-    const responseTypeName = utils.getEntityResponseName(contentType);
+    const findQueryName = getFindOneQueryName(contentType);
+    const responseTypeName = getEntityResponseName(contentType);
 
     if (!actionExists({ resolver: `${uid}.find` })) {
       return;

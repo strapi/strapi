@@ -6,7 +6,7 @@ const entityToResponseEntity = entity => ({ id: entity.id, attributes: entity })
 
 const entitiesToResponseEntities = map(entityToResponseEntity);
 
-module.exports = {
+module.exports = () => ({
   entityToResponseEntity,
   entitiesToResponseEntities,
-};
+});

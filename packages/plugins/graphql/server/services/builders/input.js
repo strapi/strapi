@@ -2,24 +2,27 @@
 
 const { inputObjectType, nonNull } = require('nexus');
 
-const { utils, mappers } = require('../types');
-
-const {
-  getComponentInputName,
-  getContentTypeInputName,
-  getEnumName,
-  getDynamicZoneInputName,
-  isStrapiScalar,
-  isRelation,
-  isMorphRelation,
-  isMedia,
-  isEnumeration,
-  isComponent,
-  isDynamicZone,
-} = utils;
-
 module.exports = context => {
   const { strapi } = context;
+
+  const { naming, mappers, attributes } = strapi.plugin('graphql').service('utils');
+
+  const {
+    getComponentInputName,
+    getContentTypeInputName,
+    getEnumName,
+    getDynamicZoneInputName,
+  } = naming;
+
+  const {
+    isStrapiScalar,
+    isRelation,
+    isMorphRelation,
+    isMedia,
+    isEnumeration,
+    isComponent,
+    isDynamicZone,
+  } = attributes;
 
   return {
     buildInputType(contentType) {

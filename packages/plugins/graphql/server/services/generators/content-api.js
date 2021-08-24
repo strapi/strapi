@@ -2,15 +2,33 @@
 
 const { makeSchema, unionType } = require('nexus');
 
-const { utils, constants, scalars, buildInternals } = require('../types');
-
-const { KINDS } = constants;
-
 module.exports = ({ strapi }) => {
   // Type Registry
   let registry;
   // Builders Instances
   let builders;
+
+  const { KINDS, GENERIC_MORPH_TYPENAME } = strapi.plugin('graphql').service('constants');
+  const utils = strapi.plugin('graphql').service('utils');
+  const { scalars, buildInternalTypes } = strapi.plugin('graphql').service('internals');
+
+  const {
+    getMorphRelationTypeName,
+    getTypeName,
+    getComponentName,
+    getEntityName,
+    getEntityResponseName,
+    getEntityQueriesTypeName,
+    getEntityMutationsTypeName,
+    getEntityResponseCollectionName,
+    getEnumName,
+    getDynamicZoneName,
+    getDynamicZoneInputName,
+    getFiltersInputTypeName,
+    getComponentInputName,
+    getContentTypeInputName,
+  } = utils.naming;
+  const { isMorphRelation, isEnumeration, isDynamicZone } = utils.attributes;
 
   /**
    * Register needed GraphQL types for every content type
@@ -46,7 +64,7 @@ module.exports = ({ strapi }) => {
   const registerMorphTypes = contentTypes => {
     // Create & register a union type that includes every type or component registered
     const genericMorphType = builders.buildGenericMorphDefinition();
-    registry.register(constants.GENERIC_MORPH_TYPENAME, genericMorphType, { kind: KINDS.morph });
+    registry.register(GENERIC_MORPH_TYPENAME, genericMorphType, { kind: KINDS.morph });
 
     // For every content type
     contentTypes.forEach(contentType => {
@@ -54,12 +72,12 @@ module.exports = ({ strapi }) => {
 
       // Isolate its polymorphic attributes
       const morphAttributes = Object.entries(attributes).filter(([, attribute]) =>
-        utils.isMorphRelation(attribute)
+        isMorphRelation(attribute)
       );
 
       // For each one of those polymorphic attribute
       for (const [attributeName, attribute] of morphAttributes) {
-        const name = utils.getMorphRelationTypeName(contentType, attributeName);
+        const name = getMorphRelationTypeName(contentType, attributeName);
         const { target } = attribute;
 
         // Ignore those whose target is not an array
@@ -72,7 +90,7 @@ module.exports = ({ strapi }) => {
           // Get content types definitions
           .map(uid => strapi.getModel(uid))
           // Resolve types names
-          .map(contentType => utils.getTypeName(contentType));
+          .map(contentType => getTypeName(contentType));
 
         // Register the new polymorphic union type
         registry.register(
@@ -89,10 +107,10 @@ module.exports = ({ strapi }) => {
               }
 
               if (contentType.modelType === 'component') {
-                return utils.getComponentName(contentType);
+                return getComponentName(contentType);
               }
 
-              return utils.getTypeName(contentType);
+              return getTypeName(contentType);
             },
 
             definition(t) {
@@ -107,7 +125,7 @@ module.exports = ({ strapi }) => {
   };
 
   const registerComponent = contentType => {
-    const name = utils.getComponentName(contentType);
+    const name = getComponentName(contentType);
     const definition = builders.buildTypeDefinition(contentType);
 
     registry.register(name, definition, { kind: KINDS.component, contentType });
@@ -115,11 +133,11 @@ module.exports = ({ strapi }) => {
 
   const registerSingleType = contentType => {
     const types = {
-      base: utils.getTypeName(contentType),
-      entity: utils.getEntityName(contentType),
-      response: utils.getEntityResponseName(contentType),
-      queries: utils.getEntityQueriesTypeName(contentType),
-      mutations: utils.getEntityMutationsTypeName(contentType),
+      base: getTypeName(contentType),
+      entity: getEntityName(contentType),
+      response: getEntityResponseName(contentType),
+      queries: getEntityQueriesTypeName(contentType),
+      mutations: getEntityMutationsTypeName(contentType),
     };
 
     const getConfig = kind => ({ kind, contentType });
@@ -158,12 +176,12 @@ module.exports = ({ strapi }) => {
   const registerCollectionType = contentType => {
     // Types name (as string)
     const types = {
-      base: utils.getTypeName(contentType),
-      entity: utils.getEntityName(contentType),
-      response: utils.getEntityResponseName(contentType),
-      responseCollection: utils.getEntityResponseCollectionName(contentType),
-      queries: utils.getEntityQueriesTypeName(contentType),
-      mutations: utils.getEntityMutationsTypeName(contentType),
+      base: getTypeName(contentType),
+      entity: getEntityName(contentType),
+      response: getEntityResponseName(contentType),
+      responseCollection: getEntityResponseCollectionName(contentType),
+      queries: getEntityQueriesTypeName(contentType),
+      mutations: getEntityMutationsTypeName(contentType),
     };
 
     const getConfig = kind => ({ kind, contentType });
@@ -210,13 +228,13 @@ module.exports = ({ strapi }) => {
     const { attributes } = contentType;
 
     const enumAttributes = Object.keys(attributes).filter(attributeName =>
-      utils.isEnumeration(attributes[attributeName])
+      isEnumeration(attributes[attributeName])
     );
 
     for (const attributeName of enumAttributes) {
       const attribute = attributes[attributeName];
 
-      const enumName = utils.getEnumName(contentType, attributeName);
+      const enumName = getEnumName(contentType, attributeName);
       const enumDefinition = builders.buildEnumTypeDefinition(attribute, enumName);
 
       registry.register(enumName, enumDefinition, {
@@ -232,13 +250,13 @@ module.exports = ({ strapi }) => {
     const { attributes } = contentType;
 
     const dynamicZoneAttributes = Object.keys(attributes).filter(attributeName =>
-      utils.isDynamicZone(attributes[attributeName])
+      isDynamicZone(attributes[attributeName])
     );
 
     for (const attributeName of dynamicZoneAttributes) {
       const attribute = attributes[attributeName];
-      const dzName = utils.getDynamicZoneName(contentType, attributeName);
-      const dzInputName = utils.getDynamicZoneInputName(contentType, attributeName);
+      const dzName = getDynamicZoneName(contentType, attributeName);
+      const dzInputName = getDynamicZoneInputName(contentType, attributeName);
 
       const [type, input] = builders.buildDynamicZoneDefinition(attribute, dzName, dzInputName);
 
@@ -256,7 +274,7 @@ module.exports = ({ strapi }) => {
   };
 
   const registerFiltersDefinition = contentType => {
-    const type = utils.getFiltersInputTypeName(contentType);
+    const type = getFiltersInputTypeName(contentType);
     const definition = builders.buildContentTypeFilters(contentType);
 
     registry.register(type, definition, { kind: KINDS.filtersInput, contentType });
@@ -265,10 +283,10 @@ module.exports = ({ strapi }) => {
   const registerInputsDefinition = contentType => {
     const { modelType } = contentType;
 
-    const type = (modelType === 'component'
-      ? utils.getComponentInputName
-      : utils.getContentTypeInputName
-    ).call(null, contentType);
+    const type = (modelType === 'component' ? getComponentInputName : getContentTypeInputName).call(
+      null,
+      contentType
+    );
 
     const definition = builders.buildInputType(contentType);
 
@@ -300,9 +318,9 @@ module.exports = ({ strapi }) => {
     });
 
     // Register Strapi's internal types
-    const internals = buildInternals({ strapi });
+    const internalTypes = buildInternalTypes({ strapi });
 
-    for (const [kind, definitions] of Object.entries(internals)) {
+    for (const [kind, definitions] of Object.entries(internalTypes)) {
       registry.registerMany(Object.entries(definitions), { kind });
     }
 

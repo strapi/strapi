@@ -2,19 +2,17 @@
 
 const { inputObjectType } = require('nexus');
 
-const { getScalarFilterInputTypeName } = require('../utils');
-const { graphqlScalarToOperators } = require('../mappers');
-
-const { enabledScalars } = graphqlScalarToOperators;
-
 /**
  * Build a map of filters type for every GraphQL scalars
  * @return {Object<string, NexusInputTypeDef>}
  */
-const buildScalarFilters = () => {
-  return enabledScalars.reduce((acc, type) => {
-    const operators = graphqlScalarToOperators(type);
-    const typeName = getScalarFilterInputTypeName(type);
+const buildScalarFilters = ({ strapi }) => {
+  const { naming, mappers } = strapi.plugin('graphql').service('utils');
+  const { helpers } = strapi.plugin('graphql').service('internals');
+
+  return helpers.getEnabledScalars().reduce((acc, type) => {
+    const operators = mappers.graphqlScalarToOperators(type);
+    const typeName = naming.getScalarFilterInputTypeName(type);
 
     if (!operators || operators.length === 0) {
       return acc;
@@ -36,6 +34,6 @@ const buildScalarFilters = () => {
   }, {});
 };
 
-module.exports = {
-  scalars: buildScalarFilters(),
-};
+module.exports = context => ({
+  scalars: buildScalarFilters(context),
+});

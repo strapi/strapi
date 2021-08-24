@@ -6,112 +6,115 @@ const {
   contentTypes: { hasDraftAndPublish },
 } = require('@strapi/utils');
 
-const {
-  args,
-  mappers: { strapiScalarToGraphQLScalar, graphQLFiltersToStrapiQuery },
-  utils: { isStrapiScalar, getScalarFilterInputTypeName, getFiltersInputTypeName },
-} = require('../types');
+module.exports = ({ strapi }) => {
+  const getGraphQLService = strapi.plugin('graphql').service;
 
-/**
- * Filter an object entries and keep only those whose value is a unique scalar attribute
- * @param {object} attributes
- * @return {Object<string, object>}
- */
-const getUniqueScalarAttributes = attributes => {
-  const uniqueAttributes = entries(attributes).filter(
-    ([, attribute]) => isStrapiScalar(attribute) && attribute.unique
-  );
+  return {
+    /**
+     * Get every args for a given content type
+     * @param {object} contentType
+     * @param {object} options
+     * @param {boolean} options.multiple
+     * @return {object}
+     */
+    getContentTypeArgs(contentType, { multiple = true } = {}) {
+      const { naming } = getGraphQLService('utils');
+      const { args } = getGraphQLService('internals');
 
-  return Object.fromEntries(uniqueAttributes);
-};
+      const { kind, modelType } = contentType;
 
-/**
- * Map each value from an attribute to a FiltersInput type name
- * @param {object} attributes - The attributes object to transform
- * @return {Object<string, string>}
- */
-const scalarAttributesToFiltersMap = mapValues(attribute => {
-  const gqlScalar = strapiScalarToGraphQLScalar(attribute.type);
+      // Components
+      if (modelType === 'component') {
+        return {
+          sort: args.SortArg,
+          pagination: args.PaginationArg,
+          filters: naming.getFiltersInputTypeName(contentType),
+        };
+      }
 
-  return getScalarFilterInputTypeName(gqlScalar);
-});
+      // Collection Types
+      else if (kind === 'collectionType') {
+        // hasDraftAndPublish
 
-/**
- * Apply basic transform to GQL args
- */
-const transformArgs = (args, { contentType, usePagination = false } = {}) => {
-  const { pagination = {}, filters = {} } = args;
+        if (!multiple) {
+          return { id: 'ID' };
+        }
 
-  // Init
-  const newArgs = omit(['pagination', 'filters'], args);
+        const params = {
+          pagination: args.PaginationArg,
+          sort: args.SortArg,
+          filters: naming.getFiltersInputTypeName(contentType),
+        };
 
-  // Pagination
-  if (usePagination) {
-    Object.assign(
-      newArgs,
-      withDefaultPagination(pagination /*, config.get(graphql.pagination.defaults)*/)
-    );
-  }
+        if (hasDraftAndPublish(contentType)) {
+          Object.assign(params, { publicationState: args.PublicationStateArg });
+        }
 
-  // Filters
-  if (args.filters) {
-    Object.assign(newArgs, { filters: graphQLFiltersToStrapiQuery(filters, contentType) });
-  }
+        return params;
+      }
 
-  return newArgs;
-};
+      // Single Types
+      else if (kind === 'singleType') {
+        return {
+          id: 'ID',
+        };
+      }
+    },
 
-/**
- * Get every args for a given content type
- * @param {object} contentType
- * @param {object} options
- * @param {boolean} options.multiple
- * @return {object}
- */
-const getContentTypeArgs = (contentType, { multiple = true } = {}) => {
-  const { kind, modelType } = contentType;
+    /**
+     * Filter an object entries and keep only those whose value is a unique scalar attribute
+     * @param {object} attributes
+     * @return {Object<string, object>}
+     */
+    getUniqueScalarAttributes: attributes => {
+      const { isStrapiScalar } = getGraphQLService('utils').attributes;
 
-  // Components
-  if (modelType === 'component') {
-    return {
-      sort: args.SortArg,
-      pagination: args.PaginationArg,
-      filters: getFiltersInputTypeName(contentType),
-    };
-  }
+      const uniqueAttributes = entries(attributes).filter(
+        ([, attribute]) => isStrapiScalar(attribute) && attribute.unique
+      );
 
-  // Collection Types
-  else if (kind === 'collectionType') {
-    // hasDraftAndPublish
+      return Object.fromEntries(uniqueAttributes);
+    },
 
-    if (!multiple) {
-      return { id: 'ID' };
-    }
+    /**
+     * Map each value from an attribute to a FiltersInput type name
+     * @param {object} attributes - The attributes object to transform
+     * @return {Object<string, string>}
+     */
+    scalarAttributesToFiltersMap: mapValues(attribute => {
+      const { mappers, naming } = getGraphQLService('utils');
 
-    const params = {
-      pagination: args.PaginationArg,
-      sort: args.SortArg,
-      filters: getFiltersInputTypeName(contentType),
-    };
+      const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
-    if (hasDraftAndPublish(contentType)) {
-      Object.assign(params, { publicationState: args.PublicationStateArg });
-    }
+      return naming.getScalarFilterInputTypeName(gqlScalar);
+    }),
 
-    return params;
-  }
+    /**
+     * Apply basic transform to GQL args
+     */
+    transformArgs(args, { contentType, usePagination = false } = {}) {
+      const { mappers } = getGraphQLService('utils');
+      const { pagination = {}, filters = {} } = args;
 
-  // Single Types
-  else if (kind === 'singleType') {
-    return {
-      id: 'ID',
-    };
-  }
-};
+      // Init
+      const newArgs = omit(['pagination', 'filters'], args);
 
-module.exports = {
-  getContentTypeArgs,
-  getUniqueScalarAttributes,
-  scalarAttributesToFiltersMap,
-  transformArgs,
+      // Pagination
+      if (usePagination) {
+        Object.assign(
+          newArgs,
+          withDefaultPagination(pagination /*, config.get(graphql.pagination.defaults)*/)
+        );
+      }
+
+      // Filters
+      if (args.filters) {
+        Object.assign(newArgs, {
+          filters: mappers.graphQLFiltersToStrapiQuery(filters, contentType),
+        });
+      }
+
+      return newArgs;
+    },
+  };
 };

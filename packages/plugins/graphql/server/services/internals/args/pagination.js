@@ -13,9 +13,7 @@ const PaginationInputType = inputObjectType({
   },
 });
 
-const PaginationArg = arg({
+module.exports = arg({
   type: PaginationInputType,
   default: {},
 });
-
-module.exports = { PaginationArg };

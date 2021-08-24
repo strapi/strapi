@@ -2,57 +2,72 @@
 
 const { inputObjectType } = require('nexus');
 
-const { utils, mappers } = require('../../types');
-const operators = require('./operators');
+module.exports = ({ strapi }) => {
+  const rootLevelOperators = () => {
+    const { operators } = strapi.plugin('graphql').service('builders').filters;
 
-const rootLevelOperators = [operators.and, operators.or, operators.not];
+    return [operators.and, operators.or, operators.not];
+  };
 
-function buildContentTypeFilters(contentType) {
-  const { attributes } = contentType;
+  const buildContentTypeFilters = contentType => {
+    const utils = strapi.plugin('graphql').service('utils');
 
-  const filtersTypeName = utils.getFiltersInputTypeName(contentType);
+    const { getFiltersInputTypeName } = utils.naming;
+    const { isStrapiScalar, isMedia, isRelation } = utils.attributes;
 
-  return inputObjectType({
-    name: filtersTypeName,
+    const { attributes } = contentType;
 
-    definition(t) {
-      // Add every defined attribute
-      for (const [attributeName, attribute] of Object.entries(attributes)) {
-        // Handle scalars
-        if (utils.isStrapiScalar(attribute)) {
-          addScalarAttribute(t, attributeName, attribute);
+    const filtersTypeName = getFiltersInputTypeName(contentType);
+
+    return inputObjectType({
+      name: filtersTypeName,
+
+      definition(t) {
+        // Add every defined attribute
+        for (const [attributeName, attribute] of Object.entries(attributes)) {
+          // Handle scalars
+          if (isStrapiScalar(attribute)) {
+            addScalarAttribute(t, attributeName, attribute);
+          }
+
+          // Handle relations
+          else if (isRelation(attribute) || isMedia(attribute)) {
+            addRelationalAttribute(t, attributeName, attribute);
+          }
         }
 
-        // Handle relations
-        else if (utils.isRelation(attribute) || utils.isMedia(attribute)) {
-          addRelationalAttribute(t, attributeName, attribute);
+        // Conditional clauses
+        for (const operator of rootLevelOperators()) {
+          operator.add(t, filtersTypeName);
         }
-      }
+      },
+    });
+  };
 
-      // Conditional clauses
-      for (const operator of rootLevelOperators) {
-        operator.add(t, filtersTypeName);
-      }
-    },
-  });
-}
+  const addScalarAttribute = (builder, attributeName, attribute) => {
+    const { naming, mappers } = strapi.plugin('graphql').service('utils');
 
-const addScalarAttribute = (builder, attributeName, attribute) => {
-  const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
+    const gqlType = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
-  builder.field(attributeName, { type: utils.getScalarFilterInputTypeName(gqlType) });
-};
+    builder.field(attributeName, { type: naming.getScalarFilterInputTypeName(gqlType) });
+  };
 
-const addRelationalAttribute = (builder, attributeName, attribute) => {
-  const model = strapi.getModel(attribute.target);
+  const addRelationalAttribute = (builder, attributeName, attribute) => {
+    const utils = strapi.plugin('graphql').service('utils');
 
-  // If there is no model corresponding to the attribute configuration
-  // or if the attribute is a polymorphic relation or a media, then ignore it
-  if (!model || utils.isMorphRelation(attribute) || utils.isMedia(attribute)) return;
+    const { getFiltersInputTypeName } = utils.naming;
+    const { isMorphRelation, isMedia } = utils.attributes;
 
-  builder.field(attributeName, { type: utils.getFiltersInputTypeName(model) });
-};
+    const model = strapi.getModel(attribute.target);
 
-module.exports = {
-  buildContentTypeFilters,
+    // If there is no model corresponding to the attribute configuration
+    // or if the attribute is a polymorphic relation or a media, then ignore it
+    if (!model || isMorphRelation(attribute) || isMedia(attribute)) return;
+
+    builder.field(attributeName, { type: getFiltersInputTypeName(model) });
+  };
+
+  return {
+    buildContentTypeFilters,
+  };
 };

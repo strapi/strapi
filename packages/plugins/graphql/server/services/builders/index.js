@@ -21,6 +21,7 @@ const resolvers = require('./resolvers');
 // Misc
 
 const operators = require('./filters/operators');
+const utils = require('./utils');
 
 const buildersFactories = [
   enums,
@@ -81,7 +82,9 @@ module.exports = ({ strapi }) => {
     },
 
     filters: {
-      operators,
+      operators: operators({ strapi }),
     },
+
+    utils: utils({ strapi }),
   };
 };
