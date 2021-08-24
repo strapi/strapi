@@ -15,7 +15,6 @@ const nodeModules = [];
 module.exports = {
   entry: `${__dirname}/lib/src/index.js`,
   externals: nodeModules,
-  // mode: process.env.NODE_ENV,
   mode: 'production',
   devtool: 'source-map',
   output: {

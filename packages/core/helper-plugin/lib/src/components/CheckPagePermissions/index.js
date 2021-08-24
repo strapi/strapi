@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
 import useRBACProvider from '../../hooks/useRBACProvider';
 import hasPermissions from '../../utils/hasPermissions';
-import LoadingIndicatorPage from '../../old/components/LoadingIndicatorPage';
+import LoadingIndicatorPage from '../LoadingIndicatorPage';
 
 const CheckPagePermissions = ({ permissions, children }) => {
   const abortController = new AbortController();
