@@ -7,6 +7,10 @@ const fse = require('fs-extra');
 module.exports = async function loadPolicies(strapi) {
   const dir = join(strapi.dir, 'policies');
 
+  if (!(await fse.pathExists(dir))) {
+    return;
+  }
+
   const policies = {};
   const paths = await fse.readdir(dir, { withFileTypes: true });
 
