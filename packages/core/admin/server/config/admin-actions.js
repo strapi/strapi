@@ -120,7 +120,7 @@ module.exports = {
     },
     {
       uid: 'api-tokens.create',
-      displayName: 'Create',
+      displayName: 'Create (generate)',
       pluginName: 'admin',
       section: 'settings',
       category: 'api tokens',
@@ -141,7 +141,7 @@ module.exports = {
     },
     {
       uid: 'api-tokens.delete',
-      displayName: 'Delete',
+      displayName: 'Delete (revoke)',
       pluginName: 'admin',
       section: 'settings',
       category: 'api tokens',
