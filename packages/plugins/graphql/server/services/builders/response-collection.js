@@ -3,7 +3,7 @@
 const { objectType, nonNull } = require('nexus');
 const { defaultTo, prop, pipe } = require('lodash/fp');
 
-const { utils, constants } = require('../../types');
+const { utils, constants } = require('../types');
 
 module.exports = () => ({
   /**

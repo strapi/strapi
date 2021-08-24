@@ -5,18 +5,18 @@ const { pickBy, has } = require('lodash/fp');
 
 const contentTypesRegistry = strapi => {
   const services = {};
-  const instanciatedServices = {};
+  const instantiatedServices = {};
 
   return {
     get(serviceUID) {
-      if (instanciatedServices[serviceUID]) {
-        return instanciatedServices[serviceUID];
+      if (instantiatedServices[serviceUID]) {
+        return instantiatedServices[serviceUID];
       }
 
       const service = services[serviceUID];
       if (service) {
-        instanciatedServices[serviceUID] = service({ strapi });
-        return instanciatedServices[serviceUID];
+        instantiatedServices[serviceUID] = service({ strapi });
+        return instantiatedServices[serviceUID];
       }
 
       return undefined;

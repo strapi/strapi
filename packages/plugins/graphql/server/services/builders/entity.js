@@ -3,7 +3,7 @@
 const { objectType } = require('nexus');
 const { prop } = require('lodash/fp');
 
-const { utils } = require('../../types');
+const { utils } = require('../types');
 
 /**
  * Build a higher level type for a content type which contains both the attributes, the ID and the metadata

@@ -1,6 +1,6 @@
 'use strict';
 
-const { GRAPHQL_SCALARS } = require('../../../../types/constants');
+const { GRAPHQL_SCALARS } = require('../../../types/constants');
 
 const EQ_FIELD_NAME = 'eq';
 

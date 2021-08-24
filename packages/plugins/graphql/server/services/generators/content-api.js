@@ -2,19 +2,20 @@
 
 const { makeSchema, unionType } = require('nexus');
 
-const createBuilders = require('../builders');
-const { utils, constants, scalars, buildInternals } = require('../../types');
-
-const { create: createTypeRegistry } = require('../../type-registry');
+const { utils, constants, scalars, buildInternals } = require('../types');
 
 const { KINDS } = constants;
 
 module.exports = ({ strapi }) => {
-  // todo[v4]: Get the type-registry service directly with something like strapi.plugin().service()
-  //          (waiting for the plugin API to be merged)
-  const registry = createTypeRegistry();
-  const builders = createBuilders({ strapi, registry });
+  // Type Registry
+  let registry;
+  // Builders Instances
+  let builders;
 
+  /**
+   * Register needed GraphQL types for every content type
+   * @param {object[]} contentTypes
+   */
   const registerAPITypes = contentTypes => {
     for (const contentType of contentTypes) {
       const { kind, modelType } = contentType;
@@ -275,6 +276,19 @@ module.exports = ({ strapi }) => {
   };
 
   return () => {
+    // Create a new empty type registry
+    registry = strapi
+      .plugin('graphql')
+      .service('type-registry')
+      .new();
+
+    // Reset the builders instances associated to the
+    // content-api, and link the new type registry
+    builders = strapi
+      .plugin('graphql')
+      .service('builders')
+      .new('content-api', registry);
+
     const contentTypes = [
       ...Object.values(strapi.components),
       ...Object.values(strapi.contentTypes),

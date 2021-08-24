@@ -6,7 +6,7 @@ const { prop } = require('lodash/fp');
 const {
   utils,
   constants: { GENERIC_MORPH_TYPENAME, KINDS },
-} = require('../../types');
+} = require('../types');
 
 module.exports = ({ strapi, registry }) => ({
   buildGenericMorphDefinition() {

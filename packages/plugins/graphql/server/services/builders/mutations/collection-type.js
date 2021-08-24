@@ -1,13 +1,12 @@
 'use strict';
 
 const { extendType } = require('nexus');
-const { utils } = require('../../../types');
-const { actionExists } = require('../../../old/utils');
-const { buildMutationsResolvers } = require('../../resolvers');
+const { utils } = require('../../types');
+const { actionExists } = require('../../old/utils');
 
 const builderUtils = require('../utils');
 
-module.exports = () => {
+module.exports = ({ strapi }) => {
   const addCreateMutation = (t, contentType) => {
     const { uid } = contentType;
 
@@ -32,10 +31,13 @@ module.exports = () => {
 
         const transformedArgs = builderUtils.transformArgs(args, { contentType });
 
-        const value = await buildMutationsResolvers({ contentType, strapi }).create(
-          source,
-          transformedArgs
-        );
+        const { create } = strapi
+          .plugin('strapi')
+          .service('builders')
+          .get('content-api')
+          .buildMutationsResolvers({ contentType });
+
+        const value = await create(source, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
@@ -73,10 +75,13 @@ module.exports = () => {
       async resolve(source, args) {
         const transformedArgs = builderUtils.transformArgs(args, { contentType });
 
-        const value = await buildMutationsResolvers({ contentType, strapi }).update(
-          source,
-          transformedArgs
-        );
+        const { update } = strapi
+          .plugin('strapi')
+          .service('builders')
+          .get('content-api')
+          .buildMutationsResolvers({ contentType });
+
+        const value = await update(source, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
@@ -111,7 +116,13 @@ module.exports = () => {
       async resolve(source, args) {
         const transformedArgs = builderUtils.transformArgs(args, { contentType });
 
-        const value = await buildMutationsResolvers({ contentType, strapi }).delete(source, args);
+        const { delete: deleteResolver } = strapi
+          .plugin('strapi')
+          .service('builders')
+          .get('content-api')
+          .buildMutationsResolvers({ contentType });
+
+        const value = await deleteResolver(source, args);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },

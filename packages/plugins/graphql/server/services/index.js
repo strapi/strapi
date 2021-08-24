@@ -1,11 +1,15 @@
 'use strict';
 
 const old = require('./old');
-const schema = require('./schema');
+const generators = require('./generators');
 const typeRegistry = require('./type-registry');
 
+const builders = require('./builders');
+
 module.exports = {
-  old,
-  schema,
+  builders,
+  generators,
   'type-registry': typeRegistry,
+  ////////////////////
+  old,
 };

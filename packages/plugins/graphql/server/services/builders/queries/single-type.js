@@ -2,12 +2,11 @@
 
 const { extendType } = require('nexus');
 
-const { actionExists } = require('../../../old/utils');
-const { buildQueriesResolvers } = require('../../resolvers');
+const { actionExists } = require('../../old/utils');
 const { transformArgs } = require('../utils');
-const { args, utils } = require('../../../types');
+const { args, utils } = require('../../types');
 
-module.exports = () => {
+module.exports = ({ strapi }) => {
   const buildSingleTypeQueries = contentType => {
     return extendType({
       type: 'Query',
@@ -38,7 +37,13 @@ module.exports = () => {
       async resolve(source, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        const value = buildQueriesResolvers({ contentType, strapi }).find();
+        const queriesResolvers = strapi
+          .plugin('graphql')
+          .service('builders')
+          .get('content-api')
+          .buildQueriesResolvers({ contentType });
+
+        const value = queriesResolvers.find();
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },

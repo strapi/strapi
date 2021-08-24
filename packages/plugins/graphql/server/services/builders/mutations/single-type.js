@@ -2,10 +2,10 @@
 
 const { extendType } = require('nexus');
 
-const { utils } = require('../../../types');
-const { actionExists } = require('../../../old/utils');
-const { toSingular } = require('../../../old/naming');
-const { buildMutation } = require('../../../old/resolvers-builder');
+const { utils } = require('../../types');
+const { actionExists } = require('../../old/utils');
+const { toSingular } = require('../../old/naming');
+const { buildMutation } = require('../../old/resolvers-builder');
 
 module.exports = () => {
   const addUpdateMutation = (t, contentType) => {

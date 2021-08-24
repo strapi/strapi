@@ -10,7 +10,7 @@ const {
   args,
   mappers: { strapiScalarToGraphQLScalar, graphQLFiltersToStrapiQuery },
   utils: { isStrapiScalar, getScalarFilterInputTypeName, getFiltersInputTypeName },
-} = require('../../types');
+} = require('../types');
 
 /**
  * Filter an object entries and keep only those whose value is a unique scalar attribute

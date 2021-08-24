@@ -2,7 +2,7 @@
 
 const NOT_FIELD_NAME = 'not';
 
-const { isGraphQLScalar, getScalarFilterInputTypeName } = require('../../../../types/utils');
+const { isGraphQLScalar, getScalarFilterInputTypeName } = require('../../../types/utils');
 
 module.exports = {
   fieldName: NOT_FIELD_NAME,

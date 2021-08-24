@@ -98,6 +98,6 @@ const createTypeRegistry = () => {
   };
 };
 
-module.exports = {
-  create: createTypeRegistry,
-};
+module.exports = () => ({
+  new: createTypeRegistry,
+});

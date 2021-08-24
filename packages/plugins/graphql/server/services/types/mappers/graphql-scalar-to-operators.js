@@ -10,7 +10,7 @@ const {
   contains,
   endsWith,
   startsWith,
-} = require('../../schema/builders/filters/operators');
+} = require('../../builders/filters/operators');
 
 const associations = {
   // ID

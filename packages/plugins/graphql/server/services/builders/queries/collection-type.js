@@ -2,10 +2,9 @@
 
 const { extendType } = require('nexus');
 
-const { actionExists } = require('../../../old/utils');
-const { utils } = require('../../../types');
+const { actionExists } = require('../../old/utils');
+const { utils } = require('../../types');
 const { transformArgs, getContentTypeArgs } = require('../utils');
-const { buildQueriesResolvers } = require('../../resolvers');
 
 module.exports = ({ strapi }) => {
   const buildCollectionTypeQueries = contentType => {
@@ -43,10 +42,13 @@ module.exports = ({ strapi }) => {
       async resolve(source, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        const value = buildQueriesResolvers({ contentType, strapi }).findOne(
-          source,
-          transformedArgs
-        );
+        const { findOne } = strapi
+          .plugin('graphql')
+          .service('builders')
+          .get('content-api')
+          .buildQueriesResolvers({ contentType });
+
+        const value = findOne(source, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
@@ -77,7 +79,13 @@ module.exports = ({ strapi }) => {
       async resolve(source, args) {
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
-        const nodes = buildQueriesResolvers({ contentType, strapi }).find(source, transformedArgs);
+        const { find } = strapi
+          .plugin('graphql')
+          .service('builders')
+          .get('content-api')
+          .buildQueriesResolvers({ contentType });
+
+        const nodes = find(source, transformedArgs);
 
         return { nodes, info: { args: transformedArgs, resourceUID: uid } };
       },

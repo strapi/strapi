@@ -2,7 +2,7 @@
 
 const { inputObjectType } = require('nexus');
 
-const { utils, mappers } = require('../../../types');
+const { utils, mappers } = require('../../types');
 const operators = require('./operators');
 
 const rootLevelOperators = [operators.and, operators.or, operators.not];

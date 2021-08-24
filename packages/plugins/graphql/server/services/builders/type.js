@@ -5,8 +5,7 @@ const { objectType } = require('nexus');
 
 const { contentTypes } = require('@strapi/utils');
 
-const { mappers, utils: typeUtils, constants } = require('../../types');
-const { buildAssociationResolver, buildComponentResolver } = require('../resolvers');
+const { mappers, utils: typeUtils, constants } = require('../types');
 const { getContentTypeArgs } = require('./utils');
 
 /**
@@ -159,6 +158,11 @@ const addComponentAttribute = ({ builder, attributeName, contentType, attribute,
 
   const targetComponent = strapi.getModel(attribute.component);
 
+  const { buildComponentResolver } = strapi
+    .plugin('graphql')
+    .service('builders')
+    .get('content-api');
+
   const resolve = buildComponentResolver({
     contentTypeUID: contentType.uid,
     attributeName,
@@ -213,6 +217,11 @@ const addMediaAttribute = options => {
 
   const fileContentType = strapi.contentTypes['plugin::upload.file'];
 
+  const { buildAssociationResolver } = strapi
+    .plugin('graphql')
+    .service('builders')
+    .get('content-api');
+
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
     attributeName,
@@ -248,6 +257,11 @@ const addPolymorphicRelationalAttribute = options => {
   }
   // todo[v4]: How to handle polymorphic relation w/ entity response collection types?
   //            -> Currently return raw polymorphic entities
+
+  const { buildAssociationResolver } = strapi
+    .plugin('graphql')
+    .service('builders')
+    .get('content-api');
 
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,
@@ -285,6 +299,11 @@ const addRegularRelationalAttribute = options => {
   } = options;
 
   const isToManyRelation = attribute.relation.endsWith('Many');
+
+  const { buildAssociationResolver } = strapi
+    .plugin('graphql')
+    .service('builders')
+    .get('content-api');
 
   const resolve = buildAssociationResolver({
     contentTypeUID: contentType.uid,

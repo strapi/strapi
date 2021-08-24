@@ -13,8 +13,8 @@ module.exports = async strapi => {
   // Generate the GraphQL schema for the content API
   const schema = strapi
     .plugin('graphql')
-    .service('schema')
-    .generateContentAPISchema();
+    .service('generators')
+    .buildContentAPISchema();
 
   if (isEmpty(schema)) {
     strapi.log.warn('The GraphQL schema has not been generated because it is empty');

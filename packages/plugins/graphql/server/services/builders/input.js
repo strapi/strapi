@@ -2,7 +2,7 @@
 
 const { inputObjectType, nonNull } = require('nexus');
 
-const { utils, mappers } = require('../../types');
+const { utils, mappers } = require('../types');
 
 const {
   getComponentInputName,

@@ -2,7 +2,7 @@
 
 const { has, propEq, isNil } = require('lodash/fp');
 
-const operators = require('../../schema/builders/filters/operators');
+const operators = require('../../builders/filters/operators');
 const { isMedia, isRelation, isStrapiScalar } = require('../utils');
 
 const ROOT_LEVEL_OPERATORS = [operators.and, operators.or, operators.not];
