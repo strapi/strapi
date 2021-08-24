@@ -84,8 +84,9 @@ module.exports = async strapi => {
   });
 
   // Register destroy behavior
-  // todo[v4]: expose this in strapi-server.js (destroy attribute)
-  strapi.plugins.graphql.destroy = async () => {
+  // We're doing it here instead of exposing a destroy method to the strapi-server.js
+  // file since we need to have access to the ApolloServer instance
+  strapi.plugin('graphql').destroy = async () => {
     await server.stop();
   };
 };
