@@ -87,23 +87,49 @@ module.exports = strapi => {
 
     // router[requestMethod](endpoint, requestHandler);
 
-    const { method, endpoint, policies, action } = routerChecker(routeConfig, plugin);
+    try {
+      const middlewares = resolveMiddlewares(routeConfig);
 
-    if (_.isUndefined(action) || !_.isFunction(action)) {
-      return strapi.log.warn(
-        `Ignored attempt to bind route '${routeConfig.method} ${routeConfig.path}' to unknown controller/action.`
+      const { method, endpoint, policies, action } = routerChecker(routeConfig, plugin);
+
+      if (_.isUndefined(action) || !_.isFunction(action)) {
+        return strapi.log.warn(
+          `Ignored attempt to bind route '${routeConfig.method} ${routeConfig.path}' to unknown controller/action.`
+        );
+      }
+
+      router[method](endpoint, compose([...policies, ...middlewares, action]));
+    } catch (error) {
+      throw new Error(
+        `Error creating endpoint ${routeConfig.method} ${routeConfig.path}: ${error.message}`
       );
     }
-
-    router[method](endpoint, compose(policies, action));
   };
+};
+
+const resolveMiddlewares = route => {
+  const middlewaresConfig = _.get(route, 'config.middlewares', []);
+
+  return middlewaresConfig.map(middlewareConfig => {
+    if (typeof middlewareConfig === 'function') {
+      return middlewareConfig;
+    }
+
+    const middleware = strapi.middleware(middlewareConfig);
+
+    if (!middleware) {
+      throw new Error(`Middleware ${middlewareConfig} not found.`);
+    }
+
+    return middleware;
+  });
 };
 
 const getMethod = route => _.trim(_.toLower(route.method));
 const getEndpoint = route => _.trim(route.path);
 
-const createRouteChecker = strapi =>
-  function routerChecker(value, plugin) {
+const createRouteChecker = strapi => {
+  return (value, plugin) => {
     const method = getMethod(value);
     const endpoint = getEndpoint(value);
 
@@ -138,7 +164,8 @@ const createRouteChecker = strapi =>
       controllerKey
     );
 
-    // Add the `globalPolicy`.
+    const { bodyPolicy } = policyUtils;
+
     const globalPolicy = policyUtils.globalPolicy({
       controller: controllerKey,
       action: actionName,
@@ -147,27 +174,14 @@ const createRouteChecker = strapi =>
       plugin,
     });
 
+    const policyOption = _.get(value, 'config.policies', []);
+
+    const routePolicies = policyOption.map(policyConfig => {
+      return policyUtils.get(policyConfig, plugin, currentApiName);
+    });
+
     // Init policies array.
-    const policies = [globalPolicy];
-
-    let policyOption = _.get(value, 'config.policies', []);
-
-    policyOption.forEach(policyConfig => {
-      try {
-        policies.push(policyUtils.get(policyConfig, plugin, currentApiName));
-      } catch (error) {
-        throw new Error(`Error creating endpoint ${method} ${endpoint}: ${error.message}`);
-      }
-    });
-
-    policies.push(async (ctx, next) => {
-      // Set body.
-      const values = await next();
-
-      if (_.isNil(ctx.body) && !_.isNil(values)) {
-        ctx.body = values;
-      }
-    });
+    const policies = [globalPolicy, ...routePolicies, bodyPolicy];
 
     return {
       method,
@@ -176,3 +190,4 @@ const createRouteChecker = strapi =>
       action,
     };
   };
+};

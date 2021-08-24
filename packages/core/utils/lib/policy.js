@@ -23,7 +23,6 @@ const stripPolicy = (policy, prefix) => policy.replace(prefix, '');
 
 const createPolicy = (policyName, args) => ({ policyName, args });
 
-// TODO: could be removed policy should only be a function.
 const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
 
 const parsePolicy = policy => {
@@ -78,6 +77,14 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
   };
 };
 
+const bodyPolicy = async (ctx, next) => {
+  const values = await next();
+
+  if (_.isNil(ctx.body) && !_.isNil(values)) {
+    ctx.body = values;
+  }
+};
+
 const policyResolvers = [
   {
     name: 'api',
@@ -90,7 +97,7 @@ const policyResolvers = [
     get: policy => {
       const [, policyWithoutPrefix] = policy.split('::');
       const [api = '', policyName = ''] = policyWithoutPrefix.split('.');
-      // TODO: move api policies into global registry
+      // TODO: load policies into the registry & user strapi.policy(policy)
       return getPolicyIn(_.get(strapi, ['api', api]), policyName);
     },
   },
@@ -103,7 +110,7 @@ const policyResolvers = [
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
     get(policy) {
-      // TODO: move admin policies into global registry
+      // TODO: load policies into the registry & user strapi.policy(policy)
       return getPolicyIn(_.get(strapi, 'admin'), stripPolicy(policy, ADMIN_PREFIX));
     },
   },
@@ -116,9 +123,7 @@ const policyResolvers = [
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
     get(policy) {
-      const [plugin = '', policyName = ''] = stripPolicy(policy, PLUGIN_PREFIX).split('.');
-      const foundPolicy = strapi.plugin(plugin).policy(policyName);
-      return foundPolicy;
+      return strapi.policy(policy);
     },
   },
   {
@@ -130,7 +135,7 @@ const policyResolvers = [
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
     get(policy) {
-      return getPolicyIn(strapi, stripPolicy(policy, GLOBAL_PREFIX));
+      return strapi.policy(policy);
     },
   },
 ];
@@ -169,7 +174,6 @@ const createPolicyFactory = (factoryCallback, options) => {
   };
 
   return options => {
-    console.log(options);
     if (validator) {
       validate(options);
     }
@@ -181,5 +185,6 @@ const createPolicyFactory = (factoryCallback, options) => {
 module.exports = {
   get,
   globalPolicy,
+  bodyPolicy,
   createPolicyFactory,
 };

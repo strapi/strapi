@@ -2,6 +2,7 @@
 
 const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
+const { addNamespace } = require('../utils');
 
 const validateKeySameToSingularName = contentTypes => {
   for (const ctName in contentTypes) {
@@ -32,7 +33,7 @@ const contentTypesRegistry = () => {
       validateKeySameToSingularName(rawContentTypes);
 
       for (const rawCtName in rawContentTypes) {
-        const uid = `${namespace}${rawCtName}`;
+        const uid = addNamespace(rawCtName, namespace);
 
         if (has(uid, contentTypes)) {
           throw new Error(`Content-type ${uid} has already been registered.`);

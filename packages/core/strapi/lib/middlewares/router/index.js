@@ -15,35 +15,37 @@ module.exports = strapi => {
   const registerAdminRoutes = () => {
     const router = new Router({ prefix: '/admin' });
 
-    strapi.admin.routes.forEach(route => {
+    for (const route of strapi.admin.routes) {
       composeEndpoint(route, { plugin: 'admin', router });
-    });
+    }
 
     strapi.app.use(router.routes()).use(router.allowedMethods());
   };
 
   const registerPluginRoutes = () => {
-    _.forEach(strapi.plugins, (plugin, pluginName) => {
+    for (const pluginName in strapi.plugins) {
+      const plugin = strapi.plugins[pluginName];
+
       const router = new Router({ prefix: `/${pluginName}` });
 
-      (plugin.routes || []).forEach(route => {
+      for (const route of plugin.routes || []) {
         const hasPrefix = _.has(route.config, 'prefix');
         composeEndpoint(route, {
           plugin: pluginName,
           router: hasPrefix ? strapi.router : router,
         });
-      });
+      }
 
       strapi.app.use(router.routes()).use(router.allowedMethods());
-    });
+    }
   };
 
   const registerAPIRoutes = () => {
     strapi.router.prefix(strapi.config.get('middleware.settings.router.prefix', ''));
 
-    _.forEach(strapi.config.routes, value => {
-      composeEndpoint(value, { router: strapi.router });
-    });
+    for (const route of strapi.config.routes) {
+      composeEndpoint(route, { router: strapi.router });
+    }
   };
 
   return {

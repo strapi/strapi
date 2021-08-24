@@ -1,6 +1,7 @@
 'use strict';
 
 const { pickBy, has } = require('lodash/fp');
+const { addNamespace } = require('../utils');
 
 const middlewaresRegistry = () => {
   const middlewares = {};
@@ -15,7 +16,7 @@ const middlewaresRegistry = () => {
     add(namespace, rawMiddlewares) {
       for (const middlewareName in rawMiddlewares) {
         const middleware = rawMiddlewares[middlewareName];
-        const uid = `${namespace}.${middlewareName}`;
+        const uid = addNamespace(middlewareName, namespace);
 
         if (has(uid, middlewares)) {
           throw new Error(`Middleware ${uid} has already been registered.`);

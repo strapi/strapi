@@ -4,8 +4,8 @@ const { join, resolve } = require('path');
 const { existsSync } = require('fs');
 const { defaultsDeep, getOr, get } = require('lodash/fp');
 const { env } = require('@strapi/utils');
-const loadConfigFile = require('../app-configuration/load-config-file');
-const loadFiles = require('../../load/load-files');
+const loadConfigFile = require('../../app-configuration/load-config-file');
+const loadFiles = require('../../../load/load-files');
 const getEnabledPlugins = require('./get-enabled-plugins');
 
 const defaultPlugin = {
@@ -99,7 +99,9 @@ const loadPlugins = async strapi => {
   await applyUserExtension(plugins);
   formatContentTypes(plugins);
 
-  return plugins;
+  for (const pluginName in plugins) {
+    strapi.container.get('plugins').add(pluginName, plugins[pluginName]);
+  }
 };
 
 module.exports = loadPlugins;

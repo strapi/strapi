@@ -5,7 +5,7 @@ const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
 const { isKebabCase } = require('@strapi/utils');
-const loadConfigFile = require('../app-configuration/load-config-file');
+const loadConfigFile = require('../../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
 
