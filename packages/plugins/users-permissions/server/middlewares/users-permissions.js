@@ -10,7 +10,7 @@ module.exports = {
     },
 
     initialize() {
-      _.forEach(strapi.admin.config.routes, value => {
+      _.forEach(strapi.admin.routes, value => {
         if (_.get(value.config, 'policies')) {
           value.config.policies.unshift('plugin::users-permissions.permissions');
         }

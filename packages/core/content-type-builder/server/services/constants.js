@@ -36,7 +36,7 @@ const VALID_UID_TARGETS = ['string', 'text'];
 const FORBIDDEN_ATTRIBUTE_NAMES = ['__component', '__contentType'];
 
 const PREFIX = 'strapi::';
-const STRAPI_USER = 'strapi::user';
+const STRAPI_USER = 'admin::user';
 const UPLOAD_FILE = 'plugin::upload.file';
 
 module.exports = {

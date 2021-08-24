@@ -37,9 +37,7 @@ const create = async attributes => {
 
   const user = createUser(userInfo);
 
-  const createdUser = await strapi
-    .query('strapi::user')
-    .create({ data: user, populate: ['roles'] });
+  const createdUser = await strapi.query('admin::user').create({ data: user, populate: ['roles'] });
 
   getService('metrics').sendDidInviteUser();
 
@@ -82,7 +80,7 @@ const updateById = async (id, attributes) => {
   if (_.has(attributes, 'password')) {
     const hashedPassword = await getService('auth').hashPassword(attributes.password);
 
-    return strapi.query('strapi::user').update({
+    return strapi.query('admin::user').update({
       where: { id },
       data: {
         ...attributes,
@@ -92,7 +90,7 @@ const updateById = async (id, attributes) => {
     });
   }
 
-  return strapi.query('strapi::user').update({
+  return strapi.query('admin::user').update({
     where: { id },
     data: attributes,
     populate: ['roles'],
@@ -139,7 +137,7 @@ const isLastSuperAdminUser = async userId => {
  * @returns {Promise<boolean>}
  */
 const exists = async (attributes = {}) => {
-  return (await strapi.query('strapi::user').count({ where: attributes })) > 0;
+  return (await strapi.query('admin::user').count({ where: attributes })) > 0;
 };
 
 /**
@@ -148,7 +146,7 @@ const exists = async (attributes = {}) => {
  * @returns {Promise<registrationInfo>} - Returns user email, firstname and lastname
  */
 const findRegistrationInfo = async registrationToken => {
-  const user = await strapi.query('strapi::user').findOne({ where: { registrationToken } });
+  const user = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!user) {
     return undefined;
@@ -164,7 +162,7 @@ const findRegistrationInfo = async registrationToken => {
  * @param {Object} params.userInfo user info
  */
 const register = async ({ registrationToken, userInfo }) => {
-  const matchingUser = await strapi.query('strapi::user').findOne({ where: { registrationToken } });
+  const matchingUser = await strapi.query('admin::user').findOne({ where: { registrationToken } });
 
   if (!matchingUser) {
     throw strapi.errors.badRequest('Invalid registration info');
@@ -183,7 +181,7 @@ const register = async ({ registrationToken, userInfo }) => {
  * Find one user
  */
 const findOne = async (where = {}, populate = ['roles']) => {
-  return strapi.query('strapi::user').findOne({ where, populate });
+  return strapi.query('admin::user').findOne({ where, populate });
 };
 
 /** Find many users (paginated)
@@ -193,7 +191,7 @@ const findOne = async (where = {}, populate = ['roles']) => {
 const findPage = async (query = {}) => {
   const { page = 1, pageSize = 100, populate = ['roles'] } = query;
 
-  return strapi.query('strapi::user').findPage({
+  return strapi.query('admin::user').findPage({
     where: query.filters,
     _q: query._q,
     populate,
@@ -208,7 +206,7 @@ const findPage = async (query = {}) => {
  */
 const deleteById = async id => {
   // Check at least one super admin remains
-  const userToDelete = await strapi.query('strapi::user').findOne({
+  const userToDelete = await strapi.query('admin::user').findOne({
     where: { id },
     populate: ['roles'],
   });
@@ -229,7 +227,7 @@ const deleteById = async id => {
     }
   }
 
-  return strapi.query('strapi::user').delete({ where: { id }, populate: ['roles'] });
+  return strapi.query('admin::user').delete({ where: { id }, populate: ['roles'] });
 };
 
 /** Delete a user
@@ -239,7 +237,7 @@ const deleteById = async id => {
 const deleteByIds = async ids => {
   // Check at least one super admin remains
   const superAdminRole = await getService('role').getSuperAdminWithUsersCount();
-  const nbOfSuperAdminToDelete = await strapi.query('strapi::user').count({
+  const nbOfSuperAdminToDelete = await strapi.query('admin::user').count({
     where: {
       id: ids,
       roles: { id: superAdminRole.id },
@@ -255,7 +253,7 @@ const deleteByIds = async ids => {
 
   const deletedUsers = [];
   for (const id of ids) {
-    const deletedUser = await strapi.query('strapi::user').delete({
+    const deletedUser = await strapi.query('admin::user').delete({
       where: { id },
       populate: ['roles'],
     });
@@ -270,7 +268,7 @@ const deleteByIds = async ids => {
  * @returns {Promise<number>}
  */
 const countUsersWithoutRole = async () => {
-  return strapi.query('strapi::user').count({
+  return strapi.query('admin::user').count({
     where: {
       roles: {
         id: { $null: true },
@@ -285,14 +283,14 @@ const countUsersWithoutRole = async () => {
  * @returns {Promise<number>}
  */
 const count = async (where = {}) => {
-  return strapi.query('strapi::user').count({ where });
+  return strapi.query('admin::user').count({ where });
 };
 
 /** Assign some roles to several users
  * @returns {undefined}
  */
 const assignARoleToAll = async roleId => {
-  const users = await strapi.query('strapi::user').findMany({
+  const users = await strapi.query('admin::user').findMany({
     select: ['id'],
     where: {
       roles: { id: { $null: true } },
@@ -301,7 +299,7 @@ const assignARoleToAll = async roleId => {
 
   await Promise.all(
     users.map(user => {
-      return strapi.query('strapi::user').update({
+      return strapi.query('admin::user').update({
         where: { id: user.id },
         data: { roles: [roleId] },
       });

@@ -2,7 +2,7 @@
 
 const { has, isObject } = require('lodash/fp');
 
-const permissionModelUID = 'strapi::permission';
+const permissionModelUID = 'admin::permission';
 
 const hasAttribute = attribute => has(`attributes.${attribute}`);
 const hasFieldsAttribute = hasAttribute('fields');

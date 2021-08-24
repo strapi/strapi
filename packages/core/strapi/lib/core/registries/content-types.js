@@ -22,17 +22,23 @@ const contentTypesRegistry = () => {
       return contentTypes[ctUID];
     },
     getAll(prefix = '') {
+      if (!prefix) {
+        return contentTypes;
+      }
+
       return pickBy((ct, ctUID) => ctUID.startsWith(prefix))(contentTypes);
     },
     add(namespace, rawContentTypes) {
       validateKeySameToSingularName(rawContentTypes);
+
       for (const rawCtName in rawContentTypes) {
-        const rawContentType = rawContentTypes[rawCtName];
-        const uid = `${namespace}.${rawContentType.schema.info.singularName}`;
+        const uid = `${namespace}${rawCtName}`;
+
         if (has(uid, contentTypes)) {
           throw new Error(`Content-type ${uid} has already been registered.`);
         }
-        contentTypes[uid] = createContentType(uid, rawContentType);
+
+        contentTypes[uid] = createContentType(uid, rawContentTypes[rawCtName]);
       }
     },
   };

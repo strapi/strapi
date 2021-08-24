@@ -1,18 +1,17 @@
 'use strict';
 
-const { getService } = require('./utils');
+const bootstrap = require('./bootstrap');
+const register = require('./register');
+const destroy = require('./destroy');
 
 module.exports = {
   // TODO: update load middleware to not load the admin middleware from here
-  // TODO: load bootstrap / register independently
-  async destroy() {
-    const { conditionProvider, actionProvider } = getService('permission');
-
-    await conditionProvider.clear();
-    await actionProvider.clear();
-  },
+  register,
+  bootstrap,
+  destroy,
   config: require('./config'),
+  routes: require('./routes'),
   services: require('./services'),
   controllers: require('./controllers'),
-  models: require('./content-types'),
+  contentTypes: require('./content-types'),
 };

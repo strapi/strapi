@@ -16,17 +16,8 @@ const loadConfigDir = require('./config-loader');
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
 
 const CONFIG_PATHS = {
-  admin: 'admin',
-  api: 'api',
   config: 'config',
-  controllers: 'controllers',
-  models: 'models',
-  plugins: 'plugins',
-  policies: 'policies',
-  tmp: '.tmp',
-  services: 'services',
   static: 'public',
-  validators: 'validators',
   views: 'views',
 };
 
@@ -40,15 +31,6 @@ const defaultConfig = {
   },
   admin: {},
   middleware: {
-    timeout: 1000,
-    load: {
-      before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
-      order: [],
-      after: ['parser', 'router'],
-    },
-    settings: {},
-  },
-  hook: {
     timeout: 1000,
     load: {
       before: ['responseTime', 'logger', 'cors', 'responses', 'gzip'],
@@ -80,7 +62,6 @@ module.exports = (dir, initialConfig = {}) => {
       strapi: strapiVersion,
     },
     installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
-    installedHooks: getPrefixedDeps('@strapi/hook', pkgJSON),
   };
 
   const baseConfig = omit('plugins', loadConfigDir(configDir)); // plugin config will be loaded later
