@@ -8,7 +8,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::marketplace.read']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::marketplace.read'] } },
       ],
     },
   },
@@ -37,7 +37,10 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::marketplace.plugins.install']],
+        {
+          name: 'admin::hasPermissions',
+          options: { actions: ['admin::marketplace.plugins.install'] },
+        },
       ],
     },
   },
@@ -48,7 +51,10 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::marketplace.plugins.uninstall']],
+        {
+          name: 'admin::hasPermissions',
+          options: { actions: ['admin::marketplace.plugins.uninstall'] },
+        },
       ],
     },
   },
@@ -94,7 +100,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::webhooks.read']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.read'] } },
       ],
     },
   },
@@ -105,7 +111,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::webhooks.create']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.create'] } },
       ],
     },
   },
@@ -116,7 +122,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::webhooks.read']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.read'] } },
       ],
     },
   },
@@ -127,7 +133,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::webhooks.update']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.update'] } },
       ],
     },
   },
@@ -138,7 +144,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::webhooks.delete']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.delete'] } },
       ],
     },
   },
@@ -149,7 +155,7 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['admin::hasPermissions', ['admin::webhooks.delete']],
+        { name: 'admin::hasPermissions', options: { actions: ['admin::webhooks.delete'] } },
       ],
     },
   },
@@ -190,7 +196,10 @@ module.exports = [
     path: '/users',
     handler: 'user.create',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::users.create']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::users.create'] } },
+      ],
     },
   },
   {
@@ -198,7 +207,10 @@ module.exports = [
     path: '/users',
     handler: 'user.find',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::users.read']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::users.read'] } },
+      ],
     },
   },
   {
@@ -206,7 +218,10 @@ module.exports = [
     path: '/users/:id',
     handler: 'user.findOne',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::users.read']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::users.read'] } },
+      ],
     },
   },
   {
@@ -214,7 +229,10 @@ module.exports = [
     path: '/users/:id',
     handler: 'user.update',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::users.update']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::users.update'] } },
+      ],
     },
   },
   {
@@ -222,7 +240,7 @@ module.exports = [
     path: '/users/:id',
     handler: 'user.deleteOne',
     config: {
-      policies: [['admin::hasPermissions', ['admin::users.delete']]],
+      policies: [{ name: 'admin::hasPermissions', options: { actions: ['admin::users.delete'] } }],
     },
   },
   {
@@ -230,7 +248,7 @@ module.exports = [
     path: '/users/batch-delete',
     handler: 'user.deleteMany',
     config: {
-      policies: [['admin::hasPermissions', ['admin::users.delete']]],
+      policies: [{ name: 'admin::hasPermissions', options: { actions: ['admin::users.delete'] } }],
     },
   },
   {
@@ -238,7 +256,10 @@ module.exports = [
     path: '/roles/:id/permissions',
     handler: 'role.getPermissions',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::roles.read']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.read'] } },
+      ],
     },
   },
   {
@@ -246,7 +267,10 @@ module.exports = [
     path: '/roles/:id/permissions',
     handler: 'role.updatePermissions',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::roles.update']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.update'] } },
+      ],
     },
   },
   {
@@ -254,7 +278,10 @@ module.exports = [
     path: '/roles/:id',
     handler: 'role.findOne',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::roles.read']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.read'] } },
+      ],
     },
   },
   {
@@ -262,7 +289,10 @@ module.exports = [
     path: '/roles',
     handler: 'role.findAll',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::roles.read']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.read'] } },
+      ],
     },
   },
   {
@@ -270,7 +300,10 @@ module.exports = [
     path: '/roles/:id',
     handler: 'role.update',
     config: {
-      policies: ['admin::isAuthenticatedAdmin', ['admin::hasPermissions', ['admin::roles.update']]],
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::roles.update'] } },
+      ],
     },
   },
   {
