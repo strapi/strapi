@@ -29,7 +29,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
   const pm = strapi.admin.services.permission.createPermissionsManager({ ability, action, model });
 
   const roles = _.has(entity, `${CREATED_BY_ATTRIBUTE}.id`)
-    ? await strapi.query('strapi::role').findMany({
+    ? await strapi.query('admin::role').findMany({
         where: {
           users: { id: entity[CREATED_BY_ATTRIBUTE].id },
         },

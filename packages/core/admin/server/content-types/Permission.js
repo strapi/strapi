@@ -5,7 +5,7 @@
  */
 
 module.exports = {
-  collectionName: 'strapi_permissions',
+  collectionName: 'admin_permissions',
   info: {
     name: 'Permission',
     description: '',
@@ -52,7 +52,7 @@ module.exports = {
       type: 'relation',
       relation: 'manyToOne',
       inversedBy: 'permissions',
-      target: 'strapi::role',
+      target: 'admin::role',
     },
   },
 };

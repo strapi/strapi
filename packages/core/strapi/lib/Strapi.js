@@ -14,7 +14,7 @@ const loadModules = require('./core/loaders/load-modules');
 const utils = require('./utils');
 const bootstrap = require('./core/loaders/bootstrap');
 const initializeMiddlewares = require('./middlewares');
-const createStrapiFs = require('./core/fs');
+const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
@@ -34,7 +34,6 @@ const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
 const loadPlugins = require('./core/load-plugins');
-// const { nameToSlug } = require('../../utils/lib');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -60,7 +59,6 @@ class Strapi {
     this.app = new Koa();
     this.router = new Router();
     this.server = createHTTPServer(this, this.app);
-    this.contentTypes = {}; // to remove V3
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
@@ -80,6 +78,18 @@ class Strapi {
 
   service(uid) {
     return this.container.get('services').get(uid);
+  }
+
+  controller(uid) {
+    return this.container.get('controllers').get(uid);
+  }
+
+  contentType(name) {
+    return this.container.get('content-types').get(name);
+  }
+
+  get contentTypes() {
+    return this.container.get('content-types').getAll();
   }
 
   plugin(name) {
@@ -219,6 +229,8 @@ class Strapi {
   loadAdmin() {
     this.admin = require('@strapi/admin/strapi-server');
 
+    strapi.container.get('content-types').add(`admin::`, strapi.admin.contentTypes);
+
     // TODO: rename into just admin and ./config/admin.js
     const userAdminConfig = strapi.config.get('server.admin');
     this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
@@ -252,7 +264,6 @@ class Strapi {
     this.components = modules.components;
 
     this.middleware = modules.middlewares;
-    this.hook = modules.hook;
 
     await bootstrap(this);
 
@@ -371,12 +382,7 @@ class Strapi {
     await execLifecycle(this.config.get(configPath));
 
     // admin
-    const adminFunc = _.get(this.admin.config, configPath);
-    return execLifecycle(adminFunc).catch(err => {
-      strapi.log.error(`${lifecycleName} function in admin failed`);
-      console.error(err);
-      strapi.stop();
-    });
+    await this.admin[lifecycleName]();
   }
 
   getModel(uid) {
