@@ -33,7 +33,7 @@ const createModule = (namespace, rawModule, strapi) => {
       await rawModule.destroy(strapi);
     },
     load() {
-      strapi.container.get('content-types').add(namespace + '.', rawModule.contentTypes);
+      strapi.container.get('content-types').add(namespace, rawModule.contentTypes);
       strapi.container.get('services').add(namespace, rawModule.services);
       strapi.container.get('policies').add(namespace, rawModule.policies);
       strapi.container.get('middlewares').add(namespace, rawModule.middlewares);

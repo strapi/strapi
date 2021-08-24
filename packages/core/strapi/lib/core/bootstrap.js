@@ -5,7 +5,7 @@ const { toLower, kebabCase } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 const pluralize = require('pluralize');
 
-const { createCoreApi } = require('../../core-api');
+const { createCoreApi } = require('../core-api');
 
 // TODO: function to be moved next to where the api will be loaded
 const validateContentTypesUnicity = schemas => {
@@ -42,7 +42,7 @@ module.exports = function(strapi) {
       model.info.singularName = model.info.singularName || modelName;
       model.info.pluralName = model.info.pluralName || pluralize(modelName);
 
-      strapi.container.get('content-types').add(`api::${apiName}.`, {
+      strapi.container.get('content-types').add(`api::${apiName}`, {
         [modelName]: { schema: model, actions: model.actions, lifecycles: model.lifecycles },
       });
 

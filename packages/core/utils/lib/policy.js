@@ -10,8 +10,6 @@ const PLUGIN_PREFIX = 'plugin::';
 const ADMIN_PREFIX = 'admin::';
 const APPLICATION_PREFIX = 'api::';
 
-const isPolicyFactory = _.isArray;
-
 const getPolicyIn = (container, policy) => {
   return (
     _.get(container, ['config', 'policies', policy]) ||
@@ -23,12 +21,18 @@ const policyExistsIn = (container, policy) => !_.isUndefined(getPolicyIn(contain
 
 const stripPolicy = (policy, prefix) => policy.replace(prefix, '');
 
-const createPolicy = (policyName, ...args) => ({ policyName, args });
+const createPolicy = (policyName, args) => ({ policyName, args });
 
 const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
 
-const parsePolicy = policy =>
-  isPolicyFactory(policy) ? createPolicy(...policy) : createPolicy(policy);
+const parsePolicy = policy => {
+  if (typeof policy === 'string') {
+    return createPolicy(policy);
+  }
+
+  const { name, options = {} } = policy;
+  return createPolicy(name, options);
+};
 
 const resolvePolicy = policyName => {
   const resolver = policyResolvers.find(resolver => resolver.exists(policyName));
@@ -73,6 +77,14 @@ const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
   };
 };
 
+const bodyPolicy = async (ctx, next) => {
+  const values = await next();
+
+  if (_.isNil(ctx.body) && !_.isNil(values)) {
+    ctx.body = values;
+  }
+};
+
 const policyResolvers = [
   {
     name: 'api',
@@ -85,6 +97,7 @@ const policyResolvers = [
     get: policy => {
       const [, policyWithoutPrefix] = policy.split('::');
       const [api = '', policyName = ''] = policyWithoutPrefix.split('.');
+      // TODO: load policies into the registry & user strapi.policy(policy)
       return getPolicyIn(_.get(strapi, ['api', api]), policyName);
     },
   },
@@ -96,7 +109,8 @@ const policyResolvers = [
     exists(policy) {
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
-    get: policy => {
+    get(policy) {
+      // TODO: load policies into the registry & user strapi.policy(policy)
       return getPolicyIn(_.get(strapi, 'admin'), stripPolicy(policy, ADMIN_PREFIX));
     },
   },
@@ -109,9 +123,7 @@ const policyResolvers = [
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
     get(policy) {
-      const [plugin = '', policyName = ''] = stripPolicy(policy, PLUGIN_PREFIX).split('.');
-      const foundPolicy = strapi.plugin(plugin).policy(policyName);
-      return foundPolicy;
+      return strapi.policy(policy);
     },
   },
   {
@@ -123,18 +135,22 @@ const policyResolvers = [
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
     get(policy) {
-      return getPolicyIn(strapi, stripPolicy(policy, GLOBAL_PREFIX));
+      return strapi.policy(policy);
     },
   },
 ];
 
 const get = (policy, plugin, apiName) => {
+  if (typeof policy === 'function') {
+    return policy;
+  }
+
   const { policyName, args } = parsePolicy(policy);
 
   const resolvedPolicy = resolvePolicy(policyName);
 
   if (resolvedPolicy !== undefined) {
-    return isPolicyFactory(policy) ? resolvedPolicy(...args) : resolvedPolicy;
+    return _.isPlainObject(policy) ? resolvedPolicy(args) : resolvedPolicy;
   }
 
   const localPolicy = searchLocalPolicy(policy, plugin, apiName);
@@ -157,17 +173,18 @@ const createPolicyFactory = (factoryCallback, options) => {
     }
   };
 
-  return (...args) => {
+  return options => {
     if (validator) {
-      validate(...args);
+      validate(options);
     }
 
-    return factoryCallback(...args);
+    return factoryCallback(options);
   };
 };
 
 module.exports = {
   get,
   globalPolicy,
+  bodyPolicy,
   createPolicyFactory,
 };

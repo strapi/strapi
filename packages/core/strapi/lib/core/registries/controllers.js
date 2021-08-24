@@ -1,6 +1,7 @@
 'use strict';
 
 const { pickBy, has } = require('lodash/fp');
+const { addNamespace } = require('../utils');
 
 const policiesRegistry = () => {
   const controllers = {};
@@ -15,7 +16,7 @@ const policiesRegistry = () => {
     add(namespace, newControllers) {
       for (const controllerName in newControllers) {
         const controller = newControllers[controllerName];
-        const uid = `${namespace}.${controllerName}`;
+        const uid = addNamespace(controllerName, namespace);
 
         if (has(uid, controllers)) {
           throw new Error(`Controller ${uid} has already been registered.`);

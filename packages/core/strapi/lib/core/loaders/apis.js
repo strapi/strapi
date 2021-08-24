@@ -6,8 +6,8 @@ const _ = require('lodash');
 const loadFiles = require('../../load/load-files');
 const loadConfig = require('../../load/load-config-files');
 
-module.exports = async ({ dir }) => {
-  const apiDir = join(dir, 'api');
+module.exports = async strapi => {
+  const apiDir = join(strapi.dir, 'api');
 
   if (!existsSync(apiDir)) {
     throw new Error(`Missing api folder. Please create one in your app root directory`);
