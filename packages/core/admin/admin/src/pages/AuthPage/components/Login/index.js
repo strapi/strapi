@@ -13,15 +13,10 @@ const Login = loginProps => {
 
 Login.defaultProps = {
   onSubmit: e => e.preventDefault(),
-  requestError: null,
 };
 
 Login.propTypes = {
-  formErrors: PropTypes.object.isRequired,
-  modifiedData: PropTypes.object.isRequired,
-  onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func,
-  requestError: PropTypes.object,
 };
 
 export default Login;
