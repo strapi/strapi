@@ -110,11 +110,20 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                 <Column>
                   <Logo />
                   <Box paddingTop="6" paddingBottom="1">
-                    <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+                    <H1 id="welcome">
+                      {formatMessage({
+                        id: 'Auth.form.welcome.title',
+                        defaultMessage: 'Welcome back!',
+                      })}
+                    </H1>
                   </Box>
                   <CenteredBox paddingBottom="7">
                     <Subtitle textColor="neutral600">
-                      {formatMessage({ id: 'Auth.form.register.subtitle' })}
+                      {formatMessage({
+                        id: 'Auth.form.register.subtitle',
+                        defaultMessage:
+                          'Your credentials are only used to authenticate yourself on the admin panel. All saved data will be stored in your own database.',
+                      })}
                     </Subtitle>
                   </CenteredBox>
                 </Column>
@@ -126,20 +135,38 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                         required
                         value={values.firstname}
                         error={
-                          errors.firstname ? formatMessage({ id: errors.firstname }) : undefined
+                          errors.firstname
+                            ? formatMessage({
+                                id: errors.firstname,
+                                defaultMessage: 'This value is required.',
+                              })
+                            : undefined
                         }
                         onChange={handleChange}
-                        label={formatMessage({ id: 'Auth.form.firstname.label' })}
+                        label={formatMessage({
+                          id: 'Auth.form.firstname.label',
+                          defaultMessage: 'Firstname',
+                        })}
                       />
                     </GridItem>
                     <GridItem col={6}>
                       <TextInput
                         name="lastname"
-                        error={errors.lastname ? formatMessage({ id: errors.lastname }) : undefined}
+                        error={
+                          errors.lastname
+                            ? formatMessage({
+                                id: errors.lastname,
+                                defaultMessage: 'This value is required.',
+                              })
+                            : undefined
+                        }
                         required
                         value={values.lastname}
                         onChange={handleChange}
-                        label={formatMessage({ id: 'Auth.form.lastname.label' })}
+                        label={formatMessage({
+                          id: 'Auth.form.lastname.label',
+                          defaultMessage: 'Lastname',
+                        })}
                       />
                     </GridItem>
                   </Grid>
@@ -148,16 +175,30 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     disabled={fieldsToDisable.includes('email')}
                     value={values.email}
                     onChange={handleChange}
-                    error={errors.email ? formatMessage({ id: errors.email }) : undefined}
+                    error={
+                      errors.email
+                        ? formatMessage({
+                            id: errors.email,
+                            defaultMessage: 'This value is required.',
+                          })
+                        : undefined
+                    }
                     required
-                    label={formatMessage({ id: 'Auth.form.email.label' })}
+                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
                     type="email"
                   />
                   <TextInput
                     name="password"
                     onChange={handleChange}
                     value={values.password}
-                    error={errors.password ? formatMessage({ id: errors.password }) : undefined}
+                    error={
+                      errors.password
+                        ? formatMessage({
+                            id: errors.password,
+                            defaultMessage: 'This value is required',
+                          })
+                        : undefined
+                    }
                     endAction={
                       // eslint-disable-next-line react/jsx-wrap-multilines
                       <FieldActionWrapper
@@ -165,18 +206,31 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                           e.preventDefault();
                           setPasswordShown(prev => !prev);
                         }}
-                        label={formatMessage({
-                          id: passwordShown
-                            ? 'Auth.form.password.show-password'
-                            : 'Auth.form.password.hide-password',
-                        })}
+                        label={formatMessage(
+                          passwordShown
+                            ? {
+                                id: 'Auth.form.password.show-password',
+                                defaultMessage: 'Show password',
+                              }
+                            : {
+                                id: 'Auth.form.password.hide-password',
+                                defaultMessage: 'Hide password',
+                              }
+                        )}
                       >
                         {passwordShown ? <Show /> : <Hide />}
                       </FieldActionWrapper>
                     }
-                    hint={formatMessage({ id: 'Auth.form.password.hint' })}
+                    hint={formatMessage({
+                      id: 'Auth.form.password.hint',
+                      defaultMessage:
+                        'Password must contain at least 8 characters, 1 uppercase, 1 lowercase and 1 number',
+                    })}
                     required
-                    label={formatMessage({ id: 'Auth.form.password.label' })}
+                    label={formatMessage({
+                      id: 'Auth.form.password.label',
+                      defaultMessage: 'Password',
+                    })}
                     type={passwordShown ? 'text' : 'password'}
                   />
                   <TextInput
@@ -185,7 +239,10 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     value={values.confirmPassword}
                     error={
                       errors.confirmPassword
-                        ? formatMessage({ id: errors.confirmPassword })
+                        ? formatMessage({
+                            id: errors.confirmPassword,
+                            defaultMessage: 'This value is required.',
+                          })
                         : undefined
                     }
                     endAction={
@@ -195,17 +252,26 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                           e.preventDefault();
                           setConfirmPasswordShown(prev => !prev);
                         }}
-                        label={formatMessage({
-                          id: confirmPasswordShown
-                            ? 'Auth.form.password.show-password'
-                            : 'Auth.form.password.hide-password',
-                        })}
+                        label={formatMessage(
+                          confirmPasswordShown
+                            ? {
+                                id: 'Auth.form.password.show-password',
+                                defaultMessage: 'Show password',
+                              }
+                            : {
+                                id: 'Auth.form.password.hide-password',
+                                defaultMessage: 'Hide password',
+                              }
+                        )}
                       >
                         {confirmPasswordShown ? <Show /> : <Hide />}
                       </FieldActionWrapper>
                     }
                     required
-                    label={formatMessage({ id: 'Auth.form.confirmPassword.label' })}
+                    label={formatMessage({
+                      id: 'Auth.form.confirmPassword.label',
+                      defaultMessage: 'Confirmation Password',
+                    })}
                     type={confirmPasswordShown ? 'text' : 'password'}
                   />
                   <Checkbox
@@ -216,23 +282,36 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     name="news"
                   >
                     {formatMessage(
-                      { id: 'Auth.form.register.news.label' },
+                      {
+                        id: 'Auth.form.register.news.label',
+                        defaultMessage:
+                          'Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).',
+                      },
                       {
                         terms: (
                           <A target="_blank" href="https://strapi.io/terms" rel="noreferrer">
-                            {formatMessage({ id: 'Auth.privacy-policy-agreement.terms' })}
+                            {formatMessage({
+                              id: 'Auth.privacy-policy-agreement.terms',
+                              defaultMessage: 'terms',
+                            })}
                           </A>
                         ),
                         policy: (
                           <A target="_blank" href="https://strapi.io/privacy" rel="noreferrer">
-                            {formatMessage({ id: 'Auth.privacy-policy-agreement.policy' })}
+                            {formatMessage({
+                              id: 'Auth.privacy-policy-agreement.policy',
+                              defaultMessage: 'policy',
+                            })}
                           </A>
                         ),
                       }
                     )}
                   </Checkbox>
                   <AuthButton size="L" type="submit">
-                    {formatMessage({ id: 'Auth.form.button.register' })}
+                    {formatMessage({
+                      id: 'Auth.form.button.register',
+                      defaultMessage: "Let's start",
+                    })}
                   </AuthButton>
                 </Stack>
               </Main>
@@ -243,7 +322,10 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
           <Box paddingTop={4}>
             <Row justifyContent="center">
               <Link label="Auth.link.signin" to="/auth/login">
-                {formatMessage({ id: 'Auth.link.signin.account' })}
+                {formatMessage({
+                  id: 'Auth.link.signin.account',
+                  defaultMessage: 'Already have an account?',
+                })}
               </Link>
             </Row>
           </Box>

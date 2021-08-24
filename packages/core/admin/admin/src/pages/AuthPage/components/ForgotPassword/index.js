@@ -33,28 +33,47 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                   <Logo />
                   <Box paddingTop="6" paddingBottom="7">
                     <H1 id="password-forgotten">
-                      {formatMessage({ id: 'Auth.form.button.password-forgotten' })}
+                      {formatMessage({
+                        id: 'Auth.form.button.password-forgotten',
+                        defaultMessage: 'Password forgotten',
+                      })}
                     </H1>
                   </Box>
                   {errors.errorMessage && (
                     <Text id="global-form-error" role="alert" tabIndex={-1} textColor="danger600">
-                      {formatMessage({ id: errors.errorMessage })}
+                      {formatMessage({
+                        id: errors.errorMessage,
+                        defaultMessage: 'An error occurred',
+                      })}
                     </Text>
                   )}
                 </Column>
 
                 <Stack size={6}>
                   <TextInput
-                    error={errors.email ? formatMessage({ id: errors.email }) : ''}
+                    error={
+                      errors.email
+                        ? formatMessage({
+                            id: errors.email,
+                            defaultMessage: 'This email is invalid.',
+                          })
+                        : ''
+                    }
                     value={values.email}
                     onChange={handleChange}
-                    label={formatMessage({ id: 'Auth.form.email.label' })}
-                    placeholder={formatMessage({ id: 'Auth.form.email.placeholder' })}
+                    label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
+                    placeholder={formatMessage({
+                      id: 'Auth.form.email.placeholder',
+                      defaultMessage: 'kai@doe.com',
+                    })}
                     name="email"
                     required
                   />
                   <AuthButton type="submit">
-                    {formatMessage({ id: 'Auth.form.button.forgot-password' })}
+                    {formatMessage({
+                      id: 'Auth.form.button.forgot-password',
+                      defaultMessage: 'Send Email',
+                    })}
                   </AuthButton>
                 </Stack>
               </Form>
@@ -64,7 +83,9 @@ const ForgotPassword = ({ onSubmit, schema }) => {
         <Row justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text small>{formatMessage({ id: 'Auth.link.ready' })}</Text>
+              <Text small>
+                {formatMessage({ id: 'Auth.link.ready', defaultMessage: 'Ready to sign in?' })}
+              </Text>
             </Link>
           </Box>
         </Row>

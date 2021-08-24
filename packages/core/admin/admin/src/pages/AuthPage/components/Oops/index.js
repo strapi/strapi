@@ -12,7 +12,12 @@ const Oops = () => {
   const { formatMessage } = useIntl();
   const query = useQuery();
 
-  const message = query.get('info') || formatMessage({ id: 'Auth.components.Oops.text' });
+  const message =
+    query.get('info') ||
+    formatMessage({
+      id: 'Auth.components.Oops.text',
+      defaultMessage: 'Your account has been suspended.',
+    });
 
   return (
     <UnauthenticatedLayout>
@@ -21,13 +26,16 @@ const Oops = () => {
           <Column>
             <Logo />
             <Box paddingTop="6" paddingBottom="7">
-              <H1 id="email-sent">{formatMessage({ id: 'Auth.components.Oops.title' })}</H1>
+              <H1 id="email-sent">
+                {formatMessage({ id: 'Auth.components.Oops.title', defaultMessage: 'Oops...' })}
+              </H1>
             </Box>
             <Text>{message}</Text>
             <Box paddingTop={4}>
               <Text>
                 {formatMessage({
                   id: 'Auth.components.Oops.text.admin',
+                  defaultMessage: 'If this is a mistake, please contact your administrator.',
                 })}
               </Text>
             </Box>
@@ -36,7 +44,7 @@ const Oops = () => {
         <Row justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text>{formatMessage({ id: 'Auth.link.signin' })}</Text>
+              <Text>{formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}</Text>
             </Link>
           </Box>
         </Row>

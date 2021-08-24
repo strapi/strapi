@@ -18,18 +18,24 @@ const ForgotPasswordSuccess = () => {
             <Logo />
             <Box paddingTop="6" paddingBottom="7">
               <H1 id="email-sent">
-                {formatMessage({ id: 'app.containers.AuthPage.ForgotPasswordSuccess.title' })}
+                {formatMessage({
+                  id: 'app.containers.AuthPage.ForgotPasswordSuccess.title',
+                  defaultMessage: 'Email sent',
+                })}
               </H1>
             </Box>
             <Text>
               {formatMessage({
                 id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.email',
+                defaultMessage: 'It can take a few minutes to receive your password recovery link.',
               })}
             </Text>
             <Box paddingTop={4}>
               <Text>
                 {formatMessage({
                   id: 'app.containers.AuthPage.ForgotPasswordSuccess.text.contact-admin',
+                  defaultMessage:
+                    'If you do not receive this link, please contact your administrator.',
                 })}
               </Text>
             </Box>
@@ -38,7 +44,7 @@ const ForgotPasswordSuccess = () => {
         <Row justifyContent="center">
           <Box paddingTop={4}>
             <Link to="/auth/login">
-              <Text>{formatMessage({ id: 'Auth.link.signin' })}</Text>
+              <Text>{formatMessage({ id: 'Auth.link.signin', defaultMessage: 'Sign in' })}</Text>
             </Link>
           </Box>
         </Row>
