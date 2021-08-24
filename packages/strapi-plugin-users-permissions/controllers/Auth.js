@@ -283,7 +283,7 @@ module.exports = {
         null,
         formatError({
           id: 'Auth.form.error.email.format',
-          message: 'Please provide valid email address.',
+          message: 'Please provide a valid email address.',
         })
       );
     }
@@ -312,7 +312,13 @@ module.exports = {
 
     // User blocked
     if (user.blocked) {
-      return ctx.badRequest('blocked.user');
+      return ctx.badRequest(
+        null,
+        formatError({
+          id: 'Auth.form.error.user.blocked',
+          message: 'This user is disabled.',
+        })
+      );
     }
 
     // Generate random token.
