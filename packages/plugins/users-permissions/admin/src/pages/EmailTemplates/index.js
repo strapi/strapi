@@ -11,6 +11,7 @@ import {
   getYupInnerErrors,
   useNotification,
   useOverlayBlocker,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { Row } from 'reactstrap';
 import pluginPermissions from '../../permissions';
@@ -21,6 +22,12 @@ import ModalForm from '../../components/ModalForm';
 import { getRequestURL, getTrad } from '../../utils';
 import forms from './utils/forms';
 import schema from './utils/schema';
+
+const ProtectedEmailTemplatesPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.readEmailTemplates}>
+    <EmailTemplatesPage />
+  </CheckPagePermissions>
+);
 
 const EmailTemplatesPage = () => {
   const { formatMessage } = useIntl();
@@ -232,4 +239,4 @@ const EmailTemplatesPage = () => {
   );
 };
 
-export default EmailTemplatesPage;
+export default ProtectedEmailTemplatesPage;

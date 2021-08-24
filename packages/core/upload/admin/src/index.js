@@ -4,15 +4,13 @@
 // Here's the file: strapi/docs/3.0.0-beta.x/guides/registering-a-field-in-admin.md
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
-import React from 'react';
-import { CheckPagePermissions, prefixPluginTranslations } from '@strapi/helper-plugin';
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import Initializer from './components/Initializer';
 import InputMedia from './components/InputMedia';
 import InputModalStepper from './components/InputModalStepper';
-import SettingsPage from './pages/SettingsPage';
 import reducers from './reducers';
 import pluginId from './pluginId';
 import { getTrad } from './utils';
@@ -61,11 +59,13 @@ export default {
         defaultMessage: 'Media Library',
       },
       to: '/settings/media-library',
-      Component: () => (
-        <CheckPagePermissions permissions={pluginPermissions.settings}>
-          <SettingsPage />
-        </CheckPagePermissions>
-      ),
+      Component: async () => {
+        const component = await import(
+          /* webpackChunkName: "upload-settings" */ './pages/SettingsPage'
+        );
+
+        return component;
+      },
       permissions: pluginPermissions.settings,
     });
   },

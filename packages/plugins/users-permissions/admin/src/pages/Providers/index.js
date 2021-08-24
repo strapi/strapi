@@ -11,6 +11,7 @@ import {
   request,
   useNotification,
   useOverlayBlocker,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import { get, upperFirst, has } from 'lodash';
 import { Row } from 'reactstrap';
@@ -22,6 +23,12 @@ import ListRow from '../../components/ListRow';
 import ModalForm from '../../components/ModalForm';
 import createProvidersArray from './utils/createProvidersArray';
 import forms from './utils/forms';
+
+const ProtectedProvidersPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.readProviders}>
+    <ProvidersPage />
+  </CheckPagePermissions>
+);
 
 const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -279,4 +286,4 @@ const ProvidersPage = () => {
   );
 };
 
-export default ProvidersPage;
+export default ProtectedProvidersPage;

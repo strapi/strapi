@@ -1,9 +1,6 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
-
-import App from './pages/App';
-
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
 const name = pluginPkg.strapi.name;
@@ -17,7 +14,11 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: 'My plugin',
       },
-      Component: App,
+      Component: async () => {
+        const component = await import(/* webpackChunkName: "my-plugin" */ './pages/App');
+
+        return component;
+      },
       permissions: [],
     });
     app.registerPlugin({

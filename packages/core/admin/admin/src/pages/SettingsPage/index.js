@@ -45,7 +45,7 @@ function SettingsPage() {
     );
   }, []);
 
-  const pluginsRoutes = useMemo(() => createSectionsRoutes(settings), [settings]);
+  const pluginsRoutes = createSectionsRoutes(settings);
 
   // Only display accessible sections
   const filteredMenu = useMemo(() => getSectionsToDisplay(menu), [menu]);
