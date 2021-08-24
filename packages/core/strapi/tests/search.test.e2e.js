@@ -3,7 +3,7 @@
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createAuthRequest, transformToRESTResource } = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let rq;
@@ -147,9 +147,17 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.bed[2]);
+      expect(res.body.data.length).toBe(1);
+
+      expect(res.body.data[0]).toMatchObject(transformToRESTResource(data.bed[2]));
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 1,
+        },
+      });
     });
 
     test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
@@ -161,9 +169,18 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.bed[0]);
+      expect(res.body.data.length).toBe(1);
+
+      expect(res.body.data[0]).toMatchObject(transformToRESTResource(data.bed[0]));
+
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 1,
+        },
+      });
     });
 
     test('search with an empty query', async () => {
@@ -175,9 +192,18 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(5);
-      expect(res.body).toEqual(expect.arrayContaining(data.bed));
+      expect(res.body.data.length).toBe(5);
+      expect(res.body.data).toEqual(
+        expect.arrayContaining(data.bed.map(bed => transformToRESTResource(bed)))
+      );
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 5,
+        },
+      });
     });
 
     test('search with special characters', async () => {
@@ -189,9 +215,18 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.bed[3]);
+      expect(res.body.data.length).toBe(1);
+
+      expect(res.body.data[0]).toMatchObject(transformToRESTResource(data.bed[3]));
+
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 1,
+        },
+      });
     });
   });
 
@@ -208,10 +243,24 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(3);
-      expect(res.body).toEqual(expect.arrayContaining([data.bed[0], data.bed[1], data.bed[4]]));
+      expect(res.body.data.length).toBe(3);
+
+      const expected = [data.bed[0], data.bed[1], data.bed[4]].map(bed =>
+        transformToRESTResource(bed)
+      );
+
+      expect(res.body.data).toEqual(expect.arrayContaining(expected));
+
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 3,
+        },
+      });
     });
+
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
         method: 'GET',
@@ -224,9 +273,19 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body).toEqual(expect.arrayContaining([data.bed[0], data.bed[4]]));
+      expect(res.body.data.length).toBe(2);
+
+      const expected = [data.bed[0], data.bed[4]].map(bed => transformToRESTResource(bed));
+      expect(res.body.data).toEqual(expect.arrayContaining(expected));
+
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 2,
+        },
+      });
     });
 
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
@@ -241,9 +300,18 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(2);
-      expect(res.body).toEqual(expect.arrayContaining(data.bed.slice(0, 2)));
+      expect(res.body.data.length).toBe(2);
+
+      const expected = data.bed.slice(0, 2).map(bed => transformToRESTResource(bed));
+      expect(res.body.data).toEqual(expect.arrayContaining(expected));
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 2,
+        },
+      });
     });
 
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
@@ -260,9 +328,16 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(1);
-      expect(res.body[0]).toMatchObject(data.bed[0]);
+      expect(res.body.data.length).toBe(1);
+      expect(res.body.data[0]).toMatchObject(transformToRESTResource(data.bed[0]));
+      expect(res.body.meta).toMatchObject({
+        pagination: {
+          page: 1,
+          pageSize: 10,
+          pageCount: 1,
+          total: 1,
+        },
+      });
     });
 
     test('search with a backslash', async () => {
@@ -279,8 +354,7 @@ describe('Search query', () => {
         },
       });
 
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body.length).toBe(0);
+      expect(res.body.data.length).toBe(0);
     });
   });
 });

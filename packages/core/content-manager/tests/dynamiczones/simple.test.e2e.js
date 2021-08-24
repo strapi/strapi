@@ -72,15 +72,8 @@ const createEmpty = () => {
   });
 };
 
-describe.each([
-  [
-    'CONTENT MANAGER',
-    '/content-manager/collection-types/application::withdynamiczone.withdynamiczone',
-  ],
-  ['GENERATED API', '/withdynamiczones'],
-])('[%s] => Not required dynamiczone', (_, path) => {
+describe('Not required dynamiczone', () => {
   const builder = createTestBuilder();
-  const hasPagination = path.includes('/content-manager');
 
   beforeAll(async () => {
     await builder
@@ -91,7 +84,9 @@ describe.each([
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(path);
+    rq.setURLPrefix(
+      '/content-manager/collection-types/application::withdynamiczone.withdynamiczone'
+    );
   });
 
   afterAll(async () => {
@@ -241,26 +236,9 @@ describe.each([
 
       expect(res.statusCode).toBe(200);
 
-      if (hasPagination) {
-        expect(res.body.pagination).toBeDefined();
-        expect(Array.isArray(res.body.results)).toBe(true);
-        expect(res.body.results).toEqual(
-          expect.arrayContaining([
-            expect.objectContaining({
-              field: expect.arrayContaining([
-                expect.objectContaining({
-                  id: expect.anything(),
-                  __component: expect.any(String),
-                }),
-              ]),
-            }),
-          ])
-        );
-        return;
-      }
-
-      expect(Array.isArray(res.body)).toBe(true);
-      expect(res.body).toEqual(
+      expect(res.body.pagination).toBeDefined();
+      expect(Array.isArray(res.body.results)).toBe(true);
+      expect(res.body.results).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             field: expect.arrayContaining([

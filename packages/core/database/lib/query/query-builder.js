@@ -30,6 +30,25 @@ const createQueryBuilder = (uid, db) => {
     alias: getAlias(),
     getAlias,
 
+    select(args) {
+      state.type = 'select';
+      state.select = _.uniq(_.castArray(args)).map(col => this.aliasColumn(col));
+
+      return this;
+    },
+
+    addSelect(args) {
+      _.uniq(_.castArray(args))
+        .map(col => this.aliasColumn(col))
+        .forEach(toSelect => {
+          if (!state.select.includes(toSelect)) {
+            state.select.push(toSelect);
+          }
+        });
+
+      return this;
+    },
+
     insert(data) {
       state.type = 'insert';
       state.data = data;
@@ -62,18 +81,6 @@ const createQueryBuilder = (uid, db) => {
 
       state.where.push(processedWhere);
 
-      return this;
-    },
-
-    select(args) {
-      state.type = 'select';
-      state.select = _.castArray(args).map(col => this.aliasColumn(col));
-
-      return this;
-    },
-
-    addSelect(args) {
-      state.select.push(..._.castArray(args).map(col => this.aliasColumn(col)));
       return this;
     },
 
@@ -110,37 +117,37 @@ const createQueryBuilder = (uid, db) => {
     init(params = {}) {
       const { _q, where, select, limit, offset, orderBy, groupBy, populate } = params;
 
-      if (where) {
+      if (!_.isNil(where)) {
         this.where(where);
       }
 
-      if (_q) {
+      if (!_.isNil(_q)) {
         this.search(_q);
       }
 
-      if (select) {
+      if (!_.isNil(select)) {
         this.select(select);
       } else {
         this.select('*');
       }
 
-      if (limit) {
+      if (!_.isNil(limit)) {
         this.limit(limit);
       }
 
-      if (offset) {
+      if (!_.isNil(offset)) {
         this.offset(offset);
       }
 
-      if (orderBy) {
+      if (!_.isNil(orderBy)) {
         this.orderBy(orderBy);
       }
 
-      if (groupBy) {
+      if (!_.isNil(groupBy)) {
         this.groupBy(groupBy);
       }
 
-      if (populate) {
+      if (!_.isNil(populate)) {
         this.populate(populate);
       }
 
@@ -185,8 +192,8 @@ const createQueryBuilder = (uid, db) => {
             state.select = [this.aliasColumn('*')];
           }
 
-          if (state.joins.length > 0) {
-            // add ordered columns to distinct in case of joins
+          if (state.joins.length > 0 && !state.groupBy) {
+            // add a discting when making joins and if we don't have a groupBy
             // TODO: make sure we return the right data
             qb.distinct(`${this.alias}.id`);
             // TODO: add column if they aren't there already

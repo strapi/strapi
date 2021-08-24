@@ -134,7 +134,7 @@ const BrowseAssets = () => {
                   />
                 </Padded>
               )}
-              <SortPicker onChange={handleChangeParams} value={params._sort} />
+              <SortPicker onChange={handleChangeParams} value={params.sort} />
               <Padded left size="sm" />
               <Filters
                 filters={params.filters}

@@ -5,6 +5,8 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/test/jest2e2.setup.js'],
   testPathIgnorePatterns: [
     '<rootDir>/packages/plugins/graphql',
+    'graphql.test.e2e.js',
+    'graphqlUpload.test.e2e.js',
     '<rootDir>/packages/core/database.old',
   ],
   coveragePathIgnorePatterns: [

@@ -64,7 +64,7 @@ const InputModalStepperProvider = ({
         : [],
       params: {
         ...state.params,
-        _sort: `${updated_at}:DESC`,
+        sort: `${updated_at}:DESC`,
       },
     })
   );
@@ -336,7 +336,7 @@ const InputModalStepperProvider = ({
 
   const fetchMediaLibFilesCount = async () => {
     const requestURL = getRequestUrl('files/count');
-    const paramsToSend = getFilters(['_limit', '_sort', '_start']);
+    const paramsToSend = getFilters(['_limit', '_start']);
 
     try {
       return await request(`${requestURL}?${paramsToSend}`, {

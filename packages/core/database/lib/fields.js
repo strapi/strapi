@@ -217,7 +217,9 @@ const typeToFieldMap = {
   boolean: BooleanField,
 };
 
-const createField = (type /*attribute*/) => {
+const createField = attribute => {
+  const { type } = attribute;
+
   if (_.has(type, typeToFieldMap)) {
     return new typeToFieldMap[type]({});
   }

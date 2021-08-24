@@ -34,14 +34,26 @@ const createHTTPServer = (strapi, koaApp) => {
     strapi.log.error(err);
   });
 
-  server.destroy = callback => {
+  server.destroy = async () => {
     for (const connection of connections) {
       connection.destroy();
 
       connections.delete(connection);
     }
 
-    server.close(callback);
+    if (!server.listening) {
+      return;
+    }
+
+    return new Promise((resolve, reject) =>
+      server.close(error => {
+        if (error) {
+          return reject(error);
+        }
+
+        resolve();
+      })
+    );
   };
 
   return server;

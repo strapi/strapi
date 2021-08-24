@@ -39,7 +39,7 @@ function SettingsPage() {
     );
   }, []);
 
-  const pluginsRoutes = useMemo(() => createSectionsRoutes(settings), [settings]);
+  const pluginsRoutes = createSectionsRoutes(settings);
 
   const toggleHeaderSearch = label =>
     setShowHeaderSearchState(prev => {

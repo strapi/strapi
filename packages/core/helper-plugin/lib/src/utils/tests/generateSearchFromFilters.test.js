@@ -4,7 +4,7 @@ describe('HELPER PLUGIN | utils | generateSearchFromFilters', () => {
   it('should return a string with all the applied filters', () => {
     const data = {
       _limit: 10,
-      _sort: 'id:ASC',
+      sort: 'id:ASC',
       _page: 2,
       filters: [
         {
@@ -46,7 +46,7 @@ describe('HELPER PLUGIN | utils | generateSearchFromFilters', () => {
     };
 
     const expected =
-      '_limit=10&_sort=id:ASC&_page=2&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
+      '_limit=10&sort=id:ASC&_page=2&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
     const encoded = expected
       .split('&')
       .map(pair => {

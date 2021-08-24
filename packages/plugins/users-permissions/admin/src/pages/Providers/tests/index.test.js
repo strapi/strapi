@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { useForm } from '../../../hooks';
-import ProvidersPage from '../index';
+import { ProvidersPage } from '../index';
 
 jest.mock('../../../hooks', () => ({
   useForm: jest.fn(),

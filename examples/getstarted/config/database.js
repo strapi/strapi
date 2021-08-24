@@ -15,7 +15,6 @@ const postgres = {
     port: 5432,
     host: 'localhost',
   },
-  // debug: true,
 };
 
 const mysql = {

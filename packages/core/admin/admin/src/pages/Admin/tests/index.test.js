@@ -63,7 +63,7 @@ describe('<Admin />', () => {
         },
         {
           to: '/plugins/documentation',
-          Component: () => <div>DOCUMENTATION PLUGIN</div>,
+          Component: () => ({ default: () => <div>DOCUMENTATION PLUGIN</div> }),
         },
       ],
     }));

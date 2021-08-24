@@ -54,7 +54,7 @@ module.exports = app => {
       console.log();
     },
 
-    logStartupMessage() {
+    logDefaultStartupMessage() {
       this.logStats();
 
       console.log(chalk.bold('Welcome back!'));
@@ -70,6 +70,21 @@ module.exports = app => {
       const serverUrl = getAbsoluteServerUrl(strapi.config);
       console.log(chalk.bold(serverUrl));
       console.log();
+    },
+
+    logStartupMessage(isInitialized) {
+      // Should the startup message be displayed?
+      const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
+        ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
+        : false;
+
+      if (hideStartupMessage === false) {
+        if (!isInitialized) {
+          this.logFirstStartupMessage();
+        } else {
+          this.logStartupMessage();
+        }
+      }
     },
   };
 };

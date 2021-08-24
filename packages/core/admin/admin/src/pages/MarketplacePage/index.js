@@ -1,13 +1,14 @@
-// import React, { useEffect, useRef } from 'react';
-// import {
-//   LoadingIndicatorPage,
-//   request,
-//   useNotification,
-//   useAutoReloadOverlayBlocker,
-//   useAppInfos,
-//   useTracking,
-//   useStrapiApp,
-// } from '@strapi/helper-plugin';
+import React from 'react';
+import {
+  // LoadingIndicatorPage,
+  // request,
+  // useNotification,
+  // useAutoReloadOverlayBlocker,
+  // useAppInfos,
+  // useTracking,
+  // useStrapiApp,
+  CheckPagePermissions,
+} from '@strapi/helper-plugin';
 // import { Header } from '@buffetjs/custom';
 // import { useIntl } from 'react-intl';
 // import { useHistory } from 'react-router-dom';
@@ -15,7 +16,8 @@
 // import PageTitle from '../../components/PageTitle';
 // import PluginCard from './PluginCard';
 // import Wrapper from './Wrapper';
-// import PluginBanner from './PluginBanner';
+// import MarketplaceBanner from './MarketplaceBanner';
+import adminPermissions from '../../permissions';
 
 // const MarketPlacePage = () => {
 //   const toggleNotification = useNotification();
@@ -91,7 +93,7 @@
 //             id: 'app.components.InstallPluginPage.description',
 //           })}
 //         />
-//         <PluginBanner />
+//         <MarketplaceBanner />
 //         <div className="row" style={{ paddingTop: '4.1rem' }}>
 //           {data.map(plugin => {
 //             return (
@@ -112,11 +114,6 @@
 //     </div>
 //   );
 // };
-
-// export default MarketPlacePage;
-import React from 'react';
-import { CheckPagePermissions } from '@strapi/helper-plugin';
-import adminPermissions from '../../permissions';
 
 export default () => (
   <CheckPagePermissions permissions={adminPermissions.marketplace.main}>

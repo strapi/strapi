@@ -4,6 +4,16 @@
     "module": "commonjs",
     "target": "es6"
   },
-  "include": ["packages/**/*.js"],
-  "exclude": ["node_modules", ".git", ".npm", ".cache", ".tmp", "dist", "build"]
+  "exclude": [
+    "**/node_modules/*",
+    ".git",
+    ".npm",
+    "**/.cache/*",
+    "**/.tmp/*",
+    "**/dist/*",
+    "**/build/*",
+    "**/*.test.js",
+    "**/*.test.e2e.js",
+    "**/examples/getstarted/*"
+  ]
 }

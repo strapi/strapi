@@ -1,6 +1,6 @@
 'use strict';
 
-const MANY_RELATIONS = ['oneToMany', 'manyToMany', 'manyWay'];
+const MANY_RELATIONS = ['oneToMany', 'manyToMany'];
 
 const getRelationalFields = contentType => {
   return Object.keys(contentType.attributes).filter(attributeName => {

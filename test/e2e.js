@@ -30,9 +30,10 @@ const databases = {
   },
   sqlite: {
     client: 'sqlite',
-    connecton: {
+    connection: {
       filename: './tmp/data.db',
     },
+    useNullAsDefault: true,
   },
 };
 
@@ -51,7 +52,7 @@ const main = async (database, args) => {
     await cleanTestApp(appName);
     await generateTestApp({ appName, database });
 
-    await runAllTests(args).catch(()=> {
+    await runAllTests(args).catch(() => {
       process.stdout.write('Tests failed\n', () => {
         process.exit(1);
       });

@@ -1,6 +1,6 @@
 {
   "name": "@strapi/logger",
-  "version": "3.6.6",
+  "version": "3.6.7",
   "description": "Strapi's logger",
   "homepage": "https://strapi.io",
   "main": "./lib/index.js",

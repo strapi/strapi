@@ -154,6 +154,8 @@ describe('Publication State', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
+    console.log(JSON.stringify(builder.sanitizedFixtures(strapi), null, 2));
+
     Object.assign(data, builder.sanitizedFixtures(strapi));
   });
 
@@ -170,13 +172,8 @@ describe('Publication State', () => {
       test('Can get entries', async () => {
         const res = await rq({ method: 'GET', url: `${baseUrl}${query}` });
 
-        expect(res.body).toHaveLength(lengthFor(modelName, { mode }));
-      });
-
-      test('Can count entries', async () => {
-        const res = await rq({ method: 'GET', url: `${baseUrl}/count${query}` });
-
-        expect(res.body).toBe(lengthFor(modelName, { mode }));
+        expect(res.body.data).toHaveLength(lengthFor(modelName, { mode }));
+        expect(res.body.meta.pagination.total).toBe(lengthFor(modelName, { mode }));
       });
     });
   });
@@ -194,7 +191,8 @@ describe('Publication State', () => {
             populate: ['categories', 'comp.countries'],
           },
         });
-        products = res.body;
+
+        products = res.body.data.map(res => ({ id: res.id, ...res.attributes }));
       });
 
       const getApiRef = id => data.product.find(product => product.id === id);

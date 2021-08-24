@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/reviews/count",
-      "handler": "Review.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/reviews/:id",
       "handler": "Review.findOne",
       "config": {

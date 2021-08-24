@@ -28,11 +28,7 @@ const ct = {
   },
 };
 
-describe.each([
-  ['CONTENT MANAGER', '/content-manager/collection-types/application::withcomponent.withcomponent'],
-  ['GENERATED API', '/withcomponents'],
-])('[%s] => Non repeatable and Not required component', (_, path) => {
-  const hasPagination = path.includes('/content-manager');
+describe('Non repeatable and Not required component', () => {
   const builder = createTestBuilder();
 
   beforeAll(async () => {
@@ -43,7 +39,7 @@ describe.each([
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(path);
+    rq.setURLPrefix('/content-manager/collection-types/application::withcomponent.withcomponent');
   });
 
   afterAll(async () => {
@@ -187,27 +183,9 @@ describe.each([
 
       expect(res.statusCode).toBe(200);
 
-      if (hasPagination) {
-        expect(res.body.pagination).toBeDefined();
-        expect(Array.isArray(res.body.results)).toBe(true);
-        res.body.results.forEach(entry => {
-          expect(Array.isArray(entry.field)).toBe(true);
-
-          if (entry.field.length === 0) return;
-
-          expect(entry.field).toEqual(
-            expect.arrayContaining([
-              expect.objectContaining({
-                name: expect.any(String),
-              }),
-            ])
-          );
-        });
-        return;
-      }
-
-      expect(Array.isArray(res.body)).toBe(true);
-      res.body.forEach(entry => {
+      expect(res.body.pagination).toBeDefined();
+      expect(Array.isArray(res.body.results)).toBe(true);
+      res.body.results.forEach(entry => {
         expect(Array.isArray(entry.field)).toBe(true);
 
         if (entry.field.length === 0) return;

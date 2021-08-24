@@ -1,7 +1,7 @@
 import React from 'react';
 import { Router, Route } from 'react-router-dom';
 import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import Theme from '../../../components/Theme';
@@ -230,7 +230,7 @@ describe('ADMIN | pages | SettingsPage', () => {
     expect(screen.getByText(/App infos/)).toBeInTheDocument();
   });
 
-  it('should create the plugins routes correctly', () => {
+  it('should create the plugins routes correctly', async () => {
     useSettingsMenu.mockImplementation(() => ({
       isLoading: false,
       menu: [
@@ -247,7 +247,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               isDisplayed: true,
               permissions: [],
               to: '/settings/internationalization',
-              Component: () => <div>i18n settings</div>,
+              Component: () => ({ default: () => <div>i18n settings</div> }),
             },
           ],
         },
@@ -261,7 +261,7 @@ describe('ADMIN | pages | SettingsPage', () => {
               isDisplayed: true,
               permissions: [],
               to: '/settings/email-settings',
-              Component: () => <div>email settings</div>,
+              Component: () => ({ default: () => <div>email settings</div> }),
             },
           ],
         },
@@ -283,7 +283,7 @@ describe('ADMIN | pages | SettingsPage', () => {
             isDisplayed: true,
             permissions: [],
             to: '/settings/internationalization',
-            Component: () => <div>i18n settings</div>,
+            Component: () => ({ default: () => <div>i18n settings</div> }),
           },
         ],
       },
@@ -297,7 +297,7 @@ describe('ADMIN | pages | SettingsPage', () => {
             isDisplayed: true,
             permissions: [],
             to: '/settings/email-settings',
-            Component: () => <div>email settings</div>,
+            Component: () => ({ default: () => <div>email settings</div> }),
           },
         ],
       },
@@ -311,10 +311,14 @@ describe('ADMIN | pages | SettingsPage', () => {
 
     userEvent.click(screen.getByText('i18n.plugin.name'));
 
-    expect(screen.getByText(/i18n settings/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/i18n settings/)).toBeInTheDocument();
+    });
 
     userEvent.click(screen.getByText('email'));
 
-    expect(screen.getByText(/email settings/)).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText(/email settings/)).toBeInTheDocument();
+    });
   });
 });

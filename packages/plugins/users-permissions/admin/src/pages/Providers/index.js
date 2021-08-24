@@ -14,6 +14,13 @@ import {
   // useNotification,
   // useOverlayBlocker,
   LoadingIndicatorPage,
+  // SizedInput,
+  // useTracking,
+  // getYupInnerErrors,
+  // request,
+  // useNotification,
+  // useOverlayBlocker,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 // import { get, upperFirst, has } from 'lodash';
 // import has from 'lodash/has';
@@ -39,7 +46,7 @@ import {
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
 
-const ProvidersPage = () => {
+export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
 
   // const { trackUsage } = useTracking();
@@ -340,4 +347,10 @@ const ProvidersPage = () => {
   );
 };
 
-export default ProvidersPage;
+const ProtectedProvidersPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.readProviders}>
+    <ProvidersPage />
+  </CheckPagePermissions>
+);
+
+export default ProtectedProvidersPage;
