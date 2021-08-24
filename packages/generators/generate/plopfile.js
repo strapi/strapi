@@ -4,8 +4,61 @@ const { join } = require('path');
 const fs = require('fs-extra');
 const pluralize = require('pluralize');
 
+const rootDir = process.cwd();
+
+const getFilePath = destination => {
+  if (destination === 'api') {
+    return `api/{{api}}`;
+  }
+
+  if (destination === 'plugin') {
+    return `plugins/{{plugin}}`;
+  }
+
+  return `api/{{id}}`;
+};
+
+const getDestinationPrompts = action => {
+  return [
+    {
+      type: 'list',
+      name: 'destination',
+      message: `Where do you want to add this ${action}?`,
+      choices: [
+        {
+          name: `Add ${action} to ${action === 'policy' ? 'root of project' : 'new API'}`,
+          value: 'new',
+        },
+        { name: `Add ${action} to existing API`, value: 'api' },
+        { name: `Add ${action} to existing plugin`, value: 'plugin' },
+      ],
+    },
+    {
+      when: answers => answers.destination === 'api',
+      type: 'input',
+      message: 'Which API is this for?',
+      name: 'api',
+      validate: async input => {
+        const exists = await fs.pathExists(join(rootDir, `api/${input}`));
+
+        return exists || 'That api does not exist, please try again';
+      },
+    },
+    {
+      when: answers => answers.destination === 'plugin',
+      type: 'input',
+      message: 'Which plugin is this for?',
+      name: 'plugin',
+      validate: async input => {
+        const exists = await fs.pathExists(join(rootDir, `plugins/${input}`));
+
+        return exists || 'That plugin does not exist, please try again';
+      },
+    },
+  ];
+};
+
 module.exports = function(plop) {
-  const rootDir = process.cwd();
   plop.setWelcomeMessage('Strapi Generators');
 
   plop.addHelper('pluralize', text => pluralize(text));
@@ -20,38 +73,80 @@ module.exports = function(plop) {
         message: 'API name',
       },
       {
+        type: 'list',
+        name: 'kind',
+        message: 'Please choose the model type',
+        choices: [
+          { name: 'Collection Type', value: 'collectionType' },
+          { name: 'Singe Type', value: 'singleType' },
+        ],
+      },
+      {
+        type: 'confirm',
+        name: 'isPluginApi',
+        message: 'Is this API for a plugin?',
+      },
+      {
+        when: answers => answers.isPluginApi,
+        type: 'input',
+        name: 'plugin',
+        message: 'Plugin name',
+        validate: async input => {
+          const exists = await fs.pathExists(join(rootDir, `plugins/${input}`));
+
+          return exists || 'That plugin does not exist, please try again';
+        },
+      },
+      {
         type: 'confirm',
         name: 'useDraftAndPublish',
         message: 'Use draft and publish?',
       },
     ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/config/routes.json'),
-        templateFile: 'templates/api-routes.json.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/controllers/{{id}}.js'),
-        templateFile: 'templates/controller.js.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.js'),
-        templateFile: 'templates/model.js.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.settings.json'),
-        templateFile: 'templates/model.settings.json.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/services/{{id}}.js'),
-        templateFile: 'templates/service.js.hbs',
-      },
-    ],
+    actions: answers => {
+      let filePath;
+      if (answers.isPluginApi && answers.plugin) {
+        filePath = `plugins/{{plugin}}`;
+      } else {
+        filePath = `api/{{id}}`;
+      }
+
+      const baseActions = [
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/controllers/{{id}}.js`),
+          templateFile: 'templates/controller.js.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/models/{{id}}.js`),
+          templateFile: 'templates/model.js.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/models/{{id}}.settings.json`),
+          templateFile: 'templates/model.settings.json.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/services/{{id}}.js`),
+          templateFile: 'templates/service.js.hbs',
+        },
+      ];
+
+      if (answers.isPluginApi) {
+        return baseActions;
+      } else {
+        return [
+          {
+            type: 'add',
+            path: join(rootDir, `${filePath}/config/routes.json`),
+            templateFile: 'templates/api-routes.json.hbs',
+          },
+          ...baseActions,
+        ];
+      }
+    },
   });
 
   // Controller generator
@@ -63,14 +158,19 @@ module.exports = function(plop) {
         name: 'id',
         message: 'Controller name',
       },
+      ...getDestinationPrompts('controller'),
     ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/controllers/{{id}}.js'),
-        templateFile: 'templates/controller.js.hbs',
-      },
-    ],
+    actions: answers => {
+      const filePath = getFilePath(answers.destination);
+
+      return [
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/controllers/{{id}}.js`),
+          templateFile: 'templates/controller.js.hbs',
+        },
+      ];
+    },
   });
 
   // Model generator
@@ -83,23 +183,37 @@ module.exports = function(plop) {
         message: 'Model name',
       },
       {
+        type: 'list',
+        name: 'kind',
+        message: 'Please choose the model type',
+        choices: [
+          { name: 'Collection Type', value: 'collectionType' },
+          { name: 'Singe Type', value: 'singleType' },
+        ],
+      },
+      ...getDestinationPrompts('model'),
+      {
         type: 'confirm',
         name: 'useDraftAndPublish',
         message: 'Use draft and publish?',
       },
     ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.js'),
-        templateFile: 'templates/model.js.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.settings.json'),
-        templateFile: 'templates/model.settings.json.hbs',
-      },
-    ],
+    actions: answers => {
+      const filePath = getFilePath(answers.destination);
+
+      return [
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/models/{{id}}.js`),
+          templateFile: 'templates/model.js.hbs',
+        },
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/models/{{id}}.settings.json`),
+          templateFile: 'templates/model.settings.json.hbs',
+        },
+      ];
+    },
   });
 
   // Plugin generator
@@ -112,8 +226,8 @@ module.exports = function(plop) {
         message: 'Plugin name',
       },
     ],
-    actions: data => {
-      fs.copySync(join(__dirname, 'files', 'plugin'), join(rootDir, 'plugins', data.id));
+    actions: answers => {
+      fs.copySync(join(__dirname, 'files', 'plugin'), join(rootDir, 'plugins', answers.id));
       return [
         {
           type: 'add',
@@ -153,14 +267,26 @@ module.exports = function(plop) {
         name: 'id',
         message: 'Policy name',
       },
+      ...getDestinationPrompts('policy'),
     ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'config/policies/{{id}}.js'),
-        templateFile: 'templates/policy.js.hbs',
-      },
-    ],
+    actions: answers => {
+      let filePath;
+      if (answers.destination === 'api') {
+        filePath = `api/{{api}}`;
+      } else if (answers.destination === 'plugin') {
+        filePath = `plugins/{{plugin}}`;
+      } else {
+        filePath = ``;
+      }
+
+      return [
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/config/policies/{{id}}.js`),
+          templateFile: 'templates/policy.js.hbs',
+        },
+      ];
+    },
   });
 
   // Service generator
@@ -172,13 +298,17 @@ module.exports = function(plop) {
         name: 'id',
         message: 'Service name',
       },
+      ...getDestinationPrompts('service'),
     ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/services/{{id}}.js'),
-        templateFile: 'templates/service.js.hbs',
-      },
-    ],
+    actions: answers => {
+      const filePath = getFilePath(answers.destination);
+      return [
+        {
+          type: 'add',
+          path: join(rootDir, `${filePath}/services/{{id}}.js`),
+          templateFile: 'templates/service.js.hbs',
+        },
+      ];
+    },
   });
 };
