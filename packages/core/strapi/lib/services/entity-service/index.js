@@ -23,7 +23,7 @@ const { MANY_RELATIONS } = relationsUtils.constants;
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
 
-const paginateAndTransformToQuery = (uid, opts) => {
+const paginateAndTransformToQuery = (uid, opts = {}) => {
   // Paginate the opts
   const paginatedOpts = paginationUtils.withDefaultPagination(opts);
 
