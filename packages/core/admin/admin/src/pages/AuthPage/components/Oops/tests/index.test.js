@@ -4,39 +4,26 @@ import { ThemeProvider } from '@strapi/parts/ThemeProvider';
 import { lightTheme } from '@strapi/parts/themes';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import { IntlProvider } from 'react-intl';
 import Oops from '..';
 
-jest.mock('react-intl', () => {
-  const reactIntl = jest.requireActual('react-intl');
-  const intl = reactIntl.createIntl({
-    locale: 'en',
-  });
-
-  return {
-    ...reactIntl,
-    useIntl: () => intl,
-  };
-});
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
   localeNames: ['en'],
   messages: ['test'],
-}));
-jest.mock('@strapi/helper-plugin', () => ({
-  useQuery: () => ({
-    get: () => '',
-  }),
 }));
 
 describe('ADMIN | PAGES | AUTH | Oops', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
     const { container } = render(
-      <ThemeProvider theme={lightTheme}>
-        <Router history={history}>
-          <Oops />
-        </Router>
-      </ThemeProvider>
+      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+        <ThemeProvider theme={lightTheme}>
+          <Router history={history}>
+            <Oops />
+          </Router>
+        </ThemeProvider>
+      </IntlProvider>
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`

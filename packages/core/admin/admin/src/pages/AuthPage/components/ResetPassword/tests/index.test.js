@@ -5,34 +5,30 @@ import { lightTheme } from '@strapi/parts/themes';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import * as yup from 'yup';
+import { IntlProvider } from 'react-intl';
 import ResetPassword from '..';
 
-jest.mock('react-intl', () => {
-  const reactIntl = jest.requireActual('react-intl');
-  const intl = reactIntl.createIntl({
-    locale: 'en',
-  });
-
-  return {
-    ...reactIntl,
-    useIntl: () => intl,
-  };
-});
 jest.mock('../../../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
   localeNames: ['en'],
   messages: ['test'],
+}));
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useNotification: () => jest.fn({}),
 }));
 
 describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
     const { container } = render(
-      <ThemeProvider theme={lightTheme}>
-        <Router history={history}>
-          <ResetPassword onSubmit={() => {}} schema={yup.object()} />
-        </Router>
-      </ThemeProvider>
+      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+        <ThemeProvider theme={lightTheme}>
+          <Router history={history}>
+            <ResetPassword onSubmit={() => {}} schema={yup.object()} />
+          </Router>
+        </ThemeProvider>
+      </IntlProvider>
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
@@ -196,6 +192,16 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         align-items: center;
       }
 
+      .c15 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
       .c15 > * {
         margin-top: 0;
         margin-bottom: 0;
@@ -203,6 +209,16 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c15 > * + * {
         margin-top: 24px;
+      }
+
+      .c17 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
       .c17 > * {
