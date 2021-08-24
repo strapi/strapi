@@ -17,7 +17,7 @@ describe('convertRestQueryParams', () => {
 
     expect(
       convertRestQueryParams({
-        _sort: 'id:desc,price',
+        sort: 'id:desc,price',
         _start: '5',
         _limit: '10',
       })
@@ -31,12 +31,12 @@ describe('convertRestQueryParams', () => {
   describe('Sort param', () => {
     test('Throws on invalid params', () => {
       // invalid sort queries
-      expect(() => convertRestQueryParams({ _sort: 1 })).toThrow();
-      expect(() => convertRestQueryParams({ _sort: {} })).toThrow();
-      expect(() => convertRestQueryParams({ _sort: 'id,,test' })).toThrow();
-      expect(() => convertRestQueryParams({ _sort: 'id,test,' })).toThrow();
-      expect(() => convertRestQueryParams({ _sort: 'id:asc,test:dasc' })).toThrow();
-      expect(() => convertRestQueryParams({ _sort: 'id:asc,:asc' })).toThrow();
+      expect(() => convertRestQueryParams({ sort: 1 })).toThrow();
+      expect(() => convertRestQueryParams({ sort: {} })).toThrow();
+      expect(() => convertRestQueryParams({ sort: 'id,,test' })).toThrow();
+      expect(() => convertRestQueryParams({ sort: 'id,test,' })).toThrow();
+      expect(() => convertRestQueryParams({ sort: 'id:asc,test:dasc' })).toThrow();
+      expect(() => convertRestQueryParams({ sort: 'id:asc,:asc' })).toThrow();
     });
 
     test.each([
@@ -54,7 +54,7 @@ describe('convertRestQueryParams', () => {
         [{ published_at: 'asc' }, { price: 'asc' }, { date: 'desc' }],
       ],
     ])('Converts sort query "%s" correctly', (input, expected) => {
-      expect(convertRestQueryParams({ _sort: input })).toMatchObject({
+      expect(convertRestQueryParams({ sort: input })).toMatchObject({
         sort: expected,
       });
     });
