@@ -29,7 +29,7 @@ describe('i18n | contentManagerHooks | addColumnToTable', () => {
     // In our scenario, it's even more tricky because we use a closure in order to pass
     // the locales.
     // Stringifying the action allows us to have a name inside the expectation for the "cellFormatter" key
-    expect(JSON.stringify(result)).toBe(
+    expect(JSON.stringify(result.displayedHeaders)).toBe(
       '[{"key":"__locale_key__","fieldSchema":{"type":"string"},"metadatas":{"label":"Content available in","searchable":false,"sortable":false},"name":"locales"}]'
     );
   });

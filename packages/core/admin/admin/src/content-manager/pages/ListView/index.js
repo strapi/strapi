@@ -102,7 +102,7 @@ function ListView({
   const tableHeaders = useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
 
-    return headers;
+    return headers.displayedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout]);
 
   const [{ query }, setQuery] = useQueryParams();

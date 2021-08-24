@@ -9,16 +9,19 @@ const addColumnToTableHook = ({ displayedHeaders, layout }) => {
     return displayedHeaders;
   }
 
-  return [
-    ...displayedHeaders,
-    {
-      key: '__locale_key__',
-      fieldSchema: { type: 'string' },
-      metadatas: { label: 'Content available in', searchable: false, sortable: false },
-      name: 'locales',
-      cellFormatter: props => <LocaleListCell {...props} />,
-    },
-  ];
+  return {
+    displayedHeaders: [
+      ...displayedHeaders,
+      {
+        key: '__locale_key__',
+        fieldSchema: { type: 'string' },
+        metadatas: { label: 'Content available in', searchable: false, sortable: false },
+        name: 'locales',
+        cellFormatter: props => <LocaleListCell {...props} />,
+      },
+    ],
+    layout,
+  };
 };
 
 export default addColumnToTableHook;
