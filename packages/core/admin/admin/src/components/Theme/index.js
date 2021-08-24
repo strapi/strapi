@@ -6,8 +6,8 @@ import GlobalStyle from '../GlobalStyle';
 
 const Theme = ({ children, theme }) => (
   <ThemeProvider theme={theme}>
-    <GlobalStyle />
     {children}
+    <GlobalStyle />
   </ThemeProvider>
 );
 

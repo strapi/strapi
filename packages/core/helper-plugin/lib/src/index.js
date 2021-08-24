@@ -67,7 +67,6 @@ export { default as ListTitle } from './old/components/ListTitle';
 
 export { default as LoadingBar } from './old/components/LoadingBar';
 export { default as LoadingIndicator } from './old/components/LoadingIndicator';
-export { default as LoadingIndicatorPage } from './old/components/LoadingIndicatorPage';
 
 export { default as ModalConfirm } from './old/components/ModalConfirm';
 export { default as Modal } from './old/components/Modal';
@@ -175,3 +174,4 @@ export { default as SearchIcon } from './old/svgs/Search';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
 export * from './components/InjectionZone';
+export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
