@@ -82,8 +82,8 @@ describe('Admin | components | AuthenticatedApp', () => {
         border: 6px solid #f3f3f3;
         border-top: 6px solid #1c91e7;
         border-radius: 50%;
-        -webkit-animation: fEWCgj 2s linear infinite;
-        animation: fEWCgj 2s linear infinite;
+        -webkit-animation: cilQsd 2s linear infinite;
+        animation: cilQsd 2s linear infinite;
       }
 
       <div

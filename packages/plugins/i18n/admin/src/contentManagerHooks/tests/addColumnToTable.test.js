@@ -9,8 +9,10 @@ describe('i18n | contentManagerHooks | addColumnToTable', () => {
 
     const result = addColumnToTable({ displayedHeaders, layout });
 
-    expect(result).toHaveLength(1);
-    expect(result).toEqual(['one']);
+    expect(result).toHaveProperty('displayedHeaders');
+    expect(result).toHaveProperty('layout');
+    expect(result.displayedHeaders).toHaveLength(1);
+    expect(result.displayedHeaders).toEqual(['one']);
   });
 
   it('adds a header to the displayedHeaders array when the content type is localized', () => {

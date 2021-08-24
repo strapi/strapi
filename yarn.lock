@@ -608,7 +608,7 @@
     "@babel/helper-plugin-utils" "^7.14.5"
     "@babel/plugin-syntax-dynamic-import" "^7.8.3"
 
-"@babel/plugin-proposal-export-default-from@^7.12.1":
+"@babel/plugin-proposal-export-default-from@7.14.5", "@babel/plugin-proposal-export-default-from@^7.12.1":
   version "7.14.5"
   resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-export-default-from/-/plugin-proposal-export-default-from-7.14.5.tgz#8931a6560632c650f92a8e5948f6e73019d6d321"
   integrity sha512-T8KZ5abXvKMjF6JcoXjgac3ElmXf0AWzJwi2O/42Jk+HmCky3D9+i1B7NPP1FblyceqTevKeV/9szeikFoaMDg==
@@ -623,6 +623,14 @@
   dependencies:
     "@babel/helper-plugin-utils" "^7.14.5"
     "@babel/plugin-syntax-export-namespace-from" "^7.8.3"
+
+"@babel/plugin-proposal-function-bind@7.14.5":
+  version "7.14.5"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-proposal-function-bind/-/plugin-proposal-function-bind-7.14.5.tgz#83bbc684312bf82bda46ec7cb52dc226e891833f"
+  integrity sha512-PSQk5JImi81nFAzIebCEqkd0aiP9LDVKLCIH+0yR66JV8cQ1oZ8IRK9NNaA5nw9sjo0cPXxuBPCqgqcpugR8tA==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.14.5"
+    "@babel/plugin-syntax-function-bind" "^7.14.5"
 
 "@babel/plugin-proposal-json-strings@^7.13.8", "@babel/plugin-proposal-json-strings@^7.14.5":
   version "7.14.5"
@@ -779,6 +787,13 @@
   version "7.14.5"
   resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-flow/-/plugin-syntax-flow-7.14.5.tgz#2ff654999497d7d7d142493260005263731da180"
   integrity sha512-9WK5ZwKCdWHxVuU13XNT6X73FGmutAXeor5lGFq6qhOFtMFUF4jkbijuyUdZZlpYq6E2hZeZf/u3959X9wsv0Q==
+  dependencies:
+    "@babel/helper-plugin-utils" "^7.14.5"
+
+"@babel/plugin-syntax-function-bind@^7.14.5":
+  version "7.14.5"
+  resolved "https://registry.yarnpkg.com/@babel/plugin-syntax-function-bind/-/plugin-syntax-function-bind-7.14.5.tgz#eb7544014fe349f48acbebc5084eeadde2efe57e"
+  integrity sha512-gstAIrKtlPwrQaRz4uK+kT7zI2p5MQqX41SeO+kZKH1XGO1jL0nLZBWznRigPpkem6LfIoG2EduQZmPBcUwEmg==
   dependencies:
     "@babel/helper-plugin-utils" "^7.14.5"
 

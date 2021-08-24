@@ -6,7 +6,7 @@ const addColumnToTableHook = ({ displayedHeaders, layout }) => {
   const isFieldLocalized = get(layout, 'contentType.pluginOptions.i18n.localized', false);
 
   if (!isFieldLocalized) {
-    return displayedHeaders;
+    return { displayedHeaders, layout };
   }
 
   return {
