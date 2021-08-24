@@ -296,13 +296,13 @@ describe('Role CRUD End to End', () => {
               Object {
                 "action": "admin::api-tokens.create",
                 "category": "api tokens",
-                "displayName": "Create",
+                "displayName": "Create (generate)",
                 "subCategory": "general",
               },
               Object {
                 "action": "admin::api-tokens.delete",
                 "category": "api tokens",
-                "displayName": "Delete",
+                "displayName": "Delete (revoke)",
                 "subCategory": "general",
               },
               Object {
@@ -769,13 +769,13 @@ describe('Role CRUD End to End', () => {
                 Object {
                   "action": "admin::api-tokens.create",
                   "category": "api tokens",
-                  "displayName": "Create",
+                  "displayName": "Create (generate)",
                   "subCategory": "general",
                 },
                 Object {
                   "action": "admin::api-tokens.delete",
                   "category": "api tokens",
-                  "displayName": "Delete",
+                  "displayName": "Delete (revoke)",
                   "subCategory": "general",
                 },
                 Object {
@@ -1177,13 +1177,13 @@ describe('Role CRUD End to End', () => {
                 Object {
                   "action": "admin::api-tokens.create",
                   "category": "api tokens",
-                  "displayName": "Create",
+                  "displayName": "Create (generate)",
                   "subCategory": "general",
                 },
                 Object {
                   "action": "admin::api-tokens.delete",
                   "category": "api tokens",
-                  "displayName": "Delete",
+                  "displayName": "Delete (revoke)",
                   "subCategory": "general",
                 },
                 Object {
