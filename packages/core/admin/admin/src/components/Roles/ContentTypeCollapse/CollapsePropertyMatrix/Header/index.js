@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Row, TableLabel } from '@strapi/parts';
 import styled from 'styled-components';
-import { cellWidth, firstRowWidth } from '../../../Permissions/utils/constants';
+import { cellWidth, firstRowWidth, rowHeight } from '../../../Permissions/utils/constants';
 
 const HeaderLabel = styled(Row)`
   width: ${cellWidth};
@@ -11,7 +11,7 @@ const HeaderLabel = styled(Row)`
 `;
 const PropertyLabelWrapper = styled(Row)`
   width: ${firstRowWidth};
-  height: ${52 / 16}rem;
+  height: ${rowHeight};
   flex-shrink: 0;
 `;
 

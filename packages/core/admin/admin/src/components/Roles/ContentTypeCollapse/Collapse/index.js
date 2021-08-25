@@ -9,7 +9,7 @@ import { usePermissionsDataManager } from '../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
 import HiddenAction from '../../HiddenAction';
-import { cellWidth } from '../../Permissions/utils/constants';
+import { cellWidth, rowHeight } from '../../Permissions/utils/constants';
 import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../utils';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
@@ -34,7 +34,7 @@ const activeRowStyle = (theme, isActive, isClicked) => `
 const Wrapper = styled.div`
   display: flex;
   align-items: center;
-  height: ${52 / 16}rem;
+  height: ${rowHeight};
   background-color: ${({ isGrey, theme }) =>
     isGrey ? theme.colors.neutral100 : theme.colors.neutral0};
   border: 1px solid transparent;

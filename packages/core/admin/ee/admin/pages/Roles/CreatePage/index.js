@@ -235,7 +235,14 @@ const CreatePage = () => {
                       />
                     </Box>
                   ) : (
-                    <Row alignItems="center" justifyContent="center" padding={11}>
+                    <Row
+                      alignItems="center"
+                      justifyContent="center"
+                      padding={11}
+                      background="neutral0"
+                      shadow="filterShadow"
+                      hasRadius
+                    >
                       <Loader />
                     </Row>
                   )}

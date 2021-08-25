@@ -6,7 +6,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
-import { cellWidth } from '../../../Permissions/utils/constants';
+import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
 import RequiredSign from '../../../RequiredSign';
 import RowLabelWithCheckbox from '../../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../../utils';
@@ -21,7 +21,7 @@ const Cell = styled(Row)`
 `;
 
 const Wrapper = styled(Row)`
-  height: ${52 / 16}rem;
+  height: ${rowHeight};
   flex: 1;
 
   ${({ isCollapsable, theme }) =>

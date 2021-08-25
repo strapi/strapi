@@ -5,9 +5,10 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
 import ConditionsSelect from '../ConditionsSelect';
+import { rowHeight } from '../../Permissions/utils/constants';
 
 const RowWrapper = styled(Row)`
-  height: ${52 / 16}rem;
+  height: ${rowHeight};
 `;
 
 const ActionRow = ({
