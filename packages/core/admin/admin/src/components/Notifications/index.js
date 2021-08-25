@@ -30,7 +30,6 @@ const Notifications = ({ children }) => {
           })}
         </Stack>
       </NotificationsWrapper>
-
       {children}
     </NotificationsProvider>
   );
