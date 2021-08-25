@@ -23,9 +23,11 @@ const inputModifiers = [
 ];
 
 module.exports = createPolicyFactory(
-  input => {
-    const permissions = input.map(val =>
-      inputModifiers.find(modifier => modifier.check(val)).transform(val)
+  options => {
+    const { actions } = options;
+
+    const permissions = actions.map(action =>
+      inputModifiers.find(modifier => modifier.check(action)).transform(action)
     );
 
     return (ctx, next) => {

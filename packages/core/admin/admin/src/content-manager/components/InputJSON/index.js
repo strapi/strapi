@@ -7,13 +7,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cm from 'codemirror';
-import 'codemirror/mode/javascript/javascript';
-import 'codemirror/addon/lint/lint';
-import 'codemirror/addon/lint/javascript-lint';
-import 'codemirror/addon/edit/closebrackets';
-import 'codemirror/addon/selection/mark-selection';
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/solarized.css';
 
 import { trimStart } from 'lodash';
 import jsonlint from './jsonlint';
@@ -22,6 +15,26 @@ import Wrapper from './components';
 const WAIT = 600;
 const stringify = JSON.stringify;
 const DEFAULT_THEME = 'solarized dark';
+
+const loadCss = async () => {
+  await import(
+    /* webpackChunkName: "codemirror-javacript" */ 'codemirror/mode/javascript/javascript'
+  );
+  await import(/* webpackChunkName: "codemirror-addon-lint" */ 'codemirror/addon/lint/lint');
+  await import(
+    /* webpackChunkName: "codemirror-addon-lint-js" */ 'codemirror/addon/lint/javascript-lint'
+  );
+  await import(
+    /* webpackChunkName: "codemirror-addon-closebrackets" */ 'codemirror/addon/edit/closebrackets'
+  );
+  await import(
+    /* webpackChunkName: "codemirror-addon-mark-selection" */ 'codemirror/addon/selection/mark-selection'
+  );
+  await import(/* webpackChunkName: "codemirror-css" */ 'codemirror/lib/codemirror.css');
+  await import(/* webpackChunkName: "codemirror-theme" */ 'codemirror/theme/solarized.css');
+};
+
+loadCss();
 
 class InputJSON extends React.Component {
   timer = null;

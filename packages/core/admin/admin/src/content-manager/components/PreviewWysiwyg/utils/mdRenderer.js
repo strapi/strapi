@@ -1,6 +1,5 @@
 /* eslint-disable prefer-template */
 import Markdown from 'markdown-it';
-import 'highlight.js/styles/solarized-dark.css';
 import { getLanguage, highlightAuto, highlight } from 'highlight.js';
 import abbr from 'markdown-it-abbr';
 import container from 'markdown-it-container';
@@ -11,6 +10,12 @@ import ins from 'markdown-it-ins';
 import mark from 'markdown-it-mark';
 import sub from 'markdown-it-sub';
 import sup from 'markdown-it-sup';
+
+const loadCss = async () => {
+  await import(/* webpackChunkName: "highlight.js" */ 'highlight.js/styles/solarized-dark.css');
+};
+
+loadCss();
 
 const md = new Markdown({
   html: true, // Enable HTML tags in source

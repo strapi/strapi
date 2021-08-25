@@ -6,7 +6,7 @@ const {
 const { validateHasPermissionsInput } = require('../../validation/policies/hasPermissions');
 
 module.exports = createPolicyFactory(
-  (actions, { hasAtLeastOne = false } = {}) => (ctx, next) => {
+  ({ actions = [], hasAtLeastOne = false } = {}) => (ctx, next) => {
     const {
       state: { userAbility, isAuthenticatedAdmin },
       params: { model },

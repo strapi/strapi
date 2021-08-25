@@ -10,9 +10,7 @@ const loadConfiguration = require('./core/app-configuration');
 
 const { createHTTPServer } = require('./server');
 const { createContainer } = require('./container');
-const loadModules = require('./core/loaders/load-modules');
 const utils = require('./utils');
-const bootstrap = require('./core/loaders/bootstrap');
 const initializeMiddlewares = require('./middlewares');
 const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
@@ -33,7 +31,8 @@ const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
-const loadPlugins = require('./core/load-plugins');
+const bootstrap = require('./core/bootstrap');
+const loaders = require('./core/loaders');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -90,6 +89,14 @@ class Strapi {
 
   get contentTypes() {
     return this.container.get('content-types').getAll();
+  }
+
+  policy(name) {
+    return this.container.get('policies').get(name);
+  }
+
+  middleware(name) {
+    return this.container.get('middlewares').get(name);
   }
 
   plugin(name) {
@@ -226,22 +233,28 @@ class Strapi {
     process.exit(exitCode);
   }
 
-  loadAdmin() {
-    this.admin = require('@strapi/admin/strapi-server');
-
-    strapi.container.get('content-types').add(`admin::`, strapi.admin.contentTypes);
-
-    // TODO: rename into just admin and ./config/admin.js
-    const userAdminConfig = strapi.config.get('server.admin');
-    this.config.set('server.admin', _.merge(this.admin.config, userAdminConfig));
+  async loadAdmin() {
+    await loaders.loadAdmin(this);
   }
 
   async loadPlugins() {
-    const loadedPlugins = await loadPlugins(this);
+    await loaders.loadPlugins(this);
+  }
 
-    for (const pluginName in loadedPlugins) {
-      this.container.get('plugins').add(pluginName, loadedPlugins[pluginName]);
-    }
+  async loadPolicies() {
+    await loaders.loadPolicies(this);
+  }
+
+  async loadAPIs() {
+    this.api = await loaders.loadAPIs(this);
+  }
+
+  async loadComponents() {
+    this.components = await loaders.loadComponents(this);
+  }
+
+  async loadMiddlewares() {
+    this.middleware = await loaders.loadMiddlewares(this);
   }
 
   async load() {
@@ -254,16 +267,14 @@ class Strapi {
       }
     });
 
-    await this.loadPlugins();
-
-    const modules = await loadModules(this);
-
-    await this.loadAdmin();
-
-    this.api = modules.api;
-    this.components = modules.components;
-
-    this.middleware = modules.middlewares;
+    await Promise.all([
+      this.loadPlugins(),
+      this.loadAdmin(),
+      this.loadAPIs(),
+      this.loadComponents(),
+      this.loadMiddlewares(),
+      this.loadPolicies(),
+    ]);
 
     await bootstrap(this);
 

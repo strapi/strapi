@@ -24,7 +24,7 @@ module.exports = {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          ['admin::hasPermissions', ['admin::provider-login.read']],
+          { name: 'admin::hasPermissions', options: { actions: ['admin::provider-login.read'] } },
         ],
       },
     },
@@ -35,7 +35,7 @@ module.exports = {
       config: {
         policies: [
           'admin::isAuthenticatedAdmin',
-          ['admin::hasPermissions', ['admin::provider-login.update']],
+          { name: 'admin::hasPermissions', options: { actions: ['admin::provider-login.update'] } },
         ],
       },
     },

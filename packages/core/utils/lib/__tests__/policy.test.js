@@ -13,10 +13,11 @@ describe('Policy util', () => {
 
       // init global strapi
       global.strapi = {
-        config: {
-          policies: {
-            'test-policy': policyFn,
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'global::test-policy': policyFn,
         },
       };
 
@@ -27,12 +28,11 @@ describe('Policy util', () => {
       const policyFn = () => {};
 
       global.strapi = {
-        plugins: {
-          'test-plugin': {
-            policies: {
-              'test-policy': policyFn,
-            },
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'plugin::test-plugin.test-policy': policyFn,
         },
       };
 
@@ -44,12 +44,11 @@ describe('Policy util', () => {
       const policyFn = () => {};
 
       global.strapi = {
-        plugins: {
-          'test-plugin': {
-            policies: {
-              'test-policy': policyFn,
-            },
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'plugin::test-plugin.test-policy': policyFn,
         },
       };
 

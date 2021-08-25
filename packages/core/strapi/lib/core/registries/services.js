@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 const { pickBy, has } = require('lodash/fp');
+const { addNamespace } = require('../utils');
 
 const contentTypesRegistry = strapi => {
   const services = {};
@@ -30,7 +31,8 @@ const contentTypesRegistry = strapi => {
     add(namespace, newServices) {
       for (const serviceName in newServices) {
         const service = newServices[serviceName];
-        const uid = `${namespace}.${serviceName}`;
+        const uid = addNamespace(serviceName, namespace);
+
         if (has(uid, services)) {
           throw new Error(`Service ${uid} has already been registered.`);
         }

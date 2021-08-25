@@ -8,7 +8,10 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['plugin::content-manager.hasPermissions', ['plugin::i18n.locale.read']],
+        {
+          name: 'plugin::content-manager.hasPermissions',
+          options: { actions: ['plugin::i18n.locale.read'] },
+        },
       ],
     },
   },
@@ -27,7 +30,10 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['plugin::content-manager.hasPermissions', ['plugin::i18n.locale.create']],
+        {
+          name: 'plugin::content-manager.hasPermissions',
+          options: { actions: ['plugin::i18n.locale.create'] },
+        },
       ],
     },
   },
@@ -38,7 +44,10 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['plugin::content-manager.hasPermissions', ['plugin::i18n.locale.update']],
+        {
+          name: 'plugin::content-manager.hasPermissions',
+          options: { actions: ['plugin::i18n.locale.update'] },
+        },
       ],
     },
   },
@@ -49,7 +58,10 @@ module.exports = [
     config: {
       policies: [
         'admin::isAuthenticatedAdmin',
-        ['plugin::content-manager.hasPermissions', ['plugin::i18n.locale.delete']],
+        {
+          name: 'plugin::content-manager.hasPermissions',
+          options: { actions: ['plugin::i18n.locale.delete'] },
+        },
       ],
     },
   },
