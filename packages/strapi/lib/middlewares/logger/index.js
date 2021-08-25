@@ -56,6 +56,25 @@ module.exports = strapi => {
           await next();
           const delta = Math.ceil(Date.now() - start);
           strapi.log.debug(`${ctx.method} ${ctx.url} (${delta} ms) ${codeToColor(ctx.status)}`);
+          
+          if (ctx.state) {
+            console.log(chalk.bold('Authorized user: '), _.pick(ctx.state.user, [
+              'id',
+              'username',
+              'email',
+              'role.type'
+            ]));
+          }
+
+          if (ctx.request) {
+            console.log(chalk.bold('Request data: '), _.pick(ctx.request, [
+              'body',
+              'params',
+              'query'
+            ]));
+          }
+
+          console.log();
         });
       }
     },
