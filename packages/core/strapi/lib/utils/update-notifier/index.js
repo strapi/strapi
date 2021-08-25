@@ -27,7 +27,7 @@ const geUpdatetMessage = (newVersion, currentVersion) => {
 
   return `
 A new version of Strapi is available ${currentVersionLog} → ${newVersionLog}
-Check out the new the releases at: ${releaseLink}
+Check out the new releases at: ${releaseLink}
 `.trim();
 };
 
