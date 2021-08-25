@@ -54,7 +54,7 @@
   "HomePage.helmet.title": "Homepage",
   "HomePage.roadmap": "See our roadmap",
   "HomePage.welcome.congrats": "Congrats!",
-  "HomePage.welcome.congrats.content": "You are logged as the first administrator. To discover the powerful features provided by Strapi,",
+  "HomePage.welcome.congrats.content": "You are logged in as the first administrator. To discover the powerful features provided by Strapi,",
   "HomePage.welcome.congrats.content.bold": "we recommend you to create your first Collection-Type.",
   "Media Library": "Media Library",
   "New entry": "New entry",
