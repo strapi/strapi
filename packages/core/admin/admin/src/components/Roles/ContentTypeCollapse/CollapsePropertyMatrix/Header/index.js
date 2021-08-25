@@ -7,10 +7,12 @@ import { cellWidth, firstRowWidth } from '../../../Permissions/utils/constants';
 
 const HeaderLabel = styled(Row)`
   width: ${cellWidth};
+  flex-shrink: 0;
 `;
 const PropertyLabelWrapper = styled(Row)`
   width: ${firstRowWidth};
   height: ${52 / 16}rem;
+  flex-shrink: 0;
 `;
 
 const Header = ({ headers, label }) => {

@@ -13,6 +13,7 @@ const CenteredStack = styled(Stack)`
   align-items: center;
   justify-content: center;
   width: ${cellWidth};
+  flex-shrink: 0;
 `;
 
 const GlobalActions = ({ actions, isFormDisabled, kind }) => {

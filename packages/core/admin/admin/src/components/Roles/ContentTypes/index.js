@@ -6,7 +6,7 @@ import GlobalActions from '../GlobalActions';
 
 const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) => {
   return (
-    <Box background="neutral0">
+    <Box background="neutral0" style={{ overflowX: 'auto' }}>
       <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
       <ContentTypeCollapses
         actions={actions}

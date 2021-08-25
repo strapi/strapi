@@ -26,7 +26,7 @@ const RowLabelWithCheckbox = ({
   value,
 }) => {
   return (
-    <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth }}>
+    <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
       <Checkbox
         name={checkboxName}
         aria-label={checkboxName}

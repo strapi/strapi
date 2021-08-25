@@ -1,5 +1,4 @@
-import { Down, Up } from '@strapi/icons';
-import { Box, Checkbox, Row } from '@strapi/parts';
+import { Checkbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -12,41 +11,25 @@ import RequiredSign from '../../../RequiredSign';
 import RowLabelWithCheckbox from '../../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../../utils';
 import { activeStyle } from '../../utils';
+import CarretIcon from '../CarretIcon';
 import SubActionRow from '../SubActionRow';
 import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
 
-const Cell = styled(Box)`
+const Cell = styled(Row)`
   width: ${cellWidth};
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
 `;
 
-// ! Something needs to be done in the DS parts to avoid doing this
-const Chevron = styled(Box)`
-  display: none;
-  svg {
-    width: ${11 / 16}rem;
-  }
-  * {
-    fill: ${({ theme }) => theme.colors.primary600};
-  }
-`;
-
 const Wrapper = styled(Row)`
-  height: 52px;
+  height: ${52 / 16}rem;
   flex: 1;
-  background: ${({ theme, isOdd }) => theme.colors[isOdd ? 'neutral100' : 'neutral0']};
-  ${Chevron} {
-    width: ${13 / 16}rem;
-  }
+
   ${({ isCollapsable, theme }) =>
     isCollapsable &&
     `
-      ${Chevron} {
+      ${CarretIcon} {
         display: block;
-        color: ${theme.main.colors.grey};
+        color: ${theme.colors.neutral100};
       }
       &:hover {
         ${activeStyle(theme)}
@@ -108,7 +91,12 @@ const ActionRow = ({
 
   return (
     <>
-      <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive} isOdd={isOdd}>
+      <Wrapper
+        alignItems="center"
+        isCollapsable={isCollapsable}
+        isActive={isActive}
+        background={isOdd ? 'neutral100' : 'neutral0'}
+      >
         <Row>
           <RowLabelWithCheckbox
             onChange={handleChangeLeftRowCheckbox}
@@ -121,7 +109,7 @@ const ActionRow = ({
             isActive={isActive}
           >
             {required && <RequiredSign />}
-            <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
+            <CarretIcon $isActive={isActive} />
           </RowLabelWithCheckbox>
           <Row>
             {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
@@ -141,7 +129,7 @@ const ActionRow = ({
                 const checkboxValue = get(modifiedData, checkboxName, false);
 
                 return (
-                  <Cell key={actionId}>
+                  <Cell key={actionId} justifyContent="center" alignItems="center">
                     <Checkbox
                       disabled={isFormDisabled || IS_DISABLED}
                       name={checkboxName.join('..')}
@@ -165,7 +153,7 @@ const ActionRow = ({
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
 
               return (
-                <Cell key={label}>
+                <Cell key={label} justifyContent="center" alignItems="center">
                   <Checkbox
                     disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName.join('..')}

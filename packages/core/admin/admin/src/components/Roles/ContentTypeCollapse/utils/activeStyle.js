@@ -1,14 +1,14 @@
-import { Text } from '@buffetjs/core';
-import Chevron from '../../Chevron';
+import { Text } from '@strapi/parts';
+import CarretIcon from '../CollapsePropertyMatrix/CarretIcon';
 
 const activeStyle = theme => `
-  color: ${theme.main.colors.mediumBlue};
   ${Text} {
-    color: ${theme.main.colors.mediumBlue};
+    color: ${theme.colors.primary600};
+    font-weight: bold;
   }
-  ${Chevron} {
+  ${CarretIcon} {
     display: block;
-    color: ${theme.main.colors.mediumBlue};
+    color: ${theme.colors.primary600};
   }
 `;
 
