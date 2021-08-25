@@ -393,31 +393,31 @@ describe('Role', () => {
 
       const defaultPermissions = [
         {
-          action: 'plugins::upload.read',
+          action: 'plugin::upload.read',
           conditions: ['admin::is-creator'],
           properties: {},
           subject: null,
         },
         {
-          action: 'plugins::upload.assets.create',
+          action: 'plugin::upload.assets.create',
           conditions: [],
           properties: {},
           subject: null,
         },
         {
-          action: 'plugins::upload.assets.update',
+          action: 'plugin::upload.assets.update',
           conditions: ['admin::is-creator'],
           properties: {},
           subject: null,
         },
         {
-          action: 'plugins::upload.assets.download',
+          action: 'plugin::upload.assets.download',
           conditions: [],
           properties: {},
           subject: null,
         },
         {
-          action: 'plugins::upload.assets.copy-link',
+          action: 'plugin::upload.assets.copy-link',
           conditions: [],
           properties: {},
           subject: null,
@@ -479,7 +479,7 @@ describe('Role', () => {
       });
 
       expect(getPermissionsWithNestedFields).toHaveBeenCalledWith(actions, {
-        restrictedSubjects: ['plugins::users-permissions.user'],
+        restrictedSubjects: ['plugin::users-permissions.user'],
       });
 
       expect(createMany).toHaveBeenCalledTimes(2);

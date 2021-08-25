@@ -82,7 +82,7 @@ describe('Action Domain', () => {
       expect(action).not.toHaveProperty('actionId');
       // The new action should match the original one and add a new actionId attribute
       expect(newAction).toMatchObject(action);
-      expect(newAction).toHaveProperty('actionId', 'application::foobar');
+      expect(newAction).toHaveProperty('actionId', 'api::foobar');
     });
   });
 
@@ -131,7 +131,7 @@ describe('Action Domain', () => {
   describe('create', () => {
     test('Should register an action with the minimum amount of information', () => {
       const action = { section: 'contentTypes', uid: 'foo' };
-      const expected = { section: 'contentTypes', actionId: 'application::foo' };
+      const expected = { section: 'contentTypes', actionId: 'api::foo' };
 
       const result = domain.create(action);
 
@@ -150,7 +150,7 @@ describe('Action Domain', () => {
       const expected = {
         section: 'settings',
         pluginName: 'bar',
-        actionId: 'plugins::bar.foo',
+        actionId: 'plugin::bar.foo',
         subCategory: 'foobar',
       };
 
@@ -161,9 +161,9 @@ describe('Action Domain', () => {
   });
 
   describe('computeActionId', () => {
-    test('Should return an actionId prefixed with "application::" when there is no pluginName', () => {
+    test('Should return an actionId prefixed with "api::" when there is no pluginName', () => {
       const attributes = { uid: 'foobar' };
-      const expected = 'application::foobar';
+      const expected = 'api::foobar';
 
       const actionId = domain.computeActionId(attributes);
 
@@ -179,9 +179,9 @@ describe('Action Domain', () => {
       expect(actionId).toBe(expected);
     });
 
-    test('Should return an actionId prefixed with "plugins::" when there is a pluginName (other than admin)', () => {
+    test('Should return an actionId prefixed with "plugin::" when there is a pluginName (other than admin)', () => {
       const attributes = { uid: 'foobar', pluginName: 'myPlugin' };
-      const expected = 'plugins::myPlugin.foobar';
+      const expected = 'plugin::myPlugin.foobar';
 
       const actionId = domain.computeActionId(attributes);
 

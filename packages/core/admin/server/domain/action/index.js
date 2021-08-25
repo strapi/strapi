@@ -62,14 +62,14 @@ const computeActionId = attributes => {
   const { pluginName, uid } = attributes;
 
   if (!pluginName) {
-    return `application::${uid}`;
+    return `api::${uid}`;
   }
 
   if (pluginName === 'admin') {
     return `admin::${uid}`;
   }
 
-  return `plugins::${pluginName}.${uid}`;
+  return `plugin::${pluginName}.${uid}`;
 };
 
 /**

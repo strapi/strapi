@@ -13,10 +13,11 @@ describe('Policy util', () => {
 
       // init global strapi
       global.strapi = {
-        config: {
-          policies: {
-            'test-policy': policyFn,
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'global::test-policy': policyFn,
         },
       };
 
@@ -27,33 +28,27 @@ describe('Policy util', () => {
       const policyFn = () => {};
 
       global.strapi = {
-        plugins: {
-          'test-plugin': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
-            },
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'plugin::test-plugin.test-policy': policyFn,
         },
       };
 
       expect(() => policyUtils.get('test-plugin.test-policy')).toThrow();
-      expect(policyUtils.get('plugins::test-plugin.test-policy')).toBe(policyFn);
+      expect(policyUtils.get('plugin::test-plugin.test-policy')).toBe(policyFn);
     });
 
     test('Retrieves a plugin policy locally', () => {
       const policyFn = () => {};
 
       global.strapi = {
-        plugins: {
-          'test-plugin': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
-            },
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'plugin::test-plugin.test-policy': policyFn,
         },
       };
 

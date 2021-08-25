@@ -1,7 +1,9 @@
 {
   "collectionName": "reviews",
   "info": {
-    "name": "review",
+    "displayName": "Review",
+    "singularName": "review",
+    "pluralName": "reviews",
     "description": ""
   },
   "options": {
@@ -22,18 +24,18 @@
     "likes": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::like.like",
+      "target": "api::like.like",
       "mappedBy": "review"
     },
     "author": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "plugins::users-permissions.user"
+      "target": "plugin::users-permissions.user"
     },
     "restaurant": {
       "type": "relation",
       "relation": "oneToOne",
-      "target": "application::restaurant.restaurant"
+      "target": "api::restaurant.restaurant"
     }
   }
 }

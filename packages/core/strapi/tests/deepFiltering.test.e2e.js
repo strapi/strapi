@@ -37,7 +37,7 @@ const collector = {
     cards: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'application::card.card',
+      target: 'api::card.card',
     },
     collector_friends: {
       type: 'relation',

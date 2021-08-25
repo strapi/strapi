@@ -36,8 +36,8 @@ const getDefaultLocale = (ctPermissions, locales = []) => {
     return null;
   }
 
-  const readPermissions = ctPermissions['plugins::content-manager.explorer.read'];
-  const createPermissions = ctPermissions['plugins::content-manager.explorer.create'];
+  const readPermissions = ctPermissions['plugin::content-manager.explorer.read'];
+  const createPermissions = ctPermissions['plugin::content-manager.explorer.create'];
 
   if (hasLocalePermission(readPermissions, defaultLocale.code)) {
     return defaultLocale.code;

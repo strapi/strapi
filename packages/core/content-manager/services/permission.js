@@ -4,18 +4,17 @@ const { prop } = require('lodash/fp');
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { getService } = require('../utils');
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   canConfigureContentType({ userAbility, contentType }) {
     const action = contentTypesUtils.isSingleType(contentType)
-      ? 'plugins::content-manager.single-types.configure-view'
-      : 'plugins::content-manager.collection-types.configure-view';
+      ? 'plugin::content-manager.single-types.configure-view'
+      : 'plugin::content-manager.collection-types.configure-view';
 
     return userAbility.can(action);
   },
 
   async registerPermissions() {
     const displayedContentTypes = getService('content-types').findDisplayedContentTypes();
-
     const contentTypesUids = displayedContentTypes.map(prop('uid'));
 
     const draftAndPublishContentTypesUids = displayedContentTypes
@@ -92,4 +91,4 @@ module.exports = {
 
     await strapi.admin.services.permission.actionProvider.registerMany(actions);
   },
-};
+});

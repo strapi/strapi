@@ -100,11 +100,11 @@ describe('localePermissionMiddleware', () => {
         },
       },
       permissions: {
-        'plugins::content-manager.explorer.create': [
+        'plugin::content-manager.explorer.create': [
           {
             id: 459,
-            action: 'plugins::content-manager.explorer.create',
-            subject: 'application::article.article',
+            action: 'plugin::content-manager.explorer.create',
+            subject: 'api::article.article',
             properties: {
               fields: ['Name'],
               locales: ['en'],
@@ -113,8 +113,8 @@ describe('localePermissionMiddleware', () => {
           },
           {
             id: 459,
-            action: 'plugins::content-manager.explorer.create',
-            subject: 'application::article.article',
+            action: 'plugin::content-manager.explorer.create',
+            subject: 'api::article.article',
             properties: {
               fields: ['test'],
               locales: ['it'],
@@ -131,11 +131,11 @@ describe('localePermissionMiddleware', () => {
       type: 'ContentManager/RBACManager/SET_PERMISSIONS',
       __meta__: { containerName: 'listView', plugins: { i18n: { locale: 'en' } } },
       permissions: {
-        'plugins::content-manager.explorer.create': [
+        'plugin::content-manager.explorer.create': [
           {
             id: 459,
-            action: 'plugins::content-manager.explorer.create',
-            subject: 'application::article.article',
+            action: 'plugin::content-manager.explorer.create',
+            subject: 'api::article.article',
             properties: {
               fields: ['Name'],
               locales: ['en'],

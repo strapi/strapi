@@ -33,7 +33,7 @@ describe('Test type UID', () => {
     });
 
     test('Creates an entry successfully', async () => {
-      const res = await rq.post('/content-manager/collection-types/application::withuid.withuid', {
+      const res = await rq.post('/content-manager/collection-types/api::withuid.withuid', {
         body: {
           slug: 'valid-uid',
         },
@@ -46,7 +46,7 @@ describe('Test type UID', () => {
     });
 
     test('Throws error on duplicate value', async () => {
-      const res = await rq.post('/content-manager/collection-types/application::withuid.withuid', {
+      const res = await rq.post('/content-manager/collection-types/api::withuid.withuid', {
         body: {
           slug: 'duplicate-uid',
         },
@@ -57,20 +57,17 @@ describe('Test type UID', () => {
         slug: 'duplicate-uid',
       });
 
-      const conflicting = await rq.post(
-        '/content-manager/collection-types/application::withuid.withuid',
-        {
-          body: {
-            slug: 'duplicate-uid',
-          },
-        }
-      );
+      const conflicting = await rq.post('/content-manager/collection-types/api::withuid.withuid', {
+        body: {
+          slug: 'duplicate-uid',
+        },
+      });
 
       expect(conflicting.statusCode).toBe(400);
     });
 
     test('Can set value to be null', async () => {
-      const res = await rq.post('/content-manager/collection-types/application::withuid.withuid', {
+      const res = await rq.post('/content-manager/collection-types/api::withuid.withuid', {
         body: {
           slug: null,
         },
@@ -110,7 +107,7 @@ describe('Test type UID', () => {
 
     test('Creates an entry successfully', async () => {
       const res = await rq.post(
-        '/content-manager/collection-types/application::withrequireduid.withrequireduid',
+        '/content-manager/collection-types/api::withrequireduid.withrequireduid',
         {
           body: {
             slug: 'valid-uid',
@@ -126,7 +123,7 @@ describe('Test type UID', () => {
 
     test('Throws error on duplicate value', async () => {
       const res = await rq.post(
-        '/content-manager/collection-types/application::withrequireduid.withrequireduid',
+        '/content-manager/collection-types/api::withrequireduid.withrequireduid',
         {
           body: {
             slug: 'duplicate-uid',
@@ -140,7 +137,7 @@ describe('Test type UID', () => {
       });
 
       const conflicting = await rq.post(
-        '/content-manager/collection-types/application::withrequireduid.withrequireduid',
+        '/content-manager/collection-types/api::withrequireduid.withrequireduid',
         {
           body: {
             slug: 'duplicate-uid',
@@ -153,7 +150,7 @@ describe('Test type UID', () => {
 
     test('Cannot set value to be null', async () => {
       const res = await rq.post(
-        '/content-manager/collection-types/application::withrequireduid.withrequireduid',
+        '/content-manager/collection-types/api::withrequireduid.withrequireduid',
         {
           body: {
             slug: null,

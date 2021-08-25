@@ -16,7 +16,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', true)
+            formatComponent(component, 'api::test-content-type.test-content-type', true)
           ).not.toHaveProperty('uid');
         });
 
@@ -24,7 +24,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', true)
+            formatComponent(component, 'api::test-content-type.test-content-type', true)
           ).toHaveProperty('tmpUID');
         });
 
@@ -33,7 +33,7 @@ describe('CleanData utils', () => {
           const expectedComponent = expectedData.formattedComponents['components.main-compo'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', true)
+            formatComponent(component, 'api::test-content-type.test-content-type', true)
           ).toEqual(expectedComponent);
         });
       });
@@ -44,7 +44,7 @@ describe('CleanData utils', () => {
           const expectedComponent = expectedData.formattedComponents['blog.quote'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', true)
+            formatComponent(component, 'api::test-content-type.test-content-type', true)
           ).toEqual(expectedComponent);
         });
       });
@@ -56,7 +56,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', false)
+            formatComponent(component, 'api::test-content-type.test-content-type', false)
           ).not.toHaveProperty('uid');
         });
 
@@ -64,7 +64,7 @@ describe('CleanData utils', () => {
           const component = rawData.rawData.components['components.main-compo'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', false)
+            formatComponent(component, 'api::test-content-type.test-content-type', false)
           ).toHaveProperty('tmpUID');
         });
 
@@ -74,7 +74,7 @@ describe('CleanData utils', () => {
             expectedData.formattedComponentsForEdit['components.main-compo'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', false)
+            formatComponent(component, 'api::test-content-type.test-content-type', false)
           ).toEqual(expectedComponent);
         });
       });
@@ -85,7 +85,7 @@ describe('CleanData utils', () => {
           const expectedComponent = expectedData.formattedComponents['blog.quote'];
 
           expect(
-            formatComponent(component, 'application::test-content-type.test-content-type', true)
+            formatComponent(component, 'api::test-content-type.test-content-type', true)
           ).toEqual(expectedComponent);
         });
       });
@@ -131,7 +131,7 @@ describe('CleanData utils', () => {
           getComponentsToPost(
             components,
             initialComponents,
-            'application::test-content-type.test-content-type',
+            'api::test-content-type.test-content-type',
             true
           )
         ).toEqual(expectedFormattedComponents);
@@ -150,7 +150,7 @@ describe('CleanData utils', () => {
           getComponentsToPost(
             components,
             initialComponents,
-            'application::test-content-type.test-content-type',
+            'api::test-content-type.test-content-type',
             false
           )
         ).toEqual(expectedFormattedComponents);

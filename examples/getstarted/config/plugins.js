@@ -1,9 +1,16 @@
+'use strict';
+
+const path = require('path');
+
 module.exports = ({ env }) => ({
   graphql: {
-    amountLimit: 50,
-    depthLimit: 10,
-    apolloServer: {
-      tracing: true,
+    enabled: true,
+    config: {
+      amountLimit: 50,
+      depthLimit: 10,
+      apolloServer: {
+        tracing: true,
+      },
     },
   },
 });

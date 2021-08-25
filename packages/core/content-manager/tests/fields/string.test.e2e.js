@@ -31,14 +31,11 @@ describe('Test type string', () => {
   });
 
   test('Creates an entry with JSON', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withstring.withstring',
-      {
-        body: {
-          field: 'Some string',
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withstring.withstring', {
+      body: {
+        field: 'Some string',
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -47,9 +44,7 @@ describe('Test type string', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get(
-      '/content-manager/collection-types/application::withstring.withstring'
-    );
+    const res = await rq.get('/content-manager/collection-types/api::withstring.withstring');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
@@ -60,15 +55,12 @@ describe('Test type string', () => {
   });
 
   test('Updating entry with JSON sets the right value and format', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withstring.withstring',
-      {
-        body: { field: 'Some string' },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withstring.withstring', {
+      body: { field: 'Some string' },
+    });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/application::withstring.withstring/${res.body.id}`,
+      `/content-manager/collection-types/api::withstring.withstring/${res.body.id}`,
       {
         body: { field: 'Updated string' },
       }

@@ -27,7 +27,7 @@ const validatePassword = (password, hash) => bcrypt.compare(password, hash);
  * @param {string} options.password
  */
 const checkCredentials = async ({ email, password }) => {
-  const user = await strapi.query('strapi::user').findOne({ where: { email } });
+  const user = await strapi.query('admin::user').findOne({ where: { email } });
 
   if (!user || !user.password) {
     return [null, false, { message: 'Invalid credentials' }];
@@ -52,7 +52,7 @@ const checkCredentials = async ({ email, password }) => {
  * @param {string} param.email user email for which to reset the password
  */
 const forgotPassword = async ({ email } = {}) => {
-  const user = await strapi.query('strapi::user').findOne({ where: { email, isActive: true } });
+  const user = await strapi.query('admin::user').findOne({ where: { email, isActive: true } });
 
   if (!user) {
     return;
@@ -65,7 +65,9 @@ const forgotPassword = async ({ email } = {}) => {
   const url = `${getAbsoluteAdminUrl(
     strapi.config
   )}/auth/reset-password?code=${resetPasswordToken}`;
-  return strapi.plugins.email.services.email
+  return strapi
+    .plugin('email')
+    .service('email')
     .sendTemplatedEmail(
       {
         to: user.email,
@@ -92,7 +94,7 @@ const forgotPassword = async ({ email } = {}) => {
  */
 const resetPassword = async ({ resetPasswordToken, password } = {}) => {
   const matchingUser = await strapi
-    .query('strapi::user')
+    .query('admin::user')
     .findOne({ where: { resetPasswordToken, isActive: true } });
 
   if (!matchingUser) {

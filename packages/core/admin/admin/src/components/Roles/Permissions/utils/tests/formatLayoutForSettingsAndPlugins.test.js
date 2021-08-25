@@ -14,7 +14,7 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             actions: [
               {
                 displayName: 'Read',
-                action: 'plugins::content-type-builder.read',
+                action: 'plugin::content-type-builder.read',
                 subCategory: 'general',
                 plugin: 'plugin::content-type-builder',
               },
@@ -32,7 +32,7 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             actions: [
               {
                 displayName: 'Access the Documentation',
-                action: 'plugins::documentation.read',
+                action: 'plugin::documentation.read',
                 subCategory: 'general',
                 plugin: 'plugin::documentation',
               },
@@ -44,13 +44,13 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             actions: [
               {
                 displayName: 'Update and delete',
-                action: 'plugins::documentation.settings.update',
+                action: 'plugin::documentation.settings.update',
                 subCategory: 'settings',
                 plugin: 'plugin::documentation',
               },
               {
                 displayName: 'Regenerate',
-                action: 'plugins::documentation.settings.regenerate',
+                action: 'plugin::documentation.settings.regenerate',
                 subCategory: 'settings',
                 plugin: 'plugin::documentation',
               },
@@ -68,7 +68,7 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             actions: [
               {
                 displayName: 'Access the Media Library',
-                action: 'plugins::upload.read',
+                action: 'plugin::upload.read',
                 subCategory: 'general',
                 plugin: 'plugin::upload',
               },
@@ -80,7 +80,7 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             actions: [
               {
                 displayName: 'Create (upload)',
-                action: 'plugins::upload.assets.create',
+                action: 'plugin::upload.assets.create',
                 subCategory: 'assets',
                 plugin: 'plugin::upload',
               },
@@ -107,7 +107,7 @@ describe('ADMIN | COMPONENTS | ROLE | PluginsAndSettings | formatLayoutForSetti
             actions: [
               {
                 displayName: 'Access the Media Library settings page',
-                action: 'plugins::upload.settings.read',
+                action: 'plugin::upload.settings.read',
                 category: 'media library',
                 subCategory: 'general',
               },

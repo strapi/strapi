@@ -17,15 +17,15 @@ describe('checkPermissions', () => {
     const userPermissions = [
       {
         id: 458,
-        action: 'plugins::i18n.locale.read',
+        action: 'plugin::i18n.locale.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
         id: 460,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -34,8 +34,8 @@ describe('checkPermissions', () => {
       },
       {
         id: 461,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],
@@ -46,7 +46,7 @@ describe('checkPermissions', () => {
 
     const data = [
       {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         isDisplayed: true,
         apiID: 'address',
         kind: 'collectionType',
@@ -55,7 +55,7 @@ describe('checkPermissions', () => {
         },
       },
       {
-        uid: 'application::article.article',
+        uid: 'api::article.article',
         isDisplayed: true,
         apiID: 'article',
         kind: 'collectionType',
@@ -78,7 +78,7 @@ describe('checkPermissions', () => {
       return Promise.resolve({
         data: [
           {
-            uid: 'application::address.address',
+            uid: 'api::address.address',
             settings: {
               pageSize: 10,
               defaultSortBy: 'name',
@@ -92,36 +92,36 @@ describe('checkPermissions', () => {
     const expected = {
       authorizedCtLinks: [
         {
-          destination: '/content-manager/collectionType/application::address.address',
+          destination: '/content-manager/collectionType/api::address.address',
           icon: 'circle',
           isDisplayed: true,
           label: 'address',
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.create',
-              subject: 'application::address.address',
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'api::address.address',
             },
             {
-              action: 'plugins::content-manager.explorer.read',
-              subject: 'application::address.address',
+              action: 'plugin::content-manager.explorer.read',
+              subject: 'api::address.address',
             },
           ],
           search: 'page=1&pageSize=10&sort=name:ASC',
         },
         {
-          destination: '/content-manager/collectionType/application::article.article',
+          destination: '/content-manager/collectionType/api::article.article',
           icon: 'circle',
           isDisplayed: true,
           label: 'article',
           search: null,
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.create',
-              subject: 'application::article.article',
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'api::article.article',
             },
             {
-              action: 'plugins::content-manager.explorer.read',
-              subject: 'application::article.article',
+              action: 'plugin::content-manager.explorer.read',
+              subject: 'api::article.article',
             },
           ],
         },

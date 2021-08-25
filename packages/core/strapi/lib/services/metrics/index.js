@@ -23,7 +23,7 @@ const LIMITED_EVENTS = [
 ];
 
 const createTelemetryInstance = strapi => {
-  const { uuid } = strapi.config;
+  const uuid = strapi.config.get('uuid');
   const isDisabled = !uuid || isTruthy(process.env.STRAPI_TELEMETRY_DISABLED);
 
   const crons = [];
@@ -83,7 +83,8 @@ const hash = str =>
     .update(str)
     .digest('hex');
 
-const hashProject = strapi => hash(`${strapi.config.info.name}${strapi.config.info.description}`);
+const hashProject = strapi =>
+  hash(`${strapi.config.get('info.name')}${strapi.config.get('info.description')}`);
 
 const hashDep = strapi => {
   const depStr = JSON.stringify(strapi.config.info.dependencies);

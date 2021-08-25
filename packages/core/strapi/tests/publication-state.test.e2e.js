@@ -58,7 +58,7 @@ const contentTypes = {
       categories: {
         type: 'relation',
         relation: 'oneToMany',
-        target: 'application::category.category',
+        target: 'api::category.category',
       },
       comp: {
         component: 'default.comp',
@@ -102,7 +102,7 @@ const components = {
       countries: {
         type: 'relation',
         relation: 'oneToMany',
-        target: 'application::country.country',
+        target: 'api::country.country',
       },
     },
   },
@@ -153,8 +153,6 @@ describe('Publication State', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-
-    console.log(JSON.stringify(builder.sanitizedFixtures(strapi), null, 2));
 
     Object.assign(data, builder.sanitizedFixtures(strapi));
   });

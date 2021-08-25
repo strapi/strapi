@@ -54,13 +54,13 @@ const data = {
         {
           name: 'address',
           relation: 'oneToOne',
-          target: 'application::address.address',
+          target: 'api::address.address',
           type: 'relation',
         },
         {
           name: 'addresses',
           relation: 'oneToMany',
-          target: 'application::address.address',
+          target: 'api::address.address',
           type: 'relation',
         },
         {
