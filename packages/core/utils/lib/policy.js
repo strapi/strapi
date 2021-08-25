@@ -19,8 +19,6 @@ const getPolicyIn = (container, policy) => {
 
 const policyExistsIn = (container, policy) => !_.isUndefined(getPolicyIn(container, policy));
 
-const stripPolicy = (policy, prefix) => policy.replace(prefix, '');
-
 const createPolicy = (policyName, args) => ({ policyName, args });
 
 const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
@@ -110,8 +108,7 @@ const policyResolvers = [
       return this.is(policy) && !_.isUndefined(this.get(policy));
     },
     get(policy) {
-      // TODO: load policies into the registry & user strapi.policy(policy)
-      return getPolicyIn(_.get(strapi, 'admin'), stripPolicy(policy, ADMIN_PREFIX));
+      return strapi.policy(policy);
     },
   },
   {
