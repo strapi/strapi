@@ -71,22 +71,6 @@ module.exports = strapi => {
   return (routeConfig, { plugin, router }) => {
     validateRouteConfig(routeConfig);
 
-    // const { method, path, handler, config } = routeConfig;
-    // const { policies, middlewares /* validate, auth, ...rest */ } = config;
-
-    // const requestMethod = _.trim(_.toLower(method));
-    // const endpoint = _.trim(path);
-
-    // const requestHandler = compose([
-    //   // ...buildValidator(validate),
-    //   // ...buildAuth(auth),
-    //   ...resolvePolicies(policies),
-    //   ...resolveMiddlewares(middlewares),
-    //   ...resolveHandler(handler),
-    // ]);
-
-    // router[requestMethod](endpoint, requestHandler);
-
     try {
       const middlewares = resolveMiddlewares(routeConfig);
 
