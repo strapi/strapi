@@ -223,17 +223,17 @@ module.exports = ({ strapi }) => {
 
   const getCreateMutationTypeName = buildCustomTypeNameGenerator({
     prefix: 'create',
-    firstLetterCase: 'lower',
+    firstLetterCase: 'upper',
   });
 
   const getUpdateMutationTypeName = buildCustomTypeNameGenerator({
     prefix: 'update',
-    firstLetterCase: 'lower',
+    firstLetterCase: 'upper',
   });
 
   const getDeleteMutationTypeName = buildCustomTypeNameGenerator({
     prefix: 'delete',
-    firstLetterCase: 'lower',
+    firstLetterCase: 'upper',
   });
 
   return {
