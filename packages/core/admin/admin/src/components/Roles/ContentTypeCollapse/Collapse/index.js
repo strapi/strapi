@@ -227,6 +227,7 @@ const Collapse = ({
             }
           )}
         </Row>
+        <Box style={{ width: 120 }} />
         <ConditionsModal
           headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
           actions={checkboxesActions}
