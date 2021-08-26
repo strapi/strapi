@@ -26,8 +26,10 @@ import Input from './Input';
 const FormModal = ({
   headerBreadcrumbs,
   initialData,
+  isSubmiting,
   layout,
   isOpen,
+  onSubmit,
   onToggle,
   providerToEditName,
 }) => {
@@ -46,7 +48,12 @@ const FormModal = ({
           ))}
         </Breadcrumbs>
       </ModalHeader>
-      <Formik initialValues={initialData} validationSchema={layout.schema} validateOnChange={false}>
+      <Formik
+        onSubmit={values => onSubmit(values)}
+        initialValues={initialData}
+        validationSchema={layout.schema}
+        validateOnChange={false}
+      >
         {({ errors, handleChange, values }) => {
           return (
             <Form>
@@ -82,7 +89,7 @@ const FormModal = ({
                 }
                 endActions={
                   <>
-                    <Button type="submit">
+                    <Button type="submit" loading={isSubmiting}>
                       {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
                     </Button>
                   </>
@@ -109,6 +116,8 @@ FormModal.propTypes = {
     schema: PropTypes.object,
   }).isRequired,
   isOpen: PropTypes.bool.isRequired,
+  isSubmiting: PropTypes.bool.isRequired,
+  onSubmit: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
   providerToEditName: PropTypes.string,
 };

@@ -1,8 +1,4 @@
-import React, {
-  useMemo,
-  // useRef,
-  useState,
-} from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
@@ -14,11 +10,11 @@ import {
   // useOverlayBlocker,
   LoadingIndicatorPage,
   // SizedInput,
-  // useTracking,
+  useTracking,
   // getYupInnerErrors,
   // request,
-  // useNotification,
-  // useOverlayBlocker,
+  useNotification,
+  useOverlayBlocker,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
@@ -51,15 +47,15 @@ import FormModal from '../../components/FormModal';
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
 
-  // const { trackUsage } = useTracking();
-  // const trackUsageRef = useRef(trackUsage);
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
-  // const [isSubmiting, setIsSubmiting] = useState(false);
+  const [isSubmiting, setIsSubmiting] = useState(false);
   // const buttonSubmitRef = useRef(null);
   // const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
-  // const toggleNotification = useNotification();
-  // const { lockApp, unlockApp } = useOverlayBlocker();
+  const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -133,66 +129,42 @@ export const ProvidersPage = () => {
   //   setShowForm(true);
   // }, []);
 
-  // const handleSubmit = useCallback(
-  //   async e => {
-  //     e.preventDefault();
-  //     const { schema } = layoutToRender;
-  //     let errors = {};
+  const handleSubmit = async () => {
+    // e.preventDefault();
 
-  //     setIsSubmiting(true);
+    setIsSubmiting(true);
 
-  //     try {
-  //       await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
-  //       lockApp();
+    lockApp();
 
-  //       try {
-  //         trackUsageRef.current('willEditAuthenticationProvider');
+    try {
+      trackUsageRef.current('willEditAuthenticationProvider');
 
-  //         await request(getRequestURL('providers'), {
-  //           method: 'PUT',
-  //           body: { providers: modifiedData },
-  //         });
+      // await request(getRequestURL('providers'), {
+      //   method: 'PUT',
+      //   body: { providers: modifiedData },
+      // });
 
-  //         trackUsageRef.current('didEditAuthenticationProvider');
+      trackUsageRef.current('didEditAuthenticationProvider');
 
-  //         toggleNotification({
-  //           type: 'success',
-  //           message: { id: getTrad('notification.success.submit') },
-  //         });
+      toggleNotification({
+        type: 'success',
+        message: { id: getTrad('notification.success.submit') },
+      });
 
-  //         dispatchSubmitSucceeded();
+      // dispatchSubmitSucceeded();
 
-  //         handleToggle();
-  //       } catch (err) {
-  //         console.error(err);
-  //         toggleNotification({
-  //           type: 'warning',
-  //           message: { id: 'notification.error' },
-  //         });
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //       errors = getYupInnerErrors(err);
-  //       console.log(errors);
-  //     }
+      // handleToggle();
+    } catch (err) {
+      console.error(err);
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    }
 
-  //     dispatchSetFormErrors(errors);
-
-  //     setIsSubmiting(false);
-  //     unlockApp();
-  //   },
-  //   [
-  //     dispatchSetFormErrors,
-  //     dispatchSubmitSucceeded,
-  //     layoutToRender,
-  //     handleToggle,
-  //     modifiedData,
-  //     providerToEditName,
-  //     toggleNotification,
-  //     lockApp,
-  //     unlockApp,
-  //   ]
-  // );
+    setIsSubmiting(false);
+    unlockApp();
+  };
 
   console.log({ modifiedData, providerToEditName });
 
@@ -296,6 +268,7 @@ export const ProvidersPage = () => {
       <FormModal
         initialData={modifiedData[providerToEditName]}
         isOpen={isOpen}
+        isSubmiting={isSubmiting}
         layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({
@@ -305,6 +278,7 @@ export const ProvidersPage = () => {
           upperFirst(providerToEditName),
         ]}
         onToggle={handleToggleModal}
+        onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
 
