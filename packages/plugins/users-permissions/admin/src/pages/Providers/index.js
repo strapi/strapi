@@ -7,6 +7,7 @@ import {
   useNotification,
   useOverlayBlocker,
   CheckPagePermissions,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
@@ -18,7 +19,9 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
+import { useQuery } from 'react-query';
 import forms from './utils/forms';
+import { fetchData } from './utils/api';
 import createProvidersArray from './utils/createProvidersArray';
 import { getRequestURL, getTrad } from '../../utils';
 import { useForm } from '../../hooks';
@@ -42,12 +45,22 @@ export const ProvidersPage = () => {
   }, []);
 
   const {
-    allowedActions: { canUpdate },
+    // allowedActions: { canUpdate },
     dispatchSubmitSucceeded,
-    isLoading,
-    isLoadingForPermissions,
-    modifiedData,
+    // isLoading,
+    // isLoadingForPermissions,
+    // modifiedData,
   } = useForm('providers', updatePermissions);
+
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canUpdate },
+  } = useRBAC(updatePermissions);
+  const { isLoading, data: modifiedData } = useQuery(
+    'get-providers',
+    () => fetchData(toggleNotification),
+    { initialData: {} }
+  );
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
 
