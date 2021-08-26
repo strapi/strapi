@@ -1,10 +1,11 @@
 import {
   CheckPagePermissions,
+  Form,
+  LoadingIndicatorPage,
   request,
   useNotification,
   useOverlayBlocker,
   useTracking,
-  Form,
 } from '@strapi/helper-plugin';
 import {
   Box,
@@ -13,13 +14,12 @@ import {
   Grid,
   GridItem,
   HeaderLayout,
+  Main,
   Row,
   Stack,
   Text,
   Textarea,
   TextInput,
-  Main,
-  Loader,
 } from '@strapi/parts';
 import { Formik } from 'formik';
 import { get, isEmpty } from 'lodash';
@@ -216,7 +216,7 @@ const CreatePage = () => {
                               defaultMessage: 'Description',
                             })}
                             name="description"
-                            error={errors.name && formatMessage({ id: errors.name })}
+                            error={errors.description && formatMessage({ id: errors.description })}
                             onChange={handleChange}
                           >
                             {values.description}
@@ -235,16 +235,7 @@ const CreatePage = () => {
                       />
                     </Box>
                   ) : (
-                    <Row
-                      alignItems="center"
-                      justifyContent="center"
-                      padding={11}
-                      background="neutral0"
-                      shadow="filterShadow"
-                      hasRadius
-                    >
-                      <Loader />
-                    </Row>
+                    <LoadingIndicatorPage />
                   )}
                 </Stack>
               </ContentLayout>
