@@ -12,6 +12,7 @@ process.env.NODE_ENV = process.env.NODE_ENV || 'development';
 
 const getPrefixedDeps = require('../../utils/get-prefixed-dependencies');
 const loadConfigDir = require('./config-loader');
+const loadFunction = require('./load-functions');
 
 const { version: strapiVersion } = require(path.join(__dirname, '../../../package.json'));
 
@@ -61,6 +62,7 @@ module.exports = (dir, initialConfig = {}) => {
       ...pkgJSON,
       strapi: strapiVersion,
     },
+    functions: loadFunction(path.join(configDir, 'functions')),
     installedMiddlewares: getPrefixedDeps('@strapi/middleware', pkgJSON),
   };
 
