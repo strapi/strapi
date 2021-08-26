@@ -15,3 +15,7 @@ export const fetchData = async toggleNotification => {
     throw new Error('error');
   }
 };
+
+export const putProvider = body => {
+  return axiosInstance.put(getRequestURL('providers'), body);
+}

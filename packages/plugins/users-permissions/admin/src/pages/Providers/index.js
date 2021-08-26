@@ -19,9 +19,9 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
-import { useQuery } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';
-import { fetchData } from './utils/api';
+import { fetchData, putProvider } from './utils/api';
 import createProvidersArray from './utils/createProvidersArray';
 import { getRequestURL, getTrad } from '../../utils';
 import { useForm } from '../../hooks';
@@ -31,7 +31,7 @@ import { axiosInstance } from '../../../../../../core/admin/admin/src/core/utils
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
-
+  const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
@@ -56,11 +56,33 @@ export const ProvidersPage = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useRBAC(updatePermissions);
+
   const { isLoading, data: modifiedData } = useQuery(
     'get-providers',
     () => fetchData(toggleNotification),
     { initialData: {} }
   );
+
+  const submitMutation = useMutation(putProvider, {
+    onSuccess: () => {
+      queryClient.invalidateQueries('get-providers');
+      toggleNotification({
+        type: 'info',
+        message: { id: getTrad('notification.success.submit') },
+      });
+
+      trackUsageRef.current('didEditAuthenticationProvider');
+
+      // handleToggleModal();
+    },
+    onError: () => { 
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    },
+  })
+  
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
 
@@ -105,6 +127,7 @@ export const ProvidersPage = () => {
   };
 
   const handleSubmit = async values => {
+    console.log('is sub')
     setIsSubmiting(true);
 
     lockApp();
@@ -113,20 +136,9 @@ export const ProvidersPage = () => {
       trackUsageRef.current('willEditAuthenticationProvider');
 
       const body = { ...modifiedData, [providerToEditName]: values };
-      const endPoint = getRequestURL('providers');
 
-      await axiosInstance.put(endPoint, { providers: body });
+      // submitMutation.mutate({providers: body});
 
-      trackUsageRef.current('didEditAuthenticationProvider');
-
-      toggleNotification({
-        type: 'success',
-        message: { id: getTrad('notification.success.submit') },
-      });
-
-      dispatchSubmitSucceeded(body);
-
-      handleToggleModal();
     } catch (err) {
       console.error(err);
       toggleNotification({
