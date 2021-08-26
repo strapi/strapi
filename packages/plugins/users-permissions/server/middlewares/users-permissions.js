@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const { getOr } = require('lodash/fp');
 
 module.exports = {
   defaults: { 'users-permissions': { enabled: true } },
@@ -18,9 +17,14 @@ module.exports = {
       });
 
       _.forEach(strapi.api, api => {
-        const routes = getOr([], 'config.routes', api);
-        _.forEach(routes, route => {
-          if (_.get(route.config, 'policies')) {
+        _.forEach(api.routes, route => {
+          if (_.has(route, 'routes')) {
+            _.forEach(route.routes || [], route => {
+              if (_.get(route.config, 'policies')) {
+                route.config.policies.unshift('plugin::users-permissions.permissions');
+              }
+            });
+          } else if (_.get(route.config, 'policies')) {
             route.config.policies.unshift('plugin::users-permissions.permissions');
           }
         });

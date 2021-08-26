@@ -6,7 +6,6 @@
 
 // Public node modules.
 const _ = require('lodash');
-const { getOr } = require('lodash/fp');
 const Router = require('koa-router');
 const createEndpointComposer = require('./utils/composeEndpoint');
 
@@ -44,11 +43,26 @@ module.exports = strapi => {
   const registerAPIRoutes = () => {
     for (const apiName in strapi.api) {
       const api = strapi.api[apiName];
-      const routes = getOr([], 'config.routes', api);
 
-      for (const route of routes) {
-        composeEndpoint(route, { apiName, router: strapi.router });
-      }
+      _.forEach(api.routes, route => {
+        // nested router
+        if (_.has(route, 'routes')) {
+          for (const key in api.routes) {
+            const routerInfo = api.routes[key];
+
+            const router = new Router({ prefix: routerInfo.prefix });
+
+            // TODO:: support router routes
+            for (const route of routerInfo.routes || []) {
+              composeEndpoint(route, { apiName, router });
+            }
+
+            strapi.router.use(router.routes()).use(router.allowedMethods());
+          }
+        } else {
+          composeEndpoint(route, { apiName, router: strapi.router });
+        }
+      });
     }
   };
 
