@@ -6,7 +6,6 @@
   "license": "MIT",
   "dependencies": {
     "fs-extra": "10.0.0",
-    "inquirer": "8.1.2",
     "inquirer-recursive": "0.0.7",
     "node-plop": "0.26.2",
     "plop": "2.7.4",
