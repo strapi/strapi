@@ -173,6 +173,7 @@ module.exports = function(plop) {
     },
   });
 
+  plop.setPrompt('recursive', require('inquirer-recursive'));
   // Model generator
   plop.setGenerator('model', {
     description: 'Generate a model for an API',
@@ -192,6 +193,10 @@ module.exports = function(plop) {
         ],
       },
       ...getDestinationPrompts('model'),
+      {
+        type: 'addAttributes',
+        name: 'attributes',
+      },
       {
         type: 'confirm',
         name: 'useDraftAndPublish',
@@ -215,6 +220,9 @@ module.exports = function(plop) {
       ];
     },
   });
+
+  const { prompts } = plop.inquirer.prompt;
+  console.log(prompts);
 
   // Plugin generator
   plop.setGenerator('plugin', {
