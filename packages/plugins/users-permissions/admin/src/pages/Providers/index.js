@@ -194,6 +194,8 @@ export const ProvidersPage = () => {
   //   ]
   // );
 
+  console.log({ modifiedData, providerToEditName });
+
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
@@ -292,6 +294,7 @@ export const ProvidersPage = () => {
         )}
       </Main>
       <FormModal
+        initialData={modifiedData[providerToEditName]}
         isOpen={isOpen}
         layout={layoutToRender}
         headerBreadcrumbs={[
