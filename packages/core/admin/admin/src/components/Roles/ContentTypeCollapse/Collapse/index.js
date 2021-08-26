@@ -16,10 +16,12 @@ import { getCheckboxState } from '../../utils';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
 
 const activeRowStyle = (theme, isActive, isClicked) => `
-  ${isClicked ? `border: 1px solid ${theme.colors.primary600}; border-bottom: none;` : ''}
-  background-color: ${theme.colors.primary100};
-  color: ${theme.colors.primary600};
-  border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
+  ${Wrapper} {
+    ${isClicked ? `border: 1px solid ${theme.colors.primary600}; border-bottom: none;` : ''}
+    background-color: ${theme.colors.primary100};
+    color: ${theme.colors.primary600};
+    border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
+  }
   ${Text} {
     color: ${theme.colors.primary600};
     font-weight: bold;
@@ -33,12 +35,19 @@ const activeRowStyle = (theme, isActive, isClicked) => `
 `;
 
 const Wrapper = styled.div`
+  flex: 1;
   display: flex;
   align-items: center;
   height: ${rowHeight};
   background-color: ${({ isGrey, theme }) =>
     isGrey ? theme.colors.neutral100 : theme.colors.neutral0};
   border: 1px solid transparent;
+`;
+
+const BoxWrapper = styled.div`
+  display: inline-flex;
+  min-width: 100%;
+
   ${ConditionsButton} {
     display: none;
   }
@@ -75,6 +84,12 @@ const TinyDot = styled(Box)`
   height: 6px;
   border-radius: 20px;
   background: ${({ theme }) => theme.colors.primary600};
+`;
+
+const AbsoluteBox = styled(Box)`
+  position: absolute;
+  right: 9px;
+  transform: translateY(10px);
 `;
 
 const Collapse = ({
@@ -129,103 +144,105 @@ const Collapse = ({
   );
 
   return (
-    <Wrapper isActive={isActive} isGrey={isGrey}>
-      <RowLabelWithCheckbox
-        isCollapsable
-        isFormDisabled={isFormDisabled}
-        label={label}
-        checkboxName={pathToData}
-        onChange={onChangeParentCheckbox}
-        onClick={onClickToggle}
-        someChecked={hasSomeActionsSelected}
-        value={hasAllActionsSelected}
-        isActive={isActive}
-      >
-        <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
-      </RowLabelWithCheckbox>
+    <BoxWrapper isActive={isActive}>
+      <Wrapper isGrey={isGrey}>
+        <RowLabelWithCheckbox
+          isCollapsable
+          isFormDisabled={isFormDisabled}
+          label={label}
+          checkboxName={pathToData}
+          onChange={onChangeParentCheckbox}
+          onClick={onClickToggle}
+          someChecked={hasSomeActionsSelected}
+          value={hasAllActionsSelected}
+          isActive={isActive}
+        >
+          <Chevron paddingLeft={2}>{isActive ? <Up /> : <Down />}</Chevron>
+        </RowLabelWithCheckbox>
 
-      <Row style={{ flex: 1 }}>
-        {checkboxesActions.map(
-          ({
-            actionId,
-            hasConditions,
-            hasAllActionsSelected,
-            hasSomeActionsSelected,
-            isDisplayed,
-            isParentCheckbox,
-            checkboxName,
-            label: permissionLabel,
-          }) => {
-            if (!isDisplayed) {
-              return <HiddenAction key={actionId} />;
-            }
+        <Row style={{ flex: 1 }}>
+          {checkboxesActions.map(
+            ({
+              actionId,
+              hasConditions,
+              hasAllActionsSelected,
+              hasSomeActionsSelected,
+              isDisplayed,
+              isParentCheckbox,
+              checkboxName,
+              label: permissionLabel,
+            }) => {
+              if (!isDisplayed) {
+                return <HiddenAction key={actionId} />;
+              }
 
-            if (isParentCheckbox) {
+              if (isParentCheckbox) {
+                return (
+                  <Cell key={actionId} justifyContent="center" alignItems="center">
+                    {hasConditions && <TinyDot />}
+                    <Checkbox
+                      disabled={isFormDisabled || IS_DISABLED}
+                      name={checkboxName}
+                      aria-label={formatMessage(
+                        {
+                          id: `Settings.permissions.select-by-permission`,
+                          defaultMessage: 'Select {label} permission',
+                        },
+                        { label: `${permissionLabel} ${label}` }
+                      )}
+                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                      onValueChange={value =>
+                        onChangeParentCheckbox({
+                          target: {
+                            name: checkboxName,
+                            value,
+                          },
+                        })}
+                      indeterminate={hasSomeActionsSelected}
+                      value={hasAllActionsSelected}
+                    />
+                  </Cell>
+                );
+              }
+
               return (
                 <Cell key={actionId} justifyContent="center" alignItems="center">
                   {hasConditions && <TinyDot />}
                   <Checkbox
                     disabled={isFormDisabled || IS_DISABLED}
+                    indeterminate={hasConditions}
                     name={checkboxName}
-                    aria-label={formatMessage(
-                      {
-                        id: `Settings.permissions.select-by-permission`,
-                        defaultMessage: 'Select {label} permission',
-                      },
-                      { label: `${permissionLabel} ${label}` }
-                    )}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onValueChange={value =>
-                      onChangeParentCheckbox({
+                      onChangeSimpleCheckbox({
                         target: {
                           name: checkboxName,
                           value,
                         },
                       })}
-                    indeterminate={hasSomeActionsSelected}
                     value={hasAllActionsSelected}
                   />
                 </Cell>
               );
             }
-
-            return (
-              <Cell key={actionId} justifyContent="center" alignItems="center">
-                {hasConditions && <TinyDot />}
-                <Checkbox
-                  disabled={isFormDisabled || IS_DISABLED}
-                  indeterminate={hasConditions}
-                  name={checkboxName}
-                  // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                  onValueChange={value =>
-                    onChangeSimpleCheckbox({
-                      target: {
-                        name: checkboxName,
-                        value,
-                      },
-                    })}
-                  value={hasAllActionsSelected}
-                />
-              </Cell>
-            );
-          }
-        )}
-      </Row>
-      <Box paddingRight={6}>
+          )}
+        </Row>
+        <ConditionsModal
+          headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+          actions={checkboxesActions}
+          isOpen={isModalOpen}
+          isFormDisabled={isFormDisabled}
+          onClosed={handleModalClose}
+          onToggle={handleToggleModalIsOpen}
+        />
+      </Wrapper>
+      <AbsoluteBox>
         <ConditionsButton
           onClick={handleToggleModalIsOpen}
           hasConditions={doesConditionButtonHasConditions}
         />
-      </Box>
-      <ConditionsModal
-        headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
-        actions={checkboxesActions}
-        isOpen={isModalOpen}
-        isFormDisabled={isFormDisabled}
-        onClosed={handleModalClose}
-        onToggle={handleToggleModalIsOpen}
-      />
-    </Wrapper>
+      </AbsoluteBox>
+    </BoxWrapper>
   );
 };
 

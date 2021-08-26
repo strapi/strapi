@@ -116,7 +116,7 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
             </Tab>
           ))}
         </Tabs>
-        <TabPanels>
+        <TabPanels style={{ position: 'relative' }}>
           <TabPanel>
             <ContentTypes
               layout={layouts.collectionTypes}

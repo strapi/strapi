@@ -1,12 +1,17 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts';
+import styled from 'styled-components';
 import ContentTypeCollapses from '../ContentTypeCollapses';
 import GlobalActions from '../GlobalActions';
 
+const StyledBox = styled(Box)`
+  overflow-x: auto;
+`;
+
 const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) => {
   return (
-    <Box background="neutral0" style={{ overflowX: 'auto' }}>
+    <StyledBox background="neutral0">
       <GlobalActions actions={actions} kind={kind} isFormDisabled={isFormDisabled} />
       <ContentTypeCollapses
         actions={actions}
@@ -14,7 +19,7 @@ const ContentTypes = ({ isFormDisabled, kind, layout: { actions, subjects } }) =
         pathToData={kind}
         subjects={subjects}
       />
-    </Box>
+    </StyledBox>
   );
 };
 
