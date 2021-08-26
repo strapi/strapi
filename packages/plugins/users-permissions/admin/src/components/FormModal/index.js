@@ -7,6 +7,9 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import {
+  Stack,
+  Grid,
+  GridItem,
   ModalLayout,
   ModalHeader,
   ModalFooter,
@@ -18,8 +21,10 @@ import {
 import PropTypes from 'prop-types';
 // import { getTrad } from '../../../utils';
 
-const FormModal = ({ headerBreadcrumbs, isOpen, onToggle }) => {
+const FormModal = ({ headerBreadcrumbs, layout, isOpen, onToggle }) => {
   const { formatMessage } = useIntl();
+
+  console.log({ fo: layout.form });
 
   if (!isOpen) {
     return null;
@@ -34,7 +39,30 @@ const FormModal = ({ headerBreadcrumbs, isOpen, onToggle }) => {
           ))}
         </Breadcrumbs>
       </ModalHeader>
-      <ModalBody>Hello world</ModalBody>
+      <ModalBody>
+        <Stack size={1}>
+          <Grid gap={5}>
+            {layout.form.map(row => {
+              return row.map(input => {
+                console.log({ input });
+
+                return (
+                  <GridItem key={input.name} col={input.size} xs={12}>
+                    {input.intlLabel.id}
+                    {/* <Inputs
+                      {...input}
+                      // customInputs={{ string: () => "TEXT CUSTOM" }}
+                      error={formErrors?.[input.name]}
+                      onChange={handleChange}
+                      value={modifiedData[input.name]}
+                    /> */}
+                  </GridItem>
+                );
+              });
+            })}
+          </Grid>
+        </Stack>
+      </ModalBody>
       <ModalFooter
         startActions={
           <Button variant="tertiary" onClick={onToggle} type="button">
@@ -55,6 +83,10 @@ const FormModal = ({ headerBreadcrumbs, isOpen, onToggle }) => {
 
 FormModal.propTypes = {
   headerBreadcrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
+  layout: PropTypes.shape({
+    form: PropTypes.arrayOf(PropTypes.array),
+    schema: PropTypes.object,
+  }).isRequired,
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
 };

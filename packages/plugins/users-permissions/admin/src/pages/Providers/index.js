@@ -21,6 +21,7 @@ import {
   // useOverlayBlocker,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
+import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 // import { get, upperFirst, has } from 'lodash';
 // import has from 'lodash/has';
@@ -36,7 +37,7 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
-// import forms from './utils/forms';
+import forms from './utils/forms';
 import createProvidersArray from './utils/createProvidersArray';
 // import ModalForm from '../../components/ModalForm';
 import {
@@ -45,7 +46,7 @@ import {
 } from '../../utils';
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
-import FormModal from './FormModal';
+import FormModal from '../../components/FormModal';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -80,32 +81,32 @@ export const ProvidersPage = () => {
 
   const rowCount = providers.length;
 
-  // const isProviderWithSubdomain = useMemo(() => {
-  //   if (!providerToEditName) {
-  //     return false;
-  //   }
+  const isProviderWithSubdomain = useMemo(() => {
+    if (!providerToEditName) {
+      return false;
+    }
 
-  //   const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
 
-  //   return has(providerToEdit, 'subdomain');
-  // }, [providers, providerToEditName]);
+    return has(providerToEdit, 'subdomain');
+  }, [providers, providerToEditName]);
 
   const pageTitle = formatMessage({
     id: getTrad('HeaderNav.link.providers'),
     defaultMessage: 'Providers',
   });
 
-  // const formToRender = useMemo(() => {
-  //   if (providerToEditName === 'email') {
-  //     return forms.email;
-  //   }
+  const layoutToRender = useMemo(() => {
+    if (providerToEditName === 'email') {
+      return forms.email;
+    }
 
-  //   if (isProviderWithSubdomain) {
-  //     return forms.providersWithSubdomain;
-  //   }
+    if (isProviderWithSubdomain) {
+      return forms.providersWithSubdomain;
+    }
 
-  //   return forms.providers;
-  // }, [providerToEditName, isProviderWithSubdomain]);
+    return forms.providers;
+  }, [providerToEditName, isProviderWithSubdomain]);
 
   // const handleClick = useCallback(() => {
   //   buttonSubmitRef.current.click();
@@ -135,7 +136,7 @@ export const ProvidersPage = () => {
   // const handleSubmit = useCallback(
   //   async e => {
   //     e.preventDefault();
-  //     const { schema } = formToRender;
+  //     const { schema } = layoutToRender;
   //     let errors = {};
 
   //     setIsSubmiting(true);
@@ -183,7 +184,7 @@ export const ProvidersPage = () => {
   //   [
   //     dispatchSetFormErrors,
   //     dispatchSubmitSucceeded,
-  //     formToRender,
+  //     layoutToRender,
   //     handleToggle,
   //     modifiedData,
   //     providerToEditName,
@@ -291,6 +292,7 @@ export const ProvidersPage = () => {
         )}
       </Main>
       <FormModal
+        layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({
             id: getTrad('PopUpForm.header.edit.providers'),
@@ -321,7 +323,7 @@ export const ProvidersPage = () => {
         {showForm && (
           <form onSubmit={handleSubmit}>
             <Row>
-              {formToRender.form.map(input => {
+              {layoutToRender.form.map(input => {
                 const label = input.label.params
                   ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
                   : input.label;
