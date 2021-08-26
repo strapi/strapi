@@ -2,6 +2,8 @@
 
 const { validateModule } = require('./validation');
 
+const uidToPath = uid => uid.replace('::', '.');
+
 const createModule = (namespace, rawModule, strapi) => {
   try {
     validateModule(rawModule);
@@ -38,9 +40,12 @@ const createModule = (namespace, rawModule, strapi) => {
       strapi.container.get('policies').add(namespace, rawModule.policies);
       strapi.container.get('middlewares').add(namespace, rawModule.middlewares);
       strapi.container.get('controllers').add(namespace, rawModule.controllers);
-      strapi.container.get('config').set(namespace.replace('::', '.'), rawModule.config);
+      strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
     },
     routes: rawModule.routes, // TODO: to remove v3
+    config(path) {
+      return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`);
+    },
     contentType(ctName) {
       return strapi.container.get('content-types').get(`${namespace}.${ctName}`);
     },

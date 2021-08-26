@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { pickBy, has } = require('lodash/fp');
 const { addNamespace } = require('../utils');
 
-const contentTypesRegistry = strapi => {
+const servicesRegistry = strapi => {
   const services = {};
   const instanciatedServices = {};
 
@@ -42,4 +42,4 @@ const contentTypesRegistry = strapi => {
   };
 };
 
-module.exports = contentTypesRegistry;
+module.exports = servicesRegistry;

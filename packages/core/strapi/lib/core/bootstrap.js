@@ -33,9 +33,10 @@ module.exports = function(strapi) {
   const allApisSchemas = Object.values(strapi.api).flatMap(api => Object.values(api.models));
   validateContentTypesUnicity(allApisSchemas);
 
-  // set default services and default controllers
+  // add user's content-types, controller and services
   for (const apiName in strapi.api) {
     const api = strapi.api[apiName];
+    _.defaultsDeep(api, { config: { routes: [] } }); // TODO: remove V4
     for (const modelName in api.models) {
       const model = api.models[modelName];
       model.info.displayName = model.info.displayName || model.info.name;
@@ -45,30 +46,17 @@ module.exports = function(strapi) {
       strapi.container.get('content-types').add(`api::${apiName}`, {
         [modelName]: { schema: model, actions: model.actions, lifecycles: model.lifecycles },
       });
-
       const contentType = strapi.contentType(`api::${apiName}.${modelName}`);
 
       const { service, controller } = createCoreApi({ model: contentType, api, strapi });
+      // TODO: remove V4
       _.set(strapi.api[apiName], ['services', modelName], service);
       _.set(strapi.api[apiName], ['controllers', modelName], controller);
+
+      strapi.container.get('controllers').add(`api::${apiName}`, { [modelName]: controller });
+      strapi.container.get('services').add(`api::${apiName}`, { [modelName]: service });
     }
   }
-
-  // Set user's controllers.
-  strapi.controllers = Object.keys(strapi.api || []).reduce((acc, apiName) => {
-    strapi.container.get('controllers').add(`api::${apiName}`, strapi.api[apiName].controllers);
-    for (let controllerName in strapi.api[apiName].controllers) {
-      let controller = strapi.api[apiName].controllers[controllerName];
-      acc[controllerName] = controller;
-    }
-
-    return acc;
-  }, {});
-
-  // Set routes.
-  strapi.config.routes = Object.keys(strapi.api || []).reduce((acc, key) => {
-    return acc.concat(_.get(strapi.api[key], 'config.routes') || {});
-  }, []);
 
   // TODO: delete v3 code
   _.forEach(strapi.plugins, plugin => {

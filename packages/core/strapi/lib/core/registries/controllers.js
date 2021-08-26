@@ -3,7 +3,7 @@
 const { pickBy, has } = require('lodash/fp');
 const { addNamespace } = require('../utils');
 
-const policiesRegistry = () => {
+const controllersRegistry = () => {
   const controllers = {};
 
   return {
@@ -24,7 +24,15 @@ const policiesRegistry = () => {
         controllers[uid] = controller;
       }
     },
+    extend(controllerUID, extendFn) {
+      const currentController = this.get(controllerUID);
+      if (!currentController) {
+        throw new Error(`Controller ${controllerUID} doesn't exist`);
+      }
+      const newController = extendFn(currentController);
+      controllers[controllerUID] = newController;
+    },
   };
 };
 
-module.exports = policiesRegistry;
+module.exports = controllersRegistry;
