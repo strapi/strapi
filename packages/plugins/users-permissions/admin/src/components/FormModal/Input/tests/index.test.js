@@ -11,9 +11,7 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import Input from '../index';
 
 const messages = {
-  en: {
-    'users-permissions.component.name': 'Input',
-  },
+  en: {},
 };
 
 describe('<Input />', () => {
@@ -26,8 +24,10 @@ describe('<Input />', () => {
           <Input
             intlLabel={{ id: 'enabled', defaultMessage: 'Enabled' }}
             name="test"
+            onChange={jest.fn()}
             providerToEditName="email"
             type="text"
+            value="test"
           />
         </ThemeProvider>
       </IntlProvider>
@@ -172,9 +172,10 @@ describe('<Input />', () => {
                 aria-invalid="false"
                 class="c6"
                 id="textinput-1"
+                name="test"
                 placeholder=""
                 type="text"
-                value=""
+                value="test"
               />
             </div>
           </div>

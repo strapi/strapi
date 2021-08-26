@@ -24,6 +24,8 @@ describe('<FormModal />', () => {
           isOpen={false}
           onToggle={jest.fn()}
           headerBreadcrumbs={['Edit', 'Email']}
+          onSubmit={jest.fn()}
+          isSubmiting={false}
         />
       </IntlProvider>
     );

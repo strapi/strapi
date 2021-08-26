@@ -9,6 +9,13 @@ jest.mock('../../../hooks', () => ({
   useForm: jest.fn(),
 }));
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
+  useNotification: jest.fn(),
+  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
+}));
+
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">

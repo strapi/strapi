@@ -6,9 +6,7 @@ describe('USERS PERMISSIONS | HOOKS | useForm | reducer', () => {
 
   beforeEach(() => {
     state = {
-      formErrors: {},
       isLoading: true,
-      initialData: {},
       modifiedData: {},
     };
   });
@@ -28,12 +26,10 @@ describe('USERS PERMISSIONS | HOOKS | useForm | reducer', () => {
       };
 
       state.isLoading = false;
-      state.initialData = true;
       state.modifiedData = true;
 
       const expected = produce(state, draft => {
         draft.isLoading = true;
-        draft.initialData = {};
         draft.modifiedData = {};
       });
 
@@ -61,7 +57,6 @@ describe('USERS PERMISSIONS | HOOKS | useForm | reducer', () => {
 
       const expected = produce(state, draft => {
         draft.isLoading = false;
-        draft.initialData = data;
         draft.modifiedData = data;
       });
 
@@ -85,67 +80,14 @@ describe('USERS PERMISSIONS | HOOKS | useForm | reducer', () => {
     });
   });
 
-  describe('ON_CHANGE', () => {
-    it('should change the data correctly', () => {
-      state.modifiedData = { from: { name: 'test' }, test: 'test' };
-
-      const action = {
-        type: 'ON_CHANGE',
-        keys: 'from.name',
-        value: 'test@test.io',
-      };
-
-      const expected = produce(state, draft => {
-        draft.modifiedData = {
-          from: { name: 'test@test.io' },
-          test: 'test',
-        };
-      });
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
   describe('ON_SUBMIT_SUCCEEDED', () => {
     it('should set the initialData object with the modifiedData', () => {
-      state.initialData = { test: true };
       state.modifiedData = { test: false };
-      state.formErrors = { ok: true };
 
-      const action = { type: 'ON_SUBMIT_SUCCEEDED' };
-
-      const expected = produce(state, draft => {
-        draft.initialData = { test: false };
-        draft.formErrors = {};
-      });
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('RESET_FORM', () => {
-    it('should set the modifiedData object with the initialData', () => {
-      state.initialData = { test: true };
-      state.modifiedData = { test: false };
-      state.formErrors = { ok: true };
-
-      const action = { type: 'RESET_FORM' };
+      const action = { type: 'ON_SUBMIT_SUCCEEDED', data: { test: true, foo: 'bar' } };
 
       const expected = produce(state, draft => {
-        draft.modifiedData = { test: true };
-        draft.formErrors = {};
-      });
-
-      expect(reducer(state, action)).toEqual(expected);
-    });
-  });
-
-  describe('SET_ERRORS', () => {
-    it('should set the formErrors correctly', () => {
-      const action = { type: 'SET_ERRORS', errors: { test: true } };
-
-      const expected = produce(state, draft => {
-        draft.formErrors = { test: true };
+        draft.modifiedData = { test: true, foo: 'bar' };
       });
 
       expect(reducer(state, action)).toEqual(expected);
