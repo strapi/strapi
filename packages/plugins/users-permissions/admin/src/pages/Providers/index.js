@@ -2,30 +2,15 @@ import React, { useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
-  // SizedInput,
-  // useTracking,
-  // getYupInnerErrors,
-  // request,
-  // useNotification,
-  // useOverlayBlocker,
   LoadingIndicatorPage,
-  // SizedInput,
   useTracking,
-  // getYupInnerErrors,
-  // request,
   useNotification,
   useOverlayBlocker,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
-// import { get, upperFirst, has } from 'lodash';
-// import has from 'lodash/has';
-// import { Row } from 'reactstrap';
-
-// // DS INTEGRATION
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
@@ -35,14 +20,11 @@ import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import forms from './utils/forms';
 import createProvidersArray from './utils/createProvidersArray';
-// import ModalForm from '../../components/ModalForm';
-import {
-  // getRequestURL,
-  getTrad,
-} from '../../utils';
+import { getRequestURL, getTrad } from '../../utils';
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
 import FormModal from '../../components/FormModal';
+import { axiosInstance } from '../../../../../../core/admin/admin/src/core/utils';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
@@ -51,8 +33,6 @@ export const ProvidersPage = () => {
   const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmiting, setIsSubmiting] = useState(false);
-  // const buttonSubmitRef = useRef(null);
-  // const [showForm, setShowForm] = useState(false);
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -63,11 +43,7 @@ export const ProvidersPage = () => {
 
   const {
     allowedActions: { canUpdate },
-    // dispatchResetForm,
-    // dispatchSetFormErrors,
-    // dispatchSubmitSucceeded,
-    // formErrors,
-    // handleChange,
+    dispatchSubmitSucceeded,
     isLoading,
     isLoadingForPermissions,
     modifiedData,
@@ -104,10 +80,6 @@ export const ProvidersPage = () => {
     return forms.providers;
   }, [providerToEditName, isProviderWithSubdomain]);
 
-  // const handleClick = useCallback(() => {
-  //   buttonSubmitRef.current.click();
-  // }, []);
-
   const handleToggleModal = () => {
     setIsOpen(prev => !prev);
   };
@@ -119,19 +91,7 @@ export const ProvidersPage = () => {
     }
   };
 
-  // const handleClosed = useCallback(() => {
-  //   setProviderToEditName(null);
-  //   setShowForm(false);
-  //   dispatchResetForm();
-  // }, [dispatchResetForm]);
-
-  // const handleOpened = useCallback(() => {
-  //   setShowForm(true);
-  // }, []);
-
-  const handleSubmit = async () => {
-    // e.preventDefault();
-
+  const handleSubmit = async values => {
     setIsSubmiting(true);
 
     lockApp();
@@ -139,10 +99,10 @@ export const ProvidersPage = () => {
     try {
       trackUsageRef.current('willEditAuthenticationProvider');
 
-      // await request(getRequestURL('providers'), {
-      //   method: 'PUT',
-      //   body: { providers: modifiedData },
-      // });
+      const body = { ...modifiedData, [providerToEditName]: values };
+      const endPoint = getRequestURL('providers');
+
+      await axiosInstance.put(endPoint, { providers: body });
 
       trackUsageRef.current('didEditAuthenticationProvider');
 
@@ -151,9 +111,9 @@ export const ProvidersPage = () => {
         message: { id: getTrad('notification.success.submit') },
       });
 
-      // dispatchSubmitSucceeded();
+      dispatchSubmitSucceeded(body);
 
-      // handleToggle();
+      handleToggleModal();
     } catch (err) {
       console.error(err);
       toggleNotification({
@@ -165,8 +125,6 @@ export const ProvidersPage = () => {
     setIsSubmiting(false);
     unlockApp();
   };
-
-  console.log({ modifiedData, providerToEditName });
 
   return (
     <Layout>
@@ -281,55 +239,6 @@ export const ProvidersPage = () => {
         onSubmit={handleSubmit}
         providerToEditName={providerToEditName}
       />
-
-      {/* <ModalForm
-        isOpen={isOpen}
-        onClick={handleClick}
-        onCancel={handleToggle}
-        isLoading={isSubmiting}
-        onOpened={handleOpened}
-        onClosed={handleClosed}
-        onToggle={handleToggle}
-        headerBreadcrumbs={[
-          formatMessage({
-            id: getTrad('PopUpForm.header.edit.providers'),
-            defaultMessage: 'Edit Provider',
-          }),
-          upperFirst(providerToEditName),
-        ]}
-      >
-        {showForm && (
-          <form onSubmit={handleSubmit}>
-            <Row>
-              {layoutToRender.form.map(input => {
-                const label = input.label.params
-                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                  : input.label;
-
-                const value =
-                  input.name === 'noName'
-                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
-
-                return (
-                  <SizedInput
-                    key={input.name}
-                    {...input}
-                    label={label}
-                    error={formErrors[input.name]}
-                    name={`${providerToEditName}.${input.name}`}
-                    onChange={handleChange}
-                    value={value}
-                  />
-                );
-              })}
-            </Row>
-            <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
-              hidden button to use the native form event
-            </button>
-          </form>
-        )}
-      </ModalForm> */}
     </Layout>
   );
 };

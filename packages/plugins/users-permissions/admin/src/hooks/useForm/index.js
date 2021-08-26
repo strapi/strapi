@@ -72,9 +72,10 @@ const useUserForm = (endPoint, permissions) => {
     dispatch({ type: 'SET_ERRORS', errors });
   }, []);
 
-  const dispatchSubmitSucceeded = useCallback(() => {
+  const dispatchSubmitSucceeded = useCallback(data => {
     dispatch({
       type: 'ON_SUBMIT_SUCCEEDED',
+      data,
     });
   }, []);
 

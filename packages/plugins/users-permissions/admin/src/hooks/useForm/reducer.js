@@ -36,13 +36,14 @@ const reducer = (state, action) =>
         break;
       }
       case 'ON_SUBMIT_SUCCEEDED': {
-        draftState.initialData = state.modifiedData;
-        draftState.formErrors = {};
+        draftState.initialData = action.data;
+        draftState.modifiedData = action.data;
+        // draftState.formErrors = {};
         break;
       }
       case 'RESET_FORM': {
         draftState.modifiedData = state.initialData;
-        draftState.formErrors = {};
+        // draftState.formErrors = {};
         break;
       }
       case 'SET_ERRORS': {
