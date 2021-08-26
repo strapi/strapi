@@ -42,7 +42,7 @@ const forms = {
     form: [
       [
         {
-          intLabel: enabledLabel,
+          intlLabel: enabledLabel,
           name: 'enabled',
           type: 'bool',
           description: enabledDescription,

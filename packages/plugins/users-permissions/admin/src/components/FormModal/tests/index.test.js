@@ -10,9 +10,7 @@ import { IntlProvider } from 'react-intl';
 import FormModal from '../index';
 
 const messages = {
-  en: {
-    'users-permissions.component.name': 'Form Modal',
-  },
+  en: {},
 };
 
 describe('<FormModal />', () => {
@@ -21,10 +19,17 @@ describe('<FormModal />', () => {
       container: { firstChild },
     } = render(
       <IntlProvider locale="en" messages={messages} textComponent="span">
-        <FormModal />
+        <FormModal
+          layout={{ forms: [], schema: {} }}
+          isOpen={false}
+          onToggle={jest.fn()}
+          headerBreadcrumbs={['Edit', 'Email']}
+        />
       </IntlProvider>
     );
 
-    expect(firstChild).toMatchInlineSnapshot();
+    expect(firstChild).toMatchInlineSnapshot(`null`);
   });
+
+  test.todo('It should display an array of inputs');
 });

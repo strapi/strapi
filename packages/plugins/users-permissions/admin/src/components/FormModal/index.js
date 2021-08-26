@@ -19,12 +19,11 @@ import {
   Crumb,
 } from '@strapi/parts';
 import PropTypes from 'prop-types';
+import Input from './Input';
 // import { getTrad } from '../../../utils';
 
-const FormModal = ({ headerBreadcrumbs, layout, isOpen, onToggle }) => {
+const FormModal = ({ headerBreadcrumbs, layout, isOpen, onToggle, providerToEditName }) => {
   const { formatMessage } = useIntl();
-
-  console.log({ fo: layout.form });
 
   if (!isOpen) {
     return null;
@@ -40,28 +39,28 @@ const FormModal = ({ headerBreadcrumbs, layout, isOpen, onToggle }) => {
         </Breadcrumbs>
       </ModalHeader>
       <ModalBody>
-        <Stack size={1}>
-          <Grid gap={5}>
-            {layout.form.map(row => {
-              return row.map(input => {
-                console.log({ input });
-
-                return (
-                  <GridItem key={input.name} col={input.size} xs={12}>
-                    {input.intlLabel.id}
-                    {/* <Inputs
+        <form onSubmit={e => e.preventDefault()}>
+          <Stack size={1}>
+            <Grid gap={5}>
+              {layout.form.map(row => {
+                return row.map(input => {
+                  return (
+                    <GridItem key={input.name} col={input.size} xs={12}>
+                      <Input {...input} providerToEditName={providerToEditName} />
+                      {/* <Inputs
                       {...input}
                       // customInputs={{ string: () => "TEXT CUSTOM" }}
                       error={formErrors?.[input.name]}
                       onChange={handleChange}
                       value={modifiedData[input.name]}
                     /> */}
-                  </GridItem>
-                );
-              });
-            })}
-          </Grid>
-        </Stack>
+                    </GridItem>
+                  );
+                });
+              })}
+            </Grid>
+          </Stack>
+        </form>
       </ModalBody>
       <ModalFooter
         startActions={
@@ -81,6 +80,10 @@ const FormModal = ({ headerBreadcrumbs, layout, isOpen, onToggle }) => {
   );
 };
 
+FormModal.defaultProps = {
+  providerToEditName: null,
+};
+
 FormModal.propTypes = {
   headerBreadcrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
   layout: PropTypes.shape({
@@ -89,6 +92,7 @@ FormModal.propTypes = {
   }).isRequired,
   isOpen: PropTypes.bool.isRequired,
   onToggle: PropTypes.func.isRequired,
+  providerToEditName: PropTypes.string,
 };
 
 export default FormModal;

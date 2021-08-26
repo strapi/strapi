@@ -292,6 +292,7 @@ export const ProvidersPage = () => {
         )}
       </Main>
       <FormModal
+        isOpen={isOpen}
         layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({
@@ -300,8 +301,8 @@ export const ProvidersPage = () => {
           }),
           upperFirst(providerToEditName),
         ]}
-        isOpen={isOpen}
         onToggle={handleToggleModal}
+        providerToEditName={providerToEditName}
       />
 
       {/* <ModalForm
