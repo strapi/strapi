@@ -568,6 +568,7 @@
   "form.button.continue": "Continue",
   "form.button.done": "Done",
   "form.button.finish": "Finish",
+  "form.button.save": "Save",
   "global.prompt.unsaved": "Are you sure you want to leave this page? All your modifications will be lost",
   "notification.contentType.relations.conflict": "Content type has conflicting relations",
   "notification.error": "An error occurred",

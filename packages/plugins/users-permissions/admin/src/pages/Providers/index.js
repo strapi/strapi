@@ -1,5 +1,4 @@
 import React, {
-  useCallback,
   useMemo,
   // useRef,
   useState,
@@ -22,6 +21,7 @@ import {
   // useOverlayBlocker,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
+import upperFirst from 'lodash/upperFirst';
 // import { get, upperFirst, has } from 'lodash';
 // import has from 'lodash/has';
 // import { Row } from 'reactstrap';
@@ -45,19 +45,18 @@ import {
 } from '../../utils';
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
+import FormModal from './FormModal';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
 
   // const { trackUsage } = useTracking();
   // const trackUsageRef = useRef(trackUsage);
-  // const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
   // const [isSubmiting, setIsSubmiting] = useState(false);
   // const buttonSubmitRef = useRef(null);
   // const [showForm, setShowForm] = useState(false);
-  // const [providerToEditName, setProviderToEditName] = useState(null);
-  // FIXME
-  const [, setProviderToEditName] = useState(null);
+  const [providerToEditName, setProviderToEditName] = useState(null);
   // const toggleNotification = useNotification();
   // const { lockApp, unlockApp } = useOverlayBlocker();
 
@@ -112,20 +111,16 @@ export const ProvidersPage = () => {
   //   buttonSubmitRef.current.click();
   // }, []);
 
-  // const handleToggle = useCallback(() => {
-  //   setIsOpen(prev => !prev);
-  // }, []);
+  const handleToggleModal = () => {
+    setIsOpen(prev => !prev);
+  };
 
-  const handleClickEdit = useCallback(
-    provider => {
-      if (canUpdate) {
-        setProviderToEditName(provider.name);
-        // handleToggle();
-      }
-    },
-    // [canUpdate, handleToggle]
-    [canUpdate]
-  );
+  const handleClickEdit = provider => {
+    if (canUpdate) {
+      setProviderToEditName(provider.name);
+      handleToggleModal();
+    }
+  };
 
   // const handleClosed = useCallback(() => {
   //   setProviderToEditName(null);
@@ -295,6 +290,18 @@ export const ProvidersPage = () => {
           </ContentLayout>
         )}
       </Main>
+      <FormModal
+        headerBreadcrumbs={[
+          formatMessage({
+            id: getTrad('PopUpForm.header.edit.providers'),
+            defaultMessage: 'Edit Provider',
+          }),
+          upperFirst(providerToEditName),
+        ]}
+        isOpen={isOpen}
+        onToggle={handleToggleModal}
+      />
+
       {/* <ModalForm
         isOpen={isOpen}
         onClick={handleClick}
