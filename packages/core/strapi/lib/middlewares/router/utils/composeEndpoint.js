@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const compose = require('koa-compose');
-const { yup } = require('@strapi/utils');
+const { yup, policy: policyUtils } = require('@strapi/utils');
 
 const policyOrMiddlewareSchema = yup.lazy(value => {
   if (typeof value === 'string') {
@@ -62,19 +62,19 @@ const validateRouteConfig = routeConfig => {
   }
 };
 
-// Strapi utilities.
-const { finder, policy: policyUtils } = require('@strapi/utils');
-
 module.exports = strapi => {
   const routerChecker = createRouteChecker(strapi);
 
-  return (routeConfig, { plugin, router }) => {
+  return (routeConfig, { pluginName, router, apiName }) => {
     validateRouteConfig(routeConfig);
 
     try {
       const middlewares = resolveMiddlewares(routeConfig);
 
-      const { method, endpoint, policies, action } = routerChecker(routeConfig, plugin);
+      const { method, endpoint, policies, action } = routerChecker(routeConfig, {
+        pluginName,
+        apiName,
+      });
 
       if (_.isUndefined(action) || !_.isFunction(action)) {
         return strapi.log.warn(
@@ -113,7 +113,7 @@ const getMethod = route => _.trim(_.toLower(route.method));
 const getEndpoint = route => _.trim(route.path);
 
 const createRouteChecker = strapi => {
-  return (value, plugin) => {
+  return (value, { pluginName, apiName }) => {
     const method = getMethod(value);
     const endpoint = getEndpoint(value);
 
@@ -123,16 +123,15 @@ const createRouteChecker = strapi => {
 
     let controller;
 
-    if (plugin) {
-      if (plugin === 'admin') {
+    if (pluginName) {
+      if (pluginName === 'admin') {
         controller = strapi.admin.controllers[controllerKey];
       } else {
-        controller = strapi.plugin(plugin).controller(controllerKey);
+        controller = strapi.plugin(pluginName).controller(controllerKey);
       }
     } else {
-      controller = strapi.controllers[controllerKey];
+      controller = strapi.container.get('controllers').get(`api::${apiName}.${controllerKey}`);
     }
-
     if (!_.isFunction(controller[actionName])) {
       strapi.stopWithError(
         `Error creating endpoint ${method} ${endpoint}: handler not found "${controllerKey}.${actionName}"`
@@ -141,13 +140,6 @@ const createRouteChecker = strapi => {
 
     const action = controller[actionName].bind(controller);
 
-    // Retrieve the API's name where the controller is located
-    // to access to the right validators
-    const currentApiName = finder(
-      strapi.plugin(plugin) || strapi.api || strapi.admin,
-      controllerKey
-    );
-
     const { bodyPolicy } = policyUtils;
 
     const globalPolicy = policyUtils.globalPolicy({
@@ -155,13 +147,13 @@ const createRouteChecker = strapi => {
       action: actionName,
       method,
       endpoint,
-      plugin,
+      plugin: pluginName,
     });
 
     const policyOption = _.get(value, 'config.policies', []);
 
     const routePolicies = policyOption.map(policyConfig => {
-      return policyUtils.get(policyConfig, plugin, currentApiName);
+      return policyUtils.get(policyConfig, { pluginName, apiName });
     });
 
     // Init policies array.

@@ -12,7 +12,6 @@ const {
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
-const finder = require('./finder');
 const policy = require('./policy');
 const templateConfiguration = require('./template-configuration');
 const { yup, formatYupErrors } = require('./validators');
@@ -40,7 +39,6 @@ const providerFactory = require('./provider-factory');
 module.exports = {
   yup,
   formatYupErrors,
-  finder,
   policy,
   templateConfiguration,
   convertRestQueryParams,

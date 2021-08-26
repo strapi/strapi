@@ -38,7 +38,7 @@ const resolvePolicy = policyName => {
   return resolver ? resolveHandler(resolver.get)(policyName) : undefined;
 };
 
-const searchLocalPolicy = (policy, plugin, apiName) => {
+const searchLocalPolicy = (policy, { pluginName, apiName }) => {
   let [absoluteApiName, policyName] = policy.split('.');
   let absoluteApi = _.get(strapi.api, absoluteApiName);
   const resolver = policyResolvers.find(({ name }) => name === 'plugin');
@@ -47,9 +47,9 @@ const searchLocalPolicy = (policy, plugin, apiName) => {
     return resolveHandler(getPolicyIn(absoluteApi, policyName));
   }
 
-  const pluginPolicy = `${PLUGIN_PREFIX}${plugin}.${policy}`;
+  const pluginPolicy = `${PLUGIN_PREFIX}${pluginName}.${policy}`;
 
-  if (plugin && resolver.exists(pluginPolicy)) {
+  if (pluginName && resolver.exists(pluginPolicy)) {
     return resolveHandler(resolver.get(pluginPolicy));
   }
 
@@ -137,7 +137,7 @@ const policyResolvers = [
   },
 ];
 
-const get = (policy, plugin, apiName) => {
+const get = (policy, { pluginName, apiName }) => {
   if (typeof policy === 'function') {
     return policy;
   }
@@ -150,7 +150,7 @@ const get = (policy, plugin, apiName) => {
     return _.isPlainObject(policy) ? resolvedPolicy(args) : resolvedPolicy;
   }
 
-  const localPolicy = searchLocalPolicy(policy, plugin, apiName);
+  const localPolicy = searchLocalPolicy(policy, { pluginName, apiName });
 
   if (localPolicy !== undefined) {
     return localPolicy;

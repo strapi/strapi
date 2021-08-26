@@ -165,7 +165,7 @@ class Strapi {
 
   async openAdmin({ isInitialized }) {
     const shouldOpenAdmin =
-      this.config.environment === 'development' &&
+      this.config.get('environment') === 'development' &&
       this.config.get('server.admin.autoOpen', true) !== false;
 
     if (shouldOpenAdmin || !isInitialized) {
@@ -302,7 +302,7 @@ class Strapi {
     await this.db.schema.sync();
 
     this.store = createCoreStore({
-      environment: this.config.environment,
+      environment: this.config.get('environment'),
       db: this.db,
     });
 
