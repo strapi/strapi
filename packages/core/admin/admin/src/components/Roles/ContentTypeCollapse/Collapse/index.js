@@ -1,9 +1,10 @@
-import { Box, Checkbox, Text, Row } from '@strapi/parts';
-import { Up, Down } from '@strapi/icons';
+import { Down, Up } from '@strapi/icons';
+import { Box, Checkbox, Row, Text } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/Collapse/utils/constants';
 import { get, omit } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
@@ -86,6 +87,7 @@ const Collapse = ({
   pathToData,
 }) => {
   const [isModalOpen, setModalOpen] = useState(false);
+  const { formatMessage } = useIntl();
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -152,6 +154,7 @@ const Collapse = ({
             isDisplayed,
             isParentCheckbox,
             checkboxName,
+            label: permissionLabel,
           }) => {
             if (!isDisplayed) {
               return <HiddenAction key={actionId} />;
@@ -164,7 +167,13 @@ const Collapse = ({
                   <Checkbox
                     disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName}
-                    aria-label={checkboxName}
+                    aria-label={formatMessage(
+                      {
+                        id: `Settings.permissions.select-by-permission`,
+                        defaultMessage: 'Select {label} permission',
+                      },
+                      { label: `${permissionLabel} ${label}` }
+                    )}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                     onValueChange={value =>
                       onChangeParentCheckbox({

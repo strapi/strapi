@@ -78,7 +78,6 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           <Box paddingLeft={4}>
             <Checkbox
               name={pathToData.join('..')}
-              aria-label={pathToData.join('..')}
               disabled={isFormDisabled || IS_DISABLED}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
               onValueChange={value =>

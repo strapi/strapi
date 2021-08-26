@@ -46,7 +46,18 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
                 }}
                 name={actionId}
-                aria-label={actionId}
+                aria-label={formatMessage(
+                  {
+                    id: `Settings.permissions.select-all-by-permission`,
+                    defaultMessage: 'Select all {label} permissions',
+                  },
+                  {
+                    label: formatMessage({
+                      id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+                      defaultMessage: label,
+                    }),
+                  }
+                )}
                 value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
                 indeterminate={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}
               />

@@ -3,6 +3,7 @@ import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import React, { memo } from 'react';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';
 import { firstRowWidth } from '../Permissions/utils/constants';
 
@@ -25,11 +26,19 @@ const RowLabelWithCheckbox = ({
   someChecked,
   value,
 }) => {
+  const { formatMessage } = useIntl();
+
   return (
     <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
       <Checkbox
         name={checkboxName}
-        aria-label={checkboxName}
+        aria-label={formatMessage(
+          {
+            id: `Settings.permissions.select-all-by-permission`,
+            defaultMessage: 'Select all {label} permissions',
+          },
+          { label }
+        )}
         disabled={isFormDisabled}
         // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
         onValueChange={value =>

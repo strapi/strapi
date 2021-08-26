@@ -35,13 +35,13 @@ const ContentTypeCollapse = ({
         pathToData={pathToData}
       />
       {isActive &&
-        properties.map(({ label, value, children: childrenForm }, i) => {
+        properties.map(({ label: propertyLabel, value, children: childrenForm }, i) => {
           return (
             <CollapsePropertyMatrix
               availableActions={availableActions}
               childrenForm={childrenForm}
               isFormDisabled={isFormDisabled}
-              label={label}
+              label={propertyLabel}
               pathToData={pathToData}
               propertyName={value}
               key={value}

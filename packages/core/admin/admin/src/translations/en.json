@@ -118,6 +118,8 @@
   "Settings.permissions.users.listview.header.description.plural": "{number} users found",
   "Settings.permissions.users.listview.header.description.singular": "{number} user found",
   "Settings.permissions.users.listview.header.title": "Users",
+  "Settings.permissions.select-all-by-permission": "Select all {label} permissions",
+  "Settings.permissions.select-by-permission": "Select {label} permission",
   "Settings.profile.form.section.experience.interfaceLanguage": "Interface language",
   "Settings.profile.form.section.experience.interfaceLanguage.hint": "This will only display your own interface in the chosen language.",
   "Settings.profile.form.section.experience.title": "Experience",

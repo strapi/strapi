@@ -4,7 +4,7 @@ import { Row, TableLabel } from '@strapi/parts';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 
-import ConditionsSelect from '../ConditionsSelect';
+// import ConditionsSelect from '../ConditionsSelect';
 import { rowHeight } from '../../Permissions/utils/constants';
 
 const RowWrapper = styled(Row)`
@@ -12,14 +12,14 @@ const RowWrapper = styled(Row)`
 `;
 
 const ActionRow = ({
-  arrayOfOptionsGroupedByCategory,
-  isFormDisabled,
+  // arrayOfOptionsGroupedByCategory,
+  // isFormDisabled,
   isGrey,
   label,
-  name,
-  onCategoryChange,
-  onChange,
-  value,
+  // name,
+  // onCategoryChange,
+  // onChange,
+  // value,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -56,26 +56,26 @@ const ActionRow = ({
           })}
         </TableLabel>
       </Row>
-      <ConditionsSelect
+      {/* <ConditionsSelect
         arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
         name={name}
         isFormDisabled={isFormDisabled}
         onCategoryChange={onCategoryChange}
         onChange={onChange}
         value={value}
-      />
+      /> */}
     </RowWrapper>
   );
 };
 
 ActionRow.propTypes = {
-  arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
-  isFormDisabled: PropTypes.bool.isRequired,
+  // arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
+  // isFormDisabled: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  value: PropTypes.object.isRequired,
-  onCategoryChange: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
+  // name: PropTypes.string.isRequired,
+  // value: PropTypes.object.isRequired,
+  // onCategoryChange: PropTypes.func.isRequired,
+  // onChange: PropTypes.func.isRequired,
 };
 export default ActionRow;

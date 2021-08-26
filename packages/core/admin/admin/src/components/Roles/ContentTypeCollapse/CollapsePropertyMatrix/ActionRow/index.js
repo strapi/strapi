@@ -2,6 +2,7 @@ import { Checkbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../../../hooks';
@@ -49,6 +50,7 @@ const ActionRow = ({
   propertyName,
   isOdd,
 }) => {
+  const { formatMessage } = useIntl();
   const [rowToOpen, setRowToOpen] = useState(null);
   const {
     modifiedData,
@@ -133,7 +135,13 @@ const ActionRow = ({
                     <Checkbox
                       disabled={isFormDisabled || IS_DISABLED}
                       name={checkboxName.join('..')}
-                      aria-label={checkboxName.join('..')}
+                      aria-label={formatMessage(
+                        {
+                          id: `Settings.permissions.select-by-permission`,
+                          defaultMessage: 'Select {label} permission',
+                        },
+                        { label: `${name} ${label}` }
+                      )}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                       onValueChange={value =>
                         onChangeSimpleCheckbox({
@@ -165,6 +173,13 @@ const ActionRow = ({
                           value,
                         },
                       })}
+                    aria-label={formatMessage(
+                      {
+                        id: `Settings.permissions.select-by-permission`,
+                        defaultMessage: 'Select {label} permission',
+                      },
+                      { label: `${name} ${label}` }
+                    )}
                     value={hasAllActionsSelected}
                     indeterminate={hasSomeActionsSelected}
                   />

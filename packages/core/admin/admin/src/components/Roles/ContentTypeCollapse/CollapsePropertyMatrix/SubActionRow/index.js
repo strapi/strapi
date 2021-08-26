@@ -1,18 +1,19 @@
-import React, { memo, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import { get, upperFirst } from 'lodash';
-import styled from 'styled-components';
-import { Box, Row, Text, Checkbox } from '@strapi/parts';
+import { Box, Checkbox, Row, Text } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
+import { get, upperFirst } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { memo, useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../../../hooks';
-import { getCheckboxState } from '../../../utils';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';
-import RequiredSign from '../../../RequiredSign';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
-import CarretIcon from '../CarretIcon';
+import RequiredSign from '../../../RequiredSign';
+import { getCheckboxState } from '../../../utils';
 import { activeStyle } from '../../utils';
+import CarretIcon from '../CarretIcon';
 
 const Cell = styled(Row)`
   width: ${cellWidth};
@@ -75,6 +76,7 @@ const SubActionRow = ({
   parentName,
   propertyName,
 }) => {
+  const { formatMessage } = useIntl();
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -133,71 +135,85 @@ const SubActionRow = ({
                   </CollapseLabel>
                 </RowStyle>
                 <Row style={{ flex: 1 }}>
-                  {propertyActions.map(({ actionId, label, isActionRelatedToCurrentProperty }) => {
-                    if (!isActionRelatedToCurrentProperty) {
-                      return <HiddenAction key={actionId} />;
-                    }
-                    /*
-                     * Usually we use a 'dot' in order to know the key path of an object for which we want to change the value.
-                     * Since an action and a subject are both separated by '.' or '::' we chose to use the '..' separators
-                     */
-                    const checkboxName = [
-                      ...pathToDataFromActionRow.split('..'),
-                      actionId,
-                      'properties',
-                      propertyName,
-                      ...parentName.split('..'),
-                      value,
-                    ];
+                  {propertyActions.map(
+                    ({ actionId, label: propertyLabel, isActionRelatedToCurrentProperty }) => {
+                      if (!isActionRelatedToCurrentProperty) {
+                        return <HiddenAction key={actionId} />;
+                      }
+                      /*
+                       * Usually we use a 'dot' in order to know the key path of an object for which we want to change the value.
+                       * Since an action and a subject are both separated by '.' or '::' we chose to use the '..' separators
+                       */
+                      const checkboxName = [
+                        ...pathToDataFromActionRow.split('..'),
+                        actionId,
+                        'properties',
+                        propertyName,
+                        ...parentName.split('..'),
+                        value,
+                      ];
 
-                    const checkboxValue = get(modifiedData, checkboxName, false);
+                      const checkboxValue = get(modifiedData, checkboxName, false);
 
-                    if (!subChildrenForm) {
+                      if (!subChildrenForm) {
+                        return (
+                          <Cell key={propertyLabel} justifyContent="center" alignItems="center">
+                            <Checkbox
+                              disabled={isFormDisabled || IS_DISABLED}
+                              name={checkboxName.join('..')}
+                              aria-label={formatMessage(
+                                {
+                                  id: `Settings.permissions.select-by-permission`,
+                                  defaultMessage: 'Select {label} permission',
+                                },
+                                { label: `${parentName} ${label} ${propertyLabel}` }
+                              )}
+                              // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                              onValueChange={value =>
+                                onChangeSimpleCheckbox({
+                                  target: {
+                                    name: checkboxName.join('..'),
+                                    value,
+                                  },
+                                })}
+                              value={checkboxValue}
+                            />
+                          </Cell>
+                        );
+                      }
+
+                      const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
+                        checkboxValue
+                      );
+
                       return (
-                        <Cell key={label} justifyContent="center" alignItems="center">
+                        <Cell key={propertyLabel} justifyContent="center" alignItems="center">
                           <Checkbox
+                            key={propertyLabel}
                             disabled={isFormDisabled || IS_DISABLED}
                             name={checkboxName.join('..')}
-                            aria-label={checkboxName.join('..')}
+                            aria-label={formatMessage(
+                              {
+                                id: `Settings.permissions.select-by-permission`,
+                                defaultMessage: 'Select {label} permission',
+                              },
+                              { label: `${parentName} ${label} ${propertyLabel}` }
+                            )}
                             // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
                             onValueChange={value =>
-                              onChangeSimpleCheckbox({
+                              onChangeParentCheckbox({
                                 target: {
                                   name: checkboxName.join('..'),
                                   value,
                                 },
                               })}
-                            value={checkboxValue}
+                            value={hasAllActionsSelected}
+                            indeterminate={hasSomeActionsSelected}
                           />
                         </Cell>
                       );
                     }
-
-                    const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
-                      checkboxValue
-                    );
-
-                    return (
-                      <Cell key={label} justifyContent="center" alignItems="center">
-                        <Checkbox
-                          key={label}
-                          disabled={isFormDisabled || IS_DISABLED}
-                          name={checkboxName.join('..')}
-                          aria-label={checkboxName.join('..')}
-                          // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                          onValueChange={value =>
-                            onChangeParentCheckbox({
-                              target: {
-                                name: checkboxName.join('..'),
-                                value,
-                              },
-                            })}
-                          value={hasAllActionsSelected}
-                          indeterminate={hasSomeActionsSelected}
-                        />
-                      </Cell>
-                    );
-                  })}
+                  )}
                 </Row>
               </Row>
             </RowWrapper>

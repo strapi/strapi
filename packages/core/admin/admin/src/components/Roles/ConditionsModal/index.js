@@ -115,8 +115,9 @@ const ConditionsModal = ({
               defaultMessage: 'Define conditions',
             })}
           </H2>
-          {/* ! Need to force margin here - Remove this when Divider is updated in parts */}
-          <Divider style={{ marginTop: `${24 / 16}rem` }} />
+          <Box>
+            <Divider />
+          </Box>
           <Box>
             {actionsToDisplay.length === 0 && (
               <Text>
