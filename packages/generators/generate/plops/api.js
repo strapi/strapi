@@ -14,15 +14,6 @@ module.exports = (plop, rootDir) => {
         message: 'API name',
       },
       {
-        type: 'list',
-        name: 'kind',
-        message: 'Please choose the model type',
-        choices: [
-          { name: 'Collection Type', value: 'collectionType' },
-          { name: 'Singe Type', value: 'singleType' },
-        ],
-      },
-      {
         type: 'confirm',
         name: 'isPluginApi',
         message: 'Is this API for a plugin?',
@@ -37,6 +28,15 @@ module.exports = (plop, rootDir) => {
 
           return exists || 'That plugin does not exist, please try again';
         },
+      },
+      {
+        type: 'list',
+        name: 'kind',
+        message: 'Please choose the model type',
+        choices: [
+          { name: 'Collection Type', value: 'collectionType' },
+          { name: 'Singe Type', value: 'singleType' },
+        ],
       },
       {
         type: 'confirm',

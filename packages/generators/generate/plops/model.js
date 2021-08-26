@@ -73,18 +73,30 @@ module.exports = (plop, rootDir) => {
               return { name: type, value: type };
             }),
           },
+          {
+            when: answers => {
+              console.log(answers);
+              return answers.attributeType === 'enumeration';
+            },
+            type: 'input',
+            name: 'enum',
+            message: 'Add values separated by a comma',
+          },
         ],
       },
     ],
     actions: answers => {
+      console.log(answers);
       const attributes = answers.attributes.reduce((object, answer) => {
         // Rest/spread properties are not supported until Node.js 8.3.0.
         // The configured version range is '>=8.0.0'
-        return Object.assign(
-          object,
-          { [answer.attributeName]: { type: answer.attributeType } },
-          {}
-        );
+        const val = { type: answer.attributeType };
+
+        if (answer.attributeType === 'enumeration') {
+          val.enum = answer.enum.split(',').map(item => item.trim());
+        }
+
+        return Object.assign(object, { [answer.attributeName]: val }, {});
       }, {});
 
       const filePath = getFilePath(answers.destination);
@@ -104,9 +116,9 @@ module.exports = (plop, rootDir) => {
           type: 'modify',
           path: join(rootDir, `${filePath}/models/{{id}}.settings.json`),
           transform: template => {
-            const temp = JSON.parse(template);
-            temp.attributes = attributes;
-            return JSON.stringify(temp, null, 2);
+            const parsedTemplate = JSON.parse(template);
+            parsedTemplate.attributes = attributes;
+            return JSON.stringify(parsedTemplate, null, 2);
           },
         },
       ];
