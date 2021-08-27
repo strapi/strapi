@@ -1,184 +1,25 @@
 'use strict';
 
-const { join } = require('path');
-const fs = require('fs-extra');
 const pluralize = require('pluralize');
 
-module.exports = function(plop) {
-  const rootDir = process.cwd();
+const generateApi = require('./plops/api');
+const generateController = require('./plops/controller');
+const generateModel = require('./plops/model');
+const generatePlugin = require('./plops/plugin');
+const generatePolicy = require('./plops/policy');
+const generateService = require('./plops/service');
+
+module.exports = (plop) => {
+  // Plop config
   plop.setWelcomeMessage('Strapi Generators');
-
   plop.addHelper('pluralize', text => pluralize(text));
+  plop.setPrompt('recursive', require('inquirer-recursive'));
 
-  // API generator
-  plop.setGenerator('api', {
-    description: 'Generate a basic API',
-    prompts: [
-      {
-        type: 'input',
-        name: 'id',
-        message: 'API name',
-      },
-      {
-        type: 'confirm',
-        name: 'useDraftAndPublish',
-        message: 'Use draft and publish?',
-      },
-    ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/config/routes.json'),
-        templateFile: 'templates/api-routes.json.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/controllers/{{id}}.js'),
-        templateFile: 'templates/controller.js.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.js'),
-        templateFile: 'templates/model.js.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.settings.json'),
-        templateFile: 'templates/model.settings.json.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/services/{{id}}.js'),
-        templateFile: 'templates/service.js.hbs',
-      },
-    ],
-  });
-
-  // Controller generator
-  plop.setGenerator('controller', {
-    description: 'Generate a controller for an API',
-    prompts: [
-      {
-        type: 'input',
-        name: 'id',
-        message: 'Controller name',
-      },
-    ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/controllers/{{id}}.js'),
-        templateFile: 'templates/controller.js.hbs',
-      },
-    ],
-  });
-
-  // Model generator
-  plop.setGenerator('model', {
-    description: 'Generate a model for an API',
-    prompts: [
-      {
-        type: 'input',
-        name: 'id',
-        message: 'Model name',
-      },
-      {
-        type: 'confirm',
-        name: 'useDraftAndPublish',
-        message: 'Use draft and publish?',
-      },
-    ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.js'),
-        templateFile: 'templates/model.js.hbs',
-      },
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/models/{{id}}.settings.json'),
-        templateFile: 'templates/model.settings.json.hbs',
-      },
-    ],
-  });
-
-  // Plugin generator
-  plop.setGenerator('plugin', {
-    description: 'Generate a basic plugin',
-    prompts: [
-      {
-        type: 'input',
-        name: 'id',
-        message: 'Plugin name',
-      },
-    ],
-    actions: data => {
-      fs.copySync(join(__dirname, 'files', 'plugin'), join(rootDir, 'plugins', data.id));
-      return [
-        {
-          type: 'add',
-          path: join(rootDir, 'plugins/{{id}}/services/{{id}}.js'),
-          templateFile: 'templates/service.js.hbs',
-        },
-        {
-          type: 'add',
-          path: join(rootDir, 'plugins/{{id}}/controllers/{{id}}.js'),
-          templateFile: 'templates/controller.js.hbs',
-        },
-        {
-          type: 'add',
-          path: join(rootDir, 'plugins/{{id}}/config/routes.json'),
-          templateFile: 'templates/plugin-routes.json.hbs',
-        },
-        {
-          type: 'add',
-          path: join(rootDir, 'plugins/{{id}}/README.md'),
-          templateFile: 'templates/README.md.hbs',
-        },
-        {
-          type: 'add',
-          path: join(rootDir, 'plugins/{{id}}/package.json'),
-          templateFile: 'templates/plugin-package.json.hbs',
-        },
-      ];
-    },
-  });
-
-  // Policy generator
-  plop.setGenerator('policy', {
-    description: 'Generate a policy for an API',
-    prompts: [
-      {
-        type: 'input',
-        name: 'id',
-        message: 'Policy name',
-      },
-    ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'config/policies/{{id}}.js'),
-        templateFile: 'templates/policy.js.hbs',
-      },
-    ],
-  });
-
-  // Service generator
-  plop.setGenerator('service', {
-    description: 'Generate a service for an API',
-    prompts: [
-      {
-        type: 'input',
-        name: 'id',
-        message: 'Service name',
-      },
-    ],
-    actions: [
-      {
-        type: 'add',
-        path: join(rootDir, 'api/{{id}}/services/{{id}}.js'),
-        templateFile: 'templates/service.js.hbs',
-      },
-    ],
-  });
+  // Generators
+  generateApi(plop);
+  generateController(plop);
+  generateModel(plop);
+  generatePlugin(plop);
+  generatePolicy(plop);
+  generateService(plop);
 };
