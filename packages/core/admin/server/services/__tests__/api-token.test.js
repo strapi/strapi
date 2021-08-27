@@ -34,6 +34,7 @@ describe('API Token', () => {
       const res = await apiTokenService.create(attributes);
 
       expect(create).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type', 'accessKey'],
         data: {
           ...attributes,
           accessKey: mockedApiToken.hexedString,
