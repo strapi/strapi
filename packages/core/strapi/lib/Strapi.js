@@ -31,6 +31,7 @@ const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
+const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 
@@ -52,6 +53,7 @@ class Strapi {
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
+    this.container.register('apis', apisRegistry(this));
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -105,6 +107,14 @@ class Strapi {
 
   get plugins() {
     return this.container.get('plugins').getAll();
+  }
+
+  // api(name) {
+  //   return this.container.get('apis').get(name);
+  // }
+
+  get api() {
+    return this.container.get('apis').getAll();
   }
 
   async start() {
@@ -246,7 +256,7 @@ class Strapi {
   }
 
   async loadAPIs() {
-    this.api = await loaders.loadAPIs(this);
+    await loaders.loadAPIs(this);
   }
 
   async loadComponents() {

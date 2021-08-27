@@ -4,30 +4,7 @@ const _ = require('lodash');
 const { toLower } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 
-const { createCoreApi } = require('../core-api');
-
 module.exports = function(strapi) {
-  // add user's content-types, controller and services
-  for (const apiName in strapi.api) {
-    const api = strapi.api[apiName];
-
-    for (const modelName in api.contentTypes) {
-      const model = api.contentTypes[modelName];
-
-      strapi.container.get('content-types').add(`api::${apiName}`, { [modelName]: model });
-
-      const contentType = strapi.contentType(`api::${apiName}.${modelName}`);
-
-      const { service, controller } = createCoreApi({ model: contentType, api, strapi });
-      // TODO: remove V4
-      _.set(strapi.api[apiName], ['services', modelName], service);
-      _.set(strapi.api[apiName], ['controllers', modelName], controller);
-
-      strapi.container.get('controllers').add(`api::${apiName}`, { [modelName]: controller });
-      strapi.container.get('services').add(`api::${apiName}`, { [modelName]: service });
-    }
-  }
-
   // TODO: delete v3 code
   _.forEach(strapi.plugins, plugin => {
     _.forEach(plugin.middlewares, (middleware, middlewareUID) => {

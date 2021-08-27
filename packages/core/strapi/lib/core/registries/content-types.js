@@ -7,6 +7,7 @@ const { addNamespace } = require('../utils');
 const validateKeySameToSingularName = contentTypes => {
   for (const ctName in contentTypes) {
     const contentType = contentTypes[ctName];
+
     if (ctName !== contentType.schema.info.singularName) {
       throw new Error(
         `The key of the content-type should be the same as its singularName. Found ${ctName} and ${contentType.schema.info.singularName}.`

@@ -201,10 +201,12 @@ const addCreateLocalizationAction = contentType => {
 
   strapi.api[apiName].routes[modelName].routes.push(localizationRoute);
 
-  strapi.container.get('controllers').extend(`api::${apiName}.${modelName}`, controller => ({
-    ...controller,
-    createLocalization: createLocalizationHandler(contentType),
-  }));
+  strapi.container.get('controllers').extend(`api::${apiName}.${modelName}`, controller => {
+    return {
+      ...controller,
+      createLocalization: createLocalizationHandler(contentType),
+    };
+  });
 };
 
 const mergeCustomizer = (dest, src) => {
