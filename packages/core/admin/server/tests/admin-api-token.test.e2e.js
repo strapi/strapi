@@ -12,6 +12,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 2. Fails to creates an api token (invalid `type` in the body)
  * 3. Creates an api token (successfully)
  * 4. Creates an api token without a description (successfully)
+ * 5. Creates an api token with trimmed description and name (successfully)
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -116,6 +117,29 @@ describe('Admin API Token CRUD (e2e)', () => {
       accessKey: expect.any(String),
       name: body.name,
       description: '',
+      type: body.type,
+      id: expect.any(Number),
+    });
+  });
+
+  test('5. Creates an api token with trimmed description and name (successfully)', async () => {
+    const body = {
+      name: 'api-token_tests-name-with-spaces-at-the-end   ',
+      description: 'api-token_tests-description-with-spaces-at-the-end   ',
+      type: 'read-only',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(201);
+    expect(res.body.data).toMatchObject({
+      accessKey: expect.any(String),
+      name: 'api-token_tests-name-with-spaces-at-the-end',
+      description: 'api-token_tests-description-with-spaces-at-the-end',
       type: body.type,
       id: expect.any(Number),
     });
