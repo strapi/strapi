@@ -14,7 +14,7 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    if (apiTokenService.exists({ name: attributes.name })) {
+    if (await apiTokenService.exists({ name: attributes.name })) {
       return ctx.badRequest('Name already taken');
     }
 
