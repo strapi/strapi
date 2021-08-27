@@ -2,6 +2,7 @@
 
 const { join } = require('path');
 const fs = require('fs-extra');
+const validateInput = require('./utils/validate-input');
 
 module.exports = (plop, rootDir) => {
   // API generator
@@ -12,6 +13,7 @@ module.exports = (plop, rootDir) => {
         type: 'input',
         name: 'id',
         message: 'API name',
+        validate: input => validateInput(input),
       },
       {
         type: 'confirm',
@@ -20,13 +22,27 @@ module.exports = (plop, rootDir) => {
       },
       {
         when: answers => answers.isPluginApi,
-        type: 'input',
+        type: 'list',
         name: 'plugin',
         message: 'Plugin name',
-        validate: async input => {
-          const exists = await fs.pathExists(join(rootDir, `plugins/${input}`));
+        choices: async () => {
+          const pluginsPath = join(rootDir, 'plugins');
+          const exists = await fs.pathExists(pluginsPath);
 
-          return exists || 'That plugin does not exist, please try again';
+          if (!exists) {
+            throw Error('Couldn\'t find a "plugins" directory');
+          }
+
+          const pluginsDir = await fs.readdir(pluginsPath);
+          const pluginsDirContent = pluginsDir.filter(api =>
+            fs.lstatSync(join(pluginsPath, api)).isDirectory()
+          );
+
+          if (pluginsDirContent.length === 0) {
+            throw Error('The "plugins" directory is empty');
+          }
+
+          return pluginsDirContent;
         },
       },
       {

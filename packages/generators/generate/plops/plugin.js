@@ -15,7 +15,7 @@ module.exports = (plop, rootDir) => {
       },
     ],
     actions: answers => {
-      fs.copySync(join(__dirname, 'files', 'plugin'), join(rootDir, 'plugins', answers.id));
+      fs.copySync(join(__dirname, '..', 'files', 'plugin'), join(rootDir, 'plugins', answers.id));
       return [
         {
           type: 'add',

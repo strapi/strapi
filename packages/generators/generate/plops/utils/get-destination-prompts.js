@@ -19,24 +19,49 @@ module.exports = (action, rootDir) => {
     },
     {
       when: answers => answers.destination === 'api',
-      type: 'input',
+      type: 'list',
       message: 'Which API is this for?',
       name: 'api',
-      validate: async input => {
-        const exists = await fs.pathExists(join(rootDir, `api/${input}`));
+      choices: async () => {
+        const apiPath = join(rootDir, 'api');
+        const exists = await fs.pathExists(apiPath);
 
-        return exists || 'That api does not exist, please try again';
+        if (!exists) {
+          throw Error('Couldn\'t find an "api" directory');
+        }
+
+        const apiDir = await fs.readdir(apiPath);
+        const apiDirContent = apiDir.filter(api => fs.lstatSync(join(apiPath, api)).isDirectory());
+        if (apiDirContent.length === 0) {
+          throw Error('The "api" directory is empty');
+        }
+
+        return apiDirContent;
       },
     },
     {
       when: answers => answers.destination === 'plugin',
-      type: 'input',
+      type: 'list',
       message: 'Which plugin is this for?',
       name: 'plugin',
-      validate: async input => {
-        const exists = await fs.pathExists(join(rootDir, `plugins/${input}`));
+      choices: async () => {
+        const pluginsPath = join(rootDir, 'plugins');
+        const exists = await fs.pathExists(pluginsPath);
 
-        return exists || 'That plugin does not exist, please try again';
+        if (!exists) {
+          throw Error('Couldn\'t find a "plugins" directory');
+        }
+
+        const pluginsDir = await fs.readdir(pluginsPath);
+        const pluginsDirContent = pluginsDir.filter(api =>
+          fs.lstatSync(join(pluginsPath, api)).isDirectory()
+        );
+
+        if (pluginsDirContent.length === 0) {
+          throw Error('The "plugins" directory is empty');
+        }
+
+        return pluginsDirContent;
       },
     },
   ];

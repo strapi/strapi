@@ -75,7 +75,6 @@ module.exports = (plop, rootDir) => {
           },
           {
             when: answers => {
-              console.log(answers);
               return answers.attributeType === 'enumeration';
             },
             type: 'input',
