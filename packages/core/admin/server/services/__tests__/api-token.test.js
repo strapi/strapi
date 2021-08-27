@@ -90,5 +90,22 @@ describe('API Token', () => {
       expect(mockedAppendFile).toHaveBeenCalled();
       expect(mockedConfigSet).toHaveBeenCalled();
     });
+
+    test('It throws an error if the env variable used in the config file has been changed and is empty', () => {
+      expect.assertions(1);
+      process.env.API_TOKEN_SALT = 'api-token_tests-salt';
+
+      global.strapi = {
+        config: {
+          get: jest.fn(() => null),
+        },
+      };
+
+      try {
+        apiTokenService.createSaltIfNotDefined();
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
   });
 });
