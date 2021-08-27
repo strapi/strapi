@@ -4,7 +4,7 @@ const { join } = require('path');
 const fs = require('fs-extra');
 const validateInput = require('./utils/validate-input');
 
-module.exports = (plop) => {
+module.exports = plop => {
   // API generator
   plop.setGenerator('api', {
     description: 'Generate a basic API',
@@ -49,6 +49,7 @@ module.exports = (plop) => {
         type: 'list',
         name: 'kind',
         message: 'Please choose the model type',
+        default: 'collectionType',
         choices: [
           { name: 'Collection Type', value: 'collectionType' },
           { name: 'Singe Type', value: 'singleType' },
@@ -94,11 +95,16 @@ module.exports = (plop) => {
       if (answers.isPluginApi) {
         return baseActions;
       } else {
+        const routeType =
+          answers.kind === 'singleType'
+            ? 'single-type-routes.json.hbs'
+            : 'collection-type-routes.json.hbs';
+
         return [
           {
             type: 'add',
             path: `${filePath}/config/routes.json`,
-            templateFile: 'templates/api-routes.json.hbs',
+            templateFile: `templates/${routeType}`,
           },
           ...baseActions,
         ];
