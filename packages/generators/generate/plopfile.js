@@ -9,11 +9,10 @@ const generatePlugin = require('./plops/plugin');
 const generatePolicy = require('./plops/policy');
 const generateService = require('./plops/service');
 
-module.exports = (plop) => {
+module.exports = plop => {
   // Plop config
   plop.setWelcomeMessage('Strapi Generators');
   plop.addHelper('pluralize', text => pluralize(text));
-  plop.setPrompt('recursive', require('inquirer-recursive'));
 
   // Generators
   generateApi(plop);
