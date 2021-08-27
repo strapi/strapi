@@ -7,7 +7,10 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
   const { formatMessage } = useIntl();
 
   const usersCountText = formatMessage(
-    { id: `Roles.RoleRow.user-count.${usersCount > 1 ? 'plural' : 'singular'}` },
+    {
+      id: `Roles.RoleRow.user-count.${usersCount > 1 ? 'plural' : 'singular'}`,
+      defaultMessage: '{number} user',
+    },
     { number: usersCount }
   );
 
@@ -19,7 +22,10 @@ const RoleRow = ({ onToggle, id, name, description, usersCount, isChecked, icons
             name="role-checkbox"
             onValueChange={() => onToggle(id)}
             value={isChecked}
-            aria-label={formatMessage({ id: `Roles.RoleRow.select-all` }, { name })}
+            aria-label={formatMessage(
+              { id: `Roles.RoleRow.select-all`, defaultMessage: 'Select {name} for bulk actions' },
+              { name }
+            )}
           />
         </Td>
       )}

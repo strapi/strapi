@@ -38,6 +38,7 @@ const useSortedRoles = () => {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(adminPermissions.settings.roles);
+
   const { getData, roles, isLoading } = useRolesList(false);
   const query = useQuery();
   const _q = decodeURIComponent(query.get('_q') || '');
@@ -64,6 +65,7 @@ const useSortedRoles = () => {
 
 const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles }) => {
   const { formatMessage } = useIntl();
+
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
@@ -259,6 +261,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
+
   const {
     isLoadingForPermissions,
     canCreate,
