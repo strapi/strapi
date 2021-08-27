@@ -4,9 +4,12 @@
  * Lifecycle callbacks for the `ApiToken` model.
  */
 module.exports = {
-  collectionName: 'strapi_api_token',
+  collectionName: 'strapi_api_tokens',
   info: {
     name: 'Api Token',
+    singularName: 'api-token',
+    pluralName: 'api-tokens',
+    displayName: 'Api Token',
     description: '',
   },
   options: {},
@@ -33,8 +36,8 @@ module.exports = {
       default: '',
     },
     type: {
-      type: 'string',
-      minLength: 1,
+      type: 'enumeration',
+      enum: ['read-only', 'full-access'],
       configurable: false,
       required: false,
       default: 'read-only',

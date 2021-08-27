@@ -9,7 +9,7 @@ const crypto = require('crypto');
  * @property {string} name
  * @property {string} [description]
  * @property {string} accessKey
- * @property {'read-only'|'full-access'} id
+ * @property {'read-only'|'full-access'} type
  */
 
 /**
@@ -17,10 +17,10 @@ const crypto = require('crypto');
  * @param {string} attributes.name
  * @param {string} [attributes.description]
  *
- * @returns Promise<boolean>
+ * @returns {Promise<boolean>}
  */
 const exists = async (attributes = {}) => {
-  return (await strapi.query('strapi::api-token').count({ where: attributes })) > 0;
+  return (await strapi.query('admin::api-token').count({ where: attributes })) > 0;
 };
 
 /**
@@ -34,7 +34,7 @@ const exists = async (attributes = {}) => {
 const create = async attributes => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
-  return strapi.query('strapi::api-token').create({
+  return strapi.query('admin::api-token').create({
     select: ['id', 'name', 'description', 'type', 'accessKey'],
     data: {
       ...attributes,
