@@ -26,7 +26,8 @@ const DEFAULT_TYPES = [
   'timestamp',
   'boolean',
 
-  'relation',
+  // TODO: Should we include relation in the CLI?
+  // 'relation'
 ];
 
 module.exports = (plop, rootDir) => {
@@ -74,18 +75,25 @@ module.exports = (plop, rootDir) => {
             }),
           },
           {
-            when: answers => {
-              return answers.attributeType === 'enumeration';
-            },
+            when: answers => answers.attributeType === 'enumeration',
             type: 'input',
             name: 'enum',
             message: 'Add values separated by a comma',
+          },
+          {
+            when: answers => answers.attributeType === 'media',
+            type: 'list',
+            name: 'multiple',
+            message: 'Choose media type',
+            choices: [
+              { name: 'Multiple', value: true },
+              { name: 'Single', value: false },
+            ],
           },
         ],
       },
     ],
     actions: answers => {
-      console.log(answers);
       const attributes = answers.attributes.reduce((object, answer) => {
         // Rest/spread properties are not supported until Node.js 8.3.0.
         // The configured version range is '>=8.0.0'
@@ -93,6 +101,11 @@ module.exports = (plop, rootDir) => {
 
         if (answer.attributeType === 'enumeration') {
           val.enum = answer.enum.split(',').map(item => item.trim());
+        }
+
+        if (answer.attributeType === 'media') {
+          val.allowedTypes = ['images', 'files', 'videos'];
+          val.multiple = answer.multiple;
         }
 
         return Object.assign(object, { [answer.attributeName]: val }, {});
