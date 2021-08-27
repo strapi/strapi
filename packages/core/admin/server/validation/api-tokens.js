@@ -19,7 +19,7 @@ const apiTokenCreationSchema = yup
   })
   .noUnknown();
 
-const validateApiTokenCreationInput = data => {
+const validateApiTokenCreationInput = async data => {
   return apiTokenCreationSchema
     .validate(data, { strict: true, abortEarly: false })
     .catch(handleReject);
@@ -27,8 +27,4 @@ const validateApiTokenCreationInput = data => {
 
 module.exports = {
   validateApiTokenCreationInput,
-
-  schemas: {
-    apiTokenCreationSchema,
-  },
 };
