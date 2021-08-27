@@ -13,6 +13,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 3. Creates an api token (successfully)
  * 4. Creates an api token without a description (successfully)
  * 5. Creates an api token with trimmed description and name (successfully)
+ * 6. List all tokens (successfully)
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -143,5 +144,32 @@ describe('Admin API Token CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
     });
+  });
+
+  test('6. List all tokens (successfully)', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).not.toBeNull();
+    expect(res.body.data.length).toBe(2);
+    expect(res.body.data).toStrictEqual([
+      {
+        id: expect.any(Number),
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+        accessKey: expect.any(String),
+      },
+      {
+        id: expect.any(Number),
+        name: 'api-token_tests-name',
+        description: '',
+        type: 'read-only',
+        accessKey: expect.any(String),
+      },
+    ]);
   });
 });
