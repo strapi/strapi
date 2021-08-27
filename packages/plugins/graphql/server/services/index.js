@@ -7,6 +7,7 @@ const utils = require('./utils');
 const constants = require('./constants');
 const internals = require('./internals');
 const builders = require('./builders');
+const extension = require('./extension');
 
 module.exports = {
   builders,
@@ -15,6 +16,7 @@ module.exports = {
   constants,
   internals,
   'type-registry': typeRegistry,
+  extension,
   ////////////////////
   old,
 };

@@ -37,9 +37,7 @@ module.exports = async strapi => {
         .service('old')
         ['data-loaders'].initializeLoader();
 
-      return {
-        context: ctx,
-      };
+      return ctx;
     },
 
     // Format & validation

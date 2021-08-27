@@ -1,6 +1,12 @@
 'use strict';
 
+const {
+  mergeSchemas,
+  makeExecutableSchema,
+  addResolversToSchema,
+} = require('@graphql-tools/schema');
 const { makeSchema, unionType } = require('nexus');
+const { get, getOr, isNil, isFunction, pipe } = require('lodash/fp');
 
 module.exports = ({ strapi }) => {
   // Type Registry
@@ -38,7 +44,8 @@ module.exports = ({ strapi }) => {
     for (const contentType of contentTypes) {
       const { kind, modelType } = contentType;
 
-      // Generate enums & dynamic zones
+      // Generate various types associated to the content type
+      // (enums, dynamic-zones, filters, inputs...)
       registerEnumsDefinition(contentType);
       registerDynamicZonesDefinition(contentType);
       registerFiltersDefinition(contentType);
@@ -293,7 +300,131 @@ module.exports = ({ strapi }) => {
     registry.register(type, definition, { kind: KINDS.input, contentType });
   };
 
-  return () => {
+  /**
+   * Wrap the schema's resolvers if they've been
+   * customized using the GraphQL extension service
+   * @param {object} options
+   * @param {GraphQLSchema} options.schema
+   * @param {object} options.extension
+   * @return {GraphQLSchema}
+   */
+  const wrapResolvers = ({ schema, extension = {} }) => {
+    // Get all the registered resolvers configuration
+    const { resolversConfig = {} } = extension;
+
+    // Fields filters
+    const isValidFieldName = ([field]) => !field.startsWith('__');
+    const hasResolveFunction = ([, definition]) => isFunction(definition.resolve);
+    const hasResolverOptions = type => ([field]) => !isNil(resolversConfig[`${type}.${field}`]);
+
+    const typeMap = get('_typeMap', schema);
+
+    // Iterate over every field from every type within the
+    // schema's type map and wrap its resolve attribute if needed
+    Object.entries(typeMap).forEach(([type, definition]) => {
+      const fields = get('_fields', definition);
+
+      // If the type doesn't have a `_fields` attribute, then ignore it
+      if (isNil(fields)) {
+        return;
+      }
+
+      // Only keep fields that are valid
+      const fieldsToProcess = Object.entries(fields)
+        // Ignore patterns such as "__FooBar"
+        .filter(isValidFieldName)
+        // Ignore types that don't have a resolver defined
+        // todo[v4]: Handle cases where there is a resolver config but no resolver defined (create a default one?)
+        .filter(hasResolveFunction)
+        // Don't augment the types if there isn't any configuration defined for them
+        .filter(hasResolverOptions(type));
+
+      for (const [fieldName, fieldDefinition] of fieldsToProcess) {
+        const path = `${type}.${fieldName}`;
+        const resolverConfig = resolversConfig[path];
+
+        const { resolve: baseResolver } = fieldDefinition;
+
+        fieldDefinition.resolve = async (source, args, context, info) => {
+          // 1 Handle Strapi authentication (U&P, API token, etc...)
+          if (resolverConfig.auth !== false) {
+            try {
+              await strapi.auth.verify(context.state.auth, resolverConfig.auth);
+            } catch (error) {
+              // todo[v4]: Throw GraphQL Error instead
+              throw new Error('Forbidden access');
+            }
+          }
+
+          // 2 Run middlewares
+          // runMiddlewares();
+
+          // 3 Run policies
+          const resolverPolicies = getOr([], 'policies', resolverConfig);
+
+          const policies = resolverPolicies.map(policy => {
+            if (isFunction(policy)) {
+              return policy;
+            }
+
+            if (typeof policy === 'string') {
+              return strapi.policy(policy);
+            }
+
+            if (typeof policy === 'object') {
+              const { name, options = {} } = policy;
+
+              return ctx => strapi.policy(name)(ctx, options);
+            }
+
+            throw new Error(
+              `Invalid policy format. Expected string, function or object but found "${typeof policy}"`
+            );
+          });
+
+          for (const policy of policies) {
+            const result = await policy(source, args, context, info, { strapi });
+
+            if (!result) {
+              throw new Error('Bad Request');
+            }
+          }
+          // runPolicies();
+
+          // 4 Run the base resolver & return its result
+          return baseResolver(source, args, context, info);
+        };
+      }
+    });
+
+    return schema;
+  };
+
+  const buildSchemas = ({ registry, extension }) => {
+    const { types, plugins, typeDefs = [] } = extension;
+
+    // Create a new Nexus schema (shadow CRUD) & add it to the schemas collection
+    const nexusSchema = makeSchema({
+      types: [
+        // Add the auto-generated Nexus types (shadow CRUD)
+        registry.definitions,
+        // Add every Nexus type registered using the extension service
+        types,
+      ],
+
+      plugins: [
+        // Add every plugin registered using the extension service
+        ...plugins,
+      ],
+    });
+
+    // Build schemas based on SDL type definitions (defined in the extension)
+    const sdlSchemas = typeDefs.map(sdl => makeExecutableSchema({ typeDefs: sdl }));
+
+    return [nexusSchema, ...sdlSchemas];
+  };
+
+  return async () => {
     // Create a new empty type registry
     registry = strapi
       .plugin('graphql')
@@ -330,21 +461,23 @@ module.exports = ({ strapi }) => {
     // Generate and register polymorphic types' definitions
     registerMorphTypes(contentTypes);
 
-    // Return a brand new Nexus schema
-    return makeSchema({
-      // Exhaustive list of the content-api's types definitions
-      types: registry.definitions,
+    // Generate the extension configuration for the content API
+    const extension = strapi
+      .plugin('graphql')
+      .service('extension')
+      .for('content-api')
+      .generate({ typeRegistry: registry });
 
-      // Plugins
-      plugins: [],
-
-      // Auto-gen tools configuration (.graphql, .ts)
-      // shouldGenerateArtifacts: process.env.NODE_ENV === 'development',
-      //
-      outputs: {
-        // typegen: join(__dirname, '..', 'nexus-typegen.ts'),
-        // schema: join(__dirname, '../../../../../..', 'schema.graphql'),
-      },
-    });
+    return pipe(
+      // Build a collection of schema based on the
+      // type registry & the extension configuration
+      buildSchemas,
+      // Merge every created schema into a single one
+      schemas => mergeSchemas({ schemas }),
+      // Add the extension's resolvers to the final schema
+      schema => addResolversToSchema(schema, extension.resolvers),
+      // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
+      schema => wrapResolvers({ schema, extension })
+    )({ registry, extension });
   };
 };
