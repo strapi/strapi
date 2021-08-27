@@ -2,7 +2,7 @@
   "routes": [
     {
       "method": "GET",
-      "path": "/{{pluralize id}}",
+      "path": "/{{id}}",
       "handler": "{{id}}.find",
       "config": {
         "policies": []
@@ -10,7 +10,7 @@
     },
     {
       "method": "PUT",
-      "path": "/{{pluralize id}}",
+      "path": "/{{id}}",
       "handler": "{{id}}.update",
       "config": {
         "policies": []
@@ -18,7 +18,7 @@
     },
     {
       "method": "DELETE",
-      "path": "/{{pluralize id}}/",
+      "path": "/{{id}}/",
       "handler": "{{id}}.delete",
       "config": {
         "policies": []
