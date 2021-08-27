@@ -3,6 +3,16 @@
 const crypto = require('crypto');
 
 /**
+ * @typedef ApiToken
+ *
+ * @property {number} id
+ * @property {string} name
+ * @property {string} [description]
+ * @property {string} accessKey
+ * @property {'read-only'|'full-access'} id
+ */
+
+/**
  * @param {Object} attributes
  * @param {string} attributes.name
  * @param {string} [attributes.description]
@@ -19,12 +29,13 @@ const exists = async (attributes = {}) => {
  * @param {string} attributes.name
  * @param {string} [attributes.description]
  *
- * @returns {Promise<Record<'id'|'name'|'description'|'type'|'accessKey', string>>}
+ * @returns {Promise<ApiToken>}
  */
 const create = async attributes => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   return strapi.query('strapi::api-token').create({
+    select: ['id', 'name', 'description', 'type', 'accessKey'],
     data: {
       ...attributes,
       accessKey,
