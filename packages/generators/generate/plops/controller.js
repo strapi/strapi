@@ -14,9 +14,10 @@ module.exports = (plop, rootDir) => {
         name: 'id',
         message: 'Controller name',
       },
-      ...getDestinationPrompts('controller'),
+      ...getDestinationPrompts('controller', rootDir),
     ],
     actions: answers => {
+      console.log('*********', answers);
       const filePath = getFilePath(answers.destination);
 
       return [

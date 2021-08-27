@@ -13,7 +13,7 @@ module.exports = (plop, rootDir) => {
         name: 'id',
         message: 'Policy name',
       },
-      ...getDestinationPrompts('policy'),
+      ...getDestinationPrompts('policy', rootDir),
     ],
     actions: answers => {
       let filePath;

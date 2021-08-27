@@ -13,8 +13,8 @@ module.exports = (action, rootDir) => {
           name: `Add ${action} to ${action === 'policy' ? 'root of project' : 'new API'}`,
           value: 'new',
         },
-        { name: `Add ${action} to existing API`, value: 'api' },
-        { name: `Add ${action} to existing plugin`, value: 'plugin' },
+        { name: `Add ${action} to an existing API`, value: 'api' },
+        { name: `Add ${action} to an existing plugin`, value: 'plugin' },
       ],
     },
     {

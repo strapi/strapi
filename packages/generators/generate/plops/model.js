@@ -48,7 +48,7 @@ module.exports = (plop, rootDir) => {
           { name: 'Singe Type', value: 'singleType' },
         ],
       },
-      ...getDestinationPrompts('model'),
+      ...getDestinationPrompts('model', rootDir),
       {
         type: 'confirm',
         name: 'useDraftAndPublish',
