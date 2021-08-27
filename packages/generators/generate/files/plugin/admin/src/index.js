@@ -39,7 +39,7 @@ export default {
       name,
     });
   },
-  // eslint-disable-next-line
+
   bootstrap(app) {},
   async registerTrads({ locales }) {
     const importedTrads = await Promise.all(
