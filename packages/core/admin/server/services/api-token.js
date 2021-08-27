@@ -70,12 +70,15 @@ const createSaltIfNotDefined = () => {
     return;
   }
 
-  const salt = crypto.randomBytes(16).toString('hex');
-
-  if (!process.env.API_TOKEN_SALT) {
-    strapi.fs.appendFile('.env', `API_TOKEN_SALT=${salt}\n`);
-    strapi.config.set('server.admin.api-token.salt', salt);
+  if (process.env.API_TOKEN_SALT) {
+    throw new Error(
+      `There's something wrong with the configuration of your api-token salt. If you have changed the env variable used in the configuration file, please verify that you have created and set the variable in your .env file.`
+    );
   }
+
+  const salt = crypto.randomBytes(16).toString('hex');
+  strapi.fs.appendFile('.env', `API_TOKEN_SALT=${salt}\n`);
+  strapi.config.set('server.admin.api-token.salt', salt);
 };
 
 module.exports = {
