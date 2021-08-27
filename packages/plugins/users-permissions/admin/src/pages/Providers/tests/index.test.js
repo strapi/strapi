@@ -1,36 +1,53 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
-import { useForm } from '../../../hooks';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { useRBAC } from '@strapi/helper-plugin';
 import { ProvidersPage } from '../index';
-
-jest.mock('../../../hooks', () => ({
-  useForm: jest.fn(),
-}));
+import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn(),
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
+  useRBAC: jest.fn(),
 }));
+
+const client = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
-      <ProvidersPage />
-    </IntlProvider>
+    <QueryClientProvider client={client}>
+      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+        <ProvidersPage />
+      </IntlProvider>
+    </QueryClientProvider>
   </ThemeProvider>
 );
 
 describe('Admin | containers | ProvidersPage', () => {
+  beforeAll(() => server.listen());
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterEach(() => server.resetHandlers());
+
+  afterAll(() => server.close());
+
   it('renders and matches the snapshot', () => {
-    useForm.mockImplementation(() => ({
-      allowedActions: { canUpdate: true },
+    useRBAC.mockImplementation(() => ({
       isLoading: true,
-      isLoadingForPermissions: true,
-      modifiedData: {},
+      allowedActions: { canUpdate: false },
     }));
 
     const {
@@ -216,11 +233,9 @@ describe('Admin | containers | ProvidersPage', () => {
 
   describe('Shows a loading state', () => {
     it('should show a loader when it is loading for the data and not for the permissions', () => {
-      useForm.mockImplementation(() => ({
-        allowedActions: { canUpdate: true },
-        isLoading: true,
-        isLoadingForPermissions: false,
-        modifiedData: {},
+      useRBAC.mockImplementation(() => ({
+        isLoading: false,
+        allowedActions: { canUpdate: false },
       }));
 
       render(App);
@@ -228,43 +243,33 @@ describe('Admin | containers | ProvidersPage', () => {
       expect(screen.getByTestId('loader')).toBeInTheDocument();
     });
 
-    it('should show a loader when it is loading for the permissions', () => {
-      useForm.mockImplementation(() => ({
-        allowedActions: { canUpdate: true },
+    it('should show a loader when it is loading for the permissions', async () => {
+      useRBAC.mockImplementation(() => ({
         isLoading: false,
-        isLoadingForPermissions: true,
-        modifiedData: {},
+        allowedActions: { canUpdate: false },
       }));
 
       render(App);
 
-      expect(screen.getByTestId('loader')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(screen.getByTestId('loader')).toBeInTheDocument();
+      });
     });
   });
 
-  it('should show a list of providers', () => {
-    useForm.mockImplementation(() => ({
-      allowedActions: { canUpdate: true },
+  it('should show a list of providers', async () => {
+    useRBAC.mockImplementation(() => ({
       isLoading: false,
-      isLoadingForPermissions: false,
-      modifiedData: {
-        email: { enabled: true, icon: 'envelope' },
-        discord: {
-          callback: '/auth/discord/callback',
-          enabled: false,
-          icon: 'discord',
-          key: '',
-          scope: ['identify', 'email'],
-          secret: '',
-        },
-      },
+      allowedActions: { canUpdate: false },
     }));
 
     render(App);
 
-    expect(screen.getByText('email')).toBeInTheDocument();
-    const element = screen.getByTestId('enable-email');
-    expect(element.textContent).toEqual('Enabled');
-    expect(screen.getByTestId('enable-discord').textContent).toEqual('Disabled');
+    await waitFor(() => {
+      expect(screen.getByText('email')).toBeInTheDocument();
+      const element = screen.getByTestId('enable-email');
+      expect(element.textContent).toEqual('Enabled');
+      expect(screen.getByTestId('enable-discord').textContent).toEqual('Disabled');
+    });
   });
 });

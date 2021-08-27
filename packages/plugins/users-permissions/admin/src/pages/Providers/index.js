@@ -7,6 +7,7 @@ import {
   useNotification,
   useOverlayBlocker,
   CheckPagePermissions,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
@@ -18,17 +19,17 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';
+import { fetchData, putProvider } from './utils/api';
 import createProvidersArray from './utils/createProvidersArray';
-import { getRequestURL, getTrad } from '../../utils';
-import { useForm } from '../../hooks';
+import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
 import FormModal from '../../components/FormModal';
-import { axiosInstance } from '../../../../../../core/admin/admin/src/core/utils';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
-
+  const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
   const [isOpen, setIsOpen] = useState(false);
@@ -42,12 +43,41 @@ export const ProvidersPage = () => {
   }, []);
 
   const {
+    isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
-    dispatchSubmitSucceeded,
-    isLoading,
-    isLoadingForPermissions,
-    modifiedData,
-  } = useForm('providers', updatePermissions);
+  } = useRBAC(updatePermissions);
+
+  const { isLoading: isLoadingForData, data: modifiedData, isFetching } = useQuery(
+    'get-providers',
+    () => fetchData(toggleNotification),
+    { initialData: {} }
+  );
+
+  const isLoading = isLoadingForData || isFetching;
+
+  const submitMutation = useMutation(putProvider, {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('get-providers');
+      toggleNotification({
+        type: 'info',
+        message: { id: getTrad('notification.success.submit') },
+      });
+
+      trackUsageRef.current('didEditAuthenticationProvider');
+      setIsSubmiting(false);
+      handleToggleModal();
+      unlockApp();
+    },
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+      unlockApp();
+      setIsSubmiting(false);
+    },
+    refetchActive: false,
+  });
 
   const providers = useMemo(() => createProvidersArray(modifiedData), [modifiedData]);
 
@@ -96,34 +126,11 @@ export const ProvidersPage = () => {
 
     lockApp();
 
-    try {
-      trackUsageRef.current('willEditAuthenticationProvider');
+    trackUsageRef.current('willEditAuthenticationProvider');
 
-      const body = { ...modifiedData, [providerToEditName]: values };
-      const endPoint = getRequestURL('providers');
+    const body = { ...modifiedData, [providerToEditName]: values };
 
-      await axiosInstance.put(endPoint, { providers: body });
-
-      trackUsageRef.current('didEditAuthenticationProvider');
-
-      toggleNotification({
-        type: 'success',
-        message: { id: getTrad('notification.success.submit') },
-      });
-
-      dispatchSubmitSucceeded(body);
-
-      handleToggleModal();
-    } catch (err) {
-      console.error(err);
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-
-    setIsSubmiting(false);
-    unlockApp();
+    submitMutation.mutate({ providers: body });
   };
 
   return (
