@@ -1,14 +1,27 @@
 'use strict';
 
+const _ = require('lodash');
 const { validateModule } = require('./validation');
 
 const uidToPath = uid => uid.replace('::', '.');
 
+const defaultModule = {
+  config: {},
+  routes: [],
+  controllers: {},
+  services: {},
+  contentTypes: {},
+  policies: {},
+  middlewares: {},
+};
+
 const createModule = (namespace, rawModule, strapi) => {
+  _.defaults(rawModule, defaultModule);
+
   try {
     validateModule(rawModule);
   } catch (e) {
-    throw new Error(`strapi-server.js is invalid for plugin ${namespace}.\n${e.errors.join('\n')}`);
+    throw new Error(`strapi-server.js is invalid for '${namespace}'.\n${e.errors.join('\n')}`);
   }
 
   const called = {};
@@ -18,21 +31,21 @@ const createModule = (namespace, rawModule, strapi) => {
         throw new Error(`Bootstrap for ${namespace} has already been called`);
       }
       called.bootstrap = true;
-      await rawModule.bootstrap(strapi);
+      await (rawModule.bootstrap && rawModule.bootstrap(strapi));
     },
     async register() {
       if (called.register) {
         throw new Error(`Register for ${namespace} has already been called`);
       }
       called.register = true;
-      await rawModule.register(strapi);
+      await (rawModule.register && rawModule.register(strapi));
     },
     async destroy() {
       if (called.destroy) {
         throw new Error(`Destroy for ${namespace} has already been called`);
       }
       called.destroy = true;
-      await rawModule.destroy(strapi);
+      await (rawModule.destroy && rawModule.destroy(strapi));
     },
     load() {
       strapi.container.get('content-types').add(namespace, rawModule.contentTypes);
@@ -42,7 +55,7 @@ const createModule = (namespace, rawModule, strapi) => {
       strapi.container.get('controllers').add(namespace, rawModule.controllers);
       strapi.container.get('config').set(uidToPath(namespace), rawModule.config);
     },
-    routes: rawModule.routes, // TODO: to remove v3
+    routes: rawModule.routes,
     config(path) {
       return strapi.container.get('config').get(`${uidToPath(namespace)}.${path}`);
     },
@@ -74,7 +87,13 @@ const createModule = (namespace, rawModule, strapi) => {
       return strapi.container.get('controllers').get(`${namespace}.${controllerName}`);
     },
     get controllers() {
-      return rawModule.controllers;
+      const map = strapi.container.get('controllers').getAll(namespace);
+
+      // TODO: add removeNamespace in getAll(namespace) in registries
+      return _.mapKeys(map, (value, key) => {
+        const name = _.last(key.split('.'));
+        return name;
+      });
     },
   };
 };

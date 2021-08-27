@@ -7,43 +7,10 @@ const fse = require('fs-extra');
 
 const normalizeName = _.toLower;
 
-const defaultAPI = {
-  config: {},
-  routes: [],
-  controllers: {},
-  services: {},
-  contentTypes: {},
-  policies: {},
-  middlewares: {},
-};
-
-const defaultContentType = {
+const DEFAULT_CONTENT_TYPE = {
   schema: {},
   actions: {},
   lifecycles: {},
-};
-
-// TODO: function to be moved next to where the api will be loaded
-const validateContentTypesUnicity = apis => {
-  const allApisSchemas = Object.values(apis).flatMap(api => Object.values(api.contentTypes));
-
-  const names = [];
-  allApisSchemas.forEach(({ schema }) => {
-    if (schema.info.singularName) {
-      const singularName = _.kebabCase(schema.info.singularName);
-      if (names.includes(singularName)) {
-        throw new Error(`The singular name "${schema.info.singularName}" should be unique`);
-      }
-      names.push(singularName);
-    }
-    if (schema.info.pluralName) {
-      const pluralName = _.kebabCase(schema.info.pluralName);
-      if (names.includes(pluralName)) {
-        throw new Error(`The plural name "${schema.info.pluralName}" should be unique`);
-      }
-      names.push(pluralName);
-    }
-  });
 };
 
 module.exports = async strapi => {
@@ -62,17 +29,44 @@ module.exports = async strapi => {
       const apiName = normalizeName(apiFD.name);
       const api = await loadAPI(join(apisDir, apiFD.name));
 
-      apis[apiName] = _.defaults(api, defaultAPI);
+      apis[apiName] = api;
     }
   }
 
   validateContentTypesUnicity(apis);
 
-  return apis;
+  for (const apiName in apis) {
+    strapi.container.get('apis').add(apiName, apis[apiName]);
+  }
+};
+
+// TODO: function to be moved next to where the api will be loaded
+const validateContentTypesUnicity = apis => {
+  const allApisSchemas = Object.values(apis).flatMap(api => Object.values(api.contentTypes));
+
+  const names = [];
+  allApisSchemas.forEach(({ schema }) => {
+    if (schema.info.singularName) {
+      const singularName = _.kebabCase(schema.info.singularName);
+      if (names.includes(singularName)) {
+        throw new Error(`The singular name "${schema.info.singularName}" should be unique`);
+      }
+      names.push(singularName);
+    }
+
+    if (schema.info.pluralName) {
+      const pluralName = _.kebabCase(schema.info.pluralName);
+      if (names.includes(pluralName)) {
+        throw new Error(`The plural name "${schema.info.pluralName}" should be unique`);
+      }
+      names.push(pluralName);
+    }
+  });
 };
 
 const loadAPI = async dir => {
   const [
+    index,
     config,
     routes,
     controllers,
@@ -81,6 +75,7 @@ const loadAPI = async dir => {
     middlewares,
     contentTypes,
   ] = await Promise.all([
+    loadIndex(dir),
     loadDir(join(dir, 'config')),
     loadDir(join(dir, 'routes')),
     loadDir(join(dir, 'controllers')),
@@ -91,14 +86,21 @@ const loadAPI = async dir => {
   ]);
 
   return {
-    config,
-    routes,
-    controllers,
-    services,
-    policies,
-    middlewares,
-    contentTypes,
+    ...(index || {}),
+    config: config || {},
+    routes: routes || [],
+    controllers: controllers || {},
+    services: services || {},
+    policies: policies || {},
+    middlewares: middlewares || {},
+    contentTypes: contentTypes || {},
   };
+};
+
+const loadIndex = async dir => {
+  if (await fse.pathExists(join(dir, 'index.js'))) {
+    return loadFile(join(dir, 'index.js'));
+  }
 };
 
 const loadContentTypes = async dir => {
@@ -117,7 +119,7 @@ const loadContentTypes = async dir => {
 
     const contentTypeName = normalizeName(fd.name);
     const contentType = await loadDir(join(dir, fd.name));
-    contentTypes[normalizeName(contentTypeName)] = _.defaults(contentType, defaultContentType);
+    contentTypes[normalizeName(contentTypeName)] = _.defaults(contentType, DEFAULT_CONTENT_TYPE);
   }
 
   return contentTypes;

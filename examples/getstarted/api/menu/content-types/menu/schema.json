@@ -23,8 +23,8 @@
     },
     "restaurant": {
       "type": "relation",
-      "target": "api::restaurant.restaurant",
       "relation": "oneToOne",
+      "target": "api::restaurant.restaurant",
       "mappedBy": "menu"
     }
   }
