@@ -46,7 +46,7 @@ module.exports = (plop, rootDir) => {
           { name: 'Singe Type', value: 'singleType' },
         ],
       },
-      ...getDestinationPrompts('model', rootDir),
+      ...getDestinationPrompts('model', plop.getDestBasePath()),
       {
         type: 'confirm',
         name: 'useDraftAndPublish',
@@ -92,8 +92,6 @@ module.exports = (plop, rootDir) => {
     ],
     actions: answers => {
       const attributes = answers.attributes.reduce((object, answer) => {
-        // Rest/spread properties are not supported until Node.js 8.3.0.
-        // The configured version range is '>=8.0.0'
         const val = { type: answer.attributeType };
 
         if (answer.attributeType === 'enumeration') {
@@ -113,7 +111,7 @@ module.exports = (plop, rootDir) => {
       return [
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/models/{{id}}.js`),
+          path: `${filePath}/models/{{id}}.js`,
           templateFile: 'templates/model.js.hbs',
         },
         {

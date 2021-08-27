@@ -1,9 +1,8 @@
 'use strict';
 
-const { join } = require('path');
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 
-module.exports = (plop, rootDir) => {
+module.exports = (plop) => {
   // Policy generator
   plop.setGenerator('policy', {
     description: 'Generate a policy for an API',
@@ -13,7 +12,7 @@ module.exports = (plop, rootDir) => {
         name: 'id',
         message: 'Policy name',
       },
-      ...getDestinationPrompts('policy', rootDir),
+      ...getDestinationPrompts('policy', plop.getDestBasePath()),
     ],
     actions: answers => {
       let filePath;
@@ -28,7 +27,7 @@ module.exports = (plop, rootDir) => {
       return [
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/config/policies/{{id}}.js`),
+          path: `${filePath}/config/policies/{{id}}.js`,
           templateFile: 'templates/policy.js.hbs',
         },
       ];

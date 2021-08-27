@@ -4,7 +4,7 @@ const { join } = require('path');
 const fs = require('fs-extra');
 const validateInput = require('./utils/validate-input');
 
-module.exports = (plop, rootDir) => {
+module.exports = (plop) => {
   // API generator
   plop.setGenerator('api', {
     description: 'Generate a basic API',
@@ -26,7 +26,7 @@ module.exports = (plop, rootDir) => {
         name: 'plugin',
         message: 'Plugin name',
         choices: async () => {
-          const pluginsPath = join(rootDir, 'plugins');
+          const pluginsPath = join(plop.getDestBasePath(), 'plugins');
           const exists = await fs.pathExists(pluginsPath);
 
           if (!exists) {
@@ -71,22 +71,22 @@ module.exports = (plop, rootDir) => {
       const baseActions = [
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/controllers/{{id}}.js`),
+          path: `${filePath}/controllers/{{id}}.js`,
           templateFile: 'templates/controller.js.hbs',
         },
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/models/{{id}}.js`),
+          path: `${filePath}/models/{{id}}.js`,
           templateFile: 'templates/model.js.hbs',
         },
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/models/{{id}}.settings.json`),
+          path: `${filePath}/models/{{id}}.settings.json`,
           templateFile: 'templates/model.settings.json.hbs',
         },
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/services/{{id}}.js`),
+          path: `${filePath}/services/{{id}}.js`,
           templateFile: 'templates/service.js.hbs',
         },
       ];
@@ -97,7 +97,7 @@ module.exports = (plop, rootDir) => {
         return [
           {
             type: 'add',
-            path: join(rootDir, `${filePath}/config/routes.json`),
+            path: `${filePath}/config/routes.json`,
             templateFile: 'templates/api-routes.json.hbs',
           },
           ...baseActions,

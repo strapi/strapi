@@ -1,11 +1,10 @@
 'use strict';
 
-const { join } = require('path');
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 const validateInput = require('./utils/validate-input');
 
-module.exports = (plop, rootDir) => {
+module.exports = (plop) => {
   // Controller generator
   plop.setGenerator('controller', {
     description: 'Generate a controller for an API',
@@ -16,7 +15,7 @@ module.exports = (plop, rootDir) => {
         message: 'Controller name',
         validate: input => validateInput(input),
       },
-      ...getDestinationPrompts('controller', rootDir),
+      ...getDestinationPrompts('controller', plop.getDestBasePath()),
     ],
     actions: answers => {
       const filePath = getFilePath(answers.destination);
@@ -24,7 +23,7 @@ module.exports = (plop, rootDir) => {
       return [
         {
           type: 'add',
-          path: join(rootDir, `${filePath}/controllers/{{id}}.js`),
+          path: `${filePath}/controllers/{{id}}.js`,
           templateFile: 'templates/controller.js.hbs',
         },
       ];

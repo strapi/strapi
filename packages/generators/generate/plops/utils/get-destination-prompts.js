@@ -2,7 +2,7 @@
 const { join } = require('path');
 const fs = require('fs-extra');
 
-module.exports = (action, rootDir) => {
+module.exports = (action, basePath) => {
   return [
     {
       type: 'list',
@@ -23,7 +23,7 @@ module.exports = (action, rootDir) => {
       message: 'Which API is this for?',
       name: 'api',
       choices: async () => {
-        const apiPath = join(rootDir, 'api');
+        const apiPath = join(basePath, 'api');
         const exists = await fs.pathExists(apiPath);
 
         if (!exists) {
@@ -45,7 +45,7 @@ module.exports = (action, rootDir) => {
       message: 'Which plugin is this for?',
       name: 'plugin',
       choices: async () => {
-        const pluginsPath = join(rootDir, 'plugins');
+        const pluginsPath =  join(basePath, 'plugins');
         const exists = await fs.pathExists(pluginsPath);
 
         if (!exists) {
