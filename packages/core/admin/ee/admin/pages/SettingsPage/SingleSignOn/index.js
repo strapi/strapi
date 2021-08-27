@@ -26,15 +26,16 @@ import { getRequestUrl } from '../../../../../admin/src/utils';
 import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
-import { schema } from './utils';
+import schema from './utils/schema';
 
 const ssoPermissions = {
   ...adminPermissions.settings.sso,
   readRoles: adminPermissions.settings.roles.read,
 };
 
-const SingleSignOn = () => {
+export const SingleSignOn = () => {
   const { formatMessage } = useIntl();
+
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate, canReadRoles },
@@ -82,6 +83,7 @@ const SingleSignOn = () => {
           id="title"
           primaryAction={
             <Button
+              data-testid="save-button"
               disabled={isHeaderButtonDisabled}
               loading={showHeaderButtonLoader}
               startIcon={<CheckIcon />}
@@ -110,6 +112,7 @@ const SingleSignOn = () => {
                     <GridItem col="6" xs="12">
                       <ToggleCheckbox
                         aria-label="autoRegister"
+                        data-testid="autoRegister"
                         disabled={!canUpdate}
                         checked={modifiedData.autoRegister}
                         hint={formatMessage({
@@ -139,7 +142,6 @@ const SingleSignOn = () => {
                     </GridItem>
                     <GridItem col="6" xs="12">
                       <Select
-                        aria-label="autoRegister"
                         disabled={!canUpdate}
                         hint={formatMessage({
                           id: 'Settings.sso.form.defaultRole.description',
@@ -164,6 +166,7 @@ const SingleSignOn = () => {
                         }}
                         placeholder={formatMessage({
                           id: 'components.InputSelect.option.placeholder',
+                          defaultMessage: 'Choose here',
                         })}
                         value={modifiedData.defaultRole}
                       >
