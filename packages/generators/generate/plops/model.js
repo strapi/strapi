@@ -25,9 +25,6 @@ const DEFAULT_TYPES = [
   'datetime',
   'timestamp',
   'boolean',
-
-  // TODO: Should we include relation in the CLI?
-  // 'relation'
 ];
 
 module.exports = (plop, rootDir) => {
