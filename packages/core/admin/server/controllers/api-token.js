@@ -14,7 +14,9 @@ module.exports = {
      * - having only spaces as value;
      */
     attributes.name = attributes.name.trim();
-    attributes.description = attributes.description.trim();
+    if (attributes.description) {
+      attributes.description = attributes.description.trim();
+    }
 
     try {
       await validateApiTokenCreationInput(attributes);
