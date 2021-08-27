@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { useConfigurations } from '../../../../hooks';
 
 const Img = styled.img`
-  height: 72px;
+  height: ${72 / 16}rem;
 `;
 
 const Logo = () => {

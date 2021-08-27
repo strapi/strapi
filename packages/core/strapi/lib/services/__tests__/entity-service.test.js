@@ -15,32 +15,27 @@ describe('Entity service', () => {
   };
 
   describe('Decorator', () => {
-    test.each([
-      'create',
-      'update',
-      'find',
-      'findOne',
-      'delete',
-      'count',
-      'findPage',
-    ])('Can decorate', async method => {
-      const instance = createEntityService({
-        strapi: {},
-        db: {},
-        eventHub: new EventEmitter(),
-      });
+    test.each(['create', 'update', 'find', 'findOne', 'delete', 'count', 'findPage'])(
+      'Can decorate',
+      async method => {
+        const instance = createEntityService({
+          strapi: {},
+          db: {},
+          eventHub: new EventEmitter(),
+        });
 
-      const methodFn = jest.fn();
-      const decorator = () => ({
-        [method]: methodFn,
-      });
+        const methodFn = jest.fn();
+        const decorator = () => ({
+          [method]: methodFn,
+        });
 
-      instance.decorate(decorator);
+        instance.decorate(decorator);
 
-      const args = [{}, {}];
-      await instance[method](...args);
-      expect(methodFn).toHaveBeenCalled();
-    });
+        const args = [{}, {}];
+        await instance[method](...args);
+        expect(methodFn).toHaveBeenCalled();
+      }
+    );
   });
 
   describe('Find', () => {

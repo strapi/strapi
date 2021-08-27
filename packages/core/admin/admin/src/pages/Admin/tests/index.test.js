@@ -28,8 +28,6 @@ jest.mock('../../../hooks', () => ({
 }));
 
 jest.mock('../../../components/LeftMenu', () => () => <div>menu</div>);
-
-jest.mock('../Logout', () => () => <div>Logout</div>);
 jest.mock('../../HomePage', () => () => <div>HomePage</div>);
 
 const makeApp = history => (
@@ -63,7 +61,7 @@ describe('<Admin />', () => {
         },
         {
           to: '/plugins/documentation',
-          Component: () => <div>DOCUMENTATION PLUGIN</div>,
+          Component: () => ({ default: () => <div>DOCUMENTATION PLUGIN</div> }),
         },
       ],
     }));

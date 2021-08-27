@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/countries/count",
-      "handler": "Country.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/countries/:id",
       "handler": "Country.findOne",
       "config": {

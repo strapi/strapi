@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/addresses/count",
-      "handler": "Address.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/addresses/:id",
       "handler": "Address.findOne",
       "config": {

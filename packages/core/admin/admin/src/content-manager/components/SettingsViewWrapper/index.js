@@ -151,12 +151,12 @@ const SettingsViewWrapper = ({
         kind,
         uid,
       } = modifiedData;
-      const _sort = `${defaultSortBy}:${defaultSortOrder}`;
+      const sort = `${defaultSortBy}:${defaultSortOrder}`;
       const goBackSearch = `${stringify(
         {
           page: 1,
           pageSize,
-          _sort,
+          sort,
         },
         { encode: false }
       )}${pluginsQueryParams ? `&${pluginsQueryParams}` : ''}`;

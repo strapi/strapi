@@ -1,3 +1,5 @@
+import { ThemeProvider, lightTheme } from '@strapi/parts';
+
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
   controls: {
@@ -7,3 +9,13 @@ export const parameters = {
     },
   },
 };
+
+export const decorators = [
+  Story => (
+    <ThemeProvider theme={lightTheme}>
+      <main>
+        <Story />
+      </main>
+    </ThemeProvider>
+  ),
+];

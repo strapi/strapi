@@ -19,13 +19,10 @@ const notificationReducer = (state = initialState, action) =>
             id: 'notification.success.saved',
             defaultMessage: 'Saved',
           }),
-          title: get(action, ['config', 'title'], null),
           link: get(action, ['config', 'link'], null),
           timeout: get(action, ['config', 'timeout'], 2500),
           blockTransition: get(action, ['config', 'blockTransition'], false),
-          uid: get(action, ['config', 'uid'], null),
           onClose: get(action, ['config', 'onClose'], null),
-          centered: get(action, ['config', 'centered'], false),
         });
         draftState.notifId = state.notifId + 1;
         break;

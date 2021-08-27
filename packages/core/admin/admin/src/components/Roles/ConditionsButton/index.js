@@ -1,32 +1,40 @@
-import React from 'react';
-import styled from 'styled-components';
+import { Settings } from '@strapi/icons';
+import { Button } from '@strapi/parts';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { useIntl } from 'react-intl';
-import { Flex, Text, Padded } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import styled from 'styled-components';
 
-import Wrapper from './Wrapper';
+const Wrapper = styled.div`
+  position: relative;
 
-const ConditionsButton = ({ onClick, className, hasConditions, isRight }) => {
+  ${({ hasConditions, disabled, theme }) =>
+    hasConditions &&
+    `
+    &:before {
+      content: '';
+      position: absolute;
+      top: -3px;
+      left: -10px;
+      width: 6px;
+      height: 6px;
+      border-radius: ${20 / 16}rem;;
+      background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
+    }
+  `}
+`;
+
+const ConditionsButton = ({ onClick, className, hasConditions, variant }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Wrapper
-      isRight={isRight}
-      hasConditions={hasConditions}
-      className={className}
-      onClick={onClick}
-    >
-      <Padded right size="smd">
-        <Flex alignItems="center">
-          <Text color="mediumBlue">
-            {formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' })}
-          </Text>
-          <Padded style={{ height: '18px', lineHeight: 'normal' }} left size="xs">
-            <FontAwesomeIcon style={{ fontSize: '11px' }} icon="cog" />
-          </Padded>
-        </Flex>
-      </Padded>
+    <Wrapper hasConditions={hasConditions} className={className}>
+      <Button variant={variant} startIcon={<Settings />} onClick={onClick}>
+        {formatMessage({
+          id: 'app.components.LeftMenuLinkContainer.settings',
+          defaultMessage: 'Settings',
+        })}
+      </Button>
     </Wrapper>
   );
 };
@@ -34,13 +42,13 @@ const ConditionsButton = ({ onClick, className, hasConditions, isRight }) => {
 ConditionsButton.defaultProps = {
   className: null,
   hasConditions: false,
-  isRight: false,
+  variant: 'secondary',
 };
 ConditionsButton.propTypes = {
   onClick: PropTypes.func.isRequired,
   className: PropTypes.string,
   hasConditions: PropTypes.bool,
-  isRight: PropTypes.bool,
+  variant: PropTypes.string,
 };
 
 // This is a styled component advanced usage :

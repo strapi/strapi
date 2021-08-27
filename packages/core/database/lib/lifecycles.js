@@ -1,15 +1,15 @@
 'use strict';
 
 const createLifecyclesManager = db => {
+  let subscribers = [];
+
   const lifecycleManager = {
-    _subscribers: [],
     subscribe(subscriber) {
       // TODO: verify subscriber
-
-      this._subscribers.push(subscriber);
+      subscribers.push(subscriber);
 
       return () => {
-        this._subscribers.splice(this._subscribers.indexOf(subscriber), 1);
+        subscribers.splice(subscribers.indexOf(subscriber), 1);
       };
     },
 
@@ -24,10 +24,11 @@ const createLifecyclesManager = db => {
     },
 
     async run(action, uid, properties) {
-      for (const subscriber of this._subscribers) {
+      for (const subscriber of subscribers) {
         if (typeof subscriber === 'function') {
           const event = this.createEvent(action, uid, properties);
-          return await subscriber(event);
+          await subscriber(event);
+          continue;
         }
 
         const hasAction = action in subscriber;
@@ -42,7 +43,7 @@ const createLifecyclesManager = db => {
     },
 
     clear() {
-      this._subscribers = [];
+      subscribers = [];
     },
   };
 

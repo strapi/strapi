@@ -154,10 +154,12 @@ const createContentType = (model, { modelName }, { apiName, pluginName } = {}) =
   Object.assign(model.attributes, {
     [CREATED_AT_ATTRIBUTE]: {
       type: 'datetime',
-      // default: () => new Date(),
+      default: () => new Date(),
     },
+    // TODO: handle on edit set to new date
     [UPDATED_AT_ATTRIBUTE]: {
       type: 'datetime',
+      default: () => new Date(),
     },
   });
 

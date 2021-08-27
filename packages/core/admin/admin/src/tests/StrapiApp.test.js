@@ -19,27 +19,53 @@ describe('ADMIN | StrapiApp', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
+      }
+
+      .c2 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c2 > * + * {
+        margin-top: 0px;
+      }
+
+      .c1 {
         position: fixed;
-        top: 72px;
-        left: 0;
+        top: 46px;
         right: 0;
+        left: 0;
         z-index: 1100;
-        list-style: none;
-        width: 100%;
-        overflow-y: hidden;
-        pointer-events: none;
       }
 
       <div
-        class="c0"
-      />
+        class="c0 c1"
+      >
+        <div
+          class="c2"
+        />
+      </div>
     `);
   });
 

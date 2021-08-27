@@ -2,7 +2,7 @@ import React, { useEffect, useReducer } from 'react';
 import axios from 'axios';
 import { camelCase, get, omit } from 'lodash';
 import { Redirect, useRouteMatch, useHistory } from 'react-router-dom';
-import { auth, useNotification, useQuery } from '@strapi/helper-plugin';
+import { auth, useQuery } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import forms from 'ee_else_ce/pages/AuthPage/utils/forms';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
@@ -11,14 +11,12 @@ import init from './init';
 import { initialState, reducer } from './reducer';
 
 const AuthPage = ({ hasAdmin, setHasAdmin }) => {
-  const toggleNotification = useNotification();
   const { push } = useHistory();
   const { changeLocale } = useLocalesProvider();
   const {
     params: { authType },
   } = useRouteMatch('/auth/:authType');
   const query = useQuery();
-  const registrationToken = query.get('registrationToken');
   const { Component, endPoint, fieldsToDisable, fieldsToOmit, inputsPrefix, schema, ...rest } = get(
     forms,
     authType,
@@ -47,41 +45,6 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     });
   }, [authType]);
 
-  useEffect(() => {
-    if (authType === 'register') {
-      const getData = async () => {
-        try {
-          const {
-            data: { data },
-          } = await axios.get(
-            `${strapi.backendURL}/admin/registration-info?registrationToken=${registrationToken}`
-          );
-
-          if (data) {
-            dispatch({
-              type: 'SET_DATA',
-              data: { registrationToken, userInfo: data },
-            });
-          }
-        } catch (err) {
-          const errorMessage = get(err, ['response', 'data', 'message'], 'An error occurred');
-
-          toggleNotification({
-            type: 'warning',
-            message: errorMessage,
-          });
-
-          // Redirect to the oops page in case of an invalid token
-          // @alexandrebodin @JAB I am not sure it is the wanted behavior
-          push(`/auth/oops?info=${encodeURIComponent(errorMessage)}`);
-        }
-      };
-
-      getData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [authType]);
-
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
       type: 'ON_CHANGE',
@@ -96,23 +59,23 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     const requestURL = `/admin/${endPoint}`;
 
     if (authType === 'login') {
-      await loginRequest(body, requestURL, { setSubmitting, setErrors });
+      await loginRequest(e, requestURL, { setSubmitting, setErrors });
     }
 
     if (authType === 'register' || authType === 'register-admin') {
-      await registerRequest(body, requestURL, { setSubmitting, setErrors });
+      await registerRequest(e, requestURL, { setSubmitting, setErrors });
     }
 
     if (authType === 'forgot-password') {
-      await forgotPasswordRequest(body, requestURL);
+      await forgotPasswordRequest(body, requestURL, { setSubmitting, setErrors });
     }
 
     if (authType === 'reset-password') {
-      await resetPasswordRequest(body, requestURL);
+      await resetPasswordRequest(body, requestURL, { setSubmitting, setErrors });
     }
   };
 
-  const forgotPasswordRequest = async (body, requestURL) => {
+  const forgotPasswordRequest = async (body, requestURL, { setSubmitting, setErrors }) => {
     try {
       await axios({
         method: 'POST',
@@ -125,10 +88,9 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
     } catch (err) {
       console.error(err);
 
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
+      setErrors({ errorMessage: 'notification.error' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -141,7 +103,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       } = await axios({
         method: 'POST',
         url: `${strapi.backendURL}${requestURL}`,
-        data: body,
+        data: omit(body, fieldsToOmit),
         cancelToken: source.token,
       });
 
@@ -149,13 +111,12 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         changeLocale(user.preferedLanguage);
       }
 
-      auth.setToken(token, modifiedData.rememberMe);
-      auth.setUserInfo(user, modifiedData.rememberMe);
+      auth.setToken(token, body.rememberMe);
+      auth.setUserInfo(user, body.rememberMe);
 
       push('/');
     } catch (err) {
       if (err.response) {
-        setSubmitting(false);
         const errorMessage = get(err, ['response', 'data', 'message'], 'Something went wrong');
 
         if (camelCase(errorMessage).toLowerCase() === 'usernotactive') {
@@ -170,6 +131,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
 
         setErrors({ errorMessage });
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -182,7 +145,7 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       } = await axios({
         method: 'POST',
         url: `${strapi.backendURL}${requestURL}`,
-        data: body,
+        data: omit(body, fieldsToOmit),
         cancelToken: source.token,
       });
 
@@ -190,8 +153,8 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
       auth.setUserInfo(user, false);
 
       if (
-        (authType === 'register' && modifiedData.userInfo.news === true) ||
-        (authType === 'register-admin' && modifiedData.news === true)
+        (authType === 'register' && body.userInfo.news === true) ||
+        (authType === 'register-admin' && body.news === true)
       ) {
         axios({
           method: 'POST',
@@ -200,9 +163,11 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
             email: user.email,
             username: user.firstname,
           },
+          cancelToken: source.token,
         });
       }
       // Redirect to the homePage
+      setSubmitting(false);
       setHasAdmin(true);
       push('/');
     } catch (err) {
@@ -210,19 +175,12 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
         const { data } = err.response;
         const apiErrors = formatAPIErrors(data);
 
-        dispatch({
-          type: 'SET_ERRORS',
-          errors: apiErrors,
-        });
-
         setErrors({ apiErrors });
       }
-    } finally {
-      setSubmitting(false);
     }
   };
 
-  const resetPasswordRequest = async (body, requestURL) => {
+  const resetPasswordRequest = async (body, requestURL, { setErrors, setSubmitting }) => {
     try {
       const {
         data: {
@@ -250,7 +208,10 @@ const AuthPage = ({ hasAdmin, setHasAdmin }) => {
           errorMessage,
           errorStatus,
         });
+        setErrors({ errorMessage });
       }
+    } finally {
+      setSubmitting(false);
     }
   };
 

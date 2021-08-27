@@ -1,9 +1,8 @@
 import styled from 'styled-components';
+import { cellWidth } from '../Permissions/utils/constants';
 
 const HiddenAction = styled.div`
-  min-width: 10rem;
-  max-width: 12rem;
-  flex: 1;
+  width: ${cellWidth};
 `;
 
 export default HiddenAction;

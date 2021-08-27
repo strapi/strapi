@@ -50,7 +50,7 @@
 //   ] = useReducer(reducer, initialState, init);
 //   const pageSize = parseInt(query.get('pageSize') || 10, 10);
 //   const page = parseInt(query.get('page') || 0, 10);
-//   const _sort = decodeURIComponent(query.get('_sort'));
+//   const sort = decodeURIComponent(query.get('sort'));
 //   const _q = decodeURIComponent(query.get('_q') || '');
 //   const getDataRef = useRef();
 //   const listRef = useRef();
@@ -242,7 +242,7 @@
 //         <>
 //           <BaselineAlignment top size="1px">
 //             <Flex flexWrap="wrap">
-//               <SortPicker onChange={handleChangeSort} value={_sort} />
+//               <SortPicker onChange={handleChangeSort} value={sort} />
 //               <Padded right size="10px" />
 //               <BaselineAlignment bottom size="6px">
 //                 <FilterPicker onChange={handleChangeFilter} />
@@ -289,4 +289,5 @@
 // };
 
 // export default ListPage;
-export default () => 'Users - LV';
+
+export default () => 'User - LV';

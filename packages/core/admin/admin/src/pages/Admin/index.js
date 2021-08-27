@@ -86,8 +86,8 @@ const Admin = () => {
             <Route path="/" component={HomePage} exact />
             {/* TODO */}
             {/* <Route path="/me" component={ProfilePage} exact />
-
             <Route path="/content-manager" component={CM} />
+
             <Route path="/plugins/content-type-builder" component={CTB} />
             <Route path="/plugins/upload" component={Upload} /> */}
             {routes}

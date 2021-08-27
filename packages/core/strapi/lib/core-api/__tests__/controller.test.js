@@ -14,7 +14,6 @@ describe('Default Controller', () => {
     expect(controller).toEqual({
       find: expect.any(Function),
       findOne: expect.any(Function),
-      count: expect.any(Function),
       create: expect.any(Function),
       update: expect.any(Function),
       delete: expect.any(Function),

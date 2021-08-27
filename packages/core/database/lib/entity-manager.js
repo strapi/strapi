@@ -5,14 +5,32 @@ const types = require('./types');
 const { createField } = require('./fields');
 const { createQueryBuilder } = require('./query');
 const { createRepository } = require('./entity-repository');
-const { isBidirectional } = require('./metadata/relations');
+const { isBidirectional, isOneToAny } = require('./metadata/relations');
 
 const toId = value => value.id || value;
 const toIds = value => _.castArray(value || []).map(toId);
 
-// TODO: move to query layer
+const isValidId = value => _.isString(value) || _.isInteger(value);
+const toAssocs = data => {
+  return _.castArray(data)
+    .filter(datum => !_.isNil(datum))
+    .map(datum => {
+      // if it is a string or an integer return an obj with id = to datum
+      if (isValidId(datum)) {
+        return { id: datum, __pivot: {} };
+      }
+
+      // if it is an object check it has at least a valid id
+      if (!_.has('id', datum) || !isValidId(datum.id)) {
+        throw new Error(`Invalid id, expected a string or integer, got ${datum}`);
+      }
+
+      return datum;
+    });
+};
+
 // TODO: handle programmatic defaults
-const toRow = (metadata, data = {}) => {
+const toRow = (metadata, data = {}, { withDefaults = false } = {}) => {
   const { attributes } = metadata;
 
   const obj = {};
@@ -20,14 +38,24 @@ const toRow = (metadata, data = {}) => {
   for (const attributeName in attributes) {
     const attribute = attributes[attributeName];
 
-    if (types.isScalar(attribute.type) && _.has(attributeName, data)) {
-      // TODO: we convert to column name
-      // TODO: handle default value
+    // TODO:  convert to column name
+    if (types.isScalar(attribute.type)) {
+      const field = createField(attribute);
 
-      const field = createField(attribute.type, attribute);
+      if (_.isUndefined(data[attributeName])) {
+        if (!_.isUndefined(attribute.default) && withDefaults) {
+          if (typeof attribute.default === 'function') {
+            obj[attributeName] = attribute.default();
+          } else {
+            obj[attributeName] = attribute.default;
+          }
+        }
+        continue;
+      }
 
-      // TODO: validate data on creation
-      // field.validate(data[attributeName]);
+      if (typeof field.validate === 'function' && data[attributeName] !== null) {
+        field.validate(data[attributeName]);
+      }
 
       const val = data[attributeName] === null ? null : field.toDB(data[attributeName]);
 
@@ -117,7 +145,7 @@ const createEntityManager = db => {
       await db.lifecycles.run('beforeCount', uid, { params });
 
       const res = await this.createQueryBuilder(uid)
-        .where(params.where)
+        .init(_.pick(['_q', 'where'], params))
         .count()
         .first()
         .execute();
@@ -139,7 +167,7 @@ const createEntityManager = db => {
         throw new Error('Create expects a data object');
       }
 
-      const dataToInsert = toRow(metadata, data);
+      const dataToInsert = toRow(metadata, data, { withDefaults: true });
 
       const [id] = await this.createQueryBuilder(uid)
         .insert(dataToInsert)
@@ -160,6 +188,7 @@ const createEntityManager = db => {
       return result;
     },
 
+    // TODO: where do we handle relation processing for many queries ?
     async createMany(uid, params = {}) {
       await db.lifecycles.run('beforeCreateMany', uid, { params });
 
@@ -170,7 +199,7 @@ const createEntityManager = db => {
         throw new Error('CreateMany expects data to be an array');
       }
 
-      const dataToInsert = data.map(datum => toRow(metadata, datum));
+      const dataToInsert = data.map(datum => toRow(metadata, datum, { withDefaults: true }));
 
       if (_.isEmpty(dataToInsert)) {
         throw new Error('Nothing to insert');
@@ -236,6 +265,7 @@ const createEntityManager = db => {
       return result;
     },
 
+    // TODO: where do we handle relation processing for many queries ?
     async updateMany(uid, params = {}) {
       await db.lifecycles.run('beforeUpdateMany', uid, { params });
 
@@ -327,7 +357,7 @@ const createEntityManager = db => {
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
 
-        const isValidLink = _.has(attributeName, data) && !_.isNull(data[attributeName]);
+        const isValidLink = _.has(attributeName, data) && !_.isNil(data[attributeName]);
 
         if (attribute.type !== 'relation' || !isValidLink) {
           continue;
@@ -352,13 +382,17 @@ const createEntityManager = db => {
 
             const { idColumn, typeColumn } = morphColumn;
 
-            const rows = toIds(data[attributeName]).map((dataID, idx) => ({
-              [joinColumn.name]: dataID,
-              [idColumn.name]: id,
-              [typeColumn.name]: uid,
-              ...(joinTable.on || {}),
-              order: idx,
-            }));
+            const rows = toAssocs(data[attributeName]).map((data, idx) => {
+              return {
+                [joinColumn.name]: data.id,
+                [idColumn.name]: id,
+                [typeColumn.name]: uid,
+                ...(joinTable.on || {}),
+                ...(data.__pivot || {}),
+                order: idx + 1,
+                field: attributeName,
+              };
+            });
 
             if (_.isEmpty(rows)) {
               continue;
@@ -379,12 +413,12 @@ const createEntityManager = db => {
 
           const { idColumn, typeColumn, typeField = '__type' } = morphColumn;
 
-          const rows = _.castArray(data[attributeName] || []).map((data, idx) => ({
+          const rows = toAssocs(data[attributeName]).map(data => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
-            order: idx,
+            ...(data.__pivot || {}),
           }));
 
           if (_.isEmpty(rows)) {
@@ -438,13 +472,8 @@ const createEntityManager = db => {
           const { joinTable } = attribute;
           const { joinColumn, inverseJoinColumn } = joinTable;
 
-          // TODO: redefine
-          // TODO: check it is an id & the entity exists (will throw due to FKs otherwise so not a big pbl in SQL)
-
-          if (
-            ['oneToOne', 'oneToMany'].includes(attribute.relation) &&
-            isBidirectional(attribute)
-          ) {
+          // TODO: validate logic of delete
+          if (isOneToAny(attribute) && isBidirectional(attribute)) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
               .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName]) })
@@ -452,11 +481,12 @@ const createEntityManager = db => {
               .execute();
           }
 
-          const insert = _.castArray(data[attributeName]).map(datum => {
+          const insert = toAssocs(data[attributeName]).map(data => {
             return {
               [joinColumn.name]: id,
-              [inverseJoinColumn.name]: datum,
+              [inverseJoinColumn.name]: data.id,
               ...(joinTable.on || {}),
+              ...(data.__pivot || {}),
             };
           });
 
@@ -524,15 +554,18 @@ const createEntityManager = db => {
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
                 ...(joinTable.on || {}),
+                field: attributeName,
               })
               .execute();
 
-            const rows = toIds(data[attributeName] || []).map((dataID, idx) => ({
-              [joinColumn.name]: dataID,
+            const rows = toAssocs(data[attributeName]).map((data, idx) => ({
+              [joinColumn.name]: data.id,
               [idColumn.name]: id,
               [typeColumn.name]: uid,
               ...(joinTable.on || {}),
-              order: idx,
+              ...(data.__pivot || {}),
+              order: idx + 1,
+              field: attributeName,
             }));
 
             if (_.isEmpty(rows)) {
@@ -566,12 +599,12 @@ const createEntityManager = db => {
             })
             .execute();
 
-          const rows = _.castArray(data[attributeName] || []).map((data, idx) => ({
+          const rows = toAssocs(data[attributeName]).map(data => ({
             [joinColumn.name]: id,
             [idColumn.name]: data.id,
             [typeColumn.name]: data[typeField],
             ...(joinTable.on || {}),
-            order: idx,
+            ...(data.__pivot || {}),
           }));
 
           if (_.isEmpty(rows)) {
@@ -624,17 +657,18 @@ const createEntityManager = db => {
           if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
-              .where({ [inverseJoinColumn.name]: _.castArray(data[attributeName] || []) })
+              .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })
               .where(joinTable.on || {})
               .execute();
           }
 
           if (!_.isNull(data[attributeName])) {
-            const insert = _.castArray(data[attributeName] || []).map(datum => {
+            const insert = toAssocs(data[attributeName]).map(data => {
               return {
                 [joinColumn.name]: id,
-                [inverseJoinColumn.name]: datum,
+                [inverseJoinColumn.name]: data.id,
                 ...(joinTable.on || {}),
+                ...(data.__pivot || {}),
               };
             });
 
@@ -652,9 +686,9 @@ const createEntityManager = db => {
     },
 
     /**
-     * Delete relations of an existing entity
+     * Delete relational associations of an existing entity
      * This removes associations but doesn't do cascade deletions for components for example. This will be handled on the entity service layer instead
-     * NOTE: Most of the deletion should be handled by ON DELETE CASCADE for dialect that have FKs
+     * NOTE: Most of the deletion should be handled by ON DELETE CASCADE for dialects that have FKs
      *
      * @param {EntityManager} em - entity manager instance
      * @param {Metadata} metadata - model metadta
@@ -703,6 +737,7 @@ const createEntityManager = db => {
                 [idColumn.name]: id,
                 [typeColumn.name]: uid,
                 ...(joinTable.on || {}),
+                field: attributeName,
               })
               .execute();
           }
@@ -816,11 +851,8 @@ const createEntityManager = db => {
     // custom queries
 
     // utilities
-    // -> format
-    // -> parse
     // -> map result
     // -> map input
-    // -> validation
 
     // extra features
     // -> virtuals

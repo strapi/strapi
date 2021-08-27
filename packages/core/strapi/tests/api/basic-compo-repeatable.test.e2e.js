@@ -75,7 +75,8 @@ describe('Core API - Basic + compo', () => {
         },
       ],
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-compos',
       body: product,
@@ -84,14 +85,19 @@ describe('Core API - Basic + compo', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeUndefined();
-    data.productsWithCompo.push(res.body);
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeUndefined();
+    data.productsWithCompo.push(body.data);
   });
 
   test('Read product with compo', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'GET',
       url: '/product-with-compos',
       qs: {
@@ -99,11 +105,14 @@ describe('Core API - Basic + compo', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(Array.isArray(res.body)).toBe(true);
-    expect(res.body).toHaveLength(1);
-    expect(res.body[0]).toMatchObject(data.productsWithCompo[0]);
-    res.body.forEach(p => expect(p.published_at).toBeUndefined());
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toHaveLength(1);
+    expect(body.data[0]).toMatchObject(data.productsWithCompo[0]);
+
+    body.data.forEach(p => {
+      expect(p.attributes.published_at).toBeUndefined();
+    });
   });
 
   test('Update product with compo', async () => {
@@ -117,7 +126,8 @@ describe('Core API - Basic + compo', () => {
         },
       ],
     };
-    const res = await rq({
+
+    const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-compos/${data.productsWithCompo[0].id}`,
       body: product,
@@ -126,15 +136,21 @@ describe('Core API - Basic + compo', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(product);
-    expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.published_at).toBeUndefined();
-    data.productsWithCompo[0] = res.body;
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: data.productsWithCompo[0].id,
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeUndefined();
+    expect(body.data.published_at).toBeUndefined();
+
+    data.productsWithCompo[0] = body.data;
   });
 
   test('Delete product with compo', async () => {
-    const res = await rq({
+    const { statusCode, body } = await rq({
       method: 'DELETE',
       url: `/product-with-compos/${data.productsWithCompo[0].id}`,
       qs: {
@@ -142,10 +158,10 @@ describe('Core API - Basic + compo', () => {
       },
     });
 
-    expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject(data.productsWithCompo[0]);
+
+    expect(body.data.attributes.published_at).toBeUndefined();
     data.productsWithCompo.shift();
   });
 

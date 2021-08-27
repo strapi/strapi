@@ -1,29 +1,43 @@
 import React, { useMemo, useState } from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
+import { Row, Box, TableLabel, Checkbox, Grid, GridItem } from '@strapi/parts';
+
 import { useIntl } from 'react-intl';
-import { BaselineAlignment } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import IS_DISABLED from 'ee_else_ce/components/Roles/PluginsAndSettings/SubCategory/utils/constants';
 import { usePermissionsDataManager } from '../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
-import CheckboxWrapper from './CheckboxWrapper';
-import ConditionsButtonWrapper from './ConditionsButtonWrapper';
-import Wrapper from './Wrapper';
 import { formatActions, getConditionsButtonState } from './utils';
 
 const Border = styled.div`
   flex: 1;
   align-self: center;
-  border-top: 1px solid #f6f6f6;
-  padding: 0px 10px;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+const CheckboxWrapper = styled.div`
+  position: relative;
+  ${({ hasConditions, disabled, theme }) =>
+    hasConditions &&
+    `
+    &:before {
+      content: '';
+      position: absolute;
+      top: ${-4 / 16}rem;
+      left: ${-8 / 16}rem;
+      width: ${6 / 16}rem;
+      height: ${6 / 16}rem;
+      border-radius: ${20 / 16}rem;
+      background: ${disabled ? theme.colors.neutral100 : theme.colors.primary600};
+    }
+  `}
 `;
 
 const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, pathToData }) => {
-  const [modalState, setModalState] = useState({ isOpen: false, isMounted: false });
+  const [isModalOpen, setModalOpen] = useState(false);
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -43,84 +57,87 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
   const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(dataWithoutCondition);
 
   const handleToggleModalIsOpen = () => {
-    setModalState(prevState => ({ isMounted: true, isOpen: !prevState.isOpen }));
+    setModalOpen(s => !s);
   };
 
   const handleModalClose = () => {
-    setModalState(prevState => ({ ...prevState, isMounted: false }));
+    setModalOpen(false);
   };
-
   // We need to format the actions so it matches the shape of the ConditionsModal actions props
   const formattedActions = formatActions(actions, modifiedData, pathToData);
   const doesButtonHasCondition = getConditionsButtonState(get(modifiedData, [...pathToData], {}));
 
   return (
     <>
-      <Wrapper>
-        <Flex justifyContent="space-between" alignItems="center">
-          <Padded right size="sm">
-            <Text
-              lineHeight="18px"
-              color="#919bae"
-              fontWeight="bold"
-              fontSize="xs"
-              textTransform="uppercase"
-            >
-              {subCategoryName}
-            </Text>
-          </Padded>
+      <Box>
+        <Row justifyContent="space-between" alignItems="center">
+          <Box paddingRight={4}>
+            <TableLabel textColor="neutral600">{subCategoryName}</TableLabel>
+          </Box>
           <Border />
-          <Padded left size="sm">
-            <BaselineAlignment top size="1px" />
+          <Box paddingLeft={4}>
             <Checkbox
               name={pathToData.join('..')}
-              message={formatMessage({ id: 'app.utils.select-all' })}
               disabled={isFormDisabled || IS_DISABLED}
-              onChange={onChangeParentCheckbox}
-              someChecked={hasSomeActionsSelected}
+              // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+              onValueChange={value =>
+                onChangeParentCheckbox({
+                  target: {
+                    name: pathToData.join('..'),
+                    value,
+                  },
+                })}
+              indeterminate={hasSomeActionsSelected}
               value={hasAllActionsSelected}
-            />
-          </Padded>
-        </Flex>
-        <BaselineAlignment top size="1px" />
-        <Padded top size="xs">
-          <Flex flexWrap="wrap">
+            >
+              {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
+            </Checkbox>
+          </Box>
+        </Row>
+        <Row paddingTop={6} paddingBottom={6}>
+          <Grid gap={2} style={{ flex: 1 }}>
             {formattedActions.map(({ checkboxName, value, action, displayName, hasConditions }) => {
               return (
-                <CheckboxWrapper
-                  disabled={isFormDisabled || IS_DISABLED}
-                  hasConditions={hasConditions}
-                  key={action}
-                >
-                  <Checkbox
-                    name={checkboxName}
+                <GridItem col={3} key={action}>
+                  <CheckboxWrapper
                     disabled={isFormDisabled || IS_DISABLED}
-                    message={displayName}
-                    onChange={onChangeSimpleCheckbox}
-                    value={value}
-                  />
-                </CheckboxWrapper>
+                    hasConditions={hasConditions}
+                  >
+                    <Checkbox
+                      name={checkboxName}
+                      disabled={isFormDisabled || IS_DISABLED}
+                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                      onValueChange={value =>
+                        onChangeSimpleCheckbox({
+                          target: {
+                            name: checkboxName,
+                            value,
+                          },
+                        })}
+                      value={value}
+                    >
+                      {displayName}
+                    </Checkbox>
+                  </CheckboxWrapper>
+                </GridItem>
               );
             })}
-          </Flex>
-          <ConditionsButtonWrapper disabled={isFormDisabled} hasConditions={doesButtonHasCondition}>
-            <ConditionsButton
-              hasConditions={doesButtonHasCondition}
-              onClick={handleToggleModalIsOpen}
-            />
-          </ConditionsButtonWrapper>
-        </Padded>
-      </Wrapper>
-      {modalState.isMounted && (
-        <ConditionsModal
-          headerBreadCrumbs={[categoryName, subCategoryName]}
-          actions={formattedActions}
-          isOpen={modalState.isOpen}
-          isFormDisabled={isFormDisabled}
-          onClosed={handleModalClose}
-          onToggle={handleToggleModalIsOpen}
-        />
-      )}
+          </Grid>
+          <ConditionsButton
+            hasConditions={doesButtonHasCondition}
+            onClick={handleToggleModalIsOpen}
+            variant="tertiary"
+          />
+        </Row>
+      </Box>
+      <ConditionsModal
+        headerBreadCrumbs={[categoryName, subCategoryName]}
+        actions={formattedActions}
+        isOpen={isModalOpen}
+        isFormDisabled={isFormDisabled}
+        onClosed={handleModalClose}
+        onToggle={handleToggleModalIsOpen}
+      />
     </>
   );
 };

@@ -62,6 +62,8 @@ module.exports = {
     const { model } = ctx.params;
     const { body } = ctx.request;
 
+    const totalEntries = await strapi.query(model).count();
+
     const entityManager = getService('entity-manager');
     const permissionChecker = getService('permission-checker').create({ userAbility, model });
 
@@ -77,9 +79,12 @@ module.exports = {
 
     await wrapBadRequest(async () => {
       const entity = await entityManager.create(sanitizeFn(body), model);
+
       ctx.body = permissionChecker.sanitizeOutput(entity);
 
-      await strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      if (totalEntries === 0) {
+        strapi.telemetry.send('didCreateFirstContentTypeEntry', { model });
+      }
     })();
   },
 

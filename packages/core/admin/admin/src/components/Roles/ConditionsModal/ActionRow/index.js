@@ -1,88 +1,81 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Text, Padded, Flex } from '@buffetjs/core';
+import { Row, TableLabel } from '@strapi/parts';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 
-import ConditionsSelect from '../ConditionsSelect';
-import Wrapper from './Wrapper';
+// import ConditionsSelect from '../ConditionsSelect';
+import { rowHeight } from '../../Permissions/utils/constants';
+
+const RowWrapper = styled(Row)`
+  height: ${rowHeight};
+`;
 
 const ActionRow = ({
-  arrayOfOptionsGroupedByCategory,
-  isFormDisabled,
+  // arrayOfOptionsGroupedByCategory,
+  // isFormDisabled,
   isGrey,
   label,
-  name,
-  onCategoryChange,
-  onChange,
-  value,
+  // name,
+  // onCategoryChange,
+  // onChange,
+  // value,
 }) => {
   const { formatMessage } = useIntl();
 
   return (
-    <Wrapper isGrey={isGrey}>
-      <Padded style={{ width: 200 }} top left right bottom size="sm">
-        <Flex>
-          <Text
-            lineHeight="19px"
-            color="grey"
-            fontSize="xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-          >
-            {formatMessage({
-              id: 'Settings.permissions.conditions.can',
-            })}
-            &nbsp;
-          </Text>
-          <Text
-            title={label}
-            lineHeight="19px"
-            fontWeight="bold"
-            fontSize="xs"
-            textTransform="uppercase"
-            color="mediumBlue"
-            style={{ maxWidth: '60%' }}
-            ellipsis
-          >
-            {formatMessage({
-              id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-              defaultMessage: label,
-            })}
-          </Text>
-          <Text
-            lineHeight="19px"
-            color="grey"
-            fontSize="xs"
-            fontWeight="bold"
-            textTransform="uppercase"
-          >
-            &nbsp;
-            {formatMessage({
-              id: 'Settings.permissions.conditions.when',
-            })}
-          </Text>
-        </Flex>
-      </Padded>
-      <ConditionsSelect
+    <RowWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
+      <Row paddingLeft={6} style={{ width: 180 }}>
+        <TableLabel textColor="neutral600">
+          {formatMessage({
+            id: 'Settings.permissions.conditions.can',
+            defaultMessage: 'Can',
+          })}
+          &nbsp;
+        </TableLabel>
+        <TableLabel
+          title={label}
+          textColor="primary600"
+          // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
+          style={{
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {formatMessage({
+            id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+            defaultMessage: label,
+          })}
+        </TableLabel>
+        <TableLabel textColor="neutral600">
+          &nbsp;
+          {formatMessage({
+            id: 'Settings.permissions.conditions.when',
+            defaultMessage: 'When',
+          })}
+        </TableLabel>
+      </Row>
+      {/* <ConditionsSelect
         arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
         name={name}
         isFormDisabled={isFormDisabled}
         onCategoryChange={onCategoryChange}
         onChange={onChange}
         value={value}
-      />
-    </Wrapper>
+      /> */}
+    </RowWrapper>
   );
 };
 
 ActionRow.propTypes = {
-  arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
-  isFormDisabled: PropTypes.bool.isRequired,
+  // arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
+  // isFormDisabled: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-  value: PropTypes.object.isRequired,
-  onCategoryChange: PropTypes.func.isRequired,
-  onChange: PropTypes.func.isRequired,
+  // name: PropTypes.string.isRequired,
+  // value: PropTypes.object.isRequired,
+  // onCategoryChange: PropTypes.func.isRequired,
+  // onChange: PropTypes.func.isRequired,
 };
 export default ActionRow;

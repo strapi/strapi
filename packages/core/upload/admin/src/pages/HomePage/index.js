@@ -42,7 +42,7 @@ const HomePage = () => {
   const isMounted = useRef(true);
 
   const pluginName = formatMessage({ id: getTrad('plugin.name') });
-  const paramsKeys = ['_limit', '_start', '_q', '_sort'];
+  const paramsKeys = ['_limit', '_start', '_q', 'sort'];
 
   useEffect(() => {
     return () => (isMounted.current = false);
@@ -74,9 +74,9 @@ const HomePage = () => {
     const dataRequestURL = getRequestUrl('files');
     const params = generateStringFromParams(query);
 
-    const paramsToSend = params.includes('_sort')
+    const paramsToSend = params.includes('sort')
       ? params
-      : params.concat(`&_sort=${updated_at}:DESC`);
+      : params.concat(`&sort=${updated_at}:DESC`);
 
     try {
       const data = await request(`${dataRequestURL}?${paramsToSend}`, {
@@ -98,7 +98,7 @@ const HomePage = () => {
   };
 
   const fetchDataCount = async () => {
-    const params = generateStringFromParams(query, ['_limit', '_sort', '_start']);
+    const params = generateStringFromParams(query, ['_limit', '_start']);
     const requestURL = getRequestUrl('files/count');
 
     try {

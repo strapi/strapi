@@ -41,7 +41,7 @@ const create = async attributes => {
     .query('strapi::user')
     .create({ data: user, populate: ['roles'] });
 
-  await getService('metrics').sendDidInviteUser();
+  getService('metrics').sendDidInviteUser();
 
   return createdUser;
 };

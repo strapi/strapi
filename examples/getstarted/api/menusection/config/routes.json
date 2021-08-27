@@ -10,14 +10,6 @@
     },
     {
       "method": "GET",
-      "path": "/menusections/count",
-      "handler": "Menusection.count",
-      "config": {
-        "policies": []
-      }
-    },
-    {
-      "method": "GET",
       "path": "/menusections/:id",
       "handler": "Menusection.findOne",
       "config": {

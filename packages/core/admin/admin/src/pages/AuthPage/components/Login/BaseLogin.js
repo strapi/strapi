@@ -45,11 +45,19 @@ const Login = ({ onSubmit, schema, children }) => {
               <Column>
                 <Logo />
                 <Box paddingTop="6" paddingBottom="1">
-                  <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
+                  <H1 id="welcome">
+                    {formatMessage({
+                      id: 'Auth.form.welcome.title',
+                      defaultMessage: 'Welcome back!',
+                    })}
+                  </H1>
                 </Box>
                 <Box paddingBottom="7">
                   <Subtitle textColor="neutral600">
-                    {formatMessage({ id: 'Auth.form.welcome.subtitle' })}
+                    {formatMessage({
+                      id: 'Auth.form.welcome.subtitle',
+                      defaultMessage: 'Log in to your Strapi account',
+                    })}
                   </Subtitle>
                 </Box>
                 {errors.errorMessage && (
@@ -61,19 +69,39 @@ const Login = ({ onSubmit, schema, children }) => {
 
               <Stack size={6}>
                 <TextInput
-                  error={errors.email ? formatMessage({ id: errors.email }) : ''}
+                  error={
+                    errors.email
+                      ? formatMessage({
+                          id: errors.email,
+                          defaultMessage: 'This value is required.',
+                        })
+                      : ''
+                  }
                   value={values.email}
                   onChange={handleChange}
-                  label={formatMessage({ id: 'Auth.form.email.label' })}
-                  placeholder={formatMessage({ id: 'Auth.form.email.placeholder' })}
+                  label={formatMessage({ id: 'Auth.form.email.label', defaultMessage: 'Email' })}
+                  placeholder={formatMessage({
+                    id: 'Auth.form.email.placeholder',
+                    defaultMessage: 'kai@doe.com',
+                  })}
                   name="email"
                   required
                 />
                 <TextInput
-                  error={errors.password ? formatMessage({ id: errors.password }) : ''}
+                  error={
+                    errors.password
+                      ? formatMessage({
+                          id: errors.password,
+                          defaultMessage: 'This value is required.',
+                        })
+                      : ''
+                  }
                   onChange={handleChange}
                   value={values.password}
-                  label={formatMessage({ id: 'Auth.form.password.label' })}
+                  label={formatMessage({
+                    id: 'Auth.form.password.label',
+                    defaultMessage: 'Password',
+                  })}
                   name="password"
                   type={passwordShown ? 'text' : 'password'}
                   endAction={
@@ -82,11 +110,17 @@ const Login = ({ onSubmit, schema, children }) => {
                         e.stopPropagation();
                         setPasswordShown(prev => !prev);
                       }}
-                      label={formatMessage({
-                        id: passwordShown
-                          ? 'Auth.form.password.show-password'
-                          : 'Auth.form.password.hide-password',
-                      })}
+                      label={formatMessage(
+                        passwordShown
+                          ? {
+                              id: 'Auth.form.password.show-password',
+                              defaultMessage: 'Show password',
+                            }
+                          : {
+                              id: 'Auth.form.password.hide-password',
+                              defaultMessage: 'Hide password',
+                            }
+                      )}
                     >
                       {passwordShown ? <Show /> : <Hide />}
                     </FieldActionWrapper>
@@ -98,12 +132,16 @@ const Login = ({ onSubmit, schema, children }) => {
                     handleChange({ target: { value: checked, name: 'rememberMe' } });
                   }}
                   value={values.rememberMe}
+                  aria-label="rememberMe"
                   name="rememberMe"
                 >
-                  {formatMessage({ id: 'Auth.form.rememberMe.label' })}
+                  {formatMessage({
+                    id: 'Auth.form.rememberMe.label',
+                    defaultMessage: 'Remember me',
+                  })}
                 </Checkbox>
                 <AuthButton type="submit">
-                  {formatMessage({ id: 'Auth.form.button.login' })}
+                  {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
                 </AuthButton>
               </Stack>
             </Form>
@@ -114,7 +152,12 @@ const Login = ({ onSubmit, schema, children }) => {
       <Row justifyContent="center">
         <Box paddingTop={4}>
           <Link to="/auth/forgot-password">
-            <Text small>{formatMessage({ id: 'Auth.link.forgot-password' })}</Text>
+            <Text small>
+              {formatMessage({
+                id: 'Auth.link.forgot-password',
+                defaultMessage: 'Forgot your password?',
+              })}
+            </Text>
           </Link>
         </Box>
       </Row>

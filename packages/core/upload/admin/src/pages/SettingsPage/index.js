@@ -4,13 +4,24 @@ import { Helmet } from 'react-helmet';
 import { Text } from '@buffetjs/core';
 import { isEqual } from 'lodash';
 import { useIntl } from 'react-intl';
-import { LoadingIndicatorPage, useNotification, request } from '@strapi/helper-plugin';
-
+import {
+  CheckPagePermissions,
+  LoadingIndicatorPage,
+  useNotification,
+  request,
+} from '@strapi/helper-plugin';
 import { getRequestUrl, getTrad } from '../../utils';
 import SectionTitleWrapper from './SectionTitleWrapper';
 import Wrapper from './Wrapper';
 import init from './init';
 import reducer, { initialState } from './reducer';
+import pluginPermissions from '../../permissions';
+
+const ProtectedSettingsPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.settings}>
+    <SettingsPage />
+  </CheckPagePermissions>
+);
 
 const SettingsPage = () => {
   const { formatMessage } = useIntl();
@@ -202,4 +213,4 @@ const SettingsPage = () => {
   );
 };
 
-export default SettingsPage;
+export default ProtectedSettingsPage;

@@ -8,7 +8,7 @@ import IntlText from '../IntlText';
 
 const SortListItem = ({ onClick, selectedItem, label, value }) => {
   const handleClick = () => {
-    onClick({ target: { name: '_sort', value } });
+    onClick({ target: { name: 'sort', value } });
   };
 
   return (

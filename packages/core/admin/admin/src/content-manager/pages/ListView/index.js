@@ -102,7 +102,7 @@ function ListView({
   const tableHeaders = useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
 
-    return headers;
+    return headers.displayedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout]);
 
   const [{ query }, setQuery] = useQueryParams();
@@ -122,7 +122,7 @@ function ListView({
     return formatFiltersFromQuery(query);
   }, [query]);
 
-  const _sort = query._sort;
+  const sort = query.sort;
   const _q = query._q || '';
 
   const label = contentType.info.label;
@@ -382,7 +382,7 @@ function ListView({
     <>
       <ListViewProvider
         _q={_q}
-        _sort={_sort}
+        sort={sort}
         data={data}
         entriesToDelete={entriesToDelete}
         filters={filters}

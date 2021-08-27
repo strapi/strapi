@@ -5,14 +5,12 @@
 // Also the strapi-generate-plugins/files/admin/src/index.js needs to be updated
 // IF THE DOC IS NOT UPDATED THE PULL REQUEST WILL NOT BE MERGED
 
-import React from 'react';
-import { CheckPagePermissions, prefixPluginTranslations } from '@strapi/helper-plugin';
+import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
 import pluginLogo from './assets/images/logo.svg';
 import pluginPermissions from './permissions';
 import getTrad from './utils/getTrad';
-import SettingsPage from './pages/Settings';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -34,12 +32,13 @@ export default {
           },
           id: 'settings',
           to: `/settings/${pluginId}`,
-          Component: () => (
-            <CheckPagePermissions permissions={pluginPermissions.settings}>
-              <SettingsPage />
-            </CheckPagePermissions>
-          ),
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "email-settings-page" */ './pages/Settings'
+            );
 
+            return component;
+          },
           permissions: pluginPermissions.settings,
         },
       ]

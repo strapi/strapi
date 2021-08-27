@@ -21,7 +21,7 @@ const initialState = {
     _start: 0,
     _q: '',
     filters: [],
-    _sort: null,
+    sort: null,
   },
   currentStep: 'list',
   isFormDisabled: false,
@@ -180,7 +180,7 @@ const reducer = (state, action) =>
       }
       case 'RESET_PROPS': {
         if (action.defaultSort) {
-          draftState.params._sort = action.defaultSort;
+          draftState.params.sort = action.defaultSort;
         } else {
           return initialState;
         }
