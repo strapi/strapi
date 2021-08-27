@@ -11,7 +11,7 @@ describe('API Token Controller', () => {
       type: 'read-only',
     };
 
-    test('Fails if API Token already exist', async () => {
+    test('Fails if API Token already exists', async () => {
       const exists = jest.fn(() => true);
       const badRequest = jest.fn();
       const ctx = createContext({ body }, { badRequest });
