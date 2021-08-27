@@ -7,10 +7,10 @@ const crypto = require('crypto');
  * @param {string} attributes.name
  * @param {string} [attributes.description]
  *
- * @returns boolean
+ * @returns Promise<boolean>
  */
-const exists = (attributes = {}) => {
-  return strapi.query('strapi::api-token').count({ where: attributes }) > 0;
+const exists = async (attributes = {}) => {
+  return (await strapi.query('strapi::api-token').count({ where: attributes })) > 0;
 };
 
 /**

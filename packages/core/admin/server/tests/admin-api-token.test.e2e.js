@@ -65,7 +65,7 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body.data).not.toBeNull();
-    expect(res.body.data.id).toBeDefined();
+    expect(res.body.data.id).toBe(1);
     expect(res.body.data.accessKey).toBeDefined();
     expect(res.body.data.name).toBe(body.name);
     expect(res.body.data.description).toBe(body.description);
@@ -74,7 +74,7 @@ describe('Admin API Token CRUD (e2e)', () => {
 
   test('3. Creates an api token without a description (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-name',
+      name: 'api-token_tests-name-without-description',
       type: 'read-only',
     };
 
@@ -86,7 +86,7 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(201);
     expect(res.body.data).not.toBeNull();
-    expect(res.body.data.id).toBeDefined();
+    expect(res.body.data.id).toBe(2);
     expect(res.body.data.accessKey).toBeDefined();
     expect(res.body.data.name).toBe(body.name);
     expect(res.body.data.description).toBe('');
