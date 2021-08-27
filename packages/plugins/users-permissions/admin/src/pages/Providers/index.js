@@ -47,11 +47,13 @@ export const ProvidersPage = () => {
     allowedActions: { canUpdate },
   } = useRBAC(updatePermissions);
 
-  const { isLoading, data: modifiedData } = useQuery(
+  const { isLoading: isLoadingForData, data: modifiedData, isFetching } = useQuery(
     'get-providers',
     () => fetchData(toggleNotification),
     { initialData: {} }
   );
+
+  const isLoading = isLoadingForData || isFetching;
 
   const submitMutation = useMutation(putProvider, {
     onSuccess: async () => {
