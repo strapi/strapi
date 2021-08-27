@@ -1,8 +1,8 @@
 import styled from 'styled-components';
-import { Flex } from '@buffetjs/core';
+import { Row } from '@strapi/parts';
 
-const CollapseLabel = styled(Flex)`
-  padding-right: 10px;
+const CollapseLabel = styled(Row)`
+  padding-right: ${({ theme }) => theme.spaces[2]};
   overflow: hidden;
   flex: 1;
   ${({ isCollapsable }) => isCollapsable && 'cursor: pointer;'}

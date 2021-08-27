@@ -1,23 +1,70 @@
-import React, { memo, useMemo, useState } from 'react';
-import PropTypes from 'prop-types';
-import { get } from 'lodash';
-import { Flex, Text } from '@buffetjs/core';
-import styled from 'styled-components';
+import { Box, Checkbox, Row, Text } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
+import { get, upperFirst } from 'lodash';
+import PropTypes from 'prop-types';
+import React, { memo, useMemo, useState } from 'react';
+import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../../../hooks';
-import { getCheckboxState } from '../../../utils';
-import CheckboxWithCondition from '../../../CheckboxWithCondition';
-import Chevron from '../../../Chevron';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';
+import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
 import RequiredSign from '../../../RequiredSign';
-import { RowStyle, RowWrapper } from './row';
-import { LeftBorderTimeline, TopTimeline } from './timeline';
-import Wrapper from './Wrapper';
+import { getCheckboxState } from '../../../utils';
+import { activeStyle } from '../../utils';
+import CarretIcon from '../CarretIcon';
 
-const SubLevelWrapper = styled.div`
-  padding-bottom: 8px;
+const Cell = styled(Row)`
+  width: ${cellWidth};
+  position: relative;
+`;
+
+const RowWrapper = styled(Row)`
+  height: ${rowHeight};
+`;
+
+const Wrapper = styled(Box)`
+  padding-left: ${31 / 16}rem;
+`;
+
+const LeftBorderTimeline = styled(Box)`
+  border-left: ${({ isVisible, theme }) =>
+    isVisible ? `4px solid ${theme.colors.primary200}` : '4px solid transparent'};
+`;
+
+const RowStyle = styled(Row)`
+  padding-left: ${({ theme }) => theme.spaces[4]};
+  width: ${({ level }) => 145 - level * 36}px;
+
+  ${({ isCollapsable, theme }) =>
+    isCollapsable &&
+    `
+      ${CarretIcon} {
+        display: block;
+        color: ${theme.colors.neutral100};
+      }
+      &:hover {
+        ${activeStyle(theme)}
+      }
+  `}
+  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+`;
+
+const TopTimeline = styled.div`
+  padding-top: 8px;
+  margin-top: 8px;
+  width: 4px;
+  background-color: ${({ theme }) => theme.colors.primary200};
+  border-top-left-radius: 2px;
+  border-top-right-radius: 2px;
+`;
+
+// ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
+const StyledText = styled(Text)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 `;
 
 const SubActionRow = ({
@@ -29,6 +76,7 @@ const SubActionRow = ({
   parentName,
   propertyName,
 }) => {
+  const { formatMessage } = useIntl();
   const {
     modifiedData,
     onChangeParentCheckbox,
@@ -60,91 +108,117 @@ const SubActionRow = ({
       {childrenForm.map(({ label, value, required, children: subChildrenForm }, index) => {
         const isVisible = index + 1 < childrenForm.length;
         const isArrayType = Array.isArray(subChildrenForm);
-        const isSmall = isArrayType || index + 1 === childrenForm.length;
         const isActive = rowToOpen === value;
 
         return (
           <LeftBorderTimeline key={value} isVisible={isVisible}>
-            <RowWrapper isSmall={isSmall}>
-              <Curve fill="#a5d5ff" />
-              <Flex style={{ flex: 1 }}>
+            <RowWrapper>
+              <Curve color="primary200" />
+              <Row style={{ flex: 1 }}>
                 <RowStyle level={recursiveLevel} isActive={isActive} isCollapsable={isArrayType}>
                   <CollapseLabel
                     alignItems="center"
                     isCollapsable={isArrayType}
-                    onClick={() => {
-                      if (isArrayType) {
-                        handleClickToggleSubLevel(value);
-                      }
-                    }}
+                    {...(isArrayType && {
+                      onClick: () => handleClickToggleSubLevel(value),
+                      'aria-expanded': isActive,
+                      onKeyDown: ({ key }) =>
+                        (key === 'Enter' || key === ' ') && handleClickToggleSubLevel(value),
+                      tabIndex: 0,
+                      role: 'button',
+                    })}
                     title={label}
                   >
-                    <Text
-                      color={isActive ? 'mediumBlue' : 'grey'}
-                      ellipsis
-                      fontSize="xs"
-                      fontWeight="bold"
-                      lineHeight="20px"
-                      textTransform="uppercase"
-                    >
-                      {label}
-                    </Text>
+                    <StyledText>{upperFirst(label)}</StyledText>
                     {required && <RequiredSign />}
-                    <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
+                    <CarretIcon $isActive={isActive} />
                   </CollapseLabel>
                 </RowStyle>
-                <Flex style={{ flex: 1 }}>
-                  {propertyActions.map(({ actionId, label, isActionRelatedToCurrentProperty }) => {
-                    if (!isActionRelatedToCurrentProperty) {
-                      return <HiddenAction key={actionId} />;
-                    }
-                    /*
-                     * Usually we use a 'dot' in order to know the key path of an object for which we want to change the value.
-                     * Since an action and a subject are both separated by '.' or '::' we chose to use the '..' separators
-                     */
-                    const checkboxName = [
-                      ...pathToDataFromActionRow.split('..'),
-                      actionId,
-                      'properties',
-                      propertyName,
-                      ...parentName.split('..'),
-                      value,
-                    ];
+                <Row style={{ flex: 1 }}>
+                  {propertyActions.map(
+                    ({ actionId, label: propertyLabel, isActionRelatedToCurrentProperty }) => {
+                      if (!isActionRelatedToCurrentProperty) {
+                        return <HiddenAction key={actionId} />;
+                      }
+                      /*
+                       * Usually we use a 'dot' in order to know the key path of an object for which we want to change the value.
+                       * Since an action and a subject are both separated by '.' or '::' we chose to use the '..' separators
+                       */
+                      const checkboxName = [
+                        ...pathToDataFromActionRow.split('..'),
+                        actionId,
+                        'properties',
+                        propertyName,
+                        ...parentName.split('..'),
+                        value,
+                      ];
 
-                    const checkboxValue = get(modifiedData, checkboxName, false);
+                      const checkboxValue = get(modifiedData, checkboxName, false);
 
-                    if (!subChildrenForm) {
+                      if (!subChildrenForm) {
+                        return (
+                          <Cell key={propertyLabel} justifyContent="center" alignItems="center">
+                            <Checkbox
+                              disabled={isFormDisabled || IS_DISABLED}
+                              name={checkboxName.join('..')}
+                              aria-label={formatMessage(
+                                {
+                                  id: `Settings.permissions.select-by-permission`,
+                                  defaultMessage: 'Select {label} permission',
+                                },
+                                { label: `${parentName} ${label} ${propertyLabel}` }
+                              )}
+                              // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                              onValueChange={value =>
+                                onChangeSimpleCheckbox({
+                                  target: {
+                                    name: checkboxName.join('..'),
+                                    value,
+                                  },
+                                })}
+                              value={checkboxValue}
+                            />
+                          </Cell>
+                        );
+                      }
+
+                      const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
+                        checkboxValue
+                      );
+
                       return (
-                        <CheckboxWithCondition
-                          key={label}
-                          disabled={isFormDisabled || IS_DISABLED}
-                          name={checkboxName.join('..')}
-                          onChange={onChangeSimpleCheckbox}
-                          value={checkboxValue}
-                        />
+                        <Cell key={propertyLabel} justifyContent="center" alignItems="center">
+                          <Checkbox
+                            key={propertyLabel}
+                            disabled={isFormDisabled || IS_DISABLED}
+                            name={checkboxName.join('..')}
+                            aria-label={formatMessage(
+                              {
+                                id: `Settings.permissions.select-by-permission`,
+                                defaultMessage: 'Select {label} permission',
+                              },
+                              { label: `${parentName} ${label} ${propertyLabel}` }
+                            )}
+                            // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                            onValueChange={value =>
+                              onChangeParentCheckbox({
+                                target: {
+                                  name: checkboxName.join('..'),
+                                  value,
+                                },
+                              })}
+                            value={hasAllActionsSelected}
+                            indeterminate={hasSomeActionsSelected}
+                          />
+                        </Cell>
                       );
                     }
-
-                    const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(
-                      checkboxValue
-                    );
-
-                    return (
-                      <CheckboxWithCondition
-                        key={label}
-                        disabled={isFormDisabled || IS_DISABLED}
-                        name={checkboxName.join('..')}
-                        onChange={onChangeParentCheckbox}
-                        value={hasAllActionsSelected}
-                        someChecked={hasSomeActionsSelected}
-                      />
-                    );
-                  })}
-                </Flex>
-              </Flex>
+                  )}
+                </Row>
+              </Row>
             </RowWrapper>
             {displayedRecursiveChildren && isActive && (
-              <SubLevelWrapper>
+              <Box paddingBottom={2}>
                 <SubActionRow
                   isFormDisabled={isFormDisabled}
                   parentName={`${parentName}..${value}`}
@@ -154,7 +228,7 @@ const SubActionRow = ({
                   recursiveLevel={recursiveLevel + 1}
                   childrenForm={displayedRecursiveChildren.children}
                 />
-              </SubLevelWrapper>
+              </Box>
             )}
           </LeftBorderTimeline>
         );

@@ -674,6 +674,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                     class="c22 c23"
                   >
                     <input
+                      aria-label="rememberMe"
                       class="c24"
                       id="checkbox-3"
                       name="rememberMe"

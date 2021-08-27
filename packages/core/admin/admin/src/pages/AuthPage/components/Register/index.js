@@ -280,6 +280,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                     }}
                     value={values.news}
                     name="news"
+                    aria-label="news"
                   >
                     {formatMessage(
                       {

@@ -63,7 +63,10 @@ function SettingsPage() {
     return <Redirect to="/settings/application-infos" />;
   }
 
-  const settingTitle = formatMessage({ id: 'app.components.LeftMenuLinkContainer.settings' });
+  const settingTitle = formatMessage({
+    id: 'app.components.LeftMenuLinkContainer.settings',
+    defaultMessage: 'Settings',
+  });
 
   return (
     <SettingsSearchHeaderProvider value={{ toggleHeaderSearch }}>
