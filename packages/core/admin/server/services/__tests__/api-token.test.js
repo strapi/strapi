@@ -23,6 +23,9 @@ describe('API Token', () => {
         query() {
           return { create };
         },
+        config: {
+          get: jest.fn(() => ({})),
+        },
       };
 
       const attributes = {
@@ -34,16 +37,58 @@ describe('API Token', () => {
       const res = await apiTokenService.create(attributes);
 
       expect(create).toHaveBeenCalledWith({
-        select: ['id', 'name', 'description', 'type', 'accessKey'],
+        select: ['id', 'name', 'description', 'type'],
         data: {
           ...attributes,
-          accessKey: mockedApiToken.hexedString,
+          accessKey: apiTokenService.hash(mockedApiToken.hexedString),
         },
       });
       expect(res).toEqual({
         ...attributes,
         accessKey: mockedApiToken.hexedString,
       });
+    });
+  });
+
+  describe('createSaltIfNotDefined', () => {
+    test('It does nothing if the salt is alread defined', () => {
+      const mockedAppendFile = jest.fn();
+      const mockedConfigSet = jest.fn();
+
+      global.strapi = {
+        config: {
+          get: jest.fn(() => ({
+            server: {
+              admin: { 'api-token': { salt: 'api-token_tests-salt' } },
+            },
+          })),
+          set: mockedConfigSet,
+        },
+        fs: { appendFile: mockedAppendFile },
+      };
+
+      apiTokenService.createSaltIfNotDefined();
+
+      expect(mockedAppendFile).not.toHaveBeenCalled();
+      expect(mockedConfigSet).not.toHaveBeenCalled();
+    });
+
+    test('It creates a new salt, appendit to the .env file and sets it in the configuration', () => {
+      const mockedAppendFile = jest.fn();
+      const mockedConfigSet = jest.fn();
+
+      global.strapi = {
+        config: {
+          get: jest.fn(() => null),
+          set: mockedConfigSet,
+        },
+        fs: { appendFile: mockedAppendFile },
+      };
+
+      apiTokenService.createSaltIfNotDefined();
+
+      expect(mockedAppendFile).toHaveBeenCalled();
+      expect(mockedConfigSet).toHaveBeenCalled();
     });
   });
 });

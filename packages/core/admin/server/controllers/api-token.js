@@ -14,12 +14,12 @@ module.exports = {
       return ctx.badRequest('ValidationError', err);
     }
 
-    if (await apiTokenService.exists({ name: attributes.name })) {
+    const alreadyExists = await apiTokenService.exists({ name: attributes.name });
+    if (alreadyExists) {
       return ctx.badRequest('Name already taken');
     }
 
     const apiToken = await apiTokenService.create(attributes);
-
     ctx.created({ data: apiToken });
   },
 };

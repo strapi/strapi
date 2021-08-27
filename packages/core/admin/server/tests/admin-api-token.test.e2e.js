@@ -8,8 +8,10 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  *
  * N°   Description
  * -------------------------------------------
- * 1.  Creates an api token (wrong body)
- * 2.  Creates an api token (successfully)
+ * 1. Fails to creates an api token (missing parameters from the body)
+ * 2. Fails to creates an api token (invalid `type` in the body)
+ * 3. Creates an api token (successfully)
+ * 4. Creates an api token without a description (successfully)
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -27,7 +29,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     await strapi.destroy();
   });
 
-  test('1. Creates an api token (wrong body)', async () => {
+  test('1. Fails to creates an api token (missing parameters from the body)', async () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
@@ -50,7 +52,31 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('2. Creates an api token (successfully)', async () => {
+  test('2. Fails to creates an api token (invalid `type` in the body)', async () => {
+    const body = {
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'invalid-type',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens',
+      method: 'POST',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'ValidationError',
+      data: {
+        type: ['type must be one of the following values: read-only, full-access'],
+      },
+    });
+  });
+
+  test('3. Creates an api token (successfully)', async () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
@@ -64,15 +90,16 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).not.toBeNull();
-    expect(res.body.data.id).toBe(1);
-    expect(res.body.data.accessKey).toBeDefined();
-    expect(res.body.data.name).toBe(body.name);
-    expect(res.body.data.description).toBe(body.description);
-    expect(res.body.data.type).toBe(body.type);
+    expect(res.body.data).toMatchObject({
+      accessKey: expect.any(String),
+      name: body.name,
+      description: body.description,
+      type: body.type,
+      id: expect.any(Number),
+    });
   });
 
-  test('3. Creates an api token without a description (successfully)', async () => {
+  test('4. Creates an api token without a description (successfully)', async () => {
     const body = {
       name: 'api-token_tests-name-without-description',
       type: 'read-only',
@@ -85,11 +112,12 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).not.toBeNull();
-    expect(res.body.data.id).toBe(2);
-    expect(res.body.data.accessKey).toBeDefined();
-    expect(res.body.data.name).toBe(body.name);
-    expect(res.body.data.description).toBe('');
-    expect(res.body.data.type).toBe(body.type);
+    expect(res.body.data).toMatchObject({
+      accessKey: expect.any(String),
+      name: body.name,
+      description: '',
+      type: body.type,
+      id: expect.any(Number),
+    });
   });
 });

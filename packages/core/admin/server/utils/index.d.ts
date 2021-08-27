@@ -11,11 +11,11 @@ type S = {
   role: typeof role;
   user: typeof user;
   permission: typeof permission;
-  ['content-type']: typeof contentType;
+  'content-type': typeof contentType;
   token: typeof token;
   auth: typeof auth;
   metrics: typeof metrics;
-  ['api-token']: typeof apiToken;
+  'api-token': typeof apiToken;
 };
 
 export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;

@@ -1,8 +1,5 @@
 'use strict';
 
-/**
- * Lifecycle callbacks for the `ApiToken` model.
- */
 module.exports = {
   collectionName: 'strapi_api_tokens',
   info: {
