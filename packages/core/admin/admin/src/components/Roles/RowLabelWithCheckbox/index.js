@@ -1,50 +1,72 @@
-import React, { memo } from 'react';
+import { Row, Checkbox, Text } from '@strapi/parts';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
-import { Checkbox, Text } from '@buffetjs/core';
+import React, { memo } from 'react';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';
-import Wrapper from './Wrapper';
+import { firstRowWidth } from '../Permissions/utils/constants';
+
+// ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
+const StyledText = styled(Text)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
 
 const RowLabelWithCheckbox = ({
   children,
   isCollapsable,
+  isActive,
   isFormDisabled,
   label,
   onChange,
   onClick,
   checkboxName,
   someChecked,
-  textColor,
   value,
-  width,
 }) => {
+  const { formatMessage } = useIntl();
+
   return (
-    <Wrapper width={width} disabled={isFormDisabled}>
+    <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
       <Checkbox
         name={checkboxName}
+        aria-label={formatMessage(
+          {
+            id: `Settings.permissions.select-all-by-permission`,
+            defaultMessage: 'Select all {label} permissions',
+          },
+          { label }
+        )}
         disabled={isFormDisabled}
-        onChange={onChange}
-        someChecked={someChecked}
+        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+        onValueChange={value =>
+          onChange({
+            target: {
+              name: checkboxName,
+              value,
+            },
+          })}
+        indeterminate={someChecked}
         value={value}
       />
       <CollapseLabel
         title={label}
         alignItems="center"
         isCollapsable={isCollapsable}
-        onClick={onClick}
+        {...(isCollapsable && {
+          onClick,
+          'aria-expanded': isActive,
+          onKeyDown: ({ key }) => (key === 'Enter' || key === ' ') && onClick(),
+          tabIndex: 0,
+          role: 'button',
+        })}
       >
-        <Text
-          color={textColor}
-          ellipsis
-          fontSize="xs"
-          fontWeight="bold"
-          lineHeight="20px"
-          textTransform="uppercase"
-        >
-          {label}
-        </Text>
+        <StyledText>{upperFirst(label)}</StyledText>
         {children}
       </CollapseLabel>
-    </Wrapper>
+    </Row>
   );
 };
 
@@ -55,8 +77,6 @@ RowLabelWithCheckbox.defaultProps = {
   value: false,
   someChecked: false,
   isCollapsable: false,
-  textColor: 'grey',
-  width: '18rem',
 };
 
 RowLabelWithCheckbox.propTypes = {
@@ -68,9 +88,8 @@ RowLabelWithCheckbox.propTypes = {
   onChange: PropTypes.func,
   onClick: PropTypes.func.isRequired,
   someChecked: PropTypes.bool,
-  textColor: PropTypes.string,
   value: PropTypes.bool,
-  width: PropTypes.string,
+  isActive: PropTypes.bool.isRequired,
 };
 
 export default memo(RowLabelWithCheckbox);

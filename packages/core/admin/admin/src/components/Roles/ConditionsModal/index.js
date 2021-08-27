@@ -1,14 +1,24 @@
-import React, { useMemo, useState } from 'react';
+import {
+  Box,
+  Breadcrumbs,
+  Button,
+  Crumb,
+  H2,
+  ModalFooter,
+  ModalHeader,
+  ModalLayout,
+  Stack,
+  Text,
+  Divider,
+} from '@strapi/parts';
+import { cloneDeep, get, groupBy, set, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
-import { cloneDeep, get, groupBy, set } from 'lodash';
-import { Modal, ModalHeader, ModalFooter } from '@strapi/helper-plugin';
-import { Button, Text, Padded } from '@buffetjs/core';
+import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../hooks';
-import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
-import ActionRow from './ActionRow';
-import Separator from './Separator';
 import updateValues from '../Permissions/utils/updateValues';
+import ActionRow from './ActionRow';
+import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 
 const ConditionsModal = ({
   actions,
@@ -79,53 +89,83 @@ const ConditionsModal = ({
     onToggle();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <Modal withoverflow="true" onClosed={onClosed} isOpen={isOpen} onToggle={onToggle}>
-      <ModalHeader headerBreadcrumbs={headerBreadCrumbs} />
-      <Padded top left right bottom size="md">
-        <Text fontSize="lg" fontWeight="bold">
-          {formatMessage({
-            id: 'Settings.permissions.conditions.define-conditions',
-          })}
-        </Text>
-        <Separator />
-        {actionsToDisplay.length === 0 && (
-          <Text fontSize="md" color="grey">
-            {formatMessage({ id: 'Settings.permissions.conditions.no-actions' })}
-          </Text>
-        )}
-        {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
-          const name = pathToConditionsObject.join('..');
+    <ModalLayout onClose={onClosed}>
+      <ModalHeader>
+        <Breadcrumbs label={headerBreadCrumbs.join(', ')}>
+          {headerBreadCrumbs.map(label => (
+            <Crumb key={label}>
+              {upperFirst(
+                formatMessage({
+                  id: label,
+                  defaultMessage: label,
+                })
+              )}
+            </Crumb>
+          ))}
+        </Breadcrumbs>
+      </ModalHeader>
+      <Box padding={8}>
+        <Stack size={6}>
+          <H2>
+            {formatMessage({
+              id: 'Settings.permissions.conditions.define-conditions',
+              defaultMessage: 'Define conditions',
+            })}
+          </H2>
+          <Box>
+            <Divider />
+          </Box>
+          <Box>
+            {actionsToDisplay.length === 0 && (
+              <Text>
+                {formatMessage({
+                  id: 'Settings.permissions.conditions.no-actions',
+                  defaultMessage:
+                    'You first need to select actions (create, read, update, ...) before defining conditions on them.',
+                })}
+              </Text>
+            )}
+            <ul>
+              {actionsToDisplay.map(({ actionId, label, pathToConditionsObject }, index) => {
+                const name = pathToConditionsObject.join('..');
 
-          return (
-            <ActionRow
-              key={actionId}
-              arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-              label={label}
-              isFormDisabled={isFormDisabled}
-              isGrey={index % 2 === 0}
-              name={name}
-              onCategoryChange={handleCategoryChange}
-              onChange={handleChange}
-              value={get(state, name, {})}
-            />
-          );
-        })}
-      </Padded>
-      <ModalFooter>
-        <section>
-          <Button type="button" color="cancel" onClick={onToggle}>
-            {formatMessage({ id: 'app.components.Button.cancel' })}
+                return (
+                  <ActionRow
+                    key={actionId}
+                    arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
+                    label={label}
+                    isFormDisabled={isFormDisabled}
+                    isGrey={index % 2 === 0}
+                    name={name}
+                    onCategoryChange={handleCategoryChange}
+                    onChange={handleChange}
+                    value={get(state, name, {})}
+                  />
+                );
+              })}
+            </ul>
+          </Box>
+        </Stack>
+      </Box>
+      <ModalFooter
+        startActions={
+          <Button variant="tertiary" onClick={onToggle}>
+            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
           </Button>
-
-          <Button type="button" color="success" onClick={handleSubmit}>
+        }
+        endActions={
+          <Button onClick={handleSubmit}>
             {formatMessage({
               id: 'Settings.permissions.conditions.apply',
+              defaultMessage: 'Apply',
             })}
           </Button>
-        </section>
-      </ModalFooter>
-    </Modal>
+        }
+      />
+    </ModalLayout>
   );
 };
 

@@ -1,9 +1,8 @@
-import React, { useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import React, { useCallback, useMemo } from 'react';
 import Collapse from './Collapse';
 import CollapsePropertyMatrix from './CollapsePropertyMatrix';
 import { getAvailableActions } from './utils';
-import Wrapper from './Wrapper';
 
 const ContentTypeCollapse = ({
   allActions,
@@ -24,10 +23,8 @@ const ContentTypeCollapse = ({
     return getAvailableActions(allActions, contentTypeName);
   }, [allActions, contentTypeName]);
 
-  const isOdd = useMemo(() => index % 2 !== 0, [index]);
-
   return (
-    <Wrapper withMargin={isOdd}>
+    <>
       <Collapse
         availableActions={availableActions}
         isActive={isActive}
@@ -38,22 +35,21 @@ const ContentTypeCollapse = ({
         pathToData={pathToData}
       />
       {isActive &&
-        properties.map(({ label, value, children: childrenForm }, i) => {
+        properties.map(({ label: propertyLabel, value, children: childrenForm }, i) => {
           return (
             <CollapsePropertyMatrix
               availableActions={availableActions}
               childrenForm={childrenForm}
               isFormDisabled={isFormDisabled}
-              label={label}
+              label={propertyLabel}
               pathToData={pathToData}
               propertyName={value}
               key={value}
               isLast={i === properties.length - 1}
-              isOdd={isOdd}
             />
           );
         })}
-    </Wrapper>
+    </>
   );
 };
 

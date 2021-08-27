@@ -1,11 +1,9 @@
-import React, { useMemo } from 'react';
-import { Flex, Text } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { PermissionsWrapper, RowContainer } from '@strapi/helper-plugin';
+import { Accordion, AccordionContent, AccordionToggle, Box } from '@strapi/parts';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
+import React, { useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import SubCategory from '../SubCategory';
-import RowStyle from './Wrapper';
 
 const PermissionRow = ({
   childrenForm,
@@ -30,26 +28,18 @@ const PermissionRow = ({
   }, [name]);
 
   return (
-    <RowContainer isWhite={isWhite}>
-      <RowStyle isWhite={isWhite} isActive={isOpen} onClick={handleClick}>
-        <Flex alignItems="center" justifyContent="space-between">
-          <div>
-            <Text color="grey" fontWeight="bold" fontSize="xs" textTransform="uppercase">
-              {categoryName}
-            </Text>
-            <Text lineHeight="22px" color="grey">
-              {formatMessage({ id: 'Settings.permissions.category' }, { category: categoryName })}
-              &nbsp;{kind === 'plugins' ? 'plugin' : kind}
-            </Text>
-          </div>
-          <div>
-            <FontAwesomeIcon style={{ width: '11px' }} color="#9EA7B8" icon="chevron-down" />
-          </div>
-        </Flex>
-      </RowStyle>
+    <Accordion expanded={isOpen} toggle={handleClick} id="acc-1">
+      <AccordionToggle
+        title={upperFirst(categoryName)}
+        description={`${formatMessage(
+          { id: 'Settings.permissions.category' },
+          { category: categoryName }
+        )} ${kind === 'plugins' ? 'plugin' : kind}`}
+        variant={isWhite ? 'primary' : 'secondary'}
+      />
 
-      {isOpen && (
-        <PermissionsWrapper isWhite={isWhite}>
+      <AccordionContent>
+        <Box padding={6}>
           {childrenForm.map(({ actions, subCategoryName, subCategoryId }) => (
             <SubCategory
               key={subCategoryName}
@@ -60,9 +50,9 @@ const PermissionRow = ({
               pathToData={[...pathToData, subCategoryId]}
             />
           ))}
-        </PermissionsWrapper>
-      )}
-    </RowContainer>
+        </Box>
+      </AccordionContent>
+    </Accordion>
   );
 };
 

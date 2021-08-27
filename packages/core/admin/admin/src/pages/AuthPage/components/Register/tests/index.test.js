@@ -906,6 +906,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         class="c4 c33"
                       >
                         <input
+                          aria-label="news"
                           class="c34"
                           id="checkbox-7"
                           name="news"

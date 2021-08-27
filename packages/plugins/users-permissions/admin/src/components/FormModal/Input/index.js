@@ -40,13 +40,20 @@ const Input = ({
   if (type === 'bool') {
     return (
       <ToggleCheckbox
+        aria-label={name}
         checked={value}
         disabled={disabled}
         hint={hint}
         name={name}
-        onLabel="On"
+        offLabel={formatMessage({
+          id: 'app.components.ToggleCheckbox.off-label',
+          defaultMessage: 'Off',
+        })}
+        onLabel={formatMessage({
+          id: 'app.components.ToggleCheckbox.on-label',
+          defaultMessage: 'On',
+        })}
         onChange={onChange}
-        offLabel="Off"
       >
         {label}
       </ToggleCheckbox>
@@ -64,6 +71,7 @@ const Input = ({
 
   return (
     <TextInput
+      aria-label={name}
       disabled={disabled}
       error={errorMessage}
       label={label}

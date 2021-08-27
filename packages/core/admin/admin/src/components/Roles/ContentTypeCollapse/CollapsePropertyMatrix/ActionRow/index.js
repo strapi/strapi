@@ -1,18 +1,43 @@
-import React, { memo, useState, useMemo, useCallback } from 'react';
-import PropTypes from 'prop-types';
-import { get } from 'lodash';
-import { Padded, Flex } from '@buffetjs/core';
+import { Checkbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
+import { get } from 'lodash';
+import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
+import React, { memo, useCallback, useMemo, useState } from 'react';
+import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../../../hooks';
-import { getCheckboxState } from '../../../utils';
-import CheckboxWithCondition from '../../../CheckboxWithCondition';
-import Chevron from '../../../Chevron';
 import HiddenAction from '../../../HiddenAction';
+import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
 import RequiredSign from '../../../RequiredSign';
 import RowLabelWithCheckbox from '../../../RowLabelWithCheckbox';
+import { getCheckboxState } from '../../../utils';
+import { activeStyle } from '../../utils';
+import CarretIcon from '../CarretIcon';
 import SubActionRow from '../SubActionRow';
-import Wrapper from './Wrapper';
 import getRowLabelCheckboxeState from './utils/getRowLabelCheckboxeState';
+
+const Cell = styled(Row)`
+  width: ${cellWidth};
+  position: relative;
+`;
+
+const Wrapper = styled(Row)`
+  height: ${rowHeight};
+  flex: 1;
+
+  ${({ isCollapsable, theme }) =>
+    isCollapsable &&
+    `
+      ${CarretIcon} {
+        display: block;
+        color: ${theme.colors.neutral100};
+      }
+      &:hover {
+        ${activeStyle(theme)}
+      }
+  `}
+  ${({ isActive, theme }) => isActive && activeStyle(theme)};
+`;
 
 const ActionRow = ({
   childrenForm,
@@ -23,7 +48,9 @@ const ActionRow = ({
   pathToData,
   propertyActions,
   propertyName,
+  isOdd,
 }) => {
+  const { formatMessage } = useIntl();
   const [rowToOpen, setRowToOpen] = useState(null);
   const {
     modifiedData,
@@ -66,11 +93,14 @@ const ActionRow = ({
 
   return (
     <>
-      <Wrapper alignItems="center" isCollapsable={isCollapsable} isActive={isActive}>
-        <Flex style={{ flex: 1 }}>
-          <Padded left size="sm" />
+      <Wrapper
+        alignItems="center"
+        isCollapsable={isCollapsable}
+        isActive={isActive}
+        background={isOdd ? 'neutral100' : 'neutral0'}
+      >
+        <Row>
           <RowLabelWithCheckbox
-            width="15rem"
             onChange={handleChangeLeftRowCheckbox}
             onClick={handleClick}
             isCollapsable={isCollapsable}
@@ -78,11 +108,12 @@ const ActionRow = ({
             label={label}
             someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
+            isActive={isActive}
           >
             {required && <RequiredSign />}
-            <Chevron icon={isActive ? 'caret-up' : 'caret-down'} />
+            <CarretIcon $isActive={isActive} />
           </RowLabelWithCheckbox>
-          <Flex style={{ flex: 1 }}>
+          <Row>
             {propertyActions.map(({ label, isActionRelatedToCurrentProperty, actionId }) => {
               if (!isActionRelatedToCurrentProperty) {
                 return <HiddenAction key={label} />;
@@ -100,13 +131,28 @@ const ActionRow = ({
                 const checkboxValue = get(modifiedData, checkboxName, false);
 
                 return (
-                  <CheckboxWithCondition
-                    key={actionId}
-                    disabled={isFormDisabled || IS_DISABLED}
-                    name={checkboxName.join('..')}
-                    onChange={onChangeSimpleCheckbox}
-                    value={checkboxValue}
-                  />
+                  <Cell key={actionId} justifyContent="center" alignItems="center">
+                    <Checkbox
+                      disabled={isFormDisabled || IS_DISABLED}
+                      name={checkboxName.join('..')}
+                      aria-label={formatMessage(
+                        {
+                          id: `Settings.permissions.select-by-permission`,
+                          defaultMessage: 'Select {label} permission',
+                        },
+                        { label: `${name} ${label}` }
+                      )}
+                      // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                      onValueChange={value =>
+                        onChangeSimpleCheckbox({
+                          target: {
+                            name: checkboxName.join('..'),
+                            value,
+                          },
+                        })}
+                      value={checkboxValue}
+                    />
+                  </Cell>
                 );
               }
 
@@ -115,18 +161,33 @@ const ActionRow = ({
               const { hasAllActionsSelected, hasSomeActionsSelected } = getCheckboxState(data);
 
               return (
-                <CheckboxWithCondition
-                  key={label}
-                  disabled={isFormDisabled || IS_DISABLED}
-                  name={checkboxName.join('..')}
-                  onChange={onChangeParentCheckbox}
-                  value={hasAllActionsSelected}
-                  someChecked={hasSomeActionsSelected}
-                />
+                <Cell key={label} justifyContent="center" alignItems="center">
+                  <Checkbox
+                    disabled={isFormDisabled || IS_DISABLED}
+                    name={checkboxName.join('..')}
+                    // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+                    onValueChange={value =>
+                      onChangeParentCheckbox({
+                        target: {
+                          name: checkboxName.join('..'),
+                          value,
+                        },
+                      })}
+                    aria-label={formatMessage(
+                      {
+                        id: `Settings.permissions.select-by-permission`,
+                        defaultMessage: 'Select {label} permission',
+                      },
+                      { label: `${name} ${label}` }
+                    )}
+                    value={hasAllActionsSelected}
+                    indeterminate={hasSomeActionsSelected}
+                  />
+                </Cell>
               );
             })}
-          </Flex>
-        </Flex>
+          </Row>
+        </Row>
       </Wrapper>
       {isActive && (
         <SubActionRow
@@ -157,6 +218,7 @@ ActionRow.propTypes = {
   propertyActions: PropTypes.array.isRequired,
   propertyName: PropTypes.string.isRequired,
   required: PropTypes.bool,
+  isOdd: PropTypes.bool.isRequired,
 };
 
 export default memo(ActionRow);

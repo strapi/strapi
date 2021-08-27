@@ -14,24 +14,26 @@ const messages = {
   en: {},
 };
 
+const makeApp = (name, type, value) => (
+  <IntlProvider locale="en" messages={messages} textComponent="span">
+    <ThemeProvider theme={lightTheme}>
+      <Input
+        intlLabel={{ id: 'enabled', defaultMessage: 'Enabled' }}
+        name={name}
+        onChange={jest.fn()}
+        providerToEditName="email"
+        type={type}
+        value={value}
+      />
+    </ThemeProvider>
+  </IntlProvider>
+);
+
 describe('<Input />', () => {
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
-    } = render(
-      <IntlProvider locale="en" messages={messages} textComponent="span">
-        <ThemeProvider theme={lightTheme}>
-          <Input
-            intlLabel={{ id: 'enabled', defaultMessage: 'Enabled' }}
-            name="test"
-            onChange={jest.fn()}
-            providerToEditName="email"
-            type="text"
-            value="test"
-          />
-        </ThemeProvider>
-      </IntlProvider>
-    );
+    } = render(makeApp('test', 'text', 'test'));
 
     expect(firstChild).toMatchInlineSnapshot(`
       .c3 {
@@ -170,6 +172,7 @@ describe('<Input />', () => {
             >
               <input
                 aria-invalid="false"
+                aria-label="test"
                 class="c6"
                 id="textinput-1"
                 name="test"
@@ -184,5 +187,15 @@ describe('<Input />', () => {
     `);
   });
 
-  test.todo('it should set the value correctly when the input\'s name is "noName"');
+  it('should set the value correctly when the input\'s name is "noName"', () => {
+    const { getByLabelText } = render(makeApp('noName', 'text', 'test'));
+
+    expect(getByLabelText('noName').value).toBe(`${strapi.backendURL}/connect/email/callback`);
+  });
+
+  it('should display the toggleCheckbox correctly', () => {
+    const { getByLabelText } = render(makeApp('test', 'bool', true));
+
+    expect(getByLabelText('test').value).toBe('on');
+  });
 });
