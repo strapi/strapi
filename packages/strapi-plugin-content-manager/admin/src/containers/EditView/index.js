@@ -154,6 +154,9 @@ const EditView = ({
                               {fieldsBlock.map(
                                 ({ name, size, fieldSchema, labelIcon, metadatas }, fieldIndex) => {
                                   const isComponent = fieldSchema.type === 'component';
+                                  const label = fieldSchema.required
+                                    ? `* ${metadatas.label}`
+                                    : metadatas.label;
 
                                   if (isComponent) {
                                     const { component, max, min, repeatable = false } = fieldSchema;
@@ -165,7 +168,7 @@ const EditView = ({
                                         componentUid={component}
                                         labelIcon={labelIcon}
                                         isRepeatable={repeatable}
-                                        label={metadatas.label}
+                                        label={label}
                                         max={max}
                                         min={min}
                                         name={name}
@@ -183,6 +186,7 @@ const EditView = ({
                                         }
                                         fieldSchema={fieldSchema}
                                         keys={name}
+                                        label={label}
                                         labelIcon={labelIcon}
                                         metadatas={metadatas}
                                       />

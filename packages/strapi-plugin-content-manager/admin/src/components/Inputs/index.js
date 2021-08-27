@@ -27,6 +27,7 @@ function Inputs({
   formErrors,
   isCreatingEntry,
   keys,
+  label,
   labelIcon,
   metadatas,
   onBlur,
@@ -184,13 +185,7 @@ function Inputs({
   }
 
   if (!shouldDisplayNotAllowedInput) {
-    return (
-      <NotAllowedInput
-        label={metadatas.label}
-        labelIcon={labelIconformatted}
-        error={errorMessage}
-      />
-    );
+    return <NotAllowedInput label={label} labelIcon={labelIconformatted} error={errorMessage} />;
   }
 
   if (type === 'relation') {
@@ -199,6 +194,7 @@ function Inputs({
         <SelectWrapper
           {...metadatas}
           {...fieldSchema}
+          label={label}
           labelIcon={labelIcon}
           isUserAllowedToEditField={isUserAllowedToEditField}
           isUserAllowedToReadField={isUserAllowedToReadField}
@@ -218,6 +214,7 @@ function Inputs({
       disabled={shouldDisableField}
       error={errorMessage}
       inputDescription={description}
+      label={label}
       labelIcon={labelIconformatted}
       description={description}
       contentTypeUID={currentContentTypeLayout.uid}
@@ -258,6 +255,7 @@ Inputs.propTypes = {
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
+  label: PropTypes.string.isRequired,
   labelIcon: PropTypes.shape({
     icon: PropTypes.node.isRequired,
     title: PropTypes.shape({
