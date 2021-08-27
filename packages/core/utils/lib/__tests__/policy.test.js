@@ -52,7 +52,7 @@ describe('Policy util', () => {
         },
       };
 
-      expect(policyUtils.get('test-policy', 'test-plugin')).toBe(policyFn);
+      expect(policyUtils.get('test-policy', { pluginName: 'test-plugin' })).toBe(policyFn);
     });
 
     test('Retrieves an api policy locally', () => {
@@ -70,7 +70,7 @@ describe('Policy util', () => {
         },
       };
 
-      expect(policyUtils.get('test-policy', undefined, 'test-api')).toBe(policyFn);
+      expect(policyUtils.get('test-policy', { apiName: 'test-api' })).toBe(policyFn);
     });
   });
 });

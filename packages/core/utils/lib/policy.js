@@ -137,7 +137,7 @@ const policyResolvers = [
   },
 ];
 
-const get = (policy, { pluginName, apiName }) => {
+const get = (policy, { pluginName, apiName } = {}) => {
   if (typeof policy === 'function') {
     return policy;
   }
