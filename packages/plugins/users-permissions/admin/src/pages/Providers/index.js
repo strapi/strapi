@@ -1,34 +1,16 @@
-import React, {
-  useCallback,
-  useMemo,
-  // useRef,
-  useState,
-} from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import {
   SettingsPageTitle,
-  // SizedInput,
-  // useTracking,
-  // getYupInnerErrors,
-  // request,
-  // useNotification,
-  // useOverlayBlocker,
   LoadingIndicatorPage,
-  // SizedInput,
-  // useTracking,
-  // getYupInnerErrors,
-  // request,
-  // useNotification,
-  // useOverlayBlocker,
+  useTracking,
+  useNotification,
+  useOverlayBlocker,
   CheckPagePermissions,
 } from '@strapi/helper-plugin';
-// import { get, upperFirst, has } from 'lodash';
-// import has from 'lodash/has';
-// import { Row } from 'reactstrap';
-
-// // DS INTEGRATION
+import has from 'lodash/has';
+import upperFirst from 'lodash/upperFirst';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
@@ -36,30 +18,24 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
-// import forms from './utils/forms';
+import forms from './utils/forms';
 import createProvidersArray from './utils/createProvidersArray';
-// import ModalForm from '../../components/ModalForm';
-import {
-  // getRequestURL,
-  getTrad,
-} from '../../utils';
+import { getRequestURL, getTrad } from '../../utils';
 import { useForm } from '../../hooks';
 import pluginPermissions from '../../permissions';
+import FormModal from '../../components/FormModal';
+import { axiosInstance } from '../../../../../../core/admin/admin/src/core/utils';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
 
-  // const { trackUsage } = useTracking();
-  // const trackUsageRef = useRef(trackUsage);
-  // const [isOpen, setIsOpen] = useState(false);
-  // const [isSubmiting, setIsSubmiting] = useState(false);
-  // const buttonSubmitRef = useRef(null);
-  // const [showForm, setShowForm] = useState(false);
-  // const [providerToEditName, setProviderToEditName] = useState(null);
-  // FIXME
-  const [, setProviderToEditName] = useState(null);
-  // const toggleNotification = useNotification();
-  // const { lockApp, unlockApp } = useOverlayBlocker();
+  const { trackUsage } = useTracking();
+  const trackUsageRef = useRef(trackUsage);
+  const [isOpen, setIsOpen] = useState(false);
+  const [isSubmiting, setIsSubmiting] = useState(false);
+  const [providerToEditName, setProviderToEditName] = useState(null);
+  const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -67,11 +43,7 @@ export const ProvidersPage = () => {
 
   const {
     allowedActions: { canUpdate },
-    // dispatchResetForm,
-    // dispatchSetFormErrors,
-    // dispatchSubmitSucceeded,
-    // formErrors,
-    // handleChange,
+    dispatchSubmitSucceeded,
     isLoading,
     isLoadingForPermissions,
     modifiedData,
@@ -81,122 +53,78 @@ export const ProvidersPage = () => {
 
   const rowCount = providers.length;
 
-  // const isProviderWithSubdomain = useMemo(() => {
-  //   if (!providerToEditName) {
-  //     return false;
-  //   }
+  const isProviderWithSubdomain = useMemo(() => {
+    if (!providerToEditName) {
+      return false;
+    }
 
-  //   const providerToEdit = providers.find(obj => obj.name === providerToEditName);
+    const providerToEdit = providers.find(obj => obj.name === providerToEditName);
 
-  //   return has(providerToEdit, 'subdomain');
-  // }, [providers, providerToEditName]);
+    return has(providerToEdit, 'subdomain');
+  }, [providers, providerToEditName]);
 
   const pageTitle = formatMessage({
     id: getTrad('HeaderNav.link.providers'),
     defaultMessage: 'Providers',
   });
 
-  // const formToRender = useMemo(() => {
-  //   if (providerToEditName === 'email') {
-  //     return forms.email;
-  //   }
+  const layoutToRender = useMemo(() => {
+    if (providerToEditName === 'email') {
+      return forms.email;
+    }
 
-  //   if (isProviderWithSubdomain) {
-  //     return forms.providersWithSubdomain;
-  //   }
+    if (isProviderWithSubdomain) {
+      return forms.providersWithSubdomain;
+    }
 
-  //   return forms.providers;
-  // }, [providerToEditName, isProviderWithSubdomain]);
+    return forms.providers;
+  }, [providerToEditName, isProviderWithSubdomain]);
 
-  // const handleClick = useCallback(() => {
-  //   buttonSubmitRef.current.click();
-  // }, []);
+  const handleToggleModal = () => {
+    setIsOpen(prev => !prev);
+  };
 
-  // const handleToggle = useCallback(() => {
-  //   setIsOpen(prev => !prev);
-  // }, []);
+  const handleClickEdit = provider => {
+    if (canUpdate) {
+      setProviderToEditName(provider.name);
+      handleToggleModal();
+    }
+  };
 
-  const handleClickEdit = useCallback(
-    provider => {
-      if (canUpdate) {
-        setProviderToEditName(provider.name);
-        // handleToggle();
-      }
-    },
-    // [canUpdate, handleToggle]
-    [canUpdate]
-  );
+  const handleSubmit = async values => {
+    setIsSubmiting(true);
 
-  // const handleClosed = useCallback(() => {
-  //   setProviderToEditName(null);
-  //   setShowForm(false);
-  //   dispatchResetForm();
-  // }, [dispatchResetForm]);
+    lockApp();
 
-  // const handleOpened = useCallback(() => {
-  //   setShowForm(true);
-  // }, []);
+    try {
+      trackUsageRef.current('willEditAuthenticationProvider');
 
-  // const handleSubmit = useCallback(
-  //   async e => {
-  //     e.preventDefault();
-  //     const { schema } = formToRender;
-  //     let errors = {};
+      const body = { ...modifiedData, [providerToEditName]: values };
+      const endPoint = getRequestURL('providers');
 
-  //     setIsSubmiting(true);
+      await axiosInstance.put(endPoint, { providers: body });
 
-  //     try {
-  //       await schema.validate(modifiedData[providerToEditName], { abortEarly: false });
-  //       lockApp();
+      trackUsageRef.current('didEditAuthenticationProvider');
 
-  //       try {
-  //         trackUsageRef.current('willEditAuthenticationProvider');
+      toggleNotification({
+        type: 'success',
+        message: { id: getTrad('notification.success.submit') },
+      });
 
-  //         await request(getRequestURL('providers'), {
-  //           method: 'PUT',
-  //           body: { providers: modifiedData },
-  //         });
+      dispatchSubmitSucceeded(body);
 
-  //         trackUsageRef.current('didEditAuthenticationProvider');
+      handleToggleModal();
+    } catch (err) {
+      console.error(err);
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    }
 
-  //         toggleNotification({
-  //           type: 'success',
-  //           message: { id: getTrad('notification.success.submit') },
-  //         });
-
-  //         dispatchSubmitSucceeded();
-
-  //         handleToggle();
-  //       } catch (err) {
-  //         console.error(err);
-  //         toggleNotification({
-  //           type: 'warning',
-  //           message: { id: 'notification.error' },
-  //         });
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //       errors = getYupInnerErrors(err);
-  //       console.log(errors);
-  //     }
-
-  //     dispatchSetFormErrors(errors);
-
-  //     setIsSubmiting(false);
-  //     unlockApp();
-  //   },
-  //   [
-  //     dispatchSetFormErrors,
-  //     dispatchSubmitSucceeded,
-  //     formToRender,
-  //     handleToggle,
-  //     modifiedData,
-  //     providerToEditName,
-  //     toggleNotification,
-  //     lockApp,
-  //     unlockApp,
-  //   ]
-  // );
+    setIsSubmiting(false);
+    unlockApp();
+  };
 
   return (
     <Layout>
@@ -295,14 +223,11 @@ export const ProvidersPage = () => {
           </ContentLayout>
         )}
       </Main>
-      {/* <ModalForm
+      <FormModal
+        initialData={modifiedData[providerToEditName]}
         isOpen={isOpen}
-        onClick={handleClick}
-        onCancel={handleToggle}
-        isLoading={isSubmiting}
-        onOpened={handleOpened}
-        onClosed={handleClosed}
-        onToggle={handleToggle}
+        isSubmiting={isSubmiting}
+        layout={layoutToRender}
         headerBreadcrumbs={[
           formatMessage({
             id: getTrad('PopUpForm.header.edit.providers'),
@@ -310,39 +235,10 @@ export const ProvidersPage = () => {
           }),
           upperFirst(providerToEditName),
         ]}
-      >
-        {showForm && (
-          <form onSubmit={handleSubmit}>
-            <Row>
-              {formToRender.form.map(input => {
-                const label = input.label.params
-                  ? { ...input.label, params: { provider: upperFirst(providerToEditName) } }
-                  : input.label;
-
-                const value =
-                  input.name === 'noName'
-                    ? `${strapi.backendURL}/connect/${providerToEditName}/callback`
-                    : get(modifiedData, [providerToEditName, ...input.name.split('.')], '');
-
-                return (
-                  <SizedInput
-                    key={input.name}
-                    {...input}
-                    label={label}
-                    error={formErrors[input.name]}
-                    name={`${providerToEditName}.${input.name}`}
-                    onChange={handleChange}
-                    value={value}
-                  />
-                );
-              })}
-            </Row>
-            <button type="submit" style={{ display: 'none' }} ref={buttonSubmitRef}>
-              hidden button to use the native form event
-            </button>
-          </form>
-        )}
-      </ModalForm> */}
+        onToggle={handleToggleModal}
+        onSubmit={handleSubmit}
+        providerToEditName={providerToEditName}
+      />
     </Layout>
   );
 };
