@@ -13,14 +13,28 @@ const crypto = require('crypto');
  */
 
 /**
- * @param {Object} attributes
- * @param {string} attributes.name
- * @param {string} [attributes.description]
+ * @param {Object} whereParams
+ * @param {string} whereParams.name
+ * @param {string} [whereParams.description]
  *
  * @returns {Promise<boolean>}
  */
-const exists = async (attributes = {}) => {
-  return (await strapi.query('admin::api-token').count({ where: attributes })) > 0;
+const exists = async (whereParams = {}) => {
+  const apiToken = await strapi.query('admin::api-token').findOne({ where: whereParams });
+
+  return !!apiToken;
+};
+
+/**
+ * @param {string} accessKey
+ *
+ * @returns {string}
+ */
+const hash = accessKey => {
+  return crypto
+    .createHash('sha512')
+    .update(`${strapi.config.get('server.admin.api-token.salt')}${accessKey}`)
+    .digest('hex');
 };
 
 /**
@@ -34,16 +48,39 @@ const exists = async (attributes = {}) => {
 const create = async attributes => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
-  return strapi.query('admin::api-token').create({
-    select: ['id', 'name', 'description', 'type', 'accessKey'],
+  const apiToken = await strapi.query('admin::api-token').create({
+    select: ['id', 'name', 'description', 'type'],
     data: {
       ...attributes,
-      accessKey,
+      accessKey: hash(accessKey),
     },
   });
+
+  return {
+    ...apiToken,
+    accessKey,
+  };
+};
+
+/**
+ * @returns {void}
+ */
+const createSaltIfNotDefined = () => {
+  if (strapi.config.get('server.admin.api-token.salt')) {
+    return;
+  }
+
+  const salt = crypto.randomBytes(16).toString('hex');
+
+  if (!process.env.API_TOKEN_SALT) {
+    strapi.fs.appendFile('.env', `API_TOKEN_SALT=${salt}\n`);
+    strapi.config.set('server.admin.api-token.salt', salt);
+  }
 };
 
 module.exports = {
   create,
   exists,
+  createSaltIfNotDefined,
+  hash,
 };
