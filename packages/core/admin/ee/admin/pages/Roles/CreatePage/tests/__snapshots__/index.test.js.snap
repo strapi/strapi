@@ -731,7 +731,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                             id="textarea-2"
                             name="description"
                           >
-                            Settings.roles.form.created August 26, 2021
+                            Settings.roles.form.created 2021–01–30T12:34:56+00:00
                           </textarea>
                         </div>
                       </div>

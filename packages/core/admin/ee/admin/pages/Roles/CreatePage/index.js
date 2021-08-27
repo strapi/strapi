@@ -95,7 +95,7 @@ const CreatePage = () => {
         setIsSubmiting(false);
         toggleNotification({
           type: 'success',
-          message: { id: 'Settings.roles.created' },
+          message: { id: 'Settings.roles.created', defaultMessage: 'created' },
         });
         replace(`/settings/roles/${res.data.id}`);
       })

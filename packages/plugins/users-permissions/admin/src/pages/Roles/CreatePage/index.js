@@ -72,7 +72,7 @@ const CreatePage = () => {
         trackUsage('didCreateRole');
         toggleNotification({
           type: 'success',
-          message: { id: 'Settings.roles.created' },
+          message: { id: 'Settings.roles.created', defaultMessage: 'created' },
         });
         // Forcing redirecting since we don't have the id in the response
         // TODO
