@@ -81,9 +81,17 @@ const createSaltIfNotDefined = () => {
   strapi.config.set('server.admin.api-token.salt', salt);
 };
 
+/**
+ * @returns {Promise<ApiToken[]>}
+ */
+const list = async () => {
+  return strapi.query('strapi::api-token').findMany({ orderBy: { name: 'ASC' } });
+};
+
 module.exports = {
   create,
   exists,
   createSaltIfNotDefined,
   hash,
+  list,
 };

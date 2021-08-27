@@ -34,4 +34,11 @@ module.exports = {
     const apiToken = await apiTokenService.create(attributes);
     ctx.created({ data: apiToken });
   },
+
+  async list(ctx) {
+    const apiTokenService = getService('api-token');
+    const apiTokens = await apiTokenService.list();
+
+    ctx.send({ data: apiTokens });
+  },
 };
