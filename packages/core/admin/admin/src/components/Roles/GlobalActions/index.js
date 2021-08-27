@@ -1,13 +1,20 @@
-import React, { memo, useMemo } from 'react';
+import { Checkbox, Stack, TableLabel, Box } from '@strapi/parts';
+import IS_DISABLED from 'ee_else_ce/components/Roles/GlobalActions/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { Flex } from '@buffetjs/core';
+import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
-import IS_DISABLED from 'ee_else_ce/components/Roles/GlobalActions/utils/constants';
+import styled from 'styled-components';
 import { usePermissionsDataManager } from '../../../hooks';
-import CheckboxWithCondition from '../CheckboxWithCondition';
+import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
 import { findDisplayedActions, getCheckboxesState } from './utils';
-import Wrapper from './Wrapper';
+
+const CenteredStack = styled(Stack)`
+  align-items: center;
+  justify-content: center;
+  width: ${cellWidth};
+  flex-shrink: 0;
+`;
 
 const GlobalActions = ({ actions, isFormDisabled, kind }) => {
   const { formatMessage } = useIntl();
@@ -22,28 +29,43 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
   }, [modifiedData, displayedActions, kind]);
 
   return (
-    <Wrapper disabled={isFormDisabled}>
-      <Flex>
+    <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
+      <Stack horizontal>
         {displayedActions.map(({ label, actionId }) => {
           return (
-            <CheckboxWithCondition
-              key={actionId}
-              disabled={isFormDisabled || IS_DISABLED}
-              message={formatMessage({
-                id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
-                defaultMessage: label,
-              })}
-              onChange={({ target: { value } }) => {
-                onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
-              }}
-              name={actionId}
-              value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
-              someChecked={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}
-            />
+            <CenteredStack key={actionId} size={3}>
+              <TableLabel textColor="neutral500">
+                {formatMessage({
+                  id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+                  defaultMessage: label,
+                })}
+              </TableLabel>
+              <Checkbox
+                disabled={isFormDisabled || IS_DISABLED}
+                onValueChange={value => {
+                  onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
+                }}
+                name={actionId}
+                aria-label={formatMessage(
+                  {
+                    id: `Settings.permissions.select-all-by-permission`,
+                    defaultMessage: 'Select all {label} permissions',
+                  },
+                  {
+                    label: formatMessage({
+                      id: `Settings.roles.form.permissions.${label.toLowerCase()}`,
+                      defaultMessage: label,
+                    }),
+                  }
+                )}
+                value={get(checkboxesState, [actionId, 'hasAllActionsSelected'], false)}
+                indeterminate={get(checkboxesState, [actionId, 'hasSomeActionsSelected'], false)}
+              />
+            </CenteredStack>
           );
         })}
-      </Flex>
-    </Wrapper>
+      </Stack>
+    </Box>
   );
 };
 

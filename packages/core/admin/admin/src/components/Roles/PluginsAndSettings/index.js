@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Padded } from '@buffetjs/core';
-import ListWrapper from './ListWrapper';
+import { Box } from '@strapi/parts';
 import PermissionRow from './Row';
 
 const PluginsAndSettingsPermissions = ({ isFormDisabled, kind, layout }) => {
@@ -12,25 +11,23 @@ const PluginsAndSettingsPermissions = ({ isFormDisabled, kind, layout }) => {
   };
 
   return (
-    <ListWrapper>
-      <Padded left right size="md">
-        {layout.map(({ category, categoryId, childrenForm }, index) => {
-          return (
-            <PermissionRow
-              key={category}
-              childrenForm={childrenForm}
-              kind={kind}
-              isFormDisabled={isFormDisabled}
-              isOpen={openedCategory === category}
-              isWhite={index % 2 === 1}
-              name={category}
-              onOpenCategory={handleOpenCategory}
-              pathToData={[kind, categoryId]}
-            />
-          );
-        })}
-      </Padded>
-    </ListWrapper>
+    <Box padding={6} background="neutral0">
+      {layout.map(({ category, categoryId, childrenForm }, index) => {
+        return (
+          <PermissionRow
+            key={category}
+            childrenForm={childrenForm}
+            kind={kind}
+            isFormDisabled={isFormDisabled}
+            isOpen={openedCategory === category}
+            isWhite={index % 2 === 1}
+            name={category}
+            onOpenCategory={handleOpenCategory}
+            pathToData={[kind, categoryId]}
+          />
+        );
+      })}
+    </Box>
   );
 };
 

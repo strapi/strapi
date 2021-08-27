@@ -5,7 +5,10 @@ import PageTitle from '../PageTitle';
 
 const SettingsPageTitle = ({ name }) => {
   const { formatMessage } = useIntl();
-  const text = formatMessage({ id: 'Settings.PageTitle' }, { name });
+  const text = formatMessage(
+    { id: 'Settings.PageTitle', defaultMessage: 'Settings - {name}' },
+    { name }
+  );
 
   return <PageTitle title={text} />;
 };

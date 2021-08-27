@@ -1,10 +1,26 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Padded } from '@buffetjs/core';
+import styled from 'styled-components';
+import { Box } from '@strapi/parts';
 import generateHeadersFromActions from './utils/generateHeadersFromActions';
 import Header from './Header';
 import ActionRow from './ActionRow';
-import Wrapper from './Wrapper';
+
+const Wrapper = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.primary600};
+  border-top: none;
+  border-bottom: ${({ isLast, theme }) => {
+    if (isLast) {
+      return `1px solid ${theme.colors.primary600}`;
+    }
+
+    return `none`;
+  }};
+`;
+
+Wrapper.defaultProps = {
+  isLast: true,
+};
 
 const CollapsePropertyMatrix = ({
   availableActions,
@@ -23,8 +39,8 @@ const CollapsePropertyMatrix = ({
   return (
     <Wrapper isLast={isLast}>
       <Header label={label} headers={propertyActions} />
-      <Padded left size="md">
-        {childrenForm.map(({ children: childrenForm, label, value, required }) => (
+      <Box>
+        {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
           <ActionRow
             childrenForm={childrenForm}
             key={value}
@@ -35,9 +51,10 @@ const CollapsePropertyMatrix = ({
             propertyActions={propertyActions}
             pathToData={pathToData}
             propertyName={propertyName}
+            isOdd={i % 2 === 0}
           />
         ))}
-      </Padded>
+      </Box>
     </Wrapper>
   );
 };
