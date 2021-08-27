@@ -12,4 +12,15 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'GET',
+    path: '/api-tokens',
+    handler: 'api-token.list',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.read'] } },
+      ],
+    },
+  },
 ];
