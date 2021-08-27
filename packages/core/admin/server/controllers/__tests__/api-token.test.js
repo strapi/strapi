@@ -11,7 +11,7 @@ describe('API Token Controller', () => {
       type: 'read-only',
     };
 
-    test('Fails if API Token already exist', async () => {
+    test('Fails if API Token already exists', async () => {
       const exists = jest.fn(() => true);
       const badRequest = jest.fn();
       const ctx = createContext({ body }, { badRequest });
@@ -19,7 +19,7 @@ describe('API Token Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            ['api-token']: {
+            'api-token': {
               exists,
             },
           },
@@ -42,7 +42,7 @@ describe('API Token Controller', () => {
       global.strapi = {
         admin: {
           services: {
-            ['api-token']: {
+            'api-token': {
               exists,
               create,
             },
