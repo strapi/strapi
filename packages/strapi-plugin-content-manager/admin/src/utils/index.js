@@ -1,7 +1,6 @@
 export { default as checkIfAttributeIsDisplayable } from './checkIfAttributeIsDisplayable';
 export { default as createDefaultForm } from './createDefaultForm';
 export { default as dateFormats } from './dateFormats';
-export { default as formatComponentData } from './formatComponentData';
 export { default as formatFiltersFromQuery } from './formatFiltersFromQuery';
 export { default as formatFiltersToQuery } from './formatFiltersToQuery';
 export { default as formatLayoutToApi } from './formatLayoutToApi';
@@ -16,4 +15,3 @@ export { default as ItemTypes } from './ItemTypes';
 export { default as mergeMetasWithSchema } from './mergeMetasWithSchema';
 export { default as removeKeyInObject } from './removeKeyInObject';
 export { default as removePasswordFieldsFromData } from './removePasswordFieldsFromData';
-export { default as removeFieldsFromClonedData } from './removeFieldsFromClonedData';

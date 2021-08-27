@@ -11,28 +11,41 @@
  * the linting exception.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Switch, Route } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
 import { LoadingIndicatorPage, auth, request } from 'strapi-helper-plugin';
+import { QueryClientProvider, QueryClient } from 'react-query';
+
 import GlobalStyle from '../../components/GlobalStyle';
 import Admin from '../Admin';
 import AuthPage from '../AuthPage';
 import NotFoundPage from '../NotFoundPage';
 // eslint-disable-next-line import/no-cycle
 import NotificationProvider from '../NotificationProvider';
-import PrivateRoute from '../PrivateRoute';
 import Theme from '../Theme';
+import { getUID } from './utils';
 import { Content, Wrapper } from './components';
 import { getDataSucceeded } from './actions';
 import NewNotification from '../NewNotification';
+import PrivateRoute from '../PrivateRoute';
+import routes from './utils/routes';
+import { makeUniqueRoutes, createRoute } from '../SettingsPage/utils';
+
+const queryClient = new QueryClient();
 
 function App(props) {
   const getDataRef = useRef();
   const [{ isLoading, hasAdmin }, setState] = useState({ isLoading: true, hasAdmin: false });
   getDataRef.current = props.getDataSucceeded;
+
+  const authRoutes = useMemo(() => {
+    return makeUniqueRoutes(
+      routes.map(({ to, Component, exact }) => createRoute(Component, to, exact))
+    );
+  }, []);
 
   useEffect(() => {
     const currentToken = auth.getToken();
@@ -67,11 +80,14 @@ function App(props) {
 
         if (uuid) {
           try {
+            const deviceId = await getUID();
+
             fetch('https://analytics.strapi.io/track', {
               method: 'POST',
               body: JSON.stringify({
                 event: 'didInitializeAdministration',
                 uuid,
+                deviceId,
               }),
               headers: {
                 'Content-Type': 'application/json',
@@ -95,6 +111,8 @@ function App(props) {
     getData();
   }, []);
 
+  const setHasAdmin = hasAdmin => setState(prev => ({ ...prev, hasAdmin }));
+
   if (isLoading) {
     return <LoadingIndicatorPage />;
   }
@@ -103,19 +121,24 @@ function App(props) {
     <Theme>
       <Wrapper>
         <GlobalStyle />
-        <NotificationProvider />
-        <NewNotification />
-        <Content>
-          <Switch>
-            <Route
-              path="/auth/:authType"
-              render={routerProps => <AuthPage {...routerProps} hasAdmin={hasAdmin} />}
-              exact
-            />
-            <PrivateRoute path="/" component={Admin} />
-            <Route path="" component={NotFoundPage} />
-          </Switch>
-        </Content>
+        <QueryClientProvider client={queryClient}>
+          <NotificationProvider />
+          <NewNotification />
+          <Content>
+            <Switch>
+              {authRoutes}
+              <Route
+                path="/auth/:authType"
+                render={routerProps => (
+                  <AuthPage {...routerProps} setHasAdmin={setHasAdmin} hasAdmin={hasAdmin} />
+                )}
+                exact
+              />
+              <PrivateRoute path="/" component={Admin} />
+              <Route path="" component={NotFoundPage} />
+            </Switch>
+          </Content>
+        </QueryClientProvider>
       </Wrapper>
     </Theme>
   );

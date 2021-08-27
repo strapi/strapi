@@ -10,6 +10,7 @@ import { FormattedMessage } from 'react-intl';
 import { withRouter } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { ButtonDropdown, DropdownItem, DropdownMenu, DropdownToggle } from 'reactstrap';
+import { get } from 'lodash';
 import { auth } from 'strapi-helper-plugin';
 import Wrapper from './components';
 
@@ -30,7 +31,10 @@ const Logout = ({ history: { push } }) => {
   const toggle = () => setIsOpen(prev => !prev);
 
   const userInfo = auth.getUserInfo();
-  const displayName = userInfo.username || `${userInfo.firstname} ${userInfo.lastname}`;
+  const displayName =
+    userInfo && userInfo.firstname && userInfo.lastname
+      ? `${userInfo.firstname} ${userInfo.lastname}`
+      : get(userInfo, 'username', '');
 
   return (
     <Wrapper>

@@ -250,6 +250,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     options,
   };
 
+  const webpackConfig = getCustomWebpackConfig(dir, args);
   const opts = {
     clientLogLevel: 'silent',
     quiet: true,
@@ -257,10 +258,11 @@ async function watchAdmin({ dir, host, port, browser, options }) {
     publicPath: options.publicPath,
     historyApiFallback: {
       index: options.publicPath,
+      disableDotRule: true,
     },
+    ...webpack(webpackConfig).options.devServer
   };
 
-  const webpackConfig = getCustomWebpackConfig(dir, args);
   const server = new WebpackDevServer(webpack(webpackConfig), opts);
 
   server.listen(port, host, function(err) {

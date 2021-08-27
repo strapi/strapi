@@ -1,11 +1,12 @@
 import { fromJS } from 'immutable';
 import reducer, { initialState } from '../reducer';
+import * as actions from '../constants';
 
 describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('ADD_COMPONENTS_TO_DYNAMIC_ZONE', () => {
     it('Should add the components correctly', () => {
       const action = {
-        type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+        type: actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE,
         components: ['default.test', 'default.test2', 'default.test3'],
         shouldAddComponents: true,
         name: 'components',
@@ -33,7 +34,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should remove the components correctly', () => {
       const action = {
-        type: 'ADD_COMPONENTS_TO_DYNAMIC_ZONE',
+        type: actions.ADD_COMPONENTS_TO_DYNAMIC_ZONE,
         components: ['default.test2', 'default.test3'],
         shouldAddComponents: false,
         name: 'components',
@@ -60,10 +61,10 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
     });
   });
 
-  describe('ON_CHANGE', () => {
+  describe(actions.ON_CHANGE, () => {
     it('Should update the modifiedData object correctly if it is not relation', () => {
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['name'],
         value: 'test',
       };
@@ -88,7 +89,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['nature'],
         value: 'manyToMany',
         targetContentType: 'application::category.category',
@@ -118,7 +119,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['nature'],
         value: 'oneWay',
         targetContentType: 'application::category.category',
@@ -149,7 +150,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['nature'],
         value: 'oneToMany',
         targetContentType: 'application::category.category',
@@ -177,7 +178,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['target'],
         value: 'application::address.address',
         oneThatIsCreatingARelationWithAnother: 'address',
@@ -206,7 +207,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['target'],
         value: 'application::country.country',
         oneThatIsCreatingARelationWithAnother: 'address',
@@ -235,7 +236,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['target'],
         value: 'application::country.country',
         oneThatIsCreatingARelationWithAnother: 'address',
@@ -266,7 +267,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['target'],
         value: 'application::country.country',
         oneThatIsCreatingARelationWithAnother: 'address',
@@ -291,7 +292,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['type'],
         value: 'datetime',
       };
@@ -313,7 +314,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         })
       );
       const action = {
-        type: 'ON_CHANGE',
+        type: actions.ON_CHANGE,
         keys: ['type'],
         value: 'biginteger',
       };
@@ -334,7 +335,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       const action = {
         name: 'all',
         value: true,
-        type: 'ON_CHANGE_ALLOWED_TYPE',
+        type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
       const expected = state.setIn(
         ['modifiedData', 'allowedTypes'],
@@ -352,7 +353,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       const action = {
         name: 'all',
         value: false,
-        type: 'ON_CHANGE_ALLOWED_TYPE',
+        type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
       const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
 
@@ -367,7 +368,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       const action = {
         name: 'images',
         value: null,
-        type: 'ON_CHANGE_ALLOWED_TYPE',
+        type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
       const expected = state.setIn(
         ['modifiedData', 'allowedTypes'],
@@ -385,7 +386,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       const action = {
         name: 'images',
         value: null,
-        type: 'ON_CHANGE_ALLOWED_TYPE',
+        type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
       const expected = state.setIn(['modifiedData', 'allowedTypes'], fromJS(['videos', 'files']));
 
@@ -397,7 +398,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
       const action = {
         name: 'videos',
         value: null,
-        type: 'ON_CHANGE_ALLOWED_TYPE',
+        type: actions.ON_CHANGE_ALLOWED_TYPE,
       };
       const expected = state.setIn(['modifiedData', 'allowedTypes'], null);
 
@@ -408,7 +409,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('RESET_PROPS', () => {
     it('Should return the initialState', () => {
       const state = initialState.setIn(['modifiedData'], 'test');
-      const action = { type: 'RESET_PROPS' };
+      const action = { type: actions.RESET_PROPS };
 
       expect(reducer(state, action)).toEqual(initialState);
     });
@@ -417,7 +418,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO', () => {
     it('Should reset the state and update the modifiedData object with the component field basic schema', () => {
       const action = {
-        type: 'RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO',
+        type: actions.RESET_PROPS_AND_SET_FORM_FOR_ADDING_AN_EXISTING_COMPO,
       };
       const state = initialState.setIn(['modifiedData'], 'test');
       const expected = state.setIn(
@@ -431,7 +432,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
   describe('RESET_PROPS_AND_SAVE_CURRENT_DATA', () => {
     it('Should reset the state and update the modifiedData and componentToCreate objects correctly', () => {
-      const action = { type: 'RESET_PROPS_AND_SAVE_CURRENT_DATA' };
+      const action = { type: actions.RESET_PROPS_AND_SAVE_CURRENT_DATA };
 
       const state = initialState.setIn(
         ['modifiedData'],
@@ -475,7 +476,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ', () => {
     it('Should reset the state and prepare the form for adding or creating a component to a dynamic zone', () => {
       const action = {
-        type: 'RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ',
+        type: actions.RESET_PROPS_AND_SET_THE_FORM_FOR_ADDING_A_COMPO_TO_A_DZ,
       };
 
       const state = initialState.set('initialData', 'test').set(
@@ -504,7 +505,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('SET_DATA_TO_EDIT', () => {
     it('Should set the state correctly', () => {
       const action = {
-        type: 'SET_DATA_TO_EDIT',
+        type: actions.SET_DATA_TO_EDIT,
         data: {
           test: true,
         },
@@ -523,7 +524,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
         .setIn(['modifiedData'], fromJS({ test: true }))
         .setIn(['initialData'], fromJS({ test: true }));
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         isEditing: true,
         modifiedDataToSetForEditing: {
           test: true,
@@ -535,7 +536,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a component in step 1', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'component',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -557,7 +558,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a component in step 2', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'component',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -578,7 +579,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a dynamiczone', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'dynamiczone',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -599,7 +600,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a text', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'text',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -619,7 +620,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a number', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'number',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -634,7 +635,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a date', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'date',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -649,7 +650,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a media', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'media',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -667,7 +668,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for an enumeration', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'enumeration',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -685,7 +686,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for a relation', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'relation',
         nameToSetForRelation: 'address test',
         targetUid: 'application::address.address',
@@ -712,7 +713,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
 
     it('Should set the state correctly for the other cases', () => {
       const action = {
-        type: 'SET_ATTRIBUTE_DATA_SCHEMA',
+        type: actions.SET_ATTRIBUTE_DATA_SCHEMA,
         attributeType: 'json',
         nameToSetForRelation: 'address',
         targetUid: 'application::address.address',
@@ -732,7 +733,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('SET_DYNAMIC_ZONE_DATA_SCHEMA', () => {
     it('Should set the dynamic zone schema correctly', () => {
       const action = {
-        type: 'SET_DYNAMIC_ZONE_DATA_SCHEMA',
+        type: actions.SET_DYNAMIC_ZONE_DATA_SCHEMA,
         attributeToEdit: {
           type: 'dynamiczone',
           components: [],
@@ -752,7 +753,7 @@ describe('CTB | containers | FormModal | reducer | actions', () => {
   describe('SET_ERRORS', () => {
     it('Should set the formErrors object correctly', () => {
       const action = {
-        type: 'SET_ERRORS',
+        type: actions.SET_ERRORS,
         errors: {
           test: 'this is required',
         },

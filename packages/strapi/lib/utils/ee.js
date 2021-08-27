@@ -15,6 +15,11 @@ const noLog = {
 };
 
 const internals = {};
+const features = {
+  bronze: [],
+  silver: [],
+  gold: ['sso'],
+};
 
 module.exports = ({ dir, logger = noLog }) => {
   if (_.has(internals, 'isEE')) return internals.isEE;
@@ -60,7 +65,8 @@ module.exports = ({ dir, logger = noLog }) => {
 
     internals.licenseInfo = JSON.parse(content);
 
-    if (internals.licenseInfo.expireAt < new Date().getTime()) {
+    const expirationTime = new Date(internals.licenseInfo.expireAt).getTime();
+    if (expirationTime < new Date().getTime()) {
       return warnAndReturn('License expired. Starting in CE');
     }
   } catch (err) {
@@ -84,6 +90,25 @@ Object.defineProperty(module.exports, 'isEE', {
   get: () => {
     mustHaveKey('isEE');
     return internals.isEE;
+  },
+  configurable: false,
+  enumerable: false,
+});
+
+Object.defineProperty(module.exports, 'features', {
+  get: () => {
+    mustHaveKey('licenseInfo');
+
+    const { type: licenseType } = module.exports.licenseInfo;
+
+    return {
+      isEnabled(feature) {
+        return features[licenseType].includes(feature);
+      },
+      getEnabled() {
+        return features[licenseType];
+      },
+    };
   },
   configurable: false,
   enumerable: false,

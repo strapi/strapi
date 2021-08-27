@@ -1,6 +1,7 @@
 import React, { memo, useState, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { Flex, Padded, Count } from '@buffetjs/core';
+import { Tooltip } from '@buffetjs/styles';
 import { useIntl } from 'react-intl';
 
 import { getTrad } from '../../utils';
@@ -24,16 +25,30 @@ const RelationPreviewList = ({
   const [tooltipIsDisplayed, setDisplayTooltip] = useState(false);
   const isSingle = ['oneWay', 'oneToOne', 'manyToOne'].includes(relationType);
   const tooltipId = useMemo(() => `${rowId}-${cellId}`, [rowId, cellId]);
+  const valueToDisplay = value ? value[mainField.name] : '-';
 
-  if (isSingle) {
+  if (value === undefined) {
     return (
       <Truncate>
-        <Truncated>{value ? value[mainField.name] : '-'}</Truncated>
+        <Truncated>-</Truncated>
       </Truncate>
     );
   }
 
-  const size = value ? value.length : 0;
+  if (isSingle) {
+    return (
+      <Truncate>
+        <Truncated>
+          <span data-for={tooltipId} data-tip={valueToDisplay}>
+            {valueToDisplay}
+          </span>
+        </Truncated>
+        <Tooltip id={tooltipId} />
+      </Truncate>
+    );
+  }
+
+  const size = value ? value.count : 0;
 
   const handleTooltipToggle = () => {
     setDisplayTooltip(prev => !prev);
@@ -69,6 +84,7 @@ const RelationPreviewList = ({
           value={value}
           mainField={mainField}
           queryInfos={queryInfos}
+          size={size}
         />
       )}
     </Truncate>

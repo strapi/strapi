@@ -1,0 +1,241 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`i18n settings page permissions shows nothing when the user doesn't have read permission 1`] = `
+.c3 {
+  display: -webkit-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-flex;
+  -webkit-align-items: center;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -webkit-justify-content: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0 15px;
+  font-weight: 600;
+  font-size: 1.3rem;
+  border-radius: 2px;
+  cursor: pointer;
+  outline: 0;
+  background-color: #ffffff;
+  background-color: #007EFF;
+  border: 1px solid #007EFF;
+  color: #ffffff;
+}
+
+.c3:hover,
+.c3:active {
+  -webkit-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  -moz-box-shadow: inset 0 0 30px rgba(0,0,0,0.1);
+  box-shadow: inset 0 0 30px [object Object];
+}
+
+.c3:focus {
+  outline: 0;
+}
+
+.c3 > span svg {
+  font-size: 10px;
+}
+
+.c3 > svg {
+  height: 10px;
+  width: auto;
+  margin-right: 10px;
+}
+
+.c0 {
+  margin-bottom: 30px;
+  position: relative;
+  width: 100%;
+  height: 50px;
+}
+
+.c0 .justify-content-end {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c0 .header-title p {
+  width: 100%;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1.3rem;
+  font-weight: 400;
+  line-height: normal;
+  color: #787e8f;
+}
+
+.c0 .sticky {
+  position: fixed;
+  top: 0;
+  left: 30.6rem;
+  z-index: 1050;
+  background-color: white;
+  width: calc(100vw - 30.6rem);
+  padding-right: 15px;
+  height: 60px;
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+
+.c0 .sticky .row {
+  width: 100%;
+  margin: auto;
+  margin-top: 16px;
+}
+
+.c0 .sticky .row .header-title p {
+  display: none;
+}
+
+.c0 .sticky .row > div > div {
+  padding-top: 0;
+}
+
+.c0 .sticky .row > div > div h1 {
+  font-size: 2rem;
+}
+
+.c0 .sticky .row > div > div h1 svg {
+  margin-top: 8px;
+}
+
+.c0 .sticky .row > div > div button {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.c2 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-pack: end;
+  -webkit-justify-content: flex-end;
+  -ms-flex-pack: end;
+  justify-content: flex-end;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  padding-top: 1rem;
+}
+
+.c2 > button {
+  margin-right: 0;
+  margin-left: 1rem;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  outline: 0;
+}
+
+.c1 {
+  position: relative;
+  padding-top: 0.5rem;
+}
+
+.c1 h1 {
+  position: relative;
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+  max-width: 100%;
+  margin-bottom: 0;
+  padding-right: 18px;
+  font-size: 2.4rem;
+  line-height: normal;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c1 svg {
+  position: absolute;
+  right: 0;
+  top: 0;
+  margin-top: 12px;
+  font-size: 12px;
+  color: rgba(16,22,34,0.35);
+  cursor: pointer;
+  outline: 0;
+}
+
+<div>
+  <div
+    class="c0"
+  >
+    <div
+      class="sticky-wrapper"
+    >
+      <div
+        class="row"
+      >
+        <div
+          class="col-sm-6 header-title"
+        >
+          <div
+            class="c1"
+          >
+            <h1>
+              Plugin.name
+            </h1>
+          </div>
+          <p>
+            Settings.list.description
+          </p>
+        </div>
+        <div
+          class="col-sm-6 justify-content-end"
+        >
+          <div
+            class="c2"
+          >
+            <button
+              class="c3"
+              color="primary"
+              style="padding-left: 15px; padding-right: 15px;"
+              type="button"
+            >
+              <svg
+                fill="#ffffff"
+                height="11px"
+                viewBox="0 0 13 13"
+                width="11px"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <g
+                  data-name="Layer 2"
+                >
+                  <path
+                    d="M6.5.5v12m6-6H.5"
+                    fill="none"
+                    stroke="#ffffff"
+                    stroke-linecap="round"
+                  />
+                </g>
+              </svg>
+              Settings.list.actions.add
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div />
+</div>
+`;

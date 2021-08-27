@@ -25,7 +25,7 @@ module.exports = async () => {
   }
 
   await pruneObsoleteRelations();
-  registerPermissionActions();
+  await registerPermissionActions();
 };
 
 const wrapFunctionForErrors = fn => async (...args) => {
@@ -36,14 +36,18 @@ const wrapFunctionForErrors = fn => async (...args) => {
   }
 };
 
-const createProvider = ({ provider, providerOptions }) => {
+const createProvider = ({ provider, providerOptions, actionOptions = {} }) => {
   try {
     const providerInstance = require(`strapi-provider-upload-${provider}`).init(providerOptions);
 
     return Object.assign(Object.create(baseProvider), {
       ...providerInstance,
-      upload: wrapFunctionForErrors(providerInstance.upload.bind(providerInstance)),
-      delete: wrapFunctionForErrors(providerInstance.delete.bind(providerInstance)),
+      upload: wrapFunctionForErrors((file, options = actionOptions.upload) => {
+        return providerInstance.upload(file, options);
+      }),
+      delete: wrapFunctionForErrors((file, options = actionOptions.delete) => {
+        return providerInstance.delete(file, options);
+      }),
     });
   } catch (err) {
     strapi.log.error(err);
@@ -90,7 +94,7 @@ const pruneObsoleteRelationsQuery = ({ model }) => {
   );
 };
 
-const registerPermissionActions = () => {
+const registerPermissionActions = async () => {
   const actions = [
     {
       section: 'plugins',
@@ -135,6 +139,5 @@ const registerPermissionActions = () => {
     },
   ];
 
-  const { actionProvider } = strapi.admin.services.permission;
-  actionProvider.register(actions);
+  await strapi.admin.services.permission.actionProvider.registerMany(actions);
 };

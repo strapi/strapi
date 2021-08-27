@@ -5,14 +5,15 @@
  *
  * @description: A set of functions similar to controller's actions to avoid code duplication.
  */
-
+const { filterSchema } = require('@graphql-tools/utils');
+const { buildFederatedSchema } = require('@apollo/federation');
 const { gql, makeExecutableSchema } = require('apollo-server-koa');
 const _ = require('lodash');
 const graphql = require('graphql');
 const PublicationState = require('../types/publication-state');
 const Types = require('./type-builder');
-const { buildModels } = require('./type-definitions');
-const { mergeSchemas, createDefaultSchema, diffResolvers } = require('./utils');
+const buildShadowCrud = require('./shadow-crud');
+const { createDefaultSchema, diffResolvers } = require('./utils');
 const { toSDL } = require('./schema-definitions');
 const { buildQuery, buildMutation } = require('./resolvers-builder');
 
@@ -23,12 +24,17 @@ const { buildQuery, buildMutation } = require('./resolvers-builder');
  */
 
 const generateSchema = () => {
+  const isFederated = _.get(strapi.plugins.graphql.config, 'federation', false);
   const shadowCRUDEnabled = strapi.plugins.graphql.config.shadowCRUD !== false;
 
-  // Generate type definition and query/mutation for models.
-  const shadowCRUD = shadowCRUDEnabled ? buildModelsShadowCRUD() : createDefaultSchema();
-
   const _schema = strapi.plugins.graphql.config._schema.graphql;
+
+  const ctx = {
+    schema: _schema,
+  };
+
+  // Generate type definition and query/mutation for models.
+  const shadowCRUD = shadowCRUDEnabled ? buildShadowCrud(ctx) : createDefaultSchema();
 
   // Extract custom definition, query or resolver.
   const { definition, query, mutation, resolver = {} } = _schema;
@@ -63,13 +69,13 @@ const generateSchema = () => {
     .join('\n');
 
   // Concatenate.
+  // Manually defined to avoid exposing all attributes (like password etc.)
   let typeDefs = `
       ${definition}
       ${shadowCRUD.definition}
       ${polymorphicSchema.definition}
-
       ${Types.addInput()}
-      
+
       ${PublicationState.definition}
 
       type AdminUser {
@@ -88,50 +94,49 @@ const generateSchema = () => {
         ${mutationFields}
         ${mutation}
       }
-
       ${scalarDef}
     `;
 
   // Build schema.
-  if (strapi.config.environment !== 'production') {
-    // Write schema.
-    const schema = makeExecutableSchema({
-      typeDefs,
-      resolvers,
-    });
+  const schema = makeExecutableSchema({
+    typeDefs,
+    resolvers,
+  });
 
-    writeGenerateSchema(graphql.printSchema(schema));
+  const generatedSchema = filterDisabledResolvers(schema, extraResolvers);
+
+  if (strapi.config.environment !== 'production') {
+    writeGenerateSchema(generatedSchema);
   }
 
-  return {
-    typeDefs: gql(typeDefs),
-    resolvers,
-  };
+  return isFederated ? getFederatedSchema(generatedSchema, resolvers) : generatedSchema;
 };
+
+const getFederatedSchema = (schema, resolvers) =>
+  buildFederatedSchema([{ typeDefs: gql(graphql.printSchema(schema)), resolvers }]);
+
+const filterDisabledResolvers = (schema, extraResolvers) =>
+  filterSchema({
+    schema,
+    rootFieldFilter: (operationName, fieldName) => {
+      const resolver = _.get(extraResolvers[operationName], fieldName, true);
+
+      // resolvers set to false are filtered from the schema
+      if (resolver === false) {
+        return false;
+      }
+      return true;
+    },
+  });
 
 /**
  * Save into a file the readable GraphQL schema.
  *
  * @return void
  */
-
 const writeGenerateSchema = schema => {
-  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', schema);
-};
-
-const buildModelsShadowCRUD = () => {
-  const models = Object.values(strapi.models).filter(model => model.internal !== true);
-
-  const pluginModels = Object.values(strapi.plugins)
-    .map(plugin => Object.values(plugin.models) || [])
-    .reduce((acc, arr) => acc.concat(arr), []);
-
-  const components = Object.values(strapi.components);
-
-  return mergeSchemas(
-    createDefaultSchema(),
-    ...buildModels([...models, ...pluginModels, ...components])
-  );
+  const printSchema = graphql.printSchema(schema);
+  return strapi.fs.writeAppFile('exports/graphql/schema.graphql', printSchema);
 };
 
 const buildResolvers = resolvers => {

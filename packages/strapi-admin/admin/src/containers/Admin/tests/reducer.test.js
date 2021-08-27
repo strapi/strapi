@@ -1,11 +1,6 @@
 import produce from 'immer';
 import packageJSON from '../../../../../package.json';
-import {
-  setAppError,
-  getUserPermissions,
-  getUserPermissionsError,
-  getUserPermissionsSucceeded,
-} from '../actions';
+import { setAppError, getStrapiLatestReleaseSucceeded } from '../actions';
 import adminReducer from '../reducer';
 
 describe('adminReducer', () => {
@@ -14,10 +9,18 @@ describe('adminReducer', () => {
   beforeEach(() => {
     state = {
       appError: false,
-      isLoading: true,
       latestStrapiReleaseTag: `v${packageJSON.version}`,
-      userPermissions: [],
+      shouldUpdateStrapi: false,
     };
+  });
+
+  it('should set the latest release version', () => {
+    const expected = produce(state, draft => {
+      draft.shouldUpdateStrapi = true;
+      draft.latestStrapiReleaseTag = 'v3.3.4';
+    });
+
+    expect(adminReducer(state, getStrapiLatestReleaseSucceeded('v3.3.4', true))).toEqual(expected);
   });
 
   it('returns the initial state', () => {
@@ -32,33 +35,5 @@ describe('adminReducer', () => {
     });
 
     expect(adminReducer(state, setAppError())).toEqual(expected);
-  });
-
-  it('should handle the getUserPermissions action correctly', () => {
-    const expected = produce(state, draft => {
-      draft.isLoading = true;
-    });
-
-    expect(adminReducer(state, getUserPermissions())).toEqual(expected);
-  });
-
-  it('should handle the getUserPermissionsError action correctly', () => {
-    const error = 'Error';
-    const expected = produce(state, draft => {
-      draft.isLoading = false;
-      draft.error = error;
-    });
-
-    expect(adminReducer(state, getUserPermissionsError(error))).toEqual(expected);
-  });
-
-  it('should handle the getUserPermissionsSucceeded action correctly', () => {
-    const data = ['permission 1', 'permission 2'];
-    const expected = produce(state, draft => {
-      draft.isLoading = false;
-      draft.userPermissions = data;
-    });
-
-    expect(adminReducer(state, getUserPermissionsSucceeded(data))).toEqual(expected);
   });
 });

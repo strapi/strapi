@@ -1,14 +1,10 @@
 'use strict';
 
 const { has, pipe, prop, pick } = require('lodash/fp');
+const { MANY_RELATIONS } = require('strapi-utils').relations.constants;
+const { setCreatorFields } = require('strapi-utils');
 
-const {
-  getService,
-  wrapBadRequest,
-  setCreatorFields,
-  pickWritableAttributes,
-} = require('../utils');
-const { MANY_RELATIONS } = require('../services/constants');
+const { getService, wrapBadRequest, pickWritableAttributes } = require('../utils');
 const { validateBulkDeleteInput, validatePagination } = require('./validation');
 
 module.exports = {
@@ -24,9 +20,9 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const method = has('_q', query) ? 'searchPage' : 'findPage';
+    const method = has('_q', query) ? 'searchWithRelationCounts' : 'findWithRelationCounts';
 
-    const permissionQuery = permissionChecker.buildPermissionQuery(query);
+    const permissionQuery = permissionChecker.buildReadQuery(query);
 
     const { results, pagination } = await entityManager[method](permissionQuery, model);
 
@@ -214,7 +210,7 @@ module.exports = {
       return ctx.forbidden();
     }
 
-    const permissionQuery = permissionChecker.buildPermissionQuery(query);
+    const permissionQuery = permissionChecker.buildDeleteQuery(query);
 
     const idsWhereClause = { [`id_in`]: ids };
     const params = {
@@ -268,8 +264,9 @@ module.exports = {
         assoc.targetUid
       );
     } else {
+      const assocModel = strapi.db.getModelByAssoc(assoc);
       relationList = await entityManager.findPage(
-        { page, pageSize, [assoc.via]: entity.id },
+        { page, pageSize, [`${assoc.via}.${assocModel.primaryKey}`]: entity.id },
         assoc.targetUid
       );
     }

@@ -27,6 +27,22 @@ module.exports = {
     ctx.body = { data: contentTypes.map(toDto) };
   },
 
+  async findContentTypesSettings(ctx) {
+    const { findAllContentTypes, findConfiguration } = getService('content-types');
+
+    const contentTypes = await findAllContentTypes();
+    const configurations = await Promise.all(
+      contentTypes.map(async contentType => {
+        const { uid, settings } = await findConfiguration(contentType);
+        return { uid, settings };
+      })
+    );
+
+    ctx.body = {
+      data: configurations,
+    };
+  },
+
   async findContentTypeConfiguration(ctx) {
     const { uid } = ctx.params;
 
@@ -61,6 +77,7 @@ module.exports = {
     const { body } = ctx.request;
 
     const contentTypeService = getService('content-types');
+    const metricsService = getService('metrics');
 
     const contentType = await contentTypeService.findContentType(uid);
 
@@ -87,6 +104,8 @@ module.exports = {
     }
 
     const newConfiguration = await contentTypeService.updateConfiguration(contentType, input);
+
+    await metricsService.sendDidConfigureListView(contentType, newConfiguration);
 
     ctx.body = { data: newConfiguration };
   },

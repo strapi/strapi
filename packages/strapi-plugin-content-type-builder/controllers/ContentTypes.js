@@ -2,6 +2,8 @@
 
 const _ = require('lodash');
 
+const { hasDraftAndPublish } = require('strapi-utils').contentTypes;
+
 const {
   validateContentTypeInput,
   validateUpdateContentTypeInput,
@@ -62,10 +64,15 @@ module.exports = {
         components: body.components,
       });
 
+      const metricsProperties = {
+        kind: contentType.kind,
+        hasDraftAndPublish: hasDraftAndPublish(contentType.schema),
+      };
+
       if (_.isEmpty(strapi.api)) {
-        await strapi.telemetry.send('didCreateFirstContentType', { kind: contentType.kind });
+        await strapi.telemetry.send('didCreateFirstContentType', metricsProperties);
       } else {
-        await strapi.telemetry.send('didCreateContentType', { kind: contentType.kind });
+        await strapi.telemetry.send('didCreateContentType', metricsProperties);
       }
 
       setImmediate(() => strapi.reload());

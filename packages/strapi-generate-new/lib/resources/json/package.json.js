@@ -6,7 +6,14 @@
  */
 
 module.exports = opts => {
-  const { strapiDependencies, additionalsDependencies, strapiVersion, projectName, uuid } = opts;
+  const {
+    strapiDependencies,
+    additionalsDependencies,
+    strapiVersion,
+    projectName,
+    uuid,
+    packageJsonStrapi,
+  } = opts;
 
   // Finally, return the JSON.
   return {
@@ -34,10 +41,11 @@ module.exports = opts => {
     },
     strapi: {
       uuid: uuid,
+      ...packageJsonStrapi,
     },
     engines: {
       node: '>=10.16.0 <=14.x.x',
-      npm: '>=6.0.0',
+      npm: '^6.0.0',
     },
     license: 'MIT',
   };

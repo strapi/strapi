@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback, useRef, useLayoutEffect } from 'react';
 import { Text, Padded } from '@buffetjs/core';
-import { LoadingIndicator, request } from 'strapi-helper-plugin';
+import { request } from 'strapi-helper-plugin';
+import { LoadingIndicator, Tooltip } from '@buffetjs/styles';
 import PropTypes from 'prop-types';
 import { getDisplayedValue, getRequestUrl } from '../../utils';
-import Tooltip from '../Tooltip';
 
 const RelationPreviewTooltip = ({
   tooltipId,
@@ -11,6 +11,7 @@ const RelationPreviewTooltip = ({
   mainField,
   name,
   queryInfos: { endPoint },
+  size,
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [relationData, setRelationData] = useState([]);
@@ -74,7 +75,7 @@ const RelationPreviewTooltip = ({
       <div>
         {isLoading ? (
           <Padded left right size="sm">
-            <LoadingIndicator small />
+            <LoadingIndicator borderWidth="3px" size="2rem" />
           </Padded>
         ) : (
           <>
@@ -85,7 +86,11 @@ const RelationPreviewTooltip = ({
                 </Text>
               </Padded>
             ))}
-            {relationData.length > 10 && <Text color="white">[...]</Text>}
+            {size > 10 && (
+              <Padded top size="xs">
+                <Text color="white">[...]</Text>
+              </Padded>
+            )}
           </>
         )}
       </div>
@@ -102,6 +107,7 @@ RelationPreviewTooltip.propTypes = {
     }).isRequired,
   }).isRequired,
   name: PropTypes.string.isRequired,
+  size: PropTypes.number.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   queryInfos: PropTypes.shape({
     endPoint: PropTypes.string.isRequired,

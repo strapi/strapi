@@ -1,5 +1,25 @@
 'use strict';
-const createService = require('../service');
+
+const _ = require('lodash');
+const { createService, getFetchParams } = require('../service');
+
+const maxLimit = 50;
+const defaultLimit = 20;
+
+// init global strapi
+global.strapi = {
+  config: {
+    get(path, defaultValue) {
+      return _.get(this, path, defaultValue);
+    },
+    api: {
+      rest: {
+        defaultLimit,
+        maxLimit,
+      },
+    },
+  },
+};
 
 describe('Default Service', () => {
   describe('Collection Type', () => {
@@ -49,6 +69,9 @@ describe('Default Service', () => {
             find: jest.fn(() => Promise.resolve(null)),
             create: jest.fn(() => Promise.resolve({ id: 1 })),
           },
+          query() {
+            return { count() {} };
+          },
         };
 
         const model = {
@@ -62,7 +85,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live' } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
           {
             model: 'testModel',
           }
@@ -82,6 +105,9 @@ describe('Default Service', () => {
             find: jest.fn(() => Promise.resolve({ id: 1 })),
             update: jest.fn(() => Promise.resolve({ id: 1 })),
           },
+          query() {
+            return { count() {} };
+          },
         };
 
         const model = {
@@ -95,7 +121,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live' } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
           {
             model: 'testModel',
           }
@@ -130,7 +156,7 @@ describe('Default Service', () => {
         await service.delete();
 
         expect(strapi.entityService.find).toHaveBeenCalledWith(
-          { populate: undefined, params: { _publicationState: 'live' } },
+          { populate: undefined, params: { _publicationState: 'live', _limit: defaultLimit } },
           {
             model: 'testModel',
           }
@@ -145,6 +171,37 @@ describe('Default Service', () => {
           }
         );
       });
+    });
+  });
+});
+
+describe('getFetchParams', () => {
+  test.each([
+    [`0 if _limit is '0'`, { _limit: '0', maxLimit }, 0],
+    ['0 if _limit is 0', { _limit: 0, maxLimit }, 0],
+    [`0 if _limit is ''`, { _limit: '', maxLimit }, 0],
+    [`1 if _limit is '1'`, { _limit: '1', maxLimit }, 1],
+    [
+      `${maxLimit} if _limit(500) exceeds max allowed limit (${maxLimit})`,
+      { _limit: '500', maxLimit },
+      maxLimit,
+    ],
+    [
+      `${maxLimit} if _limit is set to -1 and max allowed limit is set (${maxLimit})`,
+      { _limit: '-1', maxLimit },
+      maxLimit,
+    ],
+    [`${defaultLimit} (default) if no _limit is provided`, { maxLimit }, defaultLimit],
+    [
+      `${defaultLimit} (default) if _limit is undefined`,
+      { _limit: undefined, maxLimit },
+      defaultLimit,
+    ],
+    ['1000 if _limit=1000 and no max allowed limit is set', { _limit: 1000 }, 1000],
+  ])('Sets _limit parameter to %s', (description, input, expected) => {
+    strapi.config.api.rest.maxLimit = input.maxLimit;
+    expect(getFetchParams({ _limit: input._limit })).toMatchObject({
+      _limit: expected,
     });
   });
 });

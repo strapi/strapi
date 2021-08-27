@@ -1,5 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { List, Header } from '@buffetjs/custom';
+import { Helmet } from 'react-helmet';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -91,7 +92,7 @@ const RoleListPage = () => {
     ? [
         {
           label: formatMessage({
-            id: 'List.button.roles',
+            id: getTrad('List.button.roles'),
             defaultMessage: 'Add new role',
           }),
           onClick: handleNewRoleClick,
@@ -135,6 +136,8 @@ const RoleListPage = () => {
 
   return (
     <>
+      <Helmet title={formatMessage({ id: getTrad('page.title') })} />
+
       <Header
         icon
         title={{
@@ -151,6 +154,7 @@ const RoleListPage = () => {
         // Show a loader in the header while requesting data
         isLoading={isLoading || isLoadingForPermissions}
       />
+
       <BaselineAlignment />
       {canRead && (
         <RoleListWrapper>
