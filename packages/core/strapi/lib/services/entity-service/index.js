@@ -61,6 +61,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     });
   },
 
+  // TODO: rename to findMany
   async find(uid, opts) {
     const { kind } = strapi.getModel(uid);
 
@@ -83,6 +84,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return db.query(uid).findPage(query);
   },
 
+  // TODO: streamline the logic based on the populate option
   async findWithRelationCounts(uid, opts) {
     const model = strapi.getModel(uid);
 
@@ -228,6 +230,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     return entityToDelete;
   },
 
+  // FIXME: used only for the CM to be removed
   async deleteMany(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
 

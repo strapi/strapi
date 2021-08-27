@@ -31,14 +31,11 @@ describe('Test type datetime', () => {
   });
 
   test('Create entry with valid value JSON', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withdatetime.withdatetime',
-      {
-        body: {
-          field: '2019-08-08T10:10:57.000Z',
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withdatetime.withdatetime', {
+      body: {
+        field: '2019-08-08T10:10:57.000Z',
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -49,14 +46,11 @@ describe('Test type datetime', () => {
   test('Create entry with timestamp value should be converted to ISO', async () => {
     const now = new Date(2016, 4, 8);
 
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withdatetime.withdatetime',
-      {
-        body: {
-          field: now.getTime(),
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withdatetime.withdatetime', {
+      body: {
+        field: now.getTime(),
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -67,14 +61,11 @@ describe('Test type datetime', () => {
   test('Accepts string timestamp', async () => {
     const now = new Date(2000, 0, 1);
 
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withdatetime.withdatetime',
-      {
-        body: {
-          field: `${now.getTime()}`,
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withdatetime.withdatetime', {
+      body: {
+        field: `${now.getTime()}`,
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -83,22 +74,17 @@ describe('Test type datetime', () => {
   });
 
   test('Throws on invalid date format', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withdatetime.withdatetime',
-      {
-        body: {
-          field: 'azdazindoaizdnoainzd',
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withdatetime.withdatetime', {
+      body: {
+        field: 'azdazindoaizdnoainzd',
+      },
+    });
 
     expect(res.statusCode).toBe(400);
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get(
-      '/content-manager/collection-types/application::withdatetime.withdatetime'
-    );
+    const res = await rq.get('/content-manager/collection-types/api::withdatetime.withdatetime');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
@@ -111,18 +97,15 @@ describe('Test type datetime', () => {
   test('Updating entry sets the right value and format JSON', async () => {
     const now = new Date(2018, 7, 5);
 
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withdatetime.withdatetime',
-      {
-        body: {
-          field: now.getTime(),
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withdatetime.withdatetime', {
+      body: {
+        field: now.getTime(),
+      },
+    });
 
     const newDate = new Date(2017, 10, 23);
     const updateRes = await rq.put(
-      `/content-manager/collection-types/application::withdatetime.withdatetime/${res.body.id}`,
+      `/content-manager/collection-types/api::withdatetime.withdatetime/${res.body.id}`,
       {
         body: {
           field: newDate,

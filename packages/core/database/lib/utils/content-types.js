@@ -7,7 +7,7 @@ const transformAttribute = attribute => {
       return {
         type: 'relation',
         relation: attribute.multiple === true ? 'morphMany' : 'morphOne',
-        target: 'plugins::upload.file',
+        target: 'plugin::upload.file',
         morphBy: 'related',
       };
     }

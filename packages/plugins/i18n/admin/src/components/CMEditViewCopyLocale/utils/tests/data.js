@@ -1,6 +1,6 @@
 const testData = {
   contentType: {
-    uid: 'application::test.test',
+    uid: 'api::test.test',
     apiID: 'test',
     attributes: {
       created_at: { type: 'timestamp' },

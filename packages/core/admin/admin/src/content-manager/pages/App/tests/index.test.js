@@ -48,7 +48,7 @@ describe('Content manager | App | main', () => {
           isDisplayed: true,
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.read',
+              action: 'plugin::content-manager.explorer.read',
               subject: 'category',
             },
           ],
@@ -64,7 +64,7 @@ describe('Content manager | App | main', () => {
           isDisplayed: true,
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.read',
+              action: 'plugin::content-manager.explorer.read',
               subject: 'homepage',
             },
           ],
@@ -423,7 +423,7 @@ describe('Content manager | App | main', () => {
           isDisplayed: true,
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.read',
+              action: 'plugin::content-manager.explorer.read',
               subject: 'homepage',
             },
           ],

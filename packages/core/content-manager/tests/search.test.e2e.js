@@ -138,7 +138,7 @@ describe('Search query', () => {
     test('search for "id"', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: data.beds[2].id,
         },
@@ -152,7 +152,7 @@ describe('Search query', () => {
     test.each(Object.keys(bedFixtures[0]))('search that target column %p', async columnName => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: bedFixtures[0][columnName],
         },
@@ -166,7 +166,7 @@ describe('Search query', () => {
     test('search with an empty query', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: '',
         },
@@ -180,7 +180,7 @@ describe('Search query', () => {
     test('search with special characters', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: data.beds[3].name,
         },
@@ -196,7 +196,7 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber > 0', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: '',
           filters: {
@@ -212,7 +212,7 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber > 1', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: '',
           filters: {
@@ -229,7 +229,7 @@ describe('Search query', () => {
     test('search with an empty query & peopleNumber in [1, 6]', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           filters: {
             peopleNumber: [1, 6],
@@ -245,7 +245,7 @@ describe('Search query', () => {
     test('search for "Sleepy Bed" & peopleNumber < 7', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::bed.bed',
+        url: '/content-manager/collection-types/api::bed.bed',
         qs: {
           _q: 'Sleepy Bed',
           filters: {

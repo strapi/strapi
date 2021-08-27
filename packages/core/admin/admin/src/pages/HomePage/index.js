@@ -36,28 +36,28 @@ const SOCIAL_LINKS = [
     link: 'https://github.com/strapi/strapi/',
   },
   {
-    name: 'Slack',
-    link: 'https://slack.strapi.io/',
-  },
-  {
-    name: 'Medium',
-    link: 'https://medium.com/@strapi',
-  },
-  {
-    name: 'Twitter',
-    link: 'https://twitter.com/strapijs',
+    name: 'Discord',
+    link: 'https://discord.strapi.io/',
   },
   {
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
   },
   {
+    name: 'Twitter',
+    link: 'https://twitter.com/strapijs',
+  },
+  {
+    name: 'Blog',
+    link: 'https://strapi.io/blog',
+  },
+  {
     name: 'Forum',
     link: 'https://forum.strapi.io',
   },
   {
-    name: 'Academy',
-    link: 'https://academy.strapi.io',
+    name: 'Careers',
+    link: 'https://strapi.io/careers',
   },
 ];
 
@@ -70,7 +70,7 @@ const HomePage = ({ history: { push } }) => {
     e.preventDefault();
 
     push(
-      '/plugins/content-type-builder/content-types/plugins::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
+      '/plugins/content-type-builder/content-types/plugin::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
     );
   };
 

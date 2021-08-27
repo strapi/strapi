@@ -26,13 +26,13 @@ const productModel = {
     categories: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'application::category.category',
+      target: 'api::category.category',
       targetAttribute: 'product',
     },
     shops: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'application::shop.shop',
+      target: 'api::shop.shop',
     },
   },
   name: 'product',
@@ -101,7 +101,7 @@ const fixtures = {
   ],
 };
 
-const getUID = modelName => `application::${modelName}.${modelName}`;
+const getUID = modelName => `api::${modelName}.${modelName}`;
 const getCMPrefixUrl = modelName => `/content-manager/collection-types/${getUID(modelName)}`;
 
 describe('x-to-many RF Preview', () => {

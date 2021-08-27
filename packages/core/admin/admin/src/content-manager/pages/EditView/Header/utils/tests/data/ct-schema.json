@@ -1,5 +1,5 @@
 {
-  "uid": "application::restaurant.restaurant",
+  "uid": "api::restaurant.restaurant",
   "name": "restaurant",
   "apiID": "restaurant",
   "label": "Restaurants",
@@ -26,7 +26,7 @@
     "address": {
       "model": "address",
       "type": "relation",
-      "targetModel": "application::address.address",
+      "targetModel": "api::address.address",
       "relationType": "oneWay"
     },
     "cover": { "type": "media", "multiple": false, "required": false },
@@ -40,7 +40,7 @@
       "column": "id",
       "isVirtual": true,
       "type": "relation",
-      "targetModel": "application::category.category",
+      "targetModel": "api::category.category",
       "relationType": "manyWay"
     },
     "description": { "type": "richtext", "required": true, "minLength": 10 },
@@ -53,7 +53,7 @@
       "model": "menu",
       "via": "restaurant",
       "type": "relation",
-      "targetModel": "application::menu.menu",
+      "targetModel": "api::menu.menu",
       "relationType": "oneToOne"
     },
     "opening_times": {

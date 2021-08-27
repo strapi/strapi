@@ -33,6 +33,8 @@ const escapeQuery = (query, charsToEscape, escapeChar = '\\') => {
 
 const stringIncludes = (arr, val) => arr.map(String).includes(String(val));
 const stringEquals = (a, b) => String(a) === String(b);
+const isCamelCase = value => /^[a-z][a-zA-Z0-9]+$/.test(value);
+const isKebabCase = value => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
 
 module.exports = {
   nameToSlug,
@@ -42,4 +44,6 @@ module.exports = {
   escapeQuery,
   stringIncludes,
   stringEquals,
+  isCamelCase,
+  isKebabCase,
 };

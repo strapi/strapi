@@ -11,12 +11,19 @@ import {
   request,
   useNotification,
   useOverlayBlocker,
+  CheckPagePermissions,
 } from '@strapi/helper-plugin';
 import pluginPermissions from '../../permissions';
 import { getTrad, getRequestURL } from '../../utils';
 import ListBaselineAlignment from '../../components/ListBaselineAlignment';
 import form from './utils/form';
 import reducer, { initialState } from './reducer';
+
+const ProtectedAdvancedSettingsPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
+    <AdvancedSettingsPage />
+  </CheckPagePermissions>
+);
 
 const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
@@ -217,4 +224,4 @@ const AdvancedSettingsPage = () => {
   );
 };
 
-export default AdvancedSettingsPage;
+export default ProtectedAdvancedSettingsPage;

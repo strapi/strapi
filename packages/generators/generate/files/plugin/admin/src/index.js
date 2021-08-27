@@ -1,8 +1,7 @@
 import { prefixPluginTranslations } from '@strapi/helper-plugin';
 import pluginPkg from '../../package.json';
 import pluginId from './pluginId';
-import App from './containers/App';
-import Initializer from './containers/Initializer';
+import Initializer from './components/Initializer';
 
 const pluginDescription = pluginPkg.strapi.description || pluginPkg.description;
 const icon = pluginPkg.strapi.icon;
@@ -17,11 +16,15 @@ export default {
         id: `${pluginId}.plugin.name`,
         defaultMessage: name,
       },
-      Component: App,
+      Component: async () => {
+        const component = await import(/* webpackChunkName: "[request]" */ './pages/App');
+
+        return component;
+      },
       permissions: [
         // Uncomment to set the permissions of the plugin here
         // {
-        //   action: '', // the action name should be plugins::plugin-name.actionType
+        //   action: '', // the action name should be plugin::plugin-name.actionType
         //   subject: null,
         // },
       ],

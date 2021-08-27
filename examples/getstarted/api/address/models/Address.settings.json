@@ -2,7 +2,9 @@
   "kind": "collectionType",
   "collectionName": "addresses",
   "info": {
-    "name": "address",
+    "displayName": "Address",
+    "singularName": "address",
+    "pluralName": "addresses",
     "description": ""
   },
   "options": {
@@ -26,7 +28,7 @@
     "categories": {
       "type": "relation",
       "relation": "manyToMany",
-      "target": "application::category.category",
+      "target": "api::category.category",
       "inversedBy": "addresses"
     },
     "cover": {
@@ -64,31 +66,31 @@
       "relation": "manyToMany",
       "type": "relation",
       "inversedBy": "right",
-      "target": "application::address.address"
+      "target": "api::address.address"
     },
     "right": {
       "relation": "manyToMany",
       "type": "relation",
       "mappedBy": "left",
-      "target": "application::address.address"
+      "target": "api::address.address"
     },
     "left_1": {
       "relation": "manyToMany",
       "type": "relation",
       "inversedBy": "right_1",
-      "target": "application::address.address"
+      "target": "api::address.address"
     },
     "likes": {
       "type": "relation",
       "relation": "oneToMany",
-      "target": "application::like.like",
+      "target": "api::like.like",
       "mappedBy": "address"
     },
     "right_1": {
       "relation": "manyToMany",
       "type": "relation",
       "mappedBy": "left_1",
-      "target": "application::address.address"
+      "target": "api::address.address"
     },
     "json": {
       "type": "json",

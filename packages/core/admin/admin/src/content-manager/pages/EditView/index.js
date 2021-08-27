@@ -23,7 +23,7 @@ import InformationCard from './InformationCard';
 import { getTrad } from '../../utils';
 
 const cmPermissions = permissions.contentManager;
-const ctbPermissions = [{ action: 'plugins::content-type-builder.read', subject: null }];
+const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 /* eslint-disable  react/no-array-index-key */
 const EditView = ({

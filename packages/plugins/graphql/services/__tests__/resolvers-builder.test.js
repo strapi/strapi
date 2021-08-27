@@ -39,7 +39,7 @@ describe('Resolvers builder', () => {
       };
 
       const resolver = buildMutation('mutation', {
-        resolver: 'application::my-api.my-controller.myAction',
+        resolver: 'api::my-api.my-controller.myAction',
       });
 
       const result = await resolver(null, {}, graphqlContext);
@@ -54,7 +54,7 @@ describe('Resolvers builder', () => {
       };
 
       const resolver = buildMutation('mutation', {
-        resolver: 'application::my-api.my-controller.myAction',
+        resolver: 'api::my-api.my-controller.myAction',
       });
 
       const result = await resolver(null, {}, graphqlContext);
@@ -67,7 +67,7 @@ describe('Resolvers builder', () => {
       strapi.api['my-api'].controllers['my-controller'].myAction = async () => 'result';
 
       const resolver = buildMutation('mutation', {
-        resolver: 'application::my-api.my-controller.myAction',
+        resolver: 'api::my-api.my-controller.myAction',
       });
 
       const result = await resolver(null, {}, graphqlContext);
@@ -84,7 +84,7 @@ describe('Resolvers builder', () => {
       };
 
       const resolver = buildQuery('mutation', {
-        resolver: 'application::my-api.my-controller.myAction',
+        resolver: 'api::my-api.my-controller.myAction',
       });
 
       const result = await resolver(null, {}, graphqlContext);
@@ -99,7 +99,7 @@ describe('Resolvers builder', () => {
       };
 
       const resolver = buildQuery('mutation', {
-        resolver: 'application::my-api.my-controller.myAction',
+        resolver: 'api::my-api.my-controller.myAction',
       });
 
       const result = await resolver(null, {}, graphqlContext);
@@ -112,7 +112,7 @@ describe('Resolvers builder', () => {
       strapi.api['my-api'].controllers['my-controller'].myAction = async () => 'result';
 
       const resolver = buildQuery('mutation', {
-        resolver: 'application::my-api.my-controller.myAction',
+        resolver: 'api::my-api.my-controller.myAction',
       });
 
       const result = await resolver(null, {}, graphqlContext);

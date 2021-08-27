@@ -14,7 +14,7 @@ module.exports = async function isInitialized(strapi) {
     }
 
     // test if there is at least one admin
-    const anyAdministrator = await strapi.query('strapi::user').findOne({ select: ['id'] });
+    const anyAdministrator = await strapi.query('admin::user').findOne({ select: ['id'] });
 
     return !isNil(anyAdministrator);
   } catch (err) {

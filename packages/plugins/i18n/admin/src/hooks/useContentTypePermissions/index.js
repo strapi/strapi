@@ -6,9 +6,9 @@ const useContentTypePermissions = slug => {
 
   const currentCTRelatedPermissions = collectionTypesRelatedPermissions[slug];
   const readPermissions =
-    currentCTRelatedPermissions['plugins::content-manager.explorer.read'] || [];
+    currentCTRelatedPermissions['plugin::content-manager.explorer.read'] || [];
   const createPermissions =
-    currentCTRelatedPermissions['plugins::content-manager.explorer.create'] || [];
+    currentCTRelatedPermissions['plugin::content-manager.explorer.create'] || [];
 
   return { createPermissions, readPermissions };
 };

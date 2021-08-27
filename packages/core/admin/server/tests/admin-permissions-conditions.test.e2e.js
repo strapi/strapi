@@ -42,20 +42,20 @@ if (edition === 'EE') {
       },
       permissions: [
         {
-          action: 'plugins::content-manager.explorer.create',
-          subject: 'application::article.article',
+          action: 'plugin::content-manager.explorer.create',
+          subject: 'api::article.article',
           fields: null,
           conditions: [],
         },
         {
-          action: 'plugins::content-manager.explorer.read',
-          subject: 'application::article.article',
+          action: 'plugin::content-manager.explorer.read',
+          subject: 'api::article.article',
           fields: null,
           conditions: ['admin::has-same-role-as-creator'],
         },
         {
-          action: 'plugins::content-manager.explorer.delete',
-          subject: 'application::article.article',
+          action: 'plugin::content-manager.explorer.delete',
+          subject: 'api::article.article',
           fields: null,
           conditions: ['admin::is-creator'],
         },
@@ -134,7 +134,7 @@ if (edition === 'EE') {
       const modelName = getModelName();
       const res = await rq({
         method: 'POST',
-        url: `/content-manager/collection-types/application::${modelName}.${modelName}`,
+        url: `/content-manager/collection-types/api::${modelName}.${modelName}`,
         body: localTestData.entry,
       });
 
@@ -148,7 +148,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(0);
       const res = await rq({
         method: 'GET',
-        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -161,7 +161,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(1);
       const res = await rq({
         method: 'GET',
-        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);
@@ -174,7 +174,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(1);
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(403);
@@ -186,7 +186,7 @@ if (edition === 'EE') {
       const rq = getUserRequest(0);
       const res = await rq({
         method: 'DELETE',
-        url: `/content-manager/collection-types/application::${modelName}.${modelName}/${id}`,
+        url: `/content-manager/collection-types/api::${modelName}.${modelName}/${id}`,
       });
 
       expect(res.statusCode).toBe(200);

@@ -29,7 +29,7 @@ const NoContentType = () => {
   const handleClick = () => {
     // TODO change url when CTB ready
     push(
-      '/plugins/content-type-builder/content-types/plugins::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
+      '/plugins/content-type-builder/content-types/plugin::users-permissions.user?modalType=contentType&kind=collectionType&actionType=create&settingType=base&forTarget=contentType&headerId=content-type-builder.modalForm.contentType.header-create&header_icon_isCustom_1=false&header_icon_name_1=contentType&header_label_1=null'
     );
   };
 
@@ -49,7 +49,7 @@ const NoContentType = () => {
             </Text>
           </Padded>
           <CheckPermissions
-            permissions={[{ action: 'plugins::content-type-builder.read', subject: null }]}
+            permissions={[{ action: 'plugin::content-type-builder.read', subject: null }]}
           >
             <BaselineAlignment top size="14px">
               <Button color="primary" type="button" onClick={handleClick}>

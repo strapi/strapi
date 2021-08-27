@@ -1,7 +1,7 @@
 'use strict';
 
 const addressCT = {
-  uid: 'application::address.address',
+  uid: 'api::address.address',
   settings: {
     bulkable: true,
     filterable: true,
@@ -151,7 +151,7 @@ const addressCT = {
           column: 'id',
           isVirtual: true,
           type: 'relation',
-          targetModel: 'application::category.category',
+          targetModel: 'api::category.category',
           relationType: 'manyToMany',
         },
         metadatas: {
@@ -161,7 +161,7 @@ const addressCT = {
           mainField: { name: 'name', schema: { type: 'string' } },
         },
         queryInfos: {
-          endPoint: 'collection-types/application::address.address',
+          endPoint: 'collection-types/api::address.address',
           defaultParams: {},
         },
       },
@@ -350,7 +350,7 @@ const addressCT = {
           column: 'id',
           isVirtual: true,
           type: 'relation',
-          targetModel: 'application::category.category',
+          targetModel: 'api::category.category',
           relationType: 'manyToMany',
         },
         metadatas: {
@@ -362,7 +362,7 @@ const addressCT = {
           mainField: { name: 'name', schema: { type: 'string' } },
         },
         queryInfos: {
-          endPoint: '/content-manager/relations/application::address.address/categories',
+          endPoint: '/content-manager/relations/api::address.address/categories',
           containsKey: 'name_contains',
           defaultParams: {},
           shouldDisplayRelationLink: true,
@@ -377,7 +377,7 @@ const addressCT = {
           via: 'address',
           isVirtual: true,
           type: 'relation',
-          targetModel: 'application::like.like',
+          targetModel: 'api::like.like',
           relationType: 'oneToMany',
         },
         metadatas: {
@@ -389,7 +389,7 @@ const addressCT = {
           mainField: { name: 'id', schema: { type: 'integer' } },
         },
         queryInfos: {
-          endPoint: '/content-manager/relations/application::address.address/likes',
+          endPoint: '/content-manager/relations/api::address.address/likes',
           containsKey: 'id_contains',
           defaultParams: {},
           shouldDisplayRelationLink: true,
@@ -420,7 +420,7 @@ const addressCT = {
       column: 'id',
       isVirtual: true,
       type: 'relation',
-      targetModel: 'application::category.category',
+      targetModel: 'api::category.category',
       relationType: 'manyToMany',
     },
     cover: {
@@ -448,7 +448,7 @@ const addressCT = {
       via: 'address',
       isVirtual: true,
       type: 'relation',
-      targetModel: 'application::like.like',
+      targetModel: 'api::like.like',
       relationType: 'oneToMany',
     },
     json: { type: 'json', pluginOptions: { i18n: { localized: true } } },

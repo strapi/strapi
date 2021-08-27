@@ -6,7 +6,6 @@ import pluginLogo from './assets/images/logo.svg';
 import CheckboxConfirmation from './components/CheckboxConfirmation';
 import CMEditViewInjectedComponents from './components/CMEditViewInjectedComponents';
 import Initializer from './components/Initializer';
-import SettingsPage from './pages/SettingsPage';
 import LocalePicker from './components/LocalePicker';
 import middlewares from './middlewares';
 import pluginPermissions from './permissions';
@@ -64,7 +63,14 @@ export default {
       },
       id: 'internationalization',
       to: '/settings/internationalization',
-      Component: SettingsPage,
+
+      Component: async () => {
+        const component = await import(
+          /* webpackChunkName: "i18n-settings-page" */ './pages/SettingsPage'
+        );
+
+        return component;
+      },
       permissions: pluginPermissions.accessMain,
     });
 

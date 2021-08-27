@@ -46,7 +46,7 @@ const shopModel = {
     products: {
       type: 'relation',
       relation: 'manyToMany',
-      target: 'application::product.product',
+      target: 'api::product.product',
       targetAttribute: 'shops',
     },
   },
@@ -108,7 +108,7 @@ describe('Relation-list route', () => {
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/relations/application::shop.shop/products',
+        url: '/content-manager/relations/api::shop.shop/products',
       });
 
       expect(res.body).toHaveLength(data.products.length);
@@ -120,7 +120,7 @@ describe('Relation-list route', () => {
     test('Can get relation-list for products of a shop and omit some results', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/relations/application::shop.shop/products',
+        url: '/content-manager/relations/api::shop.shop/products',
         body: {
           idsToOmit: [data.products[0].id],
         },
@@ -156,7 +156,7 @@ describe('Relation-list route', () => {
     test('Can get relation-list for products of a shop', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/relations/application::shop.shop/products',
+        url: '/content-manager/relations/api::shop.shop/products',
       });
 
       expect(res.body).toHaveLength(data.products.length);
@@ -175,7 +175,7 @@ describe('Relation-list route', () => {
     test('Can get relation-list for products of a shop and omit some results', async () => {
       const res = await rq({
         method: 'POST',
-        url: '/content-manager/relations/application::shop.shop/products',
+        url: '/content-manager/relations/api::shop.shop/products',
         body: {
           idsToOmit: [data.products[1].id],
         },
