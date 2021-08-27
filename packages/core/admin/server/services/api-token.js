@@ -32,8 +32,8 @@ const exists = async (whereParams = {}) => {
  */
 const hash = accessKey => {
   return crypto
-    .createHash('sha512')
-    .update(`${strapi.config.get('server.admin.api-token.salt')}${accessKey}`)
+    .createHmac('sha512', strapi.config.get('server.admin.api-token.salt'))
+    .update(accessKey)
     .digest('hex');
 };
 
