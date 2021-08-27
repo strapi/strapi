@@ -23,28 +23,43 @@ const UpgradePlanModal = ({ isOpen, onToggle }) => {
           <Padded top size="smd">
             <Padded top size="xs">
               <Text fontSize="xl" fontWeight="bold" lineHeight="24px">
-                {formatMessage({ id: 'app.components.UpgradePlanModal.limit-reached' })}
+                {formatMessage({
+                  id: 'app.components.UpgradePlanModal.limit-reached',
+                  defaultMessage: 'You have reached the limit',
+                })}
               </Text>
             </Padded>
           </Padded>
           <Padded style={{ maxWidth: 405 }} top size="smd">
             <Text color="black" lineHeight="18px">
               <Text as="span" fontSize="md" fontWeight="semiBold">
-                {formatMessage({ id: 'app.components.UpgradePlanModal.text-power' })}
+                {formatMessage({
+                  id: 'app.components.UpgradePlanModal.text-power',
+                  defaultMessage: 'Unlock the full power',
+                })}
               </Text>
               &nbsp;
               <Text as="span" fontSize="md">
-                {formatMessage({ id: 'app.components.UpgradePlanModal.text-strapi' })}
+                {formatMessage({
+                  id: 'app.components.UpgradePlanModal.text-strapi',
+                  defaultMessage: 'of Strapi by upgrading your plan to the',
+                })}
               </Text>
               <br />
               <Text as="span" fontSize="md" fontWeight="semiBold">
-                {formatMessage({ id: 'app.components.UpgradePlanModal.text-ee' })}
+                {formatMessage({
+                  id: 'app.components.UpgradePlanModal.text-ee',
+                  defaultMessage: 'Enterprise Edititon',
+                })}
               </Text>
             </Text>
           </Padded>
           <Padded top size="md">
             <Button color="primary" onClick={handleClick} style={{ paddingRight: 0 }}>
-              {formatMessage({ id: 'app.components.UpgradePlanModal.button' })}
+              {formatMessage({
+                id: 'app.components.UpgradePlanModal.button',
+                defaultMessage: 'LEARN MORE',
+              })}
               <Download />
             </Button>
           </Padded>
