@@ -2,7 +2,7 @@
 
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 
-module.exports = (plop) => {
+module.exports = plop => {
   // Policy generator
   plop.setGenerator('policy', {
     description: 'Generate a policy for an API',
@@ -21,7 +21,7 @@ module.exports = (plop) => {
       } else if (answers.destination === 'plugin') {
         filePath = `plugins/{{plugin}}`;
       } else {
-        filePath = ``;
+        filePath = `./`;
       }
 
       return [

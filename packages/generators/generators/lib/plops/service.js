@@ -3,7 +3,7 @@
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
 
-module.exports = (plop) => {
+module.exports = plop => {
   // Service generator
   plop.setGenerator('service', {
     description: 'Generate a service for an API',

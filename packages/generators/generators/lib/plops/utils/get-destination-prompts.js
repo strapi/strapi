@@ -30,8 +30,9 @@ module.exports = (action, basePath) => {
           throw Error('Couldn\'t find an "api" directory');
         }
 
-        const apiDir = await fs.readdir(apiPath);
-        const apiDirContent = apiDir.filter(api => fs.lstatSync(join(apiPath, api)).isDirectory());
+        const apiDir = await fs.readdir(apiPath, { withFileTypes: true });
+        const apiDirContent = apiDir.filter(fd => fd.isDirectory());
+
         if (apiDirContent.length === 0) {
           throw Error('The "api" directory is empty');
         }
@@ -45,7 +46,7 @@ module.exports = (action, basePath) => {
       message: 'Which plugin is this for?',
       name: 'plugin',
       choices: async () => {
-        const pluginsPath =  join(basePath, 'plugins');
+        const pluginsPath = join(basePath, 'plugins');
         const exists = await fs.pathExists(pluginsPath);
 
         if (!exists) {

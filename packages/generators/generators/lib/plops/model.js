@@ -2,6 +2,7 @@
 
 const getDestinationPrompts = require('./utils/get-destination-prompts');
 const getFilePath = require('./utils/get-file-path');
+const validateInput = require('./utils/validate-input');
 
 const DEFAULT_TYPES = [
   // advanced types
@@ -32,6 +33,7 @@ const promptConfigQuestions = (plop, inquirer) => {
       type: 'input',
       name: 'id',
       message: 'Model name',
+      validate: input => validateInput(input),
     },
     {
       type: 'list',
@@ -41,6 +43,7 @@ const promptConfigQuestions = (plop, inquirer) => {
         { name: 'Collection Type', value: 'collectionType' },
         { name: 'Singe Type', value: 'singleType' },
       ],
+      validate: input => validateInput(input),
     },
     ...getDestinationPrompts('model', plop.getDestBasePath()),
     {
@@ -62,6 +65,7 @@ const promptAttributeQuestions = inquirer => {
       type: 'input',
       name: 'attributeName',
       message: 'Name of attribute',
+      validate: input => validateInput(input),
     },
     {
       type: 'list',

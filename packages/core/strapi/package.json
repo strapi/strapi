@@ -16,7 +16,7 @@
     "@koa/cors": "^3.0.0",
     "@strapi/admin": "3.6.8",
     "@strapi/database": "3.6.8",
-    "@strapi/generate": "3.6.8",
+    "@strapi/generators": "3.6.8",
     "@strapi/generate-new": "3.6.8",
     "@strapi/logger": "3.6.8",
     "@strapi/utils": "3.6.8",

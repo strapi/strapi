@@ -124,7 +124,8 @@ program
   .description('Launch interactive API generator')
   .action(() => {
     checkCwdIsStrapiApp('generate');
-    require('@strapi/generate').execute();
+    process.argv.splice(2, 1);
+    require('@strapi/generators').runCLI();
   });
 
 // `$ strapi generate:template <directory>`

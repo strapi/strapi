@@ -5,7 +5,7 @@
 testApp/**
 examples/**
 cypress/**
-packages/generators/generate/files/
+packages/generators/generators/lib/files/
 packages/core/helper-plugin/build/**
 packages/core/helper-plugin/lib/src/components/**
 packages/core/helper-plugin/lib/src/testUtils/**

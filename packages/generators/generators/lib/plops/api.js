@@ -33,10 +33,8 @@ module.exports = plop => {
             throw Error('Couldn\'t find a "plugins" directory');
           }
 
-          const pluginsDir = await fs.readdir(pluginsPath);
-          const pluginsDirContent = pluginsDir.filter(api =>
-            fs.lstatSync(join(pluginsPath, api)).isDirectory()
-          );
+          const pluginsDir = await fs.readdir(pluginsPath, { withFileTypes: true });
+          const pluginsDirContent = pluginsDir.filter(fd => fd.isDirectory());
 
           if (pluginsDirContent.length === 0) {
             throw Error('The "plugins" directory is empty');

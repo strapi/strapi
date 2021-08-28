@@ -1,21 +1,29 @@
 'use strict';
 
-process.argv.splice(2, 1);
-
 const { join } = require('path');
 const { Plop, run } = require('plop');
 const nodePlop = require('node-plop');
 
-const execute = () => {
+/**
+ * Starts the Plop CLI programmatically
+ */
+const runCLI = () => {
   Plop.launch({ configPath: join(__dirname, 'plopfile.js') }, env =>
     run({ ...env, dest: process.cwd() }, undefined, true)
   );
 };
 
-const generate = async (action, options, { dir = process.cwd() } = {}) => {
+/**
+ * Runs a generator programmatically without prompts
+ * @param {string} generatorName
+ * @param {Object} options generator options replacing the prompts answers
+ * @param {Object} plopOptions
+ * @param {string} plopOptions.dir base path for plop to generate the files from
+ */
+const generate = async (generatorName, options, { dir = process.cwd() } = {}) => {
   const plop = nodePlop(join(__dirname, 'plopfile.js'), { destBasePath: dir });
 
-  const generator = plop.getGenerator(action);
+  const generator = plop.getGenerator(generatorName);
   await generator.runActions(options, {
     onSuccess: () => {},
     onFailure: () => {},
@@ -25,5 +33,5 @@ const generate = async (action, options, { dir = process.cwd() } = {}) => {
 
 module.exports = {
   generate,
-  execute,
+  runCLI,
 };

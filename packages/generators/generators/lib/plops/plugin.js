@@ -1,9 +1,6 @@
 'use strict';
 
-const { join } = require('path');
-const fs = require('fs-extra');
-
-module.exports = (plop) => {
+module.exports = plop => {
   // Plugin generator
   plop.setGenerator('plugin', {
     description: 'Generate a basic plugin',
@@ -14,9 +11,14 @@ module.exports = (plop) => {
         message: 'Plugin name',
       },
     ],
-    actions: answers => {
-      fs.copySync(join(__dirname, '..', 'files', 'plugin'), join('plugins', answers.id));
+    actions: () => {
       return [
+        {
+          type: 'addMany',
+          destination: 'plugins/{{id}}/admin',
+          base: 'files/plugin/admin',
+          templateFiles: 'files/plugin/admin/**',
+        },
         {
           type: 'add',
           path: 'plugins/{{id}}/services/{{id}}.js',
