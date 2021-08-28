@@ -2,21 +2,17 @@
 
 const path = require('path');
 const fse = require('fs-extra');
-const _ = require('lodash');
 
 /**
  * Deletes the API folder of a contentType
  * @param {string} uid content type uid
  */
 async function clear(uid) {
-  const { apiName, __filename__ } = strapi.contentTypes[uid];
+  const { apiName, modelName } = strapi.contentTypes[uid];
 
   const apiFolder = path.join(strapi.dir, 'api', apiName);
 
-  // base name of the model file that will be use as comparator
-  const baseName = path.basename(__filename__, '.settings.json');
-
-  await recursiveRemoveFiles(apiFolder, createDeleteApiFunction(baseName));
+  await recursiveRemoveFiles(apiFolder, createDeleteApiFunction(modelName));
   await deleteBackup(uid);
 }
 
@@ -78,51 +74,19 @@ async function rollback(uid) {
  * @param {string} baseName
  */
 const createDeleteApiFunction = baseName => {
-  const startWithBaseName = startWithName(baseName + '.');
-
   /**
    * Delets a file in an api.
    * Will only update routes.json instead of deleting it if other routes are present
    * @param {string} filePath file path to delete
    */
   return async filePath => {
-    const fileName = path.basename(filePath);
+    const fileName = path.basename(filePath, path.extname(filePath));
 
-    if (startWithBaseName(fileName)) return fse.remove(filePath);
-
-    if (fileName === 'routes.json') {
-      const { routes } = await fse.readJSON(filePath);
-
-      const routesToKeep = routes.filter(route => !startWithBaseName(route.handler));
-
-      if (routesToKeep.length === 0) {
-        return fse.remove(filePath);
-      }
-
-      await fse.writeJSON(
-        filePath,
-        {
-          routes: routesToKeep,
-        },
-        {
-          spaces: 2,
-        }
-      );
+    const isSchemaFile = filePath.endsWith(`${baseName}/schema.json`);
+    if (fileName === baseName || isSchemaFile) {
+      return fse.remove(filePath);
     }
   };
-};
-
-/**
- * Returns a function that checks if the passed string starts with the name
- * @param {string} prefix
- * @returns {Function} a comparing function
- */
-const startWithName = prefix => {
-  /**
-   * Checks if str starts with prefix case insensitive
-   * @param {string} str string to compare
-   */
-  return str => _.startsWith(_.toLower(str), _.toLower(prefix));
 };
 
 /**

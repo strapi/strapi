@@ -2,7 +2,7 @@
 
 const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
-const { addNamespace } = require('../utils');
+const { addNamespace, hasNamespace } = require('../utils');
 
 const validateKeySameToSingularName = contentTypes => {
   for (const ctName in contentTypes) {
@@ -23,12 +23,8 @@ const contentTypesRegistry = () => {
     get(ctUID) {
       return contentTypes[ctUID];
     },
-    getAll(prefix = '') {
-      if (!prefix) {
-        return contentTypes;
-      }
-
-      return pickBy((ct, ctUID) => ctUID.startsWith(prefix))(contentTypes);
+    getAll(namespace) {
+      return pickBy((_, uid) => hasNamespace(uid, namespace))(contentTypes);
     },
     add(namespace, rawContentTypes) {
       validateKeySameToSingularName(rawContentTypes);

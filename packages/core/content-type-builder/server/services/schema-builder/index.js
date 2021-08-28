@@ -158,6 +158,7 @@ function createSchemaBuilder({ components, contentTypes }) {
         ...Array.from(tmpComponents.values()),
         ...Array.from(tmpContentTypes.values()),
       ];
+
       return Promise.all(schemas.map(schema => schema.flush()))
         .catch(error => {
           strapi.log.error('Error writing schema files');

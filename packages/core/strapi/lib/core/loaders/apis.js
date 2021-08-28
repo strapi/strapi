@@ -40,7 +40,6 @@ module.exports = async strapi => {
   }
 };
 
-// TODO: function to be moved next to where the api will be loaded
 const validateContentTypesUnicity = apis => {
   const allApisSchemas = Object.values(apis).flatMap(api => Object.values(api.contentTypes));
 
@@ -119,6 +118,7 @@ const loadContentTypes = async dir => {
 
     const contentTypeName = normalizeName(fd.name);
     const contentType = await loadDir(join(dir, fd.name));
+
     contentTypes[normalizeName(contentTypeName)] = _.defaults(contentType, DEFAULT_CONTENT_TYPE);
   }
 

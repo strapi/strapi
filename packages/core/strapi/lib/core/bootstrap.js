@@ -1,14 +1,18 @@
 'use strict';
 
 const _ = require('lodash');
-const { toLower } = require('lodash/fp');
 const { getConfigUrls } = require('@strapi/utils');
 
 module.exports = function(strapi) {
   // TODO: delete v3 code
+  _.forEach(strapi.api, api => {
+    _.forEach(api.middlewares, (middleware, middlewareName) => {
+      strapi.middleware[middlewareName] = middleware;
+    });
+  });
+
   _.forEach(strapi.plugins, plugin => {
-    _.forEach(plugin.middlewares, (middleware, middlewareUID) => {
-      const middlewareName = toLower(middlewareUID.split('.')[1]);
+    _.forEach(plugin.middlewares, (middleware, middlewareName) => {
       strapi.middleware[middlewareName] = middleware;
     });
   });

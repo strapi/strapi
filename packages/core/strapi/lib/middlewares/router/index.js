@@ -7,7 +7,7 @@
 // Public node modules.
 const _ = require('lodash');
 const Router = require('koa-router');
-const createEndpointComposer = require('./utils/composeEndpoint');
+const createEndpointComposer = require('./utils/compose-endpoint');
 
 module.exports = strapi => {
   const composeEndpoint = createEndpointComposer(strapi);

@@ -1,43 +1,41 @@
-'use strict';
-
 module.exports = {
   routes: [
     {
       method: 'GET',
-      path: '/addresses',
-      handler: 'address.find',
+      path: '/{{pluralize id}}',
+      handler: '{{id}}.find',
       config: {
-        policies: ['address'],
+        policies: [],
       },
     },
     {
       method: 'GET',
-      path: '/addresses/:id',
-      handler: 'address.findOne',
+      path: '/{{pluralize id}}/:id',
+      handler: '{{id}}.findOne',
       config: {
         policies: [],
       },
     },
     {
       method: 'POST',
-      path: '/addresses',
-      handler: 'address.create',
+      path: '/{{pluralize id}}',
+      handler: '{{id}}.create',
       config: {
         policies: [],
       },
     },
     {
       method: 'PUT',
-      path: '/addresses/:id',
-      handler: 'address.update',
+      path: '/{{pluralize id}}/:id',
+      handler: '{{id}}.update',
       config: {
         policies: [],
       },
     },
     {
       method: 'DELETE',
-      path: '/addresses/:id',
-      handler: 'address.delete',
+      path: '/{{pluralize id}}/:id',
+      handler: '{{id}}.delete',
       config: {
         policies: [],
       },
