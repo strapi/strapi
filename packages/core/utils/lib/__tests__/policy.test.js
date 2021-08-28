@@ -59,14 +59,11 @@ describe('Policy util', () => {
       const policyFn = () => {};
 
       global.strapi = {
-        api: {
-          'test-api': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
-            },
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'api::test-api.test-policy': policyFn,
         },
       };
 

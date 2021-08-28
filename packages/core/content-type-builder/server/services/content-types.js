@@ -169,7 +169,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   });
 
   if (newKind !== previousKind) {
-    const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+    const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
     await apiHandler.backup(uid);
 
     try {
@@ -196,7 +196,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
 const deleteContentTypes = async uids => {
   const builder = createBuilder();
-  const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 
   for (const uid of uids) {
     await deleteContentType(uid, builder);
@@ -221,7 +221,7 @@ const deleteContentTypes = async uids => {
 const deleteContentType = async (uid, defaultBuilder = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
-  const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
   await apiHandler.backup(uid);
 
   const contentType = builder.deleteContentType(uid);

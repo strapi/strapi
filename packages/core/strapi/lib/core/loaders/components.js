@@ -2,13 +2,13 @@
 
 const { join } = require('path');
 const _ = require('lodash');
-const { exists } = require('fs-extra');
+const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
 module.exports = async strapi => {
   const componentsDir = join(strapi.dir, 'components');
 
-  if (!(await exists(componentsDir))) {
+  if (!(await pathExists(componentsDir))) {
     return {};
   }
 

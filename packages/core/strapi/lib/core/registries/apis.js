@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { has } = require('lodash/fp');
 const { createCoreApi } = require('../../core-api');
 
@@ -14,28 +13,29 @@ const apisRegistry = strapi => {
     getAll() {
       return apis;
     },
-    add(name, apiConfig) {
-      if (has(name, apis)) {
-        throw new Error(`API ${name} has already been registered.`);
+    add(apiName, apiConfig) {
+      if (has(apiName, apis)) {
+        throw new Error(`API ${apiName} has already been registered.`);
       }
 
-      for (const ctName in apiConfig.contentTypes || {}) {
-        const contentType = apiConfig.contentTypes[ctName];
+      const apiInstance = strapi.container.get('modules').add(`api::${apiName}`, apiConfig);
+
+      for (const ctName in apiInstance.contentTypes || {}) {
+        const contentType = apiInstance.contentTypes[ctName];
 
         const { service, controller } = createCoreApi({
           model: contentType,
-          api: apiConfig,
+          api: apiInstance,
           strapi,
         });
 
-        _.set(apiConfig, ['services', ctName], service);
-        _.set(apiConfig, ['controllers', ctName], controller);
+        strapi.container.get('services').set(`api::${apiName}.${ctName}`, service);
+        strapi.container.get('controllers').set(`api::${apiName}.${ctName}`, controller);
       }
 
-      const moduleInstance = strapi.container.get('modules').add(`api::${name}`, apiConfig);
-      apis[name] = moduleInstance;
+      apis[apiName] = apiInstance;
 
-      return apis[name];
+      return apis[apiName];
     },
   };
 };

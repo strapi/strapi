@@ -1,7 +1,7 @@
 'use strict';
 
 const { pickBy, has } = require('lodash/fp');
-const { addNamespace } = require('../utils');
+const { addNamespace, hasNamespace } = require('../utils');
 
 const policiesRegistry = () => {
   const policies = {};
@@ -10,8 +10,8 @@ const policiesRegistry = () => {
     get(policyUID) {
       return policies[policyUID];
     },
-    getAll(prefix = '') {
-      return pickBy((policy, policyUID) => policyUID.startsWith(prefix))(policies);
+    getAll(namespace) {
+      return pickBy((_, uid) => hasNamespace(uid, namespace))(policies);
     },
     add(namespace, newPolicies) {
       for (const policyName in newPolicies) {

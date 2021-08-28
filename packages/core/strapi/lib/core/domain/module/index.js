@@ -1,9 +1,15 @@
 'use strict';
 
 const _ = require('lodash');
+const { removeNamespace } = require('../../utils');
 const { validateModule } = require('./validation');
 
 const uidToPath = uid => uid.replace('::', '.');
+
+// Removes the namespace from a map with keys prefixed with a namespace
+const removeNamespacedKeys = (map, namespace) => {
+  return _.mapKeys(map, (value, key) => removeNamespace(key, namespace));
+};
 
 const defaultModule = {
   config: {},
@@ -63,37 +69,36 @@ const createModule = (namespace, rawModule, strapi) => {
       return strapi.container.get('content-types').get(`${namespace}.${ctName}`);
     },
     get contentTypes() {
-      return strapi.container.get('content-types').getAll(namespace);
+      const contentTypes = strapi.container.get('content-types').getAll(namespace);
+      return removeNamespacedKeys(contentTypes, namespace);
     },
     service(serviceName) {
       return strapi.container.get('services').get(`${namespace}.${serviceName}`);
     },
     get services() {
-      return strapi.container.get('services').getAll(namespace);
+      const services = strapi.container.get('services').getAll(namespace);
+      return removeNamespacedKeys(services, namespace);
     },
     policy(policyName) {
       return strapi.container.get('policies').get(`${namespace}.${policyName}`);
     },
     get policies() {
-      return rawModule.policies;
+      const policies = strapi.container.get('policies').getAll(namespace);
+      return removeNamespacedKeys(policies, namespace);
     },
     middleware(middlewareName) {
       return strapi.container.get('middlewares').get(`${namespace}.${middlewareName}`);
     },
     get middlewares() {
-      return strapi.container.get('middlewares').getAll(namespace);
+      const middlewares = strapi.container.get('middlewares').getAll(namespace);
+      return removeNamespacedKeys(middlewares, namespace);
     },
     controller(controllerName) {
       return strapi.container.get('controllers').get(`${namespace}.${controllerName}`);
     },
     get controllers() {
-      const map = strapi.container.get('controllers').getAll(namespace);
-
-      // TODO: add removeNamespace in getAll(namespace) in registries
-      return _.mapKeys(map, (value, key) => {
-        const name = _.last(key.split('.'));
-        return name;
-      });
+      const controllers = strapi.container.get('controllers').getAll(namespace);
+      return removeNamespacedKeys(controllers, namespace);
     },
   };
 };

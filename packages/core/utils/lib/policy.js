@@ -5,23 +5,14 @@
 
 const _ = require('lodash');
 
-const GLOBAL_PREFIX = 'global::';
 const PLUGIN_PREFIX = 'plugin::';
-const ADMIN_PREFIX = 'admin::';
-const APPLICATION_PREFIX = 'api::';
-
-const getPolicyIn = (container, policy) => {
-  return (
-    _.get(container, ['config', 'policies', policy]) ||
-    _.get(container, ['config', 'policies', _.toLower(policy)])
-  );
-};
-
-const policyExistsIn = (container, policy) => !_.isUndefined(getPolicyIn(container, policy));
+const API_PREFIX = 'api::';
 
 const createPolicy = (policyName, args) => ({ policyName, args });
 
-const resolveHandler = policy => (_.isFunction(policy) ? policy : policy.handler);
+const resolveHandler = policy => {
+  return _.has('handler', policy) ? policy.handler : policy;
+};
 
 const parsePolicy = policy => {
   if (typeof policy === 'string') {
@@ -33,32 +24,21 @@ const parsePolicy = policy => {
 };
 
 const resolvePolicy = policyName => {
-  const resolver = policyResolvers.find(resolver => resolver.exists(policyName));
+  const policy = strapi.policy(policyName);
 
-  return resolver ? resolveHandler(resolver.get)(policyName) : undefined;
+  return resolveHandler(policy);
 };
 
-const searchLocalPolicy = (policy, { pluginName, apiName }) => {
-  let [absoluteApiName, policyName] = policy.split('.');
-  let absoluteApi = _.get(strapi.api, absoluteApiName);
-  const resolver = policyResolvers.find(({ name }) => name === 'plugin');
-
-  if (policyExistsIn(absoluteApi, policyName)) {
-    return resolveHandler(getPolicyIn(absoluteApi, policyName));
+const searchLocalPolicy = (policyName, { pluginName, apiName }) => {
+  if (pluginName) {
+    const policy = strapi.policy(`${PLUGIN_PREFIX}${pluginName}.${policyName}`);
+    return resolveHandler(policy);
   }
 
-  const pluginPolicy = `${PLUGIN_PREFIX}${pluginName}.${policy}`;
-
-  if (pluginName && resolver.exists(pluginPolicy)) {
-    return resolveHandler(resolver.get(pluginPolicy));
+  if (apiName) {
+    const policy = strapi.policy(`${API_PREFIX}${apiName}.${policyName}`);
+    return resolveHandler(policy);
   }
-
-  const api = _.get(strapi.api, apiName);
-  if (api && policyExistsIn(api, policy)) {
-    return resolveHandler(getPolicyIn(api, policy));
-  }
-
-  return undefined;
 };
 
 const globalPolicy = ({ method, endpoint, controller, action, plugin }) => {
@@ -82,60 +62,6 @@ const bodyPolicy = async (ctx, next) => {
     ctx.body = values;
   }
 };
-
-const policyResolvers = [
-  {
-    name: 'api',
-    is(policy) {
-      return _.startsWith(policy, APPLICATION_PREFIX);
-    },
-    exists(policy) {
-      return this.is(policy) && !_.isUndefined(this.get(policy));
-    },
-    get: policy => {
-      const [, policyWithoutPrefix] = policy.split('::');
-      const [api = '', policyName = ''] = policyWithoutPrefix.split('.');
-      // TODO: load policies into the registry & user strapi.policy(policy)
-      return getPolicyIn(_.get(strapi, ['api', api]), policyName);
-    },
-  },
-  {
-    name: 'admin',
-    is(policy) {
-      return _.startsWith(policy, ADMIN_PREFIX);
-    },
-    exists(policy) {
-      return this.is(policy) && !_.isUndefined(this.get(policy));
-    },
-    get(policy) {
-      return strapi.policy(policy);
-    },
-  },
-  {
-    name: 'plugin',
-    is(policy) {
-      return _.startsWith(policy, PLUGIN_PREFIX);
-    },
-    exists(policy) {
-      return this.is(policy) && !_.isUndefined(this.get(policy));
-    },
-    get(policy) {
-      return strapi.policy(policy);
-    },
-  },
-  {
-    name: 'global',
-    is(policy) {
-      return _.startsWith(policy, GLOBAL_PREFIX);
-    },
-    exists(policy) {
-      return this.is(policy) && !_.isUndefined(this.get(policy));
-    },
-    get(policy) {
-      return strapi.policy(policy);
-    },
-  },
-];
 
 const get = (policy, { pluginName, apiName } = {}) => {
   if (typeof policy === 'function') {
