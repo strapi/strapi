@@ -58,4 +58,42 @@ describe('API Token Controller', () => {
       expect(created).toHaveBeenCalled();
     });
   });
+
+  describe('List API tokens', () => {
+    const tokens = [
+      {
+        id: 1,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      },
+      {
+        id: 2,
+        name: 'api-token_tests-name-2',
+        description: 'api-token_tests-description-2',
+        type: 'read-only',
+      },
+    ];
+
+    test('List API tokens successfully', async () => {
+      const list = jest.fn().mockResolvedValue(tokens);
+      const send = jest.fn();
+      const ctx = createContext({}, { send });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              list,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.list(ctx);
+
+      expect(list).toHaveBeenCalled();
+      expect(send).toHaveBeenCalled();
+    });
+  });
 });
