@@ -4,7 +4,7 @@
 // import { useIntl } from 'react-intl';
 // import { BaselineAlignment, useAppInfos } from '@strapi/helper-plugin';
 // import Bloc from '../../components/Bloc';
-// import PageTitle from '../../components/SettingsPageTitle';
+// import { SettingsPageTitle } from '@strapi/helper-plugin';
 // import { Detail, InfoText } from './components';
 
 // const ApplicationInfosPage = () => {
@@ -39,7 +39,7 @@
 
 //   return (
 //     <div>
-//       <PageTitle name="Application" />
+//       <SettingPageTitle name="Application" />
 //       <Header {...headerProps} />
 //       <BaselineAlignment top size="3px" />
 //       <Bloc>

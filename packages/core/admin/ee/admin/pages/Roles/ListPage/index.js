@@ -1,6 +1,7 @@
 import {
   LoadingIndicatorPage,
   PopUpWarning,
+  SettingsPageTitle,
   request,
   useNotification,
   useQuery,
@@ -28,7 +29,6 @@ import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { EmptyRole, RoleRow as BaseRoleRow } from '../../../../../admin/src/components/Roles';
-import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import { useRolesList } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import reducer, { initialState } from './reducer';
@@ -304,7 +304,7 @@ const RoleListPage = () => {
 
   return (
     <Main labelledBy="title">
-      <PageTitle name="Roles" />
+      <SettingsPageTitle name="Roles" />
       <HeaderLayout
         id="title"
         primaryAction={

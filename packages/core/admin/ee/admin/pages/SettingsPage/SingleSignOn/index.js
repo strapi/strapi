@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import {
   CheckPagePermissions,
+  SettingsPageTitle,
   useRBAC,
   LoadingIndicatorPage,
   useFocusWhenNavigate,
@@ -23,7 +24,6 @@ import {
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
 import { getRequestUrl } from '../../../../../admin/src/utils';
-import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import { useRolesList, useSettingsForm } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import schema from './utils/schema';
@@ -68,7 +68,7 @@ export const SingleSignOn = () => {
 
   return (
     <Main labelledBy="title" tabIndex={-1}>
-      <PageTitle name="SSO" />
+      <SettingsPageTitle name="SSO" />
       <form
         onSubmit={e => {
           if (isHeaderButtonDisabled) {

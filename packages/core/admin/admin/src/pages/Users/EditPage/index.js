@@ -2,11 +2,10 @@ import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { get, isEmpty } from 'lodash';
-import { BaselineAlignment, SizedInput, auth } from '@strapi/helper-plugin';
+import { BaselineAlignment, SizedInput, auth, SettingsPageTitle } from '@strapi/helper-plugin';
 import { Col } from 'reactstrap';
 import { Padded } from '@buffetjs/core';
 import PropTypes from 'prop-types';
-import PageTitle from '../../../components/SettingsPageTitle';
 import ContainerFluid from '../../../components/ContainerFluid';
 import FormBloc from '../../../components/FormBloc';
 import { Header } from '../../../components/Settings';
@@ -56,7 +55,7 @@ const EditPage = ({ canUpdate }) => {
 
   return (
     <>
-      <PageTitle name="Users" />
+      <SettingsPageTitle name="Users" />
       <form onSubmit={handleSubmit}>
         <ContainerFluid padding="0">
           <Header

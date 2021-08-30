@@ -2,6 +2,7 @@ import {
   CheckPagePermissions,
   Form,
   LoadingIndicatorPage,
+  SettingsPageTitle,
   request,
   useNotification,
   useOverlayBlocker,
@@ -29,7 +30,6 @@ import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import Permissions from '../../../../../admin/src/components/Roles/Permissions';
-import PageTitle from '../../../../../admin/src/components/SettingsPageTitle';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import schema from './utils/schema';
@@ -118,7 +118,7 @@ const CreatePage = () => {
 
   return (
     <Main labelledBy="title">
-      <PageTitle name="Roles" />
+      <SettingsPageTitle name="Roles" />
       <Formik
         initialValues={{ name: '', description: defaultDescription }}
         onSubmit={handleCreateRoleSubmit}

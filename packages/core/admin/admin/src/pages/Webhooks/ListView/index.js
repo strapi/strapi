@@ -14,6 +14,7 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useFocusWhenNavigate,
+  SettingsPageTitle,
 } from '@strapi/helper-plugin';
 
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
@@ -35,7 +36,6 @@ import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import reducer, { initialState } from './reducer';
-import PageTitle from '../../../components/SettingsPageTitle';
 import adminPermissions from '../../../permissions';
 
 function ListView() {
@@ -229,7 +229,7 @@ function ListView() {
 
   return (
     <Layout>
-      <PageTitle name="Webhooks" />
+      <SettingsPageTitle name="Webhooks" />
       <Main labelledBy="webhooks" aria-busy={isLoading || loadingWebhooks}>
         <>
           <HeaderLayout

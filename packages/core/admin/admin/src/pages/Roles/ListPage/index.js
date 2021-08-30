@@ -1,4 +1,4 @@
-import { useQuery, useTracking } from '@strapi/helper-plugin';
+import { SettingsPageTitle, useQuery, useTracking } from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, EditIcon, Duplicate } from '@strapi/icons';
 import {
   Button,
@@ -19,7 +19,6 @@ import React, { useCallback, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router';
 import { EmptyRole, RoleRow } from '../../../components/Roles';
-import PageTitle from '../../../components/SettingsPageTitle';
 import UpgradePlanModal from '../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../hooks';
 
@@ -102,7 +101,7 @@ const RoleListPage = () => {
 
   return (
     <Main labelledBy="title">
-      <PageTitle name="Roles" />
+      <SettingsPageTitle name="Roles" />
       <HeaderLayout
         id="title"
         primaryAction={
