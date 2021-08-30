@@ -42,6 +42,14 @@ const contentTypesRegistry = () => {
         contentTypes[uid] = createContentType(uid, rawContentTypes[rawCtName]);
       }
     },
+    extend(ctUID, extendFn) {
+      const currentContentType = this.get(ctUID);
+      if (!currentContentType) {
+        throw new Error(`Content-Type ${ctUID} doesn't exist`);
+      }
+      const newContentType = extendFn(currentContentType);
+      contentTypes[ctUID] = newContentType;
+    },
   };
 };
 

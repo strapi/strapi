@@ -39,6 +39,14 @@ const servicesRegistry = strapi => {
         services[uid] = service;
       }
     },
+    extend(serviceUID, extendFn) {
+      const currentService = this.get(serviceUID);
+      if (!currentService) {
+        throw new Error(`Service ${serviceUID} doesn't exist`);
+      }
+      const newService = extendFn(currentService);
+      instanciatedServices[serviceUID] = newService;
+    },
   };
 };
 

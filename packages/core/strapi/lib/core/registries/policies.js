@@ -24,6 +24,14 @@ const policiesRegistry = () => {
         policies[uid] = policy;
       }
     },
+    extend(policyUID, extendFn) {
+      const currentPolicy = this.get(policyUID);
+      if (!currentPolicy) {
+        throw new Error(`Policy ${policyUID} doesn't exist`);
+      }
+      const newPolicy = extendFn(currentPolicy);
+      policies[policyUID] = newPolicy;
+    },
   };
 };
 
