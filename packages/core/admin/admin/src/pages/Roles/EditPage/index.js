@@ -22,7 +22,7 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/roles/:id');
-  const [, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmiting] = useState(false);
   const permissionsRef = useRef();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const { trackUsage } = useTracking();
@@ -118,7 +118,11 @@ const EditPage = () => {
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button disabled={role.code === 'strapi-super-admin'} onClick={handleSubmit}>
+                    <Button
+                      disabled={role.code === 'strapi-super-admin'}
+                      onClick={handleSubmit}
+                      loading={isSubmitting}
+                    >
                       {formatMessage({
                         id: 'app.components.Button.save',
                         defaultMessage: 'Save',
