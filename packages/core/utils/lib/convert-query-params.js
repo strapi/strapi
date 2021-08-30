@@ -10,37 +10,74 @@ const _ = require('lodash');
 // const BOOLEAN_OPERATORS = ['or', 'and'];
 const QUERY_OPERATORS = ['_where', '_or', '_and'];
 
+class InvalidOrderError extends Error {
+  constructor() {
+    super();
+    this.message = 'Invalid order. order can only be one of asc|desc|ASC|DESC';
+  }
+}
+class InvalidSortError extends Error {
+  constructor() {
+    super();
+    this.message =
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort object';
+  }
+}
+
+const validateOrder = order => {
+  if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
+    throw new InvalidOrderError();
+  }
+};
+
 /**
  * Sort query parser
  * @param {string} sortQuery - ex: id:asc,price:desc
  */
 const convertSortQueryParams = sortQuery => {
+  if (typeof sortQuery === 'string') {
+    return sortQuery.split(',').map(value => convertSingleSortQueryParam(value));
+  }
+
   if (Array.isArray(sortQuery)) {
     return sortQuery.flatMap(sortValue => convertSortQueryParams(sortValue));
   }
 
-  if (typeof sortQuery !== 'string') {
-    throw new Error(`convertSortQueryParams expected a string, got ${typeof sortQuery}`);
+  if (_.isPlainObject(sortQuery)) {
+    return convertNestedSortQueryParam(sortQuery);
   }
 
-  const sortKeys = [];
+  throw new InvalidSortError();
+};
 
-  sortQuery.split(',').forEach(part => {
-    // split field and order param with default order to ascending
-    const [field, order = 'asc'] = part.split(':');
+const convertSingleSortQueryParam = sortQuery => {
+  // split field and order param with default order to ascending
+  const [field, order = 'asc'] = sortQuery.split(':');
 
-    if (field.length === 0) {
-      throw new Error('Field cannot be empty');
+  if (field.length === 0) {
+    throw new Error('Field cannot be empty');
+  }
+
+  validateOrder(order);
+
+  return _.set({}, field, order);
+};
+
+const convertNestedSortQueryParam = sortQuery => {
+  const transformedSort = {};
+  for (const field in sortQuery) {
+    const order = sortQuery[field];
+
+    // this is a deep sort
+    if (_.isPlainObject(order)) {
+      transformedSort[field] = convertNestedSortQueryParam(order);
+    } else {
+      validateOrder(order);
+      transformedSort[field] = order;
     }
+  }
 
-    if (!['asc', 'desc'].includes(order.toLocaleLowerCase())) {
-      throw new Error('order can only be one of asc|desc|ASC|DESC');
-    }
-
-    sortKeys.push(_.set({}, field, order.toLowerCase()));
-  });
-
-  return sortKeys;
+  return transformedSort;
 };
 
 /**
@@ -71,6 +108,14 @@ const convertLimitQueryParams = limitQuery => {
   return limitAsANumber;
 };
 
+class InvalidPopulateError extends Error {
+  constructor() {
+    super();
+    this.message =
+      'Invalid populate parameter. Expected a string, an array of strings, a populate object';
+  }
+}
+
 // NOTE: we could support foo.* or foo.bar.* etc later on
 const convertPopulateQueryParams = (populate, depth = 0) => {
   if (depth === 0 && populate === '*') {
@@ -83,7 +128,13 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
 
   if (Array.isArray(populate)) {
     // map convert
-    return populate.flatMap(value => convertPopulateQueryParams(value, depth + 1));
+    return populate.flatMap(value => {
+      if (typeof value !== 'string') {
+        throw new InvalidPopulateError();
+      }
+
+      return value.split(',').map(value => _.trim(value));
+    });
   }
 
   if (_.isPlainObject(populate)) {
@@ -94,9 +145,7 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
     return transformedPopulate;
   }
 
-  throw new Error(
-    'Invalid populate parameter. Expected a string, an array of strings or a populate object'
-  );
+  throw new InvalidPopulateError();
 };
 
 const convertNestedPopulate = subPopulate => {
