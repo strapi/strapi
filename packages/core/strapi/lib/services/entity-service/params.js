@@ -7,6 +7,8 @@ const {
   convertSortQueryParams,
   convertLimitQueryParams,
   convertStartQueryParams,
+  convertPopulateQueryParams,
+  convertFiltersQueryParams,
 } = require('@strapi/utils/lib/convert-rest-query-params');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
@@ -60,7 +62,7 @@ const transformParamsToQuery = (uid, params = {}) => {
   }
 
   if (filters) {
-    query.where = filters;
+    query.where = convertFiltersQueryParams(filters);
   }
 
   if (_where) {
@@ -70,21 +72,11 @@ const transformParamsToQuery = (uid, params = {}) => {
   }
 
   if (fields) {
-    // TODO: handle *.* syntax
     query.select = _.castArray(fields);
   }
 
   if (populate) {
-    // TODO: handle *.* syntax
-    const { populate } = params;
-
-    if (populate === '*') {
-      query.populate = true;
-    } else if (typeof populate === 'object') {
-      query.populate = populate;
-    } else {
-      query.populate = _.castArray(populate);
-    }
+    query.populate = convertPopulateQueryParams(populate);
   }
 
   // TODO: move to layer above ?
