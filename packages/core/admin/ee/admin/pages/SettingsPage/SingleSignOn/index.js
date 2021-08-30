@@ -16,7 +16,7 @@ import {
   Grid,
   GridItem,
   Layout,
-  ToggleCheckbox,
+  ToggleInput,
   Select,
   Option,
 } from '@strapi/parts';
@@ -67,7 +67,7 @@ export const SingleSignOn = () => {
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 
   return (
-    <Main abelledBy="title" tabIndex={-1}>
+    <Main labelledBy="title" tabIndex={-1}>
       <PageTitle name="SSO" />
       <form
         onSubmit={e => {
@@ -109,8 +109,8 @@ export const SingleSignOn = () => {
               <Stack size={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Grid gap={4}>
-                    <GridItem col="6" xs="12">
-                      <ToggleCheckbox
+                    <GridItem col="6" m="6" s="12">
+                      <ToggleInput
                         aria-label="autoRegister"
                         data-testid="autoRegister"
                         disabled={!canUpdate}
@@ -118,6 +118,10 @@ export const SingleSignOn = () => {
                         hint={formatMessage({
                           id: 'Settings.sso.form.registration.description',
                           defaultMessage: 'Create new user on SSO login if no account exists',
+                        })}
+                        label={formatMessage({
+                          id: 'Settings.sso.form.registration.label',
+                          defaultMessage: 'Auto-registration',
                         })}
                         name="autoRegister"
                         offLabel={formatMessage({
@@ -133,14 +137,9 @@ export const SingleSignOn = () => {
                             target: { name: 'autoRegister', value: e.target.checked },
                           });
                         }}
-                      >
-                        {formatMessage({
-                          id: 'Settings.sso.form.registration.label',
-                          defaultMessage: 'Auto-registration',
-                        })}
-                      </ToggleCheckbox>
+                      />
                     </GridItem>
-                    <GridItem col="6" xs="12">
+                    <GridItem col="6" m="6" s="12">
                       <Select
                         disabled={!canUpdate}
                         hint={formatMessage({

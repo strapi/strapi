@@ -250,6 +250,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       }
 
       <main
+        aria-labelledby="title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -280,6 +281,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                   aria-disabled="true"
                   class="c6 c7"
                   data-testid="save-button"
+                  disabled=""
                   type="submit"
                 >
                   <div

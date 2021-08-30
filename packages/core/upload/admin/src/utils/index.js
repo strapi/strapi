@@ -1,3 +1,4 @@
+export { default as axiosInstance } from './axiosInstance';
 export { default as canDownloadFile } from './canDownloadFile';
 export { default as compactParams } from './compactParams';
 export { default as createFileToDownloadName } from './createFileToDownloadName';
