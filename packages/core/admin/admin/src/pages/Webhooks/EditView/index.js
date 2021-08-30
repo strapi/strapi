@@ -14,7 +14,7 @@ import {
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { BackIcon, CheckIcon, Publish } from '@strapi/icons';
-import { Button, HeaderLayout, Link, Main, Stack } from '@strapi/parts';
+import { Button, HeaderLayout, Link, Main, Stack, ContentLayout, Box } from '@strapi/parts';
 import { get, isEmpty, isEqual, omit } from 'lodash';
 import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -386,39 +386,43 @@ function EditView() {
             />
           </div>
         )}
-        <div className="form-wrapper">
-          <div className="form-card">
-            <div className="row">
-              {Object.keys(form).map(key => {
-                return (
-                  <div key={key} className={form[key].styleName}>
-                    <InputsIndex
-                      {...form[key]}
-                      customInputs={{
-                        headers: Inputs,
-                        events: Inputs,
-                      }}
-                      label={formatMessage({
-                        id: form[key].label,
-                      })}
-                      error={getErrorMessage(get(formErrors, key, null))}
-                      name={key}
-                      onChange={handleChange}
-                      shouldShowDPEvents={shouldShowDPEvents}
-                      validations={form[key].validations}
-                      value={modifiedData[key] || form[key].value}
-                      {...(form[key].type === 'headers' && {
-                        onClick: handleClick,
-                        onRemove: handleRemove,
-                        customError: formattedErrors,
-                      })}
-                    />
-                  </div>
-                );
-              })}
+        <ContentLayout>
+          <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
+            <div className="form-wrapper">
+              <div className="form-card">
+                <div className="row">
+                  {Object.keys(form).map(key => {
+                    return (
+                      <div key={key} className={form[key].styleName}>
+                        <InputsIndex
+                          {...form[key]}
+                          customInputs={{
+                            headers: Inputs,
+                            events: Inputs,
+                          }}
+                          label={formatMessage({
+                            id: form[key].label,
+                          })}
+                          error={getErrorMessage(get(formErrors, key, null))}
+                          name={key}
+                          onChange={handleChange}
+                          shouldShowDPEvents={shouldShowDPEvents}
+                          validations={form[key].validations}
+                          value={modifiedData[key] || form[key].value}
+                          {...(form[key].type === 'headers' && {
+                            onClick: handleClick,
+                            onRemove: handleRemove,
+                            customError: formattedErrors,
+                          })}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
+          </Box>
+        </ContentLayout>
       </form>
     </Main>
   );
