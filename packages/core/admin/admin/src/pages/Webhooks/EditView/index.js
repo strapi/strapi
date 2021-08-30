@@ -4,26 +4,25 @@
  *
  */
 
-import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { useHistory, useRouteMatch } from 'react-router-dom';
-import { get, isEmpty, isEqual, omit } from 'lodash';
-import { Header, Inputs as InputsIndex } from '@buffetjs/custom';
-import { Play } from '@buffetjs/icons';
+import { Inputs as InputsIndex } from '@buffetjs/custom';
 import {
-  request,
   getYupInnerErrors,
-  BackHeader,
   LoadingIndicatorPage,
+  request,
+  SettingsPageTitle,
   useNotification,
   useOverlayBlocker,
-  SettingsPageTitle,
 } from '@strapi/helper-plugin';
+import { BackIcon, CheckIcon, Publish } from '@strapi/icons';
+import { Button, HeaderLayout, Link, Main, Stack } from '@strapi/parts';
+import { get, isEmpty, isEqual, omit } from 'lodash';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { useModels } from '../../../hooks';
+import { useHistory, useRouteMatch } from 'react-router-dom';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
+import { useModels } from '../../../hooks';
 import reducer, { initialState } from './reducer';
 import { cleanData, form, schema } from './utils';
-import Wrapper from './Wrapper';
 
 function EditView() {
   const { isLoading: isLoadingForModels, collectionTypes } = useModels();
@@ -37,7 +36,7 @@ function EditView() {
     { formErrors, modifiedData, initialData, isLoading, isTriggering, triggerResponse },
     dispatch,
   ] = useReducer(reducer, initialState);
-  const { push, replace } = useHistory();
+  const { replace } = useHistory();
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
@@ -99,66 +98,6 @@ function EditView() {
 
       return obj;
     }, {});
-
-  /* eslint-disable indent */
-  const headerTitle = isCreating
-    ? formatMessage({
-        id: 'Settings.webhooks.create',
-      })
-    : initialData.name;
-
-  const headersActions = [
-    {
-      color: 'primary',
-      disabled: isTriggerActionDisabled,
-      label: formatMessage({
-        id: 'Settings.webhooks.trigger',
-      }),
-      onClick: () => handleTrigger(),
-      title: isTriggerActionDisabled
-        ? formatMessage({
-            id: 'Settings.webhooks.trigger.save',
-          })
-        : null,
-      type: 'button',
-      icon: (
-        <Play width="8px" height="10px" fill={isTriggerActionDisabled ? '#b4b6ba' : '#ffffff'} />
-      ),
-    },
-    {
-      color: 'cancel',
-      disabled: areActionDisabled,
-      label: formatMessage({
-        id: 'app.components.Button.reset',
-      }),
-      onClick: () => handleReset(),
-      style: {
-        paddingLeft: '20px',
-        paddingRight: '20px',
-      },
-      type: 'button',
-    },
-    {
-      color: 'success',
-      disabled: areActionDisabled,
-      label: formatMessage({
-        id: 'app.components.Button.save',
-      }),
-      isLoading: isSubmitting,
-      style: {
-        minWidth: 140,
-      },
-      type: 'submit',
-    },
-  ];
-  /* eslint-enable indent */
-
-  const headerProps = {
-    title: {
-      label: headerTitle,
-    },
-    actions: headersActions,
-  };
 
   const checkFormErrors = async (submit = false) => {
     try {
@@ -223,8 +162,6 @@ function EditView() {
       id: error.id,
     });
   };
-
-  const goToList = () => push('/settings/webhooks');
 
   const handleChange = ({ target: { name, value } }) => {
     dispatch({
@@ -390,12 +327,56 @@ function EditView() {
     return <LoadingIndicatorPage />;
   }
 
+  console.log(form);
+
   return (
-    <Wrapper>
+    <Main labelledBy="title">
       <SettingsPageTitle name="Webhooks" />
-      <BackHeader onClick={goToList} />
+      <HeaderLayout
+        id="title"
+        primaryAction={
+          <Stack horizontal size={2}>
+            <Button
+              onClick={handleTrigger}
+              variant="tertiary"
+              startIcon={<Publish />}
+              disabled={isTriggerActionDisabled}
+            >
+              {formatMessage({
+                id: 'Settings.webhooks.trigger',
+                defaultMessage: 'Trigger',
+              })}
+            </Button>
+            <Button variant="secondary" onClick={handleReset}>
+              {formatMessage({
+                id: 'app.components.Button.reset',
+                defaultMessage: 'Reset',
+              })}
+            </Button>
+            <Button startIcon={<CheckIcon />} onClick={handleSubmit} loading={isSubmitting}>
+              {formatMessage({
+                id: 'app.components.Button.save',
+                defaultMessage: 'Save',
+              })}
+            </Button>
+          </Stack>
+        }
+        title={
+          isCreating
+            ? formatMessage({
+                id: 'Settings.webhooks.create',
+                defaultMessage: 'Create a webhook',
+              })
+            : initialData.name
+        }
+        navigationAction={
+          <Link startIcon={<BackIcon />} to="/settings/webhooks">
+            Go back
+          </Link>
+        }
+        as="h1"
+      />
       <form onSubmit={handleSubmit}>
-        <Header {...headerProps} />
         {(isTriggering || !isEmpty(triggerResponse)) && (
           <div className="trigger-wrapper">
             <TriggerContainer
@@ -439,7 +420,7 @@ function EditView() {
           </div>
         </div>
       </form>
-    </Wrapper>
+    </Main>
   );
 }
 
