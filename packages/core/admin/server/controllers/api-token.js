@@ -6,7 +6,7 @@ const { validateApiTokenCreationInput } = require('../validation/api-tokens');
 
 module.exports = {
   async create(ctx) {
-    const { body: attributes } = ctx.request;
+    const { body } = ctx.request;
     const apiTokenService = getService('api-token');
 
     /**
@@ -14,8 +14,11 @@ module.exports = {
      * - having a space at the end or start of the value.
      * - having only spaces as value;
      */
-    attributes.name = trim(attributes.name);
-    attributes.description = trim(attributes.description);
+    const attributes = {
+      name: trim(body.name),
+      description: trim(body.description),
+      type: body.type,
+    };
 
     try {
       await validateApiTokenCreationInput(attributes);
