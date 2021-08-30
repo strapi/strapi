@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const { pick } = require('lodash/fp');
 
 const {
@@ -9,18 +8,18 @@ const {
   convertStartQueryParams,
   convertPopulateQueryParams,
   convertFiltersQueryParams,
+  convertFieldsQueryParams,
 } = require('@strapi/utils/lib/convert-query-params');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
+// TODO: check invalid values / add defaults ....
 const transformParamsToQuery = (uid, params = {}) => {
   const model = strapi.getModel(uid);
 
   const query = {};
-
-  // TODO: check invalid values / add defaults ....
 
   const {
     start,
@@ -72,7 +71,7 @@ const transformParamsToQuery = (uid, params = {}) => {
   }
 
   if (fields) {
-    query.select = _.castArray(fields);
+    query.select = convertFieldsQueryParams(fields);
   }
 
   if (populate) {

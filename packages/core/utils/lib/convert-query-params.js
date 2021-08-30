@@ -95,7 +95,7 @@ const convertPopulateQueryParams = (populate, depth = 0) => {
   }
 
   throw new Error(
-    'Invalid populate parameter. Expected a string or an array of strings or a populate object'
+    'Invalid populate parameter. Expected a string, an array of strings or a populate object'
   );
 };
 
@@ -126,7 +126,7 @@ const convertNestedPopulate = subPopulate => {
   }
 
   if (fields) {
-    query.select = _.castArray(fields);
+    query.select = convertFieldsQueryParams(fields);
   }
 
   if (populate) {
@@ -134,6 +134,25 @@ const convertNestedPopulate = subPopulate => {
   }
 
   return query;
+};
+
+const convertFieldsQueryParams = (fields, depth = 0) => {
+  if (depth === 0 && fields === '*') {
+    return undefined;
+  }
+
+  if (typeof fields === 'string') {
+    const fieldsValues = fields.split(',').map(value => _.trim(value));
+    return _.uniq(['id', ...fieldsValues]);
+  }
+
+  if (Array.isArray(fields)) {
+    // map convert
+    const fieldsValues = fields.flatMap(value => convertPopulateQueryParams(value, depth + 1));
+    return _.uniq(['id', ...fieldsValues]);
+  }
+
+  throw new Error('Invalid fields parameter. Expected a string or an array of strings');
 };
 
 // NOTE: We could validate the parameters are on existing / non private attributes
@@ -162,6 +181,7 @@ module.exports = {
   convertLimitQueryParams,
   convertPopulateQueryParams,
   convertFiltersQueryParams,
+  convertFieldsQueryParams,
   VALID_REST_OPERATORS,
   QUERY_OPERATORS,
 };
