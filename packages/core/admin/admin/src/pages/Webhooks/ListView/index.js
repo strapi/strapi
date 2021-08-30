@@ -101,7 +101,7 @@ const ListView = () => {
     }
   };
 
-  const handleModal = () => {
+  const handleToggleModal = () => {
     setShowModal(prev => !prev);
   };
 
@@ -430,7 +430,7 @@ const ListView = () => {
       </Main>
       {showModal && (
         <Dialog
-          onClose={handleModal}
+          onClose={handleToggleModal}
           title={formatMessage({
             id: 'Settings.webhooks.confirmation',
             defaultMessage: 'Confirmation',
@@ -452,7 +452,7 @@ const ListView = () => {
           </DialogBody>
           <DialogFooter
             startAction={
-              <Button onClick={handleModal} variant="tertiary">
+              <Button onClick={handleToggleModal} variant="tertiary">
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
             }
