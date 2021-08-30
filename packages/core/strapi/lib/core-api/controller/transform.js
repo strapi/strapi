@@ -2,35 +2,50 @@
 
 const { isNil, isPlainObject } = require('lodash/fp');
 
-const transformResponse = (resource, meta = {}) => {
+const transformResponse = (resource, meta = {}, { contentType } = {}) => {
   if (isNil(resource)) {
     return resource;
   }
 
   return {
-    data: transformEntry(resource),
+    data: transformEntry(resource, contentType),
     meta,
   };
 };
 
-const transformEntry = entry => {
+const transformEntry = (entry, contentType) => {
   if (isNil(entry)) {
     return entry;
   }
 
   if (Array.isArray(entry)) {
-    return entry.map(singleEntry => transformEntry(singleEntry));
+    return entry.map(singleEntry => transformEntry(singleEntry, contentType));
   }
 
   if (!isPlainObject(entry)) {
     throw new Error('Entry must be an object');
   }
 
-  const { id, ...attributes } = entry;
+  const { id, ...properties } = entry;
+
+  const attributeValues = {};
+
+  for (const key in properties) {
+    const property = properties[key];
+    const attribute = contentType && contentType.attributes[key];
+
+    if (attribute && attribute.type === 'relation') {
+      const data = transformEntry(property, strapi.contentType(attribute.target));
+
+      attributeValues[key] = { data };
+    } else {
+      attributeValues[key] = property;
+    }
+  }
 
   return {
     id,
-    attributes,
+    attributes: attributeValues,
     // NOTE: not necessary for now
     // meta: {},
   };

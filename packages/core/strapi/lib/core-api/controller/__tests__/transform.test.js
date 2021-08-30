@@ -35,4 +35,88 @@ describe('Transforms', () => {
       meta: someMeta,
     });
   });
+
+  test('Handles relations single value', () => {
+    const contentType = {
+      attributes: {
+        relation: {
+          type: 'relation',
+          target: 'xxx',
+        },
+      },
+    };
+
+    global.strapi = {
+      contentType() {
+        return undefined;
+      },
+    };
+
+    expect(
+      transforms.transformResponse(
+        { id: 1, title: 'Hello', relation: { id: 1, value: 'test' } },
+        undefined,
+        { contentType }
+      )
+    ).toStrictEqual({
+      data: {
+        id: 1,
+        attributes: {
+          title: 'Hello',
+          relation: {
+            data: {
+              id: 1,
+              attributes: {
+                value: 'test',
+              },
+            },
+          },
+        },
+      },
+      meta: {},
+    });
+  });
+
+  test('Handles relations array value', () => {
+    const contentType = {
+      attributes: {
+        relation: {
+          type: 'relation',
+          target: 'xxx',
+        },
+      },
+    };
+
+    global.strapi = {
+      contentType() {
+        return undefined;
+      },
+    };
+
+    expect(
+      transforms.transformResponse(
+        { id: 1, title: 'Hello', relation: [{ id: 1, value: 'test' }] },
+        undefined,
+        { contentType }
+      )
+    ).toStrictEqual({
+      data: {
+        id: 1,
+        attributes: {
+          title: 'Hello',
+          relation: {
+            data: [
+              {
+                id: 1,
+                attributes: {
+                  value: 'test',
+                },
+              },
+            ],
+          },
+        },
+      },
+      meta: {},
+    });
+  });
 });
