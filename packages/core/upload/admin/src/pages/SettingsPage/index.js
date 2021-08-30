@@ -17,13 +17,7 @@ import init from './init';
 import reducer, { initialState } from './reducer';
 import pluginPermissions from '../../permissions';
 
-const ProtectedSettingsPage = () => (
-  <CheckPagePermissions permissions={pluginPermissions.settings}>
-    <SettingsPage />
-  </CheckPagePermissions>
-);
-
-const SettingsPage = () => {
+export const SettingsPage = () => {
   const { formatMessage } = useIntl();
   const [{ initialData, isLoading, modifiedData }, dispatch] = useReducer(
     reducer,
@@ -212,5 +206,11 @@ const SettingsPage = () => {
     </>
   );
 };
+
+const ProtectedSettingsPage = () => (
+  <CheckPagePermissions permissions={pluginPermissions.settings}>
+    <SettingsPage />
+  </CheckPagePermissions>
+);
 
 export default ProtectedSettingsPage;
