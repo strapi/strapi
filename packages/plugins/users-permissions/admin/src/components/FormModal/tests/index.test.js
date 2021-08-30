@@ -26,6 +26,7 @@ const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
           onSubmit={jest.fn()}
           isSubmiting={false}
           initialData={{}}
+          providerToEditName="test"
         />
       </ThemeProvider>
     </IntlProvider>
@@ -83,7 +84,7 @@ describe('<FormModal />', () => {
                 intlLabel: { id: 'enabled', defaultMessage: 'Enabled' },
                 name: 'enabled',
                 type: 'text',
-                description: { id: 'test', description: 'test' },
+                description: { id: 'test', defaultMessage: 'test' },
                 size: 6,
               },
             ],

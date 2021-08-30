@@ -3,7 +3,6 @@ import { auth } from '@strapi/helper-plugin';
 
 const instance = axios.create({
   baseURL: process.env.STRAPI_ADMIN_BACKEND_URL,
-  timeout: 1000,
 });
 
 instance.interceptors.request.use(

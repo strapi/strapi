@@ -250,6 +250,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       }
 
       <main
+        aria-labelledby="title"
         class="c0"
         id="main-content"
         tabindex="-1"

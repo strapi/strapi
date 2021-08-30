@@ -109,7 +109,7 @@ export const SingleSignOn = () => {
               <Stack size={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Grid gap={4}>
-                    <GridItem col="6" xs="12">
+                    <GridItem col="6" m="6" s="12">
                       <ToggleCheckbox
                         aria-label="autoRegister"
                         data-testid="autoRegister"
@@ -140,7 +140,7 @@ export const SingleSignOn = () => {
                         })}
                       </ToggleCheckbox>
                     </GridItem>
-                    <GridItem col="6" xs="12">
+                    <GridItem col="6" m="6" s="12">
                       <Select
                         disabled={!canUpdate}
                         hint={formatMessage({

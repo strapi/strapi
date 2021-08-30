@@ -1,13 +1,11 @@
 import React, { useEffect, useReducer, useRef } from 'react';
 import { Helmet } from 'react-helmet';
-import isEqual from 'lodash/isEqual';
 import { useIntl } from 'react-intl';
 import {
   CheckPagePermissions,
   LoadingIndicatorPage,
-  useNotification,
-  request,
   useFocusWhenNavigate,
+  useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { CheckIcon } from '@strapi/icons';
@@ -25,49 +23,54 @@ import {
   ToggleCheckbox,
   H3,
 } from '@strapi/parts';
-import { getRequestUrl, getTrad } from '../../utils';
+import axios from 'axios';
+import isEqual from 'lodash/isEqual';
+import { axiosInstance, getRequestUrl, getTrad } from '../../utils';
 import init from './init';
 import reducer, { initialState } from './reducer';
 import pluginPermissions from '../../permissions';
 
 export const SettingsPage = () => {
   const { formatMessage } = useIntl();
+  const { lockApp, unlockApp } = useOverlayBlocker();
+  const toggleNotification = useNotification();
+  useFocusWhenNavigate();
+
   const [{ initialData, isLoading, isSubmiting, modifiedData }, dispatch] = useReducer(
     reducer,
     initialState,
     init
   );
 
-  const { lockApp, unlockApp } = useOverlayBlocker();
-
   const isMounted = useRef(true);
-  const getDataRef = useRef();
-  useFocusWhenNavigate();
-  const toggleNotification = useNotification();
 
-  const abortController = new AbortController();
+  useEffect(() => {
+    const CancelToken = axios.CancelToken;
+    const source = CancelToken.source();
 
-  getDataRef.current = async () => {
-    try {
-      const { signal } = abortController;
-      const { data } = await request(getRequestUrl('settings', { method: 'GET', signal }));
+    const getData = async () => {
+      try {
+        const {
+          data: { data },
+        } = await axiosInstance.get(getRequestUrl('settings'), {
+          cancelToken: source.token,
+        });
 
-      if (isMounted.current) {
         dispatch({
           type: 'GET_DATA_SUCCEEDED',
           data,
         });
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    };
 
-  useEffect(() => {
-    getDataRef.current();
+    if (isMounted.current) {
+      getData();
+    }
 
     return () => {
-      abortController.abort();
+      source.cancel('Operation canceled by the user.');
       isMounted.current = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -87,16 +90,11 @@ export const SettingsPage = () => {
     dispatch({ type: 'ON_SUBMIT' });
 
     try {
-      await request(getRequestUrl('settings'), {
-        method: 'PUT',
-        body: modifiedData,
-      });
+      await axiosInstance.put(getRequestUrl('settings'), modifiedData);
 
-      if (isMounted.current) {
-        dispatch({
-          type: 'SUBMIT_SUCCEEDED',
-        });
-      }
+      dispatch({
+        type: 'SUBMIT_SUCCEEDED',
+      });
 
       toggleNotification({
         type: 'success',
@@ -137,6 +135,7 @@ export const SettingsPage = () => {
           primaryAction={
             <Button
               disabled={isSaveButtonDisabled}
+              data-testid="save-button"
               loading={isSubmiting}
               type="submit"
               startIcon={<CheckIcon />}
@@ -171,7 +170,7 @@ export const SettingsPage = () => {
                       </Box>
                     </Row>
                     <Grid gap={6}>
-                      <GridItem col="6" xs="12">
+                      <GridItem col="6" s="12">
                         <ToggleCheckbox
                           aria-label="responsiveDimensions"
                           data-testid="responsiveDimensions"
@@ -202,7 +201,7 @@ export const SettingsPage = () => {
                           })}
                         </ToggleCheckbox>
                       </GridItem>
-                      <GridItem col="6" xs="12">
+                      <GridItem col="6" s="12">
                         <ToggleCheckbox
                           aria-label="sizeOptimization"
                           data-testid="sizeOptimization"
@@ -228,7 +227,7 @@ export const SettingsPage = () => {
                           })}
                         </ToggleCheckbox>
                       </GridItem>
-                      <GridItem col="6" xs="12">
+                      <GridItem col="6" s="12">
                         <ToggleCheckbox
                           aria-label="autoOrientation"
                           data-testid="autoOrientation"
