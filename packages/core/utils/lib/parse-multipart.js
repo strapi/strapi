@@ -3,6 +3,10 @@
 const _ = require('lodash');
 
 module.exports = ctx => {
+  if (!ctx.is('multipart')) {
+    return { data: ctx.request.body, files: {} };
+  }
+
   const { body = {}, files = {} } = ctx.request;
 
   if (!body.data) {
