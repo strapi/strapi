@@ -67,7 +67,7 @@ export const SingleSignOn = () => {
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 
   return (
-    <Main abelledBy="title" tabIndex={-1}>
+    <Main labelledBy="title" tabIndex={-1}>
       <PageTitle name="SSO" />
       <form
         onSubmit={e => {
