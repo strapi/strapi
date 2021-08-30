@@ -20,7 +20,7 @@ import {
   GridItem,
   Layout,
   Row,
-  ToggleCheckbox,
+  ToggleInput,
   H3,
 } from '@strapi/parts';
 import axios from 'axios';
@@ -171,7 +171,7 @@ export const SettingsPage = () => {
                     </Row>
                     <Grid gap={6}>
                       <GridItem col="6" s="12">
-                        <ToggleCheckbox
+                        <ToggleInput
                           aria-label="responsiveDimensions"
                           data-testid="responsiveDimensions"
                           checked={modifiedData.responsiveDimensions}
@@ -179,6 +179,10 @@ export const SettingsPage = () => {
                             id: getTrad('settings.form.responsiveDimensions.description'),
                             defaultMessage:
                               'It automatically generates multiple formats (large, medium, small) of the uploaded asset',
+                          })}
+                          label={formatMessage({
+                            id: getTrad('settings.form.responsiveDimensions.label'),
+                            defaultMessage: 'Enable responsive friendly upload',
                           })}
                           name="responsiveDimensions"
                           offLabel={formatMessage({
@@ -194,18 +198,17 @@ export const SettingsPage = () => {
                               target: { name: 'responsiveDimensions', value: e.target.checked },
                             });
                           }}
-                        >
-                          {formatMessage({
-                            id: getTrad('settings.form.responsiveDimensions.label'),
-                            defaultMessage: 'Enable responsive friendly upload',
-                          })}
-                        </ToggleCheckbox>
+                        />
                       </GridItem>
                       <GridItem col="6" s="12">
-                        <ToggleCheckbox
+                        <ToggleInput
                           aria-label="sizeOptimization"
                           data-testid="sizeOptimization"
                           checked={modifiedData.sizeOptimization}
+                          label={formatMessage({
+                            id: getTrad('settings.form.sizeOptimization.label'),
+                            defaultMessage: 'Enable size optimization (without quality loss)',
+                          })}
                           name="sizeOptimization"
                           offLabel={formatMessage({
                             id: 'app.components.ToggleCheckbox.off-label',
@@ -220,15 +223,10 @@ export const SettingsPage = () => {
                               target: { name: 'sizeOptimization', value: e.target.checked },
                             });
                           }}
-                        >
-                          {formatMessage({
-                            id: getTrad('settings.form.sizeOptimization.label'),
-                            defaultMessage: 'Enable size optimization (without quality loss)',
-                          })}
-                        </ToggleCheckbox>
+                        />
                       </GridItem>
                       <GridItem col="6" s="12">
-                        <ToggleCheckbox
+                        <ToggleInput
                           aria-label="autoOrientation"
                           data-testid="autoOrientation"
                           checked={modifiedData.autoOrientation}
@@ -236,6 +234,10 @@ export const SettingsPage = () => {
                             id: getTrad('settings.form.autoOrientation.description'),
                             defaultMessage:
                               'Automatically rotate image according to EXIF orientation tag',
+                          })}
+                          label={formatMessage({
+                            id: getTrad('settings.form.autoOrientation.label'),
+                            defaultMessage: 'Enable auto orientation',
                           })}
                           name="autoOrientation"
                           offLabel={formatMessage({
@@ -251,12 +253,7 @@ export const SettingsPage = () => {
                               target: { name: 'autoOrientation', value: e.target.checked },
                             });
                           }}
-                        >
-                          {formatMessage({
-                            id: getTrad('settings.form.autoOrientation.label'),
-                            defaultMessage: 'Enable auto orientation',
-                          })}
-                        </ToggleCheckbox>
+                        />
                       </GridItem>
                     </Grid>
                   </Stack>

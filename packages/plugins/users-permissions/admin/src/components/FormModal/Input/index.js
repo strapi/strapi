@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { ToggleCheckbox } from '@strapi/parts/ToggleCheckbox';
+import { ToggleInput } from '@strapi/parts/ToggleInput';
 import { TextInput } from '@strapi/parts/TextInput';
 import PropTypes from 'prop-types';
 
@@ -39,11 +39,12 @@ const Input = ({
 
   if (type === 'bool') {
     return (
-      <ToggleCheckbox
+      <ToggleInput
         aria-label={name}
         checked={value}
         disabled={disabled}
         hint={hint}
+        label={label}
         name={name}
         offLabel={formatMessage({
           id: 'app.components.ToggleCheckbox.off-label',
@@ -53,10 +54,10 @@ const Input = ({
           id: 'app.components.ToggleCheckbox.on-label',
           defaultMessage: 'On',
         })}
-        onChange={onChange}
-      >
-        {label}
-      </ToggleCheckbox>
+        onChange={e => {
+          onChange({ target: { name, value: e.target.checked } });
+        }}
+      />
     );
   }
 

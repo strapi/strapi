@@ -16,7 +16,7 @@ import {
   Grid,
   GridItem,
   Layout,
-  ToggleCheckbox,
+  ToggleInput,
   Select,
   Option,
 } from '@strapi/parts';
@@ -110,7 +110,7 @@ export const SingleSignOn = () => {
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Grid gap={4}>
                     <GridItem col="6" m="6" s="12">
-                      <ToggleCheckbox
+                      <ToggleInput
                         aria-label="autoRegister"
                         data-testid="autoRegister"
                         disabled={!canUpdate}
@@ -118,6 +118,10 @@ export const SingleSignOn = () => {
                         hint={formatMessage({
                           id: 'Settings.sso.form.registration.description',
                           defaultMessage: 'Create new user on SSO login if no account exists',
+                        })}
+                        label={formatMessage({
+                          id: 'Settings.sso.form.registration.label',
+                          defaultMessage: 'Auto-registration',
                         })}
                         name="autoRegister"
                         offLabel={formatMessage({
@@ -133,12 +137,7 @@ export const SingleSignOn = () => {
                             target: { name: 'autoRegister', value: e.target.checked },
                           });
                         }}
-                      >
-                        {formatMessage({
-                          id: 'Settings.sso.form.registration.label',
-                          defaultMessage: 'Auto-registration',
-                        })}
-                      </ToggleCheckbox>
+                      />
                     </GridItem>
                     <GridItem col="6" m="6" s="12">
                       <Select
