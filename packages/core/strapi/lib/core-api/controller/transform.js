@@ -38,6 +38,10 @@ const transformEntry = (entry, contentType) => {
       const data = transformEntry(property, strapi.contentType(attribute.target));
 
       attributeValues[key] = { data };
+    } else if (attribute && attribute.type === 'media') {
+      const data = transformEntry(property, strapi.contentType('plugin::upload.file'));
+
+      attributeValues[key] = { data };
     } else {
       attributeValues[key] = property;
     }
