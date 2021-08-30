@@ -94,7 +94,10 @@ describe('API Token', () => {
 
       apiTokenService.createSaltIfNotDefined();
 
-      expect(mockedAppendFile).toHaveBeenCalled();
+      expect(mockedAppendFile).toHaveBeenCalledWith(
+        '.env',
+        `API_TOKEN_SALT=${mockedApiToken.hexedString}\n`
+      );
       expect(mockedConfigSet).toHaveBeenCalledWith(
         'server.admin.api-token.salt',
         mockedApiToken.hexedString
