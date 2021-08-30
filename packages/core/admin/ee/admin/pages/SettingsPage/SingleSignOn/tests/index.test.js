@@ -281,6 +281,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                   aria-disabled="true"
                   class="c6 c7"
                   data-testid="save-button"
+                  disabled=""
                   type="submit"
                 >
                   <div

@@ -247,6 +247,7 @@ exports[`Upload | SettingsPage renders and matches the snapshot 1`] = `
               aria-disabled="true"
               class="c6 c7"
               data-testid="save-button"
+              disabled=""
               type="submit"
             >
               <div

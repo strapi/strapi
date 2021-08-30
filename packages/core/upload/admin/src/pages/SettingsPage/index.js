@@ -160,14 +160,12 @@ export const SettingsPage = () => {
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Stack size={4}>
                     <Row>
-                      <Box>
-                        <H3>
-                          {formatMessage({
-                            id: getTrad('settings.section.image.label'),
-                            defaultMessage: 'Image',
-                          })}
-                        </H3>
-                      </Box>
+                      <H3 as="h2">
+                        {formatMessage({
+                          id: getTrad('settings.section.image.label'),
+                          defaultMessage: 'Image',
+                        })}
+                      </H3>
                     </Row>
                     <Grid gap={6}>
                       <GridItem col="6" s="12">

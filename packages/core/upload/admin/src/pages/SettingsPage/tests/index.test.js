@@ -44,21 +44,18 @@ describe('Upload | SettingsPage', () => {
   });
 
   it('should display the form correctly with the initial values', async () => {
-    const { getAllByTestId } = render(App);
-
-    render(App);
+    const { getByTestId } = render(App);
 
     await waitFor(() => {
-      const responsiveDimensions = getAllByTestId('responsiveDimensions');
-      const sizeOptimizations = getAllByTestId('sizeOptimization');
-      const autoOrientations = getAllByTestId('autoOrientation');
-      // const saveButtons = getAllByTestId('save-button');
+      const responsiveDimension = getByTestId('responsiveDimensions');
+      const sizeOptimization = getByTestId('sizeOptimization');
+      const autoOrientation = getByTestId('autoOrientation');
+      const saveButton = getByTestId('save-button');
 
-      expect(responsiveDimensions[0].checked).toBe(true);
-      expect(autoOrientations[0].checked).toBe(true);
-      expect(sizeOptimizations[0].checked).toBe(false);
-      // FIXME
-      // expect(saveButtons[0]).toBeDisabled();
+      expect(responsiveDimension.checked).toBe(true);
+      expect(autoOrientation.checked).toBe(true);
+      expect(sizeOptimization.checked).toBe(false);
+      expect(saveButton).toBeDisabled();
     });
   });
 });
