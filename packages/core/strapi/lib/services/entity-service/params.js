@@ -9,7 +9,7 @@ const {
   convertStartQueryParams,
   convertPopulateQueryParams,
   convertFiltersQueryParams,
-} = require('@strapi/utils/lib/convert-rest-query-params');
+} = require('@strapi/utils/lib/convert-query-params');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
@@ -20,7 +20,7 @@ const transformParamsToQuery = (uid, params = {}) => {
 
   const query = {};
 
-  // TODO: check invalid values add defaults ....
+  // TODO: check invalid values / add defaults ....
 
   const {
     start,
@@ -79,7 +79,7 @@ const transformParamsToQuery = (uid, params = {}) => {
     query.populate = convertPopulateQueryParams(populate);
   }
 
-  // TODO: move to layer above ?
+  // TODO: move to convert-query-params ?
   if (publicationState && contentTypesUtils.hasDraftAndPublish(model)) {
     const { publicationState = 'live' } = params;
 

@@ -1,5 +1,6 @@
 'use strict';
 
+// TODO: migration
 const _ = require('lodash');
 const { rulesToQuery } = require('@casl/ability/extra');
 const { VALID_REST_OPERATORS } = require('@strapi/utils');
