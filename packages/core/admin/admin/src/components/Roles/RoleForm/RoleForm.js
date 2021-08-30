@@ -11,7 +11,7 @@ const UsersRoleNumber = styled.div`
   color: ${({ theme }) => theme.colors.primary600};
   border-radius: ${({ theme }) => theme.borderRadius};
   font-size: ${12 / 16}rem;
-  font-width: bold;
+  font-weight: bold;
 `;
 
 const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
