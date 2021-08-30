@@ -518,7 +518,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: #4945ff;
   border-radius: 4px;
   font-size: 0.75rem;
-  font-width: bold;
+  font-weight: bold;
 }
 
 @media (max-width:68.75rem) {
