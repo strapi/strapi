@@ -104,8 +104,11 @@ const convertNestedPopulate = subPopulate => {
     return true;
   }
 
+  if (_.isBoolean(subPopulate)) {
+    return subPopulate;
+  }
+
   if (!_.isPlainObject(subPopulate)) {
-    console.log(subPopulate);
     throw new Error(`Invalid nested populate. Expected '*' or an object`);
   }
 
