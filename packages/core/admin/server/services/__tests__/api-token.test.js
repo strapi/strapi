@@ -24,7 +24,7 @@ describe('API Token', () => {
           return { create };
         },
         config: {
-          get: jest.fn(() => ({})),
+          get: jest.fn(() => ''),
         },
       };
 
