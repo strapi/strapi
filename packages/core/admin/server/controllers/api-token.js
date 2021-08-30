@@ -1,5 +1,6 @@
 'use strict';
 
+const { trim } = require('lodash/fp');
 const { getService } = require('../utils');
 const { validateApiTokenCreationInput } = require('../validation/api-tokens');
 
@@ -13,10 +14,8 @@ module.exports = {
      * - having a space at the end or start of the value.
      * - having only spaces as value;
      */
-    attributes.name = attributes.name.trim();
-    if (attributes.description) {
-      attributes.description = attributes.description.trim();
-    }
+    attributes.name = trim(attributes.name);
+    attributes.description = trim(attributes.description);
 
     try {
       await validateApiTokenCreationInput(attributes);

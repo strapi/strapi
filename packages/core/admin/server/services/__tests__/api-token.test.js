@@ -73,7 +73,14 @@ describe('API Token', () => {
       expect(mockedConfigSet).not.toHaveBeenCalled();
     });
 
-    test('It creates a new salt, appendit to the .env file and sets it in the configuration', () => {
+    test('It creates a new salt, appends it to the .env file and sets it in the configuration', () => {
+      const mockedApiToken = {
+        randomBytes: 'api-token_test-random-bytes',
+        hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
+      };
+
+      crypto.randomBytes = jest.fn(() => Buffer.from(mockedApiToken.randomBytes));
+
       const mockedAppendFile = jest.fn();
       const mockedConfigSet = jest.fn();
 
@@ -88,7 +95,10 @@ describe('API Token', () => {
       apiTokenService.createSaltIfNotDefined();
 
       expect(mockedAppendFile).toHaveBeenCalled();
-      expect(mockedConfigSet).toHaveBeenCalled();
+      expect(mockedConfigSet).toHaveBeenCalledWith(
+        'server.admin.api-token.salt',
+        mockedApiToken.hexedString
+      );
     });
 
     test('It throws an error if the env variable used in the config file has been changed and is empty', () => {
