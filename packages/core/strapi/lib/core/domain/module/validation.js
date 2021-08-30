@@ -14,9 +14,7 @@ const strapiServerSchema = yup
       if (Array.isArray(value)) {
         return yup.array();
       } else {
-        const shape = _.mapValues(() => {
-          return yup.object({ routes: yup.array().required() });
-        });
+        const shape = _.mapValues(value, () => yup.object({ routes: yup.array().required() }));
 
         return yup.object(shape);
       }
