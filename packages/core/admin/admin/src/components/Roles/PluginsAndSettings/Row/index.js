@@ -28,7 +28,7 @@ const PermissionRow = ({
   }, [name]);
 
   return (
-    <Accordion expanded={isOpen} toggle={handleClick} id="acc-1">
+    <Accordion expanded={isOpen} toggle={handleClick} id={`accordion-${name}`}>
       <AccordionToggle
         title={upperFirst(categoryName)}
         description={`${formatMessage(
