@@ -1,12 +1,12 @@
 'use strict';
 
-const { transformResponse } = require('./transform');
+const { parseMultipartData } = require('@strapi/utils');
 
 /**
  *
  * Returns a collection type controller to handle default core-api actions
  */
-const createCollectionTypeController = ({ service, sanitize, parseMultipartData }) => {
+const createCollectionTypeController = ({ service, sanitize, transformResponse }) => {
   return {
     /**
      * Retrieve records.
