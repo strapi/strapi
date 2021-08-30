@@ -48,6 +48,8 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
               {formatMessage(
                 {
                   id: 'Settings.roles.form.button.users-with-role',
+                  defaultMessage:
+                    '{number, plural, =0 {# users} one {# user} other {# users}} with this role',
                 },
                 { number: role.usersCount }
               )}
@@ -59,7 +61,10 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
                 disabled={disabled}
                 name="name"
                 error={errors.name && formatMessage({ id: errors.name })}
-                label={formatMessage({ id: 'Settings.roles.form.input.name' })}
+                label={formatMessage({
+                  id: 'Settings.roles.form.input.name',
+                  defaultMessage: 'Name',
+                })}
                 onChange={onChange}
                 onBlur={onBlur}
                 value={values.name || ''}
@@ -68,7 +73,10 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
             <GridItem col={6}>
               <Textarea
                 disabled={disabled}
-                label={formatMessage({ id: 'Settings.roles.form.input.description' })}
+                label={formatMessage({
+                  id: 'Settings.roles.form.input.description',
+                  defaultMessage: 'Description',
+                })}
                 name="description"
                 error={errors.name && formatMessage({ id: errors.name })}
                 onChange={onChange}

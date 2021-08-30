@@ -4079,7 +4079,6 @@
     tslib "^2.0.0"
     upath "2.0.1"
 
-<<<<<<< HEAD
 "@storybook/addon-actions@6.3.7", "@storybook/addon-actions@^6.3.7":
   version "6.3.7"
   resolved "https://registry.yarnpkg.com/@storybook/addon-actions/-/addon-actions-6.3.7.tgz#b25434972bef351aceb3f7ec6fd66e210f256aac"
@@ -4916,17 +4915,29 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
-=======
->>>>>>> ade0a8767 (Fix conflicts with yarn lock)
 "@strapi/icons@0.0.1-alpha.15":
   version "0.0.1-alpha.15"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.15.tgz#32fc824b732b4a21d5282f84696d6207ac5cbea1"
   integrity sha512-FIczXDSEBPXTfptgqR6Hjh65Fpf4XF+kEm3o53PQX8G0GZ0Udpcbspqf2Kieeocg8TePgRkTI/oU6KS1aJbXrg==
 
+"@strapi/icons@0.0.1-alpha.16":
+  version "0.0.1-alpha.16"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.16.tgz#0906c0c36b1f27b46ba9f3011216cb63671839eb"
+  integrity sha512-6veZv8rnX+IVZUf5Di3CSQYgjaUEJiJ6CuE03HSi5R3MixsHUXc3Q/7R4oj+U6eswz/FIaSRcJcPCJ0pw4Dm8g==
+
 "@strapi/parts@0.0.1-alpha.15":
   version "0.0.1-alpha.15"
   resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.15.tgz#250cc29be0fa4cc2b91c8c0be49e1c2070a25450"
   integrity sha512-VF4gp6xrowpnHBe3qJf0BHljZEXT8Y+oMk7XbW9HJ6w7Fxrm6SmmBfGb3LGFLxkzMj+5Log7FXD+ANER298r+A==
+  dependencies:
+    "@internationalized/number" "^3.0.2"
+    compute-scroll-into-view "^1.0.17"
+    prop-types "^15.7.2"
+
+"@strapi/parts@0.0.1-alpha.16":
+  version "0.0.1-alpha.16"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.16.tgz#afb9b6c269a8afdfb1ea324dc9f56ee94f1ab985"
+  integrity sha512-KBK/JrhFLgicmRmqMjzP1eSWu4+UN0EA4Hz203tmaNs+U6sZHzsygQ2yVYFfNd2MuIkiimeW8WwMwT+QLhiw+A==
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"

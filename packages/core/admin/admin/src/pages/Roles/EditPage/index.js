@@ -1,4 +1,10 @@
-import { request, useNotification, useOverlayBlocker, useTracking } from '@strapi/helper-plugin';
+import {
+  request,
+  useNotification,
+  useOverlayBlocker,
+  useTracking,
+  LoadingIndicatorPage,
+} from '@strapi/helper-plugin';
 import { Box, Button, HeaderLayout, Main, Stack, ContentLayout } from '@strapi/parts';
 import { Formik } from 'formik';
 import get from 'lodash/get';
@@ -140,7 +146,7 @@ const EditPage = () => {
                   onBlur={handleBlur}
                   role={role}
                 />
-                {!isLayoutLoading && !isRoleLoading && (
+                {!isLayoutLoading && !isRoleLoading ? (
                   <Box paddingTop={6} paddingBottom={6}>
                     <Permissions
                       isFormDisabled={isFormDisabled}
@@ -149,6 +155,8 @@ const EditPage = () => {
                       layout={permissionsLayout}
                     />
                   </Box>
+                ) : (
+                  <LoadingIndicatorPage />
                 )}
               </ContentLayout>
             </>
