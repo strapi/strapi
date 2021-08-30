@@ -1,7 +1,5 @@
 'use strict';
 
-const { env } = require('../../../utils/lib');
-
-module.exports = {
+module.exports = ({ env }) => ({
   salt: env('API_TOKEN_SALT'),
-};
+});
