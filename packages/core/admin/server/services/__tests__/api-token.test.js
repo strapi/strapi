@@ -118,4 +118,39 @@ describe('API Token', () => {
       }
     });
   });
+
+  describe('list', () => {
+    const tokens = [
+      {
+        id: 1,
+        name: 'api-token_tests-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      },
+      {
+        id: 2,
+        name: 'api-token_tests-name-2',
+        description: 'api-token_tests-description-2',
+        type: 'read-only',
+      },
+    ];
+
+    test('It lists all the tokens', async () => {
+      const findMany = jest.fn().mockResolvedValue(tokens);
+
+      global.strapi = {
+        query() {
+          return { findMany };
+        },
+      };
+
+      const res = await apiTokenService.list();
+
+      expect(findMany).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        orderBy: { name: 'ASC' },
+      });
+      expect(res).toEqual(tokens);
+    });
+  });
 });
