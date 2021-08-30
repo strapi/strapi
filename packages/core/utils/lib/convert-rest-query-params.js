@@ -161,6 +161,71 @@ const convertPublicationStateParams = publicationState => {
   return { publicationState };
 };
 
+// TODO: we could support foo.* or foo.bar.* etc later on
+const convertPopulateQueryParams = (populate, depth = 0) => {
+  if (depth === 0 && populate === '*') {
+    return true;
+  }
+
+  if (typeof populate === 'string') {
+    return populate.split(',').map(value => _.trim(value));
+  }
+
+  if (Array.isArray(populate)) {
+    // map convert
+    return populate.flatMap(value => convertPopulateQueryParams(value, depth + 1));
+  }
+
+  if (_.isPlainObject(populate)) {
+    const transformedPopulate = {};
+    for (const key in populate) {
+      transformedPopulate[key] = convertNestedPopulate(populate[key]);
+    }
+    return transformedPopulate;
+  }
+
+  throw new Error('Invalid populate parameter. Expected a string or an array of strings');
+};
+
+const convertNestedPopulate = subPopulate => {
+  if (subPopulate === '*') {
+    return true;
+  }
+
+  // if it isn't an object returns false ?
+
+  const { sort, filters, /*start, limit,*/ fields, populate } = subPopulate;
+
+  const query = {};
+  // if (start) {
+  //   query.offset = convertStartQueryParams(start);
+  // }
+
+  // if (limit) {
+  //   query.limit = convertLimitQueryParams(limit);
+  // }
+
+  if (sort) {
+    query.orderBy = convertSortQueryParams(sort);
+  }
+
+  if (filters) {
+    query.where = convertFiltersQueryParams(filters);
+  }
+
+  if (fields) {
+    query.select = _.castArray(fields);
+  }
+
+  if (populate) {
+    query.populate = convertPopulateQueryParams(populate);
+  }
+
+  return query;
+};
+
+const convertFiltersQueryParams = filters => filters;
+
 // List of all the possible filters
 const VALID_REST_OPERATORS = [
   'eq',
@@ -240,6 +305,8 @@ module.exports = {
   convertSortQueryParams,
   convertStartQueryParams,
   convertLimitQueryParams,
+  convertPopulateQueryParams,
+  convertFiltersQueryParams,
   VALID_REST_OPERATORS,
   QUERY_OPERATORS,
 };
