@@ -153,22 +153,25 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body.data).not.toBeNull();
-    expect(res.body.data.length).toBe(2);
+    expect(res.body.data.length).toBe(3);
     expect(res.body.data).toStrictEqual([
       {
         id: expect.any(Number),
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
         type: 'read-only',
-        accessKey: expect.any(String),
       },
       {
         id: expect.any(Number),
-        name: 'api-token_tests-name',
+        name: 'api-token_tests-name-with-spaces-at-the-end',
+        description: 'api-token_tests-description-with-spaces-at-the-end',
+        type: 'read-only',
+      },
+      {
+        id: expect.any(Number),
+        name: 'api-token_tests-name-without-description',
         description: '',
         type: 'read-only',
-        accessKey: expect.any(String),
       },
     ]);
   });
