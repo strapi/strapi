@@ -4,6 +4,17 @@ const crypto = require('crypto');
 const apiTokenService = require('../api-token');
 
 describe('API Token', () => {
+  const mockedApiToken = {
+    randomBytes: 'api-token_test-random-bytes',
+    hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
+  };
+
+  beforeAll(() => {
+    jest
+      .spyOn(crypto, 'randomBytes')
+      .mockImplementation(() => Buffer.from(mockedApiToken.randomBytes));
+  });
+
   afterAll(() => {
     jest.clearAllMocks();
   });
@@ -11,13 +22,6 @@ describe('API Token', () => {
   describe('create', () => {
     test('Creates a new token', async () => {
       const create = jest.fn(({ data }) => Promise.resolve(data));
-
-      const mockedApiToken = {
-        randomBytes: 'api-token_test-random-bytes',
-        hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
-      };
-
-      crypto.randomBytes = jest.fn(() => Buffer.from(mockedApiToken.randomBytes));
 
       global.strapi = {
         query() {
@@ -74,13 +78,6 @@ describe('API Token', () => {
     });
 
     test('It creates a new salt, appends it to the .env file and sets it in the configuration', () => {
-      const mockedApiToken = {
-        randomBytes: 'api-token_test-random-bytes',
-        hexedString: '6170692d746f6b656e5f746573742d72616e646f6d2d6279746573',
-      };
-
-      crypto.randomBytes = jest.fn(() => Buffer.from(mockedApiToken.randomBytes));
-
       const mockedAppendFile = jest.fn();
       const mockedConfigSet = jest.fn();
 
