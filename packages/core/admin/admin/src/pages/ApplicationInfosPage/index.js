@@ -1,75 +1,123 @@
-// import React from 'react';
-// import { Header } from '@buffetjs/custom';
-// import { Flex, Padded, Text } from '@buffetjs/core';
-// import { useIntl } from 'react-intl';
-// import { BaselineAlignment, useAppInfos } from '@strapi/helper-plugin';
-// import Bloc from '../../components/Bloc';
-// import { SettingsPageTitle } from '@strapi/helper-plugin';
-// import { Detail, InfoText } from './components';
+import React from 'react';
+import { useIntl } from 'react-intl';
+import { useAppInfos, SettingsPageTitle } from '@strapi/helper-plugin';
+import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts/Main';
+import { Box } from '@strapi/parts/Box';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { H3 , Text, TableLabel } from '@strapi/parts/Text';
 
-// const ApplicationInfosPage = () => {
-//   const appInfos = useAppInfos();
-//   const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
-//   const { formatMessage } = useIntl();
+import { Stack } from '@strapi/parts/Stack';
+import { Link } from '@strapi/parts/Link';
+import ExternalLink from '@strapi/icons/ExternalLink';
 
-//   const currentPlan = appInfos.communityEdition
-//     ? 'app.components.UpgradePlanModal.text-ce'
-//     : 'app.components.UpgradePlanModal.text-ee';
+const ApplicationInfosPage = () => {
+  const { formatMessage } = useIntl();
+  const appInfos = useAppInfos();
+  const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
 
-//   const headerProps = {
-//     title: { label: formatMessage({ id: 'Settings.application.title' }) },
-//     content: formatMessage({
-//       id: 'Settings.application.description',
-//     }),
-//   };
-//   const pricingLabel = formatMessage({ id: 'Settings.application.link-pricing' });
-//   const upgradeLabel = formatMessage({ id: 'Settings.application.link-upgrade' });
-//   const strapiVersion = formatMessage({ id: 'Settings.application.strapi-version' });
-//   const nodeVersion = formatMessage({ id: 'Settings.application.node-version' });
-//   const editionTitle = formatMessage({ id: 'Settings.application.edition-title' });
+  const currentPlan = appInfos.communityEdition
+    ? 'app.components.UpgradePlanModal.text-ce'
+    : 'app.components.UpgradePlanModal.text-ee';
 
-//   /* eslint-disable indent */
-//   const upgradeLink = shouldUpdateStrapi
-//     ? {
-//         label: upgradeLabel,
-//         href: `https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`,
-//       }
-//     : null;
-//   /* eslint-enable indent */
+  return (
+    <Layout>
+      <SettingsPageTitle name="Application" />
+      <Main labelledBy="application">
+        <HeaderLayout
+          as="h1"
+          id="application"
+          title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Application' })}
+          subtitle={formatMessage({
+            id: 'Settings.application.description',
+            defaultMessage: "See your project's details",
+          })}
+        />
+        <ContentLayout>
+          <Box
+            hasRadius
+            background="neutral0"
+            shadow="tableShadow"
+            paddingTop={7}
+            paddingBottom={7}
+            paddingRight={6}
+            paddingLeft={6}
+          >
+            <Stack size={5}>
+              <H3>
+                {formatMessage({
+                  id: 'Settings.application.information',
+                  defaultMessage: 'Information',
+                })}
+              </H3>
 
-//   return (
-//     <div>
-//       <SettingPageTitle name="Application" />
-//       <Header {...headerProps} />
-//       <BaselineAlignment top size="3px" />
-//       <Bloc>
-//         <Padded left right top size="smd">
-//           <Padded left right top size="xs">
-//             <Flex justifyContent="space-between">
-//               <Detail
-//                 link={upgradeLink}
-//                 title={strapiVersion}
-//                 content={`v${appInfos.strapiVersion}`}
-//               />
-//               <Detail
-//                 link={{ label: pricingLabel, href: 'https://strapi.io/pricing' }}
-//                 title={editionTitle}
-//                 content={formatMessage({ id: currentPlan })}
-//               />
-//             </Flex>
-//             <Padded top size="lg">
-//               <Text fontSize="xs" color="grey" fontWeight="bold">
-//                 {nodeVersion}
-//               </Text>
-//               <InfoText content={appInfos.nodeVersion} />
-//             </Padded>
-//           </Padded>
-//         </Padded>
-//         <BaselineAlignment top size="60px" />
-//       </Bloc>
-//     </div>
-//   );
-// };
+              <Grid paddingTop={1}>
+                <GridItem col={6} s={12}>
+                  <TableLabel>
+                    {formatMessage({
+                      id: 'Settings.application.details',
+                      defaultMessage: 'details',
+                    })}
+                  </TableLabel>
+                  <Text as="p">{appInfos.latestStrapiReleaseTag}</Text>
+                </GridItem>
+                <GridItem col={6} s={12}>
+                  <TableLabel>
+                    {formatMessage({
+                      id: 'Settings.application.edition-title',
+                      defaultMessage: 'current plan',
+                    })}
+                  </TableLabel>
+                  <Text as="p">
+                    {formatMessage({
+                      id: currentPlan,
+                      defaultMessage: `${
+                        appInfos.communityEdition ? 'Community Edition' : 'Enterprise Edition'
+                      }`,
+                    })}
+                  </Text>
+                </GridItem>
+              </Grid>
 
-// export default ApplicationInfosPage;
-export default () => 'ApplicationInfosPage';
+              <Grid paddingTop={1}>
+                <GridItem col={6} s={12}>
+                  {shouldUpdateStrapi && (
+                    <Link
+                      href={`https://github.com/strapi/strapi/releases/tag/${latestStrapiReleaseTag}`}
+                      endIcon={<ExternalLink />}
+                    >
+                      {formatMessage({
+                        id: 'Settings.application.link-upgrade',
+                        defaultMessage: 'Upgrade your admin panel',
+                      })}
+                    </Link>
+                  )}
+                </GridItem>
+                <GridItem col={6} s={12}>
+                  <Link href="https://strapi.io/pricing-self-hosted" endIcon={<ExternalLink />}>
+                    {formatMessage({
+                      id: 'Settings.application.link-pricing',
+                      defaultMessage: 'See all pricing',
+                    })}
+                  </Link>
+                </GridItem>
+              </Grid>
+
+              <Box paddingTop={1}>
+                <TableLabel>
+                  {formatMessage({
+                    id: 'Settings.application.node-version',
+                    defaultMessage: 'node version',
+                  })}
+                </TableLabel>
+                <Text as="p">{appInfos.nodeVersion}</Text>
+              </Box>
+            </Stack>
+          </Box>
+        </ContentLayout>
+      </Main>
+    </Layout>
+  );
+};
+
+export default ApplicationInfosPage;
