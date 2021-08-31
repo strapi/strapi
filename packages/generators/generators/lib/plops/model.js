@@ -39,6 +39,7 @@ const promptConfigQuestions = (plop, inquirer) => {
       type: 'list',
       name: 'kind',
       message: 'Please choose the model type',
+      default: 'collectionType',
       choices: [
         { name: 'Collection Type', value: 'collectionType' },
         { name: 'Singe Type', value: 'singleType' },
@@ -49,6 +50,7 @@ const promptConfigQuestions = (plop, inquirer) => {
     {
       type: 'confirm',
       name: 'useDraftAndPublish',
+      default: false,
       message: 'Use draft and publish?',
     },
     {
@@ -154,17 +156,12 @@ module.exports = plop => {
       return [
         {
           type: 'add',
-          path: `${filePath}/models/{{id}}.js`,
-          templateFile: 'templates/model.js.hbs',
-        },
-        {
-          type: 'add',
-          path: `${filePath}/models/{{id}}.settings.json`,
-          templateFile: 'templates/model.settings.json.hbs',
+          path: `${filePath}/content-types/{{id}}/schema.json`,
+          templateFile: 'templates/model.schema.json.hbs',
         },
         {
           type: 'modify',
-          path: `${filePath}/models/{{id}}.settings.json`,
+          path: `${filePath}/content-types/{{id}}/schema.json`,
           transform: template => {
             const parsedTemplate = JSON.parse(template);
             parsedTemplate.attributes = attributes;

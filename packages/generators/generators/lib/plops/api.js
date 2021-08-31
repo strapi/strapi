@@ -56,6 +56,7 @@ module.exports = plop => {
       {
         type: 'confirm',
         name: 'useDraftAndPublish',
+        default: false,
         message: 'Use draft and publish?',
       },
     ],
@@ -75,13 +76,8 @@ module.exports = plop => {
         },
         {
           type: 'add',
-          path: `${filePath}/models/{{id}}.js`,
-          templateFile: 'templates/model.js.hbs',
-        },
-        {
-          type: 'add',
-          path: `${filePath}/models/{{id}}.settings.json`,
-          templateFile: 'templates/model.settings.json.hbs',
+          path: `${filePath}/content-types/{{id}}/schema.json`,
+          templateFile: 'templates/model.schema.json.hbs',
         },
         {
           type: 'add',
@@ -92,21 +88,21 @@ module.exports = plop => {
 
       if (answers.isPluginApi) {
         return baseActions;
-      } else {
-        const routeType =
-          answers.kind === 'singleType'
-            ? 'single-type-routes.json.hbs'
-            : 'collection-type-routes.json.hbs';
-
-        return [
-          {
-            type: 'add',
-            path: `${filePath}/config/routes.json`,
-            templateFile: `templates/${routeType}`,
-          },
-          ...baseActions,
-        ];
       }
+
+      const routeType =
+        answers.kind === 'singleType'
+          ? 'single-type-routes.js.hbs'
+          : 'collection-type-routes.js.hbs';
+
+      return [
+        {
+          type: 'add',
+          path: `${filePath}/routes/{{id}}.js`,
+          templateFile: `templates/${routeType}`,
+        },
+        ...baseActions,
+      ];
     },
   });
 };

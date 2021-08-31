@@ -1,17 +1,21 @@
 'use strict';
 
 const { pickBy, has } = require('lodash/fp');
-const { addNamespace } = require('../utils');
+const { addNamespace, hasNamespace } = require('../utils');
 
-const policiesRegistry = () => {
+const controllersRegistry = () => {
   const controllers = {};
 
   return {
-    get(controllerUID) {
-      return controllers[controllerUID];
+    get(uid) {
+      return controllers[uid];
     },
-    getAll(prefix = '') {
-      return pickBy((controller, controllerUID) => controllerUID.startsWith(prefix))(controllers);
+    getAll(namespace) {
+      return pickBy((_, uid) => hasNamespace(uid, namespace))(controllers);
+    },
+    set(uid, value) {
+      controllers[uid] = value;
+      return this;
     },
     add(namespace, newControllers) {
       for (const controllerName in newControllers) {
@@ -23,8 +27,17 @@ const policiesRegistry = () => {
         }
         controllers[uid] = controller;
       }
+      return this;
+    },
+    extend(controllerUID, extendFn) {
+      const currentController = this.get(controllerUID);
+      if (!currentController) {
+        throw new Error(`Controller ${controllerUID} doesn't exist`);
+      }
+      const newController = extendFn(currentController);
+      controllers[controllerUID] = newController;
     },
   };
 };
 
-module.exports = policiesRegistry;
+module.exports = controllersRegistry;
