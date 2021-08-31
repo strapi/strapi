@@ -1,11 +1,11 @@
 {
   "private": true,
   "devDependencies": {
-    "@babel/plugin-transform-modules-commonjs": "^7.12.1",
     "@swc-node/jest": "^1.1.0",
     "@testing-library/jest-dom": "^5.12.0",
     "@testing-library/react": "^11.2.6",
     "@testing-library/react-hooks": "^3.4.2",
+    "@testing-library/user-event": "13.1.9",
     "axios-mock-adapter": "^1.19.0",
     "babel-eslint": "^10.0.0",
     "chalk": "4.1.1",
@@ -18,6 +18,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-config-prettier": "^6.15.0",
     "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsdoc": "35.4.0",
     "eslint-plugin-jsx-a11y": "^6.4.1",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-react": "^7.23.2",
@@ -37,6 +38,7 @@
     "lint-staged": "^10.5.4",
     "lodash": "4.17.21",
     "npm-run-all": "^4.1.5",
+    "plop": "2.7.4",
     "prettier": "^1.18.2",
     "qs": "6.10.1",
     "react-test-renderer": "^17.0.2",
@@ -56,9 +58,10 @@
     "setup": "yarn && yarn build",
     "watch": "lerna run --stream watch --no-private",
     "build": "lerna run --stream build --no-private",
+    "generate": "plop --plopfile ./packages/generators/admin/plopfile.js",
     "lint": "npm-run-all -p lint:code lint:css",
     "lint:code": "eslint .",
-    "lint:css": "stylelint packages/**/admin/src/**/**/*.js",
+    "lint:css": "stylelint packages/**/admin/src/**/*.js",
     "lint:fix": "eslint --fix .",
     "lint:other": "npm run prettier:other -- --check",
     "format": "npm-run-all -p format:*",
@@ -75,7 +78,7 @@
     "test:front:update:ce": "cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --u",
     "test:snyk": "snyk test",
     "test:unit": "jest --verbose",
-    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner",
+    "test:e2e": "FORCE_COLOR=true jest --config jest.config.e2e.js --verbose --runInBand --testRunner=jest-circus/runner --forceExit --detectOpenHandles",
     "test:generate-app": "node test/create-test-app.js",
     "doc:api": "node scripts/open-api/serve.js"
   },
@@ -99,13 +102,14 @@
     "url": "https://github.com/strapi/strapi/issues"
   },
   "engines": {
-    "node": ">=10.16.0 <=14.x.x",
+    "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
   "license": "SEE LICENSE IN LICENSE",
-  "name": "strapi-monorepo",
+  "name": "strapi",
   "workspaces": [
     "packages/*",
+    "packages/*/*",
     "examples/*"
   ],
   "husky": {
@@ -120,5 +124,8 @@
     "*.js": [
       "eslint --fix"
     ]
+  },
+  "dependencies": {
+    "@babel/polyfill": "7.12.1"
   }
 }

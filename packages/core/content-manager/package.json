@@ -1,0 +1,43 @@
+{
+  "name": "@strapi/plugin-content-manager",
+  "version": "3.6.8",
+  "description": "A powerful UI to easily manage your data.",
+  "strapi": {
+    "icon": "plug",
+    "name": "content-manager",
+    "displayName": "Content Manager",
+    "description": "content-manager.plugin.description",
+    "required": true,
+    "kind": "plugin"
+  },
+  "dependencies": {
+    "@sindresorhus/slugify": "1.1.0",
+    "@strapi/helper-plugin": "3.6.8",
+    "@strapi/utils": "3.6.8",
+    "lodash": "4.17.21",
+    "pluralize": "^8.0.0",
+    "yup": "^0.32.9"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "maintainers": [
+    {
+      "name": "Strapi team",
+      "email": "hi@strapi.io",
+      "url": "https://strapi.io"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+}

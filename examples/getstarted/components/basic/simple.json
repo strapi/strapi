@@ -1,0 +1,13 @@
+{
+  "collectionName": "components_basic_simples",
+  "info": {
+    "name": "simple",
+    "icon": "address-card"
+  },
+  "options": {},
+  "attributes": {
+    "name": {
+      "type": "string"
+    }
+  }
+}

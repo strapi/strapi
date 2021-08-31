@@ -79,7 +79,7 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Node:**
 
-- NodeJS >= 10.16 <=14
+- NodeJS >= 12 <= 16
 - NPM >= 6.x
 
 **Database:**
@@ -88,7 +88,6 @@ Complete installation requirements can be found in the documentation under <a hr
 - MariaDB >= 10.1
 - PostgreSQL >= 10
 - SQLite >= 3
-- MongoDB >= 3.6 ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108))
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 
@@ -100,7 +99,7 @@ Complete installation requirements can be found in the documentation under <a hr
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL & NoSQL databases:** Works with MongoDB ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108)), PostgreSQL, MySQL, MariaDB, and SQLite.
+- **SQL databases:** Works with PostgreSQL, MySQL, MariaDB, and SQLite.
 
 **[See more on our website](https://strapi.io/overview)**.
 

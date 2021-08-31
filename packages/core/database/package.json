@@ -1,0 +1,40 @@
+{
+  "name": "@strapi/database",
+  "version": "3.6.8",
+  "description": "Strapi's database layer",
+  "homepage": "https://strapi.io",
+  "main": "./lib/index.js",
+  "scripts": {
+    "test": "echo \"no tests yet\""
+  },
+  "directories": {
+    "lib": "./lib"
+  },
+  "author": {
+    "name": "Strapi team",
+    "email": "hi@strapi.io",
+    "url": "https://strapi.io"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/strapi/strapi.git"
+  },
+  "bugs": {
+    "url": "https://github.com/strapi/strapi/issues"
+  },
+  "engines": {
+    "node": ">=12.x.x <=16.x.x",
+    "npm": ">=6.0.0"
+  },
+  "license": "SEE LICENSE IN LICENSE",
+  "dependencies": {
+    "date-fns": "2.22.1",
+    "debug": "4.3.1",
+    "fs-extra": "10.0.0",
+    "knex": "0.95.6",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "sqlite3": "5.0.2"
+  }
+}

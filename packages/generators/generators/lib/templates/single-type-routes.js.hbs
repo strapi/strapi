@@ -1,0 +1,28 @@
+module.exports = {
+  routes: [
+    {
+      method: 'GET',
+      path: '/{{id}}',
+      handler: '{{id}}.find',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'PUT',
+      path: '/{{id}}',
+      handler: '{{id}}.update',
+      config: {
+        policies: [],
+      },
+    },
+    {
+      method: 'DELETE',
+      path: '/{{id}}/',
+      handler: '{{id}}.delete',
+      config: {
+        policies: [],
+      },
+    },
+  ],
+};

@@ -1,0 +1,249 @@
+'use strict';
+
+const _ = require('lodash');
+
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createTestBuilder } = require('../../../../../test/helpers/builder');
+const { createAuthRequest } = require('../../../../../test/helpers/request');
+
+const builder = createTestBuilder();
+let strapi;
+let rq;
+let data = {
+  products: [],
+};
+
+const compo = {
+  name: 'compo',
+  attributes: {
+    name: {
+      type: 'string',
+      required: true,
+    },
+    description: {
+      type: 'text',
+      minLength: 3,
+      maxLength: 10,
+    },
+  },
+};
+
+const productWithDP = {
+  attributes: {
+    name: {
+      type: 'string',
+      required: true,
+    },
+    description: {
+      type: 'text',
+      minLength: 3,
+      maxLength: 30,
+    },
+  },
+  draftAndPublish: true,
+  name: 'product-with-dp',
+  description: '',
+  collectionName: '',
+};
+
+describe('Core API - Basic + draftAndPublish', () => {
+  beforeAll(async () => {
+    await builder
+      .addComponent(compo)
+      .addContentType(productWithDP)
+      .build();
+
+    strapi = await createStrapiInstance();
+    rq = await createAuthRequest({ strapi });
+  });
+
+  afterAll(async () => {
+    await strapi.destroy();
+    await builder.cleanup();
+  });
+
+  test('Create a product', async () => {
+    const product = {
+      name: 'Product 1',
+      description: 'Product description',
+    };
+
+    const { statusCode, body } = await rq({
+      method: 'POST',
+      url: '/product-with-dps',
+      body: product,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+
+    data.products.push(body.data);
+  });
+
+  test('Create a product + can overwrite published_at', async () => {
+    const product = {
+      name: 'Product 2',
+      description: 'Product description',
+      published_at: '2020-08-20T10:27:55.000Z',
+    };
+
+    const { statusCode, body } = await rq({
+      method: 'POST',
+      url: '/product-with-dps',
+      body: product,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: expect.anything(),
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+
+    data.products.push(body.data);
+  });
+
+  test('Read products', async () => {
+    const { statusCode, body } = await rq({
+      method: 'GET',
+      url: '/product-with-dps',
+    });
+
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toHaveLength(2);
+    expect(body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: expect.anything(),
+          attributes: expect.objectContaining({
+            name: 'Product 1',
+            description: 'Product description',
+          }),
+        }),
+      ])
+    );
+
+    body.data.forEach(p => {
+      expect(p.attributes.published_at).toBeISODate();
+    });
+  });
+
+  test('Update product', async () => {
+    const product = {
+      name: 'Product 1 updated',
+      description: 'Updated Product description',
+    };
+
+    const { statusCode, body } = await rq({
+      method: 'PUT',
+      url: `/product-with-dps/${data.products[0].id}`,
+      body: product,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject({
+      id: data.products[0].id,
+      attributes: product,
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+
+    data.products[0] = body.data;
+  });
+
+  test('Update product + can overwrite published_at', async () => {
+    const product = {
+      name: 'Product 1 updated',
+      description: 'Updated Product description',
+      published_at: '2020-08-27T09:50:50.000Z',
+    };
+
+    const { statusCode, body } = await rq({
+      method: 'PUT',
+      url: `/product-with-dps/${data.products[0].id}`,
+      body: product,
+    });
+
+    expect(statusCode).toBe(200);
+
+    expect(body.data).toMatchObject({
+      id: data.products[0].id,
+      attributes: _.pick(data.products[0], ['name', 'description']),
+    });
+
+    expect(body.data.attributes.published_at).toBeISODate();
+    expect(body.data.attributes.published_at).toBe(product.published_at);
+    data.products[0] = body.data;
+  });
+
+  test('Delete product', async () => {
+    const { statusCode, body } = await rq({
+      method: 'DELETE',
+      url: `/product-with-dps/${data.products[0].id}`,
+    });
+
+    expect(statusCode).toBe(200);
+    expect(body.data).toMatchObject(data.products[0]);
+    expect(body.data.id).toEqual(data.products[0].id);
+    expect(body.data.attributes.published_at).toBeISODate();
+    data.products.shift();
+  });
+
+  describe('validators', () => {
+    test('Cannot create a product - minLength', async () => {
+      const product = {
+        name: 'Product 1',
+        description: '',
+      };
+
+      const res = await rq({
+        method: 'POST',
+        url: '/product-with-dps',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res, 'body.data.errors.description.0')).toBe(
+        'description must be at least 3 characters'
+      );
+    });
+
+    test('Cannot create a product - required', async () => {
+      const product = {
+        description: 'Product description',
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/product-with-dps',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res, 'body.data.errors.name.0')).toBe('name must be defined.');
+    });
+
+    test('Cannot create a product - maxLength', async () => {
+      const product = {
+        name: 'Product 1',
+        description: "I'm a product description that is very long. At least thirty characters.",
+      };
+      const res = await rq({
+        method: 'POST',
+        url: '/product-with-dps',
+        body: product,
+      });
+
+      expect(res.statusCode).toBe(400);
+      expect(_.get(res.body.data, ['errors', 'description', '0'])).toBe(
+        'description must be at most 30 characters'
+      );
+    });
+  });
+});

@@ -4,7 +4,7 @@ const { get } = require('lodash/fp');
 
 const _ = require('lodash');
 const modelsUtils = require('../models');
-const { sanitizeEntity } = require('../../../packages/strapi-utils');
+const { sanitizeEntity } = require('../../../packages/core/utils');
 const actionRegistry = require('./action-registry');
 const { createContext } = require('./context');
 
@@ -26,7 +26,7 @@ const createTestBuilder = (options = {}) => {
     },
 
     sanitizedFixturesFor(modelName, strapi) {
-      const model = strapi.getModel(modelName);
+      const model = strapi.getModel(modelsUtils.toUID(modelName));
       const fixtures = this.fixturesFor(modelName);
 
       return sanitizeEntity(fixtures, { model });
@@ -77,7 +77,7 @@ const createTestBuilder = (options = {}) => {
 
       if (enableTestDataAutoCleanup) {
         for (const model of models.reverse()) {
-          await modelsUtils.cleanupModel(model.uid || model.modelName);
+          await modelsUtils.cleanupModel(model.uid);
         }
       }
 

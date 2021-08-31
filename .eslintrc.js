@@ -1,7 +1,8 @@
 const frontPaths = [
-  'packages/**/admin/src/**/**/*.js',
-  'packages/**/ee/admin/**/**/*.js',
-  'packages/strapi-helper-plugin/**/*.js',
+  'packages/**/admin/src/**/*.js',
+  'packages/generators/app/lib/resources/files/admin/app.js',
+  'packages/**/ee/admin/**/*.js',
+  'packages/core/helper-plugin/**/*.js',
   'packages/**/tests/front/**/*.js',
   'test/config/front/**/*.js',
 ];

@@ -32,10 +32,9 @@ module.exports = {
     chai: false,
     ENABLED_EE_FEATURES: false,
     // TODO: put all this in process.env in webpack to avoid having to set them here
-    REMOTE_URL: true,
+    ADMIN_PATH: true,
     BACKEND_URL: true,
     PUBLIC_PATH: true,
-    MODE: true,
     NODE_ENV: true,
   },
   settings: {

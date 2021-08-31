@@ -2,7 +2,7 @@
 
 const path = require('path');
 const _ = require('lodash');
-const strapi = require('../../packages/strapi/lib');
+const strapi = require('../../packages/core/strapi/lib');
 const { createUtils } = require('./utils');
 
 const superAdminCredentials = {

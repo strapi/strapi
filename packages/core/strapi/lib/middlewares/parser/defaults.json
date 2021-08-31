@@ -1,0 +1,11 @@
+{
+  "parser": {
+    "enabled": true,
+    "multipart": true,
+    "queryStringParser": {
+      "strictNullHandling": true,
+      "arrayLimit": 100,
+      "depth": 20
+    }
+  }
+}

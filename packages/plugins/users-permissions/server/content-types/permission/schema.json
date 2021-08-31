@@ -1,0 +1,48 @@
+{
+  "collectionName": "up_permissions",
+  "info": {
+    "name": "permission",
+    "description": "",
+    "singularName": "permission",
+    "pluralName": "permissions",
+    "displayName": "Permission"
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": false
+    }
+  },
+  "attributes": {
+    "type": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "controller": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "action": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "enabled": {
+      "type": "boolean",
+      "required": true,
+      "configurable": false
+    },
+    "policy": {
+      "type": "string",
+      "configurable": false
+    },
+    "role": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "plugin::users-permissions.role",
+      "inversedBy": "permissions",
+      "configurable": false
+    }
+  }
+}
