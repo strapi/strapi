@@ -34,7 +34,7 @@ const ActionRow = ({
     return [...arr, obj];
   }, []);
 
-  // output: ['value1', 'value2']
+  // Output: ['value1', 'value2']
   const values = Object.values(value)
     .map(x =>
       Object.entries(x)
@@ -42,6 +42,16 @@ const ActionRow = ({
         .map(([key]) => key)
     )
     .flat();
+
+  // ! Only expects arrayOfOpt to be [['default', obj]] - might break in future changes
+  const handleChange = val => {
+    const [[, values]] = arrayOfOptionsGroupedByCategory;
+    const formattedValues = values.reduce(
+      (acc, curr) => ({ [curr.id]: val.includes(curr.id), ...acc }),
+      {}
+    );
+    onChange(name, formattedValues);
+  };
 
   return (
     <RowWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
@@ -81,7 +91,7 @@ const ActionRow = ({
           id={name}
           placeholder="Your example"
           customizeContent={values => `${values.length} currently selected`}
-          onChange={value => onChange(name, value)}
+          onChange={handleChange}
           value={values}
           options={options}
           disabled={isFormDisabled}

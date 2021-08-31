@@ -53,9 +53,11 @@ const ConditionsModal = ({
   const handleChange = (name, values) => {
     setState(
       produce(draft => {
-        Object.entries(draft[name].default).forEach(([key]) => {
-          draft[name].default[key] = values.includes(key);
-        });
+        if (!draft[name]) draft[name] = {};
+
+        if (!draft[name].default) draft[name].default = {};
+
+        draft[name].default = values;
       })
     );
   };
