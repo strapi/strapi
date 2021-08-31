@@ -96,4 +96,55 @@ describe('API Token Controller', () => {
       expect(send).toHaveBeenCalledWith({ data: tokens });
     });
   });
+
+  describe('Delete an API token', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('Deletes an API token successfully', async () => {
+      const revoke = jest.fn().mockResolvedValue(token);
+      const deleted = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { deleted });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              revoke,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.revoke(ctx);
+
+      expect(revoke).toHaveBeenCalledWith(token.id);
+      expect(deleted).toHaveBeenCalledWith();
+    });
+
+    test('Does not return an error if the ressource does not exists', async () => {
+      const revoke = jest.fn().mockResolvedValue(null);
+      const deleted = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { deleted });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              revoke,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.revoke(ctx);
+
+      expect(revoke).toHaveBeenCalledWith(token.id);
+      expect(deleted).toHaveBeenCalledWith();
+    });
+  });
 });

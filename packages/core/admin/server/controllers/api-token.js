@@ -41,4 +41,13 @@ module.exports = {
 
     ctx.send({ data: apiTokens });
   },
+
+  async revoke(ctx) {
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+
+    await apiTokenService.revoke(id);
+
+    ctx.deleted();
+  },
 };

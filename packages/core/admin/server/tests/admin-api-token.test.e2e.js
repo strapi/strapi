@@ -175,4 +175,24 @@ describe('Admin API Token CRUD (e2e)', () => {
       },
     ]);
   });
+
+  test('7. Deletes a token (successfully)', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens/3',
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(204);
+    expect(res.body.data).toBeUndefined();
+  });
+
+  test('8. Does not return an error if the ressource does not exists', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens/42',
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(204);
+    expect(res.body.data).toBeUndefined();
+  });
 });
