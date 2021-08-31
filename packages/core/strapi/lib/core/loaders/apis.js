@@ -5,7 +5,7 @@ const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
 
-const normalizeName = _.toLower;
+const normalizeName = _.kebabCase;
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
