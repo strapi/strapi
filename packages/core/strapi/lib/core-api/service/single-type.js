@@ -14,7 +14,8 @@ const createSingleTypeService = ({ model, strapi, utils }) => {
      * @return {Promise}
      */
     find({ params } = {}) {
-      return strapi.entityService.find(uid, { params: getFetchParams(params) });
+      const normalizedParams = getFetchParams(params);
+      return strapi.entityService.find(uid, { params: normalizedParams });
     },
 
     /**

@@ -1,6 +1,6 @@
 'use strict';
 
-const { sanitizeEntity } = require('@strapi/utils');
+const { sanitizeEntity, contentTypes } = require('@strapi/utils');
 
 const { transformResponse } = require('./transform');
 const createSingleTypeController = require('./single-type');
@@ -18,7 +18,7 @@ module.exports = ({ service, model }) => {
     },
   };
 
-  if (model.kind === 'singleType') {
+  if (contentTypes.isSingleType(model)) {
     return createSingleTypeController(ctx);
   }
 
