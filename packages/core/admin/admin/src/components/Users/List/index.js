@@ -91,6 +91,8 @@ const List = forwardRef(
       push(`/settings/users/${id}`);
     };
 
+    console.log({ headers });
+
     return (
       <Wrapper withHigherHeight={!data.length}>
         <Table

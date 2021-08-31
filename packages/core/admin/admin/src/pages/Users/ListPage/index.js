@@ -1,56 +1,26 @@
-import React, {
-  // useCallback,
-  useEffect,
-  // useMemo,
-  useReducer,
-  useRef,
-  // useState
-} from 'react';
+import React from 'react';
 import {
-  // BaselineAlignment,
-  // useQuery,
-  request,
   useRBAC,
   LoadingIndicatorPage,
-  // PopUpWarning,
   SettingsPageTitle,
   useNotification,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import {
-  Button,
-  // ContentLayout,
-  HeaderLayout,
-  // Table,
-  // TableLabel,
-  // Tbody,
-  // TFooter,
-  // Th,
-  // Thead,
-  // Tr,
-  // VisuallyHidden,
-  Main,
-} from '@strapi/parts';
+import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/parts';
 import { Mail } from '@strapi/icons';
 import {
   // useHistory,
   useLocation,
 } from 'react-router-dom';
 import { useIntl } from 'react-intl';
-// import get from 'lodash/get';
-// import { Flex, Padded } from '@buffetjs/core';
-// import { useSettingsHeaderSearchContext } from '../../../hooks';
-// import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
+import { useQuery } from 'react-query';
+import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
-// import Header from './Header';
-// import ModalForm from './ModalForm';
-// import getFilters from './utils/getFilters';
-import init from './init';
-import { initialState, reducer } from './reducer';
+import Table from './Table';
+import fetchData from './utils/api';
 
 const ListPage = () => {
   const {
-    isLoading: isLoadingForPermissions,
     allowedActions: {
       canCreate,
       // canDelete,
@@ -59,6 +29,7 @@ const ListPage = () => {
     },
   } = useRBAC(adminPermissions.settings.users);
   const toggleNotification = useNotification();
+
   // const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
   // const [isModalOpened, setIsModalOpened] = useState(false);
   const { formatMessage } = useIntl();
@@ -66,67 +37,83 @@ const ListPage = () => {
   // const { push } = useHistory();
   const { search } = useLocation();
 
+  const { status, data, isFetching } = useQuery(['projects', search], () => fetchData(search), {
+    enabled: canRead,
+    keepPreviousData: true,
+    retry: false,
+    staleTime: 5000,
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+    },
+  });
+
   useFocusWhenNavigate();
+
+  const total = get(data, 'pagination.total', 0);
 
   // const filters = useMemo(() => {
   //   return getFilters(search);
   // }, [search]);
 
-  const [
-    {
-      // data,
-      // dataToDelete,
-      isLoading,
-      pagination: { total },
-      // shouldRefetchData,
-      // showModalConfirmButtonLoading,
-    },
-    dispatch,
-  ] = useReducer(reducer, initialState, init);
+  // const [
+  //   {
+  //     // data,
+  //     // dataToDelete,
+  //     // isLoading,
+  //     pagination: { total },
+  //     // shouldRefetchData,
+  //     // showModalConfirmButtonLoading,
+  //   },
+  //   dispatch,
+  // ] = useReducer(reducer, initialState, init);
   // const pageSize = parseInt(query.get('pageSize') || 10, 10);
   // const page = parseInt(query.get('page') || 0, 10);
   // const sort = decodeURIComponent(query.get('sort'));
   // const _q = decodeURIComponent(query.get('_q') || '');
-  const getDataRef = useRef();
+  // const getDataRef = useRef();
+
   // const listRef = useRef();
 
-  getDataRef.current = async () => {
-    if (!canRead) {
-      dispatch({
-        type: 'UNSET_IS_LOADING',
-      });
+  // getDataRef.current = async () => {
+  //   if (!canRead) {
+  //     dispatch({
+  //       type: 'UNSET_IS_LOADING',
+  //     });
 
-      return;
-    }
-    // Show the loading state and reset the state
-    dispatch({
-      type: 'GET_DATA',
-    });
+  //     return;
+  //   }
+  //   // Show the loading state and reset the state
+  //   dispatch({
+  //     type: 'GET_DATA',
+  //   });
 
-    try {
-      const {
-        data: { results, pagination },
-      } = await request(`/admin/users${search}`, { method: 'GET' });
+  //   try {
+  //     const {
+  //       data: { results, pagination },
+  //     } = await request(`/admin/users${search}`, { method: 'GET' });
 
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        data: results,
-        pagination,
-      });
-    } catch (err) {
-      console.error(err.response);
-      toggleNotification({
-        type: 'warning',
-        message: { id: 'notification.error' },
-      });
-    }
-  };
+  //     dispatch({
+  //       type: 'GET_DATA_SUCCEEDED',
+  //       data: results,
+  //       pagination,
+  //     });
+  //   } catch (err) {
+  //     console.error(err.response);
+  //     toggleNotification({
+  //       type: 'warning',
+  //       message: { id: 'notification.error' },
+  //     });
+  //   }
+  // };
 
-  useEffect(() => {
-    if (!isLoadingForPermissions) {
-      getDataRef.current();
-    }
-  }, [search, isLoadingForPermissions]);
+  // useEffect(() => {
+  //   if (!isLoadingForPermissions) {
+  //     getDataRef.current();
+  //   }
+  // }, [search, isLoadingForPermissions]);
 
   // const handleChangeDataToDelete = ids => {
   //   dispatch({
@@ -243,6 +230,10 @@ const ListPage = () => {
   //   });
   // };
 
+  // This can be improved but we need to show an something to the user
+  const isLoading =
+    (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
+
   return (
     <Main labelledBy="title">
       <SettingsPageTitle name="Users" />
@@ -272,7 +263,15 @@ const ListPage = () => {
           { number: total }
         )}
       />
-      {isLoading ? <LoadingIndicatorPage /> : undefined}
+      <ContentLayout>
+        {!canRead && <div>TODO no permissions</div>}
+        {status === 'error' && <div>An error occurred</div>}
+        {canRead && isLoading ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <Table canCreate={canCreate} rows={data?.results} reows={[]} />
+        )}
+      </ContentLayout>
     </Main>
   );
 
@@ -340,5 +339,3 @@ const ListPage = () => {
 };
 
 export default ListPage;
-
-// export default () => 'User - LV';

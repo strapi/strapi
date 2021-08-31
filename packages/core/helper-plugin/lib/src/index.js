@@ -175,3 +175,7 @@ export { default as CheckPermissions } from './components/CheckPermissions';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
+export { default as Status } from './components/Status';
+
+// New icons
+export { default as SortIcon } from './icons/SortIcon';
