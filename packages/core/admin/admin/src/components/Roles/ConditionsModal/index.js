@@ -3,20 +3,20 @@ import {
   Breadcrumbs,
   Button,
   Crumb,
+  Divider,
   H2,
   ModalFooter,
   ModalHeader,
   ModalLayout,
   Stack,
   Text,
-  Divider,
 } from '@strapi/parts';
-import { cloneDeep, get, groupBy, set, upperFirst } from 'lodash';
+import produce from 'immer';
+import { get, groupBy, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../hooks';
-import updateValues from '../Permissions/utils/updateValues';
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 
@@ -50,26 +50,14 @@ const ConditionsModal = ({
 
   const [state, setState] = useState(initState);
 
-  const handleCategoryChange = ({ keys, value }) => {
-    setState(prevState => {
-      const updatedState = cloneDeep(prevState);
-      const objToUpdate = get(prevState, keys, {});
-      const updatedValues = updateValues(objToUpdate, value);
-
-      set(updatedState, keys, updatedValues);
-
-      return updatedState;
-    });
-  };
-
-  const handleChange = ({ keys, value }) => {
-    setState(prevState => {
-      const updatedState = cloneDeep(prevState);
-
-      set(updatedState, keys, value);
-
-      return updatedState;
-    });
+  const handleChange = (name, values) => {
+    setState(
+      produce(draft => {
+        Object.entries(draft[name].default).forEach(([key]) => {
+          draft[name].default[key] = values.includes(key);
+        });
+      })
+    );
   };
 
   const handleSubmit = () => {
@@ -140,7 +128,6 @@ const ConditionsModal = ({
                     isFormDisabled={isFormDisabled}
                     isGrey={index % 2 === 0}
                     name={name}
-                    onCategoryChange={handleCategoryChange}
                     onChange={handleChange}
                     value={get(state, name, {})}
                   />

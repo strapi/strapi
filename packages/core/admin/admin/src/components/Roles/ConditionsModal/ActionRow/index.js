@@ -1,10 +1,10 @@
-import React from 'react';
+import { Box, Row, TableLabel } from '@strapi/parts';
+import { MultiSelectNested } from '@strapi/parts/Select';
+import { upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
-import { Row, TableLabel } from '@strapi/parts';
+import React from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-
-// import ConditionsSelect from '../ConditionsSelect';
 import { rowHeight } from '../../Permissions/utils/constants';
 
 const RowWrapper = styled(Row)`
@@ -12,16 +12,36 @@ const RowWrapper = styled(Row)`
 `;
 
 const ActionRow = ({
-  // arrayOfOptionsGroupedByCategory,
-  // isFormDisabled,
+  arrayOfOptionsGroupedByCategory,
+  isFormDisabled,
   isGrey,
   label,
-  // name,
-  // onCategoryChange,
-  // onChange,
-  // value,
+  name,
+  onChange,
+  value,
 }) => {
   const { formatMessage } = useIntl();
+  const options = arrayOfOptionsGroupedByCategory.reduce((arr, curr) => {
+    const [label, children] = curr;
+    const obj = {
+      label: upperFirst(label),
+      children: children.map(child => ({
+        label: child.displayName,
+        value: child.id,
+      })),
+    };
+
+    return [...arr, obj];
+  }, []);
+
+  // output: ['value1', 'value2']
+  const values = Object.values(value)
+    .map(x =>
+      Object.entries(x)
+        .filter(([, value]) => value)
+        .map(([key]) => key)
+    )
+    .flat();
 
   return (
     <RowWrapper as="li" background={isGrey ? 'neutral100' : 'neutral0'}>
@@ -56,26 +76,28 @@ const ActionRow = ({
           })}
         </TableLabel>
       </Row>
-      {/* <ConditionsSelect
-        arrayOfOptionsGroupedByCategory={arrayOfOptionsGroupedByCategory}
-        name={name}
-        isFormDisabled={isFormDisabled}
-        onCategoryChange={onCategoryChange}
-        onChange={onChange}
-        value={value}
-      /> */}
+      <Box style={{ maxWidth: 430, width: '100%' }}>
+        <MultiSelectNested
+          id={name}
+          placeholder="Your example"
+          customizeContent={values => `${values.length} currently selected`}
+          onChange={value => onChange(name, value)}
+          value={values}
+          options={options}
+          disabled={isFormDisabled}
+        />
+      </Box>
     </RowWrapper>
   );
 };
 
 ActionRow.propTypes = {
-  // arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
-  // isFormDisabled: PropTypes.bool.isRequired,
+  arrayOfOptionsGroupedByCategory: PropTypes.array.isRequired,
+  isFormDisabled: PropTypes.bool.isRequired,
   isGrey: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
-  // name: PropTypes.string.isRequired,
-  // value: PropTypes.object.isRequired,
-  // onCategoryChange: PropTypes.func.isRequired,
-  // onChange: PropTypes.func.isRequired,
+  name: PropTypes.string.isRequired,
+  value: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
 };
 export default ActionRow;
