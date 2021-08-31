@@ -17,9 +17,9 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
-
 import Table from './Table';
 import fetchData from './utils/api';
+import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
   const {
@@ -269,7 +269,10 @@ const ListPage = () => {
             canCreate={canCreate}
             canDelete={canDelete}
             canUpdate={canUpdate}
+            headers={tableHeaders}
             rows={data?.results}
+            withBulkActions
+            withMainAction={canDelete}
           />
         )}
       </CustomContentLayout>

@@ -10,33 +10,29 @@ import {
   VisuallyHidden,
 } from '@strapi/parts';
 import { SortIcon, useQueryParams } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 
-const TableHead = () => {
+const TableHead = ({ headers, withMainAction, withBulkActions }) => {
   const [{ query }, setQuery] = useQueryParams();
   const sort = query.sort;
   const [sortBy, sortOrder] = sort.split(':');
-  const headers = [
-    { label: 'Name', value: 'firstname', isSortable: true },
-    { label: 'Email', value: 'email', isSortable: true },
-    { label: 'Roles', value: 'roles', isSortable: false },
-    { label: 'Username', value: 'username', isSortable: true },
-    { label: 'Active User', value: 'isActive', isSortable: false },
-  ];
 
   return (
     <Thead>
       <Tr>
-        <Th>
-          <BaseCheckbox aria-label="Select all entries" />
-        </Th>
-        {headers.map(({ label, value, isSortable }) => {
-          const isSorted = sortBy === value;
+        {withMainAction && (
+          <Th>
+            <BaseCheckbox aria-label="Select all entries" />
+          </Th>
+        )}
+        {headers.map(({ name, metadatas: { sortable: isSortable, label } }) => {
+          const isSorted = sortBy === name;
           const isUp = sortOrder === 'ASC';
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {
               const nextSortOrder = isSorted && sortOrder === 'ASC' ? 'DESC' : 'ASC';
-              const nextSort = `${value}:${nextSortOrder}`;
+              const nextSort = `${name}:${nextSortOrder}`;
 
               setQuery({
                 sort: nextSort,
@@ -46,7 +42,7 @@ const TableHead = () => {
 
           return (
             <Th
-              key={value}
+              key={name}
               action={
                 isSorted ? (
                   <IconButton
@@ -73,12 +69,26 @@ const TableHead = () => {
           );
         })}
 
-        <Th>
-          <VisuallyHidden>Actions</VisuallyHidden>
-        </Th>
+        {withBulkActions && (
+          <Th>
+            <VisuallyHidden>Actions</VisuallyHidden>
+          </Th>
+        )}
       </Tr>
     </Thead>
   );
+};
+
+TableHead.defaultProps = {
+  headers: [],
+  withBulkActions: false,
+  withMainAction: false,
+};
+
+TableHead.propTypes = {
+  headers: PropTypes.array,
+  withBulkActions: PropTypes.bool,
+  withMainAction: PropTypes.bool,
 };
 
 export default TableHead;
