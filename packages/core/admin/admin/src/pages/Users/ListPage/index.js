@@ -1,293 +1,344 @@
-// import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-// import {
-//   BaselineAlignment,
-//   useQuery,
-//   request,
-//   useRBAC,
-//   LoadingIndicatorPage,
-//   PopUpWarning,
-//   useNotification,
-//   SettingsPageTitle
-// } from '@strapi/helper-plugin';
-// import { get } from 'lodash';
-// import { useHistory, useLocation } from 'react-router-dom';
+import React, {
+  // useCallback,
+  useEffect,
+  // useMemo,
+  useReducer,
+  useRef,
+  // useState
+} from 'react';
+import {
+  // BaselineAlignment,
+  // useQuery,
+  request,
+  useRBAC,
+  LoadingIndicatorPage,
+  // PopUpWarning,
+  SettingsPageTitle,
+  useNotification,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
+import {
+  Button,
+  // ContentLayout,
+  HeaderLayout,
+  // Table,
+  // TableLabel,
+  // Tbody,
+  // TFooter,
+  // Th,
+  // Thead,
+  // Tr,
+  // VisuallyHidden,
+  Main,
+} from '@strapi/parts';
+import { Mail } from '@strapi/icons';
+import {
+  // useHistory,
+  useLocation,
+} from 'react-router-dom';
+import { useIntl } from 'react-intl';
+// import get from 'lodash/get';
 // import { Flex, Padded } from '@buffetjs/core';
 // import { useSettingsHeaderSearchContext } from '../../../hooks';
 // import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
-// import adminPermissions from '../../../permissions';
+import adminPermissions from '../../../permissions';
 // import Header from './Header';
 // import ModalForm from './ModalForm';
 // import getFilters from './utils/getFilters';
-// import init from './init';
-// import { initialState, reducer } from './reducer';
+import init from './init';
+import { initialState, reducer } from './reducer';
 
-// const ListPage = () => {
-//   const {
-//     isLoading: isLoadingForPermissions,
-//     allowedActions: { canCreate, canDelete, canRead, canUpdate },
-//   } = useRBAC(adminPermissions.settings.users);
-//   const toggleNotification = useNotification();
-//   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
-//   const [isModalOpened, setIsModalOpened] = useState(false);
-//   const { toggleHeaderSearch } = useSettingsHeaderSearchContext();
-//   const query = useQuery();
-//   const { push } = useHistory();
-//   const { search } = useLocation();
-//   const filters = useMemo(() => {
-//     return getFilters(search);
-//   }, [search]);
+const ListPage = () => {
+  const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: {
+      canCreate,
+      // canDelete,
+      canRead,
+      // canUpdate
+    },
+  } = useRBAC(adminPermissions.settings.users);
+  const toggleNotification = useNotification();
+  // const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
+  // const [isModalOpened, setIsModalOpened] = useState(false);
+  const { formatMessage } = useIntl();
+  // const query = useQuery();
+  // const { push } = useHistory();
+  const { search } = useLocation();
 
-//   const [
-//     {
-//       data,
-//       dataToDelete,
-//       isLoading,
-//       pagination: { total },
-//       shouldRefetchData,
-//       showModalConfirmButtonLoading,
-//     },
-//     dispatch,
-//   ] = useReducer(reducer, initialState, init);
-//   const pageSize = parseInt(query.get('pageSize') || 10, 10);
-//   const page = parseInt(query.get('page') || 0, 10);
-//   const sort = decodeURIComponent(query.get('sort'));
-//   const _q = decodeURIComponent(query.get('_q') || '');
-//   const getDataRef = useRef();
-//   const listRef = useRef();
+  useFocusWhenNavigate();
 
-//   getDataRef.current = async () => {
-//     if (!canRead) {
-//       dispatch({
-//         type: 'UNSET_IS_LOADING',
-//       });
+  // const filters = useMemo(() => {
+  //   return getFilters(search);
+  // }, [search]);
 
-//       return;
-//     }
-//     // Show the loading state and reset the state
-//     dispatch({
-//       type: 'GET_DATA',
-//     });
+  const [
+    {
+      // data,
+      // dataToDelete,
+      isLoading,
+      pagination: { total },
+      // shouldRefetchData,
+      // showModalConfirmButtonLoading,
+    },
+    dispatch,
+  ] = useReducer(reducer, initialState, init);
+  // const pageSize = parseInt(query.get('pageSize') || 10, 10);
+  // const page = parseInt(query.get('page') || 0, 10);
+  // const sort = decodeURIComponent(query.get('sort'));
+  // const _q = decodeURIComponent(query.get('_q') || '');
+  const getDataRef = useRef();
+  // const listRef = useRef();
 
-//     try {
-//       const {
-//         data: { results, pagination },
-//       } = await request(`/admin/users${search}`, { method: 'GET' });
+  getDataRef.current = async () => {
+    if (!canRead) {
+      dispatch({
+        type: 'UNSET_IS_LOADING',
+      });
 
-//       dispatch({
-//         type: 'GET_DATA_SUCCEEDED',
-//         data: results,
-//         pagination,
-//       });
-//     } catch (err) {
-//       console.error(err.response);
-//       toggleNotification({
-//         type: 'warning',
-//         message: { id: 'notification.error' },
-//       });
-//     }
-//   };
+      return;
+    }
+    // Show the loading state and reset the state
+    dispatch({
+      type: 'GET_DATA',
+    });
 
-//   useEffect(() => {
-//     if (!isLoadingForPermissions) {
-//       getDataRef.current();
-//     }
-//   }, [search, isLoadingForPermissions]);
+    try {
+      const {
+        data: { results, pagination },
+      } = await request(`/admin/users${search}`, { method: 'GET' });
 
-//   useEffect(() => {
-//     if (canRead) {
-//       toggleHeaderSearch({ id: 'Settings.permissions.menu.link.users.label' });
-//     }
+      dispatch({
+        type: 'GET_DATA_SUCCEEDED',
+        data: results,
+        pagination,
+      });
+    } catch (err) {
+      console.error(err.response);
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error' },
+      });
+    }
+  };
 
-//     return () => {
-//       if (canRead) {
-//         toggleHeaderSearch();
-//       }
-//     };
-//     // eslint-disable-next-line react-hooks/exhaustive-deps
-//   }, [canRead]);
+  useEffect(() => {
+    if (!isLoadingForPermissions) {
+      getDataRef.current();
+    }
+  }, [search, isLoadingForPermissions]);
 
-//   const handleChangeDataToDelete = ids => {
-//     dispatch({
-//       type: 'ON_CHANGE_DATA_TO_DELETE',
-//       dataToDelete: ids,
-//     });
-//   };
+  // const handleChangeDataToDelete = ids => {
+  //   dispatch({
+  //     type: 'ON_CHANGE_DATA_TO_DELETE',
+  //     dataToDelete: ids,
+  //   });
+  // };
 
-//   const handleChangeFilter = ({ filter, name, value }) => {
-//     const filterName = `${name}${filter}`;
+  // const handleChangeFilter = ({ filter, name, value }) => {
+  //   const filterName = `${name}${filter}`;
 
-//     updateSearchParams(filterName, encodeURIComponent(value), true);
-//   };
+  //   updateSearchParams(filterName, encodeURIComponent(value), true);
+  // };
 
-//   const handleChangeFooterParams = ({ target: { name, value } }) => {
-//     let paramName = name.split('.')[1].replace('_', '');
+  // const handleChangeFooterParams = ({ target: { name, value } }) => {
+  //   let paramName = name.split('.')[1].replace('_', '');
 
-//     if (paramName === 'limit') {
-//       paramName = 'pageSize';
-//     }
+  //   if (paramName === 'limit') {
+  //     paramName = 'pageSize';
+  //   }
 
-//     updateSearchParams(paramName, value);
-//   };
+  //   updateSearchParams(paramName, value);
+  // };
 
-//   const handleChangeSort = ({ target: { name, value } }) => {
-//     updateSearchParams(name, value);
-//   };
+  // const handleChangeSort = ({ target: { name, value } }) => {
+  //   updateSearchParams(name, value);
+  // };
 
-//   const handleClickDeleteFilter = ({ target: { name } }) => {
-//     const currentSearch = new URLSearchParams(search);
+  // const handleClickDeleteFilter = ({ target: { name } }) => {
+  //   const currentSearch = new URLSearchParams(search);
 
-//     currentSearch.delete(name);
+  //   currentSearch.delete(name);
 
-//     push({ search: currentSearch.toString() });
-//   };
+  //   push({ search: currentSearch.toString() });
+  // };
 
-//   const handleClickDelete = useCallback(id => {
-//     handleToggleModal();
+  // const handleClickDelete = useCallback(id => {
+  //   handleToggleModal();
 
-//     dispatch({
-//       type: 'ON_CHANGE_DATA_TO_DELETE',
-//       dataToDelete: [id],
-//     });
-//   }, []);
+  //   dispatch({
+  //     type: 'ON_CHANGE_DATA_TO_DELETE',
+  //     dataToDelete: [id],
+  //   });
+  // }, []);
 
-//   const handleCloseModal = () => {
-//     // Refetch data
-//     getDataRef.current();
-//   };
+  // const handleCloseModal = () => {
+  //   // Refetch data
+  //   getDataRef.current();
+  // };
 
-//   const handleClosedModalDelete = () => {
-//     if (shouldRefetchData) {
-//       getDataRef.current();
-//     } else {
-//       // Empty the selected ids when the modal closes
-//       dispatch({
-//         type: 'RESET_DATA_TO_DELETE',
-//       });
+  // const handleClosedModalDelete = () => {
+  //   if (shouldRefetchData) {
+  //     getDataRef.current();
+  //   } else {
+  //     // Empty the selected ids when the modal closes
+  //     dispatch({
+  //       type: 'RESET_DATA_TO_DELETE',
+  //     });
 
-//       // Reset the list's reducer dataToDelete state using a ref so we don't need an effect
-//       listRef.current.resetDataToDelete();
-//     }
-//   };
+  //     // Reset the list's reducer dataToDelete state using a ref so we don't need an effect
+  //     listRef.current.resetDataToDelete();
+  //   }
+  // };
 
-//   const handleConfirmDeleteData = useCallback(async () => {
-//     dispatch({
-//       type: 'ON_DELETE_USERS',
-//     });
+  // const handleConfirmDeleteData = useCallback(async () => {
+  //   dispatch({
+  //     type: 'ON_DELETE_USERS',
+  //   });
 
-//     let shouldDispatchSucceededAction = false;
+  //   let shouldDispatchSucceededAction = false;
 
-//     try {
-//       await request('/admin/users/batch-delete', {
-//         method: 'POST',
-//         body: {
-//           ids: dataToDelete,
-//         },
-//       });
-//       shouldDispatchSucceededAction = true;
-//     } catch (err) {
-//       const errorMessage = get(err, 'response.payload.data', 'An error occured');
+  //   try {
+  //     await request('/admin/users/batch-delete', {
+  //       method: 'POST',
+  //       body: {
+  //         ids: dataToDelete,
+  //       },
+  //     });
+  //     shouldDispatchSucceededAction = true;
+  //   } catch (err) {
+  //     const errorMessage = get(err, 'response.payload.data', 'An error occured');
 
-//       toggleNotification({
-//         type: 'warning',
-//         message: errorMessage,
-//       });
-//     }
+  //     toggleNotification({
+  //       type: 'warning',
+  //       message: errorMessage,
+  //     });
+  //   }
 
-//     // Only dispatch the action once
-//     if (shouldDispatchSucceededAction) {
-//       dispatch({
-//         type: 'ON_DELETE_USERS_SUCCEEDED',
-//       });
-//     }
+  //   // Only dispatch the action once
+  //   if (shouldDispatchSucceededAction) {
+  //     dispatch({
+  //       type: 'ON_DELETE_USERS_SUCCEEDED',
+  //     });
+  //   }
 
-//     handleToggleModal();
-//   }, [dataToDelete, toggleNotification]);
+  //   handleToggleModal();
+  // }, [dataToDelete, toggleNotification]);
 
-//   const handleToggle = () => setIsModalOpened(prev => !prev);
+  // const handleToggle = () => setIsModalOpened(prev => !prev);
 
-//   const handleToggleModal = () => setIsWarningDeleteAllOpened(prev => !prev);
+  // const handleToggleModal = () => setIsWarningDeleteAllOpened(prev => !prev);
 
-//   const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
-//     const currentSearch = new URLSearchParams(search);
-//     // Update the currentSearch
-//     currentSearch.set(name, value);
+  // const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
+  //   const currentSearch = new URLSearchParams(search);
+  //   // Update the currentSearch
+  //   currentSearch.set(name, value);
 
-//     if (shouldDeleteSearch) {
-//       currentSearch.delete('_q');
-//     }
+  //   if (shouldDeleteSearch) {
+  //     currentSearch.delete('_q');
+  //   }
 
-//     push({
-//       search: currentSearch.toString(),
-//     });
-//   };
+  //   push({
+  //     search: currentSearch.toString(),
+  //   });
+  // };
 
-//   if (isLoadingForPermissions) {
-//     return <LoadingIndicatorPage />;
-//   }
+  return (
+    <Main labelledBy="title">
+      <SettingsPageTitle name="Users" />
+      <HeaderLayout
+        id="title"
+        primaryAction={
+          canCreate ? (
+            <Button onClick={() => 'handleToggleModalForCreatingRole'} startIcon={<Mail />}>
+              {formatMessage({
+                id: 'Settings.permissions.users.create',
+                defaultMessage: 'Create new user',
+              })}
+            </Button>
+          ) : (
+            undefined
+          )
+        }
+        title={formatMessage({
+          id: 'Settings.permissions.users.listview.header.title',
+          defaultMessage: 'Users',
+        })}
+        subtitle={formatMessage(
+          {
+            id: 'Settings.permissions.users.listview.header.subtitle',
+            defaultMessage: '{number, plural, =0 {# users} one {# user} other {# users}} found',
+          },
+          { number: total }
+        )}
+      />
+      {isLoading ? <LoadingIndicatorPage /> : undefined}
+    </Main>
+  );
 
-//   return (
-//     <div>
-//       <SettingsPageTitle name="Users" />
-//       <Header
-//         canCreate={canCreate}
-//         canDelete={canDelete}
-//         canRead={canRead}
-//         count={total}
-//         dataToDelete={dataToDelete}
-//         onClickAddUser={handleToggle}
-//         onClickDelete={handleToggleModal}
-//         isLoading={isLoading}
-//       />
-//       {canRead && (
-//         <>
-//           <BaselineAlignment top size="1px">
-//             <Flex flexWrap="wrap">
-//               <SortPicker onChange={handleChangeSort} value={sort} />
-//               <Padded right size="10px" />
-//               <BaselineAlignment bottom size="6px">
-//                 <FilterPicker onChange={handleChangeFilter} />
-//               </BaselineAlignment>
-//               <Padded right size="10px" />
-//               {filters.map((filter, i) => (
-//                 // eslint-disable-next-line react/no-array-index-key
-//                 <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
-//               ))}
-//             </Flex>
-//           </BaselineAlignment>
-//           <BaselineAlignment top size="8px" />
-//           <Padded top size="sm">
-//             <List
-//               canDelete={canDelete}
-//               canUpdate={canUpdate}
-//               dataToDelete={dataToDelete}
-//               isLoading={isLoading}
-//               data={data}
-//               onChange={handleChangeDataToDelete}
-//               onClickDelete={handleClickDelete}
-//               searchParam={_q}
-//               filters={filters}
-//               ref={listRef}
-//             />
-//           </Padded>
-//           <Footer
-//             count={total}
-//             onChange={handleChangeFooterParams}
-//             params={{ _limit: pageSize, _page: page }}
-//           />
-//         </>
-//       )}
-//       <ModalForm isOpen={isModalOpened} onClosed={handleCloseModal} onToggle={handleToggle} />
-//       <PopUpWarning
-//         isOpen={isWarningDeleteAllOpened}
-//         onClosed={handleClosedModalDelete}
-//         onConfirm={handleConfirmDeleteData}
-//         toggleModal={handleToggleModal}
-//         isConfirmButtonLoading={showModalConfirmButtonLoading}
-//       />
-//     </div>
-//   );
-// };
+  // return (
+  //   <div>
+  //     <SettingsPageTitle name="Users" />
+  //     <Header
+  //       canCreate={canCreate}
+  //       canDelete={canDelete}
+  //       canRead={canRead}
+  //       count={total}
+  //       dataToDelete={dataToDelete}
+  //       onClickAddUser={handleToggle}
+  //       onClickDelete={handleToggleModal}
+  //       isLoading={isLoading}
+  //     />
+  //     {canRead && (
+  //       <>
+  //         <BaselineAlignment top size="1px">
+  //           <Flex flexWrap="wrap">
+  //             <SortPicker onChange={handleChangeSort} value={sort} />
+  //             <Padded right size="10px" />
+  //             <BaselineAlignment bottom size="6px">
+  //               <FilterPicker onChange={handleChangeFilter} />
+  //             </BaselineAlignment>
+  //             <Padded right size="10px" />
+  //             {filters.map((filter, i) => (
+  //               // eslint-disable-next-line react/no-array-index-key
+  //               <Filter key={i} {...filter} onClick={handleClickDeleteFilter} />
+  //             ))}
+  //           </Flex>
+  //         </BaselineAlignment>
+  //         <BaselineAlignment top size="8px" />
+  //         <Padded top size="sm">
+  //           <List
+  //             canDelete={canDelete}
+  //             canUpdate={canUpdate}
+  //             dataToDelete={dataToDelete}
+  //             isLoading={isLoading}
+  //             data={data}
+  //             onChange={handleChangeDataToDelete}
+  //             onClickDelete={handleClickDelete}
+  //             searchParam={_q}
+  //             filters={filters}
+  //             ref={listRef}
+  //           />
+  //         </Padded>
+  //         <Footer
+  //           count={total}
+  //           onChange={handleChangeFooterParams}
+  //           params={{ _limit: pageSize, _page: page }}
+  //         />
+  //       </>
+  //     )}
+  //     <ModalForm isOpen={isModalOpened} onClosed={handleCloseModal} onToggle={handleToggle} />
+  //     <PopUpWarning
+  //       isOpen={isWarningDeleteAllOpened}
+  //       onClosed={handleClosedModalDelete}
+  //       onConfirm={handleConfirmDeleteData}
+  //       toggleModal={handleToggleModal}
+  //       isConfirmButtonLoading={showModalConfirmButtonLoading}
+  //     />
+  //   </div>
+  // );
+};
 
-// export default ListPage;
+export default ListPage;
 
-export default () => 'User - LV';
+// export default () => 'User - LV';
