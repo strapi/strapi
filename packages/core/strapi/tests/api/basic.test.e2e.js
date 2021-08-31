@@ -64,7 +64,9 @@ describe('Core API - Basic', () => {
     const res = await rq({
       method: 'POST',
       url: '/products',
-      body: product,
+      body: {
+        data: product,
+      },
     });
 
     const { statusCode, body } = res;
@@ -117,7 +119,9 @@ describe('Core API - Basic', () => {
     const res = await rq({
       method: 'PUT',
       url: `/products/${data.product[0].id}`,
-      body: product,
+      body: {
+        data: product,
+      },
     });
 
     const { statusCode, body } = res;

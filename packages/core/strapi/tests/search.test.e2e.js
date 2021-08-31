@@ -149,8 +149,6 @@ describe('Search query', () => {
 
       expect(res.body.data.length).toBe(1);
 
-      console.log(res.body.meta);
-
       expect(res.body.data[0]).toMatchObject(transformToRESTResource(data.bed[2]));
     });
 

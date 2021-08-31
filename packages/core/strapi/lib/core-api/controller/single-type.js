@@ -1,6 +1,6 @@
 'use strict';
 
-const { parseMultipartData } = require('@strapi/utils');
+const { parseBody } = require('./transform');
 
 /**
  * Returns a single type controller to handle default core-api actions
@@ -25,7 +25,7 @@ const createSingleTypeController = ({ service, sanitize, transformResponse }) =>
      */
     async update(ctx) {
       const { query } = ctx.request;
-      const { data, files } = parseMultipartData(ctx);
+      const { data, files } = parseBody(ctx);
 
       const entity = await service.createOrUpdate({ params: query, data, files });
 

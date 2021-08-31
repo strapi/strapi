@@ -71,7 +71,9 @@ describe('Core API - Basic + draftAndPublish', () => {
     const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-dps',
-      body: product,
+      body: {
+        data: product,
+      },
     });
 
     expect(statusCode).toBe(200);
@@ -95,7 +97,9 @@ describe('Core API - Basic + draftAndPublish', () => {
     const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-dps',
-      body: product,
+      body: {
+        data: product,
+      },
     });
 
     expect(statusCode).toBe(200);
@@ -144,7 +148,9 @@ describe('Core API - Basic + draftAndPublish', () => {
     const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-dps/${data.products[0].id}`,
-      body: product,
+      body: {
+        data: product,
+      },
     });
 
     expect(statusCode).toBe(200);
@@ -168,7 +174,9 @@ describe('Core API - Basic + draftAndPublish', () => {
     const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-dps/${data.products[0].id}`,
-      body: product,
+      body: {
+        data: product,
+      },
     });
 
     expect(statusCode).toBe(200);
@@ -206,7 +214,9 @@ describe('Core API - Basic + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -222,7 +232,9 @@ describe('Core API - Basic + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -237,7 +249,9 @@ describe('Core API - Basic + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
