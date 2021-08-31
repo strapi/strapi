@@ -12,18 +12,27 @@ import {
   Row,
 } from '@strapi/parts';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
-import { EmptyBodyTable, Status } from '@strapi/helper-plugin';
+import { EmptyBodyTable, Status, useQueryParams } from '@strapi/helper-plugin';
 import TableHead from './TableHead';
 
 const Table = ({ canDelete, canUpdate, rows }) => {
+  const [{ query }] = useQueryParams();
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = 7;
+  const hasFilters = query.filters !== undefined;
+  const content = hasFilters
+    ? {
+        id: 'content-manager.components.TableEmpty.withFilters',
+        defaultMessage: 'There are no {contentType} with the applied filters...',
+        values: { contentType: 'Users' },
+      }
+    : undefined;
 
   return (
     <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT}>
       <TableHead />
       {!rows.length ? (
-        <EmptyBodyTable colSpan={COL_COUNT} />
+        <EmptyBodyTable colSpan={COL_COUNT} content={content} />
       ) : (
         <Tbody>
           {rows.map(entry => (

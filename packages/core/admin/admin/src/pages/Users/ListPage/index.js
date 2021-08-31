@@ -270,7 +270,6 @@ const ListPage = () => {
             canDelete={canDelete}
             canUpdate={canUpdate}
             rows={data?.results}
-            erows={[]}
           />
         )}
       </CustomContentLayout>
