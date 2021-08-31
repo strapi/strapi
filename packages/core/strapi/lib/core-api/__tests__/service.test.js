@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { createService, getFetchParams } = require('../service');
+const { createService } = require('../service');
 
 const maxLimit = 50;
 const defaultLimit = 20;
@@ -82,7 +82,7 @@ describe('Default Service', () => {
         await service.createOrUpdate(input);
 
         expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
-          params: { publicationState: 'live', pagination: { limit: defaultLimit } },
+          params: { publicationState: 'live' },
         });
 
         expect(strapi.entityService.create).toHaveBeenCalledWith('testModel', { data: input });
@@ -111,7 +111,7 @@ describe('Default Service', () => {
 
         expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          params: { publicationState: 'live', pagination: { limit: defaultLimit } },
+          params: { publicationState: 'live' },
         });
 
         expect(strapi.entityService.update).toHaveBeenCalledWith('testModel', 1, {
@@ -138,44 +138,11 @@ describe('Default Service', () => {
 
         expect(strapi.entityService.find).toHaveBeenCalledWith('testModel', {
           populate: undefined,
-          params: { publicationState: 'live', pagination: { limit: defaultLimit } },
+          params: { publicationState: 'live' },
         });
 
         expect(strapi.entityService.delete).toHaveBeenCalledWith('testModel', 1);
       });
-    });
-  });
-});
-
-describe('getFetchParams', () => {
-  test.each([
-    [`0 if limit is '0'`, { limit: '0', maxLimit }, 0],
-    ['0 if limit is 0', { limit: 0, maxLimit }, 0],
-    [`0 if limit is ''`, { limit: '', maxLimit }, 0],
-    [`1 if limit is '1'`, { limit: '1', maxLimit }, 1],
-    [
-      `${maxLimit} if limit(500) exceeds max allowed limit (${maxLimit})`,
-      { limit: '500', maxLimit },
-      maxLimit,
-    ],
-    [
-      `${maxLimit} if limit is set to -1 and max allowed limit is set (${maxLimit})`,
-      { limit: '-1', maxLimit },
-      maxLimit,
-    ],
-    [`${defaultLimit} (default) if no limit is provided`, { maxLimit }, defaultLimit],
-    [
-      `${defaultLimit} (default) if limit is undefined`,
-      { limit: undefined, maxLimit },
-      defaultLimit,
-    ],
-    ['1000 if limit=1000 and no max allowed limit is set', { limit: 1000 }, 1000],
-  ])('Sets limit parameter to %s', (description, input, expected) => {
-    strapi.config.api.rest.maxLimit = input.maxLimit;
-    expect(getFetchParams({ pagination: { limit: input.limit } })).toMatchObject({
-      pagination: {
-        limit: expected,
-      },
     });
   });
 });

@@ -8,10 +8,10 @@ const {
 } = require('@strapi/utils').contentTypes;
 
 const {
-  applyDefaultPagination,
+  getPaginationInfo,
   convertPagedToStartLimit,
   shouldCount,
-  formatPaginationResponse,
+  transformPaginationResponse,
 } = require('./pagination');
 
 const setPublishedAt = data => {
@@ -31,7 +31,7 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
     async find(opts = {}) {
       const params = getFetchParams(opts.params);
 
-      const paginationInfo = applyDefaultPagination(params);
+      const paginationInfo = getPaginationInfo(params);
 
       const results = await strapi.entityService.find(uid, {
         params: { ...params, ...convertPagedToStartLimit(paginationInfo) },
@@ -44,7 +44,7 @@ const createCollectionTypeService = ({ model, strapi, utils }) => {
 
         return {
           results,
-          pagination: formatPaginationResponse(paginationInfo, count),
+          pagination: transformPaginationResponse(paginationInfo, count),
         };
       }
 
