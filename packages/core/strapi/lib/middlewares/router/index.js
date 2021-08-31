@@ -47,12 +47,11 @@ module.exports = strapi => {
       _.forEach(api.routes, route => {
         // nested router
         if (_.has(route, 'routes')) {
-          for (const key in api.routes) {
-            const routerInfo = api.routes[key];
+          for (const key in route.routes) {
+            const routerInfo = route.routes[key];
 
             const router = new Router({ prefix: routerInfo.prefix });
 
-            // TODO:: support router routes
             for (const route of routerInfo.routes || []) {
               composeEndpoint(route, { apiName, router });
             }
