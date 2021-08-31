@@ -23,4 +23,15 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'DELETE',
+    path: '/api-tokens/:id',
+    handler: 'api-token.revoke',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.delete'] } },
+      ],
+    },
+  },
 ];

@@ -95,10 +95,20 @@ const list = async () => {
   });
 };
 
+/**
+ * @param {string|number} id
+ *
+ * @returns {Promise<void>}
+ */
+const revoke = async id => {
+  return strapi.query('admin::api-token').delete({ where: { id } });
+};
+
 module.exports = {
   create,
   exists,
   createSaltIfNotDefined,
   hash,
   list,
+  revoke,
 };
