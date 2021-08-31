@@ -44,22 +44,18 @@ module.exports = strapi => {
     for (const apiName in strapi.api) {
       const api = strapi.api[apiName];
 
-      _.forEach(api.routes, route => {
+      _.forEach(api.routes, routeInfo => {
         // nested router
-        if (_.has(route, 'routes')) {
-          for (const key in route.routes) {
-            const routerInfo = route.routes[key];
+        if (_.has(routeInfo, 'routes')) {
+          const router = new Router({ prefix: routeInfo.prefix });
 
-            const router = new Router({ prefix: routerInfo.prefix });
-
-            for (const route of routerInfo.routes || []) {
-              composeEndpoint(route, { apiName, router });
-            }
-
-            strapi.router.use(router.routes()).use(router.allowedMethods());
+          for (const route of routeInfo.routes || []) {
+            composeEndpoint(route, { apiName, router });
           }
+
+          strapi.router.use(router.routes()).use(router.allowedMethods());
         } else {
-          composeEndpoint(route, { apiName, router: strapi.router });
+          composeEndpoint(routeInfo, { apiName, router: strapi.router });
         }
       });
     }
