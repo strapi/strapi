@@ -1,1 +1,8 @@
-
+{
+  "plugin.name": "国際化",
+  "Settings.list.description": "国際言語化プラグインの設定を行う",
+  "Settings.list.actions.add": "地域の追加",
+  "Settings.list.actions.edit": "地域の編集",
+  "Settings.list.actions.delete": "地域の削除",
+  "Settings.locales.modal.title": "設定",
+}
