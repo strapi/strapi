@@ -4,5 +4,11 @@
   "Settings.list.actions.add": "地域の追加",
   "Settings.list.actions.edit": "地域の編集",
   "Settings.list.actions.delete": "地域の削除",
-  "Settings.locales.modal.title": "設定",
+  "Settings.locales.modal.title": "構成",
+  "Settings.locales.modal.delete.success": "地域の削除に成功しました",
+  "Settings.locales.modal.edit.confirmation": "完了",
+  "Settings.locales.modal.edit.success": "地域の編集に成功しました",
+  "Settings.locales.modal.create.confirmation": "地域の追加",
+    "Settings.locales.modal.create.success": "地域の追加に成功しました",
+  "Settings.locales.modal.advanced.settings": "設定",
 }
