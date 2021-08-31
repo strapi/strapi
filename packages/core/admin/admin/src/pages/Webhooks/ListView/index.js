@@ -15,14 +15,14 @@ import {
   useFocusWhenNavigate,
   SettingsPageTitle,
 } from '@strapi/helper-plugin';
-import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
+import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
 import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { IconButton } from '@strapi/parts/IconButton';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
 import { Table, Thead, Tr, Th, Tbody, Td, TFooter } from '@strapi/parts/Table';
-import { Text, TableLabel } from '@strapi/parts/Text';
+import { Text, TableLabel, Subtitle } from '@strapi/parts/Text';
 import { Button } from '@strapi/parts/Button';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { Switch } from '@strapi/parts/Switch';
@@ -56,6 +56,7 @@ const ListView = () => {
   const { push } = useHistory();
   const { pathname } = useLocation();
   const rowsCount = webhooks.length;
+  const webhooksToDeleteLength = webhooksToDelete.length;
   const getWebhookIndex = id => webhooks.findIndex(webhook => webhook.id === id);
 
   useEffect(() => {
@@ -166,10 +167,12 @@ const ListView = () => {
   const handleDeleteClick = id => {
     setShowModal(true);
 
-    dispatch({
-      type: 'SET_WEBHOOK_TO_DELETE',
-      id,
-    });
+    if (id !== 'all') {
+      dispatch({
+        type: 'SET_WEBHOOK_TO_DELETE',
+        id,
+      });
+    }
   };
 
   const handleEnabledChange = async (value, id) => {
@@ -256,6 +259,32 @@ const ListView = () => {
               )
             }
           />
+          {webhooksToDeleteLength > 0 && canDelete && (
+            <ActionLayout
+              startActions={
+                <>
+                  <Subtitle textColor="neutral600">
+                    {formatMessage(
+                      {
+                        id: 'Settings.webhooks.to.delete',
+                        defaultMessage:
+                          '{webhooksToDeleteLength, plural, one {# asset} other {# assets}} selected',
+                      },
+                      { webhooksToDeleteLength }
+                    )}
+                  </Subtitle>
+                  <Button
+                    onClick={() => handleDeleteClick('all')}
+                    startIcon={<DeleteIcon />}
+                    size="L"
+                    variant="danger-light"
+                  >
+                    Delete
+                  </Button>
+                </>
+              }
+            />
+          )}
           {isLoading || loadingWebhooks ? (
             <LoadingIndicatorPage />
           ) : (
@@ -286,9 +315,9 @@ const ListView = () => {
                               defaultMessage: 'Select all entries',
                             })}
                             indeterminate={
-                              webhooksToDelete.length > 0 && webhooksToDelete.length < rowsCount
+                              webhooksToDeleteLength > 0 && webhooksToDeleteLength < rowsCount
                             }
-                            value={webhooksToDelete.length === rowsCount}
+                            value={webhooksToDeleteLength === rowsCount}
                             onValueChange={handleSelectAllCheckbox}
                           />
                         </Th>
@@ -394,6 +423,7 @@ const ListView = () => {
                                   })}
                                   icon={<DeleteIcon />}
                                   noBorder
+                                  id={`delete-${webhook.id}`}
                                 />
                               )}
                             </Stack>
@@ -461,6 +491,7 @@ const ListView = () => {
                 onClick={handleConfirmDelete}
                 variant="danger-light"
                 startIcon={<DeleteIcon />}
+                id="confirm-delete"
               >
                 {formatMessage({ id: 'app.components.Button.confirm', defaultMessage: 'Confirm' })}
               </Button>
