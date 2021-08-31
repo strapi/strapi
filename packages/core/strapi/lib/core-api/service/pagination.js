@@ -42,8 +42,8 @@ const getPaginationInfo = params => {
 
   if (isUndefined(params.pagination) || !isPlainObject(params.pagination)) {
     return {
-      start: 0,
-      limit: defaultLimit,
+      page: 1,
+      pageSize: defaultLimit,
     };
   }
 
