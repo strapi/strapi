@@ -4,7 +4,16 @@ import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { useHistory } from 'react-router-dom';
 
-const TableRows = ({ canUpdate, canDelete, headers, withMainAction, withBulkActions, rows }) => {
+const TableRows = ({
+  canUpdate,
+  canDelete,
+  headers,
+  entriesToDelete,
+  onSelectRow,
+  withMainAction,
+  withBulkActions,
+  rows,
+}) => {
   const {
     push,
     location: { pathname },
@@ -13,11 +22,19 @@ const TableRows = ({ canUpdate, canDelete, headers, withMainAction, withBulkActi
   return (
     <Tbody>
       {rows.map(data => {
+        const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+
         return (
           <Tr key={data.id}>
             {withMainAction && (
               <Td>
-                <BaseCheckbox aria-label="Select all entries" />
+                <BaseCheckbox
+                  aria-label="Select all entries"
+                  checked={isChecked}
+                  onChange={() => {
+                    onSelectRow({ name: data.id, value: !isChecked });
+                  }}
+                />
               </Td>
             )}
             {headers.map(({ key, cellFormatter, name, ...rest }) => {
@@ -74,7 +91,9 @@ TableRows.defaultProps = {
 TableRows.propTypes = {
   canDelete: PropTypes.bool,
   canUpdate: PropTypes.bool,
+  entriesToDelete: PropTypes.array.isRequired,
   headers: PropTypes.array.isRequired,
+  onSelectRow: PropTypes.func.isRequired,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,

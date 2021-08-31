@@ -11,6 +11,7 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = 7;
   const hasFilters = query.filters !== undefined;
+  const areAllEntriesSelected = entriesToDelete.length === rows.length && rows.length > 0;
 
   const content = hasFilters
     ? {
@@ -20,10 +21,31 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
       }
     : undefined;
 
+  const handleSelectAll = () => {
+    if (!areAllEntriesSelected) {
+      setEntriesToDelete(rows.map(row => row.id));
+    } else {
+      setEntriesToDelete([]);
+    }
+  };
+
+  const handleSelectRow = ({ name, value }) => {
+    setEntriesToDelete(prev => {
+      if (value) {
+        return prev.concat(name);
+      }
+
+      return prev.filter(id => id !== name);
+    });
+  };
+
   return (
     <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT}>
       <TableHead
+        areAllEntriesSelected={areAllEntriesSelected}
+        entriesToDelete={entriesToDelete}
         headers={headers}
+        onSelectAll={handleSelectAll}
         withMainAction={withMainAction}
         withBulkActions={withBulkActions}
       />
@@ -33,8 +55,10 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
         <TableRows
           canDelete={canDelete}
           canUpdate={canUpdate}
+          entriesToDelete={entriesToDelete}
           data={rows}
           headers={headers}
+          onSelectRow={handleSelectRow}
           rows={rows}
           withBulkActions={withBulkActions}
           withMainAction={withMainAction}

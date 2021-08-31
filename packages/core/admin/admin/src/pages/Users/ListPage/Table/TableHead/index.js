@@ -12,17 +12,31 @@ import {
 import { SortIcon, useQueryParams } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 
-const TableHead = ({ headers, withMainAction, withBulkActions }) => {
+const TableHead = ({
+  areAllEntriesSelected,
+  entriesToDelete,
+  headers,
+  onSelectAll,
+  withMainAction,
+  withBulkActions,
+}) => {
   const [{ query }, setQuery] = useQueryParams();
   const sort = query.sort;
   const [sortBy, sortOrder] = sort.split(':');
+
+  const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length;
 
   return (
     <Thead>
       <Tr>
         {withMainAction && (
           <Th>
-            <BaseCheckbox aria-label="Select all entries" />
+            <BaseCheckbox
+              aria-label="Select all entries"
+              checked={areAllEntriesSelected}
+              indeterminate={isIndeterminate}
+              onChange={onSelectAll}
+            />
           </Th>
         )}
         {headers.map(({ name, metadatas: { sortable: isSortable, label } }) => {
@@ -80,13 +94,18 @@ const TableHead = ({ headers, withMainAction, withBulkActions }) => {
 };
 
 TableHead.defaultProps = {
+  areAllEntriesSelected: false,
+  entriesToDelete: [],
   headers: [],
   withBulkActions: false,
   withMainAction: false,
 };
 
 TableHead.propTypes = {
+  areAllEntriesSelected: PropTypes.bool,
+  entriesToDelete: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.string, PropTypes.number])),
   headers: PropTypes.array,
+  onSelectAll: PropTypes.func.isRequired,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
 };
