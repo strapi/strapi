@@ -1,4 +1,7 @@
-import { Meta } from '@storybook/addon-docs';
+<!--- CheckPermissions.stories.mdx --->
+
+import { ArgsTable, Meta } from '@storybook/addon-docs';
+import CheckPermissions from './index';
 
 <Meta title="components/CheckPermissions" />
 
@@ -18,9 +21,11 @@ const HomePage = () => {
     <main>
       <h1>This is the homepage</h1>
       <CheckPermissions permissions={permissions}>
-        You can all see this if you have the right to.
+        You can see this if you have the right to.
       </CheckPermissions>
     </main>
   );
 };
 ```
+
+<ArgsTable of={CheckPermissions} />

@@ -89,7 +89,6 @@ export { default as SelectWrapper } from './old/components/SelectWrapper';
 
 export { default as ViewContainer } from './old/components/ViewContainer';
 
-export { default as SettingsPageTitle } from './old/components/SettingsPageTitle';
 export { default as FormBloc } from './old/components/FormBloc';
 export { default as IntlInput } from './old/components/IntlInput';
 export { default as SizedInput } from './old/components/SizedInput';
@@ -175,3 +174,4 @@ export { default as CheckPagePermissions } from './components/CheckPagePermissio
 export { default as CheckPermissions } from './components/CheckPermissions';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
+export { default as SettingsPageTitle } from './components/SettingsPageTitle';

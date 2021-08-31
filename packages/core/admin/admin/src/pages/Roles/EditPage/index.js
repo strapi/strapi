@@ -4,6 +4,7 @@ import {
   useOverlayBlocker,
   useTracking,
   LoadingIndicatorPage,
+  SettingsPageTitle,
 } from '@strapi/helper-plugin';
 import { Box, Button, HeaderLayout, Main, Stack, ContentLayout } from '@strapi/parts';
 import { Formik } from 'formik';
@@ -12,7 +13,6 @@ import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import { Permissions, RoleForm } from '../../../components/Roles';
-import PageTitle from '../../../components/SettingsPageTitle';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../hooks';
 import schema from './utils/schema';
 
@@ -87,7 +87,7 @@ const EditPage = () => {
 
   return (
     <Main labelledBy="title">
-      <PageTitle name="Roles" />
+      <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
         initialValues={{

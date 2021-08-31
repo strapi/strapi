@@ -16,10 +16,10 @@ import {
   LoadingIndicatorPage,
   useNotification,
   useOverlayBlocker,
+  SettingsPageTitle,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useModels } from '../../../hooks';
-import PageTitle from '../../../components/SettingsPageTitle';
 import { Inputs, TriggerContainer } from '../../../components/Webhooks';
 import reducer, { initialState } from './reducer';
 import { cleanData, form, schema } from './utils';
@@ -392,7 +392,7 @@ function EditView() {
 
   return (
     <Wrapper>
-      <PageTitle name="Webhooks" />
+      <SettingsPageTitle name="Webhooks" />
       <BackHeader onClick={goToList} />
       <form onSubmit={handleSubmit}>
         <Header {...headerProps} />

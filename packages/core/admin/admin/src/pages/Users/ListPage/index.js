@@ -7,11 +7,11 @@
 //   LoadingIndicatorPage,
 //   PopUpWarning,
 //   useNotification,
+//   SettingsPageTitle
 // } from '@strapi/helper-plugin';
 // import { get } from 'lodash';
 // import { useHistory, useLocation } from 'react-router-dom';
 // import { Flex, Padded } from '@buffetjs/core';
-// import PageTitle from '../../../components/SettingsPageTitle';
 // import { useSettingsHeaderSearchContext } from '../../../hooks';
 // import { Footer, List, Filter, FilterPicker, SortPicker } from '../../../components/Users';
 // import adminPermissions from '../../../permissions';
@@ -227,7 +227,7 @@
 
 //   return (
 //     <div>
-//       <PageTitle name="Users" />
+//       <SettingsPageTitle name="Users" />
 //       <Header
 //         canCreate={canCreate}
 //         canDelete={canDelete}

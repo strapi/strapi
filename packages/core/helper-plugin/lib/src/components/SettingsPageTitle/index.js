@@ -1,7 +1,7 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import PageTitle from '../PageTitle';
+import { Helmet } from 'react-helmet';
 
 const SettingsPageTitle = ({ name }) => {
   const { formatMessage } = useIntl();
@@ -10,7 +10,7 @@ const SettingsPageTitle = ({ name }) => {
     { name }
   );
 
-  return <PageTitle title={text} />;
+  return <Helmet title={text} />;
 };
 
 SettingsPageTitle.propTypes = {
