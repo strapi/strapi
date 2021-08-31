@@ -1,5 +1,7 @@
 'use strict';
 
+const constants = require('../services/constants');
+
 module.exports = {
   collectionName: 'strapi_api_tokens',
   info: {
@@ -34,10 +36,10 @@ module.exports = {
     },
     type: {
       type: 'enumeration',
-      enum: ['read-only', 'full-access'],
+      enum: Object.values(constants.API_TOKEN_TYPE),
       configurable: false,
       required: false,
-      default: 'read-only',
+      default: constants.API_TOKEN_TYPE.READ_ONLY,
     },
     accessKey: {
       type: 'string',
