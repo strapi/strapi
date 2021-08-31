@@ -1,12 +1,13 @@
 import React from 'react';
 import {
-  useRBAC,
+  CustomContentLayout,
   LoadingIndicatorPage,
+  useRBAC,
   SettingsPageTitle,
   useNotification,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Button, ContentLayout, HeaderLayout, Main } from '@strapi/parts';
+import { Button, HeaderLayout, Main } from '@strapi/parts';
 import { Mail } from '@strapi/icons';
 import {
   // useHistory,
@@ -16,17 +17,13 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
+
 import Table from './Table';
 import fetchData from './utils/api';
 
 const ListPage = () => {
   const {
-    allowedActions: {
-      canCreate,
-      // canDelete,
-      canRead,
-      // canUpdate
-    },
+    allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(adminPermissions.settings.users);
   const toggleNotification = useNotification();
 
@@ -234,23 +231,23 @@ const ListPage = () => {
   const isLoading =
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
+  const createAction = canCreate ? (
+    <Button onClick={() => 'handleToggleModalForCreatingRole'} startIcon={<Mail />}>
+      {formatMessage({
+        id: 'Settings.permissions.users.create',
+        defaultMessage: 'Create new user',
+      })}
+    </Button>
+  ) : (
+    undefined
+  );
+
   return (
     <Main labelledBy="title">
       <SettingsPageTitle name="Users" />
       <HeaderLayout
         id="title"
-        primaryAction={
-          canCreate ? (
-            <Button onClick={() => 'handleToggleModalForCreatingRole'} startIcon={<Mail />}>
-              {formatMessage({
-                id: 'Settings.permissions.users.create',
-                defaultMessage: 'Create new user',
-              })}
-            </Button>
-          ) : (
-            undefined
-          )
-        }
+        primaryAction={createAction}
         title={formatMessage({
           id: 'Settings.permissions.users.listview.header.title',
           defaultMessage: 'Users',
@@ -263,15 +260,20 @@ const ListPage = () => {
           { number: total }
         )}
       />
-      <ContentLayout>
-        {!canRead && <div>TODO no permissions</div>}
+      <CustomContentLayout action={createAction} canRead={canRead}>
         {status === 'error' && <div>An error occurred</div>}
         {canRead && isLoading ? (
           <LoadingIndicatorPage />
         ) : (
-          <Table canCreate={canCreate} rows={data?.results} reows={[]} />
+          <Table
+            canCreate={canCreate}
+            canDelete={canDelete}
+            canUpdate={canUpdate}
+            rows={data?.results}
+            erows={[]}
+          />
         )}
-      </ContentLayout>
+      </CustomContentLayout>
     </Main>
   );
 

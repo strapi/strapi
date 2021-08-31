@@ -172,6 +172,9 @@ export { default as SearchIcon } from './old/svgs/Search';
 // New components
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
+export { default as CustomContentLayout } from './components/CustomContentLayout';
+export { default as EmptyStateLayout } from './components/EmptyStateLayout';
+export { default as EmptyBodyTable } from './components/EmptyBodyTable';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
