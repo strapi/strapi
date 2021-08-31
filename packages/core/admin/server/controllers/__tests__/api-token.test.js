@@ -93,7 +93,7 @@ describe('API Token Controller', () => {
       await apiTokenController.list(ctx);
 
       expect(list).toHaveBeenCalled();
-      expect(send).toHaveBeenCalled();
+      expect(send).toHaveBeenCalledWith({ data: tokens });
     });
   });
 });
