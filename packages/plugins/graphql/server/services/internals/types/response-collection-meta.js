@@ -20,8 +20,8 @@ module.exports = ({ strapi }) => {
         t.nonNull.field('pagination', {
           type: PAGINATION_TYPE_NAME,
 
-          async resolve(source) {
-            const { args, resourceUID } = source;
+          async resolve(parent) {
+            const { args, resourceUID } = parent;
             const { start, limit } = args;
 
             const total = await strapi.entityService.count(resourceUID, { params: args });

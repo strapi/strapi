@@ -42,6 +42,10 @@ module.exports = strapi => {
     }
   });
 
+  if (strapi.plugin('graphql')) {
+    require('./graphql')({ strapi }).register();
+  }
+
   // TODO: to implement
   // strapi.db.migrations.register(fieldMigration);
   // strapi.db.migrations.register(enableContentTypeMigration);

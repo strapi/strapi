@@ -26,9 +26,9 @@ module.exports = ({ strapi }) => {
       // Components
       if (modelType === 'component') {
         return {
-          sort: args.SortArg,
-          pagination: args.PaginationArg,
           filters: naming.getFiltersInputTypeName(contentType),
+          pagination: args.PaginationArg,
+          sort: args.SortArg,
         };
       }
 
@@ -41,9 +41,9 @@ module.exports = ({ strapi }) => {
         }
 
         const params = {
+          filters: naming.getFiltersInputTypeName(contentType),
           pagination: args.PaginationArg,
           sort: args.SortArg,
-          filters: naming.getFiltersInputTypeName(contentType),
         };
 
         if (hasDraftAndPublish(contentType)) {
@@ -55,9 +55,13 @@ module.exports = ({ strapi }) => {
 
       // Single Types
       else if (kind === 'singleType') {
-        return {
-          id: 'ID',
-        };
+        const params = { id: 'ID' };
+
+        if (hasDraftAndPublish(contentType)) {
+          Object.assign(params, { publicationState: args.PublicationStateArg });
+        }
+
+        return params;
       }
     },
 

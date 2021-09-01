@@ -4,8 +4,10 @@ const { extendType } = require('nexus');
 const { actionExists } = require('../../old/utils');
 
 module.exports = ({ strapi }) => {
-  const { naming } = strapi.plugin('graphql').service('utils');
-  const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
+  const { service: getService } = strapi.plugin('graphql');
+
+  const { naming } = getService('utils');
+  const { transformArgs } = getService('builders').utils;
 
   const {
     getCreateMutationTypeName,
@@ -34,18 +36,16 @@ module.exports = ({ strapi }) => {
         data: getContentTypeInputName(contentType),
       },
 
-      async resolve(source, args) {
+      async resolve(parent, args) {
         // todo[v4]: need to handle media too? (type === 'media')
 
         const transformedArgs = transformArgs(args, { contentType });
 
-        const { create } = strapi
-          .plugin('graphql')
-          .service('builders')
+        const { create } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const value = await create(source, transformedArgs);
+        const value = await create(parent, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
@@ -80,16 +80,14 @@ module.exports = ({ strapi }) => {
         data: getContentTypeInputName(contentType),
       },
 
-      async resolve(source, args) {
+      async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        const { update } = strapi
-          .plugin('graphql')
-          .service('builders')
+        const { update } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const value = await update(source, transformedArgs);
+        const value = await update(parent, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
@@ -121,16 +119,14 @@ module.exports = ({ strapi }) => {
         // ...uniqueAttributes,
       },
 
-      async resolve(source, args) {
+      async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        const { delete: deleteResolver } = strapi
-          .plugin('graphql')
-          .service('builders')
+        const { delete: deleteResolver } = getService('builders')
           .get('content-api')
           .buildMutationsResolvers({ contentType });
 
-        const value = await deleteResolver(source, args);
+        const value = await deleteResolver(parent, args);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },

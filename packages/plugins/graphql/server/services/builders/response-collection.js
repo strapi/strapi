@@ -29,6 +29,7 @@ module.exports = ({ strapi }) => {
 
           t.nonNull.field('meta', {
             type: RESPONSE_COLLECTION_META_TYPE_NAME,
+
             // Pass down the args stored in the source object
             resolve: prop('info'),
           });

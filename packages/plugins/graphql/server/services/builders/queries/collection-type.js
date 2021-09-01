@@ -5,8 +5,10 @@ const { extendType } = require('nexus');
 const { actionExists } = require('../../old/utils');
 
 module.exports = ({ strapi }) => {
-  const { naming } = strapi.plugin('graphql').service('utils');
-  const { transformArgs, getContentTypeArgs } = strapi.plugin('graphql').service('builders').utils;
+  const { service: getService } = strapi.plugin('graphql');
+
+  const { naming } = getService('utils');
+  const { transformArgs, getContentTypeArgs } = getService('builders').utils;
 
   const {
     getFindOneQueryName,
@@ -47,16 +49,14 @@ module.exports = ({ strapi }) => {
 
       args: getContentTypeArgs(contentType, { multiple: false }),
 
-      async resolve(source, args) {
+      async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        const { findOne } = strapi
-          .plugin('graphql')
-          .service('builders')
+        const { findOne } = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const value = findOne(source, transformedArgs);
+        const value = findOne(parent, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
@@ -84,16 +84,14 @@ module.exports = ({ strapi }) => {
 
       args: getContentTypeArgs(contentType),
 
-      async resolve(source, args) {
+      async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
-        const { find } = strapi
-          .plugin('graphql')
-          .service('builders')
+        const { find } = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const nodes = find(source, transformedArgs);
+        const nodes = find(parent, transformedArgs);
 
         return { nodes, info: { args: transformedArgs, resourceUID: uid } };
       },

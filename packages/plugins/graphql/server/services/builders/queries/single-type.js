@@ -5,9 +5,11 @@ const { extendType } = require('nexus');
 const { actionExists } = require('../../old/utils');
 
 module.exports = ({ strapi }) => {
-  const { naming } = strapi.plugin('graphql').service('utils');
-  const { args } = strapi.plugin('graphql').service('internals');
-  const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
+  const { service: getService } = strapi.plugin('graphql');
+
+  const { naming } = getService('utils');
+  const { args } = getService('internals');
+  const { transformArgs } = getService('builders').utils;
 
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
@@ -38,16 +40,14 @@ module.exports = ({ strapi }) => {
         publicationState: args.PublicationStateArg,
       },
 
-      async resolve(source, args) {
+      async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });
 
-        const queriesResolvers = strapi
-          .plugin('graphql')
-          .service('builders')
+        const queriesResolvers = getService('builders')
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const value = queriesResolvers.find();
+        const value = queriesResolvers.find(parent, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },

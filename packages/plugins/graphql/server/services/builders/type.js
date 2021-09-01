@@ -194,10 +194,9 @@ module.exports = context => {
 
     const targetContentType = strapi.getModel(attribute.target);
 
-    const type =
-      isToManyRelation && targetContentType.kind !== 'singleType'
-        ? naming.getEntityResponseCollectionName(targetContentType)
-        : naming.getEntityResponseName(targetContentType);
+    const type = isToManyRelation
+      ? naming.getEntityResponseCollectionName(targetContentType)
+      : naming.getEntityResponseName(targetContentType);
 
     const args = isToManyRelation ? getContentTypeArgs(targetContentType) : undefined;
 

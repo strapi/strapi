@@ -6,7 +6,7 @@ module.exports = ({ strapi }) => ({
   buildComponentResolver: ({ contentTypeUID, attributeName }) => {
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
 
-    return async (source, args = {}) => {
+    return async (parent, args = {}) => {
       const contentType = strapi.contentTypes[contentTypeUID];
       const transformedArgs = transformArgs(args, { contentType, usePagination: true });
 
@@ -19,7 +19,7 @@ module.exports = ({ strapi }) => ({
       };
 
       // todo[v4]: should we move the .load to the entity service so we can use the same args everywhere?
-      return strapi.db.entityManager.load(contentTypeUID, source, attributeName, entityManagerArgs);
+      return strapi.db.entityManager.load(contentTypeUID, parent, attributeName, entityManagerArgs);
     };
   },
 });
