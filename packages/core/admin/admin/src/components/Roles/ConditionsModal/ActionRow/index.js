@@ -89,7 +89,6 @@ const ActionRow = ({
       <Box style={{ maxWidth: 430, width: '100%' }}>
         <MultiSelectNested
           id={name}
-          placeholder="Your example"
           customizeContent={values => `${values.length} currently selected`}
           onChange={handleChange}
           value={values}
