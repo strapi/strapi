@@ -53,11 +53,13 @@ describe('Non repeatable and Not required component', () => {
     test('Creating entry with JSON works', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -79,11 +81,13 @@ describe('Non repeatable and Not required component', () => {
     test('Creating second entry', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someValue',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someValue',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -107,7 +111,9 @@ describe('Non repeatable and Not required component', () => {
       async value => {
         const res = await rq.post('/', {
           body: {
-            field: value,
+            data: {
+              field: value,
+            },
           },
           qs: {
             populate: ['field'],
@@ -121,7 +127,9 @@ describe('Non repeatable and Not required component', () => {
     test('Throws when sending an empty array or an array with less than the min', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [],
+          data: {
+            field: [],
+          },
         },
         qs: {
           populate: ['field'],
@@ -134,26 +142,28 @@ describe('Non repeatable and Not required component', () => {
     test('Throws when sending too many items', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'one',
-            },
-            {
-              name: 'one',
-            },
-            {
-              name: 'one',
-            },
-            {
-              name: 'one',
-            },
-            {
-              name: 'one',
-            },
-            {
-              name: 'one',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'one',
+              },
+              {
+                name: 'one',
+              },
+              {
+                name: 'one',
+              },
+              {
+                name: 'one',
+              },
+              {
+                name: 'one',
+              },
+              {
+                name: 'one',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -168,14 +178,16 @@ describe('Non repeatable and Not required component', () => {
     test('Data is orderd in the order sent', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'firstString',
-            },
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'firstString',
+              },
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -230,11 +242,13 @@ describe('Non repeatable and Not required component', () => {
       async value => {
         const res = await rq.post('/', {
           body: {
-            field: [
-              {
-                name: 'someString',
-              },
-            ],
+            data: {
+              field: [
+                {
+                  name: 'someString',
+                },
+              ],
+            },
           },
           qs: {
             populate: ['field'],
@@ -243,7 +257,9 @@ describe('Non repeatable and Not required component', () => {
 
         const updateRes = await rq.put(`/${res.body.data.id}`, {
           body: {
-            field: value,
+            data: {
+              field: value,
+            },
           },
           qs: {
             populate: ['field'],
@@ -270,14 +286,16 @@ describe('Non repeatable and Not required component', () => {
     test('Updates order at each request', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-            {
-              name: 'otherString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+              {
+                name: 'otherString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -293,14 +311,16 @@ describe('Non repeatable and Not required component', () => {
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
-          field: [
-            {
-              name: 'otherString',
-            },
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'otherString',
+              },
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -337,14 +357,16 @@ describe('Non repeatable and Not required component', () => {
     test('Keeps the previous value if component not sent', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-            {
-              name: 'otherString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+              {
+                name: 'otherString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -352,7 +374,9 @@ describe('Non repeatable and Not required component', () => {
       });
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
-        body: {},
+        body: {
+          data: {},
+        },
         qs: {
           populate: ['field'],
         },
@@ -380,11 +404,13 @@ describe('Non repeatable and Not required component', () => {
     test('Throws when not enough items', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -393,7 +419,9 @@ describe('Non repeatable and Not required component', () => {
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
-          field: [],
+          data: {
+            field: [],
+          },
         },
         qs: {
           populate: ['field'],
@@ -415,11 +443,13 @@ describe('Non repeatable and Not required component', () => {
     test('Throws when too many items', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -428,26 +458,28 @@ describe('Non repeatable and Not required component', () => {
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-            {
-              name: 'someString',
-            },
-            {
-              name: 'someString',
-            },
-            {
-              name: 'someString',
-            },
-            {
-              name: 'someString',
-            },
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+              {
+                name: 'someString',
+              },
+              {
+                name: 'someString',
+              },
+              {
+                name: 'someString',
+              },
+              {
+                name: 'someString',
+              },
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -469,11 +501,13 @@ describe('Non repeatable and Not required component', () => {
     test('Replaces the previous components if sent without id', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -482,11 +516,13 @@ describe('Non repeatable and Not required component', () => {
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
-          field: [
-            {
-              name: 'new String',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'new String',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -533,11 +569,13 @@ describe('Non repeatable and Not required component', () => {
     test('Throws on invalid id in component', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -546,12 +584,14 @@ describe('Non repeatable and Not required component', () => {
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
-          field: [
-            {
-              id: 'invalid_id',
-              name: 'new String',
-            },
-          ],
+          data: {
+            field: [
+              {
+                id: 'invalid_id',
+                name: 'new String',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -564,17 +604,19 @@ describe('Non repeatable and Not required component', () => {
     test('Updates component with ids, create new ones and removes old ones', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'one',
-            },
-            {
-              name: 'two',
-            },
-            {
-              name: 'three',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'one',
+              },
+              {
+                name: 'two',
+              },
+              {
+                name: 'three',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -583,22 +625,24 @@ describe('Non repeatable and Not required component', () => {
 
       const updateRes = await rq.put(`/${res.body.data.id}`, {
         body: {
-          field: [
-            {
-              id: res.body.data.attributes.field[0].id, // send old id to update the previous component
-              name: 'newOne',
-            },
-            {
-              name: 'newTwo',
-            },
-            {
-              id: res.body.data.attributes.field[2].id,
-              name: 'three',
-            },
-            {
-              name: 'four',
-            },
-          ],
+          data: {
+            field: [
+              {
+                id: res.body.data.attributes.field[0].id, // send old id to update the previous component
+                name: 'newOne',
+              },
+              {
+                name: 'newTwo',
+              },
+              {
+                id: res.body.data.attributes.field[2].id,
+                name: 'three',
+              },
+              {
+                name: 'four',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -645,17 +689,19 @@ describe('Non repeatable and Not required component', () => {
     test('Returns entry with components', async () => {
       const res = await rq.post('/', {
         body: {
-          field: [
-            {
-              name: 'someString',
-            },
-            {
-              name: 'someOtherString',
-            },
-            {
-              name: 'otherSomeString',
-            },
-          ],
+          data: {
+            field: [
+              {
+                name: 'someString',
+              },
+              {
+                name: 'someOtherString',
+              },
+              {
+                name: 'otherSomeString',
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],

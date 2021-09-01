@@ -50,7 +50,9 @@ describe('Create Strapi API End to End', () => {
         url: '/tags',
         method: 'POST',
         body: {
-          name: 'tag1',
+          data: {
+            name: 'tag1',
+          },
         },
       });
 
@@ -65,7 +67,9 @@ describe('Create Strapi API End to End', () => {
         url: '/tags',
         method: 'POST',
         body: {
-          name: 'tag2',
+          data: {
+            name: 'tag2',
+          },
         },
       });
 
@@ -80,7 +84,9 @@ describe('Create Strapi API End to End', () => {
         url: '/tags',
         method: 'POST',
         body: {
-          name: 'tag3',
+          data: {
+            name: 'tag3',
+          },
         },
       });
 
@@ -99,7 +105,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/articles',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
       });
 
       data.articles.push(body.data);
@@ -119,7 +127,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/articles',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['tags'],
         },
@@ -146,7 +156,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['tags'],
         },
@@ -172,7 +184,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['tags'],
         },
@@ -198,7 +212,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['tags'],
         },
@@ -224,7 +240,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['tags'],
         },
@@ -257,7 +275,9 @@ describe('Create Strapi API End to End', () => {
         url: '/categories',
         method: 'POST',
         body: {
-          name: 'cat1',
+          data: {
+            name: 'cat1',
+          },
         },
         qs: {
           populate: ['articles'],
@@ -275,7 +295,9 @@ describe('Create Strapi API End to End', () => {
         url: '/categories',
         method: 'POST',
         body: {
-          name: 'cat2',
+          data: {
+            name: 'cat2',
+          },
         },
         qs: {
           populate: ['articles'],
@@ -298,7 +320,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/articles',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['category'],
         },
@@ -325,7 +349,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['category'],
         },
@@ -350,7 +376,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/articles',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
       });
 
       data.articles.push(body.data);
@@ -372,7 +400,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['category'],
         },
@@ -401,7 +431,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/categories/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['articles'],
         },
@@ -424,7 +456,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/categories',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['articles'],
         },
@@ -523,7 +557,9 @@ describe('Create Strapi API End to End', () => {
         url: '/references',
         method: 'POST',
         body: {
-          name: 'ref1',
+          data: {
+            name: 'ref1',
+          },
         },
       });
 
@@ -542,7 +578,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/articles',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
       });
 
       data.articles.push(body.data);
@@ -563,7 +601,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: `/articles/${id}`,
         method: 'PUT',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['reference'],
         },
@@ -587,7 +627,9 @@ describe('Create Strapi API End to End', () => {
       const { body } = await rq({
         url: '/articles',
         method: 'POST',
-        body: entry,
+        body: {
+          data: entry,
+        },
         qs: {
           populate: ['reference'],
         },
@@ -621,7 +663,9 @@ describe('Create Strapi API End to End', () => {
         url: '/tags',
         method: 'POST',
         body: {
-          name: 'tag111',
+          data: {
+            name: 'tag111',
+          },
         },
       });
 
@@ -633,8 +677,10 @@ describe('Create Strapi API End to End', () => {
         url: '/references',
         method: 'POST',
         body: {
-          name: 'cat111',
-          tag: createdTag.id,
+          data: {
+            name: 'cat111',
+            tag: createdTag.id,
+          },
         },
         qs: {
           populate: ['tag'],
@@ -652,7 +698,9 @@ describe('Create Strapi API End to End', () => {
         url: '/tags',
         method: 'POST',
         body: {
-          name: 'tag111',
+          data: {
+            name: 'tag111',
+          },
         },
       });
 
@@ -664,8 +712,10 @@ describe('Create Strapi API End to End', () => {
         url: '/references',
         method: 'POST',
         body: {
-          name: 'cat111',
-          tag: createdTag.id,
+          data: {
+            name: 'cat111',
+            tag: createdTag.id,
+          },
         },
         qs: {
           populate: ['tag'],
@@ -682,7 +732,9 @@ describe('Create Strapi API End to End', () => {
         url: `/references/${createdReference.id}`,
         method: 'PUT',
         body: {
-          tag: null,
+          data: {
+            tag: null,
+          },
         },
         qs: {
           populate: ['tag'],
@@ -699,7 +751,9 @@ describe('Create Strapi API End to End', () => {
         url: '/tags',
         method: 'POST',
         body: {
-          name: 'tag111',
+          data: {
+            name: 'tag111',
+          },
         },
       });
 
@@ -711,8 +765,10 @@ describe('Create Strapi API End to End', () => {
         url: '/references',
         method: 'POST',
         body: {
-          name: 'cat111',
-          tag: createdTag.id,
+          data: {
+            name: 'cat111',
+            tag: createdTag.id,
+          },
         },
         qs: {
           populate: ['tag'],

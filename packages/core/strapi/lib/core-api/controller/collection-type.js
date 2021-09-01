@@ -1,6 +1,6 @@
 'use strict';
 
-const { parseMultipartData } = require('@strapi/utils');
+const { parseBody } = require('./transform');
 
 /**
  *
@@ -43,7 +43,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     async create(ctx) {
       const { query } = ctx.request;
 
-      const { data, files } = parseMultipartData(ctx);
+      const { data, files } = parseBody(ctx);
 
       const entity = await service.create({ params: query, data, files });
 
@@ -59,7 +59,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
       const { id } = ctx.params;
       const { query } = ctx.request;
 
-      const { data, files } = parseMultipartData(ctx);
+      const { data, files } = parseBody(ctx);
 
       const entity = await service.update(id, { params: query, data, files });
 

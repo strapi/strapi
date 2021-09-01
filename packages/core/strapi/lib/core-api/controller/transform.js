@@ -1,6 +1,17 @@
 'use strict';
 
 const { isNil, isPlainObject } = require('lodash/fp');
+const { parseMultipartData } = require('@strapi/utils');
+
+const parseBody = ctx => {
+  if (ctx.is('multipart')) {
+    return parseMultipartData(ctx);
+  }
+
+  const { data } = ctx.request.body || {};
+
+  return { data };
+};
 
 const transformResponse = (resource, meta = {}, { contentType } = {}) => {
   if (isNil(resource)) {
@@ -56,5 +67,6 @@ const transformEntry = (entry, contentType) => {
 };
 
 module.exports = {
+  parseBody,
   transformResponse,
 };
