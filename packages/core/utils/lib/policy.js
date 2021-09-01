@@ -4,6 +4,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { eq } = require('lodash/fp');
 
 const GLOBAL_PREFIX = 'global::';
 const PLUGIN_PREFIX = 'plugin::';
@@ -182,9 +183,23 @@ const createPolicyFactory = (factoryCallback, options) => {
   };
 };
 
+const createPolicyContext = (type, ctx) => {
+  return Object.assign(
+    {
+      is: eq(type),
+
+      get type() {
+        return type;
+      },
+    },
+    ctx
+  );
+};
+
 module.exports = {
   get,
   globalPolicy,
   bodyPolicy,
   createPolicyFactory,
+  createPolicyContext,
 };
