@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router } from 'react-router-dom';
@@ -261,6 +261,23 @@ describe('Admin | containers | ListView', () => {
 
     await waitFor(() => {
       expect(screen.getByText('http:://strapi.io')).toBeInTheDocument();
+    });
+  });
+
+  it('should show confirmation delete modal', async () => {
+    useRBAC.mockImplementation(() => ({
+      isLoading: false,
+      allowedActions: { canUpdate: true, canCreate: true, canRead: true, canDelete: true },
+    }));
+
+    const { container } = render(App);
+    await waitFor(() => {
+      screen.getByText('http:://strapi.io');
+    });
+
+    fireEvent.click(container.querySelector('#delete-1'));
+    await waitFor(() => {
+      expect(screen.getByText('Are you sure you want to delete this?')).toBeInTheDocument();
     });
   });
 });
