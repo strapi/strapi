@@ -18,6 +18,7 @@ import { useQuery } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
 import DynamicTable from './DynamicTable';
+import PaginationFooter from './PaginationFooter';
 import fetchData from './utils/api';
 import tableHeaders from './utils/tableHeaders';
 
@@ -270,15 +271,18 @@ const ListPage = () => {
         {canRead && isLoading ? (
           <LoadingIndicatorPage />
         ) : (
-          <DynamicTable
-            canCreate={canCreate}
-            canDelete={canDelete}
-            canUpdate={canUpdate}
-            headers={tableHeaders}
-            rows={data?.results}
-            withBulkActions
-            withMainAction={canDelete}
-          />
+          <>
+            <DynamicTable
+              canCreate={canCreate}
+              canDelete={canDelete}
+              canUpdate={canUpdate}
+              headers={tableHeaders}
+              rows={data?.results}
+              withBulkActions
+              withMainAction={canDelete}
+            />
+            <PaginationFooter />
+          </>
         )}
       </CustomContentLayout>
     </Main>
