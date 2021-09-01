@@ -3,13 +3,17 @@
 const crypto = require('crypto');
 
 /**
+ * @typedef {'read-only'|'full-access'} TokenType
+ */
+
+/**
  * @typedef ApiToken
  *
- * @property {number} id
+ * @property {number|string} id
  * @property {string} name
  * @property {string} [description]
  * @property {string} accessKey
- * @property {'read-only'|'full-access'} type
+ * @property {TokenType} type
  */
 
 /**
@@ -39,7 +43,7 @@ const hash = accessKey => {
 
 /**
  * @param {Object} attributes
- * @param {'read-only'|'full-access'} attributes.type
+ * @param {TokenType} attributes.type
  * @param {string} attributes.name
  * @param {string} [attributes.description]
  *
@@ -81,9 +85,20 @@ const createSaltIfNotDefined = () => {
   strapi.config.set('server.admin.api-token.salt', salt);
 };
 
+/**
+ * @returns {Promise<{id: number|string, name: string, description: string, type: TokenType}>}
+ */
+const list = async () => {
+  return strapi.query('admin::api-token').findMany({
+    select: ['id', 'name', 'description', 'type'],
+    orderBy: { name: 'ASC' },
+  });
+};
+
 module.exports = {
   create,
   exists,
   createSaltIfNotDefined,
   hash,
+  list,
 };

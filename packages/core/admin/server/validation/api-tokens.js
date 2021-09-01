@@ -1,6 +1,7 @@
 'use strict';
 
 const { yup, formatYupErrors } = require('@strapi/utils');
+const constants = require('../services/constants');
 
 const handleReject = error => Promise.reject(formatYupErrors(error));
 
@@ -14,7 +15,7 @@ const apiTokenCreationSchema = yup
     description: yup.string().optional(),
     type: yup
       .string()
-      .oneOf(['read-only', 'full-access'])
+      .oneOf(Object.values(constants.API_TOKEN_TYPE))
       .required(),
   })
   .noUnknown();
