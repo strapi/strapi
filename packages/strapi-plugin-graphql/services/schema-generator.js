@@ -40,7 +40,7 @@ const generateSchema = () => {
   const { definition, query, mutation, resolver = {} } = _schema;
 
   // Polymorphic.
-  const polymorphicSchema = Types.addPolymorphicUnionType(definition + shadowCRUD.definition);
+  const polymorphicSchema = Types.addPolymorphicUnionType(definition + shadowCRUD.definition, isFederated);
 
   const builtResolvers = _.merge({}, shadowCRUD.resolvers, polymorphicSchema.resolvers);
 
@@ -98,7 +98,7 @@ const generateSchema = () => {
     `;
 
   // Build schema.
-  const schema = makeExecutableSchema({
+  const schema = isFederated ? buildFederatedSchema({ typeDefs: gql(typeDefs), resolvers }) : makeExecutableSchema({
     typeDefs,
     resolvers,
   });
@@ -109,7 +109,7 @@ const generateSchema = () => {
     writeGenerateSchema(generatedSchema);
   }
 
-  return isFederated ? getFederatedSchema(generatedSchema, resolvers) : generatedSchema;
+  return generatedSchema
 };
 
 const getFederatedSchema = (schema, resolvers) =>

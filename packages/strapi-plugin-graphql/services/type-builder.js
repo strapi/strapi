@@ -183,7 +183,26 @@ module.exports = {
    * @return string
    */
 
-  addPolymorphicUnionType(definition) {
+  addPolymorphicUnionType(definition, isFederated) {
+
+    // if the declarations contain federated decorators, we need these to keep `graphql.parse(...)` happy
+    if( isFederated ){
+      definition = `
+        scalar _FieldSet
+        directive @extends on OBJECT | INTERFACE
+
+        directive @external on FIELD_DEFINITION
+
+        directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
+
+        directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
+
+        directive @requires(fields: _FieldSet!) on FIELD_DEFINITION
+
+        ${definition}
+      `
+    }
+
     const types = graphql
       .parse(definition)
       .definitions.filter(def => def.kind === 'ObjectTypeDefinition' && def.name.value !== 'Query')
