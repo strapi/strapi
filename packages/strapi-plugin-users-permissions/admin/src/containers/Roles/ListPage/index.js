@@ -142,12 +142,12 @@ const RoleListPage = () => {
         icon
         title={{
           label: formatMessage({
-            id: 'Settings.roles.title',
+            id: getTrad('Settings.roles.title'),
             defaultMessage: 'Roles & Permissions',
           }),
         }}
         content={formatMessage({
-          id: 'Settings.roles.list.description',
+          id: getTrad('Settings.roles.list.description'),
           defaultMessage: 'Define the roles and permissions for your users.',
         })}
         actions={headerActions}

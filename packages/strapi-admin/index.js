@@ -260,7 +260,7 @@ async function watchAdmin({ dir, host, port, browser, options }) {
       index: options.publicPath,
       disableDotRule: true,
     },
-    ...webpack(webpackConfig).options.devServer
+    ...webpack(webpackConfig).options.devServer,
   };
 
   const server = new WebpackDevServer(webpack(webpackConfig), opts);

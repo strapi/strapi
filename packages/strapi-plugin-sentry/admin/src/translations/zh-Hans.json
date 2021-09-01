@@ -1,1 +1,4 @@
-{}
+{
+    "plugin.description.short": "将 Strapi 错误事件推送至 Sentry。",
+    "plugin.description.long": "将 Strapi 错误事件推送至 Sentry。"
+  }

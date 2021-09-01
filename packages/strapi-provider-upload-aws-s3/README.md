@@ -29,7 +29,9 @@ module.exports = ({ env }) => ({
 ```
 
 ## Required AWS Policy Actions
-These are the minimum amount of permissions needed for this provider to work. 
+
+These are the minimum amount of permissions needed for this provider to work.
+
 ```
 "Action": [
   "s3:PutObject",

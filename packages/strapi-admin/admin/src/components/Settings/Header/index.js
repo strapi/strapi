@@ -29,6 +29,7 @@ const Header = ({
             color: 'cancel',
             label: formatMessage({
               id: 'app.components.Button.reset',
+              defaultMessage: 'Reset',
             }),
             type: 'button',
           },
@@ -37,6 +38,7 @@ const Header = ({
             color: 'success',
             label: formatMessage({
               id: 'app.components.Button.save',
+              defaultMessage: 'Save',
             }),
             type: 'submit',
             isLoading: showHeaderButtonLoader,
