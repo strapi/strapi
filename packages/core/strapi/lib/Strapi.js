@@ -1,14 +1,12 @@
 'use strict';
 
-const Koa = require('koa');
-const Router = require('koa-router');
 const _ = require('lodash');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 
 const loadConfiguration = require('./core/app-configuration');
 
-const { createHTTPServer } = require('./server');
+const { createServer } = require('./server');
 const { createContainer } = require('./container');
 const utils = require('./utils');
 const initializeMiddlewares = require('./middlewares');
@@ -57,9 +55,8 @@ class Strapi {
 
     this.isLoaded = false;
     this.reload = this.reload();
-    this.app = new Koa();
-    this.router = new Router();
-    this.server = createHTTPServer(this, this.app);
+    this.server = createServer(strapi);
+
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
