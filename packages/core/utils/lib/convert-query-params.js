@@ -1,13 +1,12 @@
 'use strict';
 
 /**
- * Converts the standard Strapi REST query params to a moe usable format for querying
+ * Converts the standard Strapi REST query params to a more usable format for querying
  * You can read more here: https://strapi.io/documentation/developer-docs/latest/developer-resources/content-api/content-api.html#filters
  */
 
 const _ = require('lodash');
 
-// const BOOLEAN_OPERATORS = ['or', 'and'];
 const QUERY_OPERATORS = ['_where', '_or', '_and'];
 
 class InvalidOrderError extends Error {
@@ -20,7 +19,7 @@ class InvalidSortError extends Error {
   constructor() {
     super();
     this.message =
-      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort object';
+      'Invalid sort parameter. Expected a string, an array of strings, a sort object or an array of sort objects';
   }
 }
 
@@ -82,7 +81,7 @@ const convertNestedSortQueryParam = sortQuery => {
 
 /**
  * Start query parser
- * @param {string} startQuery - ex: id:asc,price:desc
+ * @param {string} startQuery
  */
 const convertStartQueryParams = startQuery => {
   const startAsANumber = _.toNumber(startQuery);
@@ -96,7 +95,7 @@ const convertStartQueryParams = startQuery => {
 
 /**
  * Limit query parser
- * @param {string} limitQuery - ex: id:asc,price:desc
+ * @param {string} limitQuery
  */
 const convertLimitQueryParams = limitQuery => {
   const limitAsANumber = _.toNumber(limitQuery);
@@ -197,7 +196,7 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
 
   if (Array.isArray(fields)) {
     // map convert
-    const fieldsValues = fields.flatMap(value => convertPopulateQueryParams(value, depth + 1));
+    const fieldsValues = fields.flatMap(value => convertFieldsQueryParams(value, depth + 1));
     return _.uniq(['id', ...fieldsValues]);
   }
 
