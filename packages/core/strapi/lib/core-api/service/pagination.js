@@ -35,7 +35,7 @@ const shouldCount = params => {
 };
 
 const isOffsetPagination = pagination => has('start', pagination) || has('limit', pagination);
-const isPagedPagination = pagination => has('page', pagination) || has('page', pagination);
+const isPagedPagination = pagination => has('page', pagination) || has('pageSize', pagination);
 
 const getPaginationInfo = params => {
   const { defaultLimit, maxLimit } = getLimitConfigDefaults();
