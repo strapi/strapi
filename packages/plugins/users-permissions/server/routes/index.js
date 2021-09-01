@@ -223,7 +223,7 @@ module.exports = [
   },
   {
     method: 'GET',
-    path: '/connect/*',
+    path: '/connect/(.*)',
     handler: 'auth.connect',
     config: {
       policies: ['plugin::users-permissions.rateLimit'],

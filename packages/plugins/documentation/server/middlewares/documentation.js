@@ -40,14 +40,20 @@ module.exports = {
         }
       );
 
-      strapi.router.get('/plugins/documentation/*', async (ctx, next) => {
-        ctx.url = path.basename(ctx.url);
+      strapi.server.routes([
+        {
+          method: 'GET',
+          path: '/plugins/documentation/(.*)',
+          handler: async (ctx, next) => {
+            ctx.url = path.basename(ctx.url);
 
-        return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
-          maxage: strapi.config.middleware.settings.public.maxAge,
-          defer: true,
-        })(ctx, next);
-      });
+            return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
+              maxage: strapi.config.middleware.settings.public.maxAge,
+              defer: true,
+            })(ctx, next);
+          },
+        },
+      ]);
     },
   },
 };

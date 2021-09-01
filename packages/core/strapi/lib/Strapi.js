@@ -55,12 +55,11 @@ class Strapi {
 
     this.isLoaded = false;
     this.reload = this.reload();
-    this.server = createServer(strapi);
+    this.server = createServer(this);
 
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
-    this.app.proxy = this.config.get('server.proxy');
     this.log = createLogger(this.config.get('logger', {}));
 
     createUpdateNotifier(this).notify();
@@ -120,9 +119,6 @@ class Strapi {
         await this.load();
       }
 
-      this.app.use(this.router.routes()).use(this.router.allowedMethods());
-
-      // Launch server.
       await this.listen();
 
       return this;
@@ -265,15 +261,6 @@ class Strapi {
   }
 
   async load() {
-    this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
-        ctx.set('strapi', 'You are so French!');
-        ctx.status = 204;
-      } else {
-        await next();
-      }
-    });
-
     await Promise.all([
       this.loadPlugins(),
       this.loadAdmin(),

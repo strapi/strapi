@@ -4,6 +4,8 @@ const _ = require('lodash');
 const compose = require('koa-compose');
 const { yup, policy: policyUtils } = require('@strapi/utils');
 
+const { bodyPolicy } = policyUtils;
+
 const policyOrMiddlewareSchema = yup.lazy(value => {
   if (typeof value === 'string') {
     return yup.string().required();
@@ -28,6 +30,10 @@ const routeSchema = yup.object({
   handler: yup.lazy(value => {
     if (typeof value === 'string') {
       return yup.string().required();
+    }
+
+    if (Array.isArray(value)) {
+      return yup.array().required();
     }
 
     return yup
@@ -76,13 +82,13 @@ module.exports = strapi => {
         apiName,
       });
 
-      if (_.isUndefined(action) || !_.isFunction(action)) {
+      if (_.isUndefined(action)) {
         return strapi.log.warn(
           `Ignored attempt to bind route '${routeConfig.method} ${routeConfig.path}' to unknown controller/action.`
         );
       }
 
-      router[method](endpoint, compose([...policies, ...middlewares, action]));
+      router[method](endpoint, compose([...policies, ...middlewares, ..._.castArray(action)]));
     } catch (error) {
       throw new Error(
         `Error creating endpoint ${routeConfig.method} ${routeConfig.path}: ${error.message}`
@@ -112,52 +118,68 @@ const resolveMiddlewares = route => {
 const getMethod = route => _.trim(_.toLower(route.method));
 const getEndpoint = route => _.trim(route.path);
 
+const getAction = ({ method, endpoint, handler }, { pluginName, apiName }, strapi) => {
+  // Define controller and action names.
+  const [controllerName, actionName] = _.trim(handler).split('.');
+  const controllerKey = _.toLower(controllerName);
+
+  let controller;
+
+  if (pluginName) {
+    if (pluginName === 'admin') {
+      controller = strapi.admin.controllers[controllerKey];
+    } else {
+      controller = strapi.plugin(pluginName).controller(controllerKey);
+    }
+  } else {
+    controller = strapi.container.get('controllers').get(`api::${apiName}.${controllerKey}`);
+  }
+  if (!_.isFunction(controller[actionName])) {
+    strapi.stopWithError(
+      `Error creating endpoint ${method} ${endpoint}: handler not found "${controllerKey}.${actionName}"`
+    );
+  }
+
+  return {
+    action: controller[actionName].bind(controller),
+    actionName,
+    controllerKey,
+  };
+};
+
 const createRouteChecker = strapi => {
   return (value, { pluginName, apiName }) => {
+    const { handler } = value;
     const method = getMethod(value);
     const endpoint = getEndpoint(value);
+    const policies = [];
+    let action;
 
-    // Define controller and action names.
-    const [controllerName, actionName] = _.trim(value.handler).split('.');
-    const controllerKey = _.toLower(controllerName);
-
-    let controller;
-
-    if (pluginName) {
-      if (pluginName === 'admin') {
-        controller = strapi.admin.controllers[controllerKey];
-      } else {
-        controller = strapi.plugin(pluginName).controller(controllerKey);
-      }
+    if (Array.isArray(handler) || typeof handler === 'function') {
+      action = handler;
     } else {
-      controller = strapi.container.get('controllers').get(`api::${apiName}.${controllerKey}`);
+      const actionInfo = getAction({ method, endpoint, handler }, { pluginName, apiName }, strapi);
+      action = actionInfo.action;
+
+      const globalPolicy = policyUtils.globalPolicy({
+        controller: actionInfo.controllerKey,
+        action: actionInfo.actionName,
+        method,
+        endpoint,
+        plugin: pluginName,
+      });
+
+      policies.push(globalPolicy);
     }
-    if (!_.isFunction(controller[actionName])) {
-      strapi.stopWithError(
-        `Error creating endpoint ${method} ${endpoint}: handler not found "${controllerKey}.${actionName}"`
-      );
-    }
-
-    const action = controller[actionName].bind(controller);
-
-    const { bodyPolicy } = policyUtils;
-
-    const globalPolicy = policyUtils.globalPolicy({
-      controller: controllerKey,
-      action: actionName,
-      method,
-      endpoint,
-      plugin: pluginName,
-    });
 
     const policyOption = _.get(value, 'config.policies', []);
 
-    const routePolicies = policyOption.map(policyConfig => {
-      return policyUtils.get(policyConfig, { pluginName, apiName });
-    });
+    const routePolicies = policyOption.map(policyConfig =>
+      policyUtils.get(policyConfig, { pluginName, apiName })
+    );
 
     // Init policies array.
-    const policies = [globalPolicy, ...routePolicies, bodyPolicy];
+    policies.push(...routePolicies, bodyPolicy);
 
     return {
       method,

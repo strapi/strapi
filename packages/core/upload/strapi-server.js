@@ -6,6 +6,7 @@ const services = require('./server/services');
 const routes = require('./server/routes');
 const config = require('./server/config');
 const controllers = require('./server/controllers');
+const middlewares = require('./server/middlewares');
 
 module.exports = () => {
   return {
@@ -14,7 +15,7 @@ module.exports = () => {
     config,
     routes,
     controllers,
-    middlewares: {},
+    middlewares,
     contentTypes,
     policies: {},
     services,

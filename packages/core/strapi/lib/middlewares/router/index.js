@@ -6,7 +6,7 @@
 
 // Public node modules.
 const _ = require('lodash');
-const Router = require('koa-router');
+const Router = require('@koa/router');
 const createEndpointComposer = require('./utils/compose-endpoint');
 
 module.exports = strapi => {
@@ -19,24 +19,24 @@ module.exports = strapi => {
       composeEndpoint(route, { pluginName: 'admin', router });
     }
 
-    strapi.app.use(router.routes()).use(router.allowedMethods());
+    strapi.server.use(router.routes()).use(router.allowedMethods());
   };
 
   const registerPluginRoutes = () => {
     for (const pluginName in strapi.plugins) {
       const plugin = strapi.plugins[pluginName];
 
-      const router = new Router({ prefix: `/${pluginName}` });
-
       for (const route of plugin.routes || []) {
         const hasPrefix = _.has(route.config, 'prefix');
-        composeEndpoint(route, {
-          pluginName,
-          router: hasPrefix ? strapi.router : router,
-        });
+
+        if (!hasPrefix) {
+          route.path = `/${pluginName}${route.path}`;
+        }
+
+        route.info = { pluginName };
       }
 
-      strapi.app.use(router.routes()).use(router.allowedMethods());
+      strapi.server.routes(plugin.routes || []);
     }
   };
 
@@ -45,25 +45,19 @@ module.exports = strapi => {
       const api = strapi.api[apiName];
 
       _.forEach(api.routes, routeInfo => {
-        // nested router
-        if (_.has(routeInfo, 'routes')) {
-          const router = new Router({ prefix: routeInfo.prefix });
+        // TODO: remove once auth setup
+        // pass meta down to compose endpoint
+        routeInfo.routes.forEach(route => {
+          route.info = { apiName };
+        });
 
-          for (const route of routeInfo.routes || []) {
-            composeEndpoint(route, { apiName, router });
-          }
-
-          strapi.router.use(router.routes()).use(router.allowedMethods());
-        } else {
-          composeEndpoint(routeInfo, { apiName, router: strapi.router });
-        }
+        return strapi.server.api('content-api').routes(routeInfo);
       });
     }
   };
 
   return {
     initialize() {
-      strapi.router.prefix(strapi.config.get('middleware.settings.router.prefix', ''));
       registerAPIRoutes();
       registerAdminRoutes();
       registerPluginRoutes();

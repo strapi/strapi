@@ -4,9 +4,9 @@ module.exports = strapi => ({
   initialize() {
     const passportMiddleware = strapi.admin.services.passport.init();
 
-    strapi.app.use(passportMiddleware);
+    strapi.server.use(passportMiddleware);
 
-    strapi.app.use(async (ctx, next) => {
+    strapi.server.use(async (ctx, next) => {
       if (
         ctx.request.header.authorization &&
         ctx.request.header.authorization.split(' ')[0] === 'Bearer'

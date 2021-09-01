@@ -2,53 +2,68 @@
 
 const Koa = require('koa');
 const Router = require('@koa/router');
-const mount = require('koa-mount');
 
 const { createHTTPServer } = require('./http-server');
 
-const createRoute = (route, router) => {
-  router[route.method.toLowerCase()](route.path, route.handler);
+const createEndpointComposer = require('./middlewares/router/utils/compose-endpoint');
+
+const createRouteManager = strapi => {
+  const composeEndpoint = createEndpointComposer(strapi);
+
+  const createRoute = (route, router) => {
+    composeEndpoint(route, { ...route.info, router });
+  };
+
+  const addRoutes = (routes, router) => {
+    if (Array.isArray(routes)) {
+      routes.forEach(route => createRoute(route, router));
+    }
+
+    if (routes.routes) {
+      const subRouter = new Router({ prefix: routes.prefix });
+
+      routes.routes.forEach(route => createRoute(route, subRouter));
+
+      return router.use(subRouter.routes(), subRouter.allowedMethods());
+    }
+  };
+
+  return {
+    addRoutes,
+  };
 };
 
-// TODO: connect to compose Endpoint
-const addRoutes = (routes, app) => {
-  if (Array.isArray(routes)) {
-    const router = new Router();
+const createAPI = (prefix, strapi) => {
+  const api = new Router({ prefix: `/${prefix}` });
 
-    routes.forEach(route => createRoute(route, router));
-
-    return app.use(router.routes()).use(router.allowedMethods());
-  }
-
-  if (routes.routes) {
-    const router = new Router({ prefix: routes.prefix });
-
-    routes.routes.forEach(route => createRoute(route, router));
-
-    app.use(router.routes()).use(router.allowedMethods());
-  }
-};
-
-const createAPI = prefix => {
-  const app = new Koa();
+  const routeManager = createRouteManager(strapi);
 
   return {
     prefix,
 
     use(fn) {
-      app.use(fn);
+      api.use(fn);
       return this;
     },
 
     routes(routes) {
-      addRoutes(routes, app);
+      routeManager.addRoutes(routes, api);
       return this;
     },
 
-    get middleware() {
-      return app;
+    mount(router) {
+      router.use(api.routes(), api.allowedMethods());
     },
   };
+};
+
+const healthCheck = async (ctx, next) => {
+  if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
+    ctx.set('strapi', 'You are so French!');
+    ctx.status = 204;
+  } else {
+    await next();
+  }
 };
 
 /**
@@ -64,16 +79,33 @@ const createAPI = prefix => {
  * @returns {Server}
  */
 const createServer = strapi => {
+  // TODO: set root level prefix
+  // strapi.router.prefix(strapi.config.get('middleware.settings.router.prefix', ''));
+
   const app = new Koa();
-  const httpServer = createHTTPServer(strapi, this.app);
+  const router = new Router();
+
+  app.proxy = strapi.config.get('server.proxy');
+
+  const routeManager = createRouteManager(strapi);
+
+  const httpServer = createHTTPServer(strapi, app);
+
   const apis = {
-    admin: createAPI('admin'),
-    'content-api': createAPI('api'),
+    admin: createAPI('admin', strapi),
+    'content-api': createAPI('api', strapi),
   };
+
+  // init health check
+  app.use(healthCheck);
 
   return {
     app,
     httpServer,
+
+    api(name) {
+      return apis[name];
+    },
 
     /**
      * Add a middleware to the main koa app or an api
@@ -106,20 +138,20 @@ const createServer = strapi => {
         return this;
       }
 
-      addRoutes(routes, app);
+      routeManager.addRoutes(routes, router);
       return this;
     },
 
-    start(args) {
-      Object.values(apis).forEach(api => {
-        app.use(mount(`/${api.prefix}`, api.app));
-      });
+    listen(...args) {
+      app.use(router.routes()).use(router.allowedMethods());
+
+      Object.values(apis).forEach(api => api.mount(router));
 
       return httpServer.listen(...args);
     },
 
     async destroy() {
-      await this.httpServer.destroy();
+      await httpServer.destroy();
     },
   };
 };

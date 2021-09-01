@@ -93,7 +93,7 @@ module.exports = strapi => {
 
   return {
     initialize() {
-      strapi.app.keys = strapi.config.get('middleware.settings.session.secretKeys');
+      strapi.server.app.keys = strapi.config.get('middleware.settings.session.secretKeys');
 
       if (
         _.has(strapi.config.middleware.settings.session, 'client') &&
@@ -112,8 +112,8 @@ module.exports = strapi => {
             strapi.config.middleware.settings.session
           );
 
-          strapi.app.use(session(options, strapi.app));
-          strapi.app.use((ctx, next) => {
+          strapi.server.use(session(options, strapi.server.app));
+          strapi.server.use((ctx, next) => {
             ctx.state = ctx.state || {};
             ctx.state.session = ctx.session || {};
 
@@ -127,8 +127,8 @@ module.exports = strapi => {
       ) {
         const options = _.assign(strapi.config.middleware.settings.session);
 
-        strapi.app.use(session(options, strapi.app));
-        strapi.app.use((ctx, next) => {
+        strapi.server.use(session(options, strapi.server.app));
+        strapi.server.use((ctx, next) => {
           ctx.state = ctx.state || {};
           ctx.state.session = ctx.session || {};
 
