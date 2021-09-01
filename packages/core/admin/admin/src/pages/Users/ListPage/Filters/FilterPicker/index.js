@@ -23,6 +23,15 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
     return null;
   }
 
+  const handleChangeFilterField = value => {
+    const nextField = displayedFilters.find(f => f.name === value);
+    const {
+      fieldSchema: { type },
+    } = nextField;
+
+    setModifiedData({ name: value, filter: '$eq', value: type === 'boolean' ? 'true' : '' });
+  };
+
   const handleSubmit = e => {
     e.preventDefault();
 
@@ -55,7 +64,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
             <Select
               name="name"
               size="S"
-              onChange={value => setModifiedData({ name: value, filter: '$eq', value: '' })}
+              onChange={handleChangeFilterField}
               value={modifiedData.name}
             >
               {displayedFilters.map(filter => {
