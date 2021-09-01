@@ -78,6 +78,7 @@ const createExtension = ({ strapi } = {}) => {
 
         // Register resolvers configuration
         if (typeof resolversConfig === 'object') {
+          // TODO: smarter merge for auth, middlewares & policies
           acc.resolversConfig = merge(acc.resolversConfig, resolversConfig);
         }
 

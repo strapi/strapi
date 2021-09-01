@@ -27,7 +27,7 @@ module.exports = ({ strapi }) => {
 
       const targetContentType = strapi.getModel(targetUID);
 
-      return async (source, args = {}) => {
+      return async (parent, args = {}) => {
         const transformedArgs = transformArgs(args, {
           contentType: targetContentType,
           usePagination: true,
@@ -44,7 +44,7 @@ module.exports = ({ strapi }) => {
         // todo[v4]: should we move the .load to the entity service so we can use the same args everywhere?
         const data = await entityManager.load(
           contentTypeUID,
-          source,
+          parent,
           attributeName,
           entityManagerArgs
         );

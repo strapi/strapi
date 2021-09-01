@@ -6,11 +6,11 @@ const pickCreateArgs = pick(['params', 'data', 'files']);
 
 module.exports = ({ strapi }) => ({
   buildMutationsResolvers: ({ contentType }) => {
-    // todo[v4]: handle single type
+    // todo[v4]: handle single type here?
     const { uid } = contentType;
 
     return {
-      async create(source, args) {
+      async create(parent, args) {
         // todo[v4]: Might be interesting to generate dynamic yup schema to validate payloads with more complex checks (on top of graphql validation)
         const params = pickCreateArgs(args);
 
@@ -18,13 +18,13 @@ module.exports = ({ strapi }) => ({
         return strapi.entityService.create(uid, params);
       },
 
-      async update(source, args) {
+      async update(parent, args) {
         const { id, data } = args;
 
         return strapi.entityService.update(uid, id, { data });
       },
 
-      async delete(source, args) {
+      async delete(parent, args) {
         const { id, ...rest } = args;
 
         return strapi.entityService.delete(uid, id, rest);

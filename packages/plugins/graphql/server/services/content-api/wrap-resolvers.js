@@ -62,7 +62,7 @@ const wrapResolvers = ({ schema, extension = {} }) => {
       });
 
       // Replace the base resolver by a custom function which will handle authorization, middlewares & policies
-      fieldDefinition.resolve = async (source, args, context, info) => {
+      fieldDefinition.resolve = async (parent, args, context, info) => {
         if (resolverConfig.auth !== false) {
           try {
             await strapi.auth.verify(context.state.auth, resolverConfig.auth);
@@ -73,7 +73,7 @@ const wrapResolvers = ({ schema, extension = {} }) => {
         }
 
         // Execute middlewares (including the policy middleware which will always be included)
-        return first(boundMiddlewares).call(null, source, args, context, info);
+        return first(boundMiddlewares).call(null, parent, args, context, info);
       };
     }
   });
