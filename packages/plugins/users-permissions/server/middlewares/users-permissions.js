@@ -16,10 +16,18 @@ module.exports = {
         }
       });
 
-      _.forEach(strapi.config.routes, value => {
-        if (_.get(value.config, 'policies')) {
-          value.config.policies.unshift('plugin::users-permissions.permissions');
-        }
+      _.forEach(strapi.api, api => {
+        _.forEach(api.routes, route => {
+          if (_.has(route, 'routes')) {
+            _.forEach(route.routes || [], route => {
+              if (_.get(route.config, 'policies')) {
+                route.config.policies.unshift('plugin::users-permissions.permissions');
+              }
+            });
+          } else if (_.get(route.config, 'policies')) {
+            route.config.policies.unshift('plugin::users-permissions.permissions');
+          }
+        });
       });
 
       if (strapi.plugins) {

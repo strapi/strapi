@@ -1,7 +1,7 @@
 'use strict';
 
 const { pickBy, has } = require('lodash/fp');
-const { addNamespace } = require('../utils');
+const { addNamespace, hasNamespace } = require('../utils');
 
 const middlewaresRegistry = () => {
   const middlewares = {};
@@ -10,8 +10,8 @@ const middlewaresRegistry = () => {
     get(middlewareUID) {
       return middlewares[middlewareUID];
     },
-    getAll(prefix = '') {
-      return pickBy((middleware, middlewareUID) => middlewareUID.startsWith(prefix))(middlewares);
+    getAll(namespace) {
+      return pickBy((_, uid) => hasNamespace(uid, namespace))(middlewares);
     },
     add(namespace, rawMiddlewares) {
       for (const middlewareName in rawMiddlewares) {

@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { getOr } = require('lodash/fp');
-const generator = require('@strapi/generate');
+const strapiGenerators = require('@strapi/generators');
 
 const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
@@ -127,23 +127,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * @param {string} name
  */
 const generateAPI = ({ name, kind = 'collectionType' }) => {
-  return new Promise((resolve, reject) => {
-    const scope = {
-      generatorType: 'api',
-      id: nameToSlug(name),
-      name: nameToSlug(name),
-      rootPath: strapi.dir,
-      args: {
-        attributes: {},
-        kind,
-      },
-    };
-
-    generator(scope, {
-      success: () => resolve(),
-      error: err => reject(err),
-    });
-  });
+  return strapiGenerators.generate('api', { id: nameToSlug(name), kind }, { dir: strapi.dir });
 };
 
 /**
@@ -185,7 +169,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
   });
 
   if (newKind !== previousKind) {
-    const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+    const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
     await apiHandler.backup(uid);
 
     try {
@@ -212,7 +196,7 @@ const editContentType = async (uid, { contentType, components = [] }) => {
 
 const deleteContentTypes = async uids => {
   const builder = createBuilder();
-  const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
 
   for (const uid of uids) {
     await deleteContentType(uid, builder);
@@ -237,7 +221,7 @@ const deleteContentTypes = async uids => {
 const deleteContentType = async (uid, defaultBuilder = undefined) => {
   const builder = defaultBuilder || createBuilder();
   // make a backup
-  const apiHandler = strapi.service('plugin::content-type-builder.api-handler');
+  const apiHandler = strapi.plugin('content-type-builder').service('api-handler');
   await apiHandler.backup(uid);
 
   const contentType = builder.deleteContentType(uid);

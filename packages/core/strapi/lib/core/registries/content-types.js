@@ -2,11 +2,12 @@
 
 const { pickBy, has } = require('lodash/fp');
 const { createContentType } = require('../domain/content-type');
-const { addNamespace } = require('../utils');
+const { addNamespace, hasNamespace } = require('../utils');
 
 const validateKeySameToSingularName = contentTypes => {
   for (const ctName in contentTypes) {
     const contentType = contentTypes[ctName];
+
     if (ctName !== contentType.schema.info.singularName) {
       throw new Error(
         `The key of the content-type should be the same as its singularName. Found ${ctName} and ${contentType.schema.info.singularName}.`
@@ -22,12 +23,8 @@ const contentTypesRegistry = () => {
     get(ctUID) {
       return contentTypes[ctUID];
     },
-    getAll(prefix = '') {
-      if (!prefix) {
-        return contentTypes;
-      }
-
-      return pickBy((ct, ctUID) => ctUID.startsWith(prefix))(contentTypes);
+    getAll(namespace) {
+      return pickBy((_, uid) => hasNamespace(uid, namespace))(contentTypes);
     },
     add(namespace, rawContentTypes) {
       validateKeySameToSingularName(rawContentTypes);
@@ -41,6 +38,14 @@ const contentTypesRegistry = () => {
 
         contentTypes[uid] = createContentType(uid, rawContentTypes[rawCtName]);
       }
+    },
+    extend(ctUID, extendFn) {
+      const currentContentType = this.get(ctUID);
+      if (!currentContentType) {
+        throw new Error(`Content-Type ${ctUID} doesn't exist`);
+      }
+      const newContentType = extendFn(currentContentType);
+      contentTypes[ctUID] = newContentType;
     },
   };
 };

@@ -52,25 +52,22 @@ describe('Policy util', () => {
         },
       };
 
-      expect(policyUtils.get('test-policy', 'test-plugin')).toBe(policyFn);
+      expect(policyUtils.get('test-policy', { pluginName: 'test-plugin' })).toBe(policyFn);
     });
 
     test('Retrieves an api policy locally', () => {
       const policyFn = () => {};
 
       global.strapi = {
-        api: {
-          'test-api': {
-            config: {
-              policies: {
-                'test-policy': policyFn,
-              },
-            },
-          },
+        policy(name) {
+          return this.policies[name];
+        },
+        policies: {
+          'api::test-api.test-policy': policyFn,
         },
       };
 
-      expect(policyUtils.get('test-policy', undefined, 'test-api')).toBe(policyFn);
+      expect(policyUtils.get('test-policy', { apiName: 'test-api' })).toBe(policyFn);
     });
   });
 });

@@ -36,8 +36,8 @@ module.exports = function createBuilder() {
       dir = `./extensions/${contentType.plugin}/content-types/${contentType.info.singularName}`;
       filename = 'schema.json';
     } else {
-      dir = `./api/${contentType.apiName}/models`;
-      filename = contentType.__filename__;
+      dir = `./api/${contentType.apiName}/content-types/${contentType.info.singularName}`;
+      filename = 'schema.json';
     }
 
     return {
@@ -158,6 +158,7 @@ function createSchemaBuilder({ components, contentTypes }) {
         ...Array.from(tmpComponents.values()),
         ...Array.from(tmpContentTypes.values()),
       ];
+
       return Promise.all(schemas.map(schema => schema.flush()))
         .catch(error => {
           strapi.log.error('Error writing schema files');

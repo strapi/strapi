@@ -51,25 +51,25 @@ interface Pagination {
 }
 
 interface QueryFromContentType<T extends keyof AllTypes> {
-  findOne(params: FindParams<AllTypes[T]>): any;
-  findMany(params: FindParams<AllTypes[T]>): any[];
-  findWithCount(params: FindParams<AllTypes[T]>): [any[], number];
-  findPage(params: FindParams<AllTypes[T]>): { results: any[]; pagination: Pagination };
+  findOne(params: FindParams<AllTypes[T]>): Promise<any>;
+  findMany(params: FindParams<AllTypes[T]>): Promise<any[]>;
+  findWithCount(params: FindParams<AllTypes[T]>): Promise<[any[], number]>;
+  findPage(params: FindParams<AllTypes[T]>): Promise<{ results: any[]; pagination: Pagination }>;
 
-  create(params: CreateParams<AllTypes[T]>): any;
-  createMany(params: CreateManyParams<AllTypes[T]>): { count: number };
+  create(params: CreateParams<AllTypes[T]>): Promise<any>;
+  createMany(params: CreateManyParams<AllTypes[T]>): Promise<{ count: number }>;
 
-  update(params: any): any;
-  updateMany(params: any): { count: number };
+  update(params: any): Promise<any>;
+  updateMany(params: any): Promise<{ count: number }>;
 
-  delete(params: any): any;
-  deleteMany(params: any): { count: number };
+  delete(params: any): Promise<any>;
+  deleteMany(params: any): Promise<{ count: number }>;
 
-  count(params: any): number;
+  count(params: any): Promise<number>;
 
-  attachRelations(id: ID, data: any): any;
-  updateRelations(id: ID, data: any): any;
-  deleteRelations(id: ID): any;
+  attachRelations(id: ID, data: any): Promise<any>;
+  updateRelations(id: ID, data: any): Promise<any>;
+  deleteRelations(id: ID): Promise<any>;
 }
 
 interface ModelConfig {

@@ -1,29 +1,29 @@
 'use strict';
 
+const _ = require('lodash');
 const { yup } = require('@strapi/utils');
 
 const strapiServerSchema = yup
   .object()
   .shape({
-    bootstrap: yup
-      .mixed()
-      .isFunction()
-      .required(),
-    destroy: yup
-      .mixed()
-      .isFunction()
-      .required(),
-    register: yup
-      .mixed()
-      .isFunction()
-      .required(),
-    config: yup.object().required(),
-    routes: yup.array().required(), // may be removed later
-    controllers: yup.object().required(), // may be removed later
-    services: yup.object().required(),
-    policies: yup.object().required(),
-    middlewares: yup.object().required(), // may be removed later
-    contentTypes: yup.object().required(),
+    bootstrap: yup.mixed().isFunction(),
+    destroy: yup.mixed().isFunction(),
+    register: yup.mixed().isFunction(),
+    config: yup.object(),
+    routes: yup.lazy(value => {
+      if (Array.isArray(value)) {
+        return yup.array();
+      } else {
+        const shape = _.mapValues(value, () => yup.object({ routes: yup.array().required() }));
+
+        return yup.object(shape);
+      }
+    }),
+    controllers: yup.object(),
+    services: yup.object(),
+    policies: yup.object(),
+    middlewares: yup.object(),
+    contentTypes: yup.object(),
   })
   .noUnknown();
 

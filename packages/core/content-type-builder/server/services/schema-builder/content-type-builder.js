@@ -77,10 +77,11 @@ module.exports = function createComponentBuilder() {
         throw new Error('contentType.alreadyExists');
       }
 
+      const modelName = nameToSlug(infos.name);
       const contentType = createSchemaHandler({
-        modelName: nameToSlug(infos.name),
-        dir: path.join(strapi.dir, 'api', nameToSlug(infos.name), 'models'),
-        filename: `${nameToSlug(infos.name)}.settings.json`,
+        modelName: modelName,
+        dir: path.join(strapi.dir, 'api', modelName, 'content-types', modelName),
+        filename: `schema.json`,
       });
 
       this.contentTypes.set(uid, contentType);
@@ -100,6 +101,10 @@ module.exports = function createComponentBuilder() {
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
         .set('collectionName', infos.collectionName || defaultCollectionName)
         .set('info', {
+          singularName: modelName,
+          pluralName: pluralize(modelName),
+          displayName: infos.name,
+          // TODO: remove name eventually
           name: infos.name,
           description: infos.description,
         })

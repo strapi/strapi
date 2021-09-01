@@ -9,15 +9,15 @@ const contentTypesRegistry = strapi => {
   const instantiatedServices = {};
 
   return {
-    get(serviceUID) {
-      if (instantiatedServices[serviceUID]) {
-        return instantiatedServices[serviceUID];
+    get(uid) {
+      if (instantiatedServices[uid]) {
+        return instantiatedServices[uid];
       }
 
-      const service = services[serviceUID];
+      const service = services[uid];
       if (service) {
-        instantiatedServices[serviceUID] = service({ strapi });
-        return instantiatedServices[serviceUID];
+        instantiatedServices[uid] = service({ strapi });
+        return instantiatedServices[uid];
       }
 
       return undefined;
