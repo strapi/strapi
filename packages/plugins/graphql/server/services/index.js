@@ -1,7 +1,7 @@
 'use strict';
 
 const old = require('./old');
-const generators = require('./generators');
+const contentAPI = require('./content-api');
 const typeRegistry = require('./type-registry');
 const utils = require('./utils');
 const constants = require('./constants');
@@ -11,12 +11,12 @@ const extension = require('./extension');
 
 module.exports = {
   builders,
-  generators,
-  utils,
+  'content-api': contentAPI,
   constants,
+  extension,
   internals,
   'type-registry': typeRegistry,
-  extension,
+  utils,
   ////////////////////
   old,
 };
