@@ -18,8 +18,10 @@ import { useQuery } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
 import DynamicTable from './DynamicTable';
+import Filters from './Filters';
 import PaginationFooter from './PaginationFooter';
 import fetchData from './utils/api';
+import displayedFilters from './utils/displayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
@@ -53,10 +55,6 @@ const ListPage = () => {
 
   const total = get(data, 'pagination.total', 0);
 
-  // const filters = useMemo(() => {
-  //   return getFilters(search);
-  // }, [search]);
-
   // const [
   //   {
   //     // data,
@@ -68,85 +66,12 @@ const ListPage = () => {
   //   },
   //   dispatch,
   // ] = useReducer(reducer, initialState, init);
-  // const pageSize = parseInt(query.get('pageSize') || 10, 10);
-  // const page = parseInt(query.get('page') || 0, 10);
-  // const sort = decodeURIComponent(query.get('sort'));
-  // const _q = decodeURIComponent(query.get('_q') || '');
-  // const getDataRef = useRef();
-
-  // const listRef = useRef();
-
-  // getDataRef.current = async () => {
-  //   if (!canRead) {
-  //     dispatch({
-  //       type: 'UNSET_IS_LOADING',
-  //     });
-
-  //     return;
-  //   }
-  //   // Show the loading state and reset the state
-  //   dispatch({
-  //     type: 'GET_DATA',
-  //   });
-
-  //   try {
-  //     const {
-  //       data: { results, pagination },
-  //     } = await request(`/admin/users${search}`, { method: 'GET' });
-
-  //     dispatch({
-  //       type: 'GET_DATA_SUCCEEDED',
-  //       data: results,
-  //       pagination,
-  //     });
-  //   } catch (err) {
-  //     console.error(err.response);
-  //     toggleNotification({
-  //       type: 'warning',
-  //       message: { id: 'notification.error' },
-  //     });
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   if (!isLoadingForPermissions) {
-  //     getDataRef.current();
-  //   }
-  // }, [search, isLoadingForPermissions]);
 
   // const handleChangeDataToDelete = ids => {
   //   dispatch({
   //     type: 'ON_CHANGE_DATA_TO_DELETE',
   //     dataToDelete: ids,
   //   });
-  // };
-
-  // const handleChangeFilter = ({ filter, name, value }) => {
-  //   const filterName = `${name}${filter}`;
-
-  //   updateSearchParams(filterName, encodeURIComponent(value), true);
-  // };
-
-  // const handleChangeFooterParams = ({ target: { name, value } }) => {
-  //   let paramName = name.split('.')[1].replace('_', '');
-
-  //   if (paramName === 'limit') {
-  //     paramName = 'pageSize';
-  //   }
-
-  //   updateSearchParams(paramName, value);
-  // };
-
-  // const handleChangeSort = ({ target: { name, value } }) => {
-  //   updateSearchParams(name, value);
-  // };
-
-  // const handleClickDeleteFilter = ({ target: { name } }) => {
-  //   const currentSearch = new URLSearchParams(search);
-
-  //   currentSearch.delete(name);
-
-  //   push({ search: currentSearch.toString() });
   // };
 
   // const handleClickDelete = useCallback(id => {
@@ -215,20 +140,6 @@ const ListPage = () => {
 
   // const handleToggleModal = () => setIsWarningDeleteAllOpened(prev => !prev);
 
-  // const updateSearchParams = (name, value, shouldDeleteSearch = false) => {
-  //   const currentSearch = new URLSearchParams(search);
-  //   // Update the currentSearch
-  //   currentSearch.set(name, value);
-
-  //   if (shouldDeleteSearch) {
-  //     currentSearch.delete('_q');
-  //   }
-
-  //   push({
-  //     search: currentSearch.toString(),
-  //   });
-  // };
-
   // This can be improved but we need to show an something to the user
   const isLoading =
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
@@ -272,6 +183,7 @@ const ListPage = () => {
           <LoadingIndicatorPage />
         ) : (
           <>
+            <Filters displayedFilters={displayedFilters} />
             <DynamicTable
               canCreate={canCreate}
               canDelete={canDelete}
