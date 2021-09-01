@@ -47,7 +47,7 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const value = queriesResolvers.find();
+        const value = queriesResolvers.find(source, transformedArgs);
 
         return { value, info: { args: transformedArgs, resourceUID: uid } };
       },

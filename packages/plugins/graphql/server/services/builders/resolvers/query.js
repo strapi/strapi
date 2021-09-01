@@ -4,15 +4,7 @@ const { omit } = require('lodash/fp');
 
 module.exports = ({ strapi }) => ({
   buildQueriesResolvers: ({ contentType }) => {
-    const { uid, kind } = contentType;
-
-    if (kind === 'singleType') {
-      return {
-        async find() {
-          return strapi.entityService.find(uid);
-        },
-      };
-    }
+    const { uid } = contentType;
 
     return {
       async find(source, args) {
