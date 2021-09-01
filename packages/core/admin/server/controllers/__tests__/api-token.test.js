@@ -1,7 +1,6 @@
 'use strict';
 
 const createContext = require('../../../../../../test/helpers/create-context');
-const constants = require('../../services/constants');
 const apiTokenController = require('../api-token');
 
 describe('API Token Controller', () => {
@@ -9,7 +8,7 @@ describe('API Token Controller', () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
-      type: constants.API_TOKEN_TYPE.READ_ONLY,
+      type: 'read-only',
     };
 
     test('Fails if API Token already exists', async () => {
@@ -66,13 +65,13 @@ describe('API Token Controller', () => {
         id: 1,
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'read-only',
       },
       {
         id: 2,
         name: 'api-token_tests-name-2',
         description: 'api-token_tests-description-2',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'full-access',
       },
     ];
 
