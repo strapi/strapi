@@ -1,5 +1,6 @@
 'use strict';
 
+const { has } = require('lodash/fp');
 const Koa = require('koa');
 const Router = require('@koa/router');
 
@@ -17,12 +18,13 @@ const createRouteManager = strapi => {
   const addRoutes = (routes, router) => {
     if (Array.isArray(routes)) {
       routes.forEach(route => createRoute(route, router));
-    }
-
-    if (routes.routes) {
+    } else if (routes.routes) {
       const subRouter = new Router({ prefix: routes.prefix });
 
-      routes.routes.forEach(route => createRoute(route, subRouter));
+      routes.routes.forEach(route => {
+        const hasPrefix = has('prefix', route.config);
+        createRoute(route, hasPrefix ? router : subRouter);
+      });
 
       return router.use(subRouter.routes(), subRouter.allowedMethods());
     }
@@ -33,14 +35,12 @@ const createRouteManager = strapi => {
   };
 };
 
-const createAPI = (prefix, strapi) => {
-  const api = new Router({ prefix: `/${prefix}` });
+const createAPI = (strapi, opts = {}) => {
+  const api = new Router(opts);
 
   const routeManager = createRouteManager(strapi);
 
   return {
-    prefix,
-
     use(fn) {
       api.use(fn);
       return this;
@@ -53,6 +53,7 @@ const createAPI = (prefix, strapi) => {
 
     mount(router) {
       router.use(api.routes(), api.allowedMethods());
+      return this;
     },
   };
 };
@@ -92,12 +93,17 @@ const createServer = strapi => {
   const httpServer = createHTTPServer(strapi, app);
 
   const apis = {
-    admin: createAPI('admin', strapi),
-    'content-api': createAPI('api', strapi),
+    admin: createAPI(strapi, { prefix: '/admin' }),
+    // set prefix to api
+    'content-api': createAPI(strapi),
   };
 
   // init health check
   app.use(healthCheck);
+
+  const state = {
+    mounted: false,
+  };
 
   return {
     app,
@@ -142,10 +148,19 @@ const createServer = strapi => {
       return this;
     },
 
-    listen(...args) {
-      app.use(router.routes()).use(router.allowedMethods());
+    mount() {
+      state.mounted = true;
 
       Object.values(apis).forEach(api => api.mount(router));
+      app.use(router.routes()).use(router.allowedMethods());
+
+      return this;
+    },
+
+    listen(...args) {
+      if (!state.mounted) {
+        this.mount();
+      }
 
       return httpServer.listen(...args);
     },

@@ -24,11 +24,7 @@ const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'fatal
 
   instance.log.level = logLevel;
 
-  await instance.app
-    // Populate Koa routes
-    .use(instance.router.routes())
-    // Populate Koa methods
-    .use(instance.router.allowedMethods());
+  instance.server.mount();
 
   const utils = createUtils(instance);
 

@@ -1,42 +1,31 @@
 'use strict';
 
-/**
- * Module dependencies
- */
-
-// Public node modules.
 const _ = require('lodash');
-const Router = require('@koa/router');
-const createEndpointComposer = require('./utils/compose-endpoint');
 
 module.exports = strapi => {
-  const composeEndpoint = createEndpointComposer(strapi);
-
   const registerAdminRoutes = () => {
-    const router = new Router({ prefix: '/admin' });
+    strapi.admin.routes.forEach(route => {
+      route.info = { pluginName: 'admin' };
+    });
 
-    for (const route of strapi.admin.routes) {
-      composeEndpoint(route, { pluginName: 'admin', router });
-    }
-
-    strapi.server.use(router.routes()).use(router.allowedMethods());
+    strapi.server.routes({
+      prefix: '/admin',
+      routes: strapi.admin.routes,
+    });
   };
 
   const registerPluginRoutes = () => {
     for (const pluginName in strapi.plugins) {
       const plugin = strapi.plugins[pluginName];
 
-      for (const route of plugin.routes || []) {
-        const hasPrefix = _.has(route.config, 'prefix');
-
-        if (!hasPrefix) {
-          route.path = `/${pluginName}${route.path}`;
-        }
-
+      plugin.routes.forEach(route => {
         route.info = { pluginName };
-      }
+      });
 
-      strapi.server.routes(plugin.routes || []);
+      strapi.server.routes({
+        prefix: `/${pluginName}`,
+        routes: plugin.routes,
+      });
     }
   };
 
@@ -58,8 +47,8 @@ module.exports = strapi => {
 
   return {
     initialize() {
-      registerAPIRoutes();
       registerAdminRoutes();
+      registerAPIRoutes();
       registerPluginRoutes();
     },
   };

@@ -95,7 +95,17 @@ module.exports = strapi => {
       if (!strapi.config.serveAdminPanel) return;
 
       const buildDir = path.resolve(strapi.dir, 'build');
-      const serveAdmin = ctx => {
+      const serveAdmin = async (ctx, next) => {
+        await next();
+
+        if (ctx.method !== 'HEAD' && ctx.method !== 'GET') {
+          return;
+        }
+
+        if (ctx.body != null || ctx.status !== 404) {
+          return;
+        }
+
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       };
@@ -103,18 +113,11 @@ module.exports = strapi => {
       strapi.server.routes([
         {
           method: 'GET',
-          path: `${strapi.config.admin.path}/(.*)`,
-          handler: serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' }),
-        },
-        {
-          method: 'GET',
-          path: `${strapi.config.admin.path}`,
-          handler: serveAdmin,
-        },
-        {
-          method: 'GET',
-          path: `${strapi.config.admin.path}/(.*)`,
-          handler: serveAdmin,
+          path: `${strapi.config.admin.path}/:path*`,
+          handler: [
+            serveAdmin,
+            serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' }),
+          ],
         },
       ]);
     },
