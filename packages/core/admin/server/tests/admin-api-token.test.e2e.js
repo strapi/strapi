@@ -2,7 +2,6 @@
 
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../../test/helpers/request');
-const constants = require('../services/constants');
 
 /**
  * == Test Suite Overview ==
@@ -74,11 +73,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       error: 'Bad Request',
       message: 'ValidationError',
       data: {
-        type: [
-          `type must be one of the following values: ${Object.values(constants.API_TOKEN_TYPE).join(
-            ', '
-          )}`,
-        ],
+        type: ['type must be one of the following values: read-only, full-access'],
       },
     });
   });
@@ -87,7 +82,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
-      type: constants.API_TOKEN_TYPE.READ_ONLY,
+      type: 'read-only',
     };
 
     const res = await rq({
@@ -109,7 +104,7 @@ describe('Admin API Token CRUD (e2e)', () => {
   test('4. Creates an api token without a description (successfully)', async () => {
     const body = {
       name: 'api-token_tests-name-without-description',
-      type: constants.API_TOKEN_TYPE.READ_ONLY,
+      type: 'full-access',
     };
 
     const res = await rq({
@@ -132,7 +127,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     const body = {
       name: 'api-token_tests-name-with-spaces-at-the-end   ',
       description: 'api-token_tests-description-with-spaces-at-the-end   ',
-      type: constants.API_TOKEN_TYPE.READ_ONLY,
+      type: 'read-only',
     };
 
     const res = await rq({
@@ -164,19 +159,19 @@ describe('Admin API Token CRUD (e2e)', () => {
         id: expect.any(Number),
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'read-only',
       },
       {
         id: expect.any(Number),
         name: 'api-token_tests-name-with-spaces-at-the-end',
         description: 'api-token_tests-description-with-spaces-at-the-end',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'read-only',
       },
       {
         id: expect.any(Number),
         name: 'api-token_tests-name-without-description',
         description: '',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'full-access',
       },
     ]);
   });

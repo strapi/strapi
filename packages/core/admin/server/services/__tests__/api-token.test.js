@@ -2,7 +2,6 @@
 
 const crypto = require('crypto');
 const apiTokenService = require('../api-token');
-const constants = require('../constants');
 
 describe('API Token', () => {
   const mockedApiToken = {
@@ -36,7 +35,7 @@ describe('API Token', () => {
       const attributes = {
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'read-only',
       };
 
       const res = await apiTokenService.create(attributes);
@@ -126,13 +125,13 @@ describe('API Token', () => {
         id: 1,
         name: 'api-token_tests-name',
         description: 'api-token_tests-description',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'read-only',
       },
       {
         id: 2,
         name: 'api-token_tests-name-2',
         description: 'api-token_tests-description-2',
-        type: constants.API_TOKEN_TYPE.READ_ONLY,
+        type: 'full-access',
       },
     ];
 
