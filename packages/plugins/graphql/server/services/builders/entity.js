@@ -1,7 +1,7 @@
 'use strict';
 
 const { objectType } = require('nexus');
-const { prop } = require('lodash/fp');
+const { prop, identity } = require('lodash/fp');
 
 module.exports = ({ strapi }) => {
   const { naming } = strapi.plugin('graphql').service('utils');
@@ -26,7 +26,7 @@ module.exports = ({ strapi }) => {
           // Keep the fetched object into a dedicated `attributes` field
           t.field('attributes', {
             type: typeName,
-            resolve: source => source,
+            resolve: identity,
           });
 
           // todo[v4]: add the meta field to the entity when there will be data in it (can't add an empty type for now)
