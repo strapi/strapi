@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 const { pickBy, has } = require('lodash/fp');
-const { addNamespace } = require('../utils');
+const { addNamespace, hasNamespace } = require('../utils');
 
 const contentTypesRegistry = strapi => {
   const services = {};
@@ -22,11 +22,14 @@ const contentTypesRegistry = strapi => {
 
       return undefined;
     },
-    getAll(prefix = '') {
-      const filteredServices = pickBy((service, serviceUID) => serviceUID.startsWith(prefix))(
-        services
-      );
+    getAll(namespace) {
+      const filteredServices = pickBy((_, uid) => hasNamespace(uid, namespace))(services);
+
       return _.mapValues(filteredServices, (service, serviceUID) => this.get(serviceUID));
+    },
+    set(uid, value) {
+      instantiatedServices[uid] = value;
+      return this;
     },
     add(namespace, newServices) {
       for (const serviceName in newServices) {
@@ -38,6 +41,14 @@ const contentTypesRegistry = strapi => {
         }
         services[uid] = service;
       }
+    },
+    extend(serviceUID, extendFn) {
+      const currentService = this.get(serviceUID);
+      if (!currentService) {
+        throw new Error(`Service ${serviceUID} doesn't exist`);
+      }
+      const newService = extendFn(currentService);
+      instantiatedServices[serviceUID] = newService;
     },
   };
 };
