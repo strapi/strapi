@@ -281,7 +281,7 @@ const ListPage = () => {
               withBulkActions
               withMainAction={canDelete}
             />
-            <PaginationFooter />
+            <PaginationFooter pagination={data?.pagination} />
           </>
         )}
       </CustomContentLayout>

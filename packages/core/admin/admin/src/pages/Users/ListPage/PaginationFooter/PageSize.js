@@ -17,6 +17,7 @@ const PageSize = () => {
   const handleChange = e => {
     setQuery({
       pageSize: e,
+      page: 1,
     });
   };
 

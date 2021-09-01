@@ -51,7 +51,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
   afterEach(() => server.resetHandlers());
 
-  afterAll(() => server.close());
+  afterAll(() => {
+    server.close();
+    jest.resetAllMocks();
+  });
 
   it('renders and matches the snapshot', () => {
     const history = createMemoryHistory();
@@ -370,8 +373,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
     const { getByText } = render(app);
 
     await waitFor(() => {
-      expect(getByText('soup soup')).toBeInTheDocument();
-      expect(getByText('dummy dummy')).toBeInTheDocument();
+      expect(getByText('soup')).toBeInTheDocument();
+      expect(getByText('dummy')).toBeInTheDocument();
       expect(getByText('Active')).toBeInTheDocument();
       expect(getByText('Inactive')).toBeInTheDocument();
     });

@@ -17,7 +17,7 @@ const handlers = [
               firstname: 'soup',
               id: 1,
               isActive: true,
-              lastname: 'soup',
+              lastname: 'soupette',
               roles: [
                 {
                   id: 1,
@@ -30,7 +30,7 @@ const handlers = [
               firstname: 'dummy',
               id: 2,
               isActive: false,
-              lastname: 'dummy',
+              lastname: 'dum test',
               roles: [
                 {
                   id: 1,

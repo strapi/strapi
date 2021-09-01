@@ -1,32 +1,35 @@
 import React from 'react';
-import { Box, Row, NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/parts';
+import PropTypes from 'prop-types';
+import { Box, Row } from '@strapi/parts';
+import Pagination from './Pagination';
 import PageSize from './PageSize';
 
-const PaginationFooter = () => {
+const PaginationFooter = ({ pagination }) => {
   return (
     <Box paddingTop={6}>
       <Row justifyContent="space-between">
         <PageSize />
-        <Pagination activePage={1} pageCount={26}>
-          <PreviousLink to="/1">Go to previous page</PreviousLink>
-          <PageLink number={1} to="/1">
-            Go to page 1
-          </PageLink>
-          <PageLink number={2} to="/2">
-            Go to page 2
-          </PageLink>
-          <Dots>And 23 other links</Dots>
-          <PageLink number={25} to="/25">
-            Go to page 3
-          </PageLink>
-          <PageLink number={26} to="/26">
-            Go to page 26
-          </PageLink>
-          <NextLink to="/3">Go to next page</NextLink>
-        </Pagination>
+        <Pagination pagination={pagination} />
       </Row>
     </Box>
   );
+};
+
+PaginationFooter.defaultProps = {
+  pagination: {
+    pageCount: 0,
+    pageSize: 10,
+    total: 0,
+  },
+};
+
+PaginationFooter.propTypes = {
+  pagination: PropTypes.shape({
+    page: PropTypes.number,
+    pageCount: PropTypes.number,
+    pageSize: PropTypes.number,
+    total: PropTypes.number,
+  }),
 };
 
 export default PaginationFooter;
