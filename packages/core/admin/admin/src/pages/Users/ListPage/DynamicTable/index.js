@@ -1,13 +1,25 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Table as TableCompo } from '@strapi/parts';
+import { Box, Row, Button, Table as TableCompo, Subtitle } from '@strapi/parts';
 import { EmptyBodyTable, useQueryParams } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { DeleteIcon } from '@strapi/icons';
+import styled from 'styled-components';
 import TableHead from './TableHead';
 import TableRows from './TableRows';
+
+const BlockActions = styled(Row)`
+  & > * + * {
+    margin-left: ${({ theme }) => theme.spaces[2]};
+  }
+
+  margin-left: ${({ pullRight }) => (pullRight ? 'auto' : undefined)};
+`;
 
 const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainAction }) => {
   const [entriesToDelete, setEntriesToDelete] = useState([]);
   const [{ query }] = useQueryParams();
+  const { formatMessage } = useIntl();
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
   const hasFilters = query.filters !== undefined;
@@ -40,30 +52,61 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
   };
 
   return (
-    <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT}>
-      <TableHead
-        areAllEntriesSelected={areAllEntriesSelected}
-        entriesToDelete={entriesToDelete}
-        headers={headers}
-        onSelectAll={handleSelectAll}
-        withMainAction={withMainAction}
-        withBulkActions={withBulkActions}
-      />
-      {!rows.length ? (
-        <EmptyBodyTable colSpan={COL_COUNT} content={content} />
-      ) : (
-        <TableRows
-          canDelete={canDelete}
-          canUpdate={canUpdate}
+    <>
+      {entriesToDelete.length > 0 && (
+        <Box>
+          <Box paddingBottom={4}>
+            <Row justifyContent="space-between">
+              <BlockActions>
+                <Subtitle textColor="neutral600">
+                  {/* FIXME: create a common translation */}
+                  {formatMessage(
+                    {
+                      id: 'Settings.webhooks.to.delete',
+                      defaultMessage:
+                        '{webhooksToDeleteLength, plural, one {# asset} other {# assets}} selected',
+                    },
+                    { webhooksToDeleteLength: entriesToDelete.length }
+                  )}
+                </Subtitle>
+                <Button
+                  // onClick={() => handleDeleteClick('all')}
+                  startIcon={<DeleteIcon />}
+                  size="L"
+                  variant="danger-light"
+                >
+                  Delete
+                </Button>
+              </BlockActions>
+            </Row>
+          </Box>
+        </Box>
+      )}
+      <TableCompo colCount={COL_COUNT} rowCount={ROW_COUNT}>
+        <TableHead
+          areAllEntriesSelected={areAllEntriesSelected}
           entriesToDelete={entriesToDelete}
           headers={headers}
-          onSelectRow={handleSelectRow}
-          rows={rows}
-          withBulkActions={withBulkActions}
+          onSelectAll={handleSelectAll}
           withMainAction={withMainAction}
+          withBulkActions={withBulkActions}
         />
-      )}
-    </TableCompo>
+        {!rows.length ? (
+          <EmptyBodyTable colSpan={COL_COUNT} content={content} />
+        ) : (
+          <TableRows
+            canDelete={canDelete}
+            canUpdate={canUpdate}
+            entriesToDelete={entriesToDelete}
+            headers={headers}
+            onSelectRow={handleSelectRow}
+            rows={rows}
+            withBulkActions={withBulkActions}
+            withMainAction={withMainAction}
+          />
+        )}
+      </TableCompo>
+    </>
   );
 };
 
