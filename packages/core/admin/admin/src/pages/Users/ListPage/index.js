@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import { useQuery } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
-import Table from './Table';
+import DynamicTable from './DynamicTable';
 import fetchData from './utils/api';
 import tableHeaders from './utils/tableHeaders';
 
@@ -25,6 +25,7 @@ const ListPage = () => {
   const {
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(adminPermissions.settings.users);
+
   const toggleNotification = useNotification();
 
   // const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpened] = useState(false);
@@ -232,7 +233,11 @@ const ListPage = () => {
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
   const createAction = canCreate ? (
-    <Button onClick={() => 'handleToggleModalForCreatingRole'} startIcon={<Mail />}>
+    <Button
+      data-testid="create-user-button"
+      onClick={() => 'handleToggleModalForCreatingRole'}
+      startIcon={<Mail />}
+    >
       {formatMessage({
         id: 'Settings.permissions.users.create',
         defaultMessage: 'Create new user',
@@ -261,11 +266,11 @@ const ListPage = () => {
         )}
       />
       <CustomContentLayout action={createAction} canRead={canRead}>
-        {status === 'error' && <div>An error occurred</div>}
+        {status === 'error' && <div>TODO: An error occurred</div>}
         {canRead && isLoading ? (
           <LoadingIndicatorPage />
         ) : (
-          <Table
+          <DynamicTable
             canCreate={canCreate}
             canDelete={canDelete}
             canUpdate={canUpdate}

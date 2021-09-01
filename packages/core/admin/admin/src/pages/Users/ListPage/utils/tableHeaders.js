@@ -7,6 +7,14 @@ const tableHeaders = [
     name: 'firstname',
     key: 'firstname',
     metadatas: { label: 'Name', sortable: true },
+    // eslint-disable-next-line react/prop-types
+    cellFormatter: ({ firstname, lastname }) => {
+      return (
+        <Text>
+          {firstname} {lastname}
+        </Text>
+      );
+    },
   },
   {
     key: 'email',

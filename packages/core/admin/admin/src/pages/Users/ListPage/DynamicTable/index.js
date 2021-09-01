@@ -9,7 +9,7 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
   const [entriesToDelete, setEntriesToDelete] = useState([]);
   const [{ query }] = useQueryParams();
   const ROW_COUNT = rows.length + 1;
-  const COL_COUNT = 7;
+  const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
   const hasFilters = query.filters !== undefined;
   const areAllEntriesSelected = entriesToDelete.length === rows.length && rows.length > 0;
 
@@ -56,7 +56,6 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
           canDelete={canDelete}
           canUpdate={canUpdate}
           entriesToDelete={entriesToDelete}
-          data={rows}
           headers={headers}
           onSelectRow={handleSelectRow}
           rows={rows}

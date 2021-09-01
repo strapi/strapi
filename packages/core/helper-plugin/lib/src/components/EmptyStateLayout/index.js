@@ -10,7 +10,7 @@ const icons = {
   permissions: EmptyStatePermissions,
 };
 
-const EmptyStateLayout = ({ action, content, icon }) => {
+const EmptyStateLayout = ({ action, content, hasRadius, icon, shadow }) => {
   const Icon = icons[icon];
   const { formatMessage } = useIntl();
 
@@ -21,7 +21,9 @@ const EmptyStateLayout = ({ action, content, icon }) => {
         { id: content.id, defaultMessage: content.defaultMessage },
         content.values
       )}
+      hasRadius={hasRadius}
       icon={<Icon width="10rem" />}
+      shadow={shadow}
     />
   );
 };
@@ -33,7 +35,9 @@ EmptyStateLayout.defaultProps = {
     defaultMessage: "You don't have any content yet...",
     values: {},
   },
+  hasRadius: true,
   icon: 'document',
+  shadow: 'tableShadow',
 };
 
 EmptyStateLayout.propTypes = {
@@ -43,7 +47,9 @@ EmptyStateLayout.propTypes = {
     defaultMessage: PropTypes.string,
     values: PropTypes.object,
   }),
+  hasRadius: PropTypes.bool,
   icon: PropTypes.oneOf(['document', 'media', 'permissions']),
+  shadow: PropTypes.string,
 };
 
 export default EmptyStateLayout;

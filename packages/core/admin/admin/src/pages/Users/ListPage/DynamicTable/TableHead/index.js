@@ -21,7 +21,7 @@ const TableHead = ({
   withBulkActions,
 }) => {
   const [{ query }, setQuery] = useQueryParams();
-  const sort = query.sort;
+  const sort = query.sort || '';
   const [sortBy, sortOrder] = sort.split(':');
 
   const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length;

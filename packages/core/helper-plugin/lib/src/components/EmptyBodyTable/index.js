@@ -1,5 +1,6 @@
 import React from 'react';
 import { Tbody, Tr, Td } from '@strapi/parts/Table';
+import styled from 'styled-components';
 import EmptyStateLayout from '../EmptyStateLayout';
 import PropTypes from 'prop-types';
 
@@ -8,7 +9,7 @@ const EmptyBodyTable = ({ colSpan, ...rest }) => {
     <Tbody>
       <Tr>
         <Td colSpan={colSpan}>
-          <EmptyStateLayout {...rest} />
+          <EmptyStateLayout {...rest} hasRadius={false} shadow="" />
         </Td>
       </Tr>
     </Tbody>
@@ -19,6 +20,7 @@ EmptyBodyTable.defaultProps = {
   action: undefined,
   colSpan: 1,
   content: undefined,
+
   icon: undefined,
 };
 
