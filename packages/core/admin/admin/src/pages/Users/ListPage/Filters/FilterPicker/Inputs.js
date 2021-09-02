@@ -17,7 +17,7 @@ const Inputs = ({ onChange, type, value }) => {
   return (
     <Field>
       <Stack>
-        <FieldInput onChange={({ target: { value } }) => onChange(value)} value={value} />
+        <FieldInput onChange={({ target: { value } }) => onChange(value)} value={value} size="S" />
       </Stack>
     </Field>
   );

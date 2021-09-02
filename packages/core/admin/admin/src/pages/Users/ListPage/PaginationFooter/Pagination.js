@@ -132,8 +132,6 @@ const Pagination = ({ pagination: { pageCount } }) => {
     ? pageCount - firstLinks.length - lastLinks.length
     : pageCount - activePage - 1;
 
-  console.log({ firstLinks, middleLinks, lastLinks });
-
   return (
     <PaginationCompo activePage={activePage} pageCount={pageCount}>
       <PreviousLink to={`${pathname}?${previousSearch}`}>Go to previous page</PreviousLink>

@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Box, Row } from '@strapi/parts';
+import { Button, Box } from '@strapi/parts';
 import { FilterIcon } from '@strapi/icons';
 import FilterList from './FilterList';
 import FilterPicker from './FilterPicker';
@@ -14,27 +14,26 @@ const Filters = ({ displayedFilters }) => {
   };
 
   return (
-    <Box paddingBottom={4}>
-      <Row style={{ flexWrap: 'wrap' }}>
-        <Box padding={1}>
-          <Button
-            variant="tertiary"
-            ref={buttonRef}
-            endIcon={<FilterIcon />}
-            onClick={handleToggle}
-          >
-            Filters
-          </Button>
-          <FilterPicker
-            displayedFilters={displayedFilters}
-            isVisible={isVisible}
-            onToggle={handleToggle}
-            source={buttonRef}
-          />
-        </Box>
-        <FilterList />
-      </Row>
-    </Box>
+    <>
+      <Box padding={1}>
+        <Button
+          variant="tertiary"
+          ref={buttonRef}
+          startIcon={<FilterIcon />}
+          onClick={handleToggle}
+          size="S"
+        >
+          Filters
+        </Button>
+        <FilterPicker
+          displayedFilters={displayedFilters}
+          isVisible={isVisible}
+          onToggle={handleToggle}
+          source={buttonRef}
+        />
+      </Box>
+      <FilterList />
+    </>
   );
 };
 

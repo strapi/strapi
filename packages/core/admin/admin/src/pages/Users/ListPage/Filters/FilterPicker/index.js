@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { Button, Box, Popover, Stack, Select, Option } from '@strapi/parts';
+import { Button, Box, Popover, Stack, Select, Option, FocusTrap } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
 import { useQueryParams } from '@strapi/helper-plugin';
 import Inputs from './Inputs';
@@ -49,7 +49,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
         { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } },
       ];
 
-      setQuery({ filters: { $and: filters } });
+      setQuery({ filters: { $and: filters }, page: 1 });
     }
     onToggle();
   };
@@ -58,54 +58,56 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
 
   return (
     <Popover source={source} padding={3}>
-      <form onSubmit={handleSubmit}>
-        <Stack size={1} style={{ minWidth: 184 }}>
-          <Box>
-            <Select
-              name="name"
-              size="S"
-              onChange={handleChangeFilterField}
-              value={modifiedData.name}
-            >
-              {displayedFilters.map(filter => {
-                return (
-                  <Option key={filter.name} value={filter.name}>
-                    {filter.metadatas.label}
-                  </Option>
-                );
-              })}
-            </Select>
-          </Box>
-          <Box>
-            <Select
-              name="filter"
-              size="S"
-              value={modifiedData.filter}
-              onChange={val => setModifiedData(prev => ({ ...prev, filter: val }))}
-            >
-              {getFilterList(appliedFilter).map(option => {
-                return (
-                  <Option key={option.value} value={option.value}>
-                    {option.label}
-                  </Option>
-                );
-              })}
-            </Select>
-          </Box>
-          <Box>
-            <Inputs
-              {...appliedFilter.fieldSchema}
-              value={modifiedData.value}
-              onChange={value => setModifiedData(prev => ({ ...prev, value }))}
-            />
-          </Box>
-          <Box>
-            <FullWidthButton variant="secondary" startIcon={<AddIcon />} type="submit">
-              Add filter
-            </FullWidthButton>
-          </Box>
-        </Stack>
-      </form>
+      <FocusTrap onEscape={onToggle}>
+        <form onSubmit={handleSubmit}>
+          <Stack size={1} style={{ minWidth: 184 }}>
+            <Box>
+              <Select
+                name="name"
+                size="S"
+                onChange={handleChangeFilterField}
+                value={modifiedData.name}
+              >
+                {displayedFilters.map(filter => {
+                  return (
+                    <Option key={filter.name} value={filter.name}>
+                      {filter.metadatas.label}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Box>
+            <Box>
+              <Select
+                name="filter"
+                size="S"
+                value={modifiedData.filter}
+                onChange={val => setModifiedData(prev => ({ ...prev, filter: val }))}
+              >
+                {getFilterList(appliedFilter).map(option => {
+                  return (
+                    <Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Option>
+                  );
+                })}
+              </Select>
+            </Box>
+            <Box>
+              <Inputs
+                {...appliedFilter.fieldSchema}
+                value={modifiedData.value}
+                onChange={value => setModifiedData(prev => ({ ...prev, value }))}
+              />
+            </Box>
+            <Box>
+              <FullWidthButton variant="secondary" startIcon={<AddIcon />} type="submit">
+                Add filter
+              </FullWidthButton>
+            </Box>
+          </Stack>
+        </form>
+      </FocusTrap>
     </Popover>
   );
 };
