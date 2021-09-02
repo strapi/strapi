@@ -18,4 +18,4 @@ type S = {
   'api-token': typeof apiToken;
 };
 
-export function getService<T extends keyof S>(name: T): ReturnType<S[T]>;
+export function getService<T extends keyof S>(name: T): S[T];

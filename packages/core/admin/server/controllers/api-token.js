@@ -49,4 +49,18 @@ module.exports = {
 
     ctx.deleted({ data: apiToken });
   },
+
+  async get(ctx) {
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+    const apiToken = await apiTokenService.get(id);
+
+    if (!apiToken) {
+      ctx.notFound('API Token not found');
+
+      return;
+    }
+
+    ctx.send({ data: apiToken });
+  },
 };
