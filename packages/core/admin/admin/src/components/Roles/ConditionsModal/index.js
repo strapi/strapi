@@ -3,31 +3,24 @@ import {
   Breadcrumbs,
   Button,
   Crumb,
+  Divider,
   H2,
   ModalFooter,
   ModalHeader,
   ModalLayout,
   Stack,
   Text,
-  Divider,
 } from '@strapi/parts';
-import { cloneDeep, get, groupBy, set, upperFirst } from 'lodash';
+import produce from 'immer';
+import { get, groupBy, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { usePermissionsDataManager } from '../../../hooks';
-import updateValues from '../Permissions/utils/updateValues';
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 
-const ConditionsModal = ({
-  actions,
-  headerBreadCrumbs,
-  isOpen,
-  isFormDisabled,
-  onClosed,
-  onToggle,
-}) => {
+const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed, onToggle }) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
 
@@ -50,26 +43,20 @@ const ConditionsModal = ({
 
   const [state, setState] = useState(initState);
 
-  const handleCategoryChange = ({ keys, value }) => {
-    setState(prevState => {
-      const updatedState = cloneDeep(prevState);
-      const objToUpdate = get(prevState, keys, {});
-      const updatedValues = updateValues(objToUpdate, value);
+  const handleChange = (name, values) => {
+    setState(
+      produce(draft => {
+        if (!draft[name]) {
+          draft[name] = {};
+        }
 
-      set(updatedState, keys, updatedValues);
+        if (!draft[name].default) {
+          draft[name].default = {};
+        }
 
-      return updatedState;
-    });
-  };
-
-  const handleChange = ({ keys, value }) => {
-    setState(prevState => {
-      const updatedState = cloneDeep(prevState);
-
-      set(updatedState, keys, value);
-
-      return updatedState;
-    });
+        draft[name].default = values;
+      })
+    );
   };
 
   const handleSubmit = () => {
@@ -88,8 +75,6 @@ const ConditionsModal = ({
     onChangeConditions(conditionsWithoutCategory);
     onToggle();
   };
-
-  if (!isOpen) return null;
 
   return (
     <ModalLayout onClose={onClosed}>
@@ -140,7 +125,6 @@ const ConditionsModal = ({
                     isFormDisabled={isFormDisabled}
                     isGrey={index % 2 === 0}
                     name={name}
-                    onCategoryChange={handleCategoryChange}
                     onChange={handleChange}
                     value={get(state, name, {})}
                   />
@@ -181,7 +165,6 @@ ConditionsModal.propTypes = {
     })
   ).isRequired,
   headerBreadCrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
-  isOpen: PropTypes.bool.isRequired,
   isFormDisabled: PropTypes.bool.isRequired,
   onClosed: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
