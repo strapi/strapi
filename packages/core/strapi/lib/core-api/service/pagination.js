@@ -1,7 +1,6 @@
 'use strict';
 
-const _ = require('lodash');
-const { has, toNumber, isUndefined, isPlainObject } = require('lodash/fp');
+const { has, toNumber, isUndefined } = require('lodash/fp');
 
 /**
  * Default limit values from config
@@ -27,8 +26,22 @@ const applyMaxLimit = (limit, maxLimit) => {
 };
 
 const shouldCount = params => {
-  if (_.has(params, 'pagination.withCount')) {
-    return params.pagination.withCount === 'false' ? false : true;
+  if (has('pagination.withCount', params)) {
+    const { withCount } = params.pagination;
+
+    if (typeof withCount === 'boolean') {
+      return withCount;
+    }
+
+    if (['true', 't', '1', 1].includes(withCount)) {
+      return true;
+    }
+
+    if (['false', 'f', '0', 0].includes(withCount)) {
+      return false;
+    }
+
+    throw new Error('Invalid withCount parameter. Expected "t","1","true","false","0","f"');
   }
 
   return Boolean(strapi.config.get('api.rest.withCount', true));
@@ -40,16 +53,19 @@ const isPagedPagination = pagination => has('page', pagination) || has('pageSize
 const getPaginationInfo = params => {
   const { defaultLimit, maxLimit } = getLimitConfigDefaults();
 
-  if (isUndefined(params.pagination) || !isPlainObject(params.pagination)) {
+  const { pagination } = params;
+
+  const isPaged = isPagedPagination(pagination);
+  const isOffset = isOffsetPagination(pagination);
+
+  if (!isPaged && !isOffset) {
     return {
       page: 1,
       pageSize: defaultLimit,
     };
   }
 
-  const { pagination } = params;
-
-  if (isOffsetPagination(pagination) && isPagedPagination(pagination)) {
+  if (isOffset && isPaged) {
     throw new Error('Invalid pagination parameters. Expected either start/limit or page/pageSize');
   }
 
@@ -75,7 +91,7 @@ const getPaginationInfo = params => {
 };
 
 const convertPagedToStartLimit = pagination => {
-  if (_.has(pagination, 'page')) {
+  if (isPagedPagination(pagination)) {
     const { page, pageSize } = pagination;
     return {
       start: (page - 1) * pageSize,
