@@ -50,6 +50,7 @@ const Table = ({
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(entriesToDelete);
+      handleToggleConfirmDeleteAll();
     } catch (err) {
       setIsConfirmButtonLoading(false);
       handleToggleConfirmDeleteAll();
@@ -60,6 +61,7 @@ const Table = ({
     try {
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(entriesToDelete);
+      handleToggleConfirmDelete();
     } catch (err) {
       setIsConfirmButtonLoading(false);
       handleToggleConfirmDelete();

@@ -23,7 +23,7 @@ import displayedFilters from './utils/displayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
-  const [isModalOpened, setIsModalOpen] = useState(true);
+  const [isModalOpened, setIsModalOpen] = useState(false);
   const {
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(adminPermissions.settings.users);
@@ -32,11 +32,13 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
+  const queryName = ['users', search];
 
-  const { status, data, isFetching } = useQuery(['users', search], () => fetchData(search), {
+  const { status, data, isFetching } = useQuery(queryName, () => fetchData(search), {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
+    staleTime: 5000,
     onError: () => {
       toggleNotification({
         type: 'warning',
@@ -53,7 +55,7 @@ const ListPage = () => {
 
   const deleteAllMutation = useMutation(ids => deleteData(ids), {
     onSuccess: async () => {
-      await queryClient.invalidateQueries(['users', search]);
+      await queryClient.invalidateQueries(queryName);
     },
     onError: err => {
       if (err?.response?.data?.data) {
@@ -129,7 +131,7 @@ const ListPage = () => {
           </>
         )}
       </CustomContentLayout>
-      {isModalOpened && <ModalForm onToggle={handleToggle} />}
+      {isModalOpened && <ModalForm onToggle={handleToggle} queryName={queryName} />}
     </Main>
   );
 

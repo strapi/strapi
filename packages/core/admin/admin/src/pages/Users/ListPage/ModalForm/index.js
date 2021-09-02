@@ -16,24 +16,54 @@ import {
   H2,
 } from '@strapi/parts';
 import { Formik } from 'formik';
-import { Form, GenericInput } from '@strapi/helper-plugin';
+import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/helper-plugin';
+import { useQueryClient, useMutation } from 'react-query';
 import formDataModel from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import SelectRoles from './SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
+import { axiosInstance } from '../../../../core/utils';
 
-const ModalForm = ({ onToggle }) => {
+const ModalForm = ({ queryName, onToggle }) => {
   const [currentStep, setStep] = useState('create');
+  const [isSubmitting, setIsSubmiting] = useState(false);
+  const [registrationToken, setRegistrationToken] = useState(null);
+  const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
+  const toggleNotification = useNotification();
+  const { lockApp, unlockApp } = useOverlayBlocker();
+  const postMutation = useMutation(body => axiosInstance.post('/admin/users', body), {
+    onSuccess: async ({ data }) => {
+      setRegistrationToken(data.registrationToken);
+      await queryClient.invalidateQueries(queryName);
+      goNext();
+      setIsSubmiting(false);
+    },
+    onError: err => {
+      console.error(err.response);
+
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+    },
+    onSettled: () => {
+      unlockApp();
+    },
+  });
+
   const headerTitle = formatMessage({
     id: 'Settings.permissions.users.create',
     defaultMessage: 'Create new user',
   });
 
-  const handleSubmit = () => {
-    goNext();
+  const handleSubmit = async body => {
+    lockApp();
+    setIsSubmiting(true);
+
+    postMutation.mutateAsync(body);
   };
 
   const goNext = () => {
@@ -45,6 +75,16 @@ const ModalForm = ({ onToggle }) => {
   };
 
   const { buttonSubmitLabel, isDisabled, next } = stepper[currentStep];
+  const endActions =
+    currentStep === 'create' ? (
+      <Button type="submit" loading={isSubmitting}>
+        {formatMessage(buttonSubmitLabel)}
+      </Button>
+    ) : (
+      <Button type="button" loading={isSubmitting} onClick={onToggle}>
+        {formatMessage(buttonSubmitLabel)}
+      </Button>
+    );
 
   return (
     <ModalLayout onClose={onToggle} labelledBy="title">
@@ -138,13 +178,7 @@ const ModalForm = ({ onToggle }) => {
                     })}
                   </Button>
                 }
-                endActions={
-                  <>
-                    <Button type="submit" loading={false} disabled={isDisabled}>
-                      {formatMessage(buttonSubmitLabel)}
-                    </Button>
-                  </>
-                }
+                endActions={endActions}
               />
             </Form>
           );
@@ -156,6 +190,7 @@ const ModalForm = ({ onToggle }) => {
 
 ModalForm.propTypes = {
   onToggle: PropTypes.func.isRequired,
+  queryName: PropTypes.array.isRequired,
 };
 
 export default ModalForm;
