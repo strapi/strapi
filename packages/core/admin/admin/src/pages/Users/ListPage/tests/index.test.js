@@ -1220,6 +1220,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                         aria-disabled="false"
                         aria-expanded="false"
                         aria-haspopup="listbox"
+                        aria-label="Entries per page"
                         aria-labelledby="select-15-label select-15-content"
                         class="c45"
                         id="select-15"

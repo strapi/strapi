@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Button, Box, Popover, Stack, Select, Option, FocusTrap } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
 import { useQueryParams } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
@@ -11,8 +12,9 @@ const FullWidthButton = styled(Button)`
   width: 100%;
 `;
 
-const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
+const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
+  const { formatMessage } = useIntl();
   const [modifiedData, setModifiedData] = useState({
     name: displayedFilters[0].name,
     filter: getFilterList(displayedFilters[0])[0].value,
@@ -63,6 +65,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
           <Stack size={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
+                aria-label="Select field"
                 name="name"
                 size="S"
                 onChange={handleChangeFilterField}
@@ -79,6 +82,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
             </Box>
             <Box>
               <Select
+                aria-label="Select filter"
                 name="filter"
                 size="S"
                 value={modifiedData.filter}
@@ -102,7 +106,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
             </Box>
             <Box>
               <FullWidthButton variant="secondary" startIcon={<AddIcon />} type="submit">
-                Add filter
+                {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
               </FullWidthButton>
             </Box>
           </Stack>
@@ -112,7 +116,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
   );
 };
 
-FilterPicker.propTypes = {
+FilterPopover.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -125,4 +129,4 @@ FilterPicker.propTypes = {
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };
 
-export default FilterPicker;
+export default FilterPopover;
