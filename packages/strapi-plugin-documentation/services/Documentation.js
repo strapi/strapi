@@ -1480,6 +1480,7 @@ module.exports = {
       case 'datetime':
       case 'time':
       case 'richtext':
+      case 'uid':
         return 'string';
       case 'float':
       case 'decimal':
@@ -1509,6 +1510,8 @@ module.exports = {
         return 'date-time';
       case 'password':
         return 'password';
+      case 'uid':
+        return 'uid';
       default:
         return undefined;
     }
