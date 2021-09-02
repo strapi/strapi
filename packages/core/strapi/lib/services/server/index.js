@@ -6,7 +6,7 @@ const Router = require('@koa/router');
 
 const { createHTTPServer } = require('./http-server');
 
-const createEndpointComposer = require('./utils/compose-endpoint');
+const createEndpointComposer = require('./compose-endpoint');
 
 const createRouteManager = strapi => {
   const composeEndpoint = createEndpointComposer(strapi);
@@ -95,7 +95,7 @@ const createServer = strapi => {
 
   const apis = {
     admin: createAPI(strapi, { prefix: '/admin' }),
-    // TODO: set prefix to api
+    // { prefix: strapi.config.get('api.prefix', '/api') }
     'content-api': createAPI(strapi),
   };
 

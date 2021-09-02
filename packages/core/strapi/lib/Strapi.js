@@ -6,12 +6,12 @@ const { Database } = require('@strapi/database');
 
 const loadConfiguration = require('./core/app-configuration');
 
-const { createServer } = require('./server');
 const { createContainer } = require('./container');
 const utils = require('./utils');
 const initializeMiddlewares = require('./middlewares');
 const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
+const { createServer } = require('./services/server');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
