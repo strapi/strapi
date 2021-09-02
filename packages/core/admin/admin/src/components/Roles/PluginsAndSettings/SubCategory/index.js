@@ -130,14 +130,15 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           />
         </Row>
       </Box>
-      <ConditionsModal
-        headerBreadCrumbs={[categoryName, subCategoryName]}
-        actions={formattedActions}
-        isOpen={isModalOpen}
-        isFormDisabled={isFormDisabled}
-        onClosed={handleModalClose}
-        onToggle={handleToggleModalIsOpen}
-      />
+      {isModalOpen && (
+        <ConditionsModal
+          headerBreadCrumbs={[categoryName, subCategoryName]}
+          actions={formattedActions}
+          isFormDisabled={isFormDisabled}
+          onClosed={handleModalClose}
+          onToggle={handleToggleModalIsOpen}
+        />
+      )}
     </>
   );
 };

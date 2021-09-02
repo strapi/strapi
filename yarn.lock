@@ -4915,15 +4915,29 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
-"@strapi/icons@0.0.1-alpha.18":
-  version "0.0.1-alpha.18"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.18.tgz#c64ca4a896b965b1ea02b2863352391daa5406ff"
-  integrity sha512-QDjCckoI5vGQc6eH/rgFxLMGrBkYqmbNsMAb7T5GOUhJxoSymPM4VPKOjqL36u6MRpi1xqYdw3GBiv48tnxZVw==
+"@strapi/icons@0.0.1-alpha.15":
+  version "0.0.1-alpha.15"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.15.tgz#32fc824b732b4a21d5282f84696d6207ac5cbea1"
+  integrity sha512-FIczXDSEBPXTfptgqR6Hjh65Fpf4XF+kEm3o53PQX8G0GZ0Udpcbspqf2Kieeocg8TePgRkTI/oU6KS1aJbXrg==
 
-"@strapi/parts@0.0.1-alpha.18":
-  version "0.0.1-alpha.18"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.18.tgz#19306892ba98404f7554360760f1870a2e57e381"
-  integrity sha512-x0LcIounSdgFY7lVsOjinh6ksS9/Nw2/CHNDVW7ZZTuXS5QHODebNlZibrTyPVZNLSJniYqn8P0rxAtc+FcLjQ==
+"@strapi/icons@0.0.1-alpha.19":
+  version "0.0.1-alpha.19"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.19.tgz#88153c77ff02deccfedffb1dc2e7f0f4cc2f830a"
+  integrity sha512-nFpT3Gsp6nQ4+FNd9DkbqhMZrX9KJbWXLQ6XFHhtYdNVA3n5vr2/0MFaqWrvYwxpnxMs3gn1xZOjG4+VzLBwbA==
+
+"@strapi/parts@0.0.1-alpha.15":
+  version "0.0.1-alpha.15"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.15.tgz#250cc29be0fa4cc2b91c8c0be49e1c2070a25450"
+  integrity sha512-VF4gp6xrowpnHBe3qJf0BHljZEXT8Y+oMk7XbW9HJ6w7Fxrm6SmmBfGb3LGFLxkzMj+5Log7FXD+ANER298r+A==
+  dependencies:
+    "@internationalized/number" "^3.0.2"
+    compute-scroll-into-view "^1.0.17"
+    prop-types "^15.7.2"
+
+"@strapi/parts@0.0.1-alpha.19":
+  version "0.0.1-alpha.19"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.19.tgz#e4c64c1f63256ab21f4ad643f684738a283c0efc"
+  integrity sha512-NzhwmCJnMNlCcRHpXTxILm0rVH+qLl2JoaCxx7XoMRnq4JZHHBaLjEiyTZHYJXRTdro+YUcWeayssL9kqEX8cw==
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"

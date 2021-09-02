@@ -59,6 +59,7 @@ module.exports = {
     '<rootDir>/test/config/front/test-bundler.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
