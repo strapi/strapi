@@ -9,7 +9,7 @@ import { Button } from '@strapi/parts/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 
-const ConfirmDialog = ({ onToggleDialog, onConfirm, isVisible }) => {
+const ConfirmDialog = ({ isConfirmButtonLoading, onToggleDialog, onConfirm, isVisible }) => {
   const { formatMessage } = useIntl();
 
   if (!isVisible) {
@@ -50,6 +50,7 @@ const ConfirmDialog = ({ onToggleDialog, onConfirm, isVisible }) => {
             variant="danger-light"
             startIcon={<DeleteIcon />}
             id="confirm-delete"
+            loading={isConfirmButtonLoading}
           >
             {formatMessage({ id: 'app.components.Button.confirm', defaultMessage: 'Confirm' })}
           </Button>
@@ -59,10 +60,15 @@ const ConfirmDialog = ({ onToggleDialog, onConfirm, isVisible }) => {
   );
 };
 
+ConfirmDialog.defaultProps = {
+  isConfirmButtonLoading: false,
+};
+
 ConfirmDialog.propTypes = {
-  onToggleDialog: PropTypes.func.isRequired,
-  onConfirm: PropTypes.func.isRequired,
+  isConfirmButtonLoading: PropTypes.bool,
   isVisible: PropTypes.bool.isRequired,
+  onConfirm: PropTypes.func.isRequired,
+  onToggleDialog: PropTypes.func.isRequired,
 };
 
 export default ConfirmDialog;

@@ -22,10 +22,28 @@ TODO
         handleToggle();
         alert('you deleted your item');
       };
+      const isLoading = false;
       return (
         <>
           <Button onClick={handleToggle}>Click me</Button>
-          <ConfirmDialog isVisible={dialogOpen} onToggleDialog={handleToggle} onConfirm={handleDelete} />
+          <ConfirmDialog isConfirmButtonLoading={isLoading} isVisible={dialogOpen} onToggleDialog={handleToggle} onConfirm={handleDelete} />
+        </>
+      );
+    }}
+  </Story>
+  <Story name="confirm-loading">
+    {() => {
+      const [dialogOpen, setDialogOpen] = useState(false);
+      const handleToggle = () => setDialogOpen(prev => !prev);
+      const handleDelete = () => {
+        handleToggle();
+        alert('you deleted your item');
+      };
+      const isLoading = true;
+      return (
+        <>
+          <Button onClick={handleToggle}>Click me</Button>
+          <ConfirmDialog isConfirmButtonLoading={true} isVisible={dialogOpen} onToggleDialog={handleToggle} onConfirm={handleDelete} />
         </>
       );
     }}

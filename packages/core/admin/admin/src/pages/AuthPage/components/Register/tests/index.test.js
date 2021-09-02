@@ -423,21 +423,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         outline: none;
       }
 
-      .c8 {
-        margin: 0 auto;
-        width: 552px;
-      }
-
-      .c11 {
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c12 {
-        height: 4.5rem;
-      }
-
       .c41 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -524,6 +509,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
       .c38:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c8 {
+        margin: 0 auto;
+        width: 552px;
+      }
+
+      .c11 {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c12 {
+        height: 4.5rem;
       }
 
       .c39 {
