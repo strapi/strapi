@@ -17,14 +17,14 @@ const koaStatic = require('koa-static');
 module.exports = {
   async getInfos(ctx) {
     try {
-      const service = strapi.plugins.documentation.services.documentation;
-      const docVersions = service.retrieveDocumentationVersions();
-      const form = await service.retrieveFrontForm();
+      const docService = strapi.plugin('documentation').service('documentation');
+      const docVersions = docService.getDocumentationVersions();
+      const form = await docService.getFrontendForm();
 
       ctx.send({
         docVersions,
-        currentVersion: service.getDocumentationVersion(),
-        prefix: strapi.config.get('plugin.documentation.x-strapi-config').path,
+        currentVersion: docService.getDocumentationVersion(),
+        prefix: strapi.plugin('documentation').config('x-strapi-config').path,
         form,
       });
     } catch (err) {
@@ -45,6 +45,7 @@ module.exports = {
           : strapi.plugins.documentation.config.info.version;
       const openAPISpecsPath = path.join(
         strapi.config.appPath,
+        'src',
         'extensions',
         'documentation',
         'documentation',
@@ -66,6 +67,7 @@ module.exports = {
         try {
           const layoutPath = path.resolve(
             strapi.config.appPath,
+            'src',
             'extensions',
             'documentation',
             'public',
@@ -80,6 +82,7 @@ module.exports = {
           try {
             const staticFolder = path.resolve(
               strapi.config.appPath,
+              'src',
               'extensions',
               'documentation',
               'public'
@@ -119,6 +122,7 @@ module.exports = {
       try {
         const layoutPath = path.resolve(
           strapi.config.appPath,
+          'src',
           'extensions',
           'documentation',
           'public',
@@ -132,6 +136,7 @@ module.exports = {
         try {
           const staticFolder = path.resolve(
             strapi.config.appPath,
+            'src',
             'extensions',
             'documentation',
             'public'
@@ -176,8 +181,9 @@ module.exports = {
   },
 
   async regenerateDoc(ctx) {
-    const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
+    const service = strapi.plugin('documentation').service('documentation');
+    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
+
     const {
       request: {
         body: { version },
@@ -211,6 +217,7 @@ module.exports = {
         JSON.stringify(fullDoc, null, 2),
         'utf8'
       );
+
       ctx.send({ ok: true });
     } catch (err) {
       ctx.badRequest(null, admin ? 'documentation.error.regenerateDoc' : 'An error occured');
@@ -221,8 +228,8 @@ module.exports = {
 
   async deleteDoc(ctx) {
     strapi.reload.isWatching = false;
-    const service = strapi.plugins.documentation.services.documentation;
-    const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
+    const service = strapi.plugin('documentation').service('documentation');
+    const documentationVersions = service.getDocumentationVersions().map(el => el.version);
 
     const {
       params: { version },

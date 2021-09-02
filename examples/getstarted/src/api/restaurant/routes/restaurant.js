@@ -5,7 +5,7 @@ module.exports = {
   routes: [
     {
       method: 'GET',
-      path: '/',
+      path: '/restaurants',
       handler: 'restaurant.find',
       config: {
         policies: [],
@@ -13,7 +13,7 @@ module.exports = {
     },
     {
       method: 'GET',
-      path: '/:id',
+      path: '/restaurants/:id',
       handler: 'restaurant.findOne',
       config: {
         policies: [],
@@ -21,7 +21,7 @@ module.exports = {
     },
     {
       method: 'POST',
-      path: '/',
+      path: '/restaurants',
       handler: 'restaurant.create',
       config: {
         policies: [],
@@ -29,7 +29,7 @@ module.exports = {
     },
     {
       method: 'PUT',
-      path: '/:id',
+      path: '/restaurants/:id',
       handler: 'restaurant.update',
       config: {
         policies: [],
@@ -37,7 +37,7 @@ module.exports = {
     },
     {
       method: 'DELETE',
-      path: '/:id',
+      path: '/restaurants/:id',
       handler: 'restaurant.delete',
       config: {
         policies: [],
