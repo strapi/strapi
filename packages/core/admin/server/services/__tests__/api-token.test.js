@@ -180,7 +180,7 @@ describe('API Token', () => {
       expect(res).toEqual(token);
     });
 
-    test('It returns `null` if the resource does not exists', async () => {
+    test('It returns `null` if the resource does not exist', async () => {
       const mockedDelete = jest.fn().mockResolvedValue(null);
 
       global.strapi = {
