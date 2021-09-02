@@ -3,12 +3,14 @@ import PropTypes from 'prop-types';
 import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { useHistory } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 
 const TableRows = ({
   canUpdate,
   canDelete,
   headers,
   entriesToDelete,
+  onClickDelete,
   onSelectRow,
   withMainAction,
   withBulkActions,
@@ -18,6 +20,7 @@ const TableRows = ({
     push,
     location: { pathname },
   } = useHistory();
+  const { formatMessage } = useIntl();
 
   return (
     <Tbody>
@@ -55,7 +58,7 @@ const TableRows = ({
                   {canUpdate && (
                     <IconButton
                       onClick={() => push(`${pathname}/${data.id}`)}
-                      label="Edit"
+                      label={formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' })}
                       noBorder
                       icon={<EditIcon />}
                     />
@@ -63,8 +66,8 @@ const TableRows = ({
                   {canDelete && (
                     <Box paddingLeft={1}>
                       <IconButton
-                        onClick={() => console.log('delete')}
-                        label="Delete"
+                        onClick={() => onClickDelete(data.id)}
+                        label={formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
                         noBorder
                         icon={<DeleteIcon />}
                       />
@@ -83,6 +86,8 @@ const TableRows = ({
 TableRows.defaultProps = {
   canDelete: false,
   canUpdate: false,
+  onClickDelete: () => {},
+  onSelectRow: () => {},
   rows: [],
   withBulkActions: false,
   withMainAction: false,
@@ -93,7 +98,8 @@ TableRows.propTypes = {
   canUpdate: PropTypes.bool,
   entriesToDelete: PropTypes.array.isRequired,
   headers: PropTypes.array.isRequired,
-  onSelectRow: PropTypes.func.isRequired,
+  onClickDelete: PropTypes.func,
+  onSelectRow: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,

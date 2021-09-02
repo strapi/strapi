@@ -5,6 +5,7 @@ import { EmptyBodyTable, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { DeleteIcon } from '@strapi/icons';
 import styled from 'styled-components';
+import ConfirmDialog from '../ConfirmDialog';
 import TableHead from './TableHead';
 import TableRows from './TableRows';
 
@@ -16,8 +17,19 @@ const BlockActions = styled(Row)`
   margin-left: ${({ pullRight }) => (pullRight ? 'auto' : undefined)};
 `;
 
-const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainAction }) => {
+const Table = ({
+  canDelete,
+  canUpdate,
+  headers,
+  onConfirmDeleteAll,
+  rows,
+  withBulkActions,
+  withMainAction,
+}) => {
   const [entriesToDelete, setEntriesToDelete] = useState([]);
+  const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
   const [{ query }] = useQueryParams();
   const { formatMessage } = useIntl();
   const ROW_COUNT = rows.length + 1;
@@ -33,12 +45,49 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
       }
     : undefined;
 
+  const handleConfirmDeleteAll = async () => {
+    try {
+      setIsConfirmButtonLoading(true);
+      await onConfirmDeleteAll(entriesToDelete);
+    } catch (err) {
+      setIsConfirmButtonLoading(false);
+      handleToggleConfirmDeleteAll();
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      setIsConfirmButtonLoading(true);
+      await onConfirmDeleteAll(entriesToDelete);
+    } catch (err) {
+      setIsConfirmButtonLoading(false);
+      handleToggleConfirmDelete();
+    }
+  };
+
   const handleSelectAll = () => {
     if (!areAllEntriesSelected) {
       setEntriesToDelete(rows.map(row => row.id));
     } else {
       setEntriesToDelete([]);
     }
+  };
+
+  const handleToggleConfirmDeleteAll = () => {
+    setShowConfirmDeleteAll(prev => !prev);
+  };
+
+  const handleToggleConfirmDelete = () => {
+    if (showConfirmDelete) {
+      setEntriesToDelete([]);
+    }
+    setShowConfirmDelete(prev => !prev);
+  };
+
+  const handleClickDelete = id => {
+    setEntriesToDelete([id]);
+
+    handleToggleConfirmDelete();
   };
 
   const handleSelectRow = ({ name, value }) => {
@@ -59,23 +108,21 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
             <Row justifyContent="space-between">
               <BlockActions>
                 <Subtitle textColor="neutral600">
-                  {/* FIXME: create a common translation */}
                   {formatMessage(
                     {
-                      id: 'Settings.webhooks.to.delete',
-                      defaultMessage:
-                        '{webhooksToDeleteLength, plural, one {# asset} other {# assets}} selected',
+                      id: 'content-manager.components.TableDelete.label',
+                      defaultMessage: '{number, plural, one {# entry} other {# entries}} selected',
                     },
-                    { webhooksToDeleteLength: entriesToDelete.length }
+                    { number: entriesToDelete.length }
                   )}
                 </Subtitle>
                 <Button
-                  // onClick={() => handleDeleteClick('all')}
+                  onClick={handleToggleConfirmDeleteAll}
                   startIcon={<DeleteIcon />}
                   size="L"
                   variant="danger-light"
                 >
-                  Delete
+                  {formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
                 </Button>
               </BlockActions>
             </Row>
@@ -99,6 +146,7 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
             canUpdate={canUpdate}
             entriesToDelete={entriesToDelete}
             headers={headers}
+            onClickDelete={handleClickDelete}
             onSelectRow={handleSelectRow}
             rows={rows}
             withBulkActions={withBulkActions}
@@ -106,12 +154,25 @@ const Table = ({ canDelete, canUpdate, headers, rows, withBulkActions, withMainA
           />
         )}
       </TableCompo>
+      <ConfirmDialog
+        isConfirmButtonLoading={isConfirmButtonLoading}
+        onConfirm={handleConfirmDeleteAll}
+        onToggle={handleToggleConfirmDeleteAll}
+        show={showConfirmDeleteAll}
+      />
+      <ConfirmDialog
+        isConfirmButtonLoading={isConfirmButtonLoading}
+        onConfirm={handleConfirmDelete}
+        onToggle={handleToggleConfirmDelete}
+        show={showConfirmDelete}
+      />
     </>
   );
 };
 
 Table.defaultProps = {
   headers: [],
+  onConfirmDeleteAll: () => {},
   rows: [],
   withBulkActions: false,
   withMainAction: false,
@@ -121,6 +182,7 @@ Table.propTypes = {
   canDelete: PropTypes.bool.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   headers: PropTypes.array,
+  onConfirmDeleteAll: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,
