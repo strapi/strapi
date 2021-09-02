@@ -14,6 +14,8 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 4. Creates an api token without a description (successfully)
  * 5. Creates an api token with trimmed description and name (successfully)
  * 6. List all tokens (successfully)
+ * 7. Deletes a token (successfully)
+ * 8. Does not return an error if the ressource does not exist
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -92,7 +94,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       description: body.description,
@@ -114,7 +116,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       description: '',
@@ -137,7 +139,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: 'api-token_tests-name-with-spaces-at-the-end',
       description: 'api-token_tests-description-with-spaces-at-the-end',
@@ -174,5 +176,30 @@ describe('Admin API Token CRUD (e2e)', () => {
         type: 'full-access',
       },
     ]);
+  });
+
+  test('7. Deletes a token (successfully)', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens/3',
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      name: 'api-token_tests-name-with-spaces-at-the-end',
+      description: 'api-token_tests-description-with-spaces-at-the-end',
+      type: 'read-only',
+      id: 3,
+    });
+  });
+
+  test('8. Does not return an error if the ressource does not exist', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens/42',
+      method: 'DELETE',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toBeNull();
   });
 });

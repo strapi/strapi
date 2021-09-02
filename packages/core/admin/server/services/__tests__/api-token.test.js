@@ -153,4 +153,49 @@ describe('API Token', () => {
       expect(res).toEqual(tokens);
     });
   });
+
+  describe('revoke', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('It deletes the token', async () => {
+      const mockedDelete = jest.fn().mockResolvedValue(token);
+
+      global.strapi = {
+        query() {
+          return { delete: mockedDelete };
+        },
+      };
+
+      const res = await apiTokenService.revoke(token.id);
+
+      expect(mockedDelete).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { id: token.id },
+      });
+      expect(res).toEqual(token);
+    });
+
+    test('It returns `null` if the resource does not exist', async () => {
+      const mockedDelete = jest.fn().mockResolvedValue(null);
+
+      global.strapi = {
+        query() {
+          return { delete: mockedDelete };
+        },
+      };
+
+      const res = await apiTokenService.revoke(42);
+
+      expect(mockedDelete).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { id: 42 },
+      });
+      expect(res).toEqual(null);
+    });
+  });
 });
