@@ -92,7 +92,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       description: body.description,
@@ -114,7 +114,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: body.name,
       description: '',
@@ -137,7 +137,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
 
     expect(res.statusCode).toBe(201);
-    expect(res.body.data).toMatchObject({
+    expect(res.body.data).toStrictEqual({
       accessKey: expect.any(String),
       name: 'api-token_tests-name-with-spaces-at-the-end',
       description: 'api-token_tests-description-with-spaces-at-the-end',
@@ -182,8 +182,13 @@ describe('Admin API Token CRUD (e2e)', () => {
       method: 'DELETE',
     });
 
-    expect(res.statusCode).toBe(204);
-    expect(res.body.data).toBeUndefined();
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      name: 'api-token_tests-name-with-spaces-at-the-end',
+      description: 'api-token_tests-description-with-spaces-at-the-end',
+      type: 'read-only',
+      id: 3,
+    });
   });
 
   test('8. Does not return an error if the ressource does not exists', async () => {
@@ -192,7 +197,7 @@ describe('Admin API Token CRUD (e2e)', () => {
       method: 'DELETE',
     });
 
-    expect(res.statusCode).toBe(204);
-    expect(res.body.data).toBeUndefined();
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toBeNull();
   });
 });
