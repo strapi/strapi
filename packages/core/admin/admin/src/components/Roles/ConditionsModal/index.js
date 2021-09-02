@@ -20,14 +20,7 @@ import { usePermissionsDataManager } from '../../../hooks';
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 
-const ConditionsModal = ({
-  actions,
-  headerBreadCrumbs,
-  isOpen,
-  isFormDisabled,
-  onClosed,
-  onToggle,
-}) => {
+const ConditionsModal = ({ actions, headerBreadCrumbs, isFormDisabled, onClosed, onToggle }) => {
   const { formatMessage } = useIntl();
   const { availableConditions, modifiedData, onChangeConditions } = usePermissionsDataManager();
 
@@ -53,9 +46,13 @@ const ConditionsModal = ({
   const handleChange = (name, values) => {
     setState(
       produce(draft => {
-        if (!draft[name]) draft[name] = {};
+        if (!draft[name]) {
+          draft[name] = {};
+        }
 
-        if (!draft[name].default) draft[name].default = {};
+        if (!draft[name].default) {
+          draft[name].default = {};
+        }
 
         draft[name].default = values;
       })
@@ -78,8 +75,6 @@ const ConditionsModal = ({
     onChangeConditions(conditionsWithoutCategory);
     onToggle();
   };
-
-  if (!isOpen) return null;
 
   return (
     <ModalLayout onClose={onClosed}>
@@ -170,7 +165,6 @@ ConditionsModal.propTypes = {
     })
   ).isRequired,
   headerBreadCrumbs: PropTypes.arrayOf(PropTypes.string).isRequired,
-  isOpen: PropTypes.bool.isRequired,
   isFormDisabled: PropTypes.bool.isRequired,
   onClosed: PropTypes.func.isRequired,
   onToggle: PropTypes.func.isRequired,
