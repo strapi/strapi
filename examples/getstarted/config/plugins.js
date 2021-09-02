@@ -13,4 +13,11 @@ module.exports = ({ env }) => ({
       },
     },
   },
+  myplugin: {
+    enabled: true,
+    resolve: `${__dirname}/../plugins/myplugin`,
+    config: {
+      testConf: 3,
+    },
+  },
 });

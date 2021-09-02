@@ -1,15 +1,13 @@
 'use strict';
 
-module.exports = (/* strapi, config */) => {
+const config = require('./server/config');
+const contentTypes = require('./server/content-types');
+const controllers = require('./server/controllers');
+
+module.exports = () => {
   return {
-    bootstrap: () => {},
-    destroy: () => {},
-    config: {},
-    routes: [],
-    controllers: {},
-    services: {},
-    policies: {},
-    middlewares: {},
-    contentTypes: [],
+    config,
+    controllers,
+    contentTypes,
   };
 };
