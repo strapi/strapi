@@ -1,9 +1,28 @@
-import React from 'react';
+import { Stack, FieldLabel, P, TableLabel } from '@strapi/parts';
+import { useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-
-import formatValue from './utils/formatValue';
+import React from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
+import styled from 'styled-components';
 import EventRow from './EventRow';
+import formatValue from './utils/formatValue';
+
+const StyledTable = styled.table`
+  td {
+    height: ${52 / 16}rem;
+    width: 10%;
+    vertical-align: middle;
+    text-align: center;
+  }
+
+  tbody tr:nth-child(odd) {
+    background: ${({ theme }) => theme.colors.neutral100};
+  }
+
+  tbody tr td:first-child {
+    padding-left: ${({ theme }) => theme.spaces[7]};
+  }
+`;
 
 const displayedData = {
   headers: {
@@ -32,13 +51,20 @@ const displayedData = {
   },
 };
 
-const EventInput = ({ onChange, name: inputName, value: inputValue, isDraftAndPublish }) => {
+const EventInput = ({ isDraftAndPublish }) => {
   const headersName = isDraftAndPublish
     ? displayedData.headers.draftAndPublish
     : displayedData.headers.default;
+
   const events = isDraftAndPublish
     ? displayedData.events.draftAndPublish
     : displayedData.events.default;
+
+  const { formatMessage } = useIntl();
+  const { values, errors, handleChange: onChange } = useFormikContext();
+
+  const inputName = 'events';
+  const inputValue = values.events;
 
   const disabledEvents = [];
 
@@ -71,55 +97,70 @@ const EventInput = ({ onChange, name: inputName, value: inputValue, isDraftAndPu
   };
 
   return (
-    <table>
-      <thead>
-        <tr>
-          <td />
-          {headersName.map(header => {
-            if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
-              return (
-                <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
-                  {msg => (
-                    <td title={msg}>
-                      <FormattedMessage id={header} />
-                    </td>
-                  )}
-                </FormattedMessage>
-              );
-            }
+    <Stack size={1}>
+      <FieldLabel>
+        {formatMessage({
+          id: 'Settings.webhooks.form.events',
+          defaultMessage: 'Events',
+        })}
+      </FieldLabel>
+      <StyledTable>
+        <thead>
+          <tr>
+            <td />
+            {headersName.map(header => {
+              if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
+                return (
+                  <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
+                    {msg => (
+                      <td title={msg}>
+                        <TableLabel textColor="neutral600">
+                          {formatMessage({ id: header })}
+                        </TableLabel>
+                      </td>
+                    )}
+                  </FormattedMessage>
+                );
+              }
 
+              return (
+                <td key={header}>
+                  <TableLabel textColor="neutral600">{formatMessage({ id: header })}</TableLabel>
+                </td>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {Object.keys(events).map(event => {
             return (
-              <td key={header}>
-                <FormattedMessage id={header} />
-              </td>
+              <EventRow
+                disabledEvents={disabledEvents}
+                key={event}
+                name={event}
+                events={events[event]}
+                inputValue={formattedValue[event]}
+                handleChange={handleChange}
+                handleChangeAll={handleChangeAll}
+              />
             );
           })}
-        </tr>
-      </thead>
-      <tbody>
-        {Object.keys(events).map(event => {
-          return (
-            <EventRow
-              disabledEvents={disabledEvents}
-              key={event}
-              name={event}
-              events={events[event]}
-              inputValue={formattedValue[event]}
-              handleChange={handleChange}
-              handleChangeAll={handleChangeAll}
-            />
-          );
-        })}
-      </tbody>
-    </table>
+        </tbody>
+      </StyledTable>
+      {errors.events && (
+        <P small textColor="danger600" data-strapi-field-error>
+          {formatMessage({
+            id: 'components.Input.error.validation.required',
+            defaultMessage: 'This value is required',
+          })}
+        </P>
+      )}
+    </Stack>
   );
 };
 
 EventInput.propTypes = {
-  name: PropTypes.string.isRequired,
-  onChange: PropTypes.func.isRequired,
   isDraftAndPublish: PropTypes.bool.isRequired,
-  value: PropTypes.array.isRequired,
 };
 
 export default EventInput;

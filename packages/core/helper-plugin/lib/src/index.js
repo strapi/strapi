@@ -144,6 +144,7 @@ export { default as formatComponentData } from './content-manager/utils/formatCo
 export { default as hasPermissions } from './utils/hasPermissions';
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as translatedErrors } from './utils/translatedErrors';
+export { default as to } from './utils/await-to-js';
 export { darken } from './utils/colors';
 export { default as getFileExtension } from './utils/getFileExtension';
 export { default as getFilterType } from './utils/getFilterType';

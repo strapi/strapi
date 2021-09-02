@@ -6,35 +6,35 @@
 
 import {
   Form,
+  LoadingIndicatorPage,
   request,
+  to,
   useNotification,
   useOverlayBlocker,
   SettingsPageTitle,
 } from '@strapi/helper-plugin';
-import { AddIcon, Autoselect, BackIcon, CheckIcon, Publish } from '@strapi/icons';
+import { BackIcon, CheckIcon, Publish } from '@strapi/icons';
 import {
   Box,
   Button,
   ContentLayout,
-  FieldLabel,
   Grid,
   GridItem,
   HeaderLayout,
-  IconButton,
   Link,
   Main,
-  P,
-  Row,
   Stack,
   TextInput,
 } from '@strapi/parts';
-import { TextButton } from '@strapi/parts/TextButton';
-import { Field, FieldArray, Formik } from 'formik';
-import React from 'react';
+import { Field, Formik } from 'formik';
+import React, { useCallback, useMemo } from 'react';
 import { useIntl } from 'react-intl';
-import { useMutation } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import EventInput from '../../../components/Webhooks/EventInput';
+import TriggerContainer from '../../../components/Webhooks/TriggerContainer';
+import HeadersInput from '../../../components/Webhooks/HeadersInput';
+import { useModels } from '../../../hooks';
 import { cleanData, schema } from './utils';
 
 const EditView = () => {
@@ -45,8 +45,63 @@ const EditView = () => {
   const { replace } = useHistory();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const toggleNotification = useNotification();
+  const queryClient = useQueryClient();
+  const { isLoading: isLoadingForModels, collectionTypes } = useModels();
 
   const isCreating = id === 'create';
+
+  const fetchWebhook = useCallback(
+    async id => {
+      const [err, { data }] = await to(
+        request(`/admin/webhooks/${id}`, {
+          method: 'GET',
+        })
+      );
+
+      if (err) {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+
+        return null;
+      }
+
+      return data;
+    },
+    [toggleNotification]
+  );
+
+  const triggerWebhookFn = useCallback(
+    async id => {
+      const [err, { data }] = await to(
+        request(`/admin/webhooks/${id}/trigger`, {
+          method: 'POST',
+        })
+      );
+
+      if (err && err?.code !== 20) {
+        toggleNotification({
+          type: 'warning',
+          message: { id: 'notification.error' },
+        });
+      }
+
+      return data;
+    },
+    [toggleNotification]
+  );
+
+  const { isLoading, data } = useQuery(['get-webhook', id], () => fetchWebhook(id), {
+    enabled: !isCreating,
+  });
+
+  const {
+    isLoading: isTriggering,
+    data: triggerResponse,
+    refetch: triggerWebhook,
+    isIdle: isTriggerIdle,
+  } = useQuery(['trigger-webhook', id], () => triggerWebhookFn(id), { enabled: false });
 
   const createWebhookMutation = useMutation(body =>
     request('/admin/webhooks', {
@@ -55,17 +110,23 @@ const EditView = () => {
     })
   );
 
+  const updateWebhookMutation = useMutation(({ id, body }) =>
+    request(`/admin/webhooks/${id}`, {
+      method: 'PUT',
+      body,
+    })
+  );
+
   const handleSubmit = async data => {
     if (isCreating) {
       lockApp();
-      console.log(data);
       createWebhookMutation.mutate(cleanData(data), {
-        onSuccess: () => {
+        onSuccess: result => {
           toggleNotification({
             type: 'success',
             message: { id: 'Settings.webhooks.created' },
           });
-          replace(`/settings/webhooks/${data.id}`);
+          replace(`/settings/webhooks/${result.data.id}`);
           unlockApp();
         },
         onError: e => {
@@ -77,8 +138,40 @@ const EditView = () => {
           unlockApp();
         },
       });
+    } else {
+      lockApp();
+      updateWebhookMutation.mutate(
+        { id, body: cleanData(data) },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries(['get-webhook', id]);
+            toggleNotification({
+              type: 'success',
+              message: { id: 'notification.form.success.fields' },
+            });
+            unlockApp();
+          },
+          onError: e => {
+            toggleNotification({
+              type: 'warning',
+              message: { id: 'notification.error' },
+            });
+            console.log(e);
+            unlockApp();
+          },
+        }
+      );
     }
   };
+
+  const isDraftAndPublishEvents = useMemo(
+    () => collectionTypes.some(ct => ct.options.draftAndPublish === true),
+    [collectionTypes]
+  );
+
+  if (isLoading || isLoadingForModels) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <Main labelledBy="title">
@@ -86,22 +179,29 @@ const EditView = () => {
       <Formik
         onSubmit={handleSubmit}
         initialValues={{
-          name: '',
-          url: '',
-          headers: [{ key: '', value: '' }],
-          events: [],
+          name: data?.name || '',
+          url: data?.url || '',
+          headers: Object.keys(data?.headers || []).length
+            ? Object.entries(data.headers).map(([key, value]) => ({ key, value }))
+            : [{ key: '', value: '' }],
+          events: data?.events || [],
         }}
         validationSchema={schema}
         validateOnChange={false}
         validateOnBlur={false}
       >
-        {({ handleSubmit, values, errors, handleReset, handleChange }) => (
+        {({ handleSubmit, errors, handleReset }) => (
           <Form noValidate>
             <HeaderLayout
               id="title"
               primaryAction={
                 <Stack horizontal size={2}>
-                  <Button onClick={() => {}} variant="tertiary" startIcon={<Publish />}>
+                  <Button
+                    onClick={triggerWebhook}
+                    variant="tertiary"
+                    startIcon={<Publish />}
+                    disabled={isCreating || isTriggering}
+                  >
                     {formatMessage({
                       id: 'Settings.webhooks.trigger',
                       defaultMessage: 'Trigger',
@@ -127,7 +227,7 @@ const EditView = () => {
                       id: 'Settings.webhooks.create',
                       defaultMessage: 'Create a webhook',
                     })
-                  : 'changeme'
+                  : data?.name
               }
               navigationAction={
                 <Link startIcon={<BackIcon />} to="/settings/webhooks">
@@ -137,6 +237,15 @@ const EditView = () => {
               as="h1"
             />
             <ContentLayout>
+              {(isTriggering || !isTriggerIdle) && (
+                <div className="trigger-wrapper">
+                  <TriggerContainer
+                    isPending={isTriggering}
+                    response={triggerResponse}
+                    onCancel={() => {}}
+                  />
+                </div>
+              )}
               <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
                 <Stack size={6}>
                   <Grid gap={6}>
@@ -163,115 +272,8 @@ const EditView = () => {
                       />
                     </GridItem>
                   </Grid>
-                  <Stack size={1}>
-                    <FieldLabel>
-                      {formatMessage({
-                        id: 'Settings.webhooks.form.headers',
-                        defaultMessage: 'Headers',
-                      })}
-                    </FieldLabel>
-                    <Box padding={8} background="neutral100" hasRadius>
-                      <FieldArray
-                        validateOnChange={false}
-                        name="headers"
-                        render={({ push, remove }) => (
-                          <Grid gap={4}>
-                            <GridItem col={6}>
-                              <FieldLabel>
-                                {formatMessage({
-                                  id: 'Settings.webhooks.key',
-                                  defaultMessage: 'Key',
-                                })}
-                              </FieldLabel>
-                            </GridItem>
-                            <GridItem col={6}>
-                              <FieldLabel>
-                                {formatMessage({
-                                  id: 'Settings.webhooks.value',
-                                  defaultMessage: 'Value',
-                                })}
-                              </FieldLabel>
-                            </GridItem>
-                            {values.headers?.map((header, i) => (
-                              // eslint-disable-next-line
-                              <React.Fragment key={i}>
-                                <GridItem col={6}>
-                                  <Field
-                                    as={TextInput}
-                                    name={`headers.${i}.key`}
-                                    error={
-                                      errors.headers?.[i]?.key &&
-                                      formatMessage({ id: errors.headers[i]?.key })
-                                    }
-                                  />
-                                </GridItem>
-                                <GridItem col={6}>
-                                  <Row>
-                                    <Box style={{ flex: 1 }}>
-                                      <Field
-                                        as={TextInput}
-                                        name={`headers.${i}.value`}
-                                        error={
-                                          errors.headers?.[i]?.value &&
-                                          formatMessage({ id: errors.headers[i]?.value })
-                                        }
-                                      />
-                                    </Box>
-                                    <Box paddingLeft={2}>
-                                      <IconButton
-                                        onClick={() => values.headers.length !== 1 && remove(i)}
-                                        label={formatMessage({
-                                          id: 'Settings.webhooks.events.update',
-                                        })}
-                                        icon={<Autoselect />}
-                                        noBorder
-                                      />
-                                    </Box>
-                                  </Row>
-                                </GridItem>
-                              </React.Fragment>
-                            ))}
-                            <GridItem col={12}>
-                              <TextButton
-                                type="button"
-                                onClick={() => {
-                                  push({ key: '', value: '' });
-                                }}
-                                startIcon={<AddIcon />}
-                              >
-                                {formatMessage({
-                                  id: 'Settings.webhooks.create.header',
-                                  defaultMessage: 'Create a new header',
-                                })}
-                              </TextButton>
-                            </GridItem>
-                          </Grid>
-                        )}
-                      />
-                    </Box>
-                  </Stack>
-                  <Stack size={1}>
-                    <FieldLabel>
-                      {formatMessage({
-                        id: 'Settings.webhooks.form.events',
-                        defaultMessage: 'Events',
-                      })}
-                    </FieldLabel>
-                    <EventInput
-                      name="events"
-                      onChange={handleChange}
-                      isDraftAndPublish={false}
-                      value={values.events}
-                    />
-                    {errors.events && (
-                      <P small textColor="danger600" data-strapi-field-error>
-                        {formatMessage({
-                          id: 'components.Input.error.validation.required',
-                          defaultMessage: 'This value is required',
-                        })}
-                      </P>
-                    )}
-                  </Stack>
+                  <HeadersInput />
+                  <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
                 </Stack>
               </Box>
             </ContentLayout>

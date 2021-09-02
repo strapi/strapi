@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Checkbox } from '@buffetjs/core';
+import { Checkbox, BaseCheckbox } from '@strapi/parts';
+import { upperFirst } from 'lodash';
 
 const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, handleChangeAll }) => {
   const enabledCheckboxes = events.filter(event => {
@@ -22,22 +23,24 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
     <tr>
       <td>
         <Checkbox
+          indeterminate={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
+          aria-label="Select all entries"
           name={name}
           onChange={onChangeAll}
-          message={name}
-          someChecked={hasSomeCheckboxSelected && !areAllCheckboxesSelected}
           value={areAllCheckboxesSelected}
-        />
+        >
+          {upperFirst(name)}
+        </Checkbox>
       </td>
 
       {events.map(event => {
         return (
           <td key={event}>
-            <Checkbox
+            <BaseCheckbox
               disabled={disabledEvents.includes(event)}
               name={event}
               value={inputValue.includes(event)}
-              onChange={handleChange}
+              onValueChange={value => handleChange({ target: { name: event, value } })}
             />
           </td>
         );
