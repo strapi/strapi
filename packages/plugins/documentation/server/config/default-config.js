@@ -21,10 +21,11 @@ module.exports = {
     path: '/documentation',
     showGeneratedFiles: true,
     generateDefaultResponse: true,
+    plugins: ['email', 'upload', 'users-permissions'],
   },
   servers: [
     {
-      url: 'http://localhost:1337',
+      url: 'http://localhost:1337/api',
       description: 'Development server',
     },
     {
@@ -45,4 +46,13 @@ module.exports = {
       bearerAuth: [],
     },
   ],
+  components: {
+    securitySchemes: {
+      bearerAuth: {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+      },
+    },
+  },
 };
