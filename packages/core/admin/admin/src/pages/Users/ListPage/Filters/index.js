@@ -1,12 +1,14 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Button, Box, Row } from '@strapi/parts';
+import { useIntl } from 'react-intl';
+import { Button, Box } from '@strapi/parts';
 import { FilterIcon } from '@strapi/icons';
 import FilterList from './FilterList';
 import FilterPicker from './FilterPicker';
 
 const Filters = ({ displayedFilters }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const { formatMessage } = useIntl();
   const buttonRef = useRef();
 
   const handleToggle = () => {
@@ -14,27 +16,28 @@ const Filters = ({ displayedFilters }) => {
   };
 
   return (
-    <Box paddingBottom={4}>
-      <Row style={{ flexWrap: 'wrap' }}>
-        <Box padding={1}>
-          <Button
-            variant="tertiary"
-            ref={buttonRef}
-            endIcon={<FilterIcon />}
-            onClick={handleToggle}
-          >
-            Filters
-          </Button>
+    <>
+      <Box padding={1}>
+        <Button
+          variant="tertiary"
+          ref={buttonRef}
+          startIcon={<FilterIcon />}
+          onClick={handleToggle}
+          size="S"
+        >
+          {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
+        </Button>
+        {isVisible && (
           <FilterPicker
             displayedFilters={displayedFilters}
             isVisible={isVisible}
             onToggle={handleToggle}
             source={buttonRef}
           />
-        </Box>
-        <FilterList />
-      </Row>
-    </Box>
+        )}
+      </Box>
+      <FilterList />
+    </>
   );
 };
 

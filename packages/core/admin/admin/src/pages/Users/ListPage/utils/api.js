@@ -1,15 +1,15 @@
 import { axiosInstance } from '../../../../core/utils';
 
 const fetchData = async search => {
-  try {
-    const {
-      data: { data },
-    } = await axiosInstance.get(`/admin/users${search}`);
+  const {
+    data: { data },
+  } = await axiosInstance.get(`/admin/users${search}`);
 
-    return data;
-  } catch (err) {
-    throw new Error(err);
-  }
+  return data;
 };
 
-export default fetchData;
+const deleteData = async ids => {
+  await axiosInstance.post('/admin/users/batch-delete', { ids });
+};
+
+export { deleteData, fetchData };

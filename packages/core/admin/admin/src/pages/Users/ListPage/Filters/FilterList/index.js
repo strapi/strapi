@@ -15,7 +15,7 @@ const FilterList = () => {
       return f[name]?.[filterType] !== value;
     });
 
-    setQuery({ filters: { $and: nextFilters } });
+    setQuery({ filters: { $and: nextFilters }, page: 1 });
   };
 
   return (
