@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 
 import formatValue from './utils/formatValue';
-import Wrapper from './Wrapper';
 import EventRow from './EventRow';
 
 const displayedData = {
@@ -33,11 +32,11 @@ const displayedData = {
   },
 };
 
-const EventInput = ({ onChange, name: inputName, value: inputValue, shouldShowDPEvents }) => {
-  const headersName = shouldShowDPEvents
+const EventInput = ({ onChange, name: inputName, value: inputValue, isDraftAndPublish }) => {
+  const headersName = isDraftAndPublish
     ? displayedData.headers.draftAndPublish
     : displayedData.headers.default;
-  const events = shouldShowDPEvents
+  const events = isDraftAndPublish
     ? displayedData.events.draftAndPublish
     : displayedData.events.default;
 
@@ -72,56 +71,54 @@ const EventInput = ({ onChange, name: inputName, value: inputValue, shouldShowDP
   };
 
   return (
-    <Wrapper>
-      <table>
-        <thead>
-          <tr>
-            <td />
-            {headersName.map(header => {
-              if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
-                return (
-                  <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
-                    {msg => (
-                      <td title={msg}>
-                        <FormattedMessage id={header} />
-                      </td>
-                    )}
-                  </FormattedMessage>
-                );
-              }
-
+    <table>
+      <thead>
+        <tr>
+          <td />
+          {headersName.map(header => {
+            if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
               return (
-                <td key={header}>
-                  <FormattedMessage id={header} />
-                </td>
+                <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
+                  {msg => (
+                    <td title={msg}>
+                      <FormattedMessage id={header} />
+                    </td>
+                  )}
+                </FormattedMessage>
               );
-            })}
-          </tr>
-        </thead>
-        <tbody>
-          {Object.keys(events).map(event => {
+            }
+
             return (
-              <EventRow
-                disabledEvents={disabledEvents}
-                key={event}
-                name={event}
-                events={events[event]}
-                inputValue={formattedValue[event]}
-                handleChange={handleChange}
-                handleChangeAll={handleChangeAll}
-              />
+              <td key={header}>
+                <FormattedMessage id={header} />
+              </td>
             );
           })}
-        </tbody>
-      </table>
-    </Wrapper>
+        </tr>
+      </thead>
+      <tbody>
+        {Object.keys(events).map(event => {
+          return (
+            <EventRow
+              disabledEvents={disabledEvents}
+              key={event}
+              name={event}
+              events={events[event]}
+              inputValue={formattedValue[event]}
+              handleChange={handleChange}
+              handleChangeAll={handleChangeAll}
+            />
+          );
+        })}
+      </tbody>
+    </table>
   );
 };
 
 EventInput.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
-  shouldShowDPEvents: PropTypes.bool.isRequired,
+  isDraftAndPublish: PropTypes.bool.isRequired,
   value: PropTypes.array.isRequired,
 };
 

@@ -17,7 +17,7 @@ const schema = yup.object().shape({
     if (array.length === 1) {
       const { key, value } = array[0];
 
-      if (key === '' && value === '') {
+      if (!key && !value) {
         return baseSchema;
       }
     }
