@@ -38,7 +38,7 @@ const SettingsNav = ({ menu }) => {
         {sections.map(section => (
           <SubNavSection key={section.id} label={formatMessage(section.intlLabel)}>
             {section.links.map(link => (
-              <SubNavLink to={link.to} key={link.id}>
+              <SubNavLink withBullet={link.hasNotification} to={link.to} key={link.id}>
                 {formatMessage(link.intlLabel)}
               </SubNavLink>
             ))}
