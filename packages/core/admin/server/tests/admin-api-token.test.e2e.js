@@ -14,6 +14,8 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 4. Creates an api token without a description (successfully)
  * 5. Creates an api token with trimmed description and name (successfully)
  * 6. List all tokens (successfully)
+ * 7. Deletes a token (successfully)
+ * 8. Does not return an error if the ressource does not exist
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -191,7 +193,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('8. Does not return an error if the ressource does not exists', async () => {
+  test('8. Does not return an error if the ressource does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'DELETE',
