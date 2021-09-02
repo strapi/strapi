@@ -21,6 +21,7 @@ const Table = ({
   canDelete,
   canUpdate,
   headers,
+  isLoading,
   onConfirmDeleteAll,
   rows,
   withBulkActions,
@@ -138,8 +139,8 @@ const Table = ({
           withMainAction={withMainAction}
           withBulkActions={withBulkActions}
         />
-        {!rows.length ? (
-          <EmptyBodyTable colSpan={COL_COUNT} content={content} />
+        {!rows.length || isLoading ? (
+          <EmptyBodyTable colSpan={COL_COUNT} content={content} isLoading={isLoading} />
         ) : (
           <TableRows
             canDelete={canDelete}
@@ -172,6 +173,7 @@ const Table = ({
 
 Table.defaultProps = {
   headers: [],
+  isLoading: false,
   onConfirmDeleteAll: () => {},
   rows: [],
   withBulkActions: false,
@@ -182,6 +184,7 @@ Table.propTypes = {
   canDelete: PropTypes.bool.isRequired,
   canUpdate: PropTypes.bool.isRequired,
   headers: PropTypes.array,
+  isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,

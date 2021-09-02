@@ -1,13 +1,12 @@
 import React from 'react';
 import {
   CustomContentLayout,
-  LoadingIndicatorPage,
   useRBAC,
   SettingsPageTitle,
   useNotification,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Button, HeaderLayout, Main } from '@strapi/parts';
+import { Button, Box, HeaderLayout, Main, Row } from '@strapi/parts';
 import { Mail } from '@strapi/icons';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -16,6 +15,7 @@ import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
 import DynamicTable from './DynamicTable';
 import Filters from './Filters';
+import Search from './Search';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';
 import displayedFilters from './utils/displayedFilters';
@@ -100,17 +100,25 @@ const ListPage = () => {
           { number: total }
         )}
       />
-      <CustomContentLayout action={createAction} canRead={canRead}>
+      <CustomContentLayout canRead={canRead}>
         {status === 'error' && <div>TODO: An error occurred</div>}
-        {canRead && isLoading ? (
-          <LoadingIndicatorPage />
-        ) : (
+        {canRead && (
           <>
-            <Filters displayedFilters={displayedFilters} />
+            <Box paddingBottom={4}>
+              <Row style={{ flexWrap: 'wrap' }}>
+                <Search />
+                <Filters displayedFilters={displayedFilters} />
+              </Row>
+            </Box>
+          </>
+        )}
+        {canRead && (
+          <>
             <DynamicTable
               canCreate={canCreate}
               canDelete={canDelete}
               canUpdate={canUpdate}
+              isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
               headers={tableHeaders}
               rows={data?.results}
