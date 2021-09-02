@@ -16,6 +16,9 @@ const crypto = require('crypto');
  * @property {TokenType} type
  */
 
+/** @constant {Array<string>} */
+const SELECT_FIELDS = ['id', 'name', 'description', 'type'];
+
 /**
  * @param {Object} whereParams
  * @param {string} whereParams.name
@@ -53,7 +56,7 @@ const create = async attributes => {
   const accessKey = crypto.randomBytes(128).toString('hex');
 
   const apiToken = await strapi.query('admin::api-token').create({
-    select: ['id', 'name', 'description', 'type'],
+    select: SELECT_FIELDS,
     data: {
       ...attributes,
       accessKey: hash(accessKey),
@@ -86,11 +89,11 @@ const createSaltIfNotDefined = () => {
 };
 
 /**
- * @returns {Promise<{id: number|string, name: string, description: string, type: TokenType}>}
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const list = async () => {
   return strapi.query('admin::api-token').findMany({
-    select: ['id', 'name', 'description', 'type'],
+    select: SELECT_FIELDS,
     orderBy: { name: 'ASC' },
   });
 };
@@ -98,10 +101,10 @@ const list = async () => {
 /**
  * @param {string|number} id
  *
- * @returns {Promise<void>}
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const revoke = async id => {
-  return strapi.query('admin::api-token').delete({ where: { id } });
+  return strapi.query('admin::api-token').delete({ select: SELECT_FIELDS, where: { id } });
 };
 
 module.exports = {
