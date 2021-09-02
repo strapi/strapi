@@ -40,31 +40,41 @@ module.exports = strapi => {
       if (!strapi.config.get('hook.load.after')) {
         _.set(strapi.config.hook.load, 'after', []);
       }
-
       strapi.config.hook.load.after.push('graphql');
-      // Load core utils.
 
+
+      // Load core utils.
       const { api, plugins, extensions } = await loadConfigs({
         appPath,
         installedPlugins,
       });
       _.merge(strapi, { api, plugins });
 
+      // skip schemas specified in config
+      const skipped = _.get(strapi, 'plugins.graphql.config.skippedSchemas', [])
+      const SchemaFilter = type => key => skipped.indexOf(`${type}::${key}`) < 0
+
       // Create a merge of all the GraphQL configuration.
-      const apisSchemas = Object.keys(strapi.api || {}).map(key => {
-        const schema = _.get(strapi.api[key], 'config.schema.graphql', {});
-        return attachMetadataToResolvers(schema, { api: key });
-      });
+      const apisSchemas = Object.keys(strapi.api || {})
+        .filter(SchemaFilter('apis'))
+        .map(key => {
+          const schema = _.get(strapi.api[key], 'config.schema.graphql', {});
+          return attachMetadataToResolvers(schema, { api: key });
+        });
 
-      const pluginsSchemas = Object.keys(strapi.plugins || {}).map(key => {
-        const schema = _.get(strapi.plugins[key], 'config.schema.graphql', {});
-        return attachMetadataToResolvers(schema, { plugin: key });
-      });
+      const pluginsSchemas = Object.keys(strapi.plugins || {})
+        .filter(SchemaFilter('plugins') )
+        .map(key => {
+          const schema = _.get(strapi.plugins[key], 'config.schema.graphql', {});
+          return attachMetadataToResolvers(schema, { plugin: key });
+        });
 
-      const extensionsSchemas = Object.keys(extensions || {}).map(key => {
-        const schema = _.get(extensions[key], 'config.schema.graphql', {});
-        return attachMetadataToResolvers(schema, { plugin: key });
-      });
+      const extensionsSchemas = Object.keys(extensions || {})
+        .filter(SchemaFilter('extensions'))
+        .map(key => {
+          const schema = _.get(extensions[key], 'config.schema.graphql', {});
+          return attachMetadataToResolvers(schema, { plugin: key });
+        });
 
       const baseSchema = mergeSchemas([...pluginsSchemas, ...extensionsSchemas, ...apisSchemas]);
 
