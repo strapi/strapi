@@ -9,35 +9,14 @@
 <br />
 
 <p align="center">
-  <a href="https://console.platform.sh/projects/create-project?template=https://raw.githubusercontent.com/platformsh/template-builder/master/templates/strapi/.platform.template.yaml&utm_content=strapi&utm_source=github&utm_medium=button&utm_campaign=deploy_on_platform">
-    <img src="https://assets.strapi.io/uploads/deploy_button_platform_sh_d032f646a7.png"  />
-  </a>
-
-  <a href="https://marketplace.digitalocean.com/apps/strapi">
-    <img src="https://assets.strapi.io/uploads/deploy_button_Digital_Ocean_fe2c286222.png" />
-  </a>
-
-  <a href="https://www.heroku.com/deploy/?template=https://github.com/strapi/strapi-heroku-template">
-    <img src="https://assets.strapi.io/uploads/Deploy_button_heroku_b1043fc67d.png" />
-  </a>
-
-  <a href="https://render.com/docs/deploy-strapi">
-    <img src="https://assets.strapi.io/uploads/deploy_render_e076b6f23a.png" height="44" />
-  </a>
-</p>
-
-<p align="center">
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/v/strapi/latest.svg" alt="NPM Version" />
   </a>
   <a href="https://www.npmjs.org/package/strapi">
     <img src="https://img.shields.io/npm/dm/strapi.svg" alt="Monthly download on NPM" />
   </a>
-  <a href="https://travis-ci.org/strapi/strapi">
-    <img src="https://travis-ci.org/strapi/strapi.svg?branch=master" alt="Travis Build Status" />
-  </a>
-  <a href="https://slack.strapi.io">
-    <img src="https://slack.strapi.io/badge.svg" alt="Strapi on Slack" />
+  <a href="https://discord.strapi.io">
+    <img src="https://img.shields.io/discord/811989166782021633?label=Discord" alt="Strapi on Discord" />
   </a>
 </p>
 
@@ -54,7 +33,7 @@
 Strapi is a free and open-source headless CMS delivering your content anywhere you need.
 
 - **Keep control over your data**. With Strapi, you know where your data is stored, and you keep full control at all times.
-- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Netlify, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
+- **Self-hosted**. You can host and scale Strapi projects the way you want. You can choose any hosting platform you want: AWS, Render, Heroku, a VPS, or a dedicated server. You can scale as you grow, 100% independent.
 - **Database agnostic**. You can choose the database you prefer. Strapi works with SQL & NoSQL databases: MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
 - **Customizable**. You can quickly build your logic by fully customizing APIs, routes, or plugins to fit your needs perfectly.
 
@@ -105,11 +84,11 @@ Complete installation requirements can be found in the documentation under <a hr
 
 **Database:**
 
-- MongoDB >= 3.6
 - MySQL >= 5.6
 - MariaDB >= 10.1
 - PostgreSQL >= 10
 - SQLite >= 3
+- MongoDB >= 3.6 ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108))
 
 **We recommend always using the latest version of Strapi to start your new projects**.
 
@@ -121,7 +100,7 @@ Complete installation requirements can be found in the documentation under <a hr
 - **Blazing Fast:** Built on top of Node.js, Strapi delivers amazing performance.
 - **Front-end Agnostic:** Use any front-end framework (React, Vue, Angular, etc.), mobile apps or even IoT.
 - **Powerful CLI:** Scaffold projects and APIs on the fly.
-- **SQL & NoSQL databases:** Works with MongoDB, PostgreSQL, MySQL, MariaDB, and SQLite.
+- **SQL & NoSQL databases:** Works with MongoDB ([please read this thread before using MongoDB](https://forum.strapi.io/t/mongodb-compatibility-delayed-on-v4/4549/108)), PostgreSQL, MySQL, MariaDB, and SQLite.
 
 **[See more on our website](https://strapi.io/overview)**.
 
@@ -133,7 +112,7 @@ Please read our [Contributing Guide](./CONTRIBUTING.md) before submitting a Pull
 
 For general help using Strapi, please refer to [the official Strapi documentation](https://strapi.io/documentation/). For additional help, you can use one of these channels to ask a question:
 
-- [Slack](https://slack.strapi.io) (For live discussion with the Community and Strapi team)
+- [Discord](https://discord.strapi.io) (For live discussion with the Community and Strapi team)
 - [GitHub](https://github.com/strapi/strapi) (Bug reports, Contributions)
 - [Community Forum](https://forum.strapi.io) (Questions and Discussions)
 - [Academy](https://academy.strapi.io) (Learn the fundamentals of Strapi)
