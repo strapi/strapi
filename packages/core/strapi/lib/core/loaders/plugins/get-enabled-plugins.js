@@ -1,15 +1,13 @@
 'use strict';
 
-const { dirname, join, isAbsolute } = require('path');
+const { dirname, join, resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
-const { isKebabCase } = require('@strapi/utils');
+const { isKebabCase, isPath } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
-
-const isPath = path => /^(\.\/|\.\.\/|\/|\.\\|\.\.\\|\\)/.test(path);
 
 const validatePluginName = pluginName => {
   if (!isKebabCase(pluginName)) {
@@ -30,9 +28,7 @@ const toDetailedDeclaration = declaration => {
     let pathToPlugin = '';
 
     if (isPath(declaration.resolve)) {
-      pathToPlugin = isAbsolute(declaration.resolve)
-        ? declaration.resolve
-        : join(strapi.dir, declaration.resolve);
+      pathToPlugin = resolve(strapi.dir, declaration.resolve);
 
       if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
         throw new Error(`${declaration.resolve} couldn't be resolved`);
