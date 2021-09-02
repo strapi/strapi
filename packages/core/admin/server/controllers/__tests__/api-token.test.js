@@ -123,7 +123,7 @@ describe('API Token Controller', () => {
       await apiTokenController.revoke(ctx);
 
       expect(revoke).toHaveBeenCalledWith(token.id);
-      expect(deleted).toHaveBeenCalledWith();
+      expect(deleted).toHaveBeenCalledWith({ data: token });
     });
 
     test('Does not return an error if the ressource does not exists', async () => {
@@ -144,7 +144,7 @@ describe('API Token Controller', () => {
       await apiTokenController.revoke(ctx);
 
       expect(revoke).toHaveBeenCalledWith(token.id);
-      expect(deleted).toHaveBeenCalledWith();
+      expect(deleted).toHaveBeenCalledWith({ data: null });
     });
   });
 });

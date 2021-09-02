@@ -173,7 +173,10 @@ describe('API Token', () => {
 
       const res = await apiTokenService.revoke(token.id);
 
-      expect(mockedDelete).toHaveBeenCalledWith({ where: { id: token.id } });
+      expect(mockedDelete).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { id: token.id },
+      });
       expect(res).toEqual(token);
     });
 
@@ -188,7 +191,10 @@ describe('API Token', () => {
 
       const res = await apiTokenService.revoke(42);
 
-      expect(mockedDelete).toHaveBeenCalledWith({ where: { id: 42 } });
+      expect(mockedDelete).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { id: 42 },
+      });
       expect(res).toEqual(null);
     });
   });
