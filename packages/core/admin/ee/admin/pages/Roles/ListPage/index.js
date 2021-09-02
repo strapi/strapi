@@ -20,7 +20,6 @@ import {
   Tr,
   TableLabel,
   VisuallyHidden,
-  BaseCheckbox,
   Main,
 } from '@strapi/parts';
 import { get } from 'lodash';
@@ -234,8 +233,6 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
   );
 
   return {
-    // handleClosedModal,
-    // handleConfirmDeleteData,
     handleNewRoleClick,
     onRoleToggle,
     onAllRolesToggle,
@@ -264,13 +261,8 @@ const RoleListPage = () => {
   } = useSortedRoles();
 
   const {
-    // handleClosedModal,
-    // handleConfirmDeleteData,
     handleNewRoleClick,
-    onRoleToggle,
-    onAllRolesToggle,
     getIcons,
-    selectedRoles,
     isWarningDeleteAllOpened,
     showModalConfirmButtonLoading,
     handleToggleModal,
@@ -282,11 +274,6 @@ const RoleListPage = () => {
 
   const rowCount = sortedRoles.length + 1;
   const colCount = 6;
-
-  const isAllEntriesIndeterminate = selectedRoles.length
-    ? selectedRoles.length !== rowCount
-    : false;
-  const isAllChecked = selectedRoles.length ? selectedRoles.length === rowCount : false;
 
   if (isLoadingForPermissions) {
     return <LoadingIndicatorPage />;
@@ -335,16 +322,6 @@ const RoleListPage = () => {
           >
             <Thead>
               <Tr>
-                {!!onRoleToggle && (
-                  <Th>
-                    <BaseCheckbox
-                      aria-label="Select all entries"
-                      indeterminate={isAllEntriesIndeterminate}
-                      value={isAllChecked}
-                      onChange={onAllRolesToggle}
-                    />
-                  </Th>
-                )}
                 <Th>
                   <TableLabel>
                     {formatMessage({
@@ -384,10 +361,6 @@ const RoleListPage = () => {
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}
-                  onToggle={onRoleToggle}
-                  isChecked={
-                    selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1
-                  }
                   name={role.name}
                   description={role.description}
                   usersCount={role.usersCount}
@@ -399,13 +372,6 @@ const RoleListPage = () => {
           {!rowCount && !isLoading && <EmptyRole />}
         </ContentLayout>
       )}
-      {/* <PopUpWarning
-        isOpen={isWarningDeleteAllOpened}
-        onClosed={handleClosedModal}
-        onConfirm={handleConfirmDeleteData}
-        toggleModal={handleToggleModal}
-        isConfirmButtonLoading={showModalConfirmButtonLoading}
-      /> */}
       <ConfirmDialog
         isVisible={isWarningDeleteAllOpened}
         onConfirm={handleDeleteData}
