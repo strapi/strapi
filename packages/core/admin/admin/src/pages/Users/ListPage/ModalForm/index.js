@@ -20,11 +20,12 @@ import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/
 import { useQueryClient, useMutation } from 'react-query';
 import formDataModel from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
+import MagicLink from 'ee_else_ce/pages/Users/ListPage/ModalForm/MagicLink';
+import { axiosInstance } from '../../../../core/utils';
 import SelectRoles from './SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
-import { axiosInstance } from '../../../../core/utils';
 
 const ModalForm = ({ queryName, onToggle }) => {
   const [currentStep, setStep] = useState('create');
@@ -36,7 +37,7 @@ const ModalForm = ({ queryName, onToggle }) => {
   const { lockApp, unlockApp } = useOverlayBlocker();
   const postMutation = useMutation(body => axiosInstance.post('/admin/users', body), {
     onSuccess: async ({ data }) => {
-      setRegistrationToken(data.registrationToken);
+      setRegistrationToken(data.data.registrationToken);
       await queryClient.invalidateQueries(queryName);
       goNext();
       setIsSubmiting(false);
@@ -104,6 +105,7 @@ const ModalForm = ({ queryName, onToggle }) => {
             <Form>
               <ModalBody>
                 <Stack size={6}>
+                  {currentStep !== 'create' && <MagicLink registrationToken={registrationToken} />}
                   <Box>
                     <H2>
                       {formatMessage({
