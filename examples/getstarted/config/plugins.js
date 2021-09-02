@@ -15,7 +15,7 @@ module.exports = ({ env }) => ({
   },
   myplugin: {
     enabled: true,
-    resolve: `${__dirname}/../plugins/myplugin`,
+    resolve: `./plugins/myplugin`, // From the root of the project
     config: {
       testConf: 3,
     },
