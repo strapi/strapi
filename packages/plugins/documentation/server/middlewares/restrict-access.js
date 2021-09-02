@@ -28,5 +28,5 @@ module.exports = async (ctx, next) => {
   }
 
   // Execute the action.
-  await next();
+  return next();
 };
