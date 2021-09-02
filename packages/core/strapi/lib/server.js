@@ -6,7 +6,7 @@ const Router = require('@koa/router');
 
 const { createHTTPServer } = require('./http-server');
 
-const createEndpointComposer = require('./middlewares/router/utils/compose-endpoint');
+const createEndpointComposer = require('./utils/compose-endpoint');
 
 const createRouteManager = strapi => {
   const composeEndpoint = createEndpointComposer(strapi);
@@ -80,13 +80,14 @@ const healthCheck = async (ctx, next) => {
  * @returns {Server}
  */
 const createServer = strapi => {
-  // TODO: set root level prefix
-  // strapi.router.prefix(strapi.config.get('middleware.settings.router.prefix', ''));
+  const app = new Koa({
+    proxy: strapi.config.get('server.proxy'),
+  });
 
-  const app = new Koa();
-  const router = new Router();
-
-  app.proxy = strapi.config.get('server.proxy');
+  const router = new Router({
+    // FIXME: this prefix can break the admin if not specified in the admin url
+    prefix: strapi.config.get('middleware.settings.router.prefix', ''),
+  });
 
   const routeManager = createRouteManager(strapi);
 
@@ -94,7 +95,7 @@ const createServer = strapi => {
 
   const apis = {
     admin: createAPI(strapi, { prefix: '/admin' }),
-    // set prefix to api
+    // TODO: set prefix to api
     'content-api': createAPI(strapi),
   };
 
@@ -113,12 +114,6 @@ const createServer = strapi => {
       return apis[name];
     },
 
-    /**
-     * Add a middleware to the main koa app or an api
-     * @param {string|function} path
-     * @param {function} fn
-     * @returns {Server}
-     */
     use(path, fn) {
       if (typeof path === 'function') {
         app.use(path);

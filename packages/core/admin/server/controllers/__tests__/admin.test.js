@@ -52,15 +52,13 @@ describe('Admin Controller', () => {
   describe('information', () => {
     beforeAll(() => {
       global.strapi = {
-        app: {
-          env: 'development',
-        },
         config: {
           get: jest.fn(
             (key, value) =>
               ({
                 autoReload: undefined,
                 'info.strapi': '1.0.0',
+                environment: 'development',
               }[key] || value)
           ),
         },
@@ -71,7 +69,11 @@ describe('Admin Controller', () => {
     test('Returns application information', async () => {
       const result = await adminController.information();
 
-      expect(global.strapi.config.get).toHaveBeenCalledTimes(2);
+      expect(global.strapi.config.get.mock.calls).toEqual([
+        ['environment'],
+        ['autoReload', false],
+        ['info.strapi', null],
+      ]);
       expect(result.data).toBeDefined();
       expect(result.data).toStrictEqual({
         currentEnvironment: 'development',
