@@ -228,14 +228,15 @@ const Collapse = ({
           )}
         </Row>
         <Box style={{ width: 120 }} />
-        <ConditionsModal
-          headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
-          actions={checkboxesActions}
-          isOpen={isModalOpen}
-          isFormDisabled={isFormDisabled}
-          onClosed={handleModalClose}
-          onToggle={handleToggleModalIsOpen}
-        />
+        {isModalOpen && (
+          <ConditionsModal
+            headerBreadCrumbs={[label, 'app.components.LeftMenuLinkContainer.settings']}
+            actions={checkboxesActions}
+            isFormDisabled={isFormDisabled}
+            onClosed={handleModalClose}
+            onToggle={handleToggleModalIsOpen}
+          />
+        )}
       </Wrapper>
       <AbsoluteBox>
         <ConditionsButton
