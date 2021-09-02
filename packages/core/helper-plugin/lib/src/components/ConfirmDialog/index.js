@@ -9,7 +9,19 @@ import { Button } from '@strapi/parts/Button';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 
-const ConfirmDialog = ({ isConfirmButtonLoading, onToggleDialog, onConfirm, isVisible }) => {
+const ConfirmDialog = ({
+  bodyText,
+  iconRightButton,
+  iconBody,
+  isConfirmButtonLoading,
+  isVisible,
+  leftButtonText,
+  onToggleDialog,
+  onConfirm,
+  rightButtonText,
+  title,
+  variantRightButton,
+}) => {
   const { formatMessage } = useIntl();
 
   if (!isVisible) {
@@ -20,19 +32,19 @@ const ConfirmDialog = ({ isConfirmButtonLoading, onToggleDialog, onConfirm, isVi
     <Dialog
       onClose={onToggleDialog}
       title={formatMessage({
-        id: 'Settings.webhooks.confirmation',
-        defaultMessage: 'Confirmation',
+        id: title.id,
+        defaultMessage: title.defaultMessage,
       })}
       labelledBy="confirmation"
       describedBy="confirm-description"
     >
-      <DialogBody icon={<AlertWarningIcon />}>
+      <DialogBody icon={iconBody}>
         <Stack size={2}>
           <Row justifyContent="center">
             <Text id="confirm-description">
               {formatMessage({
-                id: 'Settings.webhooks.confirmation.delete',
-                defaultMessage: 'Are you sure you want to delete this?',
+                id: bodyText.id,
+                defaultMessage: bodyText.defaultMessage,
               })}
             </Text>
           </Row>
@@ -41,18 +53,24 @@ const ConfirmDialog = ({ isConfirmButtonLoading, onToggleDialog, onConfirm, isVi
       <DialogFooter
         startAction={
           <Button onClick={onToggleDialog} variant="tertiary">
-            {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
+            {formatMessage({
+              id: leftButtonText.id,
+              defaultMessage: leftButtonText.defaultMessage,
+            })}
           </Button>
         }
         endAction={
           <Button
             onClick={onConfirm}
-            variant="danger-light"
-            startIcon={<DeleteIcon />}
+            variant={variantRightButton}
+            startIcon={iconRightButton}
             id="confirm-delete"
             loading={isConfirmButtonLoading}
           >
-            {formatMessage({ id: 'app.components.Button.confirm', defaultMessage: 'Confirm' })}
+            {formatMessage({
+              id: rightButtonText.id,
+              defaultMessage: rightButtonText.defaultMessage,
+            })}
           </Button>
         }
       />
@@ -61,14 +79,52 @@ const ConfirmDialog = ({ isConfirmButtonLoading, onToggleDialog, onConfirm, isVi
 };
 
 ConfirmDialog.defaultProps = {
+  bodyText: {
+    id: 'components.popUpWarning.message',
+    defaultMessage: 'Are you sure you want to delete this?',
+  },
+  iconBody: <AlertWarningIcon />,
+  iconRightButton: <DeleteIcon />,
   isConfirmButtonLoading: false,
+  leftButtonText: {
+    id: 'app.components.Button.cancel',
+    defaultMessage: 'Cancel',
+  },
+  rightButtonText: {
+    id: 'app.components.Button.confirm',
+    defaultMessage: 'Confirm',
+  },
+  title: {
+    id: 'app.components.ConfirmDialog.title',
+    defaultMessage: 'Confirmation',
+  },
+  variantRightButton: 'danger-light',
 };
 
 ConfirmDialog.propTypes = {
+  bodyText: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }),
+  iconBody: PropTypes.node,
+  iconRightButton: PropTypes.node,
   isConfirmButtonLoading: PropTypes.bool,
   isVisible: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onToggleDialog: PropTypes.func.isRequired,
+  leftButtonText: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }),
+  rightButtonText: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }),
+  title: PropTypes.shape({
+    id: PropTypes.string,
+    defaultMessage: PropTypes.string,
+  }),
+  variantRightButton: PropTypes.string,
 };
 
 export default ConfirmDialog;
