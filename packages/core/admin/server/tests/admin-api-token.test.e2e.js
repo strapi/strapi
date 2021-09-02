@@ -17,7 +17,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 7. Deletes a token (successfully)
  * 8. Does not return an error if the ressource does not exist
  * 9. Retrieves a token (successfully)
- * 10. Returns a 404 if the ressource does not exists
+ * 10. Returns a 404 if the ressource does not exist
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -220,7 +220,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('10. Returns a 404 if the ressource does not exists', async () => {
+  test('10. Returns a 404 if the ressource does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'GET',

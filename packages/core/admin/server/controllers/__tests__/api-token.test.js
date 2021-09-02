@@ -177,7 +177,7 @@ describe('API Token Controller', () => {
       expect(send).toHaveBeenCalledWith({ data: token });
     });
 
-    test('Fails if the API token does not exists', async () => {
+    test('Fails if the API token does not exist', async () => {
       const get = jest.fn().mockResolvedValue(null);
       const notFound = jest.fn();
       const ctx = createContext({ params: { id: token.id } }, { notFound });
