@@ -1,0 +1,37 @@
+<!--- ConfirmDialog.stories.mdx --->
+
+import { useState } from 'react';
+import { ArgsTable, Meta, Canvas, Story } from '@storybook/addon-docs';
+import { Button } from '@strapi/parts/Button';
+import ConfirmDialog from './index';
+
+<Meta title="components/ConfirmDialog" />
+
+# ConfirmDialog
+
+TODO
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [dialogOpen, setDialogOpen] = useState(false);
+      const handleToggle = () => setDialogOpen(prev => !prev);
+      const handleDelete = () => {
+        handleToggle();
+        alert('you deleted your item');
+      };
+      return (
+        <>
+          <Button onClick={handleToggle}>Click me</Button>
+          <ConfirmDialog isVisible={dialogOpen} onToggleDialog={handleToggle} onConfirm={handleDelete} />
+        </>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={ConfirmDialog} />
