@@ -57,7 +57,7 @@ const FilterPicker = ({ displayedFilters, isVisible, onToggle, source }) => {
   const appliedFilter = displayedFilters.find(filter => filter.name === modifiedData.name);
 
   return (
-    <Popover source={source} padding={3}>
+    <Popover source={source} padding={3} spacingTop={1}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
           <Stack size={1} style={{ minWidth: 184 }}>
