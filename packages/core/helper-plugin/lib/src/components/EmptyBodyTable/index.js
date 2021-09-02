@@ -1,8 +1,8 @@
 import React from 'react';
 import { Tbody, Tr, Td } from '@strapi/parts/Table';
 import { Box, Row, Loader } from '@strapi/parts';
-import EmptyStateLayout from '../EmptyStateLayout';
 import PropTypes from 'prop-types';
+import EmptyStateLayout from '../EmptyStateLayout';
 
 const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
   if (isLoading) {
@@ -20,6 +20,7 @@ const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
       </Tbody>
     );
   }
+
   return (
     <Tbody>
       <Tr>

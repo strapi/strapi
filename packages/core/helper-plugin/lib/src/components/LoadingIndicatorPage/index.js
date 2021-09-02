@@ -3,7 +3,7 @@ import { Loader } from '@strapi/parts/Loader';
 import { Row } from '@strapi/parts/Row';
 import PropTypes from 'prop-types';
 
-const LoadingIndicatorPage = ({ 'data-testid': dataTestId, ...rest }) => {
+const LoadingIndicatorPage = ({ 'data-testid': dataTestId }) => {
   return (
     <Row justifyContent="space-around" data-testid={dataTestId}>
       <Loader>Loading content.</Loader>
