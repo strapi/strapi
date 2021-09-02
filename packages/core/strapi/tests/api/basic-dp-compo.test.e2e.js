@@ -77,7 +77,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-compo-and-dps',
-      body: product,
+      body: {
+        data: product,
+      },
       qs: {
         populate: ['compo'],
       },
@@ -124,7 +126,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
     const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-compo-and-dps/${data.productsWithCompoAndDP[0].id}`,
-      body: product,
+      body: {
+        data: product,
+      },
       qs: {
         populate: ['compo'],
       },
@@ -166,7 +170,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-compo-and-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -185,7 +191,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-compo-and-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -206,7 +214,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-compo-and-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -226,7 +236,9 @@ describe('Core API - Basic + compo + draftAndPublish', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-compo-and-dps',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);

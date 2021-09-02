@@ -2,7 +2,7 @@
 
 const { cloneDeep } = require('lodash/fp');
 const _ = require('lodash');
-const { hasDraftAndPublish } = require('@strapi/utils').contentTypes;
+const { hasDraftAndPublish, getPrivateAttributes } = require('@strapi/utils').contentTypes;
 const {
   CREATED_AT_ATTRIBUTE,
   UPDATED_AT_ATTRIBUTE,
@@ -60,9 +60,7 @@ const createContentType = (uid, definition) => {
 
   Object.defineProperty(schema, 'privateAttributes', {
     get() {
-      // FIXME: to fix
-      // return strapi.getModel(model.uid).privateAttributes;
-      return [];
+      return getPrivateAttributes(schema);
     },
   });
 

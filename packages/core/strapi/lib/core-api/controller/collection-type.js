@@ -1,12 +1,12 @@
 'use strict';
 
-const { transformResponse } = require('./transform');
+const { parseBody } = require('./transform');
 
 /**
  *
  * Returns a collection type controller to handle default core-api actions
  */
-const createCollectionTypeController = ({ service, sanitize, parseMultipartData }) => {
+const createCollectionTypeController = ({ service, sanitize, transformResponse }) => {
   return {
     /**
      * Retrieve records.
@@ -41,15 +41,11 @@ const createCollectionTypeController = ({ service, sanitize, parseMultipartData 
      * @return {Object}
      */
     async create(ctx) {
-      const { body, query } = ctx.request;
+      const { query } = ctx.request;
 
-      let entity;
-      if (ctx.is('multipart')) {
-        const { data, files } = parseMultipartData(ctx);
-        entity = await service.create({ params: query, data, files });
-      } else {
-        entity = await service.create({ params: query, data: body });
-      }
+      const { data, files } = parseBody(ctx);
+
+      const entity = await service.create({ params: query, data, files });
 
       return transformResponse(sanitize(entity));
     },
@@ -61,15 +57,11 @@ const createCollectionTypeController = ({ service, sanitize, parseMultipartData 
      */
     async update(ctx) {
       const { id } = ctx.params;
-      const { body, query } = ctx.request;
+      const { query } = ctx.request;
 
-      let entity;
-      if (ctx.is('multipart')) {
-        const { data, files } = parseMultipartData(ctx);
-        entity = await service.update(id, { params: query, data, files });
-      } else {
-        entity = await service.update(id, { params: query, data: body });
-      }
+      const { data, files } = parseBody(ctx);
+
+      const entity = await service.update(id, { params: query, data, files });
 
       return transformResponse(sanitize(entity));
     },
