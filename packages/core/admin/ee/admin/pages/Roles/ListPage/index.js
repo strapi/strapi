@@ -1,11 +1,11 @@
 import {
   LoadingIndicatorPage,
-  PopUpWarning,
   SettingsPageTitle,
   request,
   useNotification,
   useQuery,
   useRBAC,
+  ConfirmDialog,
 } from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
 import {
@@ -69,27 +69,17 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
-  const [
-    { selectedRoles, showModalConfirmButtonLoading, shouldRefetchData },
-    dispatch,
-  ] = useReducer(reducer, initialState);
+  const [{ selectedRoles, showModalConfirmButtonLoading }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
-  const handleClosedModal = () => {
-    if (shouldRefetchData) {
-      getData();
-    }
-
-    // Empty the selected ids when the modal closes
-    dispatch({
-      type: 'RESET_DATA_TO_DELETE',
-    });
-  };
-
-  const handleConfirmDeleteData = async () => {
+  const handleDeleteData = async () => {
     try {
       dispatch({
         type: 'ON_REMOVE_ROLES',
       });
+
       const filteredRoles = selectedRoles.filter(currentId => {
         const currentRole = roles.find(role => role.id === currentId);
 
@@ -111,14 +101,13 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
           },
         });
 
-        // Empty the selectedRolesId and set the shouldRefetchData to true so the
-        // list is updated when closing the modal
+        await getData();
+
         dispatch({
-          type: 'ON_REMOVE_ROLES_SUCCEEDED',
+          type: 'RESET_DATA_TO_DELETE',
         });
       }
     } catch (err) {
-      console.error(err);
       const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
 
       if (errorIds && Array.isArray(errorIds)) {
@@ -133,9 +122,8 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
           message: { id: 'notification.error' },
         });
       }
-    } finally {
-      handleToggleModal();
     }
+    handleToggleModal();
   };
 
   const onRoleDuplicate = useCallback(
@@ -246,8 +234,8 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
   );
 
   return {
-    handleClosedModal,
-    handleConfirmDeleteData,
+    // handleClosedModal,
+    // handleConfirmDeleteData,
     handleNewRoleClick,
     onRoleToggle,
     onAllRolesToggle,
@@ -256,6 +244,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
     isWarningDeleteAllOpened,
     showModalConfirmButtonLoading,
     handleToggleModal,
+    handleDeleteData,
   };
 };
 
@@ -275,8 +264,8 @@ const RoleListPage = () => {
   } = useSortedRoles();
 
   const {
-    handleClosedModal,
-    handleConfirmDeleteData,
+    // handleClosedModal,
+    // handleConfirmDeleteData,
     handleNewRoleClick,
     onRoleToggle,
     onAllRolesToggle,
@@ -285,6 +274,7 @@ const RoleListPage = () => {
     isWarningDeleteAllOpened,
     showModalConfirmButtonLoading,
     handleToggleModal,
+    handleDeleteData,
   } = useRoleActions({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles });
 
   // ! TODO - Show the search bar only if the user is allowed to read - add the search input
@@ -409,12 +399,18 @@ const RoleListPage = () => {
           {!rowCount && !isLoading && <EmptyRole />}
         </ContentLayout>
       )}
-      <PopUpWarning
+      {/* <PopUpWarning
         isOpen={isWarningDeleteAllOpened}
         onClosed={handleClosedModal}
         onConfirm={handleConfirmDeleteData}
         toggleModal={handleToggleModal}
         isConfirmButtonLoading={showModalConfirmButtonLoading}
+      /> */}
+      <ConfirmDialog
+        isVisible={isWarningDeleteAllOpened}
+        onConfirm={handleDeleteData}
+        isConfirmButtonLoading={showModalConfirmButtonLoading}
+        onToggleDialog={handleToggleModal}
       />
     </Main>
   );
