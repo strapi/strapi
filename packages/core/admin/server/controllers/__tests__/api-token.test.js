@@ -147,4 +147,55 @@ describe('API Token Controller', () => {
       expect(deleted).toHaveBeenCalledWith({ data: null });
     });
   });
+
+  describe('Retrieve an API token', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('Retrieve an API token successfully', async () => {
+      const get = jest.fn().mockResolvedValue(token);
+      const send = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { send });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              get,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.get(ctx);
+
+      expect(get).toHaveBeenCalledWith(token.id);
+      expect(send).toHaveBeenCalledWith({ data: token });
+    });
+
+    test('Fails if the API token does not exists', async () => {
+      const get = jest.fn().mockResolvedValue(null);
+      const notFound = jest.fn();
+      const ctx = createContext({ params: { id: token.id } }, { notFound });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              get,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.get(ctx);
+
+      expect(get).toHaveBeenCalledWith(token.id);
+      expect(notFound).toHaveBeenCalledWith('API Token not found');
+    });
+  });
 });

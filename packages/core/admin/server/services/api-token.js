@@ -107,6 +107,15 @@ const revoke = async id => {
   return strapi.query('admin::api-token').delete({ select: SELECT_FIELDS, where: { id } });
 };
 
+/**
+ * @param {string|number} id
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ */
+const get = async id => {
+  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: { id } });
+};
+
 module.exports = {
   create,
   exists,
@@ -114,4 +123,5 @@ module.exports = {
   hash,
   list,
   revoke,
+  get,
 };

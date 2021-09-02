@@ -16,6 +16,8 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 6. List all tokens (successfully)
  * 7. Deletes a token (successfully)
  * 8. Does not return an error if the ressource does not exist
+ * 9. Retrieves a token (successfully)
+ * 10. Returns a 404 if the ressource does not exists
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -201,5 +203,30 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toBeNull();
+  });
+
+  test('9. Retrieves a token (successfully)', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens/1',
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+      id: 1,
+    });
+  });
+
+  test('10. Returns a 404 if the ressource does not exists', async () => {
+    const res = await rq({
+      url: '/admin/api-tokens/42',
+      method: 'GET',
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.data).toBeUndefined();
   });
 });
