@@ -23,7 +23,7 @@ const PageSize = () => {
 
   return (
     <Row>
-      <Select onChange={handleChange} value={pageSize}>
+      <Select aria-label="Entries per page" onChange={handleChange} value={pageSize}>
         <Option value="10">10</Option>
         <Option value="20">20</Option>
         <Option value="50">50</Option>

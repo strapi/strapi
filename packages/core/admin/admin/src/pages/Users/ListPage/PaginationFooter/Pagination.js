@@ -60,7 +60,13 @@ const Pagination = ({ pagination: { pageCount } }) => {
   }
 
   if (activePage === 2 && pageCount >= 3) {
-    firstLinksToCreate = pageCount === 5 ? [2, 3, 4] : [2, 3];
+    if (pageCount === 5) {
+      firstLinksToCreate = [2, 3, 4];
+    } else if (pageCount === 3) {
+      firstLinksToCreate = [2];
+    } else {
+      firstLinksToCreate = [2, 3];
+    }
   }
 
   if (activePage === 4 && pageCount >= 3) {
@@ -71,15 +77,15 @@ const Pagination = ({ pagination: { pageCount } }) => {
     lastLinksToCreate = [pageCount - 1];
   }
 
-  if (activePage === pageCount - 2 && pageCount >= 3) {
+  if (activePage === pageCount - 2 && pageCount > 3) {
     lastLinksToCreate = [activePage + 1, activePage, activePage - 1];
   }
 
-  if (activePage === pageCount - 3 && pageCount >= 3 && activePage > 5) {
+  if (activePage === pageCount - 3 && pageCount > 3 && activePage > 5) {
     lastLinksToCreate = [activePage + 2, activePage + 1, activePage, activePage - 1];
   }
 
-  if (activePage === pageCount - 1 && pageCount >= 3) {
+  if (activePage === pageCount - 1 && pageCount > 3) {
     lastLinksToCreate = [activePage, activePage - 1];
   }
 
@@ -99,7 +105,11 @@ const Pagination = ({ pagination: { pageCount } }) => {
     );
   });
 
-  if (![1, 2].includes(activePage) && activePage < pageCount - 3) {
+  if (
+    ![1, 2].includes(activePage) &&
+    activePage <= pageCount - 3 &&
+    firstLinks.length + lastLinks.length < 6
+  ) {
     const middleLinksToCreate = [activePage - 1, activePage, activePage + 1];
 
     middleLinksToCreate.forEach(number => {
