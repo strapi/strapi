@@ -18,10 +18,13 @@ const Input = ({
   name,
   onChange,
   placeholder,
+  providerToEditName,
   type,
   value,
 }) => {
   const { formatMessage } = useIntl();
+  const inputValue =
+    name === 'noName' ? `${strapi.backendURL}/connect/${providerToEditName}/callback` : value;
 
   const label = formatMessage(
     { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
@@ -77,7 +80,7 @@ const Input = ({
       onChange={onChange}
       placeholder={formattedPlaceholder}
       type={type}
-      value={value}
+      value={inputValue}
     />
   );
 };
@@ -110,6 +113,7 @@ Input.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  providerToEditName: PropTypes.string.isRequired,
   type: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };

@@ -37,7 +37,6 @@ const ListPage = () => {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
-    staleTime: 5000,
     onError: () => {
       toggleNotification({
         type: 'warning',

@@ -12,12 +12,15 @@ import {
   Button,
   Breadcrumbs,
   Crumb,
-  Text,
   Box,
   H2,
 } from '@strapi/parts';
 import { Formik } from 'formik';
-import { Form } from '@strapi/helper-plugin';
+import { Form, GenericInput } from '@strapi/helper-plugin';
+import formDataModel from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/formDataModel';
+import roleSettingsForm from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
+import SelectRoles from './SelectRoles';
+import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
 
@@ -28,6 +31,10 @@ const ModalForm = ({ onToggle }) => {
     id: 'Settings.permissions.users.create',
     defaultMessage: 'Create new user',
   });
+
+  const handleSubmit = () => {
+    goNext();
+  };
 
   const goNext = () => {
     if (next) {
@@ -47,8 +54,8 @@ const ModalForm = ({ onToggle }) => {
         </Breadcrumbs>
       </ModalHeader>
       <Formik
-        initialValues={{ firstname: '', lastname: '', email: '', roles: [] }}
-        onSubmit={() => {}}
+        initialValues={formDataModel}
+        onSubmit={handleSubmit}
         validationSchema={schema}
         validateOnChange={false}
       >
@@ -64,6 +71,27 @@ const ModalForm = ({ onToggle }) => {
                         defaultMessage: 'Details',
                       })}
                     </H2>
+                    <Box paddingTop={4}>
+                      <Stack size={1}>
+                        <Grid gap={5}>
+                          {layout.map(row => {
+                            return row.map(input => {
+                              return (
+                                <GridItem key={input.name} {...input.size}>
+                                  <GenericInput
+                                    {...input}
+                                    disabled={isDisabled}
+                                    error={errors[input.name]}
+                                    onChange={handleChange}
+                                    value={values[input.name]}
+                                  />
+                                </GridItem>
+                              );
+                            });
+                          })}
+                        </Grid>
+                      </Stack>
+                    </Box>
                   </Box>
                   <Box>
                     <H2>
@@ -72,9 +100,34 @@ const ModalForm = ({ onToggle }) => {
                         defaultMessage: 'Login settings',
                       })}
                     </H2>
+                    <Box paddingTop={4}>
+                      <Grid gap={5}>
+                        <GridItem col={6} xs={12}>
+                          <SelectRoles
+                            disabled={isDisabled}
+                            error={errors.roles}
+                            onChange={handleChange}
+                            value={values.roles}
+                          />
+                        </GridItem>
+                        {roleSettingsForm.map(row => {
+                          return row.map(input => {
+                            return (
+                              <GridItem key={input.name} {...input.size}>
+                                <GenericInput
+                                  {...input}
+                                  disabled={isDisabled}
+                                  onChange={handleChange}
+                                  value={values[input.name]}
+                                />
+                              </GridItem>
+                            );
+                          });
+                        })}
+                      </Grid>
+                    </Box>
                   </Box>
                 </Stack>
-                <input type="text" value={values.firstname} name="firstname" />
               </ModalBody>
               <ModalFooter
                 startActions={
@@ -87,7 +140,7 @@ const ModalForm = ({ onToggle }) => {
                 }
                 endActions={
                   <>
-                    <Button type="submit" loading={false}>
+                    <Button type="submit" loading={false} disabled={isDisabled}>
                       {formatMessage(buttonSubmitLabel)}
                     </Button>
                   </>

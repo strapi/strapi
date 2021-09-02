@@ -20,7 +20,8 @@ import {
 } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import { Formik } from 'formik';
-import { Form, GenericInput } from '@strapi/helper-plugin';
+import { Form } from '@strapi/helper-plugin';
+import Input from './Input';
 
 const FormModal = ({
   headerBreadcrumbs,
@@ -63,7 +64,7 @@ const FormModal = ({
                       return row.map(input => {
                         return (
                           <GridItem key={input.name} col={input.size} xs={12}>
-                            <GenericInput
+                            <Input
                               {...input}
                               error={errors[input.name]}
                               onChange={handleChange}
