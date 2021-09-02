@@ -10,7 +10,7 @@ import { ToggleInput } from '@strapi/parts/ToggleInput';
 import { TextInput } from '@strapi/parts/TextInput';
 import PropTypes from 'prop-types';
 
-const Input = ({
+const GenericInput = ({
   description,
   disabled,
   intlLabel,
@@ -85,7 +85,7 @@ const Input = ({
   );
 };
 
-Input.defaultProps = {
+GenericInput.defaultProps = {
   description: null,
   disabled: false,
   error: '',
@@ -93,7 +93,7 @@ Input.defaultProps = {
   value: '',
 };
 
-Input.propTypes = {
+GenericInput.propTypes = {
   description: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
@@ -118,4 +118,4 @@ Input.propTypes = {
   value: PropTypes.oneOfType([PropTypes.bool, PropTypes.string]),
 };
 
-export default Input;
+export default GenericInput;

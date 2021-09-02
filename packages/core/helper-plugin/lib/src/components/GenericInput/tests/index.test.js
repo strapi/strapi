@@ -1,6 +1,6 @@
 /**
  *
- * Tests for Input
+ * Tests for GenericInput
  *
  */
 
@@ -29,7 +29,7 @@ const makeApp = (name, type, value) => (
   </IntlProvider>
 );
 
-describe('<Input />', () => {
+describe('<GenericInput />', () => {
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },

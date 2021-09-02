@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   CustomContentLayout,
   useRBAC,
@@ -15,6 +15,7 @@ import get from 'lodash/get';
 import adminPermissions from '../../../permissions';
 import DynamicTable from './DynamicTable';
 import Filters from './Filters';
+import ModalForm from './ModalForm';
 import Search from './Search';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';
@@ -22,6 +23,7 @@ import displayedFilters from './utils/displayedFilters';
 import tableHeaders from './utils/tableHeaders';
 
 const ListPage = () => {
+  const [isModalOpened, setIsModalOpen] = useState(true);
   const {
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
   } = useRBAC(adminPermissions.settings.users);
@@ -29,6 +31,7 @@ const ListPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { search } = useLocation();
+  useFocusWhenNavigate();
 
   const { status, data, isFetching } = useQuery(['users', search], () => fetchData(search), {
     enabled: canRead,
@@ -43,7 +46,9 @@ const ListPage = () => {
     },
   });
 
-  useFocusWhenNavigate();
+  const handleToggle = () => {
+    setIsModalOpen(prev => !prev);
+  };
 
   const total = get(data, 'pagination.total', 0);
 
@@ -68,11 +73,7 @@ const ListPage = () => {
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
   const createAction = canCreate ? (
-    <Button
-      data-testid="create-user-button"
-      onClick={() => 'handleToggleModalForCreatingRole'}
-      startIcon={<Mail />}
-    >
+    <Button data-testid="create-user-button" onClick={handleToggle} startIcon={<Mail />}>
       {formatMessage({
         id: 'Settings.permissions.users.create',
         defaultMessage: 'Create new user',
@@ -129,6 +130,7 @@ const ListPage = () => {
           </>
         )}
       </CustomContentLayout>
+      {isModalOpened && <ModalForm onToggle={handleToggle} />}
     </Main>
   );
 

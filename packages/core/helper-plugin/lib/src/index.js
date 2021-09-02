@@ -175,6 +175,7 @@ export { default as CheckPermissions } from './components/CheckPermissions';
 export { default as CustomContentLayout } from './components/CustomContentLayout';
 export { default as EmptyStateLayout } from './components/EmptyStateLayout';
 export { default as EmptyBodyTable } from './components/EmptyBodyTable';
+export { default as GenericInput } from './components/GenericInput';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';

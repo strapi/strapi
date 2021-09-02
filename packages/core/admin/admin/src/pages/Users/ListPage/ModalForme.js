@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Button } from '@buffetjs/core';
 import { useIntl } from 'react-intl';
 import { Modal, ModalFooter, ModalHeader } from '@strapi/helper-plugin';
-import stepper from './stepper';
+import stepper from './ModalForm/utils/stepper';
 
 const ModalForm = ({ isOpen, onClosed, onToggle }) => {
   const [currentStep, setStep] = useState('create');
