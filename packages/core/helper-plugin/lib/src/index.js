@@ -181,6 +181,7 @@ export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPa
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';
+export { default as UpgradePlanModal } from './components/UpgradePlanModal';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
