@@ -5,6 +5,7 @@ import dk from './dk.json';
 import en from './en.json';
 import es from './es.json';
 import fr from './fr.json';
+import fa from './fa.json';
 import he from './he.json';
 import id from './id.json';
 import it from './it.json';
@@ -33,6 +34,7 @@ const trads = {
   en,
   es,
   fr,
+  fa,
   he,
   id,
   it,
@@ -62,6 +64,7 @@ export const languageNativeNames = {
   en: 'English',
   es: 'Español',
   fr: 'Français',
+  fa: 'فارسی',
   he: 'עברית',
   id: 'Indonesian',
   it: 'Italiano',
