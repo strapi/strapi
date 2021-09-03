@@ -53,7 +53,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         {generalSectionLinks.length > 0 ? (
           <NavSection label="General">
             {generalSectionLinks.map(link => (
-              <NavLink to={link.to} key={link.to} icon={<FontAwesomeIcon icon={link.icon} />}>
+              <NavLink
+                badgeContent={link.notificationsCount}
+                to={link.to}
+                key={link.to}
+                icon={<FontAwesomeIcon icon={link.icon} />}
+              >
                 <FormattedMessage {...link.intlLabel} />
               </NavLink>
             ))}
