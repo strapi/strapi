@@ -1271,7 +1271,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     class="c9 c11"
                     for="page-size"
                   >
-                    components.PageFooter.select
+                    Entries per page
                   </label>
                 </div>
               </div>

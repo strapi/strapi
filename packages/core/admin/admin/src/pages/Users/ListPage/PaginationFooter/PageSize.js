@@ -28,7 +28,10 @@ const PageSize = () => {
       </Select>
       <Box paddingLeft={2}>
         <Text textColor="neutral600" as="label" htmlFor="page-size">
-          {formatMessage({ id: 'components.PageFooter.select', default: 'Entries per page' })}
+          {formatMessage({
+            id: 'components.PageFooter.select',
+            defaultMessage: 'Entries per page',
+          })}
         </Text>
       </Box>
     </Row>

@@ -341,7 +341,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
             class="c14"
             for="page-size"
           >
-            components.PageFooter.select
+            Entries per page
           </label>
         </div>
       </div>

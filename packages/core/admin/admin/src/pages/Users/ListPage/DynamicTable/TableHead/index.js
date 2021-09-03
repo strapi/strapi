@@ -11,6 +11,7 @@ import {
 } from '@strapi/parts';
 import { SortIcon, useQueryParams } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 
 const TableHead = ({
   areAllEntriesSelected,
@@ -20,6 +21,7 @@ const TableHead = ({
   withMainAction,
   withBulkActions,
 }) => {
+  const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const sort = query.sort || '';
   const [sortBy, sortOrder] = sort.split(':');
@@ -32,7 +34,10 @@ const TableHead = ({
         {withMainAction && (
           <Th>
             <BaseCheckbox
-              aria-label="Select all entries"
+              aria-label={formatMessage({
+                id: 'list.all-entries.select',
+                defaultMessage: 'Select all entries',
+              })}
               checked={areAllEntriesSelected}
               indeterminate={isIndeterminate}
               onChange={onSelectAll}
@@ -60,7 +65,10 @@ const TableHead = ({
               action={
                 isSorted ? (
                   <IconButton
-                    label={`Sort on ${label}`}
+                    label={formatMessage(
+                      { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+                      { label }
+                    )}
                     onClick={handleClickSort}
                     icon={isSorted ? <SortIcon isUp={isUp} /> : undefined}
                     noBorder

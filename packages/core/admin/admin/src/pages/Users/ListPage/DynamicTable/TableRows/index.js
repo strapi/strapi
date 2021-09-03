@@ -32,7 +32,10 @@ const TableRows = ({
             {withMainAction && (
               <Td>
                 <BaseCheckbox
-                  aria-label="Select all entries"
+                  aria-label={formatMessage({
+                    id: 'list.all-entries.select',
+                    defaultMessage: 'Select all entries',
+                  })}
                   checked={isChecked}
                   onChange={() => {
                     onSelectRow({ name: data.id, value: !isChecked });
