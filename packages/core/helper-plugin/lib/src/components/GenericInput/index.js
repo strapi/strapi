@@ -37,7 +37,6 @@ const Input = ({
   if (type === 'bool') {
     return (
       <ToggleInput
-        aria-label={name}
         checked={value}
         disabled={disabled}
         hint={hint}
@@ -69,7 +68,6 @@ const Input = ({
 
   return (
     <TextInput
-      aria-label={name}
       disabled={disabled}
       error={errorMessage}
       label={label}

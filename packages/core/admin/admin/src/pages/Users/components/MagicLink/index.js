@@ -2,7 +2,7 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Text } from '@strapi/parts/Text';
 import PropTypes from 'prop-types';
-import basename from '../../../../../core/utils/basename';
+import basename from '../../../../core/utils/basename';
 import MagicLinkWrapper from './MagicLinkWrapper';
 
 const MagicLink = ({ registrationToken }) => {

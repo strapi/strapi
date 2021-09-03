@@ -1,11 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Select, Option } from '@strapi/parts';
+import { Select, Option } from '@strapi/parts/Select';
 import { useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
-import { axiosInstance } from '../../../../../core/utils';
+import { axiosInstance } from '../../../../core/utils';
 
 const rotation = keyframes`
   from {

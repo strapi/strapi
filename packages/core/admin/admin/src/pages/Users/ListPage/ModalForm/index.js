@@ -20,16 +20,16 @@ import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/
 import { useQueryClient, useMutation } from 'react-query';
 import formDataModel from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
-import MagicLink from 'ee_else_ce/pages/Users/ListPage/ModalForm/MagicLink';
+import MagicLink from 'ee_else_ce/pages/Users/components/MagicLink';
 import { axiosInstance } from '../../../../core/utils';
-import SelectRoles from './SelectRoles';
+import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';
 
 const ModalForm = ({ queryName, onToggle }) => {
   const [currentStep, setStep] = useState('create');
-  const [isSubmitting, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationToken, setRegistrationToken] = useState(null);
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
@@ -40,10 +40,11 @@ const ModalForm = ({ queryName, onToggle }) => {
       setRegistrationToken(data.data.registrationToken);
       await queryClient.invalidateQueries(queryName);
       goNext();
-      setIsSubmiting(false);
+      setIsSubmitting(false);
     },
     onError: err => {
       console.error(err.response);
+      setIsSubmitting(false);
 
       toggleNotification({
         type: 'warning',
@@ -62,7 +63,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
   const handleSubmit = async body => {
     lockApp();
-    setIsSubmiting(true);
+    setIsSubmitting(true);
 
     postMutation.mutateAsync(body);
   };
