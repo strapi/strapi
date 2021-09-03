@@ -11,7 +11,7 @@ const MagicLink = ({ registrationToken }) => {
 
   return (
     <MagicLinkWrapper target={target}>
-      <Text small textColor="neutral500" highlighted>
+      <Text small textColor="neutral600" highlighted>
         {formatMessage({
           id: 'app.components.Users.MagicLink.connect',
           defaultMessage: 'Send this link to the user for them to connect.',

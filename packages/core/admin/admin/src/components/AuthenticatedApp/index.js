@@ -14,7 +14,7 @@ const strapiVersion = packageJSON.version;
 
 const AuthenticatedApp = () => {
   const userInfo = auth.getUserInfo();
-  const userName = get(userInfo, 'username', `${userInfo.firstname} ${userInfo.lastname}`);
+  const userName = get(userInfo, 'username') || `${userInfo.firstname} ${userInfo.lastname}`;
   const [userDisplayName, setUserDisplayName] = useState(userName);
   const { showReleaseNotification } = useConfigurations();
   const [

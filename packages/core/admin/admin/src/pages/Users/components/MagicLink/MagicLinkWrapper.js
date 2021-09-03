@@ -73,7 +73,7 @@ const MagicLinkWrapper = ({ children, target }) => {
               </Text>
               <Tooltip description={copyLabel}>
                 <CopyToClipboard onCopy={handleCopy} text={target}>
-                  <Wrapper small type="button" ref={copyButtonRef}>
+                  <Wrapper type="button" ref={copyButtonRef}>
                     <Duplicate />
                   </Wrapper>
                 </CopyToClipboard>
