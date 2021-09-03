@@ -121,6 +121,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
 
 UpgradePlanModal.propTypes = {
   onClose: PropTypes.func.isRequired,
+  isOpen: PropTypes.bool.isRequired,
 };
 
 export default UpgradePlanModal;
