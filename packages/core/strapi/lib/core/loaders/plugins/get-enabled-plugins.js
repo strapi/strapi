@@ -3,11 +3,17 @@
 const { dirname, join } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
-const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
+const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe, keys } = require('lodash/fp');
 const { isKebabCase } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
+const INTERNAL_PLUGINS = [
+  '@strapi/plugin-content-manager',
+  '@strapi/plugin-content-type-builder',
+  '@strapi/plugin-email',
+  '@strapi/plugin-upload',
+];
 
 const validatePluginName = pluginName => {
   if (!isKebabCase(pluginName)) {
@@ -42,8 +48,13 @@ const toDetailedDeclaration = declaration => {
 };
 
 const getEnabledPlugins = async strapi => {
+  const projectDependencies = [
+    ...keys(strapi.config.get('info.dependencies', {})),
+    ...INTERNAL_PLUGINS,
+  ];
+
   const installedPlugins = {};
-  for (const dep in strapi.config.get('info.dependencies', {})) {
+  for (const dep of projectDependencies) {
     const packagePath = join(dep, 'package.json');
     const packageInfo = require(packagePath);
 
