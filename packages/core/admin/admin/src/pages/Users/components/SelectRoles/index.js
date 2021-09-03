@@ -5,7 +5,7 @@ import { Select, Option } from '@strapi/parts';
 import { useQuery } from 'react-query';
 import styled, { keyframes } from 'styled-components';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
-import { axiosInstance } from '../../../../../core/utils';
+import { axiosInstance } from '../../../../core/utils';
 
 const rotation = keyframes`
   from {

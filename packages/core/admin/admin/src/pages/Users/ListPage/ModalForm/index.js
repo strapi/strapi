@@ -22,7 +22,7 @@ import formDataModel from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/formD
 import roleSettingsForm from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
 import MagicLink from 'ee_else_ce/pages/Users/components/MagicLink';
 import { axiosInstance } from '../../../../core/utils';
-import SelectRoles from './SelectRoles';
+import SelectRoles from '../../components/SelectRoles';
 import layout from './utils/layout';
 import schema from './utils/schema';
 import stepper from './utils/stepper';

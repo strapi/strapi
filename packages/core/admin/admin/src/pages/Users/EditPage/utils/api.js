@@ -6,4 +6,10 @@ const fetchUser = async id => {
   return data.data;
 };
 
-export default fetchUser;
+const putUser = async (id, body) => {
+  const { data } = await axiosInstance.put(`/admin/users/${id}`, body);
+
+  return data.data;
+};
+
+export { fetchUser, putUser };
