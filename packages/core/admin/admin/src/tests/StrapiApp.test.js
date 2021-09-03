@@ -14,6 +14,24 @@ describe('ADMIN | StrapiApp', () => {
     const { container } = render(app.render());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c0 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: space-around;
+        -webkit-justify-content: space-around;
+        -ms-flex-pack: space-around;
+        justify-content: space-around;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
       .c2 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -31,24 +49,6 @@ describe('ADMIN | StrapiApp', () => {
 
       .c2 > * + * {
         margin-top: 0px;
-      }
-
-      .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: space-around;
-        -webkit-justify-content: space-around;
-        -ms-flex-pack: space-around;
-        justify-content: space-around;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
       }
 
       .c1 {
