@@ -188,3 +188,4 @@ export { default as Status } from './components/Status';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
+export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';

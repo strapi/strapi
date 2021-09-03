@@ -4929,15 +4929,6 @@
     compute-scroll-into-view "^1.0.17"
     prop-types "^15.7.2"
 
-"@strapi/parts@0.0.1-alpha.16":
-  version "0.0.1-alpha.16"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.16.tgz#afb9b6c269a8afdfb1ea324dc9f56ee94f1ab985"
-  integrity sha512-KBK/JrhFLgicmRmqMjzP1eSWu4+UN0EA4Hz203tmaNs+U6sZHzsygQ2yVYFfNd2MuIkiimeW8WwMwT+QLhiw+A==
-  dependencies:
-    "@internationalized/number" "^3.0.2"
-    compute-scroll-into-view "^1.0.17"
-    prop-types "^15.7.2"
-
 "@stylelint/postcss-css-in-js@^0.37.2":
   version "0.37.2"
   resolved "https://registry.yarnpkg.com/@stylelint/postcss-css-in-js/-/postcss-css-in-js-0.37.2.tgz#7e5a84ad181f4234a2480803422a47b8749af3d2"

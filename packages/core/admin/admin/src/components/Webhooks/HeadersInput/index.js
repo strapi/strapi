@@ -1,28 +1,10 @@
-import { AddIcon, Autoselect } from '@strapi/icons';
-import { Box, FieldLabel, Grid, GridItem, IconButton, Row, Stack, TextInput } from '@strapi/parts';
+import { RemoveRoundedButton } from '@strapi/helper-plugin';
+import { AddIcon } from '@strapi/icons';
+import { Box, FieldLabel, Grid, GridItem, Row, Stack, TextInput } from '@strapi/parts';
 import { TextButton } from '@strapi/parts/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import React from 'react';
 import { useIntl } from 'react-intl';
-import styled from 'styled-components';
-import { pxToRem } from '@strapi/helper-plugin';
-
-const StyledIconButton = styled(IconButton)(
-  ({ theme }) => `
-  border-radius: ${pxToRem(30)};
-  width: ${pxToRem(20)};
-  height: ${pxToRem(20)};
-  padding: ${pxToRem(3)};
-  align-items: center;
-  justify-content: center;
-  svg {
-    width: ${pxToRem(8)};
-    rect {
-      fill: ${theme.colors.primary600}
-    }
-  }
-`
-);
 
 const HeadersInput = () => {
   const { formatMessage } = useIntl();
@@ -85,7 +67,7 @@ const HeadersInput = () => {
                         />
                       </Box>
                       <Box paddingLeft={2}>
-                        <StyledIconButton
+                        <RemoveRoundedButton
                           onClick={() => values.headers.length !== 1 && remove(i)}
                           label={formatMessage(
                             {
@@ -94,7 +76,6 @@ const HeadersInput = () => {
                             },
                             { number: i + 1 }
                           )}
-                          icon={<Autoselect />}
                         />
                       </Box>
                     </Row>
