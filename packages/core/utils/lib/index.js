@@ -20,7 +20,6 @@ const {
   stringEquals,
   isKebabCase,
   isCamelCase,
-  isPath,
 } = require('./string-formatting');
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
@@ -58,7 +57,6 @@ module.exports = {
   stringEquals,
   isKebabCase,
   isCamelCase,
-  isPath,
   contentTypes,
   webhook,
   env,

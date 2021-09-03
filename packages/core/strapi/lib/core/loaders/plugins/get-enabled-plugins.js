@@ -4,7 +4,7 @@ const { dirname, join, resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
-const { isKebabCase, isPath } = require('@strapi/utils');
+const { isKebabCase } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
@@ -26,17 +26,12 @@ const toDetailedDeclaration = declaration => {
   }
   if (has('resolve', declaration)) {
     let pathToPlugin = '';
-
-    if (isPath(declaration.resolve)) {
+    try {
+      pathToPlugin = dirname(require.resolve(declaration.resolve));
+    } catch (e) {
       pathToPlugin = resolve(strapi.dir, declaration.resolve);
 
       if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
-        throw new Error(`${declaration.resolve} couldn't be resolved`);
-      }
-    } else {
-      try {
-        pathToPlugin = dirname(require.resolve(declaration.resolve));
-      } catch (e) {
         throw new Error(`${declaration.resolve} couldn't be resolved`);
       }
     }

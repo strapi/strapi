@@ -6,7 +6,6 @@ const {
   stringEquals,
   getCommonBeginning,
   getCommonPath,
-  isPath,
 } = require('../string-formatting');
 
 describe('string-formatting', () => {
@@ -95,23 +94,6 @@ describe('string-formatting', () => {
     ];
     test.each(tests)('%p has common path: %p', (a, expectedResult) => {
       const result = getCommonPath(...a);
-      expect(result).toBe(expectedResult);
-    });
-  });
-
-  describe('isPath', () => {
-    const tests = [
-      ['plugin', false],
-      ['.plugin', false],
-      ['./plugin', true],
-      ['../plugin', true],
-      ['/plugin', true],
-      ['.\\plugin', true],
-      ['..\\plugin', true],
-      ['\\plugin', true],
-    ];
-    test.each(tests)('%p is a path: %p', (path, expectedResult) => {
-      const result = isPath(path);
       expect(result).toBe(expectedResult);
     });
   });

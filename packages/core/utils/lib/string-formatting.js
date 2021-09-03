@@ -35,7 +35,6 @@ const stringIncludes = (arr, val) => arr.map(String).includes(String(val));
 const stringEquals = (a, b) => String(a) === String(b);
 const isCamelCase = value => /^[a-z][a-zA-Z0-9]+$/.test(value);
 const isKebabCase = value => /^([a-z][a-z0-9]*)(-[a-z0-9]+)*$/.test(value);
-const isPath = path => /^(\.{0,2}(\/|\\))/.test(path);
 
 module.exports = {
   nameToSlug,
@@ -47,5 +46,4 @@ module.exports = {
   stringEquals,
   isCamelCase,
   isKebabCase,
-  isPath,
 };
