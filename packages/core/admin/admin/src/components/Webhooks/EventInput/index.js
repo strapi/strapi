@@ -1,8 +1,8 @@
-import { Stack, FieldLabel, P, TableLabel } from '@strapi/parts';
+import { FieldLabel, P, Stack, TableLabel } from '@strapi/parts';
 import { useFormikContext } from 'formik';
 import PropTypes from 'prop-types';
 import React from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import EventRow from './EventRow';
 import formatValue from './utils/formatValue';
@@ -111,15 +111,16 @@ const EventInput = ({ isDraftAndPublish }) => {
             {headersName.map(header => {
               if (header === 'app.utils.publish' || header === 'app.utils.unpublish') {
                 return (
-                  <FormattedMessage id="Settings.webhooks.event.publish-tooltip" key={header}>
-                    {msg => (
-                      <td title={msg}>
-                        <TableLabel textColor="neutral600">
-                          {formatMessage({ id: header })}
-                        </TableLabel>
-                      </td>
-                    )}
-                  </FormattedMessage>
+                  <td
+                    key={header}
+                    title={formatMessage({
+                      id: 'Settings.webhooks.event.publish-tooltip',
+                      defaultMessage:
+                        'This event only exists for contents with Draft/Publish system enabled',
+                    })}
+                  >
+                    <TableLabel textColor="neutral600">{formatMessage({ id: header })}</TableLabel>
+                  </td>
                 );
               }
 

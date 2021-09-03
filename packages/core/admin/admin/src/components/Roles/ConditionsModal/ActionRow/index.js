@@ -1,6 +1,6 @@
 import { Box, Row, TableLabel } from '@strapi/parts';
 import { MultiSelectNested } from '@strapi/parts/Select';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useIntl } from 'react-intl';

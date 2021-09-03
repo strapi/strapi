@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useQuery } from '@strapi/helper-plugin';

@@ -88,7 +88,10 @@ const WebhookForm = ({
             }
             navigationAction={
               <Link startIcon={<BackIcon />} to="/settings/webhooks">
-                Go back
+                {formatMessage({
+                  id: 'app.components.go-back',
+                  defaultMessage: 'Go back',
+                })}
               </Link>
             }
             as="h1"

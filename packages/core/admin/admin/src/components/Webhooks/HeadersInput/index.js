@@ -49,7 +49,11 @@ const HeadersInput = () => {
                       name={`headers.${i}.key`}
                       aria-label={`row ${i + 1} key`}
                       error={
-                        errors.headers?.[i]?.key && formatMessage({ id: errors.headers[i]?.key })
+                        errors.headers?.[i]?.key &&
+                        formatMessage({
+                          id: errors.headers[i]?.key,
+                          defaultMessage: errors.headers[i]?.key,
+                        })
                       }
                     />
                   </GridItem>
@@ -62,7 +66,10 @@ const HeadersInput = () => {
                           name={`headers.${i}.value`}
                           error={
                             errors.headers?.[i]?.value &&
-                            formatMessage({ id: errors.headers[i]?.value })
+                            formatMessage({
+                              id: errors.headers[i]?.value,
+                              defaultMessage: errors.headers[i]?.value,
+                            })
                           }
                         />
                       </Box>
