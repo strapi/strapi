@@ -3,12 +3,14 @@ import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import pick from 'lodash/pick';
+import get from 'lodash/get';
 import {
   CustomContentLayout,
   Form,
   GenericInput,
   SettingsPageTitle,
-  // auth,
+  auth,
+  useAppInfos,
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
@@ -24,6 +26,7 @@ import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
 import { CheckIcon } from '@strapi/icons';
 import MagicLink from 'ee_else_ce/pages/Users/components/MagicLink';
+import { formatAPIErrors } from '../../../utils';
 import { fetchUser, putUser } from './utils/api';
 import layout from './utils/layout';
 import { editValidation } from '../utils/validations/users';
@@ -37,6 +40,7 @@ const EditPage = ({ canUpdate }) => {
     params: { id },
   } = useRouteMatch('/settings/users/:id');
   const { push } = useHistory();
+  const { setUserDisplayName } = useAppInfos();
 
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -65,15 +69,35 @@ const EditPage = ({ canUpdate }) => {
     },
   });
 
-  const handleSubmit = async body => {
+  const handleSubmit = async (body, actions) => {
     lockApp();
 
     try {
-      await putUser(id, body);
+      const data = await putUser(id, body);
+
+      const userInfos = auth.getUserInfo();
+
+      // The user is updating himself
+      if (id.toString() === userInfos.id.toString()) {
+        auth.setUserInfo(data);
+
+        const userDisplayName = get(body, 'username', `${body.firstname} ${body.lastname}`);
+
+        setUserDisplayName(userDisplayName);
+      }
     } catch (err) {
+      // FIXME when API errors are ready
+      const errors = formatAPIErrors(err.response.data);
+      const fieldsErrors = Object.keys(errors).reduce((acc, current) => {
+        acc[current] = errors[current].id;
+
+        return acc;
+      }, {});
+
+      actions.setErrors(fieldsErrors);
       toggleNotification({
         type: 'warning',
-        message: data.message,
+        message: get(err, 'response.data.message', 'notification.error'),
       });
     }
 

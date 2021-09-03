@@ -9,6 +9,11 @@ import AuthenticatedApp from '..';
 
 const strapiVersion = packageJSON.version;
 
+jest.mock('@strapi/helper-plugin', () => ({
+  ...jest.requireActual('@strapi/helper-plugin'),
+  auth: { getUserInfo: () => ({ firstname: 'kai', lastname: 'doe' }) },
+}));
+
 jest.mock('../utils/api', () => ({
   fetchStrapiLatestRelease: jest.fn(),
   fetchAppInfo: jest.fn(),
