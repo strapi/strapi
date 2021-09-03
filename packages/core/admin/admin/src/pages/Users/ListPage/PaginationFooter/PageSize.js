@@ -1,13 +1,10 @@
 import React from 'react';
-import { Row, Select, Option, Text } from '@strapi/parts';
+import { Box, Row, Select, Option, Text } from '@strapi/parts';
 import { useQueryParams } from '@strapi/helper-plugin';
-import styled from 'styled-components';
-
-const StyledText = styled(Text)`
-  margin-left: 5px;
-`;
+import { useIntl } from 'react-intl';
 
 const PageSize = () => {
+  const { formatMessage } = useIntl();
   const [
     {
       query: { pageSize },
@@ -29,9 +26,11 @@ const PageSize = () => {
         <Option value="50">50</Option>
         <Option value="100">100</Option>
       </Select>
-      <StyledText textColor="neutral500" as="label">
-        Entries per page
-      </StyledText>
+      <Box paddingLeft={2}>
+        <Text textColor="neutral600" as="label" htmlFor="page-size">
+          {formatMessage({ id: 'components.PageFooter.select', default: 'Entries per page' })}
+        </Text>
+      </Box>
     </Row>
   );
 };

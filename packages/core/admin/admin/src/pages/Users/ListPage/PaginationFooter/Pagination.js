@@ -25,12 +25,14 @@ import {
 import PropTypes from 'prop-types';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useLocation } from 'react-router-dom';
+import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
 
 const Pagination = ({ pagination: { pageCount } }) => {
   const [{ query }] = useQueryParams();
   const activePage = parseInt(query.page, 10);
   const { pathname } = useLocation();
+  const { formatMessage } = useIntl();
   const makeSearch = page => stringify({ ...query, page }, { encode: false });
   const nextSearch = makeSearch(activePage + (pageCount > 1 ? 1 : 0));
 
@@ -38,7 +40,10 @@ const Pagination = ({ pagination: { pageCount } }) => {
 
   const firstLinks = [
     <PageLink key={1} number={1} to={`${pathname}?${makeSearch(1)}`}>
-      Go to page 1
+      {formatMessage(
+        { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+        { page: 1 }
+      )}
     </PageLink>,
   ];
 
@@ -50,7 +55,10 @@ const Pagination = ({ pagination: { pageCount } }) => {
   if (pageCount > 1) {
     lastLinks.push(
       <PageLink key={pageCount} number={pageCount} to={`${pathname}?${makeSearch(pageCount)}`}>
-        Go to page {pageCount}
+        {formatMessage(
+          { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+          { page: pageCount }
+        )}
       </PageLink>
     );
   }
@@ -100,7 +108,10 @@ const Pagination = ({ pagination: { pageCount } }) => {
   firstLinksToCreate.forEach(number => {
     firstLinks.push(
       <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
-        Go to page {number}
+        {formatMessage(
+          { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+          { page: number }
+        )}
       </PageLink>
     );
   });
@@ -115,7 +126,10 @@ const Pagination = ({ pagination: { pageCount } }) => {
     middleLinksToCreate.forEach(number => {
       middleLinks.push(
         <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
-          Go to page {number}
+          {formatMessage(
+            { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+            { page: number }
+          )}
         </PageLink>
       );
     });
@@ -125,7 +139,7 @@ const Pagination = ({ pagination: { pageCount } }) => {
     pageCount > 5 || (pageCount === 5 && (activePage === 1 || activePage === 5));
   const shouldShowMiddleDots = middleLinks.length > 2 && activePage > 4 && pageCount > 5;
 
-  const beforeDotsLinks = shouldShowMiddleDots
+  const beforeDotsLinksLength = shouldShowMiddleDots
     ? pageCount - activePage - 1
     : pageCount - firstLinks.length - lastLinks.length;
   const afterDotsLength = shouldShowMiddleDots
@@ -134,13 +148,43 @@ const Pagination = ({ pagination: { pageCount } }) => {
 
   return (
     <PaginationCompo activePage={activePage} pageCount={pageCount}>
-      <PreviousLink to={`${pathname}?${previousSearch}`}>Go to previous page</PreviousLink>
+      <PreviousLink to={`${pathname}?${previousSearch}`}>
+        {formatMessage({
+          id: 'components.pagination.go-to-previous',
+          defaultMessage: 'Go to previous page',
+        })}
+      </PreviousLink>
       {firstLinks}
-      {shouldShowMiddleDots && <Dots>And {beforeDotsLinks} links</Dots>}
+      {shouldShowMiddleDots && (
+        <Dots>
+          {formatMessage(
+            {
+              id: 'components.pagination.remaining-links',
+              defaultMessage: 'And {number} other links',
+            },
+            { number: beforeDotsLinksLength }
+          )}
+        </Dots>
+      )}
       {middleLinks}
-      {shouldShowDotsAfterFirstLink && <Dots>And {afterDotsLength} links</Dots>}
+      {shouldShowDotsAfterFirstLink && (
+        <Dots>
+          {formatMessage(
+            {
+              id: 'components.pagination.remaining-links',
+              defaultMessage: 'And {number} other links',
+            },
+            { number: afterDotsLength }
+          )}
+        </Dots>
+      )}
       {lastLinks}
-      <NextLink to={`${pathname}?${nextSearch}`}>Go to next page</NextLink>
+      <NextLink to={`${pathname}?${nextSearch}`}>
+        {formatMessage({
+          id: 'components.pagination.go-to-next',
+          defaultMessage: 'Go to next page',
+        })}
+      </NextLink>
     </PaginationCompo>
   );
 };

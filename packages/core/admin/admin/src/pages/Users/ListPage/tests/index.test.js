@@ -92,13 +92,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         color: #32324d;
       }
 
-      .c51 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #8e8ea9;
-      }
-
       .c12 {
         font-size: 1rem;
         line-height: 1.5;
@@ -165,6 +158,10 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c48 {
         padding-left: 12px;
+      }
+
+      .c51 {
+        padding-left: 8px;
       }
 
       .c3 {
@@ -506,17 +503,29 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         outline: none;
       }
 
-      .c53 > * + * {
+      .c52 > * + * {
         margin-left: 4px;
       }
 
-      .c58 {
+      .c57 {
         line-height: revert;
       }
 
-      .c54 {
+      .c53 {
         padding: 12px;
         border-radius: 4px;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c55 {
+        padding: 12px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
         -webkit-text-decoration: none;
         text-decoration: none;
         display: -webkit-box;
@@ -526,50 +535,38 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c56 {
-        padding: 12px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c57 {
         color: #271fe0;
         background: #ffffff;
       }
 
-      .c57:hover {
+      .c56:hover {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c55 {
+      .c54 {
         font-size: 0.7rem;
         pointer-events: none;
       }
 
-      .c55 svg path {
+      .c54 svg path {
         fill: #c0c0cf;
       }
 
-      .c55:focus svg path,
-      .c55:hover svg path {
+      .c54:focus svg path,
+      .c54:hover svg path {
         fill: #c0c0cf;
       }
 
-      .c59 {
+      .c58 {
         font-size: 0.7rem;
       }
 
-      .c59 svg path {
+      .c58 svg path {
         fill: #666687;
       }
 
-      .c59:focus svg path,
-      .c59:hover svg path {
+      .c58:focus svg path,
+      .c58:hover svg path {
         fill: #4a4a6a;
       }
 
@@ -789,10 +786,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c16[aria-disabled='true'] svg path {
         fill: #666687;
-      }
-
-      .c52 {
-        margin-left: 5px;
       }
 
       <main
@@ -1271,24 +1264,29 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     </div>
                   </div>
                 </div>
-                <label
-                  class="c9 c51 c52"
+                <div
+                  class="c1 c51"
                 >
-                  Entries per page
-                </label>
+                  <label
+                    class="c9 c11"
+                    for="page-size"
+                  >
+                    components.PageFooter.select
+                  </label>
+                </div>
               </div>
               <nav
                 aria-label="pagination"
                 class=""
               >
                 <ul
-                  class="c1 c4 c53"
+                  class="c1 c4 c52"
                 >
                   <li>
                     <a
                       aria-current="page"
                       aria-disabled="true"
-                      class="c54 c55 active"
+                      class="c53 c54 active"
                       href="/settings/user"
                       tabindex="-1"
                     >
@@ -1315,7 +1313,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   <li>
                     <a
                       aria-current="page"
-                      class="c56 c57 active"
+                      class="c55 c56 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div
@@ -1325,7 +1323,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </div>
                       <span
                         aria-hidden="true"
-                        class="c9 c10 c58"
+                        class="c9 c10 c57"
                       >
                         1
                       </span>
@@ -1335,7 +1333,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     <a
                       aria-current="page"
                       aria-disabled="false"
-                      class="c54 c59 active"
+                      class="c53 c58 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div
