@@ -12,7 +12,7 @@ const App = (
   </ThemeProvider>
 );
 
-describe('ConfirmDialog', () => {
+describe('UpgradePlanModal', () => {
   it('renders and matches the snapshot', async () => {
     const {
       container: { firstChild },
