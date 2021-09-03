@@ -38,6 +38,7 @@ const EventRow = ({ disabledEvents, name, events, inputValue, handleChange, hand
           <td key={event}>
             <BaseCheckbox
               disabled={disabledEvents.includes(event)}
+              aria-label={event}
               name={event}
               value={inputValue.includes(event)}
               onValueChange={value => handleChange({ target: { name: event, value } })}

@@ -70,7 +70,7 @@ const WebhookForm = ({
                     defaultMessage: 'Reset',
                   })}
                 </Button>
-                <Button startIcon={<CheckIcon />} onClick={handleSubmit}>
+                <Button startIcon={<CheckIcon />} onClick={handleSubmit} type="submit">
                   {formatMessage({
                     id: 'app.components.Button.save',
                     defaultMessage: 'Save',
