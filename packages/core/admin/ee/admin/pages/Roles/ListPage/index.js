@@ -1,10 +1,11 @@
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import {
+  ConfirmDialog,
   LoadingIndicatorPage,
-  PopUpWarning,
+  Search,
   SettingsPageTitle,
-  request,
   useNotification,
-  useQuery,
+  useQueryParams,
   useRBAC,
 } from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
@@ -20,14 +21,14 @@ import {
   Tr,
   TableLabel,
   VisuallyHidden,
-  BaseCheckbox,
   Main,
+  ActionLayout,
 } from '@strapi/parts';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import { axiosInstance } from '../../../../../admin/src/core/utils';
 import { EmptyRole, RoleRow as BaseRoleRow } from '../../../../../admin/src/components/Roles';
 import { useRolesList } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
@@ -40,8 +41,8 @@ const useSortedRoles = () => {
   } = useRBAC(adminPermissions.settings.roles);
 
   const { getData, roles, isLoading } = useRolesList(false);
-  const query = useQuery();
-  const _q = decodeURIComponent(query.get('_q') || '');
+  const [{ query }] = useQueryParams();
+  const _q = query?._q || '';
   const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
   useEffect(() => {
@@ -63,62 +64,33 @@ const useSortedRoles = () => {
   };
 };
 
-const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles }) => {
+const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   const { formatMessage } = useIntl();
 
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
-  const [
-    { selectedRoles, showModalConfirmButtonLoading, shouldRefetchData },
-    dispatch,
-  ] = useReducer(reducer, initialState);
+  const [{ selectedRoles, showModalConfirmButtonLoading, roleToDelete }, dispatch] = useReducer(
+    reducer,
+    initialState
+  );
 
-  const handleClosedModal = () => {
-    if (shouldRefetchData) {
-      getData();
-    }
-
-    // Empty the selected ids when the modal closes
-    dispatch({
-      type: 'RESET_DATA_TO_DELETE',
-    });
-  };
-
-  const handleConfirmDeleteData = async () => {
+  const handleDeleteData = async () => {
     try {
       dispatch({
         type: 'ON_REMOVE_ROLES',
       });
-      const filteredRoles = selectedRoles.filter(currentId => {
-        const currentRole = roles.find(role => role.id === currentId);
 
-        return currentRole.usersCount === 0;
+      await axiosInstance.post('/admin/roles/batch-delete', {
+        ids: [roleToDelete],
       });
 
-      if (selectedRoles.length !== filteredRoles.length) {
-        toggleNotification({
-          type: 'info',
-          message: { id: 'Roles.ListPage.notification.delete-all-not-allowed' },
-        });
-      }
+      await getData();
 
-      if (filteredRoles.length) {
-        await request('/admin/roles/batch-delete', {
-          method: 'POST',
-          body: {
-            ids: filteredRoles,
-          },
-        });
-
-        // Empty the selectedRolesId and set the shouldRefetchData to true so the
-        // list is updated when closing the modal
-        dispatch({
-          type: 'ON_REMOVE_ROLES_SUCCEEDED',
-        });
-      }
+      dispatch({
+        type: 'RESET_DATA_TO_DELETE',
+      });
     } catch (err) {
-      console.error(err);
       const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
 
       if (errorIds && Array.isArray(errorIds)) {
@@ -133,9 +105,8 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
           message: { id: 'notification.error' },
         });
       }
-    } finally {
-      handleToggleModal();
     }
+    handleToggleModal();
   };
 
   const onRoleDuplicate = useCallback(
@@ -155,19 +126,6 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
 
     handleToggleModal();
   }, []);
-
-  const onRoleToggle = roleId => {
-    dispatch({
-      type: 'ON_SELECTION',
-      id: roleId,
-    });
-  };
-
-  const onAllRolesToggle = () =>
-    dispatch({
-      type: 'TOGGLE_ALL',
-      ids: sortedRoles.map(r => r.id),
-    });
 
   const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
 
@@ -246,16 +204,13 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
   );
 
   return {
-    handleClosedModal,
-    handleConfirmDeleteData,
     handleNewRoleClick,
-    onRoleToggle,
-    onAllRolesToggle,
     getIcons,
     selectedRoles,
     isWarningDeleteAllOpened,
     showModalConfirmButtonLoading,
     handleToggleModal,
+    handleDeleteData,
   };
 };
 
@@ -271,32 +226,22 @@ const RoleListPage = () => {
     isLoading,
     getData,
     sortedRoles,
-    roles,
   } = useSortedRoles();
 
   const {
-    handleClosedModal,
-    handleConfirmDeleteData,
     handleNewRoleClick,
-    onRoleToggle,
-    onAllRolesToggle,
     getIcons,
-    selectedRoles,
     isWarningDeleteAllOpened,
     showModalConfirmButtonLoading,
     handleToggleModal,
-  } = useRoleActions({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles });
+    handleDeleteData,
+  } = useRoleActions({ getData, canCreate, canDelete, canUpdate });
 
   // ! TODO - Show the search bar only if the user is allowed to read - add the search input
   // canRead
 
   const rowCount = sortedRoles.length + 1;
   const colCount = 6;
-
-  const isAllEntriesIndeterminate = selectedRoles.length
-    ? selectedRoles.length !== rowCount
-    : false;
-  const isAllChecked = selectedRoles.length ? selectedRoles.length === rowCount : false;
 
   if (isLoadingForPermissions) {
     return <LoadingIndicatorPage />;
@@ -327,6 +272,7 @@ const RoleListPage = () => {
         })}
         as="h2"
       />
+      {canRead && <ActionLayout startActions={<Search />} />}
       {canRead && (
         <ContentLayout>
           <Table
@@ -345,16 +291,6 @@ const RoleListPage = () => {
           >
             <Thead>
               <Tr>
-                {!!onRoleToggle && (
-                  <Th>
-                    <BaseCheckbox
-                      aria-label="Select all entries"
-                      indeterminate={isAllEntriesIndeterminate}
-                      value={isAllChecked}
-                      onChange={onAllRolesToggle}
-                    />
-                  </Th>
-                )}
                 <Th>
                   <TableLabel>
                     {formatMessage({
@@ -394,10 +330,6 @@ const RoleListPage = () => {
                 <BaseRoleRow
                   key={role.id}
                   id={role.id}
-                  onToggle={onRoleToggle}
-                  isChecked={
-                    selectedRoles.findIndex(selectedRoleId => selectedRoleId === role.id) !== -1
-                  }
                   name={role.name}
                   description={role.description}
                   usersCount={role.usersCount}
@@ -409,12 +341,11 @@ const RoleListPage = () => {
           {!rowCount && !isLoading && <EmptyRole />}
         </ContentLayout>
       )}
-      <PopUpWarning
-        isOpen={isWarningDeleteAllOpened}
-        onClosed={handleClosedModal}
-        onConfirm={handleConfirmDeleteData}
-        toggleModal={handleToggleModal}
+      <ConfirmDialog
+        isVisible={isWarningDeleteAllOpened}
+        onConfirm={handleDeleteData}
         isConfirmButtonLoading={showModalConfirmButtonLoading}
+        onToggleDialog={handleToggleModal}
       />
     </Main>
   );
