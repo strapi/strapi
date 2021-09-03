@@ -18,14 +18,25 @@ module.exports = strapi => {
     for (const pluginName in strapi.plugins) {
       const plugin = strapi.plugins[pluginName];
 
-      plugin.routes.forEach(route => {
-        route.info = { pluginName };
-      });
+      if (Array.isArray(plugin.routes)) {
+        plugin.routes.forEach(route => {
+          route.info = { pluginName };
+        });
 
-      strapi.server.routes({
-        prefix: `/${pluginName}`,
-        routes: plugin.routes,
-      });
+        strapi.server.routes({
+          prefix: `/${pluginName}`,
+          routes: plugin.routes,
+        });
+      } else {
+        _.forEach(plugin.routes, router => {
+          router.prefix = router.prefix || `/${pluginName}`;
+          router.routes.forEach(route => {
+            route.info = { pluginName };
+          });
+
+          strapi.server.routes(router);
+        });
+      }
     }
   };
 
@@ -33,14 +44,15 @@ module.exports = strapi => {
     for (const apiName in strapi.api) {
       const api = strapi.api[apiName];
 
-      _.forEach(api.routes, routeInfo => {
+      _.forEach(api.routes, router => {
         // TODO: remove once auth setup
         // pass meta down to compose endpoint
-        routeInfo.routes.forEach(route => {
+        router.type = 'content-api';
+        router.routes.forEach(route => {
           route.info = { apiName };
         });
 
-        return strapi.server.api('content-api').routes(routeInfo);
+        return strapi.server.routes(router);
       });
     }
   };

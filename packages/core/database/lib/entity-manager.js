@@ -654,7 +654,10 @@ const createEntityManager = db => {
             .where(joinTable.on || {})
             .execute();
 
-          if (['oneToOne', 'oneToMany'].includes(attribute.relation)) {
+          if (
+            isBidirectional(attribute) &&
+            ['oneToOne', 'oneToMany'].includes(attribute.relation)
+          ) {
             await this.createQueryBuilder(joinTable.name)
               .delete()
               .where({ [inverseJoinColumn.name]: toIds(data[attributeName]) })

@@ -95,8 +95,7 @@ const createServer = strapi => {
 
   const apis = {
     admin: createAPI(strapi, { prefix: '/admin' }),
-    // { prefix: strapi.config.get('api.prefix', '/api') }
-    'content-api': createAPI(strapi),
+    'content-api': createAPI(strapi, { prefix: strapi.config.get('api.prefix', '/api') }),
   };
 
   // init health check
@@ -108,24 +107,16 @@ const createServer = strapi => {
 
   return {
     app,
+    router,
     httpServer,
 
     api(name) {
       return apis[name];
     },
 
-    use(path, fn) {
-      if (typeof path === 'function') {
-        app.use(path);
-        return this;
-      }
-
-      if (typeof path === 'string') {
-        apis[path].use(fn);
-        return this;
-      }
-
-      throw new Error('Use expects to be called with (fn) or (name, callback)');
+    use(...args) {
+      app.use(...args);
+      return this;
     },
 
     routes(routes) {
