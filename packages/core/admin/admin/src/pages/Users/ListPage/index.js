@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import {
   CustomContentLayout,
-  useRBAC,
+  Search,
   SettingsPageTitle,
+  useRBAC,
   useNotification,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
@@ -16,7 +17,6 @@ import adminPermissions from '../../../permissions';
 import DynamicTable from './DynamicTable';
 import Filters from './Filters';
 import ModalForm from './ModalForm';
-import Search from './Search';
 import PaginationFooter from './PaginationFooter';
 import { deleteData, fetchData } from './utils/api';
 import displayedFilters from './utils/displayedFilters';

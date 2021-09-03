@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { SearchIcon } from '@strapi/icons';
 import { IconButton } from '@strapi/parts/IconButton';
 import { TextInput } from '@strapi/parts/TextInput';
+import useQueryParams from '../../hooks/useQueryParams';
 
 const Search = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [{ query }, setQuery] = useQueryParams();
-  const [value, setValue] = useState(query._q || '');
+  const [value, setValue] = useState(query?._q || '');
 
   useEffect(() => {
     const handler = setTimeout(() => {

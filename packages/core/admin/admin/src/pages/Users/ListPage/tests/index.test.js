@@ -699,46 +699,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         height: 0.25rem;
       }
 
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c36 tr:last-of-type {
-        border-bottom: none;
-      }
-
-      .c37 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c37 td,
-      .c37 th {
-        padding: 16px;
-      }
-
-      .c37 td:first-of-type,
-      .c37 th:first-of-type {
-        padding: 0 4px;
-      }
-
-      .c38 {
-        vertical-align: middle;
-        text-align: left;
-        color: #666687;
-        outline-offset: -4px;
-      }
-
-      .c38 input {
-        vertical-align: sub;
-      }
-
-      .c34 {
-        -webkit-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        transform: rotate(0deg);
-      }
-
       .c15 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -786,6 +746,46 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c16[aria-disabled='true'] svg path {
         fill: #666687;
+      }
+
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c36 tr:last-of-type {
+        border-bottom: none;
+      }
+
+      .c37 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c37 td,
+      .c37 th {
+        padding: 16px;
+      }
+
+      .c37 td:first-of-type,
+      .c37 th:first-of-type {
+        padding: 0 4px;
+      }
+
+      .c38 {
+        vertical-align: middle;
+        text-align: left;
+        color: #666687;
+        outline-offset: -4px;
+      }
+
+      .c38 input {
+        vertical-align: sub;
+      }
+
+      .c34 {
+        -webkit-transform: rotate(0deg);
+        -ms-transform: rotate(0deg);
+        transform: rotate(0deg);
       }
 
       <main

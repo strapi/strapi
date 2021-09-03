@@ -180,6 +180,7 @@ export { default as GenericInput } from './components/GenericInput';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
+export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';
 
 // New icons
