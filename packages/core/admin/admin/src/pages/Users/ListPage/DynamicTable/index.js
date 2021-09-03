@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Row, Button, Table as TableCompo, Subtitle } from '@strapi/parts';
-import { EmptyBodyTable, useQueryParams } from '@strapi/helper-plugin';
+import { ConfirmDialog, EmptyBodyTable, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { DeleteIcon } from '@strapi/icons';
 import styled from 'styled-components';
-import ConfirmDialog from '../ConfirmDialog';
 import TableHead from './TableHead';
 import TableRows from './TableRows';
 
@@ -51,6 +50,8 @@ const Table = ({
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(entriesToDelete);
       handleToggleConfirmDeleteAll();
+      setEntriesToDelete([]);
+      setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
       handleToggleConfirmDeleteAll();
@@ -62,6 +63,7 @@ const Table = ({
       setIsConfirmButtonLoading(true);
       await onConfirmDeleteAll(entriesToDelete);
       handleToggleConfirmDelete();
+      setIsConfirmButtonLoading(false);
     } catch (err) {
       setIsConfirmButtonLoading(false);
       handleToggleConfirmDelete();
@@ -160,14 +162,14 @@ const Table = ({
       <ConfirmDialog
         isConfirmButtonLoading={isConfirmButtonLoading}
         onConfirm={handleConfirmDeleteAll}
-        onToggle={handleToggleConfirmDeleteAll}
-        show={showConfirmDeleteAll}
+        onToggleDialog={handleToggleConfirmDeleteAll}
+        isVisible={showConfirmDeleteAll}
       />
       <ConfirmDialog
         isConfirmButtonLoading={isConfirmButtonLoading}
         onConfirm={handleConfirmDelete}
-        onToggle={handleToggleConfirmDelete}
-        show={showConfirmDelete}
+        onToggleDialog={handleToggleConfirmDelete}
+        isVisible={showConfirmDelete}
       />
     </>
   );

@@ -14,6 +14,7 @@ import {
   useNotification,
   useFocusWhenNavigate,
   SettingsPageTitle,
+  ConfirmDialog,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
 import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
@@ -29,11 +30,9 @@ import { Switch } from '@strapi/parts/Switch';
 import { Main } from '@strapi/parts/Main';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { notifyStatus } from '@strapi/parts/LiveRegions';
-import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
-import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import reducer, { initialState } from './reducer';
 import adminPermissions from '../../../permissions';
@@ -458,47 +457,11 @@ const ListView = () => {
           )}
         </>
       </Main>
-      {showModal && (
-        <Dialog
-          onClose={handleToggleModal}
-          title={formatMessage({
-            id: 'Settings.webhooks.confirmation',
-            defaultMessage: 'Confirmation',
-          })}
-          labelledBy="confirmation"
-          describedBy="confirm-description"
-        >
-          <DialogBody icon={<AlertWarningIcon />}>
-            <Stack size={2}>
-              <Row justifyContent="center">
-                <Text id="confirm-description">
-                  {formatMessage({
-                    id: 'Settings.webhooks.confirmation.delete',
-                    defaultMessage: 'Are you sure you want to delete this?',
-                  })}
-                </Text>
-              </Row>
-            </Stack>
-          </DialogBody>
-          <DialogFooter
-            startAction={
-              <Button onClick={handleToggleModal} variant="tertiary">
-                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
-              </Button>
-            }
-            endAction={
-              <Button
-                onClick={handleConfirmDelete}
-                variant="danger-light"
-                startIcon={<DeleteIcon />}
-                id="confirm-delete"
-              >
-                {formatMessage({ id: 'app.components.Button.confirm', defaultMessage: 'Confirm' })}
-              </Button>
-            }
-          />
-        </Dialog>
-      )}
+      <ConfirmDialog
+        isVisible={showModal}
+        onToggleDialog={handleToggleModal}
+        onConfirm={handleConfirmDelete}
+      />
     </Layout>
   );
 };
