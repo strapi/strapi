@@ -10,7 +10,7 @@ import auth from './auth';
  * @return {object}          The parsed JSON from the request
  */
 function parseJSON(response) {
-  return response.json ? response.json() : response;
+  return response.json && response.status !== 204 ? response.json() : response;
 }
 
 /**
