@@ -4,6 +4,25 @@ import { TextButton } from '@strapi/parts/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
 import React from 'react';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
+import { pxToRem } from '@strapi/helper-plugin';
+
+const StyledIconButton = styled(IconButton)(
+  ({ theme }) => `
+  border-radius: ${pxToRem(30)};
+  width: ${pxToRem(20)};
+  height: ${pxToRem(20)};
+  padding: ${pxToRem(3)};
+  align-items: center;
+  justify-content: center;
+  svg {
+    width: ${pxToRem(8)};
+    rect {
+      fill: ${theme.colors.primary600}
+    }
+  }
+`
+);
 
 const HeadersInput = () => {
   const { formatMessage } = useIntl();
@@ -46,6 +65,7 @@ const HeadersInput = () => {
                     <Field
                       as={TextInput}
                       name={`headers.${i}.key`}
+                      aria-label={`row ${i + 1} key`}
                       error={
                         errors.headers?.[i]?.key && formatMessage({ id: errors.headers[i]?.key })
                       }
@@ -56,6 +76,7 @@ const HeadersInput = () => {
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
+                          aria-label={`row ${i + 1} value`}
                           name={`headers.${i}.value`}
                           error={
                             errors.headers?.[i]?.value &&
@@ -64,13 +85,16 @@ const HeadersInput = () => {
                         />
                       </Box>
                       <Box paddingLeft={2}>
-                        <IconButton
+                        <StyledIconButton
                           onClick={() => values.headers.length !== 1 && remove(i)}
-                          label={formatMessage({
-                            id: 'Settings.webhooks.events.update',
-                          })}
+                          label={formatMessage(
+                            {
+                              id: 'Settings.webhooks.headers.remove',
+                              defaultMessage: 'Remove header row {number}',
+                            },
+                            { number: i + 1 }
+                          )}
                           icon={<Autoselect />}
-                          noBorder
                         />
                       </Box>
                     </Row>

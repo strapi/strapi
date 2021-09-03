@@ -41,6 +41,7 @@ const EditView = () => {
   const {
     params: { id },
   } = useRouteMatch('/settings/webhooks/:id');
+
   const { formatMessage } = useIntl();
   const { replace } = useHistory();
   const { lockApp, unlockApp } = useOverlayBlocker();
@@ -74,9 +75,13 @@ const EditView = () => {
 
   const triggerWebhookFn = useCallback(
     async id => {
+      const abortController = new AbortController();
+      const { signal } = abortController;
+
       const [err, { data }] = await to(
         request(`/admin/webhooks/${id}/trigger`, {
           method: 'POST',
+          signal,
         })
       );
 
@@ -86,6 +91,8 @@ const EditView = () => {
           message: { id: 'notification.error' },
         });
       }
+
+      data.cancel = () => abortController.abort();
 
       return data;
     },
@@ -237,45 +244,47 @@ const EditView = () => {
               as="h1"
             />
             <ContentLayout>
-              {(isTriggering || !isTriggerIdle) && (
-                <div className="trigger-wrapper">
-                  <TriggerContainer
-                    isPending={isTriggering}
-                    response={triggerResponse}
-                    onCancel={() => {}}
-                  />
-                </div>
-              )}
-              <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
-                <Stack size={6}>
-                  <Grid gap={6}>
-                    <GridItem col={6}>
-                      <Field
-                        as={TextInput}
-                        name="name"
-                        error={errors.name && formatMessage({ id: errors.name })}
-                        label={formatMessage({
-                          id: 'Settings.webhooks.form.name',
-                          defaultMessage: 'Name',
-                        })}
-                      />
-                    </GridItem>
-                    <GridItem col={12}>
-                      <Field
-                        as={TextInput}
-                        name="url"
-                        error={errors.url && formatMessage({ id: errors.url })}
-                        label={formatMessage({
-                          id: 'Settings.roles.form.input.url',
-                          defaultMessage: 'Url',
-                        })}
-                      />
-                    </GridItem>
-                  </Grid>
-                  <HeadersInput />
-                  <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
-                </Stack>
-              </Box>
+              <Stack size={4}>
+                {(isTriggering || !isTriggerIdle) && (
+                  <div className="trigger-wrapper">
+                    <TriggerContainer
+                      isPending={isTriggering}
+                      response={triggerResponse}
+                      onCancel={triggerResponse?.cancel}
+                    />
+                  </div>
+                )}
+                <Box background="neutral0" padding={8} shadow="filterShadow" hasRadius>
+                  <Stack size={6}>
+                    <Grid gap={6}>
+                      <GridItem col={6}>
+                        <Field
+                          as={TextInput}
+                          name="name"
+                          error={errors.name && formatMessage({ id: errors.name })}
+                          label={formatMessage({
+                            id: 'Settings.webhooks.form.name',
+                            defaultMessage: 'Name',
+                          })}
+                        />
+                      </GridItem>
+                      <GridItem col={12}>
+                        <Field
+                          as={TextInput}
+                          name="url"
+                          error={errors.url && formatMessage({ id: errors.url })}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.url',
+                            defaultMessage: 'Url',
+                          })}
+                        />
+                      </GridItem>
+                    </Grid>
+                    <HeadersInput />
+                    <EventInput isDraftAndPublish={isDraftAndPublishEvents} />
+                  </Stack>
+                </Box>
+              </Stack>
             </ContentLayout>
           </Form>
         )}

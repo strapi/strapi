@@ -161,6 +161,7 @@
   "Settings.sso.title": "Single Sign-On",
   "Settings.webhooks.create": "Create a webhook",
   "Settings.webhooks.create.header": "Create a new header",
+  "Settings.webhooks.headers.remove": "Remove header row {number}",
   "Settings.webhooks.created": "Webhook created",
   "Settings.webhooks.disabled": "Disabled",
   "Settings.webhooks.enabled": "Enabled",
