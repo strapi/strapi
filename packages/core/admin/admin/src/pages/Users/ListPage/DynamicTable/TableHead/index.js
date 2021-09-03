@@ -47,6 +47,10 @@ const TableHead = ({
         {headers.map(({ name, metadatas: { sortable: isSortable, label } }) => {
           const isSorted = sortBy === name;
           const isUp = sortOrder === 'ASC';
+          const sortLabel = formatMessage(
+            { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
+            { label }
+          );
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {
@@ -65,10 +69,7 @@ const TableHead = ({
               action={
                 isSorted ? (
                   <IconButton
-                    label={formatMessage(
-                      { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
-                      { label }
-                    )}
+                    label={sortLabel}
                     onClick={handleClickSort}
                     icon={isSorted ? <SortIcon isUp={isUp} /> : undefined}
                     noBorder
@@ -78,10 +79,10 @@ const TableHead = ({
                 )
               }
             >
-              <Tooltip label={`Sort on ${label}`}>
+              <Tooltip label={isSortable ? sortLabel : label}>
                 <TableLabel
                   as={!isSorted && isSortable ? 'button' : 'span'}
-                  label={`Sort on ${label}`}
+                  label={label}
                   onClick={() => handleClickSort(!isSorted)}
                 >
                   {label}
@@ -93,7 +94,12 @@ const TableHead = ({
 
         {withBulkActions && (
           <Th>
-            <VisuallyHidden>Actions</VisuallyHidden>
+            <VisuallyHidden>
+              {formatMessage({
+                id: 'components.TableHeader.actions-label',
+                defaultMessage: 'Actions',
+              })}
+            </VisuallyHidden>
           </Th>
         )}
       </Tr>

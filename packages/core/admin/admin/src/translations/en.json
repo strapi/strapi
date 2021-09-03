@@ -326,6 +326,7 @@
   "app.utils.publish": "Publish",
   "app.utils.select-all": "Select all",
   "app.utils.unpublish": "Unpublish",
+  "components.TableHeader.actions-label": "Actions",
   "components.pagination.go-to": "Go to page {page}",
   "components.pagination.go-to-previous": "Go to previous page",
   "components.pagination.go-to-next": "Go to next page",

@@ -366,7 +366,7 @@ describe('DynamicTable', () => {
                         <button
                           aria-labelledby="tooltip-1"
                           class="c12 c13 c14"
-                          label="Sort on Name"
+                          label="Name"
                           tabindex="-1"
                         >
                           Name
@@ -388,7 +388,7 @@ describe('DynamicTable', () => {
                         <button
                           aria-labelledby="tooltip-3"
                           class="c12 c13 c14"
-                          label="Sort on Email"
+                          label="Email"
                           tabindex="-1"
                         >
                           Email
