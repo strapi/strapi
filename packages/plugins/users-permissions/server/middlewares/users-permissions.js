@@ -33,7 +33,13 @@ module.exports = {
       if (strapi.plugins) {
         _.forEach(strapi.plugins, plugin => {
           _.forEach(plugin.routes, route => {
-            if (_.get(route.config, 'policies')) {
+            if (_.has(route, 'routes')) {
+              _.forEach(route.routes || [], route => {
+                if (_.get(route.config, 'policies')) {
+                  route.config.policies.unshift('plugin::users-permissions.permissions');
+                }
+              });
+            } else if (_.get(route.config, 'policies')) {
               route.config.policies.unshift('plugin::users-permissions.permissions');
             }
           });

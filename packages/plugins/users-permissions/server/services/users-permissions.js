@@ -230,24 +230,55 @@ module.exports = ({ strapi }) => ({
   },
 
   async getRoutes() {
-    const routes = Object.keys(strapi.api || {}).reduce((acc, current) => {
-      return acc.concat(_.get(strapi.api[current].config, 'routes', []));
-    }, []);
-    const pluginsRoutes = Object.keys(strapi.plugins).reduce((acc, current) => {
-      const routes = strapi.plugin(current).routes.reduce((acc, curr) => {
-        const prefix = curr.config.prefix;
-        const path = prefix !== undefined ? `${prefix}${curr.path}` : `/${current}${curr.path}`;
-        _.set(curr, 'path', path);
+    // TODO: remove or refactor
 
-        return acc.concat(curr);
-      }, []);
+    const applicationRoutes = [];
 
-      acc[current] = routes;
+    _.forEach(strapi.api, api => {
+      _.forEach(api.routes, route => {
+        if (_.has(route, 'routes')) {
+          applicationRoutes.push(...route.routes);
+        } else {
+          applicationRoutes.push(route);
+        }
+      });
+    });
 
-      return acc;
-    }, {});
+    const pluginsRoutes = {};
 
-    return _.merge({ application: routes }, pluginsRoutes);
+    _.forEach(strapi.plugins, (plugin, pluginName) => {
+      const pluginRoutes = [];
+
+      _.forEach(plugin.routes, route => {
+        if (_.has(route, 'routes')) {
+          pluginRoutes.push(
+            ...route.routes.map(route => {
+              const prefix = route.config && route.config.prefix;
+              const path =
+                prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
+
+              return {
+                ...route,
+                path,
+              };
+            })
+          );
+        } else {
+          const prefix = route.config && route.config.prefix;
+          const path =
+            prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
+
+          pluginRoutes.push({
+            ...route,
+            path,
+          });
+        }
+      });
+
+      pluginsRoutes[pluginName] = pluginRoutes;
+    });
+
+    return _.merge({ application: applicationRoutes }, pluginsRoutes);
   },
 
   async updatePermissions() {

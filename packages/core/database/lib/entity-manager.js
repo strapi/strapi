@@ -29,7 +29,6 @@ const toAssocs = data => {
     });
 };
 
-// TODO: handle programmatic defaults
 const toRow = (metadata, data = {}, { withDefaults = false } = {}) => {
   const { attributes } = metadata;
 
@@ -42,6 +41,7 @@ const toRow = (metadata, data = {}, { withDefaults = false } = {}) => {
     if (types.isScalar(attribute.type)) {
       const field = createField(attribute);
 
+      // TODO: move application level default to entity service
       if (_.isUndefined(data[attributeName])) {
         if (!_.isUndefined(attribute.default) && withDefaults) {
           if (typeof attribute.default === 'function') {

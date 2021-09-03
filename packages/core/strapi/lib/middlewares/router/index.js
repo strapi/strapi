@@ -47,7 +47,7 @@ module.exports = strapi => {
       _.forEach(api.routes, router => {
         // TODO: remove once auth setup
         // pass meta down to compose endpoint
-        router.type = 'content-api';
+        // router.type = 'content-api';
         router.routes.forEach(route => {
           route.info = { apiName };
         });
