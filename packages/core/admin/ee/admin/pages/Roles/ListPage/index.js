@@ -1,11 +1,12 @@
 import {
+  ConfirmDialog,
   LoadingIndicatorPage,
+  Search,
   SettingsPageTitle,
   request,
   useNotification,
-  useQuery,
+  useQueryParams,
   useRBAC,
-  ConfirmDialog,
 } from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
 import {
@@ -21,6 +22,7 @@ import {
   TableLabel,
   VisuallyHidden,
   Main,
+  ActionLayout,
 } from '@strapi/parts';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
@@ -39,8 +41,8 @@ const useSortedRoles = () => {
   } = useRBAC(adminPermissions.settings.roles);
 
   const { getData, roles, isLoading } = useRolesList(false);
-  const query = useQuery();
-  const _q = decodeURIComponent(query.get('_q') || '');
+  const [{ query }] = useQueryParams();
+  const _q = query?._q || '';
   const sortedRoles = matchSorter(roles, _q, { keys: ['name', 'description'] });
 
   useEffect(() => {
@@ -304,6 +306,7 @@ const RoleListPage = () => {
         })}
         as="h2"
       />
+      {canRead && <ActionLayout startActions={<Search />} />}
       {canRead && (
         <ContentLayout>
           <Table
