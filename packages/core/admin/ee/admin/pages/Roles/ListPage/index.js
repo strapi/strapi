@@ -1,9 +1,9 @@
+import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import {
   ConfirmDialog,
   LoadingIndicatorPage,
   Search,
   SettingsPageTitle,
-  request,
   useNotification,
   useQueryParams,
   useRBAC,
@@ -26,9 +26,9 @@ import {
 } from '@strapi/parts';
 import { get } from 'lodash';
 import matchSorter from 'match-sorter';
-import React, { useCallback, useEffect, useReducer, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import { axiosInstance } from '../../../../../admin/src/core/utils';
 import { EmptyRole, RoleRow as BaseRoleRow } from '../../../../../admin/src/components/Roles';
 import { useRolesList } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
@@ -64,13 +64,13 @@ const useSortedRoles = () => {
   };
 };
 
-const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles }) => {
+const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
   const { formatMessage } = useIntl();
 
   const toggleNotification = useNotification();
   const [isWarningDeleteAllOpened, setIsWarningDeleteAllOpenend] = useState(false);
   const { push } = useHistory();
-  const [{ selectedRoles, showModalConfirmButtonLoading }, dispatch] = useReducer(
+  const [{ selectedRoles, showModalConfirmButtonLoading, roleToDelete }, dispatch] = useReducer(
     reducer,
     initialState
   );
@@ -81,33 +81,15 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
         type: 'ON_REMOVE_ROLES',
       });
 
-      const filteredRoles = selectedRoles.filter(currentId => {
-        const currentRole = roles.find(role => role.id === currentId);
-
-        return currentRole.usersCount === 0;
+      await axiosInstance.post('/admin/roles/batch-delete', {
+        ids: [roleToDelete],
       });
 
-      if (selectedRoles.length !== filteredRoles.length) {
-        toggleNotification({
-          type: 'info',
-          message: { id: 'Roles.ListPage.notification.delete-all-not-allowed' },
-        });
-      }
+      await getData();
 
-      if (filteredRoles.length) {
-        await request('/admin/roles/batch-delete', {
-          method: 'POST',
-          body: {
-            ids: filteredRoles,
-          },
-        });
-
-        await getData();
-
-        dispatch({
-          type: 'RESET_DATA_TO_DELETE',
-        });
-      }
+      dispatch({
+        type: 'RESET_DATA_TO_DELETE',
+      });
     } catch (err) {
       const errorIds = get(err, ['response', 'payload', 'data', 'ids'], null);
 
@@ -144,19 +126,6 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
 
     handleToggleModal();
   }, []);
-
-  const onRoleToggle = roleId => {
-    dispatch({
-      type: 'ON_SELECTION',
-      id: roleId,
-    });
-  };
-
-  const onAllRolesToggle = () =>
-    dispatch({
-      type: 'TOGGLE_ALL',
-      ids: sortedRoles.map(r => r.id),
-    });
 
   const handleToggleModal = () => setIsWarningDeleteAllOpenend(prev => !prev);
 
@@ -236,8 +205,6 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate, roles, sorte
 
   return {
     handleNewRoleClick,
-    onRoleToggle,
-    onAllRolesToggle,
     getIcons,
     selectedRoles,
     isWarningDeleteAllOpened,
@@ -259,7 +226,6 @@ const RoleListPage = () => {
     isLoading,
     getData,
     sortedRoles,
-    roles,
   } = useSortedRoles();
 
   const {
@@ -269,7 +235,7 @@ const RoleListPage = () => {
     showModalConfirmButtonLoading,
     handleToggleModal,
     handleDeleteData,
-  } = useRoleActions({ getData, canCreate, canDelete, canUpdate, roles, sortedRoles });
+  } = useRoleActions({ getData, canCreate, canDelete, canUpdate });
 
   // ! TODO - Show the search bar only if the user is allowed to read - add the search input
   // canRead
