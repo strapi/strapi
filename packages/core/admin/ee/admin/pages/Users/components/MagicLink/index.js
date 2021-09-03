@@ -2,8 +2,8 @@ import React from 'react';
 import { useIntl } from 'react-intl';
 import { Text } from '@strapi/parts/Text';
 import PropTypes from 'prop-types';
-import basename from '../../../../../../../admin/src/core/utils/basename';
-import MagicLinkWrapper from '../../../../../../../admin/src/pages/Users/ListPage/ModalForm/MagicLink/MagicLinkWrapper';
+import basename from '../../../../../../admin/src/core/utils/basename';
+import MagicLinkWrapper from '../../../../../../admin/src/pages/Users/components/MagicLink/MagicLinkWrapper';
 
 // FIXME replace with parts compo when ready
 const MagicLink = ({ registrationToken }) => {

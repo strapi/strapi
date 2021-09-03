@@ -20,7 +20,7 @@ import { Form, GenericInput, useNotification, useOverlayBlocker } from '@strapi/
 import { useQueryClient, useMutation } from 'react-query';
 import formDataModel from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/formDataModel';
 import roleSettingsForm from 'ee_else_ce/pages/Users/ListPage/ModalForm/utils/roleSettingsForm';
-import MagicLink from 'ee_else_ce/pages/Users/ListPage/ModalForm/MagicLink';
+import MagicLink from 'ee_else_ce/pages/Users/components/MagicLink';
 import { axiosInstance } from '../../../../core/utils';
 import SelectRoles from './SelectRoles';
 import layout from './utils/layout';
