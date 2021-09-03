@@ -1,10 +1,25 @@
 import React from 'react';
 import { Tbody, Tr, Td } from '@strapi/parts/Table';
-import styled from 'styled-components';
+import { Box, Row, Loader } from '@strapi/parts';
 import EmptyStateLayout from '../EmptyStateLayout';
 import PropTypes from 'prop-types';
 
-const EmptyBodyTable = ({ colSpan, ...rest }) => {
+const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
+  if (isLoading) {
+    return (
+      <Tbody>
+        <Tr>
+          <Td colSpan={colSpan}>
+            <Row justifyContent="center">
+              <Box padding={11} background="neutral0">
+                <Loader />
+              </Box>
+            </Row>
+          </Td>
+        </Tr>
+      </Tbody>
+    );
+  }
   return (
     <Tbody>
       <Tr>
@@ -20,8 +35,8 @@ EmptyBodyTable.defaultProps = {
   action: undefined,
   colSpan: 1,
   content: undefined,
-
   icon: undefined,
+  isLoading: false,
 };
 
 EmptyBodyTable.propTypes = {
@@ -33,6 +48,7 @@ EmptyBodyTable.propTypes = {
     values: PropTypes.object,
   }),
   icon: PropTypes.oneOf(['document', 'media', 'permissions']),
+  isLoading: PropTypes.bool,
 };
 
 export default EmptyBodyTable;
