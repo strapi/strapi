@@ -56,6 +56,13 @@ module.exports = async () => {
       callback: `${strapi.config.server.url}/auth/github/callback`,
       scope: ['user', 'user:email'],
     },
+    magiclink: {
+      enabled: false,
+      icon: 'envelope',
+      key: '',
+      callback: `${strapi.config.server.url}/auth/magiclink/callback`,
+      scope: ['email'],
+    },
     microsoft: {
       enabled: false,
       icon: 'windows',

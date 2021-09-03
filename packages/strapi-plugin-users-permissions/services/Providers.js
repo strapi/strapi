@@ -266,6 +266,25 @@ const getProfile = async (provider, query, callback) => {
         });
       break;
     }
+    case 'magiclink': {
+      const magicLinkKey = grant["magiclink"]["key"];
+      if (access_token != magicLinkKey) {
+        callback(new Error('invalid key'));
+        return;
+      }
+
+      const email = query.email;
+      if (!email) {
+        callback(new Error('email is missing'));
+        return;
+      }
+
+      callback(null, {
+        username: email.split('@')[0],
+        email: email,
+      });
+      break;
+    }
     case 'microsoft': {
       const microsoft = purest({
         provider: 'microsoft',
