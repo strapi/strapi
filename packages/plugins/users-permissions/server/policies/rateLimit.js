@@ -1,12 +1,8 @@
 'use strict';
 
-const lazyRateLimit = {
-  get RateLimit() {
-    return require('koa2-ratelimit').RateLimit;
-  },
-};
-
 module.exports = async (ctx, next) => {
+  const ratelimit = require('koa2-ratelimit').RateLimit;
+
   const message = [
     {
       messages: [
@@ -18,7 +14,7 @@ module.exports = async (ctx, next) => {
     },
   ];
 
-  return lazyRateLimit.RateLimit.middleware(
+  return ratelimit.middleware(
     Object.assign(
       {},
       {

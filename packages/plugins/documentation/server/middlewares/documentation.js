@@ -2,7 +2,6 @@
 
 const path = require('path');
 const _ = require('lodash');
-const swaggerUi = require('swagger-ui-dist');
 const koaStatic = require('koa-static');
 
 const initialRoutes = [];
@@ -17,6 +16,8 @@ module.exports = {
     },
 
     initialize() {
+      const swaggerUi = require('swagger-ui-dist');
+
       // Find the plugins routes.
       strapi.plugins.documentation.routes = strapi.plugins.documentation.routes.map(
         (route, index) => {

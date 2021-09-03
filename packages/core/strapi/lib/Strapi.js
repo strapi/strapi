@@ -321,6 +321,7 @@ class Strapi {
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.isLoaded = true;
+
     return this;
   }
 

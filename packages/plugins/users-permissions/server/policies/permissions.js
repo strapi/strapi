@@ -69,6 +69,7 @@ module.exports = async (ctx, next) => {
   const permission = await strapi.query('plugin::users-permissions.permission').findOne({
     where: {
       role: { id: role.id },
+      // TODO: Refactor u&p to use just one action name
       type: route.plugin || 'application',
       controller: route.controller,
       action: route.action,

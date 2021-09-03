@@ -12,6 +12,7 @@ const resolveMiddlewares = route => {
       return middlewareConfig;
     }
 
+    // TODO: this won't work until we have the new middleware formats
     const middleware = strapi.middleware(middlewareConfig);
 
     if (!middleware) {

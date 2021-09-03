@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const request = require('request');
+
 const { getService } = require('../utils');
 
 const DEFAULT_PERMISSIONS = [
@@ -118,6 +118,7 @@ module.exports = ({ strapi }) => ({
   },
 
   getPlugins(lang = 'en') {
+    const request = require('request');
     return new Promise(resolve => {
       request(
         {
