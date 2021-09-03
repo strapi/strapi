@@ -26,7 +26,10 @@ const ProtectedEditPage = () => {
       if (!canRead && !canUpdate) {
         toggleNotification({
           type: 'info',
-          message: { id: 'notification.permission.not-allowed-read' },
+          message: {
+            id: 'notification.permission.not-allowed-read',
+            defaultMessage: 'You are not allowed to see this document',
+          },
         });
       }
     }

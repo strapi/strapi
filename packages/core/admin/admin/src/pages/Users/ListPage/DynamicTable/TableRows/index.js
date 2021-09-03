@@ -6,7 +6,6 @@ import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 
 const TableRows = ({
-  canUpdate,
   canDelete,
   headers,
   entriesToDelete,
@@ -58,14 +57,13 @@ const TableRows = ({
             {withBulkActions && (
               <Td>
                 <Row>
-                  {canUpdate && (
-                    <IconButton
-                      onClick={() => push(`${pathname}/${data.id}`)}
-                      label={formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' })}
-                      noBorder
-                      icon={<EditIcon />}
-                    />
-                  )}
+                  <IconButton
+                    onClick={() => push(`${pathname}/${data.id}`)}
+                    label={formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' })}
+                    noBorder
+                    icon={<EditIcon />}
+                  />
+
                   {canDelete && (
                     <Box paddingLeft={1}>
                       <IconButton
@@ -88,7 +86,6 @@ const TableRows = ({
 
 TableRows.defaultProps = {
   canDelete: false,
-  canUpdate: false,
   onClickDelete: () => {},
   onSelectRow: () => {},
   rows: [],
@@ -98,7 +95,6 @@ TableRows.defaultProps = {
 
 TableRows.propTypes = {
   canDelete: PropTypes.bool,
-  canUpdate: PropTypes.bool,
   entriesToDelete: PropTypes.array.isRequired,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,

@@ -7,7 +7,7 @@ import ConfirmDialog from '../index';
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
-      <ConfirmDialog isVisible={true} onConfirm={jest.fn()} onToggleDialog={jest.fn()} />
+      <ConfirmDialog isVisible onConfirm={jest.fn()} onToggleDialog={jest.fn()} />
     </IntlProvider>
   </ThemeProvider>
 );
@@ -54,16 +54,6 @@ describe('ConfirmDialog', () => {
   });
 
   it('renders and matches the snapshot', async () => {
-    const {
-      container: { firstChild },
-    } = render(App);
-
-    await waitFor(() => {
-      expect(screen.getByText('Are you sure you want to delete this?')).toBeInTheDocument();
-    });
-  });
-
-  it('renders and matches the snapshot', async () => {
     const AppCustom = (
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
@@ -72,7 +62,7 @@ describe('ConfirmDialog', () => {
               id: 'app.components',
               defaultMessage: 'Are you sure you want to unpublish it?',
             }}
-            isVisible={true}
+            isVisible
             onConfirm={jest.fn()}
             onToggleDialog={jest.fn()}
             title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}
@@ -82,9 +72,7 @@ describe('ConfirmDialog', () => {
       </ThemeProvider>
     );
 
-    const {
-      container: { firstChild },
-    } = render(AppCustom);
+    render(AppCustom);
 
     await waitFor(() => {
       expect(screen.getByText('Are you sure you want to unpublish it?')).toBeInTheDocument();

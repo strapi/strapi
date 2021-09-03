@@ -18,7 +18,6 @@ const BlockActions = styled(Row)`
 
 const Table = ({
   canDelete,
-  canUpdate,
   headers,
   isLoading,
   onConfirmDeleteAll,
@@ -148,7 +147,6 @@ const Table = ({
         ) : (
           <TableRows
             canDelete={canDelete}
-            canUpdate={canUpdate}
             entriesToDelete={entriesToDelete}
             headers={headers}
             onClickDelete={handleClickDelete}
@@ -186,7 +184,6 @@ Table.defaultProps = {
 
 Table.propTypes = {
   canDelete: PropTypes.bool.isRequired,
-  canUpdate: PropTypes.bool.isRequired,
   headers: PropTypes.array,
   isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
