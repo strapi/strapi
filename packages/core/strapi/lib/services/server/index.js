@@ -67,6 +67,26 @@ const healthCheck = async (ctx, next) => {
   }
 };
 
+const createAdminAPI = strapi => {
+  return createAPI(strapi, { prefix: '/admin' });
+};
+
+const createContentAPI = strapi => {
+  const api = createAPI(strapi, { prefix: strapi.config.get('api.prefix', '/api') });
+
+  // Fake protection
+  api.use((ctx, next) => {
+    console.log('la', ctx.request.query.token);
+    if (ctx.request.query.token === 'token') {
+      return next();
+    }
+
+    ctx.forbidden();
+  });
+
+  return api;
+};
+
 /**
  * @typedef Server
  *
@@ -94,8 +114,8 @@ const createServer = strapi => {
   const httpServer = createHTTPServer(strapi, app);
 
   const apis = {
-    admin: createAPI(strapi, { prefix: '/admin' }),
-    'content-api': createAPI(strapi, { prefix: strapi.config.get('api.prefix', '/api') }),
+    admin: createAdminAPI(strapi),
+    'content-api': createContentAPI(strapi),
   };
 
   // init health check
