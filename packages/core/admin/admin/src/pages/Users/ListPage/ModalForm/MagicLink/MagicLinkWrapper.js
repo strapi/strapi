@@ -9,6 +9,7 @@ import { Duplicate } from '@strapi/icons';
 import styled from 'styled-components';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 
+// FIXME replace with parts when ready
 const Envelope = () => (
   <svg width="24" height="17" xmlns="http://www.w3.org/2000/svg">
     <text

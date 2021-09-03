@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 import basename from '../../../../../../../admin/src/core/utils/basename';
 import MagicLinkWrapper from '../../../../../../../admin/src/pages/Users/ListPage/ModalForm/MagicLink/MagicLinkWrapper';
 
+// FIXME replace with parts compo when ready
 const MagicLink = ({ registrationToken }) => {
   const { formatMessage } = useIntl();
 
