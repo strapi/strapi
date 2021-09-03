@@ -68,7 +68,7 @@ module.exports = {
       }
 
       // Check if the user exists.
-      const user = await strapi.query('user', 'users-permissions').findOne(query);
+      const user = await strapi.query('user', 'users-permissions').findOne(query, ['role']);
 
       if (!user) {
         return ctx.badRequest(
@@ -473,7 +473,7 @@ module.exports = {
 
     const user = await strapi.query('user', 'users-permissions').findOne({
       email: params.email,
-    });
+    }, ['role']);
 
     if (user && user.provider === params.provider) {
       return ctx.badRequest(
@@ -589,7 +589,7 @@ module.exports = {
 
     const user = await strapi.query('user', 'users-permissions').findOne({
       email: params.email,
-    });
+    }, []);
 
     if (user.confirmed) {
       return ctx.badRequest('already.confirmed');
