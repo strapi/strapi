@@ -161,13 +161,13 @@ const Table = ({
         isConfirmButtonLoading={isConfirmButtonLoading}
         onConfirm={handleConfirmDeleteAll}
         onToggleDialog={handleToggleConfirmDeleteAll}
-        isVisible={showConfirmDeleteAll}
+        isOpen={showConfirmDeleteAll}
       />
       <ConfirmDialog
         isConfirmButtonLoading={isConfirmButtonLoading}
         onConfirm={handleConfirmDelete}
         onToggleDialog={handleToggleConfirmDelete}
-        isVisible={showConfirmDelete}
+        isOpen={showConfirmDelete}
       />
     </>
   );

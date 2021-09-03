@@ -7,7 +7,7 @@ import ConfirmDialog from '../index';
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
-      <ConfirmDialog isVisible onConfirm={jest.fn()} onToggleDialog={jest.fn()} />
+      <ConfirmDialog isOpen onConfirm={jest.fn()} onToggleDialog={jest.fn()} />
     </IntlProvider>
   </ThemeProvider>
 );
@@ -62,7 +62,7 @@ describe('ConfirmDialog', () => {
               id: 'app.components',
               defaultMessage: 'Are you sure you want to unpublish it?',
             }}
-            isVisible
+            isOpen
             onConfirm={jest.fn()}
             onToggleDialog={jest.fn()}
             title={{ id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation' }}

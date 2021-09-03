@@ -342,7 +342,7 @@ const RoleListPage = () => {
         </ContentLayout>
       )}
       <ConfirmDialog
-        isVisible={isWarningDeleteAllOpened}
+        isOpen={isWarningDeleteAllOpened}
         onConfirm={handleDeleteData}
         isConfirmButtonLoading={showModalConfirmButtonLoading}
         onToggleDialog={handleToggleModal}

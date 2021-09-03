@@ -14,7 +14,7 @@ const MagicLink = ({ registrationToken }) => {
       <MagicLinkWrapper
         target={`${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`}
       >
-        <Text small textColor="neutral600" highlighted>
+        <Text small textColor="neutral600" bold>
           {formatMessage({
             id: 'app.components.Users.MagicLink.connect',
             defaultMessage: 'Send this link to the user for them to connect.',
@@ -26,7 +26,7 @@ const MagicLink = ({ registrationToken }) => {
 
   return (
     <MagicLinkWrapper target={`${window.location.origin}${basename}auth/register`}>
-      <Text small textColor="neutral600" highlighted>
+      <Text small textColor="neutral600" bold>
         {formatMessage({
           id: 'app.components.Users.MagicLink.connect.sso',
           defaultMessage:

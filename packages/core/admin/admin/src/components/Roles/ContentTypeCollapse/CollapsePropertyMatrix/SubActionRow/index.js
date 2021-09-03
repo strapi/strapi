@@ -52,19 +52,12 @@ const RowStyle = styled(Row)`
 `;
 
 const TopTimeline = styled.div`
-  padding-top: 8px;
-  margin-top: 8px;
-  width: 4px;
+  padding-top: ${({ theme }) => theme.spaces[2]};
+  margin-top: ${({ theme }) => theme.spaces[2]};
+  width: ${4 / 16}rem;
   background-color: ${({ theme }) => theme.colors.primary200};
   border-top-left-radius: 2px;
   border-top-right-radius: 2px;
-`;
-
-// ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
-const StyledText = styled(Text)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 const SubActionRow = ({
@@ -129,7 +122,7 @@ const SubActionRow = ({
                     })}
                     title={label}
                   >
-                    <StyledText>{upperFirst(label)}</StyledText>
+                    <Text ellipsis>{upperFirst(label)}</Text>
                     {required && <RequiredSign />}
                     <CarretIcon $isActive={isActive} />
                   </CollapseLabel>

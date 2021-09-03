@@ -24,7 +24,7 @@ const RoleForm = ({ disabled, role, values, errors, onChange, onBlur }) => {
           <Row justifyContent="space-between">
             <Box>
               <Box>
-                <Text highlighted>
+                <Text bold>
                   {role
                     ? role.name
                     : formatMessage({

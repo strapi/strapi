@@ -2,14 +2,13 @@ import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Form } from '@strapi/helper-plugin';
-import { Box, Stack, H1, Text, TextInput, Main, Row, Link } from '@strapi/parts';
+import { Box, Stack, H1, Text, TextInput, Main, Row, Button, Link } from '@strapi/parts';
 import { Show, Hide } from '@strapi/icons';
 import { Formik } from 'formik';
 import UnauthenticatedLayout, {
   Column,
   LayoutContent,
 } from '../../../../layouts/UnauthenticatedLayout';
-import AuthButton from '../AuthButton';
 import Logo from '../Logo';
 import FieldActionWrapper from '../FieldActionWrapper';
 
@@ -140,12 +139,12 @@ const ForgotPassword = ({ onSubmit, schema }) => {
                     })}
                     type={confirmPasswordShown ? 'text' : 'password'}
                   />
-                  <AuthButton type="submit">
+                  <Button fullwidth type="submit">
                     {formatMessage({
                       id: 'Auth.form.button.reset-password',
                       defaultMessage: 'Change password',
                     })}
-                  </AuthButton>
+                  </Button>
                 </Stack>
               </Form>
             )}

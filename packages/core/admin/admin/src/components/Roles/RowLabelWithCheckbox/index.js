@@ -2,17 +2,9 @@ import { Row, Checkbox, Text } from '@strapi/parts';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import React, { memo } from 'react';
-import styled from 'styled-components';
 import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';
 import { firstRowWidth } from '../Permissions/utils/constants';
-
-// ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
-const StyledText = styled(Text)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-`;
 
 const RowLabelWithCheckbox = ({
   children,
@@ -63,7 +55,7 @@ const RowLabelWithCheckbox = ({
           role: 'button',
         })}
       >
-        <StyledText>{upperFirst(label)}</StyledText>
+        <Text ellipsis>{upperFirst(label)}</Text>
         {children}
       </CollapseLabel>
     </Row>

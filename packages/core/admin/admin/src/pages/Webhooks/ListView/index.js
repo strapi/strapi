@@ -30,6 +30,7 @@ import { Switch } from '@strapi/parts/Switch';
 import { Main } from '@strapi/parts/Main';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { notifyStatus } from '@strapi/parts/LiveRegions';
+import { Box } from '@strapi/parts/Box';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
@@ -284,10 +285,12 @@ const ListView = () => {
               }
             />
           )}
-          {isLoading || loadingWebhooks ? (
-            <LoadingIndicatorPage />
-          ) : (
-            <ContentLayout>
+          <ContentLayout>
+            {isLoading || loadingWebhooks ? (
+              <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                <LoadingIndicatorPage />
+              </Box>
+            ) : (
               <>
                 {rowsCount > 0 ? (
                   <Table
@@ -370,7 +373,7 @@ const ListView = () => {
                             />
                           </Td>
                           <Td>
-                            <Text highlighted textColor="neutral800">
+                            <Text bold textColor="neutral800">
                               {webhook.name}
                             </Text>
                           </Td>
@@ -453,12 +456,12 @@ const ListView = () => {
                   />
                 )}
               </>
-            </ContentLayout>
-          )}
+            )}
+          </ContentLayout>
         </>
       </Main>
       <ConfirmDialog
-        isVisible={showModal}
+        isOpen={showModal}
         onToggleDialog={handleToggleModal}
         onConfirm={handleConfirmDelete}
       />

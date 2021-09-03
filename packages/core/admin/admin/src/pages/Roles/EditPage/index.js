@@ -141,27 +141,31 @@ const EditPage = () => {
                 as="h1"
               />
               <ContentLayout>
-                <RoleForm
-                  isLoading={isRoleLoading}
-                  disabled={isFormDisabled}
-                  errors={errors}
-                  values={values}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  role={role}
-                />
-                {!isLayoutLoading && !isRoleLoading ? (
-                  <Box paddingTop={6} paddingBottom={6}>
-                    <Permissions
-                      isFormDisabled={isFormDisabled}
-                      permissions={rolePermissions}
-                      ref={permissionsRef}
-                      layout={permissionsLayout}
-                    />
-                  </Box>
-                ) : (
-                  <LoadingIndicatorPage />
-                )}
+                <Stack size={6}>
+                  <RoleForm
+                    isLoading={isRoleLoading}
+                    disabled={isFormDisabled}
+                    errors={errors}
+                    values={values}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    role={role}
+                  />
+                  {!isLayoutLoading && !isRoleLoading ? (
+                    <Box shadow="filterShadow" hasRadius>
+                      <Permissions
+                        isFormDisabled={isFormDisabled}
+                        permissions={rolePermissions}
+                        ref={permissionsRef}
+                        layout={permissionsLayout}
+                      />
+                    </Box>
+                  ) : (
+                    <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                      <LoadingIndicatorPage />
+                    </Box>
+                  )}
+                </Stack>
               </ContentLayout>
             </>
           </form>

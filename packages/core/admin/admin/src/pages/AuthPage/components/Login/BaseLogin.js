@@ -11,6 +11,7 @@ import {
   Main,
   Row,
   Link,
+  Button,
 } from '@strapi/parts';
 import { Form } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
@@ -19,7 +20,6 @@ import { Formik } from 'formik';
 
 import { Column, LayoutContent } from '../../../../layouts/UnauthenticatedLayout';
 import Logo from '../Logo';
-import AuthButton from '../AuthButton';
 import FieldActionWrapper from '../FieldActionWrapper';
 
 const Login = ({ onSubmit, schema, children }) => {
@@ -140,9 +140,9 @@ const Login = ({ onSubmit, schema, children }) => {
                     defaultMessage: 'Remember me',
                   })}
                 </Checkbox>
-                <AuthButton type="submit">
+                <Button fullWidth type="submit">
                   {formatMessage({ id: 'Auth.form.button.login', defaultMessage: 'Login' })}
-                </AuthButton>
+                </Button>
               </Stack>
             </Form>
           )}

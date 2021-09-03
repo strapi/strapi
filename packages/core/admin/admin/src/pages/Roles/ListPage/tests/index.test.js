@@ -286,8 +286,8 @@ describe('<ListPage />', () => {
 
       .c30 {
         height: 1px;
-        margin: 0;
         border: none;
+        margin: 0;
       }
 
       .c0 {
