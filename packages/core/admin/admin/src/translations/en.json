@@ -211,6 +211,7 @@
   "app.components.Button.confirm": "Confirm",
   "app.components.Button.reset": "Reset",
   "app.components.Button.save": "Save",
+  "app.component.CopyToClipboard.label": "Copy to clipboard",
   "app.components.ComingSoonPage.comingSoon": "Coming soon",
   "app.components.ConfirmDialog.title": "Confirmation",
   "app.components.DownloadInfo.download": "Download in progress...",

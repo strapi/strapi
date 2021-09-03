@@ -29,7 +29,7 @@ import stepper from './utils/stepper';
 
 const ModalForm = ({ queryName, onToggle }) => {
   const [currentStep, setStep] = useState('create');
-  const [isSubmitting, setIsSubmiting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [registrationToken, setRegistrationToken] = useState(null);
   const queryClient = useQueryClient();
   const { formatMessage } = useIntl();
@@ -40,10 +40,11 @@ const ModalForm = ({ queryName, onToggle }) => {
       setRegistrationToken(data.data.registrationToken);
       await queryClient.invalidateQueries(queryName);
       goNext();
-      setIsSubmiting(false);
+      setIsSubmitting(false);
     },
     onError: err => {
       console.error(err.response);
+      setIsSubmitting(false);
 
       toggleNotification({
         type: 'warning',
@@ -62,7 +63,7 @@ const ModalForm = ({ queryName, onToggle }) => {
 
   const handleSubmit = async body => {
     lockApp();
-    setIsSubmiting(true);
+    setIsSubmitting(true);
 
     postMutation.mutateAsync(body);
   };

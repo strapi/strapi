@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
+import { Tooltip } from '@strapi/parts/Tooltip';
 import { useNotification } from '@strapi/helper-plugin';
-import { Duplicate } from '@strapi/icons';
+import Duplicate from '@strapi/icons/Duplicate';
 import styled from 'styled-components';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
+import { useIntl } from 'react-intl';
 
 // FIXME replace with parts when ready
 const Envelope = () => (
@@ -26,10 +28,9 @@ const Envelope = () => (
   </svg>
 );
 
-const Wrapper = styled.div`
+const Wrapper = styled.button`
   padding-left: ${({ theme }) => theme.spaces[2]};
   font-size: ${({ theme }) => theme.spaces[3]};
-  cursor: pointer;
   svg {
     > g,
     path {
@@ -40,10 +41,23 @@ const Wrapper = styled.div`
 
 const MagicLinkWrapper = ({ children, target }) => {
   const toggleNotification = useNotification();
+  const copyButtonRef = useRef();
+  const { formatMessage } = useIntl();
+
+  useEffect(() => {
+    if (copyButtonRef.current) {
+      copyButtonRef.current.focus();
+    }
+  }, []);
 
   const handleCopy = () => {
     toggleNotification({ type: 'info', message: { id: 'notification.link-copied' } });
   };
+
+  const copyLabel = formatMessage({
+    id: 'app.component.CopyToClipboard.label',
+    defaultMessage: 'Copy to clipboard',
+  });
 
   return (
     <Box padding={6} background="neutral0" shadow="tableShadow" hasRadius>
@@ -57,14 +71,16 @@ const MagicLinkWrapper = ({ children, target }) => {
               <Text small textColor="neutral800" highlighted>
                 {target}
               </Text>
-              <CopyToClipboard onCopy={handleCopy} text={target}>
-                <Wrapper small>
-                  <Duplicate />
-                </Wrapper>
-              </CopyToClipboard>
+              <Tooltip description={copyLabel}>
+                <CopyToClipboard onCopy={handleCopy} text={target}>
+                  <Wrapper small type="button" ref={copyButtonRef}>
+                    <Duplicate />
+                  </Wrapper>
+                </CopyToClipboard>
+              </Tooltip>
             </Stack>
 
-            <Text small textColor="neutral500" highlighted>
+            <Text small textColor="neutral600" highlighted>
               {children}
             </Text>
           </Stack>
