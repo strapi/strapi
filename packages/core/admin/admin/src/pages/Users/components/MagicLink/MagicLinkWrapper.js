@@ -46,7 +46,7 @@ const MagicLinkWrapper = ({ children, target }) => {
   };
 
   return (
-    <Box padding={6} shadow="tableShadow">
+    <Box padding={6} background="neutral0" shadow="tableShadow" hasRadius>
       <Row>
         <Box background="neutral100" padding={2} hasRadius>
           <Envelope />

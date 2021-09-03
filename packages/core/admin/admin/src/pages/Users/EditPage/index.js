@@ -2,15 +2,16 @@ import React from 'react';
 import { useRouteMatch, useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
+// import get from 'lodash/get';
+// import isEmpty from 'lodash/isEmpty';
 import isEqual from 'lodash/isEqual';
 import pick from 'lodash/pick';
 import {
   CustomContentLayout,
   Form,
+  GenericInput,
   SettingsPageTitle,
-  auth,
+  // auth,
   useFocusWhenNavigate,
   useNotification,
 } from '@strapi/helper-plugin';
@@ -18,11 +19,16 @@ import { useQuery } from 'react-query';
 import { Formik } from 'formik';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { HeaderLayout } from '@strapi/parts/Layout';
+import { H3 } from '@strapi/parts/Text';
 import { Main } from '@strapi/parts/Main';
-import { Row } from '@strapi/parts/Row';
+// import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
 import { CheckIcon } from '@strapi/icons';
+import MagicLink from 'ee_else_ce/pages/Users/components/MagicLink';
 import fetchUser from './utils/api';
+import layout from './utils/layout';
 
 // import { Col } from 'reactstrap';
 // import { Padded } from '@buffetjs/core';
@@ -32,17 +38,8 @@ import fetchUser from './utils/api';
 // import { MagicLink, SelectRoles } from '../../../components/Users';
 // import { useSettingsForm } from '../../../hooks';
 import { editValidation } from '../utils/validations/users';
-import form from './utils/form';
 
-const fieldsToPick = [
-  'email',
-  'firstname',
-  'lastname',
-  'username',
-  'isActive',
-  'roles',
-  'registrationToken',
-];
+const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'isActive', 'roles'];
 
 const EditPage = ({ canUpdate }) => {
   const { formatMessage } = useIntl();
@@ -77,14 +74,14 @@ const EditPage = ({ canUpdate }) => {
     },
   });
 
-  const cbSuccess = data => {
-    const userInfos = auth.getUserInfo();
+  // const cbSuccess = data => {
+  //   const userInfos = auth.getUserInfo();
 
-    // The user is updating themself
-    if (data.id === userInfos.id) {
-      auth.setUserInfo(data);
-    }
-  };
+  //   // The user is updating themself
+  //   if (data.id === userInfos.id) {
+  //     auth.setUserInfo(data);
+  //   }
+  // };
   // const [
   //   { formErrors, initialData, isLoading, modifiedData, showHeaderButtonLoader, showHeaderLoader },
   //   // eslint-disable-next-line no-unused-vars
@@ -109,7 +106,7 @@ const EditPage = ({ canUpdate }) => {
 
   // const hasRegistrationToken = modifiedData.registrationToken;
   // const hasRolesError = formErrors.roles && isEmpty(modifiedData.roles);
-  console.log({ status, data });
+
   const isLoading = status !== 'success';
   const headerLabel = isLoading
     ? { id: 'app.containers.Users.EditPage.header.label-loading', defaultMessage: 'Edit user' }
@@ -161,7 +158,64 @@ const EditPage = ({ canUpdate }) => {
                 }
                 title={title}
               />
-              <CustomContentLayout isLoading={isLoading}>cooo</CustomContentLayout>
+              <CustomContentLayout isLoading={isLoading}>
+                {data?.registrationToken && (
+                  <Box paddingBottom={6}>
+                    <MagicLink registrationToken={data.registrationToken} />
+                  </Box>
+                )}
+                <Stack size={7}>
+                  <Box
+                    background="neutral0"
+                    hasRadius
+                    paddingTop={6}
+                    paddingBottom={6}
+                    paddingLeft={7}
+                    paddingRight={7}
+                  >
+                    <Stack size={4}>
+                      <H3 as="h2">
+                        {formatMessage({
+                          id: 'app.components.Users.ModalCreateBody.block-title.details',
+                          defaultMessage: 'Details',
+                        })}
+                      </H3>
+                      <Grid gap={5}>
+                        {layout.map(row => {
+                          return row.map(input => {
+                            return (
+                              <GridItem key={input.name} {...input.size}>
+                                <GenericInput
+                                  {...input}
+                                  disabled={!canUpdate}
+                                  error={errors[input.name]}
+                                  onChange={handleChange}
+                                  value={values[input.name] || ''}
+                                />
+                              </GridItem>
+                            );
+                          });
+                        })}
+                      </Grid>
+                    </Stack>
+                  </Box>
+                  <Box
+                    background="neutral0"
+                    hasRadius
+                    paddingTop={6}
+                    paddingBottom={6}
+                    paddingLeft={7}
+                    paddingRight={7}
+                  >
+                    <H3 as="h2">
+                      {formatMessage({
+                        id: 'app.components.Users.ModalCreateBody.block-title.login',
+                        defaultMessage: 'Login settings',
+                      })}
+                    </H3>
+                  </Box>
+                </Stack>
+              </CustomContentLayout>
             </Form>
           );
         }}

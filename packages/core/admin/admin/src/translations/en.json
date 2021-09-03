@@ -44,7 +44,7 @@
   "Auth.form.register.news.label": "Keep me updated about the new features and upcoming improvements (by doing this you accept the {terms} and the {policy}).",
   "Auth.form.rememberMe.label": "Remember me",
   "Auth.form.username.label": "Username",
-  "Auth.form.username.placeholder": "Kai Doe",
+  "Auth.form.username.placeholder": "e.g. Kai_Doe",
   "Auth.form.welcome.subtitle": "Log in to your Strapi account",
   "Auth.form.welcome.title": "Welcome back!",
   "Auth.link.forgot-password": "Forgot your password?",
