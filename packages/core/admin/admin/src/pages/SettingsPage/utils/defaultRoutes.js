@@ -1,5 +1,5 @@
-import RolesCreatePage from 'ee_else_ce/pages/Roles/CreatePage';
-import ProtectedRolesListPage from 'ee_else_ce/pages/Roles/ProtectedListPage';
+import RolesCreatePage from 'ee_else_ce/pages/SettingsPage/pages/Roles/CreatePage';
+import ProtectedRolesListPage from 'ee_else_ce/pages/SettingsPage/pages/Roles/ProtectedListPage';
 
 const defaultRoutes = [
   {
@@ -27,7 +27,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ '../../Roles/ProtectedEditPage'
+        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/ProtectedEditPage'
       );
 
       return component;
