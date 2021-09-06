@@ -1,90 +1,142 @@
-import React from 'react';
+import { CheckIcon, ClearField, Close, LoadingIcon } from '@strapi/icons';
+import { Box, Grid, GridItem, Row, Stack, Text } from '@strapi/parts';
 import PropTypes from 'prop-types';
+import React from 'react';
 import { FormattedMessage } from 'react-intl';
-import { Fail, Success, Pending, Remove } from '@buffetjs/icons';
+import styled from 'styled-components';
 
-import Wrapper from './Wrapper';
+// Being discussed in Notion: create a <Icon /> component in Parts
+const Icon = styled.svg(
+  ({ theme, color }) => `
+  width: ${12 / 16}rem;
+  height: ${12 / 16}rem;
+
+  path {
+    fill: ${theme.colors[color]};
+  }
+`
+);
+
+const Status = ({ isPending, statusCode }) => {
+  if (isPending) {
+    return (
+      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+        <Icon as={LoadingIcon} />
+        <Text>
+          <FormattedMessage id="Settings.webhooks.trigger.pending" defaultMessage="pending" />
+        </Text>
+      </Stack>
+    );
+  }
+
+  if (statusCode >= 200 && statusCode < 300) {
+    return (
+      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+        <Icon as={CheckIcon} color="success700" />
+        <Text>
+          <FormattedMessage id="Settings.webhooks.trigger.success" defaultMessage="success" />
+        </Text>
+      </Stack>
+    );
+  }
+
+  if (statusCode >= 300) {
+    return (
+      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+        <Icon as={Close} color="danger700" />
+        <Text>
+          <FormattedMessage id="Settings.error" defaultMessage="error" /> {statusCode}
+        </Text>
+      </Stack>
+    );
+  }
+
+  return null;
+};
+Status.propTypes = {
+  isPending: PropTypes.bool.isRequired,
+  statusCode: PropTypes.number,
+};
+Status.defaultProps = {
+  statusCode: undefined,
+};
+
+const Message = ({ statusCode, message }) => {
+  if (statusCode >= 200 && statusCode < 300) {
+    return (
+      <Row justifyContent="flex-end">
+        <Text>
+          <FormattedMessage id="Settings.webhooks.trigger.success.label" defaultMessage="success" />
+        </Text>
+      </Row>
+    );
+  }
+
+  if (statusCode >= 300) {
+    return (
+      <Row justifyContent="flex-end" title={message}>
+        <Text
+          // ! REMOVE THIS WHEN DS IS UPDATED WITH ELLIPSIS PROP
+          style={{
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            textOverflow: 'ellipsis',
+          }}
+        >
+          {message}
+        </Text>
+      </Row>
+    );
+  }
+
+  return null;
+};
+Message.propTypes = {
+  statusCode: PropTypes.number,
+  message: PropTypes.string,
+};
+Message.defaultProps = {
+  statusCode: undefined,
+  message: undefined,
+};
+
+const CancelButton = ({ onCancel }) => (
+  <Row justifyContent="flex-end">
+    <button onClick={onCancel} type="button">
+      <Stack horizontal size={2} style={{ alignItems: 'center' }}>
+        <Text textColor="neutral400">
+          <FormattedMessage id="Settings.webhooks.trigger.cancel" defaultMessage="cancel" />
+        </Text>
+        <Icon as={ClearField} color="neutral400" />
+      </Stack>
+    </button>
+  </Row>
+);
+CancelButton.propTypes = { onCancel: PropTypes.func.isRequired };
 
 const TriggerContainer = ({ isPending, onCancel, response }) => {
   const { statusCode, message } = response;
 
   return (
-    <Wrapper>
-      <table>
-        <tbody>
-          <tr>
-            <td>
-              <p>
-                <FormattedMessage
-                  id="Settings.webhooks.trigger.test"
-                  defaultMessage="test-trigger"
-                />
-              </p>
-            </td>
-            {isPending && (
-              <>
-                <td>
-                  <p>
-                    <Pending fill="#ffb500" width="15px" height="15px" />
-                    <FormattedMessage
-                      id="Settings.webhooks.trigger.pending"
-                      defaultMessage="pending"
-                    />
-                  </p>
-                </td>
-                <td>
-                  <button onClick={onCancel} type="button">
-                    <FormattedMessage
-                      id="Settings.webhooks.trigger.cancel"
-                      defaultMessage="cancel"
-                    />
-                    <Remove fill="#b4b6ba" />
-                  </button>
-                </td>
-              </>
-            )}
-
-            {!isPending && statusCode >= 200 && statusCode < 300 && (
-              <>
-                <td>
-                  <p className="success-label">
-                    <Success fill="#6DBB1A" width="19px" height="19px" />
-                    <FormattedMessage
-                      id="Settings.webhooks.trigger.success"
-                      defaultMessage="success"
-                    />
-                  </p>
-                </td>
-                <td>
-                  <p>
-                    <FormattedMessage
-                      id="Settings.webhooks.trigger.success.label"
-                      defaultMessage="success"
-                    />
-                  </p>
-                </td>
-              </>
-            )}
-
-            {!isPending && statusCode >= 300 && (
-              <>
-                <td>
-                  <p className="fail-label">
-                    <Fail fill="#f64d0a" width="15px" height="15px" />
-                    <FormattedMessage id="Settings.error" defaultMessage="error" />
-                    &nbsp;
-                    {statusCode}
-                  </p>
-                </td>
-                <td>
-                  <p title={message}>{message}</p>
-                </td>
-              </>
-            )}
-          </tr>
-        </tbody>
-      </table>
-    </Wrapper>
+    <Box background="neutral0" padding={5} shadow="filterShadow" hasRadius>
+      <Grid gap={4} style={{ alignItems: 'center' }}>
+        <GridItem col={3}>
+          <Text>
+            <FormattedMessage id="Settings.webhooks.trigger.test" defaultMessage="test-trigger" />
+          </Text>
+        </GridItem>
+        <GridItem col={3}>
+          <Status isPending={isPending} statusCode={statusCode} />
+        </GridItem>
+        <GridItem col={6}>
+          {!isPending ? (
+            <Message statusCode={statusCode} message={message} />
+          ) : (
+            <CancelButton onCancel={onCancel} />
+          )}
+        </GridItem>
+      </Grid>
+    </Box>
   );
 };
 
