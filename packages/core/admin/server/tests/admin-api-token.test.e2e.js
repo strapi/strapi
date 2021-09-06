@@ -15,14 +15,16 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 5. Creates an api token with trimmed description and name (successfully)
  * 6. List all tokens (successfully)
  * 7. Deletes a token (successfully)
- * 8. Does not return an error if the ressource does not exist
+ * 8. Does not return an error if the ressource to delete does not exist
  * 9. Retrieves a token (successfully)
- * 10. Returns a 404 if the ressource does not exist
+ * 10. Returns a 404 if the ressource to retrieve does not exist
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
   let rq;
   let strapi;
+
+  const apiTokens = [];
 
   // Initialization Actions
   beforeAll(async () => {
@@ -103,6 +105,8 @@ describe('Admin API Token CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
     });
+
+    apiTokens.push(res.body.data);
   });
 
   test('4. Creates an api token without a description (successfully)', async () => {
@@ -125,6 +129,8 @@ describe('Admin API Token CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
     });
+
+    apiTokens.push(res.body.data);
   });
 
   test('5. Creates an api token with trimmed description and name (successfully)', async () => {
@@ -148,6 +154,8 @@ describe('Admin API Token CRUD (e2e)', () => {
       type: body.type,
       id: expect.any(Number),
     });
+
+    apiTokens.push(res.body.data);
   });
 
   test('6. List all tokens (successfully)', async () => {
@@ -182,20 +190,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
   test('7. Deletes a token (successfully)', async () => {
     const res = await rq({
-      url: '/admin/api-tokens/3',
+      url: `/admin/api-tokens/${apiTokens[2].id}`,
       method: 'DELETE',
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
-      name: 'api-token_tests-name-with-spaces-at-the-end',
-      description: 'api-token_tests-description-with-spaces-at-the-end',
-      type: 'read-only',
-      id: 3,
+      name: apiTokens[2].name,
+      description: apiTokens[2].description,
+      type: apiTokens[2].type,
+      id: apiTokens[2].id,
     });
   });
 
-  test('8. Does not return an error if the ressource does not exist', async () => {
+  test('8. Does not return an error if the ressource to delete does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'DELETE',
@@ -207,20 +215,20 @@ describe('Admin API Token CRUD (e2e)', () => {
 
   test('9. Retrieves a token (successfully)', async () => {
     const res = await rq({
-      url: '/admin/api-tokens/1',
+      url: `/admin/api-tokens/${apiTokens[0].id}`,
       method: 'GET',
     });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.data).toStrictEqual({
-      name: 'api-token_tests-name',
-      description: 'api-token_tests-description',
-      type: 'read-only',
-      id: 1,
+      name: apiTokens[0].name,
+      description: apiTokens[0].description,
+      type: apiTokens[0].type,
+      id: apiTokens[0].id,
     });
   });
 
-  test('10. Returns a 404 if the ressource does not exist', async () => {
+  test('10. Returns a 404 if the ressource to retrieve does not exist', async () => {
     const res = await rq({
       url: '/admin/api-tokens/42',
       method: 'GET',

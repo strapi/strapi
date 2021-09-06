@@ -53,7 +53,7 @@ module.exports = {
   async get(ctx) {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
-    const apiToken = await apiTokenService.get(id);
+    const apiToken = await apiTokenService.getById(id);
 
     if (!apiToken) {
       ctx.notFound('API Token not found');
