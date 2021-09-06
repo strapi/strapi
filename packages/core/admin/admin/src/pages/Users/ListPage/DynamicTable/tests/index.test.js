@@ -55,6 +55,74 @@ describe('DynamicTable', () => {
     const { container, getByText } = render(app);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c24 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #666687;
+      }
+
+      .c19 {
+        background: #ffffff;
+        padding: 64px;
+      }
+
+      .c21 {
+        padding-bottom: 24px;
+      }
+
+      .c23 {
+        padding-bottom: 16px;
+      }
+
+      .c20 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-align: center;
+      }
+
+      .c22 svg {
+        height: 5.5rem;
+      }
+
+      .c16 tr:last-of-type {
+        border-bottom: none;
+      }
+
+      .c17 {
+        border-bottom: 1px solid #eaeaef;
+      }
+
+      .c17 td,
+      .c17 th {
+        padding: 16px;
+      }
+
+      .c17 td:first-of-type,
+      .c17 th:first-of-type {
+        padding: 0 4px;
+      }
+
+      .c18 {
+        vertical-align: middle;
+        text-align: left;
+        color: #666687;
+        outline-offset: -4px;
+      }
+
+      .c18 input {
+        vertical-align: sub;
+      }
+
       .c12 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -246,74 +314,6 @@ describe('DynamicTable', () => {
 
       .c11 svg {
         height: 0.25rem;
-      }
-
-      .c24 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #666687;
-      }
-
-      .c19 {
-        background: #ffffff;
-        padding: 64px;
-      }
-
-      .c21 {
-        padding-bottom: 24px;
-      }
-
-      .c23 {
-        padding-bottom: 16px;
-      }
-
-      .c20 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-align: center;
-      }
-
-      .c22 svg {
-        height: 5.5rem;
-      }
-
-      .c16 tr:last-of-type {
-        border-bottom: none;
-      }
-
-      .c17 {
-        border-bottom: 1px solid #eaeaef;
-      }
-
-      .c17 td,
-      .c17 th {
-        padding: 16px;
-      }
-
-      .c17 td:first-of-type,
-      .c17 th:first-of-type {
-        padding: 0 4px;
-      }
-
-      .c18 {
-        vertical-align: middle;
-        text-align: left;
-        color: #666687;
-        outline-offset: -4px;
-      }
-
-      .c18 input {
-        vertical-align: sub;
       }
 
       <div

@@ -334,6 +334,17 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
+      .c9 {
+        margin: 0 auto;
+        width: 552px;
+      }
+
+      .c11 {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
       .c30 {
         font-weight: 500;
         font-size: 0.75rem;
@@ -415,17 +426,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
       .c27:active {
         border: 1px solid #4945ff;
         background: #4945ff;
-      }
-
-      .c9 {
-        margin: 0 auto;
-        width: 552px;
-      }
-
-      .c11 {
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
       }
 
       .c28 {

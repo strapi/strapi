@@ -134,8 +134,8 @@ describe('ADMIN | pages | SettingsPage', () => {
 
       .c7 {
         height: 1px;
-        margin: 0;
         border: none;
+        margin: 0;
       }
 
       .c8 {
