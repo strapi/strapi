@@ -7,7 +7,7 @@
 // } from '@strapi/helper-plugin';
 // import { Header, List } from '@buffetjs/custom';
 // import { useIntl } from 'react-intl';
-// import PageTitle from '../../components/PageTitle';
+// import { Helmet } from 'react-helmet';
 // import ContainerFluid from '../../components/ContainerFluid';
 // import ListWrapper from './ListWrapper';
 // import Row from './Row';
@@ -48,7 +48,7 @@
 
 //   return (
 //     <div>
-//       <PageTitle
+//       <Helmet
 //         title={formatMessage({
 //           id: 'app.components.ListPluginsPage.helmet.title',
 //         })}

@@ -5,7 +5,6 @@ export { default as useFetchPluginsFromMarketPlace } from './useFetchPluginsFrom
 export { default as useFetchRole } from './useFetchRole';
 export { default as useMenu } from './useMenu';
 export { default as useRolesList } from './useRolesList';
-export { default as useSettingsHeaderSearchContext } from './useSettingsHeaderSearchContext';
 export { default as useSettingsMenu } from './useSettingsMenu';
 export { default as useSettingsForm } from './useSettingsForm';
 export { default as usePermissionsDataManager } from './usePermissionsDataManager';

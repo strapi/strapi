@@ -4,7 +4,7 @@ import { isEmpty, isFunction } from 'lodash';
 import cn from 'classnames';
 
 // Utils
-import validateInput from '../../../utils/inputsValidations';
+import validateInput from '../../utils/inputsValidations';
 
 // Design
 import Label from '../Label';

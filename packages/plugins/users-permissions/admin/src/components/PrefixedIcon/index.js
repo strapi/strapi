@@ -1,7 +1,7 @@
 import React from 'react';
 import { Flex, Padded, Text } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 
 const PrefixedIcon = ({ icon, name }) => {
