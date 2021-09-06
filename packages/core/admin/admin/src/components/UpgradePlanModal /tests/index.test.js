@@ -7,7 +7,7 @@ import UpgradePlanModal from '../index';
 const App = (
   <ThemeProvider theme={lightTheme}>
     <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
-      <UpgradePlanModal isOpen={true} onClose={jest.fn()} />
+      <UpgradePlanModal isOpen onClose={jest.fn()} />
     </IntlProvider>
   </ThemeProvider>
 );

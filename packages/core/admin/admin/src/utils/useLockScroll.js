@@ -1,12 +1,15 @@
 import { useEffect } from 'react';
 
-export const useLockScroll = lockScroll => {
+const useLockScroll = lockScroll => {
   useEffect(() => {
     if (lockScroll) {
       document.body.classList.add('lock-body-scroll');
     }
-    return () => {
+    
+return () => {
       document.body.classList.remove('lock-body-scroll');
     };
   }, [lockScroll]);
 };
+
+export default useLockScroll;

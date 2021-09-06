@@ -2,8 +2,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { setOpacity } from '../../utils/setOpacity';
-import { useLockScroll } from '../../utils/useLockScroll';
 import { Portal } from '@strapi/parts/Portal';
 import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { IconButton } from '@strapi/parts/IconButton';
@@ -14,8 +12,10 @@ import { Text, H1 } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
-import AirBalloon from './../../../../../admin/admin/src/assets/images/hot-air-balloon.png';
-import BigArrow from './../../../../../admin/admin/src/assets/images/upgrade-details.png';
+import AirBalloon from "../../assets/images/hot-air-balloon.png";
+import BigArrow from "../../assets/images/upgrade-details.png";
+import setOpacity from '../../utils/setOpacity';
+import useLockScroll from '../../utils/useLockScroll';
 
 const UpragdeWrapper = styled.div`
   position: absolute;
@@ -78,7 +78,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
       <UpragdeWrapper>
         <FocusTrap onClose={onClose}>
           <UpgradeContainer aria-labelledby="upgrade-plan" background="neutral0" hasRadius>
-            <img src={AirBalloon} />
+            <img src={AirBalloon} alt="air-balloon" />
             <CloseButtonContainer>
               <IconButton onClick={onClose} label="Close" icon={<CloseAlertIcon />} />
             </CloseButtonContainer>
@@ -111,7 +111,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
                 })}
               </LinkButton>
             </StackFlexStart>
-            <img src={BigArrow} />
+            <img src={BigArrow} alt="upgrade-arrow" />
           </UpgradeContainer>
         </FocusTrap>
       </UpragdeWrapper>
