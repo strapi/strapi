@@ -1,6 +1,6 @@
 'use strict';
 
-const { dirname, join } = require('path');
+const { dirname, join, resolve } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
 const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
@@ -29,9 +29,9 @@ const toDetailedDeclaration = declaration => {
     try {
       pathToPlugin = dirname(require.resolve(declaration.resolve));
     } catch (e) {
-      if (existsSync(declaration.resolve) && statSync(declaration.resolve).isDirectory()) {
-        pathToPlugin = declaration.resolve;
-      } else {
+      pathToPlugin = resolve(strapi.dir, declaration.resolve);
+
+      if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
         throw new Error(`${declaration.resolve} couldn't be resolved`);
       }
     }
