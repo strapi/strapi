@@ -40,7 +40,6 @@ module.exports = strapi => {
               .findMany({
                 where: {
                   role: user.role.id,
-                  enabled: true,
                 },
               });
 
@@ -74,7 +73,6 @@ module.exports = strapi => {
         .findMany({
           where: {
             role: { type: 'public' },
-            enabled: true,
           },
         });
 
