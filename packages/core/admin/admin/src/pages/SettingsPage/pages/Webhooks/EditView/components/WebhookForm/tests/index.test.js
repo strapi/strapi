@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { Router } from 'react-router';
 import { createMemoryHistory } from 'history';
-import en from '../../../../../../translations/en.json';
-import Theme from '../../../../../../components/Theme';
-import LanguageProvider from '../../../../../../components/LanguageProvider';
+import en from '../../../../../../../../translations/en.json';
+import Theme from '../../../../../../../../components/Theme';
+import LanguageProvider from '../../../../../../../../components/LanguageProvider';
 import WebhookForm from '../index';
 
 const makeApp = component => {

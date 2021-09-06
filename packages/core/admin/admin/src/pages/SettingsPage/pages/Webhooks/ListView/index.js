@@ -35,7 +35,7 @@ import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import reducer, { initialState } from './reducer';
-import adminPermissions from '../../../permissions';
+import adminPermissions from '../../../../../permissions';
 
 const ListView = () => {
   const {

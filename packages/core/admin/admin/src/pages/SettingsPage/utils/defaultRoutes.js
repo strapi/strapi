@@ -60,7 +60,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ '../../Webhooks/ProtectedCreateView'
+        /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedCreateView'
       );
 
       return component;
@@ -71,7 +71,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ '../../Webhooks/ProtectedEditView'
+        /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedEditView'
       );
 
       return component;
@@ -82,7 +82,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-list-page" */ '../../Webhooks/ProtectedListView'
+        /* webpackChunkName: "webhook-list-page" */ '../pages/Webhooks/ProtectedListView'
       );
 
       return component;
