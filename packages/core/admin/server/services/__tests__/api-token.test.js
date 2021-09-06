@@ -243,4 +243,35 @@ describe('API Token', () => {
       expect(res).toEqual(null);
     });
   });
+
+  describe('update', () => {
+    test('Updates a token', async () => {
+      const update = jest.fn(({ data }) => Promise.resolve(data));
+
+      global.strapi = {
+        query() {
+          return { update };
+        },
+        config: {
+          get: jest.fn(() => ''),
+        },
+      };
+
+      const id = 1;
+      const attributes = {
+        name: 'api-token_tests-updated-name',
+        description: 'api-token_tests-description',
+        type: 'read-only',
+      };
+
+      const res = await apiTokenService.update(id, attributes);
+
+      expect(update).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { id },
+        data: attributes,
+      });
+      expect(res).toEqual(attributes);
+    });
+  });
 });
