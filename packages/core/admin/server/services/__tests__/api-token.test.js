@@ -207,7 +207,7 @@ describe('API Token', () => {
       type: 'read-only',
     };
 
-    test('It deletes the token', async () => {
+    test('It retrieves the token', async () => {
       const findOne = jest.fn().mockResolvedValue(token);
 
       global.strapi = {
@@ -216,7 +216,7 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.get(token.id);
+      const res = await apiTokenService.getById(token.id);
 
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type'],
@@ -234,7 +234,7 @@ describe('API Token', () => {
         },
       };
 
-      const res = await apiTokenService.get(42);
+      const res = await apiTokenService.getById(42);
 
       expect(findOne).toHaveBeenCalledWith({
         select: ['id', 'name', 'description', 'type'],
