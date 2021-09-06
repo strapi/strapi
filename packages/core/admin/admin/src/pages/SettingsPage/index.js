@@ -14,7 +14,7 @@ import { LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-plugin';
 import { Switch, Redirect, Route, useParams } from 'react-router-dom';
 import { Layout } from '@strapi/parts/Layout';
 import { useIntl } from 'react-intl';
-import PageTitle from '../../components/PageTitle';
+import { Helmet } from 'react-helmet';
 import { useSettingsMenu } from '../../hooks';
 import { createRoute, makeUniqueRoutes } from '../../utils';
 import ApplicationInfosPage from '../ApplicationInfosPage';
@@ -53,7 +53,7 @@ function SettingsPage() {
 
   return (
     <Layout sideNav={<SettingsNav menu={menu} />}>
-      <PageTitle title={settingTitle} />
+      <Helmet title={settingTitle} />
 
       <Switch>
         <Route path="/settings/application-infos" component={ApplicationInfosPage} exact />

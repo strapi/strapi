@@ -8,7 +8,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { get, upperFirst } from 'lodash';
 import { auth, LoadingIndicatorPage } from '@strapi/helper-plugin';
-import PageTitle from '../../components/PageTitle';
+import { Helmet } from 'react-helmet';
 import { useModels } from '../../hooks';
 
 import useFetch from './hooks';
@@ -108,7 +108,7 @@ const HomePage = ({ history: { push } }) => {
   return (
     <>
       <FormattedMessage id="HomePage.helmet.title">
-        {title => <PageTitle title={title[0]} />}
+        {title => <Helmet title={title[0]} />}
       </FormattedMessage>
       <Container className="container-fluid">
         <div className="row">

@@ -6,7 +6,7 @@
 // import { useIntl } from 'react-intl';
 // import ContainerFluid from '../../components/ContainerFluid';
 // import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
-// import PageTitle from '../../components/PageTitle';
+// import { Helmet } from 'react-helmet';
 // import SizedInput from '../../components/SizedInput';
 // import FormBloc from '../../components/FormBloc';
 // import { useSettingsForm } from '../../hooks';
@@ -47,7 +47,7 @@
 
 //   return (
 //     <>
-//       <PageTitle title="User profile" />
+//       <Helmet title="User profile" />
 //       <form onSubmit={handleSubmit}>
 //         <ContainerFluid padding="18px 30px 0 30px">
 //           <Header

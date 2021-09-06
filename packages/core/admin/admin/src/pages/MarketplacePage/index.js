@@ -13,7 +13,7 @@ import {
 // import { useIntl } from 'react-intl';
 // import { useHistory } from 'react-router-dom';
 // import { useFetchPluginsFromMarketPlace } from '../../hooks';
-// import PageTitle from '../../components/PageTitle';
+// import { Helmet } from 'react-helmet';
 // import PluginCard from './PluginCard';
 // import Wrapper from './Wrapper';
 // import MarketplaceBanner from './MarketplaceBanner';
@@ -77,7 +77,7 @@ import adminPermissions from '../../permissions';
 
 //   return (
 //     <div>
-//       <PageTitle
+//       <Helmet
 //         title={formatMessage({
 //           id: 'app.components.InstallPluginPage.helmet',
 //         })}
