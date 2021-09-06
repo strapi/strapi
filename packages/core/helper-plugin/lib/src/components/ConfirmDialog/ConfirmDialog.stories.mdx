@@ -28,7 +28,7 @@ TODO
       return (
         <>
           <Button onClick={handleToggle}>Click me</Button>
-          <ConfirmDialog isConfirmButtonLoading={isLoading} isVisible={dialogOpen} onToggleDialog={handleToggle} onConfirm={handleDelete} />
+          <ConfirmDialog isConfirmButtonLoading={isLoading} isOpen={dialogOpen} onToggleDialog={handleToggle} onConfirm={handleDelete} />
         </>
       );
     }}
@@ -47,7 +47,7 @@ TODO
           <Button onClick={handleToggle}>Click me</Button>
           <ConfirmDialog 
             isConfirmButtonLoading={true} 
-            isVisible={dialogOpen} 
+            isOpen={dialogOpen} 
             onToggleDialog={handleToggle} 
             onConfirm={handleDelete} 
           />
@@ -72,7 +72,7 @@ TODO
             iconBody={<HelpIcon/>}
             iconRightButton={<CheckIcon/>}
             isConfirmButtonLoading={isLoading} 
-            isVisible={dialogOpen} 
+            isOpen={dialogOpen} 
             onToggleDialog={handleToggle} 
             onConfirm={handleDelete} 
             title={{id: 'app.components.ConfirmDialog.title', defaultMessage: 'Confirmation'}}

@@ -22,66 +22,66 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c7 {
+      .c8 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c9 {
+      .c11 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
       }
 
-      .c14 {
+      .c16 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c22 {
+      .c24 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c34 {
+      .c33 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #4945ff;
       }
 
-      .c37 {
+      .c36 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c10 {
+      .c12 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c35 {
+      .c34 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c36 {
+      .c35 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c1 {
+      .c2 {
         background: #ffffff;
         padding-top: 48px;
         padding-right: 56px;
@@ -91,29 +91,29 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c6 {
+      .c7 {
         padding-top: 24px;
         padding-bottom: 4px;
       }
 
-      .c8 {
+      .c9 {
         padding-bottom: 32px;
       }
 
-      .c19 {
+      .c21 {
         padding-right: 12px;
         padding-left: 8px;
       }
 
-      .c25 {
+      .c27 {
         padding-left: 8px;
       }
 
-      .c32 {
+      .c31 {
         padding-top: 16px;
       }
 
-      .c3 {
+      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -127,7 +127,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c15 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -145,7 +145,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c31 {
+      .c30 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -163,7 +163,33 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c24 {
+      .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+      }
+
+      .c28 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c28 svg > g,
+      .c28 svg path {
+        fill: #ffffff;
+      }
+
+      .c28[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c26 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -173,12 +199,12 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         background-color: #ffffff;
       }
 
-      .c24:checked {
+      .c26:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c24:checked:after {
+      .c26:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -192,21 +218,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c24:checked:disabled:after {
+      .c26:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c24:disabled {
+      .c26:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c24:indeterminate {
+      .c26:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c24:indeterminate:after {
+      .c26:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -221,32 +247,87 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c24:indeterminate:disabled {
+      .c26:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c24:indeterminate:disabled:after {
+      .c26:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c11 {
+      .c29 {
+        padding: 8px 16px;
+        background: #4945ff;
+        border: none;
+        border: 1px solid #4945ff;
+        background: #4945ff;
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        width: 100%;
+      }
+
+      .c29 .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
-      .c11 > * {
-        margin-top: 0;
-        margin-bottom: 0;
+      .c29 .c10 {
+        color: #ffffff;
       }
 
-      .c11 > * + * {
-        margin-top: 24px;
+      .c29[aria-disabled='true'] {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c29[aria-disabled='true'] .c10 {
+        color: #666687;
+      }
+
+      .c29[aria-disabled='true'] svg > g,
+      .c29[aria-disabled='true'] svg path {
+        fill: #666687;
+      }
+
+      .c29[aria-disabled='true']:active {
+        border: 1px solid #dcdce4;
+        background: #eaeaef;
+      }
+
+      .c29[aria-disabled='true']:active .c10 {
+        color: #666687;
+      }
+
+      .c29[aria-disabled='true']:active svg > g,
+      .c29[aria-disabled='true']:active svg path {
+        fill: #666687;
+      }
+
+      .c29:hover {
+        border: 1px solid #7b79ff;
+        background: #7b79ff;
+      }
+
+      .c29:active {
+        border: 1px solid #4945ff;
+        background: #4945ff;
       }
 
       .c13 {
@@ -265,10 +346,29 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       .c13 > * + * {
+        margin-top: 24px;
+      }
+
+      .c15 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c15 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c15 > * + * {
         margin-top: 4px;
       }
 
-      .c17 {
+      .c19 {
         border: none;
         padding-left: 16px;
         padding-right: 16px;
@@ -280,36 +380,36 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         height: 2.5rem;
       }
 
-      .c17::-webkit-input-placeholder {
+      .c19::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c17::-moz-placeholder {
+      .c19::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c17:-ms-input-placeholder {
+      .c19:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c17::placeholder {
+      .c19::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c17:disabled {
+      .c19:disabled {
         background: inherit;
         color: inherit;
       }
 
-      .c17:focus {
+      .c19:focus {
         outline: none;
       }
 
-      .c18 {
+      .c20 {
         border: none;
         padding-left: 16px;
         padding-right: 0;
@@ -321,47 +421,47 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         height: 2.5rem;
       }
 
-      .c18::-webkit-input-placeholder {
+      .c20::-webkit-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c18::-moz-placeholder {
+      .c20::-moz-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c18:-ms-input-placeholder {
+      .c20:-ms-input-placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c18::placeholder {
+      .c20::placeholder {
         color: #8e8ea9;
         opacity: 1;
       }
 
-      .c18:disabled {
+      .c20:disabled {
         background: inherit;
         color: inherit;
       }
 
-      .c18:focus {
+      .c20:focus {
         outline: none;
       }
 
-      .c16 {
+      .c18 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
         overflow: hidden;
       }
 
-      .c16:focus-within {
+      .c18:focus-within {
         border: 1px solid #4945ff;
       }
 
-      .c23 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -372,15 +472,15 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c23 * {
+      .c25 * {
         cursor: default;
       }
 
-      .c12 textarea {
+      .c14 textarea {
         height: 5rem;
       }
 
-      .c33 {
+      .c32 {
         display: -webkit-inline-box;
         display: -webkit-inline-flex;
         display: -ms-inline-flexbox;
@@ -394,11 +494,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         text-decoration: none;
       }
 
-      .c33 svg path {
+      .c32 svg path {
         fill: #4945ff;
       }
 
-      .c33 svg {
+      .c32 svg {
         font-size: 0.625rem;
       }
 
@@ -406,110 +506,22 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         outline: none;
       }
 
-      .c2 {
+      .c3 {
         margin: 0 auto;
         width: 552px;
       }
 
-      .c4 {
+      .c5 {
         -webkit-flex-direction: column;
         -ms-flex-direction: column;
         flex-direction: column;
       }
 
-      .c5 {
+      .c6 {
         height: 4.5rem;
       }
 
-      .c30 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c26 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c26 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c26 svg > g,
-      .c26 svg path {
-        fill: #ffffff;
-      }
-
-      .c26[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c27 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c27 .c29 {
-        color: #ffffff;
-      }
-
-      .c27[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c27[aria-disabled='true'] .c29 {
-        color: #666687;
-      }
-
-      .c27[aria-disabled='true'] svg > g,
-      .c27[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c27[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c27[aria-disabled='true']:active .c29 {
-        color: #666687;
-      }
-
-      .c27[aria-disabled='true']:active svg > g,
-      .c27[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c27:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c27:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c28 {
-        display: inline-block;
-        width: 100%;
-      }
-
-      .c20 {
+      .c22 {
         border: none;
         background: transparent;
         font-size: 1.6rem;
@@ -525,12 +537,12 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         align-items: center;
       }
 
-      .c21 svg {
+      .c23 svg {
         height: 1rem;
         width: 1rem;
       }
 
-      .c21 svg path {
+      .c23 svg path {
         fill: #666687;
       }
 
@@ -541,66 +553,66 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         tabindex="-1"
       >
         <div
-          class="c1 c2"
+          class="c1 c2 c3"
         >
           <form
             action="#"
             novalidate=""
           >
             <div
-              class="c3 c4"
+              class="c1 c4 c5"
             >
               <img
                 alt=""
                 aria-hidden="true"
-                class="c5"
+                class="c6"
               />
               <div
-                class="c6"
+                class="c1 c7"
               >
                 <h1
-                  class="c7"
+                  class="c8"
                   id="welcome"
                 >
                   Welcome back!
                 </h1>
               </div>
               <div
-                class="c8"
+                class="c1 c9"
               >
                 <span
-                  class="c9 c10"
+                  class="c10 c11 c12"
                 >
                   Log in to your Strapi account
                 </span>
               </div>
             </div>
             <div
-              class="c11"
+              class="c13"
             >
               <div
-                class="c12"
+                class="c14"
               >
                 <div>
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class="c3"
+                      class="c1 c4"
                     >
                       <label
-                        class="c14"
+                        class="c10 c16"
                         for="textinput-1"
                       >
                         Email
                       </label>
                     </div>
                     <div
-                      class="c15 c16"
+                      class="c1 c17 c18"
                     >
                       <input
                         aria-invalid="false"
-                        class="c17"
+                        class="c19"
                         id="textinput-1"
                         name="email"
                         placeholder="kai@doe.com"
@@ -612,28 +624,28 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                 </div>
               </div>
               <div
-                class="c12"
+                class="c14"
               >
                 <div>
                   <div
-                    class="c13"
+                    class="c15"
                   >
                     <div
-                      class="c3"
+                      class="c1 c4"
                     >
                       <label
-                        class="c14"
+                        class="c10 c16"
                         for="textinput-2"
                       >
                         Password
                       </label>
                     </div>
                     <div
-                      class="c15 c16"
+                      class="c1 c17 c18"
                     >
                       <input
                         aria-invalid="false"
-                        class="c18"
+                        class="c20"
                         id="textinput-2"
                         name="password"
                         required=""
@@ -641,11 +653,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                         value=""
                       />
                       <div
-                        class="c19"
+                        class="c1 c21"
                       >
                         <button
                           aria-label="Hide password"
-                          class="c20 c21"
+                          class="c22 c23"
                           type="button"
                         >
                           <svg
@@ -668,20 +680,20 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
               <div>
                 <div
-                  class="c13"
+                  class="c15"
                 >
                   <label
-                    class="c22 c23"
+                    class="c10 c24 c25"
                   >
                     <input
                       aria-label="rememberMe"
-                      class="c24"
+                      class="c26"
                       id="checkbox-3"
                       name="rememberMe"
                       type="checkbox"
                     />
                     <div
-                      class="c25"
+                      class="c1 c27"
                     >
                       Remember me
                     </div>
@@ -690,11 +702,11 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
               <button
                 aria-disabled="false"
-                class="c26 c27 c28"
+                class="c28 c29"
                 type="submit"
               >
                 <span
-                  class="c29 c30"
+                  class="c10 c16"
                 >
                   Login
                 </span>
@@ -703,20 +715,20 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
           </form>
         </div>
         <div
-          class="c31"
+          class="c1 c30"
         >
           <div
-            class="c32"
+            class="c1 c31"
           >
             <a
-              class="c33"
+              class="c32"
               href="/auth/forgot-password"
             >
               <span
-                class="c34 c35 c36"
+                class="c10 c33 c34 c35"
               >
                 <span
-                  class="c37"
+                  class="c10 c36"
                 >
                   Forgot your password?
                 </span>

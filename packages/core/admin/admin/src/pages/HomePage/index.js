@@ -12,7 +12,6 @@ import { useModels } from '../../hooks';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
 import ContentBlocks from './ContentBlocks';
-import PageTitle from '../../components/PageTitle';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Layout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
