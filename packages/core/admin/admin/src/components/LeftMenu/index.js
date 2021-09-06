@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import get from 'lodash/get';
+
 import { useHistory } from 'react-router-dom';
 import {
   MainNav,
@@ -16,23 +16,14 @@ import {
   Button,
 } from '@strapi/parts';
 import ContentIcon from '@strapi/icons/ContentIcon';
-import { auth, usePersistentState } from '@strapi/helper-plugin';
+import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { menuLogo } = useConfigurations();
   const { push } = useHistory();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
-
-  const userInfo = auth.getUserInfo();
-
-  let displayName;
-
-  if (userInfo && userInfo.firstname && userInfo.lastname) {
-    displayName = `${userInfo.firstname} ${userInfo.lastname}`;
-  } else {
-    displayName = get(userInfo, 'username', '');
-  }
+  const { userDisplayName } = useAppInfos();
 
   return (
     <MainNav condensed={condensed}>
@@ -62,7 +53,12 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         {generalSectionLinks.length > 0 ? (
           <NavSection label="General">
             {generalSectionLinks.map(link => (
-              <NavLink to={link.to} key={link.to} icon={<FontAwesomeIcon icon={link.icon} />}>
+              <NavLink
+                badgeContent={link.notificationsCount > 0 && link.notificationsCount}
+                to={link.to}
+                key={link.to}
+                icon={<FontAwesomeIcon icon={link.icon} />}
+              >
                 <FormattedMessage {...link.intlLabel} />
               </NavLink>
             ))}
@@ -81,7 +77,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       </NavSections>
 
       <NavUser src="https://avatars.githubusercontent.com/u/3874873?v=4" to="/me">
-        {displayName}
+        {userDisplayName}
       </NavUser>
 
       <NavCondense onClick={() => setCondensed(s => !s)}>

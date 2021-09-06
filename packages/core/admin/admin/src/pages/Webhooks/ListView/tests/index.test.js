@@ -12,6 +12,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useNotification: jest.fn(),
   useRBAC: jest.fn(),
+  useFocusWhenNavigate: jest.fn(),
 }));
 
 const history = createMemoryHistory();

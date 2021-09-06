@@ -1,4 +1,5 @@
 import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { IntlProvider } from 'react-intl';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -13,9 +14,11 @@ export const parameters = {
 export const decorators = [
   Story => (
     <ThemeProvider theme={lightTheme}>
-      <main>
-        <Story />
-      </main>
+      <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+        <main>
+          <Story />
+        </main>
+      </IntlProvider>
     </ThemeProvider>
   ),
 ];

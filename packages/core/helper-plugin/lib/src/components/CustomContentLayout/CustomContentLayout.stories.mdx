@@ -1,0 +1,76 @@
+<!--- CustomContentLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Button, Main, Row } from '@strapi/parts';
+import { AddIcon } from '@strapi/icons';
+import CustomContentLayout from './index';
+
+<Meta title="components/CustomContentLayout" />
+
+# CustomContentLayout
+
+TODO...
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    <Main>
+      <CustomContentLayout>children</CustomContentLayout>
+    </Main>
+  </Story>
+</Canvas>
+
+## Empty State
+
+<Canvas>
+  <Story name="empty-state">
+    <Main>
+      <CustomContentLayout shouldShowEmptyState>children</CustomContentLayout>
+    </Main>
+  </Story>
+</Canvas>
+
+## Empty State with action
+
+<Canvas>
+  <Story name="empty-state-with-action">
+    <Main>
+      <CustomContentLayout shouldShowEmptyState action={
+          <Button variant="secondary" startIcon={<AddIcon />}>
+            Create your first content-type
+          </Button>
+        }>
+        children
+      </CustomContentLayout>
+    </Main>
+  </Story>
+</Canvas>
+
+## No permissions
+
+<Canvas>
+  <Story name="no-permissions">
+    <Main>
+      <CustomContentLayout canRead={false} shouldShowEmptyState>
+        children
+      </CustomContentLayout>
+    </Main>
+  </Story>
+</Canvas>
+
+## Loading
+
+<Canvas>
+  <Story name="loading">
+    <Main>
+      <CustomContentLayout isLoading>
+        children
+      </CustomContentLayout>
+    </Main>
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={CustomContentLayout} />

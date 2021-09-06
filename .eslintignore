@@ -7,7 +7,7 @@ examples/**
 cypress/**
 packages/generators/plugin/files/admin/src/**
 packages/core/helper-plugin/build/**
-packages/core/helper-plugin/lib/src/components/**
+packages/core/helper-plugin/lib/src/old/components/**
 packages/core/helper-plugin/lib/src/testUtils/**
 packages/core/helper-plugin/lib/src/utils/**
 packages/plugins/users-permissions/admin/OLD/**

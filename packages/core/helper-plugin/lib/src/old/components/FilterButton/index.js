@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 
 import Wrapper from './Wrapper';
 import RemoveButton from './RemoveButton';

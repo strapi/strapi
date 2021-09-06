@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { Form, useFormikContext, getIn } from 'formik';
 
+// TODO move the components folder
 const FormWithFocus = props => {
   const { isSubmitting, isValidating, errors, touched } = useFormikContext();
 
@@ -11,6 +12,7 @@ const FormWithFocus = props => {
       if (errorNames.length) {
         let errorEl;
 
+        // Does not handle field arrays
         errorNames.forEach(errorKey => {
           const selector = `[name="${errorKey}"]`;
 
@@ -19,15 +21,13 @@ const FormWithFocus = props => {
           }
         });
 
-        errorEl.focus();
+        errorEl?.focus();
       }
     }
     if (!isSubmitting && !isValidating && Object.keys(errors).length) {
       const el = document.getElementById('global-form-error');
 
-      if (el) {
-        el.focus();
-      }
+      el?.focus();
     }
   }, [errors, isSubmitting, isValidating, touched]);
 

@@ -134,32 +134,35 @@ export { default as NotificationsProvider } from './providers/NotificationsProvi
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
 
 // Utils
-export { default as auth } from './utils/auth';
-export { default as cleanData } from './utils/cleanData';
-export { default as difference } from './utils/difference';
+export { default as auth } from './old/utils/auth';
+export { default as cleanData } from './old/utils/cleanData';
+export { default as difference } from './old/utils/difference';
 export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
-export { default as dateFormats } from './utils/dateFormats';
-export { default as dateToUtcTime } from './utils/dateToUtcTime';
+export { default as dateFormats } from './old/utils/dateFormats';
+export { default as dateToUtcTime } from './old/utils/dateToUtcTime';
 export { default as formatComponentData } from './content-manager/utils/formatComponentData';
-export { default as hasPermissions } from './utils/hasPermissions';
-export { findMatchingPermissions } from './utils/hasPermissions';
-export { default as translatedErrors } from './utils/translatedErrors';
-export { darken } from './utils/colors';
-export { default as getFileExtension } from './utils/getFileExtension';
-export { default as getFilterType } from './utils/getFilterType';
-export { default as getQueryParameters } from './utils/getQueryParameters';
-export { default as validateInput } from './utils/inputsValidations';
-export { default as request } from './utils/request';
-export { default as storeData } from './utils/storeData';
-export { default as templateObject } from './utils/templateObject';
+export { default as hasPermissions } from './old/utils/hasPermissions';
+export { findMatchingPermissions } from './old/utils/hasPermissions';
+export { default as translatedErrors } from './old/utils/translatedErrors';
+export { darken } from './old/utils/colors';
+export { default as getFileExtension } from './old/utils/getFileExtension';
+export { default as getFilterType } from './old/utils/getFilterType';
+export { default as getQueryParameters } from './old/utils/getQueryParameters';
+export { default as validateInput } from './old/utils/inputsValidations';
+export { default as request } from './old/utils/request';
+export { default as storeData } from './old/utils/storeData';
+export { default as templateObject } from './old/utils/templateObject';
 export { getType };
 export { getOtherInfos };
-export { default as getYupInnerErrors } from './utils/getYupInnerErrors';
-export { default as generateFiltersFromSearch } from './utils/generateFiltersFromSearch';
-export { default as generateSearchFromFilters } from './utils/generateSearchFromFilters';
-export { default as generateSearchFromObject } from './utils/generateSearchFromObject';
-export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl';
-export { default as prefixPluginTranslations } from './utils/prefixPluginTranslations';
+export { default as getYupInnerErrors } from './old/utils/getYupInnerErrors';
+export { default as generateFiltersFromSearch } from './old/utils/generateFiltersFromSearch';
+export { default as generateSearchFromFilters } from './old/utils/generateSearchFromFilters';
+export { default as generateSearchFromObject } from './old/utils/generateSearchFromObject';
+export { default as prefixFileUrlWithBackendUrl } from './old/utils/prefixFileUrlWithBackendUrl';
+export { default as prefixPluginTranslations } from './old/utils/prefixPluginTranslations';
+
+export { default as pxToRem } from './utils/pxToRem';
+export { default as to } from './utils/await-to-js';
 
 // SVGS
 export { default as LayoutIcon } from './old/svgs/Layout';
@@ -172,6 +175,18 @@ export { default as SearchIcon } from './old/svgs/Search';
 // New components
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
+export { default as ConfirmDialog } from './components/ConfirmDialog';
+export { default as ContentBox } from './components/ContentBox';
+export { default as CustomContentLayout } from './components/CustomContentLayout';
+export { default as EmptyStateLayout } from './components/EmptyStateLayout';
+export { default as EmptyBodyTable } from './components/EmptyBodyTable';
+export { default as GenericInput } from './components/GenericInput';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
+export { default as Search } from './components/Search';
+export { default as Status } from './components/Status';
+
+// New icons
+export { default as SortIcon } from './icons/SortIcon';
+export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
