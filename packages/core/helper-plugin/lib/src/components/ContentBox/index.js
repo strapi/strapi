@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
-import { Text, TextButton } from '@strapi/parts/Text';
+import { Text } from '@strapi/parts/Text';
+import { TextButton } from '@strapi/parts/TextButton';
 
 const IconWrapper = styled(Row)`
   margin-right: ${({ theme }) => theme.spaces[6]};

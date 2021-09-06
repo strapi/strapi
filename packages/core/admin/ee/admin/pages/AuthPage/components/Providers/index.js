@@ -13,6 +13,7 @@ import {
   Link,
   Text,
   Loader,
+  Button,
 } from '@strapi/parts';
 import { useIntl } from 'react-intl';
 import { useAuthProviders } from '../../../../hooks';
@@ -22,7 +23,6 @@ import UnauthenticatedLayout, {
 } from '../../../../../../admin/src/layouts/UnauthenticatedLayout';
 import SSOProviders from './SSOProviders';
 import Logo from '../../../../../../admin/src/pages/AuthPage/components/Logo';
-import AuthButton from '../../../../../../admin/src/pages/AuthPage/components/AuthButton';
 
 const DividerFull = styled(Divider)`
   flex: 1;
@@ -73,9 +73,9 @@ const Providers = () => {
               </Box>
               <DividerFull />
             </Row>
-            <AuthButton size="L" onClick={handleClick}>
+            <Button fullWidth size="L" onClick={handleClick}>
               {formatMessage({ id: 'Auth.form.button.login.strapi' })}
-            </AuthButton>
+            </Button>
           </Stack>
         </LayoutContent>
         <Row justifyContent="center">
