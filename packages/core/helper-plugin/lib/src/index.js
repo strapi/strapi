@@ -127,6 +127,7 @@ export { default as useRBACProvider } from './hooks/useRBACProvider';
 export { default as useRBAC } from './hooks/useRBAC';
 export { default as usePersistentState } from './hooks/usePersistentState';
 export { default as useFocusWhenNavigate } from './hooks/useFocusWhenNavigate';
+export { default as useLockScroll } from './hooks/useLockScroll';
 
 // Providers
 export { default as LibraryProvider } from './providers/LibraryProvider';
@@ -166,7 +167,6 @@ export { default as to } from './utils/await-to-js';
 
 // NEW UTILS
 export { default as setHexOpacity } from './utils/setHexOpacity';
-export { default as useLockScroll } from './utils/useLockScroll';
 
 // SVGS
 export { default as LayoutIcon } from './old/svgs/Layout';
