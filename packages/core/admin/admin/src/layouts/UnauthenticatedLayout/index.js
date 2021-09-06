@@ -2,7 +2,7 @@ import React from 'react';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { Box, Row } from '@strapi/parts';
-import LocaleToggle from '../components/LocaleToggle';
+import LocaleToggle from './LocaleToggle';
 
 const Wrapper = styled(Box)`
   margin: 0 auto;

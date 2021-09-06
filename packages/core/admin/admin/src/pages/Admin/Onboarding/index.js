@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import cn from 'classnames';
-import { useConfigurations } from '../../hooks';
+import { useConfigurations } from '../../../hooks';
 import StaticLinks from './StaticLinks';
 import Wrapper from './Wrapper';
 

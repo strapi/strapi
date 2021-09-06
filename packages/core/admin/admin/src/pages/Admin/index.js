@@ -11,10 +11,10 @@ import { useTracking, LoadingIndicatorPage, useStrapiApp } from '@strapi/helper-
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import LeftMenu from '../../components/LeftMenu';
-import Onboarding from '../../components/Onboarding';
-import { useMenu, useReleaseNotification } from '../../hooks';
-import { createRoute } from '../../utils';
 import AppLayout from '../../layouts/AppLayout';
+import { useMenu, useReleaseNotification } from '../../hooks';
+import Onboarding from './Onboarding';
+import { createRoute } from '../../utils';
 
 // const CM = lazy(() =>
 //   import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
