@@ -27,22 +27,22 @@ export default {
         },
       },
       [
-        // {
-        //   intlLabel: {
-        //     id: getTrad('HeaderNav.link.roles'),
-        //     defaultMessage: 'Roles',
-        //   },
-        //   id: 'roles',
-        //   to: `/settings/${pluginId}/roles`,
-        //   Component: async () => {
-        //     const component = await import(
-        //       /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
-        //     );
+        {
+          intlLabel: {
+            id: getTrad('HeaderNav.link.roles'),
+            defaultMessage: 'Roles',
+          },
+          id: 'roles',
+          to: `/settings/${pluginId}/roles`,
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "users-roles-settings-page" */ './pages/Roles'
+            );
 
-        //     return component;
-        //   },
-        //   permissions: pluginPermissions.accessRoles,
-        // },
+            return component;
+          },
+          permissions: pluginPermissions.accessRoles,
+        },
         {
           intlLabel: {
             id: getTrad('HeaderNav.link.providers'),
