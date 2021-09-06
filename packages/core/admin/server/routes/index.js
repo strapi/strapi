@@ -3,17 +3,6 @@
 module.exports = [
   {
     method: 'GET',
-    path: '/plugins',
-    handler: 'admin.plugins',
-    config: {
-      policies: [
-        'admin::isAuthenticatedAdmin',
-        { name: 'admin::hasPermissions', options: { actions: ['admin::marketplace.read'] } },
-      ],
-    },
-  },
-  {
-    method: 'GET',
     path: '/init',
     handler: 'admin.init',
   },
@@ -28,6 +17,17 @@ module.exports = [
     handler: 'admin.information',
     config: {
       policies: ['admin::isAuthenticatedAdmin'],
+    },
+  },
+  {
+    method: 'GET',
+    path: '/plugins',
+    handler: 'admin.plugins',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::marketplace.read'] } },
+      ],
     },
   },
   {

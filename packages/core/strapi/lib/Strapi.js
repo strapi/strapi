@@ -316,7 +316,7 @@ class Strapi {
     this.telemetry = createTelemetry(this);
 
     // Initialize middlewares.
-    await initializeMiddlewares.call(this);
+    await initializeMiddlewares(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 

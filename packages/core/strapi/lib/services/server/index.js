@@ -83,13 +83,12 @@ const createContentAPI = strapi => {
   const api = createAPI(strapi, opts);
 
   // TODO: attach authentication middleware
-  api.use((ctx, next) => {
-    if (ctx.request.query.token === 'token') {
-      return next();
-    }
-
-    ctx.forbidden();
-  });
+  // api.use((ctx, next) => {
+  // if (ctx.request.query.token === 'token') {
+  //   return next();
+  // }
+  // ctx.forbidden();
+  // });
 
   return api;
 };

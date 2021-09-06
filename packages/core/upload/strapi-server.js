@@ -10,7 +10,6 @@ const middlewares = require('./server/middlewares');
 
 module.exports = () => {
   return {
-    register: () => {},
     bootstrap,
     config,
     routes,
