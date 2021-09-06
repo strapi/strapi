@@ -173,6 +173,7 @@ export { default as SearchIcon } from './old/svgs/Search';
 export { default as CheckPagePermissions } from './components/CheckPagePermissions';
 export { default as CheckPermissions } from './components/CheckPermissions';
 export { default as ConfirmDialog } from './components/ConfirmDialog';
+export { default as ContentBox } from './components/ContentBox';
 export { default as CustomContentLayout } from './components/CustomContentLayout';
 export { default as EmptyStateLayout } from './components/EmptyStateLayout';
 export { default as EmptyBodyTable } from './components/EmptyBodyTable';
