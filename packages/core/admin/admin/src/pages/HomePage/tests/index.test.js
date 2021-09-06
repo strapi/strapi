@@ -1,13 +1,14 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import HomePage from '../index';
+import { useModels } from '../../../hooks';
 
 jest.mock('../../../hooks', () => ({
-  useModels: jest.fn(() => ({ isLoading: false, collectionTypes: [], singleTypes: [] })),
+  useModels: jest.fn(),
 }));
 
 const history = createMemoryHistory();
@@ -23,6 +24,12 @@ const App = (
 );
 
 describe('Admin | containers | ListView', () => {
+  useModels.mockImplementation(() => ({
+    isLoading: false,
+    collectionTypes: [],
+    singleTypes: [],
+  }));
+
   it('renders and matches the snapshot', () => {
     const {
       container: { firstChild },
@@ -1279,5 +1286,37 @@ describe('Admin | containers | ListView', () => {
         </div>
       </div>
     `);
+  });
+
+  it('should show congrats message when there is no collectionTypes and no singletypes', () => {
+    useModels.mockImplementation(() => ({
+      isLoading: false,
+      collectionTypes: [],
+      singleTypes: [],
+    }));
+
+    render(App);
+
+    expect(
+      screen.getByText(
+        'Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!'
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('should show regular message when there are collectionTypes and singletypes', () => {
+    useModels.mockImplementation(() => ({
+      isLoading: false,
+      collectionTypes: [{ uuid: 102 }],
+      singleTypes: [{ isDisplayed: true }],
+    }));
+
+    render(App);
+
+    expect(
+      screen.getByText(
+        'We hope you are making progress on your project! Feel free to read the latest news about Strapi. We are giving our best to improve the product based on your feedback.'
+      )
+    ).toBeInTheDocument();
   });
 });
