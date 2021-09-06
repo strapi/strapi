@@ -38,7 +38,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "admin-users" */ '../../Users/ProtectedListPage'
+        /* webpackChunkName: "admin-users" */ '../pages/Users/ProtectedListPage'
       );
 
       return component;
@@ -49,7 +49,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "admin-edit-users" */ '../../Users/ProtectedEditPage'
+        /* webpackChunkName: "admin-edit-users" */ '../pages/Users/ProtectedEditPage'
       );
 
       return component;
