@@ -3,7 +3,7 @@
 const { dirname, join } = require('path');
 const { statSync, existsSync } = require('fs');
 const _ = require('lodash');
-const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe, keys } = require('lodash/fp');
+const { get, has, pick, pickBy, defaultsDeep, map, prop, pipe } = require('lodash/fp');
 const { isKebabCase } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 
@@ -27,9 +27,6 @@ const toDetailedDeclaration = declaration => {
   }
 
   let detailedDeclaration = pick(['enabled'], declaration);
-  if (has('config', declaration)) {
-    detailedDeclaration.userConfig = declaration.config;
-  }
   if (has('resolve', declaration)) {
     let pathToPlugin = '';
     try {
@@ -48,13 +45,20 @@ const toDetailedDeclaration = declaration => {
 };
 
 const getEnabledPlugins = async strapi => {
-  const projectDependencies = [
-    ...keys(strapi.config.get('info.dependencies', {})),
-    ...INTERNAL_PLUGINS,
-  ];
+  const internalPlugins = {};
+  for (const dep of INTERNAL_PLUGINS) {
+    const packagePath = join(dep, 'package.json');
+    const packageInfo = require(packagePath);
+
+    validatePluginName(packageInfo.strapi.name);
+    internalPlugins[packageInfo.strapi.name] = toDetailedDeclaration({
+      enabled: true,
+      resolve: packagePath,
+    });
+  }
 
   const installedPlugins = {};
-  for (const dep of projectDependencies) {
+  for (const dep in strapi.config.get('info.dependencies', {})) {
     const packagePath = join(dep, 'package.json');
     const packageInfo = require(packagePath);
 
@@ -83,9 +87,10 @@ const getEnabledPlugins = async strapi => {
     installedPlugins
   );
   const enabledPlugins = pipe(
+    defaultsDeep(declaredPlugins),
     defaultsDeep(installedPluginsNotAlreadyUsed),
     pickBy(p => p.enabled)
-  )(declaredPlugins);
+  )(internalPlugins);
 
   return enabledPlugins;
 };
