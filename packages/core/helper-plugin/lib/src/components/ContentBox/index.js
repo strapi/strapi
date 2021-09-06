@@ -15,7 +15,7 @@ const IconWrapper = styled(Row)`
 
 const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
   return (
-    <Row shadow="tableShadow" hasRadius padding={6}>
+    <Row shadow="tableShadow" hasRadius padding={6} background="neutral0">
       <IconWrapper background={iconBackground} hasRadius padding={3}>
         {icon}
       </IconWrapper>

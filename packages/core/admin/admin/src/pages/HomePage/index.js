@@ -5,9 +5,9 @@
  */
 /* eslint-disable */
 import React, { memo, useMemo } from 'react';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
+import styled from 'styled-components';
 import { useModels } from '../../hooks';
-
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
 import ContentBlocks from './ContentBlocks';
@@ -17,10 +17,18 @@ import { Layout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Box } from '@strapi/parts/Box';
 import { Grid, GridItem } from '@strapi/parts/Grid';
+import Logo from '../../assets/images/homepage-logo.png';
+
+const LogoContainer = styled(Box)`
+  position: absolute;
+  top: 0;
+  right: 0;
+  img {
+    width: ${150 / 16}rem;
+  }
+`;
 
 const HomePage = ({ history: { push } }) => {
-  // const { formatMessage } = useIntl();
-  // const { error, isLoading, posts } = useFetch();
   // // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
 
@@ -47,9 +55,12 @@ const HomePage = ({ history: { push } }) => {
   return (
     <Layout>
       <FormattedMessage id="HomePage.helmet.title">
-        {title => <PageTitle title={title} />}
+        {title => <PageTitle title={title[0]} />}
       </FormattedMessage>
       <Main labelledBy="homepage">
+        <LogoContainer>
+          <img alt="" src={Logo} />
+        </LogoContainer>
         <Box padding={10}>
           <Grid>
             <GridItem col={8} s={12}>

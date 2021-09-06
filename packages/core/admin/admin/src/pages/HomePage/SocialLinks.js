@@ -5,7 +5,7 @@
 
 import React from 'react';
 import styled from 'styled-components';
-
+import { useIntl } from 'react-intl';
 import { H3, Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
@@ -24,7 +24,7 @@ const socialLinks = [
   {
     name: 'Github',
     link: 'https://github.com/strapi/strapi/',
-    icon: <Github />,
+    icon: <Github fill="#7289DA" />,
     alt: 'github',
   },
   {
@@ -84,6 +84,8 @@ const WordWrap = styled(Text)`
 `;
 
 const SocialLinks = () => {
+  const { formatMessage } = useIntl();
+
   return (
     <Box
       background="neutral0"
@@ -97,13 +99,25 @@ const SocialLinks = () => {
       <Box paddingBottom={7}>
         <Stack size={5}>
           <Stack size={3}>
-            <H3>Join the community</H3>
+            <H3>
+              {formatMessage({
+                id: 'app.components.HomePage.community',
+                defaultMessage: 'Join the community',
+              })}
+            </H3>
             <WordWrap textColor="neutral600">
-              Discuss with team members, contributors and developers on different channels
+              {formatMessage({
+                id: 'app.components.HomePage.community.content',
+                defaultMessage:
+                  'Discuss with team members, contributors and developers on different channels',
+              })}
             </WordWrap>
           </Stack>
           <Link href="https://strapi.io/" endIcon={<ExternalLink />}>
-            see our road map
+            {formatMessage({
+              id: 'app.components.HomePage.roadmap',
+              defaultMessage: 'See our road map',
+            })}
           </Link>
         </Stack>
       </Box>
