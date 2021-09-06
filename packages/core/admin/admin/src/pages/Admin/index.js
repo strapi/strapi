@@ -28,9 +28,9 @@ const MarketplacePage = lazy(() =>
 );
 const NotFoundPage = lazy(() => import('../NotFoundPage'));
 
-// const ProfilePage = lazy(() =>
-//   import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
-// );
+const ProfilePage = lazy(() =>
+  import(/* webpackChunkName: "Admin_profilePage" */ '../ProfilePage')
+);
 const SettingsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
 );
@@ -84,8 +84,9 @@ const Admin = () => {
         <Suspense fallback={<LoadingIndicatorPage />}>
           <Switch>
             <Route path="/" component={HomePage} exact />
+            <Route path="/me" component={ProfilePage} exact />
             {/* TODO */}
-            {/* <Route path="/me" component={ProfilePage} exact />
+            {/* <
             <Route path="/content-manager" component={CM} />
 
             <Route path="/plugins/content-type-builder" component={CTB} />

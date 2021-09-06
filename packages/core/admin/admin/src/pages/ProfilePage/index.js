@@ -1,159 +1,160 @@
-import React, { useMemo } from 'react';
-import { BaselineAlignment, auth, Select, Option } from '@strapi/helper-plugin';
-import { Padded, Text } from '@buffetjs/core';
-import { Col } from 'reactstrap';
-import { get } from 'lodash';
-import { useIntl } from 'react-intl';
-import ContainerFluid from '../../components/ContainerFluid';
-import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
-import PageTitle from '../../components/PageTitle';
-import SizedInput from '../../components/SizedInput';
-import { Header } from '../../components/Settings';
-import FormBloc from '../../components/FormBloc';
-import { useSettingsForm } from '../../hooks';
-import ProfilePageLabel from './components';
-import { form, schema } from './utils';
+// import React, { useMemo } from 'react';
+// import { BaselineAlignment, auth, Select, Option } from '@strapi/helper-plugin';
+// import { Padded, Text } from '@buffetjs/core';
+// import { Col } from 'reactstrap';
+// import { get } from 'lodash';
+// import { useIntl } from 'react-intl';
+// import ContainerFluid from '../../components/ContainerFluid';
+// import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
+// import PageTitle from '../../components/PageTitle';
+// import SizedInput from '../../components/SizedInput';
+// import FormBloc from '../../components/FormBloc';
+// import { useSettingsForm } from '../../hooks';
+// import ProfilePageLabel from './components';
+// import { form, schema } from './utils';
 
-const ProfilePage = () => {
-  const { changeLocale, localeNames } = useLocalesProvider();
-  const { formatMessage } = useIntl();
+// const ProfilePage = () => {
+//   const { changeLocale, localeNames } = useLocalesProvider();
+//   const { formatMessage } = useIntl();
 
-  const onSubmitSuccessCb = data => {
-    changeLocale(data.preferedLanguage);
-    auth.setUserInfo(data);
-  };
+//   const onSubmitSuccessCb = data => {
+//     changeLocale(data.preferedLanguage);
+//     auth.setUserInfo(data);
+//   };
 
-  const [
-    { formErrors, initialData, isLoading, modifiedData, showHeaderLoader, showHeaderButtonLoader },
-    // eslint-disable-next-line no-unused-vars
-    _,
-    { handleCancel, handleChange, handleSubmit, setField },
-  ] = useSettingsForm('/admin/users/me', schema, onSubmitSuccessCb, [
-    'email',
-    'firstname',
-    'lastname',
-    'username',
-    'preferedLanguage',
-  ]);
+//   const [
+//     { formErrors, initialData, isLoading, modifiedData, showHeaderLoader, showHeaderButtonLoader },
+//     // eslint-disable-next-line no-unused-vars
+//     _,
+//     { handleCancel, handleChange, handleSubmit, setField },
+//   ] = useSettingsForm('/admin/users/me', schema, onSubmitSuccessCb, [
+//     'email',
+//     'firstname',
+//     'lastname',
+//     'username',
+//     'preferedLanguage',
+//   ]);
 
-  const headerLabel = useMemo(() => {
-    const userInfos = auth.getUserInfo();
+//   const headerLabel = useMemo(() => {
+//     const userInfos = auth.getUserInfo();
 
-    if (modifiedData) {
-      return modifiedData.username || `${modifiedData.firstname} ${modifiedData.lastname}`;
-    }
+//     if (modifiedData) {
+//       return modifiedData.username || `${modifiedData.firstname} ${modifiedData.lastname}`;
+//     }
 
-    return userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
-  }, [modifiedData]);
+//     return userInfos.username || `${userInfos.firstname} ${userInfos.lastname}`;
+//   }, [modifiedData]);
 
-  return (
-    <>
-      <PageTitle title="User profile" />
-      <form onSubmit={handleSubmit}>
-        <ContainerFluid padding="18px 30px 0 30px">
-          <Header
-            isLoading={showHeaderLoader}
-            initialData={initialData}
-            label={headerLabel}
-            modifiedData={modifiedData}
-            onCancel={handleCancel}
-            showHeaderButtonLoader={showHeaderButtonLoader}
-          />
-          <BaselineAlignment top size="3px" />
-          {/* Experience block */}
-          <FormBloc
-            isLoading={isLoading}
-            title={formatMessage({ id: 'Settings.profile.form.section.profile.title' })}
-          >
-            {Object.keys(form).map(key => (
-              <SizedInput
-                {...form[key]}
-                key={key}
-                error={formErrors[key]}
-                name={key}
-                onChange={handleChange}
-                value={get(modifiedData, key, '')}
-              />
-            ))}
-          </FormBloc>
-          <BaselineAlignment top size="2px" />
+//   return (
+//     <>
+//       <PageTitle title="User profile" />
+//       <form onSubmit={handleSubmit}>
+//         <ContainerFluid padding="18px 30px 0 30px">
+//           <Header
+//             isLoading={showHeaderLoader}
+//             initialData={initialData}
+//             label={headerLabel}
+//             modifiedData={modifiedData}
+//             onCancel={handleCancel}
+//             showHeaderButtonLoader={showHeaderButtonLoader}
+//           />
+//           <BaselineAlignment top size="3px" />
+//           {/* Experience block */}
+//           <FormBloc
+//             isLoading={isLoading}
+//             title={formatMessage({ id: 'Settings.profile.form.section.profile.title' })}
+//           >
+//             {Object.keys(form).map(key => (
+//               <SizedInput
+//                 {...form[key]}
+//                 key={key}
+//                 error={formErrors[key]}
+//                 name={key}
+//                 onChange={handleChange}
+//                 value={get(modifiedData, key, '')}
+//               />
+//             ))}
+//           </FormBloc>
+//           <BaselineAlignment top size="2px" />
 
-          {/* Password block */}
-          {!isLoading && (
-            <>
-              <Padded top size="md">
-                <FormBloc
-                  title={formatMessage({ id: 'Settings.profile.form.section.password.title' })}
-                >
-                  <SizedInput
-                    label="Auth.form.password.label"
-                    type="password"
-                    autoComplete="new-password"
-                    validations={{}}
-                    error={formErrors.password}
-                    name="password"
-                    onChange={handleChange}
-                    value={get(modifiedData, 'password', '')}
-                  />
+//           {/* Password block */}
+//           {!isLoading && (
+//             <>
+//               <Padded top size="md">
+//                 <FormBloc
+//                   title={formatMessage({ id: 'Settings.profile.form.section.password.title' })}
+//                 >
+//                   <SizedInput
+//                     label="Auth.form.password.label"
+//                     type="password"
+//                     autoComplete="new-password"
+//                     validations={{}}
+//                     error={formErrors.password}
+//                     name="password"
+//                     onChange={handleChange}
+//                     value={get(modifiedData, 'password', '')}
+//                   />
 
-                  <SizedInput
-                    label="Auth.form.confirmPassword.label"
-                    type="password"
-                    validations={{}}
-                    error={formErrors.confirmPassword}
-                    name="confirmPassword"
-                    onChange={handleChange}
-                    value={get(modifiedData, 'confirmPassword', '')}
-                  />
-                </FormBloc>
-              </Padded>
+//                   <SizedInput
+//                     label="Auth.form.confirmPassword.label"
+//                     type="password"
+//                     validations={{}}
+//                     error={formErrors.confirmPassword}
+//                     name="confirmPassword"
+//                     onChange={handleChange}
+//                     value={get(modifiedData, 'confirmPassword', '')}
+//                   />
+//                 </FormBloc>
+//               </Padded>
 
-              <BaselineAlignment top size="13px" />
+//               <BaselineAlignment top size="13px" />
 
-              {/* Interface block */}
-              <Padded top size="smd">
-                <FormBloc
-                  title={formatMessage({ id: 'Settings.profile.form.section.experience.title' })}
-                >
-                  <ProfilePageLabel htmlFor="">
-                    {formatMessage({
-                      id: 'Settings.profile.form.section.experience.interfaceLanguage',
-                    })}
-                  </ProfilePageLabel>
-                  <Col xs="6">
-                    <Select
-                      aria-labelledby="interface-language"
-                      selectedValue={get(modifiedData, 'preferedLanguage')}
-                      onChange={nextLocaleCode => setField('preferedLanguage', nextLocaleCode)}
-                    >
-                      {Object.keys(localeNames).map(language => {
-                        const langName = localeNames[language];
+//               {/* Interface block */}
+//               <Padded top size="smd">
+//                 <FormBloc
+//                   title={formatMessage({ id: 'Settings.profile.form.section.experience.title' })}
+//                 >
+//                   <ProfilePageLabel htmlFor="">
+//                     {formatMessage({
+//                       id: 'Settings.profile.form.section.experience.interfaceLanguage',
+//                     })}
+//                   </ProfilePageLabel>
+//                   <Col xs="6">
+//                     <Select
+//                       aria-labelledby="interface-language"
+//                       selectedValue={get(modifiedData, 'preferedLanguage')}
+//                       onChange={nextLocaleCode => setField('preferedLanguage', nextLocaleCode)}
+//                     >
+//                       {Object.keys(localeNames).map(language => {
+//                         const langName = localeNames[language];
 
-                        return (
-                          <Option value={language} key={language}>
-                            {langName}
-                          </Option>
-                        );
-                      })}
-                    </Select>
+//                         return (
+//                           <Option value={language} key={language}>
+//                             {langName}
+//                           </Option>
+//                         );
+//                       })}
+//                     </Select>
 
-                    <Padded size="sm" top bottom>
-                      <Text color="grey">
-                        {formatMessage({
-                          id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
-                        })}
-                      </Text>
-                    </Padded>
-                  </Col>
-                </FormBloc>
-              </Padded>
-            </>
-          )}
-        </ContainerFluid>
-      </form>
-      <BaselineAlignment bottom size="80px" />
-    </>
-  );
-};
+//                     <Padded size="sm" top bottom>
+//                       <Text color="grey">
+//                         {formatMessage({
+//                           id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
+//                         })}
+//                       </Text>
+//                     </Padded>
+//                   </Col>
+//                 </FormBloc>
+//               </Padded>
+//             </>
+//           )}
+//         </ContainerFluid>
+//       </form>
+//       <BaselineAlignment bottom size="80px" />
+//     </>
+//   );
+// };
 
-export default ProfilePage;
+// export default ProfilePage;
+
+export default () => 'TODO profile page';
