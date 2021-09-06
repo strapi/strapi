@@ -202,24 +202,24 @@ module.exports = {
         prefix: '',
       },
     },
-    {
-      method: 'POST',
-      path: '/auth/local',
-      handler: 'auth.callback',
-      config: {
-        policies: ['plugin::users-permissions.rateLimit'],
-        prefix: '',
-      },
-    },
-    {
-      method: 'POST',
-      path: '/auth/local/register',
-      handler: 'auth.register',
-      config: {
-        policies: ['plugin::users-permissions.rateLimit'],
-        prefix: '',
-      },
-    },
+    // {
+    //   method: 'POST',
+    //   path: '/auth/local',
+    //   handler: 'auth.callback',
+    //   config: {
+    //     policies: ['plugin::users-permissions.rateLimit'],
+    //     prefix: '',
+    //   },
+    // },
+    // {
+    //   method: 'POST',
+    //   path: '/auth/local/register',
+    //   handler: 'auth.register',
+    //   config: {
+    //     policies: ['plugin::users-permissions.rateLimit'],
+    //     prefix: '',
+    //   },
+    // },
     {
       method: 'GET',
       path: '/auth/:provider/callback',

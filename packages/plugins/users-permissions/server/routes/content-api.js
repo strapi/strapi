@@ -2,22 +2,27 @@
 
 module.exports = {
   type: 'content-api',
+  // TODO:
   routes: [
     {
-      method: 'GET',
-      path: '/users/count',
-      handler: 'user.count',
+      method: 'POST',
+      path: '/auth/local',
+      handler: 'auth.callback',
+      config: {
+        auth: { public: true },
+        policies: ['plugin::users-permissions.rateLimit'],
+        prefix: '',
+      },
     },
     {
-      method: 'GET',
-      path: '/users',
-      handler: 'user.find',
-    },
-    {
-      method: 'GET',
-      path: '/users/me',
-      handler: 'user.me',
+      method: 'POST',
+      path: '/auth/local/register',
+      handler: 'auth.register',
+      config: {
+        auth: { public: true },
+        policies: ['plugin::users-permissions.rateLimit'],
+        prefix: '',
+      },
     },
   ],
-  // TODO: add connection / auto registration routes
 };

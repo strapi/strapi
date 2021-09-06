@@ -63,8 +63,7 @@ const validateRouteConfig = routeConfig => {
       stripUnknown: true,
     });
   } catch (error) {
-    console.error(error);
-    throw new Error('Invalid route config');
+    throw new Error('Invalid route config', error.message);
   }
 };
 

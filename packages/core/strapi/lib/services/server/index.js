@@ -44,8 +44,8 @@ const createServer = strapi => {
   const httpServer = createHTTPServer(strapi, app);
 
   const apis = {
-    admin: createAdminAPI(strapi),
     'content-api': createContentAPI(strapi),
+    admin: createAdminAPI(strapi),
   };
 
   // init health check

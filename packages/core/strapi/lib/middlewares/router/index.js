@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { toLower } = require('lodash/fp');
 
 module.exports = strapi => {
   const registerAdminRoutes = () => {
@@ -52,6 +53,15 @@ module.exports = strapi => {
         // pass meta down to compose endpoint
         router.type = 'content-api';
         router.routes.forEach(route => {
+          if (typeof route.handler === 'string') {
+            const [controller, action] = route.handler.split('.');
+            _.defaultsDeep(route.config, {
+              auth: {
+                scope: `application.${toLower(controller)}.${toLower(action)}`,
+              },
+            });
+          }
+
           route.info = { apiName };
         });
 

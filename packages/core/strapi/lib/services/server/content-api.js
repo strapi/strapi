@@ -28,6 +28,10 @@ const authPolicy = (ctx, next) => {
   }
 
   if (!has('auth.scope', config)) {
+    return ctx.unauthorized();
+  }
+
+  if (config.auth.scope === '*') {
     // just requires authentication
     return next();
   }
@@ -52,10 +56,8 @@ const createContentAPI = strapi => {
   const api = createAPI(strapi, opts);
 
   // implement auth providers
-  api.use((ctx, next) => {
-    ctx.state.auth = {
-      isAuthenticated: true,
-    };
+  api.use(async (ctx, next) => {
+    await strapi.container.get('content-api').auth.authenticate(ctx);
 
     return next();
   });

@@ -18,6 +18,7 @@ const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
@@ -52,6 +53,7 @@ class Strapi {
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
+    this.container.register('content-api', createContentAPI(this));
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -388,7 +390,7 @@ class Strapi {
     await execLifecycle(this.config.get(configPath));
 
     // admin
-    await this.admin[lifecycleName]();
+    await this.admin[lifecycleName](this);
   }
 
   getModel(uid) {
