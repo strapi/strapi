@@ -74,9 +74,8 @@ const createAdminAPI = strapi => {
 const createContentAPI = strapi => {
   const api = createAPI(strapi, { prefix: strapi.config.get('api.prefix', '/api') });
 
-  // Fake protection
+  // TODO: attach authentication middleware
   api.use((ctx, next) => {
-    console.log('la', ctx.request.query.token);
     if (ctx.request.query.token === 'token') {
       return next();
     }
