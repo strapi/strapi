@@ -8,6 +8,12 @@ const { isKebabCase } = require('@strapi/utils');
 const loadConfigFile = require('../../app-configuration/load-config-file');
 
 const isStrapiPlugin = info => get('strapi.kind', info) === 'plugin';
+const INTERNAL_PLUGINS = [
+  '@strapi/plugin-content-manager',
+  '@strapi/plugin-content-type-builder',
+  '@strapi/plugin-email',
+  '@strapi/plugin-upload',
+];
 
 const validatePluginName = pluginName => {
   if (!isKebabCase(pluginName)) {
@@ -21,9 +27,6 @@ const toDetailedDeclaration = declaration => {
   }
 
   let detailedDeclaration = pick(['enabled'], declaration);
-  if (has('config', declaration)) {
-    detailedDeclaration.userConfig = declaration.config;
-  }
   if (has('resolve', declaration)) {
     let pathToPlugin = '';
     try {
@@ -42,6 +45,18 @@ const toDetailedDeclaration = declaration => {
 };
 
 const getEnabledPlugins = async strapi => {
+  const internalPlugins = {};
+  for (const dep of INTERNAL_PLUGINS) {
+    const packagePath = join(dep, 'package.json');
+    const packageInfo = require(packagePath);
+
+    validatePluginName(packageInfo.strapi.name);
+    internalPlugins[packageInfo.strapi.name] = toDetailedDeclaration({
+      enabled: true,
+      resolve: packagePath,
+    });
+  }
+
   const installedPlugins = {};
   for (const dep in strapi.config.get('info.dependencies', {})) {
     const packagePath = join(dep, 'package.json');
@@ -72,9 +87,10 @@ const getEnabledPlugins = async strapi => {
     installedPlugins
   );
   const enabledPlugins = pipe(
+    defaultsDeep(declaredPlugins),
     defaultsDeep(installedPluginsNotAlreadyUsed),
     pickBy(p => p.enabled)
-  )(declaredPlugins);
+  )(internalPlugins);
 
   return enabledPlugins;
 };
