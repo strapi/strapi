@@ -116,6 +116,21 @@ const getById = async id => {
   return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: { id } });
 };
 
+/**
+ * @param {string|number} id
+ * @param {Object} attributes
+ * @param {TokenType} attributes.type
+ * @param {string} attributes.name
+ * @param {string} [attributes.description]
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ */
+const update = async (id, attributes) => {
+  return strapi
+    .query('admin::api-token')
+    .update({ where: { id }, data: attributes, select: SELECT_FIELDS });
+};
+
 module.exports = {
   create,
   exists,
@@ -124,4 +139,5 @@ module.exports = {
   list,
   revoke,
   getById,
+  update,
 };

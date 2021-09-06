@@ -18,6 +18,10 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 8. Does not return an error if the ressource to delete does not exist
  * 9. Retrieves a token (successfully)
  * 10. Returns a 404 if the ressource to retrieve does not exist
+ * 11. Updates a token (successfully)
+ * 12. Returns a 404 if the ressource to update does not exist
+ * 13. Fails to creates an api token (missing parameters from the body)
+ * 14. Fails to creates an api token (invalid `type` in the body)
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -37,7 +41,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     await strapi.destroy();
   });
 
-  test('1. Fails to creates an api token (missing parameters from the body)', async () => {
+  test('1. Fails to create an api token (missing parameters from the body)', async () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
@@ -60,7 +64,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     });
   });
 
-  test('2. Fails to creates an api token (invalid `type` in the body)', async () => {
+  test('2. Fails to create an api token (invalid `type` in the body)', async () => {
     const body = {
       name: 'api-token_tests-name',
       description: 'api-token_tests-description',
@@ -236,5 +240,91 @@ describe('Admin API Token CRUD (e2e)', () => {
 
     expect(res.statusCode).toBe(404);
     expect(res.body.data).toBeUndefined();
+  });
+
+  test('11. Updates a token (successfully)', async () => {
+    const body = {
+      name: 'api-token_tests-updated-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    const res = await rq({
+      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toStrictEqual({
+      name: body.name,
+      description: body.description,
+      type: body.type,
+      id: apiTokens[0].id,
+    });
+  });
+
+  test('12. Returns a 404 if the ressource to update does not exist', async () => {
+    const body = {
+      name: 'api-token_tests-updated-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens/42',
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.statusCode).toBe(404);
+    expect(res.body.data).toBeUndefined();
+  });
+
+  test('13. Fails to update an api token (missing parameters from the body)', async () => {
+    const body = {
+      name: 'api-token_tests-updated-name',
+      description: 'api-token_tests-description',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens/1',
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'ValidationError',
+      data: {
+        type: ['type is a required field'],
+      },
+    });
+  });
+
+  test('14. Fails to update an api token (invalid `type` in the body)', async () => {
+    const body = {
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'invalid-type',
+    };
+
+    const res = await rq({
+      url: '/admin/api-tokens/1',
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.body).toMatchObject({
+      statusCode: 400,
+      error: 'Bad Request',
+      message: 'ValidationError',
+      data: {
+        type: ['type must be one of the following values: read-only, full-access'],
+      },
+    });
   });
 });
