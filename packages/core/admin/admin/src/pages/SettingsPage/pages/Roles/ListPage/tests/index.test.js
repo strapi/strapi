@@ -54,10 +54,6 @@ describe('<ListPage />', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c37 {
-        font-family: Lato;
-      }
-
       .c5 {
         font-weight: 600;
         font-size: 2rem;
@@ -402,6 +398,10 @@ describe('<ListPage />', () => {
         display: block;
         width: 100%;
         border: none;
+      }
+
+      .c37 {
+        font-family: Lato;
       }
 
       <main

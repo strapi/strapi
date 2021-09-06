@@ -114,6 +114,7 @@ const CreatePage = () => {
 
   const defaultDescription = `${formatMessage({
     id: 'Settings.roles.form.created',
+    defaultMessage: 'Created',
   })} ${moment().format('LL')}`;
 
   return (
@@ -169,7 +170,7 @@ const CreatePage = () => {
                       <Row justifyContent="space-between">
                         <Box>
                           <Box>
-                            <Text highlighted>
+                            <Text bold>
                               {formatMessage({
                                 id: 'Settings.roles.form.title',
                                 defaultMessage: 'Details',
@@ -235,7 +236,9 @@ const CreatePage = () => {
                       />
                     </Box>
                   ) : (
-                    <LoadingIndicatorPage />
+                    <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
+                      <LoadingIndicatorPage />
+                    </Box>
                   )}
                 </Stack>
               </ContentLayout>

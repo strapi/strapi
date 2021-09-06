@@ -68,7 +68,7 @@ const MagicLinkWrapper = ({ children, target }) => {
         <Box paddingLeft={6}>
           <Stack gap={2}>
             <Stack horizontal gap={2}>
-              <Text small textColor="neutral800" highlighted>
+              <Text small textColor="neutral800" bold>
                 {target}
               </Text>
               <Tooltip description={copyLabel}>
@@ -80,7 +80,7 @@ const MagicLinkWrapper = ({ children, target }) => {
               </Tooltip>
             </Stack>
 
-            <Text small textColor="neutral600" highlighted>
+            <Text small textColor="neutral600" bold>
               {children}
             </Text>
           </Stack>

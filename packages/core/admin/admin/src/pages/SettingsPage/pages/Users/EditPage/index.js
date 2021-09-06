@@ -180,6 +180,7 @@ const EditPage = ({ canUpdate }) => {
                   <Box
                     background="neutral0"
                     hasRadius
+                    shadow="filterShadow"
                     paddingTop={6}
                     paddingBottom={6}
                     paddingLeft={7}
@@ -214,6 +215,7 @@ const EditPage = ({ canUpdate }) => {
                   <Box
                     background="neutral0"
                     hasRadius
+                    shadow="filterShadow"
                     paddingTop={6}
                     paddingBottom={6}
                     paddingLeft={7}
