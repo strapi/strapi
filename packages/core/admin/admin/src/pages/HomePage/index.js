@@ -7,6 +7,7 @@
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
+import { Helmet } from 'react-helmet';
 import { useModels } from '../../hooks';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
@@ -55,11 +56,11 @@ const HomePage = ({ history: { push } }) => {
   return (
     <Layout>
       <FormattedMessage id="HomePage.helmet.title">
-        {title => <PageTitle title={title[0]} />}
+        {title => <Helmet title={title[0]} />}
       </FormattedMessage>
       <Main labelledBy="homepage">
         <LogoContainer>
-          <img alt="" src={Logo} />
+          <img alt="Strapi logo" src={Logo} />
         </LogoContainer>
         <Box padding={10}>
           <Grid>
