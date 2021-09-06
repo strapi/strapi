@@ -3,7 +3,6 @@
 const { toLower, castArray, trim, prop } = require('lodash/fp');
 
 const compose = require('koa-compose');
-const { validateRouteConfig } = require('./route');
 const { resolveMiddlewares } = require('./middleware');
 const { resolvePolicies } = require('./policy');
 
@@ -28,49 +27,29 @@ const createRouteInfoMiddleware = ({ method, path, handler }, { pluginName }) =>
   };
 };
 
-const createAuthMiddleware = () => {
-  return (ctx, next) => {
-    return next();
-
-    // if (routeConfig.auth && routeConfig.auth.public === true) {
-    //   return next();
-    // }
-
-    // const { credentials, isAuthenticated = false } = ({} = ctx.state.auth);
-
-    // if (!isAuthenticated) {
-    //   throw new ctx.unauthorized();
-    // }
-
-    // check credentials scope with routeConfig scope
-  };
-};
-
 module.exports = strapi => {
-  return (routeConfig, { pluginName, router, apiName }) => {
-    validateRouteConfig(routeConfig);
-
+  return (route, { pluginName, router, apiName }) => {
     try {
-      const method = getMethod(routeConfig);
-      const path = getPath(routeConfig);
-      const handler = getHandler(routeConfig);
+      const method = getMethod(route);
+      const path = getPath(route);
+      const handler = getHandler(route);
 
-      const middlewares = resolveMiddlewares(routeConfig);
-      const policies = resolvePolicies(routeConfig, { pluginName, apiName });
+      const middlewares = resolveMiddlewares(route);
+      const policies = resolvePolicies(route, { pluginName, apiName });
 
       const routeInfoMiddleware = createRouteInfoMiddleware(
         { method, path, handler },
         { pluginName }
       );
 
-      // we can add this as a root middleware
-      const authMiddleware = createAuthMiddleware();
-
-      const action = getAction(routeConfig, { pluginName, apiName }, strapi);
+      const action = getAction(route, { pluginName, apiName }, strapi);
 
       const routeHandler = compose([
+        (ctx, next) => {
+          ctx.state.route = route;
+          return next();
+        },
         routeInfoMiddleware,
-        authMiddleware,
         ...policies,
         ...middlewares,
         ...castArray(action),
@@ -78,9 +57,7 @@ module.exports = strapi => {
 
       router[method](path, routeHandler);
     } catch (error) {
-      throw new Error(
-        `Error creating endpoint ${routeConfig.method} ${routeConfig.path}: ${error.message}`
-      );
+      throw new Error(`Error creating endpoint ${route.method} ${route.path}: ${error.message}`);
     }
   };
 };

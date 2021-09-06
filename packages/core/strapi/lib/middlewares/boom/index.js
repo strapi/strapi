@@ -94,8 +94,8 @@ module.exports = strapi => {
 
       strapi.server.use(async (ctx, next) => {
         await next();
-        // Empty body is considered as `notFound` response.
-        if (_.isNil(ctx.body) && _.isNil(ctx.status)) {
+
+        if (_.isNil(ctx.body) && (_.isNil(ctx.status) || ctx.status === 404)) {
           ctx.notFound();
         }
       });

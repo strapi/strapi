@@ -1,62 +1,12 @@
 'use strict';
 
-const { has } = require('lodash/fp');
 const Koa = require('koa');
 const Router = require('@koa/router');
 
 const { createHTTPServer } = require('./http-server');
-
-const createEndpointComposer = require('./compose-endpoint');
-
-const createRouteManager = strapi => {
-  const composeEndpoint = createEndpointComposer(strapi);
-
-  const createRoute = (route, router) => {
-    composeEndpoint(route, { ...route.info, router });
-  };
-
-  const addRoutes = (routes, router) => {
-    if (Array.isArray(routes)) {
-      routes.forEach(route => createRoute(route, router));
-    } else if (routes.routes) {
-      const subRouter = new Router({ prefix: routes.prefix });
-
-      routes.routes.forEach(route => {
-        const hasPrefix = has('prefix', route.config);
-        createRoute(route, hasPrefix ? router : subRouter);
-      });
-
-      return router.use(subRouter.routes(), subRouter.allowedMethods());
-    }
-  };
-
-  return {
-    addRoutes,
-  };
-};
-
-const createAPI = (strapi, opts = {}) => {
-  const api = new Router(opts);
-
-  const routeManager = createRouteManager(strapi);
-
-  return {
-    use(fn) {
-      api.use(fn);
-      return this;
-    },
-
-    routes(routes) {
-      routeManager.addRoutes(routes, api);
-      return this;
-    },
-
-    mount(router) {
-      router.use(api.routes(), api.allowedMethods());
-      return this;
-    },
-  };
-};
+const { createRouteManager } = require('./routing');
+const { createAdminAPI } = require('./admin-api');
+const { createContentAPI } = require('./content-api');
 
 const healthCheck = async (ctx, next) => {
   if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
@@ -65,32 +15,6 @@ const healthCheck = async (ctx, next) => {
   } else {
     await next();
   }
-};
-
-const createAdminAPI = strapi => {
-  const opts = {
-    prefix: '', // '/admin';
-  };
-
-  return createAPI(strapi, opts);
-};
-
-const createContentAPI = strapi => {
-  const opts = {
-    prefix: '', // strapi.config.get('api.prefix', '/api'),
-  };
-
-  const api = createAPI(strapi, opts);
-
-  // TODO: attach authentication middleware
-  // api.use((ctx, next) => {
-  // if (ctx.request.query.token === 'token') {
-  //   return next();
-  // }
-  // ctx.forbidden();
-  // });
-
-  return api;
 };
 
 /**
