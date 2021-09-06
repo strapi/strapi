@@ -112,7 +112,7 @@ const revoke = async id => {
  *
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
-const get = async id => {
+const getById = async id => {
   return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: { id } });
 };
 
@@ -123,5 +123,5 @@ module.exports = {
   hash,
   list,
   revoke,
-  get,
+  getById,
 };

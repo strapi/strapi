@@ -157,7 +157,7 @@ describe('API Token Controller', () => {
     };
 
     test('Retrieve an API token successfully', async () => {
-      const get = jest.fn().mockResolvedValue(token);
+      const getById = jest.fn().mockResolvedValue(token);
       const send = jest.fn();
       const ctx = createContext({ params: { id: token.id } }, { send });
 
@@ -165,7 +165,7 @@ describe('API Token Controller', () => {
         admin: {
           services: {
             'api-token': {
-              get,
+              getById,
             },
           },
         },
@@ -173,12 +173,12 @@ describe('API Token Controller', () => {
 
       await apiTokenController.get(ctx);
 
-      expect(get).toHaveBeenCalledWith(token.id);
+      expect(getById).toHaveBeenCalledWith(token.id);
       expect(send).toHaveBeenCalledWith({ data: token });
     });
 
     test('Fails if the API token does not exist', async () => {
-      const get = jest.fn().mockResolvedValue(null);
+      const getById = jest.fn().mockResolvedValue(null);
       const notFound = jest.fn();
       const ctx = createContext({ params: { id: token.id } }, { notFound });
 
@@ -186,7 +186,7 @@ describe('API Token Controller', () => {
         admin: {
           services: {
             'api-token': {
-              get,
+              getById,
             },
           },
         },
@@ -194,7 +194,7 @@ describe('API Token Controller', () => {
 
       await apiTokenController.get(ctx);
 
-      expect(get).toHaveBeenCalledWith(token.id);
+      expect(getById).toHaveBeenCalledWith(token.id);
       expect(notFound).toHaveBeenCalledWith('API Token not found');
     });
   });
