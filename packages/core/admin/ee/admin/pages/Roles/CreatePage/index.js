@@ -29,7 +29,7 @@ import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
-import Permissions from '../../../../../admin/src/components/Roles/Permissions';
+import Permissions from '../../../../../admin/src/pages/Roles/EditPage/components/Permissions';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
 import schema from './utils/schema';

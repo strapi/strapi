@@ -29,9 +29,10 @@ import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import { axiosInstance } from '../../../../../admin/src/core/utils';
-import { EmptyRole, RoleRow as BaseRoleRow } from '../../../../../admin/src/components/Roles';
 import { useRolesList } from '../../../../../admin/src/hooks';
 import adminPermissions from '../../../../../admin/src/permissions';
+import EmptyRole from '../../../../../admin/src/pages/Roles/ListPage/components/EmptyRole';
+import BaseRoleRow from '../../../../../admin/src/pages/Roles/ListPage/components/RoleRow';
 import reducer, { initialState } from './reducer';
 
 const useSortedRoles = () => {

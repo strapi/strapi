@@ -16,7 +16,7 @@ import { get, groupBy, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
-import { usePermissionsDataManager } from '../../../hooks';
+import { usePermissionsDataManager } from '../../../../../hooks';
 import ActionRow from './ActionRow';
 import createDefaultConditionsForm from './utils/createDefaultConditionsForm';
 

@@ -1,11 +1,11 @@
 import { Checkbox, Stack, TableLabel, Box } from '@strapi/parts';
-import IS_DISABLED from 'ee_else_ce/components/Roles/GlobalActions/utils/constants';
+import IS_DISABLED from 'ee_else_ce/pages/Roles/EditPage/components/GlobalActions/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { memo, useMemo } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { usePermissionsDataManager } from '../../../hooks';
+import { usePermissionsDataManager } from '../../../../../hooks';
 import { cellWidth, firstRowWidth } from '../Permissions/utils/constants';
 import { findDisplayedActions, getCheckboxesState } from './utils';
 

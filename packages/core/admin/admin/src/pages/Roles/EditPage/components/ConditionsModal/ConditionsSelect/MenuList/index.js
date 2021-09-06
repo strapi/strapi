@@ -6,7 +6,7 @@ import { get } from 'lodash';
 import { Checkbox, Flex } from '@buffetjs/core';
 import { Label } from '@buffetjs/styles';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import IS_DISABLED from 'ee_else_ce/components/Roles/ConditionsModal/ConditionsSelect/MenuList/utils/constants';
+import IS_DISABLED from 'ee_else_ce/pages/Roles/EditPage/components/ConditionsModal/ConditionsSelect/MenuList/utils/constants';
 import { getCheckboxState } from '../../../utils';
 import createCollapsesObject from './utils/createCollapsesObject';
 import SubUl from './SubUl';

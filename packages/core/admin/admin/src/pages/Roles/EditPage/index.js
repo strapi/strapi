@@ -12,7 +12,7 @@ import get from 'lodash/get';
 import React, { useRef, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
-import { Permissions, RoleForm } from '../../../components/Roles';
+import { Permissions, RoleForm } from './components';
 import { useFetchPermissionsLayout, useFetchRole } from '../../../hooks';
 import schema from './utils/schema';
 

@@ -18,7 +18,8 @@ import matchSorter from 'match-sorter';
 import React, { useCallback, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router';
-import { EmptyRole, RoleRow } from '../../../components/Roles';
+import RoleRow from './components/RoleRow';
+import EmptyRole from './components/EmptyRole';
 import UpgradePlanModal from '../../../components/UpgradePlanModal';
 import { useRolesList } from '../../../hooks';
 

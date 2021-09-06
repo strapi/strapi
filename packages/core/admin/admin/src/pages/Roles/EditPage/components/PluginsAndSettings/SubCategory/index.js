@@ -5,8 +5,8 @@ import { Row, Box, TableLabel, Checkbox, Grid, GridItem } from '@strapi/parts';
 
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
-import IS_DISABLED from 'ee_else_ce/components/Roles/PluginsAndSettings/SubCategory/utils/constants';
-import { usePermissionsDataManager } from '../../../../hooks';
+import IS_DISABLED from 'ee_else_ce/pages/Roles/EditPage/components/PluginsAndSettings/SubCategory/utils/constants';
+import { usePermissionsDataManager } from '../../../../../../hooks';
 import { getCheckboxState, removeConditionKeyFromData } from '../../utils';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
@@ -80,13 +80,14 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
               name={pathToData.join('..')}
               disabled={isFormDisabled || IS_DISABLED}
               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-              onValueChange={value =>
+              onValueChange={value => {
                 onChangeParentCheckbox({
                   target: {
                     name: pathToData.join('..'),
                     value,
                   },
-                })}
+                });
+              }}
               indeterminate={hasSomeActionsSelected}
               value={hasAllActionsSelected}
             >

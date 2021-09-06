@@ -1,12 +1,12 @@
 import { Down, Up } from '@strapi/icons';
 import { Box, Checkbox, Row, Text } from '@strapi/parts';
-import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/Collapse/utils/constants';
+import IS_DISABLED from 'ee_else_ce/pages/Roles/EditPage/components/ContentTypeCollapse/Collapse/utils/constants';
 import { get, omit } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { usePermissionsDataManager } from '../../../../hooks';
+import { usePermissionsDataManager } from '../../../../../../hooks';
 import ConditionsButton from '../../ConditionsButton';
 import ConditionsModal from '../../ConditionsModal';
 import HiddenAction from '../../HiddenAction';
@@ -191,13 +191,14 @@ const Collapse = ({
                         { label: `${permissionLabel} ${label}` }
                       )}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={value =>
+                      onValueChange={value => {
                         onChangeParentCheckbox({
                           target: {
                             name: checkboxName,
                             value,
                           },
-                        })}
+                        });
+                      }}
                       indeterminate={hasSomeActionsSelected}
                       value={hasAllActionsSelected}
                     />

@@ -1,11 +1,11 @@
 import { Box, Checkbox, Row, Text } from '@strapi/parts';
-import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
+import IS_DISABLED from 'ee_else_ce/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { get, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
 import React, { memo, useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
-import { usePermissionsDataManager } from '../../../../../hooks';
+import { usePermissionsDataManager } from '../../../../../../../hooks';
 import CollapseLabel from '../../../CollapseLabel';
 import Curve from '../../../Curve';
 import HiddenAction from '../../../HiddenAction';
@@ -169,13 +169,14 @@ const SubActionRow = ({
                                 { label: `${parentName} ${label} ${propertyLabel}` }
                               )}
                               // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                              onValueChange={value =>
+                              onValueChange={value => {
                                 onChangeSimpleCheckbox({
                                   target: {
                                     name: checkboxName.join('..'),
                                     value,
                                   },
-                                })}
+                                });
+                              }}
                               value={checkboxValue}
                             />
                           </Cell>

@@ -1,11 +1,11 @@
 import { Checkbox, Row } from '@strapi/parts';
-import IS_DISABLED from 'ee_else_ce/components/Roles/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
+import IS_DISABLED from 'ee_else_ce/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { usePermissionsDataManager } from '../../../../../hooks';
+import { usePermissionsDataManager } from '../../../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';
 import RequiredSign from '../../../RequiredSign';
@@ -143,13 +143,14 @@ const ActionRow = ({
                         { label: `${name} ${label}` }
                       )}
                       // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                      onValueChange={value =>
+                      onValueChange={value => {
                         onChangeSimpleCheckbox({
                           target: {
                             name: checkboxName.join('..'),
                             value,
                           },
-                        })}
+                        });
+                      }}
                       value={checkboxValue}
                     />
                   </Cell>
@@ -166,13 +167,14 @@ const ActionRow = ({
                     disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName.join('..')}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-                    onValueChange={value =>
+                    onValueChange={value => {
                       onChangeParentCheckbox({
                         target: {
                           name: checkboxName.join('..'),
                           value,
                         },
-                      })}
+                      });
+                    }}
                     aria-label={formatMessage(
                       {
                         id: `Settings.permissions.select-by-permission`,
