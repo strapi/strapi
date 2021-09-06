@@ -5,5 +5,6 @@ const userRoutes = require('./user');
 const authRoutes = require('./auth');
 
 module.exports = {
+  type: 'admin',
   routes: [...usersPermissionsRoutes, ...authRoutes, ...userRoutes],
 };

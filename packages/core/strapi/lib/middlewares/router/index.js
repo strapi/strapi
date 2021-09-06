@@ -9,6 +9,7 @@ module.exports = strapi => {
     });
 
     strapi.server.routes({
+      type: 'admin',
       prefix: '/admin',
       routes: strapi.admin.routes,
     });
@@ -24,12 +25,14 @@ module.exports = strapi => {
         });
 
         strapi.server.routes({
+          type: 'admin',
           prefix: `/${pluginName}`,
           routes: plugin.routes,
         });
       } else {
         _.forEach(plugin.routes, router => {
-          router.prefix = router.prefix || `/${pluginName}`;
+          router.type = router.type || 'admin';
+          router.prefix = `/${pluginName}`;
           router.routes.forEach(route => {
             route.info = { pluginName };
           });
@@ -47,7 +50,7 @@ module.exports = strapi => {
       _.forEach(api.routes, router => {
         // TODO: remove once auth setup
         // pass meta down to compose endpoint
-        // router.type = 'content-api';
+        router.type = 'content-api';
         router.routes.forEach(route => {
           route.info = { apiName };
         });

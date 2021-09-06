@@ -68,11 +68,19 @@ const healthCheck = async (ctx, next) => {
 };
 
 const createAdminAPI = strapi => {
-  return createAPI(strapi, { prefix: '/admin' });
+  const opts = {
+    prefix: '', // '/admin';
+  };
+
+  return createAPI(strapi, opts);
 };
 
 const createContentAPI = strapi => {
-  const api = createAPI(strapi, { prefix: strapi.config.get('api.prefix', '/api') });
+  const opts = {
+    prefix: '', // strapi.config.get('api.prefix', '/api'),
+  };
+
+  const api = createAPI(strapi, opts);
 
   // TODO: attach authentication middleware
   api.use((ctx, next) => {

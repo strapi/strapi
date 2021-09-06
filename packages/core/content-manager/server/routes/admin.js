@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  // type: 'admin',
+  type: 'admin',
   routes: [
     {
       method: 'GET',
