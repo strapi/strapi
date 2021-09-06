@@ -67,49 +67,18 @@ describe('ContentBox', () => {
         margin-top: 4px;
       }
 
-      .c8 {
+      .c5 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c6 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
-      }
-
-      .c7 {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #4945ff;
-      }
-
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 {
-        background: transparent;
-        border: none;
-      }
-
-      .c6 svg {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        font-size: 0.625rem;
-      }
-
-      .c6 svg path {
-        fill: #4945ff;
       }
 
       .c3 {
@@ -133,20 +102,14 @@ describe('ContentBox', () => {
           <div
             class="c1"
           >
-            <button
-              aria-disabled="false"
-              class="c5 c6"
-              type="button"
+            <h3
+              class="c5"
             >
-              <span
-                class="c7"
-              >
-                Code example
-              </span>
-            </button>
+              Code example
+            </h3>
           </div>
           <span
-            class="c8"
+            class="c6"
           >
             Learn by testing real project developed by the community
           </span>

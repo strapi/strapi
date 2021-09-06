@@ -8,6 +8,7 @@ import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
+import { useHistory } from 'react-router-dom';
 import { useModels } from '../../hooks';
 import SocialLinks from './SocialLinks';
 import HomeHeader from './HomeHeader';
@@ -28,10 +29,11 @@ const LogoContainer = styled(Box)`
   }
 `;
 
-const HomePage = ({ history: { push } }) => {
+const HomePage = () => {
   // // Temporary until we develop the menu API
   const { collectionTypes, singleTypes, isLoading: isLoadingForModels } = useModels();
 
+  const { push } = useHistory();
   const handleClick = e => {
     e.preventDefault();
 
@@ -54,7 +56,7 @@ const HomePage = ({ history: { push } }) => {
 
   return (
     <Layout>
-      <FormattedMessage id="HomePage.helmet.title">
+      <FormattedMessage id="HomePage.helmet.title" defaultMessage="Homepage">
         {title => <Helmet title={title[0]} />}
       </FormattedMessage>
       <Main labelledBy="homepage">
