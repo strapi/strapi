@@ -400,10 +400,6 @@ describe('<ListPage />', () => {
         border: none;
       }
 
-      .c37 {
-        font-family: Lato;
-      }
-
       <main
         aria-labelledby="title"
         class="c0"
@@ -612,9 +608,6 @@ describe('<ListPage />', () => {
             </div>
           </div>
         </div>
-        <div
-          class="c37"
-        />
       </main>
     `);
   });

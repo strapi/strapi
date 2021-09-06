@@ -20,7 +20,7 @@ import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router';
 import RoleRow from './components/RoleRow';
 import EmptyRole from './components/EmptyRole';
-import UpgradePlanModal from '../../../../../components/UpgradePlanModal';
+import UpgradePlanModal from '../../../../../components/UpgradePlanModal ';
 import { useRolesList } from '../../../../../hooks';
 
 const useSortedRoles = () => {
@@ -186,7 +186,7 @@ const RoleListPage = () => {
         </Table>
         {!rowCount && !isLoading && <EmptyRole />}
       </ContentLayout>
-      <UpgradePlanModal isOpen={isModalOpen} onToggle={handleToggle} />
+      <UpgradePlanModal isOpen={isModalOpen} onClose={handleToggle} />
     </Main>
   );
 };
