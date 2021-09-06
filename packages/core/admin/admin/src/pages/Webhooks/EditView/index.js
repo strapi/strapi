@@ -16,7 +16,7 @@ import { Main } from '@strapi/parts';
 import React, { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
-import WebhookForm from '../../../components/Webhooks/WebhookForm';
+import WebhookForm from './components/WebhookForm';
 import { useModels } from '../../../hooks';
 import cleanData from './utils/formatData';
 
