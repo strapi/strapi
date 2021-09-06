@@ -17,7 +17,7 @@ import { useIntl } from 'react-intl';
 import { Helmet } from 'react-helmet';
 import { useSettingsMenu } from '../../hooks';
 import { createRoute, makeUniqueRoutes } from '../../utils';
-import ApplicationInfosPage from '../ApplicationInfosPage';
+import ApplicationInfosPage from './pages/ApplicationInfosPage';
 import { createSectionsRoutes, routes } from './utils';
 import SettingsNav from './components/SettingsNav';
 
