@@ -5,8 +5,8 @@ const useLockScroll = lockScroll => {
     if (lockScroll) {
       document.body.classList.add('lock-body-scroll');
     }
-    
-return () => {
+
+    return () => {
       document.body.classList.remove('lock-body-scroll');
     };
   }, [lockScroll]);

@@ -164,6 +164,10 @@ export { default as prefixPluginTranslations } from './old/utils/prefixPluginTra
 export { default as pxToRem } from './utils/pxToRem';
 export { default as to } from './utils/await-to-js';
 
+// NEW UTILS
+export { default as setHexOpacity } from './utils/setHexOpacity';
+export { default as useLockScroll } from './utils/useLockScroll';
+
 // SVGS
 export { default as LayoutIcon } from './old/svgs/Layout';
 export { default as ClearIcon } from './old/svgs/Clear';

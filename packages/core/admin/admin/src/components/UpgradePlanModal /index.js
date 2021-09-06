@@ -12,16 +12,15 @@ import { Text, H1 } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import ExternalLink from '@strapi/icons/ExternalLink';
 import CloseAlertIcon from '@strapi/icons/CloseAlertIcon';
-import AirBalloon from "../../assets/images/hot-air-balloon.png";
-import BigArrow from "../../assets/images/upgrade-details.png";
-import setOpacity from '../../utils/setOpacity';
-import useLockScroll from '../../utils/useLockScroll';
+import { setHexOpacity, useLockScroll } from '@strapi/helper-plugin';
+import AirBalloon from '../../assets/images/hot-air-balloon.png';
+import BigArrow from '../../assets/images/upgrade-details.png';
 
-const UpragdeWrapper = styled.div`
+const UpgradeWrapper = styled.div`
   position: absolute;
   z-index: 3;
   inset: 0;
-  background: ${({ theme }) => setOpacity(theme.colors.neutral800, 0.2)};
+  background: ${({ theme }) => setHexOpacity(theme.colors.neutral800, 0.2)};
   padding: 0 ${({ theme }) => theme.spaces[8]};
 `;
 
@@ -50,7 +49,7 @@ const UpgradeContainer = styled(Row)`
 `;
 
 const TextBold = styled(Text)`
-  font-weight: bold;
+  font-weight: 700;
 `;
 
 const StackFlexStart = styled(Stack)`
@@ -75,7 +74,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
 
   return (
     <Portal>
-      <UpragdeWrapper>
+      <UpgradeWrapper>
         <FocusTrap onClose={onClose}>
           <UpgradeContainer aria-labelledby="upgrade-plan" background="neutral0" hasRadius>
             <img src={AirBalloon} alt="air-balloon" />
@@ -114,7 +113,7 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
             <img src={BigArrow} alt="upgrade-arrow" />
           </UpgradeContainer>
         </FocusTrap>
-      </UpragdeWrapper>
+      </UpgradeWrapper>
     </Portal>
   );
 };
