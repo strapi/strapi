@@ -12,6 +12,7 @@ const FormWithFocus = props => {
       if (errorNames.length) {
         let errorEl;
 
+        // Does not handle field arrays
         errorNames.forEach(errorKey => {
           const selector = `[name="${errorKey}"]`;
 
@@ -20,17 +21,13 @@ const FormWithFocus = props => {
           }
         });
 
-        if (errorEl) {
-          errorEl.focus();
-        }
+        errorEl?.focus();
       }
     }
     if (!isSubmitting && !isValidating && Object.keys(errors).length) {
       const el = document.getElementById('global-form-error');
 
-      if (el) {
-        el.focus();
-      }
+      el?.focus();
     }
   }, [errors, isSubmitting, isValidating, touched]);
 
