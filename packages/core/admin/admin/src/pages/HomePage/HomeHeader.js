@@ -19,13 +19,13 @@ const StackCustom = styled(Stack)`
 
 const HomeHeader = ({ hasCreatedContentType, id, onCreateCT }) => {
   const { formatMessage } = useIntl();
-  
-return (
-  <div>
-    <Box paddingLeft={6} paddingBottom={10}>
-      <StackCustom size={5}>
-        <H1 id={id}>
-          {hasCreatedContentType
+
+  return (
+    <div>
+      <Box paddingLeft={6} paddingBottom={10}>
+        <StackCustom size={5}>
+          <H1 id={id}>
+            {hasCreatedContentType
               ? formatMessage({
                   id: 'app.components.HomePage.welcome.again',
                   defaultMessage: 'Welcome 👋',
@@ -34,9 +34,9 @@ return (
                   id: 'app.components.HomePage.welcome',
                   defaultMessage: 'Welcome on board!',
                 })}
-        </H1>
-        <WordWrap textColor="neutral600">
-          {hasCreatedContentType
+          </H1>
+          <WordWrap textColor="neutral600">
+            {hasCreatedContentType
               ? formatMessage({
                   id: 'app.components.HomePage.welcomeBlock.content.again',
                   defaultMessage:
@@ -47,17 +47,25 @@ return (
                   defaultMessage:
                     'Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!',
                 })}
-        </WordWrap>
-        {hasCreatedContentType ? (
-          <Link href="https://strapi.io/blog">see more on the blog</Link>
+          </WordWrap>
+          {hasCreatedContentType ? (
+            <Link href="https://strapi.io/blog">
+              {formatMessage({
+                id: 'app.components.HomePage.button.blog',
+                defaultMessage: 'See more on the blog',
+              })}
+            </Link>
           ) : (
-            <Button onClick={onCreateCT} endIcon={<NextIcon />}>
-              Create your first Content type
+            <Button size="L" onClick={onCreateCT} endIcon={<NextIcon />}>
+              {formatMessage({
+                id: 'app.components.HomePage.create',
+                defaultMessage: 'Create your first Content type',
+              })}
             </Button>
           )}
-      </StackCustom>
-    </Box>
-  </div>
+        </StackCustom>
+      </Box>
+    </div>
   );
 };
 

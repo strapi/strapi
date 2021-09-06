@@ -13,48 +13,48 @@ import { Grid, GridItem } from '@strapi/parts/Grid';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { Link } from '@strapi/parts/Link';
 import ExternalLink from '@strapi/icons/ExternalLink';
-import Forum from '../../assets/images/social_forum.png';
-import Reddit from '../../assets/images/social_reddit.png';
-import Twitter from '../../assets/images/social_twitter.png';
-import Medium from '../../assets/images/social_medium.png';
-import Slack from '../../assets/images/social_slack.png';
-import Gh from '../../assets/images/social_gh.png';
+import Github from '@strapi/icons/Github';
+import Slack from '@strapi/icons/Slack';
+import Reddit from '@strapi/icons/Reddit';
+import Twitter from '@strapi/icons/Twitter';
+import Medium from '@strapi/icons/Medium';
+import Discourse from '@strapi/icons/Discourse';
 
 const socialLinks = [
   {
     name: 'Github',
     link: 'https://github.com/strapi/strapi/',
-    img: Gh,
+    icon: <Github />,
     alt: 'github',
   },
   {
     name: 'Discord',
     link: 'https://slack.strapi.io/',
-    img: Slack,
+    icon: <Slack />,
     alt: 'slack',
   },
   {
     name: 'Reddit',
     link: 'https://www.reddit.com/r/Strapi/',
-    img: Reddit,
+    icon: <Reddit />,
     alt: 'reddit',
   },
   {
     name: 'Twitter',
     link: 'https://twitter.com/strapijs',
-    img: Twitter,
+    icon: <Twitter />,
     alt: 'twitter',
   },
   {
     name: 'Medium',
     link: 'https://medium.com/@strapi',
-    img: Medium,
+    icon: <Medium />,
     alt: 'medium',
   },
   {
     name: 'Forum',
     link: 'https://forum.strapi.io',
-    img: Forum,
+    icon: <Discourse />,
     alt: 'forum',
   },
 ];
@@ -64,9 +64,9 @@ const LinkCustom = styled(LinkButton)`
   align-items: center;
   border: none;
 
-  img {
-    width: 24px;
-    height: 24px;
+  svg {
+    width: ${({ theme }) => theme.spaces[6]};
+    height: ${({ theme }) => theme.spaces[6]};
   }
 
   span {
@@ -113,7 +113,7 @@ const SocialLinks = () => {
             <GridItem col={6} s={12} key={socialLink.name}>
               <LinkCustom
                 size="L"
-                startIcon={<img alt={socialLink.alt} src={socialLink.img} />}
+                startIcon={socialLink.icon}
                 variant="tertiary"
                 href={socialLink.link}
               >

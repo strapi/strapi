@@ -47,7 +47,7 @@ const HomePage = ({ history: { push } }) => {
   return (
     <Layout>
       <FormattedMessage id="HomePage.helmet.title">
-        {title => <PageTitle title={title[0]} />}
+        {title => <PageTitle title={title} />}
       </FormattedMessage>
       <Main labelledBy="homepage">
         <Box padding={10}>
