@@ -1,6 +1,5 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { Text } from '@strapi/parts/Text';
 import PropTypes from 'prop-types';
 import basename from '../../../../../../../../admin/src/core/utils/basename';
 import MagicLinkWrapper from '../../../../../../../../admin/src/pages/SettingsPage/pages/Users/components/MagicLink/MagicLinkWrapper';
@@ -14,25 +13,21 @@ const MagicLink = ({ registrationToken }) => {
       <MagicLinkWrapper
         target={`${window.location.origin}${basename}auth/register?registrationToken=${registrationToken}`}
       >
-        <Text small textColor="neutral600" bold>
-          {formatMessage({
-            id: 'app.components.Users.MagicLink.connect',
-            defaultMessage: 'Send this link to the user for them to connect.',
-          })}
-        </Text>
+        {formatMessage({
+          id: 'app.components.Users.MagicLink.connect',
+          defaultMessage: 'Send this link to the user for them to connect.',
+        })}
       </MagicLinkWrapper>
     );
   }
 
   return (
     <MagicLinkWrapper target={`${window.location.origin}${basename}auth/register`}>
-      <Text small textColor="neutral600" bold>
-        {formatMessage({
-          id: 'app.components.Users.MagicLink.connect.sso',
-          defaultMessage:
-            'Send this link to the user, the first login can be made via a SSO provider.',
-        })}
-      </Text>
+      {formatMessage({
+        id: 'app.components.Users.MagicLink.connect.sso',
+        defaultMessage:
+          'Send this link to the user, the first login can be made via a SSO provider.',
+      })}
     </MagicLinkWrapper>
   );
 };

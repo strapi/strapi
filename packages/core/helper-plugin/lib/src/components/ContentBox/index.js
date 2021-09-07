@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
-import { TextButton } from '@strapi/parts/TextButton';
 
 const IconWrapper = styled(Row)`
   margin-right: ${({ theme }) => theme.spaces[6]};
@@ -15,14 +14,26 @@ const IconWrapper = styled(Row)`
 `;
 
 const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
+  const firstTitleChar = title.substring(0, 4);
+
+  if (title.length > 70 && firstTitleChar === 'http') {
+    const endSubstring = title.indexOf('registrationToken') + 20;
+    title = `${title.substring(0, endSubstring)}...${title.substring(
+      title.length - 3,
+      title.length
+    )}`;
+  }
+
   return (
-    <Row shadow="tableShadow" hasRadius padding={6}>
+    <Row shadow="tableShadow" hasRadius padding={6} background="neutral0">
       <IconWrapper background={iconBackground} hasRadius padding={3}>
         {icon}
       </IconWrapper>
       <Stack size={endAction ? '' : 1}>
         <Row>
-          <TextButton>{title}</TextButton>
+          <Text small bold>
+            {title}
+          </Text>
           {endAction}
         </Row>
         <Text textColor="neutral600">{subtitle}</Text>
