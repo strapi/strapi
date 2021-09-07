@@ -9,19 +9,6 @@ const { getService } = require('../utils');
 const { getContentTypeRoutePrefix, isSingleType, getWritableAttributes } = contentTypes;
 
 /**
- * Returns a parsed request body. It handles whether the body is multipart or not
- * @param {object} ctx - Koa request context
- * @returns {{ data: { [key: string]: any }, files: { [key: string]: any } }}
- */
-const parseRequest = ctx => {
-  if (ctx.is('multipart')) {
-    return parseMultipartData(ctx);
-  } else {
-    return { data: ctx.request.body, files: {} };
-  }
-};
-
-/**
  * Returns all locales for an entry
  * @param {object} entry
  * @returns {string[]}
@@ -105,7 +92,7 @@ const createLocalizationHandler = contentType => {
    * Create localized entry from another one
    */
   const createFromBaseEntry = async (ctx, entry) => {
-    const { data, files } = parseRequest(ctx);
+    const { data, files } = parseMultipartData(ctx);
 
     const { findByCode } = getService('locales');
 

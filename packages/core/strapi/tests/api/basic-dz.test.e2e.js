@@ -79,7 +79,9 @@ describe('Core API - Basic + dz', () => {
     const { statusCode, body } = await rq({
       method: 'POST',
       url: '/product-with-dzs',
-      body: product,
+      body: {
+        data: product,
+      },
       qs: {
         populate: ['dz'],
       },
@@ -130,7 +132,9 @@ describe('Core API - Basic + dz', () => {
     const { statusCode, body } = await rq({
       method: 'PUT',
       url: `/product-with-dzs/${data.productWithDz[0].id}`,
-      body: product,
+      body: {
+        data: product,
+      },
       qs: {
         populate: ['dz'],
       },
@@ -171,7 +175,9 @@ describe('Core API - Basic + dz', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dzs',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -193,7 +199,9 @@ describe('Core API - Basic + dz', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dzs',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -217,7 +225,9 @@ describe('Core API - Basic + dz', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dzs',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -240,7 +250,9 @@ describe('Core API - Basic + dz', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dzs',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);
@@ -263,7 +275,9 @@ describe('Core API - Basic + dz', () => {
       const res = await rq({
         method: 'POST',
         url: '/product-with-dzs',
-        body: product,
+        body: {
+          data: product,
+        },
       });
 
       expect(res.statusCode).toBe(400);

@@ -1,6 +1,8 @@
 {
   "info": {
-    "name": "test",
+    "displayName": "Test",
+    "singularName": "test",
+    "pluralName": "tests",
     "description": ""
   },
   "options": {

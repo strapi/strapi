@@ -99,16 +99,18 @@ describe('Not required dynamiczone', () => {
         method: 'POST',
         url: '/',
         body: {
-          field: [
-            {
-              __component: 'default.one-media',
-              media: mediaId,
-            },
-            {
-              __component: 'default.many-media',
-              media: [mediaId, mediaId],
-            },
-          ],
+          data: {
+            field: [
+              {
+                __component: 'default.one-media',
+                media: mediaId,
+              },
+              {
+                __component: 'default.many-media',
+                media: [mediaId, mediaId],
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field.media'],
@@ -153,16 +155,18 @@ describe('Not required dynamiczone', () => {
         method: 'POST',
         url: '/',
         body: {
-          field: [
-            {
-              __component: 'default.one-media',
-              media: mediaId,
-            },
-            {
-              __component: 'default.many-media',
-              media: [mediaId, mediaId],
-            },
-          ],
+          data: {
+            field: [
+              {
+                __component: 'default.one-media',
+                media: mediaId,
+              },
+              {
+                __component: 'default.many-media',
+                media: [mediaId, mediaId],
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -180,16 +184,18 @@ describe('Not required dynamiczone', () => {
         method: 'PUT',
         url: `/${res.body.data.id}`,
         body: {
-          field: [
-            {
-              __component: 'default.one-media',
-              media: newMediaId,
-            },
-            {
-              __component: 'default.many-media',
-              media: [newMediaId, newMediaId],
-            },
-          ],
+          data: {
+            field: [
+              {
+                __component: 'default.one-media',
+                media: newMediaId,
+              },
+              {
+                __component: 'default.many-media',
+                media: [newMediaId, newMediaId],
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field.media'],
@@ -232,16 +238,18 @@ describe('Not required dynamiczone', () => {
         method: 'POST',
         url: '/',
         body: {
-          field: [
-            {
-              __component: 'default.one-media',
-              media: mediaId,
-            },
-            {
-              __component: 'default.many-media',
-              media: [mediaId, mediaId],
-            },
-          ],
+          data: {
+            field: [
+              {
+                __component: 'default.one-media',
+                media: mediaId,
+              },
+              {
+                __component: 'default.many-media',
+                media: [mediaId, mediaId],
+              },
+            ],
+          },
         },
         qs: {
           populate: ['field'],
@@ -296,17 +304,19 @@ describe('Not required dynamiczone', () => {
         method: 'POST',
         url: '/',
         body: {
-          field: [
-            {
-              __component: 'default.with-nested',
-              singleMedia: {
-                media: mediaId,
+          data: {
+            field: [
+              {
+                __component: 'default.with-nested',
+                singleMedia: {
+                  media: mediaId,
+                },
+                multipleMedia: {
+                  media: [mediaId, mediaId],
+                },
               },
-              multipleMedia: {
-                media: [mediaId, mediaId],
-              },
-            },
-          ],
+            ],
+          },
         },
         qs: {
           populate: ['field.singleMedia.media', 'field.multipleMedia.media'],

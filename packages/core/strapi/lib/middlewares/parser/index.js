@@ -61,6 +61,7 @@ module.exports = strapi => {
               ],
             });
           }
+
           throw e;
         }
       });
