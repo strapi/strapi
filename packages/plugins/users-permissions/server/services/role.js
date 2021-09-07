@@ -1,6 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
+const { getService } = require('../utils');
 
 module.exports = ({ strapi }) => ({
   async createRole(params) {
@@ -48,11 +49,13 @@ module.exports = ({ strapi }) => ({
       throw new Error('Role not found');
     }
 
+    const allActions = getService('users-permissions').getActions();
+
     // Group by `type`.
-    const permissions = role.permissions.reduce((acc, permission) => {
+    role.permissions.forEach(permission => {
       const [type, controller, action] = permission.action.split('.');
 
-      _.set(acc, `${type}.controllers.${controller}.${action}`, {
+      _.set(allActions, `${type}.controllers.${controller}.${action}`, {
         enabled: true,
         policy: '',
       });
@@ -60,15 +63,13 @@ module.exports = ({ strapi }) => ({
       if (permission.action.startsWith('plugin')) {
         const [, pluginName] = type.split('::');
 
-        acc[type].information = plugins.find(plugin => plugin.id === pluginName) || {};
+        allActions[type].information = plugins.find(plugin => plugin.id === pluginName) || {};
       }
-
-      return acc;
-    }, {});
+    });
 
     return {
       ...role,
-      permissions,
+      permissions: allActions,
     };
   },
 

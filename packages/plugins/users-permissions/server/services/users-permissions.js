@@ -17,6 +17,16 @@ const DEFAULT_PERMISSIONS = [
   { action: 'plugin::users-permissions.user.me', roleType: null },
 ];
 
+const transformRoutePrefixFor = pluginName => route => {
+  const prefix = route.config && route.config.prefix;
+  const path = prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
+
+  return {
+    ...route,
+    path,
+  };
+};
+
 module.exports = ({ strapi }) => ({
   getPlugins(lang = 'en') {
     const request = require('request');
@@ -41,6 +51,7 @@ module.exports = ({ strapi }) => ({
     });
   },
 
+  // TODO: Filter on content-api only
   getActions() {
     const actionMap = {};
 
@@ -67,59 +78,48 @@ module.exports = ({ strapi }) => ({
     return actionMap;
   },
 
+  // TODO: Filter on content-api only
   async getRoutes() {
-    // TODO: remove or refactor
+    const routesMap = {};
 
-    const applicationRoutes = [];
-
-    _.forEach(strapi.api, api => {
-      _.forEach(api.routes, route => {
+    _.forEach(strapi.api, (api, apiName) => {
+      const routes = _.flatMap(api.routes, route => {
         if (_.has(route, 'routes')) {
-          applicationRoutes.push(...route.routes);
-        } else {
-          applicationRoutes.push(route);
+          return route.routes;
         }
-      });
-    });
 
-    const pluginsRoutes = {};
+        return route;
+      });
+
+      if (routes.length === 0) {
+        return;
+      }
+
+      routesMap[`api::${apiName}`] = routes;
+    });
 
     _.forEach(strapi.plugins, (plugin, pluginName) => {
-      const pluginRoutes = [];
+      const transformPrefix = transformRoutePrefixFor(pluginName);
 
-      _.forEach(plugin.routes, route => {
+      const routes = _.flatMap(plugin.routes, route => {
         if (_.has(route, 'routes')) {
-          pluginRoutes.push(
-            ...route.routes.map(route => {
-              const prefix = route.config && route.config.prefix;
-              const path =
-                prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
-
-              return {
-                ...route,
-                path,
-              };
-            })
-          );
-        } else {
-          const prefix = route.config && route.config.prefix;
-          const path =
-            prefix !== undefined ? `${prefix}${route.path}` : `/${pluginName}${route.path}`;
-
-          pluginRoutes.push({
-            ...route,
-            path,
-          });
+          return route.routes.map(transformPrefix);
         }
+
+        return transformPrefix(route);
       });
 
-      pluginsRoutes[pluginName] = pluginRoutes;
+      if (routes.length === 0) {
+        return;
+      }
+
+      routesMap[`plugin::${pluginName}`] = routes;
     });
 
-    return _.merge({ application: applicationRoutes }, pluginsRoutes);
+    return routesMap;
   },
 
-  async updatePermissions() {
+  async syncPermissions() {
     const roles = await strapi.query('plugin::users-permissions.role').findMany();
     const dbPermissions = await strapi.query('plugin::users-permissions.permission').findMany();
 
@@ -194,57 +194,7 @@ module.exports = ({ strapi }) => ({
       });
     }
 
-    return getService('users-permissions').updatePermissions();
-  },
-
-  async updateRole(roleID, body) {
-    const [role, authenticated] = await Promise.all([
-      this.getRole(roleID, []),
-      strapi.query('plugin::users-permissions.role').findOne({ where: { type: 'authenticated' } }),
-    ]);
-
-    await strapi.query('plugin::users-permissions.role').update({
-      where: { id: roleID },
-      data: _.pick(body, ['name', 'description']),
-    });
-
-    await Promise.all(
-      Object.keys(body.permissions || {}).reduce((acc, type) => {
-        Object.keys(body.permissions[type].controllers).forEach(controller => {
-          Object.keys(body.permissions[type].controllers[controller]).forEach(action => {
-            const bodyAction = body.permissions[type].controllers[controller][action];
-            const currentAction = _.get(
-              role.permissions,
-              `${type}.controllers.${controller}.${action}`,
-              {}
-            );
-
-            if (!_.isEqual(bodyAction, currentAction)) {
-              acc.push(
-                strapi.query('plugin::users-permissions.permission').update({
-                  where: {
-                    role: roleID,
-                    type,
-                    controller,
-                    action: action.toLowerCase(),
-                  },
-                  data: bodyAction,
-                })
-              );
-            }
-          });
-        });
-
-        return acc;
-      }, [])
-    );
-
-    // Add user to this role.
-    const newUsers = _.differenceBy(body.users, role.users, 'id');
-    await Promise.all(newUsers.map(user => this.updateUserRole(user, roleID)));
-
-    const oldUsers = _.differenceBy(role.users, body.users, 'id');
-    await Promise.all(oldUsers.map(user => this.updateUserRole(user, authenticated.id)));
+    return getService('users-permissions').syncPermissions();
   },
 
   async updateUserRole(user, role) {
