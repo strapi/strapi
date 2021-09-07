@@ -69,13 +69,8 @@ describe('ContentBox', () => {
 
       .c5 {
         font-weight: 500;
-<<<<<<< HEAD
         font-size: 0.75rem;
         line-height: 1.33;
-=======
-        font-size: 1rem;
-        line-height: 1.25;
->>>>>>> b625c77297a3b3b17c6e7ed752aff710b82f44ee
         color: #32324d;
       }
 
