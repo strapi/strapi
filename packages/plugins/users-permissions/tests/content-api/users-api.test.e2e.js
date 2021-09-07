@@ -29,7 +29,7 @@ describe('Users API', () => {
 
     const res = await rq({
       method: 'POST',
-      url: '/api/users',
+      url: '/users',
       body: user,
     });
 
@@ -45,7 +45,7 @@ describe('Users API', () => {
   test('Delete user', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/api/users/${data.user.id}`,
+      url: `/users/${data.user.id}`,
     });
 
     expect(res.statusCode).toBe(200);
