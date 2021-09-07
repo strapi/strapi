@@ -35,25 +35,24 @@ const MagicLinkWrapper = ({ children, target }) => {
     id: 'app.component.CopyToClipboard.label',
     defaultMessage: 'Copy to clipboard',
   });
-  console.log(children);
-  
-return (
-  <ContentBox
-    endAction={
-      <CopyToClipboard onCopy={handleCopy} text={target}>
-        <IconButton label={copyLabel} noBorder icon={<Duplicate />} />
-      </CopyToClipboard>
+
+  return (
+    <ContentBox
+      endAction={
+        <CopyToClipboard onCopy={handleCopy} text={target}>
+          <IconButton label={copyLabel} noBorder icon={<Duplicate />} />
+        </CopyToClipboard>
       }
-    title={target}
-    subtitle={children}
-    icon={<Envelope />}
-    iconBackground="neutral100"
-  />
+      title={target}
+      subtitle={children}
+      icon={<Envelope />}
+      iconBackground="neutral100"
+    />
   );
 };
 
 MagicLinkWrapper.propTypes = {
-  children: PropTypes.element.isRequired,
+  children: PropTypes.oneOfType([PropTypes.element, PropTypes.string]).isRequired,
   target: PropTypes.string.isRequired,
 };
 
