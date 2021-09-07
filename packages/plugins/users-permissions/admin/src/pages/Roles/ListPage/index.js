@@ -2,11 +2,12 @@ import React from 'react';
 import { Button, HeaderLayout, Layout, Main } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import { useTracking, SettingsPageTitle } from '@strapi/helper-plugin';
+import { useTracking, SettingsPageTitle, CheckPermissions } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 
 import { getTrad } from '../../../utils';
 import pluginId from '../../../pluginId';
+import permissions from '../../../permissions';
 
 const RoleListPage = () => {
   const { trackUsage } = useTracking();
@@ -44,12 +45,14 @@ const RoleListPage = () => {
             defaultMessage: 'List of roles',
           })}
           primaryAction={
-            <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
-              {formatMessage({
-                id: getTrad('List.button.roles'),
-                defaultMessage: 'Add new role',
-              })}
-            </Button>
+            <CheckPermissions permissions={permissions.createRole}>
+              <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
+                {formatMessage({
+                  id: getTrad('List.button.roles'),
+                  defaultMessage: 'Add new role',
+                })}
+              </Button>
+            </CheckPermissions>
           }
         />
       </Main>

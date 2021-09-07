@@ -9,6 +9,7 @@ jest.mock('@strapi/helper-plugin', () => ({
   ...jest.requireActual('@strapi/helper-plugin'),
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn(),
+  CheckPermissions: jest.fn(() => <div />),
 }));
 
 jest.mock('react-router-dom', () => ({
@@ -33,37 +34,30 @@ describe('Admin | containers | RoleListPage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c8 {
+      .c7 {
         font-weight: 600;
         font-size: 2rem;
         line-height: 1.25;
         color: #32324d;
       }
 
-      .c13 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c14 {
+      .c8 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #666687;
       }
 
-      .c15 {
+      .c9 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c2 {
+      .c1 {
         padding-bottom: 56px;
       }
 
-      .c5 {
+      .c4 {
         background: #f6f6f9;
         padding-top: 56px;
         padding-right: 56px;
@@ -71,11 +65,7 @@ describe('Admin | containers | RoleListPage', () => {
         padding-left: 56px;
       }
 
-      .c11 {
-        padding-right: 8px;
-      }
-
-      .c6 {
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -93,7 +83,7 @@ describe('Admin | containers | RoleListPage', () => {
         align-items: center;
       }
 
-      .c7 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -107,170 +97,56 @@ describe('Admin | containers | RoleListPage', () => {
         align-items: center;
       }
 
-      .c9 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c9 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c9 svg > g,
-      .c9 svg path {
-        fill: #ffffff;
-      }
-
-      .c9[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c10 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c10 .c0 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c10 .c12 {
-        color: #ffffff;
-      }
-
-      .c10[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c10[aria-disabled='true'] .c12 {
-        color: #666687;
-      }
-
-      .c10[aria-disabled='true'] svg > g,
-      .c10[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c10[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c10[aria-disabled='true']:active .c12 {
-        color: #666687;
-      }
-
-      .c10[aria-disabled='true']:active svg > g,
-      .c10[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c10:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c10:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c1 {
+      .c0 {
         display: grid;
         grid-template-columns: 1fr;
       }
 
-      .c3 {
+      .c2 {
         overflow-x: hidden;
       }
 
-      .c4 {
+      .c3 {
         outline: none;
       }
 
       <div
-        class="c0 c1"
+        class="c0"
       >
         <div
-          class="c0 c2 c3"
+          class="c1 c2"
         >
           <main
             aria-labelledby="Roles"
-            class="c4"
+            class="c3"
             id="main-content"
             tabindex="-1"
           >
             <div
-              class="c0 "
+              class=""
               style="height: 0px;"
             >
               <div
-                class="c0 c5"
+                class="c4"
                 data-strapi-header="true"
               >
                 <div
-                  class="c0 c6"
+                  class="c5"
                 >
                   <div
-                    class="c0 c7"
+                    class="c6"
                   >
                     <h1
-                      class="c8"
+                      class="c7"
                       id="roles"
                     >
                       Roles
                     </h1>
                   </div>
-                  <button
-                    aria-disabled="false"
-                    class="c9 c10"
-                    type="button"
-                  >
-                    <div
-                      aria-hidden="true"
-                      class="c0 c11"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          d="M24 13.604a.3.3 0 01-.3.3h-9.795V23.7a.3.3 0 01-.3.3h-3.21a.3.3 0 01-.3-.3v-9.795H.3a.3.3 0 01-.3-.3v-3.21a.3.3 0 01.3-.3h9.795V.3a.3.3 0 01.3-.3h3.21a.3.3 0 01.3.3v9.795H23.7a.3.3 0 01.3.3v3.21z"
-                          fill="#212134"
-                        />
-                      </svg>
-                    </div>
-                    <span
-                      class="c12 c13"
-                    >
-                      Add new role
-                    </span>
-                  </button>
+                  <div />
                 </div>
                 <p
-                  class="c12 c14 c15"
+                  class="c8 c9"
                 >
                   List of roles
                 </p>
