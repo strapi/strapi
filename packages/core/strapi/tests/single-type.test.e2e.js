@@ -27,16 +27,6 @@ describe('Content Manager single types', () => {
 
     strapi = await createStrapiInstance();
 
-    strapi.container.get('content-api').auth.register({
-      name: 'test-strategy',
-      authenticate() {
-        return { authenticated: true };
-      },
-      verify() {
-        return;
-      },
-    });
-
     rq = await createContentAPIRequest({ strapi });
   });
 

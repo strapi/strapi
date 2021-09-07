@@ -2,7 +2,7 @@
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
@@ -38,8 +38,8 @@ describe('Non repeatable and Not required component', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix('/withcomponents');
+    rq = await createContentAPIRequest({ strapi });
+    rq.setURLPrefix('/api/withcomponents');
   });
 
   afterAll(async () => {

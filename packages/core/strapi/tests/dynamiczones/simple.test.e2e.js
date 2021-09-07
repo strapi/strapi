@@ -2,7 +2,7 @@
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
@@ -87,8 +87,8 @@ describe('Not required dynamiczone', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix('/withdynamiczones');
+    rq = await createContentAPIRequest({ strapi });
+    rq.setURLPrefix('/api/withdynamiczones');
   });
 
   afterAll(async () => {
