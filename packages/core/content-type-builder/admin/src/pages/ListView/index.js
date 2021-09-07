@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { get, has, isEqual } from 'lodash';
-import { BackHeader, ListWrapper, useTracking } from '@strapi/helper-plugin';
+import { ListWrapper, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Header } from '@buffetjs/custom';
 import ListViewContext from '../../contexts/ListViewContext';
@@ -10,7 +10,6 @@ import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
-import LeftMenu from '../../components/LeftMenu';
 import ListRow from '../../components/ListRow';
 import List from '../../components/List';
 import ListButton from '../../components/ListButton';
@@ -32,7 +31,7 @@ const ListView = () => {
   } = useDataManager();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const { push, goBack } = useHistory();
+  const { push } = useHistory();
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
 
@@ -287,14 +286,12 @@ const ListView = () => {
   return (
     <ListViewContext.Provider value={{ openModalAddField: handleClickAddField }}>
       <Wrapper>
-        <BackHeader onClick={goBack} />
         <Prompt
           message={formatMessage({ id: getTrad('prompt.unsaved') })}
           when={hasModelBeenModified && enablePrompt}
         />
         <div className="container-fluid">
           <div className="row">
-            <LeftMenu wait={wait} />
             <div className="col-md-9 content" style={{ paddingLeft: '30px', paddingRight: '30px' }}>
               <Header {...headerProps} />
 

@@ -54,8 +54,6 @@ export { default as InputToggleWithErrors } from './old/components/InputToggleWi
 
 export { default as Label } from './old/components/Label';
 export { default as LabelIconWrapper } from './old/components/LabelIconWrapper';
-export { default as LeftMenu } from './old/components/LeftMenu';
-export { default as LeftMenuList } from './old/components/LeftMenuList';
 export { default as LiLink } from './old/components/LiLink';
 export { default as List } from './old/components/List';
 export { default as ListButton } from './old/components/ListButton';
