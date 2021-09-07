@@ -23,7 +23,7 @@ const App = (
   </ThemeProvider>
 );
 
-describe('Admin | containers | ListView', () => {
+describe('Homepage', () => {
   useModels.mockImplementation(() => ({
     isLoading: false,
     collectionTypes: [],
@@ -704,6 +704,7 @@ describe('Admin | containers | ListView', () => {
                       <a
                         class="c23"
                         href="https://strapi.io/resource-center"
+                        rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
@@ -752,6 +753,7 @@ describe('Admin | containers | ListView', () => {
                       <a
                         class="c23"
                         href="https://strapi.io/starters"
+                        rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
@@ -802,6 +804,7 @@ describe('Admin | containers | ListView', () => {
                       <a
                         class="c23"
                         href="https://strapi.io/blog"
+                        rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
@@ -852,6 +855,7 @@ describe('Admin | containers | ListView', () => {
                       <a
                         class="c23"
                         href="https://strapi.io/blog"
+                        rel="noopener noreferrer nofollow"
                         target="_blank"
                       >
                         <div
@@ -1286,22 +1290,6 @@ describe('Admin | containers | ListView', () => {
         </div>
       </div>
     `);
-  });
-
-  it('should show congrats message when there is no collectionTypes and no singletypes', () => {
-    useModels.mockImplementation(() => ({
-      isLoading: false,
-      collectionTypes: [],
-      singleTypes: [],
-    }));
-
-    render(App);
-
-    expect(
-      screen.getByText(
-        'Congrats! You are logged as the first administrator. To discover the powerful features provided by Strapi, we recommend you to create your first Content type!'
-      )
-    ).toBeInTheDocument();
   });
 
   it('should show regular message when there are collectionTypes and singletypes', () => {

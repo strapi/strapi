@@ -17,7 +17,11 @@ const ContentBlocks = () => {
 
   return (
     <Stack size={5}>
-      <BlockLink href="https://strapi.io/resource-center" target="_blank">
+      <BlockLink
+        href="https://strapi.io/resource-center"
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+      >
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.documentation',
@@ -31,7 +35,11 @@ const ContentBlocks = () => {
           iconBackground="primary100"
         />
       </BlockLink>
-      <BlockLink href="https://strapi.io/starters" target="_blank">
+      <BlockLink
+        href="https://strapi.io/starters"
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+      >
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.code',
@@ -45,7 +53,7 @@ const ContentBlocks = () => {
           iconBackground="warning100"
         />
       </BlockLink>
-      <BlockLink href="https://strapi.io/blog" target="_blank">
+      <BlockLink href="https://strapi.io/blog" target="_blank" rel="noopener noreferrer nofollow">
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.tutorial',
@@ -59,7 +67,7 @@ const ContentBlocks = () => {
           iconBackground="secondary100"
         />
       </BlockLink>
-      <BlockLink href="https://strapi.io/blog" target="_blank">
+      <BlockLink href="https://strapi.io/blog" target="_blank" rel="noopener noreferrer nofollow">
         <ContentBox
           title={formatMessage({
             id: 'app.components.BlockLink.blog',
