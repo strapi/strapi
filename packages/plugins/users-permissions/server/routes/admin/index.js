@@ -1,11 +1,10 @@
 'use strict';
 
-const usersPermissionsRoutes = require('./users-permissions');
+const permissionsRoutes = require('./permissions');
+const settingsRoutes = require('./settings');
 const roleRoutes = require('./role');
-const userRoutes = require('./user');
-const authRoutes = require('./auth');
 
 module.exports = {
   type: 'admin',
-  routes: [...roleRoutes, ...usersPermissionsRoutes, ...authRoutes, ...userRoutes],
+  routes: [...roleRoutes, ...settingsRoutes, ...permissionsRoutes],
 };

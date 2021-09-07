@@ -3,24 +3,8 @@
 module.exports = [
   {
     method: 'GET',
-    path: '/permissions',
-    handler: 'users-permissions.getPermissions',
-  },
-  {
-    method: 'GET',
-    path: '/policies',
-    handler: 'users-permissions.getPolicies',
-  },
-
-  {
-    method: 'GET',
-    path: '/routes',
-    handler: 'users-permissions.getRoutes',
-  },
-  {
-    method: 'GET',
     path: '/email-templates',
-    handler: 'users-permissions.getEmailTemplate',
+    handler: 'settings.getEmailTemplate',
     config: {
       policies: [
         {
@@ -35,7 +19,7 @@ module.exports = [
   {
     method: 'PUT',
     path: '/email-templates',
-    handler: 'users-permissions.updateEmailTemplate',
+    handler: 'settings.updateEmailTemplate',
     config: {
       policies: [
         {
@@ -50,7 +34,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/advanced',
-    handler: 'users-permissions.getAdvancedSettings',
+    handler: 'settings.getAdvancedSettings',
     config: {
       policies: [
         {
@@ -65,7 +49,7 @@ module.exports = [
   {
     method: 'PUT',
     path: '/advanced',
-    handler: 'users-permissions.updateAdvancedSettings',
+    handler: 'settings.updateAdvancedSettings',
     config: {
       policies: [
         {
@@ -80,7 +64,7 @@ module.exports = [
   {
     method: 'GET',
     path: '/providers',
-    handler: 'users-permissions.getProviders',
+    handler: 'settings.getProviders',
     config: {
       policies: [
         {
@@ -96,7 +80,7 @@ module.exports = [
   {
     method: 'PUT',
     path: '/providers',
-    handler: 'users-permissions.updateProviders',
+    handler: 'settings.updateProviders',
     config: {
       policies: [
         {

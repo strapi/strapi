@@ -1,65 +1,47 @@
 'use strict';
 
-const { castArray, has, prop } = require('lodash/fp');
-
+const { prop } = require('lodash/fp');
 const { createAPI } = require('./api');
 
-const authPolicy = (ctx, next) => {
-  const { route } = ctx.state;
+const getAuthConfig = prop('config.auth');
+
+const createAuthPolicy = strapi => async (ctx, next) => {
+  const { auth, route } = ctx.state;
 
   if (!route) {
     return ctx.unauthorized();
   }
 
-  const { config } = route;
+  try {
+    await strapi.container.get('content-api').auth.verify(auth, getAuthConfig(route));
 
-  if (prop('auth.public', config) === true) {
     return next();
+  } catch (error) {
+    const { errors } = strapi.container.get('content-api');
+
+    if (error instanceof errors.UnauthorizedError) {
+      return ctx.unauthorized();
+    }
+
+    if (error instanceof errors.ForbiddenError) {
+      return ctx.forbidden();
+    }
+
+    throw error;
   }
-
-  if (!ctx.state.auth) {
-    return ctx.unauthorized();
-  }
-
-  const { isAuthenticated = false } = ctx.state.auth || {};
-
-  if (!isAuthenticated) {
-    return ctx.unauthorized();
-  }
-
-  if (!has('auth.scope', config)) {
-    return ctx.unauthorized();
-  }
-
-  if (config.auth.scope === '*') {
-    // just requires authentication
-    return next();
-  }
-
-  const hasValidScope = castArray(config.auth.scope).every(scope =>
-    ctx.state.auth.scope.includes(scope)
-  );
-
-  if (!hasValidScope) {
-    return ctx.forbidden();
-  }
-
-  return next();
 };
 
 const createContentAPI = strapi => {
   const opts = {
-    prefix: '', // strapi.config.get('api.prefix', '/api'),
-    defaultPolicies: [authPolicy],
+    prefix: strapi.config.get('api.prefix', '/api'),
+    defaultPolicies: [createAuthPolicy(strapi)],
   };
 
   const api = createAPI(strapi, opts);
 
   // implement auth providers
-  api.use(async (ctx, next) => {
-    await strapi.container.get('content-api').auth.authenticate(ctx);
-
-    return next();
+  api.use((ctx, next) => {
+    return strapi.container.get('content-api').auth.authenticate(ctx, next);
   });
 
   return api;

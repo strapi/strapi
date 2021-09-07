@@ -1,6 +1,7 @@
 'use strict';
 
 const Router = require('@koa/router');
+const _ = require('lodash');
 const { has } = require('lodash/fp');
 const { yup } = require('@strapi/utils');
 
@@ -73,8 +74,12 @@ const createRouteManager = (strapi, opts = {}) => {
   const createRoute = (route, router) => {
     validateRouteConfig(route);
 
-    if (opts.defaultPolicies && has('config.policies', route)) {
-      route.config.policies.unshift(...opts.defaultPolicies);
+    if (opts.defaultPolicies) {
+      if (has('config.policies', route)) {
+        route.config.policies.unshift(...opts.defaultPolicies);
+      } else {
+        _.set(route, 'config.policies', [...opts.defaultPolicies]);
+      }
     }
 
     composeEndpoint(route, { ...route.info, router });

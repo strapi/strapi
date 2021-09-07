@@ -14,6 +14,7 @@ module.exports = [
     path: '/users',
     handler: 'user.find',
     config: {
+      auth: {},
       prefix: '',
     },
   },

@@ -1,6 +1,6 @@
 'use strict';
 
-const { toLower, castArray, trim, prop } = require('lodash/fp');
+const { toLower, castArray, trim } = require('lodash/fp');
 
 const compose = require('koa-compose');
 const { resolveMiddlewares } = require('./middleware');
@@ -8,23 +8,10 @@ const { resolvePolicies } = require('./policy');
 
 const getMethod = route => trim(toLower(route.method));
 const getPath = route => trim(route.path);
-const getHandler = prop('handler');
 
-const createRouteInfoMiddleware = ({ method, path, handler }, { pluginName }) => {
-  return (ctx, next) => {
-    if (typeof handler === 'string') {
-      const [controllerName, actionName] = handler.split('.');
-      ctx.request.route = {
-        endpoint: `${method} ${path}`,
-        controller: toLower(controllerName),
-        action: toLower(actionName),
-        verb: toLower(method),
-        plugin: pluginName,
-      };
-    }
-
-    return next();
-  };
+const routeInfoMiddleware = route => (ctx, next) => {
+  ctx.state.route = route;
+  return next();
 };
 
 module.exports = strapi => {
@@ -32,24 +19,14 @@ module.exports = strapi => {
     try {
       const method = getMethod(route);
       const path = getPath(route);
-      const handler = getHandler(route);
 
       const middlewares = resolveMiddlewares(route);
       const policies = resolvePolicies(route, { pluginName, apiName });
 
-      const routeInfoMiddleware = createRouteInfoMiddleware(
-        { method, path, handler },
-        { pluginName }
-      );
-
       const action = getAction(route, { pluginName, apiName }, strapi);
 
       const routeHandler = compose([
-        (ctx, next) => {
-          ctx.state.route = route;
-          return next();
-        },
-        routeInfoMiddleware,
+        routeInfoMiddleware(route),
         ...policies,
         ...middlewares,
         ...castArray(action),
