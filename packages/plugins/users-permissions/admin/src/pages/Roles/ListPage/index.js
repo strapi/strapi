@@ -106,7 +106,7 @@ const RoleListPage = () => {
                   <Th>
                     <TableLabel>
                       {formatMessage({
-                        id: getTrad('Roles.descriptions'),
+                        id: getTrad('Roles.description'),
                         defaultMessage: 'Description',
                       })}
                     </TableLabel>
