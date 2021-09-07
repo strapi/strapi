@@ -106,7 +106,6 @@ ConfirmDialog.propTypes = {
   iconBody: PropTypes.node,
   iconRightButton: PropTypes.node,
   isConfirmButtonLoading: PropTypes.bool,
-  isVisible: PropTypes.bool.isRequired,
   onConfirm: PropTypes.func.isRequired,
   onToggleDialog: PropTypes.func.isRequired,
   leftButtonText: PropTypes.shape({
