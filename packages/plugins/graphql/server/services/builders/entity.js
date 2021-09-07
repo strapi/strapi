@@ -8,7 +8,7 @@ module.exports = ({ strapi }) => {
 
   return {
     /**
-     * Build a higher level type for a content type which contains both the attributes, the ID and the metadata
+     * Build a higher level type for a content type which contains the attributes, the ID and the metadata
      * @param {object} contentType The content type which will be used to build its entity type
      * @return {NexusObjectTypeDef}
      */

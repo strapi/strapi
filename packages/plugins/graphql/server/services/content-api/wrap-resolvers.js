@@ -9,10 +9,11 @@ const { createPoliciesMiddleware } = require('./policy');
  * customized using the GraphQL extension service
  * @param {object} options
  * @param {GraphQLSchema} options.schema
+ * @param {object} options.strapi
  * @param {object} options.extension
  * @return {GraphQLSchema}
  */
-const wrapResolvers = ({ schema, extension = {} }) => {
+const wrapResolvers = ({ schema, strapi, extension = {} }) => {
   // Get all the registered resolvers configuration
   const { resolversConfig = {} } = extension;
 
@@ -43,7 +44,7 @@ const wrapResolvers = ({ schema, extension = {} }) => {
 
       const { resolve: baseResolver = get(fieldName) } = fieldDefinition;
 
-      const middlewares = parseMiddlewares(resolverConfig);
+      const middlewares = parseMiddlewares(resolverConfig, strapi);
 
       // Generate the policy middleware
       const policyMiddleware = createPoliciesMiddleware(resolverConfig, { strapi });
@@ -84,9 +85,10 @@ const wrapResolvers = ({ schema, extension = {} }) => {
 /**
  * Get & parse middlewares definitions from the resolver's config
  * @param {object} resolverConfig
+ * @param {object} strapi
  * @return {function[]}
  */
-const parseMiddlewares = resolverConfig => {
+const parseMiddlewares = (resolverConfig, strapi) => {
   const resolverMiddlewares = getOr([], 'middlewares', resolverConfig);
 
   // TODO: [v4] to factorize with compose endpoints (routes)

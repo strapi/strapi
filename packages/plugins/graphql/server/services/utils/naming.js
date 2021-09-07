@@ -2,7 +2,7 @@
 
 const { camelCase, upperFirst, lowerFirst, pipe, get } = require('lodash/fp');
 
-const { toSingular, toPlural } = require('../old/naming');
+const { toSingular } = require('../old/naming');
 
 module.exports = ({ strapi }) => {
   /**
@@ -23,15 +23,20 @@ module.exports = ({ strapi }) => {
   /**
    * Build the base type name for a given content type
    * @param {object} contentType
+   * @param {object} options
+   * @param {'singular' | 'plural'} options.plurality
    * @return {string}
    */
-  const getTypeName = contentType => {
+  const getTypeName = (contentType, { plurality = 'singular' } = {}) => {
     const plugin = get('plugin', contentType);
     const modelName = get('modelName', contentType);
-    const singularName = get('info.singularName', contentType);
+    const name =
+      plurality === 'singular'
+        ? get('info.singularName', contentType)
+        : get('info.pluralName', contentType);
 
     const transformedPlugin = upperFirst(camelCase(plugin));
-    const transformedModelName = upperFirst(singularName || toSingular(modelName));
+    const transformedModelName = upperFirst(camelCase(name || toSingular(modelName)));
 
     return `${transformedPlugin}${transformedModelName}`;
   };
@@ -207,10 +212,10 @@ module.exports = ({ strapi }) => {
     }
 
     const getCustomTypeName = pipe(
-      getTypeName,
-      plurality === 'plural' ? toPlural : toSingular,
+      ct => getTypeName(ct, { plurality }),
       firstLetterCase === 'upper' ? upperFirst : lowerFirst
     );
+
     return contentType => `${prefix}${getCustomTypeName(contentType)}${suffix}`;
   };
 

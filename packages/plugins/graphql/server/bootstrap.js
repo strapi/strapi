@@ -1,6 +1,6 @@
 'use strict';
 
-const { isEmpty, getOr } = require('lodash/fp');
+const { isEmpty, mergeWith, isArray } = require('lodash/fp');
 const { ApolloServer } = require('apollo-server-koa');
 const {
   ApolloServerPluginLandingPageLocalDefault,
@@ -8,6 +8,12 @@ const {
 } = require('apollo-server-core');
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
+
+const merge = mergeWith((a, b) => {
+  if (isArray(a) && isArray(b)) {
+    return a.concat(b);
+  }
+});
 
 module.exports = async strapi => {
   // Generate the GraphQL schema for the content API
@@ -22,10 +28,9 @@ module.exports = async strapi => {
     return;
   }
 
-  const config = getOr({}, 'config', strapi.plugin('graphql'));
-  const apolloServerConfig = getOr({}, 'apolloServer', config);
+  const { config } = strapi.plugin('graphql');
 
-  const serverParams = {
+  const defaultServerConfig = {
     // Schema
     schema,
 
@@ -40,13 +45,8 @@ module.exports = async strapi => {
       return ctx;
     },
 
-    // Format & validation
-    formatError: err => {
-      const formatError = getOr(null, 'formatError', config);
-
-      return typeof formatError === 'function' ? formatError(err) : err;
-    },
-    validationRules: [depthLimit(config.depthLimit)],
+    // Validation
+    validationRules: [depthLimit(config('depthLimit'))],
 
     // Misc
     cors: false,
@@ -59,11 +59,12 @@ module.exports = async strapi => {
         ? ApolloServerPluginLandingPageLocalDefault({ footer: false })
         : ApolloServerPluginLandingPageProductionDefault({ footer: false }),
     ],
-    ...apolloServerConfig,
   };
 
+  const serverConfig = merge(defaultServerConfig, config('apolloServer', {}));
+
   // Create a new Apollo server
-  const server = new ApolloServer(serverParams);
+  const server = new ApolloServer(serverConfig);
 
   // Register the upload middleware
   useUploadMiddleware(strapi, config);
@@ -78,7 +79,7 @@ module.exports = async strapi => {
   // Link the Apollo server & the Strapi app
   server.applyMiddleware({
     app: strapi.app,
-    path: config.endpoint,
+    path: config('endpoint', '/graphql'),
   });
 
   // Register destroy behavior
@@ -92,13 +93,13 @@ module.exports = async strapi => {
 /**
  * Register the upload middleware powered by graphql-upload in Strapi
  * @param {object} strapi
- * @param {object} config
+ * @param {function} config
  */
 const useUploadMiddleware = (strapi, config) => {
   const uploadMiddleware = graphqlUploadKoa();
 
   strapi.app.use((ctx, next) => {
-    if (ctx.path === config.endpoint) {
+    if (ctx.path === config('endpoint')) {
       return uploadMiddleware(ctx, next);
     }
 

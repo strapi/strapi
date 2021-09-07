@@ -54,11 +54,11 @@ const KINDS = {
 
 const GRAPHQL_SCALAR_OPERATORS = {
   // ID
-  ID: ['eq', 'not'],
+  ID: ['eq', 'not', 'gt', 'lt'],
   // Booleans
   Boolean: ['eq', 'not'],
   // Strings
-  String: ['eq', 'not', 'contains', 'startsWith', 'endsWith'],
+  String: ['eq', 'not', 'gt', 'lt', 'contains', 'startsWith', 'endsWith'],
   // Numbers
   Int: ['eq', 'not', 'gt', 'lt'],
   Long: ['eq', 'not', 'gt', 'lt'],
