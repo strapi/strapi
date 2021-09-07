@@ -72,7 +72,7 @@ const data = {
           {
             name: 'category',
             relation: 'oneToOne',
-            target: 'application::category.category',
+            target: 'api::category.category',
             targetAttribute: null,
             type: 'relation',
           },
@@ -130,7 +130,7 @@ const data = {
     },
   },
   contentTypes: {
-    'plugins::myplugin.test': {
+    'plugin::myplugin.test': {
       uid: '',
       plugin: 'myplugin',
       schema: {
@@ -149,8 +149,8 @@ const data = {
         ],
       },
     },
-    'plugins::users-permissions.role': {
-      uid: 'plugins::users-permissions.role',
+    'plugin::users-permissions.role': {
+      uid: 'plugin::users-permissions.role',
       plugin: 'users-permissions',
       schema: {
         name: 'role',
@@ -170,7 +170,7 @@ const data = {
           {
             name: 'permissions',
             relation: 'oneToMany',
-            target: 'plugins::users-permissions.permission',
+            target: 'plugin::users-permissions.permission',
             plugin: 'users-permissions',
             targetAttribute: 'role',
             configurable: false,
@@ -179,7 +179,7 @@ const data = {
           {
             name: 'users',
             relation: 'oneToMany',
-            target: 'plugins::users-permissions.user',
+            target: 'plugin::users-permissions.user',
             plugin: 'users-permissions',
             type: 'relation',
             targetAttribute: 'role',
@@ -187,8 +187,8 @@ const data = {
         ],
       },
     },
-    'application::address.address': {
-      uid: 'application::address.address',
+    'api::address.address': {
+      uid: 'api::address.address',
       schema: {
         name: 'address',
         description: '',
@@ -201,7 +201,7 @@ const data = {
           {
             name: 'category',
             relation: 'oneToOne',
-            target: 'application::category.category',
+            target: 'api::category.category',
             targetAttribute: null,
             type: 'relation',
           },
@@ -211,8 +211,8 @@ const data = {
         ],
       },
     },
-    'application::menusection.menusection': {
-      uid: 'application::menusection.menusection',
+    'api::menusection.menusection': {
+      uid: 'api::menusection.menusection',
       schema: {
         name: 'menusection',
         description: '',
@@ -229,15 +229,15 @@ const data = {
           {
             name: 'menu',
             relation: 'manyToOne',
-            target: 'application::menu.menu',
+            target: 'api::menu.menu',
             targetAttribute: 'menusections',
             type: 'relation',
           },
         ],
       },
     },
-    'application::country.country': {
-      uid: 'application::country.country',
+    'api::country.country': {
+      uid: 'api::country.country',
       schema: {
         name: 'country',
         description: '',
@@ -249,8 +249,8 @@ const data = {
         ],
       },
     },
-    'plugins::users-permissions.user': {
-      uid: 'plugins::users-permissions.user',
+    'plugin::users-permissions.user': {
+      uid: 'plugin::users-permissions.user',
       plugin: 'users-permissions',
       schema: {
         name: 'users',
@@ -292,7 +292,7 @@ const data = {
           {
             name: 'role',
             relation: 'manyToOne',
-            target: 'plugins::users-permissions.role',
+            target: 'plugin::users-permissions.role',
             plugin: 'users-permissions',
             targetAttribute: 'users',
             type: 'relation',
@@ -301,8 +301,8 @@ const data = {
         ],
       },
     },
-    'application::review.review': {
-      uid: 'application::review.review',
+    'api::review.review': {
+      uid: 'api::review.review',
       schema: {
         name: 'review',
         description: '',
@@ -314,14 +314,14 @@ const data = {
           {
             name: 'likes',
             relation: 'oneToMany',
-            target: 'application::like.like',
+            target: 'api::like.like',
             targetAttribute: 'review',
             type: 'relation',
           },
           {
             name: 'author',
             relation: 'oneToOne',
-            target: 'plugins::users-permissions.user',
+            target: 'plugin::users-permissions.user',
             targetAttribute: null,
             plugin: 'users-permissions',
             type: 'relation',
@@ -329,15 +329,15 @@ const data = {
           {
             name: 'restaurant',
             relation: 'oneToOne',
-            target: 'application::restaurant.restaurant',
+            target: 'api::restaurant.restaurant',
             targetAttribute: null,
             type: 'relation',
           },
         ],
       },
     },
-    'application::like.like': {
-      uid: 'application::like.like',
+    'api::like.like': {
+      uid: 'api::like.like',
       schema: {
         name: 'like',
         description: '',
@@ -347,7 +347,7 @@ const data = {
           {
             name: 'author',
             relation: 'oneToOne',
-            target: 'plugins::users-permissions.user',
+            target: 'plugin::users-permissions.user',
             targetAttribute: null,
             plugin: 'users-permissions',
             type: 'relation',
@@ -355,15 +355,15 @@ const data = {
           {
             name: 'review',
             relation: 'manyToOne',
-            target: 'application::review.review',
+            target: 'api::review.review',
             targetAttribute: 'likes',
             type: 'relation',
           },
         ],
       },
     },
-    'application::category.category': {
-      uid: 'application::category.category',
+    'api::category.category': {
+      uid: 'api::category.category',
       schema: {
         name: 'category',
         description: '',
@@ -372,8 +372,8 @@ const data = {
         attributes: [{ name: 'name', type: 'string' }],
       },
     },
-    'plugins::users-permissions.permission': {
-      uid: 'plugins::users-permissions.permission',
+    'plugin::users-permissions.permission': {
+      uid: 'plugin::users-permissions.permission',
       plugin: 'users-permissions',
       schema: {
         name: 'permission',
@@ -389,7 +389,7 @@ const data = {
           {
             name: 'role',
             relation: 'manyToOne',
-            target: 'plugins::users-permissions.role',
+            target: 'plugin::users-permissions.role',
             plugin: 'users-permissions',
             targetAttribute: 'permissions',
             type: 'relation',
@@ -397,8 +397,8 @@ const data = {
         ],
       },
     },
-    'application::menu.menu': {
-      uid: 'application::menu.menu',
+    'api::menu.menu': {
+      uid: 'api::menu.menu',
       schema: {
         name: 'menu',
         description: '',
@@ -409,22 +409,22 @@ const data = {
           {
             name: 'menusections',
             relation: 'oneToMany',
-            target: 'application::menusection.menusection',
+            target: 'api::menusection.menusection',
             targetAttribute: 'menu',
             type: 'relation',
           },
           {
             name: 'restaurant',
             relation: 'oneToOne',
-            target: 'application::restaurant.restaurant',
+            target: 'api::restaurant.restaurant',
             targetAttribute: 'menu',
             type: 'relation',
           },
         ],
       },
     },
-    'application::restaurant.restaurant': {
-      uid: 'application::restaurant.restaurant',
+    'api::restaurant.restaurant': {
+      uid: 'api::restaurant.restaurant',
       schema: {
         name: 'restaurant',
         description: '',
@@ -445,7 +445,7 @@ const data = {
           {
             name: 'address',
             relation: 'oneToOne',
-            target: 'application::address.address',
+            target: 'api::address.address',
             targetAttribute: null,
             type: 'relation',
           },
@@ -456,7 +456,7 @@ const data = {
           {
             name: 'categories',
             relation: 'oneToMany',
-            target: 'application::category.category',
+            target: 'api::category.category',
             targetAttribute: null,
             type: 'relation',
           },
@@ -470,7 +470,7 @@ const data = {
           {
             name: 'menu',
             nature: 'oneToOne',
-            target: 'application::menu.menu',
+            target: 'api::menu.menu',
             dominant: false,
             targetAttribute: 'restaurant',
             unique: false,
@@ -496,8 +496,8 @@ const data = {
         ],
       },
     },
-    'application::homepage.homepage': {
-      uid: 'application::homepage.homepage',
+    'api::homepage.homepage': {
+      uid: 'api::homepage.homepage',
       schema: {
         name: 'homepage',
         attributes: [

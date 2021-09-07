@@ -39,9 +39,9 @@ describe('rbacProviderReducer', () => {
     it('should set the collectionTypesRelatedPermissions correctly', () => {
       const expected = {
         foo: {
-          'plugins::content-manager.explorer.create': [
+          'plugin::content-manager.explorer.create': [
             {
-              action: 'plugins::content-manager.explorer.create',
+              action: 'plugin::content-manager.explorer.create',
               subject: 'foo',
               properties: {
                 fields: ['f1'],
@@ -49,7 +49,7 @@ describe('rbacProviderReducer', () => {
               conditions: [],
             },
             {
-              action: 'plugins::content-manager.explorer.create',
+              action: 'plugin::content-manager.explorer.create',
               subject: 'foo',
               properties: {
                 fields: ['f2'],
@@ -57,9 +57,9 @@ describe('rbacProviderReducer', () => {
               conditions: [],
             },
           ],
-          'plugins::content-manager.explorer.read': [
+          'plugin::content-manager.explorer.read': [
             {
-              action: 'plugins::content-manager.explorer.read',
+              action: 'plugin::content-manager.explorer.read',
               subject: 'foo',
               properties: {
                 fields: ['f1'],
@@ -69,15 +69,15 @@ describe('rbacProviderReducer', () => {
           ],
         },
         bar: {
-          'plugins::content-manager.explorer.delete': [
+          'plugin::content-manager.explorer.delete': [
             {
-              action: 'plugins::content-manager.explorer.delete',
+              action: 'plugin::content-manager.explorer.delete',
               subject: 'bar',
             },
           ],
-          'plugins::content-manager.explorer.update': [
+          'plugin::content-manager.explorer.update': [
             {
-              action: 'plugins::content-manager.explorer.update',
+              action: 'plugin::content-manager.explorer.update',
               subject: 'bar',
               properties: {
                 fields: ['f1'],

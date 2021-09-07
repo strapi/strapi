@@ -9,7 +9,7 @@ describe('CONTENT MANAGER | CONTAINERS | EditView | utils | getFieldsActionMatch
       updateActionAllowedFields: ['name', 'description'],
     };
 
-    expect(getFieldsActionMatchingPermissions(permissions, 'application::article.article')).toEqual(
+    expect(getFieldsActionMatchingPermissions(permissions, 'api::article.article')).toEqual(
       expected
     );
   });

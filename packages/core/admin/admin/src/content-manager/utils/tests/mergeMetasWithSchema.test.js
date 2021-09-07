@@ -6,7 +6,7 @@ describe('CONTENT MANAGER | utils | mergeMetasWithSchema', () => {
     const data = {
       contentType: {
         metadatas: {},
-        uid: 'application::test.test',
+        uid: 'api::test.test',
       },
       components: {},
     };

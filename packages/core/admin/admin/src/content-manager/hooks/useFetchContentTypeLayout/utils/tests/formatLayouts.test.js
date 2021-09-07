@@ -8,10 +8,10 @@ import formatLayouts, {
 } from '../formatLayouts';
 
 const addressSchema = {
-  uid: 'application::address.address',
+  uid: 'api::address.address',
   attributes: {
     categories: {
-      targetModel: 'application::category.category',
+      targetModel: 'api::category.category',
     },
   },
   layouts: {
@@ -30,7 +30,7 @@ const addressSchema = {
 };
 const simpleModels = [
   {
-    uid: 'application::category.category',
+    uid: 'api::category.category',
     isDisplayed: true,
     attributes: {
       name: {
@@ -48,7 +48,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
           name: 'categories',
           size: 6,
           fieldSchema: {
-            targetModel: 'application::category.category',
+            targetModel: 'api::category.category',
           },
           metadatas: {
             mainField: {
@@ -57,7 +57,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
             },
           },
           queryInfos: {
-            endPoint: '/content-manager/relations/application::address.address/categories',
+            endPoint: '/content-manager/relations/api::address.address/categories',
             containsKey: 'name_contains',
             defaultParams: {},
             shouldDisplayRelationLink: true,
@@ -551,7 +551,7 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
   describe('generateRelationQueryInfos', () => {
     it('should return an object with the correct keys', () => {
       expect(generateRelationQueryInfos(addressSchema, 'categories', simpleModels)).toEqual({
-        endPoint: '/content-manager/relations/application::address.address/categories',
+        endPoint: '/content-manager/relations/api::address.address/categories',
         containsKey: 'name_contains',
         defaultParams: {},
         shouldDisplayRelationLink: true,
@@ -565,14 +565,14 @@ describe('Content Manager | hooks | useFetchContentTypeLayout | utils ', () => {
         generateRelationQueryInfosForComponents(
           addressSchema,
           'categories',
-          'application::address.address',
+          'api::address.address',
           simpleModels
         )
       ).toEqual({
-        endPoint: '/content-manager/relations/application::address.address/categories',
+        endPoint: '/content-manager/relations/api::address.address/categories',
         containsKey: 'name_contains',
         defaultParams: {
-          _component: 'application::address.address',
+          _component: 'api::address.address',
         },
         shouldDisplayRelationLink: true,
       });

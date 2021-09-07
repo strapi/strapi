@@ -76,20 +76,9 @@ module.exports = {
   },
 
   async plugins(ctx) {
-    try {
-      const plugins = Object.keys(strapi.plugins).reduce((acc, key) => {
-        acc[key] = _.get(strapi.plugins, [key, 'package', 'strapi'], {
-          name: key,
-        });
-
-        return acc;
-      }, {});
-
-      ctx.send({ plugins });
-    } catch (err) {
-      strapi.log.error(err);
-      ctx.badRequest(null, [{ messages: [{ id: 'An error occurred' }] }]);
-    }
+    // TODO: use name from plugin package.json info
+    const plugins = _.mapValues(strapi.plugins, (_, key) => ({ name: key }));
+    ctx.send({ plugins });
   },
 
   async uninstallPlugin(ctx) {

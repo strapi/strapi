@@ -1,11 +1,11 @@
 'use strict';
 
-const uidService = require('../uid');
+const uidServiceLoader = require('../uid');
 
 describe('Test uid service', () => {
   describe('generateUIDField', () => {
     test('Uses modelName if no targetField specified or set', async () => {
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -24,6 +24,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -35,10 +36,7 @@ describe('Test uid service', () => {
     });
 
     test('Calls findUniqueUID', async () => {
-      const tmpFn = uidService.findUniqueUID;
-      uidService.findUniqueUID = jest.fn(v => v);
-
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -61,6 +59,8 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
+      uidService.findUniqueUID = jest.fn(v => v);
 
       await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -77,8 +77,6 @@ describe('Test uid service', () => {
       });
 
       expect(uidService.findUniqueUID).toHaveBeenCalledTimes(2);
-
-      uidService.findUniqueUID = tmpFn;
     });
 
     test('Uses targetField value for generation', async () => {
@@ -86,7 +84,7 @@ describe('Test uid service', () => {
         return [{ slug: 'test-title' }];
       });
 
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -109,6 +107,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -121,7 +120,7 @@ describe('Test uid service', () => {
       expect(uid).toBe('test-title-1');
 
       // change find response
-      global.strapi.db.query = () => ({ findMany: jest.fn(async () => []) });
+      strapi.db.query = () => ({ findMany: jest.fn(async () => []) });
 
       const uidWithEmptyTarget = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -135,7 +134,7 @@ describe('Test uid service', () => {
     });
 
     test('Uses options for generation', async () => {
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -159,6 +158,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -172,7 +172,7 @@ describe('Test uid service', () => {
     });
 
     test('Ignores minLength attribute (should be handle by the user)', async () => {
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -196,6 +196,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -209,7 +210,7 @@ describe('Test uid service', () => {
     });
 
     test('Ignores maxLength attribute (should be handled user side)', async () => {
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -233,6 +234,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -246,7 +248,7 @@ describe('Test uid service', () => {
     });
 
     test('Generates a UID using the default value if necessary', async () => {
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -266,6 +268,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.generateUIDField({
         contentTypeUID: 'my-model',
@@ -288,7 +291,7 @@ describe('Test uid service', () => {
         ];
       });
 
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -307,6 +310,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const uid = await uidService.findUniqueUID({
         contentTypeUID: 'my-model',
@@ -322,7 +326,7 @@ describe('Test uid service', () => {
         return [];
       });
 
-      global.strapi = {
+      const strapi = {
         contentTypes: {
           'my-model': {
             modelName: 'myTestModel',
@@ -341,6 +345,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       await uidService.findUniqueUID({
         contentTypeUID: 'my-model',
@@ -358,7 +363,7 @@ describe('Test uid service', () => {
     test('Counts the data in db', async () => {
       const count = jest.fn(async () => 0);
 
-      global.strapi = {
+      const strapi = {
         db: {
           query() {
             return {
@@ -367,6 +372,7 @@ describe('Test uid service', () => {
           },
         },
       };
+      const uidService = uidServiceLoader({ strapi });
 
       const isAvailable = await uidService.checkUIDAvailability({
         contentTypeUID: 'my-model',

@@ -28,7 +28,7 @@ const findCreatorRoles = entity => {
 
   if (has(createdByPath, entity)) {
     const creatorId = prop(createdByPath, entity);
-    return strapi.query('strapi::role').findMany({ where: { users: { id: creatorId } } });
+    return strapi.query('admin::role').findMany({ where: { users: { id: creatorId } } });
   }
 
   return [];
@@ -92,7 +92,7 @@ const getBasePopulate = (uid, populate) => {
   });
 };
 
-module.exports = {
+module.exports = ({ strapi }) => ({
   async assocCreatorRoles(entity) {
     if (!entity) {
       return entity;
@@ -202,4 +202,4 @@ module.exports = {
 
     return strapi.entityService.update(uid, entity.id, { params, data });
   }),
-};
+});

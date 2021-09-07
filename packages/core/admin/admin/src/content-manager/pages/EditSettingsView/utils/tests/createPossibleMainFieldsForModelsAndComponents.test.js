@@ -5,7 +5,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
     it('should return an object with key/value corresponding to the uid of the model and an array with its possible main fields', () => {
       const models = [
         {
-          uid: 'application::address.address',
+          uid: 'api::address.address',
           attributes: {
             id: { type: 'integer' },
             geolocation: { type: 'json', required: true },
@@ -19,7 +19,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
               column: 'id',
               isVirtual: true,
               type: 'relation',
-              targetModel: 'application::category.category',
+              targetModel: 'api::category.category',
               relationType: 'manyToMany',
             },
             cover: { type: 'media', multiple: false, required: false },
@@ -31,7 +31,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
         },
 
         {
-          uid: 'application::menusection.menusection',
+          uid: 'api::menusection.menusection',
           attributes: {
             id: { type: 'integer' },
             name: { type: 'string', required: true, minLength: 6 },
@@ -44,7 +44,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
               model: 'menu',
               via: 'menusections',
               type: 'relation',
-              targetModel: 'application::menu.menu',
+              targetModel: 'api::menu.menu',
               relationType: 'manyToOne',
             },
             created_at: { type: 'timestamp' },
@@ -54,7 +54,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
       ];
 
       const expected = {
-        'application::address.address': [
+        'api::address.address': [
           'id',
           'city',
           'postal_coder',
@@ -62,7 +62,7 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
           'created_at',
           'updated_at',
         ],
-        'application::menusection.menusection': ['id', 'name', 'created_at', 'updated_at'],
+        'api::menusection.menusection': ['id', 'name', 'created_at', 'updated_at'],
       };
 
       expect(createPossibleMainFieldsForModelsAndComponents(models)).toEqual(expected);

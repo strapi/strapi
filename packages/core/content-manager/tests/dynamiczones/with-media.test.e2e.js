@@ -81,7 +81,7 @@ describe('Not required dynamiczone', () => {
 
     rq = await createAuthRequest({ strapi });
     rq.setURLPrefix(
-      '/content-manager/collection-types/application::withdynamiczonemedia.withdynamiczonemedia'
+      '/content-manager/collection-types/api::withdynamiczonemedia.withdynamiczonemedia'
     );
   });
 

@@ -14,7 +14,7 @@ const hasProperty = curry((property, subject) => {
 
 const getValidOptions = pick(['applyToProperties']);
 
-const toSubjectTemplate = ct => ({ uid: ct.uid, label: ct.info.name, properties: [] });
+const toSubjectTemplate = ct => ({ uid: ct.uid, label: ct.info.singularName, properties: [] });
 
 module.exports = {
   isOfKind,

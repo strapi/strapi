@@ -22,20 +22,20 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       const actions = [
         {
           displayName: 'Update and delete',
-          action: 'plugins::documentation.settings.update',
+          action: 'plugin::documentation.settings.update',
           subCategory: 'settings',
           plugin: 'plugin::documentation',
         },
         {
           displayName: 'Regenerate',
-          action: 'plugins::documentation.settings.regenerate',
+          action: 'plugin::documentation.settings.regenerate',
           subCategory: 'settings',
           plugin: 'plugin::documentation',
         },
       ];
 
       const expected = {
-        'plugins::documentation.settings.update': {
+        'plugin::documentation.settings.update': {
           properties: {
             enabled: false,
           },
@@ -44,7 +44,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             'admin::has-same-role-as-creator': false,
           },
         },
-        'plugins::documentation.settings.regenerate': {
+        'plugin::documentation.settings.regenerate': {
           properties: {
             enabled: false,
           },
@@ -62,13 +62,13 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       const actions = [
         {
           displayName: 'Update and delete',
-          action: 'plugins::documentation.settings.update',
+          action: 'plugin::documentation.settings.update',
           subCategory: 'settings',
           plugin: 'plugin::documentation',
         },
         {
           displayName: 'Regenerate',
-          action: 'plugins::documentation.settings.regenerate',
+          action: 'plugin::documentation.settings.regenerate',
           subCategory: 'settings',
           plugin: 'plugin::documentation',
         },
@@ -76,14 +76,14 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
 
       const permissions = [
         {
-          action: 'plugins::documentation.settings.update',
+          action: 'plugin::documentation.settings.update',
           subject: null,
           conditions: ['admin::has-same-role-as-creator'],
         },
       ];
 
       const expected = {
-        'plugins::documentation.settings.update': {
+        'plugin::documentation.settings.update': {
           properties: {
             enabled: true,
           },
@@ -92,7 +92,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             'admin::has-same-role-as-creator': true,
           },
         },
-        'plugins::documentation.settings.regenerate': {
+        'plugin::documentation.settings.regenerate': {
           properties: {
             enabled: false,
           },
@@ -116,7 +116,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           actions: [
             {
               displayName: 'Access the Documentation',
-              action: 'plugins::documentation.read',
+              action: 'plugin::documentation.read',
               subCategory: 'general',
               plugin: 'plugin::documentation',
             },
@@ -128,13 +128,13 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           actions: [
             {
               displayName: 'Update and delete',
-              action: 'plugins::documentation.settings.update',
+              action: 'plugin::documentation.settings.update',
               subCategory: 'settings',
               plugin: 'plugin::documentation',
             },
             {
               displayName: 'Regenerate',
-              action: 'plugins::documentation.settings.regenerate',
+              action: 'plugin::documentation.settings.regenerate',
               subCategory: 'settings',
               plugin: 'plugin::documentation',
             },
@@ -143,7 +143,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       ];
       const expected = {
         general: {
-          'plugins::documentation.read': {
+          'plugin::documentation.read': {
             properties: {
               enabled: false,
             },
@@ -154,7 +154,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
           },
         },
         settings: {
-          'plugins::documentation.settings.update': {
+          'plugin::documentation.settings.update': {
             properties: {
               enabled: false,
             },
@@ -163,7 +163,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
               'admin::has-same-role-as-creator': false,
             },
           },
-          'plugins::documentation.settings.regenerate': {
+          'plugin::documentation.settings.regenerate': {
             properties: {
               enabled: false,
             },
@@ -192,7 +192,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
               actions: [
                 {
                   displayName: 'Read',
-                  action: 'plugins::content-type-builder.read',
+                  action: 'plugin::content-type-builder.read',
                   subCategory: 'general',
                   plugin: 'plugin::content-type-builder',
                 },
@@ -210,7 +210,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
               actions: [
                 {
                   displayName: 'Access the Documentation',
-                  action: 'plugins::documentation.read',
+                  action: 'plugin::documentation.read',
                   subCategory: 'general',
                   plugin: 'plugin::documentation',
                 },
@@ -222,13 +222,13 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
               actions: [
                 {
                   displayName: 'Update and delete',
-                  action: 'plugins::documentation.settings.update',
+                  action: 'plugin::documentation.settings.update',
                   subCategory: 'settings',
                   plugin: 'plugin::documentation',
                 },
                 {
                   displayName: 'Regenerate',
-                  action: 'plugins::documentation.settings.regenerate',
+                  action: 'plugin::documentation.settings.regenerate',
                   subCategory: 'settings',
                   plugin: 'plugin::documentation',
                 },
@@ -241,7 +241,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
       const expected = {
         'plugin::content-type-builder': {
           general: {
-            'plugins::content-type-builder.read': {
+            'plugin::content-type-builder.read': {
               properties: {
                 enabled: false,
               },
@@ -254,7 +254,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
         },
         'plugin::documentation': {
           general: {
-            'plugins::documentation.read': {
+            'plugin::documentation.read': {
               properties: {
                 enabled: false,
               },
@@ -265,7 +265,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
             },
           },
           settings: {
-            'plugins::documentation.settings.update': {
+            'plugin::documentation.settings.update': {
               properties: {
                 enabled: false,
               },
@@ -274,7 +274,7 @@ describe('ADMIN | COMPONENTS | Permissions | utils', () => {
                 'admin::has-same-role-as-creator': false,
               },
             },
-            'plugins::documentation.settings.regenerate': {
+            'plugin::documentation.settings.regenerate': {
               properties: {
                 enabled: false,
               },

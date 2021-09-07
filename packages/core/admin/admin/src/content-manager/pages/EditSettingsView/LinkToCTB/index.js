@@ -14,7 +14,7 @@ import { Button } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import getTrad from '../../../utils/getTrad';
 
-const permissions = [{ action: 'plugins::content-type-builder.read', subject: null }];
+const permissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 // Create link from content-type-builder to content-manager
 const LinkToCTB = ({ modifiedData, slug, type }) => {

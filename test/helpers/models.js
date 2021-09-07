@@ -4,13 +4,13 @@ const { isFunction, isNil, prop } = require('lodash/fp');
 const { createStrapiInstance } = require('./strapi');
 
 const toUID = name => {
-  return name.includes('::') ? name : `application::${name}.${name}`;
+  return name.includes('::') ? name : `api::${name}.${name}`;
 };
 
 const createHelpers = async ({ strapi: strapiInstance = null, ...options } = {}) => {
   const strapi = strapiInstance || (await createStrapiInstance(options));
-  const contentTypeService = strapi.plugins['content-type-builder'].services['content-types'];
-  const componentsService = strapi.plugins['content-type-builder'].services.components;
+  const contentTypeService = strapi.plugin('content-type-builder').service('content-types');
+  const componentsService = strapi.plugin('content-type-builder').service('components');
 
   const cleanup = async () => {
     if (isNil(strapiInstance)) {

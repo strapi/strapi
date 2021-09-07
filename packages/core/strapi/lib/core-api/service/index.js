@@ -27,54 +27,6 @@ const createService = ({ model, strapi }) => {
 };
 
 /**
- * Default limit values from config
- * @return {{maxLimit: number, defaultLimit: number}}
- */
-const getLimitConfigDefaults = () => ({
-  defaultLimit: _.toNumber(strapi.config.get('api.rest.defaultLimit', 100)),
-  maxLimit: _.toNumber(strapi.config.get('api.rest.maxLimit')) || null,
-});
-
-/**
- * if there is max limit set and limit exceeds this number, return configured max limit
- * @param {number} limit - limit you want to cap
- * @param {number?} maxLimit - maxlimit used has capping
- * @returns {number}
- */
-const applyMaxLimit = (limit, maxLimit) => {
-  if (maxLimit && (limit === -1 || limit > maxLimit)) {
-    return maxLimit;
-  }
-
-  return limit;
-};
-
-const applyDefaultPagination = params => {
-  const { defaultLimit, maxLimit } = getLimitConfigDefaults();
-
-  if (_.isUndefined(params.pagination) || !_.isPlainObject(params.pagination)) {
-    return {
-      limit: defaultLimit,
-    };
-  }
-
-  const { pagination } = params;
-
-  if (!_.isUndefined(pagination.pageSize)) {
-    return {
-      page: pagination.page,
-      pageSize: applyMaxLimit(_.toNumber(pagination.pageSize), maxLimit),
-    };
-  }
-
-  const limit = _.isUndefined(pagination.limit) ? defaultLimit : _.toNumber(pagination.limit);
-  return {
-    start: pagination.start,
-    limit: applyMaxLimit(limit, maxLimit),
-  };
-};
-
-/**
  * Create default fetch params
  * @param {*} params
  * @returns
@@ -83,7 +35,6 @@ const getFetchParams = (params = {}) => {
   return {
     publicationState: DP_PUB_STATE_LIVE,
     ...params,
-    pagination: applyDefaultPagination(params),
   };
 };
 

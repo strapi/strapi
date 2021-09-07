@@ -34,7 +34,7 @@ describe('Test type json', () => {
     const inputValue = {
       key: 'value',
     };
-    const res = await rq.post('/content-manager/collection-types/application::withjson.withjson', {
+    const res = await rq.post('/content-manager/collection-types/api::withjson.withjson', {
       body: {
         field: inputValue,
       },
@@ -55,7 +55,7 @@ describe('Test type json', () => {
         key: 'value',
       },
     ];
-    const res = await rq.post('/content-manager/collection-types/application::withjson.withjson', {
+    const res = await rq.post('/content-manager/collection-types/api::withjson.withjson', {
       body: {
         field: inputValue,
       },
@@ -68,7 +68,7 @@ describe('Test type json', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get('/content-manager/collection-types/application::withjson.withjson');
+    const res = await rq.get('/content-manager/collection-types/api::withjson.withjson');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
@@ -83,7 +83,7 @@ describe('Test type json', () => {
   test.todo('Throw when input is not a nested object');
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post('/content-manager/collection-types/application::withjson.withjson', {
+    const res = await rq.post('/content-manager/collection-types/api::withjson.withjson', {
       body: {
         field: {
           key: 'value',
@@ -92,7 +92,7 @@ describe('Test type json', () => {
     });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/application::withjson.withjson/${res.body.id}`,
+      `/content-manager/collection-types/api::withjson.withjson/${res.body.id}`,
       {
         body: {
           field: {

@@ -26,7 +26,7 @@ const permissionDomain = require('../../domain/permission/index');
  * @returns {Promise<array>}
  */
 const deleteByRolesIds = async rolesIds => {
-  const permissionsToDelete = await strapi.query('strapi::permission').findMany({
+  const permissionsToDelete = await strapi.query('admin::permission').findMany({
     select: ['id'],
     where: {
       role: { id: rolesIds },
@@ -45,7 +45,7 @@ const deleteByRolesIds = async rolesIds => {
  */
 const deleteByIds = async ids => {
   for (const id of ids) {
-    await strapi.query('strapi::permission').delete({ where: { id } });
+    await strapi.query('admin::permission').delete({ where: { id } });
   }
 };
 
@@ -57,7 +57,7 @@ const deleteByIds = async ids => {
 const createMany = async permissions => {
   const createdPermissions = [];
   for (const permission of permissions) {
-    const newPerm = await strapi.query('strapi::permission').create({ data: permission });
+    const newPerm = await strapi.query('admin::permission').create({ data: permission });
     createdPermissions.push(newPerm);
   }
 
@@ -72,7 +72,7 @@ const createMany = async permissions => {
  */
 const update = async (params, attributes) => {
   const updatedPermission = await strapi
-    .query('strapi::permission')
+    .query('admin::permission')
     .update({ where: params, data: attributes });
 
   return permissionDomain.toPermission(updatedPermission);
@@ -84,7 +84,7 @@ const update = async (params, attributes) => {
  * @returns {Promise<Permission[]>}
  */
 const findMany = async (params = {}) => {
-  const rawPermissions = await strapi.query('strapi::permission').findMany(params);
+  const rawPermissions = await strapi.query('admin::permission').findMany(params);
 
   return permissionDomain.toPermission(rawPermissions);
 };
@@ -141,13 +141,13 @@ const cleanPermissionsInDatabase = async () => {
 
   const contentTypeService = getService('content-type');
 
-  const total = await strapi.query('strapi::permission').count();
+  const total = await strapi.query('admin::permission').count();
   const pageCount = Math.ceil(total / pageSize);
 
   for (let page = 0; page < pageCount; page++) {
     // 1. Find invalid permissions and collect their ID to delete them later
     const results = await strapi
-      .query('strapi::permission')
+      .query('admin::permission')
       .findMany({ limit: pageSize, offset: page * pageSize });
 
     const permissions = permissionDomain.toPermission(results);
@@ -193,7 +193,7 @@ const ensureBoundPermissionsInDatabase = async () => {
   }
 
   const contentTypes = Object.values(strapi.contentTypes);
-  const editorRole = await strapi.query('strapi::role').findOne({
+  const editorRole = await strapi.query('admin::role').findOne({
     where: { code: EDITOR_CODE },
   });
 

@@ -18,7 +18,7 @@ module.exports = strapi => ({
         if (isValid) {
           // request is made by an admin
           const admin = await strapi
-            .query('strapi::user')
+            .query('admin::user')
             .findOne({ where: { id: payload.id }, populate: ['roles'] });
 
           if (!admin || !(admin.isActive === true)) {

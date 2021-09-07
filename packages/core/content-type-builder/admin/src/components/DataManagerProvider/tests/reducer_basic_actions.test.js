@@ -38,7 +38,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
       const contentType = {
-        uid: 'application::test',
+        uid: 'api::test',
         schema: {
           name: 'test',
           attributes: [
@@ -66,7 +66,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         modifiedData: {
           components,
           contentType: {
-            uid: 'application::test',
+            uid: 'api::test',
             schema: {
               name: 'test',
               attributes: [
@@ -196,7 +196,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       const componentUID = 'default.openingtimes';
       const component = testData.components[componentUID];
 
-      const ct = testData.contentTypes['application::address.address'];
+      const ct = testData.contentTypes['api::address.address'];
 
       const contentType = {
         ...ct,
@@ -287,7 +287,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       const component = get(testData, ['components', componentUID]);
 
       const contentType = {
-        uid: 'application::address.address',
+        uid: 'api::address.address',
         schema: {
           name: 'address',
           description: '',
@@ -326,7 +326,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
             [componentToAddUid]: testData.components[componentToAddUid],
           },
           contentType: {
-            uid: 'application::address.address',
+            uid: 'api::address.address',
             schema: {
               name: 'address',
               description: '',
@@ -431,7 +431,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
 
   describe('CREATE_SCHEMA', () => {
     it('Should create a content type schema correctly', () => {
-      const uid = 'application::test';
+      const uid = 'api::test';
       const data = {
         collectionName: 'test',
         name: 'test',
@@ -510,8 +510,8 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         },
       };
       const contentTypes = {
-        'application::test.test': {
-          uid: 'application::test.test',
+        'api::test.test': {
+          uid: 'api::test.test',
           schema: {
             attributes: [],
           },
@@ -608,7 +608,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
       const modifiedData = {
         components,
         contentType: {
-          uid: 'application::address.address',
+          uid: 'api::address.address',
           schema: {
             name: 'address',
             description: '',
@@ -652,7 +652,7 @@ describe('CTB | components | DataManagerProvider | reducer | basics actions ', (
         modifiedData: {
           components,
           contentType: {
-            uid: 'application::address.address',
+            uid: 'api::address.address',
             schema: {
               name: 'address',
               description: '',

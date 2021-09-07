@@ -101,7 +101,7 @@ const hasPermissionsTestData = {
 
       // Content type builder
       {
-        action: 'plugins::content-type-builder.read',
+        action: 'plugin::content-type-builder.read',
         subject: null,
         properties: {},
         conditions: null,
@@ -109,19 +109,19 @@ const hasPermissionsTestData = {
 
       // Documentation plugin
       {
-        action: 'plugins::documentation.read',
+        action: 'plugin::documentation.read',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::documentation.settings.update',
+        action: 'plugin::documentation.settings.update',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::documentation.settings.regenerate',
+        action: 'plugin::documentation.settings.regenerate',
         subject: null,
         properties: {},
         conditions: null,
@@ -129,31 +129,31 @@ const hasPermissionsTestData = {
 
       // Upload plugin
       {
-        action: 'plugins::upload.read',
+        action: 'plugin::upload.read',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::upload.assets.create',
+        action: 'plugin::upload.assets.create',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::upload.assets.update',
+        action: 'plugin::upload.assets.update',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::upload.assets.dowload',
+        action: 'plugin::upload.assets.dowload',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::upload.assets.copy-link',
+        action: 'plugin::upload.assets.copy-link',
         subject: null,
         properties: {},
         conditions: null,
@@ -161,61 +161,61 @@ const hasPermissionsTestData = {
 
       // Users-permissions
       {
-        action: 'plugins::users-permissions.roles.create',
+        action: 'plugin::users-permissions.roles.create',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.roles.read',
+        action: 'plugin::users-permissions.roles.read',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.roles.update',
+        action: 'plugin::users-permissions.roles.update',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.roles.delete',
+        action: 'plugin::users-permissions.roles.delete',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.email-templates.read',
+        action: 'plugin::users-permissions.email-templates.read',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.email-templates.update',
+        action: 'plugin::users-permissions.email-templates.update',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.providers.read',
+        action: 'plugin::users-permissions.providers.read',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.providers.update',
+        action: 'plugin::users-permissions.providers.update',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.advanced-settings.read',
+        action: 'plugin::users-permissions.advanced-settings.read',
         subject: null,
         properties: {},
         conditions: null,
       },
       {
-        action: 'plugins::users-permissions.advanced-settings.update',
+        action: 'plugin::users-permissions.advanced-settings.update',
         subject: null,
         properties: {},
         conditions: null,
@@ -309,7 +309,7 @@ const hasPermissionsTestData = {
 
       // Content type builder
       {
-        action: 'plugins::content-type-builder.read',
+        action: 'plugin::content-type-builder.read',
         subject: null,
         properties: {},
         conditions: [],
@@ -317,31 +317,31 @@ const hasPermissionsTestData = {
 
       // Upload plugin
       {
-        action: 'plugins::upload.read',
+        action: 'plugin::upload.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::upload.assets.create',
+        action: 'plugin::upload.assets.create',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::upload.assets.update',
+        action: 'plugin::upload.assets.update',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::upload.assets.dowload',
+        action: 'plugin::upload.assets.dowload',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::upload.assets.copy-link',
+        action: 'plugin::upload.assets.copy-link',
         subject: null,
         properties: {},
         conditions: [],
@@ -349,61 +349,61 @@ const hasPermissionsTestData = {
 
       // Users-permissions
       {
-        action: 'plugins::users-permissions.roles.create',
+        action: 'plugin::users-permissions.roles.create',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.roles.read',
+        action: 'plugin::users-permissions.roles.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.roles.update',
+        action: 'plugin::users-permissions.roles.update',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.roles.delete',
+        action: 'plugin::users-permissions.roles.delete',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.email-templates.read',
+        action: 'plugin::users-permissions.email-templates.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.email-templates.update',
+        action: 'plugin::users-permissions.email-templates.update',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.providers.read',
+        action: 'plugin::users-permissions.providers.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.providers.update',
+        action: 'plugin::users-permissions.providers.update',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.advanced-settings.read',
+        action: 'plugin::users-permissions.advanced-settings.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
-        action: 'plugins::users-permissions.advanced-settings.update',
+        action: 'plugin::users-permissions.advanced-settings.update',
         subject: null,
         properties: {},
         conditions: [],
@@ -436,9 +436,9 @@ const hasPermissionsTestData = {
       { action: 'admin::roles.read', subject: null },
       { action: 'admin::roles.delete', subject: null },
       // media library
-      { action: 'plugins::upload.read', subject: null },
-      { action: 'plugins::upload.assets.create', subject: null },
-      { action: 'plugins::upload.assets.update', subject: null },
+      { action: 'plugin::upload.read', subject: null },
+      { action: 'plugin::upload.assets.create', subject: null },
+      { action: 'plugin::upload.assets.update', subject: null },
     ],
   },
 };

@@ -1,24 +1,23 @@
 /*
- *
  * HomePage
  *
  */
-/* eslint-disable */
+
 import React, { memo, useMemo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import styled from 'styled-components';
 import { Helmet } from 'react-helmet';
 import { useHistory } from 'react-router-dom';
-import { useModels } from '../../hooks';
-import SocialLinks from './SocialLinks';
-import HomeHeader from './HomeHeader';
-import ContentBlocks from './ContentBlocks';
 import { LoadingIndicatorPage } from '@strapi/helper-plugin';
 import { Layout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Box } from '@strapi/parts/Box';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import Logo from '../../assets/images/homepage-logo.png';
+import { useModels } from '../../hooks';
+import SocialLinks from './SocialLinks';
+import HomeHeader from './HomeHeader';
+import ContentBlocks from './ContentBlocks';
 
 const LogoContainer = styled(Box)`
   position: absolute;

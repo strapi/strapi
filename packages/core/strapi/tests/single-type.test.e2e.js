@@ -48,7 +48,9 @@ describe('Content Manager single types', () => {
       url: `/${uid}`,
       method: 'PUT',
       body: {
-        title: 'Title',
+        data: {
+          title: 'Title',
+        },
       },
     });
 
@@ -68,7 +70,9 @@ describe('Content Manager single types', () => {
       url: `/${uid}`,
       method: 'PUT',
       body: {
-        title: 'Title',
+        data: {
+          title: 'Title',
+        },
       },
     });
 

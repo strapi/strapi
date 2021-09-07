@@ -32,14 +32,11 @@ describe('Test type float', () => {
 
   test('Create entry with value input JSON', async () => {
     const inputValue = 12.31;
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withfloat.withfloat',
-      {
-        body: {
-          field: inputValue,
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withfloat.withfloat', {
+      body: {
+        field: inputValue,
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -49,14 +46,11 @@ describe('Test type float', () => {
 
   test('Create entry with integer should convert to float', async () => {
     const inputValue = 1821;
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withfloat.withfloat',
-      {
-        body: {
-          field: inputValue,
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withfloat.withfloat', {
+      body: {
+        field: inputValue,
+      },
+    });
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject({
@@ -65,7 +59,7 @@ describe('Test type float', () => {
   });
 
   test('Reading entry, returns correct value', async () => {
-    const res = await rq.get('/content-manager/collection-types/application::withfloat.withfloat');
+    const res = await rq.get('/content-manager/collection-types/api::withfloat.withfloat');
 
     expect(res.statusCode).toBe(200);
     expect(res.body.pagination).toBeDefined();
@@ -76,17 +70,14 @@ describe('Test type float', () => {
   });
 
   test('Updating entry sets the right value and format', async () => {
-    const res = await rq.post(
-      '/content-manager/collection-types/application::withfloat.withfloat',
-      {
-        body: {
-          field: 11.2,
-        },
-      }
-    );
+    const res = await rq.post('/content-manager/collection-types/api::withfloat.withfloat', {
+      body: {
+        field: 11.2,
+      },
+    });
 
     const updateRes = await rq.put(
-      `/content-manager/collection-types/application::withfloat.withfloat/${res.body.id}`,
+      `/content-manager/collection-types/api::withfloat.withfloat/${res.body.id}`,
       {
         body: {
           field: 14,
