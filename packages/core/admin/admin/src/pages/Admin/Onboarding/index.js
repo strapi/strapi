@@ -91,13 +91,20 @@ const Onboarding = () => {
   };
 
   return (
-    <FocusTrap onEscape={handleClick}>
-      <Wrapper onClick={handleClick}>
-        {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
-        {isOpen && <FontAwesomeIcon icon={faTimes} />}
-        {/* FIX ME - replace with popover when overflow popover is fixed 
-        + when v4 mockups for onboarding component are ready */}
-        {isOpen && (
+    <Wrapper
+      aria-label={formatMessage({
+        id: 'app.components.Onboarding.help.button',
+        defaultMessage: 'Help Button',
+      })}
+      type="button"
+      onClick={handleClick}
+    >
+      {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
+      {isOpen && <FontAwesomeIcon icon={faTimes} />}
+      {/* FIX ME - replace with popover when overflow popover is fixed 
+      + when v4 mockups for onboarding component are ready */}
+      {isOpen && (
+        <FocusTrap onEscape={handleClick}>
           <LinksWrapper
             background="neutral0"
             hasRadius
@@ -117,9 +124,9 @@ const Onboarding = () => {
               </StyledLink>
             ))}
           </LinksWrapper>
-        )}
-      </Wrapper>
-    </FocusTrap>
+        </FocusTrap>
+      )}
+    </Wrapper>
   );
 };
 

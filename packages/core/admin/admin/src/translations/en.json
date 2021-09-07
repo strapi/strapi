@@ -265,6 +265,7 @@
   "app.components.NotFoundPage.back": "Back to homepage",
   "app.components.NotFoundPage.description": "Not Found",
   "app.components.Official": "Official",
+  "app.components.Onboarding.help.button": "Help button",
   "app.components.Onboarding.label.completed": "% completed",
   "app.components.Onboarding.title": "Get Started Videos",
   "app.components.MarketplaceBanner": "Discover plugins built by the community, and many more awesome things to kickstart your project, on Strapi Awesome.",
