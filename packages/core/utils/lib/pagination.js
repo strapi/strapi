@@ -30,7 +30,7 @@ const ensureMinValues = ({ start, limit }) => ({
 });
 
 const ensureMaxValues = (maxLimit = -1) => ({ start, limit }) => ({
-  start: Math.min(start, limit),
+  start: start,
   limit: withMaxLimit(limit, maxLimit),
 });
 
