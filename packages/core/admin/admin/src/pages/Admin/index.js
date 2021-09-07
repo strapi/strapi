@@ -16,9 +16,9 @@ import { useMenu, useReleaseNotification } from '../../hooks';
 import Onboarding from './Onboarding';
 import { createRoute } from '../../utils';
 
-// const CM = lazy(() =>
-//   import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
-// );
+const CM = lazy(() =>
+  import(/* webpackChunkName: "content-manager" */ '../../content-manager/pages/App')
+);
 const HomePage = lazy(() => import(/* webpackChunkName: "Admin_homePage" */ '../HomePage'));
 const InstalledPluginsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_pluginsPage" */ '../InstalledPluginsPage')
@@ -85,9 +85,9 @@ const Admin = () => {
           <Switch>
             <Route path="/" component={HomePage} exact />
             <Route path="/me" component={ProfilePage} exact />
+            <Route path="/content-manager" component={CM} />
             {/* TODO */}
             {/* <
-            <Route path="/content-manager" component={CM} />
 
             <Route path="/plugins/content-type-builder" component={CTB} />
             <Route path="/plugins/upload" component={Upload} /> */}
