@@ -76,7 +76,7 @@ const Wrapper = styled.div`
     margin-right: 15px;
     background-color: white;
     box-shadow: 0 2px 4px 0 #e3e9f3;
-    border-radius: 3px;
+    border-radius: ${({ theme }) => theme.spaces[2]};
     overflow: hidden;
     &.shown {
       animation: ${fadeIn} 0.5s forwards;
@@ -104,8 +104,8 @@ const Wrapper = styled.div`
       height: 100%;
       border-radius: 50%;
       color: white;
-      background: #0e7de7;
-      box-shadow: 0px 2px 4px 0px rgba(227, 233, 243, 1);
+      background: ${({ theme }) => theme.colors.primary600};
+      box-shadow: ${({ theme }) => theme.shadows.tableShadow};
       i,
       svg {
         margin: auto;
