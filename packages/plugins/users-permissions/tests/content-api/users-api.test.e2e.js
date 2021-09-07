@@ -2,17 +2,18 @@
 
 // Test a simple default API with no relations
 
-const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
+const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
+
 let data = {};
 
 describe('Users API', () => {
   beforeAll(async () => {
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {
@@ -28,25 +29,23 @@ describe('Users API', () => {
 
     const res = await rq({
       method: 'POST',
-      url: '/auth/local/register',
+      url: '/api/users',
       body: user,
     });
 
-    expect(res.statusCode).toBe(200);
+    expect(res.statusCode).toBe(201);
     expect(res.body).toMatchObject({
-      jwt: expect.any(String),
-      user: {
-        username: user.username,
-        email: user.email,
-      },
+      username: user.username,
+      email: user.email,
     });
-    data.user = res.body.user;
+
+    data.user = res.body;
   });
 
   test('Delete user', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/users/${data.user.id}`,
+      url: `/api/users/${data.user.id}`,
     });
 
     expect(res.statusCode).toBe(200);

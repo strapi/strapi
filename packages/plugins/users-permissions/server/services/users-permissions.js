@@ -52,13 +52,16 @@ module.exports = ({ strapi }) => ({
   },
 
   // TODO: Filter on content-api only
-  getActions() {
+  getActions({ defaultEnable = false } = {}) {
     const actionMap = {};
 
     _.forEach(strapi.api, (api, apiName) => {
       const controllers = _.mapValues(api.controllers, controller => {
         return _.mapValues(controller, () => {
-          return { enabled: false, policy: '' };
+          return {
+            enabled: defaultEnable,
+            policy: '',
+          };
         });
       });
 
@@ -68,7 +71,10 @@ module.exports = ({ strapi }) => ({
     _.forEach(strapi.plugins, (plugin, pluginName) => {
       const controllers = _.mapValues(plugin.controllers, controller => {
         return _.mapValues(controller, () => {
-          return { enabled: false, policy: '' };
+          return {
+            enabled: defaultEnable,
+            policy: '',
+          };
         });
       });
 
