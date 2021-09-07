@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { Text } from '@strapi/parts/Text';
+import customEllipsis from '../../utils/customEllipsis';
 
 const IconWrapper = styled(Row)`
   margin-right: ${({ theme }) => theme.spaces[6]};
@@ -17,11 +18,7 @@ const ContentBox = ({ title, subtitle, icon, iconBackground, endAction }) => {
   const firstTitleChar = title.substring(0, 4);
 
   if (title.length > 70 && firstTitleChar === 'http') {
-    const endSubstring = title.indexOf('registrationToken') + 20;
-    title = `${title.substring(0, endSubstring)}...${title.substring(
-      title.length - 3,
-      title.length
-    )}`;
+    title = customEllipsis(title);
   }
 
   return (

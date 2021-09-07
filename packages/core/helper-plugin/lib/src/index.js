@@ -167,6 +167,7 @@ export { default as to } from './utils/await-to-js';
 
 // NEW UTILS
 export { default as setHexOpacity } from './utils/setHexOpacity';
+export { default as customEllipsis } from './utils/customEllipsis';
 
 // SVGS
 export { default as LayoutIcon } from './old/svgs/Layout';
