@@ -1,24 +1,25 @@
 'use strict';
 
-const _ = require('lodash');
 const { pick } = require('lodash/fp');
 
 const {
   convertSortQueryParams,
   convertLimitQueryParams,
   convertStartQueryParams,
-} = require('@strapi/utils/lib/convert-rest-query-params');
+  convertPopulateQueryParams,
+  convertFiltersQueryParams,
+  convertFieldsQueryParams,
+} = require('@strapi/utils/lib/convert-query-params');
 
 const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
+// TODO: check invalid values / add defaults ....
 const transformParamsToQuery = (uid, params = {}) => {
   const model = strapi.getModel(uid);
 
   const query = {};
-
-  // TODO: check invalid values add defaults ....
 
   const {
     start,
@@ -60,7 +61,7 @@ const transformParamsToQuery = (uid, params = {}) => {
   }
 
   if (filters) {
-    query.where = filters;
+    query.where = convertFiltersQueryParams(filters);
   }
 
   if (_where) {
@@ -70,24 +71,14 @@ const transformParamsToQuery = (uid, params = {}) => {
   }
 
   if (fields) {
-    // TODO: handle *.* syntax
-    query.select = _.castArray(fields);
+    query.select = convertFieldsQueryParams(fields);
   }
 
   if (populate) {
-    // TODO: handle *.* syntax
-    const { populate } = params;
-
-    if (populate === '*') {
-      query.populate = true;
-    } else if (typeof populate === 'object') {
-      query.populate = populate;
-    } else {
-      query.populate = _.castArray(populate);
-    }
+    query.populate = convertPopulateQueryParams(populate);
   }
 
-  // TODO: move to layer above ?
+  // TODO: move to convert-query-params ?
   if (publicationState && contentTypesUtils.hasDraftAndPublish(model)) {
     const { publicationState = 'live' } = params;
 
