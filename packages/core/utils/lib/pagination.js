@@ -15,21 +15,36 @@ const STRAPI_DEFAULTS = {
 
 const paginationAttributes = ['start', 'limit', 'page', 'pageSize'];
 
+const withMaxLimit = (limit, maxLimit = -1) => {
+  if (maxLimit === -1 || limit < maxLimit) {
+    return limit;
+  }
+
+  return maxLimit;
+};
+
 // Ensure minimum page & pageSize values (page >= 1, pageSize >= 0, start >= 0, limit >= 0)
 const ensureMinValues = ({ start, limit }) => ({
   start: Math.max(start, 0),
-  limit: Math.max(limit, 0),
+  limit: Math.max(limit, 1),
 });
 
-const withDefaultPagination = (args, defaults = {}) => {
+const ensureMaxValues = (maxLimit = -1) => ({ start, limit }) => ({
+  start: Math.min(start, limit),
+  limit: withMaxLimit(limit, maxLimit),
+});
+
+const withDefaultPagination = (args, { defaults = {}, maxLimit = -1 } = {}) => {
   const defaultValues = merge(STRAPI_DEFAULTS, defaults);
 
   const usePagePagination = !isNil(args.page) || !isNil(args.pageSize);
   const useOffsetPagination = !isNil(args.start) || !isNil(args.limit);
 
+  const ensureValidValues = pipe(ensureMinValues, ensureMaxValues(maxLimit));
+
   // If there is no pagination attribute, don't modify the payload
   if (!usePagePagination && !useOffsetPagination) {
-    return merge(args, defaultValues.offset);
+    return merge(args, ensureValidValues(defaultValues.offset));
   }
 
   // If there is page & offset pagination attributes, throw an error
@@ -59,8 +74,8 @@ const withDefaultPagination = (args, defaults = {}) => {
   const replacePaginationAttributes = pipe(
     // Remove pagination attributes
     omit(paginationAttributes),
-    // Merge the object with the new pagination + ensure minimum values (page >= 1, pageSize >= 0)
-    merge(ensureMinValues(pagination))
+    // Merge the object with the new pagination + ensure minimum & maximum values
+    merge(ensureValidValues(pagination))
   );
 
   return replacePaginationAttributes(args);

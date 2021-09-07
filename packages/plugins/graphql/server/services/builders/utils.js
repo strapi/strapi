@@ -7,7 +7,7 @@ const {
 } = require('@strapi/utils');
 
 module.exports = ({ strapi }) => {
-  const getGraphQLService = strapi.plugin('graphql').service;
+  const { service: getService } = strapi.plugin('graphql');
 
   return {
     /**
@@ -18,8 +18,8 @@ module.exports = ({ strapi }) => {
      * @return {object}
      */
     getContentTypeArgs(contentType, { multiple = true } = {}) {
-      const { naming } = getGraphQLService('utils');
-      const { args } = getGraphQLService('internals');
+      const { naming } = getService('utils');
+      const { args } = getService('internals');
 
       const { kind, modelType } = contentType;
 
@@ -71,7 +71,7 @@ module.exports = ({ strapi }) => {
      * @return {Object<string, object>}
      */
     getUniqueScalarAttributes: attributes => {
-      const { isStrapiScalar } = getGraphQLService('utils').attributes;
+      const { isStrapiScalar } = getService('utils').attributes;
 
       const uniqueAttributes = entries(attributes).filter(
         ([, attribute]) => isStrapiScalar(attribute) && attribute.unique
@@ -86,7 +86,7 @@ module.exports = ({ strapi }) => {
      * @return {Object<string, string>}
      */
     scalarAttributesToFiltersMap: mapValues(attribute => {
-      const { mappers, naming } = getGraphQLService('utils');
+      const { mappers, naming } = getService('utils');
 
       const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);
 
@@ -97,7 +97,7 @@ module.exports = ({ strapi }) => {
      * Apply basic transform to GQL args
      */
     transformArgs(args, { contentType, usePagination = false } = {}) {
-      const { mappers } = getGraphQLService('utils');
+      const { mappers } = getService('utils');
       const { pagination = {}, filters = {} } = args;
 
       // Init
@@ -105,9 +105,18 @@ module.exports = ({ strapi }) => {
 
       // Pagination
       if (usePagination) {
+        const defaultLimit = strapi.plugin('graphql').config('defaultLimit');
+        const maxLimit = strapi.plugin('graphql').config('maxLimit', -1);
+
         Object.assign(
           newArgs,
-          withDefaultPagination(pagination /*, config.get(graphql.pagination.defaults)*/)
+          withDefaultPagination(pagination, {
+            maxLimit,
+            defaults: {
+              offset: { limit: defaultLimit },
+              page: { pageSize: defaultLimit },
+            },
+          })
         );
       }
 
