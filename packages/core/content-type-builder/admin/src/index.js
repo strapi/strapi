@@ -19,6 +19,7 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addReducers(reducers);
+    // ! TODO: @soupette remove the addCorePluginMenuLink api
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
       icon,

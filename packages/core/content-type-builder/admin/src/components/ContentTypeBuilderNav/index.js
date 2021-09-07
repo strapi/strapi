@@ -1,35 +1,40 @@
+import React from 'react';
+import { AddIcon } from '@strapi/icons';
 import {
+  Box,
   SubNav,
   SubNavHeader,
   SubNavLink,
   SubNavLinkSection,
   SubNavSection,
   SubNavSections,
-  Box,
 } from '@strapi/parts';
 import { TextButton } from '@strapi/parts/TextButton';
-import { AddIcon } from '@strapi/icons';
 import upperFirst from 'lodash/upperFirst';
-import React from 'react';
 import { useIntl } from 'react-intl';
 import useContentTypeBuilderMenu from './useContentTypeBuilderMenu';
-import pluginId from '../../pluginId';
-
-// ! ASK SOUP ABOUT THE WAIT + TOGGLEPROMPT
-const wait = () => new Promise(resolve => setTimeout(resolve, 100));
+import getTrad from '../../utils/getTrad';
 
 const ContentTypeBuilderNav = () => {
-  const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu({ wait });
+  const { menu, searchValue, onSearchChange } = useContentTypeBuilderMenu();
   const { formatMessage } = useIntl();
 
   return (
-    <SubNav ariaLabel={`${pluginId}.plugin.name`}>
+    <SubNav
+      ariaLabel={formatMessage({
+        id: `${getTrad('plugin.name')}`,
+        defaultMessage: 'Content-Types Builder',
+      })}
+    >
       <SubNavHeader
         searchable
         value={searchValue}
         onClear={() => onSearchChange('')}
         onChange={e => onSearchChange(e.target.value)}
-        label={formatMessage({ id: `${pluginId}.plugin.name` })}
+        label={formatMessage({
+          id: `${getTrad('plugin.name')}`,
+          defaultMessage: 'Content-Types Builder',
+        })}
         searchLabel="Search..."
       />
       <SubNavSections>
@@ -37,9 +42,8 @@ const ContentTypeBuilderNav = () => {
           const title = `${section.title.id}${section.links.length > 1 ? 'plural' : 'singular'}`;
 
           return (
-            <>
+            <React.Fragment key={section.name}>
               <SubNavSection
-                key={section.name}
                 label={formatMessage({ id: title, defaultMessage: title.defaultMessage })}
                 collapsable
                 badgeLabel={section.links.length.toString()}
@@ -47,9 +51,9 @@ const ContentTypeBuilderNav = () => {
                 {section.links.map(link => {
                   if (link.links) {
                     return (
-                      <SubNavLinkSection key={link.title} label={upperFirst(link.title)}>
+                      <SubNavLinkSection key={link.name} label={upperFirst(link.title)}>
                         {link.links.map(subLink => (
-                          <SubNavLink to={subLink.to} active={subLink.active} key={subLink.uid}>
+                          <SubNavLink to={subLink.to} active={subLink.active} key={subLink.name}>
                             {upperFirst(
                               formatMessage({ id: subLink.name, defaultMessage: subLink.title })
                             )}
@@ -60,7 +64,7 @@ const ContentTypeBuilderNav = () => {
                   }
 
                   return (
-                    <SubNavLink to={link.to} active={link.active} key={link.uid}>
+                    <SubNavLink to={link.to} active={link.active} key={link.name}>
                       {upperFirst(formatMessage({ id: link.name, defaultMessage: link.title }))}
                     </SubNavLink>
                   );
@@ -71,12 +75,12 @@ const ContentTypeBuilderNav = () => {
                   <TextButton onClick={section.customLink.onClick} startIcon={<AddIcon />}>
                     {formatMessage({
                       id: section.customLink.id,
-                      defaultMessage: section.customLink.id,
+                      defaultMessage: section.customLink.defaultMessage,
                     })}
                   </TextButton>
                 </Box>
               )}
-            </>
+            </React.Fragment>
           );
         })}
       </SubNavSections>

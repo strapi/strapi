@@ -1,8 +1,7 @@
-import { Text } from '@buffetjs/core';
+import { useState } from 'react';
 import { useNotification, useTracking } from '@strapi/helper-plugin';
 import { camelCase, isEmpty, sortBy, toLower, upperFirst } from 'lodash';
 import matchSorter from 'match-sorter';
-import React, { useMemo, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import useDataManager from '../../hooks/useDataManager';
@@ -10,7 +9,7 @@ import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
 
-const useContentTypeBuilderMenu = ({ wait }) => {
+const useContentTypeBuilderMenu = () => {
   const {
     components,
     componentsGroupedByCategory,
@@ -38,6 +37,7 @@ const useContentTypeBuilderMenu = ({ wait }) => {
           categoryName: data.name,
           header_label_1: formatMessage({
             id: getTrad('modalForm.header.categories'),
+            defaultMessage: 'Categories',
           }),
           header_icon_name_1: 'component',
           header_icon_isCustom_1: false,
@@ -79,7 +79,6 @@ const useContentTypeBuilderMenu = ({ wait }) => {
     if (canOpenModalCreateCTorComponent()) {
       trackUsage(`willCreate${upperFirst(camelCase(type))}`);
 
-      await wait();
       const search = makeSearch({
         modalType,
         kind,
@@ -97,48 +96,27 @@ const useContentTypeBuilderMenu = ({ wait }) => {
     } else {
       toggleNotification({
         type: 'info',
-        message: { id: `${pluginId}.notification.info.creating.notSaved` },
+        message: {
+          id: `${getTrad('notification.info.creating.notSaved')}`,
+          defaultMessage:
+            'Please save your work before creating a new collection type or component',
+        },
       });
     }
   };
 
-  const displayedContentTypes = useMemo(() => {
-    return sortedContentTypesList
-      .filter(obj => obj.visible)
-      .map(obj => {
-        if (obj.plugin) {
-          return {
-            ...obj,
-            CustomComponent: () => (
-              <p style={{ justifyContent: 'normal' }}>
-                {obj.title}&nbsp;
-                <Text
-                  as="span"
-                  ellipsis
-                  // This is needed here
-                  style={{ fontStyle: 'italic' }}
-                  fontWeight="inherit"
-                  lineHeight="inherit"
-                >
-                  ({formatMessage({ id: getTrad('from') })}: {obj.plugin})&nbsp;
-                </Text>
-              </p>
-            ),
-          };
-        }
-
-        return obj;
-      });
-  }, [sortedContentTypesList, formatMessage]);
+  const displayedContentTypes = sortedContentTypesList.filter(obj => obj.visible);
 
   const data = [
     {
       name: 'models',
       title: {
-        id: `${pluginId}.menu.section.models.name.`,
+        id: `${getTrad('menu.section.models.name.')}`,
+        defaultMessage: 'Collection Types',
       },
       customLink: isInDevelopmentMode && {
-        id: `${pluginId}.button.model.create`,
+        id: `${getTrad('button.model.create')}`,
+        defaultMessage: 'Create new collection type',
         onClick: () => handleClickOpenModal('contentType', 'collectionType'),
       },
       links: displayedContentTypes.filter(contentType => contentType.kind === 'collectionType'),
@@ -146,10 +124,12 @@ const useContentTypeBuilderMenu = ({ wait }) => {
     {
       name: 'singleTypes',
       title: {
-        id: `${pluginId}.menu.section.single-types.name.`,
+        id: `${getTrad('menu.section.single-types.name.')}`,
+        defaultMessage: 'Single Types',
       },
       customLink: isInDevelopmentMode && {
-        id: `${pluginId}.button.single-types.create`,
+        id: `${getTrad('button.single-types.create')}`,
+        defaultMessage: 'Create new single type',
         onClick: () => handleClickOpenModal('contentType', 'singleType'),
       },
       links: displayedContentTypes.filter(singleType => singleType.kind === 'singleType'),
@@ -157,10 +137,12 @@ const useContentTypeBuilderMenu = ({ wait }) => {
     {
       name: 'components',
       title: {
-        id: `${pluginId}.menu.section.components.name.`,
+        id: `${getTrad('menu.section.components.name.')}`,
+        defaultMessage: 'Components',
       },
       customLink: {
-        id: `${pluginId}.button.component.create`,
+        id: `${getTrad('button.component.create')}`,
+        defaultMessage: 'Create a new component',
         onClick: () => handleClickOpenModal('component'),
       },
       links: componentsData,
