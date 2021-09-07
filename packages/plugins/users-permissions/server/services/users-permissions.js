@@ -71,36 +71,27 @@ module.exports = ({ strapi }) => ({
     }
 
     // Move users to guest role.
-    const arrayOfPromises = role.users.reduce((acc, user) => {
-      acc.push(
-        strapi.query('plugin::users-permissions.user').update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            role: publicRoleID,
-          },
-        })
-      );
-
-      return acc;
-    }, []);
-
-    // Remove permissions related to this role.
-    role.permissions.forEach(permission => {
-      arrayOfPromises.push(
-        strapi.query('plugin::users-permissions.permission').delete({
-          where: { id: permission.id },
-        })
-      );
-    });
-
-    // Delete the role.
-    arrayOfPromises.push(
-      strapi.query('plugin::users-permissions.role').delete({ where: { id: roleID } })
+    await Promise.all(
+      role.users.map(user => {
+        return strapi.query('plugin::users-permissions.user').update({
+          where: { id: user.id },
+          data: { role: publicRoleID },
+        });
+      })
     );
 
-    return await Promise.all(arrayOfPromises);
+    // Remove permissions related to this role.
+    // TODO: use delete many
+    await Promise.all(
+      role.permissions.map(permission => {
+        return strapi.query('plugin::users-permissions.permission').delete({
+          where: { id: permission.id },
+        });
+      })
+    );
+
+    // Delete the role.
+    await strapi.query('plugin::users-permissions.role').delete({ where: { id: roleID } });
   },
 
   getPlugins(lang = 'en') {
@@ -188,10 +179,10 @@ module.exports = ({ strapi }) => ({
   async getRoles() {
     const roles = await strapi.query('plugin::users-permissions.role').findMany({ sort: ['name'] });
 
-    for (let i = 0; i < roles.length; ++i) {
-      roles[i].nb_users = await strapi
+    for (const role of roles) {
+      roles.nb_users = await strapi
         .query('plugin::users-permissions.user')
-        .count({ where: { role: { id: roles[i].id } } });
+        .count({ where: { role: { id: role.id } } });
     }
 
     return roles;

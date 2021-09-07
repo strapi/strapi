@@ -3,49 +3,15 @@
 module.exports = [
   {
     method: 'GET',
-    path: '/',
-    handler: 'users-permissions.index',
-  },
-  {
-    method: 'GET',
-    path: '/search/:id',
-    handler: 'users-permissions.searchUsers',
+    path: '/permissions',
+    handler: 'users-permissions.getPermissions',
   },
   {
     method: 'GET',
     path: '/policies',
     handler: 'users-permissions.getPolicies',
   },
-  {
-    method: 'GET',
-    path: '/roles/:id',
-    handler: 'users-permissions.getRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          options: {
-            actions: ['plugin::users-permissions.roles.read'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'GET',
-    path: '/roles',
-    handler: 'users-permissions.getRoles',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          options: {
-            actions: ['plugin::users-permissions.roles.read'],
-          },
-        },
-      ],
-    },
-  },
+
   {
     method: 'GET',
     path: '/routes',
@@ -113,11 +79,6 @@ module.exports = [
   },
   {
     method: 'GET',
-    path: '/permissions',
-    handler: 'users-permissions.getPermissions',
-  },
-  {
-    method: 'GET',
     path: '/providers',
     handler: 'users-permissions.getProviders',
     config: {
@@ -142,51 +103,6 @@ module.exports = [
           name: 'admin::hasPermissions',
           options: {
             actions: ['plugin::users-permissions.providers.update'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'POST',
-    path: '/roles',
-    handler: 'users-permissions.createRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          options: {
-            actions: ['plugin::users-permissions.roles.create'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'PUT',
-    path: '/roles/:role',
-    handler: 'users-permissions.updateRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          options: {
-            actions: ['plugin::users-permissions.roles.update'],
-          },
-        },
-      ],
-    },
-  },
-  {
-    method: 'DELETE',
-    path: '/roles/:role',
-    handler: 'users-permissions.deleteRole',
-    config: {
-      policies: [
-        {
-          name: 'admin::hasPermissions',
-          options: {
-            actions: ['plugin::users-permissions.roles.delete'],
           },
         },
       ],
