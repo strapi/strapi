@@ -2,12 +2,12 @@ import formatPolicies from '../formatPolicies';
 
 describe('USERS PERMISSIONS | utils | formatPolicies', () => {
   it('should format the policies correclty', () => {
-    const policies = ['custompolicies', 'ratelimit', 'isauthenticated'];
+    const policies = ['customPolicies', 'rateLimit', 'isAuthenticated'];
 
     const expected = [
-      { label: 'custompolicies', value: 'custompolicies' },
-      { label: 'ratelimit', value: 'ratelimit' },
-      { label: 'isauthenticated', value: 'isauthenticated' },
+      { label: 'customPolicies', value: 'customPolicies' },
+      { label: 'rateLimit', value: 'rateLimit' },
+      { label: 'isAuthenticated', value: 'isAuthenticated' },
     ];
 
     expect(formatPolicies(policies)).toEqual(expected);

@@ -11,7 +11,7 @@ const fixtures = [
     actionId: PUBLISH_ACTION,
   },
   {
-    actionId: 'plugins::test.action',
+    actionId: 'plugin::test.action',
   },
 ];
 

@@ -36,30 +36,30 @@ const collector = {
     stamps: {
       type: 'relation',
       relation: 'oneToMany',
-      target: 'application::stamp.stamp',
+      target: 'api::stamp.stamp',
     },
     stamps_one_way: {
       type: 'relation',
       relation: 'oneToOne',
-      target: 'application::stamp.stamp',
+      target: 'api::stamp.stamp',
     },
     stamps_m2m: {
       type: 'relation',
       relation: 'manyToMany',
       targetAttribute: 'collectors',
-      target: 'application::stamp.stamp',
+      target: 'api::stamp.stamp',
     },
     stamps_one_many: {
       type: 'relation',
       relation: 'oneToMany',
       targetAttribute: 'collector',
-      target: 'application::stamp.stamp',
+      target: 'api::stamp.stamp',
     },
     stamps_one_one: {
       type: 'relation',
       relation: 'oneToOne',
       targetAttribute: 'collector_one_one',
-      target: 'application::stamp.stamp',
+      target: 'api::stamp.stamp',
     },
   },
 };
@@ -133,7 +133,7 @@ describe('CM API', () => {
     test('many-way', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
       });
 
       expect(res.statusCode).toBe(200);
@@ -147,7 +147,7 @@ describe('CM API', () => {
     test('many-to-many (collector -> stamps)', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
       });
 
       expect(res.statusCode).toBe(200);
@@ -161,7 +161,7 @@ describe('CM API', () => {
     test('many-to-many (stamp -> collectors)', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::stamp.stamp',
+        url: '/content-manager/collection-types/api::stamp.stamp',
       });
 
       expect(res.statusCode).toBe(200);
@@ -175,7 +175,7 @@ describe('CM API', () => {
     test('one-to-many', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
       });
 
       expect(res.statusCode).toBe(200);
@@ -191,7 +191,7 @@ describe('CM API', () => {
     test('many-way', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           filters: { stamps: { name: '1946' } },
         },
@@ -207,7 +207,7 @@ describe('CM API', () => {
     test('many-to-many (collector -> stamps)', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           filters: { stamps_m2m: { name: '1946' } },
         },
@@ -223,7 +223,7 @@ describe('CM API', () => {
     test('many-to-many (stamp -> collectors)', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::stamp.stamp',
+        url: '/content-manager/collection-types/api::stamp.stamp',
         qs: {
           filters: { collectors: { name: 'Emma' } },
         },
@@ -239,7 +239,7 @@ describe('CM API', () => {
     test('one-to-many', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           filters: { stamps_one_many: { name: '1947' } },
         },
@@ -254,7 +254,7 @@ describe('CM API', () => {
     test('many-to-one', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::stamp.stamp',
+        url: '/content-manager/collection-types/api::stamp.stamp',
         qs: {
           filters: { collector: { name: 'Isabelle' } },
         },
@@ -270,7 +270,7 @@ describe('CM API', () => {
     test('one-way', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           filters: { stamps_one_way: { name: '1947' } },
         },
@@ -285,7 +285,7 @@ describe('CM API', () => {
     test('one-one', async () => {
       const res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           filters: { stamps_one_one: { name: '1947' } },
         },
@@ -302,7 +302,7 @@ describe('CM API', () => {
     test('many-to-one', async () => {
       let res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::stamp.stamp',
+        url: '/content-manager/collection-types/api::stamp.stamp',
         qs: {
           sort: 'collector.name:ASC',
         },
@@ -317,7 +317,7 @@ describe('CM API', () => {
 
       res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::stamp.stamp',
+        url: '/content-manager/collection-types/api::stamp.stamp',
         qs: {
           sort: 'collector.name:DESC',
         },
@@ -334,7 +334,7 @@ describe('CM API', () => {
     test('one-way', async () => {
       let res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           sort: 'stamps_one_way.name:ASC',
         },
@@ -349,7 +349,7 @@ describe('CM API', () => {
 
       res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           sort: 'stamps_one_way.name:DESC',
         },
@@ -366,7 +366,7 @@ describe('CM API', () => {
     test('one-one', async () => {
       let res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           sort: 'stamps_one_one.name:ASC',
         },
@@ -381,7 +381,7 @@ describe('CM API', () => {
 
       res = await rq({
         method: 'GET',
-        url: '/content-manager/collection-types/application::collector.collector',
+        url: '/content-manager/collection-types/api::collector.collector',
         qs: {
           sort: 'stamps_one_one.name:DESC',
         },

@@ -2,7 +2,7 @@
 
 const path = require('path');
 const createMiddleware = require('../index');
-const configProvider = require('../../../core/app-configuration/config-provider');
+const configProvider = require('../../../core/registries/config');
 
 describe('Session middleware', () => {
   beforeEach(() => {

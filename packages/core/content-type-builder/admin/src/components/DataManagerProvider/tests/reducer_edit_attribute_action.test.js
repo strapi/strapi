@@ -4,7 +4,7 @@ import { EDIT_ATTRIBUTE } from '../constants';
 describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', () => {
   describe('Editing a common attribute (string, integer, json, media, ...)', () => {
     it('Should edit the attribute correctly and preserve the order of the attributes for a content type', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const contentType = {
         uid: contentTypeUID,
         schema: {
@@ -18,7 +18,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               type: 'relation',
             },
           ],
@@ -70,7 +70,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   type: 'relation',
                 },
               ],
@@ -83,7 +83,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
     });
 
     it('Should edit the attribute correctly and preserve the order of the attributes for a component inside the content type view', () => {
-      const contentTypeUID = 'application::address.address';
+      const contentTypeUID = 'api::address.address';
       const componentUID = 'default.dish';
       const contentType = {
         uid: contentTypeUID,
@@ -102,7 +102,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
             {
               name: 'category',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               type: 'relation',
             },
           ],
@@ -208,7 +208,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
     describe('Editing a relation with the same content type', () => {
       describe('Changing the nature of the relation', () => {
         it('Should handle changing the nature from a one side relation (oneWay or manyWay) to another one side relation correctly and preserve the order of the attributes', () => {
-          const contentTypeUID = 'application::address.address';
+          const contentTypeUID = 'api::address.address';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -230,7 +230,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -309,7 +309,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -336,7 +336,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         it('Should handle changing the nature from a one side relation (oneWay or manyWay) to a many sides (oneToOne, ...) correctly and preserve the order of the attributes', () => {
-          const contentTypeUID = 'application::address.address';
+          const contentTypeUID = 'api::address.address';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -358,7 +358,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -444,7 +444,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -471,7 +471,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         it('Should handle changing the nature from a many side relation to a one side relation correctly and preserve the order of the attributes', () => {
-          const contentTypeUID = 'application::address.address';
+          const contentTypeUID = 'api::address.address';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -498,7 +498,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -563,7 +563,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -579,8 +579,8 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
 
       describe('Changing the target of the relation', () => {
         it('Should handle the edition of the target correctly for a one way relation (oneWay, manyWay) with another content type and preserve the order of the attributes', () => {
-          const contentTypeUID = 'application::address.address';
-          const updatedTargetUID = 'application::category.category';
+          const contentTypeUID = 'api::address.address';
+          const updatedTargetUID = 'api::category.category';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -599,7 +599,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -668,7 +668,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -688,8 +688,8 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         it('Should remove the opposite attribute and keep the order of the attributes if the relation nature is not a one side', () => {
-          const contentTypeUID = 'application::address.address';
-          const updatedTargetUID = 'application::category.category';
+          const contentTypeUID = 'api::address.address';
+          const updatedTargetUID = 'api::category.category';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -716,7 +716,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -780,7 +780,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -796,7 +796,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
 
       describe('Editing the other informations of the relation', () => {
         it('Should handle the edition of the other properties correctly by updating the opposite attribute in the other cases', () => {
-          const contentTypeUID = 'application::address.address';
+          const contentTypeUID = 'api::address.address';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -823,7 +823,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -895,7 +895,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -909,7 +909,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
         });
 
         it('Should handle the edition of the name of the relation correctly for a one side relation', () => {
-          const contentTypeUID = 'application::address.address';
+          const contentTypeUID = 'api::address.address';
           const contentType = {
             uid: contentTypeUID,
             schema: {
@@ -929,7 +929,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                 {
                   name: 'category',
                   relation: 'oneToOne',
-                  target: 'application::category.category',
+                  target: 'api::category.category',
                   targetAttribute: null,
                   type: 'relation',
                 },
@@ -999,7 +999,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                     {
                       name: 'category',
                       relation: 'oneToOne',
-                      target: 'application::category.category',
+                      target: 'api::category.category',
                       targetAttribute: null,
                       type: 'relation',
                     },
@@ -1022,8 +1022,8 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
 
     describe('Editing a relation with another content type', () => {
       it('Should not create an opposite attribute if the target is the same content type and the nature is a one side relation (oneWay, manyWay)', () => {
-        const contentTypeUID = 'application::category.category';
-        const updatedTargetUID = 'application::address.address';
+        const contentTypeUID = 'api::category.category';
+        const updatedTargetUID = 'api::address.address';
         const contentType = {
           uid: contentTypeUID,
           schema: {
@@ -1043,7 +1043,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
               {
                 name: 'category',
                 relation: 'oneToOne',
-                target: 'application::category.category',
+                target: 'api::category.category',
                 targetAttribute: null,
                 type: 'relation',
               },
@@ -1112,7 +1112,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                   {
                     name: 'category',
                     relation: 'oneToOne',
-                    target: 'application::category.category',
+                    target: 'api::category.category',
                     targetAttribute: null,
                     type: 'relation',
                   },
@@ -1132,8 +1132,8 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
       });
 
       it('Should create an opposite attribute if the target is the same content type and the nature is not a one side relation (oneToOne, ...)', () => {
-        const originalTargetUID = 'application::category.category';
-        const contentTypeUID = 'application::address.address';
+        const originalTargetUID = 'api::category.category';
+        const contentTypeUID = 'api::address.address';
         const contentType = {
           uid: contentTypeUID,
           schema: {
@@ -1153,7 +1153,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
               {
                 name: 'category',
                 relation: 'oneToOne',
-                target: 'application::category.category',
+                target: 'api::category.category',
                 targetAttribute: null,
                 type: 'relation',
               },
@@ -1230,7 +1230,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                   {
                     name: 'category',
                     relation: 'oneToOne',
-                    target: 'application::category.category',
+                    target: 'api::category.category',
                     targetAttribute: null,
                     type: 'relation',
                   },
@@ -1250,8 +1250,8 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
       });
 
       it('Should create an opposite attribute if the target is the same content type and the nature is manyToMany', () => {
-        const originalTargetUID = 'application::category.category';
-        const contentTypeUID = 'application::address.address';
+        const originalTargetUID = 'api::category.category';
+        const contentTypeUID = 'api::address.address';
         const contentType = {
           uid: contentTypeUID,
           schema: {
@@ -1271,7 +1271,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
               {
                 name: 'category',
                 relation: 'oneToOne',
-                target: 'application::category.category',
+                target: 'api::category.category',
                 targetAttribute: null,
                 type: 'relation',
               },
@@ -1347,7 +1347,7 @@ describe('CTB | components | DataManagerProvider | reducer | EDIT_ATTRIBUTE', ()
                   {
                     name: 'category',
                     relation: 'oneToOne',
-                    target: 'application::category.category',
+                    target: 'api::category.category',
                     targetAttribute: null,
                     type: 'relation',
                   },

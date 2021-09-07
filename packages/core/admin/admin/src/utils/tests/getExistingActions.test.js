@@ -6,10 +6,10 @@ describe('ADMIN | utils | getExistingActions', () => {
     const existingActions = getExistingActions(data.contentTypesPermissions);
 
     expect(existingActions).toEqual([
-      'plugins::content-manager.explorer.create',
-      'plugins::content-manager.explorer.update',
-      'plugins::content-manager.explorer.read',
-      'plugins::content-manager.explorer.delete',
+      'plugin::content-manager.explorer.create',
+      'plugin::content-manager.explorer.update',
+      'plugin::content-manager.explorer.read',
+      'plugin::content-manager.explorer.delete',
     ]);
   });
 });

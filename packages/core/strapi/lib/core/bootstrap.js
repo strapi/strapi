@@ -1,100 +1,19 @@
 'use strict';
 
 const _ = require('lodash');
-const { getConfigUrls, contentTypes: contentTypesUtils } = require('@strapi/utils');
-
-const { createCoreApi } = require('../core-api');
+const { getConfigUrls } = require('@strapi/utils');
 
 module.exports = function(strapi) {
-  strapi.contentTypes = {};
-
-  // Set models.
-  strapi.models = Object.keys(strapi.api || []).reduce((acc, apiName) => {
-    const api = strapi.api[apiName];
-
-    for (let modelName in api.models) {
-      let model = strapi.api[apiName].models[modelName];
-
-      // mutate model
-      contentTypesUtils.createContentType(model, { modelName }, { apiName });
-
-      strapi.contentTypes[model.uid] = model;
-
-      const { service, controller } = createCoreApi({ model, api, strapi });
-
-      _.set(strapi.api[apiName], ['services', modelName], service);
-      _.set(strapi.api[apiName], ['controllers', modelName], controller);
-
-      acc[modelName] = model;
-    }
-    return acc;
-  }, {});
-
-  // Set controllers.
-  strapi.controllers = Object.keys(strapi.api || []).reduce((acc, key) => {
-    for (let index in strapi.api[key].controllers) {
-      let controller = strapi.api[key].controllers[index];
-      controller.identity = controller.identity || _.upperFirst(index);
-      acc[index] = controller;
-    }
-
-    return acc;
-  }, {});
-
-  // Set services.
-  strapi.services = Object.keys(strapi.api || []).reduce((acc, key) => {
-    for (let index in strapi.api[key].services) {
-      acc[index] = strapi.api[key].services[index];
-    }
-
-    return acc;
-  }, {});
-
-  // Set routes.
-  strapi.config.routes = Object.keys(strapi.api || []).reduce((acc, key) => {
-    return acc.concat(_.get(strapi.api[key], 'config.routes') || {});
-  }, []);
-
-  // Init admin controllers.
-  Object.keys(strapi.admin.controllers || []).forEach(key => {
-    if (!strapi.admin.controllers[key].identity) {
-      strapi.admin.controllers[key].identity = key;
-    }
+  // TODO: delete v3 code
+  _.forEach(strapi.api, api => {
+    _.forEach(api.middlewares, (middleware, middlewareName) => {
+      strapi.middleware[middlewareName] = middleware;
+    });
   });
 
-  // Init admin models.
-  Object.keys(strapi.admin.models || []).forEach(modelName => {
-    let model = strapi.admin.models[modelName];
-
-    // mutate model
-    contentTypesUtils.createContentType(model, { modelName });
-
-    strapi.contentTypes[model.uid] = model;
-  });
-
-  Object.keys(strapi.plugins).forEach(pluginName => {
-    let plugin = strapi.plugins[pluginName];
-    Object.assign(plugin, {
-      controllers: plugin.controllers || [],
-      services: plugin.services || [],
-      models: plugin.models || [],
-    });
-
-    Object.keys(plugin.controllers).forEach(key => {
-      let controller = plugin.controllers[key];
-
-      Object.assign(controller, {
-        identity: controller.identity || key,
-      });
-    });
-
-    Object.keys(plugin.models || []).forEach(modelName => {
-      let model = plugin.models[modelName];
-
-      // mutate model
-      contentTypesUtils.createContentType(model, { modelName }, { pluginName });
-
-      strapi.contentTypes[model.uid] = model;
+  _.forEach(strapi.plugins, plugin => {
+    _.forEach(plugin.middlewares, (middleware, middlewareName) => {
+      strapi.middleware[middlewareName] = middleware;
     });
   });
 
@@ -128,7 +47,7 @@ module.exports = function(strapi) {
   // check if we should serve admin panel
   const shouldServeAdmin = strapi.config.get(
     'server.admin.serveAdminPanel',
-    strapi.config.serveAdminPanel
+    strapi.config.get('serveAdminPanel')
   );
 
   if (!shouldServeAdmin) {

@@ -4,15 +4,10 @@
  * Export shared utilities
  */
 const { buildQuery, hasDeepFilters } = require('./build-query');
-const {
-  convertRestQueryParams,
-  VALID_REST_OPERATORS,
-  QUERY_OPERATORS,
-} = require('./convert-rest-query-params');
+const { VALID_REST_OPERATORS, QUERY_OPERATORS } = require('./convert-query-params');
 const parseMultipartData = require('./parse-multipart');
 const sanitizeEntity = require('./sanitize-entity');
 const parseType = require('./parse-type');
-const finder = require('./finder');
 const policy = require('./policy');
 const templateConfiguration = require('./template-configuration');
 const { yup, formatYupErrors } = require('./validators');
@@ -23,6 +18,8 @@ const {
   escapeQuery,
   stringIncludes,
   stringEquals,
+  isKebabCase,
+  isCamelCase,
 } = require('./string-formatting');
 const { removeUndefined } = require('./object-formatting');
 const { getConfigUrls, getAbsoluteAdminUrl, getAbsoluteServerUrl } = require('./config');
@@ -38,10 +35,8 @@ const providerFactory = require('./provider-factory');
 module.exports = {
   yup,
   formatYupErrors,
-  finder,
   policy,
   templateConfiguration,
-  convertRestQueryParams,
   VALID_REST_OPERATORS,
   QUERY_OPERATORS,
   buildQuery,
@@ -60,6 +55,8 @@ module.exports = {
   generateTimestampCode,
   stringIncludes,
   stringEquals,
+  isKebabCase,
+  isCamelCase,
   contentTypes,
   webhook,
   env,

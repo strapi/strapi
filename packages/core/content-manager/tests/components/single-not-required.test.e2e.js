@@ -39,7 +39,7 @@ describe('Non repeatable and Not required component', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix('/content-manager/collection-types/application::withcomponent.withcomponent');
+    rq.setURLPrefix('/content-manager/collection-types/api::withcomponent.withcomponent');
   });
 
   afterAll(async () => {

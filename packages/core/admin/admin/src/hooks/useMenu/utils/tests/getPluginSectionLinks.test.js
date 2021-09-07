@@ -16,15 +16,15 @@ describe('getPluginSectionLinks', () => {
     const userPermissions = [
       {
         id: 458,
-        action: 'plugins::i18n.locale.read',
+        action: 'plugin::i18n.locale.read',
         subject: null,
         properties: {},
         conditions: [],
       },
       {
         id: 459,
-        action: 'plugins::content-manager.explorer.create',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.create',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -33,8 +33,8 @@ describe('getPluginSectionLinks', () => {
       },
       {
         id: 460,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['en'],
@@ -43,8 +43,8 @@ describe('getPluginSectionLinks', () => {
       },
       {
         id: 461,
-        action: 'plugins::content-manager.explorer.read',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.read',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],
@@ -53,8 +53,8 @@ describe('getPluginSectionLinks', () => {
       },
       {
         id: 462,
-        action: 'plugins::content-manager.explorer.update',
-        subject: 'application::article.article',
+        action: 'plugin::content-manager.explorer.update',
+        subject: 'api::article.article',
         properties: {
           fields: ['Name'],
           locales: ['fr-FR'],
@@ -73,7 +73,7 @@ describe('getPluginSectionLinks', () => {
         },
         permissions: [
           {
-            action: 'plugins::content-type-builder.read',
+            action: 'plugin::content-type-builder.read',
             subject: null,
           },
         ],
@@ -88,15 +88,15 @@ describe('getPluginSectionLinks', () => {
         },
         permissions: [
           {
-            action: 'plugins::upload.read',
+            action: 'plugin::upload.read',
             subject: null,
           },
           {
-            action: 'plugins::upload.assets.create',
+            action: 'plugin::upload.assets.create',
             subject: null,
           },
           {
-            action: 'plugins::upload.assets.update',
+            action: 'plugin::upload.assets.update',
             subject: null,
           },
         ],
@@ -110,7 +110,7 @@ describe('getPluginSectionLinks', () => {
         icon: 'paint-brush',
         isDisplayed: false,
         label: { defaultMessage: 'Content-Types Builder', id: 'content-type-builder.plugin.name' },
-        permissions: [{ action: 'plugins::content-type-builder.read', subject: null }],
+        permissions: [{ action: 'plugin::content-type-builder.read', subject: null }],
       },
       {
         destination: '/plugins/upload',
@@ -118,9 +118,9 @@ describe('getPluginSectionLinks', () => {
         isDisplayed: false,
         label: { defaultMessage: 'Media Library', id: 'upload.plugin.name' },
         permissions: [
-          { action: 'plugins::upload.read', subject: null },
-          { action: 'plugins::upload.assets.create', subject: null },
-          { action: 'plugins::upload.assets.update', subject: null },
+          { action: 'plugin::upload.read', subject: null },
+          { action: 'plugin::upload.assets.create', subject: null },
+          { action: 'plugin::upload.assets.update', subject: null },
         ],
       },
     ];

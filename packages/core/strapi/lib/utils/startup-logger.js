@@ -72,7 +72,7 @@ module.exports = app => {
       console.log();
     },
 
-    logStartupMessage(isInitialized) {
+    logStartupMessage({ isInitialized } = {}) {
       // Should the startup message be displayed?
       const hideStartupMessage = process.env.STRAPI_HIDE_STARTUP_MESSAGE
         ? process.env.STRAPI_HIDE_STARTUP_MESSAGE === 'true'
@@ -82,7 +82,7 @@ module.exports = app => {
         if (!isInitialized) {
           this.logFirstStartupMessage();
         } else {
-          this.logStartupMessage();
+          this.logDefaultStartupMessage();
         }
       }
     },

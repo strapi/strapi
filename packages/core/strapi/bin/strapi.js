@@ -118,68 +118,22 @@ program
   .description('Start your Strapi application in development mode')
   .action(getLocalScript('develop'));
 
-// `$ strapi generate:api`
+// $ strapi generate
 program
-  .command('generate:api <id> [attributes...]')
-  .option('-a, --api <api>', 'API name to generate the files in')
-  .option('-p, --plugin <api>', 'Name of the local plugin')
-  .option('-e, --extend <api>', 'Name of the plugin to extend')
-  .option('--draft-and-publish', 'Enable draft/publish', false)
-  .description('Generate a basic API')
-  .action((id, attributes, cliArguments) => {
-    cliArguments.attributes = attributes;
-    getLocalScript('generate')(id, cliArguments);
+  .command('generate')
+  .description('Launch interactive API generator')
+  .action(() => {
+    checkCwdIsStrapiApp('generate');
+    process.argv.splice(2, 1);
+    require('@strapi/generators').runCLI();
   });
-
-// `$ strapi generate:controller`
-program
-  .command('generate:controller <id>')
-  .option('-a, --api <api>', 'API name to generate the files in')
-  .option('-p, --plugin <api>', 'Name of the local plugin')
-  .option('-e, --extend <api>', 'Name of the plugin to extend')
-  .description('Generate a controller for an API')
-  .action(getLocalScript('generate'));
-
-// `$ strapi generate:model`
-program
-  .command('generate:model <id> [attributes...]')
-  .option('-a, --api <api>', 'API name to generate a sub API')
-  .option('-p, --plugin <api>', 'plugin name')
-  .option('--draft-and-publish', 'Enable draft/publish', false)
-  .description('Generate a model for an API')
-  .action((id, attributes, cliArguments) => {
-    cliArguments.attributes = attributes;
-    getLocalScript('generate')(id, cliArguments);
-  });
-
-// `$ strapi generate:policy`
-program
-  .command('generate:policy <id>')
-  .option('-a, --api <api>', 'API name')
-  .option('-p, --plugin <api>', 'plugin name')
-  .description('Generate a policy for an API')
-  .action(getLocalScript('generate'));
-
-// `$ strapi generate:service`
-program
-  .command('generate:service <id>')
-  .option('-a, --api <api>', 'API name')
-  .option('-p, --plugin <api>', 'plugin name')
-  .description('Generate a service for an API')
-  .action(getLocalScript('generate'));
-
-// `$ strapi generate:plugin`
-program
-  .command('generate:plugin <id>')
-  .option('-n, --name <name>', 'Plugin name')
-  .description('Generate a basic plugin')
-  .action(getLocalScript('generate'));
 
 // `$ strapi generate:template <directory>`
 program
   .command('generate:template <directory>')
   .description('Generate template from Strapi project')
   .action(getLocalScript('generate-template'));
+
 program
   .command('build')
   .option('--clean', 'Remove the build and .cache folders', false)

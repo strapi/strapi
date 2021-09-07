@@ -42,7 +42,7 @@ describe('CRUD locales', () => {
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    localeService = strapi.plugins.i18n.services.locales;
+    localeService = strapi.plugin('i18n').service('locales');
   });
 
   afterAll(async () => {
@@ -347,14 +347,14 @@ describe('CRUD locales', () => {
 
     test('Delete a locale and entities in this locale', async () => {
       const { body: frenchProduct } = await rq({
-        url: '/content-manager/collection-types/application::product.product',
+        url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
         qs: { plugins: { i18n: { locale: 'fr-FR' } } },
         body: { name: 'product name' },
       });
 
       await rq({
-        url: '/content-manager/collection-types/application::product.product',
+        url: '/content-manager/collection-types/api::product.product',
         method: 'POST',
         qs: { plugins: { i18n: { locale: 'en', relatedEntityId: frenchProduct.id } } },
         body: { name: 'product name' },
@@ -363,7 +363,7 @@ describe('CRUD locales', () => {
       const {
         body: { results: createdProducts },
       } = await rq({
-        url: '/content-manager/collection-types/application::product.product',
+        url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
         qs: { locale: 'fr-FR' },
       });
@@ -379,7 +379,7 @@ describe('CRUD locales', () => {
       const {
         body: { results: frenchProducts },
       } = await rq({
-        url: '/content-manager/collection-types/application::product.product',
+        url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
         qs: { locale: 'fr-FR' },
       });
@@ -388,7 +388,7 @@ describe('CRUD locales', () => {
       const {
         body: { results: englishProducts },
       } = await rq({
-        url: '/content-manager/collection-types/application::product.product',
+        url: '/content-manager/collection-types/api::product.product',
         method: 'GET',
         qs: { locale: 'en' },
       });

@@ -1,9 +1,9 @@
 const data = {
   homeSingleType: {
     contentType: {
-      uid: 'plugins::myplugins.home',
+      uid: 'plugin::myplugins.home',
       schema: {
-        name: 'plugins::myplugins.home',
+        name: 'plugin::myplugins.home',
         kind: 'singleType',
         attributes: [
           {
@@ -20,9 +20,9 @@ const data = {
   },
   articleContentType: {
     contentType: {
-      uid: 'plugins::myplugins.article',
+      uid: 'plugin::myplugins.article',
       schema: {
-        name: 'plugins::myplugins.article',
+        name: 'plugin::myplugins.article',
         kind: 'collectionType',
         attributes: [
           {
@@ -39,9 +39,9 @@ const data = {
   },
   postContentType: {
     contentType: {
-      uid: 'plugins::myplugins.post',
+      uid: 'plugin::myplugins.post',
       schema: {
-        name: 'plugins::myplugins.post',
+        name: 'plugin::myplugins.post',
         kind: 'collectionType',
         attributes: [
           {

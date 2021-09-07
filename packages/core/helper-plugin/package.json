@@ -1,8 +1,8 @@
 {
   "name": "@strapi/helper-plugin",
-  "version": "3.6.7",
+  "version": "3.6.8",
   "description": "Helper for Strapi plugins development",
-  "main": "build/helper-plugin.js",
+  "main": "build/index.js",
   "module": "lib/src/index.js",
   "files": [
     "build"
@@ -27,8 +27,11 @@
   "scripts": {
     "prepublishOnly": "npm run build",
     "prebuild": "rimraf build",
-    "build": "webpack-cli",
-    "watch": "webpack-cli -w",
+    "build": "yarn build:development && yarn build:production && yarn create:index",
+    "build:development": "cross-env NODE_ENV=development webpack-cli",
+    "build:production": "cross-env NODE_ENV=production webpack-cli",
+    "create:index": "node ./createBuildIndex.js",
+    "watch": "yarn create:index && cross-env NODE_ENV=development webpack-cli -w",
     "test": "echo \"no tests yet\"",
     "storybook": "start-storybook -p 6006",
     "build-storybook": "build-storybook"
@@ -56,6 +59,7 @@
     "@strapi/icons": "0.0.1-alpha.22",
     "@strapi/parts": "0.0.1-alpha.22",
     "babel-loader": "^8.2.2",
+    "cross-env": "^7.0.3",
     "enzyme": "^3.8.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "rimraf": "3.0.2"

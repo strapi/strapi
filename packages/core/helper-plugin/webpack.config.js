@@ -15,16 +15,15 @@ const nodeModules = [];
 module.exports = {
   entry: `${__dirname}/lib/src/index.js`,
   externals: nodeModules,
-  mode: 'production',
-  devtool: 'source-map',
+  mode: process.env.NODE_ENV,
+  devtool: process.env.NODE_ENV === 'development' ? 'eval-source-map' : false,
   output: {
     path: `${__dirname}/build`,
-    filename: `helper-plugin.js`,
+    filename: `helper-plugin.${process.env.NODE_ENV}.js`,
     library: {
       name: 'helperPlugin',
       type: 'umd',
     },
-
     umdNamedDefine: true,
   },
   module: {
