@@ -12,38 +12,31 @@ module.exports = ({ strapi }) => ({
       .query('plugin::users-permissions.role')
       .create({ data: _.omit(params, ['users', 'permissions']) });
 
-    const arrayOfPromises = Object.keys(params.permissions || {}).reduce((acc, type) => {
-      Object.keys(params.permissions[type].controllers).forEach(controller => {
-        Object.keys(params.permissions[type].controllers[controller]).forEach(action => {
-          acc.push(
-            strapi.query('plugin::users-permissions.permission').create({
-              data: {
-                role: role.id,
-                type,
-                controller,
-                action: action.toLowerCase(),
-                ...params.permissions[type].controllers[controller][action],
-              },
-            })
-          );
-        });
-      });
+    const createPromises = _.flatMap(params.permissions, (type, typeName) => {
+      return _.flatMap(type.controllers, (controller, controllerName) => {
+        return _.reduce(
+          controller,
+          (acc, action, actionName) => {
+            const { enabled /* policy */ } = action;
 
-      return acc;
-    }, []);
+            if (enabled) {
+              const actionID = `${typeName}.${controllerName}.${actionName}`;
 
-    // Use Content Manager business logic to handle relation.
-    if (params.users && params.users.length > 0)
-      arrayOfPromises.push(
-        strapi.query('plugin::users-permissions.role').update({
-          where: {
-            id: role.id,
+              acc.push(
+                strapi
+                  .query('plugin::users-permissions.permission')
+                  .create({ data: { action: actionID, role: role.id } })
+              );
+            }
+
+            return acc;
           },
-          data: { users: params.users },
-        })
-      );
+          []
+        );
+      });
+    });
 
-    return await Promise.all(arrayOfPromises);
+    await Promise.all(createPromises);
   },
 
   async getRole(roleID, plugins) {
@@ -52,7 +45,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['permissions'] });
 
     if (!role) {
-      throw new Error('Cannot find this role');
+      throw new Error('Role not found');
     }
 
     // Group by `type`.
@@ -91,54 +84,66 @@ module.exports = ({ strapi }) => ({
     return roles;
   },
 
-  async updateRole(roleID, body) {
-    const [role, authenticated] = await Promise.all([
-      this.getRole(roleID, []),
-      strapi.query('plugin::users-permissions.role').findOne({ where: { type: 'authenticated' } }),
-    ]);
+  async updateRole(roleID, data) {
+    const role = await strapi
+      .query('plugin::users-permissions.role')
+      .findOne({ where: { id: roleID }, populate: ['permissions'] });
+
+    if (!role) {
+      throw new Error('Role not found');
+    }
 
     await strapi.query('plugin::users-permissions.role').update({
       where: { id: roleID },
-      data: _.pick(body, ['name', 'description']),
+      data: _.pick(data, ['name', 'description']),
     });
 
-    await Promise.all(
-      Object.keys(body.permissions || {}).reduce((acc, type) => {
-        Object.keys(body.permissions[type].controllers).forEach(controller => {
-          Object.keys(body.permissions[type].controllers[controller]).forEach(action => {
-            const bodyAction = body.permissions[type].controllers[controller][action];
-            const currentAction = _.get(
-              role.permissions,
-              `${type}.controllers.${controller}.${action}`,
-              {}
-            );
+    const { permissions } = data;
 
-            if (!_.isEqual(bodyAction, currentAction)) {
-              acc.push(
-                strapi.query('plugin::users-permissions.permission').update({
-                  where: {
-                    role: roleID,
-                    type,
-                    controller,
-                    action: action.toLowerCase(),
-                  },
-                  data: bodyAction,
-                })
-              );
+    const newActions = _.flatMap(permissions, (type, typeName) => {
+      return _.flatMap(type.controllers, (controller, controllerName) => {
+        return _.reduce(
+          controller,
+          (acc, action, actionName) => {
+            const { enabled /* policy */ } = action;
+
+            if (enabled) {
+              acc.push(`${typeName}.${controllerName}.${actionName}`);
             }
-          });
-        });
 
-        return acc;
-      }, [])
+            return acc;
+          },
+          []
+        );
+      });
+    });
+
+    const oldActions = role.permissions.map(({ action }) => action);
+
+    const toDelete = role.permissions.reduce((acc, permission) => {
+      if (!newActions.includes(permission.action)) {
+        acc.push(permission);
+      }
+      return acc;
+    }, []);
+
+    const toCreate = newActions
+      .filter(action => !oldActions.includes(action))
+      .map(action => ({ action, role: role.id }));
+
+    await Promise.all(
+      toDelete.map(permission =>
+        strapi
+          .query('plugin::users-permissions.permission')
+          .delete({ where: { id: permission.id } })
+      )
     );
 
-    // Add user to this role.
-    const newUsers = _.differenceBy(body.users, role.users, 'id');
-    await Promise.all(newUsers.map(user => this.updateUserRole(user, roleID)));
-
-    const oldUsers = _.differenceBy(role.users, body.users, 'id');
-    await Promise.all(oldUsers.map(user => this.updateUserRole(user, authenticated.id)));
+    await Promise.all(
+      toCreate.map(permissionInfo =>
+        strapi.query('plugin::users-permissions.permission').create({ data: permissionInfo })
+      )
+    );
   },
 
   async deleteRole(roleID, publicRoleID) {
@@ -147,7 +152,7 @@ module.exports = ({ strapi }) => ({
       .findOne({ where: { id: roleID }, populate: ['users', 'permissions'] });
 
     if (!role) {
-      throw new Error('Cannot find this role');
+      throw new Error('Role not found');
     }
 
     // Move users to guest role.
