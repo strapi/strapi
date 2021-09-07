@@ -76,7 +76,7 @@ module.exports = ({ strapi }) => {
       // Add the extension's resolvers to the final schema
       schema => addResolversToSchema(schema, extension.resolvers),
       // Wrap resolvers if needed (auth, middlewares, policies...) as configured in the extension
-      schema => wrapResolvers({ schema, extension })
+      schema => wrapResolvers({ schema, strapi, extension })
     )({ registry, extension });
   };
 
