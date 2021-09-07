@@ -69,8 +69,8 @@ describe('ContentBox', () => {
 
       .c5 {
         font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
+        font-size: 0.75rem;
+        line-height: 1.33;
         color: #32324d;
       }
 
@@ -102,11 +102,11 @@ describe('ContentBox', () => {
           <div
             class="c1"
           >
-            <h3
+            <span
               class="c5"
             >
               Code example
-            </h3>
+            </span>
           </div>
           <span
             class="c6"
