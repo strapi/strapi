@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faQuestion, faTimes } from '@fortawesome/free-solid-svg-icons';
 import { Box } from '@strapi/parts/Box';
 import { Text } from '@strapi/parts/Text';
+import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { useConfigurations } from '../../../hooks';
 
 const Wrapper = styled.button`
@@ -90,31 +91,35 @@ const Onboarding = () => {
   };
 
   return (
-    <Wrapper onClick={handleClick}>
-      {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
-      {isOpen && <FontAwesomeIcon icon={faTimes} />}
-      {isOpen && (
-        <LinksWrapper
-          background="neutral0"
-          hasRadius
-          shadow="tableShadow"
-          paddingBottom={2}
-          paddingTop={2}
-        >
-          {staticLinks.map(link => (
-            <StyledLink
-              key={link.label}
-              rel="nofollow noreferrer noopener"
-              target="_blank"
-              href={link.destination}
-            >
-              <FontAwesomeIcon icon={link.icon} />
-              <Text>{link.label}</Text>
-            </StyledLink>
-          ))}
-        </LinksWrapper>
-      )}
-    </Wrapper>
+    <FocusTrap onEscape={handleClick}>
+      <Wrapper onClick={handleClick}>
+        {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
+        {isOpen && <FontAwesomeIcon icon={faTimes} />}
+        {/* FIX ME - replace with popover when overflow popover is fixed 
+        + when v4 mockups for onboarding component are ready */}
+        {isOpen && (
+          <LinksWrapper
+            background="neutral0"
+            hasRadius
+            shadow="tableShadow"
+            paddingBottom={2}
+            paddingTop={2}
+          >
+            {staticLinks.map(link => (
+              <StyledLink
+                key={link.label}
+                rel="nofollow noreferrer noopener"
+                target="_blank"
+                href={link.destination}
+              >
+                <FontAwesomeIcon icon={link.icon} />
+                <Text>{link.label}</Text>
+              </StyledLink>
+            ))}
+          </LinksWrapper>
+        )}
+      </Wrapper>
+    </FocusTrap>
   );
 };
 
