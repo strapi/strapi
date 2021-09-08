@@ -3,7 +3,10 @@
 // Test an API with all the possible filed types and simple filtering (no deep filtering, no relations)
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
-const { createAuthRequest, transformToRESTResource } = require('../../../../test/helpers/request');
+const {
+  createContentAPIRequest,
+  transformToRESTResource,
+} = require('../../../../test/helpers/request');
 
 const builder = createTestBuilder();
 let rq;
@@ -127,7 +130,7 @@ describe('Search query', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createContentAPIRequest({ strapi });
 
     data.bed = builder.sanitizedFixturesFor(bedModel.name, strapi);
   });

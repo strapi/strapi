@@ -1,7 +1,7 @@
 'use strict';
 
-const uploadController = require('./upload');
+const upload = require('./upload');
 
 module.exports = {
-  upload: uploadController,
+  upload,
 };

@@ -11,7 +11,6 @@ const path = require('path');
 
 // Public dependencies.
 const fs = require('fs-extra');
-const cheerio = require('cheerio');
 const _ = require('lodash');
 const koaStatic = require('koa-static');
 
@@ -101,6 +100,9 @@ module.exports = {
   },
 
   async loginView(ctx, next) {
+    // lazy require cheerio
+    const cheerio = require('cheerio');
+
     const { error } = ctx.query;
 
     try {

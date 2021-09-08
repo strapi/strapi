@@ -4,8 +4,14 @@ const { createAgent } = require('./agent');
 const { superAdmin } = require('./strapi');
 
 const createRequest = ({ strapi } = {}) => createAgent(strapi);
-const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials }) =>
-  createAgent(strapi).login(userInfo);
+
+const createContentAPIRequest = ({ strapi } = {}) => {
+  return createAgent(strapi, { urlPrefix: '/api', token: 'test-token' });
+};
+
+const createAuthRequest = ({ strapi, userInfo = superAdmin.credentials }) => {
+  return createAgent(strapi).login(userInfo);
+};
 
 const transformToRESTResource = input => {
   if (Array.isArray(input)) {
@@ -18,6 +24,7 @@ const transformToRESTResource = input => {
 
 module.exports = {
   createRequest,
+  createContentAPIRequest,
   createAuthRequest,
   transformToRESTResource,
 };

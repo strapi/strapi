@@ -10,7 +10,7 @@ module.exports = {
       const sentry = strapi.plugin('sentry').service('sentry');
       sentry.init();
 
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         try {
           await next();
         } catch (error) {

@@ -1,7 +1,6 @@
 'use strict';
 const { green } = require('chalk');
 
-// eslint-disable-next-line node/no-extraneous-require
 const strapiAdmin = require('@strapi/admin');
 const { getConfigUrls } = require('@strapi/utils');
 const loadConfiguration = require('../core/app-configuration');

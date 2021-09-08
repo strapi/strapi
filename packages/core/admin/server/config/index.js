@@ -1,6 +1,9 @@
 'use strict';
 
+const forgotPasswordTemplate = require('./email-templates/forgot-password');
+
 module.exports = {
-  layout: require('./layout'),
-  ...require('./settings'),
+  forgotPassword: {
+    emailTemplate: forgotPasswordTemplate,
+  },
 };

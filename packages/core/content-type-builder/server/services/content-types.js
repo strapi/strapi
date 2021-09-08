@@ -2,7 +2,6 @@
 
 const _ = require('lodash');
 const { getOr } = require('lodash/fp');
-const strapiGenerators = require('@strapi/generators');
 
 const { nameToSlug, contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { formatAttributes, replaceTemporaryUIDs } = require('../utils/attributes');
@@ -127,6 +126,7 @@ const createContentType = async ({ contentType, components = [] }, options = {})
  * @param {string} name
  */
 const generateAPI = ({ name, kind = 'collectionType' }) => {
+  const strapiGenerators = require('@strapi/generators');
   return strapiGenerators.generate('api', { id: nameToSlug(name), kind }, { dir: strapi.dir });
 };
 

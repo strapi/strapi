@@ -22,13 +22,19 @@ const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'fatal
 
   await instance.load();
 
+  instance.container.get('content-api').auth.register({
+    name: 'test-strategy',
+    authenticate() {
+      return { authenticated: true };
+    },
+    verify() {
+      return;
+    },
+  });
+
   instance.log.level = logLevel;
 
-  await instance.app
-    // Populate Koa routes
-    .use(instance.router.routes())
-    // Populate Koa methods
-    .use(instance.router.allowedMethods());
+  instance.server.mount();
 
   const utils = createUtils(instance);
 
