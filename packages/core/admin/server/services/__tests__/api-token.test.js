@@ -199,7 +199,7 @@ describe('API Token', () => {
     });
   });
 
-  describe('get', () => {
+  describe('getById', () => {
     const token = {
       id: 1,
       name: 'api-token_tests-name',
@@ -272,6 +272,50 @@ describe('API Token', () => {
         data: attributes,
       });
       expect(res).toEqual(attributes);
+    });
+  });
+  describe('getByName', () => {
+    const token = {
+      id: 1,
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    test('It retrieves the token', async () => {
+      const findOne = jest.fn().mockResolvedValue(token);
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+      };
+
+      const res = await apiTokenService.getByName(token.name);
+
+      expect(findOne).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { name: token.name },
+      });
+      expect(res).toEqual(token);
+    });
+
+    test('It returns `null` if the resource does not exist', async () => {
+      const findOne = jest.fn().mockResolvedValue(null);
+
+      global.strapi = {
+        query() {
+          return { findOne };
+        },
+      };
+
+      const res = await apiTokenService.getByName('unexistant-name');
+
+      expect(findOne).toHaveBeenCalledWith({
+        select: ['id', 'name', 'description', 'type'],
+        where: { name: 'unexistant-name' },
+      });
+      expect(res).toEqual(null);
     });
   });
 });

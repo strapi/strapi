@@ -73,16 +73,19 @@ module.exports = {
     const { id } = ctx.params;
     const apiTokenService = getService('api-token');
 
+    const attributes = body;
     /**
      * We trim both field to avoid having issues with either:
      * - having a space at the end or start of the value.
      * - having only spaces as value;
      */
-    const attributes = {
-      name: trim(body.name),
-      description: trim(body.description),
-      type: body.type,
-    };
+    if (has(attributes, 'name')) {
+      attributes.name = trim(body.name);
+    }
+
+    if (has(attributes, 'description') || attributes.description === null) {
+      attributes.description = trim(body.description);
+    }
 
     try {
       await validateApiTokenUpdateInput(attributes);
@@ -96,8 +99,8 @@ module.exports = {
     }
 
     if (has(attributes, 'name')) {
-      const nameAlreadyTaken = await apiTokenService.exists({ name: attributes.name });
-      if (nameAlreadyTaken) {
+      const nameAlreadyTaken = await apiTokenService.getByName(attributes.name);
+      if (!!nameAlreadyTaken && nameAlreadyTaken.id !== id) {
         return ctx.badRequest('Name already taken');
       }
     }

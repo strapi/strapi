@@ -8,8 +8,8 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  *
  * N°   Description
  * -------------------------------------------
- * 1. Fails to creates an api token (missing parameters from the body)
- * 2. Fails to creates an api token (invalid `type` in the body)
+ * 1. Fails to create an api token (missing parameters from the body)
+ * 2. Fails to create an api token (invalid `type` in the body)
  * 3. Creates an api token (successfully)
  * 4. Creates an api token without a description (successfully)
  * 5. Creates an api token with trimmed description and name (successfully)
@@ -20,8 +20,10 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 10. Returns a 404 if the ressource to retrieve does not exist
  * 11. Updates a token (successfully)
  * 12. Returns a 404 if the ressource to update does not exist
- * 13. Fails to creates an api token (missing parameters from the body)
- * 14. Fails to creates an api token (invalid `type` in the body)
+ * 13. Updates a token with partial payload (successfully)
+ * 14. Fails to update an api token (invalid `type` in the body)
+ * 15. Updates a token when passing a `null` description (successfully)
+ * 16. Updates a token but not the description of no description is passed (successfully)
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -262,12 +264,14 @@ describe('Admin API Token CRUD (e2e)', () => {
       type: body.type,
       id: apiTokens[0].id,
     });
+
+    apiTokens[0] = res.body.data;
   });
 
   test('12. Returns a 404 if the ressource to update does not exist', async () => {
     const body = {
       name: 'api-token_tests-updated-name',
-      description: 'api-token_tests-description',
+      description: 'api-token_tests-updated-description',
       type: 'read-only',
     };
 
@@ -281,27 +285,26 @@ describe('Admin API Token CRUD (e2e)', () => {
     expect(res.body.data).toBeUndefined();
   });
 
-  test('13. Fails to update an api token (missing parameters from the body)', async () => {
+  test('13. Updates a token with partial payload (successfully)', async () => {
     const body = {
-      name: 'api-token_tests-updated-name',
-      description: 'api-token_tests-description',
+      description: 'api-token_tests-re-updated-description',
     };
 
     const res = await rq({
-      url: '/admin/api-tokens/1',
+      url: `/admin/api-tokens/${apiTokens[0].id}`,
       method: 'PUT',
       body,
     });
 
-    expect(res.statusCode).toBe(400);
-    expect(res.body).toMatchObject({
-      statusCode: 400,
-      error: 'Bad Request',
-      message: 'ValidationError',
-      data: {
-        type: ['type is a required field'],
-      },
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      name: apiTokens[0].name,
+      description: body.description,
+      type: apiTokens[0].type,
+      id: apiTokens[0].id,
     });
+
+    apiTokens[0] = res.body.data;
   });
 
   test('14. Fails to update an api token (invalid `type` in the body)', async () => {
@@ -326,5 +329,49 @@ describe('Admin API Token CRUD (e2e)', () => {
         type: ['type must be one of the following values: read-only, full-access'],
       },
     });
+  });
+
+  test('15. Updates a token when passing a `null` description (successfully)', async () => {
+    const body = {
+      description: null,
+    };
+
+    const res = await rq({
+      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      name: apiTokens[0].name,
+      description: '',
+      type: apiTokens[0].type,
+      id: apiTokens[0].id,
+    });
+
+    apiTokens[0] = res.body.data;
+  });
+
+  test('16. Updates a token but not the description of no description is passed (successfully)', async () => {
+    const body = {
+      name: 'api-token_tests-name',
+    };
+
+    const res = await rq({
+      url: `/admin/api-tokens/${apiTokens[0].id}`,
+      method: 'PUT',
+      body,
+    });
+
+    expect(res.statusCode).toBe(200);
+    expect(res.body.data).toMatchObject({
+      name: body.name,
+      description: apiTokens[0].description,
+      type: apiTokens[0].type,
+      id: apiTokens[0].id,
+    });
+
+    apiTokens[0] = res.body.data;
   });
 });

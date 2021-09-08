@@ -210,7 +210,7 @@ describe('API Token Controller', () => {
 
     test('Fails if the name is already taken', async () => {
       const getById = jest.fn(() => ({ id, ...body }));
-      const exists = jest.fn(() => true);
+      const getByName = jest.fn(() => ({ id: 2, name: body.name }));
       const badRequest = jest.fn();
       const ctx = createContext({ body, params: { id } }, { badRequest });
 
@@ -218,8 +218,8 @@ describe('API Token Controller', () => {
         admin: {
           services: {
             'api-token': {
-              exists,
               getById,
+              getByName,
             },
           },
         },
@@ -227,7 +227,7 @@ describe('API Token Controller', () => {
 
       await apiTokenController.update(ctx);
 
-      expect(exists).toHaveBeenCalledWith({ name: body.name });
+      expect(getByName).toHaveBeenCalledWith(body.name);
       expect(badRequest).toHaveBeenCalledWith('Name already taken');
     });
 
@@ -255,7 +255,7 @@ describe('API Token Controller', () => {
     test('Updates API Token Successfully', async () => {
       const update = jest.fn().mockResolvedValue(body);
       const getById = jest.fn(() => ({ id, ...body }));
-      const exists = jest.fn(() => false);
+      const getByName = jest.fn(() => null);
       const badRequest = jest.fn();
       const notFound = jest.fn();
       const send = jest.fn();
@@ -266,7 +266,7 @@ describe('API Token Controller', () => {
           services: {
             'api-token': {
               getById,
-              exists,
+              getByName,
               update,
             },
           },
@@ -276,7 +276,7 @@ describe('API Token Controller', () => {
       await apiTokenController.update(ctx);
 
       expect(getById).toHaveBeenCalledWith(id);
-      expect(exists).toHaveBeenCalledWith({ name: body.name });
+      expect(getByName).toHaveBeenCalledWith(body.name);
       expect(badRequest).not.toHaveBeenCalled();
       expect(notFound).not.toHaveBeenCalled();
       expect(update).toHaveBeenCalledWith(id, body);
