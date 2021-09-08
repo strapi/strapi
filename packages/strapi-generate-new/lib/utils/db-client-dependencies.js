@@ -1,7 +1,7 @@
 'use strict';
 
 const sqlClientModule = {
-  sqlite: { sqlite3: '5.0.0' },
+  sqlite: { sqlite3: '5.0.2' },
   postgres: { pg: '8.5.1' },
   mysql: { mysql: '2.18.1' },
 };
