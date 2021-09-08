@@ -605,5 +605,6 @@
   "notification.version.update.message": "A new version of Strapi is available!",
   "or": "OR",
   "request.error.model.unknown": "This model doesn't exist",
-  "skipToContent": "Skip to content"
+  "skipToContent": "Skip to content",
+  "clearLabel": "Clear"
 }
