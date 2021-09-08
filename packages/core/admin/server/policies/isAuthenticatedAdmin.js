@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = (ctx, next) => {
-  if (!ctx.state.isAuthenticatedAdmin) {
+  if (!ctx.state.isAuthenticated) {
     return ctx.unauthorized();
   }
 

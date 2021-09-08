@@ -20,34 +20,34 @@ const authenticate = async ctx => {
       const { id } = await getService('jwt').getToken(ctx);
 
       if (id === undefined) {
-        throw new Error('Invalid token: Token did not contain required fields');
+        return { error: 'Invalid token: Token did not contain required fields' };
       }
 
       // fetch authenticated user
       const user = await getService('user').fetchAuthenticatedUser(id);
 
-      if (user) {
-        return {
-          authenticated: true,
-          credentials: user,
-        };
+      if (!user) {
+        return { error: 'Invalid credentials' };
       }
+
+      const advancedSettings = await getAdvancedSettings();
+
+      if (advancedSettings.email_confirmation && !user.confirmed) {
+        return { error: 'Invalid credentials' };
+      }
+
+      if (user.blocked) {
+        return { error: 'Invalid credentials' };
+      }
+
+      ctx.state.user = user;
+
+      return {
+        authenticated: true,
+        credentials: user,
+      };
     } catch (err) {
-      return { authenticated: false };
-    }
-
-    if (!ctx.state.user) {
-      return { authenticated: false };
-    }
-
-    const advancedSettings = await getAdvancedSettings();
-
-    if (advancedSettings.email_confirmation && !ctx.state.user.confirmed) {
-      return { authenticated: false };
-    }
-
-    if (ctx.state.user.blocked) {
-      return { authenticated: false };
+      return { error: 'Invalid credentials' };
     }
   }
 
@@ -68,7 +68,7 @@ const authenticate = async ctx => {
 };
 
 const verify = async (auth, config) => {
-  const { errors } = strapi.container.get('content-api');
+  const { errors } = strapi.container.get('auth');
 
   const { credentials: user } = auth;
 

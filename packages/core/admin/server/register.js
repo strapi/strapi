@@ -3,56 +3,51 @@
 
 // const permissionsFieldsToPropertiesMigration = require('../migrations/permissions-fields-to-properties');
 
-/**
- * Tries to authenticated admin user and calls next.
- * @param {KoaContext} ctx
- * @param {Middleware} next
- * @returns {undefined}
- */
-const authMiddleware = async (ctx, next) => {
-  if (!ctx.request.header.authorization) {
-    return next();
-  }
+const adminAuthStrategy = {
+  name: 'admin',
+  async authenticate(ctx) {
+    const { authorization } = ctx.request.header;
 
-  if (
-    ctx.request.header.authorization &&
-    ctx.request.header.authorization.split(' ')[0] === 'Bearer'
-  ) {
-    const token = ctx.request.header.authorization.split(' ')[1];
+    if (!authorization) {
+      return { authenticated: false };
+    }
 
+    const parts = authorization.split(/\s+/);
+
+    if (parts[0] !== 'Bearer' || parts.length !== 2) {
+      return { authenticated: false };
+    }
+
+    const token = parts[1];
     const { payload, isValid } = strapi.admin.services.token.decodeJwtToken(token);
 
     if (isValid) {
-      const admin = await strapi
+      const user = await strapi
         .query('admin::user')
         .findOne({ where: { id: payload.id }, populate: ['roles'] });
 
-      if (!admin || !(admin.isActive === true)) {
-        return ctx.unauthorized('Invalid credentials');
+      if (!user || !(user.isActive === true)) {
+        return { error: 'Invalid credentials' };
       }
 
-      // TODO: use simple user & isAuthenticated
+      const userAbility = await strapi.admin.services.permission.engine.generateUserAbility(user);
 
-      ctx.state.admin = admin;
-      ctx.state.user = admin;
-      ctx.state.userAbility = await strapi.admin.services.permission.engine.generateUserAbility(
-        admin
-      );
+      ctx.state.userAbility = userAbility;
+      ctx.state.user = user;
 
-      ctx.state.isAuthenticatedAdmin = true;
-
-      return next();
+      return { authenticated: true, credentials: user };
     }
-  }
 
-  ctx.unauthorized('Invalid credentials');
+    return { error: 'Invalid credentials' };
+  },
+  // async verify() {},
 };
 
 module.exports = () => {
   const passportMiddleware = strapi.admin.services.passport.init();
 
   strapi.server.api('admin').use(passportMiddleware);
-  strapi.server.api('admin').use(authMiddleware);
+  strapi.container.get('auth').register('admin', adminAuthStrategy);
 
   // FIXME: to implement
   // strapi.db.migrations.register(permissionsFieldsToPropertiesMigration);

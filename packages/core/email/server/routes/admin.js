@@ -7,7 +7,9 @@ module.exports = {
       method: 'POST',
       path: '/',
       handler: 'email.send',
-      config: {},
+      config: {
+        policies: ['admin::isAuthenticatedAdmin'],
+      },
     },
     {
       method: 'POST',

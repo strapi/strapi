@@ -5,11 +5,11 @@ const Router = require('@koa/router');
 const { createRouteManager } = require('./routing');
 
 const createAPI = (strapi, opts = {}) => {
-  const { prefix, defaultPolicies } = opts;
+  const { prefix, type } = opts;
 
   const api = new Router({ prefix });
 
-  const routeManager = createRouteManager(strapi, { defaultPolicies });
+  const routeManager = createRouteManager(strapi, { type });
 
   return {
     use(fn) {

@@ -32,6 +32,7 @@ module.exports = {
           method: 'GET',
           path: '/uploads/(.*)',
           handler: [range, koaStatic(staticDir, { defer: true, ...localServerConfig })],
+          config: { auth: false },
         },
       ]);
     },

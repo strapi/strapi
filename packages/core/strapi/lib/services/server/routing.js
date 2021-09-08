@@ -69,20 +69,16 @@ const validateRouteConfig = routeConfig => {
 };
 
 const createRouteManager = (strapi, opts = {}) => {
+  const { type } = opts;
+
   const composeEndpoint = createEndpointComposer(strapi);
 
   const createRoute = (route, router) => {
     validateRouteConfig(route);
 
-    if (opts.defaultPolicies) {
-      if (has('config.policies', route)) {
-        route.config.policies.unshift(...opts.defaultPolicies);
-      } else {
-        _.set(route, 'config.policies', [...opts.defaultPolicies]);
-      }
-    }
+    _.set(route, 'info.type', type || 'admin');
 
-    composeEndpoint(route, { ...route.info, router });
+    composeEndpoint(route, { router });
   };
 
   const addRoutes = (routes, router) => {
