@@ -13,6 +13,7 @@ import {
   Thead,
   Th,
   TableLabel,
+  useNotifyAT,
 } from '@strapi/parts';
 
 import { AddIcon, EditIcon } from '@strapi/icons';
@@ -38,6 +39,7 @@ const RoleListPage = () => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
   const toggleNotification = useNotification();
+  const { notifyStatus } = useNotifyAT();
 
   const updatePermissions = useMemo(() => {
     return {
@@ -57,7 +59,7 @@ const RoleListPage = () => {
     isLoading: isLoadingForData,
     data: { roles },
     isFetching,
-  } = useQuery('get-roles', () => fetchData(toggleNotification), { initialData: {} });
+  } = useQuery('get-roles', () => fetchData(toggleNotification, notifyStatus), { initialData: {} });
 
   const isLoading = isLoadingForData || isFetching;
 

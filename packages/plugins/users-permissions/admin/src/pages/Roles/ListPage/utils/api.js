@@ -1,8 +1,9 @@
 import { getRequestURL, axiosInstance } from '../../../../utils';
 
-export const fetchData = async toggleNotification => {
+export const fetchData = async (toggleNotification, notifyStatus) => {
   try {
     const { data } = await axiosInstance.get(getRequestURL('roles'));
+    notifyStatus('The roles have loaded successfully');
 
     return data;
   } catch (err) {
