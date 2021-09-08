@@ -22,7 +22,7 @@ const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'fatal
 
   await instance.load();
 
-  instance.container.get('content-api').auth.register({
+  instance.container.get('auth').register({
     name: 'test-strategy',
     authenticate() {
       return { authenticated: true };

@@ -8,13 +8,9 @@ const { createRouteManager } = require('./routing');
 const { createAdminAPI } = require('./admin-api');
 const { createContentAPI } = require('./content-api');
 
-const healthCheck = async (ctx, next) => {
-  if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
-    ctx.set('strapi', 'You are so French!');
-    ctx.status = 204;
-  } else {
-    await next();
-  }
+const healthCheck = async ctx => {
+  ctx.set('strapi', 'You are so French!');
+  ctx.status = 204;
 };
 
 /**
@@ -49,7 +45,7 @@ const createServer = strapi => {
   };
 
   // init health check
-  app.use(healthCheck);
+  router.all('/_health', healthCheck);
 
   const state = {
     mounted: false,
