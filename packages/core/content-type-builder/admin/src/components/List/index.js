@@ -9,6 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { ListButton, useTracking } from '@strapi/helper-plugin';
+import { TableLabel } from '@strapi/parts';
 import { Button } from '@buffetjs/core';
 import { Plus } from '@buffetjs/icons';
 import { useIntl } from 'react-intl';
@@ -17,13 +18,12 @@ import useListView from '../../hooks/useListView';
 import useDataManager from '../../hooks/useDataManager';
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
-import Wrapper from './List';
+import BoxWrapper from './BoxWrapper';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 function List({
-  className,
   customRowComponent,
   items,
   addComponentToDZ,
@@ -186,8 +186,25 @@ function List({
 
   return (
     <>
-      <Wrapper className={className} isFromDynamicZone={isFromDynamicZone}>
+      <BoxWrapper
+        isFromDynamicZone={isFromDynamicZone}
+        background="neutral0"
+        shadow="filterShadow"
+        hasRadius
+        paddingLeft={6}
+        paddingRight={6}
+      >
         <table>
+          <thead>
+            <tr>
+              <th colSpan="2">
+                <TableLabel textColor="neutral600">Name</TableLabel>
+              </th>
+              <th colSpan="2">
+                <TableLabel textColor="neutral600">Type</TableLabel>
+              </th>
+            </tr>
+          </thead>
           <tbody>
             {items.map(item => {
               const { type } = item;
@@ -247,7 +264,7 @@ function List({
             <Button {...addButtonProps} />
           </ListButton>
         )}
-      </Wrapper>
+      </BoxWrapper>
       {isSub && (
         <div className="plus-icon" onClick={onClickAddField}>
           {isInDevelopmentMode && <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />}
@@ -259,7 +276,6 @@ function List({
 
 List.defaultProps = {
   addComponentToDZ: () => {},
-  className: null,
   customRowComponent: null,
   dzName: null,
   firstLoopComponentName: null,
@@ -276,7 +292,6 @@ List.defaultProps = {
 
 List.propTypes = {
   addComponentToDZ: PropTypes.func,
-  className: PropTypes.string,
   customRowComponent: PropTypes.func,
   dzName: PropTypes.string,
   editTarget: PropTypes.string.isRequired,

@@ -2,15 +2,16 @@ import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { FormattedMessage } from 'react-intl';
-import { AttributeIcon, IconLinks } from '@buffetjs/core';
+import { IconLinks } from '@buffetjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import pluginId from '../../pluginId';
 import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
-import Curve from '../../icons/Curve';
+// import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
-import Wrapper from './Wrapper';
+import BoxWrapper from './BoxWrapper';
+import AttributeIcon from '../AttributeIcon';
 
 function ListRow({
   configurable,
@@ -198,14 +199,15 @@ function ListRow({
   }
 
   return (
-    <Wrapper
+    <BoxWrapper
+      as="tr"
       onClick={handleClick}
       className={[target ? 'relation-row' : '', configurable ? 'clickable' : '']}
       loopNumber={loopNumber}
     >
       <td>
-        <AttributeIcon key={src} type={src} />
-        <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} />
+        <AttributeIcon paddingLeft={2} key={src} type={src} />
+        {/* <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} /> */}
       </td>
       <td style={{ fontWeight: 600 }}>
         <p>{name}</p>
@@ -288,7 +290,7 @@ function ListRow({
           </>
         )}
       </td>
-    </Wrapper>
+    </BoxWrapper>
   );
 }
 

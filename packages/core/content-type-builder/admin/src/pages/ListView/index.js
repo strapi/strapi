@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
 import { useTracking } from '@strapi/helper-plugin';
 import { AddIcon, BackIcon, CheckIcon, EditIcon } from '@strapi/icons';
-import { Box, Button, ContentLayout, HeaderLayout, Link, Row, Stack } from '@strapi/parts';
+import { Button, ContentLayout, HeaderLayout, Link, Row, Stack } from '@strapi/parts';
 import { get, has, isEqual, upperFirst } from 'lodash';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import List from '../../components/List';
@@ -202,20 +201,6 @@ const ListView = () => {
     });
   };
 
-  const CustomRow = props => {
-    const { name } = props;
-
-    return <ListRow {...props} attributeName={name} name={name} onClick={handleClickEditField} />;
-  };
-
-  CustomRow.defaultProps = {
-    name: null,
-  };
-
-  CustomRow.propTypes = {
-    name: PropTypes.string,
-  };
-
   return (
     <ListViewContext.Provider value={{ openModalAddField: handleClickAddField }}>
       <>
@@ -302,19 +287,17 @@ const ListView = () => {
                 </Button>
               </Stack>
             </Row>
-            <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-              <List
-                items={attributes}
-                customRowComponent={props => <CustomRow {...props} />}
-                addComponentToDZ={handleClickAddComponentToDZ}
-                targetUid={targetUid}
-                dataType={forTarget}
-                dataTypeName={currentDataName}
-                mainTypeName={currentDataName}
-                editTarget={forTarget}
-                isMain
-              />
-            </Box>
+            <List
+              items={attributes}
+              customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
+              addComponentToDZ={handleClickAddComponentToDZ}
+              targetUid={targetUid}
+              dataType={forTarget}
+              dataTypeName={currentDataName}
+              mainTypeName={currentDataName}
+              editTarget={forTarget}
+              isMain
+            />
           </Stack>
         </ContentLayout>
       </>
