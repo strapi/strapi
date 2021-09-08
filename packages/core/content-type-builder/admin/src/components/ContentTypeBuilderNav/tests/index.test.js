@@ -4,15 +4,24 @@
  *
  */
 
-import React from 'react';
+import { Layout } from '@strapi/parts';
 import { render } from '@testing-library/react';
-import { Router, Route } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
-import Theme from '../../../../../../admin/admin/src/components/Theme';
+import React from 'react';
+import { Router } from 'react-router-dom';
 import LanguageProvider from '../../../../../../admin/admin/src/components/LanguageProvider';
+import Theme from '../../../../../../admin/admin/src/components/Theme';
 import en from '../../../../../../admin/admin/src/translations/en.json';
-
 import ContentTypeBuilderNav from '../index';
+import mockData from './mockData';
+
+jest.mock('../useContentTypeBuilderMenu.js', () => {
+  return jest.fn(() => ({
+    menu: mockData,
+    searchValue: '',
+    onSearchChange: () => {},
+  }));
+});
 
 const makeApp = () => {
   const history = createMemoryHistory();
@@ -23,9 +32,7 @@ const makeApp = () => {
     <LanguageProvider messages={messages} localeNames={localeNames}>
       <Theme>
         <Router history={history}>
-          <Route path="/plugins/content-type-builder">
-            <ContentTypeBuilderNav />
-          </Route>
+          <Layout sideNav={<ContentTypeBuilderNav />} />
         </Router>
       </Theme>
     </LanguageProvider>
