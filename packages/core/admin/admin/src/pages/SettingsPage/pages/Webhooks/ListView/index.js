@@ -29,7 +29,7 @@ import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { Switch } from '@strapi/parts/Switch';
 import { Main } from '@strapi/parts/Main';
 import { LinkButton } from '@strapi/parts/LinkButton';
-import { notifyStatus } from '@strapi/parts/LiveRegions';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Box } from '@strapi/parts/Box';
 import AddIcon from '@strapi/icons/AddIcon';
 import EditIcon from '@strapi/icons/EditIcon';
@@ -51,6 +51,7 @@ const ListView = () => {
     reducer,
     initialState
   );
+  const { notifyStatus } = useNotifyAT();
 
   useFocusWhenNavigate();
   const { push } = useHistory();
@@ -88,6 +89,8 @@ const ListView = () => {
         notifyStatus('webhooks have been loaded');
       }
     } catch (err) {
+      console.log(err);
+
       if (isMounted.current) {
         if (err.code !== 20) {
           toggleNotification({
