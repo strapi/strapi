@@ -32,12 +32,12 @@ const apiTokenUpdateSchema = yup
     name: yup
       .string()
       .min(1)
-      .required(),
-    description: yup.string().optional(),
+      .notNull(),
+    description: yup.string().nullable(),
     type: yup
       .string()
       .oneOf(Object.values(constants.API_TOKEN_TYPE))
-      .required(),
+      .notNull(),
   })
   .noUnknown();
 

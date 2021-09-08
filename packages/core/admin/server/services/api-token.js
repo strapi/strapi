@@ -117,6 +117,15 @@ const getById = async id => {
 };
 
 /**
+ * @param {string} name
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
+ */
+const getByName = async name => {
+  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: { name } });
+};
+
+/**
  * @param {string|number} id
  * @param {Object} attributes
  * @param {TokenType} attributes.type
@@ -140,4 +149,5 @@ module.exports = {
   revoke,
   getById,
   update,
+  getByName,
 };
