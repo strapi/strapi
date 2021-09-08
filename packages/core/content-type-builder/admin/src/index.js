@@ -19,7 +19,8 @@ const name = pluginPkg.strapi.name;
 export default {
   register(app) {
     app.addReducers(reducers);
-    app.addCorePluginMenuLink({
+    // ! TODO: @soupette remove the addCorePluginMenuLink api
+    app.addMenuLink({
       to: `/plugins/${pluginId}`,
       icon,
       intlLabel: {
@@ -27,6 +28,11 @@ export default {
         defaultMessage: 'Content-Types Builder',
       },
       permissions: pluginPermissions.main,
+      Component: async () => {
+        const component = await import(/* webpackChunkName: "documentation-page" */ './pages/App');
+
+        return component;
+      },
     });
 
     app.registerPlugin({

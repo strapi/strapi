@@ -4,12 +4,12 @@
 import i18nPlugin from '../../../../plugins/i18n/admin/src';
 // import sentryPlugin from '../../../../plugins/sentry/admin/src';
 import usersPermissionsPlugin from '../../../../plugins/users-permissions/admin/src';
-// import ctbPlugin from '../../../content-type-builder/admin/src';
+import ctbPlugin from '../../../content-type-builder/admin/src';
 // import emailPlugin from '../../../email/admin/src';
 import uploadPlugin from '../../../upload/admin/src';
 
 const plugins = {
-  // '@strapi/plugin-content-type-builder': ctbPlugin,
+  '@strapi/plugin-content-type-builder': ctbPlugin,
   // '@strapi/plugin-documentation': documentationPlugin,
   '@strapi/plugin-i18n': i18nPlugin,
   // '@strapi/plugin-email': emailPlugin,

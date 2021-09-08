@@ -81,7 +81,7 @@ const EditPage = ({ canUpdate }) => {
       if (id.toString() === userInfos.id.toString()) {
         auth.setUserInfo(data);
 
-        const userDisplayName = get(body, 'username', `${body.firstname} ${body.lastname}`);
+        const userDisplayName = get(body, 'username') || `${body.firstname} ${body.lastname}`;
 
         setUserDisplayName(userDisplayName);
       }

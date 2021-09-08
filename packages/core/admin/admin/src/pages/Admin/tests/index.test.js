@@ -2,15 +2,11 @@ import React from 'react';
 import { Router } from 'react-router-dom';
 import { render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
+import { ThemeProvider, lightTheme } from '@strapi/parts';
+import { IntlProvider } from 'react-intl';
 import { useStrapiApp } from '@strapi/helper-plugin';
-import Theme from '../../../components/Theme';
 import { useMenu } from '../../../hooks';
 import Admin from '../index';
-
-jest.mock('react-intl', () => ({
-  // eslint-disable-next-line react/prop-types
-  FormattedMessage: ({ id }) => <p>{id}</p>,
-}));
 
 jest.mock('@strapi/helper-plugin', () => ({
   LoadingIndicatorPage: () => <div>Loading</div>,
@@ -31,11 +27,13 @@ jest.mock('../../../components/LeftMenu', () => () => <div>menu</div>);
 jest.mock('../../HomePage', () => () => <div>HomePage</div>);
 
 const makeApp = history => (
-  <Theme>
-    <Router history={history}>
-      <Admin />
-    </Router>
-  </Theme>
+  <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+    <ThemeProvider theme={lightTheme}>
+      <Router history={history}>
+        <Admin />
+      </Router>
+    </ThemeProvider>
+  </IntlProvider>
 );
 
 describe('<Admin />', () => {

@@ -1,26 +1,15 @@
-/**
- *
- * LeftMenu
- *
- */
-
-import React, { useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { sortBy, camelCase, upperFirst } from 'lodash';
-import { useHistory } from 'react-router-dom';
+import { useState } from 'react';
+import { useNotification, useTracking } from '@strapi/helper-plugin';
+import { camelCase, isEmpty, sortBy, toLower, upperFirst } from 'lodash';
+import matchSorter from 'match-sorter';
 import { useIntl } from 'react-intl';
-import { LeftMenuList, useTracking, useNotification } from '@strapi/helper-plugin';
-import { Text } from '@buffetjs/core';
+import { useHistory } from 'react-router-dom';
+import useDataManager from '../../hooks/useDataManager';
 import pluginId from '../../pluginId';
 import getTrad from '../../utils/getTrad';
-import CustomLink from '../CustomLink';
-import useDataManager from '../../hooks/useDataManager';
 import makeSearch from '../../utils/makeSearch';
-import Wrapper from './Wrapper';
 
-/* eslint-disable indent */
-
-function LeftMenu({ wait }) {
+const useContentTypeBuilderMenu = () => {
   const {
     components,
     componentsGroupedByCategory,
@@ -32,6 +21,7 @@ function LeftMenu({ wait }) {
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();
   const { push } = useHistory();
+  const [search, setSearch] = useState('');
 
   const componentsData = sortBy(
     Object.keys(componentsGroupedByCategory).map(category => ({
@@ -47,6 +37,7 @@ function LeftMenu({ wait }) {
           categoryName: data.name,
           header_label_1: formatMessage({
             id: getTrad('modalForm.header.categories'),
+            defaultMessage: 'Categories',
           }),
           header_icon_name_1: 'component',
           header_icon_isCustom_1: false,
@@ -88,7 +79,6 @@ function LeftMenu({ wait }) {
     if (canOpenModalCreateCTorComponent()) {
       trackUsage(`willCreate${upperFirst(camelCase(type))}`);
 
-      await wait();
       const search = makeSearch({
         modalType,
         kind,
@@ -106,115 +96,92 @@ function LeftMenu({ wait }) {
     } else {
       toggleNotification({
         type: 'info',
-        message: { id: `${pluginId}.notification.info.creating.notSaved` },
+        message: {
+          id: `${getTrad('notification.info.creating.notSaved')}`,
+          defaultMessage:
+            'Please save your work before creating a new collection type or component',
+        },
       });
     }
   };
 
-  const displayedContentTypes = useMemo(() => {
-    return sortedContentTypesList
-      .filter(obj => obj.visible)
-      .map(obj => {
-        if (obj.plugin) {
-          return {
-            ...obj,
-            CustomComponent: () => (
-              <p style={{ justifyContent: 'normal' }}>
-                {obj.title}&nbsp;
-                <Text
-                  as="span"
-                  ellipsis
-                  // This is needed here
-                  style={{ fontStyle: 'italic' }}
-                  fontWeight="inherit"
-                  lineHeight="inherit"
-                >
-                  ({formatMessage({ id: getTrad('from') })}: {obj.plugin})&nbsp;
-                </Text>
-              </p>
-            ),
-          };
-        }
-
-        return obj;
-      });
-  }, [sortedContentTypesList, formatMessage]);
+  const displayedContentTypes = sortedContentTypesList.filter(obj => obj.visible);
 
   const data = [
     {
       name: 'models',
       title: {
-        id: `${pluginId}.menu.section.models.name.`,
+        id: `${getTrad('menu.section.models.name.')}`,
+        defaultMessage: 'Collection Types',
       },
-      searchable: true,
-      customLink: isInDevelopmentMode
-        ? {
-            Component: CustomLink,
-            componentProps: {
-              id: `${pluginId}.button.model.create`,
-              onClick: () => {
-                handleClickOpenModal('contentType', 'collectionType');
-              },
-            },
-          }
-        : null,
+      customLink: isInDevelopmentMode && {
+        id: `${getTrad('button.model.create')}`,
+        defaultMessage: 'Create new collection type',
+        onClick: () => handleClickOpenModal('contentType', 'collectionType'),
+      },
       links: displayedContentTypes.filter(contentType => contentType.kind === 'collectionType'),
     },
     {
       name: 'singleTypes',
       title: {
-        id: `${pluginId}.menu.section.single-types.name.`,
+        id: `${getTrad('menu.section.single-types.name.')}`,
+        defaultMessage: 'Single Types',
       },
-      searchable: true,
-      customLink: isInDevelopmentMode
-        ? {
-            Component: CustomLink,
-            componentProps: {
-              id: `${pluginId}.button.single-types.create`,
-              onClick: () => {
-                handleClickOpenModal('contentType', 'singleType');
-              },
-            },
-          }
-        : null,
+      customLink: isInDevelopmentMode && {
+        id: `${getTrad('button.single-types.create')}`,
+        defaultMessage: 'Create new single type',
+        onClick: () => handleClickOpenModal('contentType', 'singleType'),
+      },
       links: displayedContentTypes.filter(singleType => singleType.kind === 'singleType'),
     },
     {
       name: 'components',
       title: {
-        id: `${pluginId}.menu.section.components.name.`,
+        id: `${getTrad('menu.section.components.name.')}`,
+        defaultMessage: 'Components',
       },
-      searchable: true,
-      customLink: isInDevelopmentMode
-        ? {
-            Component: CustomLink,
-            componentProps: {
-              id: `${pluginId}.button.component.create`,
-              onClick: () => {
-                handleClickOpenModal('component');
-              },
-            },
-          }
-        : null,
+      customLink: {
+        id: `${getTrad('button.component.create')}`,
+        defaultMessage: 'Create a new component',
+        onClick: () => handleClickOpenModal('component'),
+      },
       links: componentsData,
     },
   ];
 
-  return (
-    <Wrapper className="col-md-3">
-      {data.map(list => {
-        return <LeftMenuList {...list} key={list.name} />;
-      })}
-    </Wrapper>
-  );
-}
+  const matchByTitle = links =>
+    matchSorter(links, toLower(search), { keys: [item => toLower(item.title)] });
 
-LeftMenu.defaultProps = {
-  wait: () => {},
+  const getMenu = () => {
+    // Maybe we can do it simpler with matchsorter wildcards ?
+    return data
+      .map(section => {
+        const hasChild = section.links.some(l => !isEmpty(l.links));
+
+        if (hasChild) {
+          return {
+            ...section,
+            links: section.links.map(l => ({ ...l, links: matchByTitle(l.links) })),
+          };
+        }
+
+        return {
+          ...section,
+          links: matchByTitle(section.links),
+        };
+      })
+      .filter(section => {
+        const hasChildren = section.links.every(l => l.links);
+
+        if (hasChildren) {
+          return section.links.some(l => l.links.length);
+        }
+
+        return section.links.length;
+      });
+  };
+
+  return { menu: getMenu(), searchValue: search, onSearchChange: setSearch };
 };
 
-LeftMenu.propTypes = {
-  wait: PropTypes.func,
-};
-
-export default LeftMenu;
+export default useContentTypeBuilderMenu;
