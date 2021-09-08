@@ -1,20 +1,33 @@
-import React, { useState, useRef } from 'react';
-import { Main, HeaderLayout, Button } from '@strapi/parts';
+import React, { useState } from 'react';
+import {
+  Main,
+  HeaderLayout,
+  Button,
+  Stack,
+  Box,
+  GridItem,
+  Grid,
+  TextInput,
+  Textarea,
+} from '@strapi/parts';
+import { H3 } from '@strapi/parts/Text';
+import { CheckIcon } from '@strapi/icons';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';
 import {
-  request,
-  useNotification,
   useOverlayBlocker,
   SettingsPageTitle,
+  CustomContentLayout,
+  LoadingIndicatorPage,
+  useNotification,
 } from '@strapi/helper-plugin';
 
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
 import { usePlugins, useFetchRole } from '../../../hooks';
-
 import schema from './utils/schema';
+import axiosInstance from '../../../utils/axiosInstance';
 
 const EditPage = () => {
   const { formatMessage } = useIntl();
@@ -24,42 +37,43 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
-  const { isLoading } = usePlugins();
-  const { role, onSubmitSucceeded } = useFetchRole(id);
-  const permissionsRef = useRef();
+  const { isLoading: isLoadingPlugins } = usePlugins();
+  const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
 
-  const handleCreateRoleSubmit = data => {
+  const handleCreateRoleSubmit = async data => {
+    // Set loading state
     lockApp();
     setIsSubmitting(true);
-
-    const permissions = permissionsRef.current.getPermissions();
-
-    Promise.resolve(
-      request(`/${pluginId}/roles/${id}`, {
-        method: 'PUT',
-        body: { ...data, ...permissions, users: [] },
-      })
-    )
-      .then(() => {
-        onSubmitSucceeded({ name: data.name, description: data.description });
-        permissionsRef.current.setFormAfterSubmit();
-        toggleNotification({
-          type: 'success',
-          message: { id: getTrad('Settings.roles.edited') },
-        });
-      })
-      .catch(err => {
-        console.error(err);
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      })
-      .finally(() => {
-        setIsSubmitting(false);
-        unlockApp();
+    try {
+      // Update role in Strapi
+      await axiosInstance.put(`/${pluginId}/roles/${id}`, { ...data, users: [] });
+      // Notify success
+      onSubmitSucceeded({ name: data.name, description: data.description });
+      toggleNotification({
+        type: 'success',
+        message: {
+          id: getTrad('Settings.roles.edited'),
+          defaultMessage: 'Role edited',
+        },
       });
+    } catch (err) {
+      console.error(err);
+      toggleNotification({
+        type: 'warning',
+        message: {
+          id: 'notification.error',
+          defaultMessage: 'An error occurred',
+        },
+      });
+    }
+    // Unset loading state
+    setIsSubmitting(false);
+    unlockApp();
   };
+
+  if (isLoadingRole) {
+    return <LoadingIndicatorPage />;
+  }
 
   return (
     <Main labelledBy="title">
@@ -70,16 +84,17 @@ const EditPage = () => {
         onSubmit={handleCreateRoleSubmit}
         validationSchema={schema}
       >
-        {({ handleSubmit }) => (
-          <form onSubmit={handleSubmit}>
+        {({ handleSubmit, values, handleBlur, handleChange, errors }) => (
+          <>
             <HeaderLayout
               id="title"
               primaryAction={
-                !isLoading && (
+                !isLoadingPlugins && (
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
                     onClick={handleSubmit}
                     loading={isSubmitting}
+                    startIcon={<CheckIcon />}
                   >
                     {formatMessage({
                       id: 'app.components.Button.save',
@@ -91,7 +106,59 @@ const EditPage = () => {
               title={role.name}
               subtitle={role.description}
             />
-          </form>
+            <form onSubmit={handleSubmit}>
+              <CustomContentLayout>
+                <Stack size={7}>
+                  <Box
+                    background="neutral0"
+                    hasRadius
+                    shadow="filterShadow"
+                    paddingTop={6}
+                    paddingBottom={6}
+                    paddingLeft={7}
+                    paddingRight={7}
+                  >
+                    <Stack size={4}>
+                      <H3>
+                        {formatMessage({
+                          id: getTrad('EditPage.form.roles'),
+                          defaultMessage: 'Role details',
+                        })}
+                      </H3>
+                      <Grid gap={4}>
+                        <GridItem col={6}>
+                          <TextInput
+                            name="name"
+                            value={values.name || ''}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            label={formatMessage({
+                              id: 'Settings.roles.form.input.name',
+                              defaultMessage: 'Name',
+                            })}
+                            error={errors.name ? { id: errors.name } : null}
+                          />
+                        </GridItem>
+                        <GridItem col={6}>
+                          <Textarea
+                            name="description"
+                            value={values.description || ''}
+                            onChange={handleChange}
+                            onBlur={handleBlur}
+                            label={formatMessage({
+                              id: 'Settings.roles.form.input.description',
+                              defaultMessage: 'Description',
+                            })}
+                            error={errors.description ? { id: errors.description } : null}
+                          />
+                        </GridItem>
+                      </Grid>
+                    </Stack>
+                  </Box>
+                </Stack>
+              </CustomContentLayout>
+            </form>
+          </>
         )}
       </Formik>
     </Main>
