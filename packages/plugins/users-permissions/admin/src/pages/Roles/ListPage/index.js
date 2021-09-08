@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Button,
-  ContentLayout,
   HeaderLayout,
   IconButton,
   Layout,
@@ -15,14 +14,16 @@ import {
   Th,
   TableLabel,
 } from '@strapi/parts';
+
 import { AddIcon, EditIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import {
   useTracking,
   SettingsPageTitle,
   CheckPermissions,
-  LoadingIndicatorPage,
   useNotification,
+  CustomContentLayout,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
@@ -38,7 +39,21 @@ const RoleListPage = () => {
   const { push } = useHistory();
   const toggleNotification = useNotification();
 
+  const updatePermissions = useMemo(() => {
+    return {
+      update: permissions.updateRole,
+      create: permissions.createRole,
+      delete: permissions.deleteRole,
+      read: permissions.readRoles,
+    };
+  }, []);
+
   const {
+    isLoading: isLoadingForPermissions,
+    allowedActions: { canRead },
+  } = useRBAC(updatePermissions);
+
+  let {
     isLoading: isLoadingForData,
     data: { roles },
     isFetching,
@@ -64,10 +79,11 @@ const RoleListPage = () => {
     <Layout>
       <SettingsPageTitle name={pageTitle} />
       <Main
+        aria-busy={isLoading}
         labelledBy={formatMessage({
           id: getTrad('HeaderNav.link.roles'),
           defaultMessage: 'Roles',
-        })}
+        }).toLowerCase()}
       >
         <HeaderLayout
           as="h1"
@@ -91,38 +107,41 @@ const RoleListPage = () => {
             </CheckPermissions>
           }
         />
-        {isLoading ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <ContentLayout>
-            <Table colCount={4}>
-              <Thead>
-                <Tr>
-                  <Th>
-                    <TableLabel>
-                      {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
-                    </TableLabel>
-                  </Th>
-                  <Th>
-                    <TableLabel>
-                      {formatMessage({
-                        id: getTrad('Roles.description'),
-                        defaultMessage: 'Description',
-                      })}
-                    </TableLabel>
-                  </Th>
-                  <Th>
-                    <TableLabel>
-                      {formatMessage({
-                        id: getTrad('Roles.users'),
-                        defaultMessage: 'Users',
-                      })}
-                    </TableLabel>
-                  </Th>
-                </Tr>
-              </Thead>
-              <Tbody>
-                {roles.map(role => (
+
+        <CustomContentLayout
+          canRead={canRead}
+          shouldShowEmptyState={roles && !roles.length}
+          isLoading={isLoading || isLoadingForPermissions}
+        >
+          <Table colCount={4} rowCount={roles && roles.length + 1}>
+            <Thead>
+              <Tr>
+                <Th>
+                  <TableLabel>
+                    {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
+                  </TableLabel>
+                </Th>
+                <Th>
+                  <TableLabel>
+                    {formatMessage({
+                      id: getTrad('Roles.description'),
+                      defaultMessage: 'Description',
+                    })}
+                  </TableLabel>
+                </Th>
+                <Th>
+                  <TableLabel>
+                    {formatMessage({
+                      id: getTrad('Roles.users'),
+                      defaultMessage: 'Users',
+                    })}
+                  </TableLabel>
+                </Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {roles &&
+                roles.map(role => (
                   <Tr key={role.name}>
                     <Td width="20%">
                       <Text>{role.name}</Text>
@@ -131,7 +150,12 @@ const RoleListPage = () => {
                       <Text>{role.description}</Text>
                     </Td>
                     <Td width="30%">
-                      <Text>{role.nb_users} users</Text>
+                      <Text data-testid="plop">
+                        {`${role.nb_users} ${formatMessage({
+                          id: getTrad('Roles.users'),
+                          defaultMessage: 'users',
+                        }).toLowerCase()}`}
+                      </Text>
                     </Td>
                     <Td>
                       <CheckPermissions permissions={permissions.updateRole}>
@@ -145,10 +169,9 @@ const RoleListPage = () => {
                     </Td>
                   </Tr>
                 ))}
-              </Tbody>
-            </Table>
-          </ContentLayout>
-        )}
+            </Tbody>
+          </Table>
+        </CustomContentLayout>
       </Main>
     </Layout>
   );
