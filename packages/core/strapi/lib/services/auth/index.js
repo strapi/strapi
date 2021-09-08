@@ -69,8 +69,6 @@ const createAuthentication = () => {
         }
       }
 
-      console.log('ici');
-
       return ctx.unauthorized('Missing credentials');
     },
     async verify(auth, config = {}) {

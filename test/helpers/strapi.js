@@ -20,17 +20,18 @@ const createStrapiInstance = async ({ ensureSuperAdmin = true, logLevel = 'fatal
   const options = { dir: TEST_APP_URL };
   const instance = strapi(options);
 
-  await instance.load();
-
-  instance.container.get('auth').register({
-    name: 'test-strategy',
+  instance.container.get('auth').register('content-api', {
+    name: 'test-auth',
     authenticate() {
+      console.log('lala');
       return { authenticated: true };
     },
     verify() {
       return;
     },
   });
+
+  await instance.load();
 
   instance.log.level = logLevel;
 
