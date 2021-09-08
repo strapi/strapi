@@ -8,18 +8,20 @@ import { Text } from '@strapi/parts/Text';
 import { FocusTrap } from '@strapi/parts/FocusTrap';
 import { useConfigurations } from '../../../hooks';
 
-const Wrapper = styled.button`
+const OnboardingWrapper = styled(Box)`
   position: fixed;
   bottom: ${({ theme }) => theme.spaces[2]};
   right: ${({ theme }) => theme.spaces[2]};
+`;
+
+const Button = styled.button`
   width: ${({ theme }) => theme.spaces[8]};
   height: ${({ theme }) => theme.spaces[8]};
   background: ${({ theme }) => theme.colors.primary600};
   box-shadow: ${({ theme }) => theme.shadows.tableShadow};
   border-radius: 50%;
-
   svg {
-    color: white;
+    color: ${({ theme }) => theme.colors.neutral0};
   }
 `;
 
@@ -33,7 +35,6 @@ const LinksWrapper = styled(Box)`
 const StyledLink = styled.a`
   display: flex;
   align-items: center;
-  width: 100%;
   text-decoration: none;
   padding: ${({ theme }) => theme.spaces[2]};
   padding-left: ${({ theme }) => theme.spaces[5]};
@@ -91,18 +92,21 @@ const Onboarding = () => {
   };
 
   return (
-    <Wrapper
-      aria-label={formatMessage({
-        id: 'app.components.Onboarding.help.button',
-        defaultMessage: 'Help Button',
-      })}
-      type="button"
-      onClick={handleClick}
-    >
-      {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
-      {isOpen && <FontAwesomeIcon icon={faTimes} />}
+    <OnboardingWrapper>
+      <Button
+        id="onboarding"
+        aria-label={formatMessage({
+          id: 'app.components.Onboarding.help.button',
+          defaultMessage: 'Help button',
+        })}
+        onClick={handleClick}
+      >
+        {!isOpen && <FontAwesomeIcon icon={faQuestion} />}
+        {isOpen && <FontAwesomeIcon icon={faTimes} />}
+      </Button>
+
       {/* FIX ME - replace with popover when overflow popover is fixed 
-      + when v4 mockups for onboarding component are ready */}
+       + when v4 mockups for onboarding component are ready */}
       {isOpen && (
         <FocusTrap onEscape={handleClick}>
           <LinksWrapper
@@ -126,7 +130,7 @@ const Onboarding = () => {
           </LinksWrapper>
         </FocusTrap>
       )}
-    </Wrapper>
+    </OnboardingWrapper>
   );
 };
 
