@@ -20,7 +20,7 @@ const SmallLoader = styled(Loader)`
  * onClear props to prevent the Select from re-rendering N times when typing on a specific
  * key in a formik form
  */
-const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
+const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear, ...props }) => {
   const { formatMessage } = useIntl();
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { locales } = useLocales();
@@ -35,6 +35,10 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
 
       return !foundLocale;
     });
+
+  if (isLoading) {
+    return null;
+  }
 
   const computedValue = value || '';
 
@@ -60,6 +64,7 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
           onLocaleChange({ code: selectedLocale.value, displayName: selectedLocale.label });
         }
       }}
+      {...props}
     >
       {isLoading
         ? null
@@ -76,12 +81,13 @@ LocaleSelect.defaultProps = {
   error: undefined,
   value: undefined,
   onClear: () => undefined,
+  onLocaleChange: () => undefined,
 };
 
 LocaleSelect.propTypes = {
   error: PropTypes.string,
   onClear: PropTypes.func,
-  onLocaleChange: PropTypes.func.isRequired,
+  onLocaleChange: PropTypes.func,
   value: PropTypes.string,
 };
 

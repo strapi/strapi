@@ -63,8 +63,8 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
       </ContentLayout>
 
       {isCreating && <ModalCreate onClose={onToggleCreateModal} />}
+      {localeToEdit && <ModalEdit onClose={closeModalToEdit} locale={localeToEdit} />}
       <ModalDelete localeToDelete={localeToDelete} onClose={closeModalToDelete} />
-      <ModalEdit localeToEdit={localeToEdit} onClose={closeModalToEdit} locales={locales} />
     </Main>
   );
 };

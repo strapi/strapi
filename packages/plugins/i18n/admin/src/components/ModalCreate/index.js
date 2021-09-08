@@ -59,7 +59,13 @@ const ModalCreate = ({ onClose }) => {
               </ButtonText>
             </ModalHeader>
             <ModalBody>
-              <TabGroup label="Some stuff for the label" id="tabs" variant="simple">
+              <TabGroup
+                label={formatMessage({
+                  id: getTrad('Settings.locales.modal.title'),
+                })}
+                id="tabs"
+                variant="simple"
+              >
                 <Row justifyContent="space-between">
                   <H2>
                     {formatMessage({
