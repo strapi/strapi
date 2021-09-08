@@ -6,7 +6,7 @@ const pluginPermissions = {
   ],
   createRole: [{ action: 'plugin::users-permissions.roles.create', subject: null }],
   deleteRole: [{ action: 'plugin::users-permissions.roles.delete', subject: null }],
-  readRole: [{ action: 'plugin::users-permissions.roles.read', subject: null }],
+  readRoles: [{ action: 'plugin::users-permissions.roles.read', subject: null }],
   updateRole: [{ action: 'plugin::users-permissions.roles.update', subject: null }],
 
   // AdvancedSettings

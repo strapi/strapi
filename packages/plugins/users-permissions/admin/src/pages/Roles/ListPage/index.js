@@ -55,7 +55,7 @@ const RoleListPage = () => {
     allowedActions: { canRead },
   } = useRBAC(updatePermissions);
 
-  let {
+  const {
     isLoading: isLoadingForData,
     data: { roles },
     isFetching,
