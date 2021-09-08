@@ -38,18 +38,11 @@ module.exports = {
   getSettings: resolveControllerMethod('getSettings'),
 
   async upload(ctx) {
-    const isUploadDisabled = _.get(strapi.plugins, 'upload.config.enabled', true) === false;
-
-    if (isUploadDisabled) {
-      throw strapi.errors.badRequest(null, {
-        errors: [{ id: 'Upload.status.disabled', message: 'File upload is disabled' }],
-      });
-    }
-
     const {
       query: { id },
       request: { files: { files } = {} },
     } = ctx;
+
     const controller = resolveController(ctx);
 
     if (id && (_.isEmpty(files) || files.size === 0)) {

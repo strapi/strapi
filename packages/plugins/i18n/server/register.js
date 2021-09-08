@@ -3,6 +3,8 @@
 const _ = require('lodash');
 // const { PUBLISHED_AT_ATTRIBUTE } = require('@strapi/utils').contentTypes.constants;
 
+const validateLocaleCreation = require('./controllers/validate-locale-creation');
+
 const { getService } = require('./utils');
 // const fieldMigration = require('./migrations/field');
 // const enableContentTypeMigration = require('./migrations/content-type/enable');
@@ -40,6 +42,22 @@ module.exports = strapi => {
       coreApiService.addCreateLocalizationAction(contentType);
       // coreApiService.addGraphqlLocalizationAction(contentType); // TODO: to implement
     }
+  });
+
+  strapi.server.router.use('/content-manager/collection-types/:model', (ctx, next) => {
+    if (ctx.method === 'POST') {
+      return validateLocaleCreation(ctx, next);
+    }
+
+    return next();
+  });
+
+  strapi.server.router.use('/content-manager/single-types/:model', (ctx, next) => {
+    if (ctx.method === 'PUT') {
+      return validateLocaleCreation(ctx, next);
+    }
+
+    return next();
   });
 
   if (strapi.plugin('graphql')) {

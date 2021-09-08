@@ -11,6 +11,10 @@ module.exports = function(strapi) {
     });
   });
 
+  _.forEach(strapi.admin.middlewares, (middleware, middlewareName) => {
+    strapi.middleware[middlewareName] = middleware;
+  });
+
   _.forEach(strapi.plugins, plugin => {
     _.forEach(plugin.middlewares, (middleware, middlewareName) => {
       strapi.middleware[middlewareName] = middleware;

@@ -19,14 +19,14 @@ module.exports = strapi => {
      */
 
     initialize() {
-      locale(strapi.app);
+      locale(strapi.server.app);
 
       const { defaultLocale, modes, cookieName } = strapi.config.middleware.settings.language;
 
       const directory = resolve(strapi.config.appPath, strapi.config.paths.config, 'locales');
 
-      strapi.app.use(
-        i18n(strapi.app, {
+      strapi.server.use(
+        i18n(strapi.server.app, {
           directory,
           locales: strapi.config.get('middleware.settings.language.locales', []),
           defaultLocale,

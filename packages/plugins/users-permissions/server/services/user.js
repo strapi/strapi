@@ -114,10 +114,6 @@ module.exports = ({ strapi }) => ({
     return strapi.query('plugin::users-permissions.user').delete({ where: params });
   },
 
-  async removeAll(params) {
-    return strapi.query('plugin::users-permissions.user').delete({ where: params });
-  },
-
   validatePassword(password, hash) {
     return bcrypt.compare(password, hash);
   },

@@ -1,25 +1,24 @@
 'use strict';
 
-const Koa = require('koa');
-const Router = require('koa-router');
 const _ = require('lodash');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
 
 const loadConfiguration = require('./core/app-configuration');
 
-const { createHTTPServer } = require('./server');
 const { createContainer } = require('./container');
 const utils = require('./utils');
 const initializeMiddlewares = require('./middlewares');
 const createStrapiFs = require('./services/fs');
 const createEventHub = require('./services/event-hub');
+const { createServer } = require('./services/server');
 const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
+const createContentAPI = require('./services/content-api');
 const createUpdateNotifier = require('./utils/update-notifier');
 const createStartupLogger = require('./utils/startup-logger');
 const ee = require('./utils/ee');
@@ -54,16 +53,15 @@ class Strapi {
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
+    this.container.register('content-api', createContentAPI(this));
 
     this.isLoaded = false;
     this.reload = this.reload();
-    this.app = new Koa();
-    this.router = new Router();
-    this.server = createHTTPServer(this, this.app);
+    this.server = createServer(this);
+
     this.fs = createStrapiFs(this);
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
-    this.app.proxy = this.config.get('server.proxy');
     this.log = createLogger(this.config.get('logger', {}));
 
     createUpdateNotifier(this).notify();
@@ -123,9 +121,6 @@ class Strapi {
         await this.load();
       }
 
-      this.app.use(this.router.routes()).use(this.router.allowedMethods());
-
-      // Launch server.
       await this.listen();
 
       return this;
@@ -268,15 +263,6 @@ class Strapi {
   }
 
   async load() {
-    this.app.use(async (ctx, next) => {
-      if (ctx.request.url === '/_health' && ['HEAD', 'GET'].includes(ctx.request.method)) {
-        ctx.set('strapi', 'You are so French!');
-        ctx.status = 204;
-      } else {
-        await next();
-      }
-    });
-
     await Promise.all([
       this.loadPlugins(),
       this.loadAdmin(),
@@ -332,11 +318,12 @@ class Strapi {
     this.telemetry = createTelemetry(this);
 
     // Initialize middlewares.
-    await initializeMiddlewares.call(this);
+    await initializeMiddlewares(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
     this.isLoaded = true;
+
     return this;
   }
 
@@ -403,7 +390,7 @@ class Strapi {
     await execLifecycle(this.config.get(configPath));
 
     // admin
-    await this.admin[lifecycleName]();
+    await this.admin[lifecycleName](this);
   }
 
   getModel(uid) {

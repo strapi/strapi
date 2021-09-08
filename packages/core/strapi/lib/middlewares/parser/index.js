@@ -37,7 +37,7 @@ module.exports = strapi => {
      * Initialize the hook
      */
     initialize() {
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         // disable for graphql
         // TODO: find a better way later
         if (ctx.url === '/graphql') {
@@ -66,7 +66,10 @@ module.exports = strapi => {
         }
       });
 
-      addQsParser(strapi.app, strapi.config.get('middleware.settings.parser.queryStringParser'));
+      addQsParser(
+        strapi.server.app,
+        strapi.config.get('middleware.settings.parser.queryStringParser')
+      );
     },
   };
 };

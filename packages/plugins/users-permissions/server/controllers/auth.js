@@ -9,7 +9,6 @@
 /* eslint-disable no-useless-escape */
 const crypto = require('crypto');
 const _ = require('lodash');
-const grant = require('grant-koa');
 const { sanitizeEntity } = require('@strapi/utils');
 const { getService } = require('../utils');
 
@@ -232,6 +231,8 @@ module.exports = {
   },
 
   async connect(ctx, next) {
+    const grant = require('grant-koa');
+
     const grantConfig = await strapi
       .store({
         environment: '',

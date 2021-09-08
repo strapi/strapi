@@ -15,13 +15,13 @@ const requiredMiddlewares = [
   'favicon',
 ];
 
-module.exports = async function() {
+module.exports = async function(strapi) {
   /** Utils */
-  const middlewareConfig = this.config.middleware;
+  const middlewareConfig = strapi.config.middleware;
 
   // check if a middleware exists
   const middlewareExists = key => {
-    return !isUndefined(this.middleware[key]);
+    return !isUndefined(strapi.middleware[key]);
   };
 
   // check if a middleware is enabled
@@ -33,26 +33,26 @@ module.exports = async function() {
   };
 
   // list of enabled middlewares
-  const enabledMiddlewares = Object.keys(this.middleware).filter(middlewareEnabled);
+  const enabledMiddlewares = Object.keys(strapi.middleware).filter(middlewareEnabled);
 
   // Method to initialize middlewares and emit an event.
   const initialize = middlewareKey => {
-    if (this.middleware[middlewareKey].loaded === true) return;
+    if (strapi.middleware[middlewareKey].loaded === true) return;
 
-    const module = this.middleware[middlewareKey].load;
+    const module = strapi.middleware[middlewareKey].load;
 
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(
         () => reject(`(middleware: ${middlewareKey}) is taking too long to load.`),
         middlewareConfig.timeout || 1000
       );
-      this.middleware[middlewareKey] = merge(this.middleware[middlewareKey], module);
+      strapi.middleware[middlewareKey] = merge(strapi.middleware[middlewareKey], module);
 
       Promise.resolve()
-        .then(() => module.initialize())
+        .then(() => module.initialize(strapi))
         .then(() => {
           clearTimeout(timeout);
-          this.middleware[middlewareKey].loaded = true;
+          strapi.middleware[middlewareKey].loaded = true;
           resolve();
         })
         .catch(err => {
@@ -72,9 +72,9 @@ module.exports = async function() {
   // Run beforeInitialize of every middleware
   await Promise.all(
     enabledMiddlewares.map(key => {
-      const { beforeInitialize } = this.middleware[key].load;
+      const { beforeInitialize } = strapi.middleware[key].load;
       if (typeof beforeInitialize === 'function') {
-        return beforeInitialize();
+        return beforeInitialize(strapi);
       }
     })
   );

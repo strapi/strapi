@@ -65,18 +65,18 @@ module.exports = strapi => {
      */
 
     initialize() {
-      this.delegator = delegate(strapi.app.context, 'response');
+      this.delegator = delegate(strapi.server.app.context, 'response');
       this.createResponses();
 
       strapi.errors = Boom;
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         try {
           // App logic.
           await next();
         } catch (error) {
           // emit error if configured
           if (strapi.config.get('server.emitErrors', false)) {
-            strapi.app.emit('error', error, ctx);
+            strapi.server.app.emit('error', error, ctx);
           }
 
           // Log error.
@@ -92,10 +92,10 @@ module.exports = strapi => {
         }
       });
 
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         await next();
         // Empty body is considered as `notFound` response.
-        if (_.isNil(ctx.body) && _.isNil(ctx.status)) {
+        if (_.isNil(ctx.body) && (_.isNil(ctx.status) || ctx.status === 404)) {
           ctx.notFound();
         }
       });
@@ -104,7 +104,7 @@ module.exports = strapi => {
     // Custom function to avoid ctx.body repeat
     createResponses() {
       boomMethods.forEach(method => {
-        strapi.app.response[method] = function(msg, ...rest) {
+        strapi.server.app.response[method] = function(msg, ...rest) {
           const boomError = Boom[method](msg, ...rest) || {};
 
           const { status, body } = formatBoomPayload(boomError);
@@ -119,17 +119,17 @@ module.exports = strapi => {
         this.delegator.method(method);
       });
 
-      strapi.app.response.send = function(data, status = 200) {
+      strapi.server.app.response.send = function(data, status = 200) {
         this.status = status;
         this.body = data;
       };
 
-      strapi.app.response.created = function(data) {
+      strapi.server.app.response.created = function(data) {
         this.status = 201;
         this.body = data;
       };
 
-      strapi.app.response.deleted = function(data) {
+      strapi.server.app.response.deleted = function(data) {
         if (_.isNil(data)) {
           this.status = 204;
         } else {

@@ -95,7 +95,7 @@ describe('Provider Login', () => {
     test('It should fail with a public request', async () => {
       const res = await requests.public.get('/admin/providers/options');
 
-      expect(res.status).toBe(hasSSO ? 403 : 404);
+      expect(res.status).toBe(hasSSO ? 401 : 404);
     });
 
     test('It should fail with an authenticated request (restricted user)', async () => {
@@ -133,7 +133,7 @@ describe('Provider Login', () => {
     test('It should fail with a public request', async () => {
       const res = await requests.public.put('/admin/providers/options', { body: newOptions });
 
-      expect(res.status).toBe(hasSSO ? 403 : 405);
+      expect(res.status).toBe(hasSSO ? 401 : 405);
     });
 
     test('It should fail with an authenticated request (restricted user)', async () => {

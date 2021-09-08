@@ -2,7 +2,6 @@
 coverage
 node_modules
 stats.json
-config/layout.json
 package-lock.json
 
 
