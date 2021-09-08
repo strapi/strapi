@@ -1,5 +1,5 @@
 'use strict';
-/* eslint-disable no-useless-escape */
+
 const path = require('path');
 const _ = require('lodash');
 const fs = require('fs-extra');
@@ -34,9 +34,9 @@ function getCustomWebpackConfig(dir, config) {
   return webpackConfig;
 }
 
-async function build({ dir, env, options, optimize }) {
+async function build({ plugins, dir, env, options, optimize }) {
   // Create the cache dir containing the front-end files.
-  await createCacheDir(dir);
+  await createCacheDir({ dir, plugins });
 
   const cacheDir = path.resolve(dir, '.cache');
   const entry = path.resolve(cacheDir, 'admin', 'src');
@@ -78,34 +78,28 @@ async function build({ dir, env, options, optimize }) {
   });
 }
 
-async function createPluginsJs(plugins, localPlugins, dest) {
-  const createPluginsArray = plugins =>
-    plugins.map(name => {
-      const shortName = _.camelCase(name.replace(/^@strapi\/plugin-/i, ''));
-
-      return { name, shortName };
-    });
-  const appPluginsArray = createPluginsArray(plugins);
-  const localPluginsArray = createPluginsArray(localPlugins);
+async function createPluginsJs(plugins, dest) {
+  const pluginsArray = plugins.map(({ pathToPlugin, name }) => {
+    const shortName = _.camelCase(name);
+    return {
+      name,
+      pathToPlugin: path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin),
+      shortName,
+    };
+  });
 
   const content = `
-${appPluginsArray
-  .map(({ name, shortName }) => {
-    const req = `'../../plugins/${name}/admin/src'`;
+${pluginsArray
+  .map(({ pathToPlugin, shortName }) => {
+    const req = `'${pathToPlugin}/admin/src'`;
 
     return `import ${shortName} from ${req};`;
   })
   .join('\n')}
-${localPluginsArray
-  .map(({ name, shortName }) => {
-    const req = `'../../../plugins/${name}/admin/src'`;
 
-    return `import ${shortName} from ${req};`;
-  })
-  .join('\n')}
 
 const plugins = {
-${[...appPluginsArray, ...localPluginsArray]
+${[...pluginsArray]
   .map(({ name, shortName }) => {
     return `  '${name}': ${shortName},`;
   })
@@ -126,21 +120,6 @@ async function clean({ dir }) {
   fs.removeSync(cacheDir);
 }
 
-async function copyPlugin(name, dest) {
-  const pkgFilePath = getPkgPath(name);
-
-  const resolveDepPath = (...args) => path.resolve(pkgFilePath, ...args);
-  const resolveDest = (...args) => path.resolve(dest, 'plugins', name, ...args);
-
-  const copy = (...args) => {
-    return fs.copy(resolveDepPath(...args), resolveDest(...args));
-  };
-
-  // Copy the entire admin folder
-  await copy('admin');
-  await copy('package.json');
-}
-
 async function copyAdmin(dest) {
   const adminPath = getPkgPath('@strapi/admin');
 
@@ -154,34 +133,22 @@ async function copyAdmin(dest) {
   await fs.copy(path.resolve(adminPath, 'package.json'), path.resolve(dest, 'package.json'));
 }
 
-async function createCacheDir(dir) {
+async function createCacheDir({ dir, plugins }) {
   const cacheDir = path.resolve(dir, '.cache');
 
-  const pkgJSON = require(path.join(dir, 'package.json'));
-
-  const pluginsToCopy = Object.keys(pkgJSON.dependencies).filter(
-    dep =>
-      dep.startsWith('@strapi/plugin') &&
-      fs.existsSync(path.resolve(getPkgPath(dep), 'admin', 'src', 'index.js'))
-  );
-
-  let localPluginsToCopy = [];
-  if (fs.existsSync(path.join(dir, 'plugins'))) {
-    localPluginsToCopy = fs
-      .readdirSync(path.join(dir, 'plugins'))
-      .filter(plugin =>
-        fs.existsSync(path.resolve(dir, 'plugins', plugin, 'admin', 'src', 'index.js'))
-      );
-  }
+  const pluginsWithFront = Object.keys(plugins)
+    .filter(pluginName => {
+      const pluginInfo = plugins[pluginName];
+      // TODO: use strapi-admin
+      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'admin', 'src', 'index.js'));
+    })
+    .map(name => ({ name, ...plugins[name] }));
 
   // create .cache dir
   await fs.emptyDir(cacheDir);
 
   // copy admin core code
   await copyAdmin(cacheDir);
-
-  // copy plugins code
-  await Promise.all(pluginsToCopy.map(name => copyPlugin(name, cacheDir)));
 
   // Copy app.js
   const customAdminConfigFilePath = path.join(dir, 'admin', 'app.js');
@@ -198,12 +165,12 @@ async function createCacheDir(dir) {
   }
 
   // create plugins.js with plugins requires
-  await createPluginsJs(pluginsToCopy, localPluginsToCopy, cacheDir);
+  await createPluginsJs(pluginsWithFront, cacheDir);
 }
 
-async function watchAdmin({ dir, host, port, browser, options }) {
+async function watchAdmin({ plugins, dir, host, port, browser, options }) {
   // Create the cache dir containing the front-end files.
-  await createCacheDir(dir);
+  await createCacheDir({ dir, plugins });
 
   const entry = path.join(dir, '.cache', 'admin', 'src');
   const dest = path.join(dir, 'build');
