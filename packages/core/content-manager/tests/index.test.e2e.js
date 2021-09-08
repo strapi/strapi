@@ -26,7 +26,7 @@ const deleteFixtures = async () => {
     ['articles', 'article'],
     ['articlesWithTag', 'articlewithtag'],
   ]) {
-    const uid = `application::${modelName}.${modelName}`;
+    const uid = `api::${modelName}.${modelName}`;
 
     if (data[name] && data[name].length > 0) {
       await rq({
@@ -102,7 +102,7 @@ describe('Content Manager End to End', () => {
 
     test('Create tag1', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag1',
@@ -121,7 +121,7 @@ describe('Content Manager End to End', () => {
 
     test('Create tag2', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag2',
@@ -140,7 +140,7 @@ describe('Content Manager End to End', () => {
 
     test('Create tag3', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag3',
@@ -165,7 +165,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
       });
@@ -190,7 +190,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
       });
@@ -216,7 +216,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -244,7 +244,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -268,7 +268,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -293,7 +293,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -312,7 +312,7 @@ describe('Content Manager End to End', () => {
 
     test('Delete all articles should remove the association in each tags related to them', async () => {
       const { body: createdTag } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag11',
@@ -320,7 +320,7 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: article12 } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: {
           title: 'article12',
@@ -330,12 +330,12 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: updatedTag } = await rq({
-        url: `/content-manager/collection-types/application::tag.tag/${createdTag.id}`,
+        url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
 
       const { body: article13 } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: {
           title: 'article13',
@@ -352,7 +352,7 @@ describe('Content Manager End to End', () => {
       expect(articles[1].tags.length).toBe(1);
 
       let { body: foundTag } = await rq({
-        url: `/content-manager/collection-types/application::tag.tag/${createdTag.id}`,
+        url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
 
@@ -360,7 +360,7 @@ describe('Content Manager End to End', () => {
       expect(foundTag.articles.length).toBe(2);
 
       await rq({
-        url: '/content-manager/collection-types/application::article.article/actions/bulkDelete',
+        url: '/content-manager/collection-types/api::article.article/actions/bulkDelete',
         method: 'POST',
         body: {
           ids: articles.map(article => article.id),
@@ -368,7 +368,7 @@ describe('Content Manager End to End', () => {
       });
 
       let { body: foundTag2 } = await rq({
-        url: `/content-manager/collection-types/application::tag.tag/${createdTag.id}`,
+        url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'GET',
       });
 
@@ -391,7 +391,7 @@ describe('Content Manager End to End', () => {
 
     test('Creating an article with some many way tags', async () => {
       const { body: createdTag } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag11',
@@ -405,7 +405,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::articlewithtag.articlewithtag',
+        url: '/content-manager/collection-types/api::articlewithtag.articlewithtag',
         method: 'POST',
         body: entry,
       });
@@ -435,7 +435,7 @@ describe('Content Manager End to End', () => {
 
     test('Create cat1', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::category.category',
+        url: '/content-manager/collection-types/api::category.category',
         method: 'POST',
         body: {
           name: 'cat1',
@@ -454,7 +454,7 @@ describe('Content Manager End to End', () => {
 
     test('Create cat2', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::category.category',
+        url: '/content-manager/collection-types/api::category.category',
         method: 'POST',
         body: {
           name: 'cat2',
@@ -479,7 +479,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
       });
@@ -503,7 +503,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -526,7 +526,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
       });
@@ -549,7 +549,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -573,7 +573,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::category.category/${entry.id}`,
+        url: `/content-manager/collection-types/api::category.category/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -595,7 +595,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::category.category',
+        url: '/content-manager/collection-types/api::category.category',
         method: 'POST',
         body: entry,
       });
@@ -612,7 +612,7 @@ describe('Content Manager End to End', () => {
 
     test('Get article1 with cat3', async () => {
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${data.articles[0].id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[0].id}`,
         method: 'GET',
       });
 
@@ -624,7 +624,7 @@ describe('Content Manager End to End', () => {
 
     test('Get article2 with cat2', async () => {
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${data.articles[1].id}`,
+        url: `/content-manager/collection-types/api::article.article/${data.articles[1].id}`,
         method: 'GET',
       });
 
@@ -636,7 +636,7 @@ describe('Content Manager End to End', () => {
 
     test('Get cat1 without relations', async () => {
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::category.category/${data.categories[0].id}`,
+        url: `/content-manager/collection-types/api::category.category/${data.categories[0].id}`,
         method: 'GET',
       });
 
@@ -648,7 +648,7 @@ describe('Content Manager End to End', () => {
 
     test('Get cat2 with article2', async () => {
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::category.category/${data.categories[1].id}`,
+        url: `/content-manager/collection-types/api::category.category/${data.categories[1].id}`,
         method: 'GET',
       });
 
@@ -661,7 +661,7 @@ describe('Content Manager End to End', () => {
 
     test('Get cat3 with article1', async () => {
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::category.category/${data.categories[2].id}`,
+        url: `/content-manager/collection-types/api::category.category/${data.categories[2].id}`,
         method: 'GET',
       });
 
@@ -687,7 +687,7 @@ describe('Content Manager End to End', () => {
 
     test('Create ref1', async () => {
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::reference.reference',
+        url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
           name: 'ref1',
@@ -709,7 +709,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
       });
@@ -732,7 +732,7 @@ describe('Content Manager End to End', () => {
       cleanDate(entry);
 
       let { body } = await rq({
-        url: `/content-manager/collection-types/application::article.article/${entry.id}`,
+        url: `/content-manager/collection-types/api::article.article/${entry.id}`,
         method: 'PUT',
         body: entry,
       });
@@ -755,7 +755,7 @@ describe('Content Manager End to End', () => {
       };
 
       let { body } = await rq({
-        url: '/content-manager/collection-types/application::article.article',
+        url: '/content-manager/collection-types/api::article.article',
         method: 'POST',
         body: entry,
       });
@@ -774,7 +774,7 @@ describe('Content Manager End to End', () => {
   describe('Test oneWay relation (reference - tag) with Content Manager', () => {
     test('Attach Tag to a Reference', async () => {
       const { body: createdTag } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag111',
@@ -782,7 +782,7 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: createdReference } = await rq({
-        url: '/content-manager/collection-types/application::reference.reference',
+        url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
           name: 'cat111',
@@ -796,7 +796,7 @@ describe('Content Manager End to End', () => {
 
     test('Detach Tag to a Reference', async () => {
       const { body: createdTag } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag111',
@@ -804,7 +804,7 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: createdReference } = await rq({
-        url: '/content-manager/collection-types/application::reference.reference',
+        url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
           name: 'cat111',
@@ -815,7 +815,7 @@ describe('Content Manager End to End', () => {
       expect(createdReference.tag.id).toBe(createdTag.id);
 
       const { body: referenceToUpdate } = await rq({
-        url: `/content-manager/collection-types/application::reference.reference/${createdReference.id}`,
+        url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
         method: 'PUT',
         body: {
           tag: null,
@@ -827,7 +827,7 @@ describe('Content Manager End to End', () => {
 
     test('Delete Tag so the relation in the Reference side should be removed', async () => {
       const { body: createdTag } = await rq({
-        url: '/content-manager/collection-types/application::tag.tag',
+        url: '/content-manager/collection-types/api::tag.tag',
         method: 'POST',
         body: {
           name: 'tag111',
@@ -835,7 +835,7 @@ describe('Content Manager End to End', () => {
       });
 
       const { body: createdReference } = await rq({
-        url: '/content-manager/collection-types/application::reference.reference',
+        url: '/content-manager/collection-types/api::reference.reference',
         method: 'POST',
         body: {
           name: 'cat111',
@@ -844,12 +844,12 @@ describe('Content Manager End to End', () => {
       });
 
       await rq({
-        url: `/content-manager/collection-types/application::tag.tag/${createdTag.id}`,
+        url: `/content-manager/collection-types/api::tag.tag/${createdTag.id}`,
         method: 'DELETE',
       });
 
       const { body: foundReference } = await rq({
-        url: `/content-manager/collection-types/application::reference.reference/${createdReference.id}`,
+        url: `/content-manager/collection-types/api::reference.reference/${createdReference.id}`,
         method: 'GET',
       });
 

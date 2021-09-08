@@ -14,19 +14,19 @@ const StyledButton = styled(Base)`
 const cmPermissions = {
   collectionTypesConfigurations: [
     {
-      action: 'plugins::content-manager.collection-types.configure-view',
+      action: 'plugin::content-manager.collection-types.configure-view',
       subject: null,
     },
   ],
   componentsConfigurations: [
     {
-      action: 'plugins::content-manager.components.configure-layout',
+      action: 'plugin::content-manager.components.configure-layout',
       subject: null,
     },
   ],
   singleTypesConfigurations: [
     {
-      action: 'plugins::content-manager.single-types.configure-view',
+      action: 'plugin::content-manager.single-types.configure-view',
       subject: null,
     },
   ],

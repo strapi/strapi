@@ -23,14 +23,14 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
     ];
     const permissions = {
       foo: {
-        'plugins::content-manager.explorer.create': [
+        'plugin::content-manager.explorer.create': [
           {
             properties: {
               fields: ['name'],
             },
           },
         ],
-        'plugins::content-manager.explorer.read': [
+        'plugin::content-manager.explorer.read': [
           {
             properties: {
               fields: ['name'],
@@ -39,7 +39,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
         ],
       },
       bar: {
-        'plugins::content-manager.explorer.create': [
+        'plugin::content-manager.explorer.create': [
           {
             properties: {
               fields: ['name'],
@@ -47,7 +47,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
             },
           },
         ],
-        'plugins::content-manager.explorer.read': [
+        'plugin::content-manager.explorer.read': [
           {
             properties: {
               fields: ['name'],
@@ -79,7 +79,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
     ];
     const permissions = {
       foo: {
-        'plugins::content-manager.explorer.create': [
+        'plugin::content-manager.explorer.create': [
           {
             properties: {
               fields: ['name'],
@@ -87,7 +87,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
             },
           },
         ],
-        'plugins::content-manager.explorer.read': [
+        'plugin::content-manager.explorer.read': [
           {
             properties: {
               fields: ['name'],
@@ -96,7 +96,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
         ],
       },
       bar: {
-        'plugins::content-manager.explorer.create': [
+        'plugin::content-manager.explorer.create': [
           {
             properties: {
               fields: ['name'],
@@ -104,7 +104,7 @@ describe('i18n | contentManagerHooks | utils | addLocaleToLinksSearch', () => {
             },
           },
         ],
-        'plugins::content-manager.explorer.read': [
+        'plugin::content-manager.explorer.read': [
           {
             properties: {
               fields: ['name'],

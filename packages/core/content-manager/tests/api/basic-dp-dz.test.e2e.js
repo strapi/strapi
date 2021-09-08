@@ -80,8 +80,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'POST',
-      url:
-        '/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp',
+      url: '/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp',
       body: product,
     });
 
@@ -94,7 +93,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
   test('Read product with compo', async () => {
     const res = await rq({
       method: 'GET',
-      url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -116,7 +115,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
     };
     const res = await rq({
       method: 'PUT',
-      url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
       body: product,
     });
 
@@ -130,7 +129,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
   test('Delete product with compo', async () => {
     const res = await rq({
       method: 'DELETE',
-      url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
+      url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${data.productsWithDzAndDP[0].id}`,
     });
 
     expect(res.statusCode).toBe(200);
@@ -150,7 +149,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         };
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
-          url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${
+          url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
             method === 'update' ? data.productsWithDzAndDP[0].id : ''
           }`,
           body: product,
@@ -175,7 +174,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         };
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
-          url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${
+          url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
             method === 'update' ? data.productsWithDzAndDP[0].id : ''
           }`,
           body: product,
@@ -200,7 +199,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         };
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
-          url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${
+          url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
             method === 'update' ? data.productsWithDzAndDP[0].id : ''
           }`,
           body: product,
@@ -225,7 +224,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         };
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
-          url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${
+          url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
             method === 'update' ? data.productsWithDzAndDP[0].id : ''
           }`,
           body: product,
@@ -249,7 +248,7 @@ describe('CM API - Basic + dz + draftAndPublish', () => {
         };
         const res = await rq({
           method: method === 'create' ? 'POST' : 'PUT',
-          url: `/content-manager/collection-types/application::product-with-dz-and-dp.product-with-dz-and-dp/${
+          url: `/content-manager/collection-types/api::product-with-dz-and-dp.product-with-dz-and-dp/${
             method === 'update' ? data.productsWithDzAndDP[0].id : ''
           }`,
           body: product,

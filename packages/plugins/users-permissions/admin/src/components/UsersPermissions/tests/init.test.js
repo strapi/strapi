@@ -36,7 +36,7 @@ describe('USERS PERMISSIONS | COMPONENTS | UserPermissions | init', () => {
       application: [{ method: 'GET', path: '/addresses' }],
     };
 
-    const policies = ['isauthenticated', 'ratelimit', 'custompolicy'];
+    const policies = ['isAuthenticated', 'rateLimit', 'customPolicy'];
 
     const expected = {
       initialData: permissions,

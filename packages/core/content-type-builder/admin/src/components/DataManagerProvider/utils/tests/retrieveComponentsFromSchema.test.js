@@ -16,7 +16,7 @@ describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils | ret
       {
         type: 'relation',
         relation: 'oneToOne',
-        target: 'application::address.address',
+        target: 'api::address.address',
         targetAttribute: null,
         private: false,
         name: 'address',
@@ -25,7 +25,7 @@ describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils | ret
       {
         type: 'relation',
         relation: 'oneToOne',
-        target: 'application::menu.menu',
+        target: 'api::menu.menu',
         inversedBy: 'restaurant',
         targetAttribute: 'restaurant',
         private: false,
@@ -97,7 +97,7 @@ describe('CONTENT TYPE BUILDER | components | DataManagerProvider | utils | ret
             {
               type: 'relation',
               relation: 'oneToOne',
-              target: 'application::category.category',
+              target: 'api::category.category',
               targetAttribute: null,
               private: false,
               name: 'categories',

@@ -3,27 +3,27 @@
 const cmPermissions = [
   {
     id: 2817,
-    action: 'plugins::content-manager.single-types.configure-view',
+    action: 'plugin::content-manager.single-types.configure-view',
     subject: null,
     properties: {},
     conditions: [],
   },
   {
     id: 2818,
-    action: 'plugins::content-manager.collection-types.configure-view',
+    action: 'plugin::content-manager.collection-types.configure-view',
     subject: null,
     properties: {},
     conditions: [],
   },
   {
     id: 2819,
-    action: 'plugins::content-manager.components.configure-layout',
+    action: 'plugin::content-manager.components.configure-layout',
     subject: null,
     properties: {},
     conditions: [],
   },
   {
-    action: 'plugins::content-manager.explorer.create',
+    action: 'plugin::content-manager.explorer.create',
     subject: 'foo',
     properties: {
       fields: ['f1'],
@@ -31,7 +31,7 @@ const cmPermissions = [
     conditions: [],
   },
   {
-    action: 'plugins::content-manager.explorer.create',
+    action: 'plugin::content-manager.explorer.create',
     subject: 'foo',
     properties: {
       fields: ['f2'],
@@ -39,7 +39,7 @@ const cmPermissions = [
     conditions: [],
   },
   {
-    action: 'plugins::content-manager.explorer.read',
+    action: 'plugin::content-manager.explorer.read',
     subject: 'foo',
     properties: {
       fields: ['f1'],
@@ -47,11 +47,11 @@ const cmPermissions = [
     conditions: [],
   },
   {
-    action: 'plugins::content-manager.explorer.delete',
+    action: 'plugin::content-manager.explorer.delete',
     subject: 'bar',
   },
   {
-    action: 'plugins::content-manager.explorer.update',
+    action: 'plugin::content-manager.explorer.update',
     subject: 'bar',
     properties: {
       fields: ['f1'],

@@ -1,6 +1,8 @@
 'use strict';
 
-const entityManager = require('../entity-manager');
+const entityManagerLoader = require('../entity-manager');
+
+let entityManager;
 
 describe('Content-Manager', () => {
   const fakeModel = {
@@ -20,6 +22,7 @@ describe('Content-Manager', () => {
         eventHub: { emit: jest.fn() },
         getModel: jest.fn(() => fakeModel),
       };
+      entityManager = entityManagerLoader({ strapi });
     });
 
     afterEach(() => {
@@ -27,7 +30,7 @@ describe('Content-Manager', () => {
     });
 
     test('Publish a content-type', async () => {
-      const uid = 'application::test.test';
+      const uid = 'api::test.test';
       const entity = { id: 1, published_at: null };
       await entityManager.publish(entity, uid);
 
@@ -49,6 +52,7 @@ describe('Content-Manager', () => {
         eventHub: { emit: jest.fn() },
         getModel: jest.fn(() => fakeModel),
       };
+      entityManager = entityManagerLoader({ strapi });
     });
 
     afterEach(() => {
@@ -56,7 +60,7 @@ describe('Content-Manager', () => {
     });
 
     test('Unpublish a content-type', async () => {
-      const uid = 'application::test.test';
+      const uid = 'api::test.test';
       const entity = { id: 1, published_at: new Date() };
       await entityManager.unpublish(entity, uid);
 

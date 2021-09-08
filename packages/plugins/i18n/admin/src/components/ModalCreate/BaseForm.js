@@ -1,103 +1,74 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import { Label } from '@buffetjs/core';
-import { Inputs } from '@buffetjs/custom';
-import Select, { createFilter } from 'react-select';
-import { Col, Row } from 'reactstrap';
+import React, { useCallback } from 'react';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { TextInput } from '@strapi/parts/TextInput';
 import { useIntl } from 'react-intl';
-import { useTheme } from 'styled-components';
-import { BaselineAlignment, selectStyles, DropdownIndicator } from '@strapi/helper-plugin';
 import { useFormikContext } from 'formik';
 import { getTrad } from '../../utils';
+import LocaleSelect from '../LocaleSelect';
 
-const reactSelectLocaleFilter = createFilter({
-  ignoreCase: true,
-  ignoreAccents: true,
-  matchFrom: 'start',
-});
-
-const BaseForm = ({ options, defaultOption }) => {
-  const theme = useTheme();
+const BaseForm = () => {
   const { formatMessage } = useIntl();
-  const { values, handleChange, setFieldValue } = useFormikContext();
+  const { values, handleChange, setFieldValue, errors } = useFormikContext();
 
-  const styles = selectStyles(theme);
+  /**
+   * This is needed because the LocaleSelect component is a memoized component
+   * since it renders ~500 locales and that formik would trigger a re-render on it without
+   * it
+   */
+  const handleLocaleChange = useCallback(
+    nextLocale => {
+      setFieldValue('displayName', nextLocale.displayName);
+      setFieldValue('code', nextLocale.code);
+    },
+    [setFieldValue]
+  );
+
+  /**
+   * This is needed because the LocaleSelect component is a memoized component
+   * since it renders ~500 locales and that formik would trigger a re-render on it without
+   * it
+   */
+  const handleClear = useCallback(() => {
+    setFieldValue('displayName', '');
+    setFieldValue('code', '');
+  }, [setFieldValue]);
 
   return (
-    <Row>
-      <Col>
-        <span id="locale-code">
-          <Label htmlFor="">
-            {formatMessage({
-              id: getTrad('Settings.locales.modal.locales.label'),
-            })}
-          </Label>
-        </span>
-
-        <BaselineAlignment top size="5px" />
-
-        <Select
-          aria-labelledby="locale-code"
-          options={options}
-          defaultValue={defaultOption}
-          filterOption={reactSelectLocaleFilter}
-          onChange={selection => {
-            setFieldValue('displayName', selection.value);
-            setFieldValue('code', selection.label);
-          }}
-          components={{ DropdownIndicator }}
-          styles={{
-            ...styles,
-            control: (base, state) => ({ ...base, ...styles.control(base, state), height: '34px' }),
-            indicatorsContainer: (base, state) => ({
-              ...base,
-              ...styles.indicatorsContainer(base, state),
-              height: '32px',
-            }),
-          }}
+    <Grid gap={4}>
+      <GridItem col={6}>
+        <LocaleSelect
+          error={errors.code}
+          value={values.code}
+          onLocaleChange={handleLocaleChange}
+          onClear={handleClear}
         />
-      </Col>
+      </GridItem>
 
-      <Col>
-        <BaselineAlignment top size="2px" />
-
-        <Inputs
+      <GridItem col={6}>
+        <TextInput
+          name="displayName"
           label={formatMessage({
             id: getTrad('Settings.locales.modal.locales.displayName'),
+            defaultMessage: 'Locale display name',
           })}
-          name="displayName"
-          description={formatMessage({
+          hint={formatMessage({
             id: getTrad('Settings.locales.modal.locales.displayName.description'),
+            defaultMessage: 'Locale will be displayed under that name in the administration panel',
           })}
-          type="text"
+          error={
+            errors.displayName
+              ? formatMessage({
+                  id: getTrad('Settings.locales.modal.locales.displayName.error'),
+                  defaultMessage: 'The locale display name can only be less than 50 characters.',
+                })
+              : undefined
+          }
           value={values.displayName}
           onChange={handleChange}
-          validations={{
-            max: 50,
-          }}
-          translatedErrors={{
-            max: formatMessage({
-              id: getTrad('Settings.locales.modal.locales.displayName.error'),
-            }),
-          }}
         />
-      </Col>
-    </Row>
+      </GridItem>
+    </Grid>
   );
-};
-
-BaseForm.defaultProps = {
-  defaultOption: undefined,
-};
-
-BaseForm.propTypes = {
-  options: PropTypes.arrayOf(
-    PropTypes.exact({ value: PropTypes.string.isRequired, label: PropTypes.string.isRequired })
-  ).isRequired,
-  defaultOption: PropTypes.exact({
-    value: PropTypes.string.isRequired,
-    label: PropTypes.string.isRequired,
-  }),
 };
 
 export default BaseForm;

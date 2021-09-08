@@ -1,16 +1,16 @@
 'use strict';
 
 const createContainer = strapi => {
-  const registerd = new Map();
+  const registered = new Map();
   const resolved = new Map();
 
   return {
     register(name, resolver) {
-      if (registerd.has(name)) {
+      if (registered.has(name)) {
         throw new Error(`Cannot register already registered service ${name}`);
       }
 
-      registerd.set(name, resolver);
+      registered.set(name, resolver);
       return this;
     },
 
@@ -20,8 +20,8 @@ const createContainer = strapi => {
         return resolved.get(name);
       }
 
-      if (registerd.has(name)) {
-        const resolver = registerd.get(name);
+      if (registered.has(name)) {
+        const resolver = registered.get(name);
 
         if (typeof resolver === 'function') {
           resolved.set(name, resolver({ strapi }, args));
@@ -32,7 +32,7 @@ const createContainer = strapi => {
         return resolved.get(name);
       }
 
-      throw new Error(`Could not resovle service ${name}`);
+      throw new Error(`Could not resolve service ${name}`);
     },
 
     // TODO: implement

@@ -5,7 +5,7 @@ class NotNullConstraint extends Error {
     super();
     this.name = 'NotNullConstraint';
     this.message = `Not null constraint violation${column ? `on on column ${column}` : ''}.`;
-    this.stack = null;
+    this.stack = '';
   }
 }
 

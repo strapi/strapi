@@ -9,7 +9,7 @@ describe('ADMIN | LeftMenu | utils', () => {
     it('should return an array filtered and formatted with the correct data', () => {
       const modelsConfigurations = [
         {
-          uid: 'application::address.address',
+          uid: 'api::address.address',
           settings: {
             pageSize: 2,
             defaultSortBy: 'name',
@@ -21,7 +21,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           isDisplayed: true,
           kind: 'collectionType',
-          uid: 'application::address.address',
+          uid: 'api::address.address',
           info: {
             label: 'Addresses',
           },
@@ -29,7 +29,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           isDisplayed: false,
           kind: 'collectionType',
-          uid: 'application::test.test',
+          uid: 'api::test.test',
           info: {
             label: 'Test',
           },
@@ -37,7 +37,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           isDisplayed: true,
           kind: 'singleType',
-          uid: 'application::test1.test1',
+          uid: 'api::test1.test1',
           info: {
             label: 'Test 1',
           },
@@ -46,40 +46,40 @@ describe('ADMIN | LeftMenu | utils', () => {
 
       const expected = [
         {
-          to: '/content-manager/collectionType/application::address.address',
+          to: '/content-manager/collectionType/api::address.address',
           isDisplayed: true,
           search: `page=1&pageSize=2&sort=name:ASC`,
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.create',
-              subject: 'application::address.address',
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'api::address.address',
             },
             {
-              action: 'plugins::content-manager.explorer.read',
-              subject: 'application::address.address',
+              action: 'plugin::content-manager.explorer.read',
+              subject: 'api::address.address',
             },
           ],
           kind: 'collectionType',
           title: 'Addresses',
-          uid: 'application::address.address',
-          name: 'application::address.address',
+          uid: 'api::address.address',
+          name: 'api::address.address',
         },
         {
-          to: '/content-manager/singleType/application::test1.test1',
+          to: '/content-manager/singleType/api::test1.test1',
           isDisplayed: true,
           search: null,
           kind: 'singleType',
           title: 'Test 1',
-          uid: 'application::test1.test1',
-          name: 'application::test1.test1',
+          uid: 'api::test1.test1',
+          name: 'api::test1.test1',
           permissions: [
             {
-              action: 'plugins::content-manager.explorer.create',
-              subject: 'application::test1.test1',
+              action: 'plugin::content-manager.explorer.create',
+              subject: 'api::test1.test1',
             },
             {
-              action: 'plugins::content-manager.explorer.read',
-              subject: 'application::test1.test1',
+              action: 'plugin::content-manager.explorer.read',
+              subject: 'api::test1.test1',
             },
           ],
         },
@@ -95,7 +95,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           isDisplayed: true,
           kind: 'collectionType',
-          uid: 'application::address.address',
+          uid: 'api::address.address',
           info: {
             label: 'Addresses',
           },
@@ -103,7 +103,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           isDisplayed: false,
           kind: 'collectionType',
-          uid: 'application::test.test',
+          uid: 'api::test.test',
           info: {
             label: 'Test',
           },
@@ -111,7 +111,7 @@ describe('ADMIN | LeftMenu | utils', () => {
         {
           isDisplayed: true,
           kind: 'singleType',
-          uid: 'application::test1.test1',
+          uid: 'api::test1.test1',
           info: {
             label: 'Test 1',
           },
@@ -125,17 +125,17 @@ describe('ADMIN | LeftMenu | utils', () => {
             search: null,
             kind: 'collectionType',
             title: 'Addresses',
-            to: '/content-manager/collectionType/application::address.address',
-            uid: 'application::address.address',
-            name: 'application::address.address',
+            to: '/content-manager/collectionType/api::address.address',
+            uid: 'api::address.address',
+            name: 'api::address.address',
             permissions: [
               {
-                action: 'plugins::content-manager.explorer.create',
-                subject: 'application::address.address',
+                action: 'plugin::content-manager.explorer.create',
+                subject: 'api::address.address',
               },
               {
-                action: 'plugins::content-manager.explorer.read',
-                subject: 'application::address.address',
+                action: 'plugin::content-manager.explorer.read',
+                subject: 'api::address.address',
               },
             ],
           },
@@ -146,13 +146,13 @@ describe('ADMIN | LeftMenu | utils', () => {
             kind: 'singleType',
             search: null,
             title: 'Test 1',
-            to: '/content-manager/singleType/application::test1.test1',
-            uid: 'application::test1.test1',
-            name: 'application::test1.test1',
+            to: '/content-manager/singleType/api::test1.test1',
+            uid: 'api::test1.test1',
+            name: 'api::test1.test1',
             permissions: [
               {
-                action: 'plugins::content-manager.explorer.read',
-                subject: 'application::test1.test1',
+                action: 'plugin::content-manager.explorer.read',
+                subject: 'api::test1.test1',
               },
             ],
           },

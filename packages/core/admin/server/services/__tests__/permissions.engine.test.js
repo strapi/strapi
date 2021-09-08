@@ -39,13 +39,13 @@ describe('Permissions Engine', () => {
             action: 'read',
             subject: 'article',
             properties: { fields: ['**'] },
-            conditions: ['plugins::test.isBob'],
+            conditions: ['plugin::test.isBob'],
           },
           {
             action: 'read',
             subject: 'user',
             properties: { fields: ['title'] },
-            conditions: ['plugins::test.isAdmin'],
+            conditions: ['plugin::test.isAdmin'],
           },
         ],
       },
@@ -55,7 +55,7 @@ describe('Permissions Engine', () => {
             action: 'post',
             subject: 'article',
             properties: { fields: ['*'] },
-            conditions: ['plugins::test.isBob'],
+            conditions: ['plugin::test.isBob'],
           },
         ],
       },
@@ -65,7 +65,7 @@ describe('Permissions Engine', () => {
             action: 'read',
             subject: 'user',
             properties: { fields: ['title'] },
-            conditions: ['plugins::test.isContainedIn'],
+            conditions: ['plugin::test.isContainedIn'],
           },
         ],
       },
@@ -286,7 +286,7 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         properties: { fields: ['title'] },
-        conditions: ['plugins::test.isAdmin'],
+        conditions: ['plugin::test.isAdmin'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
@@ -306,7 +306,7 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         properties: { fields: ['title'] },
-        conditions: ['plugins::test.isBob'],
+        conditions: ['plugin::test.isBob'],
       };
       const user = getUser('alice');
       const registerFn = jest.fn();
@@ -321,7 +321,7 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         properties: { fields: ['title'] },
-        conditions: ['plugins::test.isCreatedBy'],
+        conditions: ['plugin::test.isCreatedBy'],
       };
 
       global.strapi.admin.services.permission.actionProvider.get = () => ({
@@ -354,7 +354,7 @@ describe('Permissions Engine', () => {
       action: 'read',
       subject: null,
       properties: {},
-      conditions: ['plugins::test.isCreatedBy'],
+      conditions: ['plugin::test.isCreatedBy'],
     };
 
     const user = getUser('alice');

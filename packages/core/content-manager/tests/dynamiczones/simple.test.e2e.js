@@ -84,9 +84,7 @@ describe('Not required dynamiczone', () => {
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix(
-      '/content-manager/collection-types/application::withdynamiczone.withdynamiczone'
-    );
+    rq.setURLPrefix('/content-manager/collection-types/api::withdynamiczone.withdynamiczone');
   });
 
   afterAll(async () => {

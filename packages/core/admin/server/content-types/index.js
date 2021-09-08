@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = {
-  permission: require('./Permission'),
-  user: require('./User'),
-  role: require('./Role'),
+  permission: { schema: require('./Permission') },
+  user: { schema: require('./User') },
+  role: { schema: require('./Role') },
 };

@@ -93,7 +93,7 @@ describe('Sanitize Entity', () => {
     },
   };
 
-  const models = {
+  const contentTypes = {
     user: userModel,
     article: articleModel,
     userRel: userRelModel,
@@ -103,7 +103,7 @@ describe('Sanitize Entity', () => {
   beforeEach(() => {
     global.strapi = {
       getModel(name) {
-        return models[name];
+        return contentTypes[name];
       },
       config: {
         get: jest.fn,
@@ -156,7 +156,7 @@ describe('Sanitize Entity', () => {
     ];
 
     test.each(tests)(`Test n°%#`, (options, expected) => {
-      const { user: model } = models;
+      const { user: model } = contentTypes;
       expect(sanitizeEntity(input, { ...options, model })).toStrictEqual(expected);
     });
   });
@@ -198,12 +198,12 @@ describe('Sanitize Entity', () => {
       ];
 
       const model = {
-        ...models.user,
+        ...contentTypes.user,
         options: {
-          ...models.user.options,
+          ...contentTypes.user.options,
           privateAttributes: ['firstname'],
         },
-        privateAttributes: [].concat(models.user.privateAttributes, ['firstname'], ['id']),
+        privateAttributes: [].concat(contentTypes.user.privateAttributes, ['firstname'], ['id']),
       };
 
       test.each(tests)(`Test n°%#`, (options, expected) => {
@@ -256,14 +256,14 @@ describe('Sanitize Entity', () => {
     ];
 
     test.each(tests)(`Test n°%#`, (source, options, expected) => {
-      const { userRel: model } = models;
+      const { userRel: model } = contentTypes;
       expect(sanitizeEntity(source, { ...options, model })).toStrictEqual(expected);
     });
   });
 
   describe('With Dynamic Zone', () => {
     test('Dynamic zone null', () => {
-      const { userDz: model } = models;
+      const { userDz: model } = contentTypes;
       const dataSource = { ...inputWithDz, dz: null };
 
       const expected = _.pick(dataSource, ['id', 'firstname', 'lastname', 'dz']);
@@ -272,7 +272,7 @@ describe('Sanitize Entity', () => {
     });
 
     test('Dynamic zone with a basic component', () => {
-      const { userDz: model } = models;
+      const { userDz: model } = contentTypes;
 
       const expected = {
         ..._.pick(inputWithDz, ['id', 'firstname', 'lastname']),
@@ -295,7 +295,7 @@ describe('Sanitize Entity', () => {
     });
 
     test(`It returns the input data as-is if it's not an object or an array`, () => {
-      const { user: model } = models;
+      const { user: model } = contentTypes;
       expect(sanitizeEntity('foobar', { model })).toBe('foobar');
       expect(sanitizeEntity(undefined, { model })).toBeUndefined();
       expect(sanitizeEntity(null, { model })).toBeNull();
@@ -309,7 +309,7 @@ describe('Sanitize Entity', () => {
         _.pick(input, 'id', 'firstname', 'lastname'),
       ];
 
-      const { user: model } = models;
+      const { user: model } = contentTypes;
 
       expect(sanitizeEntity(dataSource, { model })).toStrictEqual(expected);
     });
@@ -318,7 +318,7 @@ describe('Sanitize Entity', () => {
       const dataSource = { ...inputWithRelation, article: null };
       const expected = _.omit(dataSource, ['email', 'password']);
 
-      const { userRel: model } = models;
+      const { userRel: model } = contentTypes;
 
       expect(sanitizeEntity(dataSource, { model })).toStrictEqual(expected);
     });
@@ -332,7 +332,7 @@ describe('Sanitize Entity', () => {
         toJSON: jest.fn(() => null),
       };
 
-      const { user: model } = models;
+      const { user: model } = contentTypes;
 
       expect(sanitizeEntity(dataSource, { model })).toStrictEqual(
         _.omit(input, ['email', 'password'])
@@ -346,7 +346,7 @@ describe('Sanitize Entity', () => {
     test('It should handle custom fields', () => {
       const dataSource = { ...input, foo: 'bar' };
       const expected = _.omit(dataSource, ['email', 'password']);
-      const { user: model } = models;
+      const { user: model } = contentTypes;
 
       expect(sanitizeEntity(dataSource, { model })).toStrictEqual(expected);
     });

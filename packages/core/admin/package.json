@@ -1,6 +1,6 @@
 {
   "name": "@strapi/admin",
-  "version": "3.6.7",
+  "version": "3.6.8",
   "description": "Strapi Admin",
   "repository": {
     "type": "git",
@@ -9,7 +9,7 @@
   "scripts": {
     "prepublishOnly": "node ./scripts/build.js",
     "test": "echo \"no tests yet\"",
-    "develop": "webpack serve --config webpack.config.dev.js --progress profile",
+    "develop": "cross-env NODE_ENV=development webpack serve --config webpack.config.dev.js --progress profile",
     "develop:ce": "STRAPI_DISABLE_EE=true webpack serve --config webpack.config.dev.js --progress profile",
     "analyze:bundle": "ANALYZE_BUNDLE=true webpack --config webpack.config.dev.js",
     "analyze:deps": "ANALYZE_DEPS=true webpack serve --config webpack.config.dev.js --progress profile"
@@ -39,10 +39,10 @@
     "@fortawesome/free-solid-svg-icons": "^5.15.3",
     "@fortawesome/react-fontawesome": "^0.1.14",
     "@strapi/babel-plugin-switch-ee-ce": "1.0.0",
-    "@strapi/helper-plugin": "3.6.7",
-    "@strapi/icons": "0.0.1-alpha.22",
-    "@strapi/parts": "0.0.1-alpha.22",
-    "@strapi/utils": "3.6.7",
+    "@strapi/helper-plugin": "3.6.8",
+    "@strapi/icons": "0.0.1-alpha.23",
+    "@strapi/parts": "0.0.1-alpha.23",
+    "@strapi/utils": "3.6.8",
     "axios": "^0.21.1",
     "babel-loader": "8.2.2",
     "babel-plugin-styled-components": "1.12.0",

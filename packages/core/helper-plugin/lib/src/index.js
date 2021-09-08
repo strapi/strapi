@@ -23,7 +23,6 @@ export { default as HeaderSearch } from './old/components/HeaderSearch';
 export { default as IcoContainer } from './old/components/IcoContainer';
 export { default as InputAddon } from './old/components/InputAddon';
 export { default as EmptyState } from './old/components/EmptyState';
-export { default as Form } from './old/components/Form';
 export * from './old/components/Tabs';
 export * from './old/components/Select';
 
@@ -167,6 +166,7 @@ export { default as to } from './utils/await-to-js';
 
 // NEW UTILS
 export { default as setHexOpacity } from './utils/setHexOpacity';
+export { default as customEllipsis } from './utils/customEllipsis';
 
 // SVGS
 export { default as LayoutIcon } from './old/svgs/Layout';
@@ -190,6 +190,7 @@ export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPa
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';
+export { default as Form } from './components/Form';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';

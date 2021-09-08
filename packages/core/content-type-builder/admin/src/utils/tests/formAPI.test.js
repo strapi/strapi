@@ -17,7 +17,7 @@ describe('formsAPI', () => {
 
       // Act
       const schema = formsAPI.makeValidator.bind(types)(target, initShape, [
-        'application::country.country',
+        'api::country.country',
       ]);
 
       // Assert

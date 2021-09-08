@@ -28,7 +28,7 @@ Object {
       "restrictRelationsTo": null,
       "visible": true,
     },
-    "uid": "application::test-collection-type.test-collection-type",
+    "uid": "api::test-collection-type.test-collection-type",
   },
 }
 `;
@@ -51,7 +51,7 @@ Object {
       "restrictRelationsTo": null,
       "visible": true,
     },
-    "uid": "application::ct-with-dp.ct-with-dp",
+    "uid": "api::ct-with-dp.ct-with-dp",
   },
 }
 `;
@@ -84,7 +84,7 @@ Object {
       "restrictRelationsTo": null,
       "visible": true,
     },
-    "uid": "application::test-single-type.test-single-type",
+    "uid": "api::test-single-type.test-single-type",
   },
 }
 `;

@@ -5,10 +5,13 @@
  */
 
 module.exports = {
-  collectionName: 'strapi_roles',
+  collectionName: 'admin_roles',
   info: {
     name: 'Role',
     description: '',
+    singularName: 'role',
+    pluralName: 'roles',
+    displayName: 'Role',
   },
   options: {},
   pluginOptions: {
@@ -43,14 +46,14 @@ module.exports = {
       type: 'relation',
       relation: 'manyToMany',
       mappedBy: 'roles',
-      target: 'strapi::user',
+      target: 'admin::user',
     },
     permissions: {
       configurable: false,
       type: 'relation',
       relation: 'oneToMany',
       mappedBy: 'role',
-      target: 'strapi::permission',
+      target: 'admin::permission',
     },
   },
 };

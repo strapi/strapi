@@ -2,11 +2,14 @@
 
 const { yup, formatYupErrors } = require('@strapi/utils');
 
-const hasPermissionsSchema = yup.array().of(yup.string());
+const hasPermissionsSchema = yup.object({
+  actions: yup.array().of(yup.string()),
+  hasAtLeastOne: yup.boolean(),
+});
 
-const validateHasPermissionsInput = actions => {
+const validateHasPermissionsInput = options => {
   try {
-    return hasPermissionsSchema.validateSync(actions, { strict: true, abortEarly: true });
+    return hasPermissionsSchema.validateSync(options, { strict: true, abortEarly: true });
   } catch (e) {
     throw new Error(formatYupErrors(e));
   }
