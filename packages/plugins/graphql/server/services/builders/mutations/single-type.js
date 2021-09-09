@@ -1,13 +1,16 @@
 'use strict';
 
 const { extendType } = require('nexus');
+const { omit, isNil } = require('lodash/fp');
+const { getNonWritableAttributes } = require('@strapi/utils').contentTypes;
 
-const { actionExists } = require('../../old/utils');
-const { toSingular } = require('../../old/naming');
-const { buildMutation } = require('../../old/resolvers-builder');
+const sanitizeInput = (contentType, data) => omit(getNonWritableAttributes(contentType), data);
 
 module.exports = ({ strapi }) => {
-  const { naming } = strapi.plugin('graphql').service('utils');
+  const { service: getService } = strapi.plugin('graphql');
+
+  const { naming } = getService('utils');
+  const { transformArgs } = getService('builders').utils;
 
   const {
     getUpdateMutationTypeName,
@@ -17,19 +20,10 @@ module.exports = ({ strapi }) => {
   } = naming;
 
   const addUpdateMutation = (t, contentType) => {
-    const { uid, modelName } = contentType;
+    const { uid } = contentType;
 
     const updateMutationName = getUpdateMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
-
-    const resolverOptions = { resolver: `${uid}.update` };
-
-    // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists(resolverOptions)) {
-      return;
-    }
-
-    const resolver = buildMutation(toSingular(modelName), resolverOptions);
 
     t.field(updateMutationName, {
       type: responseTypeName,
@@ -39,42 +33,59 @@ module.exports = ({ strapi }) => {
         data: getContentTypeInputName(contentType),
       },
 
-      async resolve(parent, args, context, info) {
-        // const query = mappers.graphQLFiltersToStrapiQuery(args.params, contentType);
+      async resolve(parent, args) {
+        const transformedArgs = transformArgs(args, { contentType });
 
-        const res = await resolver(parent, args, context, info);
+        // Sanitize input data
+        Object.assign(transformedArgs, { data: sanitizeInput(contentType, transformedArgs.data) });
 
-        return { data: { id: res.id, attributes: res } };
+        const { create, update } = getService('builders')
+          .get('content-api')
+          .buildMutationsResolvers({ contentType });
+
+        const findParams = omit(['data', 'files'], transformedArgs);
+        const entity = await strapi.entityService.find(uid, { params: findParams });
+
+        // Create or update
+        const value = isNil(entity)
+          ? create(parent, transformedArgs)
+          : update(uid, { id: entity.id, data: transformedArgs.data });
+
+        return { value: value, info: { args: transformedArgs, resourceUID: uid } };
       },
     });
   };
 
   const addDeleteMutation = (t, contentType) => {
-    const { uid, modelName } = contentType;
+    const { uid } = contentType;
 
     const deleteMutationName = getDeleteMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
-
-    const resolverOptions = { resolver: `${uid}.delete` };
-
-    // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists(resolverOptions)) {
-      return;
-    }
-
-    const resolver = buildMutation(toSingular(modelName), resolverOptions);
 
     t.field(deleteMutationName, {
       type: responseTypeName,
 
       args: {},
 
-      async resolve(parent, args, context, info) {
-        // const query = mappers.graphQLFiltersToStrapiQuery(args.params, contentType);
+      async resolve(parent, args) {
+        const transformedArgs = transformArgs(args, { contentType });
 
-        const res = await resolver(parent, args, context, info);
+        Object.assign(transformedArgs, { data: sanitizeInput(contentType, transformedArgs.data) });
 
-        return { data: { id: res.id, attributes: res } };
+        const { delete: deleteResolver } = getService('builders')
+          .get('content-api')
+          .buildMutationsResolvers({ contentType });
+
+        const params = omit(['data', 'files'], transformedArgs);
+        const entity = await strapi.entityService.find(uid, { params });
+
+        if (!entity) {
+          throw new Error('Entity not found');
+        }
+
+        const value = await deleteResolver(parent, { id: entity.id, params });
+
+        return { value, info: { args: transformedArgs, resourceUID: uid } };
       },
     });
   };
