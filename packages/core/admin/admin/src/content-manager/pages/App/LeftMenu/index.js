@@ -78,6 +78,10 @@ const LeftMenu = () => {
         value={search}
         onChange={handleChangeSearch}
         onClear={handleClear}
+        searchLabel={formatMessage({
+          id: 'content-manager.components.LeftMenu.Search.label',
+          defaultMessage: 'Search for a content type',
+        })}
       />
       <SubNavSections>
         {menu.map(section => {

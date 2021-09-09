@@ -465,6 +465,7 @@ describe('Content manager | App | main', () => {
               <span>
                 <button
                   aria-disabled="false"
+                  aria-labelledby="tooltip-2"
                   class="c5 c6"
                   tabindex="0"
                   type="button"

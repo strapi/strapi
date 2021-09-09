@@ -428,6 +428,7 @@
   "content-manager.components.LimitSelect.itemsPerPage": "Items per page",
   "content-manager.components.NotAllowedInput.text": "No permissions to see this field",
   "content-manager.components.Search.placeholder": "Search for an entry...",
+  "content-manager.components.LeftMenu.Search.label": "Search for a content type",
   "content-manager.components.Select.draft-info-title": "State: Draft",
   "content-manager.components.Select.publish-info-title": "State: Published",
   "content-manager.components.SettingsViewWrapper.pluginHeader.description.edit-settings": "Customize how the edit view will look like.",
