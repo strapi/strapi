@@ -4,7 +4,7 @@ const _ = require('lodash');
 const { pickBy, has } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
-const contentTypesRegistry = strapi => {
+const servicesRegistry = strapi => {
   const services = {};
   const instantiatedServices = {};
 
@@ -41,6 +41,8 @@ const contentTypesRegistry = strapi => {
         }
         services[uid] = service;
       }
+
+      return this;
     },
     extend(serviceUID, extendFn) {
       const currentService = this.get(serviceUID);
@@ -53,4 +55,4 @@ const contentTypesRegistry = strapi => {
   };
 };
 
-module.exports = contentTypesRegistry;
+module.exports = servicesRegistry;
