@@ -175,7 +175,7 @@ function List({
           <table>
             <thead>
               <tr>
-                <th colSpan="2">
+                <th>
                   <TableLabel textColor="neutral600">Name</TableLabel>
                 </th>
                 <th colSpan="2">

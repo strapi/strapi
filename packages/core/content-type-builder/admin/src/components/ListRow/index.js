@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
-import { IconButton, Stack, Text } from '@strapi/parts';
+import { IconButton, Stack, Text, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
@@ -252,7 +252,7 @@ function ListRow({
       </td>
       <td>
         {isInDevelopmentMode && (
-          <>
+          <Row justifyContent="flex-end">
             {configurable ? (
               <Stack horizontal size={1}>
                 {!isMorph && (
@@ -276,7 +276,7 @@ function ListRow({
               // ! TODO ASK DESIGN TO PUT LOCK ICON INSIDE DS
               <FontAwesomeIcon icon="lock" />
             )}
-          </>
+          </Row>
         )}
       </td>
     </BoxWrapper>
