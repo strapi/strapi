@@ -45,15 +45,6 @@ const SettingsPage = lazy(() =>
   import(/* webpackChunkName: "Admin_settingsPage" */ '../SettingsPage')
 );
 
-const CTB = lazy(() =>
-  import(
-    /* webpackChunkName: "content-type-builder" */ '@strapi/plugin-content-type-builder/admin/src/pages/App'
-  )
-);
-const Upload = lazy(() =>
-  import(/* webpackChunkName: "upload" */ '@strapi/plugin-upload/admin/src/pages/App')
-);
-
 // Simple hook easier for testing
 const useTrackUsage = () => {
   const { trackUsage } = useTracking();
@@ -100,8 +91,6 @@ const Admin = () => {
                 <Route path="/me" component={ProfilePage} exact />
 
                 <Route path="/content-manager" component={CM} />
-                <Route path="/plugins/content-type-builder" component={CTB} />
-                <Route path="/plugins/upload" component={Upload} />
                 {routes}
                 <Route path="/settings/:settingId" component={SettingsPage} />
                 <Route path="/settings" component={SettingsPage} exact />
