@@ -301,8 +301,7 @@ describe('Admin | containers | ListView', () => {
     });
 
     fireEvent.click(container.querySelector('#delete-1'));
-    await waitFor(async () => {
-      expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
-    });
+
+    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 });
