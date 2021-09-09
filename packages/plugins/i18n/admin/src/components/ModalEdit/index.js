@@ -38,77 +38,75 @@ const ModalEdit = ({ locale, onClose }) => {
         onSubmit={handleSubmit}
         validationSchema={localeFormSchema}
       >
-        {({ handleSubmit }) => (
-          <Form onSubmit={handleSubmit}>
-            <ModalHeader>
-              <ButtonText textColor="neutral800" as="h2" id="edit-locale-title">
-                {formatMessage({
-                  id: getTrad('Settings.list.actions.edit'),
-                  defaultMessage: 'Edit a locale',
-                })}
-              </ButtonText>
-            </ModalHeader>
-            <ModalBody>
-              <TabGroup
-                label={formatMessage({
-                  id: getTrad('Settings.locales.modal.title'),
-                  defaultMessage: 'Configurations',
-                })}
-                id="tabs"
-                variant="simple"
-              >
-                <Row justifyContent="space-between">
-                  <H2>
+        <Form>
+          <ModalHeader>
+            <ButtonText textColor="neutral800" as="h2" id="edit-locale-title">
+              {formatMessage({
+                id: getTrad('Settings.list.actions.edit'),
+                defaultMessage: 'Edit a locale',
+              })}
+            </ButtonText>
+          </ModalHeader>
+          <ModalBody>
+            <TabGroup
+              label={formatMessage({
+                id: getTrad('Settings.locales.modal.title'),
+                defaultMessage: 'Configurations',
+              })}
+              id="tabs"
+              variant="simple"
+            >
+              <Row justifyContent="space-between">
+                <H2>
+                  {formatMessage({
+                    id: getTrad('Settings.locales.modal.title'),
+                    defaultMessage: 'Configurations',
+                  })}
+                </H2>
+                <Tabs>
+                  <Tab>
                     {formatMessage({
-                      id: getTrad('Settings.locales.modal.title'),
-                      defaultMessage: 'Configurations',
+                      id: getTrad('Settings.locales.modal.base'),
+                      defaultMessage: 'Base settings',
                     })}
-                  </H2>
-                  <Tabs>
-                    <Tab>
-                      {formatMessage({
-                        id: getTrad('Settings.locales.modal.base'),
-                        defaultMessage: 'Base settings',
-                      })}
-                    </Tab>
-                    <Tab>
-                      {formatMessage({
-                        id: getTrad('Settings.locales.modal.advanced'),
-                        defaultMessage: 'Advanced settings',
-                      })}
-                    </Tab>
-                  </Tabs>
-                </Row>
+                  </Tab>
+                  <Tab>
+                    {formatMessage({
+                      id: getTrad('Settings.locales.modal.advanced'),
+                      defaultMessage: 'Advanced settings',
+                    })}
+                  </Tab>
+                </Tabs>
+              </Row>
 
-                <Divider />
+              <Divider />
 
-                <Box paddingTop={7} paddingBottom={7}>
-                  <TabPanels>
-                    <TabPanel>
-                      <BaseForm locale={locale} />
-                    </TabPanel>
-                    <TabPanel>
-                      <AdvancedForm isDefaultLocale={Boolean(locale && locale.isDefault)} />
-                    </TabPanel>
-                  </TabPanels>
-                </Box>
-              </TabGroup>
-            </ModalBody>
+              <Box paddingTop={7} paddingBottom={7}>
+                <TabPanels>
+                  <TabPanel>
+                    <BaseForm locale={locale} />
+                  </TabPanel>
+                  <TabPanel>
+                    <AdvancedForm isDefaultLocale={Boolean(locale && locale.isDefault)} />
+                  </TabPanel>
+                </TabPanels>
+              </Box>
+            </TabGroup>
+          </ModalBody>
 
-            <ModalFooter
-              startActions={
-                <Button variant="tertiary" onClick={onClose}>
-                  {formatMessage({ id: 'app.components.Button.cancel' })}
-                </Button>
-              }
-              endActions={
-                <Button type="submit" startIcon={<CheckIcon />} disabled={isEditing}>
-                  {formatMessage({ id: 'app.components.Button.save' })}
-                </Button>
-              }
-            />
-          </Form>
-        )}
+          <ModalFooter
+            startActions={
+              <Button variant="tertiary" onClick={onClose}>
+                {formatMessage({ id: 'app.components.Button.cancel' })}
+              </Button>
+            }
+            endActions={
+              <Button type="submit" startIcon={<CheckIcon />} disabled={isEditing}>
+                {formatMessage({ id: 'app.components.Button.save' })}
+              </Button>
+            }
+          />
+        </Form>
       </Formik>
     </ModalLayout>
   );

@@ -51,69 +51,67 @@ const ModalCreate = ({ onClose }) => {
         validationSchema={localeFormSchema}
         validateOnChange={false}
       >
-        {({ handleSubmit }) => (
-          <Form onSubmit={handleSubmit}>
-            <ModalHeader>
-              <ButtonText textColor="neutral800" as="h2" id="add-locale-title">
-                {formatMessage({ id: getTrad('Settings.list.actions.add') })}
-              </ButtonText>
-            </ModalHeader>
-            <ModalBody>
-              <TabGroup
-                label={formatMessage({
-                  id: getTrad('Settings.locales.modal.title'),
-                })}
-                id="tabs"
-                variant="simple"
-              >
-                <Row justifyContent="space-between">
-                  <H2>
+        <Form>
+          <ModalHeader>
+            <ButtonText textColor="neutral800" as="h2" id="add-locale-title">
+              {formatMessage({ id: getTrad('Settings.list.actions.add') })}
+            </ButtonText>
+          </ModalHeader>
+          <ModalBody>
+            <TabGroup
+              label={formatMessage({
+                id: getTrad('Settings.locales.modal.title'),
+              })}
+              id="tabs"
+              variant="simple"
+            >
+              <Row justifyContent="space-between">
+                <H2>
+                  {formatMessage({
+                    id: getTrad('Settings.locales.modal.title'),
+                  })}
+                </H2>
+                <Tabs>
+                  <Tab>
                     {formatMessage({
-                      id: getTrad('Settings.locales.modal.title'),
+                      id: getTrad('Settings.locales.modal.base'),
                     })}
-                  </H2>
-                  <Tabs>
-                    <Tab>
-                      {formatMessage({
-                        id: getTrad('Settings.locales.modal.base'),
-                      })}
-                    </Tab>
-                    <Tab>
-                      {formatMessage({
-                        id: getTrad('Settings.locales.modal.advanced'),
-                      })}
-                    </Tab>
-                  </Tabs>
-                </Row>
+                  </Tab>
+                  <Tab>
+                    {formatMessage({
+                      id: getTrad('Settings.locales.modal.advanced'),
+                    })}
+                  </Tab>
+                </Tabs>
+              </Row>
 
-                <Divider />
+              <Divider />
 
-                <Box paddingTop={7} paddingBottom={7}>
-                  <TabPanels>
-                    <TabPanel>
-                      <BaseForm />
-                    </TabPanel>
-                    <TabPanel>
-                      <AdvancedForm />
-                    </TabPanel>
-                  </TabPanels>
-                </Box>
-              </TabGroup>
-            </ModalBody>
-            <ModalFooter
-              startActions={
-                <Button variant="tertiary" onClick={onClose}>
-                  {formatMessage({ id: 'app.components.Button.cancel' })}
-                </Button>
-              }
-              endActions={
-                <Button type="submit" startIcon={<CheckIcon />} disabled={isAdding}>
-                  {formatMessage({ id: 'app.components.Button.save' })}
-                </Button>
-              }
-            />
-          </Form>
-        )}
+              <Box paddingTop={7} paddingBottom={7}>
+                <TabPanels>
+                  <TabPanel>
+                    <BaseForm />
+                  </TabPanel>
+                  <TabPanel>
+                    <AdvancedForm />
+                  </TabPanel>
+                </TabPanels>
+              </Box>
+            </TabGroup>
+          </ModalBody>
+          <ModalFooter
+            startActions={
+              <Button variant="tertiary" onClick={onClose}>
+                {formatMessage({ id: 'app.components.Button.cancel' })}
+              </Button>
+            }
+            endActions={
+              <Button type="submit" startIcon={<CheckIcon />} disabled={isAdding}>
+                {formatMessage({ id: 'app.components.Button.save' })}
+              </Button>
+            }
+          />
+        </Form>
       </Formik>
     </ModalLayout>
   );

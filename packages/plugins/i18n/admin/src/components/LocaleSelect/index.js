@@ -60,14 +60,13 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
           onLocaleChange({ code: selectedLocale.value, displayName: selectedLocale.label });
         }
       }}
-      {...props}
     >
       {isLoading
         ? null
         : options.map(option => (
-            <Option value={option.value} key={option.value}>
-              {option.label}
-            </Option>
+          <Option value={option.value} key={option.value}>
+            {option.label}
+          </Option>
           ))}
     </Select>
   );
