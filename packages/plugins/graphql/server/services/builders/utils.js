@@ -34,8 +34,6 @@ module.exports = ({ strapi }) => {
 
       // Collection Types
       else if (kind === 'collectionType') {
-        // hasDraftAndPublish
-
         if (!multiple) {
           return { id: 'ID' };
         }
@@ -55,7 +53,7 @@ module.exports = ({ strapi }) => {
 
       // Single Types
       else if (kind === 'singleType') {
-        const params = { id: 'ID' };
+        const params = {};
 
         if (hasDraftAndPublish(contentType)) {
           Object.assign(params, { publicationState: args.PublicationStateArg });
