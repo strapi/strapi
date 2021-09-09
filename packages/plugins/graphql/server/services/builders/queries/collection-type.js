@@ -2,8 +2,6 @@
 
 const { extendType } = require('nexus');
 
-const { actionExists } = require('../../old/utils');
-
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
 
@@ -69,11 +67,6 @@ module.exports = ({ strapi }) => {
     const findQueryName = getFindQueryName(contentType);
     const responseCollectionTypeName = getEntityResponseCollectionName(contentType);
 
-    // If the action doesn't exist, return early and don't add the query
-    if (!actionExists({ resolver: `${uid}.find` })) {
-      return;
-    }
-
     t.field(findQueryName, {
       type: responseCollectionTypeName,
 
@@ -86,7 +79,7 @@ module.exports = ({ strapi }) => {
           .get('content-api')
           .buildQueriesResolvers({ contentType });
 
-        const nodes = find(parent, transformedArgs);
+        const nodes = await find(parent, transformedArgs);
 
         return { nodes, info: { args: transformedArgs, resourceUID: uid } };
       },
