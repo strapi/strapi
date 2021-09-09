@@ -20,7 +20,7 @@ const SmallLoader = styled(Loader)`
  * onClear props to prevent the Select from re-rendering N times when typing on a specific
  * key in a formik form
  */
-const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear, ...props }) => {
+const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
   const { formatMessage } = useIntl();
   const { defaultLocales, isLoading } = useDefaultLocales();
   const { locales } = useLocales();
@@ -65,9 +65,9 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear, ...pro
       {isLoading
         ? null
         : options.map(option => (
-          <Option value={option.value} key={option.value}>
-            {option.label}
-          </Option>
+            <Option value={option.value} key={option.value}>
+              {option.label}
+            </Option>
           ))}
     </Select>
   );
