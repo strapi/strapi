@@ -9,7 +9,6 @@ import List from '../../components/List';
 import ListRow from '../../components/ListRow';
 import ListViewContext from '../../contexts/ListViewContext';
 import useDataManager from '../../hooks/useDataManager';
-import pluginId from '../../pluginId';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
@@ -151,7 +150,7 @@ const ListView = () => {
     return (
       description ||
       formatMessage({
-        id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        id: getTrad('modelPage.contentHeader.emptyDescription.description'),
       })
     );
   };
@@ -283,7 +282,7 @@ const ListView = () => {
                     handleClickAddField(forTarget, targetUid, headerDisplayObject);
                   }}
                 >
-                  {formatMessage({ id: `${pluginId}.button.attributes.add.another` })}
+                  {formatMessage({ id: getTrad('button.attributes.add.another') })}
                 </Button>
               </Stack>
             </Row>

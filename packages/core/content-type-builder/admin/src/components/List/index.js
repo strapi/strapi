@@ -8,17 +8,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
-import { ListButton, useTracking } from '@strapi/helper-plugin';
-import { TableLabel } from '@strapi/parts';
-import { Button } from '@buffetjs/core';
-import { Plus } from '@buffetjs/icons';
+import { useTracking } from '@strapi/helper-plugin';
+import { TableLabel, TFooter, Box, TextButton } from '@strapi/parts';
+import { AddIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
-import pluginId from '../../pluginId';
 import useListView from '../../hooks/useListView';
 import useDataManager from '../../hooks/useDataManager';
 import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import BoxWrapper from './BoxWrapper';
+import getTrad from '../../utils/getTrad';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -160,26 +159,6 @@ function List({
     );
   };
 
-  /* eslint-disable indent */
-  const addButtonProps = {
-    icon: !isSub ? <Plus fill="#007eff" width="11px" height="11px" /> : false,
-    color: 'primary',
-    label: isInDevelopmentMode
-      ? formatMessage({
-          id: !isSub
-            ? `${pluginId}.form.button.add.field.to.${
-                modifiedData.contentType
-                  ? modifiedData.contentType.schema.kind
-                  : editTarget || 'collectionType'
-              }`
-            : `${pluginId}.form.button.add.field.to.component`,
-          defaultMessage: 'Add another field',
-        })
-      : null,
-    onClick: onClickAddField,
-  };
-  /* eslint-enable indent */
-
   if (!targetUid) {
     return null;
   }
@@ -191,85 +170,93 @@ function List({
         background="neutral0"
         shadow="filterShadow"
         hasRadius
-        paddingLeft={6}
-        paddingRight={6}
       >
-        <table>
-          <thead>
-            <tr>
-              <th colSpan="2">
-                <TableLabel textColor="neutral600">Name</TableLabel>
-              </th>
-              <th colSpan="2">
-                <TableLabel textColor="neutral600">Type</TableLabel>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(item => {
-              const { type } = item;
-              const CustomRow = customRowComponent;
+        <Box paddingLeft={6} paddingRight={6}>
+          <table>
+            <thead>
+              <tr>
+                <th colSpan="2">
+                  <TableLabel textColor="neutral600">Name</TableLabel>
+                </th>
+                <th colSpan="2">
+                  <TableLabel textColor="neutral600">Type</TableLabel>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map(item => {
+                const { type } = item;
+                const CustomRow = customRowComponent;
 
-              return (
-                <React.Fragment key={item.name}>
-                  <CustomRow
-                    {...item}
-                    dzName={dzName}
-                    isNestedInDZComponent={isNestedInDZComponent}
-                    targetUid={targetUid}
-                    mainTypeName={mainTypeName}
-                    editTarget={editTarget}
-                    firstLoopComponentName={firstLoopComponentName}
-                    firstLoopComponentUid={firstLoopComponentUid}
-                    isFromDynamicZone={isFromDynamicZone}
-                    secondLoopComponentName={secondLoopComponentName}
-                    secondLoopComponentUid={secondLoopComponentUid}
-                  />
-
-                  {type === 'component' && (
-                    <ComponentList
+                return (
+                  <React.Fragment key={item.name}>
+                    <CustomRow
                       {...item}
-                      customRowComponent={customRowComponent}
-                      targetUid={targetUid}
                       dzName={dzName}
-                      isNestedInDZComponent={isFromDynamicZone}
+                      isNestedInDZComponent={isNestedInDZComponent}
+                      targetUid={targetUid}
                       mainTypeName={mainTypeName}
                       editTarget={editTarget}
                       firstLoopComponentName={firstLoopComponentName}
                       firstLoopComponentUid={firstLoopComponentUid}
+                      isFromDynamicZone={isFromDynamicZone}
+                      secondLoopComponentName={secondLoopComponentName}
+                      secondLoopComponentUid={secondLoopComponentUid}
                     />
-                  )}
 
-                  {type === 'dynamiczone' && (
-                    <DynamicZoneList
-                      {...item}
-                      customRowComponent={customRowComponent}
-                      addComponent={addComponentToDZ}
-                      targetUid={targetUid}
-                      mainTypeName={mainTypeName}
-                    />
-                  )}
-                </React.Fragment>
-              );
-            })}
-          </tbody>
-        </table>
+                    {type === 'component' && (
+                      <ComponentList
+                        {...item}
+                        customRowComponent={customRowComponent}
+                        targetUid={targetUid}
+                        dzName={dzName}
+                        isNestedInDZComponent={isFromDynamicZone}
+                        mainTypeName={mainTypeName}
+                        editTarget={editTarget}
+                        firstLoopComponentName={firstLoopComponentName}
+                        firstLoopComponentUid={firstLoopComponentUid}
+                      />
+                    )}
+
+                    {type === 'dynamiczone' && (
+                      <DynamicZoneList
+                        {...item}
+                        customRowComponent={customRowComponent}
+                        addComponent={addComponentToDZ}
+                        targetUid={targetUid}
+                        mainTypeName={mainTypeName}
+                      />
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </tbody>
+          </table>
+        </Box>
+
         {isMain && isInDevelopmentMode && (
-          <ListButton>
-            <Button {...addButtonProps} />
-          </ListButton>
+          <TFooter icon={<AddIcon />} onClick={onClickAddField}>
+            {formatMessage({
+              id: getTrad(
+                `form.button.add.field.to.${
+                  modifiedData.contentType
+                    ? modifiedData.contentType.schema.kind
+                    : editTarget || 'collectionType'
+                }`
+              ),
+              defaultMessage: 'Add another field',
+            })}
+          </TFooter>
         )}
-        {!isMain && (
-          <ListButton>
-            <Button {...addButtonProps} />
-          </ListButton>
+        {isSub && isInDevelopmentMode && (
+          <TextButton startIcon={<AddIcon />} onClick={onClickAddField}>
+            {formatMessage({
+              id: getTrad(`form.button.add.field.to.component`),
+              defaultMessage: 'Add another field',
+            })}
+          </TextButton>
         )}
       </BoxWrapper>
-      {isSub && (
-        <div className="plus-icon" onClick={onClickAddField}>
-          {isInDevelopmentMode && <Plus fill={isFromDynamicZone ? '#007EFF' : '#b4b6ba'} />}
-        </div>
-      )}
     </>
   );
 }

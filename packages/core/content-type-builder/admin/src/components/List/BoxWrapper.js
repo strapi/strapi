@@ -18,9 +18,11 @@ const BoxWrapper = styled(Box)`
     border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
 
-  tr {
+  tr:not(:last-child) {
     border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+  }
 
+  tr {
     & td,
     & th {
       padding: ${({ theme }) => theme.spaces[4]};

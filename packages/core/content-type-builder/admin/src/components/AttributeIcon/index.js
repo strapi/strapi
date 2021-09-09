@@ -6,7 +6,7 @@ import {
   Component,
   CT,
   Date,
-  Bool,
+  Boolean,
   DynamicZone,
   Email,
   Enumeration,
@@ -24,7 +24,7 @@ import { pxToRem } from '@strapi/helper-plugin';
 
 const types = {
   biginteger: Numbers,
-  boolean: Bool,
+  boolean: Boolean,
   component: Component,
   contentType: CT,
   date: Date,
