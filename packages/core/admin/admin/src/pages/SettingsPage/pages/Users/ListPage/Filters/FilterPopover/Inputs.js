@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Select, Field, Stack, FieldInput, Option } from '@strapi/parts';
+import { Select, Field, FieldInput, Option } from '@strapi/parts';
 
 const Inputs = ({ onChange, type, value }) => {
   if (type === 'boolean') {
@@ -16,9 +16,7 @@ const Inputs = ({ onChange, type, value }) => {
 
   return (
     <Field>
-      <Stack>
-        <FieldInput onChange={({ target: { value } }) => onChange(value)} value={value} size="S" />
-      </Stack>
+      <FieldInput onChange={({ target: { value } }) => onChange(value)} value={value} size="S" />
     </Field>
   );
 };

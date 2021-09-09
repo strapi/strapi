@@ -49,10 +49,10 @@ const Providers = () => {
         <LayoutContent>
           <Column>
             <Logo />
-            <Box paddingTop="6" paddingBottom="1">
+            <Box paddingTop={6} paddingBottom={1}>
               <H1 id="welcome">{formatMessage({ id: 'Auth.form.welcome.title' })}</H1>
             </Box>
-            <Box paddingBottom="7">
+            <Box paddingBottom={7}>
               <Subtitle textColor="neutral600">
                 {formatMessage({ id: 'Auth.login.sso.subtitle' })}
               </Subtitle>

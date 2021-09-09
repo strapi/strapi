@@ -449,6 +449,7 @@ describe('Content manager | App | main', () => {
         class="c0"
       >
         <nav
+          aria-label="label"
           class="c1"
         >
           <div

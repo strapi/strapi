@@ -16,7 +16,7 @@ const ForgotPasswordSuccess = () => {
         <LayoutContent>
           <Column>
             <Logo />
-            <Box paddingTop="6" paddingBottom="7">
+            <Box paddingTop={6} paddingBottom={7}>
               <H1 id="email-sent">
                 {formatMessage({
                   id: 'app.containers.AuthPage.ForgotPasswordSuccess.title',

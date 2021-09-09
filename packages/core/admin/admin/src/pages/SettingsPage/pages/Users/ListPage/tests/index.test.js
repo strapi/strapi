@@ -1172,7 +1172,9 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             >
                               <div
                                 class="c35"
-                              />
+                              >
+                                Loading content...
+                              </div>
                               <img
                                 aria-hidden="true"
                                 class="c41"

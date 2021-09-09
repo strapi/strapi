@@ -71,7 +71,7 @@ const LeftMenu = () => {
   });
 
   return (
-    <SubNav arialLabel={label}>
+    <SubNav ariaLabel={label}>
       <SubNavHeader
         label={label}
         searchable

@@ -4,6 +4,7 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import omit from 'lodash/omit';
 import {
   CustomContentLayout,
   Form,
@@ -73,7 +74,7 @@ const EditPage = ({ canUpdate }) => {
     lockApp();
 
     try {
-      const data = await putUser(id, body);
+      const data = await putUser(id, omit(body, 'confirmPassword'));
 
       const userInfos = auth.getUserInfo();
 
@@ -85,6 +86,7 @@ const EditPage = ({ canUpdate }) => {
 
         setUserDisplayName(userDisplayName);
       }
+      actions.setValues(pick(body, fieldsToPick));
     } catch (err) {
       // FIXME when API errors are ready
       const errors = formatAPIErrors(err.response.data);

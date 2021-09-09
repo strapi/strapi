@@ -1,8 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
+import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
 import {
   MainNav,
@@ -24,6 +23,7 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { push } = useHistory();
   const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
   const { userDisplayName } = useAppInfos();
+  const { formatMessage } = useIntl();
 
   return (
     <MainNav condensed={condensed}>
@@ -37,14 +37,14 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
 
       <NavSections>
         <NavLink to="/content-manager" icon={<ContentIcon />}>
-          <FormattedMessage id="content-manager.plugin.name" defaultMessage="Content manager" />
+          {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
         </NavLink>
 
         {pluginsSectionLinks.length > 0 ? (
           <NavSection label="Plugins">
             {pluginsSectionLinks.map(link => (
               <NavLink to={link.to} key={link.to} icon={<FontAwesomeIcon icon={link.icon} />}>
-                <FormattedMessage {...link.intlLabel} />
+                {formatMessage(link.intlLabel)}
               </NavLink>
             ))}
           </NavSection>
@@ -54,12 +54,14 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
           <NavSection label="General">
             {generalSectionLinks.map(link => (
               <NavLink
-                badgeContent={link.notificationsCount > 0 && link.notificationsCount}
+                badgeContent={
+                  (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
+                }
                 to={link.to}
                 key={link.to}
                 icon={<FontAwesomeIcon icon={link.icon} />}
               >
-                <FormattedMessage {...link.intlLabel} />
+                {formatMessage(link.intlLabel)}
               </NavLink>
             ))}
             {/* This is temporary */}
@@ -81,11 +83,15 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
       </NavUser>
 
       <NavCondense onClick={() => setCondensed(s => !s)}>
-        {condensed ? (
-          <FormattedMessage id="app.components.LeftMenu.expand" />
-        ) : (
-          <FormattedMessage id="app.components.LeftMenu.collapse" />
-        )}
+        {condensed
+          ? formatMessage({
+              id: 'app.components.LeftMenu.expand',
+              defaultMessage: 'Expand the navbar',
+            })
+          : formatMessage({
+              id: 'app.components.LeftMenu.collapse',
+              defaultMessage: 'Collapse the navbar',
+            })}
       </NavCondense>
     </MainNav>
   );

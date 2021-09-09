@@ -168,7 +168,7 @@ export const SettingsPage = () => {
                       </H3>
                     </Row>
                     <Grid gap={6}>
-                      <GridItem col="6" s="12">
+                      <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="responsiveDimensions"
                           data-testid="responsiveDimensions"
@@ -198,7 +198,7 @@ export const SettingsPage = () => {
                           }}
                         />
                       </GridItem>
-                      <GridItem col="6" s="12">
+                      <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="sizeOptimization"
                           data-testid="sizeOptimization"
@@ -223,7 +223,7 @@ export const SettingsPage = () => {
                           }}
                         />
                       </GridItem>
-                      <GridItem col="6" s="12">
+                      <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="autoOrientation"
                           data-testid="autoOrientation"

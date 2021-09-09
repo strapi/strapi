@@ -25,7 +25,7 @@ const Oops = () => {
         <LayoutContent>
           <Column>
             <Logo />
-            <Box paddingTop="6" paddingBottom="7">
+            <Box paddingTop={6} paddingBottom={7}>
               <H1 id="email-sent">
                 {formatMessage({ id: 'Auth.components.Oops.title', defaultMessage: 'Oops...' })}
               </H1>
