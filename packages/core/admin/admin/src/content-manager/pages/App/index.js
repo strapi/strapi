@@ -12,6 +12,7 @@ import ModelsContext from '../../contexts/ModelsContext';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
 import ComponentSettingsView from '../ComponentSetttingsView';
 import NoContentType from '../NoContentType';
+import NoPermissions from '../NoPermissions';
 import SingleTypeRecursivePath from '../SingleTypeRecursivePath';
 import LeftMenu from './LeftMenu';
 import useModels from './useModels';
@@ -78,11 +79,9 @@ const App = () => {
           />
           <Route path="/content-manager/singleType/:slug" component={SingleTypeRecursivePath} />
 
-          {/* These pages must be defined */}
-          <Route
-            path="/content-manager/403"
-            render={() => <div>TBD No rights to see the content types</div>}
-          />
+          <Route path="/content-manager/403">
+            <NoPermissions />
+          </Route>
           <Route path="/content-manager/no-content-types">
             <NoContentType />
           </Route>
