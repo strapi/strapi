@@ -6,7 +6,6 @@ const pickCreateArgs = pick(['params', 'data', 'files']);
 
 module.exports = ({ strapi }) => ({
   buildMutationsResolvers: ({ contentType }) => {
-    // todo[v4]: handle single type here?
     const { uid } = contentType;
 
     return {
