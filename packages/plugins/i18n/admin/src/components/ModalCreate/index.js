@@ -61,6 +61,7 @@ const ModalCreate = ({ onClose }) => {
             <TabGroup
               label={formatMessage({
                 id: getTrad('Settings.locales.modal.title'),
+                defaultMessage: 'Configurations',
               })}
               id="tabs"
               variant="simple"
@@ -69,17 +70,20 @@ const ModalCreate = ({ onClose }) => {
                 <H2>
                   {formatMessage({
                     id: getTrad('Settings.locales.modal.title'),
+                    defaultMessage: 'Configurations',
                   })}
                 </H2>
                 <Tabs>
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.base'),
+                      defaultMessage: 'Base settings',
                     })}
                   </Tab>
                   <Tab>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.advanced'),
+                      defaultMessage: 'Advanced settings',
                     })}
                   </Tab>
                 </Tabs>
@@ -102,12 +106,12 @@ const ModalCreate = ({ onClose }) => {
           <ModalFooter
             startActions={
               <Button variant="tertiary" onClick={onClose}>
-                {formatMessage({ id: 'app.components.Button.cancel' })}
+                {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
               </Button>
             }
             endActions={
               <Button type="submit" startIcon={<CheckIcon />} disabled={isAdding}>
-                {formatMessage({ id: 'app.components.Button.save' })}
+                {formatMessage({ id: 'app.components.Button.save', defaultMessage: 'Save' })}
               </Button>
             }
           />
