@@ -42,22 +42,17 @@ const ModalEdit = ({ locale, onClose }) => {
           <Form onSubmit={handleSubmit}>
             <ModalHeader>
               <ButtonText textColor="neutral800" as="h2" id="edit-locale-title">
-                {formatMessage({ id: getTrad('Settings.list.actions.edit') })}
+                {formatMessage({
+                  id: getTrad('Settings.list.actions.edit'),
+                  defaultMessage: 'Edit a locale',
+                })}
               </ButtonText>
             </ModalHeader>
-            <ModalBody
-              title={formatMessage({
-                id: getTrad('Settings.locales.modal.title'),
-              })}
-              breadCrumb={[getTrad('Settings.list.actions.edit')]}
-              tabsAriaLabel={formatMessage({
-                id: getTrad('Settings.locales.modal.edit.tab.label'),
-              })}
-              tabsId="i18n-settings-tabs-edit"
-            >
+            <ModalBody>
               <TabGroup
                 label={formatMessage({
                   id: getTrad('Settings.locales.modal.title'),
+                  defaultMessage: 'Configurations',
                 })}
                 id="tabs"
                 variant="simple"
@@ -66,18 +61,20 @@ const ModalEdit = ({ locale, onClose }) => {
                   <H2>
                     {formatMessage({
                       id: getTrad('Settings.locales.modal.title'),
+                      defaultMessage: 'Configurations',
                     })}
                   </H2>
-
                   <Tabs>
                     <Tab>
                       {formatMessage({
                         id: getTrad('Settings.locales.modal.base'),
+                        defaultMessage: 'Base settings',
                       })}
                     </Tab>
                     <Tab>
                       {formatMessage({
                         id: getTrad('Settings.locales.modal.advanced'),
+                        defaultMessage: 'Advanced settings',
                       })}
                     </Tab>
                   </Tabs>
