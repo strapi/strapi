@@ -12,7 +12,7 @@ const EmptyBodyTable = ({ colSpan, isLoading, ...rest }) => {
           <Td colSpan={colSpan}>
             <Row justifyContent="center">
               <Box padding={11} background="neutral0">
-                <Loader />
+                <Loader>Loading content...</Loader>
               </Box>
             </Row>
           </Td>

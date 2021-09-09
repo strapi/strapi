@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-indent */
 import React from 'react';
 import styled from 'styled-components';
 import { Select, Option } from '@strapi/parts/Select';
@@ -60,13 +61,14 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
           onLocaleChange({ code: selectedLocale.value, displayName: selectedLocale.label });
         }
       }}
+      placeholder={formatMessage({ id: 'components.placeholder.select', defaultMessage: 'Select' })}
     >
       {isLoading
         ? null
         : options.map(option => (
-          <Option value={option.value} key={option.value}>
-            {option.label}
-          </Option>
+            <Option value={option.value} key={option.value}>
+              {option.label}
+            </Option>
           ))}
     </Select>
   );

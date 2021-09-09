@@ -26,7 +26,7 @@ const TableHead = ({
   const sort = query.sort || '';
   const [sortBy, sortOrder] = sort.split(':');
 
-  const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length;
+  const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length > 0;
 
   return (
     <Thead>
