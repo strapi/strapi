@@ -1,0 +1,38 @@
+<!--- Search.stories.mdx --->
+
+import { ArgsTable, Meta } from '@storybook/addon-docs';
+import Search from './index';
+
+<Meta title="components/Search" />
+
+# Search
+
+This component provides and input to search an array
+
+## Usage
+
+```jsx
+import { Search, useQueryParams } from '@strapi/helper-plugin';
+import matchSorter from 'match-sorter';
+
+const HomePage = () => {
+  const [{ query }] = useQueryParams()
+  const _q = query?._q || ''
+  const items = [{name: 'Paul', instrument: 'bass'}, {name: 'George', instrument: 'guitar'}]
+
+  const sortedList = matchSorter(items, _q, {keys: ['name', 'instrument']})
+  const itemsList = sortedList?.length ? sortedList : items
+
+  return (
+    <Search />
+    {itemsList.map(item => (
+      <div>
+        <h1>{item.name}</h1>
+        <p>{item.instrument}</p>
+      </div>
+    ))}
+  )
+};
+```
+
+<ArgsTable of={Search} />
