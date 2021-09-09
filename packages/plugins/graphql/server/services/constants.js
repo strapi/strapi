@@ -31,7 +31,24 @@ const STRAPI_SCALARS = [
   'time',
   'datetime',
   'timestamp',
+  'uid',
 ];
+
+const SCALARS_ASSOCIATIONS = {
+  uid: 'String',
+  boolean: 'Boolean',
+  integer: 'Int',
+  string: 'String',
+  richtext: 'String',
+  biginteger: 'Long',
+  float: 'Float',
+  decimal: 'Float',
+  json: 'JSON',
+  date: 'Date',
+  time: 'Time',
+  datetime: 'DateTime',
+  timestamp: 'DateTime',
+};
 
 const GENERIC_MORPH_TYPENAME = 'GenericMorph';
 
@@ -80,4 +97,5 @@ module.exports = () => ({
   GENERIC_MORPH_TYPENAME,
   KINDS,
   GRAPHQL_SCALAR_OPERATORS,
+  SCALARS_ASSOCIATIONS,
 });
