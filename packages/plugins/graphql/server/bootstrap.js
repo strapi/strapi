@@ -78,7 +78,7 @@ module.exports = async strapi => {
 
   // Link the Apollo server & the Strapi app
   server.applyMiddleware({
-    app: strapi.app,
+    app: strapi.server.app,
     path: config('endpoint', '/graphql'),
   });
 
@@ -98,7 +98,7 @@ module.exports = async strapi => {
 const useUploadMiddleware = (strapi, config) => {
   const uploadMiddleware = graphqlUploadKoa();
 
-  strapi.app.use((ctx, next) => {
+  strapi.server.app.use((ctx, next) => {
     if (ctx.path === config('endpoint')) {
       return uploadMiddleware(ctx, next);
     }

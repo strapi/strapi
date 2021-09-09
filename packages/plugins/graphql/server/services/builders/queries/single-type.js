@@ -2,14 +2,11 @@
 
 const { extendType } = require('nexus');
 
-const { actionExists } = require('../../old/utils');
-
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
 
   const { naming } = getService('utils');
-  const { args } = getService('internals');
-  const { transformArgs } = getService('builders').utils;
+  const { transformArgs, getContentTypeArgs } = getService('builders').utils;
 
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
@@ -29,16 +26,10 @@ module.exports = ({ strapi }) => {
     const findQueryName = getFindOneQueryName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    if (!actionExists({ resolver: `${uid}.find` })) {
-      return;
-    }
-
     t.field(findQueryName, {
       type: responseTypeName,
 
-      args: {
-        publicationState: args.PublicationStateArg,
-      },
+      args: getContentTypeArgs(contentType),
 
       async resolve(parent, args) {
         const transformedArgs = transformArgs(args, { contentType });

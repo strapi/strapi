@@ -37,8 +37,6 @@ module.exports = ({ strapi }) => {
       },
 
       async resolve(parent, args) {
-        // todo[v4]: need to handle media too? (type === 'media')
-
         const transformedArgs = transformArgs(args, { contentType });
 
         const { create } = getService('builders')
