@@ -6,6 +6,9 @@ const { unionType, scalarType } = require('nexus');
 
 module.exports = ({ strapi }) => {
   const buildTypeDefinition = (name, components) => {
+    const { ERROR_TYPE_NAME } = strapi.plugin('graphql').service('constants');
+    const isEmpty = components.length === 0;
+
     const componentsTypeNames = components.map(componentUID => {
       const component = strapi.components[componentUID];
 
@@ -22,11 +25,15 @@ module.exports = ({ strapi }) => {
       name,
 
       resolveType(obj) {
+        if (isEmpty) {
+          return ERROR_TYPE_NAME;
+        }
+
         return strapi.components[obj.__component].globalId;
       },
 
       definition(t) {
-        t.members(...componentsTypeNames);
+        t.members(...componentsTypeNames, ERROR_TYPE_NAME);
       },
     });
   };
@@ -79,12 +86,6 @@ module.exports = ({ strapi }) => {
      */
     buildDynamicZoneDefinition(definition, name, inputName) {
       const { components } = definition;
-
-      // If there is no component defined for the dynamic zone
-      // don't generate the type definition & return early with null values
-      if (components.length === 0) {
-        return [null, null];
-      }
 
       const typeDefinition = buildTypeDefinition(name, components);
       const inputDefinition = buildInputDefinition(inputName, components);

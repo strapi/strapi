@@ -22,16 +22,14 @@ const registerDynamicZonesDefinition = (contentType, { registry, strapi, builder
 
     const [type, input] = builders.buildDynamicZoneDefinition(attribute, dzName, dzInputName);
 
-    if (type && input) {
-      const baseConfig = {
-        contentType,
-        attributeName,
-        attribute,
-      };
+    const baseConfig = {
+      contentType,
+      attributeName,
+      attribute,
+    };
 
-      registry.register(dzName, type, { kind: KINDS.dynamicZone, ...baseConfig });
-      registry.register(dzInputName, input, { kind: KINDS.input, ...baseConfig });
-    }
+    registry.register(dzName, type, { kind: KINDS.dynamicZone, ...baseConfig });
+    registry.register(dzInputName, input, { kind: KINDS.input, ...baseConfig });
   }
 };
 

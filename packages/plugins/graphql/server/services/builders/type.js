@@ -1,6 +1,6 @@
 'use strict';
 
-const { isArray, isString, isUndefined } = require('lodash/fp');
+const { isArray, isString, isUndefined, constant } = require('lodash/fp');
 const { objectType } = require('nexus');
 
 const { contentTypes } = require('@strapi/utils');
@@ -79,10 +79,28 @@ module.exports = context => {
    */
   const addDynamicZoneAttribute = ({ builder, attributeName, contentType }) => {
     const { naming } = getGraphQLService('utils');
+    const { ERROR_CODES } = getGraphQLService('constants');
+    const { buildDynamicZoneResolver } = getGraphQLService('builders').get('content-api');
 
+    const { components } = contentType.attributes[attributeName];
+
+    const isEmpty = components.length === 0;
     const type = naming.getDynamicZoneName(contentType, attributeName);
 
-    builder.field(attributeName, { type });
+    const resolve = isEmpty
+      ? // If the dynamic zone don't have any component, then return an error payload
+        constant({
+          code: ERROR_CODES.emptyDynamicZone,
+          message: `This dynamic zone don't have any component attached to it`,
+        })
+      : //  Else, return a classic dynamic-zone resolver
+        buildDynamicZoneResolver({
+          contentTypeUID: contentType.uid,
+          attributeName,
+          strapi,
+        });
+
+    builder.list.field(attributeName, { type, resolve });
   };
 
   /**
@@ -302,7 +320,7 @@ module.exports = context => {
               }
 
               // Dynamic Zones
-              else if (isDynamicZone(attribute) && attribute.components.length > 0) {
+              else if (isDynamicZone(attribute)) {
                 addDynamicZoneAttribute(options);
               }
 
