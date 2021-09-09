@@ -1,9 +1,12 @@
 import React from 'react';
 import { Switch, Route, useRouteMatch, Redirect, useLocation } from 'react-router-dom';
 import { CheckPagePermissions, LoadingIndicatorPage, NotFound } from '@strapi/helper-plugin';
-import { Layout } from '@strapi/parts/Layout';
+import { Layout, HeaderLayout } from '@strapi/parts/Layout';
+import { Main } from '@strapi/parts';
+import { useIntl } from 'react-intl';
 import sortBy from 'lodash/sortBy';
 import permissions from '../../../permissions';
+import getTrad from '../../utils/getTrad';
 import DragLayer from '../../components/DragLayer';
 import ModelsContext from '../../contexts/ModelsContext';
 import CollectionTypeRecursivePath from '../CollectionTypeRecursivePath';
@@ -20,9 +23,22 @@ const App = () => {
   const { status, collectionTypeLinks, singleTypeLinks, models, refetchData } = useModels();
   const authorisedModels = sortBy([...collectionTypeLinks, ...singleTypeLinks], 'title');
   const { pathname } = useLocation();
+  const { formatMessage } = useIntl();
 
+  // Check with @mfrachet if ok with a11y
   if (status === 'loading') {
-    return <LoadingIndicatorPage />;
+    return (
+      <Main labelledBy="title" aria-busy="true">
+        <HeaderLayout
+          id="title"
+          title={formatMessage({
+            id: getTrad('header.name'),
+            defaultMessage: 'Content',
+          })}
+        />
+        <LoadingIndicatorPage />
+      </Main>
+    );
   }
 
   // Redirect the user to the 403 page

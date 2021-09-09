@@ -64,6 +64,7 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/examples/getstarted/',
+    '<rootDir>/examples/kitchensink/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '/OLD/',
     '__tests__',
