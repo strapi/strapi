@@ -165,28 +165,25 @@ function List({
 
   return (
     <>
-      <BoxWrapper
-        isFromDynamicZone={isFromDynamicZone}
-        background="neutral0"
-        shadow="filterShadow"
-        hasRadius
-      >
-        <Box paddingLeft={6} paddingRight={6}>
+      <BoxWrapper isFromDynamicZone={isFromDynamicZone}>
+        <Box paddingLeft={6} paddingRight={isMain ? 6 : 0}>
           <table>
-            <thead>
-              <tr>
-                <th>
-                  <TableLabel textColor="neutral600">
-                    {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
-                  </TableLabel>
-                </th>
-                <th colSpan="2">
-                  <TableLabel textColor="neutral600">
-                    {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
-                  </TableLabel>
-                </th>
-              </tr>
-            </thead>
+            {isMain && (
+              <thead>
+                <tr>
+                  <th>
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                    </TableLabel>
+                  </th>
+                  <th colSpan="2">
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                    </TableLabel>
+                  </th>
+                </tr>
+              </thead>
+            )}
             <tbody>
               {items.map(item => {
                 const { type } = item;

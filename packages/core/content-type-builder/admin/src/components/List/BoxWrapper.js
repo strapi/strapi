@@ -16,10 +16,14 @@ const BoxWrapper = styled(Box)`
 
   thead {
     border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+
+    tr {
+      border-top: 0;
+    }
   }
 
-  tr:not(:last-child) {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+  tr {
+    border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
   }
 
   tr {

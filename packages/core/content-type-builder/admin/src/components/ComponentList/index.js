@@ -6,11 +6,55 @@
 /* eslint-disable import/no-cycle */
 import React from 'react';
 import { get } from 'lodash';
-import { Box } from '@strapi/parts';
+import styled from 'styled-components';
+import { pxToRem } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import List from '../List';
 import useDataManager from '../../hooks/useDataManager';
-import Td from '../Td';
+
+// Keep component-row for css specificity
+const Tr = styled.tr`
+  &.component-row {
+    position: relative;
+    border-top: none !important;
+
+    table tr:first-child {
+      border-top: none;
+    }
+
+    > td:first-of-type {
+      padding: 0 0 0 ${pxToRem(20)};
+      &::before {
+        content: '';
+        width: ${pxToRem(4)};
+        height: calc(100% - 15px);
+        position: absolute;
+        top: -7px;
+        left: 17px;
+        border-radius: 4px;
+
+        ${({ isFromDynamicZone, isChildOfDynamicZone, theme }) => {
+          if (isChildOfDynamicZone) {
+            return `
+          z-index: -1;
+          background-color: transparent !important;
+        `;
+          }
+
+          if (isFromDynamicZone) {
+            return `
+          background-color: #AED4FB !important;
+        `;
+          }
+
+          return `
+        background: ${theme.colors.neutral150}};
+      `;
+        }}
+      }
+    }
+  }
+`;
 
 function ComponentList({
   customRowComponent,
@@ -29,22 +73,9 @@ function ComponentList({
     schema: { attributes: [] },
   });
 
-  // ! TEMPORARY DISABLE NESTED COMPONENT
-  const bool = true; // prevent eslint from crying
-
-  if (bool) {
-    return (
-      <tr>
-        <td colSpan={12} style={{ padding: 10 }}>
-          <Box background="neutral100" style={{ height: 40 }} />
-        </td>
-      </tr>
-    );
-  }
-
   return (
-    <tr className="component-row">
-      <Td colSpan={12} isChildOfDynamicZone={isFromDynamicZone}>
+    <Tr isChildOfDynamicZone={isFromDynamicZone} className="component-row">
+      <td colSpan={12}>
         <List
           customRowComponent={customRowComponent}
           dzName={dzName}
@@ -60,8 +91,8 @@ function ComponentList({
           secondLoopComponentName={firstLoopComponentName ? componentName : null}
           secondLoopComponentUid={firstLoopComponentUid ? component : null}
         />
-      </Td>
-    </tr>
+      </td>
+    </Tr>
   );
 }
 

@@ -5,7 +5,7 @@ import {
   request,
   LoadingIndicatorPage,
   useTracking,
-  // PopUpWarning,
+  PopUpWarning,
   useNotification,
   useStrapiApp,
   useAutoReloadOverlayBlocker,
@@ -20,7 +20,7 @@ import DataManagerContext from '../../contexts/DataManagerContext';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
 import pluginId from '../../pluginId';
-// import FormModal from '../FormModal';
+import FormModal from '../FormModal';
 import createDataObject from './utils/createDataObject';
 import createModifiedDataSchema from './utils/createModifiedDataSchema';
 import retrieveSpecificInfoFromComponents from './utils/retrieveSpecificInfoFromComponents';
@@ -30,15 +30,14 @@ import { retrieveComponentsThatHaveComponents } from './utils/retrieveComponents
 import {
   getComponentsToPost,
   formatMainDataType,
-  // FIXME
-  // getCreatedAndModifiedComponents,
+  getCreatedAndModifiedComponents,
   sortContentType,
 } from './utils/cleanData';
 
 import {
   ADD_ATTRIBUTE,
   ADD_CREATED_COMPONENT_TO_DYNAMIC_ZONE,
-  // CANCEL_CHANGES,
+  CANCEL_CHANGES,
   CHANGE_DYNAMIC_ZONE_COMPONENTS,
   CREATE_SCHEMA,
   CREATE_COMPONENT_SCHEMA,
@@ -73,9 +72,7 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  // FIXME
-  const [, toggleInfoModal] = useState({ cancel: false });
-  // const [infoModals, toggleInfoModal] = useState({ cancel: false });
+  const [infoModals, toggleInfoModal] = useState({ cancel: false });
   const { autoReload } = useAppInfos();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -159,9 +156,8 @@ const DataManagerProvider = ({
     }
   }, [autoReload, toggleNotification]);
 
-  // FIXME
-  // const didModifiedComponents =
-  //   getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
+  const didModifiedComponents =
+    getCreatedAndModifiedComponents(modifiedData.components || {}, components).length > 0;
 
   const addAttribute = (
     attributeToSet,
@@ -191,11 +187,10 @@ const DataManagerProvider = ({
     });
   };
 
-  // FIXME
-  // const cancelChanges = () => {
-  //   toggleModalCancel();
-  //   dispatch({ type: CANCEL_CHANGES });
-  // };
+  const cancelChanges = () => {
+    toggleModalCancel();
+    dispatch({ type: CANCEL_CHANGES });
+  };
 
   const createSchema = (
     data,
@@ -573,8 +568,8 @@ const DataManagerProvider = ({
           {children}
           {isInDevelopmentMode && (
             <>
-              {/* <FormModal /> */}
-              {/* <PopUpWarning
+              <FormModal />
+              <PopUpWarning
                 isOpen={infoModals.cancel}
                 toggleModal={toggleModalCancel}
                 content={{
@@ -588,7 +583,7 @@ const DataManagerProvider = ({
                 onConfirm={() => {
                   cancelChanges();
                 }}
-              /> */}
+              />
             </>
           )}
         </>
