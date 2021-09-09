@@ -11,6 +11,7 @@ const AdvancedForm = ({ isDefaultLocale }) => {
 
   return (
     <Checkbox
+      name="isDefault"
       hint={formatMessage({
         id: getTrad('Settings.locales.modal.advanced.setAsDefault.hint'),
         defaultMessage: 'One default locale is required, change it by selecting another one',

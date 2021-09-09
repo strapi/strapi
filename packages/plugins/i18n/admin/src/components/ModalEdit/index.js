@@ -1,6 +1,6 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { Form } from '@strapi/helper-plugin';
+import { Form, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import CheckIcon from '@strapi/icons/CheckIcon';
@@ -18,19 +18,16 @@ import BaseForm from './BaseForm';
 import AdvancedForm from './AdvancedForm';
 
 const ModalEdit = ({ locale, onClose }) => {
+  const { refetchPermissions } = useRBACProvider();
   const { isEditing, editLocale } = useEditLocale();
-  const shouldUpdateMenu = useRef(false);
   const { formatMessage } = useIntl();
 
-  const handleSubmit = ({ displayName, isDefault }) => {
+  const handleSubmit = async ({ displayName, isDefault }) => {
     const id = locale.id;
     const name = displayName || locale.code;
 
-    return editLocale(id, { name, isDefault })
-      .then(() => {
-        shouldUpdateMenu.current = true;
-      })
-      .then(onClose);
+    await editLocale(id, { name, isDefault });
+    await refetchPermissions();
   };
 
   return (
