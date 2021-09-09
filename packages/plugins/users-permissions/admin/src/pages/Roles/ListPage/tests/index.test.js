@@ -13,6 +13,8 @@ jest.mock('@strapi/helper-plugin', () => ({
   useTracking: jest.fn(() => ({ trackUsage: jest.fn() })),
   useNotification: jest.fn(),
   useRBAC: jest.fn(),
+  useQueryParams: jest.fn(() => [{}]),
+  Search: jest.fn(() => <div />),
   CheckPermissions: jest.fn(() => <div />),
 }));
 
@@ -41,7 +43,7 @@ const App = (
   </ThemeProvider>
 );
 
-describe('Admin | containers | RoleListPage', () => {
+describe('Plugin | Users and Permissions | RoleListPage', () => {
   beforeAll(() => server.listen());
 
   beforeEach(() => {
