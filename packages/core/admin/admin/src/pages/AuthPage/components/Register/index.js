@@ -109,7 +109,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
               <Main labelledBy="welcome">
                 <Column>
                   <Logo />
-                  <Box paddingTop="6" paddingBottom="1">
+                  <Box paddingTop={6} paddingBottom={1}>
                     <H1 id="welcome">
                       {formatMessage({
                         id: 'Auth.form.welcome.title',
@@ -117,7 +117,7 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
                       })}
                     </H1>
                   </Box>
-                  <CenteredBox paddingBottom="7">
+                  <CenteredBox paddingBottom={7}>
                     <Subtitle textColor="neutral600">
                       {formatMessage({
                         id: 'Auth.form.register.subtitle',

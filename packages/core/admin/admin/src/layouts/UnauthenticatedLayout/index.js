@@ -17,10 +17,10 @@ export const LayoutContent = ({ children }) => (
   <Wrapper
     shadow="tableShadow"
     hasRadius
-    paddingTop="9"
-    paddingBottom="9"
-    paddingLeft="10"
-    paddingRight="10"
+    paddingTop={9}
+    paddingBottom={9}
+    paddingLeft={10}
+    paddingRight={10}
     background="neutral0"
     justifyContent="center"
   >
@@ -39,7 +39,7 @@ const UnauthenticatedLayout = ({ children }) => {
           <LocaleToggle />
         </Box>
       </Row>
-      <Box paddingTop="11" paddingBottom="11">
+      <Box paddingTop={11} paddingBottom={11}>
         {children}
       </Box>
     </div>
