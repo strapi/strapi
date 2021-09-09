@@ -66,6 +66,7 @@ module.exports = {
     'import/no-extraneous-dependencies': 0,
     'import/no-named-as-default': 0,
     'import/order': 2,
+    'import/prefer-default-export': 'off',
     'jsx-a11y/click-events-have-key-events': 1,
     'max-len': [
       2,
