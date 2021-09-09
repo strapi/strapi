@@ -28,7 +28,7 @@ const App = () => {
   // Check with @mfrachet if ok with a11y
   if (status === 'loading') {
     return (
-      <Main labelledBy="title">
+      <Main labelledBy="title" aria-busy="true">
         <HeaderLayout
           id="title"
           title={formatMessage({
