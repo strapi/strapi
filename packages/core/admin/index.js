@@ -48,7 +48,18 @@ async function build({ plugins, dir, env, options, optimize }) {
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
-  const config = getCustomWebpackConfig(dir, { entry, dest, env, options, optimize, roots });
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+
+  const config = getCustomWebpackConfig(dir, {
+    entry,
+    pluginsPath,
+    cacheDir,
+    dest,
+    env,
+    options,
+    optimize,
+    roots,
+  });
 
   const compiler = webpack(config);
 
@@ -170,13 +181,12 @@ async function createCacheDir({ dir, plugins }) {
 
 async function watchAdmin({ plugins, dir, host, port, browser, options }) {
   // Create the cache dir containing the front-end files.
+  const cacheDir = path.join(dir, '.cache');
   await createCacheDir({ dir, plugins });
 
-  const entry = path.join(dir, '.cache', 'admin', 'src');
+  const entry = path.join(cacheDir, 'admin', 'src');
   const dest = path.join(dir, 'build');
   const env = 'development';
-
-  const cacheDir = path.join(dir, '.cache');
 
   // Roots for the @strapi/babel-plugin-switch-ee-ce
   const roots = {
@@ -184,8 +194,12 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
     ceRoot: path.resolve(cacheDir, 'admin', 'src'),
   };
 
+  const pluginsPath = Object.keys(plugins).map(pluginName => plugins[pluginName].pathToPlugin);
+
   const args = {
     entry,
+    cacheDir,
+    pluginsPath,
     dest,
     env,
     port,

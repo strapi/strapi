@@ -24,7 +24,7 @@ export default {
     // TODO update doc and guides
     app.addComponents({ name: 'media-library', Component: InputModalStepper });
 
-    app.addCorePluginMenuLink({
+    app.addMenuLink({
       to: `/plugins/${pluginId}`,
       icon,
       intlLabel: {
@@ -32,6 +32,11 @@ export default {
         defaultMessage: 'Media Library',
       },
       permissions: pluginPermissions.main,
+      Component: async () => {
+        const component = await import(/* webpackChunkName: "upload" */ './pages/App');
+
+        return component;
+      },
     });
 
     // TODO update guide

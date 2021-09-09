@@ -13,6 +13,8 @@ const getClientEnvironment = require('./env');
 
 module.exports = ({
   entry,
+  cacheDir,
+  pluginsPath,
   dest,
   env,
   optimize,
@@ -98,7 +100,7 @@ module.exports = ({
         {
           test: /\.m?js$/,
           // TODO remove when plugins are built separately
-          exclude: /node_modules\/(?!(@strapi\/plugin-content-type-builder|@strapi\/plugin-upload)\/).*/,
+          include: [cacheDir, ...pluginsPath],
           use: {
             loader: require.resolve('babel-loader'),
             options: {
