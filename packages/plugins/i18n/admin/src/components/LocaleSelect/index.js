@@ -36,10 +36,6 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear, ...pro
       return !foundLocale;
     });
 
-  if (isLoading) {
-    return null;
-  }
-
   const computedValue = value || '';
 
   return (
