@@ -99,8 +99,6 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
 
   const { sanitizeInput, sanitizeInputFiles } = createSanitizer(contentType);
 
-  console.log(ctx.data);
-
   const entry = isSingleType(contentType)
     ? await strapi.query(contentType.uid).findOne({ populate: ['localizations'] })
     : await strapi
@@ -141,6 +139,7 @@ const createCreateLocalizationHandler = contentType => async (ctx = {}) => {
   const newEntry = await strapi.entityService.create(contentType.uid, {
     data: sanitizedData,
     files: sanitizedFiles,
+    params: { populate: ['localizations'] },
   });
 
   return sanitizeEntity(newEntry, { model: strapi.getModel(contentType.uid) });
