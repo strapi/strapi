@@ -76,12 +76,13 @@ LocaleSelect.defaultProps = {
   error: undefined,
   value: undefined,
   onClear: () => undefined,
+  onLocaleChange: () => undefined,
 };
 
 LocaleSelect.propTypes = {
   error: PropTypes.string,
   onClear: PropTypes.func,
-  onLocaleChange: PropTypes.func.isRequired,
+  onLocaleChange: PropTypes.func,
   value: PropTypes.string,
 };
 

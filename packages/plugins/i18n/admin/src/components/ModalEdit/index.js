@@ -1,113 +1,129 @@
-import React, { useRef } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { Modal, ModalFooter, TabPanel } from '@strapi/helper-plugin';
+import { Form, useRBACProvider } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { Button } from '@buffetjs/core';
 import { Formik } from 'formik';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import { ModalLayout, ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
+import { TabGroup, Tabs, Tab, TabPanels, TabPanel } from '@strapi/parts/Tabs';
+import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { Divider } from '@strapi/parts/Divider';
+import { ButtonText, H2 } from '@strapi/parts/Text';
 import localeFormSchema from '../../schemas';
 import useEditLocale from '../../hooks/useEditLocale';
 import { getTrad } from '../../utils';
 import BaseForm from './BaseForm';
 import AdvancedForm from './AdvancedForm';
-import SettingsModal from '../SettingsModal';
 
-const ModalEdit = ({ localeToEdit, onClose, locales }) => {
+const ModalEdit = ({ locale, onClose }) => {
+  const { refetchPermissions } = useRBACProvider();
   const { isEditing, editLocale } = useEditLocale();
-  const shouldUpdateMenu = useRef(false);
   const { formatMessage } = useIntl();
-  const isOpened = Boolean(localeToEdit);
 
-  const handleSubmit = ({ displayName, isDefault }) => {
-    const id = localeToEdit.id;
-    const name = displayName || localeToEdit.code;
-
-    return editLocale(id, { name, isDefault })
-      .then(() => {
-        shouldUpdateMenu.current = true;
-      })
-      .then(onClose);
+  const handleSubmit = async ({ displayName, isDefault }) => {
+    await editLocale(locale.id, { name: displayName, isDefault });
+    await refetchPermissions();
   };
 
-  let options = [];
-  let defaultOption;
-
-  if (localeToEdit) {
-    options = locales.map(locale => ({ label: locale.code, value: locale.id }));
-    defaultOption = options.find(option => option.value === localeToEdit.id);
-  }
-
   return (
-    <Modal isOpen={isOpened} onToggle={onClose}>
+    <ModalLayout onClose={onClose} labelledBy="edit-locale-title">
       <Formik
         initialValues={{
-          displayName: localeToEdit ? localeToEdit.name : '',
-          isDefault: localeToEdit ? localeToEdit.isDefault : false,
+          code: locale?.code,
+          displayName: locale?.name || '',
+          isDefault: Boolean(locale?.isDefault),
         }}
         onSubmit={handleSubmit}
         validationSchema={localeFormSchema}
       >
-        {({ handleSubmit, errors }) => (
-          <form onSubmit={handleSubmit}>
-            <SettingsModal
-              title={formatMessage({
+        <Form>
+          <ModalHeader>
+            <ButtonText textColor="neutral800" as="h2" id="edit-locale-title">
+              {formatMessage({
+                id: getTrad('Settings.list.actions.edit'),
+                defaultMessage: 'Edit a locale',
+              })}
+            </ButtonText>
+          </ModalHeader>
+          <ModalBody>
+            <TabGroup
+              label={formatMessage({
                 id: getTrad('Settings.locales.modal.title'),
+                defaultMessage: 'Configurations',
               })}
-              breadCrumb={[getTrad('Settings.list.actions.edit')]}
-              tabsAriaLabel={formatMessage({
-                id: getTrad('Settings.locales.modal.edit.tab.label'),
-              })}
-              tabsId="i18n-settings-tabs-edit"
+              id="tabs"
+              variant="simple"
             >
-              <TabPanel>
-                <BaseForm options={options} defaultOption={defaultOption} />
-              </TabPanel>
-              <TabPanel>
-                <AdvancedForm isDefaultLocale={Boolean(localeToEdit && localeToEdit.isDefault)} />
-              </TabPanel>
-            </SettingsModal>
+              <Row justifyContent="space-between">
+                <H2>
+                  {formatMessage({
+                    id: getTrad('Settings.locales.modal.title'),
+                    defaultMessage: 'Configurations',
+                  })}
+                </H2>
+                <Tabs>
+                  <Tab>
+                    {formatMessage({
+                      id: getTrad('Settings.locales.modal.base'),
+                      defaultMessage: 'Base settings',
+                    })}
+                  </Tab>
+                  <Tab>
+                    {formatMessage({
+                      id: getTrad('Settings.locales.modal.advanced'),
+                      defaultMessage: 'Advanced settings',
+                    })}
+                  </Tab>
+                </Tabs>
+              </Row>
 
-            <ModalFooter>
-              <section>
-                <Button type="button" color="cancel" onClick={onClose}>
-                  {formatMessage({ id: 'app.components.Button.cancel' })}
-                </Button>
-                <Button
-                  color="success"
-                  type="submit"
-                  isLoading={isEditing}
-                  disabled={Object.keys(errors).length > 0}
-                >
-                  {formatMessage({ id: getTrad('Settings.locales.modal.edit.confirmation') })}
-                </Button>
-              </section>
-            </ModalFooter>
-          </form>
-        )}
+              <Divider />
+
+              <Box paddingTop={7} paddingBottom={7}>
+                <TabPanels>
+                  <TabPanel>
+                    <BaseForm locale={locale} />
+                  </TabPanel>
+                  <TabPanel>
+                    <AdvancedForm isDefaultLocale={Boolean(locale && locale.isDefault)} />
+                  </TabPanel>
+                </TabPanels>
+              </Box>
+            </TabGroup>
+          </ModalBody>
+
+          <ModalFooter
+            startActions={
+              <Button variant="tertiary" onClick={onClose}>
+                {formatMessage({ id: 'app.components.Button.cancel' })}
+              </Button>
+            }
+            endActions={
+              <Button type="submit" startIcon={<CheckIcon />} disabled={isEditing}>
+                {formatMessage({ id: 'app.components.Button.save' })}
+              </Button>
+            }
+          />
+        </Form>
       </Formik>
-    </Modal>
+    </ModalLayout>
   );
 };
 
 ModalEdit.defaultProps = {
-  localeToEdit: undefined,
-  locales: [],
+  locale: undefined,
 };
 
 ModalEdit.propTypes = {
-  localeToEdit: PropTypes.shape({
+  locale: PropTypes.shape({
     id: PropTypes.number.isRequired,
     name: PropTypes.string.isRequired,
     code: PropTypes.string.isRequired,
     isDefault: PropTypes.bool.isRequired,
   }),
   onClose: PropTypes.func.isRequired,
-  locales: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.number,
-      name: PropTypes.string,
-      code: PropTypes.string,
-    })
-  ),
 };
 
 export default ModalEdit;
