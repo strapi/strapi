@@ -73,20 +73,14 @@ const RoleListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const handleClickEdit = id => {
+  const handleClickEdit = (id) => {
     push(`/settings/${pluginId}/roles/${id}`);
   };
 
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <Main
-        aria-busy={isLoading}
-        labelledBy={formatMessage({
-          id: getTrad('HeaderNav.link.roles'),
-          defaultMessage: 'Roles',
-        }).toLowerCase()}
-      >
+      <Main aria-busy={isLoading} labelledBy="roles">
         <HeaderLayout
           as="h1"
           id="roles"
@@ -143,7 +137,7 @@ const RoleListPage = () => {
             </Thead>
             <Tbody>
               {roles &&
-                roles.map(role => (
+                roles.map((role) => (
                   <Tr key={role.name}>
                     <Td width="20%">
                       <Text>{role.name}</Text>
@@ -152,7 +146,7 @@ const RoleListPage = () => {
                       <Text>{role.description}</Text>
                     </Td>
                     <Td width="30%">
-                      <Text data-testid="plop">
+                      <Text>
                         {`${role.nb_users} ${formatMessage({
                           id: getTrad('Roles.users'),
                           defaultMessage: 'users',
