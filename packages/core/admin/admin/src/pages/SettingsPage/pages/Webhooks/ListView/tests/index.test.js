@@ -295,14 +295,13 @@ describe('Admin | containers | ListView', () => {
       allowedActions: { canUpdate: true, canCreate: true, canRead: true, canDelete: true },
     }));
 
-    const { container } = render(App);
+    const { container, getByText } = render(App);
     await waitFor(() => {
       screen.getByText('http:://strapi.io');
     });
 
     fireEvent.click(container.querySelector('#delete-1'));
-    await waitFor(() => {
-      expect(screen.getByText('Are you sure you want to delete this?')).toBeInTheDocument();
-    });
+
+    expect(getByText('Are you sure you want to delete this?')).toBeInTheDocument();
   });
 });
