@@ -2,6 +2,7 @@
 
 const PAGINATION_TYPE_NAME = 'Pagination';
 const PUBLICATION_STATE_TYPE_NAME = 'PublicationState';
+const ERROR_TYPE_NAME = 'Error';
 
 const RESPONSE_COLLECTION_META_TYPE_NAME = 'ResponseCollectionMeta';
 
@@ -88,6 +89,10 @@ const GRAPHQL_SCALAR_OPERATORS = {
   JSON: ['eq', 'not'],
 };
 
+const ERROR_CODES = {
+  emptyDynamicZone: 'dynamiczone.empty',
+};
+
 module.exports = () => ({
   PAGINATION_TYPE_NAME,
   RESPONSE_COLLECTION_META_TYPE_NAME,
@@ -98,4 +103,6 @@ module.exports = () => ({
   KINDS,
   GRAPHQL_SCALAR_OPERATORS,
   SCALARS_ASSOCIATIONS,
+  ERROR_CODES,
+  ERROR_TYPE_NAME,
 });
