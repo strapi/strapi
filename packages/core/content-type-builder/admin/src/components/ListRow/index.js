@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
-// import Curve from '../../icons/Curve';
+import Curve from '../../icons/Curve';
 import UpperFist from '../UpperFirst';
 import BoxWrapper from './BoxWrapper';
 import AttributeIcon from '../AttributeIcon';
@@ -201,18 +201,12 @@ function ListRow({
   }
 
   return (
-    <BoxWrapper
-      as="tr"
-      onClick={handleClick}
-      className={[target ? 'relation-row' : '', configurable ? 'clickable' : '']}
-      // PaddingLeft handled here in nested component
-      loopNumber={loopNumber}
-    >
+    <BoxWrapper as="tr" onClick={handleClick}>
       <td>
+        {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
           <AttributeIcon key={src} type={src} />
           <Text bold>{upperFirst(name)}</Text>
-          {/* <Curve fill={isFromDynamicZone ? '#AED4FB' : '#f3f4f4'} /> */}
         </Stack>
       </td>
       <td>

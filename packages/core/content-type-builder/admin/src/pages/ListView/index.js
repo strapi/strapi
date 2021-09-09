@@ -163,7 +163,7 @@ const ListView = () => {
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
-  // ! Have a discussion with maeva about this
+  // ! Have a discussion with maeva about this - displaying nb of rows
   // const listTitle = [
   //   formatMessage(
   //     {

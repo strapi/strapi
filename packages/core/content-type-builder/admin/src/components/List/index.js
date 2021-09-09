@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useTracking } from '@strapi/helper-plugin';
-import { TableLabel, TFooter, Box, TextButton } from '@strapi/parts';
+import { TableLabel, TFooter, Box } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useListView from '../../hooks/useListView';
@@ -18,6 +18,7 @@ import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import BoxWrapper from './BoxWrapper';
 import getTrad from '../../utils/getTrad';
+import NestedTFooter from '../NestedTFooter/NestedTFooter';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -165,7 +166,7 @@ function List({
 
   return (
     <>
-      <BoxWrapper isFromDynamicZone={isFromDynamicZone}>
+      <BoxWrapper>
         <Box paddingLeft={6} paddingRight={isMain ? 6 : 0}>
           <table>
             {isMain && (
@@ -250,12 +251,16 @@ function List({
           </TFooter>
         )}
         {isSub && isInDevelopmentMode && (
-          <TextButton startIcon={<AddIcon />} onClick={onClickAddField}>
+          <NestedTFooter
+            icon={<AddIcon />}
+            onClick={onClickAddField}
+            color={isFromDynamicZone ? 'primary' : 'neutral'}
+          >
             {formatMessage({
               id: getTrad(`form.button.add.field.to.component`),
               defaultMessage: 'Add another field',
             })}
-          </TextButton>
+          </NestedTFooter>
         )}
       </BoxWrapper>
     </>

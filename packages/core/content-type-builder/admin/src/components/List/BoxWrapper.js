@@ -7,8 +7,6 @@ import { Box } from '@strapi/parts';
 import styled from 'styled-components';
 
 const BoxWrapper = styled(Box)`
-  overflow-x: auto;
-
   table {
     width: 100%;
     white-space: nowrap;
@@ -46,9 +44,5 @@ const BoxWrapper = styled(Box)`
     outline-offset: -4px;
   }
 `;
-
-BoxWrapper.defaultProps = {
-  isFromDynamicZone: false,
-};
 
 export default BoxWrapper;
