@@ -23,10 +23,7 @@ const ModalEdit = ({ locale, onClose }) => {
   const { formatMessage } = useIntl();
 
   const handleSubmit = async ({ displayName, isDefault }) => {
-    const id = locale.id;
-    const name = displayName || locale.code;
-
-    await editLocale(id, { name, isDefault });
+    await editLocale(locale.id, { name: displayName, isDefault });
     await refetchPermissions();
   };
 
