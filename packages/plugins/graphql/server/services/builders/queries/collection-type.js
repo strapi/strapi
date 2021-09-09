@@ -39,11 +39,6 @@ module.exports = ({ strapi }) => {
     const findOneQueryName = getFindOneQueryName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    // If the action doesn't exist, return early and don't add the query
-    if (!actionExists({ resolver: `${uid}.findOne` })) {
-      return;
-    }
-
     t.field(findOneQueryName, {
       type: responseTypeName,
 
