@@ -32,6 +32,17 @@ const LeftMenu = () => {
     shallowEqual
   );
 
+  const toIntl = links =>
+    links.map(link => {
+      return {
+        ...link,
+        title: formatMessage({ id: link.title, defaultMessage: link.title }),
+      };
+    });
+
+  const intlCollectionTypeLinks = toIntl(collectionTypeLinks);
+  const intlSingleTypeLinks = toIntl(singleTypeLinks);
+
   const menu = [
     {
       id: 'collectionTypes',
@@ -39,10 +50,10 @@ const LeftMenu = () => {
         id: getTrad('components.LeftMenu.collection-types'),
         defaultMessage:
           '{number, plural, =0 {Collection Types} one {Collection Type } other {Collection Types}}',
-        values: { number: collectionTypeLinks.length },
+        values: { number: intlCollectionTypeLinks.length },
       },
       searchable: true,
-      links: sortBy(matchByTitle(collectionTypeLinks, search), 'title'),
+      links: sortBy(matchByTitle(intlCollectionTypeLinks, search), 'title'),
     },
     {
       id: 'singleTypes',
@@ -50,10 +61,10 @@ const LeftMenu = () => {
         id: getTrad('components.LeftMenu.single-types'),
         defaultMessage:
           '{number, plural, =0 {Single Types} one {Single Type } other {Single Types}}',
-        values: { number: singleTypeLinks.length },
+        values: { number: intlSingleTypeLinks.length },
       },
       searchable: true,
-      links: sortBy(matchByTitle(singleTypeLinks, search), 'title'),
+      links: sortBy(matchByTitle(intlSingleTypeLinks, search), 'title'),
     },
   ];
 
