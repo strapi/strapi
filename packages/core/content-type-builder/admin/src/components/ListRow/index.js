@@ -256,7 +256,12 @@ function ListRow({
             {configurable ? (
               <Stack horizontal size={1}>
                 {!isMorph && (
-                  <IconButton onClick={handleClick} label="Edit" noBorder icon={<EditIcon />} />
+                  <IconButton
+                    onClick={handleClick}
+                    label={formatMessage({ id: 'app.utils.edit', formatMessage: 'Edit' })}
+                    noBorder
+                    icon={<EditIcon />}
+                  />
                 )}
                 <IconButton
                   onClick={e => {
@@ -267,7 +272,7 @@ function ListRow({
                       secondLoopComponentUid || firstLoopComponentUid || ''
                     );
                   }}
-                  label="Delete"
+                  label={formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
                   noBorder
                   icon={<DeleteIcon />}
                 />

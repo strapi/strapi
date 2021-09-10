@@ -22,7 +22,7 @@ import {
 } from '@strapi/icons';
 import { pxToRem } from '@strapi/helper-plugin';
 
-const types = {
+const iconByTypes = {
   biginteger: Numbers,
   boolean: Boolean,
   component: Component,
@@ -53,20 +53,20 @@ const types = {
   uid: Uid,
 };
 
-const StyledCompo = styled(Box)`
+const IconBox = styled(Box)`
   width: ${pxToRem(32)};
   height: ${pxToRem(24)};
   box-sizing: content-box;
 `;
 
 const AttributeIcon = ({ type, ...rest }) => {
-  const Compo = types[type];
+  const Compo = iconByTypes[type];
 
-  if (!types[type]) {
+  if (!iconByTypes[type]) {
     return null;
   }
 
-  return <StyledCompo as={Compo} {...rest} />;
+  return <IconBox as={Compo} {...rest} />;
 };
 
 AttributeIcon.propTypes = {

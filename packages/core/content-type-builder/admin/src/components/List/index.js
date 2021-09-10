@@ -176,10 +176,14 @@ function List({
             <thead>
               <tr>
                 <th>
-                  <TableLabel textColor="neutral600">Name</TableLabel>
+                  <TableLabel textColor="neutral600">
+                    {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                  </TableLabel>
                 </th>
                 <th colSpan="2">
-                  <TableLabel textColor="neutral600">Type</TableLabel>
+                  <TableLabel textColor="neutral600">
+                    {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                  </TableLabel>
                 </th>
               </tr>
             </thead>
