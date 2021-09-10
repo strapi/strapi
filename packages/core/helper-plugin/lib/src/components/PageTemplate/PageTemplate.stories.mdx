@@ -1,0 +1,64 @@
+<!--- EmptyStateLayout.stories.mdx --->
+
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Layout, HeaderLayout, Button, ActionLayout, ContentLayout,Box } from '@strapi/parts';
+import AddIcon from '@strapi/icons/AddIcon'
+import EditIcon from '@strapi/icons/EditIcon'
+import LoadingIndicatorPage from '../LoadingIndicatorPage';
+import NoContent from '../NoContent'
+import NoPermissions from '../NoPermissions'
+
+<Meta title="components/PageTemplate" />
+
+# PageTemplate
+
+This component is used to display an empty state.
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const canRead = false;
+      const isLoading = true;
+      const data = [];
+      return (
+        <Box background="neutral100">
+          <Layout>
+            <Main labelledBy="title" aria-busy={isLoading}>
+              <HeaderLayout
+                id="title"
+                primaryAction={<Button startIcon={<AddIcon />}>Add an entry</Button>}
+                secondaryAction={
+                  <Button variant="tertiary" startIcon={<EditIcon />}>
+                    Edit
+                  </Button>
+                }
+                title="Other CT"
+                subtitle="36 entries found"
+              />
+              <ActionLayout
+                startActions={
+                  <>
+                    <Button variant="tertiary">Search</Button>
+                    <Button variant="tertiary">Filter</Button>
+                  </>
+                }
+                endActions={
+                  <>
+                    <Button variant="tertiary">Settings</Button>
+                  </>
+                }
+              />
+              <ContentLayout>
+                {!canRead && <NoPermissions />}
+                {(data && data.length === 0) && <NoContent content="No content available" action={<Button>Add content</Button>}/>}
+                {isLoading && <LoadingIndicatorPage />}
+              </ContentLayout>
+            </Main>
+          </Layout>
+        </Box>
+      );
+    }}
+  </Story>
+</Canvas>
