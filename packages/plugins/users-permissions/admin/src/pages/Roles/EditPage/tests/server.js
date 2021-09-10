@@ -2,7 +2,7 @@ import { setupServer } from 'msw/node';
 import { rest } from 'msw';
 
 const handlers = [
-  // Mock role route
+  // Mock get role route
   rest.get('*/users-permissions/roles/:roleId', (req, res, ctx) => {
     return res(
       ctx.delay(500),
@@ -32,71 +32,9 @@ const handlers = [
     );
   }),
 
-  // Mock permissions route
-  rest.get('*/users-permissions/permissions', (req, res, ctx) => {
-    return res(
-      ctx.delay(500),
-      ctx.status(200),
-      ctx.json({
-        data: [
-          {
-            id: 113,
-            action: 'plugin::content-manager.explorer.create',
-            subject: 'plugin::users-permissions.user',
-            properties: {
-              fields: [
-                'username',
-                'email',
-                'provider',
-                'password',
-                'resetPasswordToken',
-                'confirmationToken',
-                'confirmed',
-                'blocked',
-                'role',
-                'picture',
-              ],
-            },
-            conditions: [],
-          },
-        ],
-      })
-    );
-  }),
-
-  // Mock routes route
-  rest.get('*/users-permissions/routes', (req, res, ctx) => {
-    return res(
-      ctx.delay(500),
-      ctx.status(200),
-      ctx.json({
-        routes: {
-          application: [],
-          'content-manager': [
-            {
-              method: 'GET',
-              path:
-                '/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-types',
-              handler: 'content-types.findContentTypes',
-              config: {
-                policies: ['plugin::users-permissions.permissions'],
-              },
-            },
-          ],
-        },
-      })
-    );
-  }),
-
-  // Mock policies route
-  rest.get('*/users-permissions/policies', (req, res, ctx) => {
-    return res(
-      ctx.delay(500),
-      ctx.status(200),
-      ctx.json({
-        policies: ['isAuthenticated', 'rateLimit'],
-      })
-    );
+  // Mock edit role route
+  rest.put('*/users-permissions/roles/:roleId', (req, res, ctx) => {
+    return res(ctx.delay(500), ctx.status(200), ctx.json({ ok: true }));
   }),
 ];
 

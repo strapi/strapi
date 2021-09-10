@@ -1,4 +1,4 @@
-import { useCallback, useReducer, useEffect } from 'react';
+import { useCallback, useReducer, useEffect, useRef } from 'react';
 import { request, useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
 import pluginId from '../../pluginId';
@@ -6,8 +6,11 @@ import pluginId from '../../pluginId';
 const useFetchRole = id => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
+  const isMounted = useRef(null);
 
   useEffect(() => {
+    isMounted.current = true;
+
     if (id) {
       fetchRole(id);
     } else {
@@ -17,6 +20,7 @@ const useFetchRole = id => {
       });
     }
 
+    return () => (isMounted.current = false);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -24,10 +28,13 @@ const useFetchRole = id => {
     try {
       const { role } = await request(`/${pluginId}/roles/${roleId}`, { method: 'GET' });
 
-      dispatch({
-        type: 'GET_DATA_SUCCEEDED',
-        role,
-      });
+      // Prevent updating state on an unmounted component
+      if (isMounted.current) {
+        dispatch({
+          type: 'GET_DATA_SUCCEEDED',
+          role,
+        });
+      }
     } catch (err) {
       console.error(err);
 

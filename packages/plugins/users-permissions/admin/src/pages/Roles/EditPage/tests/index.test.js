@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, waitForElementToBeRemoved } from '@testing-library/react';
+import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
@@ -15,10 +16,25 @@ jest.mock('@strapi/helper-plugin', () => ({
   useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
 }));
 
+jest.mock('../../../../hooks', () => {
+  const originalModule = jest.requireActual('../../../../hooks');
+
+  return {
+    ...originalModule,
+    usePlugins: () => ({
+      ...originalModule.usePlugins,
+      isLoading: false,
+    }),
+  };
+});
+
 function makeAndRenderApp() {
   const history = createMemoryHistory();
+  const messages = {
+    'components.Input.error.validation.required': 'This value is required.',
+  };
   const app = (
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={messages} textComponent="span">
       <ThemeProvider theme={lightTheme}>
         <Router history={history}>
           <Switch>
@@ -37,9 +53,7 @@ function makeAndRenderApp() {
 describe('Admin | containers | RoleEditPage', () => {
   beforeAll(() => server.listen());
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  beforeEach(() => jest.clearAllMocks());
 
   afterEach(() => server.resetHandlers());
 
@@ -112,7 +126,7 @@ describe('Admin | containers | RoleEditPage', () => {
   });
 
   it("can edit a users-permissions role's name and description", async () => {
-    const { getByLabelText, getByRole, getByTestId } = makeAndRenderApp();
+    const { getByLabelText, getByRole, getByTestId, getAllByText } = makeAndRenderApp();
 
     // Check loading screen
     const loader = getByTestId('loader');
@@ -123,8 +137,20 @@ describe('Admin | containers | RoleEditPage', () => {
     const saveButton = getByRole('button', { name: /save/i });
     expect(saveButton).toBeInTheDocument();
     const nameField = getByLabelText(/name/i);
-    expect(nameField).not.toBeNull();
+    expect(nameField).toBeInTheDocument();
     const descriptionField = getByLabelText(/description/i);
     expect(descriptionField).toBeInTheDocument();
+
+    // Shows error when name is missing
+    await userEvent.clear(nameField);
+    expect(nameField).toHaveValue('');
+    await userEvent.clear(descriptionField);
+    expect(descriptionField).toHaveValue('');
+
+    // Show errors after form submit
+    await userEvent.click(saveButton);
+    await waitFor(() => expect(saveButton).not.toBeDisabled());
+    const errorMessages = await getAllByText(/this value is required/i);
+    errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
   });
 });
