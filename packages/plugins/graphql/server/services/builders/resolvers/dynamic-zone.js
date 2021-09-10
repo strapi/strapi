@@ -2,6 +2,6 @@
 
 module.exports = ({ strapi }) => ({
   buildDynamicZoneResolver: ({ contentTypeUID, attributeName }) => async parent => {
-    return strapi.db.entityManager.load(contentTypeUID, parent, attributeName);
+    return strapi.entityService.load(contentTypeUID, parent, attributeName);
   },
 });

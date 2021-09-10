@@ -1,6 +1,6 @@
 'use strict';
 
-const { pick } = require('lodash/fp');
+const { pick, pipe, isNil } = require('lodash/fp');
 
 const {
   convertSortQueryParams,
@@ -15,45 +15,26 @@ const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 
 const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
-// TODO: check invalid values / add defaults ....
-const transformParamsToQuery = (uid, params = {}) => {
-  const model = strapi.getModel(uid);
+// TODO: to remove once the front is migrated
+const convertOldQuery = params => {
+  const obj = {};
 
-  const query = {};
+  Object.keys(params).forEach(key => {
+    if (key.startsWith('_')) {
+      obj[key.slice(1)] = params[key];
+    } else {
+      obj[key] = params[key];
+    }
+  });
 
-  const {
-    start,
-    page,
-    pageSize,
-    limit,
-    sort,
-    filters,
-    fields,
-    populate,
-    publicationState,
-    _q,
-    _where,
-    ...rest
-  } = params;
+  return obj;
+};
+
+const transformCommonParams = (params = {}) => {
+  const { _q, sort, filters, _where, fields, populate, ...query } = params;
 
   if (_q) {
     query._q = _q;
-  }
-
-  if (page) {
-    query.page = Number(page);
-  }
-
-  if (pageSize) {
-    query.pageSize = Number(pageSize);
-  }
-
-  if (start) {
-    query.offset = convertStartQueryParams(start);
-  }
-
-  if (limit) {
-    query.limit = convertLimitQueryParams(limit);
   }
 
   if (sort) {
@@ -78,8 +59,50 @@ const transformParamsToQuery = (uid, params = {}) => {
     query.populate = convertPopulateQueryParams(populate);
   }
 
-  // TODO: move to convert-query-params ?
-  if (publicationState && contentTypesUtils.hasDraftAndPublish(model)) {
+  return { ...convertOldQuery(query), ...query };
+};
+
+const transformPaginationParams = (params = {}) => {
+  const { page, pageSize, start, limit, ...query } = params;
+
+  const isPagePagination = !isNil(page) || !isNil(pageSize);
+  const isOffsetPagination = !isNil(start) || !isNil(limit);
+
+  if (isPagePagination && isOffsetPagination) {
+    throw new Error(
+      'Invalid pagination attributes. You cannot use page and offset pagination in the same query'
+    );
+  }
+
+  if (page) {
+    query.page = Number(page);
+  }
+
+  if (pageSize) {
+    query.pageSize = Number(pageSize);
+  }
+
+  if (start) {
+    query.offset = convertStartQueryParams(start);
+  }
+
+  if (limit) {
+    query.limit = convertLimitQueryParams(limit);
+  }
+
+  return { ...convertOldQuery(query), ...query };
+};
+
+const transformPublicationStateParams = uid => (params = {}) => {
+  const contentType = strapi.getModel(uid);
+
+  if (!contentType) {
+    return params;
+  }
+
+  const { publicationState, ...query } = params;
+
+  if (publicationState && contentTypesUtils.hasDraftAndPublish(contentType)) {
     const { publicationState = 'live' } = params;
 
     const liveClause = {
@@ -97,32 +120,19 @@ const transformParamsToQuery = (uid, params = {}) => {
     }
   }
 
-  const finalQuery = {
-    ...convertOldQuery(rest),
-    ...query,
-  };
-
-  return finalQuery;
+  return { ...convertOldQuery(query), ...query };
 };
 
-// TODO: to remove once the front is migrated
-const convertOldQuery = params => {
-  const obj = {};
-
-  Object.keys(params).forEach(key => {
-    if (key.startsWith('_')) {
-      obj[key.slice(1)] = params[key];
-    } else {
-      obj[key] = params[key];
-    }
-  });
-
-  return obj;
+const chainParamsTransformations = (params, transformFunctions = []) => {
+  return pipe(...transformFunctions)(params);
 };
 
 const pickSelectionParams = pick(['fields', 'populate']);
 
 module.exports = {
-  transformParamsToQuery,
+  transformCommonParams,
+  transformPublicationStateParams,
+  transformPaginationParams,
+  chainParamsTransformations,
   pickSelectionParams,
 };

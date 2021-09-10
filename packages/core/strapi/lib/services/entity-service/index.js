@@ -6,7 +6,6 @@ const {
   webhook: webhookUtils,
   contentTypes: contentTypesUtils,
   relations: relationsUtils,
-  pagination: paginationUtils,
 } = require('@strapi/utils');
 const uploadFiles = require('../utils/upload-files');
 
@@ -16,20 +15,29 @@ const {
   updateComponents,
   deleteComponents,
 } = require('./components');
-const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const {
+  chainParamsTransformations,
+  transformCommonParams,
+  transformPaginationParams,
+  transformPublicationStateParams,
+  pickSelectionParams,
+} = require('./params');
+
+const transformParamsToQuery = (uid, params) => {
+  return chainParamsTransformations(params, [
+    // _q, _where, filters, etc...
+    transformCommonParams,
+    // page, pageSize, start, limit
+    transformPaginationParams,
+    // publicationState
+    transformPublicationStateParams(uid),
+  ]);
+};
 
 const { MANY_RELATIONS } = relationsUtils.constants;
 
 // TODO: those should be strapi events used by the webhooks not the other way arround
 const { ENTRY_CREATE, ENTRY_UPDATE, ENTRY_DELETE } = webhookUtils.webhookEvents;
-
-const paginateAndTransformToQuery = (uid, opts = {}) => {
-  // Paginate the opts
-  const paginatedOpts = paginationUtils.withDefaultPagination(opts);
-
-  // Transform the opts into a query & return it
-  return transformParamsToQuery(uid, paginatedOpts);
-};
 
 module.exports = ctx => {
   const implementation = createDefaultImplementation(ctx);
@@ -76,7 +84,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
     const { params } = await this.wrapOptions(opts, { uid, action: 'find' });
 
-    const query = paginateAndTransformToQuery(uid, params);
+    const query = transformParamsToQuery(uid, params);
 
     if (kind === 'singleType') {
       return db.query(uid).findOne(query);
@@ -88,7 +96,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async findPage(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
 
-    const query = paginateAndTransformToQuery(uid, params);
+    const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).findPage(query);
   },
@@ -140,7 +148,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async count(uid, opts) {
     const { params } = await this.wrapOptions(opts, { uid, action: 'count' });
 
-    const query = paginateAndTransformToQuery(uid, params);
+    const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).count(query);
   },
@@ -247,5 +255,18 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, params);
 
     return db.query(uid).deleteMany(query);
+  },
+
+  load(uid, entity, field, params) {
+    const { attributes } = strapi.getModel(uid);
+
+    const attribute = attributes[field];
+
+    const loadParams =
+      attribute.type === 'relation'
+        ? transformParamsToQuery(attribute.target, params)
+        : chainParamsTransformations(params, [transformCommonParams, transformPaginationParams]);
+
+    return db.query(uid).load(entity, field, loadParams);
   },
 });
