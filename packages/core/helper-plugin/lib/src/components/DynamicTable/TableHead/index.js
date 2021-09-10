@@ -9,9 +9,10 @@ import {
   Tooltip,
   VisuallyHidden,
 } from '@strapi/parts';
-import { SortIcon, useQueryParams } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import SortIcon from '../../../icons/SortIcon';
+import useQueryParams from '../../../hooks/useQueryParams';
 
 const TableHead = ({
   areAllEntriesSelected,

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   CustomContentLayout,
+  DynamicTable,
   Search,
   SettingsPageTitle,
   useRBAC,
@@ -14,7 +15,7 @@ import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../../../permissions';
-import DynamicTable from './DynamicTable';
+import TableRows from './DynamicTable/TableRows';
 import Filters from './Filters';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
@@ -117,15 +118,25 @@ const ListPage = () => {
         {canRead && (
           <>
             <DynamicTable
-              canCreate={canCreate}
-              canDelete={canDelete}
+              contentType="Users"
               isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
               headers={tableHeaders}
               rows={data?.results}
               withBulkActions
               withMainAction={canDelete}
-            />
+            >
+              <TableRows
+                canDelete={canDelete}
+                // entriesToDelete={entriesToDelete}
+                headers={tableHeaders}
+                // onClickDelete={handleClickDelete}
+                // onSelectRow={handleSelectRow}
+                rows={data?.results || []}
+                withBulkActions
+                withMainAction={canDelete}
+              />
+            </DynamicTable>
             <PaginationFooter pagination={data?.pagination} />
           </>
         )}

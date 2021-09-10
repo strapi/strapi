@@ -86,6 +86,7 @@ const TableRows = ({
 
 TableRows.defaultProps = {
   canDelete: false,
+  entriesToDelete: [],
   onClickDelete: () => {},
   onSelectRow: () => {},
   rows: [],
@@ -95,7 +96,7 @@ TableRows.defaultProps = {
 
 TableRows.propTypes = {
   canDelete: PropTypes.bool,
-  entriesToDelete: PropTypes.array.isRequired,
+  entriesToDelete: PropTypes.array,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,
   onSelectRow: PropTypes.func,
