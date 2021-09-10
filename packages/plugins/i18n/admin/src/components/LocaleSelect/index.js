@@ -41,7 +41,18 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
 
   return (
     <Select
-      startIcon={isLoading ? <SmallLoader>Loading the locales...</SmallLoader> : undefined}
+      startIcon={
+        isLoading ? (
+          <SmallLoader>
+            {formatMessage({
+              id: getTrad('Settings.locales.modal.create.defaultLocales.loading'),
+              defaultMessage: 'Settings.locales.modal.create.defaultLocales.loading',
+            })}
+          </SmallLoader>
+        ) : (
+          undefined
+        )
+      }
       aria-busy={isLoading}
       label={formatMessage({
         id: getTrad('Settings.locales.modal.locales.label'),
