@@ -2,16 +2,8 @@ import React from 'react';
 import { ContentLayout } from '@strapi/parts/Layout';
 import PropTypes from 'prop-types';
 import EmptyStateLayout from '../EmptyStateLayout';
-import LoadingIndicatorPage from '../LoadingIndicatorPage';
 
-const CustomContentLayout = ({
-  action,
-  canRead,
-  children,
-  isLoading,
-  shouldShowEmptyState,
-  ...rest
-}) => {
+const CustomContentLayout = ({ action, canRead, children, shouldShowEmptyState }) => {
   if (!canRead) {
     return (
       <ContentLayout>
@@ -35,14 +27,6 @@ const CustomContentLayout = ({
     );
   }
 
-  if (isLoading) {
-    return (
-      <ContentLayout>
-        <LoadingIndicatorPage {...rest} />
-      </ContentLayout>
-    );
-  }
-
   return <ContentLayout>{children}</ContentLayout>;
 };
 
@@ -50,7 +34,6 @@ CustomContentLayout.defaultProps = {
   action: undefined,
   canRead: true,
   children: null,
-  isLoading: false,
   shouldShowEmptyState: false,
 };
 
@@ -58,7 +41,6 @@ CustomContentLayout.propTypes = {
   action: PropTypes.any,
   canRead: PropTypes.bool,
   children: PropTypes.any,
-  isLoading: PropTypes.bool,
   shouldShowEmptyState: PropTypes.bool,
 };
 

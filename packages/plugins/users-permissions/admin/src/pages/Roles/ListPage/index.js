@@ -25,6 +25,7 @@ import {
   useNotification,
   CustomContentLayout,
   useRBAC,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
@@ -73,7 +74,7 @@ const RoleListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const handleClickEdit = (id) => {
+  const handleClickEdit = id => {
     push(`/settings/${pluginId}/roles/${id}`);
   };
 
@@ -104,70 +105,74 @@ const RoleListPage = () => {
           }
         />
 
-        <CustomContentLayout
-          canRead={canRead}
-          shouldShowEmptyState={roles && !roles.length}
-          isLoading={isLoading || isLoadingForPermissions}
-        >
-          <Table colCount={4} rowCount={roles && roles.length + 1}>
-            <Thead>
-              <Tr>
-                <Th>
-                  <TableLabel>
-                    {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
-                  </TableLabel>
-                </Th>
-                <Th>
-                  <TableLabel>
-                    {formatMessage({
-                      id: getTrad('Roles.description'),
-                      defaultMessage: 'Description',
-                    })}
-                  </TableLabel>
-                </Th>
-                <Th>
-                  <TableLabel>
-                    {formatMessage({
-                      id: getTrad('Roles.users'),
-                      defaultMessage: 'Users',
-                    })}
-                  </TableLabel>
-                </Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {roles &&
-                roles.map((role) => (
-                  <Tr key={role.name}>
-                    <Td width="20%">
-                      <Text>{role.name}</Text>
-                    </Td>
-                    <Td width="50%">
-                      <Text>{role.description}</Text>
-                    </Td>
-                    <Td width="30%">
-                      <Text>
-                        {`${role.nb_users} ${formatMessage({
-                          id: getTrad('Roles.users'),
-                          defaultMessage: 'users',
-                        }).toLowerCase()}`}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <CheckPermissions permissions={permissions.updateRole}>
-                        <IconButton
-                          onClick={() => handleClickEdit(role.id)}
-                          noBorder
-                          icon={<EditIcon />}
-                          label="Edit"
-                        />
-                      </CheckPermissions>
-                    </Td>
-                  </Tr>
-                ))}
-            </Tbody>
-          </Table>
-        </CustomContentLayout>
+        {isLoading ? (
+          <LoadingIndicatorPage />
+        ) : (
+          <CustomContentLayout
+            canRead={canRead}
+            shouldShowEmptyState={roles && !roles.length}
+            isLoading={isLoading || isLoadingForPermissions}
+          >
+            <Table colCount={4} rowCount={roles && roles.length + 1}>
+              <Thead>
+                <Tr>
+                  <Th>
+                    <TableLabel>
+                      {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel>
+                      {formatMessage({
+                        id: getTrad('Roles.description'),
+                        defaultMessage: 'Description',
+                      })}
+                    </TableLabel>
+                  </Th>
+                  <Th>
+                    <TableLabel>
+                      {formatMessage({
+                        id: getTrad('Roles.users'),
+                        defaultMessage: 'Users',
+                      })}
+                    </TableLabel>
+                  </Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {roles &&
+                  roles.map(role => (
+                    <Tr key={role.name}>
+                      <Td width="20%">
+                        <Text>{role.name}</Text>
+                      </Td>
+                      <Td width="50%">
+                        <Text>{role.description}</Text>
+                      </Td>
+                      <Td width="30%">
+                        <Text>
+                          {`${role.nb_users} ${formatMessage({
+                            id: getTrad('Roles.users'),
+                            defaultMessage: 'users',
+                          }).toLowerCase()}`}
+                        </Text>
+                      </Td>
+                      <Td>
+                        <CheckPermissions permissions={permissions.updateRole}>
+                          <IconButton
+                            onClick={() => handleClickEdit(role.id)}
+                            noBorder
+                            icon={<EditIcon />}
+                            label="Edit"
+                          />
+                        </CheckPermissions>
+                      </Td>
+                    </Tr>
+                  ))}
+              </Tbody>
+            </Table>
+          </CustomContentLayout>
+        )}
       </Main>
     </Layout>
   );

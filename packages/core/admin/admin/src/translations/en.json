@@ -411,6 +411,7 @@
   "content-manager.api.id": "API ID",
   "content-manager.header.name": "Content",
   "content-manager.App.schemas.data-loaded": "The schemas have been successfully loaded",
+  "app.utils.notify.data-loaded": "The {target} has loaded",
   "content-manager.components.AddFilterCTA.add": "Filters",
   "content-manager.components.AddFilterCTA.hide": "Filters",
   "content-manager.components.DraggableAttr.edit": "Click to edit",

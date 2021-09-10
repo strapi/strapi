@@ -8,7 +8,7 @@ import {
   useNotification,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { Button, Box, HeaderLayout, Main, Row } from '@strapi/parts';
+import { ActionLayout, Button, HeaderLayout, Main, useNotifyAT } from '@strapi/parts';
 import { Mail } from '@strapi/icons';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -33,9 +33,27 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
+  const { notifyStatus } = useNotifyAT();
   const queryName = ['users', search];
 
-  const { status, data, isFetching } = useQuery(queryName, () => fetchData(search), {
+  const title = formatMessage({
+    id: 'Settings.permissions.users.listview.header.title',
+    defaultMessage: 'Users',
+  });
+
+  const notifyLoad = () => {
+    notifyStatus(
+      formatMessage(
+        {
+          id: 'app.utils.notify.data-loaded',
+          defaultMessage: 'The {label} has loaded',
+        },
+        { target: title }
+      )
+    );
+  };
+
+  const { status, data, isFetching } = useQuery(queryName, () => fetchData(search, notifyLoad), {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -85,11 +103,6 @@ const ListPage = () => {
     undefined
   );
 
-  const title = formatMessage({
-    id: 'Settings.permissions.users.listview.header.title',
-    defaultMessage: 'Users',
-  });
-
   return (
     <Main labelledBy="title">
       <SettingsPageTitle name="Users" />
@@ -105,23 +118,23 @@ const ListPage = () => {
           { number: total }
         )}
       />
+      {canRead && (
+        <ActionLayout
+          startActions={
+            <>
+              <Search
+                label={formatMessage(
+                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                  { target: title }
+                )}
+              />
+              <Filters displayedFilters={displayedFilters} />
+            </>
+          }
+        />
+      )}
       <CustomContentLayout canRead={canRead}>
         {status === 'error' && <div>TODO: An error occurred</div>}
-        {canRead && (
-          <>
-            <Box paddingBottom={4}>
-              <Row wrap="wrap">
-                <Search
-                  label={formatMessage(
-                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                    { target: title }
-                  )}
-                />
-                <Filters displayedFilters={displayedFilters} />
-              </Row>
-            </Box>
-          </>
-        )}
         {canRead && (
           <>
             <DynamicTable
@@ -135,10 +148,7 @@ const ListPage = () => {
             >
               <TableRows
                 canDelete={canDelete}
-                // entriesToDelete={entriesToDelete}
                 headers={tableHeaders}
-                // onClickDelete={handleClickDelete}
-                // onSelectRow={handleSelectRow}
                 rows={data?.results || []}
                 withBulkActions
                 withMainAction={canDelete}
