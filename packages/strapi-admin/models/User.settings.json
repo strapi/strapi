@@ -4,6 +4,9 @@
     "name": "User",
     "description": ""
   },
+  "options": {
+    "timestamps": true
+  },
   "pluginOptions": {
     "content-manager": {
       "visible": false
