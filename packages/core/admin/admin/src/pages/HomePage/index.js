@@ -60,7 +60,7 @@ const HomePage = () => {
       </FormattedMessage>
       <Main labelledBy="homepage">
         <LogoContainer>
-          <img alt="Strapi logo" src={Logo} />
+          <img alt="" aria-hidden src={Logo} />
         </LogoContainer>
         <Box padding={10}>
           <Grid>
