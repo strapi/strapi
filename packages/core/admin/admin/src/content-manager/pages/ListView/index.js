@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -12,7 +12,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
-  // CustomContentLayout,
+  CustomContentLayout,
+  DynamicTable,
   // CheckPermissions,
   // PopUpWarning,
   useFocusWhenNavigate,
@@ -74,7 +75,7 @@ import {
 /* eslint-disable react/no-array-index-key */
 function ListView({
   canCreate,
-  // canDelete,
+  canDelete,
   canRead,
   // canUpdate,
   // didDeleteData,
@@ -90,7 +91,7 @@ function ListView({
   // showWarningDeleteAll,
   // toggleModalDelete,
   // toggleModalDeleteAll,
-  // data,
+  data,
   displayedHeaders,
   getData,
   getDataSucceeded,
@@ -108,6 +109,7 @@ function ListView({
   //     // settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   //   },
   // } = layout;
+  console.log({ data });
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -124,8 +126,6 @@ function ListView({
 
     return headers.displayedHeaders;
   }, [runHookWaterfall, displayedHeaders, layout]);
-
-  console.log({ tableHeaders });
 
   // const [{ query }, setQuery] = useQueryParams();
   const [{ query }] = useQueryParams();
@@ -396,6 +396,19 @@ function ListView({
         subtitle={subtitle}
         title={headerLayoutTitle}
       />
+      <CustomContentLayout canRead={canRead}>
+        <DynamicTable
+          contentType={headerLayoutTitle}
+          isLoading={isLoading}
+          headers={tableHeaders}
+          // rows={data}
+          rows={[]}
+          withBulkActions
+          withMainAction={canDelete}
+        >
+          {/* TODO */}
+        </DynamicTable>
+      </CustomContentLayout>
     </Main>
   );
 
@@ -542,19 +555,19 @@ function ListView({
   // );
 }
 
-ListView.defaultProps = {
-  permissions: [],
-};
+// ListView.defaultProps = {
+//   permissions: [],
+// };
 
 ListView.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
-  canUpdate: PropTypes.bool.isRequired,
+  // canUpdate: PropTypes.bool.isRequired,
   displayedHeaders: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
-  didDeleteData: PropTypes.bool.isRequired,
-  entriesToDelete: PropTypes.array.isRequired,
+  // didDeleteData: PropTypes.bool.isRequired,
+  // entriesToDelete: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
@@ -572,30 +585,30 @@ ListView.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
-  onChangeBulk: PropTypes.func.isRequired,
-  onChangeBulkSelectall: PropTypes.func.isRequired,
-  onChangeListHeaders: PropTypes.func.isRequired,
-  onDeleteDataError: PropTypes.func.isRequired,
-  onDeleteDataSucceeded: PropTypes.func.isRequired,
-  onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
-  onResetListHeaders: PropTypes.func.isRequired,
+  // onChangeBulk: PropTypes.func.isRequired,
+  // onChangeBulkSelectall: PropTypes.func.isRequired,
+  // onChangeListHeaders: PropTypes.func.isRequired,
+  // onDeleteDataError: PropTypes.func.isRequired,
+  // onDeleteDataSucceeded: PropTypes.func.isRequired,
+  // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
+  // onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
-  setModalLoadingState: PropTypes.func.isRequired,
-  showModalConfirmButtonLoading: PropTypes.bool.isRequired,
-  showWarningDelete: PropTypes.bool.isRequired,
-  showWarningDeleteAll: PropTypes.bool.isRequired,
+  // setModalLoadingState: PropTypes.func.isRequired,
+  // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
+  // showWarningDelete: PropTypes.bool.isRequired,
+  // showWarningDeleteAll: PropTypes.bool.isRequired,
   slug: PropTypes.string.isRequired,
-  toggleModalDelete: PropTypes.func.isRequired,
-  toggleModalDeleteAll: PropTypes.func.isRequired,
-  setLayout: PropTypes.func.isRequired,
-  permissions: PropTypes.arrayOf(
-    PropTypes.shape({
-      action: PropTypes.string.isRequired,
-      subject: PropTypes.string.isRequired,
-      properties: PropTypes.object,
-      conditions: PropTypes.arrayOf(PropTypes.string),
-    })
-  ),
+  // toggleModalDelete: PropTypes.func.isRequired,
+  // toggleModalDeleteAll: PropTypes.func.isRequired,
+  // setLayout: PropTypes.func.isRequired,
+  // permissions: PropTypes.arrayOf(
+  //   PropTypes.shape({
+  //     action: PropTypes.string.isRequired,
+  //     subject: PropTypes.string.isRequired,
+  //     properties: PropTypes.object,
+  //     conditions: PropTypes.arrayOf(PropTypes.string),
+  //   })
+  // ),
 };
 
 const mapStateToProps = makeSelectListView();
