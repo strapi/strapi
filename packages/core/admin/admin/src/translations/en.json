@@ -1,5 +1,10 @@
 {
   "Analytics": "Analytics",
+  "app.component.search.label": "Search for {target}",
+  "app.component.table.select.all-entries": "Select all entries",
+  "app.component.table.select.one-entry": "Select {target}",
+  "app.component.table.edit": "Edit {target}",
+  "app.component.table.delete": "Delete {target}",
   "Auth.components.Oops.title": "Oops...",
   "Auth.components.Oops.text": "Your account has been suspended.",
   "Auth.components.Oops.text.admin": "If this is a mistake, please contact your administrator.",

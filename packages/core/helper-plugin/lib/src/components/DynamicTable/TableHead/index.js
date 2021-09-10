@@ -36,7 +36,7 @@ const TableHead = ({
           <Th>
             <BaseCheckbox
               aria-label={formatMessage({
-                id: 'list.all-entries.select',
+                id: 'app.component.table.select.all-entries',
                 defaultMessage: 'Select all entries',
               })}
               checked={areAllEntriesSelected}

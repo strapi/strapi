@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Row, Select, Option, Text } from '@strapi/parts';
+import { Row, Select, Option } from '@strapi/parts';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
@@ -20,20 +20,27 @@ const PageSize = () => {
 
   return (
     <Row>
-      <Select aria-label="Entries per page" onChange={handleChange} value={pageSize}>
+      <Select
+        label={formatMessage({
+          id: 'components.PageFooter.select',
+          defaultMessage: 'Entries per page',
+        })}
+        onChange={handleChange}
+        value={pageSize}
+      >
         <Option value="10">10</Option>
         <Option value="20">20</Option>
         <Option value="50">50</Option>
         <Option value="100">100</Option>
       </Select>
-      <Box paddingLeft={2}>
+      {/* <Box paddingLeft={2}>
         <Text textColor="neutral600" as="label" htmlFor="page-size">
           {formatMessage({
             id: 'components.PageFooter.select',
             defaultMessage: 'Entries per page',
           })}
         </Text>
-      </Box>
+      </Box> */}
     </Row>
   );
 };

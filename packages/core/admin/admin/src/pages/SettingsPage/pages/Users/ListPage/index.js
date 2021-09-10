@@ -85,16 +85,18 @@ const ListPage = () => {
     undefined
   );
 
+  const title = formatMessage({
+    id: 'Settings.permissions.users.listview.header.title',
+    defaultMessage: 'Users',
+  });
+
   return (
     <Main labelledBy="title">
       <SettingsPageTitle name="Users" />
       <HeaderLayout
         id="title"
         primaryAction={createAction}
-        title={formatMessage({
-          id: 'Settings.permissions.users.listview.header.title',
-          defaultMessage: 'Users',
-        })}
+        title={title}
         subtitle={formatMessage(
           {
             id: 'Settings.permissions.users.listview.header.subtitle',
@@ -108,8 +110,13 @@ const ListPage = () => {
         {canRead && (
           <>
             <Box paddingBottom={4}>
-              <Row style={{ flexWrap: 'wrap' }}>
-                <Search />
+              <Row wrap="wrap">
+                <Search
+                  label={formatMessage(
+                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                    { target: title }
+                  )}
+                />
                 <Filters displayedFilters={displayedFilters} />
               </Row>
             </Box>

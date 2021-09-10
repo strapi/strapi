@@ -7,7 +7,7 @@ import PageSize from './PageSize';
 const PaginationFooter = ({ pagination }) => {
   return (
     <Box paddingTop={6}>
-      <Row justifyContent="space-between">
+      <Row alignItems="flex-end" justifyContent="space-between">
         <PageSize />
         <Pagination pagination={pagination} />
       </Row>
