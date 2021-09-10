@@ -16,6 +16,8 @@ import {
   useNotifyAT,
   ContentLayout,
   Box,
+  Row,
+  VisuallyHidden,
 } from '@strapi/parts';
 
 import { AddIcon, EditIcon } from '@strapi/icons';
@@ -104,7 +106,7 @@ const RoleListPage = () => {
   const emptyContent = _q && !sortedRoles.length ? 'search' : 'roles';
 
   const colCount = 4;
-  const rowCount = roles && roles.length + 1;
+  const rowCount = (roles?.length || 0) + 1;
 
   return (
     <Layout>
@@ -137,7 +139,9 @@ const RoleListPage = () => {
           isLoading={isLoading || isLoadingForPermissions}
         >
           <Box paddingBottom={4}>
-            <Search />
+            <Row style={{ flexWrap: 'wrap' }}>
+              <Search />
+            </Row>
           </Box>
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
@@ -165,6 +169,14 @@ const RoleListPage = () => {
                         defaultMessage: 'Users',
                       })}
                     </TableLabel>
+                  </Th>
+                  <Th>
+                    <VisuallyHidden>
+                      {formatMessage({
+                        id: 'components.TableHeader.actions-label',
+                        defaultMessage: 'Actions',
+                      })}
+                    </VisuallyHidden>
                   </Th>
                 </Tr>
               </Thead>
