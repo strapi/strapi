@@ -10,27 +10,33 @@ import { useHistory, useLocation } from 'react-router-dom';
 // import { Header } from '@buffetjs/custom';
 // import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
-// import { stringify } from 'qs';
+import { stringify } from 'qs';
 import {
-  CustomContentLayout,
-  CheckPermissions,
+  // CustomContentLayout,
+  // CheckPermissions,
   // PopUpWarning,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
   useRBACProvider,
-  useStrapiApp,
+  // useStrapiApp,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
 import { HeaderLayout } from '@strapi/parts/Layout';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Button } from '@strapi/parts/Button';
+import Add from '@strapi/icons/Add';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 // import { InjectionZone } from '../../../shared/components';
-import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
-import permissions from '../../../permissions';
-import { formatFiltersFromQuery, getRequestUrl, getTrad } from '../../utils';
+// import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+// import permissions from '../../../permissions';
+import {
+  // formatFiltersFromQuery,
+  getRequestUrl,
+  getTrad,
+} from '../../utils';
 // import Container from '../../components/Container';
 // import CustomTable from '../../components/CustomTable';
 // import Search from '../../components/Search';
@@ -56,91 +62,93 @@ import {
   onResetListHeaders,
 } from './actions';
 import makeSelectListView from './selectors';
-import { getAllAllowedHeaders, getFirstSortableHeader, buildQueryString } from './utils';
+import {
+  // getAllAllowedHeaders,
+  // getFirstSortableHeader,
+  buildQueryString,
+} from './utils';
 // import AttributeFilter from '../../components/AttributeFilter';
 
-const cmPermissions = permissions.contentManager;
+// const cmPermissions = permissions.contentManager;
 
 /* eslint-disable react/no-array-index-key */
 function ListView({
   canCreate,
-  canDelete,
+  // canDelete,
   canRead,
-  canUpdate,
-  didDeleteData,
-  entriesToDelete,
-  onChangeBulk,
-  onChangeBulkSelectall,
-  onDeleteDataError,
-  onDeleteDataSucceeded,
-  onDeleteSeveralDataSucceeded,
-  setModalLoadingState,
-  showWarningDelete,
-  showModalConfirmButtonLoading,
-  showWarningDeleteAll,
-  toggleModalDelete,
-  toggleModalDeleteAll,
-  data,
-  displayedHeaders,
+  // canUpdate,
+  // didDeleteData,
+  // entriesToDelete,
+  // onChangeBulk,
+  // onChangeBulkSelectall,
+  // onDeleteDataError,
+  // onDeleteDataSucceeded,
+  // onDeleteSeveralDataSucceeded,
+  // setModalLoadingState,
+  // showWarningDelete,
+  // showModalConfirmButtonLoading,
+  // showWarningDeleteAll,
+  // toggleModalDelete,
+  // toggleModalDeleteAll,
+  // data,
+  // displayedHeaders,
   getData,
   getDataSucceeded,
   isLoading,
   layout,
-  onChangeListHeaders,
-  onResetListHeaders,
+  // onChangeListHeaders,
+  // onResetListHeaders,
   pagination: { total },
   slug,
 }) {
-  const {
-    contentType: {
-      attributes,
-      metadatas,
-      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-    },
-  } = layout;
+  // const {
+  //   contentType: {
+  //     // attributes,
+  //     // metadatas,
+  //     // settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+  //   },
+  // } = layout;
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
   const trackUsageRef = useRef(trackUsage);
   const fetchPermissionsRef = useRef(refetchPermissions);
+  const { notifyStatus } = useNotifyAT();
 
   useFocusWhenNavigate();
 
-  const { runHookWaterfall } = useStrapiApp();
+  // const { runHookWaterfall } = useStrapiApp();
 
-  const tableHeaders = useMemo(() => {
-    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
+  // const tableHeaders = useMemo(() => {
+  //   const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
 
-    return headers.displayedHeaders;
-  }, [runHookWaterfall, displayedHeaders, layout]);
+  //   return headers.displayedHeaders;
+  // }, [runHookWaterfall, displayedHeaders, layout]);
 
-  const [{ query }, setQuery] = useQueryParams();
+  // const [{ query }, setQuery] = useQueryParams();
+  const [{ query }] = useQueryParams();
   const params = buildQueryString(query);
 
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
 
-  const [isFilterPickerOpen, setFilterPickerState] = useState(false);
-  const [idToDelete, setIdToDelete] = useState(null);
+  // const [isFilterPickerOpen, setFilterPickerState] = useState(false);
+  // const [idToDelete, setIdToDelete] = useState(null);
   const contentType = layout.contentType;
   const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
-  const allAllowedHeaders = useMemo(() => getAllAllowedHeaders(attributes), [attributes]);
+  // const allAllowedHeaders = useMemo(() => getAllAllowedHeaders(attributes), [attributes]);
 
-  const filters = useMemo(() => {
-    return formatFiltersFromQuery(query);
-  }, [query]);
+  // const filters = useMemo(() => {
+  //   return formatFiltersFromQuery(query);
+  // }, [query]);
 
-  const sort = query.sort;
-  const _q = query._q || '';
+  // const sort = query.sort;
+  // const _q = query._q || '';
 
   // const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
   //   displayedHeaders,
   // ]);
-
-  useEffect(() => {
-    setFilterPickerState(false);
-  }, []);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
@@ -155,6 +163,18 @@ function ListView({
         const {
           data: { results, pagination },
         } = await axiosInstance.get(endPoint, opts);
+
+        notifyStatus(
+          formatMessage(
+            {
+              id: getTrad('utils.data-loaded'),
+              defaultMessage:
+                '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
+            },
+            // Using the plural form
+            { number: 2 }
+          )
+        );
 
         getDataSucceeded(pagination, results);
       } catch (err) {
@@ -185,7 +205,7 @@ function ListView({
         });
       }
     },
-    [getData, getDataSucceeded, push, toggleNotification]
+    [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification]
   );
 
   // const handleChangeListLabels = useCallback(
@@ -323,63 +343,6 @@ function ListView({
   //   });
   // }, []);
 
-  // const headerAction = useMemo(() => {
-  //   if (!canCreate) {
-  //     return [];
-  //   }
-
-  //   return [
-  //     {
-  //       label: formatMessage(
-  //         {
-  //           id: 'content-manager.containers.List.addAnEntry',
-  //         },
-  //         {
-  //           entity: label || 'Content Manager',
-  //         }
-  //       ),
-  //       onClick: () => {
-  //         const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
-
-  //         trackUsageRef.current('willCreateEntry', trackerProperty);
-  //         push({
-  //           pathname: `${pathname}/create`,
-  //           search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
-  //         });
-  //       },
-  //       color: 'primary',
-  //       type: 'button',
-  //       icon: true,
-  //       style: {
-  //         paddingLeft: 15,
-  //         paddingRight: 15,
-  //         fontWeight: 600,
-  //       },
-  //     },
-  //   ];
-  // }, [label, pathname, canCreate, formatMessage, hasDraftAndPublish, push, query]);
-
-  // const headerProps = useMemo(() => {
-  //   /* eslint-disable indent */
-  //   return {
-  //     title: {
-  //       label: label || 'Content Manager',
-  //     },
-  //     content: canRead
-  //       ? formatMessage(
-  //           {
-  //             id:
-  //               total > 1
-  //                 ? getTrad('containers.List.pluginHeaderDescription')
-  //                 : getTrad('containers.List.pluginHeaderDescription.singular'),
-  //           },
-  //           { label: total }
-  //         )
-  //       : null,
-  //     actions: headerAction,
-  //   };
-  // }, [total, headerAction, label, canRead, formatMessage]);
-
   // const handleToggleModalDeleteAll = e => {
   //   trackUsageRef.current('willBulkDeleteEntries');
   //   toggleModalDeleteAll(e);
@@ -393,23 +356,43 @@ function ListView({
     id: contentType.info.label,
     defaultMessage: contentType.info.label || defaultHeaderLayoutTitle,
   });
-  const subtitle = formatMessage(
-    {
-      id: 'content-manager.pages.ListView.header-subtitle',
-      defaultMessage: '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
-    },
-    { number: total }
-  );
+  const subtitle = canRead
+    ? formatMessage(
+        {
+          id: getTrad('pages.ListView.header-subtitle'),
+          defaultMessage: '{number, plural, =0 {# entries} one {# entry} other {# entries}} found',
+        },
+        { number: total }
+      )
+    : null;
 
-  console.log(contentType);
+  const createAction = canCreate ? (
+    <Button
+      onClick={() => {
+        const trackerProperty = hasDraftAndPublish ? { status: 'draft' } : {};
+
+        trackUsageRef.current('willCreateEntry', trackerProperty);
+        push({
+          pathname: `${pathname}/create`,
+          search: query.plugins ? stringify({ plugins: query.plugins }, { encode: false }) : '',
+        });
+      }}
+      startIcon={<Add />}
+    >
+      {formatMessage({
+        id: getTrad('HeaderLayout.button.label-add-entry'),
+        defaultMessage: 'Add new entry',
+      })}
+    </Button>
+  ) : null;
 
   return (
-    <Main labelledBy="title">
+    <Main labelledBy="title" aria-busy={isLoading}>
       <HeaderLayout
         id="title"
-        // primaryAction={createAction}
-        title={headerLayoutTitle}
+        primaryAction={createAction}
         subtitle={subtitle}
+        title={headerLayoutTitle}
       />
     </Main>
   );
