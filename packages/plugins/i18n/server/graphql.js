@@ -115,7 +115,13 @@ module.exports = ({ strapi }) => ({
           return;
         }
 
-        const contentType = typeRegistry.get(config.type).config.contentType;
+        const registryType = typeRegistry.get(config.type);
+
+        if (!registryType) {
+          return;
+        }
+
+        const contentType = registryType.config.contentType;
 
         const createLocalizationMutationType = getCreateLocalizationMutationType(contentType);
 
