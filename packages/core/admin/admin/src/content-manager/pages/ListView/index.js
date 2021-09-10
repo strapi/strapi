@@ -19,7 +19,7 @@ import {
   useQueryParams,
   useNotification,
   useRBACProvider,
-  // useStrapiApp,
+  useStrapiApp,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
@@ -30,7 +30,7 @@ import Add from '@strapi/icons/Add';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 // import { InjectionZone } from '../../../shared/components';
-// import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 // import permissions from '../../../permissions';
 import {
   // formatFiltersFromQuery,
@@ -91,7 +91,7 @@ function ListView({
   // toggleModalDelete,
   // toggleModalDeleteAll,
   // data,
-  // displayedHeaders,
+  displayedHeaders,
   getData,
   getDataSucceeded,
   isLoading,
@@ -117,13 +117,15 @@ function ListView({
 
   useFocusWhenNavigate();
 
-  // const { runHookWaterfall } = useStrapiApp();
+  const { runHookWaterfall } = useStrapiApp();
 
-  // const tableHeaders = useMemo(() => {
-  //   const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
+  const tableHeaders = useMemo(() => {
+    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
 
-  //   return headers.displayedHeaders;
-  // }, [runHookWaterfall, displayedHeaders, layout]);
+    return headers.displayedHeaders;
+  }, [runHookWaterfall, displayedHeaders, layout]);
+
+  console.log({ tableHeaders });
 
   // const [{ query }, setQuery] = useQueryParams();
   const [{ query }] = useQueryParams();

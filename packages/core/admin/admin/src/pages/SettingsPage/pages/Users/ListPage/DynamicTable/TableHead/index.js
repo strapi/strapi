@@ -51,6 +51,7 @@ const TableHead = ({
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
             { label }
           );
+          const intlLabel = formatMessage({ id: label, defaultMessage: label });
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {
@@ -79,13 +80,13 @@ const TableHead = ({
                 )
               }
             >
-              <Tooltip label={isSortable ? sortLabel : label}>
+              <Tooltip label={isSortable ? sortLabel : intlLabel}>
                 <TableLabel
                   as={!isSorted && isSortable ? 'button' : 'span'}
-                  label={label}
+                  label={intlLabel}
                   onClick={() => handleClickSort(!isSorted)}
                 >
-                  {label}
+                  {intlLabel}
                 </TableLabel>
               </Tooltip>
             </Th>
