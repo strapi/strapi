@@ -13,6 +13,9 @@ module.exports = {
     pluralName: 'users',
     displayName: 'User',
   },
+  options: {
+    timestamps: true,
+  },
   pluginOptions: {
     'content-manager': {
       visible: false,
