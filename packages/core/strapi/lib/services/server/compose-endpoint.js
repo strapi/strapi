@@ -1,6 +1,6 @@
 'use strict';
 
-const { toLower, castArray, trim } = require('lodash/fp');
+const { toLower, castArray, trim, prop } = require('lodash/fp');
 
 const compose = require('koa-compose');
 const { resolveMiddlewares } = require('./middleware');
@@ -9,24 +9,64 @@ const { resolvePolicies } = require('./policy');
 const getMethod = route => trim(toLower(route.method));
 const getPath = route => trim(route.path);
 
-const routeInfoMiddleware = route => (ctx, next) => {
+const createRouteInfoMiddleware = routeInfo => (ctx, next) => {
+  const route = {
+    ...routeInfo,
+    config: routeInfo.config || {},
+  };
+
   ctx.state.route = route;
   return next();
 };
 
+const getAuthConfig = prop('config.auth');
+
+const createAuthorizeMiddleware = strapi => async (ctx, next) => {
+  const { auth, route } = ctx.state;
+
+  const authService = strapi.container.get('auth');
+
+  try {
+    await authService.verify(auth, getAuthConfig(route));
+
+    return next();
+  } catch (error) {
+    const { UnauthorizedError, ForbiddenError } = authService.errors;
+
+    if (error instanceof UnauthorizedError) {
+      return ctx.unauthorized();
+    }
+
+    if (error instanceof ForbiddenError) {
+      return ctx.forbidden();
+    }
+
+    throw error;
+  }
+};
+
+const createAuthenticateMiddleware = strapi => async (ctx, next) => {
+  return strapi.container.get('auth').authenticate(ctx, next);
+};
+
 module.exports = strapi => {
-  return (route, { pluginName, router, apiName }) => {
+  const authenticate = createAuthenticateMiddleware(strapi);
+  const authorize = createAuthorizeMiddleware(strapi);
+
+  return (route, { router }) => {
     try {
       const method = getMethod(route);
       const path = getPath(route);
 
       const middlewares = resolveMiddlewares(route);
-      const policies = resolvePolicies(route, { pluginName, apiName });
+      const policies = resolvePolicies(route);
 
-      const action = getAction(route, { pluginName, apiName }, strapi);
+      const action = getAction(route, strapi);
 
       const routeHandler = compose([
-        routeInfoMiddleware(route),
+        createRouteInfoMiddleware(route),
+        authenticate,
+        authorize,
         ...policies,
         ...middlewares,
         ...castArray(action),
@@ -52,7 +92,10 @@ const getController = (name, { pluginName, apiName }, strapi) => {
   return strapi.controller(name);
 };
 
-const getAction = ({ handler }, { pluginName, apiName }, strapi) => {
+const getAction = (route, strapi) => {
+  const { handler, info = {} } = route;
+  const { pluginName, apiName } = info;
+
   if (Array.isArray(handler) || typeof handler === 'function') {
     return handler;
   }

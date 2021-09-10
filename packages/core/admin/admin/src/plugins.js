@@ -9,14 +9,14 @@ import emailPlugin from '../../../email/admin/src';
 import uploadPlugin from '../../../upload/admin/src';
 
 const plugins = {
-  '@strapi/plugin-content-type-builder': ctbPlugin,
-  '@strapi/plugin-documentation': documentationPlugin,
-  '@strapi/plugin-i18n': i18nPlugin,
-  '@strapi/plugin-email': emailPlugin,
-  '@strapi/plugin-upload': uploadPlugin,
-  '@strapi/plugin-graphql': graphqlPlugin,
-  '@strapi/plugin-sentry': sentryPlugin,
-  '@strapi/plugin-users-permissions': usersPermissionsPlugin,
+  'content-type-builder': ctbPlugin,
+  documentation: documentationPlugin,
+  i18n: i18nPlugin,
+  email: emailPlugin,
+  upload: uploadPlugin,
+  graphql: graphqlPlugin,
+  sentry: sentryPlugin,
+  'users-permissions': usersPermissionsPlugin,
 };
 
 export default plugins;

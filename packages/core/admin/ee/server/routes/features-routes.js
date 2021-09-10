@@ -6,16 +6,19 @@ module.exports = {
       method: 'GET',
       path: '/providers',
       handler: 'authentication.getProviders',
+      config: { auth: false },
     },
     {
       method: 'GET',
       path: '/connect/:provider',
       handler: 'authentication.providerLogin',
+      config: { auth: false },
     },
     {
       method: 'POST',
       path: '/connect/:provider',
       handler: 'authentication.providerLogin',
+      config: { auth: false },
     },
     {
       method: 'GET',

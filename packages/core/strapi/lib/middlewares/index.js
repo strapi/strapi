@@ -3,6 +3,7 @@
 const { uniq, difference, get, isUndefined, merge } = require('lodash');
 
 const requiredMiddlewares = [
+  'auth',
   'responses',
   'router',
   'logger',

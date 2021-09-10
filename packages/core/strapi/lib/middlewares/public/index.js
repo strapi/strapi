@@ -67,11 +67,13 @@ module.exports = strapi => {
             method: 'GET',
             path: '/',
             handler: serveIndexPage,
+            config: { auth: false },
           },
           {
             method: 'GET',
             path: '/index.html',
             handler: serveIndexPage,
+            config: { auth: false },
           },
           {
             method: 'GET',
@@ -80,6 +82,7 @@ module.exports = strapi => {
               maxage: maxAge,
               defer: true,
             }),
+            config: { auth: false },
           },
           {
             method: 'GET',
@@ -88,6 +91,7 @@ module.exports = strapi => {
               maxage: maxAge,
               defer: true,
             }),
+            config: { auth: false },
           },
         ]);
       }
@@ -118,6 +122,7 @@ module.exports = strapi => {
             serveAdmin,
             serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' }),
           ],
+          config: { auth: false },
         },
       ]);
     },
