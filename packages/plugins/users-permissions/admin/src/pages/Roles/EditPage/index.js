@@ -20,6 +20,7 @@ import {
   SettingsPageTitle,
   CustomContentLayout,
   LoadingIndicatorPage,
+  Form,
   useNotification,
 } from '@strapi/helper-plugin';
 
@@ -84,15 +85,15 @@ const EditPage = () => {
         onSubmit={handleCreateRoleSubmit}
         validationSchema={schema}
       >
-        {({ handleSubmit, values, handleBlur, handleChange, errors }) => (
-          <>
+        {({ handleSubmit, values, handleChange, errors }) => (
+          <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
               id="title"
               primaryAction={
                 !isLoadingPlugins && (
                   <Button
                     disabled={role.code === 'strapi-super-admin'}
-                    onClick={handleSubmit}
+                    type="submit"
                     loading={isSubmitting}
                     startIcon={<CheckIcon />}
                   >
@@ -106,59 +107,66 @@ const EditPage = () => {
               title={role.name}
               subtitle={role.description}
             />
-            <form onSubmit={handleSubmit}>
-              <CustomContentLayout>
-                <Stack size={7}>
-                  <Box
-                    background="neutral0"
-                    hasRadius
-                    shadow="filterShadow"
-                    paddingTop={6}
-                    paddingBottom={6}
-                    paddingLeft={7}
-                    paddingRight={7}
-                  >
-                    <Stack size={4}>
-                      <H3>
-                        {formatMessage({
-                          id: getTrad('EditPage.form.roles'),
-                          defaultMessage: 'Role details',
-                        })}
-                      </H3>
-                      <Grid gap={4}>
-                        <GridItem col={6}>
-                          <TextInput
-                            name="name"
-                            value={values.name || ''}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            label={formatMessage({
-                              id: 'Settings.roles.form.input.name',
-                              defaultMessage: 'Name',
-                            })}
-                            error={errors.name ? { id: errors.name } : null}
-                          />
-                        </GridItem>
-                        <GridItem col={6}>
-                          <Textarea
-                            name="description"
-                            value={values.description || ''}
-                            onChange={handleChange}
-                            onBlur={handleBlur}
-                            label={formatMessage({
-                              id: 'Settings.roles.form.input.description',
-                              defaultMessage: 'Description',
-                            })}
-                            error={errors.description ? { id: errors.description } : null}
-                          />
-                        </GridItem>
-                      </Grid>
-                    </Stack>
-                  </Box>
-                </Stack>
-              </CustomContentLayout>
-            </form>
-          </>
+            <CustomContentLayout>
+              <Stack size={7}>
+                <Box
+                  background="neutral0"
+                  hasRadius
+                  shadow="filterShadow"
+                  paddingTop={6}
+                  paddingBottom={6}
+                  paddingLeft={7}
+                  paddingRight={7}
+                >
+                  <Stack size={4}>
+                    <H3>
+                      {formatMessage({
+                        id: getTrad('EditPage.form.roles'),
+                        defaultMessage: 'Role details',
+                      })}
+                    </H3>
+                    <Grid gap={4}>
+                      <GridItem col={6}>
+                        <TextInput
+                          name="name"
+                          value={values.name || ''}
+                          onChange={handleChange}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.name',
+                            defaultMessage: 'Name',
+                          })}
+                          error={
+                            errors.name
+                              ? formatMessage({ id: errors.name, defaultMessage: errors.name })
+                              : null
+                          }
+                        />
+                      </GridItem>
+                      <GridItem col={6}>
+                        <Textarea
+                          name="description"
+                          value={values.description || ''}
+                          onChange={handleChange}
+                          label={formatMessage({
+                            id: 'Settings.roles.form.input.description',
+                            defaultMessage: 'Description',
+                          })}
+                          error={
+                            errors.description
+                              ? formatMessage({
+                                  id: errors.description,
+                                  defaultMessage: errors.description,
+                                })
+                              : null
+                          }
+                        />
+                      </GridItem>
+                    </Grid>
+                  </Stack>
+                </Box>
+              </Stack>
+            </CustomContentLayout>
+          </Form>
         )}
       </Formik>
     </Main>
