@@ -52,7 +52,7 @@ This component is used to display an empty state.
               />
               <ContentLayout>
                 {!canRead && <NoPermissions />}
-                {(data && data.length === 0) && <NoContent content="No content available" action={<Button>Add content</Button>}/>}
+                {(canRead && data && data.length === 0) && <NoContent content="No content available" action={<Button>Add content</Button>}/>}
                 {isLoading && <LoadingIndicatorPage />}
               </ContentLayout>
             </Main>
