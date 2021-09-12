@@ -25,7 +25,7 @@
     "inquirer": "8.1.0",
     "js-yaml": "4.1.0",
     "node-fetch": "^2.6.1",
-    "ora": "5.4.0",
+    "ora": "6.0.0",
     "strapi-generate-new": "3.6.8",
     "tar": "6.1.9"
   },
