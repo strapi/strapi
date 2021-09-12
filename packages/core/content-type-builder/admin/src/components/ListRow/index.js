@@ -201,7 +201,7 @@ function ListRow({
   }
 
   return (
-    <BoxWrapper as="tr" onClick={handleClick}>
+    <BoxWrapper as="tr">
       <td>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
@@ -252,7 +252,10 @@ function ListRow({
                 {!isMorph && (
                   <IconButton
                     onClick={handleClick}
-                    label={formatMessage({ id: 'app.utils.edit', formatMessage: 'Edit' })}
+                    label={`${formatMessage({
+                      id: 'app.utils.edit',
+                      formatMessage: 'Edit',
+                    })} ${name}`}
                     noBorder
                     icon={<EditIcon />}
                   />
@@ -266,7 +269,10 @@ function ListRow({
                       secondLoopComponentUid || firstLoopComponentUid || ''
                     );
                   }}
-                  label={formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
+                  label={`${formatMessage({
+                    id: 'app.utils.delete',
+                    defaultMessage: 'Delete',
+                  })} ${name}`}
                   noBorder
                   icon={<DeleteIcon />}
                 />

@@ -18,7 +18,7 @@ import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import BoxWrapper from './BoxWrapper';
 import getTrad from '../../utils/getTrad';
-import NestedTFooter from '../NestedTFooter/NestedTFooter';
+import NestedTFooter from '../NestedTFooter';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -167,7 +167,11 @@ function List({
   return (
     <>
       <BoxWrapper>
-        <Box paddingLeft={6} paddingRight={isMain ? 6 : 0}>
+        <Box
+          paddingLeft={6}
+          paddingRight={isMain ? 6 : 0}
+          {...(isMain && { style: { overflowX: 'auto' } })}
+        >
           <table>
             {isMain && (
               <thead>

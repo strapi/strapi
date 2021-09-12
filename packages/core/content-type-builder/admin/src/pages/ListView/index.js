@@ -224,7 +224,7 @@ const ListView = () => {
                 </Button>
                 <Button
                   startIcon={<CheckIcon />}
-                  onClick={submitData}
+                  onClick={() => submitData()}
                   type="submit"
                   disabled={isEqual(modifiedData, initialData)}
                 >
