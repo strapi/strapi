@@ -103,19 +103,6 @@ describe('Content manager | App | main', () => {
     expect(screen.getByText('Categories')).toBeVisible();
     expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c30 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c31 {
-        overflow-x: hidden;
-      }
-
       .c34 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -153,6 +140,19 @@ describe('Content manager | App | main', () => {
 
       .c33 {
         height: 100vh;
+      }
+
+      .c30 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c31 {
+        overflow-x: hidden;
       }
 
       .c2 {

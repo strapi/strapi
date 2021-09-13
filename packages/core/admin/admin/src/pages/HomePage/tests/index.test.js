@@ -139,19 +139,6 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
-      .c1 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
       .c24 {
         background: #ffffff;
         padding: 24px;
@@ -294,6 +281,19 @@ describe('Homepage', () => {
       .c27 svg {
         width: 2rem;
         height: 2rem;
+      }
+
+      .c1 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c2 {
+        overflow-x: hidden;
       }
 
       .c3 {
@@ -628,7 +628,8 @@ describe('Homepage', () => {
               class="c4"
             >
               <img
-                alt="Strapi logo"
+                alt=""
+                aria-hidden="true"
                 src="IMAGE_MOCK"
               />
             </div>
