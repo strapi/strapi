@@ -1,6 +1,5 @@
 import React from 'react';
 import { useQuery } from 'react-query';
-import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { Text } from '@strapi/parts/Text';
@@ -8,7 +7,7 @@ import { Loader } from '@strapi/parts/Loader';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { axiosInstance } from '../../../../../core/utils';
 import { getRequestUrl } from '../../../../utils';
-import formatDisplayedValue from '../utils/formatDisplayedValue';
+import CellValue from '../CellValue';
 
 const fetchRelation = async (endPoint, notifyStatus) => {
   const {
@@ -22,12 +21,12 @@ const fetchRelation = async (endPoint, notifyStatus) => {
 
 const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) => {
   const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name}`);
-
-  const { formatDate, formatTime, formatNumber, formatMessage } = useIntl();
   const { notifyStatus } = useNotifyAT();
 
-  const { data, status } = useQuery([targetModel, rowId], () =>
-    fetchRelation(requestURL, notifyStatus)
+  const { data, status } = useQuery(
+    [targetModel, rowId],
+    () => fetchRelation(requestURL, notifyStatus),
+    { staleTime: 0 }
   );
 
   if (status !== 'success') {
@@ -41,18 +40,13 @@ const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) =
   return (
     <ul>
       {data?.results.map(entry => {
-        const displayedValue = entry[fieldSchema.name]
-          ? formatDisplayedValue(entry[fieldSchema.name], fieldSchema.type, {
-              formatDate,
-              formatTime,
-              formatNumber,
-              formatMessage,
-            })
-          : '-';
+        const value = entry[fieldSchema.name];
 
         return (
           <Box as="li" key={entry.id} padding={3}>
-            <Text>{displayedValue}</Text>
+            <Text>
+              {value ? <CellValue type={fieldSchema.type} value={entry[fieldSchema.name]} /> : '-'}
+            </Text>
           </Box>
         );
       })}

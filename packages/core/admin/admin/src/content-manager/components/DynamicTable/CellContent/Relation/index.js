@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import toString from 'lodash/toString';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Text } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
@@ -10,8 +9,8 @@ import { Row } from '@strapi/parts/Row';
 import { Popover } from '@strapi/parts/Popover';
 import { SortIcon } from '@strapi/helper-plugin';
 import styled from 'styled-components';
-import formatDisplayedValue from '../utils/formatDisplayedValue';
 import PopoverContent from './PopoverContent';
+import CellValue from '../CellValue';
 
 const SINGLE_RELATIONS = ['oneToOne', 'manyToOne'];
 
@@ -29,22 +28,16 @@ const RelationCountBadge = styled(Badge)`
 `;
 
 const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) => {
-  const { formatDate, formatTime, formatNumber, formatMessage } = useIntl();
+  const { formatMessage } = useIntl();
   const [visible, setVisible] = useState(false);
   const buttonRef = useRef();
 
   if (SINGLE_RELATIONS.includes(fieldSchema.relation)) {
-    const formattedValue = formatDisplayedValue(
-      value[metadatas.mainField.name],
-      metadatas.mainField.schema.type,
-      {
-        formatDate,
-        formatTime,
-        formatNumber,
-      }
+    return (
+      <Text textColor="neutral800">
+        <CellValue type={metadatas.mainField.schema.type} value={value[metadatas.mainField.name]} />
+      </Text>
     );
-
-    return <Text textColor="neutral800">{toString(formattedValue)}</Text>;
   }
 
   const handleTogglePopover = () => setVisible(prev => !prev);
