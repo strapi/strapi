@@ -1,6 +1,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useSelector } from 'react-redux';
+import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import LocaleListCell from '../LocaleListCell';
 
@@ -43,9 +44,11 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'fr-FR' }, { locale: 'ar' }];
 
     render(
-      <ThemeProvider theme={lightTheme}>
-        <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
-      </ThemeProvider>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <ThemeProvider theme={lightTheme}>
+          <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+        </ThemeProvider>
+      </IntlProvider>
     );
 
     expect(screen.getByText('French (default), Arabic, English')).toBeVisible();
@@ -85,9 +88,11 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'ar' }];
 
     render(
-      <ThemeProvider theme={lightTheme}>
-        <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
-      </ThemeProvider>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <ThemeProvider theme={lightTheme}>
+          <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+        </ThemeProvider>
+      </IntlProvider>
     );
 
     expect(screen.getByText('Arabic, English')).toBeVisible();
@@ -126,9 +131,11 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'en' }, { locale: 'ar' }];
 
     render(
-      <ThemeProvider theme={lightTheme}>
-        <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
-      </ThemeProvider>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <ThemeProvider theme={lightTheme}>
+          <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+        </ThemeProvider>
+      </IntlProvider>
     );
 
     expect(screen.getByText('French (default), Arabic, English')).toBeVisible();
