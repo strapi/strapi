@@ -37,7 +37,7 @@ const SearchAsset = ({ onSubmit, ...props }) => {
       </Searchbar>
       <VisuallyHidden>
         <button type="submit" tabIndex={-1}>
-          {formatMessage({ id: 'submit' })}
+          {formatMessage({ id: 'submit', defaultMessage: 'Submit' })}
         </button>
       </VisuallyHidden>
     </SearchForm>

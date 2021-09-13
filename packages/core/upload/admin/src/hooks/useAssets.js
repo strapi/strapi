@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { useQuery as useURLQuery, useNotification } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { axiosInstance, getRequestUrl, generateStringFromParams } from '../utils';
 import useSelectTimestamps from './useSelectTimestamps';
 
 export const useAssets = ({ skipWhen }) => {
+  const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const [, updated_at] = useSelectTimestamps();
   const { notifyStatus } = useNotifyAT();
@@ -26,9 +28,14 @@ export const useAssets = ({ skipWhen }) => {
 
   useEffect(() => {
     if (data) {
-      notifyStatus('The assets have finished loading');
+      notifyStatus(
+        formatMessage({
+          id: 'list.asset.at.finished',
+          defaultMessage: 'The assets have finished loading.',
+        })
+      );
     }
-  }, [data, notifyStatus]);
+  }, [data, notifyStatus, formatMessage]);
 
   useEffect(() => {
     if (error) {
