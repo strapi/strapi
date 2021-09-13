@@ -1,13 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi/parts';
-import { EditIcon, DeleteIcon } from '@strapi/icons';
+import { EditIcon, DeleteIcon, Duplicate } from '@strapi/icons';
+import { useTracking } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
+import { usePluginsQueryParams } from '../../../hooks';
 // import { Tooltip } from '@strapi/parts/Tooltip';
 // import toString from 'lodash/toString';
 
 const TableRows = ({
+  canCreate,
   canDelete,
   headers,
   entriesToDelete,
@@ -22,6 +25,8 @@ const TableRows = ({
     location: { pathname },
   } = useHistory();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+  const pluginsQueryParams = usePluginsQueryParams();
 
   return (
     <Tbody>
@@ -70,7 +75,14 @@ const TableRows = ({
               <Td>
                 <Row justifyContent="end">
                   <IconButton
-                    onClick={() => push(`${pathname}/${data.id}`)}
+                    onClick={() => {
+                      trackUsage('willEditEntryFromButton');
+                      push({
+                        pathname: `${pathname}/${data.id}`,
+                        state: { from: pathname },
+                        search: pluginsQueryParams,
+                      });
+                    }}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
                       { target: itemLineText }
@@ -78,6 +90,29 @@ const TableRows = ({
                     noBorder
                     icon={<EditIcon />}
                   />
+
+                  {canCreate && (
+                    <Box paddingLeft={1}>
+                      <IconButton
+                        onClick={() => {
+                          push({
+                            pathname: `${pathname}/create/clone${data.id}`,
+                            state: { from: pathname },
+                            search: pluginsQueryParams,
+                          });
+                        }}
+                        label={formatMessage(
+                          {
+                            id: 'app.component.table.duplicate',
+                            defaultMessage: 'Duplicate {target}',
+                          },
+                          { target: itemLineText }
+                        )}
+                        noBorder
+                        icon={<Duplicate />}
+                      />
+                    </Box>
+                  )}
 
                   {canDelete && (
                     <Box paddingLeft={1}>
@@ -103,6 +138,7 @@ const TableRows = ({
 };
 
 TableRows.defaultProps = {
+  canCreate: false,
   canDelete: false,
   entriesToDelete: [],
   onClickDelete: () => {},
@@ -113,6 +149,7 @@ TableRows.defaultProps = {
 };
 
 TableRows.propTypes = {
+  canCreate: PropTypes.bool,
   canDelete: PropTypes.bool,
   entriesToDelete: PropTypes.array,
   headers: PropTypes.array.isRequired,

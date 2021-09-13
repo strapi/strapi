@@ -8,13 +8,12 @@ import { getTrad } from '../../utils';
 import State from '../State';
 import TableRows from './TableRows';
 
-const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) => {
+const DynamicTable = ({ canCreate, canDelete, contentTypeName, isLoading, layout, rows }) => {
   const { runHookWaterfall } = useStrapiApp();
   const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
   const { formatMessage } = useIntl();
 
   const tableHeaders = useMemo(() => {
-    console.log('up');
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
       displayedHeaders: layout.contentType.layouts.list,
       layout,
@@ -56,6 +55,7 @@ const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) =
       withMainAction={canDelete}
     >
       <TableRows
+        canCreate={canCreate}
         canDelete={canDelete}
         headers={tableHeaders}
         rows={rows}
@@ -67,6 +67,7 @@ const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) =
 };
 
 DynamicTable.propTypes = {
+  canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
   isLoading: PropTypes.bool.isRequired,

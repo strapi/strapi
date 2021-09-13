@@ -389,6 +389,7 @@ function ListView({
       <ContentLayout>
         {canRead ? (
           <DynamicTable
+            canCreate={canCreate}
             canDelete={canDelete}
             contentTypeName={headerLayoutTitle}
             isLoading={isLoading}
