@@ -121,6 +121,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding-right: 8px;
       }
 
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
       .c14 {
         padding-bottom: 16px;
       }
@@ -748,11 +753,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
       .c36 tr:last-of-type {
         border-bottom: none;
       }
@@ -789,6 +789,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       <main
+        aria-busy="true"
         aria-labelledby="title"
         class="c0"
         id="main-content"
@@ -861,7 +862,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
           </div>
         </div>
         <div
-          class="c13"
+          class="c1 c13"
         >
           <div
             class="c1 c14"

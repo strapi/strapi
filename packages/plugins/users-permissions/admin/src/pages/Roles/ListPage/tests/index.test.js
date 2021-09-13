@@ -91,6 +91,11 @@ describe('Admin | containers | RoleListPage', () => {
         padding-left: 56px;
       }
 
+      .c10 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
       .c5 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -134,11 +139,6 @@ describe('Admin | containers | RoleListPage', () => {
 
       .c3 {
         outline: none;
-      }
-
-      .c10 {
-        padding-right: 56px;
-        padding-left: 56px;
       }
 
       .c13 {

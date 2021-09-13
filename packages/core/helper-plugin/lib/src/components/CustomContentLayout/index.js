@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ContentLayout } from '@strapi/parts/Layout';
 import PropTypes from 'prop-types';
 import EmptyStateLayout from '../EmptyStateLayout';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
 
+// TODO: REMOVE this component
 const CustomContentLayout = ({
   action,
   canRead,
@@ -12,6 +13,12 @@ const CustomContentLayout = ({
   shouldShowEmptyState,
   ...rest
 }) => {
+  useEffect(() => {
+    console.error(
+      'This component will soon be removed, please check out the PageTemplate in the storybook'
+    );
+  }, []);
+
   if (!canRead) {
     return (
       <ContentLayout>
