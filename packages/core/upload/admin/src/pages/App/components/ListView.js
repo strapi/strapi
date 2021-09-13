@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+// TODO: implement the view
 export const ListView = ({ assets }) => {
-  console.log('lol', assets);
-
-  return <div>Hello world</div>;
+  return <div>Number of assets: {assets.length}</div>;
 };
 
 ListView.propTypes = {
