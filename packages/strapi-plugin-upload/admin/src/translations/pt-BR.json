@@ -1,4 +1,5 @@
 {
+  "page.title": "Configurações - Biblioteca de Mídia",
   "button.next": "Próximo",
   "checkControl.crop-duplicate": "Duplicar e recortar o arquivo",
   "checkControl.crop-original": "Recortar o arquivo original",
@@ -27,6 +28,7 @@
   "input.label-bold": "Arraste e solte",
   "input.label-normal": "para enviar ou",
   "input.placeholder": "Clique para selecionar um arquivo ou arraste e solte um arquivo nessa área",
+  "input.placeholder.icon": "Solte o arquivo nesta área",
   "input.url.description": "Insira cada URL em uma linha.",
   "input.url.label": "URL",
   "list.assets-empty.subtitle": "Adicione o primeiro à lista.",
@@ -35,6 +37,9 @@
   "list.assets.selected.plural": "{number} arquivos selecionados",
   "list.assets.selected.singular": "{number} arquivo selecionado",
   "list.assets.type-not-allowed": "Esse tipo de arquivo não é permitido.",
+  "list.assets.not-supported-content": "Pré-visualização indisponível",
+  "list.assets.loading-asset": "Carregando pré-visualização para a mídia: {path}",
+  "list.assets.preview-asset": "Pré-visualização para o vídeo no caminho {path}",
   "modal.file-details.date": "Data",
   "modal.file-details.dimensions": "Dimensões",
   "modal.file-details.extension": "Extensão",
