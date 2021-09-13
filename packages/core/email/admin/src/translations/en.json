@@ -14,5 +14,6 @@
   "Settings.email.plugin.notification.test.error": "Failed to send a test mail to {to}",
   "Settings.email.plugin.notification.test.success": "Email test succeeded, check the {to} mailbox",
   "Settings.email.plugin.subTitle": "Test the settings for the email plugin",
-  "Settings.email.plugin.title": "Email settings"
+  "Settings.email.plugin.title": "Email settings",
+  "Settings.email.plugin.notification.data.loaded": "Email settings data has been loaded"
 }

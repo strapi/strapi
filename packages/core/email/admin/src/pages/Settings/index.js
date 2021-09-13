@@ -17,6 +17,7 @@ import { Grid, GridItem } from '@strapi/parts/Grid';
 import { H3 } from '@strapi/parts/Text';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Button } from '@strapi/parts/Button';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import Configuration from './components/Configuration';
 import schema from '../../utils/schema';
@@ -35,6 +36,7 @@ const SettingsPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { notifyStatus } = useNotifyAT();
   useFocusWhenNavigate();
 
   const [formErrors, setFormErrors] = useState({});
@@ -98,6 +100,13 @@ const SettingsPage = () => {
 
     fetchEmailSettings()
       .then(config => {
+        notifyStatus(
+          formatMessage({
+            id: 'Settings.email.plugin.notification.data.loaded',
+            defaultMessage: 'Email settings data has been loaded',
+          })
+        );
+
         setConfig(config);
 
         const testAddressFound = get(config, 'settings.testAddress');
@@ -116,7 +125,7 @@ const SettingsPage = () => {
         })
       )
       .finally(() => setIsLoading(false));
-  }, [formatMessage, toggleNotification]);
+  }, [formatMessage, toggleNotification, notifyStatus]);
 
   if (isLoading) {
     return (
