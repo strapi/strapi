@@ -94,8 +94,18 @@ const ProfilePage = () => {
   if (isLoading) {
     return (
       <Main>
-        <Helmet title="User profile" />
-        <HeaderLayout title="Profile page" />
+        <Helmet
+          title={formatMessage({
+            id: 'Settings.profile.form.section.helmet.title',
+            defaultMessage: 'User profile',
+          })}
+        />
+        <HeaderLayout
+          title={formatMessage({
+            id: 'Settings.profile.form.section.profile.page.title',
+            defaultMessage: 'Profile page',
+          })}
+        />
         <CustomContentLayout isLoading />
       </Main>
     );
@@ -103,7 +113,12 @@ const ProfilePage = () => {
 
   return (
     <Main aria-busy={isSubmittingForm}>
-      <Helmet title="User profile" />
+      <Helmet
+        title={formatMessage({
+          id: 'Settings.profile.form.section.helmet.title',
+          defaultMessage: 'User profile',
+        })}
+      />
       <Formik
         onSubmit={handleSubmit}
         initialValues={initialData}
