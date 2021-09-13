@@ -2,9 +2,7 @@
 
 const _ = require('lodash');
 const yup = require('yup');
-const { formatYupErrors, nameToSlug } = require('@strapi/utils');
-const pluralize = require('pluralize');
-
+const { formatYupErrors } = require('@strapi/utils');
 const { getService } = require('../../utils');
 const { modelTypes, DEFAULT_TYPES, typeKinds } = require('../../services/constants');
 const createSchema = require('./model-schema');
@@ -46,16 +44,26 @@ const VALID_TYPES = [...DEFAULT_TYPES, 'uid', 'component', 'dynamiczone'];
  */
 const createContentTypeSchema = (data, { isEdition = false } = {}) => {
   const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
-
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
     modelType: modelTypes.CONTENT_TYPE,
   }).shape({
-    name: yup
+    displayName: yup
       .string()
-      .test(hasPluralName)
+      .min(1)
+      .required(),
+    singularName: yup
+      .string()
+      .min(1)
       .test(alreadyUsedContentTypeName(isEdition))
       .test(forbiddenContentTypeNameValidator())
+      .isKebabCase()
+      .required(),
+    pluralName: yup
+      .string()
       .min(1)
+      .test(alreadyUsedContentTypeName(isEdition))
+      .test(forbiddenContentTypeNameValidator())
+      .isKebabCase()
       .required(),
   });
 
@@ -112,7 +120,7 @@ const forbiddenContentTypeNameValidator = () => {
     name: 'forbiddenContentTypeName',
     message: `Content Type name cannot be one of ${reservedNames.join(', ')}`,
     test: value => {
-      if (reservedNames.includes(nameToSlug(value))) {
+      if (value && reservedNames.includes(value)) {
         return false;
       }
 
@@ -121,21 +129,8 @@ const forbiddenContentTypeNameValidator = () => {
   };
 };
 
-const hasPluralName = {
-  name: 'hasPluralName',
-  message:
-    'Content Type name `${value}` cannot be pluralized. \nSuggestion: add Item after the name (e.g News -> NewsItem).',
-  test: value => {
-    if (pluralize.singular(value) === pluralize(value)) {
-      return false;
-    }
-
-    return true;
-  },
-};
-
 const alreadyUsedContentTypeName = isEdition => {
-  const usedNames = Object.values(strapi.contentTypes).map(ct => ct.modelName);
+  const usedNames = _.flatMap(strapi.contentTypes, ct => [ct.singularName, ct.pluralName]);
 
   return {
     name: 'nameAlreadyUsed',
@@ -144,7 +139,7 @@ const alreadyUsedContentTypeName = isEdition => {
       // don't check on edition
       if (isEdition) return true;
 
-      if (usedNames.includes(nameToSlug(value))) {
+      if (usedNames.includes(value)) {
         return false;
       }
       return true;

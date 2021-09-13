@@ -16,7 +16,9 @@ let data = {
 };
 
 const bedModel = {
-  name: 'bed',
+  displayName: 'Bed',
+  singularName: 'bed',
+  pluralName: 'beds',
   kind: 'collectionType',
   attributes: {
     name: {
@@ -126,13 +128,13 @@ describe('Search query', () => {
   beforeAll(async () => {
     await builder
       .addContentType(bedModel)
-      .addFixtures(bedModel.name, bedFixtures)
+      .addFixtures(bedModel.singularName, bedFixtures)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createContentAPIRequest({ strapi });
 
-    data.bed = builder.sanitizedFixturesFor(bedModel.name, strapi);
+    data.bed = builder.sanitizedFixturesFor(bedModel.singularName, strapi);
   });
 
   afterAll(async () => {

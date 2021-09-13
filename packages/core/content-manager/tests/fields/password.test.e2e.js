@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withpassword',
+  displayName: 'withpassword',
+  singularName: 'withpassword',
+  pluralName: 'withpasswords',
   attributes: {
     field: {
       type: 'password',

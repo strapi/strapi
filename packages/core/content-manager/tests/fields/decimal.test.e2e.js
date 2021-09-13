@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withdecimal',
+  displayName: 'withdecimal',
+  singularName: 'withdecimal',
+  pluralName: 'withdecimals',
   attributes: {
     field: {
       type: 'decimal',

@@ -24,7 +24,9 @@ const defaultBody = {
 
 const models = {
   ct: {
-    name: 'withdynamiczone',
+    displayName: 'withdynamiczone',
+    singularName: 'withdynamiczone',
+    pluralName: 'withdynamiczones',
     attributes: {
       field: {
         type: 'dynamiczone',

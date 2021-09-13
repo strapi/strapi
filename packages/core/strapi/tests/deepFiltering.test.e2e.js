@@ -18,7 +18,9 @@ let rq;
 let strapi;
 
 const card = {
-  name: 'card',
+  displayName: 'Card',
+  singularName: 'card',
+  pluralName: 'cards',
   kind: 'collectionType',
   attributes: {
     name: {
@@ -28,7 +30,9 @@ const card = {
 };
 
 const collector = {
-  name: 'collector',
+  displayName: 'Collector',
+  singularName: 'collector',
+  pluralName: 'collectors',
   kind: 'collectionType',
   attributes: {
     name: {
@@ -87,8 +91,8 @@ describe('Deep Filtering API', () => {
   beforeAll(async () => {
     await builder
       .addContentTypes([card, collector])
-      .addFixtures(card.name, fixtures.card)
-      .addFixtures(collector.name, fixtures.collector)
+      .addFixtures(card.singularName, fixtures.card)
+      .addFixtures(collector.singularName, fixtures.collector)
       .build();
 
     strapi = await createStrapiInstance();

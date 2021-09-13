@@ -185,7 +185,7 @@ async function modifyContentType(data, { strapi } = {}) {
   delete sanitizedData.editable;
   delete sanitizedData.restrictRelationsTo;
 
-  const uid = toUID(sanitizedData.name);
+  const uid = toUID(sanitizedData.singularName);
 
   const ct = await contentTypeService.editContentType(uid, {
     contentType: {

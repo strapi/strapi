@@ -36,7 +36,9 @@ const product = {
       type: 'biginteger',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
@@ -88,7 +90,7 @@ describe('Filtering API', () => {
   beforeAll(async () => {
     await builder
       .addContentType(product)
-      .addFixtures(product.name, productFixtures)
+      .addFixtures(product.singularName, productFixtures)
       .build();
 
     strapi = await createStrapiInstance();

@@ -50,7 +50,9 @@ describe('Content Type Builder - Content types', () => {
         url: '/content-type-builder/content-types',
         body: {
           contentType: {
-            name: 'Test Collection Type',
+            displayName: 'Test Collection Type',
+            singularName: 'test-collection-type',
+            pluralName: 'test-collection-types',
             pluginOptions: {
               i18n: {
                 localized: true,
@@ -94,7 +96,9 @@ describe('Content Type Builder - Content types', () => {
         url: '/content-type-builder/content-types',
         body: {
           contentType: {
-            name: 'CT with DP',
+            displayName: 'CT with DP',
+            singularName: 'ct-with-dp',
+            pluralName: 'ct-with-dps',
             draftAndPublish: true,
             attributes: {
               title: {
@@ -134,7 +138,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'Test Single Type',
+            displayName: 'Test Single Type',
+            singularName: 'test-single-type',
+            pluralName: 'test-single-types',
             pluginOptions: {
               i18n: {
                 localized: true,
@@ -209,7 +215,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'collectionType',
-            name: 'test-collection',
+            displayName: 'test-collection',
+            singularName: 'test-collection',
+            pluralName: 'test-collections',
             attributes: {
               title: {
                 type: 'string',
@@ -236,7 +244,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'test-collection',
+            displayName: 'test-collection',
+            singularName: 'test-collection',
+            pluralName: 'test-collections',
             attributes: {
               title: {
                 type: 'string',
@@ -261,7 +271,9 @@ describe('Content Type Builder - Content types', () => {
         body: {
           contentType: {
             kind: 'singleType',
-            name: 'test-collection',
+            displayName: 'test-collection',
+            singularName: 'test-collection',
+            pluralName: 'test-collections',
             attributes: {
               relation: {
                 private: true,

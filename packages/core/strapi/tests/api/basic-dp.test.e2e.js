@@ -41,7 +41,9 @@ const productWithDP = {
     },
   },
   draftAndPublish: true,
-  name: 'product-with-dp',
+  displayName: 'product-with-dp',
+  singularName: 'product-with-dp',
+  pluralName: 'product-with-dps',
   description: '',
   collectionName: '',
 };

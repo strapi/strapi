@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withinteger',
+  displayName: 'withinteger',
+  singularName: 'withinteger',
+  pluralName: 'withintegers',
   attributes: {
     field: {
       type: 'integer',

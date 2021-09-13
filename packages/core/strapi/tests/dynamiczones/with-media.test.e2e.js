@@ -55,7 +55,9 @@ const components = {
 };
 
 const ct = {
-  name: 'withdynamiczonemedia',
+  displayName: 'withdynamiczonemedia',
+  singularName: 'withdynamiczonemedia',
+  pluralName: 'withdynamiczonemedias',
   attributes: {
     field: {
       type: 'dynamiczone',

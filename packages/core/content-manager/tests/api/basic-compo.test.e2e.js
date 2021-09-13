@@ -42,7 +42,9 @@ const productWithCompo = {
       required: true,
     },
   },
-  name: 'product with compo',
+  displayName: 'product with compo',
+  singularName: 'product-with-compo',
+  pluralName: 'product-with-compos',
   description: '',
   collectionName: '',
 };
