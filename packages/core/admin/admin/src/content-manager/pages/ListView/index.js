@@ -384,13 +384,8 @@ function ListView({
   ) : null;
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading}>
-      <HeaderLayout
-        id="title"
-        primaryAction={createAction}
-        subtitle={subtitle}
-        title={headerLayoutTitle}
-      />
+    <Main aria-busy={isLoading}>
+      <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
       <ContentLayout>
         {canRead ? (
           <DynamicTable
@@ -400,9 +395,7 @@ function ListView({
             // FIXME: remove the layout props drilling
             layout={layout}
             rows={data}
-          >
-            {/* TODO */}
-          </DynamicTable>
+          />
         ) : (
           <NoPermissions />
         )}

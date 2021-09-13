@@ -1,21 +1,32 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Text } from '@buffetjs/core';
+import { Text } from '@strapi/parts/Text';
+import { Box } from '@strapi/parts/Box';
 import { getTrad } from '../../utils';
-import Wrapper from './Wrapper';
 
 const State = ({ isPublished }) => {
   const { formatMessage } = useIntl();
+  const content = formatMessage({
+    id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
+  });
+  const background = isPublished ? 'success100' : 'secondary100';
+  const textColor = isPublished ? 'success700' : 'secondary700';
 
   return (
-    <Wrapper isGreen={isPublished}>
-      <Text lineHeight="19px">
-        {formatMessage({
-          id: getTrad(`containers.List.${isPublished ? 'published' : 'draft'}`),
-        })}
+    <Box
+      background={background}
+      hasRadius
+      paddingTop={1}
+      paddingBottom={1}
+      paddingLeft={2}
+      paddingRight={2}
+      style={{ width: 'fit-content' }}
+    >
+      <Text bold textColor={textColor}>
+        {content}
       </Text>
-    </Wrapper>
+    </Box>
   );
 };
 

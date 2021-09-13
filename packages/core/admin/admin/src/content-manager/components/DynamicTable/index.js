@@ -1,20 +1,50 @@
 import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
+import isEmpty from 'lodash/isEmpty';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { getTrad } from '../../utils';
+import State from '../State';
 import TableRows from './TableRows';
 
 const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) => {
   const { runHookWaterfall } = useStrapiApp();
+  const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
+  const { formatMessage } = useIntl();
 
   const tableHeaders = useMemo(() => {
+    console.log('up');
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
       displayedHeaders: layout.contentType.layouts.list,
       layout,
     });
 
-    return headers.displayedHeaders;
-  }, [runHookWaterfall, layout]);
+    if (!hasDraftAndPublish) {
+      return headers.displayedHeaders;
+    }
+
+    return [
+      ...headers.displayedHeaders,
+      {
+        key: '__published_at_temp_key__',
+        name: 'published_at',
+        fieldSchema: {
+          type: 'custom',
+        },
+        metadatas: {
+          label: formatMessage({ id: getTrad('containers.ListPage.table-headers.published_at') }),
+          searchable: false,
+          sortable: true,
+        },
+        cellFormatter: cellData => {
+          const isPublished = !isEmpty(cellData.published_at);
+
+          return <State isPublished={isPublished} />;
+        },
+      },
+    ];
+  }, [runHookWaterfall, layout, hasDraftAndPublish, formatMessage]);
 
   return (
     <Table

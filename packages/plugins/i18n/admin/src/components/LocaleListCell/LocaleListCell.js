@@ -92,7 +92,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
             <ul>
               {localesArray.map(name => (
                 <Box key={name} padding={3} as="li">
-                  {name}
+                  <Text>{name}</Text>
                 </Box>
               ))}
             </ul>
