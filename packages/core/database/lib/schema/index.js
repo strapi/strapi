@@ -1,5 +1,6 @@
 'use strict';
 
+// const util = require('util');
 const createSchemaBuilder = require('./builder');
 const createSchemaStorage = require('./schema-storage');
 const { diffSchemas } = require('./schema-diff');
@@ -73,6 +74,10 @@ const createSchemaProvider = db => {
         return this.create();
       }
 
+      // const schemaInspect = await db.dialect.schemaInspector.getSchema();
+
+      // console.log(util.inspect(schemaInspect, null, null, true));
+
       // run migrations
       db.migration.up();
 
@@ -81,9 +86,7 @@ const createSchemaProvider = db => {
       // diff schema
       const { status, diff } = diffSchemas(DBSchema, currentSchema);
 
-      // TODO: replace by schemaDiff.hasChanged()
       if (status === 'UNCHANGED') {
-        // NOTE: should we still update the schema in DB ?
         return;
       }
 

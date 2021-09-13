@@ -1,0 +1,127 @@
+'use strict';
+
+const SQL_QUERIES = {
+  TABLE_LIST: `select name from sqlite_master where type = 'table' and name NOT LIKE 'sqlite%'`,
+  TABLE_INFO: `pragma table_info(??)`,
+  INDEX_LIST: 'pragma index_list(??)',
+  INDEX_INFO: 'pragma index_info(??)',
+  FOREIGN_KEY_LIST: 'pragma foreign_key_list(??)',
+};
+
+const toStrapiType = column => {
+  switch (true) {
+    case column.type === 'integer': {
+      return { type: 'integer' };
+    }
+    case column.type.startsWith('varchar('): {
+      const length = column.type.slice(8, column.type.length - 1);
+      return { type: 'string', args: [Number(length)] };
+    }
+    default: {
+      return { type: 'specificType', args: [column.data_type] };
+    }
+  }
+};
+
+class SqliteSchemaInspector {
+  constructor(db) {
+    this.db = db;
+  }
+
+  async getSchema() {
+    const schema = { tables: [] };
+    const tables = await this.getTables();
+
+    for (const tableName of tables) {
+      const columns = await this.getColumns(tableName);
+      const indexes = await this.getIndexes(tableName);
+      const foreignKeys = await this.getForeignKeys(tableName);
+
+      schema.tables.push({
+        name: tableName,
+        columns,
+        indexes,
+        foreignKeys,
+      });
+    }
+
+    return schema;
+  }
+
+  async getTables() {
+    const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST);
+
+    return rows.map(row => row.name);
+  }
+
+  async getColumns(tableName) {
+    const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
+
+    return rows.map(row => {
+      return {
+        ...toStrapiType(row),
+        name: row.name,
+        // sqlType: row.type,
+        defaultTo: row.dflt_value,
+        notNullable: Boolean(row.notnull),
+        // primary: Boolean(row.pk),
+        // unsigned: false,
+        // autoincrement: false,
+      };
+    });
+  }
+
+  async getIndexes(tableName) {
+    const cols = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
+    const indexes = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [tableName]);
+
+    const ret = [];
+
+    for (const col of cols.filter(c => c.pk)) {
+      ret.push({
+        columns: [col.name],
+        type: 'primary',
+      });
+    }
+    // merge pk together
+
+    for (const index of indexes.filter(index => !index.name.startsWith('sqlite_'))) {
+      const res = await this.db.connection.raw(SQL_QUERIES.INDEX_INFO, [index.name]);
+
+      ret.push({
+        columns: res.map(row => row.name),
+        name: index.name,
+        // TODO: find other index types
+        type: index.unique ? 'unique' : null,
+      });
+    }
+
+    return ret;
+  }
+
+  async getForeignKeys(tableName) {
+    const fks = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_LIST, [tableName]);
+
+    const ret = {};
+
+    for (const fk of fks) {
+      if (!ret[fk.id]) {
+        ret[fk.id] = {
+          // TODO: name, //  find name
+          columns: [fk.from],
+          referencedColumns: [fk.to],
+          referencedTable: fk.table,
+          onUpdate: fk.on_update.toLowerCase(),
+          onDelete: fk.on_delete.toLowerCase(),
+        };
+      } else {
+        ret[fk.id].columns.push(fk.from);
+        ret[fk.id].referencedColumns.push(fk.to);
+      }
+    }
+
+    return Object.values(ret);
+  }
+}
+
+module.exports = SqliteSchemaInspector;

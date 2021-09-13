@@ -1,0 +1,31 @@
+'use strict';
+
+class Dialect {
+  constructor(db) {
+    this.db = db;
+  }
+
+  configure() {}
+  initialize() {}
+
+  usesForeignKeys() {
+    return false;
+  }
+
+  useReturning() {
+    return false;
+  }
+
+  // TODO: pass query info to display some more metadata
+  transformErrors(error) {
+    if (error instanceof Error) {
+      throw error;
+    }
+
+    throw new Error(error.message);
+  }
+}
+
+module.exports = {
+  Dialect,
+};
