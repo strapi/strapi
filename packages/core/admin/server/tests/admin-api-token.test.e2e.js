@@ -23,7 +23,7 @@ const { createAuthRequest } = require('../../../../../test/helpers/request');
  * 13. Updates a token with partial payload (successfully)
  * 14. Fails to update an api token (invalid `type` in the body)
  * 15. Updates a token when passing a `null` description (successfully)
- * 16. Updates a token but not the description of no description is passed (successfully)
+ * 16. Updates a token but not the description if no description is passed (successfully)
  */
 
 describe('Admin API Token CRUD (e2e)', () => {
@@ -353,7 +353,7 @@ describe('Admin API Token CRUD (e2e)', () => {
     apiTokens[0] = res.body.data;
   });
 
-  test('16. Updates a token but not the description of no description is passed (successfully)', async () => {
+  test('16. Updates a token but not the description if no description is passed (successfully)', async () => {
     const body = {
       name: 'api-token_tests-name',
     };
