@@ -19,10 +19,10 @@ import useDataManager from '../../hooks/useDataManager';
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 
 const StyledFontAwesomeIcon = styled(FontAwesomeIcon)`
-  width: 32px !important;
-  height: 32px !important;
-  padding: 9px;
-  border-radius: 64px;
+  width: ${pxToRem(32)} !important;
+  height: ${pxToRem(32)} !important;
+  padding: ${pxToRem(9)};
+  border-radius: ${pxToRem(64)};
   background: ${({ theme }) => theme.colors.neutral150};
   path {
     fill: ${({ theme }) => theme.colors.neutral500};
@@ -33,11 +33,11 @@ const CloseButton = styled.div`
   position: absolute;
   display: none;
   top: 5px;
-  right: 8px;
+  right: ${pxToRem(8)};
 
   svg {
-    width: 10px;
-    height: 10px;
+    width: ${pxToRem(10)};
+    height: ${pxToRem(10)};
     path {
       fill: ${({ theme }) => theme.colors.primary600};
     }

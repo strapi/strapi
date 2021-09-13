@@ -19,10 +19,10 @@ import ComponentList from '../ComponentList';
 import Tr from '../Tr';
 
 const StyledAddIcon = styled(AddIcon)`
-  width: 32px;
-  height: 32px;
-  padding: 9px;
-  border-radius: 64px;
+  width: ${pxToRem(32)};
+  height: ${pxToRem(32)};
+  padding: ${pxToRem(9)};
+  border-radius: ${pxToRem(64)};
   background: ${({ theme }) => theme.colors.primary100};
   path {
     fill: ${({ theme }) => theme.colors.primary600};

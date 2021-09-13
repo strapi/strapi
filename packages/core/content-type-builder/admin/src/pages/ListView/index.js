@@ -31,8 +31,6 @@ const ListView = () => {
   const { search } = useLocation();
   const [enablePrompt, togglePrompt] = useState(true);
 
-  console.log(initialData, modifiedData);
-
   useEffect(() => {
     if (search === '') {
       togglePrompt(true);
