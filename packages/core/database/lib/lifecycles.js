@@ -1,16 +1,40 @@
 'use strict';
 
+const assert = require('assert').strict;
+
+/**
+ * @typedef Event
+ * @property {string} action
+ * @property {Model} model
+ */
+
+/**
+ * For each model try to run it's lifecycles function if any is defined
+ * @param {Event} event
+ */
+const modelLifecyclesSubscriber = async event => {
+  const { model } = event;
+  if (event.action in model.lifecycles) {
+    await model.lifecycles[event.action](event);
+  }
+};
+
+const isValidSubscriber = subscriber => {
+  return (
+    typeof subscriber === 'function' || (typeof subscriber === 'object' && subscriber !== null)
+  );
+};
+
 const createLifecyclesManager = db => {
-  let subscribers = [];
+  let subscribers = [modelLifecyclesSubscriber];
 
   const lifecycleManager = {
     subscribe(subscriber) {
-      // TODO: verify subscriber
+      assert(isValidSubscriber(subscriber), 'Invalid subscriber. Expected function or object');
+
       subscribers.push(subscriber);
 
-      return () => {
-        subscribers.splice(subscribers.indexOf(subscriber), 1);
-      };
+      return () => subscribers.splice(subscribers.indexOf(subscriber), 1);
     },
 
     createEvent(action, uid, properties) {

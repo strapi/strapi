@@ -8,7 +8,7 @@ const PROVIDER_URLS_MAP = {
   error: PROVIDER_REDIRECT_ERROR,
 };
 
-const getAdminStore = async () => strapi.store({ type: 'core', environment: '', name: 'admin' });
+const getAdminStore = async () => strapi.store({ type: 'core', name: 'admin' });
 
 const getPrefixedRedirectUrls = () => {
   const { url: adminUrl } = strapi.config.get('admin');

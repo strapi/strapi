@@ -11,7 +11,7 @@ module.exports = plop => {
         message: 'Plugin name',
       },
     ],
-    actions: () => {
+    actions() {
       return [
         {
           type: 'addMany',

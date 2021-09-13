@@ -74,6 +74,7 @@ const createSchemaProvider = db => {
       }
 
       // run migrations
+      db.migration.up();
 
       // reload updated schema
 

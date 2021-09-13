@@ -10,6 +10,9 @@ class Dialect {
     this.db = db;
   }
 
+  configure() {}
+  initialize() {}
+
   usesForeignKeys() {
     return false;
   }
@@ -33,8 +36,7 @@ class PostgresDialect extends Dialect {
   }
 
   initialize() {
-    // FIXME:
-    // this.db.connection.context.client.types.setTypeParser(1700, 'text', parseFloat);
+    this.db.connection.client.driver.types.setTypeParser(1700, 'text', parseFloat);
   }
 
   usesForeignKeys() {
@@ -54,7 +56,7 @@ class PostgresDialect extends Dialect {
 }
 
 class MysqlDialect extends Dialect {
-  initialize() {
+  configure() {
     this.db.config.connection.connection.supportBigNumbers = true;
     this.db.config.connection.connection.bigNumberStrings = true;
     this.db.config.connection.connection.typeCast = (field, next) => {
@@ -81,10 +83,8 @@ class MysqlDialect extends Dialect {
 }
 
 class SqliteDialect extends Dialect {
-  async initialize() {
-    // Create the directory if it does not exist.
-
-    // TODO: get strapi.dir from somewhere else
+  configure() {
+    // TODO: use strapi.dir ?
 
     this.db.config.connection.connection.filename = path.resolve(
       this.db.config.connection.connection.filename
@@ -92,7 +92,7 @@ class SqliteDialect extends Dialect {
 
     const dbDir = path.dirname(this.db.config.connection.connection.filename);
 
-    await fse.ensureDir(dbDir);
+    fse.ensureDirSync(dbDir);
   }
 
   transformErrors(error) {
@@ -106,7 +106,6 @@ class SqliteDialect extends Dialect {
     }
   }
 }
-
 const createDialect = (db, client) => {
   switch (client) {
     case 'postgres':

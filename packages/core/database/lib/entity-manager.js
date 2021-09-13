@@ -815,7 +815,7 @@ const createEntityManager = db => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: populate,
+        populate,
       });
 
       return Object.assign({}, entity, entry);

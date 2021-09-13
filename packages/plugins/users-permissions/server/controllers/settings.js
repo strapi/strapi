@@ -6,16 +6,7 @@ const { isValidEmailTemplate } = require('./validation/email-template');
 
 module.exports = {
   async getEmailTemplate(ctx) {
-    ctx.send(
-      await strapi
-        .store({
-          environment: '',
-          type: 'plugin',
-          name: 'users-permissions',
-          key: 'email',
-        })
-        .get()
-    );
+    ctx.send(await strapi.store({ type: 'plugin', name: 'users-permissions', key: 'email' }).get());
   },
 
   async updateEmailTemplate(ctx) {
@@ -34,12 +25,7 @@ module.exports = {
     }
 
     await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'email',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'email' })
       .set({ value: emailTemplates });
 
     ctx.send({ ok: true });
@@ -47,12 +33,7 @@ module.exports = {
 
   async getAdvancedSettings(ctx) {
     const settings = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
     const roles = await getService('role').getRoles();
@@ -66,12 +47,7 @@ module.exports = {
     }
 
     await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .set({ value: ctx.request.body });
 
     ctx.send({ ok: true });
@@ -79,12 +55,7 @@ module.exports = {
 
   async getProviders(ctx) {
     const providers = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'grant',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
     for (const provider in providers) {
@@ -105,12 +76,7 @@ module.exports = {
     }
 
     await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'grant',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .set({ value: ctx.request.body.providers });
 
     ctx.send({ ok: true });

@@ -112,8 +112,8 @@ const createContentType = (uid, definition) => {
 
   return {
     ...schema,
-    actions: actions,
-    lifecycles: lifecycles,
+    actions,
+    lifecycles,
   };
 };
 

@@ -22,11 +22,7 @@ module.exports = {
     const provider = ctx.params.provider || 'local';
     const params = ctx.request.body;
 
-    const store = await strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-    });
+    const store = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
     if (provider === 'local') {
       if (!_.get(await store.get({ key: 'grant' }), 'email.enabled')) {
@@ -234,12 +230,7 @@ module.exports = {
     const grant = require('grant-koa');
 
     const grantConfig = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'grant',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
     const [requestPath] = ctx.request.url.split('?');
@@ -280,11 +271,7 @@ module.exports = {
       );
     }
 
-    const pluginStore = await strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-    });
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
     // Find the user by email.
     const user = await strapi
@@ -371,11 +358,7 @@ module.exports = {
   },
 
   async register(ctx) {
-    const pluginStore = await strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-    });
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
     const settings = await pluginStore.get({
       key: 'advanced',
@@ -552,12 +535,7 @@ module.exports = {
       });
     } else {
       const settings = await strapi
-        .store({
-          environment: '',
-          type: 'plugin',
-          name: 'users-permissions',
-          key: 'advanced',
-        })
+        .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
         .get();
 
       ctx.redirect(settings.email_confirmation_redirection || '/');

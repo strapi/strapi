@@ -3,6 +3,7 @@
 const _ = require('lodash');
 const { createLogger } = require('@strapi/logger');
 const { Database } = require('@strapi/database');
+const { createAsyncParallelHook } = require('@strapi/utils').hooks;
 
 const loadConfiguration = require('./core/app-configuration');
 
@@ -26,6 +27,7 @@ const contentTypesRegistry = require('./core/registries/content-types');
 const servicesRegistry = require('./core/registries/services');
 const policiesRegistry = require('./core/registries/policies');
 const middlewaresRegistry = require('./core/registries/middlewares');
+const hooksRegistry = require('./core/registries/hooks');
 const controllersRegistry = require('./core/registries/controllers');
 const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
@@ -33,6 +35,9 @@ const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
+
+// TODO: move somewhere else
+const draftAndPublishSync = require('./migrations/draft-publish');
 
 const LIFECYCLES = {
   REGISTER: 'register',
@@ -49,6 +54,7 @@ class Strapi {
     this.container.register('services', servicesRegistry(this));
     this.container.register('policies', policiesRegistry(this));
     this.container.register('middlewares', middlewaresRegistry(this));
+    this.container.register('hooks', hooksRegistry(this));
     this.container.register('controllers', controllersRegistry(this));
     this.container.register('modules', modulesRegistry(this));
     this.container.register('plugins', pluginsRegistry(this));
@@ -105,6 +111,14 @@ class Strapi {
 
   get plugins() {
     return this.container.get('plugins').getAll();
+  }
+
+  hook(name) {
+    return this.container.get('hooks').get(name);
+  }
+
+  get hooks() {
+    return this.container.get('hooks');
   }
 
   // api(name) {
@@ -262,6 +276,14 @@ class Strapi {
     this.middleware = await loaders.loadMiddlewares(this);
   }
 
+  registerInternalHooks() {
+    this.hooks.set('strapi::content-types.beforeSync', createAsyncParallelHook());
+    this.hooks.set('strapi::content-types.afterSync', createAsyncParallelHook());
+
+    this.hook('strapi::content-types.beforeSync').register(draftAndPublishSync.disable);
+    this.hook('strapi::content-types.afterSync').register(draftAndPublishSync.enable);
+  }
+
   async load() {
     await Promise.all([
       this.loadPlugins(),
@@ -281,6 +303,8 @@ class Strapi {
       configuration: this.config.get('server.webhooks', {}),
     });
 
+    this.registerInternalHooks();
+
     await this.runLifecyclesFunctions(LIFECYCLES.REGISTER);
 
     const contentTypes = [
@@ -295,19 +319,10 @@ class Strapi {
       models: Database.transformContentTypes(contentTypes),
     });
 
-    await this.db.schema.sync();
-
-    this.store = createCoreStore({
-      environment: this.config.get('environment'),
-      db: this.db,
-    });
-
+    this.store = createCoreStore({ db: this.db });
     this.webhookStore = createWebhookStore({ db: this.db });
 
-    await this.startWebhooks();
-
     this.entityValidator = entityValidator;
-
     this.entityService = createEntityService({
       strapi: this,
       db: this.db,
@@ -316,6 +331,36 @@ class Strapi {
     });
 
     this.telemetry = createTelemetry(this);
+
+    let oldContentTypes;
+    if (await this.db.connection.schema.hasTable(coreStoreModel.collectionName)) {
+      oldContentTypes = await this.store.get({
+        type: 'strapi',
+        name: 'content_types',
+        key: 'schema',
+      });
+    }
+
+    await this.hook('strapi::content-types.beforeSync').call({
+      oldContentTypes,
+      contentTypes: strapi.contentTypes,
+    });
+
+    await this.db.schema.sync();
+
+    await this.hook('strapi::content-types.afterSync').call({
+      oldContentTypes,
+      contentTypes: strapi.contentTypes,
+    });
+
+    await this.store.set({
+      type: 'strapi',
+      name: 'content_types',
+      key: 'schema',
+      value: strapi.contentTypes,
+    });
+
+    await this.startWebhooks();
 
     // Initialize middlewares.
     await initializeMiddlewares(this);
@@ -354,14 +399,14 @@ class Strapi {
     Object.defineProperty(reload, 'isWatching', {
       configurable: true,
       enumerable: true,
-      set: value => {
+      set(value) {
         // Special state when the reloader is disabled temporarly (see GraphQL plugin example).
         if (state.isWatching === false && value === true) {
           state.shouldReload += 1;
         }
         state.isWatching = value;
       },
-      get: () => {
+      get() {
         return state.isWatching;
       },
     });

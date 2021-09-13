@@ -19,7 +19,7 @@ const prompts = [
     type: 'input',
     name: 'name',
     message: 'What should be the name of the component?',
-    validate: async (name, answers) => {
+    async validate(name, answers) {
       if (!name) {
         return 'The name cannot be empty.';
       }

@@ -62,6 +62,11 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
+    ref(name) {
+      // TODO: name to column ?
+      return db.connection.ref(name);
+    },
+
     update(data) {
       state.type = 'update';
       state.data = data;

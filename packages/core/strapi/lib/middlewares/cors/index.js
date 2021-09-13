@@ -32,7 +32,7 @@ module.exports = strapi => {
 
       strapi.server.use(
         cors({
-          origin: async function(ctx) {
+          async origin(ctx) {
             let originList;
 
             if (typeof origin === 'function') {
