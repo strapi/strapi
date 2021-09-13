@@ -22,9 +22,7 @@ const BoxWrapper = styled(Box)`
 
   tr {
     border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
-  }
 
-  tr {
     & td,
     & th {
       padding: ${({ theme }) => theme.spaces[4]};
