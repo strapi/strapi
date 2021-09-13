@@ -85,10 +85,8 @@ const RoleListPage = () => {
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <Main aria-busy={isLoading} labelledBy="roles">
+      <Main aria-busy={isLoading}>
         <HeaderLayout
-          as="h1"
-          id="roles"
           title={formatMessage({
             id: 'Settings.roles.title',
             defaultMessage: 'Roles',

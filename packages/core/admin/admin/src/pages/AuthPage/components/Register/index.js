@@ -106,11 +106,11 @@ const Register = ({ fieldsToDisable, noSignin, onSubmit, schema }) => {
         >
           {({ values, errors, handleChange }) => (
             <Form noValidate>
-              <Main labelledBy="welcome">
+              <Main>
                 <Column>
                   <Logo />
                   <Box paddingTop={6} paddingBottom={1}>
-                    <H1 id="welcome">
+                    <H1>
                       {formatMessage({
                         id: 'Auth.form.welcome.title',
                         defaultMessage: 'Welcome back!',

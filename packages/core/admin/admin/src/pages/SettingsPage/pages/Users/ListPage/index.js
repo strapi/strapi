@@ -112,10 +112,9 @@ const ListPage = () => {
   );
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading}>
+    <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        id="title"
         primaryAction={createAction}
         title={title}
         subtitle={formatMessage(

@@ -240,11 +240,9 @@ const ListView = () => {
   return (
     <Layout>
       <SettingsPageTitle name="Webhooks" />
-      <Main labelledBy="webhooks" aria-busy={isLoading || loadingWebhooks}>
+      <Main aria-busy={isLoading || loadingWebhooks}>
         <>
           <HeaderLayout
-            as="h1"
-            id="webhooks"
             title={formatMessage({ id: 'Settings.webhooks.title', defaultMessage: 'Webhooks' })}
             subtitle={formatMessage({
               id: 'Settings.webhooks.list.description',

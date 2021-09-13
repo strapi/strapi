@@ -118,7 +118,7 @@ const CreatePage = () => {
   })} ${moment().format('LL')}`;
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <Formik
         initialValues={{ name: '', description: defaultDescription }}
@@ -130,7 +130,6 @@ const CreatePage = () => {
           <Form noValidate>
             <>
               <HeaderLayout
-                id="title"
                 primaryAction={
                   <Stack horizontal size={2}>
                     <Button
@@ -161,7 +160,6 @@ const CreatePage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
-                as="h1"
               />
               <ContentLayout>
                 <Stack size={6}>

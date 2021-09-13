@@ -29,9 +29,8 @@ const LocaleList = ({ canUpdateLocale, canDeleteLocale, onToggleCreateModal, isC
   const handleEditLocale = canUpdateLocale ? setLocaleToEdit : undefined;
 
   return (
-    <Main labelledBy="title" tabIndex={-1}>
+    <Main tabIndex={-1}>
       <HeaderLayout
-        id="title"
         primaryAction={
           <Button startIcon={<AddIcon />} onClick={onToggleCreateModal}>
             {formatMessage({ id: getTrad('Settings.list.actions.add') })}

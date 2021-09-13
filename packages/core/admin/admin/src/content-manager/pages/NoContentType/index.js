@@ -13,9 +13,8 @@ const NoContentType = () => {
   useFocusWhenNavigate();
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <HeaderLayout
-        id="title"
         title={formatMessage({
           id: getTrad('header.name'),
           defaultMessage: 'Content',

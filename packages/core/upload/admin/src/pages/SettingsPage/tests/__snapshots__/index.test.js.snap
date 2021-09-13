@@ -220,7 +220,7 @@ exports[`Upload | SettingsPage renders and matches the snapshot 1`] = `
 
 <div>
   <main
-    aria-labelledby="title"
+    aria-labelledby="main-content-title"
     class="c0"
     id="main-content"
     tabindex="-1"
@@ -242,7 +242,7 @@ exports[`Upload | SettingsPage renders and matches the snapshot 1`] = `
             >
               <h1
                 class="c5"
-                id="title"
+                id="main-content-title"
               >
                 Media Library - Settings
               </h1>

@@ -319,6 +319,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
 
       .c23 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 0;
         color: #32324d;
@@ -354,19 +355,10 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         color: inherit;
       }
 
-      .c23:focus {
-        outline: none;
-      }
-
       .c22 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c22:focus-within {
-        border: 1px solid #4945ff;
       }
 
       .c18 textarea {
@@ -506,7 +498,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
           class="c0 c8"
         >
           <main
-            aria-labelledby="password-forgotten"
+            aria-labelledby="main-content-title"
             class="c9"
             id="main-content"
             tabindex="-1"
@@ -531,7 +523,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   >
                     <h1
                       class="c16"
-                      id="password-forgotten"
+                      id="main-content-title"
                     >
                       Reset password
                     </h1>

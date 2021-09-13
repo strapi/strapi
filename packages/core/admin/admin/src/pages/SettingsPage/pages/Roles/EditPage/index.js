@@ -86,7 +86,7 @@ const EditPage = () => {
   const isFormDisabled = role.code === 'strapi-super-admin';
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
@@ -102,7 +102,6 @@ const EditPage = () => {
           <form onSubmit={handleSubmit}>
             <>
               <HeaderLayout
-                id="title"
                 primaryAction={
                   <Stack horizontal size={2}>
                     <Button
@@ -138,7 +137,6 @@ const EditPage = () => {
                   id: 'Settings.roles.create.description',
                   defaultMessage: 'Define the rights given to the role',
                 })}
-                as="h1"
               />
               <ContentLayout>
                 <Stack size={6}>

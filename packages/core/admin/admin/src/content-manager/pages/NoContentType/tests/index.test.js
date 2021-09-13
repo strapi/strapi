@@ -257,7 +257,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
       }
 
       <main
-        aria-labelledby="title"
+        aria-labelledby="main-content-title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -278,7 +278,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
               >
                 <h1
                   class="c4"
-                  id="title"
+                  id="main-content-title"
                 >
                   Content
                 </h1>

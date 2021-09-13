@@ -116,7 +116,7 @@ it('renders users-permissions edit role and matches snapshot', () => {
     }
 
     <main
-      aria-labelledby="title"
+      aria-labelledby="main-content-title"
       class="c0"
       id="main-content"
       tabindex="-1"
@@ -137,7 +137,7 @@ it('renders users-permissions edit role and matches snapshot', () => {
               >
                 <h1
                   class="c4"
-                  id="title"
+                  id="main-content-title"
                 >
                   Authenticated
                 </h1>

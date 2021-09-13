@@ -26,12 +26,10 @@ const App = () => {
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
 
-  // Check with @mfrachet if ok with a11y
   if (status === 'loading') {
     return (
-      <Main labelledBy="title" aria-busy="true">
+      <Main aria-busy="true">
         <HeaderLayout
-          id="title"
           title={formatMessage({
             id: getTrad('header.name'),
             defaultMessage: 'Content',
