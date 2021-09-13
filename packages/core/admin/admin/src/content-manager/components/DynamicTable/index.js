@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import TableRows from './TableRows';
 
 const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) => {
   const { runHookWaterfall } = useStrapiApp();
@@ -25,7 +26,13 @@ const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) =
       withBulkActions
       withMainAction={canDelete}
     >
-      {/* TODO */}
+      <TableRows
+        canDelete={canDelete}
+        headers={tableHeaders}
+        rows={rows}
+        withBulkActions
+        withMainAction={canDelete}
+      />
     </Table>
   );
 };
