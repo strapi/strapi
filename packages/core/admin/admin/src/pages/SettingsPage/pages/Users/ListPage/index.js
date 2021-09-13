@@ -54,7 +54,7 @@ const ListPage = () => {
       formatMessage(
         {
           id: 'app.utils.notify.data-loaded',
-          defaultMessage: 'The {label} has loaded',
+          defaultMessage: 'The {target} has loaded',
         },
         { target: title }
       )

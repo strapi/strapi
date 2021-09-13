@@ -12,8 +12,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
-  CustomContentLayout,
   DynamicTable,
+  NoPermissions,
   // CheckPermissions,
   // PopUpWarning,
   useFocusWhenNavigate,
@@ -24,7 +24,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
-import { HeaderLayout } from '@strapi/parts/Layout';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Button } from '@strapi/parts/Button';
 import Add from '@strapi/icons/Add';
@@ -396,19 +396,23 @@ function ListView({
         subtitle={subtitle}
         title={headerLayoutTitle}
       />
-      <CustomContentLayout canRead={canRead}>
-        <DynamicTable
-          contentType={headerLayoutTitle}
-          isLoading={isLoading}
-          headers={tableHeaders}
-          // rows={data}
-          rows={[]}
-          withBulkActions
-          withMainAction={canDelete}
-        >
-          {/* TODO */}
-        </DynamicTable>
-      </CustomContentLayout>
+      <ContentLayout>
+        {canRead ? (
+          <DynamicTable
+            contentType={headerLayoutTitle}
+            isLoading={isLoading}
+            headers={tableHeaders}
+            // rows={data}
+            rows={[]}
+            withBulkActions
+            withMainAction={canDelete}
+          >
+            {/* TODO */}
+          </DynamicTable>
+        ) : (
+          <NoPermissions />
+        )}
+      </ContentLayout>
     </Main>
   );
 
