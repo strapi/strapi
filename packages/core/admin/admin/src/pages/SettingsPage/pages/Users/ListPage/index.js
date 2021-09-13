@@ -1,14 +1,22 @@
 import React, { useState } from 'react';
 import {
-  CustomContentLayout,
   DynamicTable,
   Search,
   SettingsPageTitle,
   useRBAC,
   useNotification,
   useFocusWhenNavigate,
+  NoPermissions,
 } from '@strapi/helper-plugin';
-import { ActionLayout, Button, HeaderLayout, Main, useNotifyAT } from '@strapi/parts';
+import {
+  ActionLayout,
+  ContentLayout,
+  Button,
+  HeaderLayout,
+  Main,
+  useNotifyAT,
+} from '@strapi/parts';
+
 import { Mail } from '@strapi/icons';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -104,7 +112,7 @@ const ListPage = () => {
   );
 
   return (
-    <Main labelledBy="title">
+    <Main labelledBy="title" aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
         id="title"
@@ -133,7 +141,9 @@ const ListPage = () => {
           }
         />
       )}
-      <CustomContentLayout canRead={canRead}>
+
+      <ContentLayout canRead={canRead}>
+        {!canRead && <NoPermissions />}
         {status === 'error' && <div>TODO: An error occurred</div>}
         {canRead && (
           <>
@@ -157,7 +167,7 @@ const ListPage = () => {
             <PaginationFooter pagination={data?.pagination} />
           </>
         )}
-      </CustomContentLayout>
+      </ContentLayout>
       {isModalOpened && <ModalForm onToggle={handleToggle} queryName={queryName} />}
     </Main>
   );

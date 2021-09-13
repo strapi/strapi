@@ -14,6 +14,7 @@ import {
   Th,
   TableLabel,
   useNotifyAT,
+  ContentLayout,
 } from '@strapi/parts';
 
 import { AddIcon, EditIcon } from '@strapi/icons';
@@ -23,8 +24,8 @@ import {
   SettingsPageTitle,
   CheckPermissions,
   useNotification,
-  CustomContentLayout,
   useRBAC,
+  NoPermissions,
   LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
@@ -60,7 +61,10 @@ const RoleListPage = () => {
     isLoading: isLoadingForData,
     data: { roles },
     isFetching,
-  } = useQuery('get-roles', () => fetchData(toggleNotification, notifyStatus), { initialData: {} });
+  } = useQuery('get-roles', () => fetchData(toggleNotification, notifyStatus), {
+    initialData: {},
+    enabled: canRead,
+  });
 
   const isLoading = isLoadingForData || isFetching;
 
@@ -105,14 +109,14 @@ const RoleListPage = () => {
           }
         />
 
-        {isLoading ? (
-          <LoadingIndicatorPage />
-        ) : (
-          <CustomContentLayout
-            canRead={canRead}
-            shouldShowEmptyState={roles && !roles.length}
-            isLoading={isLoading || isLoadingForPermissions}
-          >
+        <ContentLayout
+          canRead={canRead}
+          shouldShowEmptyState={roles && !roles.length}
+          isLoading={isLoading || isLoadingForPermissions}
+        >
+          {!canRead && <NoPermissions />}
+          {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
+          {canRead && roles && roles.length && (
             <Table colCount={4} rowCount={roles && roles.length + 1}>
               <Thead>
                 <Tr>
@@ -171,8 +175,8 @@ const RoleListPage = () => {
                   ))}
               </Tbody>
             </Table>
-          </CustomContentLayout>
-        )}
+          )}
+        </ContentLayout>
       </Main>
     </Layout>
   );

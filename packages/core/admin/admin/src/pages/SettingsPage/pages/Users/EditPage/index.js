@@ -6,7 +6,6 @@ import pick from 'lodash/pick';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
 import {
-  CustomContentLayout,
   Form,
   GenericInput,
   SettingsPageTitle,
@@ -15,13 +14,14 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { HeaderLayout } from '@strapi/parts/Layout';
+import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { H3 } from '@strapi/parts/Text';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
@@ -130,7 +130,7 @@ const EditPage = ({ canUpdate }) => {
 
   if (isLoading) {
     return (
-      <Main labelledBy="title">
+      <Main labelledBy="title" aria-busy="true">
         <SettingsPageTitle name="Users" />
         <HeaderLayout
           id="title"
@@ -141,7 +141,9 @@ const EditPage = ({ canUpdate }) => {
           }
           title={title}
         />
-        <CustomContentLayout isLoading />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
       </Main>
     );
   }
@@ -172,7 +174,7 @@ const EditPage = ({ canUpdate }) => {
                 }
                 title={title}
               />
-              <CustomContentLayout isLoading={isLoading}>
+              <ContentLayout>
                 {data?.registrationToken && (
                   <Box paddingBottom={6}>
                     <MagicLink registrationToken={data.registrationToken} />
@@ -243,7 +245,7 @@ const EditPage = ({ canUpdate }) => {
                     </Stack>
                   </Box>
                 </Stack>
-              </CustomContentLayout>
+              </ContentLayout>
             </Form>
           );
         }}
