@@ -134,7 +134,7 @@ const RoleListPage = () => {
           <ActionLayout withPadding={false} startActions={<Search />} />
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
-          {canRead && roles && sortedRoles?.length ? (
+          {canRead && sortedRoles && sortedRoles?.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
                 <Tr>

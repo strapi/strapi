@@ -37,7 +37,7 @@ const Search = ({ label }) => {
         onBlur={() => setIsOpen(false)}
         value={value}
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        onClear={() => setQuery({ _q: '' }, 'remove')}
+        onClear={() => setValue('')}
       >
         {label}
       </Searchbar>
