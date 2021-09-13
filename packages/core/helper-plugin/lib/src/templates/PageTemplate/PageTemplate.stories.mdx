@@ -4,15 +4,25 @@ import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { Main, Layout, HeaderLayout, Button, ActionLayout, ContentLayout,Box } from '@strapi/parts';
 import AddIcon from '@strapi/icons/AddIcon'
 import EditIcon from '@strapi/icons/EditIcon'
-import LoadingIndicatorPage from '../LoadingIndicatorPage';
-import NoContent from '../NoContent'
-import NoPermissions from '../NoPermissions'
+import LoadingIndicatorPage from '../../components/LoadingIndicatorPage';
+import NoContent from '../../components/NoContent'
+import NoPermissions from '../../components/NoPermissions'
 
-<Meta title="components/PageTemplate" />
+<Meta title="templates/PageTemplate" />
 
 # PageTemplate
 
 This component is used to display an empty state.
+
+## Imports
+
+```js
+import { Main } from '@strapi/parts/Main';
+import { ActionLayout, ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
+import { Button } from '@strapi/parts/Button';
+import { Box } from '@strapi/parts/Box';
+import { LoadingIndicatorPage, NoContent, NoPermissions } from '@strapi/helper-plugin';
+```
 
 ## Usage
 
