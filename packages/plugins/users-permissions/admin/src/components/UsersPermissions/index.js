@@ -1,12 +1,9 @@
 import React, { memo, useReducer, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
-import { Padded, Flex } from '@buffetjs/core';
+import { Text, Grid, GridItem, H3, Stack } from '@strapi/parts';
 import { useIntl } from 'react-intl';
-
-import FormCard from '../FormBloc';
 import getTrad from '../../utils/getTrad';
 import Policies from '../Policies';
-import Permissions from '../Permissions';
 import reducer, { initialState } from './reducer';
 import { UsersPermissionsProvider } from '../../contexts/UsersPermissionsContext';
 import init from './init';
@@ -63,8 +60,23 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
 
   return (
     <UsersPermissionsProvider value={providerValue}>
-      <Flex>
-        <FormCard
+      <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
+        <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
+          <Stack size={2}>
+            <H3>
+              {formatMessage({
+                id: getTrad('Plugins.header.title'),
+              })}
+            </H3>
+            <Text as="p" textColor="neutral600">
+              {formatMessage({
+                id: getTrad('Plugins.header.description'),
+              })}
+            </Text>
+          </Stack>
+        </GridItem>
+        <Policies />
+        {/* <FormCard
           title={formatMessage({
             id: getTrad('Plugins.header.title'),
           })}
@@ -72,12 +84,11 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
             id: getTrad('Plugins.header.description'),
           })}
         >
-          <Padded left right size="xs">
+          <Box padding={6}>
             <Permissions />
-          </Padded>
-        </FormCard>
-        <Policies />
-      </Flex>
+          </Box>
+        </FormCard> */}
+      </Grid>
     </UsersPermissionsProvider>
   );
 });
