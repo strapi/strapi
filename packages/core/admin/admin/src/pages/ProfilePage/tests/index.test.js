@@ -2,9 +2,10 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
+// import { rest } from 'msw';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import ProfilePage from '../index';
-import { serverUsername, serverNoUsername } from './utils/server';
+import server from './utils/server';
 
 jest.mock('../../../components/LocalesProvider/useLocalesProvider', () => () => ({
   changeLocale: () => {},
@@ -39,25 +40,22 @@ const App = (
 );
 
 describe('ADMIN | Pages | Profile page', () => {
-  // beforeAll(() => server.listen());
+  beforeAll(() => server.listen());
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   afterEach(() => {
-    serverUsername.resetHandlers();
-    serverNoUsername.resetHandlers();
+    server.resetHandlers();
   });
 
   afterAll(() => {
     jest.resetAllMocks();
-    serverUsername.close();
-    serverNoUsername.close();
+    server.close();
   });
 
   it('renders and matches the snapshot', async () => {
-    serverUsername.listen();
     const { container } = render(App);
     await waitFor(() => {
       expect(screen.getByText('Interface language')).toBeInTheDocument();
@@ -565,7 +563,7 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       <main
-        aria-labelledby="user-profile"
+        aria-busy="false"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -590,7 +588,6 @@ describe('ADMIN | Pages | Profile page', () => {
                 >
                   <h1
                     class="c4"
-                    id="user-profile"
                   >
                     yolo
                   </h1>
@@ -1029,7 +1026,6 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   it('should display username if it exists', async () => {
-    serverUsername.listen();
     render(App);
     await waitFor(() => {
       expect(screen.getByText('yolo')).toBeInTheDocument();
@@ -1037,10 +1033,30 @@ describe('ADMIN | Pages | Profile page', () => {
   });
 
   it("should display firstname/lastname if username doesn't exist", async () => {
-    // serverNoUsername.listen();
+    // TODO
+    // server.use(
+    //   rest.get('*/me', (req, res, ctx) => {
+    //     return res(
+    //       ctx.delay(100),
+    //       ctx.status(200),
+    //       ctx.json({
+    //         data: {
+    //           email: 'HOLA@michka.fr',
+    //           firstname: 'michoko',
+    //           lastname: 'ronronscelestes',
+    //           username: 'HOLA',
+    //           preferedLanguage: 'en',
+    //         },
+    //       })
+    //     )
+    //   }),
+    // )
     // const { queryByText } = render(App);
+    // // await waitFor(() => {
+    // //   expect(queryByText('michka@michka.fr')).not.toBeInTheDocument();
+    // // });
     // await waitFor(() => {
-    //   expect(queryByText('michoko@michka.fr')).toBeInTheDocument();
+    //   expect(screen.getByText('HOLA@michka.fr')).toBeInTheDocument();
     // });
   });
 });

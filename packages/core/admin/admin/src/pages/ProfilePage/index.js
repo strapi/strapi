@@ -74,6 +74,8 @@ const ProfilePage = () => {
     refetchActive: true,
   });
 
+  const { isLoading: isSubmittingForm } = submitMutation;
+
   const handleSubmit = async body => {
     lockApp();
 
@@ -91,16 +93,16 @@ const ProfilePage = () => {
 
   if (isLoading) {
     return (
-      <Main labelledBy="title">
+      <Main>
         <Helmet title="User profile" />
-        <HeaderLayout id="title" title="Profile page" />
+        <HeaderLayout title="Profile page" />
         <CustomContentLayout isLoading />
       </Main>
     );
   }
 
   return (
-    <Main labelledBy="user-profile">
+    <Main aria-busy={isSubmittingForm}>
       <Helmet title="User profile" />
       <Formik
         onSubmit={handleSubmit}
@@ -113,7 +115,6 @@ const ProfilePage = () => {
           return (
             <Form>
               <HeaderLayout
-                id="user-profile"
                 title={data.username || `${data.firstname} ${data.lastname}`}
                 primaryAction={
                   <Button startIcon={<CheckIcon />} loading={isSubmitting} type="submit">
