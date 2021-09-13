@@ -7,6 +7,7 @@ import { Provider } from 'react-redux';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
 import { render, screen } from '@testing-library/react';
+import { IntlProvider } from 'react-intl';
 import Theme from '../../../../components/Theme';
 import ContentManagerApp from '..';
 import cmReducers from '../../../../reducers';
@@ -18,10 +19,6 @@ jest.mock('../useModels', () =>
   })
 );
 
-jest.mock('react-intl', () => ({
-  FormattedMessage: () => 'label',
-  useIntl: () => ({ formatMessage: jest.fn(() => 'label') }),
-}));
 jest.mock('@fortawesome/react-fontawesome', () => ({
   FontAwesomeIcon: () => null,
 }));
@@ -89,34 +86,23 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager');
 
     const { container } = render(
-      <Theme>
-        <DndProvider backend={HTML5Backend}>
-          <Provider store={store}>
-            <Router history={history}>
-              <ContentManagerApp />
-            </Router>
-          </Provider>
-        </DndProvider>
-      </Theme>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <Theme>
+          <DndProvider backend={HTML5Backend}>
+            <Provider store={store}>
+              <Router history={history}>
+                <ContentManagerApp />
+              </Router>
+            </Provider>
+          </DndProvider>
+        </Theme>
+      </IntlProvider>
     );
 
     expect(screen.getByText('Home page')).toBeVisible();
     expect(screen.getByText('Categories')).toBeVisible();
     expect(history.location.pathname).toEqual('/content-manager/collectionType/category');
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c30 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: auto 1fr;
-      }
-
-      .c31 {
-        overflow-x: hidden;
-      }
-
       .c34 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -154,6 +140,19 @@ describe('Content manager | App | main', () => {
 
       .c33 {
         height: 100vh;
+      }
+
+      .c30 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c31 {
+        overflow-x: hidden;
       }
 
       .c2 {
@@ -449,7 +448,7 @@ describe('Content manager | App | main', () => {
         class="c0"
       >
         <nav
-          aria-label="label"
+          aria-label="Content"
           class="c1"
         >
           <div
@@ -461,7 +460,7 @@ describe('Content manager | App | main', () => {
               <h2
                 class="c4"
               >
-                label
+                Content
               </h2>
               <span>
                 <button
@@ -518,7 +517,7 @@ describe('Content manager | App | main', () => {
                         <span
                           class="c18 c19 c20 c21"
                         >
-                          label
+                          Collection Type 
                         </span>
                       </div>
                     </div>
@@ -590,7 +589,7 @@ describe('Content manager | App | main', () => {
                         <span
                           class="c18 c19 c20 c21"
                         >
-                          label
+                          Single Type 
                         </span>
                       </div>
                     </div>
@@ -713,15 +712,17 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager');
 
     render(
-      <Theme>
-        <DndProvider backend={HTML5Backend}>
-          <Provider store={store}>
-            <Router history={history}>
-              <ContentManagerApp />
-            </Router>
-          </Provider>
-        </DndProvider>
-      </Theme>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <Theme>
+          <DndProvider backend={HTML5Backend}>
+            <Provider store={store}>
+              <Router history={history}>
+                <ContentManagerApp />
+              </Router>
+            </Provider>
+          </DndProvider>
+        </Theme>
+      </IntlProvider>
     );
 
     expect(history.location.pathname).toEqual('/content-manager/homepage');
@@ -754,15 +755,17 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager/collectionType/category');
 
     render(
-      <Theme>
-        <DndProvider backend={HTML5Backend}>
-          <Provider store={store}>
-            <Router history={history}>
-              <ContentManagerApp />
-            </Router>
-          </Provider>
-        </DndProvider>
-      </Theme>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <Theme>
+          <DndProvider backend={HTML5Backend}>
+            <Provider store={store}>
+              <Router history={history}>
+                <ContentManagerApp />
+              </Router>
+            </Provider>
+          </DndProvider>
+        </Theme>
+      </IntlProvider>
     );
 
     expect(history.location.pathname).toEqual('/content-manager/403');
@@ -788,15 +791,17 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager/collectionType/category');
 
     render(
-      <Theme>
-        <DndProvider backend={HTML5Backend}>
-          <Provider store={store}>
-            <Router history={history}>
-              <ContentManagerApp />
-            </Router>
-          </Provider>
-        </DndProvider>
-      </Theme>
+      <IntlProvider messages={{ en: {} }} locale="en">
+        <Theme>
+          <DndProvider backend={HTML5Backend}>
+            <Provider store={store}>
+              <Router history={history}>
+                <ContentManagerApp />
+              </Router>
+            </Provider>
+          </DndProvider>
+        </Theme>
+      </IntlProvider>
     );
 
     expect(history.location.pathname).toEqual('/content-manager/no-content-types');

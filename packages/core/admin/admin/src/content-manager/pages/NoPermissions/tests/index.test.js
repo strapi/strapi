@@ -69,6 +69,10 @@ describe('<NoPermissions />', () => {
         height: 5.5rem;
       }
 
+      .c0 {
+        outline: none;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 56px;
@@ -131,10 +135,6 @@ describe('<NoPermissions />', () => {
       .c6 {
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c0 {
-        outline: none;
       }
 
       <main

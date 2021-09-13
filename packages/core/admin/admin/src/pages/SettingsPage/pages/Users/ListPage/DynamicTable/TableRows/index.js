@@ -31,10 +31,13 @@ const TableRows = ({
             {withMainAction && (
               <Td>
                 <BaseCheckbox
-                  aria-label={formatMessage({
-                    id: 'list.all-entries.select',
-                    defaultMessage: 'Select all entries',
-                  })}
+                  aria-label={formatMessage(
+                    {
+                      id: 'app.component.table.select.one-entry',
+                      defaultMessage: `Select {target}`,
+                    },
+                    { target: `${data.firstname} ${data.lastname}` }
+                  )}
                   checked={isChecked}
                   onChange={() => {
                     onSelectRow({ name: data.id, value: !isChecked });
@@ -59,7 +62,10 @@ const TableRows = ({
                 <Row>
                   <IconButton
                     onClick={() => push(`${pathname}/${data.id}`)}
-                    label={formatMessage({ id: 'app.utils.edit', defaultMessage: 'Edit' })}
+                    label={formatMessage(
+                      { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                      { target: `${data.firstname} ${data.lastname}` }
+                    )}
                     noBorder
                     icon={<EditIcon />}
                   />
@@ -68,7 +74,10 @@ const TableRows = ({
                     <Box paddingLeft={1}>
                       <IconButton
                         onClick={() => onClickDelete(data.id)}
-                        label={formatMessage({ id: 'app.utils.delete', defaultMessage: 'Delete' })}
+                        label={formatMessage(
+                          { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
+                          { target: `${data.firstname} ${data.lastname}` }
+                        )}
                         noBorder
                         icon={<DeleteIcon />}
                       />
@@ -86,6 +95,7 @@ const TableRows = ({
 
 TableRows.defaultProps = {
   canDelete: false,
+  entriesToDelete: [],
   onClickDelete: () => {},
   onSelectRow: () => {},
   rows: [],
@@ -95,7 +105,7 @@ TableRows.defaultProps = {
 
 TableRows.propTypes = {
   canDelete: PropTypes.bool,
-  entriesToDelete: PropTypes.array.isRequired,
+  entriesToDelete: PropTypes.array,
   headers: PropTypes.array.isRequired,
   onClickDelete: PropTypes.func,
   onSelectRow: PropTypes.func,

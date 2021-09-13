@@ -62,6 +62,7 @@ export default {
     translations: {
       fr: {
         'Auth.form.email.label': 'test',
+        Users: 'Utilisateurs',
       },
     },
     tutorials: false,
