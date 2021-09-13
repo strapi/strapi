@@ -462,7 +462,6 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       <main
-        aria-labelledby="title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -487,7 +486,6 @@ describe('Admin | containers | RoleEditPage', () => {
                 >
                   <h1
                     class="c5"
-                    id="title"
                   >
                     Authenticated
                   </h1>
