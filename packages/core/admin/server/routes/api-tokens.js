@@ -45,4 +45,15 @@ module.exports = [
       ],
     },
   },
+  {
+    method: 'PUT',
+    path: '/api-tokens/:id',
+    handler: 'api-token.update',
+    config: {
+      policies: [
+        'admin::isAuthenticatedAdmin',
+        { name: 'admin::hasPermissions', options: { actions: ['admin::api-tokens.update'] } },
+      ],
+    },
+  },
 ];

@@ -26,6 +26,28 @@ const validateApiTokenCreationInput = async data => {
     .catch(handleReject);
 };
 
+const apiTokenUpdateSchema = yup
+  .object()
+  .shape({
+    name: yup
+      .string()
+      .min(1)
+      .notNull(),
+    description: yup.string().nullable(),
+    type: yup
+      .string()
+      .oneOf(Object.values(constants.API_TOKEN_TYPE))
+      .notNull(),
+  })
+  .noUnknown();
+
+const validateApiTokenUpdateInput = async data => {
+  return apiTokenUpdateSchema
+    .validate(data, { strict: true, abortEarly: false })
+    .catch(handleReject);
+};
+
 module.exports = {
   validateApiTokenCreationInput,
+  validateApiTokenUpdateInput,
 };

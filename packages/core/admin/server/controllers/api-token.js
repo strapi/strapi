@@ -1,8 +1,12 @@
 'use strict';
 
 const { trim } = require('lodash/fp');
+const has = require('lodash/has');
 const { getService } = require('../utils');
-const { validateApiTokenCreationInput } = require('../validation/api-tokens');
+const {
+  validateApiTokenCreationInput,
+  validateApiTokenUpdateInput,
+} = require('../validation/api-tokens');
 
 module.exports = {
   async create(ctx) {
@@ -61,6 +65,47 @@ module.exports = {
       return;
     }
 
+    ctx.send({ data: apiToken });
+  },
+
+  async update(ctx) {
+    const { body } = ctx.request;
+    const { id } = ctx.params;
+    const apiTokenService = getService('api-token');
+
+    const attributes = body;
+    /**
+     * We trim both field to avoid having issues with either:
+     * - having a space at the end or start of the value.
+     * - having only spaces as value;
+     */
+    if (has(attributes, 'name')) {
+      attributes.name = trim(body.name);
+    }
+
+    if (has(attributes, 'description') || attributes.description === null) {
+      attributes.description = trim(body.description);
+    }
+
+    try {
+      await validateApiTokenUpdateInput(attributes);
+    } catch (err) {
+      return ctx.badRequest('ValidationError', err);
+    }
+
+    const apiTokenExists = await apiTokenService.getById(id);
+    if (!apiTokenExists) {
+      return ctx.notFound('API token not found');
+    }
+
+    if (has(attributes, 'name')) {
+      const nameAlreadyTaken = await apiTokenService.getByName(attributes.name);
+      if (!!nameAlreadyTaken && nameAlreadyTaken.id !== id) {
+        return ctx.badRequest('Name already taken');
+      }
+    }
+
+    const apiToken = await apiTokenService.update(id, attributes);
     ctx.send({ data: apiToken });
   },
 };

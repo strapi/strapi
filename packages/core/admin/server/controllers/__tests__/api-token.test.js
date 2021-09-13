@@ -198,4 +198,89 @@ describe('API Token Controller', () => {
       expect(notFound).toHaveBeenCalledWith('API Token not found');
     });
   });
+
+  describe('Update API Token', () => {
+    const body = {
+      name: 'api-token_tests-name',
+      description: 'api-token_tests-description',
+      type: 'read-only',
+    };
+
+    const id = 1;
+
+    test('Fails if the name is already taken', async () => {
+      const getById = jest.fn(() => ({ id, ...body }));
+      const getByName = jest.fn(() => ({ id: 2, name: body.name }));
+      const badRequest = jest.fn();
+      const ctx = createContext({ body, params: { id } }, { badRequest });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getById,
+              getByName,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.update(ctx);
+
+      expect(getByName).toHaveBeenCalledWith(body.name);
+      expect(badRequest).toHaveBeenCalledWith('Name already taken');
+    });
+
+    test('Fails if the token does not exist', async () => {
+      const getById = jest.fn(() => null);
+      const notFound = jest.fn();
+      const ctx = createContext({ body, params: { id } }, { notFound });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getById,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.update(ctx);
+
+      expect(getById).toHaveBeenCalledWith(id);
+      expect(notFound).toHaveBeenCalledWith('API token not found');
+    });
+
+    test('Updates API Token Successfully', async () => {
+      const update = jest.fn().mockResolvedValue(body);
+      const getById = jest.fn(() => ({ id, ...body }));
+      const getByName = jest.fn(() => null);
+      const badRequest = jest.fn();
+      const notFound = jest.fn();
+      const send = jest.fn();
+      const ctx = createContext({ body, params: { id } }, { badRequest, notFound, send });
+
+      global.strapi = {
+        admin: {
+          services: {
+            'api-token': {
+              getById,
+              getByName,
+              update,
+            },
+          },
+        },
+      };
+
+      await apiTokenController.update(ctx);
+
+      expect(getById).toHaveBeenCalledWith(id);
+      expect(getByName).toHaveBeenCalledWith(body.name);
+      expect(badRequest).not.toHaveBeenCalled();
+      expect(notFound).not.toHaveBeenCalled();
+      expect(update).toHaveBeenCalledWith(id, body);
+      expect(send).toHaveBeenCalled();
+    });
+  });
 });
