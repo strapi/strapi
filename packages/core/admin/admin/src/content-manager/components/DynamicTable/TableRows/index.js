@@ -1,13 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi/parts';
+import { BaseCheckbox, Box, IconButton, Tbody, Td, Tr, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon, Duplicate } from '@strapi/icons';
 import { useTracking } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { usePluginsQueryParams } from '../../../hooks';
-// import { Tooltip } from '@strapi/parts/Tooltip';
-// import toString from 'lodash/toString';
+import CellContent from '../CellContent';
 
 const TableRows = ({
   canCreate,
@@ -25,6 +24,7 @@ const TableRows = ({
     location: { pathname },
   } = useHistory();
   const { formatMessage } = useIntl();
+
   const { trackUsage } = useTracking();
   const pluginsQueryParams = usePluginsQueryParams();
 
@@ -65,7 +65,7 @@ const TableRows = ({
                   {typeof cellFormatter === 'function' ? (
                     cellFormatter(data, { key, name, ...rest })
                   ) : (
-                    <Text textColor="neutral800">{data[name] || '-'}</Text>
+                    <CellContent content={data[name]} name={name} {...rest} rowId={data.id} />
                   )}
                 </Td>
               );

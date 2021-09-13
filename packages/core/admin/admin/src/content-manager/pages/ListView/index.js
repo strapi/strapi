@@ -169,7 +169,7 @@ function ListView({
                 '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
             },
             // Using the plural form
-            { number: 2 }
+            { number: pagination.count }
           )
         );
 
