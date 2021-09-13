@@ -1,9 +1,16 @@
 'use strict';
 
-const { Dialect } = require('../dialect');
 const errors = require('../../errors');
+const { Dialect } = require('../dialect');
+const PostgresqlSchemaInspector = require('./schema-inspector');
 
 class PostgresDialect extends Dialect {
+  constructor(db) {
+    super(db);
+
+    this.schemaInspector = new PostgresqlSchemaInspector(db);
+  }
+
   useReturning() {
     return true;
   }

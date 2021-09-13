@@ -14,6 +14,14 @@ class SqliteDialect extends Dialect {
     this.schemaInspector = new SqliteSchmeaInspector(db);
   }
 
+  canAlterConstraints() {
+    return false;
+  }
+
+  async initialize() {
+    await this.db.connection.raw('pragma foreign_keys = on');
+  }
+
   // TODO: use strapi.dir
   configure() {
     this.db.config.connection.connection.filename = path.resolve(

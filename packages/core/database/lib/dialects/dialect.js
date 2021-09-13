@@ -8,6 +8,10 @@ class Dialect {
   configure() {}
   initialize() {}
 
+  canAlterConstraints() {
+    return true;
+  }
+
   usesForeignKeys() {
     return false;
   }
