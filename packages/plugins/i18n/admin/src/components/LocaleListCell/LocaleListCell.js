@@ -1,10 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useSelector } from 'react-redux';
-import { Padded, Text } from '@buffetjs/core';
-import { Tooltip } from '@buffetjs/styles';
+import { Tooltip } from '@strapi/parts/Tooltip';
+import { Text } from '@strapi/parts/Text';
 import get from 'lodash/get';
-import styled from 'styled-components';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 
 const mapToLocaleName = (locales, localeCode) =>
@@ -13,12 +12,6 @@ const mapToLocaleName = (locales, localeCode) =>
     'name',
     localeCode
   );
-
-const LocaleName = styled.div`
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`;
 
 const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const locales = useSelector(selectI18NLocales);
@@ -55,21 +48,26 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const elId = `entry-${id}__locale`;
   const localesNames = localesArray.join(', ');
 
+  const tooltipDescription = localesArray.map(name => (
+    <React.Fragment key={name}>
+      {name}
+      <br />
+    </React.Fragment>
+  ));
+
   return (
-    <div>
-      <LocaleName data-for={elId} data-tip={localesNames}>
+    <Tooltip description={tooltipDescription}>
+      <Text
+        style={{ maxWidth: '252px', cursor: 'pointer' }}
+        as="button"
+        data-for={elId}
+        data-tip={localesNames}
+        textColor="neutral800"
+        ellipsis
+      >
         {localesNames}
-      </LocaleName>
-      <Tooltip id={elId} place="bottom" delay={0}>
-        {localesArray.map(name => (
-          <Padded key={name} top bottom size="xs">
-            <Text ellipsis color="white">
-              {name}
-            </Text>
-          </Padded>
-        ))}
-      </Tooltip>
-    </div>
+      </Text>
+    </Tooltip>
   );
 };
 

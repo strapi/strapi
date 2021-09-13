@@ -1,16 +1,8 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { useSelector } from 'react-redux';
+import { ThemeProvider, lightTheme } from '@strapi/parts';
 import LocaleListCell from '../LocaleListCell';
-
-jest.mock('@buffetjs/styles', () => ({
-  Tooltip: () => null,
-}));
-
-jest.mock('@buffetjs/core', () => ({
-  Padded: props => <div {...props} />,
-  Text: props => <p {...props} />,
-}));
 
 jest.mock('react-redux', () => ({
   useSelector: jest.fn(() => []),
@@ -51,7 +43,9 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'fr-FR' }, { locale: 'ar' }];
 
     render(
-      <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+      <ThemeProvider theme={lightTheme}>
+        <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+      </ThemeProvider>
     );
 
     expect(screen.getByText('French (default), Arabic, English')).toBeVisible();
@@ -91,7 +85,9 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'ar' }];
 
     render(
-      <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+      <ThemeProvider theme={lightTheme}>
+        <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+      </ThemeProvider>
     );
 
     expect(screen.getByText('Arabic, English')).toBeVisible();
@@ -130,7 +126,9 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'en' }, { locale: 'ar' }];
 
     render(
-      <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+      <ThemeProvider theme={lightTheme}>
+        <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
+      </ThemeProvider>
     );
 
     expect(screen.getByText('French (default), Arabic, English')).toBeVisible();

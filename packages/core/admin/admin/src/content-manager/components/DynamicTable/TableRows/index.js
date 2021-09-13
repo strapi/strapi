@@ -4,6 +4,8 @@ import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
+// import { Tooltip } from '@strapi/parts/Tooltip';
+// import toString from 'lodash/toString';
 
 const TableRows = ({
   canDelete,
@@ -23,8 +25,15 @@ const TableRows = ({
 
   return (
     <Tbody>
-      {rows.map(data => {
+      {rows.map((data, index) => {
         const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+        const itemLineText = formatMessage(
+          {
+            id: 'content-manager.components.DynamicTable.row-line',
+            defaultMessage: 'item line {number}',
+          },
+          { number: index }
+        );
 
         return (
           <Tr key={data.id}>
@@ -64,7 +73,7 @@ const TableRows = ({
                     onClick={() => push(`${pathname}/${data.id}`)}
                     label={formatMessage(
                       { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
-                      { target: `${data.firstname} ${data.lastname}` }
+                      { target: itemLineText }
                     )}
                     noBorder
                     icon={<EditIcon />}
@@ -76,7 +85,7 @@ const TableRows = ({
                         onClick={() => onClickDelete(data.id)}
                         label={formatMessage(
                           { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
-                          { target: `${data.firstname} ${data.lastname}` }
+                          { target: itemLineText }
                         )}
                         noBorder
                         icon={<DeleteIcon />}

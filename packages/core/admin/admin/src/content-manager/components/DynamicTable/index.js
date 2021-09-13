@@ -21,7 +21,6 @@ const DynamicTable = ({ canDelete, contentTypeName, isLoading, layout, rows }) =
       contentType={contentTypeName}
       isLoading={isLoading}
       headers={tableHeaders}
-      // rows={data}
       rows={rows}
       withBulkActions
       withMainAction={canDelete}
