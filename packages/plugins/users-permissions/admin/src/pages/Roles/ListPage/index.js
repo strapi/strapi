@@ -15,11 +15,9 @@ import {
   TableLabel,
   useNotifyAT,
   ContentLayout,
-  Box,
-  Row,
+  ActionLayout,
   VisuallyHidden,
 } from '@strapi/parts';
-
 import { AddIcon, EditIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import {
@@ -133,11 +131,7 @@ const RoleListPage = () => {
           }
         />
         <ContentLayout>
-          <Box paddingBottom={4}>
-            <Row style={{ flexWrap: 'wrap' }}>
-              <Search />
-            </Row>
-          </Box>
+          <ActionLayout withPadding={false} startActions={<Search />} />
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
           {canRead && roles && sortedRoles?.length ? (
@@ -179,13 +173,13 @@ const RoleListPage = () => {
                 {sortedRoles?.map(role => (
                   <Tr key={role.name}>
                     <Td width="20%">
-                      <Text>{role.name}</Text>
+                      <Text label="name">{role.name}</Text>
                     </Td>
                     <Td width="50%">
-                      <Text>{role.description}</Text>
+                      <Text label="description">{role.description}</Text>
                     </Td>
                     <Td width="30%">
-                      <Text>
+                      <Text label="users">
                         {`${role.nb_users} ${formatMessage({
                           id: getTrad('Roles.users'),
                           defaultMessage: 'users',
