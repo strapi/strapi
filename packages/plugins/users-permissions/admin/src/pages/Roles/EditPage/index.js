@@ -1,15 +1,6 @@
 import React, { useState } from 'react';
-import {
-  Main,
-  HeaderLayout,
-  Button,
-  Stack,
-  Box,
-  GridItem,
-  Grid,
-  TextInput,
-  Textarea,
-} from '@strapi/parts';
+import { Main, Button, Stack, Box, GridItem, Grid, TextInput, Textarea } from '@strapi/parts';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { H3 } from '@strapi/parts/Text';
 import { CheckIcon } from '@strapi/icons';
 import { Formik } from 'formik';
@@ -18,7 +9,6 @@ import { useRouteMatch } from 'react-router-dom';
 import {
   useOverlayBlocker,
   SettingsPageTitle,
-  CustomContentLayout,
   LoadingIndicatorPage,
   Form,
   useNotification,
@@ -106,7 +96,7 @@ const EditPage = () => {
               title={role.name}
               subtitle={role.description}
             />
-            <CustomContentLayout>
+            <ContentLayout>
               <Stack size={7}>
                 <Box
                   background="neutral0"
@@ -164,7 +154,7 @@ const EditPage = () => {
                   </Stack>
                 </Box>
               </Stack>
-            </CustomContentLayout>
+            </ContentLayout>
           </Form>
         )}
       </Formik>
