@@ -16,7 +16,7 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
   }
 
   if (fieldSchema.type === 'media' && fieldSchema.multiple) {
-    return <MultipleMedias {...content} />;
+    return <MultipleMedias value={content} />;
   }
 
   if (fieldSchema.type === 'relation') {
