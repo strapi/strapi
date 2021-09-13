@@ -647,10 +647,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 }
 
 .c56 {
-  width: 32px !important;
-  height: 32px !important;
-  padding: 9px;
-  border-radius: 64px;
+  width: 2rem !important;
+  height: 2rem !important;
+  padding: 0.5625rem;
+  border-radius: 4rem;
   background: #eaeaef;
 }
 
@@ -662,12 +662,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   position: absolute;
   display: none;
   top: 5px;
-  right: 8px;
+  right: 0.5rem;
 }
 
 .c58 svg {
-  width: 10px;
-  height: 10px;
+  width: 0.625rem;
+  height: 0.625rem;
 }
 
 .c58 svg path {
@@ -789,10 +789,10 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 }
 
 .c51 {
-  width: 32px;
-  height: 32px;
-  padding: 9px;
-  border-radius: 64px;
+  width: 2rem;
+  height: 2rem;
+  padding: 0.5625rem;
+  border-radius: 4rem;
   background: #f0f0ff;
 }
 

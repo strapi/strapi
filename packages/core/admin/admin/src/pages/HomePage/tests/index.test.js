@@ -628,7 +628,8 @@ describe('Homepage', () => {
               class="c4"
             >
               <img
-                alt="Strapi logo"
+                alt=""
+                aria-hidden="true"
                 src="IMAGE_MOCK"
               />
             </div>
