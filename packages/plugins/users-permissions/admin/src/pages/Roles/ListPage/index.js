@@ -132,12 +132,7 @@ const RoleListPage = () => {
             </CheckPermissions>
           }
         />
-
-        <ContentLayout
-          canRead={canRead}
-          shouldShowEmptyState={roles && !roles.length}
-          isLoading={isLoading || isLoadingForPermissions}
-        >
+        <ContentLayout>
           <Box paddingBottom={4}>
             <Row style={{ flexWrap: 'wrap' }}>
               <Search />
@@ -145,7 +140,7 @@ const RoleListPage = () => {
           </Box>
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
-          {canRead && roles && roles.length ? (
+          {canRead && roles && sortedRoles?.length ? (
             <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
                 <Tr>
