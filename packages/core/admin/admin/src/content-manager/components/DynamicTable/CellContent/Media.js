@@ -12,7 +12,6 @@ const FileWrapper = styled(Row)`
   border-radius: 50%;
   width: 26px;
   height: 26px;
-  // TODO
   background: ${({ theme }) => theme.colors.neutral100};
 `;
 
