@@ -276,7 +276,7 @@ describe('LocaleSelect', () => {
               <div
                 class="c6"
               >
-
+                
                 <button
                   aria-hidden="true"
                   class="c7 c13 c14"
