@@ -130,10 +130,9 @@ const EditPage = ({ canUpdate }) => {
 
   if (isLoading) {
     return (
-      <Main labelledBy="title" aria-busy="true">
+      <Main aria-busy="true">
         <SettingsPageTitle name="Users" />
         <HeaderLayout
-          id="title"
           primaryAction={
             <Button disabled startIcon={<CheckIcon />} type="button">
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
@@ -149,7 +148,7 @@ const EditPage = ({ canUpdate }) => {
   }
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Users" />
       <Formik
         onSubmit={handleSubmit}
@@ -161,7 +160,6 @@ const EditPage = ({ canUpdate }) => {
           return (
             <Form>
               <HeaderLayout
-                id="title"
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate}

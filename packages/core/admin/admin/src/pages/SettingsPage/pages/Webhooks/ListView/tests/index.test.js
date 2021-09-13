@@ -184,7 +184,7 @@ describe('Admin | containers | ListView', () => {
         >
           <main
             aria-busy="true"
-            aria-labelledby="webhooks"
+            aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
             tabindex="-1"
@@ -205,7 +205,7 @@ describe('Admin | containers | ListView', () => {
                   >
                     <h1
                       class="c7"
-                      id="webhooks"
+                      id="main-content-title"
                     >
                       Webhooks
                     </h1>

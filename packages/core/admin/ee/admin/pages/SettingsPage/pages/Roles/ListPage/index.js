@@ -249,10 +249,9 @@ const RoleListPage = () => {
   }
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
-        id="title"
         primaryAction={
           canCreate ? (
             <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>

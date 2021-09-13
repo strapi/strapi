@@ -370,6 +370,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
 
       .c19 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 16px;
         color: #32324d;
@@ -405,12 +406,9 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: inherit;
       }
 
-      .c19:focus {
-        outline: none;
-      }
-
       .c20 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 0;
         color: #32324d;
@@ -446,19 +444,10 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         color: inherit;
       }
 
-      .c20:focus {
-        outline: none;
-      }
-
       .c18 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c18:focus-within {
-        border: 1px solid #4945ff;
       }
 
       .c25 {
@@ -547,7 +536,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
       }
 
       <main
-        aria-labelledby="welcome"
+        aria-labelledby="main-content-title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -572,7 +561,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               >
                 <h1
                   class="c8"
-                  id="welcome"
+                  id="main-content-title"
                 >
                   Welcome back!
                 </h1>

@@ -188,7 +188,7 @@ describe('Admin | containers | RoleListPage', () => {
         >
           <main
             aria-busy="true"
-            aria-labelledby="roles"
+            aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
             tabindex="-1"
@@ -209,7 +209,7 @@ describe('Admin | containers | RoleListPage', () => {
                   >
                     <h1
                       class="c7"
-                      id="roles"
+                      id="main-content-title"
                     >
                       Roles
                     </h1>

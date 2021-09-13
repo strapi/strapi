@@ -77,6 +77,7 @@ describe('<Input />', () => {
 
       .c6 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 16px;
         color: #32324d;
@@ -112,19 +113,10 @@ describe('<Input />', () => {
         color: inherit;
       }
 
-      .c6:focus {
-        outline: none;
-      }
-
       .c5 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c5:focus-within {
-        border: 1px solid #4945ff;
       }
 
       .c1 {

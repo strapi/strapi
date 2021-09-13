@@ -348,6 +348,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 
 .c26 {
   border: none;
+  border-radius: 4px;
   padding-left: 16px;
   padding-right: 16px;
   color: #32324d;
@@ -383,19 +384,10 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   color: inherit;
 }
 
-.c26:focus {
-  outline: none;
-}
-
 .c25 {
   border: 1px solid #dcdce4;
   border-radius: 4px;
   background: #ffffff;
-  overflow: hidden;
-}
-
-.c25:focus-within {
-  border: 1px solid #4945ff;
 }
 
 .c23 textarea {
@@ -430,11 +422,6 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
   font-size: 0.875rem;
   color: #32324d;
   background: #ffffff;
-  outline: none;
-}
-
-.c28:focus {
-  border: 1px solid #4945ff;
 }
 
 .c28::-webkit-input-placeholder {
@@ -558,7 +545,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
 
 <div>
   <main
-    aria-labelledby="title"
+    aria-labelledby="main-content-title"
     class="c0"
     id="main-content"
     tabindex="-1"
@@ -579,7 +566,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
             >
               <h1
                 class="c5"
-                id="title"
+                id="main-content-title"
               >
                 Edit a role
               </h1>

@@ -177,7 +177,7 @@ describe('Admin | containers | ProvidersPage', () => {
           class="c1 c2"
         >
           <main
-            aria-labelledby="Providers"
+            aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
             tabindex="-1"
@@ -198,7 +198,7 @@ describe('Admin | containers | ProvidersPage', () => {
                   >
                     <h1
                       class="c7"
-                      id="providers"
+                      id="main-content-title"
                     >
                       Providers
                     </h1>

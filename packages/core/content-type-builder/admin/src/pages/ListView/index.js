@@ -257,7 +257,6 @@ const ListView = () => {
               })}
             </Link>
           }
-          as="h1"
         />
         <ContentLayout>
           <Stack size={4}>

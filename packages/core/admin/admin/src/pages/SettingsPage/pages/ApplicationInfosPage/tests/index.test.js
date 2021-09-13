@@ -258,7 +258,7 @@ describe('Application page', () => {
           class="c1 c2"
         >
           <main
-            aria-labelledby="application"
+            aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
             tabindex="-1"
@@ -279,7 +279,7 @@ describe('Application page', () => {
                   >
                     <h1
                       class="c7"
-                      id="application"
+                      id="main-content-title"
                     >
                       Application
                     </h1>

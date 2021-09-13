@@ -85,10 +85,9 @@ const ListPage = () => {
   );
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading}>
+    <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        id="title"
         primaryAction={createAction}
         title={formatMessage({
           id: 'Settings.permissions.users.listview.header.title',
