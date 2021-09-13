@@ -18,6 +18,42 @@ import ComponentCard from '../ComponentCard';
 import ComponentList from '../ComponentList';
 import Tr from '../Tr';
 
+const StyledAddIcon = styled(AddIcon)`
+  width: 32px;
+  height: 32px;
+  padding: 9px;
+  border-radius: 64px;
+  background: ${({ theme }) => theme.colors.primary100};
+  path {
+    fill: ${({ theme }) => theme.colors.primary600};
+  }
+`;
+
+const FixedBox = styled(Box)`
+  height: ${pxToRem(90)};
+  position: absolute;
+  width: 100%;
+  top: 0;
+  left: 0;
+`;
+
+const ScrollableStack = styled(Stack)`
+  width: 100%;
+  overflow-x: auto;
+`;
+
+const ComponentContentBox = styled(Box)`
+  padding-top: ${pxToRem(90)};
+`;
+
+const ComponentStack = styled(Stack)`
+  flex-shrink: 0;
+  width: ${pxToRem(140)};
+  height: ${pxToRem(80)};
+  justify-content: center;
+  align-items: center;
+`;
+
 function DynamicZoneList({
   customRowComponent,
   components,
@@ -40,42 +76,6 @@ function DynamicZoneList({
     addComponent(name);
   };
 
-  const FixedBox = styled(Box)`
-    height: ${pxToRem(90)};
-    position: absolute;
-    width: 100%;
-    top: 0;
-    left: 0;
-  `;
-
-  const ScrollableStack = styled(Stack)`
-    width: 100%;
-    overflow-x: auto;
-  `;
-
-  const ComponentContentBox = styled(Box)`
-    padding-top: ${pxToRem(90)};
-  `;
-
-  const ComponentStack = styled(Stack)`
-    flex-shrink: 0;
-    width: ${pxToRem(140)};
-    height: ${pxToRem(80)};
-    justify-content: center;
-    align-items: center;
-  `;
-
-  const StyledAddIcon = styled(AddIcon)`
-    width: 32px;
-    height: 32px;
-    padding: 9px;
-    border-radius: 64px;
-    background: ${({ theme }) => theme.colors.primary100};
-    path {
-      fill: ${({ theme }) => theme.colors.primary600};
-    }
-  `;
-
   return (
     <Tr className="dynamiczone-row" isFromDynamicZone>
       <td colSpan={12}>
@@ -83,7 +83,7 @@ function DynamicZoneList({
           <ScrollableStack horizontal size={2}>
             {isInDevelopmentMode && (
               <button type="button" onClick={handleClickAdd}>
-                <ComponentStack as="button" size={1}>
+                <ComponentStack size={1}>
                   <StyledAddIcon />
                   <Text small bold textColor="primary600">
                     {formatMessage({

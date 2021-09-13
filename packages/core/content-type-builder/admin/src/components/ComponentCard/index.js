@@ -86,6 +86,11 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
     schema: { icon: null },
   });
 
+  const onClose = e => {
+    e.stopPropagation();
+    removeComponentFromDynamicZone(dzName, index);
+  };
+
   return (
     <button type="button" onClick={onClick}>
       <ComponentBox className={isActive ? 'active' : ''} borderRadius="borderRadius">
@@ -98,10 +103,9 @@ function ComponentCard({ component, dzName, index, isActive, isInDevelopmentMode
         {isInDevelopmentMode && (
           <CloseButton
             role="button"
-            onClick={e => {
-              e.stopPropagation();
-              removeComponentFromDynamicZone(dzName, index);
-            }}
+            tabIndex={0}
+            onKeyDown={e => (e.key === 'Enter' || e.key === ' ') && onClose(e)}
+            onClick={onClose}
           >
             <Close />
           </CloseButton>
