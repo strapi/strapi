@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-indent */
 import React from 'react';
 import styled from 'styled-components';
 import { Select, Option } from '@strapi/parts/Select';
@@ -40,7 +41,18 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
 
   return (
     <Select
-      startIcon={isLoading ? <SmallLoader>Loading the locales...</SmallLoader> : undefined}
+      startIcon={
+        isLoading ? (
+          <SmallLoader>
+            {formatMessage({
+              id: getTrad('Settings.locales.modal.create.defaultLocales.loading'),
+              defaultMessage: 'Settings.locales.modal.create.defaultLocales.loading',
+            })}
+          </SmallLoader>
+        ) : (
+          undefined
+        )
+      }
       aria-busy={isLoading}
       label={formatMessage({
         id: getTrad('Settings.locales.modal.locales.label'),
@@ -60,13 +72,14 @@ const LocaleSelect = React.memo(({ value, onLocaleChange, error, onClear }) => {
           onLocaleChange({ code: selectedLocale.value, displayName: selectedLocale.label });
         }
       }}
+      placeholder={formatMessage({ id: 'components.placeholder.select', defaultMessage: 'Select' })}
     >
       {isLoading
         ? null
         : options.map(option => (
-          <Option value={option.value} key={option.value}>
-            {option.label}
-          </Option>
+            <Option value={option.value} key={option.value}>
+              {option.label}
+            </Option>
           ))}
     </Select>
   );
@@ -76,12 +89,13 @@ LocaleSelect.defaultProps = {
   error: undefined,
   value: undefined,
   onClear: () => undefined,
+  onLocaleChange: () => undefined,
 };
 
 LocaleSelect.propTypes = {
   error: PropTypes.string,
   onClear: PropTypes.func,
-  onLocaleChange: PropTypes.func.isRequired,
+  onLocaleChange: PropTypes.func,
   value: PropTypes.string,
 };
 

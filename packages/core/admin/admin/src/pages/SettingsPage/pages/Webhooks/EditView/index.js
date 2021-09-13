@@ -3,7 +3,7 @@
  * EditView
  *
  */
-
+import React, { useCallback, useMemo } from 'react';
 import {
   LoadingIndicatorPage,
   request,
@@ -13,7 +13,6 @@ import {
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts';
-import React, { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import WebhookForm from './components/WebhookForm';
@@ -163,7 +162,7 @@ const EditView = () => {
   }
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Webhooks" />
       <WebhookForm
         {...{

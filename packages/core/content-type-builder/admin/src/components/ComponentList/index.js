@@ -6,6 +6,7 @@
 /* eslint-disable import/no-cycle */
 import React from 'react';
 import { get } from 'lodash';
+import { Box } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import List from '../List';
 import useDataManager from '../../hooks/useDataManager';
@@ -27,6 +28,19 @@ function ComponentList({
   } = get(modifiedData, ['components', component], {
     schema: { attributes: [] },
   });
+
+  // ! TEMPORARY DISABLE NESTED COMPONENT
+  const bool = true; // prevent eslint from crying
+
+  if (bool) {
+    return (
+      <tr>
+        <td colSpan={12} style={{ padding: 10 }}>
+          <Box background="neutral100" style={{ height: 40 }} />
+        </td>
+      </tr>
+    );
+  }
 
   return (
     <tr className="component-row">

@@ -139,19 +139,6 @@ describe('Homepage', () => {
         background: #4945ff;
       }
 
-      .c1 {
-        padding-bottom: 56px;
-      }
-
-      .c0 {
-        display: grid;
-        grid-template-columns: 1fr;
-      }
-
-      .c2 {
-        overflow-x: hidden;
-      }
-
       .c24 {
         background: #ffffff;
         padding: 24px;
@@ -294,6 +281,19 @@ describe('Homepage', () => {
       .c27 svg {
         width: 2rem;
         height: 2rem;
+      }
+
+      .c1 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+
+      .c2 {
+        overflow-x: hidden;
       }
 
       .c3 {
@@ -619,7 +619,7 @@ describe('Homepage', () => {
           class="c1 c2"
         >
           <main
-            aria-labelledby="homepage"
+            aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
             tabindex="-1"
@@ -628,7 +628,8 @@ describe('Homepage', () => {
               class="c4"
             >
               <img
-                alt="Strapi logo"
+                alt=""
+                aria-hidden="true"
                 src="IMAGE_MOCK"
               />
             </div>
@@ -653,7 +654,7 @@ describe('Homepage', () => {
                         >
                           <h1
                             class="c11"
-                            id="homepage"
+                            id="main-content-title"
                           >
                             Welcome on board!
                           </h1>
@@ -917,7 +918,8 @@ describe('Homepage', () => {
                   <div
                     class=""
                   >
-                    <div
+                    <aside
+                      aria-labelledby="join-the-community"
                       class="c34"
                     >
                       <div
@@ -929,11 +931,12 @@ describe('Homepage', () => {
                           <div
                             class="c36"
                           >
-                            <h3
+                            <h2
                               class="c37"
+                              id="join-the-community"
                             >
                               Join the community
-                            </h3>
+                            </h2>
                             <span
                               class="c12 c38"
                             >
@@ -1288,7 +1291,7 @@ describe('Homepage', () => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </aside>
                   </div>
                 </div>
               </div>

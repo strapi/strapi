@@ -251,7 +251,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
           class="c6"
         >
           <main
-            aria-labelledby="email-sent"
+            aria-labelledby="main-content-title"
             class="c7"
             id="main-content"
             tabindex="-1"
@@ -272,7 +272,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                 >
                   <h1
                     class="c14"
-                    id="email-sent"
+                    id="main-content-title"
                   >
                     Oops...
                   </h1>

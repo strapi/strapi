@@ -58,16 +58,15 @@ const HomePage = () => {
       <FormattedMessage id="HomePage.helmet.title" defaultMessage="Homepage">
         {title => <Helmet title={title[0]} />}
       </FormattedMessage>
-      <Main labelledBy="homepage">
+      <Main>
         <LogoContainer>
-          <img alt="Strapi logo" src={Logo} />
+          <img alt="" aria-hidden src={Logo} />
         </LogoContainer>
         <Box padding={10}>
           <Grid>
             <GridItem col={8} s={12}>
               <HomeHeader
                 onCreateCT={handleClick}
-                id="homepage"
                 hasCreatedContentType={hasAlreadyCreatedContentTypes}
               />
             </GridItem>

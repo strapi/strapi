@@ -50,7 +50,6 @@ const WebhookForm = ({
       {({ handleSubmit, errors, handleReset }) => (
         <Form noValidate>
           <HeaderLayout
-            id="title"
             primaryAction={
               <Stack horizontal size={2}>
                 <Button
@@ -94,7 +93,6 @@ const WebhookForm = ({
                 })}
               </Link>
             }
-            as="h1"
           />
           <ContentLayout>
             <Stack size={4}>

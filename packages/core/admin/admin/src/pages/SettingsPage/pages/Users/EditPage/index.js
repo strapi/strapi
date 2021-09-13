@@ -4,8 +4,8 @@ import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
 import pick from 'lodash/pick';
 import get from 'lodash/get';
+import omit from 'lodash/omit';
 import {
-  CustomContentLayout,
   Form,
   GenericInput,
   SettingsPageTitle,
@@ -14,13 +14,14 @@ import {
   useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useQuery } from 'react-query';
 import { Formik } from 'formik';
 import { Box } from '@strapi/parts/Box';
 import { Button } from '@strapi/parts/Button';
 import { Grid, GridItem } from '@strapi/parts/Grid';
-import { HeaderLayout } from '@strapi/parts/Layout';
+import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
 import { H3 } from '@strapi/parts/Text';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
@@ -73,7 +74,7 @@ const EditPage = ({ canUpdate }) => {
     lockApp();
 
     try {
-      const data = await putUser(id, body);
+      const data = await putUser(id, omit(body, 'confirmPassword'));
 
       const userInfos = auth.getUserInfo();
 
@@ -85,6 +86,7 @@ const EditPage = ({ canUpdate }) => {
 
         setUserDisplayName(userDisplayName);
       }
+      actions.setValues(pick(body, fieldsToPick));
     } catch (err) {
       // FIXME when API errors are ready
       const errors = formatAPIErrors(err.response.data);
@@ -128,10 +130,9 @@ const EditPage = ({ canUpdate }) => {
 
   if (isLoading) {
     return (
-      <Main labelledBy="title">
+      <Main aria-busy="true">
         <SettingsPageTitle name="Users" />
         <HeaderLayout
-          id="title"
           primaryAction={
             <Button disabled startIcon={<CheckIcon />} type="button">
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
@@ -139,13 +140,15 @@ const EditPage = ({ canUpdate }) => {
           }
           title={title}
         />
-        <CustomContentLayout isLoading />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
       </Main>
     );
   }
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Users" />
       <Formik
         onSubmit={handleSubmit}
@@ -157,7 +160,6 @@ const EditPage = ({ canUpdate }) => {
           return (
             <Form>
               <HeaderLayout
-                id="title"
                 primaryAction={
                   <Button
                     disabled={isSubmitting || !canUpdate}
@@ -170,7 +172,7 @@ const EditPage = ({ canUpdate }) => {
                 }
                 title={title}
               />
-              <CustomContentLayout isLoading={isLoading}>
+              <ContentLayout>
                 {data?.registrationToken && (
                   <Box paddingBottom={6}>
                     <MagicLink registrationToken={data.registrationToken} />
@@ -241,7 +243,7 @@ const EditPage = ({ canUpdate }) => {
                     </Stack>
                   </Box>
                 </Stack>
-              </CustomContentLayout>
+              </ContentLayout>
             </Form>
           );
         }}

@@ -77,7 +77,7 @@ const EditPage = () => {
   }
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
@@ -88,7 +88,6 @@ const EditPage = () => {
         {({ handleSubmit, values, handleChange, errors }) => (
           <Form noValidate onSubmit={handleSubmit}>
             <HeaderLayout
-              id="title"
               primaryAction={
                 !isLoadingPlugins && (
                   <Button

@@ -67,7 +67,7 @@ export const SingleSignOn = () => {
   const isHeaderButtonDisabled = isEqual(initialData, modifiedData);
 
   return (
-    <Main labelledBy="title" tabIndex={-1}>
+    <Main tabIndex={-1}>
       <SettingsPageTitle name="SSO" />
       <form
         onSubmit={e => {
@@ -80,7 +80,6 @@ export const SingleSignOn = () => {
         }}
       >
         <HeaderLayout
-          id="title"
           primaryAction={
             <Button
               data-testid="save-button"
@@ -109,7 +108,7 @@ export const SingleSignOn = () => {
               <Stack size={12}>
                 <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
                   <Grid gap={4}>
-                    <GridItem col="6" m="6" s="12">
+                    <GridItem col={6} m={6} s={12}>
                       <ToggleInput
                         aria-label="autoRegister"
                         data-testid="autoRegister"
@@ -139,7 +138,7 @@ export const SingleSignOn = () => {
                         }}
                       />
                     </GridItem>
-                    <GridItem col="6" m="6" s="12">
+                    <GridItem col={6} m={6} s={12}>
                       <Select
                         disabled={!canUpdate}
                         hint={formatMessage({

@@ -19,7 +19,7 @@ const ForgotPassword = ({ onSubmit, schema }) => {
 
   return (
     <UnauthenticatedLayout>
-      <Main labelledBy="password-forgotten">
+      <Main>
         <LayoutContent>
           <Formik
             enableReinitialize
@@ -35,8 +35,8 @@ const ForgotPassword = ({ onSubmit, schema }) => {
               <Form noValidate>
                 <Column>
                   <Logo />
-                  <Box paddingTop="6" paddingBottom="7">
-                    <H1 id="password-forgotten">
+                  <Box paddingTop={6} paddingBottom={7}>
+                    <H1>
                       {formatMessage({
                         id: 'Auth.reset-password.title',
                         defaultMessage: 'Reset password',

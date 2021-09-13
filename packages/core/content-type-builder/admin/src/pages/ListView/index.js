@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from 'react';
 import { useTracking } from '@strapi/helper-plugin';
 import { AddIcon, BackIcon, CheckIcon, EditIcon } from '@strapi/icons';
-import { Box, Button, ContentLayout, HeaderLayout, Link, Row, Stack } from '@strapi/parts';
+import { Button, ContentLayout, HeaderLayout, Link, Row, Stack } from '@strapi/parts';
 import { get, has, isEqual, upperFirst } from 'lodash';
-import PropTypes from 'prop-types';
+import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
 import { Prompt, useHistory, useLocation } from 'react-router-dom';
 import List from '../../components/List';
 import ListRow from '../../components/ListRow';
 import ListViewContext from '../../contexts/ListViewContext';
 import useDataManager from '../../hooks/useDataManager';
-import pluginId from '../../pluginId';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
 import getTrad from '../../utils/getTrad';
 import makeSearch from '../../utils/makeSearch';
@@ -152,7 +150,7 @@ const ListView = () => {
     return (
       description ||
       formatMessage({
-        id: `${pluginId}.modelPage.contentHeader.emptyDescription.description`,
+        id: getTrad('modelPage.contentHeader.emptyDescription.description'),
       })
     );
   };
@@ -200,20 +198,6 @@ const ListView = () => {
         headerId: getTrad('modalForm.header-edit'),
       }),
     });
-  };
-
-  const CustomRow = props => {
-    const { name } = props;
-
-    return <ListRow {...props} attributeName={name} name={name} onClick={handleClickEditField} />;
-  };
-
-  CustomRow.defaultProps = {
-    name: null,
-  };
-
-  CustomRow.propTypes = {
-    name: PropTypes.string,
   };
 
   return (
@@ -273,7 +257,6 @@ const ListView = () => {
               })}
             </Link>
           }
-          as="h1"
         />
         <ContentLayout>
           <Stack size={4}>
@@ -298,23 +281,21 @@ const ListView = () => {
                     handleClickAddField(forTarget, targetUid, headerDisplayObject);
                   }}
                 >
-                  {formatMessage({ id: `${pluginId}.button.attributes.add.another` })}
+                  {formatMessage({ id: getTrad('button.attributes.add.another') })}
                 </Button>
               </Stack>
             </Row>
-            <Box background="neutral0" padding={6} shadow="filterShadow" hasRadius>
-              <List
-                items={attributes}
-                customRowComponent={props => <CustomRow {...props} />}
-                addComponentToDZ={handleClickAddComponentToDZ}
-                targetUid={targetUid}
-                dataType={forTarget}
-                dataTypeName={currentDataName}
-                mainTypeName={currentDataName}
-                editTarget={forTarget}
-                isMain
-              />
-            </Box>
+            <List
+              items={attributes}
+              customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
+              addComponentToDZ={handleClickAddComponentToDZ}
+              targetUid={targetUid}
+              dataType={forTarget}
+              dataTypeName={currentDataName}
+              mainTypeName={currentDataName}
+              editTarget={forTarget}
+              isMain
+            />
           </Stack>
         </ContentLayout>
       </>

@@ -1,20 +1,29 @@
 import React, { useState } from 'react';
 import {
-  CustomContentLayout,
+  DynamicTable,
   Search,
   SettingsPageTitle,
   useRBAC,
   useNotification,
   useFocusWhenNavigate,
+  NoPermissions,
 } from '@strapi/helper-plugin';
-import { Button, Box, HeaderLayout, Main, Row } from '@strapi/parts';
+import {
+  ActionLayout,
+  ContentLayout,
+  Button,
+  HeaderLayout,
+  Main,
+  useNotifyAT,
+} from '@strapi/parts';
+
 import { Mail } from '@strapi/icons';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import get from 'lodash/get';
 import adminPermissions from '../../../../../permissions';
-import DynamicTable from './DynamicTable';
+import TableRows from './DynamicTable/TableRows';
 import Filters from './Filters';
 import ModalForm from './ModalForm';
 import PaginationFooter from './PaginationFooter';
@@ -32,9 +41,27 @@ const ListPage = () => {
   const { formatMessage } = useIntl();
   const { search } = useLocation();
   useFocusWhenNavigate();
+  const { notifyStatus } = useNotifyAT();
   const queryName = ['users', search];
 
-  const { status, data, isFetching } = useQuery(queryName, () => fetchData(search), {
+  const title = formatMessage({
+    id: 'Settings.permissions.users.listview.header.title',
+    defaultMessage: 'Users',
+  });
+
+  const notifyLoad = () => {
+    notifyStatus(
+      formatMessage(
+        {
+          id: 'app.utils.notify.data-loaded',
+          defaultMessage: 'The {target} has loaded',
+        },
+        { target: title }
+      )
+    );
+  };
+
+  const { status, data, isFetching } = useQuery(queryName, () => fetchData(search, notifyLoad), {
     enabled: canRead,
     keepPreviousData: true,
     retry: false,
@@ -85,15 +112,11 @@ const ListPage = () => {
   );
 
   return (
-    <Main labelledBy="title">
+    <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        id="title"
         primaryAction={createAction}
-        title={formatMessage({
-          id: 'Settings.permissions.users.listview.header.title',
-          defaultMessage: 'Users',
-        })}
+        title={title}
         subtitle={formatMessage(
           {
             id: 'Settings.permissions.users.listview.header.subtitle',
@@ -102,34 +125,48 @@ const ListPage = () => {
           { number: total }
         )}
       />
-      <CustomContentLayout canRead={canRead}>
+      {canRead && (
+        <ActionLayout
+          startActions={
+            <>
+              <Search
+                label={formatMessage(
+                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                  { target: title }
+                )}
+              />
+              <Filters displayedFilters={displayedFilters} />
+            </>
+          }
+        />
+      )}
+
+      <ContentLayout canRead={canRead}>
+        {!canRead && <NoPermissions />}
         {status === 'error' && <div>TODO: An error occurred</div>}
         {canRead && (
           <>
-            <Box paddingBottom={4}>
-              <Row style={{ flexWrap: 'wrap' }}>
-                <Search />
-                <Filters displayedFilters={displayedFilters} />
-              </Row>
-            </Box>
-          </>
-        )}
-        {canRead && (
-          <>
             <DynamicTable
-              canCreate={canCreate}
-              canDelete={canDelete}
+              contentType="Users"
               isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
               headers={tableHeaders}
               rows={data?.results}
               withBulkActions
               withMainAction={canDelete}
-            />
+            >
+              <TableRows
+                canDelete={canDelete}
+                headers={tableHeaders}
+                rows={data?.results || []}
+                withBulkActions
+                withMainAction={canDelete}
+              />
+            </DynamicTable>
             <PaginationFooter pagination={data?.pagination} />
           </>
         )}
-      </CustomContentLayout>
+      </ContentLayout>
       {isModalOpened && <ModalForm onToggle={handleToggle} queryName={queryName} />}
     </Main>
   );

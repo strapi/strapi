@@ -88,6 +88,8 @@ const SocialLinks = () => {
 
   return (
     <Box
+      as="aside"
+      aria-labelledby="join-the-community"
       background="neutral0"
       hasRadius
       paddingRight={5}
@@ -99,7 +101,7 @@ const SocialLinks = () => {
       <Box paddingBottom={7}>
         <Stack size={5}>
           <Stack size={3}>
-            <H3>
+            <H3 as="h2" id="join-the-community">
               {formatMessage({
                 id: 'app.components.HomePage.community',
                 defaultMessage: 'Join the community',

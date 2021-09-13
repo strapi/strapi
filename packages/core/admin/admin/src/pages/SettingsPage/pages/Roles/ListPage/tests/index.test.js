@@ -401,7 +401,7 @@ describe('<ListPage />', () => {
       }
 
       <main
-        aria-labelledby="title"
+        aria-labelledby="main-content-title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -422,7 +422,7 @@ describe('<ListPage />', () => {
               >
                 <h1
                   class="c5"
-                  id="title"
+                  id="main-content-title"
                 >
                   roles
                 </h1>

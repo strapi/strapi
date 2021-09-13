@@ -118,7 +118,7 @@ export const SettingsPage = () => {
   };
 
   return (
-    <Main labelledBy="title" tabIndex={-1}>
+    <Main tabIndex={-1}>
       <Helmet
         title={formatMessage({
           id: getTrad('page.title'),
@@ -127,7 +127,6 @@ export const SettingsPage = () => {
       />
       <form onSubmit={handleSubmit}>
         <HeaderLayout
-          id="title"
           title={formatMessage({
             id: getTrad('settings.header.label'),
             defaultMessage: 'Media Library - Settings',
@@ -168,7 +167,7 @@ export const SettingsPage = () => {
                       </H3>
                     </Row>
                     <Grid gap={6}>
-                      <GridItem col="6" s="12">
+                      <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="responsiveDimensions"
                           data-testid="responsiveDimensions"
@@ -198,7 +197,7 @@ export const SettingsPage = () => {
                           }}
                         />
                       </GridItem>
-                      <GridItem col="6" s="12">
+                      <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="sizeOptimization"
                           data-testid="sizeOptimization"
@@ -223,7 +222,7 @@ export const SettingsPage = () => {
                           }}
                         />
                       </GridItem>
-                      <GridItem col="6" s="12">
+                      <GridItem col={6} s={12}>
                         <ToggleInput
                           aria-label="autoOrientation"
                           data-testid="autoOrientation"

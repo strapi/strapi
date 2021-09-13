@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Row, Button, Table as TableCompo, Subtitle } from '@strapi/parts';
 import { ConfirmDialog, EmptyBodyTable, useQueryParams } from '@strapi/helper-plugin';
@@ -6,7 +6,6 @@ import { useIntl } from 'react-intl';
 import { DeleteIcon } from '@strapi/icons';
 import styled from 'styled-components';
 import TableHead from './TableHead';
-import TableRows from './TableRows';
 
 const BlockActions = styled(Row)`
   & > * + * {
@@ -17,7 +16,8 @@ const BlockActions = styled(Row)`
 `;
 
 const Table = ({
-  canDelete,
+  children,
+  contentType,
   headers,
   isLoading,
   onConfirmDeleteAll,
@@ -40,7 +40,7 @@ const Table = ({
     ? {
         id: 'content-manager.components.TableEmpty.withFilters',
         defaultMessage: 'There are no {contentType} with the applied filters...',
-        values: { contentType: 'Users' },
+        values: { contentType },
       }
     : undefined;
 
@@ -145,16 +145,13 @@ const Table = ({
         {!rows.length || isLoading ? (
           <EmptyBodyTable colSpan={COL_COUNT} content={content} isLoading={isLoading} />
         ) : (
-          <TableRows
-            canDelete={canDelete}
-            entriesToDelete={entriesToDelete}
-            headers={headers}
-            onClickDelete={handleClickDelete}
-            onSelectRow={handleSelectRow}
-            rows={rows}
-            withBulkActions={withBulkActions}
-            withMainAction={withMainAction}
-          />
+          Children.toArray(children).map(child =>
+            cloneElement(child, {
+              entriesToDelete,
+              onClickDelete: handleClickDelete,
+              onSelectRow: handleSelectRow,
+            })
+          )
         )}
       </TableCompo>
       <ConfirmDialog
@@ -174,6 +171,7 @@ const Table = ({
 };
 
 Table.defaultProps = {
+  children: undefined,
   headers: [],
   isLoading: false,
   onConfirmDeleteAll: () => {},
@@ -183,7 +181,8 @@ Table.defaultProps = {
 };
 
 Table.propTypes = {
-  canDelete: PropTypes.bool.isRequired,
+  children: PropTypes.node,
+  contentType: PropTypes.string.isRequired,
   headers: PropTypes.array,
   isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
