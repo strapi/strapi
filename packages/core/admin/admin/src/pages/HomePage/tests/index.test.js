@@ -917,7 +917,8 @@ describe('Homepage', () => {
                   <div
                     class=""
                   >
-                    <div
+                    <aside
+                      aria-labelledby="join-the-community"
                       class="c34"
                     >
                       <div
@@ -929,11 +930,12 @@ describe('Homepage', () => {
                           <div
                             class="c36"
                           >
-                            <h3
+                            <h2
                               class="c37"
+                              id="join-the-community"
                             >
                               Join the community
-                            </h3>
+                            </h2>
                             <span
                               class="c12 c38"
                             >
@@ -1288,7 +1290,7 @@ describe('Homepage', () => {
                           </div>
                         </div>
                       </div>
-                    </div>
+                    </aside>
                   </div>
                 </div>
               </div>
