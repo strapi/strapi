@@ -15,7 +15,13 @@ This component is used to display an empty state.
 <Canvas>
   <Story name="base">
     <Main>
-      <NoContent content="There's no content" action={<Button>Add content</Button>} />
+      <NoContent
+        content={{
+          id: 'app.components.EmptyStateLayout.content-document',
+          defaultMessage: "There's no content",
+        }}
+        action={<Button>Add content</Button>}
+      />
     </Main>
   </Story>
 </Canvas>
