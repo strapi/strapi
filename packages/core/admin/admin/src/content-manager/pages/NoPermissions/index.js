@@ -1,7 +1,7 @@
 import React from 'react';
-import { CustomContentLayout, useFocusWhenNavigate } from '@strapi/helper-plugin';
+import { useFocusWhenNavigate, NoPermissions as NoPermissionsCompo } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
-import { HeaderLayout } from '@strapi/parts/Layout';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -18,9 +18,9 @@ const NoPermissions = () => {
           defaultMessage: 'Content',
         })}
       />
-      <CustomContentLayout canRead={false}>
-        <div />
-      </CustomContentLayout>
+      <ContentLayout>
+        <NoPermissionsCompo />
+      </ContentLayout>
     </Main>
   );
 };
