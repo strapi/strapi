@@ -3,8 +3,8 @@
 const { isEmpty, mergeWith, isArray } = require('lodash/fp');
 const { ApolloServer } = require('apollo-server-koa');
 const {
-  ApolloServerPluginLandingPageLocalDefault,
-  ApolloServerPluginLandingPageProductionDefault,
+  ApolloServerPluginLandingPageDisabled,
+  ApolloServerPluginLandingPageGraphQLPlayground,
 } = require('apollo-server-core');
 const depthLimit = require('graphql-depth-limit');
 const { graphqlUploadKoa } = require('graphql-upload');
@@ -35,15 +35,10 @@ module.exports = async strapi => {
     schema,
 
     // Initialize loaders for this request.
-    context: ({ ctx }) => {
-      // TODO: set loaders in the context not globally
-      strapi
-        .plugin('graphql')
-        .service('old')
-        ['data-loaders'].initializeLoader();
-
-      return ctx;
-    },
+    context: ({ ctx }) => ({
+      state: ctx.state,
+      koaContext: ctx,
+    }),
 
     // Validation
     validationRules: [depthLimit(config('depthLimit'))],
@@ -54,10 +49,9 @@ module.exports = async strapi => {
     bodyParserConfig: true,
 
     plugins: [
-      // Specify which GraphQL landing page we want for the different env.
-      process.env.NODE_ENV !== 'production'
-        ? ApolloServerPluginLandingPageLocalDefault({ footer: false })
-        : ApolloServerPluginLandingPageProductionDefault({ footer: false }),
+      process.env.NODE_ENV === 'production'
+        ? ApolloServerPluginLandingPageDisabled()
+        : ApolloServerPluginLandingPageGraphQLPlayground(),
     ],
   };
 
@@ -77,10 +71,30 @@ module.exports = async strapi => {
   }
 
   // Link the Apollo server & the Strapi app
-  server.applyMiddleware({
-    app: strapi.server.app,
-    path: config('endpoint', '/graphql'),
-  });
+  strapi.server.routes([
+    {
+      method: 'ALL',
+      path: config('endpoint', '/graphql'),
+      handler: [
+        (ctx, next) => {
+          ctx.state.route = {
+            info: {
+              // Indicate it's a content API route
+              type: 'content-api',
+            },
+          };
+
+          return strapi.auth.authenticate(ctx, next);
+        },
+
+        // Apollo Server
+        server.getMiddleware({ path: config('endpoint', '/graphql') }),
+      ],
+      config: {
+        auth: false,
+      },
+    },
+  ]);
 
   // Register destroy behavior
   // We're doing it here instead of exposing a destroy method to the strapi-server.js

@@ -11,6 +11,18 @@ module.exports = ({ strapi }) => {
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
   const buildSingleTypeQueries = contentType => {
+    getService('extension')
+      .for('content-api')
+      .use(() => ({
+        resolversConfig: {
+          [`Query.${getFindOneQueryName(contentType)}`]: {
+            auth: {
+              scope: [`${contentType.uid}.findOne`],
+            },
+          },
+        },
+      }));
+
     return extendType({
       type: 'Query',
 

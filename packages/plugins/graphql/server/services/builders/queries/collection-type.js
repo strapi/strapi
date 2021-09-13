@@ -16,6 +16,24 @@ module.exports = ({ strapi }) => {
   } = naming;
 
   const buildCollectionTypeQueries = contentType => {
+    getService('extension')
+      .for('content-api')
+      .use(() => ({
+        resolversConfig: {
+          [`Query.${getFindOneQueryName(contentType)}`]: {
+            auth: {
+              scope: [`${contentType.uid}.findOne`],
+            },
+          },
+
+          [`Query.${getFindQueryName(contentType)}`]: {
+            auth: {
+              scope: [{ name: `${contentType.uid}.find`, type: 'read-only' }],
+            },
+          },
+        },
+      }));
+
     return extendType({
       type: 'Query',
 

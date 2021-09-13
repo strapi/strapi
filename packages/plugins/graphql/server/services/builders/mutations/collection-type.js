@@ -133,6 +133,30 @@ module.exports = ({ strapi }) => {
 
   return {
     buildCollectionTypeMutations(contentType) {
+      getService('extension')
+        .for('content-api')
+        .use(() => ({
+          resolversConfig: {
+            [`Mutation.${getCreateMutationTypeName(contentType)}`]: {
+              auth: {
+                scope: [`${contentType.uid}.create`],
+              },
+            },
+
+            [`Mutation.${getUpdateMutationTypeName(contentType)}`]: {
+              auth: {
+                scope: [`${contentType.uid}.update`],
+              },
+            },
+
+            [`Mutation.${getDeleteMutationTypeName(contentType)}`]: {
+              auth: {
+                scope: [`${contentType.uid}.delete`],
+              },
+            },
+          },
+        }));
+
       return extendType({
         type: 'Mutation',
 

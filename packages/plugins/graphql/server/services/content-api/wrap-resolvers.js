@@ -1,8 +1,18 @@
 'use strict';
 
-const { isNil, get, getOr, isFunction, first } = require('lodash/fp');
+const { get, getOr, isFunction, first } = require('lodash/fp');
 
+const { GraphQLObjectType } = require('graphql');
 const { createPoliciesMiddleware } = require('./policy');
+
+const ignoredObjectTypes = [
+  '__Schema',
+  '__Type',
+  '__Field',
+  '__InputValue',
+  '__EnumValue',
+  '__Directive',
+];
 
 /**
  * Wrap the schema's resolvers if they've been
@@ -19,31 +29,31 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
 
   // Fields filters
   const isValidFieldName = ([field]) => !field.startsWith('__');
-  const hasResolverConfig = type => ([field]) => !isNil(resolversConfig[`${type}.${field}`]);
 
-  const typeMap = get('_typeMap', schema);
+  const typeMap = schema.getTypeMap();
 
   // Iterate over every field from every type within the
   // schema's type map and wrap its resolve attribute if needed
   Object.entries(typeMap).forEach(([type, definition]) => {
-    const fields = get('_fields', definition);
+    const isGraphQLObjectType = definition instanceof GraphQLObjectType;
+    const isIgnoredType = ignoredObjectTypes.includes(type);
 
-    if (isNil(fields)) {
+    if (!isGraphQLObjectType || isIgnoredType) {
       return;
     }
 
-    const fieldsToProcess = Object.entries(fields)
-      // Ignore patterns such as "__FooBar"
-      .filter(isValidFieldName)
-      // Don't augment the types if there isn't any configuration defined for them
-      .filter(hasResolverConfig(type));
+    const fields = definition.getFields();
+    const fieldsToProcess = Object.entries(fields).filter(isValidFieldName);
 
     for (const [fieldName, fieldDefinition] of fieldsToProcess) {
+      const defaultResolver = get(fieldName);
+
       const path = `${type}.${fieldName}`;
-      const resolverConfig = resolversConfig[path];
+      const resolverConfig = getOr({}, path, resolversConfig);
 
-      const { resolve: baseResolver = get(fieldName) } = fieldDefinition;
+      const { resolve: baseResolver = defaultResolver } = fieldDefinition;
 
+      // Parse & initialize the middlewares
       const middlewares = parseMiddlewares(resolverConfig, strapi);
 
       // Generate the policy middleware
@@ -62,16 +72,35 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
           );
       });
 
-      // Replace the base resolver by a custom function which will handle authorization, middlewares & policies
-      fieldDefinition.resolve = async (parent, args, context, info) => {
-        if (resolverConfig.auth !== false) {
+      /**
+       * GraphQL authorization flow
+       * @param {object} context
+       * @return {Promise<void>}
+       */
+      const authorize = async ({ context }) => {
+        const authConfig = get('auth', resolverConfig);
+        const authContext = get('state.auth', context);
+
+        if (authConfig !== false) {
           try {
-            await strapi.auth.verify(context.state.auth, resolverConfig.auth);
+            await strapi.auth.verify(authContext, authConfig);
           } catch (error) {
             // TODO: [v4] Throw GraphQL Error instead
             throw new Error('Forbidden access');
           }
         }
+      };
+
+      /**
+       * Base resolver wrapper that handles authorization, middlewares & policies
+       * @param {object} parent
+       * @param {object} args
+       * @param {object} context
+       * @param {object} info
+       * @return {Promise<any>}
+       */
+      fieldDefinition.resolve = async (parent, args, context, info) => {
+        await authorize({ context });
 
         // Execute middlewares (including the policy middleware which will always be included)
         return first(boundMiddlewares).call(null, parent, args, context, info);
