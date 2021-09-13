@@ -53,7 +53,12 @@ export const Search = () => {
   const [expanded, setExpanded] = useState(false);
 
   if (expanded) {
-    return <SearchAsset onBlur={() => setExpanded(false)} onSubmit={() => console.log('lool')} />;
+    return (
+      <SearchAsset
+        onBlur={() => setExpanded(false)}
+        onSubmit={() => console.log('Search submitted')}
+      />
+    );
   }
 
   return (
