@@ -22,6 +22,7 @@ import { HeaderLayout } from '@strapi/parts/Layout';
 import { Button } from '@strapi/parts/Button';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Stack } from '@strapi/parts/Stack';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Select, Option } from '@strapi/parts/Select';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
@@ -35,9 +36,18 @@ const ProfilePage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { notifyStatus } = useNotifyAT();
   useFocusWhenNavigate();
 
   const { status, data } = useQuery('user', () => fetchUser(), {
+    onSuccess: () => {
+      notifyStatus(
+        formatMessage({
+          id: 'Settings.profile.form.notify.data.loaded',
+          defaultMessage: 'Your profile data has been loaded',
+        })
+      );
+    },
     onError: () => {
       toggleNotification({
         type: 'warning',
@@ -80,20 +90,16 @@ const ProfilePage = () => {
     lockApp();
 
     const username = body.username || null;
-    submitMutation.mutate({ ...body, username });
+    await submitMutation.mutateAsync({ ...body, username });
   };
 
   const fieldsToPick = ['email', 'firstname', 'lastname', 'username', 'preferedLanguage'];
 
-  const initialData = Object.keys(pick(data, fieldsToPick)).reduce((acc, current) => {
-    acc[current] = data?.[current];
-
-    return acc;
-  }, {});
+  const initialData = pick(data, fieldsToPick);
 
   if (isLoading) {
     return (
-      <Main>
+      <Main aria-busy="true">
         <Helmet
           title={formatMessage({
             id: 'Settings.profile.form.section.helmet.title',

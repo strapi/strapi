@@ -2,7 +2,6 @@ import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
 import { QueryClient, QueryClientProvider } from 'react-query';
-// import { rest } from 'msw';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import ProfilePage from '../index';
 import server from './utils/server';
@@ -1032,31 +1031,5 @@ describe('ADMIN | Pages | Profile page', () => {
     });
   });
 
-  it("should display firstname/lastname if username doesn't exist", async () => {
-    // TODO
-    // server.use(
-    //   rest.get('*/me', (req, res, ctx) => {
-    //     return res(
-    //       ctx.delay(100),
-    //       ctx.status(200),
-    //       ctx.json({
-    //         data: {
-    //           email: 'HOLA@michka.fr',
-    //           firstname: 'michoko',
-    //           lastname: 'ronronscelestes',
-    //           username: 'HOLA',
-    //           preferedLanguage: 'en',
-    //         },
-    //       })
-    //     )
-    //   }),
-    // )
-    // const { queryByText } = render(App);
-    // // await waitFor(() => {
-    // //   expect(queryByText('michka@michka.fr')).not.toBeInTheDocument();
-    // // });
-    // await waitFor(() => {
-    //   expect(screen.getByText('HOLA@michka.fr')).toBeInTheDocument();
-    // });
-  });
+  test.todo('should display firstname/lastname when the username is null');
 });
