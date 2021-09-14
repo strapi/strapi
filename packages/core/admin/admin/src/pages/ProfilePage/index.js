@@ -1,8 +1,8 @@
 import React from 'react';
 import {
-  CustomContentLayout,
   Form,
   GenericInput,
+  LoadingIndicatorPage,
   useAppInfos,
   useFocusWhenNavigate,
   useNotification,
@@ -18,7 +18,7 @@ import { Helmet } from 'react-helmet';
 import { Main } from '@strapi/parts/Main';
 import { H3 } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
-import { HeaderLayout } from '@strapi/parts/Layout';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { Button } from '@strapi/parts/Button';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Stack } from '@strapi/parts/Stack';
@@ -112,7 +112,9 @@ const ProfilePage = () => {
             defaultMessage: 'Profile page',
           })}
         />
-        <CustomContentLayout isLoading />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
       </Main>
     );
   }
@@ -143,7 +145,7 @@ const ProfilePage = () => {
                   </Button>
                 }
               />
-              <CustomContentLayout>
+              <ContentLayout>
                 <Stack size={6}>
                   <Box
                     background="neutral0"
@@ -262,7 +264,7 @@ const ProfilePage = () => {
                     </Stack>
                   </Box>
                 </Stack>
-              </CustomContentLayout>
+              </ContentLayout>
             </Form>
           );
         }}
