@@ -1,19 +1,16 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
-import isEmpty from 'lodash/isEmpty';
-// import { get, isEmpty } from 'lodash';
-import get from 'lodash/get';
-// import isEmpty from 'lodash/isEmpty'
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
   NoPermissions,
   // CheckPermissions,
-  // PopUpWarning,
   Search,
   useFocusWhenNavigate,
   useQueryParams,
@@ -38,7 +35,6 @@ import {
 } from '../../utils';
 // import Container from '../../components/Container';
 // import ListViewProvider from '../../components/ListViewProvider';
-// import InjectionZoneList from '../../components/InjectionZoneList';
 // import { Wrapper } from './components';
 // import FieldPicker from './FieldPicker';
 // import Filter from './Filter';
@@ -97,7 +93,6 @@ function ListView({
   const { formatMessage } = useIntl();
 
   // const [isFilterPickerOpen, setFilterPickerState] = useState(false);
-  // const [idToDelete, setIdToDelete] = useState(null);
   const contentType = layout.contentType;
   const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
   // TODO
@@ -106,9 +101,6 @@ function ListView({
   // const filters = useMemo(() => {
   //   return formatFiltersFromQuery(query);
   // }, [query]);
-
-  // const sort = query.sort;
-  // const _q = query._q || '';
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -467,36 +459,6 @@ function ListView({
   //           </Wrapper>
   //         )}
   //       </Container>
-  //       <PopUpWarning
-  //         isOpen={showWarningDelete}
-  //         toggleModal={toggleModalDelete}
-  //         content={{
-  //           message: getTrad('popUpWarning.bodyMessage.contentType.delete'),
-  //         }}
-  //         onConfirm={handleConfirmDeleteData}
-  //         popUpWarningType="danger"
-  //         onClosed={handleModalClose}
-  //         isConfirmButtonLoading={showModalConfirmButtonLoading}
-  //       >
-  //         <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
-  //       </PopUpWarning>
-  //       <PopUpWarning
-  //         isOpen={showWarningDeleteAll}
-  //         toggleModal={toggleModalDeleteAll}
-  //         content={{
-  //           message: getTrad(
-  //             `popUpWarning.bodyMessage.contentType.delete${
-  //               entriesToDelete.length > 1 ? '.all' : ''
-  //             }`
-  //           ),
-  //         }}
-  //         popUpWarningType="danger"
-  //         onConfirm={handleConfirmDeleteAllData}
-  //         onClosed={handleModalClose}
-  //         isConfirmButtonLoading={showModalConfirmButtonLoading}
-  //       >
-  //         <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
-  //       </PopUpWarning>
   //     </ListViewProvider>
   //   </>
   // );
@@ -529,7 +491,6 @@ ListView.propTypes = {
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired, pageCount: PropTypes.number })
     .isRequired,
   slug: PropTypes.string.isRequired,
-  // setLayout: PropTypes.func.isRequired,
 };
 
 const mapStateToProps = makeSelectListView();
