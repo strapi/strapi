@@ -62,6 +62,7 @@
   "Providers.disabled": "Disabled",
   "Providers.image": "Image",
   "Providers.settings": "Settings",
+  "Providers.data.loaded": "Providers have been loaded",
   "Roles.description": "Description",
   "Roles.name": "Name",
   "Roles.users": "Users",

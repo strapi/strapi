@@ -86,7 +86,12 @@ const ListView = () => {
           type: 'GET_DATA_SUCCEEDED',
           data,
         });
-        notifyStatus('webhooks have been loaded');
+        notifyStatus(
+          formatMessage({
+            id: 'Settings.webhooks.list.data.loaded',
+            defaultMessage: 'Webhooks have been loaded',
+          })
+        );
       }
     } catch (err) {
       console.log(err);
@@ -123,6 +128,13 @@ const ListView = () => {
         method: 'DELETE',
       });
 
+      notifyStatus(
+        formatMessage({
+          id: 'Settings.webhooks.list.webhook.deleted',
+          defaultMessage: 'Webhook deleted',
+        })
+      );
+
       dispatch({
         type: 'WEBHOOK_DELETED',
         index: getWebhookIndex(webhookToDelete),
@@ -148,6 +160,13 @@ const ListView = () => {
         method: 'POST',
         body,
       });
+
+      notifyStatus(
+        formatMessage({
+          id: 'Settings.webhooks.list.webhooks.deleted',
+          defaultMessage: 'Webhooks deleted',
+        })
+      );
 
       if (isMounted.current) {
         dispatch({
