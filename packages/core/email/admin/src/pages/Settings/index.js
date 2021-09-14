@@ -48,6 +48,45 @@ const SettingsPage = () => {
     settings: { defaultFrom: '', defaultReplyTo: '', testAddress: '' },
   });
 
+  useEffect(() => {
+    setIsLoading(true);
+
+    fetchEmailSettings()
+      .then(config => {
+        notifyStatus(
+          formatMessage({
+            id: getTrad('Settings.email.plugin.notification.data.loaded'),
+            defaultMessage: 'Email settings data has been loaded',
+          })
+        );
+
+        setConfig(config);
+
+        const testAddressFound = get(config, 'settings.testAddress');
+
+        if (testAddressFound) {
+          setTestAddress(testAddressFound);
+        }
+      })
+      .catch(() =>
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage({
+            id: getTrad('Settings.email.plugin.notification.config.error'),
+            defaultMessage: 'Failed to retrieve the email config',
+          }),
+        })
+      )
+      .finally(() => setIsLoading(false));
+  }, [formatMessage, toggleNotification, notifyStatus]);
+
+  useEffect(() => {
+    if (formErrors.email) {
+      const input = document.querySelector('#test-address-input');
+      input.focus();
+    }
+  }, [formErrors]);
+
   const handleChange = e => {
     setTestAddress(() => e.target.value);
   };
@@ -94,38 +133,6 @@ const SettingsPage = () => {
       setFormErrors(getYupInnerErrors(error));
     }
   };
-
-  useEffect(() => {
-    setIsLoading(true);
-
-    fetchEmailSettings()
-      .then(config => {
-        notifyStatus(
-          formatMessage({
-            id: 'Settings.email.plugin.notification.data.loaded',
-            defaultMessage: 'Email settings data has been loaded',
-          })
-        );
-
-        setConfig(config);
-
-        const testAddressFound = get(config, 'settings.testAddress');
-
-        if (testAddressFound) {
-          setTestAddress(testAddressFound);
-        }
-      })
-      .catch(() =>
-        toggleNotification({
-          type: 'warning',
-          message: formatMessage({
-            id: getTrad('Settings.email.plugin.notification.config.error'),
-            defaultMessage: 'Failed to retrieve the email config',
-          }),
-        })
-      )
-      .finally(() => setIsLoading(false));
-  }, [formatMessage, toggleNotification, notifyStatus]);
 
   if (isLoading) {
     return (
@@ -174,6 +181,7 @@ const SettingsPage = () => {
                 <Grid gap={5} alignItems="end">
                   <GridItem col={6} s={12}>
                     <TextInput
+                      id="test-address-input"
                       name="test-address"
                       onChange={handleChange}
                       label={formatMessage({
@@ -185,7 +193,7 @@ const SettingsPage = () => {
                         formErrors.email?.id &&
                         formatMessage({
                           id: getTrad(`${formErrors.email?.id}`),
-                          defaultMessage: 'An error occured',
+                          defaultMessage: 'This is an invalid email',
                         })
                       }
                       placeholder={formatMessage({

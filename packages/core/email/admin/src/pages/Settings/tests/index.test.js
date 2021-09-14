@@ -681,7 +681,7 @@ describe('Email | Pages | Settings', () => {
                               >
                                 <label
                                   class="c19"
-                                  for="textinput-4"
+                                  for="textinput-3"
                                 >
                                   Default shipper email
                                 </label>
@@ -694,7 +694,7 @@ describe('Email | Pages | Settings', () => {
                                   aria-invalid="false"
                                   class="c22"
                                   disabled=""
-                                  id="textinput-4"
+                                  id="textinput-3"
                                   name="shipper-email"
                                   placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
                                   value=""
@@ -723,7 +723,7 @@ describe('Email | Pages | Settings', () => {
                               >
                                 <label
                                   class="c19"
-                                  for="textinput-5"
+                                  for="textinput-4"
                                 >
                                   Default response email
                                 </label>
@@ -736,7 +736,7 @@ describe('Email | Pages | Settings', () => {
                                   aria-invalid="false"
                                   class="c22"
                                   disabled=""
-                                  id="textinput-5"
+                                  id="textinput-4"
                                   name="response-email"
                                   placeholder="ex: Strapi <example@strapi.io>"
                                   value=""
@@ -861,7 +861,7 @@ describe('Email | Pages | Settings', () => {
                               >
                                 <label
                                   class="c19"
-                                  for="textinput-6"
+                                  for="test-address-input"
                                 >
                                   Test delivery email address
                                 </label>
@@ -872,7 +872,7 @@ describe('Email | Pages | Settings', () => {
                                 <input
                                   aria-invalid="false"
                                   class="c22"
-                                  id="textinput-6"
+                                  id="test-address-input"
                                   name="test-address"
                                   placeholder="ex: developer@example.com"
                                   value=""
