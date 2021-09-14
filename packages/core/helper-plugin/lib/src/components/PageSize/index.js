@@ -7,13 +7,19 @@
 import React from 'react';
 import { Row, Select, Option } from '@strapi/parts';
 import { useIntl } from 'react-intl';
+import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 
-const PageSize = () => {
+const PageSize = ({ trackedEvent }) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
+  const { trackUsage } = useTracking();
 
   const handleChange = e => {
+    if (trackedEvent) {
+      trackUsage(trackedEvent);
+    }
     setQuery({
       pageSize: e,
       page: 1,
@@ -46,6 +52,14 @@ const PageSize = () => {
        </Box> */}
     </Row>
   );
+};
+
+PageSize.defaultProps = {
+  trackedEvent: null,
+};
+
+PageSize.propTypes = {
+  trackedEvent: PropTypes.string,
 };
 
 export default PageSize;

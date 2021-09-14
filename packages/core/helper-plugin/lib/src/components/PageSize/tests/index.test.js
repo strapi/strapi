@@ -12,6 +12,10 @@ import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import PageSize from '../index';
 
+jest.mock('../../../hooks/useTracking', () => () => ({
+  trackUsage: jest.fn(),
+}));
+
 const messages = {
   en: {
     'components.PageFooter.select': 'Entries per page',

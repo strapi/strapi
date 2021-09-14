@@ -12,24 +12,6 @@ const Img = styled.img`
   font-size: 12px;
 `;
 
-const FooterWrapper = styled.div`
-  padding-top: 3rem;
-`;
-
-const Label = styled.label`
-  display: inline-block;
-  height: 32px;
-  margin-left: 10px;
-  line-height: 32px;
-  color: #787e8f;
-  font-size: 13px;
-  font-style: italic;
-`;
-
-const SelectWrapper = styled.div`
-  display: flex;
-`;
-
 const FilterWrapper = styled.div`
   display: inline-block;
   height: 30px;
@@ -88,4 +70,4 @@ const Remove = styled.span`
   }
 `;
 
-export { FooterWrapper, Img, Label, SelectWrapper, FilterWrapper, Separator, Remove, Wrapper };
+export { Img, FilterWrapper, Separator, Remove, Wrapper };
