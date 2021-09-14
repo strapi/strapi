@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { bindActionCreators, compose } from 'redux';
@@ -12,7 +12,7 @@ import { useHistory, useLocation } from 'react-router-dom';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
-  DynamicTable,
+  // DynamicTable,
   NoPermissions,
   // CheckPermissions,
   // PopUpWarning,
@@ -20,7 +20,6 @@ import {
   useQueryParams,
   useNotification,
   useRBACProvider,
-  useStrapiApp,
   useTracking,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
@@ -31,7 +30,7 @@ import Add from '@strapi/icons/Add';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
 // import { InjectionZone } from '../../../shared/components';
-import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import DynamicTable from '../../components/DynamicTable';
 // import permissions from '../../../permissions';
 import {
   // formatFiltersFromQuery,
@@ -92,7 +91,6 @@ function ListView({
   // toggleModalDelete,
   // toggleModalDeleteAll,
   data,
-  displayedHeaders,
   getData,
   getDataSucceeded,
   isLoading,
@@ -109,7 +107,7 @@ function ListView({
   //     // settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
   //   },
   // } = layout;
-  console.log({ data });
+
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
   const { refetchPermissions } = useRBACProvider();
@@ -119,13 +117,13 @@ function ListView({
 
   useFocusWhenNavigate();
 
-  const { runHookWaterfall } = useStrapiApp();
+  // const { runHookWaterfall } = useStrapiApp();
 
-  const tableHeaders = useMemo(() => {
-    const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
+  // const tableHeaders = useMemo(() => {
+  //   const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
 
-    return headers.displayedHeaders;
-  }, [runHookWaterfall, displayedHeaders, layout]);
+  //   return headers.displayedHeaders;
+  // }, [runHookWaterfall, displayedHeaders, layout]);
 
   // const [{ query }, setQuery] = useQueryParams();
   const [{ query }] = useQueryParams();
@@ -139,6 +137,7 @@ function ListView({
   // const [idToDelete, setIdToDelete] = useState(null);
   const contentType = layout.contentType;
   const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
+  // TODO
   // const allAllowedHeaders = useMemo(() => getAllAllowedHeaders(attributes), [attributes]);
 
   // const filters = useMemo(() => {
@@ -147,10 +146,6 @@ function ListView({
 
   // const sort = query.sort;
   // const _q = query._q || '';
-
-  // const firstSortableHeader = useMemo(() => getFirstSortableHeader(displayedHeaders), [
-  //   displayedHeaders,
-  // ]);
 
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
@@ -174,7 +169,7 @@ function ListView({
                 '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
             },
             // Using the plural form
-            { number: 2 }
+            { number: pagination.count }
           )
         );
 
@@ -389,26 +384,19 @@ function ListView({
   ) : null;
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading}>
-      <HeaderLayout
-        id="title"
-        primaryAction={createAction}
-        subtitle={subtitle}
-        title={headerLayoutTitle}
-      />
+    <Main aria-busy={isLoading}>
+      <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
       <ContentLayout>
         {canRead ? (
           <DynamicTable
-            contentType={headerLayoutTitle}
+            canCreate={canCreate}
+            canDelete={canDelete}
+            contentTypeName={headerLayoutTitle}
             isLoading={isLoading}
-            headers={tableHeaders}
-            // rows={data}
-            rows={[]}
-            withBulkActions
-            withMainAction={canDelete}
-          >
-            {/* TODO */}
-          </DynamicTable>
+            // FIXME: remove the layout props drilling
+            layout={layout}
+            rows={data}
+          />
         ) : (
           <NoPermissions />
         )}
@@ -568,7 +556,6 @@ ListView.propTypes = {
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
   // canUpdate: PropTypes.bool.isRequired,
-  displayedHeaders: PropTypes.array.isRequired,
   data: PropTypes.array.isRequired,
   // didDeleteData: PropTypes.bool.isRequired,
   // entriesToDelete: PropTypes.array.isRequired,
