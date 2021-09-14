@@ -1,6 +1,7 @@
 import { useCallback, useReducer, useEffect, useRef } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import reducer, { initialState } from './reducer';
+import axiosIntance from '../../utils/axiosInstance';
 import pluginId from '../../pluginId';
 
 const useFetchRole = id => {
@@ -26,7 +27,9 @@ const useFetchRole = id => {
 
   const fetchRole = async roleId => {
     try {
-      const { role } = await request(`/${pluginId}/roles/${roleId}`, { method: 'GET' });
+      const {
+        data: { role },
+      } = await axiosIntance.get(`/${pluginId}/roles/${roleId}`);
 
       // Prevent updating state on an unmounted component
       if (isMounted.current) {

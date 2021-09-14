@@ -108,7 +108,7 @@ const EditPage = () => {
                   paddingRight={7}
                 >
                   <Stack size={4}>
-                    <H3>
+                    <H3 as="h2">
                       {formatMessage({
                         id: getTrad('EditPage.form.roles'),
                         defaultMessage: 'Role details',
@@ -126,7 +126,7 @@ const EditPage = () => {
                           })}
                           error={
                             errors.name
-                              ? formatMessage({ id: errors.name, defaultMessage: errors.name })
+                              ? formatMessage({ id: errors.name, defaultMessage: 'Invalid value' })
                               : null
                           }
                         />
@@ -144,7 +144,7 @@ const EditPage = () => {
                             errors.description
                               ? formatMessage({
                                   id: errors.description,
-                                  defaultMessage: errors.description,
+                                  defaultMessage: 'Invalid value',
                                 })
                               : null
                           }

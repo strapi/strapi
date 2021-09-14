@@ -30,11 +30,8 @@ jest.mock('../../../../hooks', () => {
 
 function makeAndRenderApp() {
   const history = createMemoryHistory();
-  const messages = {
-    'components.Input.error.validation.required': 'This value is required.',
-  };
   const app = (
-    <IntlProvider locale="en" messages={messages} textComponent="span">
+    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
       <ThemeProvider theme={lightTheme}>
         <Router history={history}>
           <Switch>
@@ -570,11 +567,11 @@ describe('Admin | containers | RoleEditPage', () => {
                 <div
                   class="c16"
                 >
-                  <h3
+                  <h2
                     class="c17"
                   >
                     Role details
-                  </h3>
+                  </h2>
                   <div
                     class="c7 c18"
                   >
@@ -688,7 +685,7 @@ describe('Admin | containers | RoleEditPage', () => {
     // Show errors after form submit
     await userEvent.click(saveButton);
     await waitFor(() => expect(saveButton).not.toBeDisabled());
-    const errorMessages = await getAllByText(/this value is required/i);
+    const errorMessages = await getAllByText(/invalid value/i);
     errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
   });
 });
