@@ -48,6 +48,7 @@ const HeadersInput = () => {
                       as={TextInput}
                       name={`headers.${i}.key`}
                       aria-label={`row ${i + 1} key`}
+                      label=""
                       error={
                         errors.headers?.[i]?.key &&
                         formatMessage({
@@ -62,6 +63,7 @@ const HeadersInput = () => {
                       <Box style={{ flex: 1 }}>
                         <Field
                           as={TextInput}
+                          label=""
                           aria-label={`row ${i + 1} value`}
                           name={`headers.${i}.value`}
                           error={
