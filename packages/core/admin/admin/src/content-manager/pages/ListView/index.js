@@ -36,7 +36,6 @@ import {
   getTrad,
 } from '../../utils';
 // import Container from '../../components/Container';
-// import Search from '../../components/Search';
 // import ListViewProvider from '../../components/ListViewProvider';
 // import InjectionZoneList from '../../components/InjectionZoneList';
 // import { Wrapper } from './components';
@@ -98,13 +97,13 @@ function ListView({
   slug,
 }) {
   const { total } = pagination;
-  // const {
-  //   contentType: {
-  //     // attributes,
-  //     // metadatas,
-  //     // settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-  //   },
-  // } = layout;
+  const {
+    contentType: {
+      // attributes,
+      // metadatas,
+      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+    },
+  } = layout;
 
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -376,17 +375,19 @@ function ListView({
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
-      {canRead && (
+      {canRead && (isSearchable || isFilterable) && (
         <ActionLayout
           startActions={
             <>
-              <Search
-                label={formatMessage(
-                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
-                  { target: headerLayoutTitle }
-                )}
-                trackedEvent="didSearch"
-              />
+              {isSearchable && (
+                <Search
+                  label={formatMessage(
+                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                    { target: headerLayoutTitle }
+                  )}
+                  trackedEvent="didSearch"
+                />
+              )}
             </>
           }
         />
@@ -398,6 +399,7 @@ function ListView({
               canCreate={canCreate}
               canDelete={canDelete}
               contentTypeName={headerLayoutTitle}
+              isBulkable={isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
               layout={layout}
