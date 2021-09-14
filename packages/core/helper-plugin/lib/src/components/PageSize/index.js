@@ -1,22 +1,25 @@
+/**
+ *
+ * PageSize
+ *
+ */
+
 import React from 'react';
 import { Row, Select, Option } from '@strapi/parts';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import useQueryParams from '../../hooks/useQueryParams';
 
 const PageSize = () => {
   const { formatMessage } = useIntl();
-  const [
-    {
-      query: { pageSize },
-    },
-    setQuery,
-  ] = useQueryParams();
+  const [{ query }, setQuery] = useQueryParams();
+
   const handleChange = e => {
     setQuery({
       pageSize: e,
       page: 1,
     });
   };
+  const pageSize = query?.pageSize || '10';
 
   return (
     <Row>
@@ -34,13 +37,13 @@ const PageSize = () => {
         <Option value="100">100</Option>
       </Select>
       {/* <Box paddingLeft={2}>
-        <Text textColor="neutral600" as="label" htmlFor="page-size">
-          {formatMessage({
-            id: 'components.PageFooter.select',
-            defaultMessage: 'Entries per page',
-          })}
-        </Text>
-      </Box> */}
+         <Text textColor="neutral600" as="label" htmlFor="page-size">
+           {formatMessage({
+             id: 'components.PageFooter.select',
+             defaultMessage: 'Entries per page',
+           })}
+         </Text>
+       </Box> */}
     </Row>
   );
 };

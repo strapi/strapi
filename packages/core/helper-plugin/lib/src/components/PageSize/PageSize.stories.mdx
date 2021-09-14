@@ -1,0 +1,43 @@
+<!--- PageSize.stories.mdx --->
+
+import { useEffect } from 'react';
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main, Box } from '@strapi/parts';
+import useQueryParams from '../../hooks/useQueryParams';
+import PageSize from './index';
+
+<Meta title="components/PageSize" />
+
+# PageSize
+
+This component is used to change the page size.
+
+## Imports
+
+```js
+import { PageSize } from '@strapi/helper-plugin';
+```
+
+## Usage
+
+<Canvas>
+  <Story name="base">
+    {() => {
+      const [{ query }, setQuery] = useQueryParams();
+      useEffect(() => {
+        setQuery({ pageSize: 10 });
+      }, []);
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <PageSize />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+This component does not have props.

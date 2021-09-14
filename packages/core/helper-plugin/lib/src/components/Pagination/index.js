@@ -30,7 +30,7 @@ import { stringify } from 'qs';
 
 const Pagination = ({ pagination: { pageCount } }) => {
   const [{ query }] = useQueryParams();
-  const activePage = parseInt(query.page, 10);
+  const activePage = parseInt(query?.page || '1', 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const makeSearch = page => stringify({ ...query, page }, { encode: false });
@@ -46,6 +46,39 @@ const Pagination = ({ pagination: { pageCount } }) => {
       )}
     </PageLink>,
   ];
+
+  if (pageCount <= 4) {
+    const links = Array.from({ length: pageCount })
+      .map((_, i) => i + 1)
+      .map(number => {
+        return (
+          <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
+            {formatMessage(
+              { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+              { page: number }
+            )}
+          </PageLink>
+        );
+      });
+
+    return (
+      <PaginationCompo activePage={activePage} pageCount={pageCount}>
+        <PreviousLink to={`${pathname}?${previousSearch}`}>
+          {formatMessage({
+            id: 'components.pagination.go-to-previous',
+            defaultMessage: 'Go to previous page',
+          })}
+        </PreviousLink>
+        {links}
+        <NextLink to={`${pathname}?${nextSearch}`}>
+          {formatMessage({
+            id: 'components.pagination.go-to-next',
+            defaultMessage: 'Go to next page',
+          })}
+        </NextLink>
+      </PaginationCompo>
+    );
+  }
 
   let firstLinksToCreate = [];
   let lastLinks = [];
