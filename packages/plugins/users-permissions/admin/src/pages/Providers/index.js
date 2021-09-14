@@ -8,6 +8,7 @@ import {
   useOverlayBlocker,
   CheckPagePermissions,
   useRBAC,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
@@ -37,6 +38,7 @@ export const ProvidersPage = () => {
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  useFocusWhenNavigate();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
