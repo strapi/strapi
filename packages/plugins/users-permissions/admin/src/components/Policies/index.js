@@ -25,7 +25,7 @@ const Policies = () => {
         <Text as="p" textColor="neutral600">
           {formatMessage({
             id: 'users-permissions.Policies.header.hint',
-            description:
+            defaultMessage:
               "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
           })}
         </Text>

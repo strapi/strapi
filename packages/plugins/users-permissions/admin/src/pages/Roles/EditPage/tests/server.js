@@ -4,10 +4,8 @@ import { rest } from 'msw';
 const handlers = [
   // Mock get role route
   rest.get('*/users-permissions/roles/:roleId', (req, res, ctx) => {
-    console.log('MOCK ROLE ID');
-
     return res(
-      ctx.delay(500),
+      ctx.delay(100),
       ctx.status(200),
       ctx.json({
         role: {
@@ -41,8 +39,6 @@ const handlers = [
 
   // Mock get all routes route
   rest.get('*/users-permissions/routes', (req, res, ctx) => {
-    console.log('mock ROUTE');
-
     return res(
       ctx.status(200),
       ctx.json({
@@ -95,6 +91,49 @@ const handlers = [
             },
           ],
         },
+      })
+    );
+  }),
+
+  // Mock permissions route
+  rest.get('*/users-permissions/permissions', (req, res, ctx) => {
+    return res(
+      ctx.delay(100),
+      ctx.status(200),
+      ctx.json({
+        data: [
+          {
+            id: 113,
+            action: 'plugin::content-manager.explorer.create',
+            subject: 'plugin::users-permissions.user',
+            properties: {
+              fields: [
+                'username',
+                'email',
+                'provider',
+                'password',
+                'resetPasswordToken',
+                'confirmationToken',
+                'confirmed',
+                'blocked',
+                'role',
+                'picture',
+              ],
+            },
+            conditions: [],
+          },
+        ],
+      })
+    );
+  }),
+
+  // Mock policies route
+  rest.get('*/users-permissions/policies', (req, res, ctx) => {
+    return res(
+      ctx.delay(100),
+      ctx.status(200),
+      ctx.json({
+        policies: ['isAuthenticated', 'rateLimit'],
       })
     );
   }),

@@ -26,7 +26,6 @@ const usePlugins = (shouldFetchData = true) => {
       const [{ permissions }, { routes }, { policies }] = await Promise.all(
         [`/${pluginId}/permissions`, `/${pluginId}/routes`, `/${pluginId}/policies`].map(
           async endpoint => {
-            console.log('fetching', endpoint);
             const res = await axiosInstance.get(endpoint);
 
             return res.data;

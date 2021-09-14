@@ -5,26 +5,21 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
-
 import pluginId from '../../../../pluginId';
 import RolesEditPage from '..';
 import server from './server';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => jest.fn()),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
-
-jest.mock('../../../../hooks', () => {
-  const originalModule = jest.requireActual('../../../../hooks');
+jest.mock('@strapi/helper-plugin', () => {
+  // Make sure the references of the mock functions stay the same, otherwise we get an endless loop
+  const mockToggleNotification = jest.fn();
+  const mockUseNotification = jest.fn(() => {
+    return mockToggleNotification;
+  });
 
   return {
-    ...originalModule,
-    usePlugins: () => ({
-      ...originalModule.usePlugins,
-      isLoading: false,
-    }),
+    ...jest.requireActual('@strapi/helper-plugin'),
+    useNotification: mockUseNotification,
+    useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
   };
 });
 
@@ -57,8 +52,9 @@ describe('Admin | containers | RoleEditPage', () => {
   afterAll(() => server.close());
 
   it('renders users-permissions edit role and matches snapshot', async () => {
-    const { container, getByTestId } = makeAndRenderApp();
+    const { container, getByTestId, getByRole } = makeAndRenderApp();
     await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitFor(() => expect(getByRole('heading', { name: /permissions/i })).toBeInTheDocument());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c34 {
@@ -935,12 +931,12 @@ describe('Admin | containers | RoleEditPage', () => {
                       <h3
                         class="c33 c34"
                       >
-                        users-permissions.Policies.header.title
+                        Advanced settings
                       </h3>
                       <p
                         class="c9 c35"
                       >
-                        users-permissions.Policies.header.hint
+                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
                       </p>
                     </div>
                   </div>
