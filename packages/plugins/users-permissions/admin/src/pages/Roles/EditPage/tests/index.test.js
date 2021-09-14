@@ -260,6 +260,7 @@ describe('Admin | containers | RoleEditPage', () => {
 
       .c25 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 16px;
         color: #32324d;
@@ -295,19 +296,10 @@ describe('Admin | containers | RoleEditPage', () => {
         color: inherit;
       }
 
-      .c25:focus {
-        outline: none;
-      }
-
       .c24 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c24:focus-within {
-        border: 1px solid #4945ff;
       }
 
       .c20 textarea {
@@ -342,11 +334,6 @@ describe('Admin | containers | RoleEditPage', () => {
         font-size: 0.875rem;
         color: #32324d;
         background: #ffffff;
-        outline: none;
-      }
-
-      .c27:focus {
-        border: 1px solid #4945ff;
       }
 
       .c27::-webkit-input-placeholder {
@@ -491,6 +478,7 @@ describe('Admin | containers | RoleEditPage', () => {
       }
 
       <main
+        aria-labelledby="main-content-title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -515,6 +503,7 @@ describe('Admin | containers | RoleEditPage', () => {
                 >
                   <h1
                     class="c4"
+                    id="main-content-title"
                   >
                     Authenticated
                   </h1>
