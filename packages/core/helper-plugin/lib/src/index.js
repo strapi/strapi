@@ -186,6 +186,7 @@ export { default as EmptyStateLayout } from './components/EmptyStateLayout';
 export { default as NoContent } from './components/NoContent';
 export { default as NoMedia } from './components/NoMedia';
 export { default as NoPermissions } from './components/NoPermissions';
+export { default as AnErrorOccurred } from './components/AnErrorOccurred';
 export { default as EmptyBodyTable } from './components/EmptyBodyTable';
 export { default as GenericInput } from './components/GenericInput';
 export * from './components/InjectionZone';

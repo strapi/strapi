@@ -619,5 +619,7 @@
   "or": "OR",
   "request.error.model.unknown": "This model doesn't exist",
   "skipToContent": "Skip to content",
-  "clearLabel": "Clear"
+  "clearLabel": "Clear",
+  "submit": "Submit",
+  "anErrorOccurred": "Woops! Something went wrong. Please, try again."
 }
