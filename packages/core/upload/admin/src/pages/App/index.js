@@ -9,6 +9,7 @@ import {
   NoPermissions,
   NoMedia,
   AnErrorOccurred,
+  Search,
 } from '@strapi/helper-plugin';
 import { Layout, HeaderLayout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
@@ -16,7 +17,6 @@ import { Button } from '@strapi/parts/Button';
 import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
-import { Search } from './components/Search';
 import { ListView } from './components/ListView';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
@@ -54,7 +54,11 @@ const App = () => {
           })}
           subtitle={formatMessage(
             {
-              id: getTrad('header.content.assets-multiple'),
+              id: getTrad(
+                data?.length > 0
+                  ? 'header.content.assets-multiple'
+                  : 'header.content.assets.assets-single'
+              ),
               defaultMessage: '0 assets',
             },
             { number: data?.length || 0 }
@@ -89,7 +93,14 @@ const App = () => {
               <Button variant="tertiary">Filter</Button>
             </>
           }
-          endActions={<Search />}
+          endActions={
+            <Search
+              label={formatMessage({
+                id: getTrad('search.label'),
+                defaultMessage: 'Search for an asset',
+              })}
+            />
+          }
         />
 
         <ContentLayout>

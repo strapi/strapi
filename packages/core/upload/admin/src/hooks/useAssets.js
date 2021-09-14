@@ -1,30 +1,32 @@
 import { useEffect } from 'react';
 import { useQuery } from 'react-query';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
-import { useQuery as useURLQuery, useNotification } from '@strapi/helper-plugin';
+import { useNotification, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
-import { axiosInstance, getRequestUrl, generateStringFromParams } from '../utils';
-import useSelectTimestamps from './useSelectTimestamps';
+import { axiosInstance, getRequestUrl } from '../utils';
 
 export const useAssets = ({ skipWhen }) => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const [, updated_at] = useSelectTimestamps();
   const { notifyStatus } = useNotifyAT();
-  const query = useURLQuery();
+  const [{ rawQuery, query }, setQuery] = useQueryParams();
   const dataRequestURL = getRequestUrl('files');
-  const params = generateStringFromParams(query);
-  const paramsToSend = params.includes('sort') ? params : params.concat(`&sort=${updated_at}:DESC`);
 
   const { data, error, isLoading } = useQuery(
     'assets',
     async () => {
-      const { data } = await axiosInstance.get(`${dataRequestURL}?${paramsToSend}`);
+      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
 
       return data;
     },
     { enabled: !skipWhen }
   );
+
+  useEffect(() => {
+    if (!query) {
+      setQuery({ sort: 'updatedAt:DESC', page: 1, pageSize: 10 });
+    }
+  }, [query, setQuery]);
 
   useEffect(() => {
     if (data) {

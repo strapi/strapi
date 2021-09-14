@@ -18,4 +18,3 @@ export { default as getYupError } from './getYupError';
 export { default as ItemTypes } from './ItemTypes';
 export { default as unformatBytes } from './unformatBytes';
 export { default as urlSchema } from './urlYupSchema';
-export { default as generateStringFromParams } from './generateStringFromParams';
