@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useReducer } from 'react';
 import { Accordion, AccordionToggle, AccordionContent, Box } from '@strapi/parts';
 import { useIntl } from 'react-intl';
-import upperFirst from 'lodash/upperFirst';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
+import formatPluginName from '../../utils/formatPluginName';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -29,7 +29,7 @@ const Permissions = () => {
           key={collapse.name}
         >
           <AccordionToggle
-            title={upperFirst(collapse.name)}
+            title={formatPluginName(collapse.name)}
             description={formatMessage(
               {
                 id: 'users-permissions.Plugin.permissions.plugins.description',

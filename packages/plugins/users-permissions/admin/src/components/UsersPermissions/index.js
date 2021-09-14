@@ -65,33 +65,21 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
         <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
           <Stack size={4}>
             <Stack size={2}>
-              <H3>
+              <H3 as="h2">
                 {formatMessage({
-                id: getTrad('Plugins.header.title'),
-              })}
+                  id: getTrad('Plugins.header.title'),
+                })}
               </H3>
               <Text as="p" textColor="neutral600">
                 {formatMessage({
-                id: getTrad('Plugins.header.description'),
-              })}
+                  id: getTrad('Plugins.header.description'),
+                })}
               </Text>
             </Stack>
             <Permissions />
           </Stack>
         </GridItem>
         <Policies />
-        {/* <FormCard
-          title={formatMessage({
-            id: getTrad('Plugins.header.title'),
-          })}
-          subtitle={formatMessage({
-            id: getTrad('Plugins.header.description'),
-          })}
-        >
-          <Box padding={6}>
-            <Permissions />
-          </Box>
-        </FormCard> */}
       </Grid>
     </UsersPermissionsProvider>
   );
