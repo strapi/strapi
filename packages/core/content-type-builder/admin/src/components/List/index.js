@@ -9,7 +9,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { get } from 'lodash';
 import { useTracking } from '@strapi/helper-plugin';
-import { TableLabel, TFooter, Box, TextButton } from '@strapi/parts';
+import { TableLabel, TFooter, Box } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import useListView from '../../hooks/useListView';
@@ -18,6 +18,7 @@ import DynamicZoneList from '../DynamicZoneList';
 import ComponentList from '../ComponentList';
 import BoxWrapper from './BoxWrapper';
 import getTrad from '../../utils/getTrad';
+import NestedTFooter from '../NestedTFooter';
 
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable jsx-a11y/no-static-element-interactions */
@@ -165,28 +166,29 @@ function List({
 
   return (
     <>
-      <BoxWrapper
-        isFromDynamicZone={isFromDynamicZone}
-        background="neutral0"
-        shadow="filterShadow"
-        hasRadius
-      >
-        <Box paddingLeft={6} paddingRight={6}>
+      <BoxWrapper>
+        <Box
+          paddingLeft={6}
+          paddingRight={isMain ? 6 : 0}
+          {...(isMain && { style: { overflowX: 'auto' } })}
+        >
           <table>
-            <thead>
-              <tr>
-                <th>
-                  <TableLabel textColor="neutral600">
-                    {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
-                  </TableLabel>
-                </th>
-                <th colSpan="2">
-                  <TableLabel textColor="neutral600">
-                    {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
-                  </TableLabel>
-                </th>
-              </tr>
-            </thead>
+            {isMain && (
+              <thead>
+                <tr>
+                  <th>
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({ id: 'table.headers.name', defaultMessage: 'Name' })}
+                    </TableLabel>
+                  </th>
+                  <th colSpan="2">
+                    <TableLabel textColor="neutral600">
+                      {formatMessage({ id: 'table.headers.type', defaultMessage: 'Type' })}
+                    </TableLabel>
+                  </th>
+                </tr>
+              </thead>
+            )}
             <tbody>
               {items.map(item => {
                 const { type } = item;
@@ -253,12 +255,16 @@ function List({
           </TFooter>
         )}
         {isSub && isInDevelopmentMode && (
-          <TextButton startIcon={<AddIcon />} onClick={onClickAddField}>
+          <NestedTFooter
+            icon={<AddIcon />}
+            onClick={onClickAddField}
+            color={isFromDynamicZone ? 'primary' : 'neutral'}
+          >
             {formatMessage({
               id: getTrad(`form.button.add.field.to.component`),
               defaultMessage: 'Add another field',
             })}
-          </TextButton>
+          </NestedTFooter>
         )}
       </BoxWrapper>
     </>

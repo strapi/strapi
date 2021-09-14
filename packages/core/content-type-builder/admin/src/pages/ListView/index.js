@@ -1,6 +1,10 @@
+/**
+ *  ! Have a discussion with maeva about l.170
+ */
+
 import { useTracking } from '@strapi/helper-plugin';
 import { AddIcon, BackIcon, CheckIcon, EditIcon } from '@strapi/icons';
-import { Button, ContentLayout, HeaderLayout, Link, Row, Stack } from '@strapi/parts';
+import { Button, ContentLayout, HeaderLayout, Link, Row, Stack, Box } from '@strapi/parts';
 import { get, has, isEqual, upperFirst } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { useIntl } from 'react-intl';
@@ -163,7 +167,6 @@ const ListView = () => {
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
-  // ! Have a discussion with maeva about this
   // const listTitle = [
   //   formatMessage(
   //     {
@@ -224,7 +227,7 @@ const ListView = () => {
                 </Button>
                 <Button
                   startIcon={<CheckIcon />}
-                  onClick={submitData}
+                  onClick={() => submitData()}
                   type="submit"
                   disabled={isEqual(modifiedData, initialData)}
                 >
@@ -285,17 +288,19 @@ const ListView = () => {
                 </Button>
               </Stack>
             </Row>
-            <List
-              items={attributes}
-              customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
-              addComponentToDZ={handleClickAddComponentToDZ}
-              targetUid={targetUid}
-              dataType={forTarget}
-              dataTypeName={currentDataName}
-              mainTypeName={currentDataName}
-              editTarget={forTarget}
-              isMain
-            />
+            <Box background="neutral0" shadow="filterShadow" hasRadius>
+              <List
+                items={attributes}
+                customRowComponent={props => <ListRow {...props} onClick={handleClickEditField} />}
+                addComponentToDZ={handleClickAddComponentToDZ}
+                targetUid={targetUid}
+                dataType={forTarget}
+                dataTypeName={currentDataName}
+                mainTypeName={currentDataName}
+                editTarget={forTarget}
+                isMain
+              />
+            </Box>
           </Stack>
         </ContentLayout>
       </>
