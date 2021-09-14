@@ -1,15 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import {
-  Main,
-  Button,
-  Stack,
-  Box,
-  GridItem,
-  Grid,
-  TextInput,
-  Textarea,
-} from '@strapi/parts';
+import { Main, Button, Stack, Box, GridItem, Grid, TextInput, Textarea } from '@strapi/parts';
 import { H3 } from '@strapi/parts/Text';
 import { CheckIcon } from '@strapi/icons';
 import { Formik } from 'formik';
@@ -41,6 +32,8 @@ const EditPage = () => {
   const { isLoading: isLoadingPlugins, routes, policies } = usePlugins();
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
+
+  console.log({ routes, isLoadingPlugins });
 
   const handleCreateRoleSubmit = async data => {
     // Set loading state
@@ -164,7 +157,7 @@ const EditPage = () => {
                     </Grid>
                   </Stack>
                 </Box>
-                {!isLoadingPlugins && !isLoadingRole && (
+                {!isLoadingPlugins && (
                   <UsersPermissions
                     ref={permissionsRef}
                     permissions={role.permissions}

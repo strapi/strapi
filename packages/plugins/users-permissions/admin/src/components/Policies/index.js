@@ -16,9 +16,18 @@ const Policies = () => {
       style={{ minHeight: '100%' }}
     >
       <Stack size={2}>
-        <H3>{formatMessage({ id: 'users-permissions.Policies.header.title' })}</H3>
+        <H3>
+          {formatMessage({
+            id: 'users-permissions.Policies.header.title',
+            defaultMessage: 'Advanced settings',
+          })}
+        </H3>
         <Text as="p" textColor="neutral600">
-          {formatMessage({ id: 'users-permissions.Policies.header.hint' })}
+          {formatMessage({
+            id: 'users-permissions.Policies.header.hint',
+            description:
+              "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
+          })}
         </Text>
       </Stack>
     </GridItem>

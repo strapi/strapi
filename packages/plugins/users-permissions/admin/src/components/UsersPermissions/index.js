@@ -68,11 +68,13 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
               <H3 as="h2">
                 {formatMessage({
                   id: getTrad('Plugins.header.title'),
+                  defaultMessage: 'Permissions',
                 })}
               </H3>
               <Text as="p" textColor="neutral600">
                 {formatMessage({
                   id: getTrad('Plugins.header.description'),
+                  defaultMessage: 'Only actions bound by a route are listed below.',
                 })}
               </Text>
             </Stack>
