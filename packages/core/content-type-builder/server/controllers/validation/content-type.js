@@ -46,26 +46,32 @@ const createContentTypeSchema = (data, { isEdition = false } = {}) => {
   const kind = _.get(data, 'contentType.kind', typeKinds.COLLECTION_TYPE);
   const contentTypeSchema = createSchema(VALID_TYPES, VALID_RELATIONS[kind] || [], {
     modelType: modelTypes.CONTENT_TYPE,
-  }).shape({
-    displayName: yup
-      .string()
-      .min(1)
-      .required(),
-    singularName: yup
-      .string()
-      .min(1)
-      .test(alreadyUsedContentTypeName(isEdition))
-      .test(forbiddenContentTypeNameValidator())
-      .isKebabCase()
-      .required(),
-    pluralName: yup
-      .string()
-      .min(1)
-      .test(alreadyUsedContentTypeName(isEdition))
-      .test(forbiddenContentTypeNameValidator())
-      .isKebabCase()
-      .required(),
-  });
+  })
+    .shape({
+      displayName: yup
+        .string()
+        .min(1)
+        .required(),
+      singularName: yup
+        .string()
+        .min(1)
+        .test(alreadyUsedContentTypeName(isEdition))
+        .test(forbiddenContentTypeNameValidator())
+        .isKebabCase()
+        .required(),
+      pluralName: yup
+        .string()
+        .min(1)
+        .test(alreadyUsedContentTypeName(isEdition))
+        .test(forbiddenContentTypeNameValidator())
+        .isKebabCase()
+        .required(),
+    })
+    .test(
+      'singularName-not-equal-pluralName',
+      '${path}: singularName and pluralName should be different',
+      value => value.singularName !== value.pluralName
+    );
 
   return yup
     .object({
