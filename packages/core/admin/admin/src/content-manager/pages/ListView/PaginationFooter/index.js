@@ -7,7 +7,7 @@ const PaginationFooter = ({ pagination }) => {
   return (
     <Box paddingTop={6}>
       <Row alignItems="flex-end" justifyContent="space-between">
-        <PageSizeURLQuery />
+        <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
         <PaginationURLQuery pagination={pagination} />
       </Row>
     </Box>

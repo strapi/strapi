@@ -1,12 +1,13 @@
 import React from 'react';
 import { useQuery } from 'react-query';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
 import { Text } from '@strapi/parts/Text';
 import { Loader } from '@strapi/parts/Loader';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { axiosInstance } from '../../../../../core/utils';
-import { getRequestUrl } from '../../../../utils';
+import { getRequestUrl, getTrad } from '../../../../utils';
 import CellValue from '../CellValue';
 
 const fetchRelation = async (endPoint, notifyStatus) => {
@@ -14,7 +15,7 @@ const fetchRelation = async (endPoint, notifyStatus) => {
     data: { results, pagination },
   } = await axiosInstance.get(endPoint);
 
-  notifyStatus('The relations has been loaded');
+  notifyStatus();
 
   return { results, pagination };
 };
@@ -22,12 +23,19 @@ const fetchRelation = async (endPoint, notifyStatus) => {
 const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) => {
   const requestURL = getRequestUrl(`${queryInfos.endPoint}/${rowId}/${name}`);
   const { notifyStatus } = useNotifyAT();
+  const { formatMessage } = useIntl();
 
-  const { data, status } = useQuery(
-    [targetModel, rowId],
-    () => fetchRelation(requestURL, notifyStatus),
-    { staleTime: 0 }
-  );
+  const notify = () => {
+    const message = formatMessage({
+      id: getTrad('DynamicTable.relation-loaded'),
+      defaultMessage: 'The relations have been loaded',
+    });
+    notifyStatus(message);
+  };
+
+  const { data, status } = useQuery([targetModel, rowId], () => fetchRelation(requestURL, notify), {
+    staleTime: 0,
+  });
 
   if (status !== 'success') {
     return (

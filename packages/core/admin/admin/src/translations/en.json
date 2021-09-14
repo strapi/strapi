@@ -66,6 +66,7 @@
   "Content Manager": "Content Manager",
   "Content Type Builder": "Content-Types Builder",
   "Documentation": "Documentation",
+  "content-manager.DynamicTable.relation-loaded": "The relations have been loaded",
   "Email": "Email",
   "Files Upload": "Files Upload",
   "HomePage.helmet.title": "Homepage",

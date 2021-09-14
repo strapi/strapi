@@ -15,22 +15,16 @@
  */
 
 import React from 'react';
-import {
-  NextLink,
-  Pagination as PaginationCompo,
-  PreviousLink,
-  Dots,
-  PageLink,
-} from '@strapi/parts';
+import { NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
 
-const Pagination = ({ pagination: { pageCount } }) => {
+const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   const [{ query }] = useQueryParams();
-  const activePage = parseInt(query.page, 10);
+  const activePage = parseInt(query?.page || '1', 10);
   const { pathname } = useLocation();
   const { formatMessage } = useIntl();
   const makeSearch = page => stringify({ ...query, page }, { encode: false });
@@ -46,6 +40,39 @@ const Pagination = ({ pagination: { pageCount } }) => {
       )}
     </PageLink>,
   ];
+
+  if (pageCount <= 4) {
+    const links = Array.from({ length: pageCount })
+      .map((_, i) => i + 1)
+      .map(number => {
+        return (
+          <PageLink key={number} number={number} to={`${pathname}?${makeSearch(number)}`}>
+            {formatMessage(
+              { id: 'components.pagination.go-to', defaultMessage: 'Go to page {page}' },
+              { page: number }
+            )}
+          </PageLink>
+        );
+      });
+
+    return (
+      <Pagination activePage={activePage} pageCount={pageCount}>
+        <PreviousLink to={`${pathname}?${previousSearch}`}>
+          {formatMessage({
+            id: 'components.pagination.go-to-previous',
+            defaultMessage: 'Go to previous page',
+          })}
+        </PreviousLink>
+        {links}
+        <NextLink to={`${pathname}?${nextSearch}`}>
+          {formatMessage({
+            id: 'components.pagination.go-to-next',
+            defaultMessage: 'Go to next page',
+          })}
+        </NextLink>
+      </Pagination>
+    );
+  }
 
   let firstLinksToCreate = [];
   let lastLinks = [];
@@ -147,7 +174,7 @@ const Pagination = ({ pagination: { pageCount } }) => {
     : pageCount - activePage - 1;
 
   return (
-    <PaginationCompo activePage={activePage} pageCount={pageCount}>
+    <Pagination activePage={activePage} pageCount={pageCount}>
       <PreviousLink to={`${pathname}?${previousSearch}`}>
         {formatMessage({
           id: 'components.pagination.go-to-previous',
@@ -185,12 +212,12 @@ const Pagination = ({ pagination: { pageCount } }) => {
           defaultMessage: 'Go to next page',
         })}
       </NextLink>
-    </PaginationCompo>
+    </Pagination>
   );
 };
 
-Pagination.propTypes = {
+PaginationURLQuery.propTypes = {
   pagination: PropTypes.shape({ pageCount: PropTypes.number.isRequired }).isRequired,
 };
 
-export default Pagination;
+export default PaginationURLQuery;

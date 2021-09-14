@@ -7,12 +7,9 @@ import get from 'lodash/get';
 // import isEmpty from 'lodash/isEmpty'
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
-// import { Header } from '@buffetjs/custom';
-// import { Flex, Padded } from '@buffetjs/core';
 import isEqual from 'react-fast-compare';
 import { stringify } from 'qs';
 import {
-  // DynamicTable,
   NoPermissions,
   // CheckPermissions,
   // PopUpWarning,
@@ -38,14 +35,13 @@ import {
   getTrad,
 } from '../../utils';
 // import Container from '../../components/Container';
-// import CustomTable from '../../components/CustomTable';
 // import Search from '../../components/Search';
 // import ListViewProvider from '../../components/ListViewProvider';
 // import InjectionZoneList from '../../components/InjectionZoneList';
 // import { Wrapper } from './components';
 // import FieldPicker from './FieldPicker';
 // import Filter from './Filter';
-// import Footer from './Footer';
+import PaginationFooter from './PaginationFooter';
 import {
   getData,
   getDataSucceeded,
@@ -95,11 +91,12 @@ function ListView({
   getDataSucceeded,
   isLoading,
   layout,
+  pagination,
   // onChangeListHeaders,
   // onResetListHeaders,
-  pagination: { total },
   slug,
 }) {
+  const { total } = pagination;
   // const {
   //   contentType: {
   //     // attributes,
@@ -116,14 +113,6 @@ function ListView({
   const { notifyStatus } = useNotifyAT();
 
   useFocusWhenNavigate();
-
-  // const { runHookWaterfall } = useStrapiApp();
-
-  // const tableHeaders = useMemo(() => {
-  //   const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, { displayedHeaders, layout });
-
-  //   return headers.displayedHeaders;
-  // }, [runHookWaterfall, displayedHeaders, layout]);
 
   // const [{ query }, setQuery] = useQueryParams();
   const [{ query }] = useQueryParams();
@@ -158,7 +147,7 @@ function ListView({
       try {
         const opts = source ? { cancelToken: source.token } : null;
         const {
-          data: { results, pagination },
+          data: { results, pagination: paginationResult },
         } = await axiosInstance.get(endPoint, opts);
 
         notifyStatus(
@@ -169,11 +158,11 @@ function ListView({
                 '{number, plural, =1 {# entry has} other {# entries have}} successfully been loaded',
             },
             // Using the plural form
-            { number: pagination.count }
+            { number: paginationResult.count }
           )
         );
 
-        getDataSucceeded(pagination, results);
+        getDataSucceeded(paginationResult, results);
       } catch (err) {
         if (axios.isCancel(err)) {
           return;
@@ -388,15 +377,18 @@ function ListView({
       <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
       <ContentLayout>
         {canRead ? (
-          <DynamicTable
-            canCreate={canCreate}
-            canDelete={canDelete}
-            contentTypeName={headerLayoutTitle}
-            isLoading={isLoading}
-            // FIXME: remove the layout props drilling
-            layout={layout}
-            rows={data}
-          />
+          <>
+            <DynamicTable
+              canCreate={canCreate}
+              canDelete={canDelete}
+              contentTypeName={headerLayoutTitle}
+              isLoading={isLoading}
+              // FIXME: remove the layout props drilling
+              layout={layout}
+              rows={data}
+            />
+            <PaginationFooter pagination={{ pageCount: pagination?.pageCount || 1 }} />
+          </>
         ) : (
           <NoPermissions />
         )}
@@ -583,7 +575,8 @@ ListView.propTypes = {
   // onDeleteDataSucceeded: PropTypes.func.isRequired,
   // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   // onResetListHeaders: PropTypes.func.isRequired,
-  pagination: PropTypes.shape({ total: PropTypes.number.isRequired }).isRequired,
+  pagination: PropTypes.shape({ total: PropTypes.number.isRequired, pageCount: PropTypes.number })
+    .isRequired,
   // setModalLoadingState: PropTypes.func.isRequired,
   // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
   // showWarningDelete: PropTypes.bool.isRequired,
