@@ -23,10 +23,8 @@ const ApplicationInfosPage = () => {
   return (
     <Layout>
       <SettingsPageTitle name="Application" />
-      <Main labelledBy="application">
+      <Main>
         <HeaderLayout
-          as="h1"
-          id="application"
           title={formatMessage({ id: 'Settings.application.title', defaultMessage: 'Application' })}
           subtitle={formatMessage({
             id: 'Settings.application.description',

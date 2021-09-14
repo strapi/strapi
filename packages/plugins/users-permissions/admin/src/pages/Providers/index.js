@@ -136,15 +136,8 @@ export const ProvidersPage = () => {
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <Main
-        labelledBy={formatMessage({
-          id: getTrad('HeaderNav.link.providers'),
-          defaultMessage: 'Providers',
-        })}
-      >
+      <Main>
         <HeaderLayout
-          as="h1"
-          id="providers"
           title={formatMessage({
             id: getTrad('HeaderNav.link.providers'),
             defaultMessage: 'Providers',

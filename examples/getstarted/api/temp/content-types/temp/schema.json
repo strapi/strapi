@@ -1,0 +1,115 @@
+{
+  "kind": "collectionType",
+  "collectionName": "temps",
+  "info": {
+    "singularName": "temp",
+    "pluralName": "temps",
+    "displayName": "temp",
+    "name": "temp",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "short": {
+      "type": "string"
+    },
+    "long": {
+      "type": "string"
+    },
+    "email": {
+      "type": "email"
+    },
+    "rich": {
+      "type": "richtext"
+    },
+    "password": {
+      "type": "password"
+    },
+    "number": {
+      "type": "integer"
+    },
+    "enum": {
+      "type": "enumeration",
+      "enum": [
+        "one",
+        "two",
+        "three"
+      ]
+    },
+    "date": {
+      "type": "date"
+    },
+    "datetime": {
+      "type": "datetime"
+    },
+    "time": {
+      "type": "time"
+    },
+    "single": {
+      "type": "media",
+      "multiple": false,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    },
+    "multiple": {
+      "type": "media",
+      "multiple": true,
+      "required": false,
+      "allowedTypes": [
+        "images",
+        "files",
+        "videos"
+      ]
+    },
+    "bool": {
+      "type": "boolean"
+    },
+    "json": {
+      "type": "json"
+    },
+    "uid": {
+      "type": "uid"
+    },
+    "one_way": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::address.address"
+    },
+    "one_to_one": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::address.address",
+      "inversedBy": "temp_one_to_one"
+    },
+    "one_to_many": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::address.address",
+      "mappedBy": "temp"
+    },
+    "many_to_one": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::address.address",
+      "inversedBy": "temps"
+    },
+    "many_to_many": {
+      "type": "relation",
+      "relation": "manyToMany",
+      "target": "api::address.address",
+      "inversedBy": "many_to_many_temp"
+    },
+    "many_way": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::address.address"
+    }
+  }
+}

@@ -58,7 +58,7 @@ const HomePage = () => {
       <FormattedMessage id="HomePage.helmet.title" defaultMessage="Homepage">
         {title => <Helmet title={title[0]} />}
       </FormattedMessage>
-      <Main labelledBy="homepage">
+      <Main>
         <LogoContainer>
           <img alt="" aria-hidden src={Logo} />
         </LogoContainer>
@@ -67,7 +67,6 @@ const HomePage = () => {
             <GridItem col={8} s={12}>
               <HomeHeader
                 onCreateCT={handleClick}
-                id="homepage"
                 hasCreatedContentType={hasAlreadyCreatedContentTypes}
               />
             </GridItem>

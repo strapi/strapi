@@ -15,8 +15,9 @@ import {
   TableLabel,
   useNotifyAT,
   ContentLayout,
+  ActionLayout,
+  VisuallyHidden,
 } from '@strapi/parts';
-
 import { AddIcon, EditIcon } from '@strapi/icons';
 import { useIntl } from 'react-intl';
 import {
@@ -27,9 +28,13 @@ import {
   useRBAC,
   NoPermissions,
   LoadingIndicatorPage,
+  Search,
+  useQueryParams,
+  EmptyStateLayout,
 } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useQuery } from 'react-query';
+import matchSorter from 'match-sorter';
 
 import { fetchData } from './utils/api';
 import { getTrad } from '../../../utils';
@@ -42,13 +47,15 @@ const RoleListPage = () => {
   const { push } = useHistory();
   const toggleNotification = useNotification();
   const { notifyStatus } = useNotifyAT();
+  const [{ query }] = useQueryParams();
+  const _q = query?._q || '';
 
   const updatePermissions = useMemo(() => {
     return {
-      update: permissions.updateRole,
       create: permissions.createRole,
-      delete: permissions.deleteRole,
       read: permissions.readRoles,
+      update: permissions.updateRole,
+      delete: permissions.deleteRole,
     };
   }, []);
 
@@ -82,13 +89,28 @@ const RoleListPage = () => {
     push(`/settings/${pluginId}/roles/${id}`);
   };
 
+  const emptyLayout = {
+    roles: {
+      id: getTrad('Roles.empty'),
+      defaultMessage: "You don't have any roles yet.",
+    },
+    search: {
+      id: getTrad('Roles.empty.search'),
+      defaultMessage: 'No roles match the search.',
+    },
+  };
+
+  const sortedRoles = matchSorter(roles || [], _q, { keys: ['name', 'description'] });
+  const emptyContent = _q && !sortedRoles.length ? 'search' : 'roles';
+
+  const colCount = 4;
+  const rowCount = (roles?.length || 0) + 1;
+
   return (
     <Layout>
       <SettingsPageTitle name={pageTitle} />
-      <Main aria-busy={isLoading} labelledBy="roles">
+      <Main aria-busy={isLoading}>
         <HeaderLayout
-          as="h1"
-          id="roles"
           title={formatMessage({
             id: 'Settings.roles.title',
             defaultMessage: 'Roles',
@@ -108,16 +130,12 @@ const RoleListPage = () => {
             </CheckPermissions>
           }
         />
-
-        <ContentLayout
-          canRead={canRead}
-          shouldShowEmptyState={roles && !roles.length}
-          isLoading={isLoading || isLoadingForPermissions}
-        >
+        <ContentLayout>
+          <ActionLayout withPadding={false} startActions={<Search />} />
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
-          {canRead && roles && roles.length && (
-            <Table colCount={4} rowCount={roles && roles.length + 1}>
+          {canRead && sortedRoles && sortedRoles?.length ? (
+            <Table colCount={colCount} rowCount={rowCount}>
               <Thead>
                 <Tr>
                   <Th>
@@ -141,40 +159,49 @@ const RoleListPage = () => {
                       })}
                     </TableLabel>
                   </Th>
+                  <Th>
+                    <VisuallyHidden>
+                      {formatMessage({
+                        id: 'components.TableHeader.actions-label',
+                        defaultMessage: 'Actions',
+                      })}
+                    </VisuallyHidden>
+                  </Th>
                 </Tr>
               </Thead>
               <Tbody>
-                {roles &&
-                  roles.map(role => (
-                    <Tr key={role.name}>
-                      <Td width="20%">
-                        <Text>{role.name}</Text>
-                      </Td>
-                      <Td width="50%">
-                        <Text>{role.description}</Text>
-                      </Td>
-                      <Td width="30%">
-                        <Text>
-                          {`${role.nb_users} ${formatMessage({
-                            id: getTrad('Roles.users'),
-                            defaultMessage: 'users',
-                          }).toLowerCase()}`}
-                        </Text>
-                      </Td>
-                      <Td>
-                        <CheckPermissions permissions={permissions.updateRole}>
-                          <IconButton
-                            onClick={() => handleClickEdit(role.id)}
-                            noBorder
-                            icon={<EditIcon />}
-                            label="Edit"
-                          />
-                        </CheckPermissions>
-                      </Td>
-                    </Tr>
-                  ))}
+                {sortedRoles?.map(role => (
+                  <Tr key={role.name}>
+                    <Td width="20%">
+                      <Text label="name">{role.name}</Text>
+                    </Td>
+                    <Td width="50%">
+                      <Text label="description">{role.description}</Text>
+                    </Td>
+                    <Td width="30%">
+                      <Text label="users">
+                        {`${role.nb_users} ${formatMessage({
+                          id: getTrad('Roles.users'),
+                          defaultMessage: 'users',
+                        }).toLowerCase()}`}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <CheckPermissions permissions={permissions.updateRole}>
+                        <IconButton
+                          onClick={() => handleClickEdit(role.id)}
+                          noBorder
+                          icon={<EditIcon />}
+                          label="Edit"
+                        />
+                      </CheckPermissions>
+                    </Td>
+                  </Tr>
+                ))}
               </Tbody>
             </Table>
+          ) : (
+            <EmptyStateLayout content={emptyLayout[emptyContent]} />
           )}
         </ContentLayout>
       </Main>

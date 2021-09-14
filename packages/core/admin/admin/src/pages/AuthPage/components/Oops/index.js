@@ -21,12 +21,12 @@ const Oops = () => {
 
   return (
     <UnauthenticatedLayout>
-      <Main labelledBy="email-sent">
+      <Main>
         <LayoutContent>
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <H1 id="email-sent">
+              <H1>
                 {formatMessage({ id: 'Auth.components.Oops.title', defaultMessage: 'Oops...' })}
               </H1>
             </Box>

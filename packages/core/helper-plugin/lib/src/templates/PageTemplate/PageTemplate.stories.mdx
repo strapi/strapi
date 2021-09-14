@@ -35,9 +35,8 @@ import { LoadingIndicatorPage, NoContent, NoPermissions } from '@strapi/helper-p
       return (
         <Box background="neutral100">
           <Layout>
-            <Main labelledBy="title" aria-busy={isLoading}>
+            <Main aria-busy={isLoading}>
               <HeaderLayout
-                id="title"
                 primaryAction={<Button startIcon={<AddIcon />}>Add an entry</Button>}
                 secondaryAction={
                   <Button variant="tertiary" startIcon={<EditIcon />}>

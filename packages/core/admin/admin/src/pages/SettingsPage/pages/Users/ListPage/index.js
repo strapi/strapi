@@ -16,7 +16,6 @@ import {
   Main,
   useNotifyAT,
 } from '@strapi/parts';
-
 import { Mail } from '@strapi/icons';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
@@ -112,10 +111,9 @@ const ListPage = () => {
   );
 
   return (
-    <Main labelledBy="title" aria-busy={isLoading}>
+    <Main aria-busy={isLoading}>
       <SettingsPageTitle name="Users" />
       <HeaderLayout
-        id="title"
         primaryAction={createAction}
         title={title}
         subtitle={formatMessage(

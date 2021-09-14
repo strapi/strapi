@@ -101,10 +101,9 @@ const RoleListPage = () => {
   // ! TODO - Add the search input
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
-        id="title"
         primaryAction={
           <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />}>
             {formatMessage({

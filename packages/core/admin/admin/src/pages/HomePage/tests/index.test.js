@@ -619,7 +619,7 @@ describe('Homepage', () => {
           class="c1 c2"
         >
           <main
-            aria-labelledby="homepage"
+            aria-labelledby="main-content-title"
             class="c3"
             id="main-content"
             tabindex="-1"
@@ -654,7 +654,7 @@ describe('Homepage', () => {
                         >
                           <h1
                             class="c11"
-                            id="homepage"
+                            id="main-content-title"
                           >
                             Welcome on board!
                           </h1>

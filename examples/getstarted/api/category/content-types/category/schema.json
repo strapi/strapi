@@ -5,15 +5,26 @@
     "displayName": "Category",
     "singularName": "category",
     "pluralName": "categories",
-    "description": ""
+    "description": "",
+    "name": "Category"
   },
   "options": {
     "draftAndPublish": true,
     "comment": ""
   },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "addresses": {
       "type": "relation",
