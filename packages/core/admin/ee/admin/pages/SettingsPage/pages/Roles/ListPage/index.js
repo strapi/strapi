@@ -248,11 +248,15 @@ const RoleListPage = () => {
     return <LoadingIndicatorPage />;
   }
 
+  const title = formatMessage({
+    id: 'Settings.roles.title',
+    defaultMessage: 'roles',
+  });
+
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
-        id="title"
         primaryAction={
           canCreate ? (
             <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
@@ -263,17 +267,25 @@ const RoleListPage = () => {
             </Button>
           ) : null
         }
-        title={formatMessage({
-          id: 'Settings.roles.title',
-          defaultMessage: 'roles',
-        })}
+        title={title}
         subtitle={formatMessage({
           id: 'Settings.roles.list.description',
           defaultMessage: 'List of roles',
         })}
         as="h2"
       />
-      {canRead && <ActionLayout startActions={<Search />} />}
+      {canRead && (
+        <ActionLayout
+          startActions={
+            <Search
+              label={formatMessage(
+                { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                { target: title }
+              )}
+            />
+          }
+        />
+      )}
       {canRead && (
         <ContentLayout>
           <Table

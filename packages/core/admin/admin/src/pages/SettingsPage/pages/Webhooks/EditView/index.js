@@ -162,7 +162,7 @@ const EditView = () => {
   }
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Webhooks" />
       <WebhookForm
         {...{

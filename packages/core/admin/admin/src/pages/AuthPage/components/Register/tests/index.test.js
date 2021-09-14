@@ -376,6 +376,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
 
       .c29 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 16px;
         color: #32324d;
@@ -411,12 +412,9 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         color: inherit;
       }
 
-      .c29:focus {
-        outline: none;
-      }
-
       .c30 {
         border: none;
+        border-radius: 4px;
         padding-left: 16px;
         padding-right: 0;
         color: #32324d;
@@ -452,19 +450,10 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         color: inherit;
       }
 
-      .c30:focus {
-        outline: none;
-      }
-
       .c28 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c28:focus-within {
-        border: 1px solid #4945ff;
       }
 
       .c35 {
@@ -635,7 +624,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
               novalidate=""
             >
               <main
-                aria-labelledby="welcome"
+                aria-labelledby="main-content-title"
                 class="c11"
                 id="main-content"
                 tabindex="-1"
@@ -653,7 +642,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   >
                     <h1
                       class="c16"
-                      id="welcome"
+                      id="main-content-title"
                     >
                       Welcome back!
                     </h1>

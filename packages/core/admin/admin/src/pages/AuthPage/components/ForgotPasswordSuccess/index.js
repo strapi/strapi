@@ -12,12 +12,12 @@ const ForgotPasswordSuccess = () => {
 
   return (
     <UnauthenticatedLayout>
-      <Main labelledBy="email-sent">
+      <Main>
         <LayoutContent>
           <Column>
             <Logo />
             <Box paddingTop={6} paddingBottom={7}>
-              <H1 id="email-sent">
+              <H1>
                 {formatMessage({
                   id: 'app.containers.AuthPage.ForgotPasswordSuccess.title',
                   defaultMessage: 'Email sent',

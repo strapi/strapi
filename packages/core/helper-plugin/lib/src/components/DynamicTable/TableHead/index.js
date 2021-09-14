@@ -9,9 +9,10 @@ import {
   Tooltip,
   VisuallyHidden,
 } from '@strapi/parts';
-import { SortIcon, useQueryParams } from '@strapi/helper-plugin';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import SortIcon from '../../../icons/SortIcon';
+import useQueryParams from '../../../hooks/useQueryParams';
 
 const TableHead = ({
   areAllEntriesSelected,
@@ -35,7 +36,7 @@ const TableHead = ({
           <Th>
             <BaseCheckbox
               aria-label={formatMessage({
-                id: 'list.all-entries.select',
+                id: 'app.component.table.select.all-entries',
                 defaultMessage: 'Select all entries',
               })}
               checked={areAllEntriesSelected}
@@ -51,6 +52,7 @@ const TableHead = ({
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
             { label }
           );
+          const intlLabel = formatMessage({ id: label, defaultMessage: label });
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {
@@ -79,13 +81,13 @@ const TableHead = ({
                 )
               }
             >
-              <Tooltip label={isSortable ? sortLabel : label}>
+              <Tooltip label={isSortable ? sortLabel : intlLabel}>
                 <TableLabel
                   as={!isSorted && isSortable ? 'button' : 'span'}
-                  label={label}
+                  label={intlLabel}
                   onClick={() => handleClickSort(!isSorted)}
                 >
-                  {label}
+                  {intlLabel}
                 </TableLabel>
               </Tooltip>
             </Th>

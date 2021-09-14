@@ -69,6 +69,10 @@ describe('<NoPermissions />', () => {
         height: 5.5rem;
       }
 
+      .c0 {
+        outline: none;
+      }
+
       .c1 {
         background: #f6f6f9;
         padding-top: 56px;
@@ -133,12 +137,8 @@ describe('<NoPermissions />', () => {
         line-height: 1.5;
       }
 
-      .c0 {
-        outline: none;
-      }
-
       <main
-        aria-labelledby="title"
+        aria-labelledby="main-content-title"
         class="c0"
         id="main-content"
         tabindex="-1"
@@ -159,7 +159,7 @@ describe('<NoPermissions />', () => {
               >
                 <h1
                   class="c4"
-                  id="title"
+                  id="main-content-title"
                 >
                   Content
                 </h1>

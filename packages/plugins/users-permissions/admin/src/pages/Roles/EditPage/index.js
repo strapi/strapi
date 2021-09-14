@@ -62,7 +62,7 @@ const EditPage = () => {
   };
 
   return (
-    <Main labelledBy="title">
+    <Main>
       <SettingsPageTitle name="Roles" />
       <Formik
         enableReinitialize
@@ -73,7 +73,6 @@ const EditPage = () => {
         {({ handleSubmit }) => (
           <form onSubmit={handleSubmit}>
             <HeaderLayout
-              id="title"
               primaryAction={
                 !isLoading && (
                   <Button

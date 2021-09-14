@@ -118,7 +118,7 @@ export const SettingsPage = () => {
   };
 
   return (
-    <Main labelledBy="title" tabIndex={-1}>
+    <Main tabIndex={-1}>
       <Helmet
         title={formatMessage({
           id: getTrad('page.title'),
@@ -127,7 +127,6 @@ export const SettingsPage = () => {
       />
       <form onSubmit={handleSubmit}>
         <HeaderLayout
-          id="title"
           title={formatMessage({
             id: getTrad('settings.header.label'),
             defaultMessage: 'Media Library - Settings',

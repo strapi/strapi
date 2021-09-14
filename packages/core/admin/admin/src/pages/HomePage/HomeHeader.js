@@ -17,14 +17,14 @@ const StackCustom = styled(Stack)`
   align-items: flex-start;
 `;
 
-const HomeHeader = ({ hasCreatedContentType, id, onCreateCT }) => {
+const HomeHeader = ({ hasCreatedContentType, onCreateCT }) => {
   const { formatMessage } = useIntl();
 
   return (
     <div>
       <Box paddingLeft={6} paddingBottom={10}>
         <StackCustom size={5}>
-          <H1 id={id}>
+          <H1>
             {hasCreatedContentType
               ? formatMessage({
                   id: 'app.components.HomePage.welcome.again',
@@ -71,13 +71,11 @@ const HomeHeader = ({ hasCreatedContentType, id, onCreateCT }) => {
 
 HomeHeader.defaultProps = {
   hasCreatedContentType: undefined,
-  id: undefined,
   onCreateCT: undefined,
 };
 
 HomeHeader.propTypes = {
   hasCreatedContentType: PropTypes.bool,
-  id: PropTypes.string,
   onCreateCT: PropTypes.func,
 };
 
