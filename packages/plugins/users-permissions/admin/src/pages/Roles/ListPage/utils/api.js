@@ -16,10 +16,13 @@ export const fetchData = async (toggleNotification, notifyStatus) => {
   }
 };
 
-export const deleteData = async id => {
+export const deleteData = async (id, toggleNotification) => {
   try {
     await axiosInstance.delete(`${getRequestURL('roles')}/${id}`);
   } catch (error) {
-    console.log('error', error);
+    toggleNotification({
+      type: 'warning',
+      message: { id: 'notification.error', defaultMessage: 'An error occured' },
+    });
   }
 };

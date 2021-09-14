@@ -103,19 +103,9 @@ const RoleListPage = () => {
     defaultMessage: 'Roles',
   });
 
-  const deleteMutation = useMutation(id => deleteData(id), {
+  const deleteMutation = useMutation(id => deleteData(id, toggleNotification), {
     onSuccess: async () => {
       await queryClient.invalidateQueries('get-roles');
-    },
-    onError: err => {
-      if (err?.response?.data?.data) {
-        toggleNotification({ type: 'warning', message: err.response.data.data });
-      } else {
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error', defaultMessage: 'An error occured' },
-        });
-      }
     },
   });
 
