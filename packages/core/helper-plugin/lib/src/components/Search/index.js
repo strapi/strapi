@@ -5,16 +5,19 @@ import { SearchIcon } from '@strapi/icons';
 import { Searchbar } from '@strapi/parts/Searchbar';
 import { IconButton } from '@strapi/parts/IconButton';
 import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 
-const Search = ({ label }) => {
+const Search = ({ label, trackedEvent }) => {
   const wrapperRef = useRef(null);
   const iconButtonRef = useRef(null);
   const isMountedRef = useRef(false);
+  const [didSearch, setDidSearch] = useState(false);
 
   const [isOpen, setIsOpen] = useState(false);
   const [{ query }, setQuery] = useQueryParams();
   const [value, setValue] = useState(query?._q || '');
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
 
   const handleToggle = () => setIsOpen(prev => !prev);
 
@@ -31,10 +34,18 @@ const Search = ({ label }) => {
   }, [isOpen]);
 
   useEffect(() => {
+    if (didSearch && trackedEvent) {
+      trackUsage(trackedEvent);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [didSearch, trackedEvent]);
+
+  useEffect(() => {
     const handler = setTimeout(() => {
       if (value) {
         setQuery({ _q: value, page: 1 });
       } else {
+        setDidSearch(false);
         setQuery({ _q: '' }, 'remove');
       }
     }, 300);
@@ -48,11 +59,17 @@ const Search = ({ label }) => {
       <div ref={wrapperRef}>
         <Searchbar
           name="search"
-          onChange={({ target: { value } }) => setValue(value)}
+          onChange={({ target: { value } }) => {
+            setDidSearch(true);
+            setValue(value);
+          }}
           onBlur={() => setIsOpen(false)}
           value={value}
           clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-          onClear={() => setValue('')}
+          onClear={() => {
+            setValue('');
+            setDidSearch(false);
+          }}
         >
           {label}
         </Searchbar>
@@ -65,8 +82,13 @@ const Search = ({ label }) => {
   );
 };
 
+Search.defaultProps = {
+  trackedEvent: null,
+};
+
 Search.propTypes = {
   label: PropTypes.string.isRequired,
+  trackedEvent: PropTypes.string,
 };
 
 export default Search;

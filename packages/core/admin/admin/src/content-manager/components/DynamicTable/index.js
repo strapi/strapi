@@ -8,7 +8,15 @@ import { getTrad } from '../../utils';
 import State from '../State';
 import TableRows from './TableRows';
 
-const DynamicTable = ({ canCreate, canDelete, contentTypeName, isLoading, layout, rows }) => {
+const DynamicTable = ({
+  canCreate,
+  canDelete,
+  contentTypeName,
+  isBulkable,
+  isLoading,
+  layout,
+  rows,
+}) => {
   const { runHookWaterfall } = useStrapiApp();
   const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
   const { formatMessage } = useIntl();
@@ -52,7 +60,7 @@ const DynamicTable = ({ canCreate, canDelete, contentTypeName, isLoading, layout
       headers={tableHeaders}
       rows={rows}
       withBulkActions
-      withMainAction={canDelete}
+      withMainAction={canDelete && isBulkable}
     >
       <TableRows
         canCreate={canCreate}
@@ -60,7 +68,7 @@ const DynamicTable = ({ canCreate, canDelete, contentTypeName, isLoading, layout
         headers={tableHeaders}
         rows={rows}
         withBulkActions
-        withMainAction={canDelete}
+        withMainAction={canDelete && isBulkable}
       />
     </Table>
   );
@@ -70,6 +78,7 @@ DynamicTable.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   contentTypeName: PropTypes.string.isRequired,
+  isBulkable: PropTypes.bool.isRequired,
   isLoading: PropTypes.bool.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,

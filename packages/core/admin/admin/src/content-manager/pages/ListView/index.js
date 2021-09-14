@@ -13,6 +13,7 @@ import {
   NoPermissions,
   // CheckPermissions,
   // PopUpWarning,
+  Search,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -20,7 +21,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Button } from '@strapi/parts/Button';
 import Add from '@strapi/icons/Add';
@@ -35,7 +36,6 @@ import {
   getTrad,
 } from '../../utils';
 // import Container from '../../components/Container';
-// import Search from '../../components/Search';
 // import ListViewProvider from '../../components/ListViewProvider';
 // import InjectionZoneList from '../../components/InjectionZoneList';
 // import { Wrapper } from './components';
@@ -97,13 +97,13 @@ function ListView({
   slug,
 }) {
   const { total } = pagination;
-  // const {
-  //   contentType: {
-  //     // attributes,
-  //     // metadatas,
-  //     // settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
-  //   },
-  // } = layout;
+  const {
+    contentType: {
+      // attributes,
+      // metadatas,
+      settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
+    },
+  } = layout;
 
   const toggleNotification = useNotification();
   const { trackUsage } = useTracking();
@@ -375,6 +375,23 @@ function ListView({
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
+      {canRead && (isSearchable || isFilterable) && (
+        <ActionLayout
+          startActions={
+            <>
+              {isSearchable && (
+                <Search
+                  label={formatMessage(
+                    { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                    { target: headerLayoutTitle }
+                  )}
+                  trackedEvent="didSearch"
+                />
+              )}
+            </>
+          }
+        />
+      )}
       <ContentLayout>
         {canRead ? (
           <>
@@ -382,6 +399,7 @@ function ListView({
               canCreate={canCreate}
               canDelete={canDelete}
               contentTypeName={headerLayoutTitle}
+              isBulkable={isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
               layout={layout}
