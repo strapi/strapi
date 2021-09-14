@@ -36,7 +36,7 @@ const Filters = ({ displayedFilters }) => {
           />
         )}
       </Box>
-      <FilterList />
+      <FilterList availableFilters={displayedFilters} />
     </>
   );
 };

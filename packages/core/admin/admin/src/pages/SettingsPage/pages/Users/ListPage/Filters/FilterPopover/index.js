@@ -15,13 +15,18 @@ const FullWidthButton = styled(Button)`
 const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
+  const defaultFieldSchema = { fieldSchema: { type: 'string' } };
   const [modifiedData, setModifiedData] = useState({
-    name: displayedFilters[0].name,
-    filter: getFilterList(displayedFilters[0])[0].value,
+    name: displayedFilters[0]?.name || '',
+    filter: getFilterList(displayedFilters[0] || defaultFieldSchema)[0].value,
     value: '',
   });
 
   if (!isVisible) {
+    return null;
+  }
+
+  if (displayedFilters.length === 0) {
     return null;
   }
 
@@ -46,10 +51,23 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
       }) !== undefined;
 
     if (modifiedData.value && !hasFilter) {
-      const filters = [
-        ...(query?.filters?.$and || []),
-        { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } },
-      ];
+      let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };
+
+      const foundAttribute = displayedFilters.find(({ name }) => name === modifiedData.name);
+
+      const type = foundAttribute.fieldSchema.type;
+
+      if (type === 'relation') {
+        filterToAdd = {
+          [modifiedData.name]: {
+            [foundAttribute.fieldSchema.mainField.name]: {
+              [modifiedData.filter]: modifiedData.value,
+            },
+          },
+        };
+      }
+
+      const filters = [...(query?.filters?.$and || []), filterToAdd];
 
       setQuery({ filters: { $and: filters }, page: 1 });
     }

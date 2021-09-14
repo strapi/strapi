@@ -1,10 +1,12 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import get from 'lodash/get';
 import { Box, Tag } from '@strapi/parts';
 import { Close } from '@strapi/icons';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
-const FilterList = () => {
+const FilterList = ({ availableFilters }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
 
@@ -22,15 +24,38 @@ const FilterList = () => {
 
   return (
     query.filters?.$and.map((filter, i) => {
-      const name = Object.keys(filter)[0];
-      const filterType = Object.keys(filter[name])[0];
-      const value = filter[name][filterType];
+      const fieldName = Object.keys(filter)[0];
+      const field = availableFilters.find(({ name }) => name === fieldName);
+
+      let filterType = Object.keys(filter[fieldName])[0];
+      let value = filter[fieldName][filterType];
+      // let negFilter = filterType === '$not' ? '$not' : null;
+
+      // if (negFilter) {
+      //   filterType = Object.keys(get(filter, [fieldName, negFilter]))[0];
+      // }
+
+      if (field.fieldSchema.type === 'relation') {
+        const relationFieldName = field.fieldSchema.mainField.name;
+
+        filterType = Object.keys(get(filter, [field.name, field.fieldSchema.mainField.name]))[0];
+
+        // negFilter = filterType === '$not' ? '$not' : null;
+
+        // if (negFilter) {
+        //   filterType = Object.keys(
+        //     get(filter, [fieldName, field.fieldSchema.mainField.name, negFilter])
+        //   )[0];
+        // }
+
+        value = get(filter, [field.name, relationFieldName, filterType]);
+      }
 
       return (
         // eslint-disable-next-line react/no-array-index-key
-        <Box key={`${name}-${i}`} padding={1} onClick={() => handleClick(filter)}>
+        <Box key={`${fieldName}-${i}`} padding={1} onClick={() => handleClick(filter)}>
           <Tag icon={<Close />}>
-            {name}&nbsp;
+            {fieldName}&nbsp;
             {formatMessage({
               id: `components.FilterOptions.FILTER_TYPES.${filterType}`,
               defaultMessage: filterType,
@@ -42,6 +67,26 @@ const FilterList = () => {
       );
     }) || null
   );
+};
+
+FilterList.defaultProps = {
+  availableFilters: [],
+};
+
+FilterList.propTypes = {
+  availableFilters: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      metadatas: PropTypes.shape({ label: PropTypes.string }),
+      fieldSchema: PropTypes.shape({
+        type: PropTypes.string,
+        mainField: PropTypes.shape({
+          name: PropTypes.string,
+          type: PropTypes.string,
+        }),
+      }),
+    })
+  ),
 };
 
 export default FilterList;

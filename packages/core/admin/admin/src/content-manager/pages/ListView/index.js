@@ -46,7 +46,7 @@ import {
   // getFirstSortableHeader,
   buildQueryString,
 } from './utils';
-// import AttributeFilter from '../../components/AttributeFilter';
+import AttributeFilter from '../../components/AttributeFilter';
 
 // const cmPermissions = permissions.contentManager;
 
@@ -71,7 +71,7 @@ function ListView({
   const {
     contentType: {
       // attributes,
-      // metadatas,
+      metadatas,
       settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
   } = layout;
@@ -327,6 +327,9 @@ function ListView({
                   trackedEvent="didSearch"
                 />
               )}
+              {isFilterable && (
+                <AttributeFilter contentType={contentType} slug={slug} metadatas={metadatas} />
+              )}
             </>
           }
         />
@@ -400,11 +403,11 @@ function ListView({
   //                   {isFilterable && (
   //                     <>
   //                       <Padded right size="sm">
-  //                         <AttributeFilter
-  //                           contentType={contentType}
-  //                           slug={slug}
-  //                           metaData={metadatas}
-  //                         />
+  // <AttributeFilter
+  //   contentType={contentType}
+  //   slug={slug}
+  //   metaData={metadatas}
+  // />
   //                       </Padded>
   //                       {filters.map(({ filter: filterName, name, value }, key) => (
   //                         <Filter
