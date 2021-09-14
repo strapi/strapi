@@ -1,5 +1,10 @@
-'use strict';
+'use strict'
+
+const baseConfig = require('../../../jest.base-config')
 
 module.exports = {
-  testMatch: ['**/(*.)+(spec|test).js'],
-};
+  displayName: 'strapi',
+  ...baseConfig,
+  rootDir: '../../..',
+  testMatch: [`<rootDir>/packages/core/strapi${baseConfig.testMatch}`]
+}

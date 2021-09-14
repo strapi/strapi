@@ -71,7 +71,7 @@
     "prettier:other": "prettier \"**/*.{md,css,scss,yaml,yml}\"",
     "test:clean": "rimraf ./coverage",
     "test:front": "npm run test:clean && cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js",
-    "test:front:watch": "cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js --watchAll",
+    "test:front:watch": "cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js --watch ",
     "test:front:update": "cross-env NODE_ENV=test IS_EE=true jest --config ./jest.config.front.js --u",
     "test:front:ce": "npm run test:clean && cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --coverage",
     "test:front:watch:ce": "cross-env NODE_ENV=test IS_EE=false jest --config ./jest.config.front.js --watchAll",

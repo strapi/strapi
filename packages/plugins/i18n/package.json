@@ -10,6 +10,9 @@
     "required": false,
     "kind": "plugin"
   },
+  "scripts": {
+    "test:front": "jest --config jest.config.front.js"
+  },
   "dependencies": {
     "@strapi/utils": "3.6.8",
     "lodash": "4.17.21"

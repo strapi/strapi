@@ -11,7 +11,7 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:front": "jest --config jest.config.front.js"
   },
   "dependencies": {
     "lodash": "4.17.21",

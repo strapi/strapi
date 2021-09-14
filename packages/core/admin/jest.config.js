@@ -1,5 +1,10 @@
-'use strict';
+'use strict'
+
+const baseConfig = require('../../../jest.base-config')
 
 module.exports = {
-  testPathIgnorePatterns: ['<rootDir>/'],
-};
+  displayName: 'admin',
+  ...baseConfig,
+  rootDir: '../../..',
+  testMatch: [`<rootDir>/packages/core/admin${baseConfig.testMatch}`]
+}

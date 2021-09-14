@@ -33,12 +33,15 @@ module.exports = {
   testPathIgnorePatterns: [
     '/node_modules/',
     '<rootDir>/examples/getstarted/',
+    '<rootDir>/examples/kitchensink/',
     '<rootDir>/packages/strapi-helper-plugin/dist/',
     '__tests__',
   ],
   setupFiles: [
     '<rootDir>/test/config/front/test-bundler.js',
     '<rootDir>/packages/admin-test-utils/lib/mocks/LocalStorageMock.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/IntersectionObserver.js',
+    '<rootDir>/packages/admin-test-utils/lib/mocks/ResizeObserver.js',
   ],
   setupFilesAfterEnv: [
     '<rootDir>/test/config/front/enzyme-setup.js',
