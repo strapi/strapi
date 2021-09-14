@@ -186,6 +186,7 @@ export { default as EmptyStateLayout } from './components/EmptyStateLayout';
 export { default as NoContent } from './components/NoContent';
 export { default as NoMedia } from './components/NoMedia';
 export { default as NoPermissions } from './components/NoPermissions';
+export { default as AnErrorOccurred } from './components/AnErrorOccurred';
 export { default as EmptyBodyTable } from './components/EmptyBodyTable';
 export { default as GenericInput } from './components/GenericInput';
 export * from './components/InjectionZone';
@@ -194,6 +195,8 @@ export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';
 export { default as Form } from './components/Form';
+export { default as PaginationURLQuery } from './components/PaginationURLQuery';
+export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';

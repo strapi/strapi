@@ -1,5 +1,6 @@
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { IntlProvider } from 'react-intl';
+import { MemoryRouter } from 'react-router-dom';
 
 export const parameters = {
   actions: { argTypesRegex: '^on[A-Z].*' },
@@ -13,12 +14,14 @@ export const parameters = {
 
 export const decorators = [
   Story => (
-    <ThemeProvider theme={lightTheme}>
-      <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
-        <main>
-          <Story />
-        </main>
-      </IntlProvider>
-    </ThemeProvider>
+    <MemoryRouter>
+      <ThemeProvider theme={lightTheme}>
+        <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+          <main>
+            <Story />
+          </main>
+        </IntlProvider>
+      </ThemeProvider>
+    </MemoryRouter>
   ),
 ];

@@ -1,4 +1,5 @@
 {
+  "CMListView.popover.display-locales.label": "Display translated locales",
   "CMEditViewCopyLocale.copy-failure": "Failed to copy locale",
   "CMEditViewCopyLocale.copy-success": "Locale copied",
   "CMEditViewCopyLocale.copy-text": "Fill in from another locale",

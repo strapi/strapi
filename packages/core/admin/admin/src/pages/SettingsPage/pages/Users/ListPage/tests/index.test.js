@@ -547,10 +547,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         margin-left: 4px;
       }
 
-      .c59 {
-        line-height: revert;
-      }
-
       .c55 {
         padding: 12px;
         border-radius: 4px;
@@ -560,27 +556,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
-      }
-
-      .c57 {
-        padding: 12px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c58 {
-        color: #271fe0;
-        background: #ffffff;
-      }
-
-      .c58:hover {
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
       .c56 {
@@ -597,16 +572,16 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #c0c0cf;
       }
 
-      .c60 {
+      .c57 {
         font-size: 0.7rem;
       }
 
-      .c60 svg path {
+      .c57 svg path {
         fill: #666687;
       }
 
-      .c60:focus svg path,
-      .c60:hover svg path {
+      .c57:focus svg path,
+      .c57:hover svg path {
         fill: #4a4a6a;
       }
 
@@ -1350,27 +1325,8 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   <li>
                     <a
                       aria-current="page"
-                      class="c57 c58 active"
-                      href="/settings/user?pageSize=10&page=1&sort=firstname"
-                    >
-                      <div
-                        class="c37"
-                      >
-                        Go to page 1
-                      </div>
-                      <span
-                        aria-hidden="true"
-                        class="c9 c10 c59"
-                      >
-                        1
-                      </span>
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      aria-current="page"
                       aria-disabled="false"
-                      class="c55 c60 active"
+                      class="c55 c57 active"
                       href="/settings/user?pageSize=10&page=1&sort=firstname"
                     >
                       <div

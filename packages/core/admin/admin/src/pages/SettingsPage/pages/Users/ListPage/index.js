@@ -16,7 +16,6 @@ import {
   Main,
   useNotifyAT,
 } from '@strapi/parts';
-
 import { Mail } from '@strapi/icons';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';

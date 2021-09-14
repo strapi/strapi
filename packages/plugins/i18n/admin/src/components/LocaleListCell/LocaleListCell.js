@@ -1,11 +1,22 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
-import { useSelector } from 'react-redux';
-import { Padded, Text } from '@buffetjs/core';
-import { Tooltip } from '@buffetjs/styles';
-import get from 'lodash/get';
 import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import { useSelector } from 'react-redux';
+import { Row } from '@strapi/parts/Row';
+import { Box } from '@strapi/parts/Box';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Text } from '@strapi/parts/Text';
+import { Popover } from '@strapi/parts/Popover';
+import { SortIcon } from '@strapi/helper-plugin';
+import get from 'lodash/get';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
+
+const ActionWrapper = styled.span`
+  svg {
+    height: ${4 / 16}rem;
+  }
+`;
 
 const mapToLocaleName = (locales, localeCode) =>
   get(
@@ -14,18 +25,15 @@ const mapToLocaleName = (locales, localeCode) =>
     localeCode
   );
 
-const LocaleName = styled.div`
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-`;
-
 const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const locales = useSelector(selectI18NLocales);
   const allLocalizations = [{ locale: currentLocaleCode }, ...localizations];
   const localizationNames = allLocalizations.map(locale => locale.locale);
   const defaultLocale = locales.find(locale => locale.isDefault);
   const hasDefaultLocale = localizationNames.includes(defaultLocale.code);
+  const [visible, setVisible] = useState(false);
+  const buttonRef = useRef();
+  const { formatMessage } = useIntl();
 
   let localesArray = [];
 
@@ -52,24 +60,46 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
     localesArray = ctLocales;
   }
 
+  const handleTogglePopover = () => setVisible(prev => !prev);
+
   const elId = `entry-${id}__locale`;
   const localesNames = localesArray.join(', ');
 
   return (
-    <div>
-      <LocaleName data-for={elId} data-tip={localesNames}>
+    <Row>
+      <Text
+        style={{ maxWidth: '252px', cursor: 'pointer' }}
+        data-for={elId}
+        data-tip={localesNames}
+        textColor="neutral800"
+        ellipsis
+      >
         {localesNames}
-      </LocaleName>
-      <Tooltip id={elId} place="bottom" delay={0}>
-        {localesArray.map(name => (
-          <Padded key={name} top bottom size="xs">
-            <Text ellipsis color="white">
-              {name}
-            </Text>
-          </Padded>
-        ))}
-      </Tooltip>
-    </div>
+      </Text>
+      <ActionWrapper>
+        <IconButton
+          onClick={handleTogglePopover}
+          ref={buttonRef}
+          noBorder
+          label={formatMessage({
+            id: 'CMListView.popover.display-locales.label',
+            defaultMessage: 'Display translated locales',
+          })}
+          icon={<SortIcon />}
+        />
+        {visible && (
+          <Popover source={buttonRef} spacingTop={4} centered>
+            <ul>
+              {localesArray.map(name => (
+                <Box key={name} padding={3} as="li">
+                  <Text>{name}</Text>
+                </Box>
+              ))}
+            </ul>
+          </Popover>
+        )}
+      </ActionWrapper>
+    </Row>
   );
 };
 
