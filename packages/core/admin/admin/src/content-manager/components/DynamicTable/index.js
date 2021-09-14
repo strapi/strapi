@@ -7,6 +7,8 @@ import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
 import { getTrad } from '../../utils';
 import State from '../State';
 import TableRows from './TableRows';
+import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
+import ConfirmDialogDelete from './ConfirmDialogDelete';
 
 const DynamicTable = ({
   canCreate,
@@ -14,6 +16,8 @@ const DynamicTable = ({
   contentTypeName,
   isBulkable,
   isLoading,
+  onConfirmDelete,
+  onConfirmDeleteAll,
   layout,
   rows,
 }) => {
@@ -55,9 +59,12 @@ const DynamicTable = ({
 
   return (
     <Table
+      components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
       contentType={contentTypeName}
       isLoading={isLoading}
       headers={tableHeaders}
+      onConfirmDelete={onConfirmDelete}
+      onConfirmDeleteAll={onConfirmDeleteAll}
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}
@@ -94,6 +101,8 @@ DynamicTable.propTypes = {
       settings: PropTypes.object.isRequired,
     }).isRequired,
   }).isRequired,
+  onConfirmDelete: PropTypes.func.isRequired,
+  onConfirmDeleteAll: PropTypes.func.isRequired,
   rows: PropTypes.array.isRequired,
 };
 
