@@ -12,6 +12,7 @@ import LanguageProvider from '../../../../../../admin/admin/src/components/Langu
 import Theme from '../../../../../../admin/admin/src/components/Theme';
 import en from '../../../../../../admin/admin/src/translations/en.json';
 import pluginEn from '../../../translations/en.json';
+import getTrad from '../../../utils/getTrad';
 
 import ListView from '../index';
 import mockData from './mockData';
@@ -35,7 +36,17 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const makeApp = () => {
   const history = createMemoryHistory();
-  const messages = { en: { ...en, ...pluginEn } };
+  const messages = {
+    en: Object.keys(pluginEn).reduce(
+      (acc, current) => {
+        acc[getTrad(current)] = pluginEn[current];
+
+        return acc;
+      },
+      { ...en }
+    ),
+  };
+
   const localeNames = { en: 'English' };
 
   return (

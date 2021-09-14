@@ -7,7 +7,7 @@
 import React from 'react';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
-import { Text, Stack } from '@strapi/parts';
+import { Text, Stack, Box } from '@strapi/parts';
 import { pxToRem } from '@strapi/helper-plugin';
 import { Close } from '@strapi/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -44,7 +44,7 @@ const CloseButton = styled.div`
   }
 `;
 
-const ComponentBox = styled(Stack)`
+const ComponentBox = styled(Box)`
   flex-shrink: 0;
   width: ${pxToRem(140)};
   height: ${pxToRem(80)};

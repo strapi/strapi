@@ -32,7 +32,7 @@ const ButtonBox = styled(Box)`
 
 const NestedTFooter = ({ children, icon, color, ...props }) => {
   return (
-    <ButtonBox paddingBottom={4} paddingTop={4} as="button" {...props}>
+    <ButtonBox paddingBottom={4} paddingTop={4} as="button" type="button" {...props}>
       <Row>
         <IconBox color={color} aria-hidden background={`${color}200`}>
           {icon}

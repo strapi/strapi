@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<ListView /> renders and matches the snapshot 1`] = `
-.c68 {
+.c67 {
   border: 0;
   -webkit-clip: rect(0 0 0 0);
   clip: rect(0 0 0 0);
@@ -144,15 +144,15 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   padding-left: 40px;
 }
 
-.c61 {
+.c60 {
   background: #d9d8ff;
 }
 
-.c63 {
+.c62 {
   background: #eaeaef;
 }
 
-.c65 {
+.c64 {
   background: #f0f0ff;
   padding: 20px;
 }
@@ -478,21 +478,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
-.c53 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  -webkit-flex-direction: column;
-  -ms-flex-direction: column;
-  flex-direction: column;
-}
-
-.c53 > * {
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .c17 {
   display: -webkit-box;
   display: -webkit-flex;
@@ -550,7 +535,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   margin-left: 4px;
 }
 
-.c64 {
+.c63 {
   height: 1px;
   border: none;
   margin: 0;
@@ -612,7 +597,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   display: flex;
 }
 
-.c67 {
+.c66 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -630,23 +615,23 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c67 svg {
+.c66 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c67 svg path {
+.c66 svg path {
   fill: #4945ff;
 }
 
-.c66 {
+.c65 {
   border-radius: 0 0 4px 4px;
   display: block;
   width: 100%;
   border: none;
 }
 
-.c56 {
+.c55 {
   width: 2rem !important;
   height: 2rem !important;
   padding: 0.5625rem;
@@ -654,27 +639,27 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   background: #eaeaef;
 }
 
-.c56 path {
+.c55 path {
   fill: #8e8ea9;
 }
 
-.c58 {
+.c57 {
   position: absolute;
   display: none;
   top: 5px;
   right: 0.5rem;
 }
 
-.c58 svg {
+.c57 svg {
   width: 0.625rem;
   height: 0.625rem;
 }
 
-.c58 svg path {
+.c57 svg path {
   fill: #4945ff;
 }
 
-.c54 {
+.c53 {
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
   flex-shrink: 0;
@@ -698,29 +683,29 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c54.active,
-.c54:hover {
+.c53.active,
+.c53:hover {
   border: 1px solid #d9d8ff;
   background: #f0f0ff;
 }
 
-.c54.active .c57,
-.c54:hover .c57 {
+.c53.active .c56,
+.c53:hover .c56 {
   display: block;
 }
 
-.c54.active .c55,
-.c54:hover .c55 {
+.c53.active .c54,
+.c53:hover .c54 {
   background: #d9d8ff;
 }
 
-.c54.active .c55 path,
-.c54:hover .c55 path {
+.c53.active .c54 path,
+.c53:hover .c54 path {
   fill: #4945ff;
 }
 
-.c54.active .c6,
-.c54:hover .c6 {
+.c53.active .c6,
+.c53:hover .c6 {
   color: #4945ff;
 }
 
@@ -738,6 +723,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c35.component-row > td:first-of-type,
 .c35.dynamiczone-row > td:first-of-type {
   padding: 0 0 0 1.25rem;
+  position: relative;
 }
 
 .c35.component-row > td:first-of-type::before,
@@ -770,6 +756,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 .c45.component-row > td:first-of-type,
 .c45.dynamiczone-row > td:first-of-type {
   padding: 0 0 0 1.25rem;
+  position: relative;
 }
 
 .c45.component-row > td:first-of-type::before,
@@ -813,7 +800,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   overflow-x: auto;
 }
 
-.c59 {
+.c58 {
   padding-top: 5.625rem;
 }
 
@@ -895,7 +882,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #666687;
 }
 
-.c62 {
+.c61 {
   height: 1.5rem;
   width: 1.5rem;
   border-radius: 50%;
@@ -913,12 +900,12 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   align-items: center;
 }
 
-.c62 svg {
+.c61 svg {
   height: 0.625rem;
   width: 0.625rem;
 }
 
-.c62 svg path {
+.c61 svg path {
   fill: #4945ff;
 }
 
@@ -958,7 +945,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   fill: #eaeaef;
 }
 
-.c60 {
+.c59 {
   position: relative;
   -webkit-flex-shrink: 0;
   -ms-flex-negative: 0;
@@ -968,7 +955,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
   transform: translate(-0.5px,-1px);
 }
 
-.c60 * {
+.c59 * {
   fill: #d9d8ff;
 }
 
@@ -1118,7 +1105,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
       <p
         class="c6 c20 c21"
       >
-        content-type-builder.modelPage.contentHeader.emptyDescription.description
+        There is no description
       </p>
     </div>
   </div>
@@ -1160,7 +1147,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
               <span
                 class="c6 c16"
               >
-                content-type-builder.form.button.configure-view
+                Configure the view
               </span>
             </button>
           </div>
@@ -1189,7 +1176,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
             <span
               class="c6 c16"
             >
-              content-type-builder.button.attributes.add.another
+              Add another field
             </span>
           </button>
         </div>
@@ -1229,7 +1216,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1266,7 +1255,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      string
+                      Text
                        
                     </span>
                   </td>
@@ -1330,7 +1319,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1435,7 +1426,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1474,7 +1467,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      media
+                      Media
                        
                     </span>
                   </td>
@@ -1538,7 +1531,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1577,7 +1572,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      media
+                      Media
                        
                     </span>
                   </td>
@@ -1641,7 +1636,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1678,7 +1675,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      string
+                      Text
                        
                     </span>
                   </td>
@@ -1742,7 +1739,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1781,7 +1780,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      json
+                      JSON
                        
                     </span>
                   </td>
@@ -1845,7 +1844,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1878,7 +1879,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      uid
+                      UID
                        
                     </span>
                   </td>
@@ -1942,7 +1943,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -1985,7 +1988,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      component
+                      Component
                        
                     </span>
                   </td>
@@ -2063,7 +2066,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <tr
                               class="c0 c28"
                             >
-                              <td>
+                              <td
+                                style="position: relative;"
+                              >
                                 <div
                                   class="c0 c37"
                                 >
@@ -2119,7 +2124,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c6 c32"
                                 >
-                                  string
+                                  Text
                                    
                                 </span>
                               </td>
@@ -2183,7 +2188,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <tr
                               class="c0 c28"
                             >
-                              <td>
+                              <td
+                                style="position: relative;"
+                              >
                                 <div
                                   class="c0 c37"
                                 >
@@ -2239,7 +2246,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c6 c32"
                                 >
-                                  string
+                                  Text
                                    
                                 </span>
                               </td>
@@ -2303,7 +2310,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <tr
                               class="c0 c28"
                             >
-                              <td>
+                              <td
+                                style="position: relative;"
+                              >
                                 <div
                                   class="c0 c37"
                                 >
@@ -2359,7 +2368,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c6 c32"
                                 >
-                                  string
+                                  Text
                                    
                                 </span>
                               </td>
@@ -2425,6 +2434,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       </div>
                       <button
                         class="c0 c39 c40"
+                        type="button"
                       >
                         <div
                           class="c0 c11"
@@ -2452,7 +2462,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c6 c44"
                             >
-                              Add another field
+                              Add another field to this component
                             </span>
                           </div>
                         </div>
@@ -2463,7 +2473,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -2506,7 +2518,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      component
+                      Component
                        
                     </span>
                   </td>
@@ -2584,7 +2596,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <tr
                               class="c0 c28"
                             >
-                              <td>
+                              <td
+                                style="position: relative;"
+                              >
                                 <div
                                   class="c0 c37"
                                 >
@@ -2640,7 +2654,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c6 c32"
                                 >
-                                  string
+                                  Text
                                    
                                 </span>
                               </td>
@@ -2704,7 +2718,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <tr
                               class="c0 c28"
                             >
-                              <td>
+                              <td
+                                style="position: relative;"
+                              >
                                 <div
                                   class="c0 c37"
                                 >
@@ -2760,7 +2776,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c6 c32"
                                 >
-                                  string
+                                  Text
                                    
                                 </span>
                               </td>
@@ -2824,7 +2840,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <tr
                               class="c0 c28"
                             >
-                              <td>
+                              <td
+                                style="position: relative;"
+                              >
                                 <div
                                   class="c0 c37"
                                 >
@@ -2880,7 +2898,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                 <span
                                   class="c6 c32"
                                 >
-                                  string
+                                  Text
                                    
                                 </span>
                               </td>
@@ -2946,6 +2964,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       </div>
                       <button
                         class="c0 c39 c40"
+                        type="button"
                       >
                         <div
                           class="c0 c11"
@@ -2973,7 +2992,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c6 c44"
                             >
-                              Add another field
+                              Add another field to this component
                             </span>
                           </div>
                         </div>
@@ -2984,7 +3003,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                 <tr
                   class="c0 c28"
                 >
-                  <td>
+                  <td
+                    style="position: relative;"
+                  >
                     <div
                       class="c29"
                     >
@@ -3021,7 +3042,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                     <span
                       class="c6 c32"
                     >
-                      dynamiczone
+                      Dynamic zone
                        
                     </span>
                   </td>
@@ -3116,7 +3137,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             <span
                               class="c6 c52"
                             >
-                              content-type-builder.button.component.add
+                              Add a component
                             </span>
                           </div>
                         </button>
@@ -3124,7 +3145,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c53 c54 active"
+                            class="c0 c53 active"
                           >
                             <div
                               class="c49"
@@ -3132,7 +3153,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-adjust fa-w-16 c55 c56"
+                                class="svg-inline--fa fa-adjust fa-w-16 c54 c55"
                                 data-icon="adjust"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3152,7 +3173,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </span>
                             </div>
                             <div
-                              class="c57 c58"
+                              class="c56 c57"
                               role="button"
                               tabindex="0"
                             >
@@ -3175,7 +3196,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c53 c54"
+                            class="c0 c53"
                           >
                             <div
                               class="c49"
@@ -3183,7 +3204,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-address-book fa-w-14 c55 c56"
+                                class="svg-inline--fa fa-address-book fa-w-14 c54 c55"
                                 data-icon="address-book"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3203,7 +3224,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </span>
                             </div>
                             <div
-                              class="c57 c58"
+                              class="c56 c57"
                               role="button"
                               tabindex="0"
                             >
@@ -3226,7 +3247,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c53 c54"
+                            class="c0 c53"
                           >
                             <div
                               class="c49"
@@ -3234,7 +3255,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-calendar fa-w-14 c55 c56"
+                                class="svg-inline--fa fa-calendar fa-w-14 c54 c55"
                                 data-icon="calendar"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3254,7 +3275,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </span>
                             </div>
                             <div
-                              class="c57 c58"
+                              class="c56 c57"
                               role="button"
                               tabindex="0"
                             >
@@ -3277,7 +3298,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                           type="button"
                         >
                           <div
-                            class="c53 c54"
+                            class="c0 c53"
                           >
                             <div
                               class="c49"
@@ -3285,7 +3306,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                             >
                               <svg
                                 aria-hidden="true"
-                                class="svg-inline--fa fa-cannabis fa-w-16 c55 c56"
+                                class="svg-inline--fa fa-cannabis fa-w-16 c54 c55"
                                 data-icon="cannabis"
                                 data-prefix="fas"
                                 focusable="false"
@@ -3305,7 +3326,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                               </span>
                             </div>
                             <div
-                              class="c57 c58"
+                              class="c56 c57"
                               role="button"
                               tabindex="0"
                             >
@@ -3327,7 +3348,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                       </div>
                     </div>
                     <div
-                      class="c0 c59"
+                      class="c0 c58"
                     >
                       <div
                         class="c0 "
@@ -3352,12 +3373,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3408,7 +3431,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              string
+                                              Text
                                                
                                             </span>
                                           </td>
@@ -3472,12 +3495,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3528,7 +3553,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              email
+                                              Email
                                                
                                             </span>
                                           </td>
@@ -3592,12 +3617,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3648,7 +3675,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              integer
+                                              Number
                                                
                                             </span>
                                           </td>
@@ -3714,13 +3741,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   </div>
                                   <button
                                     class="c0 c39 c40"
+                                    type="button"
                                   >
                                     <div
                                       class="c0 c11"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c0 c61 c62"
+                                        class="c0 c60 c61"
                                       >
                                         <svg
                                           fill="none"
@@ -3741,7 +3769,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c6 c52"
                                         >
-                                          Add another field
+                                          Add another field to this component
                                         </span>
                                       </div>
                                     </div>
@@ -3775,12 +3803,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3831,7 +3861,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              string
+                                              Text
                                                
                                             </span>
                                           </td>
@@ -3895,12 +3925,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -3951,7 +3983,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              text
+                                              Text
                                                
                                             </span>
                                           </td>
@@ -4015,12 +4047,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4071,7 +4105,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              float
+                                              Number
                                                
                                             </span>
                                           </td>
@@ -4135,12 +4169,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4193,7 +4229,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              media
+                                              Media
                                                
                                             </span>
                                           </td>
@@ -4257,12 +4293,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4315,7 +4353,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              richtext
+                                              Rich text
                                                
                                             </span>
                                           </td>
@@ -4379,12 +4417,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4505,13 +4545,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   </div>
                                   <button
                                     class="c0 c39 c40"
+                                    type="button"
                                   >
                                     <div
                                       class="c0 c11"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c0 c61 c62"
+                                        class="c0 c60 c61"
                                       >
                                         <svg
                                           fill="none"
@@ -4532,7 +4573,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c6 c52"
                                         >
-                                          Add another field
+                                          Add another field to this component
                                         </span>
                                       </div>
                                     </div>
@@ -4566,12 +4607,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4622,7 +4665,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              string
+                                              Text
                                                
                                             </span>
                                           </td>
@@ -4686,12 +4729,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4742,7 +4787,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              string
+                                              Text
                                                
                                             </span>
                                           </td>
@@ -4806,12 +4851,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -4868,7 +4915,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              component
+                                              Component
                                                
                                               (repeatable)
                                             </span>
@@ -4947,7 +4994,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <tr
                                                       class="c0 c28"
                                                     >
-                                                      <td>
+                                                      <td
+                                                        style="position: relative;"
+                                                      >
                                                         <div
                                                           class="c0 c37"
                                                         >
@@ -5003,7 +5052,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c6 c32"
                                                         >
-                                                          string
+                                                          Text
                                                            
                                                         </span>
                                                       </td>
@@ -5067,7 +5116,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <tr
                                                       class="c0 c28"
                                                     >
-                                                      <td>
+                                                      <td
+                                                        style="position: relative;"
+                                                      >
                                                         <div
                                                           class="c0 c37"
                                                         >
@@ -5123,7 +5174,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c6 c32"
                                                         >
-                                                          text
+                                                          Text
                                                            
                                                         </span>
                                                       </td>
@@ -5187,7 +5238,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <tr
                                                       class="c0 c28"
                                                     >
-                                                      <td>
+                                                      <td
+                                                        style="position: relative;"
+                                                      >
                                                         <div
                                                           class="c0 c37"
                                                         >
@@ -5243,7 +5296,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c6 c32"
                                                         >
-                                                          float
+                                                          Number
                                                            
                                                         </span>
                                                       </td>
@@ -5307,7 +5360,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <tr
                                                       class="c0 c28"
                                                     >
-                                                      <td>
+                                                      <td
+                                                        style="position: relative;"
+                                                      >
                                                         <div
                                                           class="c0 c37"
                                                         >
@@ -5365,7 +5420,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c6 c32"
                                                         >
-                                                          media
+                                                          Media
                                                            
                                                         </span>
                                                       </td>
@@ -5429,7 +5484,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <tr
                                                       class="c0 c28"
                                                     >
-                                                      <td>
+                                                      <td
+                                                        style="position: relative;"
+                                                      >
                                                         <div
                                                           class="c0 c37"
                                                         >
@@ -5487,7 +5544,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                         <span
                                                           class="c6 c32"
                                                         >
-                                                          richtext
+                                                          Rich text
                                                            
                                                         </span>
                                                       </td>
@@ -5551,7 +5608,9 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <tr
                                                       class="c0 c28"
                                                     >
-                                                      <td>
+                                                      <td
+                                                        style="position: relative;"
+                                                      >
                                                         <div
                                                           class="c0 c37"
                                                         >
@@ -5677,6 +5736,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                               </div>
                                               <button
                                                 class="c0 c39 c40"
+                                                type="button"
                                               >
                                                 <div
                                                   class="c0 c11"
@@ -5704,7 +5764,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                                     <span
                                                       class="c6 c44"
                                                     >
-                                                      Add another field
+                                                      Add another field to this component
                                                     </span>
                                                   </div>
                                                 </div>
@@ -5717,13 +5777,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   </div>
                                   <button
                                     class="c0 c39 c40"
+                                    type="button"
                                   >
                                     <div
                                       class="c0 c11"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c0 c61 c62"
+                                        class="c0 c60 c61"
                                       >
                                         <svg
                                           fill="none"
@@ -5744,7 +5805,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c6 c52"
                                         >
-                                          Add another field
+                                          Add another field to this component
                                         </span>
                                       </div>
                                     </div>
@@ -5778,12 +5839,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5834,7 +5897,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              string
+                                              Text
                                                
                                             </span>
                                           </td>
@@ -5898,12 +5961,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -5956,7 +6021,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              media
+                                              Media
                                                
                                             </span>
                                           </td>
@@ -6020,12 +6085,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <tr
                                           class="c0 c28"
                                         >
-                                          <td>
+                                          <td
+                                            style="position: relative;"
+                                          >
                                             <div
                                               class="c0 c37"
                                             >
                                               <svg
-                                                class="c60"
+                                                class="c59"
                                                 color="primary200"
                                                 fill="none"
                                                 height="23"
@@ -6076,7 +6143,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                             <span
                                               class="c6 c32"
                                             >
-                                              boolean
+                                              Boolean
                                                
                                             </span>
                                           </td>
@@ -6142,13 +6209,14 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                   </div>
                                   <button
                                     class="c0 c39 c40"
+                                    type="button"
                                   >
                                     <div
                                       class="c0 c11"
                                     >
                                       <div
                                         aria-hidden="true"
-                                        class="c0 c61 c62"
+                                        class="c0 c60 c61"
                                       >
                                         <svg
                                           fill="none"
@@ -6169,7 +6237,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                                         <span
                                           class="c6 c52"
                                         >
-                                          Add another field
+                                          Add another field to this component
                                         </span>
                                       </div>
                                     </div>
@@ -6188,17 +6256,17 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
           </div>
           <div>
             <hr
-              class="c0 c63 c64"
+              class="c0 c62 c63"
             />
             <button
-              class="c0 c65 c66"
+              class="c0 c64 c65"
             >
               <div
                 class="c0 c11"
               >
                 <div
                   aria-hidden="true"
-                  class="c0 c61 c67"
+                  class="c0 c60 c66"
                 >
                   <svg
                     fill="none"
@@ -6219,7 +6287,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
                   <span
                     class="c6 c52"
                   >
-                    Add another field
+                    Add another field to this collection type
                   </span>
                 </div>
               </div>
@@ -6230,7 +6298,7 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
     </div>
   </div>
   <div
-    class="c68"
+    class="c67"
   >
     <p
       aria-live="polite"

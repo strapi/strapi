@@ -14,6 +14,8 @@ const Tr = styled.tr`
 
     > td:first-of-type {
       padding: 0 0 0 ${pxToRem(20)};
+      position: relative;
+
       &::before {
         content: '';
         width: ${pxToRem(4)};

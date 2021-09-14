@@ -1,3 +1,7 @@
+/**
+ *  ! Have a discussion with maeva about l.170
+ */
+
 import { useTracking } from '@strapi/helper-plugin';
 import { AddIcon, BackIcon, CheckIcon, EditIcon } from '@strapi/icons';
 import { Button, ContentLayout, HeaderLayout, Link, Row, Stack, Box } from '@strapi/parts';
@@ -163,7 +167,6 @@ const ListView = () => {
   const label = get(modifiedData, [firstMainDataPath, 'schema', 'name'], '');
   const kind = get(modifiedData, [firstMainDataPath, 'schema', 'kind'], '');
 
-  // ! Have a discussion with maeva about this - displaying nb of rows
   // const listTitle = [
   //   formatMessage(
   //     {

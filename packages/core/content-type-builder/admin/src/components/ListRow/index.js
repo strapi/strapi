@@ -202,7 +202,7 @@ function ListRow({
 
   return (
     <BoxWrapper as="tr">
-      <td>
+      <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
           <AttributeIcon key={src} type={src} />
