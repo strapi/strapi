@@ -9,6 +9,9 @@
     "description": "content-type-builder.plugin.description",
     "kind": "plugin"
   },
+  "scripts": {
+    "test:front": "jest --config jest.config.front.js"
+  },
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
     "@strapi/generators": "3.6.8",

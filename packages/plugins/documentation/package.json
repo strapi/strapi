@@ -10,7 +10,7 @@
     "kind": "plugin"
   },
   "scripts": {
-    "test": "echo \"no tests yet\""
+    "test:front": "jest --config jest.config.front.js"
   },
   "dependencies": {
     "@strapi/helper-plugin": "3.6.8",
