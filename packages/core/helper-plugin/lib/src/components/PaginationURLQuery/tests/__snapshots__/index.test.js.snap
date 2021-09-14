@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`<Pagination /> should display the dots correctly 1`] = `
+exports[`<PaginationURLQuery /> should display the dots correctly 1`] = `
 .c6 {
   font-weight: 400;
   font-size: 0.75rem;
@@ -300,7 +300,7 @@ exports[`<Pagination /> should display the dots correctly 1`] = `
 </nav>
 `;
 
-exports[`<Pagination /> should work when the pageCount is inferior or equal to 4 1`] = `
+exports[`<PaginationURLQuery /> should work when the pageCount is inferior or equal to 4 1`] = `
 .c7 {
   font-weight: 500;
   font-size: 0.75rem;

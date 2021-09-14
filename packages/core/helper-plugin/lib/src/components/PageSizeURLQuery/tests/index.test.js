@@ -1,6 +1,6 @@
 /**
  *
- * Tests for PageSize
+ * Tests for PageSizeURLQuery
  *
  */
 
@@ -10,7 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
-import PageSize from '../index';
+import PageSizeURLQuery from '../index';
 
 jest.mock('../../../hooks/useTracking', () => () => ({
   trackUsage: jest.fn(),
@@ -26,13 +26,13 @@ const makeApp = history => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={messages} textComponent="span">
-        <PageSize />
+        <PageSizeURLQuery />
       </IntlProvider>
     </ThemeProvider>
   </Router>
 );
 
-describe('<PageSize />', () => {
+describe('<PageSizeURLQuery />', () => {
   it('renders and matches the snapshot', () => {
     const history = createMemoryHistory();
     const {

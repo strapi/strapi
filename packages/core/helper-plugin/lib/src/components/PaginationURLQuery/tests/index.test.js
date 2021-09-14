@@ -1,6 +1,6 @@
 /**
  *
- * Tests for Pagination
+ * Tests for PaginationURLQuery
  *
  */
 
@@ -10,7 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
-import Pagination from '../index';
+import PaginationURLQuery from '../index';
 
 const messages = {
   en: {
@@ -25,13 +25,13 @@ const makeApp = (history, pageCount) => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <IntlProvider locale="en" messages={messages} textComponent="span">
-        <Pagination pagination={{ pageCount }} />
+        <PaginationURLQuery pagination={{ pageCount }} />
       </IntlProvider>
     </ThemeProvider>
   </Router>
 );
 
-describe('<Pagination />', () => {
+describe('<PaginationURLQuery />', () => {
   it('renders and matches the snapshot', () => {
     const history = createMemoryHistory();
     const {

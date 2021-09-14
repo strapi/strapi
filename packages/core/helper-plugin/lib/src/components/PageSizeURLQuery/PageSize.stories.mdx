@@ -1,21 +1,21 @@
-<!--- Pagination.stories.mdx --->
+<!--- PageSizeURLQuery.stories.mdx --->
 
 import { useEffect } from 'react';
 import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
 import { Main, Box } from '@strapi/parts';
 import useQueryParams from '../../hooks/useQueryParams';
-import Pagination from './index';
+import PageSizeURLQuery from './index';
 
-<Meta title="components/Pagination" />
+<Meta title="components/PageSizeURLQuery" />
 
-# Pagination
+# PageSizeURLQuery
 
 This component is used to change the page size.
 
 ## Imports
 
 ```js
-import { Pagination } from '@strapi/helper-plugin';
+import { PageSizeURLQuery } from '@strapi/helper-plugin';
 ```
 
 ## Usage
@@ -25,12 +25,12 @@ import { Pagination } from '@strapi/helper-plugin';
     {() => {
       const [{ query }, setQuery] = useQueryParams();
       useEffect(() => {
-        setQuery({ pageSize: 10, page: 1, sort: 'firstname' });
+        setQuery({ pageSize: 10 });
       }, []);
       return (
         <Main>
           <Box paddingTop={6}>
-            <Pagination pagination={{ pageCount: 10 }} />
+            <PageSizeURLQuery />
           </Box>
         </Main>
       );
@@ -40,4 +40,4 @@ import { Pagination } from '@strapi/helper-plugin';
 
 ### Props
 
-<ArgsTable of={Pagination} />
+<ArgsTable of={PageSizeURLQuery} />

@@ -1,6 +1,6 @@
 /**
  *
- * PageSize
+ * PageSizeURLQuery
  *
  */
 
@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
 
-const PageSize = ({ trackedEvent }) => {
+const PageSizeURLQuery = ({ trackedEvent }) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
   const { trackUsage } = useTracking();
@@ -54,12 +54,12 @@ const PageSize = ({ trackedEvent }) => {
   );
 };
 
-PageSize.defaultProps = {
+PageSizeURLQuery.defaultProps = {
   trackedEvent: null,
 };
 
-PageSize.propTypes = {
+PageSizeURLQuery.propTypes = {
   trackedEvent: PropTypes.string,
 };
 
-export default PageSize;
+export default PageSizeURLQuery;

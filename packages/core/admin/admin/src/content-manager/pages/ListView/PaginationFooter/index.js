@@ -1,14 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Box, Row } from '@strapi/parts';
-import { Pagination, PageSize } from '@strapi/helper-plugin';
+import { PaginationURLQuery, PageSizeURLQuery } from '@strapi/helper-plugin';
 
 const PaginationFooter = ({ pagination }) => {
   return (
     <Box paddingTop={6}>
       <Row alignItems="flex-end" justifyContent="space-between">
-        <PageSize trackedEvent="willChangeNumberOfEntriesPerPage" />
-        <Pagination pagination={pagination} />
+        <PageSizeURLQuery trackedEvent="willChangeNumberOfEntriesPerPage" />
+        <PaginationURLQuery pagination={pagination} />
       </Row>
     </Box>
   );

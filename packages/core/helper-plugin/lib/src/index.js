@@ -195,8 +195,8 @@ export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';
 export { default as Form } from './components/Form';
-export { default as Pagination } from './components/Pagination';
-export { default as PageSize } from './components/PageSize';
+export { default as PaginationURLQuery } from './components/PaginationURLQuery';
+export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
