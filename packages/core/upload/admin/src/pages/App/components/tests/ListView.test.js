@@ -497,7 +497,6 @@ describe('MediaLibrary / ListView', () => {
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
                   />
                 </div>
-                 
               </div>
               <div
                 class="c11"
