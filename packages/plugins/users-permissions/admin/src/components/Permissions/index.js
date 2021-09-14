@@ -1,34 +1,43 @@
-import React, { memo, useReducer } from 'react';
+import React, { memo, useCallback, useReducer } from 'react';
 import { Accordion, AccordionToggle, AccordionContent, Box } from '@strapi/parts';
+import { useIntl } from 'react-intl';
+import upperFirst from 'lodash/upperFirst';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
-// import PermissionRow from './PermissionRow';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
 const Permissions = () => {
   const { modifiedData } = useUsersPermissions();
-  const [{ collapses }] = useReducer(reducer, initialState, state =>
+  const { formatMessage } = useIntl();
+  const [{ collapses }, dispatch] = useReducer(reducer, initialState, state =>
     init(state, modifiedData)
   );
 
-  console.log(collapses);
-
-  // const handleOpenPlugin = useCallback(index => {
-  //   dispatch({
-  //     type: 'TOGGLE_COLLAPSE',
-  //     index,
-  //   });
-  // }, []);
+  const handleToggle = useCallback(index => {
+    dispatch({
+      type: 'TOGGLE_COLLAPSE',
+      index,
+    });
+  }, []);
 
   return (
     <>
       {collapses.map((collapse, index) => (
-        // eslint-disable-next-line react/no-array-index-key
-        <Accordion expanded={false} toggle={() => {}} id="lol" key={`accordion-${index}`}>
+        <Accordion
+          expanded={collapse.isOpen}
+          toggle={() => handleToggle(index)}
+          key={collapse.name}
+        >
           <AccordionToggle
-            title="title"
-            description="description"
-            variant={index % 2 ? "primary" : "secondary"}
+            title={upperFirst(collapse.name)}
+            description={formatMessage(
+              {
+                id: 'users-permissions.Plugin.permissions.plugins.description',
+                defaultMessage: 'Define all allowed actions for the {name} plugin.',
+              },
+              { name: collapse.name }
+            )}
+            variant={index % 2 ? 'primary' : 'secondary'}
           />
           <AccordionContent>
             <Box padding={6}>
@@ -39,27 +48,6 @@ const Permissions = () => {
       ))}
     </>
   );
-
-  // return (
-  //   <ListWrapper>
-  //     <Padded left right size="sm">
-  //       {collapses.map((_, index) => {
-  //         const { isOpen, name } = collapses[index];
-
-  //         return (
-  //           <PermissionRow
-  //             key={name}
-  //             isOpen={isOpen}
-  //             isWhite={index % 2 === 1}
-  //             name={name}
-  //             onOpenPlugin={() => handleOpenPlugin(index)}
-  //             permissions={modifiedData[name]}
-  //           />
-  //         );
-  //       })}
-  //     </Padded>
-  //   </ListWrapper>
-  // );
 };
 
 export default memo(Permissions);
