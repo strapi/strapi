@@ -1048,6 +1048,14 @@
     "name":"Kikuyu (Kenya) (ki-KE)"
   },
   {
+    "code":"ky",
+    "name":"Kyrgyz (ky)"
+  },
+  {
+    "code":"ky-KG",
+    "name":"Kyrgyz (Kyrgyzstan) (ky-KG)"
+  },
+  {
     "code":"rw",
     "name":"Kinyarwanda (rw)"
   },
