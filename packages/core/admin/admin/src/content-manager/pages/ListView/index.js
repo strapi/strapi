@@ -13,6 +13,7 @@ import {
   NoPermissions,
   // CheckPermissions,
   // PopUpWarning,
+  Search,
   useFocusWhenNavigate,
   useQueryParams,
   useNotification,
@@ -20,7 +21,7 @@ import {
   useTracking,
 } from '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
-import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Button } from '@strapi/parts/Button';
 import Add from '@strapi/icons/Add';
@@ -375,6 +376,21 @@ function ListView({
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
+      {canRead && (
+        <ActionLayout
+          startActions={
+            <>
+              <Search
+                label={formatMessage(
+                  { id: 'app.component.search.label', defaultMessage: 'Search for {target}' },
+                  { target: headerLayoutTitle }
+                )}
+                trackedEvent="didSearch"
+              />
+            </>
+          }
+        />
+      )}
       <ContentLayout>
         {canRead ? (
           <>

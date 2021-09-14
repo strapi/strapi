@@ -20,6 +20,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
     if (trackedEvent) {
       trackUsage(trackedEvent);
     }
+
     setQuery({
       pageSize: e,
       page: 1,
