@@ -115,6 +115,7 @@
   "Settings.permissions.menu.link.roles.label": "Roles",
   "Settings.permissions.menu.link.users.label": "Users",
   "Settings.permissions.users.create": "Create new user",
+  "Settings.permissions.users.tabs.label": "Tabs permissions",
   "Settings.permissions.users.form.email": "Email",
   "Settings.permissions.users.form.firstname": "First name",
   "Settings.permissions.users.form.lastname": "Last name",

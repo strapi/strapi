@@ -1,4 +1,4 @@
-import { Row, Checkbox, Text } from '@strapi/parts';
+import { Row, Text, BaseCheckbox } from '@strapi/parts';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import React, { memo } from 'react';
@@ -22,7 +22,7 @@ const RowLabelWithCheckbox = ({
 
   return (
     <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
-      <Checkbox
+      <BaseCheckbox
         name={checkboxName}
         aria-label={formatMessage(
           {
