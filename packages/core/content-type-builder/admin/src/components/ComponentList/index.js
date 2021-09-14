@@ -6,11 +6,10 @@
 /* eslint-disable import/no-cycle */
 import React from 'react';
 import { get } from 'lodash';
-import { Box } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import List from '../List';
 import useDataManager from '../../hooks/useDataManager';
-import Td from '../Td';
+import Tr from '../Tr';
 
 function ComponentList({
   customRowComponent,
@@ -29,22 +28,9 @@ function ComponentList({
     schema: { attributes: [] },
   });
 
-  // ! TEMPORARY DISABLE NESTED COMPONENT
-  const bool = true; // prevent eslint from crying
-
-  if (bool) {
-    return (
-      <tr>
-        <td colSpan={12} style={{ padding: 10 }}>
-          <Box background="neutral100" style={{ height: 40 }} />
-        </td>
-      </tr>
-    );
-  }
-
   return (
-    <tr className="component-row">
-      <Td colSpan={12} isChildOfDynamicZone={isFromDynamicZone}>
+    <Tr isChildOfDynamicZone={isFromDynamicZone} className="component-row">
+      <td colSpan={12}>
         <List
           customRowComponent={customRowComponent}
           dzName={dzName}
@@ -60,8 +46,8 @@ function ComponentList({
           secondLoopComponentName={firstLoopComponentName ? componentName : null}
           secondLoopComponentUid={firstLoopComponentUid ? component : null}
         />
-      </Td>
-    </tr>
+      </td>
+    </Tr>
   );
 }
 

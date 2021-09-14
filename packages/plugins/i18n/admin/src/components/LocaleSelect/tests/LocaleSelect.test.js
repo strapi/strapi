@@ -268,9 +268,7 @@ describe('LocaleSelect', () => {
                   <span
                     class="c12"
                     id="select-1-content"
-                  >
-                    Select...
-                  </span>
+                  />
                 </div>
               </div>
               <div
