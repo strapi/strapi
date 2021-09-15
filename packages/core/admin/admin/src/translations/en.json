@@ -353,6 +353,8 @@
   "components.AutoReloadBlocker.header": "Reload feature is required for this plugin.",
   "components.TableHeader.sort": "Sort on {label}",
   "components.ErrorBoundary.title": "Something went wrong...",
+  "Settings.profile.form.section.experience.clear.select": "Clear the interface language selected",
+  "app.components.EmptyStateLayout.content-permissions": "You don't have the permissions to access that content",
   "components.FilterOptions.FILTER_TYPES.$eq": "is",
   "components.FilterOptions.FILTER_TYPES.$ne": "is not",
   "components.FilterOptions.FILTER_TYPES.$contains": "contains (case sensitive)",
