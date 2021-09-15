@@ -1,4 +1,4 @@
-'use strict'
+'use strict';
 
 const IS_EE = process.env.IS_EE === 'true';
 
@@ -6,25 +6,27 @@ const moduleNameMapper = {
   '.*\\.(css|less|styl|scss|sass)$': '<rootDir>/test/config/front/mocks/cssModule.js',
   '.*\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga|ico)$':
     '<rootDir>/test/config/front/mocks/image.js',
-  '^ee_else_ce(/.*)$': IS_EE ? [
-      '<rootDir>/packages/core/admin/ee/admin$1',
-      '<rootDir>/packages/core/content-manager/ee/admin/src$1',
-      '<rootDir>/packages/core/content-type-builder/ee/admin/src$1',
-      '<rootDir>/packages/core/upload/ee/admin/src$1',
-      '<rootDir>/packages/core/email/ee/admin/src$1',
-      '<rootDir>/packages/plugins/*/ee/admin/src$1',
-    ]
+  '^ee_else_ce(/.*)$': IS_EE
+    ? [
+        '<rootDir>/packages/core/admin/ee/admin$1',
+        '<rootDir>/packages/core/content-manager/ee/admin/src$1',
+        '<rootDir>/packages/core/content-type-builder/ee/admin/src$1',
+        '<rootDir>/packages/core/upload/ee/admin/src$1',
+        '<rootDir>/packages/core/email/ee/admin/src$1',
+        '<rootDir>/packages/plugins/*/ee/admin/src$1',
+      ]
     : [
-      '<rootDir>/packages/core/admin/admin/src$1',
-      '<rootDir>/packages/core/content-manager/admin/src$1',
-      '<rootDir>/packages/core/content-type-builder/admin/src$1',
-      '<rootDir>/packages/core/upload/admin/src$1',
-      '<rootDir>/packages/core/email/admin/src$1',
-      '<rootDir>/packages/plugins/*/admin/src$1',
-    ],
+        '<rootDir>/packages/core/admin/admin/src$1',
+        '<rootDir>/packages/core/content-manager/admin/src$1',
+        '<rootDir>/packages/core/content-type-builder/admin/src$1',
+        '<rootDir>/packages/core/upload/admin/src$1',
+        '<rootDir>/packages/core/email/admin/src$1',
+        '<rootDir>/packages/plugins/*/admin/src$1',
+      ],
 };
 
 module.exports = {
+  rootDir: __dirname,
   moduleNameMapper,
   collectCoverageFrom: [
     '<rootDir>/packages/core/*/admin/src/**/*.js',
@@ -54,5 +56,5 @@ module.exports = {
   },
   transformIgnorePatterns: ['node_modules/(?!(react-dnd|dnd-core|react-dnd-html5-backend)/)'],
   testURL: 'http://localhost:4000/admin',
-  testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)']
-}
+  testMatch: ['/**/tests/**/?(*.)+(spec|test).[jt]s?(x)'],
+};

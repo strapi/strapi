@@ -1,10 +1,10 @@
-'use strict'
+'use strict';
 
-const baseConfigFront = require('../../../jest.base-config.front')
+const baseConfig = require('../../../jest.base-config.front');
+const pkg = require('./package');
 
 module.exports = {
-  displayName: 'plugins-graphql-front',
-  rootDir: '../../..',
-  ...baseConfigFront,
-  testMatch: [`<rootDir>/packages/plugins/graphql${baseConfigFront.testMatch}`],
-}
+  ...baseConfig,
+  displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
+  roots: ['<rootDir>/packages/plugins/graphql'],
+};

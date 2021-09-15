@@ -9,9 +9,6 @@
     "description": "documentation.plugin.description",
     "kind": "plugin"
   },
-  "scripts": {
-    "test:front": "jest --config jest.config.front.js"
-  },
   "dependencies": {
     "@strapi/helper-plugin": "3.6.8",
     "cheerio": "^1.0.0-rc.5",

@@ -1,10 +1,10 @@
-'use strict'
+'use strict';
 
-const baseConfig = require('../../../jest.base-config')
+const baseConfig = require('../../../jest.base-config');
+const pkg = require('./package');
 
 module.exports = {
-  displayName: 'content-manager',
   ...baseConfig,
-  rootDir: '../../..',
-  testMatch: [`<rootDir>/packages/core/content-manager${baseConfig.testMatch}`]
-}
+  displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
+  roots: ['<rootDir>/packages/core/content-manager'],
+};
