@@ -1,18 +1,16 @@
 import React, { memo, useCallback, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import isEqual from 'react-fast-compare';
 import { bindActionCreators, compose } from 'redux';
-// import { get, isEmpty } from 'lodash';
-import get from 'lodash/get';
-// import isEmpty from 'lodash/isEmpty'
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation } from 'react-router-dom';
-import isEqual from 'react-fast-compare';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import { stringify } from 'qs';
 import {
   NoPermissions,
   // CheckPermissions,
-  // PopUpWarning,
   Search,
   useFocusWhenNavigate,
   useQueryParams,
@@ -37,26 +35,11 @@ import {
 } from '../../utils';
 // import Container from '../../components/Container';
 // import ListViewProvider from '../../components/ListViewProvider';
-// import InjectionZoneList from '../../components/InjectionZoneList';
 // import { Wrapper } from './components';
 // import FieldPicker from './FieldPicker';
 // import Filter from './Filter';
 import PaginationFooter from './PaginationFooter';
-import {
-  getData,
-  getDataSucceeded,
-  onChangeBulk,
-  onChangeBulkSelectall,
-  onDeleteDataError,
-  onDeleteDataSucceeded,
-  onDeleteSeveralDataSucceeded,
-  setModalLoadingState,
-  toggleModalDelete,
-  toggleModalDeleteAll,
-  setLayout,
-  onChangeListHeaders,
-  onResetListHeaders,
-} from './actions';
+import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import makeSelectListView from './selectors';
 import {
   // getAllAllowedHeaders,
@@ -72,20 +55,8 @@ function ListView({
   canCreate,
   canDelete,
   canRead,
-  // canUpdate,
-  // didDeleteData,
-  // entriesToDelete,
   // onChangeBulk,
   // onChangeBulkSelectall,
-  // onDeleteDataError,
-  // onDeleteDataSucceeded,
-  // onDeleteSeveralDataSucceeded,
-  // setModalLoadingState,
-  // showWarningDelete,
-  // showModalConfirmButtonLoading,
-  // showWarningDeleteAll,
-  // toggleModalDelete,
-  // toggleModalDeleteAll,
   data,
   getData,
   getDataSucceeded,
@@ -114,7 +85,6 @@ function ListView({
 
   useFocusWhenNavigate();
 
-  // const [{ query }, setQuery] = useQueryParams();
   const [{ query }] = useQueryParams();
   const params = buildQueryString(query);
 
@@ -123,7 +93,6 @@ function ListView({
   const { formatMessage } = useIntl();
 
   // const [isFilterPickerOpen, setFilterPickerState] = useState(false);
-  // const [idToDelete, setIdToDelete] = useState(null);
   const contentType = layout.contentType;
   const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
   // TODO
@@ -133,9 +102,7 @@ function ListView({
   //   return formatFiltersFromQuery(query);
   // }, [query]);
 
-  // const sort = query.sort;
-  // const _q = query._q || '';
-
+  // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
   // We need it because the hook as mulitple dependencies so it may run before the permissions have checked
   const requestUrlRef = useRef('');
@@ -169,7 +136,6 @@ function ListView({
         }
 
         const resStatus = get(err, 'response.status', null);
-        console.log(err);
 
         if (resStatus === 403) {
           await fetchPermissionsRef.current();
@@ -212,80 +178,67 @@ function ListView({
   //   [displayedHeaders, onChangeListHeaders, toggleNotification]
   // );
 
-  // const handleConfirmDeleteAllData = useCallback(async () => {
-  //   try {
-  //     setModalLoadingState();
+  const handleConfirmDeleteAllData = useCallback(
+    async ids => {
+      try {
+        await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
+          ids,
+        });
 
-  //     await axiosInstance.post(getRequestUrl(`collection-types/${slug}/actions/bulkDelete`), {
-  //       ids: entriesToDelete,
-  //     });
+        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
+        fetchData(requestUrl);
+        trackUsageRef.current('didBulkDeleteEntries');
+      } catch (err) {
+        toggleNotification({
+          type: 'warning',
+          message: { id: getTrad('error.record.delete') },
+        });
+      }
+    },
+    [fetchData, params, slug, toggleNotification]
+  );
 
-  //     onDeleteSeveralDataSucceeded();
-  //     trackUsageRef.current('didBulkDeleteEntries');
-  //   } catch (err) {
-  //     toggleNotification({
-  //       type: 'warning',
-  //       message: { id: getTrad('error.record.delete') },
-  //     });
-  //   }
-  // }, [
-  //   entriesToDelete,
-  //   onDeleteSeveralDataSucceeded,
-  //   slug,
-  //   setModalLoadingState,
-  //   toggleNotification,
-  // ]);
+  const handleConfirmDeleteData = useCallback(
+    async idToDelete => {
+      try {
+        let trackerProperty = {};
 
-  // const handleConfirmDeleteData = useCallback(async () => {
-  //   try {
-  //     let trackerProperty = {};
+        if (hasDraftAndPublish) {
+          const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
+          const isDraftEntry = isEmpty(dataToDelete.published_at);
+          const status = isDraftEntry ? 'draft' : 'published';
 
-  //     if (hasDraftAndPublish) {
-  //       const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
-  //       const isDraftEntry = isEmpty(dataToDelete.published_at);
-  //       const status = isDraftEntry ? 'draft' : 'published';
+          trackerProperty = { status };
+        }
 
-  //       trackerProperty = { status };
-  //     }
+        trackUsageRef.current('willDeleteEntry', trackerProperty);
 
-  //     trackUsageRef.current('willDeleteEntry', trackerProperty);
-  //     setModalLoadingState();
+        await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
 
-  //     await axiosInstance.delete(getRequestUrl(`collection-types/${slug}/${idToDelete}`));
+        const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
+        fetchData(requestUrl);
 
-  //     toggleNotification({
-  //       type: 'success',
-  //       message: { id: getTrad('success.record.delete') },
-  //     });
+        toggleNotification({
+          type: 'success',
+          message: { id: getTrad('success.record.delete') },
+        });
 
-  //     // Close the modal and refetch data
-  //     onDeleteDataSucceeded();
-  //     trackUsageRef.current('didDeleteEntry', trackerProperty);
-  //   } catch (err) {
-  //     const errorMessage = get(
-  //       err,
-  //       'response.payload.message',
-  //       formatMessage({ id: getTrad('error.record.delete') })
-  //     );
+        trackUsageRef.current('didDeleteEntry', trackerProperty);
+      } catch (err) {
+        const errorMessage = get(
+          err,
+          'response.payload.message',
+          formatMessage({ id: getTrad('error.record.delete') })
+        );
 
-  //     toggleNotification({
-  //       type: 'warning',
-  //       message: errorMessage,
-  //     });
-  //     // Close the modal
-  //     onDeleteDataError();
-  //   }
-  // }, [
-  //   toggleNotification,
-  //   hasDraftAndPublish,
-  //   setModalLoadingState,
-  //   slug,
-  //   idToDelete,
-  //   onDeleteDataSucceeded,
-  //   data,
-  //   formatMessage,
-  //   onDeleteDataError,
-  // ]);
+        toggleNotification({
+          type: 'warning',
+          message: errorMessage,
+        });
+      }
+    },
+    [hasDraftAndPublish, slug, params, fetchData, toggleNotification, data, formatMessage]
+  );
 
   useEffect(() => {
     const CancelToken = axios.CancelToken;
@@ -306,19 +259,6 @@ function ListView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
-  // const handleClickDelete = id => {
-  //   setIdToDelete(id);
-  //   toggleModalDelete();
-  // };
-
-  // const handleModalClose = useCallback(() => {
-  //   if (didDeleteData) {
-  //     const requestUrl = getRequestUrl(`collection-types/${slug}${params}`);
-
-  //     fetchData(requestUrl);
-  //   }
-  // }, [fetchData, didDeleteData, slug, params]);
-
   // const toggleFilterPickerState = useCallback(() => {
   //   setFilterPickerState(prevState => {
   //     if (!prevState) {
@@ -328,11 +268,6 @@ function ListView({
   //     return !prevState;
   //   });
   // }, []);
-
-  // const handleToggleModalDeleteAll = e => {
-  //   trackUsageRef.current('willBulkDeleteEntries');
-  //   toggleModalDeleteAll(e);
-  // };
 
   const defaultHeaderLayoutTitle = formatMessage({
     id: getTrad('header.name'),
@@ -399,6 +334,8 @@ function ListView({
               canCreate={canCreate}
               canDelete={canDelete}
               contentTypeName={headerLayoutTitle}
+              onConfirmDeleteAll={handleConfirmDeleteAllData}
+              onConfirmDelete={handleConfirmDeleteData}
               isBulkable={isBulkable}
               isLoading={isLoading}
               // FIXME: remove the layout props drilling
@@ -522,53 +459,16 @@ function ListView({
   //           </Wrapper>
   //         )}
   //       </Container>
-  //       <PopUpWarning
-  //         isOpen={showWarningDelete}
-  //         toggleModal={toggleModalDelete}
-  //         content={{
-  //           message: getTrad('popUpWarning.bodyMessage.contentType.delete'),
-  //         }}
-  //         onConfirm={handleConfirmDeleteData}
-  //         popUpWarningType="danger"
-  //         onClosed={handleModalClose}
-  //         isConfirmButtonLoading={showModalConfirmButtonLoading}
-  //       >
-  //         <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
-  //       </PopUpWarning>
-  //       <PopUpWarning
-  //         isOpen={showWarningDeleteAll}
-  //         toggleModal={toggleModalDeleteAll}
-  //         content={{
-  //           message: getTrad(
-  //             `popUpWarning.bodyMessage.contentType.delete${
-  //               entriesToDelete.length > 1 ? '.all' : ''
-  //             }`
-  //           ),
-  //         }}
-  //         popUpWarningType="danger"
-  //         onConfirm={handleConfirmDeleteAllData}
-  //         onClosed={handleModalClose}
-  //         isConfirmButtonLoading={showModalConfirmButtonLoading}
-  //       >
-  //         <InjectionZoneList area="contentManager.listView.deleteModalAdditionalInfos" />
-  //       </PopUpWarning>
   //     </ListViewProvider>
   //   </>
   // );
 }
 
-// ListView.defaultProps = {
-//   permissions: [],
-// };
-
 ListView.propTypes = {
   canCreate: PropTypes.bool.isRequired,
   canDelete: PropTypes.bool.isRequired,
   canRead: PropTypes.bool.isRequired,
-  // canUpdate: PropTypes.bool.isRequired,
   data: PropTypes.array.isRequired,
-  // didDeleteData: PropTypes.bool.isRequired,
-  // entriesToDelete: PropTypes.array.isRequired,
   layout: PropTypes.exact({
     components: PropTypes.object.isRequired,
     contentType: PropTypes.shape({
@@ -586,31 +486,11 @@ ListView.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
-  // onChangeBulk: PropTypes.func.isRequired,
-  // onChangeBulkSelectall: PropTypes.func.isRequired,
   // onChangeListHeaders: PropTypes.func.isRequired,
-  // onDeleteDataError: PropTypes.func.isRequired,
-  // onDeleteDataSucceeded: PropTypes.func.isRequired,
-  // onDeleteSeveralDataSucceeded: PropTypes.func.isRequired,
   // onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired, pageCount: PropTypes.number })
     .isRequired,
-  // setModalLoadingState: PropTypes.func.isRequired,
-  // showModalConfirmButtonLoading: PropTypes.bool.isRequired,
-  // showWarningDelete: PropTypes.bool.isRequired,
-  // showWarningDeleteAll: PropTypes.bool.isRequired,
   slug: PropTypes.string.isRequired,
-  // toggleModalDelete: PropTypes.func.isRequired,
-  // toggleModalDeleteAll: PropTypes.func.isRequired,
-  // setLayout: PropTypes.func.isRequired,
-  // permissions: PropTypes.arrayOf(
-  //   PropTypes.shape({
-  //     action: PropTypes.string.isRequired,
-  //     subject: PropTypes.string.isRequired,
-  //     properties: PropTypes.object,
-  //     conditions: PropTypes.arrayOf(PropTypes.string),
-  //   })
-  // ),
 };
 
 const mapStateToProps = makeSelectListView();
@@ -620,17 +500,8 @@ export function mapDispatchToProps(dispatch) {
     {
       getData,
       getDataSucceeded,
-      onChangeBulk,
-      onChangeBulkSelectall,
       onChangeListHeaders,
-      onDeleteDataError,
-      onDeleteDataSucceeded,
-      onDeleteSeveralDataSucceeded,
       onResetListHeaders,
-      setModalLoadingState,
-      toggleModalDelete,
-      toggleModalDeleteAll,
-      setLayout,
     },
     dispatch
   );

@@ -63,6 +63,9 @@ export default {
       fr: {
         'Auth.form.email.label': 'test',
         Users: 'Utilisateurs',
+        City: 'CITY FRENCH',
+        // Customize the label of the CM table..
+        Id: 'ID french',
       },
     },
     tutorials: false,

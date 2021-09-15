@@ -149,6 +149,7 @@ const ListPage = () => {
               contentType="Users"
               isLoading={isLoading}
               onConfirmDeleteAll={deleteAllMutation.mutateAsync}
+              onConfirmDelete={id => deleteAllMutation.mutateAsync([id])}
               headers={tableHeaders}
               rows={data?.results}
               withBulkActions
