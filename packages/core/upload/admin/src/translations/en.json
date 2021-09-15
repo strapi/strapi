@@ -51,9 +51,9 @@
   "modal.header.pending-assets": "Pending assets",
   "modal.header.select-files": "Selected files",
   "modal.nav.browse": "browse",
-  "modal.nav.computer": "from computer",
+  "modal.nav.computer": "From computer",
   "modal.nav.selected": "selected",
-  "modal.nav.url": "from url",
+  "modal.nav.url": "From url",
   "modal.selected-list.sub-header-subtitle": "Drag & drop to reorder the assets in the field",
   "modal.upload-list.footer.button.plural": "Upload {number} assets to the library",
   "modal.upload-list.footer.button.singular": "Upload {number} asset to the library",
@@ -86,6 +86,7 @@
   "sort.name_desc": "Reverse alphabetical order (Z to A)",
   "sort.updated_at_asc": "Oldest updates",
   "sort.updated_at_desc": "Most recent updates",
+  "tabs.title": "How do you want to upload your assets?",
   "window.confirm.close-modal.file": "Are you sure? Your changes will be lost.",
   "window.confirm.close-modal.files": "Are you sure? You have some files that have not been uploaded yet."
 }
