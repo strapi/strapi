@@ -82,7 +82,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          bool
+          Boolean
            
           is
            
@@ -123,7 +123,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          date
+          Date
            
           is
            
@@ -205,7 +205,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          long
+          Long
            
           is
            
@@ -246,7 +246,7 @@ exports[`<FilterListURLQuery /> renders and matches the snapshot 1`] = `
         <span
           class="c4 c5"
         >
-          many_to_one
+          many to one
            
           is
            

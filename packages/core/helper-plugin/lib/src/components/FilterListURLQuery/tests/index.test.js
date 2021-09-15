@@ -36,12 +36,12 @@ describe('<FilterListURLQuery />', () => {
     const filtersSchema = [
       {
         name: 'bool',
-        metadatas: { label: 'bool' },
+        metadatas: { label: 'Boolean' },
         fieldSchema: { type: 'boolean' },
       },
       {
         name: 'date',
-        metadatas: { label: 'date' },
+        metadatas: { label: 'Date' },
         fieldSchema: { type: 'date' },
       },
       {
@@ -51,12 +51,12 @@ describe('<FilterListURLQuery />', () => {
       },
       {
         name: 'long',
-        metadatas: { label: 'long' },
+        metadatas: { label: 'Long' },
         fieldSchema: { type: 'string' },
       },
       {
         name: 'many_to_one',
-        metadatas: { label: 'many_to_one' },
+        metadatas: { label: 'many to one' },
         fieldSchema: {
           type: 'relation',
           mainField: {
