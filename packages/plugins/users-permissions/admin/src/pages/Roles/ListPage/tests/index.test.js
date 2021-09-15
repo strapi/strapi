@@ -30,7 +30,7 @@ const makeApp = history => (
   <Router history={history}>
     <ThemeProvider theme={lightTheme}>
       <QueryClientProvider client={client}>
-        <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+        <IntlProvider locale="en" messages={{}} textComponent="span">
           <RoleListPage />
         </IntlProvider>
       </QueryClientProvider>

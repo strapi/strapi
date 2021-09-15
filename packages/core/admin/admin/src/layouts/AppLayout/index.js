@@ -2,17 +2,19 @@ import React from 'react';
 import { Row, Box, SkipToContent } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
-import { FormattedMessage } from 'react-intl';
+import { useIntl } from 'react-intl';
 
 const FlexBox = styled(Box)`
   flex: 1;
 `;
 
 const AppLayout = ({ children, sideNav }) => {
+  const { formatMessage } = useIntl();
+
   return (
     <Box background="neutral100">
       <SkipToContent>
-        <FormattedMessage id="skipToContent" />
+        {formatMessage({ id: 'skipToContent', defaultMessage: 'Skip to content' })}
       </SkipToContent>
       <Row alignItems="flex-start">
         {sideNav}

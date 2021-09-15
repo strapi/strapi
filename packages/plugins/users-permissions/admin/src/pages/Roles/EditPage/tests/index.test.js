@@ -26,7 +26,7 @@ jest.mock('@strapi/helper-plugin', () => {
 function makeAndRenderApp() {
   const history = createMemoryHistory();
   const app = (
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} textComponent="span">
       <ThemeProvider theme={lightTheme}>
         <Router history={history}>
           <Switch>

@@ -29,7 +29,7 @@ const client = new QueryClient({
 const makeApp = history => {
   return (
     <QueryClientProvider client={client}>
-      <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+      <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
         <Theme>
           <Router history={history}>
             <Route path="/settings/user">

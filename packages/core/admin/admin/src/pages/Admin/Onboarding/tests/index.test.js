@@ -12,7 +12,7 @@ jest.mock('../../../../hooks', () => ({
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
       <Onboarding />
     </IntlProvider>
   </ThemeProvider>

@@ -26,7 +26,7 @@ const client = new QueryClient({
 const App = (
   <ThemeProvider theme={lightTheme}>
     <QueryClientProvider client={client}>
-      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+      <IntlProvider locale="en" messages={{}} textComponent="span">
         <ProvidersPage />
       </IntlProvider>
     </QueryClientProvider>

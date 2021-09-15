@@ -10,9 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import Input from '../index';
 
-const messages = {
-  en: {},
-};
+const messages = {};
 
 const makeApp = (name, type, value) => (
   <IntlProvider locale="en" messages={messages} textComponent="span">

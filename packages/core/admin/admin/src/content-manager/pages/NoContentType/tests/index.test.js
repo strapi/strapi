@@ -16,7 +16,7 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
       container: { firstChild },
     } = render(
       <Router history={createMemoryHistory()}>
-        <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+        <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
           <Theme>
             <NoContentType />
           </Theme>

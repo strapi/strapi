@@ -30,7 +30,7 @@ const client = new QueryClient({
 
 const App = (
   <QueryClientProvider client={client}>
-    <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+    <IntlProvider messages={{}} textComponent="span" locale="en">
       <ThemeProvider theme={lightTheme}>
         <ProfilePage />
       </ThemeProvider>

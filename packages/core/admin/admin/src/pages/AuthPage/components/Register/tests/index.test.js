@@ -22,7 +22,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
     const { container } = render(
-      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+      <IntlProvider locale="en" messages={{}} textComponent="span">
         <ThemeProvider theme={lightTheme}>
           <Router history={history}>
             <Register fieldsToDisable={[]} noSignin onSubmit={() => {}} schema={yup.object()} />
