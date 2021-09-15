@@ -50,7 +50,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                   onClick={() => handleClickEdit(role.id)}
                   noBorder
                   icon={<EditIcon />}
-                  label="Edit"
+                  label={formatMessage(
+                    { id: 'app.component.table.edit', defaultMessage: 'Edit {target}' },
+                    { target: `${role.name}` }
+                  )}
                 />
               </CheckPermissions>
               {checkCanDeleteRole(role) && (
@@ -59,7 +62,10 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
                     onClick={() => handleClickDelete(role.id)}
                     noBorder
                     icon={<DeleteIcon />}
-                    label="Delete"
+                    label={formatMessage(
+                      { id: 'app.component.table.delete', defaultMessage: 'Delete {target}' },
+                      { target: `${role.name}` }
+                    )}
                   />
                 </CheckPermissions>
               )}

@@ -147,7 +147,17 @@ const RoleListPage = () => {
           }
         />
         <ContentLayout>
-          <ActionLayout withPadding={false} startActions={<Search label="search" />} />
+          <ActionLayout
+            withPadding={false}
+            startActions={
+              <Search
+                label={formatMessage({
+                  id: 'app.component.search.label',
+                  defaultMessage: 'Search',
+                })}
+              />
+            }
+          />
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
           {canRead && sortedRoles && sortedRoles?.length ? (
