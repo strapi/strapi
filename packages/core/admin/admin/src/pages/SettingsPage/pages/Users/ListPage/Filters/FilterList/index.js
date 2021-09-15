@@ -29,24 +29,11 @@ const FilterList = ({ availableFilters }) => {
 
       let filterType = Object.keys(filter[fieldName])[0];
       let value = filter[fieldName][filterType];
-      // let negFilter = filterType === '$not' ? '$not' : null;
-
-      // if (negFilter) {
-      //   filterType = Object.keys(get(filter, [fieldName, negFilter]))[0];
-      // }
 
       if (field.fieldSchema.type === 'relation') {
         const relationFieldName = field.fieldSchema.mainField.name;
 
         filterType = Object.keys(get(filter, [field.name, field.fieldSchema.mainField.name]))[0];
-
-        // negFilter = filterType === '$not' ? '$not' : null;
-
-        // if (negFilter) {
-        //   filterType = Object.keys(
-        //     get(filter, [fieldName, field.fieldSchema.mainField.name, negFilter])
-        //   )[0];
-        // }
 
         value = get(filter, [field.name, relationFieldName, filterType]);
       }

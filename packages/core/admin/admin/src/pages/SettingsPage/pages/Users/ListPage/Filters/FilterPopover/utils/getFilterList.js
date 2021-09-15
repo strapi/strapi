@@ -16,6 +16,7 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         { label: 'is', value: '$eq' },
         { label: 'is not', value: '$ne' },
         { label: 'contains', value: '$contains' },
+        // TODO
         // { label: 'not contains', value: '$not_$contains' },
       ];
     }
@@ -23,7 +24,7 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
       return [
         { label: 'is', value: '$eq' },
         { label: 'is not', value: '$ne' },
-        { label: 'not contains', value: '$not_$contains' },
+        // { label: 'not contains', value: '$not_$contains' },
       ];
     }
     default:
