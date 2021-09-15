@@ -9,10 +9,12 @@ import { Form } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import { getTrad, urlSchema } from '../../../utils';
 
-export const FromUrlForm = ({ onClose }) => {
+export const FromUrlForm = ({ onClose, onAddAsset }) => {
   const { formatMessage } = useIntl();
 
-  const handleSubmit = () => {};
+  const handleSubmit = () => {
+    onAddAsset();
+  };
 
   return (
     <Formik
@@ -71,4 +73,5 @@ export const FromUrlForm = ({ onClose }) => {
 
 FromUrlForm.propTypes = {
   onClose: PropTypes.func.isRequired,
+  onAddAsset: PropTypes.func.isRequired,
 };

@@ -1,14 +1,28 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ModalLayout } from '@strapi/parts/ModalLayout';
 import { AddAssetStep } from './AddAssetStep/AddAssetStep';
 import { PendingAssetStep } from './PendingAssetStep/PendingAssetStep';
 
+const Steps = {
+  AddAsset: 'AddAsset',
+  PendingAsset: 'PendingAsset',
+};
+
 export const UploadAssetDialog = ({ onSuccess, onClose }) => {
+  const [step, setStep] = useState(Steps.AddAsset);
+
+  const handleAddToPendingAssets = () => {
+    setStep(Steps.PendingAsset);
+    onSuccess();
+  };
+
   return (
     <ModalLayout onClose={onClose} labelledBy="title">
-      {/* <AddAssetStep onClose={onClose} /> */}
-      <PendingAssetStep onClose={onClose} />
+      {step === Steps.AddAsset && (
+        <AddAssetStep onClose={onClose} onAddAsset={handleAddToPendingAssets} />
+      )}
+      {step === Steps.PendingAsset && <PendingAssetStep onClose={onClose} />}
     </ModalLayout>
   );
 };

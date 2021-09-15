@@ -10,7 +10,7 @@ import { FromUrlForm } from './FromUrlForm';
 import { FromComputerForm } from './FromComputerForm';
 import { getTrad } from '../../../utils';
 
-export const AddAssetStep = ({ onClose }) => {
+export const AddAssetStep = ({ onClose, onAddAsset }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -54,7 +54,7 @@ export const AddAssetStep = ({ onClose }) => {
             <FromComputerForm />
           </TabPanel>
           <TabPanel>
-            <FromUrlForm onClose={onClose} />
+            <FromUrlForm onClose={onClose} onAddAsset={onAddAsset} />
           </TabPanel>
         </TabPanels>
       </TabGroup>
@@ -64,4 +64,5 @@ export const AddAssetStep = ({ onClose }) => {
 
 AddAssetStep.propTypes = {
   onClose: PropTypes.func.isRequired,
+  onAddAsset: PropTypes.func.isRequired,
 };
