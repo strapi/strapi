@@ -36,6 +36,29 @@ describe('Homepage', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c5 {
+        padding: 56px;
+      }
+
+      .c8 {
+        padding-bottom: 56px;
+        padding-left: 24px;
+      }
+
+      .c34 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 20px;
+        padding-bottom: 24px;
+        padding-left: 20px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c35 {
+        padding-bottom: 32px;
+      }
+
       .c18 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -298,29 +321,6 @@ describe('Homepage', () => {
 
       .c3 {
         outline: none;
-      }
-
-      .c5 {
-        padding: 56px;
-      }
-
-      .c8 {
-        padding-bottom: 56px;
-        padding-left: 24px;
-      }
-
-      .c34 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 20px;
-        padding-bottom: 24px;
-        padding-left: 20px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c35 {
-        padding-bottom: 32px;
       }
 
       .c6 {

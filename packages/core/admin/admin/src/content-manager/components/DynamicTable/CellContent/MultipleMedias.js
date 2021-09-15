@@ -6,8 +6,10 @@ import Media from './Media';
 const MultipleMedia = ({ value }) => {
   return (
     <AvatarGroup>
-      {value.map(file => {
-        return <Media key={file.id} {...file} />;
+      {value.map((file, index) => {
+        const key = `${file.id}${index}`;
+
+        return <Media key={key} {...file} />;
       })}
     </AvatarGroup>
   );

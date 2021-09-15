@@ -1,10 +1,17 @@
+/**
+ *
+ * FilterPopoverURLQuery
+ *
+ */
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Button, Box, Popover, Stack, Select, Option, FocusTrap } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
@@ -12,12 +19,14 @@ const FullWidthButton = styled(Button)`
   width: 100%;
 `;
 
-const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
+const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
+  const defaultFieldSchema = { fieldSchema: { type: 'string' } };
   const [modifiedData, setModifiedData] = useState({
-    name: displayedFilters[0].name,
-    filter: getFilterList(displayedFilters[0])[0].value,
+    name: displayedFilters[0]?.name || '',
+    filter: getFilterList(displayedFilters[0] || defaultFieldSchema)[0].value,
     value: '',
   });
 
@@ -25,13 +34,28 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
     return null;
   }
 
+  if (displayedFilters.length === 0) {
+    return null;
+  }
+
   const handleChangeFilterField = value => {
     const nextField = displayedFilters.find(f => f.name === value);
     const {
-      fieldSchema: { type },
+      fieldSchema: { type, options },
     } = nextField;
+    let filterValue = '';
 
-    setModifiedData({ name: value, filter: '$eq', value: type === 'boolean' ? 'true' : '' });
+    if (type === 'boolean') {
+      filterValue = 'true';
+    }
+
+    if (type === 'enumeration') {
+      filterValue = options[0];
+    }
+
+    const filter = getFilterList(nextField)[0].value;
+
+    setModifiedData({ name: value, filter, value: filterValue });
   };
 
   const handleSubmit = e => {
@@ -46,10 +70,27 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
       }) !== undefined;
 
     if (modifiedData.value && !hasFilter) {
-      const filters = [
-        ...(query?.filters?.$and || []),
-        { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } },
-      ];
+      let filterToAdd = { [modifiedData.name]: { [modifiedData.filter]: modifiedData.value } };
+
+      const foundAttribute = displayedFilters.find(({ name }) => name === modifiedData.name);
+
+      const type = foundAttribute.fieldSchema.type;
+
+      if (foundAttribute.trackedEvent) {
+        trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
+      }
+
+      if (type === 'relation') {
+        filterToAdd = {
+          [modifiedData.name]: {
+            [foundAttribute.fieldSchema.mainField.name]: {
+              [modifiedData.filter]: modifiedData.value,
+            },
+          },
+        };
+      }
+
+      const filters = [...(query?.filters?.$and || []), filterToAdd];
 
       setQuery({ filters: { $and: filters }, page: 1 });
     }
@@ -65,6 +106,7 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
           <Stack size={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
+                label="Select field"
                 aria-label="Select field"
                 name="name"
                 size="S"
@@ -82,7 +124,7 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
             </Box>
             <Box>
               <Select
-                aria-label="Select filter"
+                label="Select filter"
                 name="filter"
                 size="S"
                 value={modifiedData.filter}
@@ -99,6 +141,7 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
             </Box>
             <Box>
               <Inputs
+                {...appliedFilter.metadatas}
                 {...appliedFilter.fieldSchema}
                 value={modifiedData.value}
                 onChange={value => setModifiedData(prev => ({ ...prev, value }))}
@@ -116,12 +159,17 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
   );
 };
 
-FilterPopover.propTypes = {
+FilterPopoverURLQuery.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
       metadatas: PropTypes.shape({ label: PropTypes.string }),
       fieldSchema: PropTypes.shape({ type: PropTypes.string }),
+      // Send event to the tracker
+      trackedEvent: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        properties: PropTypes.object,
+      }),
     })
   ).isRequired,
   isVisible: PropTypes.bool.isRequired,
@@ -129,4 +177,4 @@ FilterPopover.propTypes = {
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };
 
-export default FilterPopover;
+export default FilterPopoverURLQuery;

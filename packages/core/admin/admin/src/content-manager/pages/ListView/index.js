@@ -28,14 +28,7 @@ import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
 import DynamicTable from '../../components/DynamicTable';
 // import permissions from '../../../permissions';
-import {
-  // formatFiltersFromQuery,
-  getRequestUrl,
-  getTrad,
-} from '../../utils';
-// import Container from '../../components/Container';
-// import ListViewProvider from '../../components/ListViewProvider';
-// import { Wrapper } from './components';
+import { getRequestUrl, getTrad } from '../../utils';
 // import FieldPicker from './FieldPicker';
 // import Filter from './Filter';
 import PaginationFooter from './PaginationFooter';
@@ -46,7 +39,7 @@ import {
   // getFirstSortableHeader,
   buildQueryString,
 } from './utils';
-// import AttributeFilter from '../../components/AttributeFilter';
+import AttributeFilter from '../../components/AttributeFilter';
 
 // const cmPermissions = permissions.contentManager;
 
@@ -71,7 +64,7 @@ function ListView({
   const {
     contentType: {
       // attributes,
-      // metadatas,
+      metadatas,
       settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
   } = layout;
@@ -259,16 +252,6 @@ function ListView({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
 
-  // const toggleFilterPickerState = useCallback(() => {
-  //   setFilterPickerState(prevState => {
-  //     if (!prevState) {
-  //       trackUsageRef.current('willFilterEntries');
-  //     }
-
-  //     return !prevState;
-  //   });
-  // }, []);
-
   const defaultHeaderLayoutTitle = formatMessage({
     id: getTrad('header.name'),
     defaultMessage: 'Content',
@@ -277,6 +260,7 @@ function ListView({
     id: contentType.info.label,
     defaultMessage: contentType.info.label || defaultHeaderLayoutTitle,
   });
+
   const subtitle = canRead
     ? formatMessage(
         {
@@ -326,6 +310,9 @@ function ListView({
                   )}
                   trackedEvent="didSearch"
                 />
+              )}
+              {isFilterable && (
+                <AttributeFilter contentType={contentType} slug={slug} metadatas={metadatas} />
               )}
             </>
           }
@@ -400,11 +387,11 @@ function ListView({
   //                   {isFilterable && (
   //                     <>
   //                       <Padded right size="sm">
-  //                         <AttributeFilter
-  //                           contentType={contentType}
-  //                           slug={slug}
-  //                           metaData={metadatas}
-  //                         />
+  // <AttributeFilter
+  //   contentType={contentType}
+  //   slug={slug}
+  //   metaData={metadatas}
+  // />
   //                       </Padded>
   //                       {filters.map(({ filter: filterName, name, value }, key) => (
   //                         <Filter

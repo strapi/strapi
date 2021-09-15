@@ -1,5 +1,7 @@
 export default {
-  config: {},
+  config: {
+    locales: ['fr'],
+  },
   bootstrap(app) {
     app.injectContentManagerComponent('editView', 'informations', {
       name: 'i18n-locale-filter-edit-view',
