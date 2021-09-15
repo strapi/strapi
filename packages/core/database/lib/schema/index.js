@@ -1,9 +1,9 @@
 'use strict';
 
-// const util = require('util');
+const util = require('util');
 const createSchemaBuilder = require('./builder');
 const createSchemaStorage = require('./schema-storage');
-const { diffSchemas } = require('./schema-diff');
+const createSchemaDiff = require('./schema-diff');
 const { metadataToSchema, createTable } = require('./schema');
 
 const addInternalTables = schema => {
@@ -34,6 +34,7 @@ const createSchemaProvider = db => {
   return {
     builder: createSchemaBuilder(db),
     schemaStorage: createSchemaStorage(db),
+    schemaDiff: createSchemaDiff(db),
 
     /**
      * Drops the database schema
@@ -74,17 +75,39 @@ const createSchemaProvider = db => {
         return this.create();
       }
 
-      // const schemaInspect = await db.dialect.schemaInspector.getSchema();
-
-      // console.log(util.inspect(schemaInspect, null, null, true));
+      const schemaInspect = await db.dialect.schemaInspector.getSchema();
 
       // run migrations
       db.migration.up();
 
-      // reload updated schema
-
       // diff schema
-      const { status, diff } = diffSchemas(DBSchema, currentSchema);
+      const { status, diff } = this.schemaDiff.diff(schemaInspect, currentSchema);
+
+      console.log('added :', diff.tables.added.length);
+      console.log('removed :', diff.tables.removed.length);
+      console.log('unchanged :', diff.tables.unchanged.length);
+      console.log('updated :', diff.tables.updated.length);
+
+      diff.tables.updated.forEach(table => {
+        console.log(table.name);
+
+        console.log('\tCOLUMNS:');
+        table.columns.updated.forEach(column => {
+          console.log(`\t\t${column.name}`);
+        });
+
+        console.log('\tINDEXES:');
+        table.indexes.updated.forEach(index => {
+          console.log(`\t\t${index.name}`);
+        });
+
+        console.log('\tFKS:');
+        table.foreignKeys.updated.forEach(fk => {
+          console.log(`\t\t${fk.name}`);
+        });
+      });
+
+      console.log(util.inspect(diff, null, null, true));
 
       if (status === 'UNCHANGED') {
         return;

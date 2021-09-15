@@ -8,6 +8,10 @@ class Dialect {
   configure() {}
   initialize() {}
 
+  getSqlType(type) {
+    return type;
+  }
+
   canAlterConstraints() {
     return true;
   }
@@ -17,6 +21,10 @@ class Dialect {
   }
 
   useReturning() {
+    return false;
+  }
+
+  supportsUnsigned() {
     return false;
   }
 

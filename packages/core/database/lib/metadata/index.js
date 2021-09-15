@@ -201,7 +201,7 @@ const createCompoLinkModelMeta = baseModelMeta => {
         type: 'integer',
         column: {
           unsigned: true,
-          defaultTo: [0],
+          defaultTo: 0,
         },
       },
     },
@@ -209,10 +209,12 @@ const createCompoLinkModelMeta = baseModelMeta => {
       {
         name: `${baseModelMeta.tableName}_field_index`,
         columns: ['field'],
+        type: null,
       },
       {
         name: `${baseModelMeta.tableName}_component_type_index`,
         columns: ['component_type'],
+        type: null,
       },
     ],
     foreignKeys: [

@@ -1,7 +1,7 @@
 'use strict';
 
-const { isUndefined } = require('lodash/fp');
-const debug = require('debug')('@strapi/database');
+const { isNil, prop, omit, castArray } = require('lodash/fp');
+const debug = require('debug')('strapi::database');
 
 module.exports = db => {
   const helpers = createHelpers(db);
@@ -189,16 +189,21 @@ const createHelpers = db => {
 
     const col = tableBuilder[type](name, ...args);
 
-    if (unsigned) {
+    if (unsigned === true) {
       col.unsigned();
     }
 
-    if (!isUndefined(defaultTo)) {
-      // TODO: allow some raw default values
-      col.defaultTo(...[].concat(defaultTo));
+    if (!isNil(defaultTo)) {
+      const [value, opts] = castArray(defaultTo);
+
+      if (prop('isRaw', opts)) {
+        col.defaultTo(db.connection.raw(value), omit('isRaw', opts));
+      } else {
+        col.defaultTo(value, opts);
+      }
     }
 
-    if (notNullable) {
+    if (notNullable === true) {
       col.notNullable();
     } else {
       col.nullable();
@@ -222,13 +227,6 @@ const createHelpers = db => {
    * @param {Table} table
    */
   const createTable = async (schemaBuilder, table) => {
-    if (await schemaBuilder.hasTable(table.name)) {
-      debug(`Table ${table.name} already exists trying to alter it`);
-
-      // TODO: implement a DB sync at some point
-      return;
-    }
-
     await schemaBuilder.createTable(table.name, tableBuilder => {
       // columns
       (table.columns || []).forEach(column => createColumn(tableBuilder, column));
@@ -238,7 +236,7 @@ const createHelpers = db => {
 
       // foreign keys
 
-      if (!db.dialect.canAlterContraints()) {
+      if (!db.dialect.canAlterConstraints()) {
         (table.foreignKeys || []).forEach(foreignKey => createForeignKey(tableBuilder, foreignKey));
       }
     });
@@ -255,7 +253,7 @@ const createHelpers = db => {
 
       for (const updateddIndex of table.indexes.updated) {
         debug(`Dropping updated index ${updateddIndex.name}`);
-        dropIndex(tableBuilder, updateddIndex);
+        dropIndex(tableBuilder, updateddIndex.object);
       }
 
       for (const removedForeignKey of table.foreignKeys.removed) {
@@ -265,7 +263,7 @@ const createHelpers = db => {
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Dropping updated foreign key ${updatedForeignKey.name}`);
-        dropForeignKey(tableBuilder, updatedForeignKey);
+        dropForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
       for (const removedColumn of table.columns.removed) {
@@ -278,32 +276,19 @@ const createHelpers = db => {
       for (const updatedColumn of table.columns.updated) {
         debug(`Updating column ${updatedColumn.name}`);
 
-        // TODO: cleanup diffs for columns
         const { object } = updatedColumn;
-
-        /*
-        type -> recreate the type
-        args -> recreate the type
-        unsigned
-          if changed then recreate the type
-          if removed then check if old value was true -> recreate the type else do nothing
-        defaultTo
-          reapply the default to previous data
-        notNullable
-          if null to not null we need a default value to migrate the data
-      */
 
         createColumn(tableBuilder, object).alter();
       }
 
       for (const updatedForeignKey of table.foreignKeys.updated) {
         debug(`Recreating updated foreign key ${updatedForeignKey.name}`);
-        createForeignKey(tableBuilder, updatedForeignKey);
+        createForeignKey(tableBuilder, updatedForeignKey.object);
       }
 
       for (const updatedIndex of table.indexes.updated) {
         debug(`Recreating updated index ${updatedIndex.name}`);
-        createIndex(tableBuilder, updatedIndex);
+        createIndex(tableBuilder, updatedIndex.object);
       }
 
       for (const addedColumn of table.columns.added) {

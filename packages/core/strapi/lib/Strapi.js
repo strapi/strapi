@@ -187,7 +187,7 @@ class Strapi {
       this.config.get('environment') === 'development' &&
       this.config.get('server.admin.autoOpen', true) !== false;
 
-    if (shouldOpenAdmin || !isInitialized) {
+    if (shouldOpenAdmin && !isInitialized) {
       await utils.openBrowser(this.config);
     }
   }

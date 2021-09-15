@@ -14,14 +14,6 @@ class SqliteDialect extends Dialect {
     this.schemaInspector = new SqliteSchmeaInspector(db);
   }
 
-  canAlterConstraints() {
-    return false;
-  }
-
-  async initialize() {
-    await this.db.connection.raw('pragma foreign_keys = on');
-  }
-
   // TODO: use strapi.dir
   configure() {
     this.db.config.connection.connection.filename = path.resolve(
@@ -31,6 +23,32 @@ class SqliteDialect extends Dialect {
     const dbDir = path.dirname(this.db.config.connection.connection.filename);
 
     fse.ensureDirSync(dbDir);
+  }
+
+  async initialize() {
+    await this.db.connection.raw('pragma foreign_keys = on');
+  }
+
+  canAlterConstraints() {
+    return false;
+  }
+
+  getSqlType(type) {
+    switch (type) {
+      // FIXME: enum must be dealt separately
+      case 'enum': {
+        return 'text';
+      }
+      case 'decimal': {
+        return 'float';
+      }
+      case 'timestamp': {
+        return 'datetime';
+      }
+      default: {
+        return type;
+      }
+    }
   }
 
   transformErrors(error) {

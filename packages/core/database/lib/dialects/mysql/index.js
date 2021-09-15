@@ -20,8 +20,12 @@ class MysqlDialect extends Dialect {
     };
   }
 
+  supportsUnsigned() {
+    return true;
+  }
+
   usesForeignKeys() {
-    return false;
+    return true;
   }
 
   transformErrors(error) {

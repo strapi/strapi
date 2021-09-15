@@ -775,6 +775,7 @@ const createEntityManager = db => {
           continue;
         }
 
+        // do not need to delete links when using foreign keys
         if (db.dialect.usesForeignKeys()) {
           return;
         }

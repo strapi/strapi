@@ -9,14 +9,51 @@ const SQL_QUERIES = {
 };
 
 const toStrapiType = column => {
-  switch (true) {
-    case column.type === 'integer': {
+  const { type } = column;
+
+  const rootType = type.toLowerCase().match(/[^(), ]+/)[0];
+
+  switch (rootType) {
+    case 'integer': {
+      if (column.pk) {
+        return { type: 'increments', args: [{ primary: true }] };
+      }
+
       return { type: 'integer' };
     }
-    case column.type.startsWith('varchar('): {
-      const length = column.type.slice(8, column.type.length - 1);
+    case 'varchar': {
+      const length = type.slice(8, type.length - 1);
+      if (Number(length) === 255) {
+        return { type: 'string', args: [] };
+      }
+
       return { type: 'string', args: [Number(length)] };
     }
+    case 'text': {
+      return { type: 'text', args: ['longtext'] };
+    }
+    case 'json': {
+      return { type: 'jsonb' };
+    }
+    case 'boolean': {
+      return { type: 'boolean' };
+    }
+    case 'datetime': {
+      return { type: 'datetime', args: [{ useTz: false, precision: 6 }] };
+    }
+    case 'date': {
+      return { type: 'date' };
+    }
+    case 'time': {
+      return { type: 'time', args: [{ precision: 3 }] };
+    }
+    case 'float': {
+      return { type: 'float', args: [10, 2] };
+    }
+    case 'bigint': {
+      return { type: 'bigInteger' };
+    }
+    // TODO: enum
     default: {
       return { type: 'specificType', args: [column.data_type] };
     }
@@ -58,31 +95,32 @@ class SqliteSchemaInspector {
     const rows = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
 
     return rows.map(row => {
+      const { type, args = [], ...rest } = toStrapiType(row);
+
       return {
-        ...toStrapiType(row),
+        type,
+        args,
         name: row.name,
-        // sqlType: row.type,
         defaultTo: row.dflt_value,
-        notNullable: Boolean(row.notnull),
-        // primary: Boolean(row.pk),
-        // unsigned: false,
-        // autoincrement: false,
+        notNullable: row.notnull !== null ? Boolean(row.notnull) : null,
+        unsigned: false,
+        ...rest,
       };
     });
   }
 
   async getIndexes(tableName) {
-    const cols = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
+    // const cols = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
     const indexes = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [tableName]);
 
     const ret = [];
 
-    for (const col of cols.filter(c => c.pk)) {
-      ret.push({
-        columns: [col.name],
-        type: 'primary',
-      });
-    }
+    // for (const col of cols.filter(c => c.pk)) {
+    //   ret.push({
+    //     columns: [col.name],
+    //     type: 'primary',
+    //   });
+    // }
     // merge pk together
 
     for (const index of indexes.filter(index => !index.name.startsWith('sqlite_'))) {

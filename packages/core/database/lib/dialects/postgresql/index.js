@@ -20,7 +20,7 @@ class PostgresDialect extends Dialect {
   }
 
   usesForeignKeys() {
-    return false;
+    return true;
   }
 
   transformErrors(error) {

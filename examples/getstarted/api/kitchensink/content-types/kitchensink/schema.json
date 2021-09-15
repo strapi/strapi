@@ -42,6 +42,9 @@
     "time": {
       "type": "time"
     },
+    "timestamp": {
+      "type": "timestamp"
+    },
     "boolean": {
       "type": "boolean"
     },
@@ -57,7 +60,8 @@
         "A",
         "B",
         "C",
-        "D"
+        "D",
+        "E"
       ]
     },
     "single_media": {

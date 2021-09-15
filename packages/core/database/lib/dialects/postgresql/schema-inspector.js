@@ -64,22 +64,76 @@ const SQL_QUERIES = {
 };
 
 const toStrapiType = column => {
-  switch (column.data_type) {
+  // 'int2': 'smallint',
+  // 'smallserial': 'smallint',
+  // 'int': 'integer',
+  // 'int4': 'integer',
+  // 'serial': 'integer',
+  // 'serial4': 'integer',
+  // 'int8': 'bigint',
+  // 'bigserial': 'bigint',
+  // 'serial8': 'bigint',
+  // 'numeric': 'decimal',
+  // 'bool': 'boolean',
+  // 'real': 'float',
+  // 'float4': 'float',
+  // 'float8': 'double',
+  // 'timestamp': 'datetime',
+  // 'timestamptz': 'datetime',
+  // 'bytea': 'blob',
+  // 'jsonb': 'json',
+  // 'character varying': 'varchar',
+
+  const rootType = column.data_type.toLowerCase().match(/[^(), ]+/)[0];
+
+  switch (rootType) {
     case 'integer': {
+      // find a way to figure out the increments
       return { type: 'integer' };
     }
-    case 'character varying': {
+    case 'text': {
+      return { type: 'text', args: ['longtext'] };
+    }
+    case 'boolean': {
+      return { type: 'boolean' };
+    }
+    case 'character': {
+      if (Number(column.character_maximum_length) === 255) {
+        return { type: 'string', args: [] };
+      }
+
       return { type: 'string', args: [column.character_maximum_length] };
     }
+    case 'timestamp': {
+      return { type: 'datetime', args: [{ useTz: false, precision: 6 }] };
+    }
+    case 'date': {
+      return { type: 'date' };
+    }
+    case 'time': {
+      return { type: 'time', args: [{ precision: 3 }] };
+    }
+    case 'double':
+    case 'numeric': {
+      return { type: 'float', args: [10, 2] };
+    }
+    case 'bigint': {
+      return { type: 'bigInteger' };
+    }
+    case 'jsonb': {
+      return { type: 'jsonb' };
+    }
     default: {
+      console.log(rootType);
+
       return { type: 'specificType', args: [column.data_type] };
     }
   }
 };
 
 class PostgresqlSchemaInspector {
-  constructor(knex) {
-    this.knex = knex;
+  constructor(db) {
+    this.db = db;
   }
 
   async getSchema() {
@@ -103,39 +157,43 @@ class PostgresqlSchemaInspector {
   }
 
   getDatabaseSchema() {
-    return this.knex.client.connectionSettings.schema || 'public';
+    return this.db.connection.client.connectionSettings.schema || 'public';
   }
 
   async getTables() {
-    const { rows } = await this.knex.raw(SQL_QUERIES.TABLE_LIST, [this.getDatabaseSchema()]);
+    const { rows } = await this.db.connection.raw(SQL_QUERIES.TABLE_LIST, [
+      this.getDatabaseSchema(),
+    ]);
 
     return rows.map(row => row.table_name);
   }
 
   async getColumns(tableName) {
-    const { rows } = await this.knex.raw(SQL_QUERIES.LIST_COLUMNS, [
+    const { rows } = await this.db.connection.raw(SQL_QUERIES.LIST_COLUMNS, [
       this.getDatabaseSchema(),
       tableName,
     ]);
 
-    // row.column_default.includes('nextval')
-
     return rows.map(row => {
+      const { type, args = [], ...rest } = toStrapiType(row);
+
+      const defaultTo =
+        row.column_default && row.column_default.includes('nextval(') ? null : row.column_default;
+
       return {
-        ...toStrapiType(row),
+        type,
+        args,
+        defaultTo,
         name: row.column_name,
-        sqlType: row.data_type,
-        defaultTo: row.column_default, // TODO: handle non scalar values
         notNullable: row.is_nullable === 'NO',
-        // primary: Boolean(row.pk),
-        // unsigned: false,
-        // autoincrement: false,
+        unsigned: false,
+        ...rest,
       };
     });
   }
 
   async getIndexes(tableName) {
-    const { rows } = await this.knex.raw(SQL_QUERIES.INDEX_LIST, [
+    const { rows } = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [
       this.getDatabaseSchema(),
       tableName,
     ]);
@@ -143,6 +201,10 @@ class PostgresqlSchemaInspector {
     const ret = {};
 
     for (const index of rows) {
+      if (index.column_name === 'id') {
+        continue;
+      }
+
       if (!ret[index.indexrelid]) {
         ret[index.indexrelid] = {
           columns: [index.column_name],
@@ -159,7 +221,7 @@ class PostgresqlSchemaInspector {
   }
 
   async getForeignKeys(tableName) {
-    const { rows } = await this.knex.raw(SQL_QUERIES.FOREIGN_KEY_LIST, [
+    const { rows } = await this.db.connection.raw(SQL_QUERIES.FOREIGN_KEY_LIST, [
       this.getDatabaseSchema(),
       tableName,
     ]);
