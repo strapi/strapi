@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
+import { useNotification } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
 import { cleanPermissions, formatPolicies, getTrad } from '../../utils';
+import axiosInstance from '../../utils/axiosInstance';
 import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {
@@ -23,8 +24,12 @@ const usePlugins = (shouldFetchData = true) => {
       });
 
       const [{ permissions }, { routes }, { policies }] = await Promise.all(
-        [`/${pluginId}/permissions`, `/${pluginId}/routes`, `/${pluginId}/policies`].map(endpoint =>
-          request(endpoint, { method: 'GET' })
+        [`/${pluginId}/permissions`, `/${pluginId}/routes`, `/${pluginId}/policies`].map(
+          async endpoint => {
+            const res = await axiosInstance.get(endpoint);
+
+            return res.data;
+          }
         )
       );
 
