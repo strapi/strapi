@@ -3,15 +3,15 @@ import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
 import { Formik } from 'formik';
 import {
-  SettingsPageTitle,
-  useRBAC,
-  useNotification,
-  useOverlayBlocker,
   CheckPagePermissions,
-  LoadingIndicatorPage,
   Form,
   GenericInput,
+  LoadingIndicatorPage,
+  SettingsPageTitle,
   useFocusWhenNavigate,
+  useNotification,
+  useOverlayBlocker,
+  useRBAC,
 } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Main } from '@strapi/parts/Main';
