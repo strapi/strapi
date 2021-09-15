@@ -52,7 +52,7 @@ const TableHead = ({
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
             { label }
           );
-          const intlLabel = formatMessage({ id: label, defaultMessage: label });
+          const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {

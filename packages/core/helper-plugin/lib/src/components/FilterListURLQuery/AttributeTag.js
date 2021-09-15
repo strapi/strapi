@@ -45,7 +45,7 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
   return (
     <Box padding={1} onClick={handleClick}>
       <Tag icon={<Close />}>
-        {attribute.metadatas.label}&nbsp;
+        {attribute.metadatas.label || attribute.name}&nbsp;
         {formatMessage({
           id: `components.FilterOptions.FILTER_TYPES.${operator}`,
           defaultMessage: operator,

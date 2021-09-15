@@ -54,7 +54,10 @@ const FieldPicker = ({ layout }) => {
       {allAllowedHeaders.map(header => {
         return (
           <Option key={header.name} value={header.name}>
-            {formatMessage(header.intlLabel)}
+            {formatMessage({
+              id: header.intlLabel.id || header.name,
+              defaultMessage: header.intlLabel.defaultMessage || header.name,
+            })}
           </Option>
         );
       })}
