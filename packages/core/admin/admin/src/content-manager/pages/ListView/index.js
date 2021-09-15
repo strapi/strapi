@@ -28,14 +28,7 @@ import { axiosInstance } from '../../../core/utils';
 import { InjectionZone } from '../../../shared/components';
 import DynamicTable from '../../components/DynamicTable';
 // import permissions from '../../../permissions';
-import {
-  // formatFiltersFromQuery,
-  getRequestUrl,
-  getTrad,
-} from '../../utils';
-// import Container from '../../components/Container';
-// import ListViewProvider from '../../components/ListViewProvider';
-// import { Wrapper } from './components';
+import { getRequestUrl, getTrad } from '../../utils';
 // import FieldPicker from './FieldPicker';
 // import Filter from './Filter';
 import PaginationFooter from './PaginationFooter';
@@ -258,16 +251,6 @@ function ListView({
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [canRead, getData, slug, params, getDataSucceeded, fetchData]);
-
-  // const toggleFilterPickerState = useCallback(() => {
-  //   setFilterPickerState(prevState => {
-  //     if (!prevState) {
-  //       trackUsageRef.current('willFilterEntries');
-  //     }
-
-  //     return !prevState;
-  //   });
-  // }, []);
 
   const defaultHeaderLayoutTitle = formatMessage({
     id: getTrad('header.name'),

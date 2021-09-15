@@ -3,14 +3,18 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button, Box } from '@strapi/parts';
 import { FilterIcon } from '@strapi/icons';
-import { FilterListURLQuery, FilterPopoverURLQuery } from '@strapi/helper-plugin';
+import { FilterListURLQuery, FilterPopoverURLQuery, useTracking } from '@strapi/helper-plugin';
 
 const Filters = ({ displayedFilters }) => {
   const [isVisible, setIsVisible] = useState(false);
   const { formatMessage } = useIntl();
   const buttonRef = useRef();
+  const { trackUsage } = useTracking();
 
   const handleToggle = () => {
+    if (!isVisible) {
+      trackUsage('willFilterEntries');
+    }
     setIsVisible(prev => !prev);
   };
 
