@@ -1,25 +1,31 @@
+/**
+ *
+ * FilterListURLQuery
+ *
+ */
+
 import React from 'react';
 import PropTypes from 'prop-types';
-import { useQueryParams } from '@strapi/helper-plugin';
+import useQueryParams from '../../hooks/useQueryParams';
 import AttributeTag from './AttributeTag';
 
-const FilterList = ({ filtersSchema }) => {
+const FilterListURLQuery = ({ filtersSchema }) => {
   const [{ query }, setQuery] = useQueryParams();
 
   const handleClick = filter => {
-    const nextFilters = query.filters.$and.filter(f => {
+    const nextFilters = query.filters.$and.filter(prevFilter => {
       const name = Object.keys(filter)[0];
       const filterType = Object.keys(filter[name])[0];
       const value = filter[name][filterType];
 
-      return f[name]?.[filterType] !== value;
+      return prevFilter[name]?.[filterType] !== value;
     });
 
     setQuery({ filters: { $and: nextFilters }, page: 1 });
   };
 
   return (
-    query.filters?.$and.map((filter, i) => {
+    query?.filters?.$and.map((filter, i) => {
       const attributeName = Object.keys(filter)[0];
       const attribute = filtersSchema.find(({ name }) => name === attributeName);
 
@@ -61,11 +67,11 @@ const FilterList = ({ filtersSchema }) => {
   );
 };
 
-FilterList.defaultProps = {
+FilterListURLQuery.defaultProps = {
   filtersSchema: [],
 };
 
-FilterList.propTypes = {
+FilterListURLQuery.propTypes = {
   filtersSchema: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
@@ -81,4 +87,4 @@ FilterList.propTypes = {
   ),
 };
 
-export default FilterList;
+export default FilterListURLQuery;
