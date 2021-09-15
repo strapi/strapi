@@ -6,7 +6,7 @@ const {
   addResolversToSchema,
 } = require('@graphql-tools/schema');
 const { makeSchema } = require('nexus');
-const { pipe } = require('lodash/fp');
+const { pipe, prop, startsWith } = require('lodash/fp');
 
 const { wrapResolvers } = require('./wrap-resolvers');
 const {
@@ -25,47 +25,52 @@ const {
 } = require('./register-functions');
 
 module.exports = ({ strapi }) => {
+  const { service: getGraphQLService } = strapi.plugin('graphql');
+
+  const { KINDS, GENERIC_MORPH_TYPENAME } = getGraphQLService('constants');
+
   // Type Registry
   let registry;
   // Builders Instances
   let builders;
 
-  const { KINDS, GENERIC_MORPH_TYPENAME } = strapi.plugin('graphql').service('constants');
-
   const buildSchema = () => {
+    const extensionService = getGraphQLService('extension');
+
     // Create a new empty type registry
-    registry = strapi
-      .plugin('graphql')
-      .service('type-registry')
-      .new();
+    registry = getGraphQLService('type-registry').new();
 
     // Reset the builders instances associated to the
     // content-api, and link the new type registry
-    builders = strapi
-      .plugin('graphql')
-      .service('builders')
-      .new('content-api', registry);
+    builders = getGraphQLService('builders').new('content-api', registry);
 
+    // Get every content type & component defined in Strapi
     const contentTypes = [
       ...Object.values(strapi.components),
       ...Object.values(strapi.contentTypes),
     ];
 
+    // Disable Shadow CRUD for admin content types
+    contentTypes
+      .map(prop('uid'))
+      .filter(startsWith('admin::'))
+      .forEach(uid => extensionService.shadowCRUD(uid).disable());
+
+    const contentTypesWithShadowCRUD = contentTypes.filter(ct =>
+      extensionService.shadowCRUD(ct.uid).isEnabled()
+    );
+
     registerScalars({ registry, strapi });
     registerInternals({ registry, strapi });
 
     // Generate and register definitions for every content type
-    registerAPITypes(contentTypes);
+    registerAPITypes(contentTypesWithShadowCRUD);
 
     // Generate and register polymorphic types' definitions
-    registerMorphTypes(contentTypes);
+    registerMorphTypes(contentTypesWithShadowCRUD);
 
     // Generate the extension configuration for the content API
-    const extension = strapi
-      .plugin('graphql')
-      .service('extension')
-      .for('content-api')
-      .generate({ typeRegistry: registry });
+    const extension = extensionService.generate({ typeRegistry: registry });
 
     return pipe(
       // Build a collection of schema based on the

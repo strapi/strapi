@@ -16,21 +16,19 @@ module.exports = ({ strapi }) => ({
       return `create${getTypeName(contentType)}Localization`;
     };
 
-    getGraphQLService('extension')
-      .for('content-api')
-      .use(({ nexus, typeRegistry }) => {
-        const i18nLocaleArgPlugin = createI18nLocaleArgPlugin({ nexus, typeRegistry });
-        const i18nLocaleScalar = createLocaleScalar({ nexus });
-        const createLocalizationMutations = createCreateLocalizationMutations({
-          nexus,
-          typeRegistry,
-        });
-
-        return {
-          plugins: [i18nLocaleArgPlugin],
-          types: [i18nLocaleScalar, createLocalizationMutations],
-        };
+    getGraphQLService('extension').use(({ nexus, typeRegistry }) => {
+      const i18nLocaleArgPlugin = createI18nLocaleArgPlugin({ nexus, typeRegistry });
+      const i18nLocaleScalar = createLocaleScalar({ nexus });
+      const createLocalizationMutations = createCreateLocalizationMutations({
+        nexus,
+        typeRegistry,
       });
+
+      return {
+        plugins: [i18nLocaleArgPlugin],
+        types: [i18nLocaleScalar, createLocalizationMutations],
+      };
+    });
 
     const createLocaleScalar = ({ nexus }) => {
       const locales = getI18NService('iso-locales').getIsoLocales();

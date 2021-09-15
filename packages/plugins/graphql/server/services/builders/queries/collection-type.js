@@ -16,30 +16,41 @@ module.exports = ({ strapi }) => {
   } = naming;
 
   const buildCollectionTypeQueries = contentType => {
-    getService('extension')
-      .for('content-api')
-      .use(() => ({
-        resolversConfig: {
-          [`Query.${getFindOneQueryName(contentType)}`]: {
-            auth: {
-              scope: [`${contentType.uid}.findOne`],
-            },
-          },
+    const findOneQueryName = `Query.${getFindOneQueryName(contentType)}`;
+    const findQueryName = `Query.${getFindQueryName(contentType)}`;
 
-          [`Query.${getFindQueryName(contentType)}`]: {
-            auth: {
-              scope: [{ name: `${contentType.uid}.find`, type: 'read-only' }],
-            },
-          },
-        },
-      }));
+    const extension = getService('extension');
+
+    const registerAuthConfig = (action, auth) => {
+      return extension.use(() => ({ resolversConfig: { [action]: { auth } } }));
+    };
+
+    const isActionEnabled = action => {
+      return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
+    };
+
+    const isFindOneEnabled = isActionEnabled('findOne');
+    const isFindEnabled = isActionEnabled('find');
+
+    if (isFindOneEnabled) {
+      registerAuthConfig(findOneQueryName, { scope: [`${contentType.uid}.findOne`] });
+    }
+
+    if (isFindEnabled) {
+      registerAuthConfig(findQueryName, { scope: [`${contentType.uid}.find`] });
+    }
 
     return extendType({
       type: 'Query',
 
       definition(t) {
-        addFindOneQuery(t, contentType);
-        addFindQuery(t, contentType);
+        if (isFindOneEnabled) {
+          addFindOneQuery(t, contentType);
+        }
+
+        if (isFindEnabled) {
+          addFindQuery(t, contentType);
+        }
       },
     });
   };
