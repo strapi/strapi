@@ -18,7 +18,7 @@
     "execa": "^1.0.0",
     "fs-extra": "^9.1.0",
     "git-url-parse": "^11.4.4",
-    "inquirer": "^6.3.1",
+    "inquirer": "^7.0.5",
     "lodash": "4.17.21",
     "node-fetch": "^2.6.1",
     "node-machine-id": "^1.1.10",
