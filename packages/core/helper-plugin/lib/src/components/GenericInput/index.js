@@ -71,6 +71,7 @@ const Input = ({
       disabled={disabled}
       error={errorMessage}
       label={label}
+      hint={hint}
       name={name}
       onChange={onChange}
       placeholder={formattedPlaceholder}

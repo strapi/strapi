@@ -22,6 +22,7 @@
   "HeaderNav.link.providers": "Providers",
   "HeaderNav.link.roles": "Roles",
   "Form.title.advancedSettings": "Settings",
+  "Form.advancedSettings.data.loaded": "Advanced settings data has been loaded",
   "Plugin.permissions.plugins.description": "Define all allowed actions for the {name} plugin.",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
   "Plugins.header.title": "Permissions",
