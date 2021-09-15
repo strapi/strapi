@@ -401,7 +401,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         opacity: 1;
       }
 
-      .c19:disabled {
+      .c19[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -439,7 +439,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         opacity: 1;
       }
 
-      .c20:disabled {
+      .c20[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -600,6 +600,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       class="c1 c17 c18"
                     >
                       <input
+                        aria-disabled="false"
                         aria-invalid="false"
                         class="c19"
                         id="textinput-1"
@@ -633,6 +634,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       class="c1 c17 c18"
                     >
                       <input
+                        aria-disabled="false"
                         aria-invalid="false"
                         class="c20"
                         id="textinput-2"
