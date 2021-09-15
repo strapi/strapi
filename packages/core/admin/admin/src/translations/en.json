@@ -362,7 +362,7 @@
   "components.FilterOptions.FILTER_TYPES.$lt": "is lower than",
   "components.FilterOptions.FILTER_TYPES.$lte": "is lower than or equal to",
   "components.FilterOptions.FILTER_TYPES.$startsWith": "starts with",
-  "components.FilterOptions.FILTER_TYPES.$endsWith": "starts with",
+  "components.FilterOptions.FILTER_TYPES.$endsWith": "ends with",
   "components.FilterOptions.FILTER_TYPES.$null": "is null",
   "components.FilterOptions.FILTER_TYPES.$notNull": "is not null",
   "components.Input.error.attribute.key.taken": "This value already exists",

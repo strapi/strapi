@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
+import { useIntl } from 'react-intl';
 import { Select, Option } from '@strapi/parts/Select';
 import { useTracking } from '@strapi/helper-plugin';
 import { onChangeListHeaders } from '../actions';
@@ -11,8 +12,16 @@ const FieldPicker = ({ layout }) => {
   const dispatch = useDispatch();
   const displayedHeaders = useSelector(selectDisplayedHeaders);
   const { trackUsage } = useTracking();
+  const { formatMessage } = useIntl();
 
-  const allAllowedHeaders = getAllAllowedHeaders(layout.contentType.attributes);
+  const allAllowedHeaders = getAllAllowedHeaders(layout.contentType.attributes).map(attrName => {
+    const metadatas = layout.contentType.metadatas[attrName].list;
+
+    return {
+      name: attrName,
+      intlLabel: { id: metadatas.label, defaultMessage: metadatas.label },
+    };
+  });
   const values = displayedHeaders.map(({ name }) => name);
 
   const handleChange = updatedValues => {
@@ -44,8 +53,8 @@ const FieldPicker = ({ layout }) => {
     >
       {allAllowedHeaders.map(header => {
         return (
-          <Option key={header} value={header}>
-            {header}
+          <Option key={header.name} value={header.name}>
+            {formatMessage(header.intlLabel)}
           </Option>
         );
       })}
