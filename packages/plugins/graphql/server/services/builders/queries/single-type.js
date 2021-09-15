@@ -11,23 +11,31 @@ module.exports = ({ strapi }) => {
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
   const buildSingleTypeQueries = contentType => {
-    getService('extension')
-      .for('content-api')
-      .use(() => ({
-        resolversConfig: {
-          [`Query.${getFindOneQueryName(contentType)}`]: {
-            auth: {
-              scope: [`${contentType.uid}.findOne`],
-            },
-          },
-        },
-      }));
+    const findQueryName = `Query.${getFindOneQueryName(contentType)}`;
+
+    const extension = getService('extension');
+
+    const registerAuthConfig = (action, auth) => {
+      return extension.use(() => ({ resolversConfig: { [action]: { auth } } }));
+    };
+
+    const isActionEnabled = action => {
+      return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
+    };
+
+    const isFindEnabled = isActionEnabled('find');
+
+    if (isFindEnabled) {
+      registerAuthConfig(findQueryName, { scope: [`${contentType.uid}.find`] });
+    }
 
     return extendType({
       type: 'Query',
 
       definition(t) {
-        addFindQuery(t, contentType);
+        if (isFindEnabled) {
+          addFindQuery(t, contentType);
+        }
       },
     });
   };

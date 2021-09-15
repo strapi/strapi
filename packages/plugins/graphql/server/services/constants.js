@@ -33,10 +33,14 @@ const STRAPI_SCALARS = [
   'datetime',
   'timestamp',
   'uid',
+  'email',
+  'password',
 ];
 
 const SCALARS_ASSOCIATIONS = {
   uid: 'String',
+  email: 'String',
+  password: 'String',
   boolean: 'Boolean',
   integer: 'Int',
   string: 'String',

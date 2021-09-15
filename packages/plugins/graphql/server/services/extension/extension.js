@@ -3,6 +3,8 @@
 const nexus = require('nexus');
 const { merge } = require('lodash/fp');
 
+const createShadowCRUDManager = require('./shadow-crud-manager');
+
 /**
  * @typedef StrapiGraphQLExtensionConfiguration
  * @property {NexusGen[]} types - A collection of Nexus types
@@ -26,8 +28,11 @@ const defaultState = {
 
 const createExtension = ({ strapi } = {}) => {
   const configs = [];
+  const shadowCRUDManager = createShadowCRUDManager();
 
   return {
+    shadowCRUD: shadowCRUDManager,
+
     /**
      * Register a new extension configuration
      * @param {StrapiGraphQLExtensionConfiguration | StrapiGraphQLExtensionConfigurationFactory} configuration
@@ -79,7 +84,7 @@ const createExtension = ({ strapi } = {}) => {
         // Register resolvers configuration
         if (typeof resolversConfig === 'object') {
           // TODO: smarter merge for auth, middlewares & policies
-          acc.resolversConfig = merge(acc.resolversConfig, resolversConfig);
+          acc.resolversConfig = merge(resolversConfig, acc.resolversConfig);
         }
 
         return acc;

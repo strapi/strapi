@@ -56,129 +56,125 @@ module.exports = ({ strapi }) => {
   /**
    * Register Upload's types, queries & mutations to the content API using the GraphQL extension API
    */
-  getGraphQLService('extension')
-    .for('content-api')
-    .use(({ nexus }) => {
-      const { inputObjectType, extendType, nonNull, list } = nexus;
+  getGraphQLService('extension').use(({ nexus }) => {
+    const { inputObjectType, extendType, nonNull, list } = nexus;
 
-      // Represents the input data payload for the file's information
-      const fileInfoInputType = inputObjectType({
-        name: FILE_INFO_INPUT_TYPE_NAME,
+    // Represents the input data payload for the file's information
+    const fileInfoInputType = inputObjectType({
+      name: FILE_INFO_INPUT_TYPE_NAME,
 
-        definition(t) {
-          t.string('name');
-          t.string('alternativeText');
-          t.string('caption');
-        },
-      });
-
-      const mutations = extendType({
-        type: 'Mutation',
-
-        definition(t) {
-          /**
-           * Upload a single file
-           */
-          t.field(UPLOAD_MUTATION_NAME, {
-            type: nonNull(fileEntityResponseType),
-
-            args: {
-              refId: 'ID',
-              ref: 'String',
-              field: 'String',
-              info: FILE_INFO_INPUT_TYPE_NAME,
-              file: nonNull('Upload'),
-            },
-
-            async resolve(parent, args) {
-              const { file: upload, info, ...fields } = args;
-
-              const file = await formatFile(upload, info, fields);
-              const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file);
-
-              return toEntityResponse(uploadedFile, { args, resourceUID: fileTypeName });
-            },
-          });
-
-          /**
-           * Upload multiple files
-           */
-          t.field(MULTIPLE_UPLOAD_MUTATION_NAME, {
-            type: nonNull(list(fileEntityResponseType)),
-
-            args: {
-              refId: 'ID',
-              ref: 'String',
-              field: 'String',
-              files: nonNull(list('Upload')),
-            },
-
-            async resolve(parent, args) {
-              const { files: uploads, ...fields } = args;
-
-              const files = await Promise.all(
-                uploads.map(upload => formatFile(upload, {}, fields))
-              );
-
-              const uploadService = getUploadService('upload');
-
-              const uploadedFiles = await Promise.all(
-                files.map(file => uploadService.uploadFileAndPersist(file))
-              );
-
-              return uploadedFiles.map(file =>
-                toEntityResponse(file, { args, resourceUID: fileTypeName })
-              );
-            },
-          });
-
-          /**
-           * Update some information for a given file
-           */
-          t.field(UPDATE_FILE_INFO_MUTATION_NAME, {
-            type: nonNull(fileEntityResponseType),
-
-            args: {
-              id: nonNull('ID'),
-              info: FILE_INFO_INPUT_TYPE_NAME,
-            },
-
-            async resolve(parent, args) {
-              const { id, info } = args;
-
-              const updatedFile = await getUploadService('upload').updateFileInfo(id, info);
-
-              return toEntityResponse(updatedFile, { args, resourceUID: fileTypeName });
-            },
-          });
-
-          /**
-           * Delete & remove a given file
-           */
-          t.field(DELETE_FILE_MUTATION_NAME, {
-            type: fileEntityResponseType,
-
-            args: {
-              id: nonNull('ID'),
-            },
-
-            async resolve(parent, args) {
-              const { id } = args;
-
-              const file = await getUploadService('upload').findOne({ id });
-
-              if (!file) {
-                return null;
-              }
-
-              const deletedFile = await getUploadService('upload').remove(file);
-
-              return toEntityResponse(deletedFile, { args, resourceUID: fileTypeName });
-            },
-          });
-        },
-      });
-
-      return { types: [fileInfoInputType, mutations] };
+      definition(t) {
+        t.string('name');
+        t.string('alternativeText');
+        t.string('caption');
+      },
     });
+
+    const mutations = extendType({
+      type: 'Mutation',
+
+      definition(t) {
+        /**
+         * Upload a single file
+         */
+        t.field(UPLOAD_MUTATION_NAME, {
+          type: nonNull(fileEntityResponseType),
+
+          args: {
+            refId: 'ID',
+            ref: 'String',
+            field: 'String',
+            info: FILE_INFO_INPUT_TYPE_NAME,
+            file: nonNull('Upload'),
+          },
+
+          async resolve(parent, args) {
+            const { file: upload, info, ...fields } = args;
+
+            const file = await formatFile(upload, info, fields);
+            const uploadedFile = await getUploadService('upload').uploadFileAndPersist(file);
+
+            return toEntityResponse(uploadedFile, { args, resourceUID: fileTypeName });
+          },
+        });
+
+        /**
+         * Upload multiple files
+         */
+        t.field(MULTIPLE_UPLOAD_MUTATION_NAME, {
+          type: nonNull(list(fileEntityResponseType)),
+
+          args: {
+            refId: 'ID',
+            ref: 'String',
+            field: 'String',
+            files: nonNull(list('Upload')),
+          },
+
+          async resolve(parent, args) {
+            const { files: uploads, ...fields } = args;
+
+            const files = await Promise.all(uploads.map(upload => formatFile(upload, {}, fields)));
+
+            const uploadService = getUploadService('upload');
+
+            const uploadedFiles = await Promise.all(
+              files.map(file => uploadService.uploadFileAndPersist(file))
+            );
+
+            return uploadedFiles.map(file =>
+              toEntityResponse(file, { args, resourceUID: fileTypeName })
+            );
+          },
+        });
+
+        /**
+         * Update some information for a given file
+         */
+        t.field(UPDATE_FILE_INFO_MUTATION_NAME, {
+          type: nonNull(fileEntityResponseType),
+
+          args: {
+            id: nonNull('ID'),
+            info: FILE_INFO_INPUT_TYPE_NAME,
+          },
+
+          async resolve(parent, args) {
+            const { id, info } = args;
+
+            const updatedFile = await getUploadService('upload').updateFileInfo(id, info);
+
+            return toEntityResponse(updatedFile, { args, resourceUID: fileTypeName });
+          },
+        });
+
+        /**
+         * Delete & remove a given file
+         */
+        t.field(DELETE_FILE_MUTATION_NAME, {
+          type: fileEntityResponseType,
+
+          args: {
+            id: nonNull('ID'),
+          },
+
+          async resolve(parent, args) {
+            const { id } = args;
+
+            const file = await getUploadService('upload').findOne({ id });
+
+            if (!file) {
+              return null;
+            }
+
+            const deletedFile = await getUploadService('upload').remove(file);
+
+            return toEntityResponse(deletedFile, { args, resourceUID: fileTypeName });
+          },
+        });
+      },
+    });
+
+    return { types: [fileInfoInputType, mutations] };
+  });
 };

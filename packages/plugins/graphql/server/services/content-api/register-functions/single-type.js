@@ -6,6 +6,8 @@ const registerSingleType = (contentType, { registry, strapi, builders }) => {
   const { naming } = getService('utils');
   const { KINDS } = getService('constants');
 
+  const extension = getService('extension');
+
   const types = {
     base: naming.getTypeName(contentType),
     entity: naming.getEntityName(contentType),
@@ -41,18 +43,23 @@ const registerSingleType = (contentType, { registry, strapi, builders }) => {
     getConfig(KINDS.entityResponseCollection)
   );
 
-  // Queries
-  registry.register(
-    types.queries,
-    builders.buildSingleTypeQueries(contentType),
-    getConfig(KINDS.query)
-  );
+  if (extension.shadowCRUD(contentType.uid).areQueriesEnabled()) {
+    // Queries
+    registry.register(
+      types.queries,
+      builders.buildSingleTypeQueries(contentType),
+      getConfig(KINDS.query)
+    );
+  }
 
-  registry.register(
-    types.mutations,
-    builders.buildSingleTypeMutations(contentType),
-    getConfig(KINDS.mutation)
-  );
+  if (extension.shadowCRUD(contentType.uid).areMutationsEnabled()) {
+    // Mutations
+    registry.register(
+      types.mutations,
+      builders.buildSingleTypeMutations(contentType),
+      getConfig(KINDS.mutation)
+    );
+  }
 };
 
 module.exports = { registerSingleType };

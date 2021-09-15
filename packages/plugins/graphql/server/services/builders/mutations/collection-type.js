@@ -1,7 +1,6 @@
 'use strict';
 
-const { extendType } = require('nexus');
-const { actionExists } = require('../../old/utils');
+const { extendType, nonNull } = require('nexus');
 
 module.exports = ({ strapi }) => {
   const { service: getService } = strapi.plugin('graphql');
@@ -23,17 +22,12 @@ module.exports = ({ strapi }) => {
     const createMutationName = getCreateMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists({ resolver: `${uid}.create` })) {
-      return;
-    }
-
     t.field(createMutationName, {
       type: responseTypeName,
 
       args: {
         // Create payload
-        data: getContentTypeInputName(contentType),
+        data: nonNull(getContentTypeInputName(contentType)),
       },
 
       async resolve(parent, args) {
@@ -56,11 +50,6 @@ module.exports = ({ strapi }) => {
     const updateMutationName = getUpdateMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists({ resolver: `${uid}.update` })) {
-      return;
-    }
-
     // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for updateOne queries
     // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
@@ -70,12 +59,12 @@ module.exports = ({ strapi }) => {
 
       args: {
         // Query args
-        id: 'ID',
+        id: nonNull('ID'),
         // todo[v4]: Don't allow to filter using every unique attributes for now
         // ...uniqueAttributes,
 
         // Update payload
-        data: getContentTypeInputName(contentType),
+        data: nonNull(getContentTypeInputName(contentType)),
       },
 
       async resolve(parent, args) {
@@ -98,11 +87,6 @@ module.exports = ({ strapi }) => {
     const deleteMutationName = getDeleteMutationTypeName(contentType);
     const responseTypeName = getEntityResponseName(contentType);
 
-    // If the action doesn't exist, return early and don't add the mutation
-    if (!actionExists({ resolver: `${uid}.delete` })) {
-      return;
-    }
-
     // todo[v4]: Don't allow to filter using every unique attributes for now
     // Only authorize filtering using unique scalar fields for updateOne queries
     // const uniqueAttributes = getUniqueAttributesFiltersMap(attributes);
@@ -112,7 +96,7 @@ module.exports = ({ strapi }) => {
 
       args: {
         // Query args
-        id: 'ID',
+        id: nonNull('ID'),
         // todo[v4]: Don't allow to filter using every unique attributes for now
         // ...uniqueAttributes,
       },
@@ -133,37 +117,51 @@ module.exports = ({ strapi }) => {
 
   return {
     buildCollectionTypeMutations(contentType) {
-      getService('extension')
-        .for('content-api')
-        .use(() => ({
-          resolversConfig: {
-            [`Mutation.${getCreateMutationTypeName(contentType)}`]: {
-              auth: {
-                scope: [`${contentType.uid}.create`],
-              },
-            },
+      const createMutationName = `Mutation.${getCreateMutationTypeName(contentType)}`;
+      const updateMutationName = `Mutation.${getUpdateMutationTypeName(contentType)}`;
+      const deleteMutationName = `Mutation.${getDeleteMutationTypeName(contentType)}`;
 
-            [`Mutation.${getUpdateMutationTypeName(contentType)}`]: {
-              auth: {
-                scope: [`${contentType.uid}.update`],
-              },
-            },
+      const extension = getService('extension');
 
-            [`Mutation.${getDeleteMutationTypeName(contentType)}`]: {
-              auth: {
-                scope: [`${contentType.uid}.delete`],
-              },
-            },
-          },
-        }));
+      const registerAuthConfig = (action, auth) => {
+        return extension.use(() => ({ resolversConfig: { [action]: { auth } } }));
+      };
+
+      const isActionEnabled = action => {
+        return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
+      };
+
+      const isCreateEnabled = isActionEnabled('create');
+      const isUpdateEnabled = isActionEnabled('update');
+      const isDeleteEnabled = isActionEnabled('delete');
+
+      if (isCreateEnabled) {
+        registerAuthConfig(createMutationName, { scope: [`${contentType.uid}.create`] });
+      }
+
+      if (isUpdateEnabled) {
+        registerAuthConfig(updateMutationName, { scope: [`${contentType.uid}.update`] });
+      }
+
+      if (isDeleteEnabled) {
+        registerAuthConfig(deleteMutationName, { scope: [`${contentType.uid}.delete`] });
+      }
 
       return extendType({
         type: 'Mutation',
 
         definition(t) {
-          addCreateMutation(t, contentType);
-          addUpdateMutation(t, contentType);
-          addDeleteMutation(t, contentType);
+          if (isCreateEnabled) {
+            addCreateMutation(t, contentType);
+          }
+
+          if (isUpdateEnabled) {
+            addUpdateMutation(t, contentType);
+          }
+
+          if (isDeleteEnabled) {
+            addDeleteMutation(t, contentType);
+          }
         },
       });
     },

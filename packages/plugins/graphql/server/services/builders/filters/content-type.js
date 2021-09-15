@@ -54,15 +54,18 @@ module.exports = ({ strapi }) => {
 
   const addRelationalAttribute = (builder, attributeName, attribute) => {
     const utils = strapi.plugin('graphql').service('utils');
-
+    const extension = strapi.plugin('graphql').service('extension');
     const { getFiltersInputTypeName } = utils.naming;
-    const { isMorphRelation, isMedia } = utils.attributes;
+    const { isMorphRelation } = utils.attributes;
 
     const model = strapi.getModel(attribute.target);
 
     // If there is no model corresponding to the attribute configuration
-    // or if the attribute is a polymorphic relation or a media, then ignore it
-    if (!model || isMorphRelation(attribute) || isMedia(attribute)) return;
+    // or if the attribute is a polymorphic relation, then ignore it
+    if (!model || isMorphRelation(attribute)) return;
+
+    // If the target model is disabled, then ignore it too
+    if (extension.shadowCRUD(model.uid).isDisabled()) return;
 
     builder.field(attributeName, { type: getFiltersInputTypeName(model) });
   };
