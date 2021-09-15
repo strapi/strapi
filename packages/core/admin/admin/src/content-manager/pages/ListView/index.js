@@ -25,7 +25,7 @@ import { Button } from '@strapi/parts/Button';
 import Add from '@strapi/icons/Add';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
-// import { InjectionZone } from '../../../shared/components';
+import { InjectionZone } from '../../../shared/components';
 import DynamicTable from '../../components/DynamicTable';
 // import permissions from '../../../permissions';
 import {
@@ -310,8 +310,12 @@ function ListView({
   return (
     <Main aria-busy={isLoading}>
       <HeaderLayout primaryAction={createAction} subtitle={subtitle} title={headerLayoutTitle} />
+      {!canRead && (
+        <ActionLayout endActions={<InjectionZone area="contentManager.listView.actions" />} />
+      )}
       {canRead && (isSearchable || isFilterable) && (
         <ActionLayout
+          endActions={<InjectionZone area="contentManager.listView.actions" />}
           startActions={
             <>
               {isSearchable && (
