@@ -32,6 +32,20 @@ describe('Application page', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c11 {
+        background: #ffffff;
+        padding-top: 32px;
+        padding-right: 24px;
+        padding-bottom: 32px;
+        padding-left: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c26 {
+        padding-top: 4px;
+      }
+
       .c12 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -156,20 +170,6 @@ describe('Application page', () => {
 
       .c3 {
         outline: none;
-      }
-
-      .c11 {
-        background: #ffffff;
-        padding-top: 32px;
-        padding-right: 24px;
-        padding-bottom: 32px;
-        padding-left: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c26 {
-        padding-top: 4px;
       }
 
       .c14 {
