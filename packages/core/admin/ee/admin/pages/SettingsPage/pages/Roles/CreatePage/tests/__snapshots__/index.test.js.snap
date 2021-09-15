@@ -379,7 +379,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
   opacity: 1;
 }
 
-.c26:disabled {
+.c26[aria-disabled='true'] {
   background: inherit;
   color: inherit;
 }
@@ -681,6 +681,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                             class="c1 c3 c25"
                           >
                             <input
+                              aria-disabled="false"
                               aria-invalid="false"
                               class="c26"
                               id="textinput-1"

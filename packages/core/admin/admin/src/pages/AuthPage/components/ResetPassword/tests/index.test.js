@@ -350,7 +350,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         opacity: 1;
       }
 
-      .c23:disabled {
+      .c23[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -554,6 +554,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         >
                           <input
                             aria-describedby="textinput-2-hint"
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c23"
                             id="textinput-2"
@@ -615,6 +616,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           class="c0 c21 c22"
                         >
                           <input
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c23"
                             id="textinput-3"

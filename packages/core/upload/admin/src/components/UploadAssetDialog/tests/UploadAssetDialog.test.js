@@ -59,12 +59,6 @@ describe('', () => {
         padding-left: 40px;
       }
 
-      .c30 {
-        background: #212134;
-        padding: 8px;
-        border-radius: 4px;
-      }
-
       .c1 {
         position: absolute;
         z-index: 3;
@@ -110,31 +104,6 @@ describe('', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
-      }
-
-      .c33 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #ffffff;
-      }
-
-      .c32 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
-      }
-
-      .c31 {
-        position: absolute;
-        z-index: 3;
-        display: revert;
       }
 
       .c9 {
@@ -453,28 +422,25 @@ describe('', () => {
                     >
                       Upload assets
                     </h2>
-                    <span>
-                      <button
-                        aria-disabled="false"
-                        aria-labelledby="tooltip-1"
-                        class="c9 c10"
-                        tabindex="0"
-                        type="button"
+                    <button
+                      aria-disabled="false"
+                      aria-label="Close the modal"
+                      class="c9 c10"
+                      type="button"
+                    >
+                      <svg
+                        fill="none"
+                        height="1em"
+                        viewBox="0 0 24 24"
+                        width="1em"
+                        xmlns="http://www.w3.org/2000/svg"
                       >
-                        <svg
-                          fill="none"
-                          height="1em"
-                          viewBox="0 0 24 24"
-                          width="1em"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                            fill="#212134"
-                          />
-                        </svg>
-                      </button>
-                    </span>
+                        <path
+                          d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                          fill="#212134"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
                 <div
@@ -578,26 +544,6 @@ describe('', () => {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div
-          data-react-portal="true"
-        >
-          <div
-            class="c30 c31"
-            id="tooltip-1"
-            role="tooltip"
-            style="left: 0px; top: -8px;"
-          >
-            <div
-              class="c32"
-              id="description-2"
-            />
-            <p
-              class="c33"
-            >
-              Close the modal
-            </p>
           </div>
         </div>
       </body>
