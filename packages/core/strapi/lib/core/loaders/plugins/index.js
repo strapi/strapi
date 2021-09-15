@@ -25,7 +25,7 @@ const defaultPlugin = {
 };
 
 const applyUserExtension = async plugins => {
-  const extensionsDir = resolve(strapi.dir, 'extensions');
+  const extensionsDir = resolve(strapi.dir, 'src', 'extensions');
   if (!existsSync(extensionsDir)) {
     return;
   }

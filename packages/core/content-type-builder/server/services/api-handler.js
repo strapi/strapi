@@ -10,7 +10,7 @@ const fse = require('fs-extra');
 async function clear(uid) {
   const { apiName, modelName } = strapi.contentTypes[uid];
 
-  const apiFolder = path.join(strapi.dir, 'api', apiName);
+  const apiFolder = path.join(strapi.dir, 'src', 'api', apiName);
 
   await recursiveRemoveFiles(apiFolder, createDeleteApiFunction(modelName));
   await deleteBackup(uid);
@@ -23,8 +23,8 @@ async function clear(uid) {
 async function backup(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
-  const apiFolder = path.join(strapi.dir, 'api', apiName);
-  const backupFolder = path.join(strapi.dir, 'api', '.backup', apiName);
+  const apiFolder = path.join(strapi.dir, 'src', 'api', apiName);
+  const backupFolder = path.join(strapi.dir, 'src', 'api', '.backup', apiName);
 
   // backup the api folder
   await fse.copy(apiFolder, backupFolder);
@@ -37,8 +37,8 @@ async function backup(uid) {
 async function deleteBackup(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
-  const backupFolder = path.join(strapi.dir, 'api', '.backup');
-  const apiBackupFolder = path.join(strapi.dir, 'api', '.backup', apiName);
+  const backupFolder = path.join(strapi.dir, 'src', 'api', '.backup');
+  const apiBackupFolder = path.join(strapi.dir, 'src', 'api', '.backup', apiName);
 
   await fse.remove(apiBackupFolder);
 
@@ -55,8 +55,8 @@ async function deleteBackup(uid) {
 async function rollback(uid) {
   const { apiName } = strapi.contentTypes[uid];
 
-  const apiFolder = path.join(strapi.dir, 'api', apiName);
-  const backupFolder = path.join(strapi.dir, 'api', '.backup', apiName);
+  const apiFolder = path.join(strapi.dir, 'src', 'api', apiName);
+  const backupFolder = path.join(strapi.dir, 'src', 'api', '.backup', apiName);
 
   const exists = await fse.exists(backupFolder);
 

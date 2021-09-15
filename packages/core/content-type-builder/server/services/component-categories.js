@@ -11,7 +11,7 @@ const createBuilder = require('./schema-builder');
  * @param {Object} infos new category data
  */
 const editCategory = async (name, infos) => {
-  const componentsDir = join(strapi.dir, 'components');
+  const componentsDir = join(strapi.dir, 'src', 'components');
   const newName = nameToSlug(infos.name);
 
   // don't do anything the name doesn't change

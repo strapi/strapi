@@ -6,7 +6,7 @@ const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
 module.exports = async strapi => {
-  const componentsDir = join(strapi.dir, 'components');
+  const componentsDir = join(strapi.dir, 'src', 'components');
 
   if (!(await pathExists(componentsDir))) {
     return {};
