@@ -190,8 +190,7 @@ const RoleListPage = () => {
                 canDelete={canDelete}
                 permissions={permissions}
                 setRoleToDelete={setRoleToDelete}
-                setShowConfirmDelete={setShowConfirmDelete}
-                showConfirmDelete={showConfirmDelete}
+                onDelete={[showConfirmDelete, setShowConfirmDelete]}
               />
             </Table>
           ) : (

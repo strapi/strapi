@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import { IconButton, Tbody, Text, Tr, Td, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
@@ -9,23 +9,12 @@ import { useHistory } from 'react-router-dom';
 import { getTrad } from '../../../../utils';
 import pluginId from '../../../../pluginId';
 
-const TableBody = ({
-  sortedRoles,
-  canDelete,
-  permissions,
-  setRoleToDelete,
-  setShowConfirmDelete,
-  showConfirmDelete,
-}) => {
+const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDelete }) => {
   const { formatMessage } = useIntl();
   const { push } = useHistory();
+  const [showConfirmDelete, setShowConfirmDelete] = onDelete;
 
-  const checkCanDeleteRole = useCallback(
-    role => {
-      return canDelete && !['public', 'authenticated'].includes(role.type);
-    },
-    [canDelete]
-  );
+  const checkCanDeleteRole = role => canDelete && !['public', 'authenticated'].includes(role.type);
 
   const handleClickDelete = id => {
     setRoleToDelete(id);
@@ -86,14 +75,12 @@ export default TableBody;
 
 TableBody.defaultProps = {
   canDelete: false,
-  showConfirmDelete: false,
 };
 
 TableBody.propTypes = {
+  onDelete: PropTypes.array.isRequired,
   permissions: PropTypes.object.isRequired,
   setRoleToDelete: PropTypes.func.isRequired,
-  setShowConfirmDelete: PropTypes.func.isRequired,
   sortedRoles: PropTypes.array.isRequired,
   canDelete: PropTypes.bool,
-  showConfirmDelete: PropTypes.bool,
 };
