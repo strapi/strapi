@@ -431,7 +431,7 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
-      .c25:disabled {
+      .c25[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -771,6 +771,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 class="c7 c23 c24"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c25"
                                   id="textinput-1"

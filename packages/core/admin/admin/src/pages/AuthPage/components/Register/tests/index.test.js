@@ -407,7 +407,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         opacity: 1;
       }
 
-      .c29:disabled {
+      .c29[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -445,7 +445,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         opacity: 1;
       }
 
-      .c30:disabled {
+      .c30[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -690,6 +690,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 class="c0 c27 c28"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c29"
                                   id="textinput-2"
@@ -730,6 +731,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 class="c0 c27 c28"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c29"
                                   id="textinput-3"
@@ -765,6 +767,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c0 c27 c28"
                         >
                           <input
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c29"
                             id="textinput-4"
@@ -799,6 +802,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         >
                           <input
                             aria-describedby="textinput-5-hint"
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c30"
                             id="textinput-5"
@@ -860,6 +864,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c0 c27 c28"
                         >
                           <input
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c30"
                             id="textinput-6"

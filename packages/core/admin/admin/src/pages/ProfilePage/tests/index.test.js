@@ -428,7 +428,7 @@ describe('ADMIN | Pages | Profile page', () => {
         opacity: 1;
       }
 
-      .c26:disabled {
+      .c26[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -666,6 +666,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-1"
@@ -707,6 +708,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-2"
@@ -748,6 +750,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-3"
@@ -789,6 +792,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-4"
@@ -847,6 +851,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-5"
@@ -888,6 +893,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-6"

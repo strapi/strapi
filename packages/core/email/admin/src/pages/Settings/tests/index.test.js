@@ -434,7 +434,7 @@ describe('Email | Pages | Settings', () => {
         opacity: 1;
       }
 
-      .c22:disabled {
+      .c22[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -678,9 +678,9 @@ describe('Email | Pages | Settings', () => {
                                 disabled=""
                               >
                                 <input
+                                  aria-disabled="true"
                                   aria-invalid="false"
                                   class="c22"
-                                  disabled=""
                                   id="textinput-3"
                                   name="shipper-email"
                                   placeholder="ex: Strapi No-Reply <no-reply@strapi.io>"
@@ -720,9 +720,9 @@ describe('Email | Pages | Settings', () => {
                                 disabled=""
                               >
                                 <input
+                                  aria-disabled="true"
                                   aria-invalid="false"
                                   class="c22"
-                                  disabled=""
                                   id="textinput-4"
                                   name="response-email"
                                   placeholder="ex: Strapi <example@strapi.io>"
@@ -857,6 +857,7 @@ describe('Email | Pages | Settings', () => {
                                 class="c20 c35"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c22"
                                   id="test-address-input"
