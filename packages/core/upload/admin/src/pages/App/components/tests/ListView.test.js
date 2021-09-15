@@ -10,7 +10,6 @@ jest.mock('../../../../utils', () => ({
 }));
 
 jest.mock('react-intl', () => ({
-  FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
 }));
 
@@ -144,6 +143,55 @@ describe('MediaLibrary / ListView', () => {
         display: grid;
         grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
         grid-gap: 16px;
+      }
+
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        cursor: pointer;
+        padding: 8px;
+        border-radius: 4px;
+        background: #ffffff;
+        border: 1px solid #dcdce4;
+      }
+
+      .c7 svg {
+        height: 12px;
+        width: 12px;
+      }
+
+      .c7 svg > g,
+      .c7 svg path {
+        fill: #ffffff;
+      }
+
+      .c7[aria-disabled='true'] {
+        pointer-events: none;
+      }
+
+      .c8 svg > g,
+      .c8 svg path {
+        fill: #8e8ea9;
+      }
+
+      .c8:hover svg > g,
+      .c8:hover svg path {
+        fill: #666687;
+      }
+
+      .c8:active svg > g,
+      .c8:active svg path {
+        fill: #a5a5ba;
+      }
+
+      .c8[aria-disabled='true'] {
+        background-color: #eaeaef;
+      }
+
+      .c8[aria-disabled='true'] svg path {
+        fill: #666687;
       }
 
       .c1 {
@@ -362,55 +410,6 @@ describe('MediaLibrary / ListView', () => {
         position: absolute;
         bottom: 4px;
         right: 4px;
-      }
-
-      .c7 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c7 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c7 svg > g,
-      .c7 svg path {
-        fill: #ffffff;
-      }
-
-      .c7[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c8 svg > g,
-      .c8 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c8:hover svg > g,
-      .c8:hover svg path {
-        fill: #666687;
-      }
-
-      .c8:active svg > g,
-      .c8:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c8[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c8[aria-disabled='true'] svg path {
-        fill: #666687;
       }
 
       .c15 {

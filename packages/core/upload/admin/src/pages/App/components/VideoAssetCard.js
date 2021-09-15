@@ -48,7 +48,7 @@ export const VideoAssetCard = ({ name, extension, url, mime }) => {
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
-            <Extension>{extension.replace('.', '')}</Extension>
+            <Extension>{extension}</Extension>
           </CardSubtitle>
         </CardContent>
         <CardBadge>

@@ -35,13 +35,13 @@ export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) =>
             icon={<EditIcon />}
           />
         </CardAction>
-        <CardAsset src={`http://localhost:1337${thumbnail}`} />
+        <CardAsset src={thumbnail} />
       </CardHeader>
       <CardBody>
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
-            <Extension>{extension.replace('.', '')}</Extension> - {height}✕{width}
+            <Extension>{extension}</Extension> - {height}✕{width}
           </CardSubtitle>
         </CardContent>
         <CardBadge>

@@ -145,7 +145,7 @@ export { default as hasPermissions } from './old/utils/hasPermissions';
 export { findMatchingPermissions } from './old/utils/hasPermissions';
 export { default as translatedErrors } from './old/utils/translatedErrors';
 export { darken } from './old/utils/colors';
-export { default as getFileExtension } from './old/utils/getFileExtension';
+export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
 export { default as getFilterType } from './old/utils/getFilterType';
 export { default as getQueryParameters } from './old/utils/getQueryParameters';
 export { default as validateInput } from './old/utils/inputsValidations';
@@ -158,7 +158,7 @@ export { default as getYupInnerErrors } from './old/utils/getYupInnerErrors';
 export { default as generateFiltersFromSearch } from './old/utils/generateFiltersFromSearch';
 export { default as generateSearchFromFilters } from './old/utils/generateSearchFromFilters';
 export { default as generateSearchFromObject } from './old/utils/generateSearchFromObject';
-export { default as prefixFileUrlWithBackendUrl } from './old/utils/prefixFileUrlWithBackendUrl';
+export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
 export { default as prefixPluginTranslations } from './old/utils/prefixPluginTranslations';
 
 export { default as pxToRem } from './utils/pxToRem';

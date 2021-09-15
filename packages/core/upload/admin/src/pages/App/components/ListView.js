@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { GridLayout } from '@strapi/parts/Layout';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
+import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-plugin';
 import { ImageAssetCard } from './ImageAssetCard';
 import { VideoAssetCard } from './VideoAssetCard';
 import { DocAssetCard } from './DocAssetCard';
@@ -17,8 +18,8 @@ export const ListView = ({ assets }) => {
                 id={asset.id}
                 key={asset.id}
                 name={asset.name}
-                extension={asset.ext}
-                url={asset.url}
+                extension={getFileExtension(asset.ext)}
+                url={prefixFileUrlWithBackendUrl(asset.url)}
                 mime={asset.mime}
               />
             );
@@ -30,16 +31,21 @@ export const ListView = ({ assets }) => {
                 id={asset.id}
                 key={asset.id}
                 name={asset.name}
-                extension={asset.ext}
+                extension={getFileExtension(asset.ext)}
                 height={asset.height}
                 width={asset.width}
-                thumbnail={asset?.formats?.thumbnail?.url || asset.url}
+                thumbnail={prefixFileUrlWithBackendUrl(asset?.formats?.thumbnail?.url || asset.url)}
               />
             );
           }
 
           return (
-            <DocAssetCard id={asset.id} key={asset.id} name={asset.name} extension={asset.ext} />
+            <DocAssetCard
+              id={asset.id}
+              key={asset.id}
+              name={asset.name}
+              extension={getFileExtension(asset.ext)}
+            />
           );
         })}
       </GridLayout>

@@ -31,11 +31,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration }) => {
   return (
     <VideoPreviewWrapper>
       {!loaded && (
-        <video
-          ref={videoRef}
-          onLoadedData={handleThumbnailVisibility}
-          src={`http://localhost:1337${url}`}
-        >
+        <video ref={videoRef} onLoadedData={handleThumbnailVisibility} src={url}>
           <source type={mime} />
         </video>
       )}

@@ -52,7 +52,7 @@ export const DocAssetCard = ({ name, extension }) => {
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
-            <Extension>{extension.replace('.', '')}</Extension>
+            <Extension>{extension}</Extension>
           </CardSubtitle>
         </CardContent>
         <CardBadge>
