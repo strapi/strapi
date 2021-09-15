@@ -1,10 +1,17 @@
+/**
+ *
+ * FilterPopoverURLQuery
+ *
+ */
+
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Button, Box, Popover, Stack, Select, Option, FocusTrap } from '@strapi/parts';
 import { AddIcon } from '@strapi/icons';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
+import useQueryParams from '../../hooks/useQueryParams';
+import useTracking from '../../hooks/useTracking';
 import Inputs from './Inputs';
 import getFilterList from './utils/getFilterList';
 
@@ -12,9 +19,10 @@ const FullWidthButton = styled(Button)`
   width: 100%;
 `;
 
-const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
+const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }) => {
   const [{ query }, setQuery] = useQueryParams();
   const { formatMessage } = useIntl();
+  const { trackUsage } = useTracking();
   const defaultFieldSchema = { fieldSchema: { type: 'string' } };
   const [modifiedData, setModifiedData] = useState({
     name: displayedFilters[0]?.name || '',
@@ -67,6 +75,10 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
       const foundAttribute = displayedFilters.find(({ name }) => name === modifiedData.name);
 
       const type = foundAttribute.fieldSchema.type;
+
+      if (foundAttribute.trackedEvent) {
+        trackUsage(foundAttribute.trackedEvent.name, foundAttribute.trackedEvent.properties);
+      }
 
       if (type === 'relation') {
         filterToAdd = {
@@ -147,12 +159,17 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
   );
 };
 
-FilterPopover.propTypes = {
+FilterPopoverURLQuery.propTypes = {
   displayedFilters: PropTypes.arrayOf(
     PropTypes.shape({
       name: PropTypes.string.isRequired,
       metadatas: PropTypes.shape({ label: PropTypes.string }),
       fieldSchema: PropTypes.shape({ type: PropTypes.string }),
+      // Send event to the tracker
+      trackedEvent: PropTypes.shape({
+        name: PropTypes.string.isRequired,
+        properties: PropTypes.object,
+      }),
     })
   ).isRequired,
   isVisible: PropTypes.bool.isRequired,
@@ -160,4 +177,4 @@ FilterPopover.propTypes = {
   source: PropTypes.shape({ current: PropTypes.instanceOf(Element) }).isRequired,
 };
 
-export default FilterPopover;
+export default FilterPopoverURLQuery;

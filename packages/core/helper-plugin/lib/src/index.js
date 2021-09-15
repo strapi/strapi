@@ -194,6 +194,8 @@ export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPa
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';
+export { default as FilterListURLQuery } from './components/FilterListURLQuery';
+export { default as FilterPopoverURLQuery } from './components/FilterPopoverURLQuery';
 export { default as Form } from './components/Form';
 export { default as PaginationURLQuery } from './components/PaginationURLQuery';
 export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
