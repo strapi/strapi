@@ -35,9 +35,7 @@ const FieldPicker = ({ layout }) => {
 
   return (
     <Select
-      id="select1"
-      label="Choose your meal"
-      placeholder="Your example"
+      label="change displayed fields"
       value={values}
       onChange={handleChange}
       customizeContent={values => `${values.length} currently selected`}
