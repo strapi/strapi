@@ -10,9 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import Input from '../index';
 
-const messages = {
-  en: {},
-};
+const messages = {};
 
 const makeApp = (name, type, value) => (
   <IntlProvider locale="en" messages={messages} textComponent="span">
@@ -108,7 +106,7 @@ describe('<Input />', () => {
         opacity: 1;
       }
 
-      .c6:disabled {
+      .c6[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -163,6 +161,7 @@ describe('<Input />', () => {
               class="c4 c5"
             >
               <input
+                aria-disabled="false"
                 aria-invalid="false"
                 aria-label="test"
                 class="c6"

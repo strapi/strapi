@@ -12,9 +12,7 @@ import { act } from 'react-dom/test-utils';
 import Theme from '../../Theme';
 import Notifications from '../index';
 
-const messages = {
-  en: {},
-};
+const messages = {};
 
 describe('<Notifications />', () => {
   it('renders and matches the snapshot', () => {
@@ -22,7 +20,7 @@ describe('<Notifications />', () => {
       container: { firstChild },
     } = render(
       <Theme>
-        <IntlProvider locale="en" messages={messages} textComponent="span">
+        <IntlProvider locale="en" messages={messages} defaultLocale="en" textComponent="span">
           <Notifications>
             <div />
           </Notifications>
@@ -103,7 +101,7 @@ describe('<Notifications />', () => {
 
     render(
       <Theme>
-        <IntlProvider locale="en" messages={messages} textComponent="span">
+        <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
           <Notifications>
             <Button />
           </Notifications>
@@ -144,7 +142,7 @@ describe('<Notifications />', () => {
 
     render(
       <Theme>
-        <IntlProvider locale="en" messages={messages} textComponent="span">
+        <IntlProvider locale="en" defaultLocale="en" messages={messages} textComponent="span">
           <Notifications>
             <Button />
           </Notifications>

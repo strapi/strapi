@@ -3,8 +3,7 @@ import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Button, Box } from '@strapi/parts';
 import { FilterIcon } from '@strapi/icons';
-import FilterList from './FilterList';
-import FilterPopover from './FilterPopover';
+import { FilterListURLQuery, FilterPopoverURLQuery } from '@strapi/helper-plugin';
 
 const Filters = ({ displayedFilters }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -28,7 +27,7 @@ const Filters = ({ displayedFilters }) => {
           {formatMessage({ id: 'app.utils.filters', defaultMessage: 'Filters' })}
         </Button>
         {isVisible && (
-          <FilterPopover
+          <FilterPopoverURLQuery
             displayedFilters={displayedFilters}
             isVisible={isVisible}
             onToggle={handleToggle}
@@ -36,7 +35,7 @@ const Filters = ({ displayedFilters }) => {
           />
         )}
       </Box>
-      <FilterList />
+      <FilterListURLQuery filtersSchema={displayedFilters} />
     </>
   );
 };

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Main, Button, Stack, Box, GridItem, Grid, TextInput, Textarea } from '@strapi/parts';
+import React, { useState, useRef } from 'react';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { Main, Button, Stack, Box, GridItem, Grid, TextInput, Textarea } from '@strapi/parts';
 import { H3 } from '@strapi/parts/Text';
 import { CheckIcon } from '@strapi/icons';
 import { Formik } from 'formik';
@@ -14,6 +14,7 @@ import {
   useNotification,
 } from '@strapi/helper-plugin';
 
+import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
 import { usePlugins, useFetchRole } from '../../../hooks';
@@ -28,8 +29,9 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
-  const { isLoading: isLoadingPlugins } = usePlugins();
+  const { isLoading: isLoadingPlugins, routes, policies } = usePlugins();
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
+  const permissionsRef = useRef();
 
   const handleCreateRoleSubmit = async data => {
     // Set loading state
@@ -153,6 +155,14 @@ const EditPage = () => {
                     </Grid>
                   </Stack>
                 </Box>
+                {!isLoadingPlugins && (
+                  <UsersPermissions
+                    ref={permissionsRef}
+                    permissions={role.permissions}
+                    routes={routes}
+                    policies={policies}
+                  />
+                )}
               </Stack>
             </ContentLayout>
           </Form>

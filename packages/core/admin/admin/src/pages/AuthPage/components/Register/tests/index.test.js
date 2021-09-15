@@ -22,7 +22,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
     const { container } = render(
-      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+      <IntlProvider locale="en" messages={{}} textComponent="span">
         <ThemeProvider theme={lightTheme}>
           <Router history={history}>
             <Register fieldsToDisable={[]} noSignin onSubmit={() => {}} schema={yup.object()} />
@@ -407,7 +407,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         opacity: 1;
       }
 
-      .c29:disabled {
+      .c29[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -445,7 +445,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         opacity: 1;
       }
 
-      .c30:disabled {
+      .c30[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -512,21 +512,6 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         outline: none;
       }
 
-      .c10 {
-        margin: 0 auto;
-        width: 552px;
-      }
-
-      .c13 {
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c14 {
-        height: 4.5rem;
-      }
-
       .c32 {
         border: none;
         background: transparent;
@@ -541,6 +526,21 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c10 {
+        margin: 0 auto;
+        width: 552px;
+      }
+
+      .c13 {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c14 {
+        height: 4.5rem;
       }
 
       .c33 svg {
@@ -690,6 +690,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 class="c0 c27 c28"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c29"
                                   id="textinput-2"
@@ -730,6 +731,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                                 class="c0 c27 c28"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c29"
                                   id="textinput-3"
@@ -765,6 +767,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c0 c27 c28"
                         >
                           <input
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c29"
                             id="textinput-4"
@@ -799,6 +802,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         >
                           <input
                             aria-describedby="textinput-5-hint"
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c30"
                             id="textinput-5"
@@ -860,6 +864,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                           class="c0 c27 c28"
                         >
                           <input
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c30"
                             id="textinput-6"

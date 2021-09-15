@@ -30,7 +30,7 @@ const client = new QueryClient({
 
 const App = (
   <QueryClientProvider client={client}>
-    <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+    <IntlProvider messages={{}} textComponent="span" locale="en">
       <ThemeProvider theme={lightTheme}>
         <ProfilePage />
       </ThemeProvider>
@@ -61,6 +61,16 @@ describe('ADMIN | Pages | Profile page', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c15 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
       .c10 {
         font-weight: 500;
         font-size: 0.75rem;
@@ -157,246 +167,6 @@ describe('ADMIN | Pages | Profile page', () => {
       .c6:active {
         border: 1px solid #4945ff;
         background: #4945ff;
-      }
-
-      .c14 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c14 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c14 > * + * {
-        margin-top: 24px;
-      }
-
-      .c16 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c16 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c16 > * + * {
-        margin-top: 16px;
-      }
-
-      .c17 {
-        font-weight: 500;
-        font-size: 1rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c23 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c22 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c26 {
-        border: none;
-        border-radius: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        color: #32324d;
-        font-weight: 400;
-        font-size: 0.875rem;
-        display: block;
-        width: 100%;
-        height: 2.5rem;
-      }
-
-      .c26::-webkit-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26::-moz-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26:-ms-input-placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26::placeholder {
-        color: #8e8ea9;
-        opacity: 1;
-      }
-
-      .c26:disabled {
-        background: inherit;
-        color: inherit;
-      }
-
-      .c25 {
-        border: 1px solid #dcdce4;
-        border-radius: 4px;
-        background: #ffffff;
-      }
-
-      .c21 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c21 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c21 > * + * {
-        margin-top: 4px;
-      }
-
-      .c20 textarea {
-        height: 5rem;
-      }
-
-      .c0 {
-        outline: none;
-      }
-
-      .c15 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c1 {
-        background: #f6f6f9;
-        padding-top: 56px;
-        padding-right: 56px;
-        padding-bottom: 56px;
-        padding-left: 56px;
-      }
-
-      .c13 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c2 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c11 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c12 {
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
-      .c18 {
-        display: grid;
-        grid-template-columns: repeat(12,1fr);
-        gap: 20px;
-      }
-
-      .c19 {
-        grid-column: span 6;
-        word-break: break-all;
       }
 
       .c30 {
@@ -541,6 +311,236 @@ describe('ADMIN | Pages | Profile page', () => {
         min-height: 2.5rem;
       }
 
+      .c14 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c14 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c14 > * + * {
+        margin-top: 24px;
+      }
+
+      .c16 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c16 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c16 > * + * {
+        margin-top: 16px;
+      }
+
+      .c17 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c23 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c22 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c26 {
+        border: none;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 16px;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        height: 2.5rem;
+      }
+
+      .c26::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c26[aria-disabled='true'] {
+        background: inherit;
+        color: inherit;
+      }
+
+      .c25 {
+        border: 1px solid #dcdce4;
+        border-radius: 4px;
+        background: #ffffff;
+      }
+
+      .c21 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c21 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c21 > * + * {
+        margin-top: 4px;
+      }
+
+      .c20 textarea {
+        height: 5rem;
+      }
+
+      .c0 {
+        outline: none;
+      }
+
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 56px;
+        padding-right: 56px;
+        padding-bottom: 56px;
+        padding-left: 56px;
+      }
+
+      .c13 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c11 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c12 {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c18 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 20px;
+      }
+
+      .c19 {
+        grid-column: span 6;
+        word-break: break-all;
+      }
+
       @media (max-width:68.75rem) {
         .c19 {
           grid-column: span;
@@ -666,6 +666,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-1"
@@ -707,6 +708,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-2"
@@ -748,6 +750,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-3"
@@ -789,6 +792,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-4"
@@ -847,6 +851,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-5"
@@ -888,6 +893,7 @@ describe('ADMIN | Pages | Profile page', () => {
                                 class="c24 c25"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c26"
                                   id="textinput-6"

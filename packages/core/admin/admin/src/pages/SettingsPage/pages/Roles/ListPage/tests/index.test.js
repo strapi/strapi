@@ -30,7 +30,7 @@ jest.mock('../../../../../../hooks', () => ({
 }));
 
 const makeApp = history => (
-  <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+  <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
     <Theme>
       <Router history={history}>
         <ListPage />

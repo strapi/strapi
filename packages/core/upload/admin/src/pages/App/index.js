@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Redirect } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import styled from 'styled-components';
@@ -17,6 +17,7 @@ import { Button } from '@strapi/parts/Button';
 import AddIcon from '@strapi/icons/AddIcon';
 import { Box } from '@strapi/parts/Box';
 import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { UploadAssetDialog } from '../../components/UploadAssetDialog/UploadAssetDialog';
 import { ListView } from './components/ListView';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
@@ -34,6 +35,8 @@ const App = () => {
   const { data, isLoading, error } = useAssets({
     skipWhen: !state.allowedActions.canMain,
   });
+  const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
+  const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 
   useFocusWhenNavigate();
 
@@ -64,7 +67,7 @@ const App = () => {
             { number: data?.length || 0 }
           )}
           primaryAction={
-            <Button startIcon={<AddIcon />}>
+            <Button startIcon={<AddIcon />} onClick={toggleUploadAssetDialog}>
               {formatMessage({
                 id: getTrad('header.actions.upload-assets'),
                 defaultMessage: 'Upload new assets',
@@ -110,7 +113,11 @@ const App = () => {
           {canRead && data && data.length === 0 && (
             <NoMedia
               action={
-                <Button variant="secondary" startIcon={<AddIcon />}>
+                <Button
+                  variant="secondary"
+                  startIcon={<AddIcon />}
+                  onClick={toggleUploadAssetDialog}
+                >
                   {formatMessage({
                     id: getTrad('modal.header.browse'),
                     defaultMessage: 'Upload assets',
@@ -126,6 +133,10 @@ const App = () => {
           {canRead && data && data.length > 0 && <ListView assets={data} />}
         </ContentLayout>
       </Main>
+
+      {showUploadAssetDialog && (
+        <UploadAssetDialog onClose={toggleUploadAssetDialog} onSuccess={() => {}} />
+      )}
     </Layout>
   );
 };

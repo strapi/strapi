@@ -24,7 +24,7 @@ const TableHead = ({
 }) => {
   const { formatMessage } = useIntl();
   const [{ query }, setQuery] = useQueryParams();
-  const sort = query.sort || '';
+  const sort = query?.sort || '';
   const [sortBy, sortOrder] = sort.split(':');
 
   const isIndeterminate = !areAllEntriesSelected && entriesToDelete.length > 0;
@@ -52,7 +52,7 @@ const TableHead = ({
             { id: 'components.TableHeader.sort', defaultMessage: 'Sort on {label}' },
             { label }
           );
-          const intlLabel = formatMessage({ id: label, defaultMessage: label });
+          const intlLabel = formatMessage({ id: label || name, defaultMessage: label || name });
 
           const handleClickSort = (shouldAllowClick = true) => {
             if (isSortable && shouldAllowClick) {

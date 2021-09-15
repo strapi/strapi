@@ -13,12 +13,10 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import PaginationURLQuery from '../index';
 
 const messages = {
-  en: {
-    'components.pagination.go-to': 'Go to page {page}',
-    'components.pagination.go-to-previous': 'Go to previous page',
-    'components.pagination.remaining-links': 'And {number} other links',
-    'components.pagination.go-to-next': 'Go to next page',
-  },
+  'components.pagination.go-to': 'Go to page {page}',
+  'components.pagination.go-to-previous': 'Go to previous page',
+  'components.pagination.remaining-links': 'And {number} other links',
+  'components.pagination.go-to-next': 'Go to next page',
 };
 
 const makeApp = (history, pageCount) => (

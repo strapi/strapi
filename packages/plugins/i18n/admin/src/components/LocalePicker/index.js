@@ -1,44 +1,15 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Picker, Padded, Text, Flex } from '@buffetjs/core';
-import { Carret, useQueryParams } from '@strapi/helper-plugin';
+import { useQueryParams } from '@strapi/helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
-import styled from 'styled-components';
 import get from 'lodash/get';
+import { Box } from '@strapi/parts/Box';
+import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
+import { ButtonText } from '@strapi/parts/Text';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
-
-const List = styled.ul`
-  list-style-type: none;
-  padding: 3px 0;
-  margin: 0;
-`;
-
-const ListItem = styled.li`
-  margin-top: 0;
-  margin-bottom: 0;
-  margin-left: -10px;
-  margin-right: -10px;
-  padding-left: 10px;
-  padding-right: 10px;
-  height: 36px;
-  display: flex;
-  justify-content: center;
-
-  &:hover {
-    background: ${props => props.theme.main.colors.mediumGrey};
-  }
-`;
-
-const EllipsisParagraph = styled(Text)`
-  width: ${props => props.width};
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
-  text-align: left;
-`;
 
 const LocalePicker = () => {
   const dispatch = useDispatch();
@@ -72,54 +43,61 @@ const LocalePicker = () => {
     return canCreate || canRead;
   });
 
+  const hasMultipleLocales = displayedLocales.length > 1;
+
+  const handleClick = locale => {
+    dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
+    setSelected(locale);
+
+    setQuery({
+      plugins: { ...query.plugins, i18n: { locale: locale.code } },
+    });
+  };
+
+  if (!hasMultipleLocales) {
+    return (
+      <Box
+        background="neutral0"
+        shadow="filterShadow"
+        paddingTop={2}
+        paddingBottom={2}
+        paddingLeft={4}
+        paddingRight={4}
+        hasRadius
+      >
+        <ButtonText>{selected.name}</ButtonText>
+      </Box>
+    );
+  }
+
   return (
-    <Picker
-      position="right"
-      renderButtonContent={isOpen => (
-        <Flex>
-          <EllipsisParagraph width="20ch">{selected.name}</EllipsisParagraph>
+    <Box
+      background="neutral0"
+      shadow="filterShadow"
+      paddingTop={2}
+      paddingBottom={2}
+      paddingLeft={4}
+      paddingRight={4}
+      hasRadius
+    >
+      <SimpleMenu id="label" label={selected.name}>
+        {displayedLocales.map(locale => {
+          if (locale.id === selected.id) {
+            return null;
+          }
 
-          <Padded left size="sm">
-            <Carret fill={isOpen ? '#007eff' : '#292b2c'} isUp={isOpen} />
-          </Padded>
-        </Flex>
-      )}
-      renderSectionContent={onToggle => {
-        const handleClick = locale => {
-          dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
-          setSelected(locale);
-
-          setQuery({
-            plugins: { ...query.plugins, i18n: { locale: locale.code } },
-          });
-          onToggle();
-        };
-
-        const hasMultipleLocales = displayedLocales.length > 1;
-
-        return hasMultipleLocales ? (
-          <Padded left right>
-            <List>
-              {displayedLocales.map(locale => {
-                if (locale.id === selected.id) {
-                  return null;
-                }
-
-                return (
-                  <ListItem key={locale.id}>
-                    <button onClick={() => handleClick(locale)} type="button">
-                      <EllipsisParagraph width="200px">
-                        {locale.name || locale.code}
-                      </EllipsisParagraph>
-                    </button>
-                  </ListItem>
-                );
-              })}
-            </List>
-          </Padded>
-        ) : null;
-      }}
-    />
+          return (
+            <MenuItem
+              key={locale.id}
+              id={`menu-item${locale.name || locale.code}`}
+              onClick={() => handleClick(locale)}
+            >
+              {locale.name || locale.code}
+            </MenuItem>
+          );
+        })}
+      </SimpleMenu>
+    </Box>
   );
 };
 

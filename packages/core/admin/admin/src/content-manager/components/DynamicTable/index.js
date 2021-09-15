@@ -2,11 +2,15 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import State from '../State';
 import TableRows from './TableRows';
+import ConfirmDialogDeleteAll from './ConfirmDialogDeleteAll';
+import ConfirmDialogDelete from './ConfirmDialogDelete';
 
 const DynamicTable = ({
   canCreate,
@@ -14,16 +18,19 @@ const DynamicTable = ({
   contentTypeName,
   isBulkable,
   isLoading,
+  onConfirmDelete,
+  onConfirmDeleteAll,
   layout,
   rows,
 }) => {
   const { runHookWaterfall } = useStrapiApp();
   const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
   const { formatMessage } = useIntl();
+  const displayedHeaders = useSelector(selectDisplayedHeaders);
 
   const tableHeaders = useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
-      displayedHeaders: layout.contentType.layouts.list,
+      displayedHeaders,
       layout,
     });
 
@@ -51,13 +58,16 @@ const DynamicTable = ({
         },
       },
     ];
-  }, [runHookWaterfall, layout, hasDraftAndPublish, formatMessage]);
+  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
   return (
     <Table
+      components={{ ConfirmDialogDelete, ConfirmDialogDeleteAll }}
       contentType={contentTypeName}
       isLoading={isLoading}
       headers={tableHeaders}
+      onConfirmDelete={onConfirmDelete}
+      onConfirmDeleteAll={onConfirmDeleteAll}
       rows={rows}
       withBulkActions
       withMainAction={canDelete && isBulkable}
@@ -94,6 +104,8 @@ DynamicTable.propTypes = {
       settings: PropTypes.object.isRequired,
     }).isRequired,
   }).isRequired,
+  onConfirmDelete: PropTypes.func.isRequired,
+  onConfirmDeleteAll: PropTypes.func.isRequired,
   rows: PropTypes.array.isRequired,
 };
 

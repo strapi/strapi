@@ -6,7 +6,7 @@ import ContentBox from '../index';
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} textComponent="span">
       <ContentBox
         title="Code example"
         subtitle="Learn by testing real project developed by the community"

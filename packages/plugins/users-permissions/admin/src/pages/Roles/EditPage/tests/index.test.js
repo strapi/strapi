@@ -5,33 +5,28 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
-
 import pluginId from '../../../../pluginId';
 import RolesEditPage from '..';
 import server from './server';
 
-jest.mock('@strapi/helper-plugin', () => ({
-  ...jest.requireActual('@strapi/helper-plugin'),
-  useNotification: jest.fn(() => jest.fn()),
-  useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
-}));
-
-jest.mock('../../../../hooks', () => {
-  const originalModule = jest.requireActual('../../../../hooks');
+jest.mock('@strapi/helper-plugin', () => {
+  // Make sure the references of the mock functions stay the same, otherwise we get an endless loop
+  const mockToggleNotification = jest.fn();
+  const mockUseNotification = jest.fn(() => {
+    return mockToggleNotification;
+  });
 
   return {
-    ...originalModule,
-    usePlugins: () => ({
-      ...originalModule.usePlugins,
-      isLoading: false,
-    }),
+    ...jest.requireActual('@strapi/helper-plugin'),
+    useNotification: mockUseNotification,
+    useOverlayBlocker: jest.fn(() => ({ lockApp: jest.fn(), unlockApp: jest.fn() })),
   };
 });
 
 function makeAndRenderApp() {
   const history = createMemoryHistory();
   const app = (
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} textComponent="span">
       <ThemeProvider theme={lightTheme}>
         <Router history={history}>
           <Switch>
@@ -57,15 +52,37 @@ describe('Admin | containers | RoleEditPage', () => {
   afterAll(() => server.close());
 
   it('renders users-permissions edit role and matches snapshot', async () => {
-    const { container, getByTestId } = makeAndRenderApp();
+    const { container, getByTestId, getByRole } = makeAndRenderApp();
     await waitForElementToBeRemoved(() => getByTestId('loader'));
+    await waitFor(() => expect(getByRole('heading', { name: /permissions/i })).toBeInTheDocument());
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c34 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c41 {
+        font-weight: 500;
+        font-size: 1rem;
+        line-height: 1.25;
+        color: #4a4a6a;
+      }
+
       .c10 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
+      }
+
+      .c35 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
       }
 
       .c8 {
@@ -80,6 +97,101 @@ describe('Admin | containers | RoleEditPage', () => {
         padding-left: 32px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c28 {
+        background: #ffffff;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c31 {
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c36 {
+        border-radius: 4px;
+      }
+
+      .c38 {
+        background: #f6f6f9;
+        padding: 24px;
+        border-radius: 4px;
+      }
+
+      .c40 {
+        padding-right: 24px;
+      }
+
+      .c43 {
+        background: #dcdce4;
+      }
+
+      .c46 {
+        background: #eaeaef;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+      }
+
+      .c44 {
+        height: 2rem;
+        width: 2rem;
+        border-radius: 50%;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+      }
+
+      .c44 svg {
+        height: 0.375rem;
+        width: 0.6875rem;
+      }
+
+      .c44 svg path {
+        fill: #666687;
+      }
+
+      .c37 {
+        border: 1px solid transparent;
+        overflow: hidden;
+      }
+
+      .c37:hover {
+        border: 1px solid #4945ff;
+      }
+
+      .c37:hover .c33 {
+        color: #271fe0;
+      }
+
+      .c37:hover .c9 {
+        color: #4945ff;
+      }
+
+      .c37:hover > .c7 {
+        background: #f0f0ff;
+      }
+
+      .c37:hover .c42 {
+        background: #d9d8ff;
+      }
+
+      .c37:hover .c42 svg path {
+        fill: #4945ff;
       }
 
       .c22 {
@@ -112,6 +224,15 @@ describe('Admin | containers | RoleEditPage', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c39 {
+        border: none;
+        background: transparent;
+        display: block;
+        width: 100%;
+        text-align: unset;
+        padding: 0;
       }
 
       .c5 {
@@ -258,6 +379,25 @@ describe('Admin | containers | RoleEditPage', () => {
         margin-top: 4px;
       }
 
+      .c32 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c32 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c32 > * + * {
+        margin-top: 8px;
+      }
+
       .c25 {
         border: none;
         border-radius: 4px;
@@ -291,7 +431,7 @@ describe('Admin | containers | RoleEditPage', () => {
         opacity: 1;
       }
 
-      .c25:disabled {
+      .c25[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -312,8 +452,24 @@ describe('Admin | containers | RoleEditPage', () => {
         gap: 16px;
       }
 
+      .c29 {
+        display: grid;
+        grid-template-columns: repeat(12,1fr);
+        gap: 0px;
+      }
+
       .c19 {
         grid-column: span 6;
+        word-break: break-all;
+      }
+
+      .c30 {
+        grid-column: span 7;
+        word-break: break-all;
+      }
+
+      .c45 {
+        grid-column: span 5;
         word-break: break-all;
       }
 
@@ -477,6 +633,30 @@ describe('Admin | containers | RoleEditPage', () => {
         }
       }
 
+      @media (max-width:68.75rem) {
+        .c30 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:34.375rem) {
+        .c30 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:68.75rem) {
+        .c45 {
+          grid-column: span;
+        }
+      }
+
+      @media (max-width:34.375rem) {
+        .c45 {
+          grid-column: span;
+        }
+      }
+
       <main
         aria-labelledby="main-content-title"
         class="c0"
@@ -591,6 +771,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 class="c7 c23 c24"
                               >
                                 <input
+                                  aria-disabled="false"
                                   aria-invalid="false"
                                   class="c25"
                                   id="textinput-1"
@@ -638,6 +819,115 @@ describe('Admin | containers | RoleEditPage', () => {
                           </div>
                         </div>
                       </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div
+                class="c7 c28 c29"
+              >
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c7 c31"
+                  >
+                    <div
+                      class="c16"
+                    >
+                      <div
+                        class="c32"
+                      >
+                        <h2
+                          class="c33 c34"
+                        >
+                          Permissions
+                        </h2>
+                        <p
+                          class="c9 c35"
+                        >
+                          Only actions bound by a route are listed below.
+                        </p>
+                      </div>
+                      <div
+                        class="c7 c36 c37"
+                      >
+                        <div
+                          class="c7 c38"
+                        >
+                          <button
+                            aria-controls="accordion-content-accordion-3"
+                            aria-expanded="false"
+                            aria-labelledby="accordion-label-accordion-3"
+                            class="c39"
+                            data-strapi-accordion-toggle="true"
+                            type="button"
+                          >
+                            <div
+                              class="c7 c23"
+                            >
+                              <div
+                                class="c7 c40"
+                              >
+                                <span
+                                  class="c33 c41"
+                                  id="accordion-label-accordion-3"
+                                >
+                                  Application
+                                </span>
+                                <p
+                                  class="c9 c35"
+                                  id="accordion-desc-accordion-3"
+                                >
+                                  Define all allowed actions for the application plugin.
+                                </p>
+                              </div>
+                              <span
+                                aria-hidden="true"
+                                class="c7 c42 c43 c44"
+                              >
+                                <svg
+                                  fill="none"
+                                  height="1em"
+                                  viewBox="0 0 14 8"
+                                  width="1em"
+                                  xmlns="http://www.w3.org/2000/svg"
+                                >
+                                  <path
+                                    clip-rule="evenodd"
+                                    d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                    fill="#32324D"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="c45"
+                >
+                  <div
+                    class="c7 c46"
+                    style="min-height: 100%;"
+                  >
+                    <div
+                      class="c32"
+                    >
+                      <h3
+                        class="c33 c34"
+                      >
+                        Advanced settings
+                      </h3>
+                      <p
+                        class="c9 c35"
+                      >
+                        Select the application's actions or the plugin's actions and click on the cog icon to display the bound route
+                      </p>
                     </div>
                   </div>
                 </div>

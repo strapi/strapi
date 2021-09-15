@@ -233,7 +233,7 @@ const ProfilePage = () => {
                           defaultMessage: 'Interface language',
                         })}
                         placeholder={formatMessage({
-                          id: 'Settings.profile.form.section.experience.placeholder',
+                          id: 'components.Select.placeholder',
                           defaultMessage: 'Select',
                         })}
                         hint={formatMessage({

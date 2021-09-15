@@ -86,7 +86,7 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager');
 
     const { container } = render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} defaultLocale="en" locale="en">
         <Theme>
           <DndProvider backend={HTML5Backend}>
             <Provider store={store}>
@@ -712,7 +712,7 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager');
 
     render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} defaultLocale="en" locale="en">
         <Theme>
           <DndProvider backend={HTML5Backend}>
             <Provider store={store}>
@@ -755,7 +755,7 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager/collectionType/category');
 
     render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} defaultLocale="en" locale="en">
         <Theme>
           <DndProvider backend={HTML5Backend}>
             <Provider store={store}>
@@ -791,7 +791,7 @@ describe('Content manager | App | main', () => {
     history.push('/content-manager/collectionType/category');
 
     render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} defaultLocale="en" locale="en">
         <Theme>
           <DndProvider backend={HTML5Backend}>
             <Provider store={store}>
