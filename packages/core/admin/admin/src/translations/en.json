@@ -211,6 +211,7 @@
   "Users.components.List.empty.withFilters": "There is no users with the applied filters...",
   "Users.components.List.empty.withSearch": "There is no users corresponding to the search ({search})...",
   "app.components.go-back": "Go back",
+  "app.components.HeaderLayout.link.go-back": "Back",
   "app.components.ToggleCheckbox.on-label": "On",
   "app.components.ToggleCheckbox.off-label": "Off",
   "app.components.BlockLink.blog": "Blog",
