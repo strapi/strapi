@@ -11,50 +11,213 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
   switch (type) {
     case 'email':
     case 'text':
+    case 'enumeration':
     case 'string': {
       return [
-        { label: 'is', value: '$eq' },
-        { label: 'is not', value: '$ne' },
-        { label: 'contains', value: '$contains' },
-        // TODO
-        // { label: 'not contains', value: '$not_$contains' },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
+          value: '$eq',
+        },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          value: '$ne',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$null',
+            defaultMessage: 'is null',
+          },
+          value: '$null',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notNull',
+            defaultMessage: 'is not null',
+          },
+          value: '$notNull',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$contains',
+            defaultMessage: 'contains (sensitive)',
+          },
+          value: '$contains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notContains',
+            defaultMessage: 'not contains (sensitive)',
+          },
+          value: '$notContains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$startsWith',
+            defaultMessage: 'starts with',
+          },
+          value: '$startsWith',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$endsWith',
+            defaultMessage: 'ends with',
+          },
+          value: '$endsWith',
+        },
       ];
     }
-    case 'enumeration': {
-      return [
-        { label: 'is', value: '$eq' },
-        { label: 'is not', value: '$ne' },
-        // { label: 'not contains', value: '$not_$contains' },
-      ];
-    }
+
     case 'float':
     case 'integer':
     case 'biginteger':
-    case 'decimal':
+    case 'decimal': {
+      return [
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
+          value: '$eq',
+        },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          value: '$ne',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$null',
+            defaultMessage: 'is null',
+          },
+          value: '$null',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notNull',
+            defaultMessage: 'is not null',
+          },
+          value: '$notNull',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$gt',
+            defaultMessage: 'is greater than',
+          },
+          value: '$gt',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$gte',
+            defaultMessage: 'is greater than or equal to',
+          },
+          value: '$gte',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$lt',
+            defaultMessage: 'is less than',
+          },
+          value: '$lt',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$lte',
+            defaultMessage: 'is less than or equal to',
+          },
+          value: '$lte',
+        },
+      ];
+    }
+    case 'time':
     case 'date': {
       return [
-        { label: 'is', value: '$eq' },
-        { label: 'is not', value: '$ne' },
-        { label: 'contains', value: '$contains' },
-        { label: 'is greater than', value: '$gt' },
-        { label: 'is greater than or equal to', value: '$gte' },
-        { label: 'is less than or equal to', value: '$lte' },
-        { label: 'is less than or equal to', value: '$lte' },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
+          value: '$eq',
+        },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          value: '$ne',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$null',
+            defaultMessage: 'is null',
+          },
+          value: '$null',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notNull',
+            defaultMessage: 'is not null',
+          },
+          value: '$notNull',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$contains',
+            defaultMessage: 'contains (sensitive)',
+          },
+          value: '$contains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notContains',
+            defaultMessage: 'not contains (sensitive)',
+          },
+          value: '$notContains',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$gt',
+            defaultMessage: 'is greater than',
+          },
+          value: '$gt',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$gte',
+            defaultMessage: 'is greater than or equal to',
+          },
+          value: '$gte',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$lt',
+            defaultMessage: 'is less than',
+          },
+          value: '$lt',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$lte',
+            defaultMessage: 'is less than or equal to',
+          },
+          value: '$lte',
+        },
       ];
     }
-    case 'time': {
-      return [
-        { label: 'contains', value: '$contains' },
-        { label: 'is greater than', value: '$gt' },
-        { label: 'is greater than or equal to', value: '$gte' },
-        { label: 'is less than or equal to', value: '$lte' },
-        { label: 'is less than or equal to', value: '$lte' },
-      ];
-    }
+
     default:
       return [
-        { label: 'is', value: '$eq' },
-        { label: 'is not', value: '$ne' },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$eq', defaultMessage: 'is' },
+          value: '$eq',
+        },
+        {
+          intlLabel: { id: 'components.FilterOptions.FILTER_TYPES.$neq', defaultMessage: 'is not' },
+          value: '$ne',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$null',
+            defaultMessage: 'is null',
+          },
+          value: '$null',
+        },
+        {
+          intlLabel: {
+            id: 'components.FilterOptions.FILTER_TYPES.$notNull',
+            defaultMessage: 'is not null',
+          },
+          value: '$notNull',
+        },
       ];
   }
 };

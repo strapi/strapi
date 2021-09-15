@@ -97,7 +97,22 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
     onToggle();
   };
 
+  const handleChangeOperator = operator => {
+    if (operator === '$null' || operator === '$notNull') {
+      setModifiedData(prev => ({
+        ...prev,
+        value: 'true',
+        filter: operator,
+      }));
+
+      return;
+    }
+
+    setModifiedData(prev => ({ ...prev, filter: operator, value: '' }));
+  };
+
   const appliedFilter = displayedFilters.find(filter => filter.name === modifiedData.name);
+  const operator = modifiedData.filter;
 
   return (
     <Popover source={source} padding={3} spacingTop={1}>
@@ -128,25 +143,27 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
                 name="filter"
                 size="S"
                 value={modifiedData.filter}
-                onChange={val => setModifiedData(prev => ({ ...prev, filter: val }))}
+                onChange={handleChangeOperator}
               >
                 {getFilterList(appliedFilter).map(option => {
                   return (
                     <Option key={option.value} value={option.value}>
-                      {option.label}
+                      {formatMessage(option.intlLabel)}
                     </Option>
                   );
                 })}
               </Select>
             </Box>
-            <Box>
-              <Inputs
-                {...appliedFilter.metadatas}
-                {...appliedFilter.fieldSchema}
-                value={modifiedData.value}
-                onChange={value => setModifiedData(prev => ({ ...prev, value }))}
-              />
-            </Box>
+            {operator !== '$null' && operator !== '$notNull' && (
+              <Box>
+                <Inputs
+                  {...appliedFilter.metadatas}
+                  {...appliedFilter.fieldSchema}
+                  value={modifiedData.value}
+                  onChange={value => setModifiedData(prev => ({ ...prev, value }))}
+                />
+              </Box>
+            )}
             <Box>
               <FullWidthButton variant="secondary" startIcon={<AddIcon />} type="submit">
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
