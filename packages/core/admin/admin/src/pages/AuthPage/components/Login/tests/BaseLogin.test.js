@@ -12,7 +12,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
     const { container } = render(
-      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
         <ThemeProvider theme={lightTheme}>
           <Router history={history}>
             <BaseLogin onSubmit={() => {}} schema={yup.object()} />
@@ -401,7 +401,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         opacity: 1;
       }
 
-      .c19:disabled {
+      .c19[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -439,7 +439,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         opacity: 1;
       }
 
-      .c20:disabled {
+      .c20[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -495,21 +495,6 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         outline: none;
       }
 
-      .c3 {
-        margin: 0 auto;
-        width: 552px;
-      }
-
-      .c5 {
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c6 {
-        height: 4.5rem;
-      }
-
       .c22 {
         border: none;
         background: transparent;
@@ -524,6 +509,21 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c3 {
+        margin: 0 auto;
+        width: 552px;
+      }
+
+      .c5 {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c6 {
+        height: 4.5rem;
       }
 
       .c23 svg {
@@ -600,6 +600,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       class="c1 c17 c18"
                     >
                       <input
+                        aria-disabled="false"
                         aria-invalid="false"
                         class="c19"
                         id="textinput-1"
@@ -633,6 +634,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
                       class="c1 c17 c18"
                     >
                       <input
+                        aria-disabled="false"
                         aria-invalid="false"
                         class="c20"
                         id="textinput-2"

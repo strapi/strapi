@@ -44,7 +44,7 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'fr-FR' }, { locale: 'ar' }];
 
     render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} locale="en">
         <ThemeProvider theme={lightTheme}>
           <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
         </ThemeProvider>
@@ -88,7 +88,7 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'ar' }];
 
     render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} locale="en">
         <ThemeProvider theme={lightTheme}>
           <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
         </ThemeProvider>
@@ -131,7 +131,7 @@ describe('LocaleListCell', () => {
     const localizations = [{ locale: 'en' }, { locale: 'ar' }];
 
     render(
-      <IntlProvider messages={{ en: {} }} locale="en">
+      <IntlProvider messages={{}} locale="en">
         <ThemeProvider theme={lightTheme}>
           <LocaleListCell id={12} locales={locales} locale={locale} localizations={localizations} />
         </ThemeProvider>

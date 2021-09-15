@@ -18,12 +18,15 @@ const BlockActions = styled(Row)`
 const Table = ({
   children,
   contentType,
+  components,
   headers,
   isLoading,
   onConfirmDeleteAll,
+  onConfirmDelete,
   rows,
   withBulkActions,
   withMainAction,
+  ...rest
 }) => {
   const [entriesToDelete, setEntriesToDelete] = useState([]);
   const [showConfirmDeleteAll, setShowConfirmDeleteAll] = useState(false);
@@ -33,7 +36,7 @@ const Table = ({
   const { formatMessage } = useIntl();
   const ROW_COUNT = rows.length + 1;
   const COL_COUNT = headers.length + (withBulkActions ? 1 : 0) + (withMainAction ? 1 : 0);
-  const hasFilters = query.filters !== undefined;
+  const hasFilters = query?.filters !== undefined;
   const areAllEntriesSelected = entriesToDelete.length === rows.length && rows.length > 0;
 
   const content = hasFilters
@@ -60,7 +63,8 @@ const Table = ({
   const handleConfirmDelete = async () => {
     try {
       setIsConfirmButtonLoading(true);
-      await onConfirmDeleteAll(entriesToDelete);
+      // await onConfirmDeleteAll(entriesToDelete);
+      await onConfirmDelete(entriesToDelete[0]);
       handleToggleConfirmDelete();
       setIsConfirmButtonLoading(false);
     } catch (err) {
@@ -103,6 +107,14 @@ const Table = ({
       return prev.filter(id => id !== name);
     });
   };
+
+  const ConfirmDeleteAllComponent = components?.ConfirmDialogDeleteAll
+    ? components.ConfirmDialogDeleteAll
+    : ConfirmDialog;
+
+  const ConfirmDeleteComponent = components?.ConfirmDialogDelete
+    ? components.ConfirmDialogDelete
+    : ConfirmDialog;
 
   return (
     <>
@@ -150,17 +162,22 @@ const Table = ({
               entriesToDelete,
               onClickDelete: handleClickDelete,
               onSelectRow: handleSelectRow,
+              headers,
+              rows,
+              withBulkActions,
+              withMainAction,
+              ...rest,
             })
           )
         )}
       </TableCompo>
-      <ConfirmDialog
+      <ConfirmDeleteAllComponent
         isConfirmButtonLoading={isConfirmButtonLoading}
         onConfirm={handleConfirmDeleteAll}
         onToggleDialog={handleToggleConfirmDeleteAll}
         isOpen={showConfirmDeleteAll}
       />
-      <ConfirmDialog
+      <ConfirmDeleteComponent
         isConfirmButtonLoading={isConfirmButtonLoading}
         onConfirm={handleConfirmDelete}
         onToggleDialog={handleToggleConfirmDelete}
@@ -172,9 +189,14 @@ const Table = ({
 
 Table.defaultProps = {
   children: undefined,
+  components: {
+    ConfirmDialogDeleteAll: undefined,
+    ConfirmDialogDelete: undefined,
+  },
   headers: [],
   isLoading: false,
   onConfirmDeleteAll: () => {},
+  onConfirmDelete: () => {},
   rows: [],
   withBulkActions: false,
   withMainAction: false,
@@ -183,9 +205,24 @@ Table.defaultProps = {
 Table.propTypes = {
   children: PropTypes.node,
   contentType: PropTypes.string.isRequired,
-  headers: PropTypes.array,
+  components: PropTypes.shape({
+    ConfirmDialogDelete: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
+    ConfirmDialogDeleteAll: PropTypes.oneOfType([PropTypes.func, PropTypes.element]),
+  }),
+  headers: PropTypes.arrayOf(
+    PropTypes.shape({
+      cellFormatter: PropTypes.func,
+      key: PropTypes.string.isRequired,
+      metadatas: PropTypes.shape({
+        label: PropTypes.string.isRequired,
+        sortable: PropTypes.bool,
+      }).isRequired,
+      name: PropTypes.string.isRequired,
+    })
+  ),
   isLoading: PropTypes.bool,
   onConfirmDeleteAll: PropTypes.func,
+  onConfirmDelete: PropTypes.func,
   rows: PropTypes.array,
   withBulkActions: PropTypes.bool,
   withMainAction: PropTypes.bool,

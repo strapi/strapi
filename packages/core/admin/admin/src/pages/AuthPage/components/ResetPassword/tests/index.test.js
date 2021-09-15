@@ -22,7 +22,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
   it('should render and match the snapshot', () => {
     const history = createMemoryHistory();
     const { container } = render(
-      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+      <IntlProvider locale="en" messages={{}} textComponent="span">
         <ThemeProvider theme={lightTheme}>
           <Router history={history}>
             <ResetPassword onSubmit={() => {}} schema={yup.object()} />
@@ -350,7 +350,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         opacity: 1;
       }
 
-      .c23:disabled {
+      .c23[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -413,21 +413,6 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         outline: none;
       }
 
-      .c11 {
-        margin: 0 auto;
-        width: 552px;
-      }
-
-      .c13 {
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c14 {
-        height: 4.5rem;
-      }
-
       .c25 {
         border: none;
         background: transparent;
@@ -442,6 +427,21 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c11 {
+        margin: 0 auto;
+        width: 552px;
+      }
+
+      .c13 {
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c14 {
+        height: 4.5rem;
       }
 
       .c26 svg {
@@ -554,6 +554,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                         >
                           <input
                             aria-describedby="textinput-2-hint"
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c23"
                             id="textinput-2"
@@ -615,6 +616,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                           class="c0 c21 c22"
                         >
                           <input
+                            aria-disabled="false"
                             aria-invalid="false"
                             class="c23"
                             id="textinput-3"

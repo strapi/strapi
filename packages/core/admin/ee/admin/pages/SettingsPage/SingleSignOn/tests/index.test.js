@@ -20,7 +20,7 @@ jest.mock('@strapi/helper-plugin', () => ({
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} textComponent="span">
       <SingleSignOn />
     </IntlProvider>
   </ThemeProvider>

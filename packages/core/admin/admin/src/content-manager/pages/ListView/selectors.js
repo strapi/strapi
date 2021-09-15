@@ -19,5 +19,11 @@ const makeSelectListView = () =>
     return substate;
   });
 
+const selectDisplayedHeaders = state => {
+  const { displayedHeaders } = state['content-manager_listView'];
+
+  return displayedHeaders;
+};
+
 export default makeSelectListView;
-export { listViewDomain };
+export { listViewDomain, selectDisplayedHeaders };

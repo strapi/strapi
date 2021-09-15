@@ -1,9 +1,7 @@
 import React, { memo, useReducer, useCallback, forwardRef, useImperativeHandle } from 'react';
 import PropTypes from 'prop-types';
-import { Padded, Flex } from '@buffetjs/core';
+import { Text, Grid, GridItem, H3, Stack } from '@strapi/parts';
 import { useIntl } from 'react-intl';
-
-import FormCard from '../FormBloc';
 import getTrad from '../../utils/getTrad';
 import Policies from '../Policies';
 import Permissions from '../Permissions';
@@ -63,21 +61,28 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
 
   return (
     <UsersPermissionsProvider value={providerValue}>
-      <Flex>
-        <FormCard
-          title={formatMessage({
-            id: getTrad('Plugins.header.title'),
-          })}
-          subtitle={formatMessage({
-            id: getTrad('Plugins.header.description'),
-          })}
-        >
-          <Padded left right size="xs">
+      <Grid gap={0} shadow="filterShadow" hasRadius background="neutral0">
+        <GridItem col={7} paddingTop={6} paddingBottom={6} paddingLeft={7} paddingRight={7}>
+          <Stack size={4}>
+            <Stack size={2}>
+              <H3 as="h2">
+                {formatMessage({
+                  id: getTrad('Plugins.header.title'),
+                  defaultMessage: 'Permissions',
+                })}
+              </H3>
+              <Text as="p" textColor="neutral600">
+                {formatMessage({
+                  id: getTrad('Plugins.header.description'),
+                  defaultMessage: 'Only actions bound by a route are listed below.',
+                })}
+              </Text>
+            </Stack>
             <Permissions />
-          </Padded>
-        </FormCard>
+          </Stack>
+        </GridItem>
         <Policies />
-      </Flex>
+      </Grid>
     </UsersPermissionsProvider>
   );
 });

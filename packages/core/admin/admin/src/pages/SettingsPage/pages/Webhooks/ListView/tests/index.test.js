@@ -19,7 +19,7 @@ const history = createMemoryHistory();
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
       <Router history={history}>
         <ListView />
       </Router>
@@ -49,6 +49,13 @@ describe('Admin | containers | ListView', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
+      .c11 {
+        background: #ffffff;
+        padding: 24px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
       .c14 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
@@ -167,13 +174,6 @@ describe('Admin | containers | ListView', () => {
 
       .c3 {
         outline: none;
-      }
-
-      .c11 {
-        background: #ffffff;
-        padding: 24px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
       <div

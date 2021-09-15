@@ -7,8 +7,6 @@ import { Box } from '@strapi/parts';
 import styled from 'styled-components';
 
 const BoxWrapper = styled(Box)`
-  overflow-x: auto;
-
   table {
     width: 100%;
     white-space: nowrap;
@@ -16,13 +14,15 @@ const BoxWrapper = styled(Box)`
 
   thead {
     border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
-  }
 
-  tr:not(:last-child) {
-    border-bottom: 1px solid ${({ theme }) => theme.colors.neutral150};
+    tr {
+      border-top: 0;
+    }
   }
 
   tr {
+    border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+
     & td,
     & th {
       padding: ${({ theme }) => theme.spaces[4]};
@@ -42,9 +42,5 @@ const BoxWrapper = styled(Box)`
     outline-offset: -4px;
   }
 `;
-
-BoxWrapper.defaultProps = {
-  isFromDynamicZone: false,
-};
 
 export default BoxWrapper;

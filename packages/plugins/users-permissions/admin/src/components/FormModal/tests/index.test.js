@@ -10,9 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import FormModal from '../index';
 
-const messages = {
-  en: {},
-};
+const messages = {};
 
 const makeApp = (layout = { forms: [], schema: {} }, isOpen = false) => {
   return (

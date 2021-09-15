@@ -8,7 +8,7 @@ import PaginationFooter from '../index';
 
 const makeApp = (history, pagination) => {
   return (
-    <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+    <IntlProvider messages={{}} textComponent="span" locale="en" defaultLocale="en">
       <Theme>
         <Router history={history}>
           <Route path="/settings/user">
