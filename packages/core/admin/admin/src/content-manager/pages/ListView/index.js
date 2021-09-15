@@ -277,6 +277,7 @@ function ListView({
     id: contentType.info.label,
     defaultMessage: contentType.info.label || defaultHeaderLayoutTitle,
   });
+
   const subtitle = canRead
     ? formatMessage(
         {

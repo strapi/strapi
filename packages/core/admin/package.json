@@ -53,6 +53,7 @@
     "codemirror": "^5.61.0",
     "cross-env": "^7.0.3",
     "css-loader": "5.2.4",
+    "date-fns": "2.22.1",
     "dotenv": "8.5.1",
     "draft-js": "^0.11.5",
     "execa": "^1.0.0",

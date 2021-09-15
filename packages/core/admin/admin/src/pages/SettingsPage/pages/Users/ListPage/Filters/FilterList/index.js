@@ -1,14 +1,10 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import get from 'lodash/get';
-import { Box, Tag } from '@strapi/parts';
-import { Close } from '@strapi/icons';
 import { useQueryParams } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
+import AttributeTag from './AttributeTag';
 
 const FilterList = ({ availableFilters }) => {
   const [{ query }, setQuery] = useQueryParams();
-  const { formatMessage } = useIntl();
 
   const handleClick = filter => {
     const nextFilters = query.filters.$and.filter(f => {
@@ -24,33 +20,42 @@ const FilterList = ({ availableFilters }) => {
 
   return (
     query.filters?.$and.map((filter, i) => {
-      const fieldName = Object.keys(filter)[0];
-      const field = availableFilters.find(({ name }) => name === fieldName);
+      const attributeName = Object.keys(filter)[0];
+      const attribute = availableFilters.find(({ name }) => name === attributeName);
 
-      let filterType = Object.keys(filter[fieldName])[0];
-      let value = filter[fieldName][filterType];
+      if (attribute.fieldSchema.type === 'relation') {
+        const relationTargetAttribute = attribute.fieldSchema.mainField.name;
+        const filterObj = filter[attributeName][relationTargetAttribute];
+        const operator = Object.keys(filterObj)[0];
+        const value = filterObj[operator];
 
-      if (field.fieldSchema.type === 'relation') {
-        const relationFieldName = field.fieldSchema.mainField.name;
-
-        filterType = Object.keys(get(filter, [field.name, field.fieldSchema.mainField.name]))[0];
-
-        value = get(filter, [field.name, relationFieldName, filterType]);
+        return (
+          <AttributeTag
+            // eslint-disable-next-line react/no-array-index-key
+            key={`${attributeName}-${i}`}
+            attribute={attribute}
+            filter={filter}
+            onClick={handleClick}
+            operator={operator}
+            value={value}
+          />
+        );
       }
 
+      const filterObj = filter[attributeName];
+      const operator = Object.keys(filterObj)[0];
+      const value = filterObj[operator];
+
       return (
-        // eslint-disable-next-line react/no-array-index-key
-        <Box key={`${fieldName}-${i}`} padding={1} onClick={() => handleClick(filter)}>
-          <Tag icon={<Close />}>
-            {fieldName}&nbsp;
-            {formatMessage({
-              id: `components.FilterOptions.FILTER_TYPES.${filterType}`,
-              defaultMessage: filterType,
-            })}
-            &nbsp;
-            {value}
-          </Tag>
-        </Box>
+        <AttributeTag
+          // eslint-disable-next-line react/no-array-index-key
+          key={`${attributeName}-${i}`}
+          attribute={attribute}
+          filter={filter}
+          onClick={handleClick}
+          operator={operator}
+          value={value}
+        />
       );
     }) || null
   );

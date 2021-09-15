@@ -23,14 +23,20 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
 
   const allowedAttributes = useAllowedAttributes(contentType, slug);
   const displayedFilters = allowedAttributes.map(name => {
-    const type = contentType.attributes[name].type;
+    const attribute = contentType.attributes[name];
+    const { type, enum: options } = attribute;
+
+    // if (type === 'enumeration') {
+    //   console.log(attribute);
+    // }
 
     const mainField = metadatas[name].list?.mainField;
 
     return {
       name,
-      metadatas: { label: metadatas[name].list.label },
-      fieldSchema: { type, mainField },
+      // metadatas: { label: metadatas[name].list.label },
+      metadatas: { label: name },
+      fieldSchema: { type, options, mainField },
     };
   });
 

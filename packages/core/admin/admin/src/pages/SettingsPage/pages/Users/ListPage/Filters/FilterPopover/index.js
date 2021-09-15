@@ -33,10 +33,21 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
   const handleChangeFilterField = value => {
     const nextField = displayedFilters.find(f => f.name === value);
     const {
-      fieldSchema: { type },
+      fieldSchema: { type, options },
     } = nextField;
+    let filterValue = '';
 
-    setModifiedData({ name: value, filter: '$eq', value: type === 'boolean' ? 'true' : '' });
+    if (type === 'boolean') {
+      filterValue = 'true';
+    }
+
+    if (type === 'enumeration') {
+      filterValue = options[0];
+    }
+
+    const filter = getFilterList(nextField)[0].value;
+
+    setModifiedData({ name: value, filter, value: filterValue });
   };
 
   const handleSubmit = e => {
@@ -83,6 +94,7 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
           <Stack size={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
+                label="Select field"
                 aria-label="Select field"
                 name="name"
                 size="S"
@@ -100,7 +112,7 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
             </Box>
             <Box>
               <Select
-                aria-label="Select filter"
+                label="Select filter"
                 name="filter"
                 size="S"
                 value={modifiedData.filter}
@@ -117,6 +129,7 @@ const FilterPopover = ({ displayedFilters, isVisible, onToggle, source }) => {
             </Box>
             <Box>
               <Inputs
+                {...appliedFilter.metadatas}
                 {...appliedFilter.fieldSchema}
                 value={modifiedData.value}
                 onChange={value => setModifiedData(prev => ({ ...prev, value }))}

@@ -20,11 +20,35 @@ const getFilterList = ({ fieldSchema: { type: fieldType, mainField } }) => {
         // { label: 'not contains', value: '$not_$contains' },
       ];
     }
-    case 'enum': {
+    case 'enumeration': {
       return [
         { label: 'is', value: '$eq' },
         { label: 'is not', value: '$ne' },
         // { label: 'not contains', value: '$not_$contains' },
+      ];
+    }
+    case 'float':
+    case 'integer':
+    case 'biginteger':
+    case 'decimal':
+    case 'date': {
+      return [
+        { label: 'is', value: '$eq' },
+        { label: 'is not', value: '$ne' },
+        { label: 'contains', value: '$contains' },
+        { label: 'is greater than', value: '$gt' },
+        { label: 'is greater than or equal to', value: '$gte' },
+        { label: 'is less than or equal to', value: '$lte' },
+        { label: 'is less than or equal to', value: '$lte' },
+      ];
+    }
+    case 'time': {
+      return [
+        { label: 'contains', value: '$contains' },
+        { label: 'is greater than', value: '$gt' },
+        { label: 'is greater than or equal to', value: '$gte' },
+        { label: 'is less than or equal to', value: '$lte' },
+        { label: 'is less than or equal to', value: '$lte' },
       ];
     }
     default:
