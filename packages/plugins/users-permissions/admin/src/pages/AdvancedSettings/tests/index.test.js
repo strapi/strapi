@@ -62,6 +62,16 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c14 {
+        background: #ffffff;
+        padding-top: 24px;
+        padding-right: 32px;
+        padding-bottom: 24px;
+        padding-left: 32px;
+        border-radius: 4px;
+        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
       .c10 {
         font-weight: 500;
         font-size: 0.75rem;
@@ -158,6 +168,148 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       .c6:active {
         border: 1px solid #4945ff;
         background: #4945ff;
+      }
+
+      .c22 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c22:focus {
+        outline: none;
+      }
+
+      .c20 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c27 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c31 {
+        font-weight: 400;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
+      .c26 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c28 {
+        padding-left: 12px;
+      }
+
+      .c23 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c25 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c19 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c19 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c19 > * + * {
+        margin-top: 4px;
+      }
+
+      .c21 {
+        position: relative;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        border-radius: 4px;
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .c21:focus-within {
+        border: 1px solid #4945ff;
+      }
+
+      .c29 {
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .c29 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c29 svg path {
+        fill: #666687;
+      }
+
+      .c30 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c30 svg {
+        width: 0.375rem;
+      }
+
+      .c24 {
+        min-height: 2.5rem;
       }
 
       .c15 {
@@ -265,7 +417,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         opacity: 1;
       }
 
-      .c55:disabled {
+      .c55[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -502,158 +654,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       .c12 {
         font-size: 1rem;
         line-height: 1.5;
-      }
-
-      .c14 {
-        background: #ffffff;
-        padding-top: 24px;
-        padding-right: 32px;
-        padding-bottom: 24px;
-        padding-left: 32px;
-        border-radius: 4px;
-        box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
-      }
-
-      .c22 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c22:focus {
-        outline: none;
-      }
-
-      .c20 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c27 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c31 {
-        font-weight: 400;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #666687;
-      }
-
-      .c26 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c28 {
-        padding-left: 12px;
-      }
-
-      .c23 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c19 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: column;
-        -ms-flex-direction: column;
-        flex-direction: column;
-      }
-
-      .c19 > * {
-        margin-top: 0;
-        margin-bottom: 0;
-      }
-
-      .c19 > * + * {
-        margin-top: 4px;
-      }
-
-      .c21 {
-        position: relative;
-        border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c21:focus-within {
-        border: 1px solid #4945ff;
-      }
-
-      .c29 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
-      }
-
-      .c29 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c29 svg path {
-        fill: #666687;
-      }
-
-      .c30 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        background: none;
-        border: none;
-      }
-
-      .c30 svg {
-        width: 0.375rem;
-      }
-
-      .c24 {
-        min-height: 2.5rem;
       }
 
       .c17 {
@@ -1045,6 +1045,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             >
                               <input
                                 aria-describedby="textinput-1-hint"
+                                aria-disabled="false"
                                 aria-invalid="false"
                                 class="c55"
                                 id="textinput-1"
@@ -1163,9 +1164,9 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                             >
                               <input
                                 aria-describedby="textinput-2-hint"
+                                aria-disabled="true"
                                 aria-invalid="false"
                                 class="c55"
-                                disabled=""
                                 id="textinput-2"
                                 name="email_confirmation_redirection"
                                 placeholder="ex: https://youtfrontend.com/reset-password"
