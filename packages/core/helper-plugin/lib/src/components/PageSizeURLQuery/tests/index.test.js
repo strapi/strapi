@@ -17,9 +17,7 @@ jest.mock('../../../hooks/useTracking', () => () => ({
 }));
 
 const messages = {
-  en: {
-    'components.PageFooter.select': 'Entries per page',
-  },
+  'components.PageFooter.select': 'Entries per page',
 };
 
 const makeApp = history => (

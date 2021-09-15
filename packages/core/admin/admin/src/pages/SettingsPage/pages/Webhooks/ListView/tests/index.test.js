@@ -19,7 +19,7 @@ const history = createMemoryHistory();
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
       <Router history={history}>
         <ListView />
       </Router>

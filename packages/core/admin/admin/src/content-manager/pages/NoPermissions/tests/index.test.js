@@ -20,7 +20,7 @@ describe('<NoPermissions />', () => {
     const {
       container: { firstChild },
     } = render(
-      <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+      <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
         <Theme>
           <NoPermissions />
         </Theme>

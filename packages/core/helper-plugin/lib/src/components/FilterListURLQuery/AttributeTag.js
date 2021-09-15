@@ -45,13 +45,17 @@ const AttributeTag = ({ attribute, filter, onClick, operator, value }) => {
   return (
     <Box padding={1} onClick={handleClick}>
       <Tag icon={<Close />}>
-        {attribute.name}&nbsp;
+        {attribute.metadatas.label}&nbsp;
         {formatMessage({
           id: `components.FilterOptions.FILTER_TYPES.${operator}`,
           defaultMessage: operator,
         })}
-        &nbsp;
-        {formattedValue}
+        {operator !== '$null' && operator !== '$notNull' && (
+          <>
+            &nbsp;
+            {formattedValue}
+          </>
+        )}
       </Tag>
     </Box>
   );
@@ -61,6 +65,7 @@ AttributeTag.propTypes = {
   attribute: PropTypes.shape({
     name: PropTypes.string.isRequired,
     fieldSchema: PropTypes.object.isRequired,
+    metadatas: PropTypes.shape({ label: PropTypes.string.isRequired }).isRequired,
   }).isRequired,
   filter: PropTypes.object.isRequired,
   onClick: PropTypes.func.isRequired,

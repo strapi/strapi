@@ -6,7 +6,7 @@ import ConfirmDialog from '../index';
 
 const App = (
   <ThemeProvider theme={lightTheme}>
-    <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+    <IntlProvider locale="en" messages={{}} defaultLocale="en" textComponent="span">
       <ConfirmDialog isOpen onConfirm={jest.fn()} onToggleDialog={jest.fn()} />
     </IntlProvider>
   </ThemeProvider>
@@ -59,7 +59,7 @@ describe('ConfirmDialog', () => {
   it('renders and matches the snapshot', async () => {
     const AppCustom = (
       <ThemeProvider theme={lightTheme}>
-        <IntlProvider locale="en" messages={{ en: {} }} textComponent="span">
+        <IntlProvider locale="en" messages={{}} textComponent="span">
           <ConfirmDialog
             bodyText={{
               id: 'app.components',

@@ -10,6 +10,7 @@ import { IntlProvider } from 'react-intl';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
+import qs from 'qs';
 import FilterListURLQuery from '../index';
 
 const makeApp = (history, filtersSchema) => (
@@ -19,7 +20,17 @@ const makeApp = (history, filtersSchema) => (
         locale="en"
         messages={{
           'components.FilterOptions.FILTER_TYPES.$eq': 'is',
-          'components.FilterOptions.FILTER_TYPES.$contains': 'contains',
+          'components.FilterOptions.FILTER_TYPES.$ne': 'is not',
+          'components.FilterOptions.FILTER_TYPES.$contains': 'contains (case sensitive)',
+          'components.FilterOptions.FILTER_TYPES.$notContains': 'does not contain (case sensitive)',
+          'components.FilterOptions.FILTER_TYPES.$gt': 'is greater than',
+          'components.FilterOptions.FILTER_TYPES.$gte': 'is greater than or equal to',
+          'components.FilterOptions.FILTER_TYPES.$lt': 'is lower than',
+          'components.FilterOptions.FILTER_TYPES.$lte': 'is lower than or equal to',
+          'components.FilterOptions.FILTER_TYPES.$startsWith': 'starts with',
+          'components.FilterOptions.FILTER_TYPES.$endsWith': 'ends with',
+          'components.FilterOptions.FILTER_TYPES.$null': 'is null',
+          'components.FilterOptions.FILTER_TYPES.$notNull': 'is not null',
         }}
         defaultLocale="en"
         textComponent="span"
@@ -36,12 +47,12 @@ describe('<FilterListURLQuery />', () => {
     const filtersSchema = [
       {
         name: 'bool',
-        metadatas: { label: 'bool' },
+        metadatas: { label: 'Boolean' },
         fieldSchema: { type: 'boolean' },
       },
       {
         name: 'date',
-        metadatas: { label: 'date' },
+        metadatas: { label: 'Date' },
         fieldSchema: { type: 'date' },
       },
       {
@@ -51,12 +62,22 @@ describe('<FilterListURLQuery />', () => {
       },
       {
         name: 'long',
-        metadatas: { label: 'long' },
+        metadatas: { label: 'Long' },
+        fieldSchema: { type: 'string' },
+      },
+      {
+        name: 'city',
+        metadatas: { label: 'city' },
+        fieldSchema: { type: 'string' },
+      },
+      {
+        name: 'country',
+        metadatas: { label: 'country' },
         fieldSchema: { type: 'string' },
       },
       {
         name: 'many_to_one',
-        metadatas: { label: 'many_to_one' },
+        metadatas: { label: 'many to one' },
         fieldSchema: {
           type: 'relation',
           mainField: {
@@ -71,16 +92,42 @@ describe('<FilterListURLQuery />', () => {
         fieldSchema: { type: 'integer' },
       },
       {
+        name: 'float',
+        metadatas: { label: 'Float' },
+        fieldSchema: { type: 'float' },
+      },
+      {
         name: 'time',
         metadatas: { label: 'time' },
         fieldSchema: { type: 'time' },
       },
     ];
+
+    const search = {
+      sort: 'city',
+      filters: {
+        $and: [
+          { bool: { $eq: 'true' } },
+          { date: { $ne: '2021-09-01' } },
+          { city: { $null: 'true' } },
+          { country: { $notNull: 'true' } },
+          { time: { $contains: '00:45' } },
+          { many_to_one: { postal_code: { $notContains: 'test' } } },
+          { many_to_one: { postal_code: { $eq: 'test' } } },
+          { city: { $startsWith: 'paris' } },
+          { country: { $endsWith: 'france' } },
+          { number: { $gt: '2' } },
+          { float: { $gte: '1' } },
+          { float: { $lte: '3' } },
+          { float: { $lt: '4' } },
+        ],
+      },
+    };
     history.push({
       pathname: '/',
-      search:
-        'sort=city&filters[$and][0][bool][$eq]=true&filters[$and][1][date][$eq]=2021-09-01&filters[$and][2][enum][$eq]=one&filters[$and][3][long][$eq]=test&filters[$and][4][many_to_one][postal_code][$eq]=test&filters[$and][5][number][$eq]=2&filters[$and][6][time][$contains]=00:45',
+      search: qs.stringify(search, { encode: false }),
     });
+
     const { container } = render(makeApp(history, filtersSchema));
 
     expect(container).toMatchSnapshot();

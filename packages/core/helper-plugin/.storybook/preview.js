@@ -16,7 +16,7 @@ export const decorators = [
   Story => (
     <MemoryRouter>
       <ThemeProvider theme={lightTheme}>
-        <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+        <IntlProvider messages={{}} textComponent="span" locale="en">
           <main>
             <Story />
           </main>

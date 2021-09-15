@@ -14,11 +14,11 @@ const AttributeFilter = ({ contentType, slug, metadatas }) => {
       properties: { useRelation: type === 'relation' },
     };
 
-    const mainField = metadatas[name].list?.mainField;
+    const { mainField, label } = metadatas[name].list;
 
     return {
       name,
-      metadatas: { label: name },
+      metadatas: { label },
       fieldSchema: { type, options, mainField },
       trackedEvent,
     };

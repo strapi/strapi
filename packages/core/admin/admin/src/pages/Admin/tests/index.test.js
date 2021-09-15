@@ -27,7 +27,7 @@ jest.mock('../../../components/LeftMenu', () => () => <div>menu</div>);
 jest.mock('../../HomePage', () => () => <div>HomePage</div>);
 
 const makeApp = history => (
-  <IntlProvider messages={{ en: {} }} textComponent="span" locale="en">
+  <IntlProvider messages={{}} defaultLocale="en" textComponent="span" locale="en">
     <ThemeProvider theme={lightTheme}>
       <Router history={history}>
         <Admin />
