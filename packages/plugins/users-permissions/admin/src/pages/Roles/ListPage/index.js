@@ -1,15 +1,11 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Button,
   HeaderLayout,
-  IconButton,
   Layout,
   Main,
   Table,
-  Tbody,
-  Text,
   Tr,
-  Td,
   Thead,
   Th,
   TableLabel,
@@ -18,8 +14,7 @@ import {
   ActionLayout,
   VisuallyHidden,
 } from '@strapi/parts';
-import { AddIcon, EditIcon } from '@strapi/icons';
-import { useIntl } from 'react-intl';
+import { AddIcon } from '@strapi/icons';
 import {
   useTracking,
   SettingsPageTitle,
@@ -31,15 +26,18 @@ import {
   Search,
   useQueryParams,
   EmptyStateLayout,
+  ConfirmDialog,
 } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { useMutation, useQuery, useQueryClient } from 'react-query';
 import matchSorter from 'match-sorter';
 
-import { fetchData } from './utils/api';
+import { fetchData, deleteData } from './utils/api';
 import { getTrad } from '../../../utils';
 import pluginId from '../../../pluginId';
 import permissions from '../../../permissions';
+import TableBody from './components/TableBody';
 
 const RoleListPage = () => {
   const { trackUsage } = useTracking();
@@ -49,6 +47,11 @@ const RoleListPage = () => {
   const { notifyStatus } = useNotifyAT();
   const [{ query }] = useQueryParams();
   const _q = query?._q || '';
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
+  const [isConfirmButtonLoading, setIsConfirmButtonLoading] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState();
+
+  const queryClient = useQueryClient();
 
   const updatePermissions = useMemo(() => {
     return {
@@ -61,7 +64,7 @@ const RoleListPage = () => {
 
   const {
     isLoading: isLoadingForPermissions,
-    allowedActions: { canRead },
+    allowedActions: { canRead, canDelete },
   } = useRBAC(updatePermissions);
 
   const {
@@ -80,13 +83,8 @@ const RoleListPage = () => {
     push(`/settings/${pluginId}/roles/new`);
   };
 
-  const pageTitle = formatMessage({
-    id: getTrad('HeaderNav.link.roles'),
-    defaultMessage: 'Roles',
-  });
-
-  const handleClickEdit = id => {
-    push(`/settings/${pluginId}/roles/${id}`);
+  const handleShowConfirmDelete = () => {
+    setShowConfirmDelete(!showConfirmDelete);
   };
 
   const emptyLayout = {
@@ -98,6 +96,24 @@ const RoleListPage = () => {
       id: getTrad('Roles.empty.search'),
       defaultMessage: 'No roles match the search.',
     },
+  };
+
+  const pageTitle = formatMessage({
+    id: getTrad('HeaderNav.link.roles'),
+    defaultMessage: 'Roles',
+  });
+
+  const deleteMutation = useMutation(id => deleteData(id, toggleNotification), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('get-roles');
+    },
+  });
+
+  const handleConfirmDelete = async () => {
+    setIsConfirmButtonLoading(true);
+    await deleteMutation.mutateAsync(roleToDelete);
+    setShowConfirmDelete(!showConfirmDelete);
+    setIsConfirmButtonLoading(false);
   };
 
   const sortedRoles = matchSorter(roles || [], _q, { keys: ['name', 'description'] });
@@ -131,7 +147,17 @@ const RoleListPage = () => {
           }
         />
         <ContentLayout>
-          <ActionLayout withPadding={false} startActions={<Search />} />
+          <ActionLayout
+            withPadding={false}
+            startActions={
+              <Search
+                label={formatMessage({
+                  id: 'app.component.search.label',
+                  defaultMessage: 'Search',
+                })}
+              />
+            }
+          />
           {!canRead && <NoPermissions />}
           {(isLoading || isLoadingForPermissions) && <LoadingIndicatorPage />}
           {canRead && sortedRoles && sortedRoles?.length ? (
@@ -169,41 +195,24 @@ const RoleListPage = () => {
                   </Th>
                 </Tr>
               </Thead>
-              <Tbody>
-                {sortedRoles?.map(role => (
-                  <Tr key={role.name}>
-                    <Td width="20%">
-                      <Text label="name">{role.name}</Text>
-                    </Td>
-                    <Td width="50%">
-                      <Text label="description">{role.description}</Text>
-                    </Td>
-                    <Td width="30%">
-                      <Text label="users">
-                        {`${role.nb_users} ${formatMessage({
-                          id: getTrad('Roles.users'),
-                          defaultMessage: 'users',
-                        }).toLowerCase()}`}
-                      </Text>
-                    </Td>
-                    <Td>
-                      <CheckPermissions permissions={permissions.updateRole}>
-                        <IconButton
-                          onClick={() => handleClickEdit(role.id)}
-                          noBorder
-                          icon={<EditIcon />}
-                          label="Edit"
-                        />
-                      </CheckPermissions>
-                    </Td>
-                  </Tr>
-                ))}
-              </Tbody>
+              <TableBody
+                sortedRoles={sortedRoles}
+                canDelete={canDelete}
+                permissions={permissions}
+                setRoleToDelete={setRoleToDelete}
+                onDelete={[showConfirmDelete, setShowConfirmDelete]}
+              />
             </Table>
           ) : (
             <EmptyStateLayout content={emptyLayout[emptyContent]} />
           )}
         </ContentLayout>
+        <ConfirmDialog
+          isConfirmButtonLoading={isConfirmButtonLoading}
+          onConfirm={handleConfirmDelete}
+          onToggleDialog={handleShowConfirmDelete}
+          isOpen={showConfirmDelete}
+        />
       </Main>
     </Layout>
   );
