@@ -1,4 +1,4 @@
-import { checkIfAttributeIsDisplayable } from '../../../utils';
+import { checkIfAttributeIsDisplayable } from '../../../../utils';
 
 const getAllAllowedHeaders = attributes => {
   const allowedAttributes = Object.keys(attributes).reduce((acc, current) => {

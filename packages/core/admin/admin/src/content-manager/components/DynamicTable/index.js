@@ -2,8 +2,10 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { DynamicTable as Table, useStrapiApp } from '@strapi/helper-plugin';
+import { useSelector } from 'react-redux';
 import isEmpty from 'lodash/isEmpty';
 import { INJECT_COLUMN_IN_TABLE } from '../../../exposedHooks';
+import { selectDisplayedHeaders } from '../../pages/ListView/selectors';
 import { getTrad } from '../../utils';
 import State from '../State';
 import TableRows from './TableRows';
@@ -24,10 +26,11 @@ const DynamicTable = ({
   const { runHookWaterfall } = useStrapiApp();
   const hasDraftAndPublish = layout.contentType.options.draftAndPublish || false;
   const { formatMessage } = useIntl();
+  const displayedHeaders = useSelector(selectDisplayedHeaders);
 
   const tableHeaders = useMemo(() => {
     const headers = runHookWaterfall(INJECT_COLUMN_IN_TABLE, {
-      displayedHeaders: layout.contentType.layouts.list,
+      displayedHeaders,
       layout,
     });
 
@@ -55,7 +58,7 @@ const DynamicTable = ({
         },
       },
     ];
-  }, [runHookWaterfall, layout, hasDraftAndPublish, formatMessage]);
+  }, [runHookWaterfall, displayedHeaders, layout, hasDraftAndPublish, formatMessage]);
 
   return (
     <Table

@@ -29,18 +29,14 @@ import { InjectionZone } from '../../../shared/components';
 import DynamicTable from '../../components/DynamicTable';
 // import permissions from '../../../permissions';
 import { getRequestUrl, getTrad } from '../../utils';
-// import FieldPicker from './FieldPicker';
-// import Filter from './Filter';
+import FieldPicker from './FieldPicker';
 import PaginationFooter from './PaginationFooter';
 import { getData, getDataSucceeded, onChangeListHeaders, onResetListHeaders } from './actions';
 import makeSelectListView from './selectors';
-import {
-  // getAllAllowedHeaders,
-  // getFirstSortableHeader,
-  buildQueryString,
-} from './utils';
+import { buildQueryString } from './utils';
 import AttributeFilter from '../../components/AttributeFilter';
 
+// TODO
 // const cmPermissions = permissions.contentManager;
 
 /* eslint-disable react/no-array-index-key */
@@ -48,22 +44,17 @@ function ListView({
   canCreate,
   canDelete,
   canRead,
-  // onChangeBulk,
-  // onChangeBulkSelectall,
   data,
   getData,
   getDataSucceeded,
   isLoading,
   layout,
   pagination,
-  // onChangeListHeaders,
-  // onResetListHeaders,
   slug,
 }) {
   const { total } = pagination;
   const {
     contentType: {
-      // attributes,
       metadatas,
       settings: { bulkable: isBulkable, filterable: isFilterable, searchable: isSearchable },
     },
@@ -84,16 +75,8 @@ function ListView({
   const { pathname } = useLocation();
   const { push } = useHistory();
   const { formatMessage } = useIntl();
-
-  // const [isFilterPickerOpen, setFilterPickerState] = useState(false);
   const contentType = layout.contentType;
   const hasDraftAndPublish = get(contentType, 'options.draftAndPublish', false);
-  // TODO
-  // const allAllowedHeaders = useMemo(() => getAllAllowedHeaders(attributes), [attributes]);
-
-  // const filters = useMemo(() => {
-  //   return formatFiltersFromQuery(query);
-  // }, [query]);
 
   // FIXME
   // Using a ref to avoid requests being fired multiple times on slug on change
@@ -152,24 +135,6 @@ function ListView({
     },
     [formatMessage, getData, getDataSucceeded, notifyStatus, push, toggleNotification]
   );
-
-  // const handleChangeListLabels = useCallback(
-  //   ({ name, value }) => {
-  //     // Display a notification if trying to remove the last displayed field
-
-  //     if (value && displayedHeaders.length === 1) {
-  //       toggleNotification({
-  //         type: 'warning',
-  //         message: { id: 'content-manager.notification.error.displayedFields' },
-  //       });
-  //     } else {
-  //       trackUsageRef.current('didChangeDisplayedFields');
-
-  //       onChangeListHeaders({ name, value });
-  //     }
-  //   },
-  //   [displayedHeaders, onChangeListHeaders, toggleNotification]
-  // );
 
   const handleConfirmDeleteAllData = useCallback(
     async ids => {
@@ -299,7 +264,12 @@ function ListView({
       )}
       {canRead && (isSearchable || isFilterable) && (
         <ActionLayout
-          endActions={<InjectionZone area="contentManager.listView.actions" />}
+          endActions={
+            <>
+              <InjectionZone area="contentManager.listView.actions" />
+              <FieldPicker layout={layout} />
+            </>
+          }
           startActions={
             <>
               {isSearchable && (
@@ -341,118 +311,6 @@ function ListView({
       </ContentLayout>
     </Main>
   );
-
-  // return (
-  //   <>
-  //     <ListViewProvider
-  //       _q={_q}
-  //       sort={sort}
-  //       data={data}
-  //       entriesToDelete={entriesToDelete}
-  //       filters={filters}
-  //       firstSortableHeader={firstSortableHeader}
-  //       label={label}
-  //       onChangeBulk={onChangeBulk}
-  //       onChangeBulkSelectall={onChangeBulkSelectall}
-  //       onClickDelete={handleClickDelete}
-  //       slug={slug}
-  //       toggleModalDeleteAll={handleToggleModalDeleteAll}
-  //       setQuery={setQuery}
-  //     >
-  //       <Container className="container-fluid">
-  //         {!isFilterPickerOpen && <Header {...headerProps} isLoading={isLoading && canRead} />}
-  //         {isSearchable && canRead && (
-  //           <Search
-  //             changeParams={setQuery}
-  //             initValue={_q}
-  //             model={label}
-  //             value={_q}
-  //             trackUsage={trackUsage}
-  //           />
-  //         )}
-
-  //         {!canRead && (
-  //           <Flex justifyContent="flex-end">
-  //             <Padded right size="sm">
-  //               <InjectionZone area="contentManager.listView.actions" />
-  //             </Padded>
-  //           </Flex>
-  //         )}
-
-  //         {canRead && (
-  //           <Wrapper>
-  //             <div className="row" style={{ marginBottom: '5px' }}>
-  //               <div className="col-9">
-  //                 <div className="row" style={{ marginLeft: 0, marginRight: 0 }}>
-  //                   {isFilterable && (
-  //                     <>
-  //                       <Padded right size="sm">
-  // <AttributeFilter
-  //   contentType={contentType}
-  //   slug={slug}
-  //   metaData={metadatas}
-  // />
-  //                       </Padded>
-  //                       {filters.map(({ filter: filterName, name, value }, key) => (
-  //                         <Filter
-  //                           contentType={contentType}
-  //                           filterName={filterName}
-  //                           filters={filters}
-  //                           index={key}
-  //                           key={key}
-  //                           metadatas={metadatas}
-  //                           name={name}
-  //                           toggleFilterPickerState={toggleFilterPickerState}
-  //                           isFilterPickerOpen={isFilterPickerOpen}
-  //                           setQuery={setQuery}
-  //                           value={value}
-  //                         />
-  //                       ))}
-  //                     </>
-  //                   )}
-  //                 </div>
-  //               </div>
-
-  //               <div className="col-3">
-  //                 <Flex justifyContent="flex-end">
-  //                   <Padded right size="sm">
-  //                     <InjectionZone area="contentManager.listView.actions" />
-  //                   </Padded>
-
-  //                   <CheckPermissions permissions={cmPermissions.collectionTypesConfigurations}>
-  //                     <FieldPicker
-  //                       displayedHeaders={displayedHeaders}
-  //                       items={allAllowedHeaders}
-  //                       onChange={handleChangeListLabels}
-  //                       onClickReset={onResetListHeaders}
-  //                       slug={slug}
-  //                     />
-  //                   </CheckPermissions>
-  //                 </Flex>
-  //               </div>
-  //             </div>
-  //             <div className="row" style={{ paddingTop: '12px' }}>
-  //               <div className="col-12">
-  //                 <CustomTable
-  //                   data={data}
-  //                   canCreate={canCreate}
-  //                   canDelete={canDelete}
-  //                   canUpdate={canUpdate}
-  //                   displayedHeaders={tableHeaders}
-  //                   hasDraftAndPublish={hasDraftAndPublish}
-  //                   isBulkable={isBulkable}
-  //                   setQuery={setQuery}
-  //                   showLoader={isLoading}
-  //                 />
-  //                 <Footer count={total} params={query} onChange={setQuery} />
-  //               </div>
-  //             </div>
-  //           </Wrapper>
-  //         )}
-  //       </Container>
-  //     </ListViewProvider>
-  //   </>
-  // );
 }
 
 ListView.propTypes = {
@@ -477,8 +335,6 @@ ListView.propTypes = {
   isLoading: PropTypes.bool.isRequired,
   getData: PropTypes.func.isRequired,
   getDataSucceeded: PropTypes.func.isRequired,
-  // onChangeListHeaders: PropTypes.func.isRequired,
-  // onResetListHeaders: PropTypes.func.isRequired,
   pagination: PropTypes.shape({ total: PropTypes.number.isRequired, pageCount: PropTypes.number })
     .isRequired,
   slug: PropTypes.string.isRequired,
