@@ -1,11 +1,11 @@
 'use strict';
 
-const { get, getOr, isFunction, first } = require('lodash/fp');
+const { get, getOr, isFunction, first, isNil } = require('lodash/fp');
 
 const { GraphQLObjectType } = require('graphql');
 const { createPoliciesMiddleware } = require('./policy');
 
-const ignoredObjectTypes = [
+const introspectionQueries = [
   '__Schema',
   '__Type',
   '__Field',
@@ -36,7 +36,7 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
   // schema's type map and wrap its resolve attribute if needed
   Object.entries(typeMap).forEach(([type, definition]) => {
     const isGraphQLObjectType = definition instanceof GraphQLObjectType;
-    const isIgnoredType = ignoredObjectTypes.includes(type);
+    const isIgnoredType = introspectionQueries.includes(type);
 
     if (!isGraphQLObjectType || isIgnoredType) {
       return;
@@ -81,7 +81,12 @@ const wrapResolvers = ({ schema, strapi, extension = {} }) => {
         const authConfig = get('auth', resolverConfig);
         const authContext = get('state.auth', context);
 
-        if (authConfig !== false) {
+        const isMutationOrQuery = ['Mutation', 'Query'].includes(type);
+        const hasConfig = !isNil(authConfig);
+
+        const isAuthDisabled = authConfig === false;
+
+        if ((isMutationOrQuery || hasConfig) && !isAuthDisabled) {
           try {
             await strapi.auth.verify(authContext, authConfig);
           } catch (error) {

@@ -6,6 +6,7 @@ module.exports = context => {
   const { strapi } = context;
 
   const { naming, mappers, attributes } = strapi.plugin('graphql').service('utils');
+  const extension = strapi.plugin('graphql').service('extension');
 
   const {
     getComponentInputName,
@@ -49,11 +50,19 @@ module.exports = context => {
             else if (isMedia(attribute)) {
               const isMultiple = attribute.multiple === true;
 
+              if (extension.shadowCRUD('plugin::upload.file').isDisabled()) {
+                return;
+              }
+
               isMultiple ? t.list.id(attributeName) : t.id(attributeName);
             }
 
             // Regular Relations (ignore polymorphic relations)
             else if (isRelation(attribute) && !isMorphRelation(attribute)) {
+              if (extension.shadowCRUD(attribute.target).isDisabled()) {
+                return;
+              }
+
               const isToManyRelation = attribute.relation.endsWith('Many');
 
               isToManyRelation ? t.list.id(attributeName) : t.id(attributeName);

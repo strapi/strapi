@@ -127,11 +127,17 @@ module.exports = context => {
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
+    const extension = getGraphQLService('extension');
 
     let { builder } = options;
     const { attributeName, attribute, contentType } = options;
+    const fileUID = 'plugin::upload.file';
 
-    const fileContentType = strapi.contentTypes['plugin::upload.file'];
+    if (extension.shadowCRUD(fileUID).isDisabled()) {
+      return;
+    }
+
+    const fileContentType = strapi.contentTypes[fileUID];
 
     const resolve = buildAssociationResolver({
       contentTypeUID: contentType.uid,
@@ -198,9 +204,14 @@ module.exports = context => {
     const { naming } = getGraphQLService('utils');
     const { getContentTypeArgs } = getGraphQLService('builders').utils;
     const { buildAssociationResolver } = getGraphQLService('builders').get('content-api');
+    const extension = getGraphQLService('extension');
 
     let { builder } = options;
     const { attributeName, attribute, contentType } = options;
+
+    if (extension.shadowCRUD(attribute.target).isDisabled()) {
+      return;
+    }
 
     const isToManyRelation = attribute.relation.endsWith('Many');
 

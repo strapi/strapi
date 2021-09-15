@@ -6,6 +6,8 @@ const registerCollectionType = (contentType, { registry, strapi, builders }) => 
   const { naming } = getService('utils');
   const { KINDS } = getService('constants');
 
+  const extension = getService('extension');
+
   // Types name (as string)
   const types = {
     base: naming.getTypeName(contentType),
@@ -41,19 +43,23 @@ const registerCollectionType = (contentType, { registry, strapi, builders }) => 
     getConfig(KINDS.entityResponseCollection)
   );
 
-  // Query extensions
-  registry.register(
-    types.queries,
-    builders.buildCollectionTypeQueries(contentType),
-    getConfig(KINDS.query)
-  );
+  if (extension.shadowCRUD(contentType.uid).areQueriesEnabled()) {
+    // Query extensions
+    registry.register(
+      types.queries,
+      builders.buildCollectionTypeQueries(contentType),
+      getConfig(KINDS.query)
+    );
+  }
 
-  // Mutation extensions
-  registry.register(
-    types.mutations,
-    builders.buildCollectionTypeMutations(contentType),
-    getConfig(KINDS.mutation)
-  );
+  if (extension.shadowCRUD(contentType.uid).areMutationsEnabled()) {
+    // Mutation extensions
+    registry.register(
+      types.mutations,
+      builders.buildCollectionTypeMutations(contentType),
+      getConfig(KINDS.mutation)
+    );
+  }
 };
 
 module.exports = { registerCollectionType };

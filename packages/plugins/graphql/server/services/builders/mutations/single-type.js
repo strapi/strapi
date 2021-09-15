@@ -1,6 +1,6 @@
 'use strict';
 
-const { extendType } = require('nexus');
+const { extendType, nonNull } = require('nexus');
 const { omit, isNil } = require('lodash/fp');
 const { getNonWritableAttributes } = require('@strapi/utils').contentTypes;
 
@@ -30,7 +30,7 @@ module.exports = ({ strapi }) => {
 
       args: {
         // Update payload
-        data: getContentTypeInputName(contentType),
+        data: nonNull(getContentTypeInputName(contentType)),
       },
 
       async resolve(parent, args) {
@@ -92,30 +92,41 @@ module.exports = ({ strapi }) => {
 
   return {
     buildSingleTypeMutations(contentType) {
-      getService('extension')
-        .for('content-api')
-        .use(() => ({
-          resolversConfig: {
-            [`Mutation.${getUpdateMutationTypeName(contentType)}`]: {
-              auth: {
-                scope: [`${contentType.uid}.update`],
-              },
-            },
+      const updateMutationName = `Mutation.${getUpdateMutationTypeName(contentType)}`;
+      const deleteMutationName = `Mutation.${getDeleteMutationTypeName(contentType)}`;
 
-            [`Mutation.${getDeleteMutationTypeName(contentType)}`]: {
-              auth: {
-                scope: [`${contentType.uid}.delete`],
-              },
-            },
-          },
-        }));
+      const extension = getService('extension');
+
+      const registerAuthConfig = (action, auth) => {
+        return extension.use(() => ({ resolversConfig: { [action]: { auth } } }));
+      };
+
+      const isActionEnabled = action => {
+        return extension.shadowCRUD(contentType.uid).isActionEnabled(action);
+      };
+
+      const isUpdateEnabled = isActionEnabled('update');
+      const isDeleteEnabled = isActionEnabled('delete');
+
+      if (isUpdateEnabled) {
+        registerAuthConfig(updateMutationName, { scope: [`${contentType.uid}.update`] });
+      }
+
+      if (isDeleteEnabled) {
+        registerAuthConfig(deleteMutationName, { scope: [`${contentType.uid}.delete`] });
+      }
 
       return extendType({
         type: 'Mutation',
 
         definition(t) {
-          addUpdateMutation(t, contentType);
-          addDeleteMutation(t, contentType);
+          if (isUpdateEnabled) {
+            addUpdateMutation(t, contentType);
+          }
+
+          if (isDeleteEnabled) {
+            addDeleteMutation(t, contentType);
+          }
         },
       });
     },
