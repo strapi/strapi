@@ -5,7 +5,7 @@ const path = require('path');
 
 const { createTestBuilder } = require('../../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../../test/helpers/request');
 
 let strapi;
 let rq;
@@ -77,10 +77,10 @@ describe('Not required dynamiczone', () => {
 
     strapi = await createStrapiInstance();
 
-    baseRq = await createAuthRequest({ strapi });
+    baseRq = await createContentAPIRequest({ strapi });
 
-    rq = await createAuthRequest({ strapi });
-    rq.setURLPrefix('/withdynamiczonemedias');
+    rq = await createContentAPIRequest({ strapi });
+    rq.setURLPrefix('/api/withdynamiczonemedias');
   });
 
   afterAll(async () => {

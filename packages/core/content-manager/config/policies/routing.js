@@ -12,10 +12,19 @@ module.exports = async (ctx, next) => {
   }
 
   const target = ct.plugin === 'admin' ? strapi.admin : strapi.plugin(ct.plugin);
+
+  const { route } = ctx.state;
+
+  if (typeof route.handler !== 'string') {
+    return next();
+  }
+
+  const [, action] = route.handler.split('.');
+
   const configPath =
     ct.plugin === 'admin'
-      ? ['server.admin.layout', ct.modelName, 'actions', ctx.request.route.action]
-      : ['plugin', ct.plugin, 'layout', ct.modelName, 'actions', ctx.request.route.action];
+      ? ['server.admin.layout', ct.modelName, 'actions', action]
+      : ['plugin', ct.plugin, 'layout', ct.modelName, 'actions', action];
 
   const actionConfig = strapi.config.get(configPath);
 

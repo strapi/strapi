@@ -7,7 +7,7 @@ const { getService } = require('../../utils');
 
 const sanitize = (data, options = {}) => {
   return sanitizeEntity(data, {
-    model: strapi.getModel('file', 'upload'),
+    model: strapi.getModel('plugin::upload.file'),
     ...options,
   });
 };

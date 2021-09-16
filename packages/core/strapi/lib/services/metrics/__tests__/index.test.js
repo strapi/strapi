@@ -21,7 +21,7 @@ describe('metrics', () => {
           strapi: '0.0.0',
         },
       },
-      app: {
+      server: {
         use,
       },
     });
@@ -43,7 +43,7 @@ describe('metrics', () => {
           strapi: '0.0.0',
         },
       },
-      app: {
+      server: {
         use,
       },
     });
@@ -63,7 +63,7 @@ describe('metrics', () => {
           strapi: '0.0.0',
         },
       },
-      app: {
+      server: {
         use() {},
       },
     });
@@ -96,7 +96,7 @@ describe('metrics', () => {
           strapi: '0.0.0',
         },
       },
-      app: {
+      server: {
         use() {},
       },
     });

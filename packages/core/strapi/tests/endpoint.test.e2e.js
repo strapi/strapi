@@ -2,7 +2,7 @@
 
 // Helpers.
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const modelsUtils = require('../../../../test/helpers/models');
 
@@ -29,7 +29,7 @@ describe('Create Strapi API End to End', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {

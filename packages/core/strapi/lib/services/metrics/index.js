@@ -34,7 +34,7 @@ const createTelemetryInstance = strapi => {
     const pingCron = scheduleJob('0 0 12 * * *', () => sendEvent('ping'));
     crons.push(pingCron);
 
-    strapi.app.use(createMiddleware({ sendEvent }));
+    strapi.server.use(createMiddleware({ sendEvent }));
   }
 
   if (strapi.EE === true && ee.isEE === true) {

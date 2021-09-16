@@ -23,9 +23,9 @@ module.exports = strapi => {
      * Initialize the hook
      */
     initialize() {
-      strapi.app.context.log = strapi.log;
+      strapi.server.app.context.log = strapi.log;
 
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         const start = Date.now();
         await next();
         const delta = Math.ceil(Date.now() - start);

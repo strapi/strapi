@@ -31,9 +31,9 @@ module.exports = createPolicyFactory(
     );
 
     return (ctx, next) => {
-      const { userAbility: ability, isAuthenticatedAdmin } = ctx.state;
+      const { userAbility: ability, isAuthenticated } = ctx.state;
 
-      if (!isAuthenticatedAdmin || !ability) {
+      if (!isAuthenticated || !ability) {
         return next();
       }
 

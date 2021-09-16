@@ -11,7 +11,7 @@ module.exports = strapi => {
      */
 
     initialize() {
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         const start = Date.now();
 
         await next();

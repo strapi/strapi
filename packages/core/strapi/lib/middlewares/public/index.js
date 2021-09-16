@@ -33,6 +33,7 @@ module.exports = strapi => {
         const serveIndexPage = async (ctx, next) => {
           // defer rendering of strapi index page
           await next();
+
           if (ctx.body != null || ctx.status !== 404) return;
 
           ctx.url = 'index.html';
@@ -61,38 +62,69 @@ module.exports = strapi => {
           ctx.body = body;
         };
 
-        strapi.router.get('/', serveIndexPage);
-        strapi.router.get('/index.html', serveIndexPage);
-        strapi.router.get(
-          '/assets/images/(.*)',
-          serveStatic(path.resolve(__dirname, 'assets/images'), { maxage: maxAge, defer: true })
-        );
+        strapi.server.routes([
+          {
+            method: 'GET',
+            path: '/',
+            handler: serveIndexPage,
+            config: { auth: false },
+          },
+          {
+            method: 'GET',
+            path: '/index.html',
+            handler: serveIndexPage,
+            config: { auth: false },
+          },
+          {
+            method: 'GET',
+            path: '/assets/images/(.*)',
+            handler: serveStatic(path.resolve(__dirname, 'assets/images'), {
+              maxage: maxAge,
+              defer: true,
+            }),
+            config: { auth: false },
+          },
+          {
+            method: 'GET',
+            path: '/(.*)',
+            handler: koaStatic(staticDir, {
+              maxage: maxAge,
+              defer: true,
+            }),
+            config: { auth: false },
+          },
+        ]);
       }
-
-      // serve files in public folder unless a sub router renders something else
-      strapi.router.get(
-        '/(.*)',
-        koaStatic(staticDir, {
-          maxage: maxAge,
-          defer: true,
-        })
-      );
 
       if (!strapi.config.serveAdminPanel) return;
 
       const buildDir = path.resolve(strapi.dir, 'build');
-      const serveAdmin = ctx => {
+      const serveAdmin = async (ctx, next) => {
+        await next();
+
+        if (ctx.method !== 'HEAD' && ctx.method !== 'GET') {
+          return;
+        }
+
+        if (ctx.body != null || ctx.status !== 404) {
+          return;
+        }
+
         ctx.type = 'html';
         ctx.body = fs.createReadStream(path.join(buildDir + '/index.html'));
       };
 
-      strapi.router.get(
-        `${strapi.config.admin.path}/*`,
-        serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' })
-      );
-
-      strapi.router.get(`${strapi.config.admin.path}`, serveAdmin);
-      strapi.router.get(`${strapi.config.admin.path}/*`, serveAdmin);
+      strapi.server.routes([
+        {
+          method: 'GET',
+          path: `${strapi.config.admin.path}/:path*`,
+          handler: [
+            serveAdmin,
+            serveStatic(buildDir, { maxage: maxAge, defer: false, index: 'index.html' }),
+          ],
+          config: { auth: false },
+        },
+      ]);
     },
   };
 };

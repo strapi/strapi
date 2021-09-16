@@ -1,7 +1,7 @@
 'use strict';
 
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 
 const builder = createTestBuilder();
@@ -152,7 +152,7 @@ describe('Publication State', () => {
       .build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+    rq = await createContentAPIRequest({ strapi });
 
     Object.assign(data, builder.sanitizedFixtures(strapi));
   });
