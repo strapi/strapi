@@ -253,10 +253,12 @@ const createQueryBuilder = (uid, db) => {
         qb.groupBy(state.groupBy);
       }
 
+      // if there are joins and it is a delete or update use a sub query
       if (state.where) {
         helpers.applyWhere(qb, state.where);
       }
 
+      // if there are joins and it is a delete or update use a sub query
       if (state.search) {
         qb.where(subQb => {
           helpers.applySearch(subQb, state.search, { alias: this.alias, db, uid });

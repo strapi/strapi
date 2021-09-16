@@ -19,8 +19,6 @@ const OPERATORS = [
   '$null',
   '$notNull',
   '$between',
-  // '$like',
-  // '$regexp',
   '$startsWith',
   '$endsWith',
   '$contains',
@@ -214,17 +212,6 @@ const applyOperator = (qb, column, operator, value) => {
       qb.whereBetween(column, value);
       break;
     }
-    // case '$regexp': {
-    //   // TODO:
-    //
-    // break;
-    // }
-    // // string
-    // // TODO: use $case to make it case insensitive
-    // case '$like': {
-    //   qb.where(column, 'like', value);
-    // break;
-    // }
 
     // TODO: add casting logic
     case '$startsWith': {
@@ -316,9 +303,10 @@ const applyWhere = (qb, where) => {
 
 const fieldLowerFn = qb => {
   // Postgres requires string to be passed
-  if (qb.client.config.client === 'pg') {
+  if (qb.client.config.client === 'postgres') {
     return 'LOWER(CAST(?? AS VARCHAR))';
   }
+
   return 'LOWER(??)';
 };
 
