@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -12,18 +12,22 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
+  CardTimer,
 } from '@strapi/parts/Card';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import { useIntl } from 'react-intl';
-import { getTrad } from '../../../utils';
+import { VideoPreview } from './VideoPreview';
+import { getTrad, formatDuration } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) => {
+export const VideoAssetCard = ({ name, extension, url, mime }) => {
   const { formatMessage } = useIntl();
+  const [duration, setDuration] = useState();
+  const formattedDuration = duration ? formatDuration(duration) : undefined;
 
   return (
     <Card>
@@ -35,27 +39,29 @@ export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) =>
             icon={<EditIcon />}
           />
         </CardAction>
-        <CardAsset src={thumbnail} />
+        <CardAsset>
+          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} />
+        </CardAsset>
+        <CardTimer>{formattedDuration || '...'}</CardTimer>
       </CardHeader>
       <CardBody>
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
-            <Extension>{extension}</Extension> - {height}✕{width}
+            <Extension>{extension}</Extension>
           </CardSubtitle>
         </CardContent>
         <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.image.label'), defaultMessage: 'Image' })}
+          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Doc' })}
         </CardBadge>
       </CardBody>
     </Card>
   );
 };
 
-ImageAssetCard.propTypes = {
+VideoAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
-  height: PropTypes.number.isRequired,
+  mime: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  width: PropTypes.number.isRequired,
-  thumbnail: PropTypes.string.isRequired,
+  url: PropTypes.string.isRequired,
 };

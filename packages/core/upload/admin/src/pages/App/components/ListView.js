@@ -3,9 +3,9 @@ import PropTypes from 'prop-types';
 import { GridLayout } from '@strapi/parts/Layout';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-plugin';
-import { ImageAssetCard } from './ImageAssetCard';
-import { VideoAssetCard } from './VideoAssetCard';
-import { DocAssetCard } from './DocAssetCard';
+import { ImageAssetCard } from '../../../components/AssetCard/ImageAssetCard';
+import { VideoAssetCard } from '../../../components/AssetCard/VideoAssetCard';
+import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
 
 export const ListView = ({ assets }) => {
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -12,22 +12,25 @@ import {
   CardHeader,
   CardTitle,
   CardSubtitle,
-  CardTimer,
 } from '@strapi/parts/Card';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
+import IconDocumentation from '@strapi/icons/IconDocumentation';
 import { useIntl } from 'react-intl';
-import { VideoPreview } from './VideoPreview';
-import { getTrad, formatDuration } from '../../../utils';
+import { getTrad } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const VideoAssetCard = ({ name, extension, url, mime }) => {
+const IconWrapper = styled.span`
+  svg {
+    font-size: 3rem;
+  }
+`;
+
+export const DocAssetCard = ({ name, extension }) => {
   const { formatMessage } = useIntl();
-  const [duration, setDuration] = useState();
-  const formattedDuration = duration ? formatDuration(duration) : undefined;
 
   return (
     <Card>
@@ -40,9 +43,10 @@ export const VideoAssetCard = ({ name, extension, url, mime }) => {
           />
         </CardAction>
         <CardAsset>
-          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} />
+          <IconWrapper>
+            <IconDocumentation aria-label={name} />
+          </IconWrapper>
         </CardAsset>
-        <CardTimer>{formattedDuration || '...'}</CardTimer>
       </CardHeader>
       <CardBody>
         <CardContent>
@@ -52,16 +56,14 @@ export const VideoAssetCard = ({ name, extension, url, mime }) => {
           </CardSubtitle>
         </CardContent>
         <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Doc' })}
+          {formatMessage({ id: getTrad('settings.section.doc.label'), defaultMessage: 'Doc' })}
         </CardBadge>
       </CardBody>
     </Card>
   );
 };
 
-VideoAssetCard.propTypes = {
+DocAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
-  mime: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  url: PropTypes.string.isRequired,
 };

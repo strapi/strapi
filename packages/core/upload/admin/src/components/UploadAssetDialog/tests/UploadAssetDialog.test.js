@@ -52,13 +52,6 @@ describe('', () => {
         padding-left: 20px;
       }
 
-      .c11 {
-        padding-top: 24px;
-        padding-right: 40px;
-        padding-bottom: 24px;
-        padding-left: 40px;
-      }
-
       .c1 {
         position: absolute;
         z-index: 3;
@@ -86,20 +79,6 @@ describe('', () => {
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c23 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -159,14 +138,6 @@ describe('', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c22 {
-        border-top: 1px solid #eaeaef;
-      }
-
-      .c24 > * + * {
-        margin-left: 8px;
-      }
-
       .c7 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -179,146 +150,6 @@ describe('', () => {
         line-height: 1.14;
       }
 
-      .c28 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c25 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c25 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #ffffff;
-      }
-
-      .c25[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c26 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #dcdce4;
-        background: #ffffff;
-      }
-
-      .c26 .c27 {
-        color: #ffffff;
-      }
-
-      .c26[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c26[aria-disabled='true'] .c27 {
-        color: #666687;
-      }
-
-      .c26[aria-disabled='true'] svg > g,
-      .c26[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c26[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c26[aria-disabled='true']:active .c27 {
-        color: #666687;
-      }
-
-      .c26[aria-disabled='true']:active svg > g,
-      .c26[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c26:hover {
-        background-color: #f6f6f9;
-      }
-
-      .c26:active {
-        background-color: #eaeaef;
-      }
-
-      .c26 .c27 {
-        color: #32324d;
-      }
-
-      .c26 svg > g,
-      .c26 svg path {
-        fill: #32324d;
-      }
-
-      .c29 {
-        padding: 8px 16px;
-        background: #4945ff;
-        border: none;
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
-      .c29 .c27 {
-        color: #ffffff;
-      }
-
-      .c29[aria-disabled='true'] {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c29[aria-disabled='true'] .c27 {
-        color: #666687;
-      }
-
-      .c29[aria-disabled='true'] svg > g,
-      .c29[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c29[aria-disabled='true']:active {
-        border: 1px solid #dcdce4;
-        background: #eaeaef;
-      }
-
-      .c29[aria-disabled='true']:active .c27 {
-        color: #666687;
-      }
-
-      .c29[aria-disabled='true']:active svg > g,
-      .c29[aria-disabled='true']:active svg path {
-        fill: #666687;
-      }
-
-      .c29:hover {
-        border: 1px solid #7b79ff;
-        background: #7b79ff;
-      }
-
-      .c29:active {
-        border: 1px solid #4945ff;
-        background: #4945ff;
-      }
-
       .c19 {
         background: #eaeaef;
       }
@@ -327,6 +158,17 @@ describe('', () => {
         height: 1px;
         border: none;
         margin: 0;
+      }
+
+      .c11 {
+        padding-top: 24px;
+        padding-right: 40px;
+        padding-left: 40px;
+      }
+
+      .c21 {
+        padding-top: 16px;
+        padding-bottom: 16px;
       }
 
       .c14 {
@@ -365,11 +207,6 @@ describe('', () => {
 
       .c17 {
         border-bottom: 2px solid transparent;
-      }
-
-      .c21 {
-        padding-top: 16px;
-        padding-bottom: 16px;
       }
 
       <body
@@ -443,10 +280,10 @@ describe('', () => {
                     </button>
                   </div>
                 </div>
-                <div
-                  class="c11"
-                >
-                  <div>
+                <div>
+                  <div
+                    class="c11"
+                  >
                     <div
                       aria-label="How do you want to upload your assets?"
                       role="tablist"
@@ -490,55 +327,19 @@ describe('', () => {
                     <hr
                       class="c19 c20"
                     />
-                    <div>
-                      <div
-                        aria-labelledby="tabgroup-1-0-tab"
-                        id="tabgroup-1-0-tabpanel"
-                        role="tabpanel"
-                        tabindex="0"
-                      >
-                        <div
-                          class="c21"
-                        >
-                          From URL form
-                        </div>
-                      </div>
-                    </div>
                   </div>
-                </div>
-                <div
-                  class="c4 c22"
-                >
-                  <div
-                    class="c6"
-                  >
+                  <div>
                     <div
-                      class="c23 c24"
+                      aria-labelledby="tabgroup-1-0-tab"
+                      id="tabgroup-1-0-tabpanel"
+                      role="tabpanel"
+                      tabindex="0"
                     >
-                      <button
-                        aria-disabled="false"
-                        class="c25 c26"
-                        type="button"
+                      <div
+                        class="c21"
                       >
-                        <span
-                          class="c27 c28"
-                        />
-                      </button>
-                    </div>
-                    <div
-                      class="c23 c24"
-                    >
-                      <button
-                        aria-disabled="false"
-                        class="c25 c29"
-                        type="button"
-                      >
-                        <span
-                          class="c27 c28"
-                        >
-                          Upload {number} asset to the library
-                        </span>
-                      </button>
+                        From computer form
+                      </div>
                     </div>
                   </div>
                 </div>

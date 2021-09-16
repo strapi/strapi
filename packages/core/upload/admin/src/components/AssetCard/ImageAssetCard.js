@@ -15,21 +15,14 @@ import {
 } from '@strapi/parts/Card';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
-import IconDocumentation from '@strapi/icons/IconDocumentation';
 import { useIntl } from 'react-intl';
-import { getTrad } from '../../../utils';
+import { getTrad } from '../../utils';
 
 const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-const IconWrapper = styled.span`
-  svg {
-    font-size: 3rem;
-  }
-`;
-
-export const DocAssetCard = ({ name, extension }) => {
+export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -42,28 +35,27 @@ export const DocAssetCard = ({ name, extension }) => {
             icon={<EditIcon />}
           />
         </CardAction>
-        <CardAsset>
-          <IconWrapper>
-            <IconDocumentation aria-label={name} />
-          </IconWrapper>
-        </CardAsset>
+        <CardAsset src={thumbnail} />
       </CardHeader>
       <CardBody>
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
-            <Extension>{extension}</Extension>
+            <Extension>{extension}</Extension> - {height}✕{width}
           </CardSubtitle>
         </CardContent>
         <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.doc.label'), defaultMessage: 'Doc' })}
+          {formatMessage({ id: getTrad('settings.section.image.label'), defaultMessage: 'Image' })}
         </CardBadge>
       </CardBody>
     </Card>
   );
 };
 
-DocAssetCard.propTypes = {
+ImageAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
+  height: PropTypes.number.isRequired,
   name: PropTypes.string.isRequired,
+  width: PropTypes.number.isRequired,
+  thumbnail: PropTypes.string.isRequired,
 };

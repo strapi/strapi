@@ -21,6 +21,7 @@
   "form.upload-url.error.url.invalid": "One URL is invalid",
   "form.upload-url.error.url.invalids": "{number} URLs are invalids",
   "header.actions.upload-assets": "Upload assets",
+  "header.actions.upload-new-asset": "Upload new asset",
   "header.content.assets-empty": "No assets",
   "header.content.assets-multiple": "{number} assets",
   "header.content.assets-single": "1 asset",
