@@ -51,6 +51,14 @@ class SqliteDialect extends Dialect {
     }
   }
 
+  async startSchemaUpdate() {
+    await this.db.connection.raw(`pragma foreign_keys = off`);
+  }
+
+  async endSchemaUpdate() {
+    await this.db.connection.raw(`pragma foreign_keys = on`);
+  }
+
   transformErrors(error) {
     switch (error.errno) {
       case 19: {

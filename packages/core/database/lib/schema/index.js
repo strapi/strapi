@@ -1,6 +1,5 @@
 'use strict';
 
-const util = require('util');
 const createSchemaBuilder = require('./builder');
 const createSchemaStorage = require('./schema-storage');
 const createSchemaDiff = require('./schema-diff');
@@ -82,32 +81,6 @@ const createSchemaProvider = db => {
 
       // diff schema
       const { status, diff } = this.schemaDiff.diff(schemaInspect, currentSchema);
-
-      console.log('added :', diff.tables.added.length);
-      console.log('removed :', diff.tables.removed.length);
-      console.log('unchanged :', diff.tables.unchanged.length);
-      console.log('updated :', diff.tables.updated.length);
-
-      diff.tables.updated.forEach(table => {
-        console.log(table.name);
-
-        console.log('\tCOLUMNS:');
-        table.columns.updated.forEach(column => {
-          console.log(`\t\t${column.name}`);
-        });
-
-        console.log('\tINDEXES:');
-        table.indexes.updated.forEach(index => {
-          console.log(`\t\t${index.name}`);
-        });
-
-        console.log('\tFKS:');
-        table.foreignKeys.updated.forEach(fk => {
-          console.log(`\t\t${fk.name}`);
-        });
-      });
-
-      console.log(util.inspect(diff, null, null, true));
 
       if (status === 'UNCHANGED') {
         return;

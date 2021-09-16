@@ -149,8 +149,8 @@ class SqliteSchemaInspector {
           columns: [fk.from],
           referencedColumns: [fk.to],
           referencedTable: fk.table,
-          onUpdate: fk.on_update.toLowerCase(),
-          onDelete: fk.on_delete.toLowerCase(),
+          onUpdate: fk.on_update.toUpperCase(),
+          onDelete: fk.on_delete.toUpperCase(),
         };
       } else {
         ret[fk.id].columns.push(fk.from);

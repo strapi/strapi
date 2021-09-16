@@ -1,8 +1,15 @@
 'use strict';
 
 const { Dialect } = require('../dialect');
+const MysqlSchemaInspector = require('./schema-inspector');
 
 class MysqlDialect extends Dialect {
+  constructor(db) {
+    super(db);
+
+    this.schemaInspector = new MysqlSchemaInspector(db);
+  }
+
   configure() {
     this.db.config.connection.connection.supportBigNumbers = true;
     this.db.config.connection.connection.bigNumberStrings = true;
@@ -18,6 +25,14 @@ class MysqlDialect extends Dialect {
       }
       return next();
     };
+  }
+
+  async startSchemaUpdate() {
+    await this.db.connection.raw(`set foreign_key_checks = 0;`);
+  }
+
+  async endSchemaUpdate() {
+    await this.db.connection.raw(`set foreign_key_checks = 1;`);
   }
 
   supportsUnsigned() {

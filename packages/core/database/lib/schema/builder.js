@@ -73,6 +73,7 @@ module.exports = db => {
      */
     // TODO: implement force option to disable removal in DB
     async updateSchema(schemaDiff) {
+      await db.dialect.startSchemaUpdate();
       await db.connection.transaction(async trx => {
         await this.createTables(schemaDiff.tables.added, trx);
 
@@ -99,6 +100,8 @@ module.exports = db => {
           await helpers.alterTable(schemaBuilder, table);
         }
       });
+
+      await db.dialect.endSchemaUpdate();
     },
   };
 };

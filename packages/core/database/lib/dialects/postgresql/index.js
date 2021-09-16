@@ -23,6 +23,17 @@ class PostgresDialect extends Dialect {
     return true;
   }
 
+  getSqlType(type) {
+    switch (type) {
+      case 'timestamp': {
+        return 'datetime';
+      }
+      default: {
+        return type;
+      }
+    }
+  }
+
   transformErrors(error) {
     switch (error.code) {
       case '23502': {

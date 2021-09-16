@@ -7,7 +7,7 @@ const SQL_QUERIES = {
     WHERE table_schema = ? AND table_type = 'BASE TABLE';
   `,
   LIST_COLUMNS: /* sql */ `
-    SELECT *
+    SELECT data_type, column_name, character_maximum_length, column_default, is_nullable
     FROM information_schema.columns
     WHERE table_schema = ?
       AND table_name = ?;
@@ -37,13 +37,12 @@ const SQL_QUERIES = {
   `,
   FOREIGN_KEY_LIST: /* sql */ `
     SELECT
-      tco."constraint_name" as contraint_name,
+      tco."constraint_name" as constraint_name,
       kcu."column_name" as column_name,
       rel_kcu."table_name" as foreign_table,
       rel_kcu."column_name" as fk_column_name,
       rco.update_rule as on_update,
-      rco.delete_rule as on_delete,
-      *
+      rco.delete_rule as on_delete
     FROM information_schema.table_constraints tco
     JOIN information_schema.key_column_usage kcu
       ON tco.constraint_schema = kcu.constraint_schema
@@ -64,26 +63,6 @@ const SQL_QUERIES = {
 };
 
 const toStrapiType = column => {
-  // 'int2': 'smallint',
-  // 'smallserial': 'smallint',
-  // 'int': 'integer',
-  // 'int4': 'integer',
-  // 'serial': 'integer',
-  // 'serial4': 'integer',
-  // 'int8': 'bigint',
-  // 'bigserial': 'bigint',
-  // 'serial8': 'bigint',
-  // 'numeric': 'decimal',
-  // 'bool': 'boolean',
-  // 'real': 'float',
-  // 'float4': 'float',
-  // 'float8': 'double',
-  // 'timestamp': 'datetime',
-  // 'timestamptz': 'datetime',
-  // 'bytea': 'blob',
-  // 'jsonb': 'json',
-  // 'character varying': 'varchar',
-
   const rootType = column.data_type.toLowerCase().match(/[^(), ]+/)[0];
 
   switch (rootType) {
@@ -113,8 +92,11 @@ const toStrapiType = column => {
     case 'time': {
       return { type: 'time', args: [{ precision: 3 }] };
     }
-    case 'double':
     case 'numeric': {
+      return { type: 'decimal', args: [10, 2] };
+    }
+    case 'real':
+    case 'double': {
       return { type: 'float', args: [10, 2] };
     }
     case 'bigint': {
@@ -124,8 +106,6 @@ const toStrapiType = column => {
       return { type: 'jsonb' };
     }
     default: {
-      console.log(rootType);
-
       return { type: 'specificType', args: [column.data_type] };
     }
   }
@@ -138,20 +118,23 @@ class PostgresqlSchemaInspector {
 
   async getSchema() {
     const schema = { tables: [] };
+
     const tables = await this.getTables();
 
-    for (const tableName of tables) {
-      const columns = await this.getColumns(tableName);
-      const indexes = await this.getIndexes(tableName);
-      const foreignKeys = await this.getForeignKeys(tableName);
+    schema.tables = await Promise.all(
+      tables.map(async tableName => {
+        const columns = await this.getColumns(tableName);
+        const indexes = await this.getIndexes(tableName);
+        const foreignKeys = await this.getForeignKeys(tableName);
 
-      schema.tables.push({
-        name: tableName,
-        columns,
-        indexes,
-        foreignKeys,
-      });
-    }
+        return {
+          name: tableName,
+          columns,
+          indexes,
+          foreignKeys,
+        };
+      })
+    );
 
     return schema;
   }
@@ -209,7 +192,6 @@ class PostgresqlSchemaInspector {
         ret[index.indexrelid] = {
           columns: [index.column_name],
           name: index.index_name,
-          // TODO: find other index types
           type: index.is_primary ? 'primary' : index.is_unique ? 'unique' : null,
         };
       } else {
@@ -235,8 +217,8 @@ class PostgresqlSchemaInspector {
           columns: [fk.column_name],
           referencedColumns: [fk.fk_column_name],
           referencedTable: fk.foreign_table,
-          onUpdate: fk.on_update.toLowerCase(),
-          onDelete: fk.on_delete.toLowerCase(),
+          onUpdate: fk.on_update.toUpperCase(),
+          onDelete: fk.on_delete.toUpperCase(),
         };
       } else {
         ret[fk.constraint_name].columns.push(fk.column_name);

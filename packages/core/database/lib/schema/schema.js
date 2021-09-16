@@ -70,6 +70,11 @@ const createTable = meta => {
           // NOTE: could allow configuration
           onDelete: 'SET NULL',
         });
+
+        table.indexes.push({
+          name: `${table.name}_${columnName}_fk`,
+          columns: [columnName],
+        });
       }
     } else if (shouldCreateColumn(attribute)) {
       const column = createColumn(key, meta.attributes[key]);

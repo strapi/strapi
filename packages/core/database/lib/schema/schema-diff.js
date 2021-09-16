@@ -43,50 +43,72 @@ const helpers = {
 module.exports = db => {
   const hasChangedStatus = diff => diff.status === statuses.CHANGED;
 
-  const diffProperties = (srcObject, destObject) => {
-    const addedProperties = [];
-    const updatedProperties = [];
-    const unchangedProperties = [];
-    const removedProperties = [];
+  /**
+   * Compares two indexes info
+   * @param {Object} oldIndex - index info read from DB
+   * @param {Object} index - newly generate index info
+   */
+  const diffIndexes = (oldIndex, index) => {
+    const changes = [];
 
-    for (const key in destObject) {
-      const value = destObject[key];
-
-      if (_.has(key, srcObject)) {
-        const srcValue = srcObject[key];
-
-        if (_.isEqual(srcValue, value)) {
-          unchangedProperties.push({ key, value });
-        } else {
-          updatedProperties.push({ key, oldValue: srcValue, value });
-        }
-      } else {
-        addedProperties.push({ key, value });
-      }
+    if (_.difference(oldIndex.columns, index.columns).length > 0) {
+      changes.push('columns');
     }
 
-    for (const key in srcObject) {
-      const value = srcObject[key];
-
-      if (!_.has(key, destObject)) {
-        removedProperties.push({ key, oldValue: value });
-      }
+    if (_.toLower(oldIndex.type) !== _.toLower(index.type)) {
+      changes.push('type');
     }
-
-    const hasChanged = [addedProperties, updatedProperties, removedProperties].some(
-      arr => arr.length > 0
-    );
 
     return {
-      status: hasChanged ? statuses.CHANGED : statuses.UNCHANGED,
+      status: changes.length > 0 ? statuses.CHANGED : statuses.UNCHANGED,
       diff: {
-        name: destObject.name,
-        object: destObject,
-        // NOTE: maybe put into properties: {}
-        added: addedProperties,
-        updated: updatedProperties,
-        unchanged: unchangedProperties,
-        removed: removedProperties,
+        name: index.name,
+        object: index,
+      },
+    };
+  };
+
+  /**
+   * Compares two foreign keys info
+   * @param {Object} oldForeignKey - foreignKey info read from DB
+   * @param {Object} foreignKey - newly generate foreignKey info
+   */
+  const diffForeignKeys = (oldForeignKey, foreignKey) => {
+    const changes = [];
+
+    if (_.difference(oldForeignKey.columns, foreignKey.columns).length > 0) {
+      changes.push('columns');
+    }
+
+    if (_.difference(oldForeignKey.referencedColumns, foreignKey.referencedColumns).length > 0) {
+      changes.push('referencedColumns');
+    }
+
+    if (oldForeignKey.referencedTable !== foreignKey.referencedTable) {
+      changes.push('referencedTable');
+    }
+
+    if (_.isNil(oldForeignKey.onDelete) || _.toUpper(oldForeignKey.onDelete) === 'NO ACTION') {
+      if (!_.isNil(foreignKey.onDelete) && _.toUpper(oldForeignKey.onDelete) !== 'NO ACTION') {
+        changes.push('onDelete');
+      }
+    } else if (_.toUpper(oldForeignKey.onDelete) !== _.toUpper(foreignKey.onDelete)) {
+      changes.push('onDelete');
+    }
+
+    if (_.isNil(oldForeignKey.onUpdate) || _.toUpper(oldForeignKey.onUpdate) === 'NO ACTION') {
+      if (!_.isNil(foreignKey.onUpdate) && _.toUpper(oldForeignKey.onUpdate) !== 'NO ACTION') {
+        changes.push('onUpdate');
+      }
+    } else if (_.toUpper(oldForeignKey.onUpdate) !== _.toUpper(foreignKey.onUpdate)) {
+      changes.push('onUpdate');
+    }
+
+    return {
+      status: changes.length > 0 ? statuses.CHANGED : statuses.UNCHANGED,
+      diff: {
+        name: foreignKey.name,
+        object: foreignKey,
       },
     };
   };
@@ -99,11 +121,10 @@ module.exports = db => {
       return _.isNil(defaultTo) || _.toLower(defaultTo) === 'null';
     }
 
-    if (!_.isNil(oldDefaultTo) && !_.isNil(defaultTo)) {
-      return _.toLower(oldDefaultTo) === _.toLower(`'${column.defaultTo}'`);
-    }
-
-    return oldDefaultTo === defaultTo;
+    return (
+      _.toLower(oldDefaultTo) === _.toLower(column.defaultTo) ||
+      _.toLower(oldDefaultTo) === _.toLower(`'${column.defaultTo}'`)
+    );
   };
 
   /**
@@ -122,7 +143,7 @@ module.exports = db => {
       changes.push('type');
     }
 
-    if (!_.isEqual(oldColumn.args, column.args) && !['increments', 'enum'].includes(type)) {
+    if (!_.isEqual(oldColumn.args, column.args) && !['increments', 'enum'].includes(column.type)) {
       changes.push('args');
     }
 
@@ -137,10 +158,6 @@ module.exports = db => {
 
     if (oldColumn.unsigned !== column.unsigned && db.dialect.supportsUnsigned()) {
       changes.push('unsigned');
-    }
-
-    if (changes.length > 0) {
-      console.log(`Changes in ${column.name}, ${changes}`);
     }
 
     return {
@@ -202,7 +219,7 @@ module.exports = db => {
     for (const destIndex of destTable.indexes) {
       if (helpers.hasIndex(srcTable, destIndex.name)) {
         const srcIndex = helpers.findIndex(srcTable, destIndex.name);
-        const { status, diff } = diffProperties(srcIndex, destIndex);
+        const { status, diff } = diffIndexes(srcIndex, destIndex);
 
         if (status === statuses.CHANGED) {
           updatedIndexes.push(diff);
@@ -254,7 +271,7 @@ module.exports = db => {
     for (const destForeignKey of destTable.foreignKeys) {
       if (helpers.hasForeignKey(srcTable, destForeignKey.name)) {
         const srcForeignKey = helpers.findForeignKey(srcTable, destForeignKey.name);
-        const { status, diff } = diffProperties(srcForeignKey, destForeignKey);
+        const { status, diff } = diffForeignKeys(srcForeignKey, destForeignKey);
 
         if (status === statuses.CHANGED) {
           updatedForeignKeys.push(diff);
@@ -313,7 +330,6 @@ module.exports = db => {
 
     for (const destTable of destSchema.tables) {
       if (helpers.hasTable(srcSchema, destTable.name)) {
-        // either changed or unchanged
         const srcTable = helpers.findTable(srcSchema, destTable.name);
 
         const { status, diff } = diffTables(srcTable, destTable);
@@ -329,7 +345,7 @@ module.exports = db => {
     }
 
     for (const srcTable of srcSchema.tables) {
-      if (!helpers.hasTable(destSchema, srcTable.name)) {
+      if (!helpers.hasTable(destSchema, srcTable.name) && srcTable.name !== 'strapi_migrations') {
         removedTables.push(srcTable);
       }
     }

@@ -235,6 +235,12 @@ const createMorphToMany = (attributeName, attribute, meta, metadata) => {
         },
       },
     },
+    indexes: [
+      {
+        name: `${joinTableName}_fk`,
+        columns: [joinColumnName],
+      },
+    ],
     foreignKeys: [
       {
         name: `${joinTableName}_fk`,
@@ -415,6 +421,16 @@ const createJoinTable = (metadata, { attributeName, attribute, meta }) => {
       },
       // TODO: add extra pivot attributes -> user should use an intermediate entity
     },
+    indexes: [
+      {
+        name: `${joinTableName}_fk`,
+        columns: [joinColumnName],
+      },
+      {
+        name: `${joinTableName}_inv_fk`,
+        columns: [inverseJoinColumnName],
+      },
+    ],
     foreignKeys: [
       {
         name: `${joinTableName}_fk`,

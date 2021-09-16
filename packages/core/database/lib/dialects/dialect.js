@@ -28,6 +28,9 @@ class Dialect {
     return false;
   }
 
+  async startSchemaUpdate() {}
+  async endSchemaUpdate() {}
+
   // TODO: pass query info to display some more metadata
   transformErrors(error) {
     if (error instanceof Error) {
