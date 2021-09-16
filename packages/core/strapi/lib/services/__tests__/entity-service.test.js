@@ -71,7 +71,7 @@ describe('Entity service', () => {
       expect(fakeStrapi.getModel).toHaveBeenCalledWith('test-model');
 
       expect(fakeDB.query).toHaveBeenCalledWith('test-model');
-      expect(fakeQuery.findOne).toHaveBeenCalledWith({ limit: 10 });
+      expect(fakeQuery.findOne).toHaveBeenCalledWith({});
       expect(result).toEqual(data);
     });
   });
