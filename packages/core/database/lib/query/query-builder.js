@@ -191,6 +191,18 @@ const createQueryBuilder = (uid, db) => {
         this.select('*');
       }
 
+      if (['delete', 'update'].includes(state.type) && state.joins.length > 0) {
+        this.select('id');
+        const subQB = this.getKnexQuery();
+
+        const nestedSubQuery = db.connection.select('id').from(subQB.as('subQuery'));
+
+        return db
+          .connection(tableName)
+          [state.type]()
+          .whereIn('id', nestedSubQuery);
+      }
+
       switch (state.type) {
         case 'select': {
           if (state.select.length === 0) {
@@ -223,12 +235,14 @@ const createQueryBuilder = (uid, db) => {
         }
         case 'update': {
           qb.update(state.data);
-
           break;
         }
         case 'delete': {
           qb.del();
-
+          break;
+        }
+        case 'truncate': {
+          db.truncate();
           break;
         }
       }
