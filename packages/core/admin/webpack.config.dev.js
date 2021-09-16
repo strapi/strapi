@@ -23,7 +23,16 @@ module.exports = () => {
   const args = {
     entry,
     cacheDir: __dirname,
-    pluginsPath: [path.resolve(__dirname, '../../..')],
+    pluginsPath: [
+      path.resolve(__dirname, '../../../packages/plugins/documentation'),
+      path.resolve(__dirname, '../../../packages/plugins/graphql'),
+      path.resolve(__dirname, '../../../packages/plugins/i18n'),
+      path.resolve(__dirname, '../../../packages/plugins/sentry'),
+      path.resolve(__dirname, '../../../packages/plugins/users-permissions'),
+      path.resolve(__dirname, '../content-type-builder'),
+      path.resolve(__dirname, '../helper-plugin'),
+      path.resolve(__dirname, '../upload'),
+    ],
     dest,
     env,
     options,
