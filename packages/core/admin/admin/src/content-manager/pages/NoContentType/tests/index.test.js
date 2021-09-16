@@ -263,7 +263,6 @@ describe('CONTENT MANAGER | pages | NoContentType', () => {
         tabindex="-1"
       >
         <div
-          class=""
           style="height: 0px;"
         >
           <div

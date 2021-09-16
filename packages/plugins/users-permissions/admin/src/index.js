@@ -59,7 +59,6 @@ export default {
           },
           permissions: pluginPermissions.readProviders,
         },
-
         {
           intlLabel: {
             id: getTrad('HeaderNav.link.emailTemplates'),
@@ -76,22 +75,22 @@ export default {
           },
           permissions: pluginPermissions.readEmailTemplates,
         },
-        // {
-        //   intlLabel: {
-        //     id: getTrad('HeaderNav.link.advancedSettings'),
-        //     defaultMessage: 'Advanced Settings',
-        //   },
-        //   id: 'advanced-settings',
-        //   to: `/settings/${pluginId}/advanced-settings`,
-        //   Component: async () => {
-        //     const component = await import(
-        //       /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
-        //     );
+        {
+          intlLabel: {
+            id: getTrad('HeaderNav.link.advancedSettings'),
+            defaultMessage: 'Advanced Settings',
+          },
+          id: 'advanced-settings',
+          to: `/settings/${pluginId}/advanced-settings`,
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "users-advanced-settings-page" */ './pages/AdvancedSettings'
+            );
 
-        //     return component;
-        //   },
-        //   permissions: pluginPermissions.readAdvancedSettings,
-        // },
+            return component;
+          },
+          permissions: pluginPermissions.readAdvancedSettings,
+        },
       ]
     );
 

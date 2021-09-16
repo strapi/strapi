@@ -405,7 +405,6 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
             tabindex="-1"
           >
             <div
-              class="c0 "
               style="height: 0px;"
             >
               <div

@@ -113,21 +113,6 @@ describe('<PageSizeURLQuery />', () => {
         margin-top: 4px;
       }
 
-      .c4 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c4:focus {
-        outline: none;
-      }
-
       .c3 {
         position: relative;
         border: 1px solid #dcdce4;
@@ -168,6 +153,21 @@ describe('<PageSizeURLQuery />', () => {
 
       .c11 svg {
         width: 0.375rem;
+      }
+
+      .c4 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c4:focus {
+        outline: none;
       }
 
       .c6 {

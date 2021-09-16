@@ -971,7 +971,6 @@ exports[`<ListView /> renders and matches the snapshot 1`] = `
 
 <div>
   <div
-    class="c0 "
     style="height: 0px;"
   >
     <div

@@ -668,7 +668,6 @@ describe('Admin | containers | RoleEditPage', () => {
           novalidate=""
         >
           <div
-            class=""
             style="height: 0px;"
           >
             <div

@@ -3,6 +3,7 @@ import { cloneDeep, get, isEmpty, isEqual, set } from 'lodash';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
 import { Prompt, Redirect } from 'react-router-dom';
+import { Main } from '@strapi/parts/Main';
 import {
   LoadingIndicatorPage,
   ContentManagerEditViewDataManagerContext,
@@ -426,14 +427,6 @@ const EditViewDataManagerProvider = ({
     });
   }, []);
 
-  // const overlayBlockerParams = useMemo(
-  //   () => ({
-  //     children: <div />,
-  //     noGradient: true,
-  //   }),
-  //   []
-  // );
-
   // Redirect the user to the previous page if he is not allowed to read/update a document
   if (shouldRedirectToHomepageWhenEditingEntry) {
     return <Redirect to={from} />;
@@ -477,13 +470,10 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        {/* <OverlayBlocker
-          key="overlayBlocker"
-          isOpen={status !== 'resolved'}
-          {...overlayBlockerParams}
-        /> */}
         {isLoadingForData ? (
-          <LoadingIndicatorPage />
+          <Main aria-busy="true">
+            <LoadingIndicatorPage />
+          </Main>
         ) : (
           <>
             <Prompt
@@ -506,7 +496,7 @@ EditViewDataManagerProvider.defaultProps = {
 EditViewDataManagerProvider.propTypes = {
   allLayoutData: PropTypes.object.isRequired,
   allowedActions: PropTypes.object.isRequired,
-  children: PropTypes.arrayOf(PropTypes.element).isRequired,
+  children: PropTypes.node.isRequired,
   componentsDataStructure: PropTypes.object.isRequired,
   contentTypeDataStructure: PropTypes.object.isRequired,
   createActionAllowedFields: PropTypes.array.isRequired,

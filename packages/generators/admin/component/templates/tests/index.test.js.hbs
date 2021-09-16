@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { render {{~#if useRedux}} as tlRender {{~/if}} } from '@testing-library/react';
+import { ThemeProvider, lightTheme } from '@strapi/parts';
 {{#if useRedux}}
   import { Provider } from 'react-redux';
   import { createStore, combineReducers } from 'redux';
@@ -49,11 +50,15 @@ describe('<{{name}} />', () => {
       container: { firstChild },
     } = render(
       {{#if useI18n}}
-        <IntlProvider locale="en" messages={messages} defaultLocale="en">
-          <{{name}} />
-        </IntlProvider>,
+        <ThemeProvider theme={lightTheme}>
+          <IntlProvider locale="en" messages={messages} defaultLocale="en">
+            <{{name}} />
+          </IntlProvider>
+        </ThemeProvider>
       {{else}}
-        <{{name}} />
+        <ThemeProvider theme={lightTheme}>
+          <{{name}} />
+        </ThemeProvider>
       {{/if}}
     );
 

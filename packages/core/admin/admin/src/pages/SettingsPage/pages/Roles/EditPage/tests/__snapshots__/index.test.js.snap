@@ -551,9 +551,7 @@ exports[`<EditPage /> renders and matches the snapshot 1`] = `
     tabindex="-1"
   >
     <form>
-      <div
-        class="c1 "
-      >
+      <div>
         <div
           class="c1 c2"
           data-strapi-header="true"
