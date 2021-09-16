@@ -14,6 +14,7 @@ import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import CheckIcon from '@strapi/icons/CheckIcon';
 import PropTypes from 'prop-types';
 import isEqualFastCompare from 'react-fast-compare';
 import { getTrad } from '../../../utils';
@@ -104,7 +105,13 @@ const Header = ({
     primaryAction = (
       <Row>
         {shouldShowPublishButton && (
-          <Button disabled={didChangeData} onClick={onClick} loading={isPublishButtonLoading}>
+          <Button
+            disabled={didChangeData}
+            loading={isPublishButtonLoading}
+            onClick={onClick}
+            startIcon={<CheckIcon />}
+            variant="secondary"
+          >
             {formatMessage(pubishButtonLabel)}
           </Button>
         )}

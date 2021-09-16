@@ -10,7 +10,11 @@ import PropTypes from 'prop-types';
 // CheckPermissions,
 // useTracking,
 // '@strapi/helper-plugin';
+import { ContentLayout } from '@strapi/parts/Layout';
+import { Box } from '@strapi/parts/Box';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Main } from '@strapi/parts/Main';
+import { Stack } from '@strapi/parts/Stack';
 
 // import { Padded } from '@buffetjs/core';
 // import { InjectionZone } from '../../../shared/components';
@@ -24,6 +28,7 @@ import { Main } from '@strapi/parts/Main';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
+import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Header from './Header';
 import {
   // createAttributesLayout,
@@ -132,6 +137,40 @@ const EditView = ({
           >
             <Main aria-busy={status !== 'resolved'}>
               <Header allowedActions={allowedActions} />
+              <ContentLayout>
+                <Grid gap={4}>
+                  <GridItem col={9} s={12}>
+                    <Box
+                      hasRadius
+                      background="neutral0"
+                      shadow="tableShadow"
+                      paddingLeft={8}
+                      paddingRight={8}
+                      paddingTop={6}
+                      paddingBottom={6}
+                    >
+                      inputs TODO
+                    </Box>
+                  </GridItem>
+                  <GridItem col={3} s={12}>
+                    <Stack size={2}>
+                      <DraftAndPublishBadge />
+                      <Box
+                        as="aside"
+                        background="neutral0"
+                        borderColor="neutral150"
+                        hasRadius
+                        paddingBottom={4}
+                        paddingLeft={4}
+                        paddingRight={4}
+                        paddingTop={6}
+                      >
+                        infos + InjectionZone
+                      </Box>
+                    </Stack>
+                  </GridItem>
+                </Grid>
+              </ContentLayout>
             </Main>
           </EditViewDataManagerProvider>
         );
