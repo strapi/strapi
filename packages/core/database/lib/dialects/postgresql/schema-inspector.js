@@ -97,7 +97,7 @@ const toStrapiType = column => {
     }
     case 'real':
     case 'double': {
-      return { type: 'float', args: [10, 2] };
+      return { type: 'double' };
     }
     case 'bigint': {
       return { type: 'bigInteger' };

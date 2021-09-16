@@ -56,8 +56,8 @@ const toStrapiType = column => {
     case 'decimal': {
       return { type: 'decimal', args: [10, 2] };
     }
-    case 'float': {
-      return { type: 'float', args: [10, 2] };
+    case 'double': {
+      return { type: 'double' };
     }
     case 'bigint': {
       return { type: 'bigInteger' };
@@ -90,7 +90,6 @@ const toStrapiType = column => {
     case 'timestamp': {
       return { type: 'timestamp', args: [{ useTz: false, precision: 6 }] };
     }
-
     case 'json': {
       return { type: 'jsonb' };
     }

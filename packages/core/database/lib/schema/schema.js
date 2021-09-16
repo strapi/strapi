@@ -154,7 +154,7 @@ const getColumnType = attribute => {
       return { type: 'bigInteger' };
     }
     case 'float': {
-      return { type: 'float', args: [10, 2] };
+      return { type: 'double' };
     }
     case 'decimal': {
       return { type: 'decimal', args: [10, 2] };

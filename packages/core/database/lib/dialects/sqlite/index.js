@@ -39,6 +39,7 @@ class SqliteDialect extends Dialect {
       case 'enum': {
         return 'text';
       }
+      case 'double':
       case 'decimal': {
         return 'float';
       }
