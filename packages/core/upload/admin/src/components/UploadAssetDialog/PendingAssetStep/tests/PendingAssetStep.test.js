@@ -52,7 +52,7 @@ describe('AddAssetTest', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c53 {
+      .c54 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -97,7 +97,7 @@ describe('AddAssetTest', () => {
         align-items: center;
       }
 
-      .c50 {
+      .c51 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -164,12 +164,17 @@ describe('AddAssetTest', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c49 {
+      .c50 {
         border-top: 1px solid #eaeaef;
       }
 
-      .c51 > * + * {
+      .c52 > * + * {
         margin-left: 8px;
+      }
+
+      .c8 {
+        overflow: auto;
+        max-height: 60vh;
       }
 
       .c3 {
@@ -179,14 +184,14 @@ describe('AddAssetTest', () => {
         color: #32324d;
       }
 
-      .c11 {
+      .c12 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c12 {
+      .c13 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -198,14 +203,14 @@ describe('AddAssetTest', () => {
         line-height: 1.14;
       }
 
-      .c16 {
+      .c17 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c13 {
+      .c14 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -217,21 +222,21 @@ describe('AddAssetTest', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c13 svg {
+      .c14 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c13 svg > g,
-      .c13 svg path {
+      .c14 svg > g,
+      .c14 svg path {
         fill: #ffffff;
       }
 
-      .c13[aria-disabled='true'] {
+      .c14[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c14 {
+      .c15 {
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -239,49 +244,49 @@ describe('AddAssetTest', () => {
         background: #4945ff;
       }
 
-      .c14 .c15 {
+      .c15 .c16 {
         color: #ffffff;
       }
 
-      .c14[aria-disabled='true'] {
+      .c15[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true'] .c15 {
+      .c15[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true'] svg > g,
-      .c14[aria-disabled='true'] svg path {
+      .c15[aria-disabled='true'] svg > g,
+      .c15[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14[aria-disabled='true']:active {
+      .c15[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c14[aria-disabled='true']:active .c15 {
+      .c15[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c14[aria-disabled='true']:active svg > g,
-      .c14[aria-disabled='true']:active svg path {
+      .c15[aria-disabled='true']:active svg > g,
+      .c15[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c14:hover {
+      .c15:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c14:active {
+      .c15:active {
         border: 1px solid #4945ff;
         background: #4945ff;
       }
 
-      .c52 {
+      .c53 {
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -289,56 +294,56 @@ describe('AddAssetTest', () => {
         background: #ffffff;
       }
 
-      .c52 .c15 {
+      .c53 .c16 {
         color: #ffffff;
       }
 
-      .c52[aria-disabled='true'] {
+      .c53[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c52[aria-disabled='true'] .c15 {
+      .c53[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c52[aria-disabled='true'] svg > g,
-      .c52[aria-disabled='true'] svg path {
+      .c53[aria-disabled='true'] svg > g,
+      .c53[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c52[aria-disabled='true']:active {
+      .c53[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c52[aria-disabled='true']:active .c15 {
+      .c53[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c52[aria-disabled='true']:active svg > g,
-      .c52[aria-disabled='true']:active svg path {
+      .c53[aria-disabled='true']:active svg > g,
+      .c53[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c52:hover {
+      .c53:hover {
         background-color: #f6f6f9;
       }
 
-      .c52:active {
+      .c53:active {
         background-color: #eaeaef;
       }
 
-      .c52 .c15 {
+      .c53 .c16 {
         color: #32324d;
       }
 
-      .c52 svg > g,
-      .c52 svg path {
+      .c53 svg > g,
+      .c53 svg path {
         fill: #32324d;
       }
 
-      .c9 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -356,7 +361,7 @@ describe('AddAssetTest', () => {
         align-items: center;
       }
 
-      .c8 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -366,16 +371,16 @@ describe('AddAssetTest', () => {
         flex-direction: column;
       }
 
-      .c8 > * {
+      .c9 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c8 > * + * {
+      .c9 > * + * {
         margin-top: 32px;
       }
 
-      .c10 {
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -385,66 +390,66 @@ describe('AddAssetTest', () => {
         flex-direction: column;
       }
 
-      .c10 > * {
+      .c11 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c10 > * + * {
+      .c11 > * + * {
         margin-top: 0px;
       }
 
-      .c17 {
+      .c18 {
         display: grid;
         grid-template-columns: repeat(12,1fr);
         gap: 16px;
       }
 
-      .c18 {
+      .c19 {
         grid-column: span 4;
         word-break: break-all;
       }
 
-      .c19 {
+      .c20 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c29 {
+      .c30 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c34 {
+      .c35 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c43 {
+      .c44 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c22 {
+      .c23 {
         position: absolute;
         top: 12px;
         left: 12px;
       }
 
-      .c24 {
+      .c25 {
         position: absolute;
         top: 12px;
         right: 12px;
       }
 
-      .c20 {
+      .c21 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -462,7 +467,7 @@ describe('AddAssetTest', () => {
         align-items: center;
       }
 
-      .c30 {
+      .c31 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -476,14 +481,14 @@ describe('AddAssetTest', () => {
         align-items: center;
       }
 
-      .c28 {
+      .c29 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c27 {
+      .c28 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -497,55 +502,55 @@ describe('AddAssetTest', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c31 {
+      .c32 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c32 {
+      .c33 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c37 {
+      .c38 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c45 {
+      .c46 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c38 {
+      .c39 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c39 {
+      .c40 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c35 {
+      .c36 {
         display: inline-block;
       }
 
-      .c36 {
+      .c37 {
         margin-left: auto;
       }
 
-      .c23 {
+      .c24 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -555,12 +560,12 @@ describe('AddAssetTest', () => {
         background-color: #ffffff;
       }
 
-      .c23:checked {
+      .c24:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c23:checked:after {
+      .c24:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -574,21 +579,21 @@ describe('AddAssetTest', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c23:checked:disabled:after {
+      .c24:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c23:disabled {
+      .c24:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c23:indeterminate {
+      .c24:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c23:indeterminate:after {
+      .c24:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -603,27 +608,27 @@ describe('AddAssetTest', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c23:indeterminate:disabled {
+      .c24:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c23:indeterminate:disabled:after {
+      .c24:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
-      .c21 {
+      .c22 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c44 {
+      .c45 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c25 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -635,81 +640,81 @@ describe('AddAssetTest', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c25 svg {
+      .c26 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #ffffff;
       }
 
-      .c25[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c26 svg > g,
-      .c26 svg path {
+      .c27 svg > g,
+      .c27 svg path {
         fill: #8e8ea9;
       }
 
-      .c26:hover svg > g,
-      .c26:hover svg path {
+      .c27:hover svg > g,
+      .c27:hover svg path {
         fill: #666687;
       }
 
-      .c26:active svg > g,
-      .c26:active svg path {
+      .c27:active svg > g,
+      .c27:active svg path {
         fill: #a5a5ba;
       }
 
-      .c26[aria-disabled='true'] {
+      .c27[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c26[aria-disabled='true'] svg path {
+      .c27[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c41 {
+      .c42 {
         text-transform: uppercase;
       }
 
-      .c40 svg {
+      .c41 svg {
         font-size: 3rem;
       }
 
-      .c33 {
+      .c34 {
         text-transform: uppercase;
       }
 
-      .c42 canvas {
+      .c43 canvas {
         display: block;
         max-width: 100%;
         max-height: 100%;
       }
 
-      .c46 {
+      .c47 {
         text-transform: uppercase;
       }
 
-      .c48 {
+      .c49 {
         text-transform: uppercase;
       }
 
-      .c47 svg {
+      .c48 svg {
         font-size: 3rem;
       }
 
       @media (max-width:68.75rem) {
-        .c18 {
+        .c19 {
           grid-column: span;
         }
       }
 
       @media (max-width:34.375rem) {
-        .c18 {
+        .c19 {
           grid-column: span;
         }
       }
@@ -749,35 +754,35 @@ describe('AddAssetTest', () => {
           </div>
         </div>
         <div
-          class="c7"
+          class="c7 c8"
         >
           <div
-            class="c8"
+            class="c9"
           >
             <div
-              class="c9"
+              class="c10"
             >
               <div
-                class="c10"
+                class="c11"
               >
                 <span
-                  class="c11"
+                  class="c12"
                 >
                   {number} assets selected
                 </span>
                 <span
-                  class="c12"
+                  class="c13"
                 >
                   Manage the assets before adding them to the Media Library
                 </span>
               </div>
               <button
                 aria-disabled="false"
-                class="c13 c14"
+                class="c14 c15"
                 type="button"
               >
                 <span
-                  class="c15 c16"
+                  class="c16 c17"
                 >
                   Upload new asset
                 </span>
@@ -787,40 +792,40 @@ describe('AddAssetTest', () => {
               class=""
             >
               <div
-                class="c17"
+                class="c18"
               >
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <div
                     class=""
                   >
                     <article
                       aria-labelledby="card-1-title"
-                      class="c19"
+                      class="c20"
                       tabindex="0"
                     >
                       <div
-                        class="c20 c21"
+                        class="c21 c22"
                       >
                         <div
-                          class="c22"
+                          class="c23"
                         >
                           <input
                             aria-labelledby="card-1-title"
                             checked=""
-                            class="c23"
+                            class="c24"
                             type="checkbox"
                           />
                         </div>
                         <div
-                          class="c24"
+                          class="c25"
                         >
                           <span>
                             <button
                               aria-disabled="false"
                               aria-labelledby="tooltip-1"
-                              class="c25 c26"
+                              class="c26 c27"
                               tabindex="0"
                               type="button"
                             >
@@ -842,45 +847,45 @@ describe('AddAssetTest', () => {
                           </span>
                         </div>
                         <div
-                          class="c27"
+                          class="c28"
                         >
                           <img
                             aria-hidden="true"
-                            class="c28"
+                            class="c29"
                             src="http://localhost:5000/CPAM.jpg"
                           />
                         </div>
                       </div>
                       <div
-                        class="c29"
+                        class="c30"
                       >
                         <div
-                          class="c30"
+                          class="c31"
                         >
                           <div
                             class=""
                           >
                             <h2
-                              class="c31"
+                              class="c32"
                               id="card-1-title"
                             >
                               http://localhost:5000/CPAM.jpg
                             </h2>
                             <div
-                              class="c32"
+                              class="c33"
                             >
                               <span
-                                class="c33"
+                                class="c34"
                               >
                                 jpg
                               </span>
                             </div>
                           </div>
                           <div
-                            class="c34 c35 c36"
+                            class="c35 c36 c37"
                           >
                             <span
-                              class="c37 c38 c39"
+                              class="c38 c39 c40"
                             >
                               Image
                             </span>
@@ -891,37 +896,37 @@ describe('AddAssetTest', () => {
                   </div>
                 </div>
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <div
                     class=""
                   >
                     <article
                       aria-labelledby="card-2-title"
-                      class="c19"
+                      class="c20"
                       tabindex="0"
                     >
                       <div
-                        class="c20 c21"
+                        class="c21 c22"
                       >
                         <div
-                          class="c22"
+                          class="c23"
                         >
                           <input
                             aria-labelledby="card-2-title"
                             checked=""
-                            class="c23"
+                            class="c24"
                             type="checkbox"
                           />
                         </div>
                         <div
-                          class="c24"
+                          class="c25"
                         >
                           <span>
                             <button
                               aria-disabled="false"
                               aria-labelledby="tooltip-3"
-                              class="c25 c26"
+                              class="c26 c27"
                               tabindex="0"
                               type="button"
                             >
@@ -943,13 +948,13 @@ describe('AddAssetTest', () => {
                           </span>
                         </div>
                         <div
-                          class="c27"
+                          class="c28"
                         >
                           <div
-                            class="c30"
+                            class="c31"
                           >
                             <span
-                              class="c40"
+                              class="c41"
                             >
                               <svg
                                 aria-label="http://localhost:5000/MARIAGE%20FRACHET%204.pdf"
@@ -969,35 +974,35 @@ describe('AddAssetTest', () => {
                         </div>
                       </div>
                       <div
-                        class="c29"
+                        class="c30"
                       >
                         <div
-                          class="c30"
+                          class="c31"
                         >
                           <div
                             class=""
                           >
                             <h2
-                              class="c31"
+                              class="c32"
                               id="card-2-title"
                             >
                               http://localhost:5000/MARIAGE%20FRACHET%204.pdf
                             </h2>
                             <div
-                              class="c32"
+                              class="c33"
                             >
                               <span
-                                class="c41"
+                                class="c42"
                               >
                                 pdf
                               </span>
                             </div>
                           </div>
                           <div
-                            class="c34 c35 c36"
+                            class="c35 c36 c37"
                           >
                             <span
-                              class="c37 c38 c39"
+                              class="c38 c39 c40"
                             >
                               Doc
                             </span>
@@ -1008,37 +1013,37 @@ describe('AddAssetTest', () => {
                   </div>
                 </div>
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <div
                     class=""
                   >
                     <article
                       aria-labelledby="card-3-title"
-                      class="c19"
+                      class="c20"
                       tabindex="0"
                     >
                       <div
-                        class="c20 c21"
+                        class="c21 c22"
                       >
                         <div
-                          class="c22"
+                          class="c23"
                         >
                           <input
                             aria-labelledby="card-3-title"
                             checked=""
-                            class="c23"
+                            class="c24"
                             type="checkbox"
                           />
                         </div>
                         <div
-                          class="c24"
+                          class="c25"
                         >
                           <span>
                             <button
                               aria-disabled="false"
                               aria-labelledby="tooltip-5"
-                              class="c25 c26"
+                              class="c26 c27"
                               tabindex="0"
                               type="button"
                             >
@@ -1060,13 +1065,13 @@ describe('AddAssetTest', () => {
                           </span>
                         </div>
                         <div
-                          class="c27"
+                          class="c28"
                         >
                           <div
-                            class="c30"
+                            class="c31"
                           >
                             <div
-                              class="c42"
+                              class="c43"
                             >
                               <video
                                 src="http://localhost:5000/mov_bbb.mp4"
@@ -1080,45 +1085,45 @@ describe('AddAssetTest', () => {
                           </div>
                         </div>
                         <time
-                          class="c43 c44"
+                          class="c44 c45"
                         >
                           <span
-                            class="c45"
+                            class="c46"
                           >
                             ...
                           </span>
                         </time>
                       </div>
                       <div
-                        class="c29"
+                        class="c30"
                       >
                         <div
-                          class="c30"
+                          class="c31"
                         >
                           <div
                             class=""
                           >
                             <h2
-                              class="c31"
+                              class="c32"
                               id="card-3-title"
                             >
                               http://localhost:5000/mov_bbb.mp4
                             </h2>
                             <div
-                              class="c32"
+                              class="c33"
                             >
                               <span
-                                class="c46"
+                                class="c47"
                               >
                                 mp4
                               </span>
                             </div>
                           </div>
                           <div
-                            class="c34 c35 c36"
+                            class="c35 c36 c37"
                           >
                             <span
-                              class="c37 c38 c39"
+                              class="c38 c39 c40"
                             >
                               Video
                             </span>
@@ -1129,37 +1134,37 @@ describe('AddAssetTest', () => {
                   </div>
                 </div>
                 <div
-                  class="c18"
+                  class="c19"
                 >
                   <div
                     class=""
                   >
                     <article
                       aria-labelledby="card-4-title"
-                      class="c19"
+                      class="c20"
                       tabindex="0"
                     >
                       <div
-                        class="c20 c21"
+                        class="c21 c22"
                       >
                         <div
-                          class="c22"
+                          class="c23"
                         >
                           <input
                             aria-labelledby="card-4-title"
                             checked=""
-                            class="c23"
+                            class="c24"
                             type="checkbox"
                           />
                         </div>
                         <div
-                          class="c24"
+                          class="c25"
                         >
                           <span>
                             <button
                               aria-disabled="false"
                               aria-labelledby="tooltip-7"
-                              class="c25 c26"
+                              class="c26 c27"
                               tabindex="0"
                               type="button"
                             >
@@ -1181,13 +1186,13 @@ describe('AddAssetTest', () => {
                           </span>
                         </div>
                         <div
-                          class="c27"
+                          class="c28"
                         >
                           <div
-                            class="c30"
+                            class="c31"
                           >
                             <span
-                              class="c47"
+                              class="c48"
                             >
                               <svg
                                 aria-label="https://www.w3schools.com/html/mov_bbb.mp4"
@@ -1274,25 +1279,25 @@ describe('AddAssetTest', () => {
                         </div>
                       </div>
                       <div
-                        class="c29"
+                        class="c30"
                       >
                         <div
-                          class="c30"
+                          class="c31"
                         >
                           <div
                             class=""
                           >
                             <h2
-                              class="c31"
+                              class="c32"
                               id="card-4-title"
                             >
                               https://www.w3schools.com/html/mov_bbb.mp4
                             </h2>
                             <div
-                              class="c32"
+                              class="c33"
                             >
                               <span
-                                class="c48"
+                                class="c49"
                               >
                                 mp4
                               </span>
@@ -1308,34 +1313,34 @@ describe('AddAssetTest', () => {
           </div>
         </div>
         <div
-          class="c0 c49"
+          class="c0 c50"
         >
           <div
             class="c2"
           >
             <div
-              class="c50 c51"
+              class="c51 c52"
             >
               <button
                 aria-disabled="false"
-                class="c13 c52"
+                class="c14 c53"
                 type="button"
               >
                 <span
-                  class="c15 c16"
+                  class="c16 c17"
                 />
               </button>
             </div>
             <div
-              class="c50 c51"
+              class="c51 c52"
             >
               <button
                 aria-disabled="false"
-                class="c13 c14"
+                class="c14 c15"
                 type="submit"
               >
                 <span
-                  class="c15 c16"
+                  class="c16 c17"
                 >
                   Upload {number} asset to the library
                 </span>
@@ -1344,7 +1349,7 @@ describe('AddAssetTest', () => {
           </div>
         </div>
         <div
-          class="c53"
+          class="c54"
         >
           <p
             aria-live="polite"

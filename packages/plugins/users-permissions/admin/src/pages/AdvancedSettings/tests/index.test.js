@@ -345,6 +345,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         color: #32324d;
       }
 
+      .c56 {
+        font-weight: 400;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #666687;
+      }
+
       .c51 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -421,7 +428,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         background: #ffffff;
       }
 
-      .c56 {
+      .c57 {
         border: 1px solid #dcdce4;
         border-radius: 4px;
         background: #ffffff;
@@ -1036,6 +1043,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               class="c53 c54"
                             >
                               <input
+                                aria-describedby="textinput-1-hint"
                                 aria-disabled="false"
                                 aria-invalid="false"
                                 class="c55"
@@ -1046,6 +1054,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 value="https://cat-bounce.com/"
                               />
                             </div>
+                            <p
+                              class="c56"
+                              id="textinput-1-hint"
+                            >
+                              URL of your application's reset password page.
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -1144,10 +1158,11 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                               </label>
                             </div>
                             <div
-                              class="c53 c56"
+                              class="c53 c57"
                               disabled=""
                             >
                               <input
+                                aria-describedby="textinput-2-hint"
                                 aria-disabled="true"
                                 aria-invalid="false"
                                 class="c55"
@@ -1158,6 +1173,12 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                                 value=""
                               />
                             </div>
+                            <p
+                              class="c56"
+                              id="textinput-2-hint"
+                            >
+                              After you confirmed your email, choose where you will be redirected.
+                            </p>
                           </div>
                         </div>
                       </div>
