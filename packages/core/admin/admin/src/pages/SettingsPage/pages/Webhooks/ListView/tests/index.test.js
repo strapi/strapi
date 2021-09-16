@@ -190,7 +190,6 @@ describe('Admin | containers | ListView', () => {
             tabindex="-1"
           >
             <div
-              class=""
               style="height: 0px;"
             >
               <div

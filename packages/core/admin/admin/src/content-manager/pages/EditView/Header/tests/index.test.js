@@ -245,7 +245,6 @@ describe('CONTENT MANAGER | EditView | Header', () => {
       }
 
       <div
-        class=""
         style="height: 0px;"
       >
         <div

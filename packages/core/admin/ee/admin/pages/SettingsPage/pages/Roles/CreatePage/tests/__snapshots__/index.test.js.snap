@@ -554,9 +554,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
       action="#"
       novalidate=""
     >
-      <div
-        class="c1 "
-      >
+      <div>
         <div
           class="c1 c2"
           data-strapi-header="true"

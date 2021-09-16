@@ -565,7 +565,6 @@ describe('ADMIN | Pages | Profile page', () => {
           novalidate=""
         >
           <div
-            class=""
             style="height: 0px;"
           >
             <div
