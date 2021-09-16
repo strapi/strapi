@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withboolean',
+  displayName: 'withboolean',
+  singularName: 'withboolean',
+  pluralName: 'withbooleans',
   attributes: {
     field: {
       type: 'boolean',

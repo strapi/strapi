@@ -12,6 +12,8 @@ describe('Content types service', () => {
       collectionName: 'tests',
       info: {
         displayName: 'My name',
+        singularName: 'my-name',
+        pluralName: 'my-names',
         description: 'My description',
       },
       options: {

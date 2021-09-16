@@ -11,10 +11,6 @@ const getRelationValidator = require('./relations');
 
 const createSchema = (types, relations, { modelType } = {}) => {
   const shape = {
-    name: yup
-      .string()
-      .min(1)
-      .required('name.required'),
     description: yup.string(),
     draftAndPublish: yup.boolean(),
     pluginOptions: yup.object(),

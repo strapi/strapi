@@ -10,7 +10,9 @@ let rq;
 describe('Test type UID', () => {
   describe('No targetField, required=false, not length limits', () => {
     const model = {
-      name: 'withuid',
+      displayName: 'With uid',
+      singularName: 'withuid',
+      pluralName: 'withuids',
       attributes: {
         slug: {
           type: 'uid',
@@ -82,7 +84,9 @@ describe('Test type UID', () => {
 
   describe('No targetField, required, no length limits', () => {
     const model = {
-      name: 'withrequireduid',
+      displayName: 'withrequireduid',
+      singularName: 'withrequireduid',
+      pluralName: 'withrequireduids',
       attributes: {
         slug: {
           type: 'uid',

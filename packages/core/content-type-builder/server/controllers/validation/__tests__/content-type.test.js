@@ -64,11 +64,13 @@ describe('Content type validator', () => {
     });
   });
 
-  describe('Prevents use of names without plural form', () => {
-    test('Throws when using name without plural form', async () => {
+  describe('Prevents use of same singularName and pluralName', () => {
+    test('Throws when using same singularName and pluralName', async () => {
       const data = {
         contentType: {
-          name: 'news',
+          displayName: 'news',
+          singularName: 'news',
+          pluralName: 'news',
           attributes: {
             title: {
               type: 'string',
@@ -79,7 +81,7 @@ describe('Content type validator', () => {
 
       await validateContentTypeInput(data).catch(err => {
         expect(err).toMatchObject({
-          'contentType.name': [expect.stringMatching('cannot be pluralized')],
+          contentType: [expect.stringMatching('singularName and pluralName should be different')],
         });
       });
     });
@@ -89,7 +91,9 @@ describe('Content type validator', () => {
     test('Can use custom keys', async () => {
       const input = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             views: {
               type: 'integer',
@@ -115,7 +119,9 @@ describe('Content type validator', () => {
     test('Deletes empty defaults', async () => {
       const data = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             slug: {
               type: 'string',
@@ -161,7 +167,9 @@ describe('Content type validator', () => {
     test('Deleted UID target fields are removed from input data', async () => {
       const data = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             slug: {
               type: 'uid',
@@ -181,7 +189,9 @@ describe('Content type validator', () => {
     test('Can use custom keys', async () => {
       const input = {
         contentType: {
-          name: 'test',
+          displayName: 'test',
+          singularName: 'test',
+          pluralName: 'tests',
           attributes: {
             views: {
               type: 'integer',

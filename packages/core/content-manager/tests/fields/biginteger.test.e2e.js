@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withbiginteger',
+  displayName: 'withbiginteger',
+  singularName: 'withbiginteger',
+  pluralName: 'withbigintegers',
   attributes: {
     field: {
       type: 'biginteger',

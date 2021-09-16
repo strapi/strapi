@@ -35,7 +35,9 @@ const productModel = {
       target: 'api::shop.shop',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
 };
 
 const categoryModel = {
@@ -45,7 +47,9 @@ const categoryModel = {
       unique: true,
     },
   },
-  name: 'category',
+  displayName: 'Category',
+  singularName: 'category',
+  pluralName: 'categories',
 };
 
 const shopModel = {
@@ -58,7 +62,9 @@ const shopModel = {
       type: 'string',
     },
   },
-  name: 'shop',
+  displayName: 'Shop',
+  singularName: 'shop',
+  pluralName: 'shops',
 };
 
 const PRODUCT_SHOP_COUNT = 12;
@@ -105,14 +111,14 @@ const getUID = modelName => `api::${modelName}.${modelName}`;
 const getCMPrefixUrl = modelName => `/content-manager/collection-types/${getUID(modelName)}`;
 
 describe('x-to-many RF Preview', () => {
-  const cmProductUrl = getCMPrefixUrl(productModel.name);
+  const cmProductUrl = getCMPrefixUrl(productModel.singularName);
 
   beforeAll(async () => {
     await builder
       .addContentTypes([shopModel, categoryModel, productModel])
-      .addFixtures(shopModel.name, fixtures.shop)
-      .addFixtures(categoryModel.name, fixtures.category)
-      .addFixtures(productModel.name, fixtures.product)
+      .addFixtures(shopModel.singularName, fixtures.shop)
+      .addFixtures(categoryModel.singularName, fixtures.category)
+      .addFixtures(productModel.singularName, fixtures.product)
       .build();
 
     strapi = await createStrapiInstance();
@@ -146,7 +152,7 @@ describe('x-to-many RF Preview', () => {
 
   describe('Relation Nature', () => {
     test(`Throws if the relation's nature is not a x-to-many`, async () => {
-      const url = getCMPrefixUrl(categoryModel.name);
+      const url = getCMPrefixUrl(categoryModel.singularName);
       const id = data.category[0].id;
 
       const { body, statusCode } = await rq.get(`${url}/${id}/product`);

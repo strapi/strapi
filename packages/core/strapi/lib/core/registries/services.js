@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { pickBy, has } = require('lodash/fp');
+const { pickBy, has, isFunction } = require('lodash/fp');
 const { addNamespace, hasNamespace } = require('../utils');
 
 const servicesRegistry = strapi => {
@@ -16,7 +16,7 @@ const servicesRegistry = strapi => {
 
       const service = services[uid];
       if (service) {
-        instanciatedServices[uid] = service({ strapi });
+        instanciatedServices[uid] = isFunction(service) ? service({ strapi }) : service;
         return instanciatedServices[uid];
       }
 

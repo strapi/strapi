@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withfloat',
+  displayName: 'withfloat',
+  singularName: 'withfloat',
+  pluralName: 'withfloats',
   attributes: {
     field: {
       type: 'float',

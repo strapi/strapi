@@ -42,13 +42,13 @@ module.exports = function createComponentBuilder() {
         filename: `${nameToSlug(infos.name)}.json`,
       });
 
-      const defaultCollectionName = `components_${nameToCollectionName(
+      const collectionName = `components_${nameToCollectionName(
         infos.category
       )}_${nameToCollectionName(pluralize(infos.name))}`;
 
       handler
         .setUID(uid)
-        .set('collectionName', infos.collectionName || defaultCollectionName)
+        .set('collectionName', collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)
@@ -98,7 +98,6 @@ module.exports = function createComponentBuilder() {
       component
         .setUID(newUID)
         .setDir(newDir)
-        .set('collectionName', infos.collectionName)
         .set(['info', 'name'], infos.name)
         .set(['info', 'icon'], infos.icon)
         .set(['info', 'description'], infos.description)

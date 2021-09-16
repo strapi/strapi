@@ -24,7 +24,9 @@ const productModel = {
       type: 'string',
     },
   },
-  name: 'product',
+  displayName: 'Product',
+  singularName: 'product',
+  pluralName: 'products',
   description: '',
   collectionName: '',
 };
@@ -46,7 +48,9 @@ const shopModel = {
       targetAttribute: 'shops',
     },
   },
-  name: 'shop',
+  displayName: 'Shop',
+  singularName: 'shop',
+  pluralName: 'shops',
 };
 
 const shops = [
@@ -87,15 +91,15 @@ describe('i18n - Relation-list route', () => {
           code: 'it',
         },
       ])
-      .addFixtures(shopModel.name, shops)
-      .addFixtures(productModel.name, products)
+      .addFixtures(shopModel.singularName, shops)
+      .addFixtures(productModel.singularName, products)
       .build();
 
     strapi = await createStrapiInstance();
     rq = await createAuthRequest({ strapi });
 
-    data.shops = builder.sanitizedFixturesFor(shopModel.name, strapi);
-    data.products = builder.sanitizedFixturesFor(productModel.name, strapi);
+    data.shops = builder.sanitizedFixturesFor(shopModel.singularName, strapi);
+    data.products = builder.sanitizedFixturesFor(productModel.singularName, strapi);
   });
 
   afterAll(async () => {

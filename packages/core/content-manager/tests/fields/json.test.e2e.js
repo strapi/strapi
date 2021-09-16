@@ -9,7 +9,9 @@ let strapi;
 let rq;
 
 const ct = {
-  name: 'withjson',
+  displayName: 'withjson',
+  singularName: 'withjson',
+  pluralName: 'withjsons',
   attributes: {
     field: {
       type: 'json',

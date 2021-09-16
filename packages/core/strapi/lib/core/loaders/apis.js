@@ -4,8 +4,10 @@ const { join, extname, basename } = require('path');
 const { existsSync } = require('fs-extra');
 const _ = require('lodash');
 const fse = require('fs-extra');
+const { isKebabCase } = require('@strapi/utils');
 
-const normalizeName = _.kebabCase;
+// to handle names with numbers in it we first check is it is already in kebabCase
+const normalizeName = name => (isKebabCase(name) ? name : _.kebabCase(name));
 
 const DEFAULT_CONTENT_TYPE = {
   schema: {},
