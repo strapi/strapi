@@ -11,8 +11,10 @@ const Steps = {
 
 export const UploadAssetDialog = ({ onSuccess, onClose }) => {
   const [step, setStep] = useState(Steps.AddAsset);
+  const [assets, setAssets] = useState([]);
 
-  const handleAddToPendingAssets = () => {
+  const handleAddToPendingAssets = nextAssets => {
+    setAssets(prevAssets => prevAssets.concat(nextAssets));
     setStep(Steps.PendingAsset);
     onSuccess();
   };
@@ -22,7 +24,7 @@ export const UploadAssetDialog = ({ onSuccess, onClose }) => {
       {step === Steps.AddAsset && (
         <AddAssetStep onClose={onClose} onAddAsset={handleAddToPendingAssets} />
       )}
-      {step === Steps.PendingAsset && <PendingAssetStep onClose={onClose} />}
+      {step === Steps.PendingAsset && <PendingAssetStep onClose={onClose} assets={assets} />}
     </ModalLayout>
   );
 };

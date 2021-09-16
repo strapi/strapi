@@ -8,12 +8,16 @@ import { Button } from '@strapi/parts/Button';
 import { Form } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import { getTrad, urlSchema } from '../../../utils';
+import { urlsToAssets } from '../../../utils/urlsToAssets';
 
 export const FromUrlForm = ({ onClose, onAddAsset }) => {
   const { formatMessage } = useIntl();
 
-  const handleSubmit = () => {
-    onAddAsset();
+  const handleSubmit = async ({ urls }) => {
+    const urlArray = urls.split(/\r?\n/);
+    const assets = await urlsToAssets(urlArray);
+
+    onAddAsset(assets);
   };
 
   return (
@@ -55,13 +59,10 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
             }
             endActions={
               <Button type="submit">
-                {formatMessage(
-                  {
-                    id: getTrad('modal.upload-list.footer.button.singular'),
-                    defaultMessage: 'Upload assets',
-                  },
-                  { number: 0 }
-                )}
+                {formatMessage({
+                  id: getTrad('button.next'),
+                  defaultMessage: 'Next',
+                })}
               </Button>
             }
           />
