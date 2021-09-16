@@ -10,7 +10,7 @@ const schema = yup.object().shape({
     .nullable()
     .when('email_confirmation', {
       is: true,
-      then: yup.string().required(),
+      then: yup.string().required(translatedErrors.required),
       otherwise: yup.string(),
     }),
   email_reset_password: yup
