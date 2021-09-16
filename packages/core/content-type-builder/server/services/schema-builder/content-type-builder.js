@@ -84,8 +84,6 @@ module.exports = function createComponentBuilder() {
 
       this.contentTypes.set(uid, contentType);
 
-      const defaultCollectionName = nameToCollectionName(infos.pluralName);
-
       // support self referencing content type relation
       Object.keys(infos.attributes).forEach(key => {
         const { target } = infos.attributes[key];
@@ -97,16 +95,14 @@ module.exports = function createComponentBuilder() {
       contentType
         .setUID(uid)
         .set('kind', infos.kind || typeKinds.COLLECTION_TYPE)
-        .set('collectionName', infos.collectionName || defaultCollectionName)
+        .set('collectionName', nameToCollectionName(infos.pluralName))
         .set('info', {
           singularName: infos.singularName,
           pluralName: infos.pluralName,
           displayName: infos.displayName,
           description: infos.description,
         })
-        .set('options', {
-          draftAndPublish: infos.draftAndPublish || false,
-        })
+        .set('options', { draftAndPublish: infos.draftAndPublish || false })
         .set('pluginOptions', infos.pluginOptions)
         .setAttributes(this.convertAttributes(infos.attributes));
 
@@ -213,7 +209,6 @@ module.exports = function createComponentBuilder() {
       });
 
       contentType
-        .set('collectionName', infos.collectionName)
         .set('kind', infos.kind || contentType.schema.kind)
         .set(['info', 'displayName'], infos.displayName)
         .set(['info', 'description'], infos.description)
