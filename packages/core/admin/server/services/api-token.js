@@ -21,13 +21,15 @@ const SELECT_FIELDS = ['id', 'name', 'description', 'type'];
 
 /**
  * @param {Object} whereParams
- * @param {string} whereParams.name
+ * @param {string|number} [whereParams.id]
+ * @param {string} [whereParams.name]
  * @param {string} [whereParams.description]
+ * @param {string} [whereParams.accessKey]
  *
  * @returns {Promise<boolean>}
  */
 const exists = async (whereParams = {}) => {
-  const apiToken = await strapi.query('admin::api-token').findOne({ where: whereParams });
+  const apiToken = await getBy(whereParams);
 
   return !!apiToken;
 };
@@ -113,7 +115,7 @@ const revoke = async id => {
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const getById = async id => {
-  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: { id } });
+  return getBy({ id });
 };
 
 /**
@@ -122,7 +124,7 @@ const getById = async id => {
  * @returns {Promise<Omit<ApiToken, 'accessKey'>>}
  */
 const getByName = async name => {
-  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: { name } });
+  return getBy({ name });
 };
 
 /**
@@ -140,6 +142,23 @@ const update = async (id, attributes) => {
     .update({ where: { id }, data: attributes, select: SELECT_FIELDS });
 };
 
+/**
+ * @param {Object} whereParams
+ * @param {string|number} [whereParams.id]
+ * @param {string} [whereParams.name]
+ * @param {string} [whereParams.description]
+ * @param {string} [whereParams.accessKey]
+ *
+ * @returns {Promise<Omit<ApiToken, 'accessKey'> | null>}
+ */
+const getBy = async (whereParams = {}) => {
+  if (Object.keys(whereParams).length === 0) {
+    return null;
+  }
+
+  return strapi.query('admin::api-token').findOne({ select: SELECT_FIELDS, where: whereParams });
+};
+
 module.exports = {
   create,
   exists,
@@ -150,4 +169,5 @@ module.exports = {
   getById,
   update,
   getByName,
+  getBy,
 };

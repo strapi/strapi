@@ -11,27 +11,28 @@ const getAdvancedSettings = () => {
 const authenticate = async ctx => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
+      console.log({ ctx });
       const { id } = await getService('jwt').getToken(ctx);
 
       if (id === undefined) {
-        return { error: 'Invalid token: Token did not contain required fields' };
+        return { authenticated: false };
       }
 
       // fetch authenticated user
       const user = await getService('user').fetchAuthenticatedUser(id);
 
       if (!user) {
-        return { error: 'Invalid credentials' };
+        return { authenticated: false };
       }
 
       const advancedSettings = await getAdvancedSettings();
 
       if (advancedSettings.email_confirmation && !user.confirmed) {
-        return { error: 'Invalid credentials' };
+        return { authenticated: false };
       }
 
       if (user.blocked) {
-        return { error: 'Invalid credentials' };
+        return { authenticated: false };
       }
 
       ctx.state.user = user;
@@ -41,7 +42,7 @@ const authenticate = async ctx => {
         credentials: user,
       };
     } catch (err) {
-      return { error: 'Invalid credentials' };
+      return { authenticated: false };
     }
   }
 
