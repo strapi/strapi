@@ -17,8 +17,8 @@ const pluginsRegistry = strapi => {
         throw new Error(`Plugin ${name} has already been registered.`);
       }
 
-      const moduleInstance = strapi.container.get('modules').add(`plugin::${name}`, pluginConfig);
-      plugins[name] = moduleInstance;
+      const pluginModule = strapi.container.get('modules').add(`plugin::${name}`, pluginConfig);
+      plugins[name] = pluginModule;
 
       return plugins[name];
     },

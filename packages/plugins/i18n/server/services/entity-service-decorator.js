@@ -18,7 +18,7 @@ const paramsContain = (key, params) => {
  * Adds default locale or replaces locale by locale in query params
  * @param {object} params - query params
  */
-// TODO: fix
+// TODO: remove _locale
 const wrapParams = async (params = {}, ctx = {}) => {
   const { action } = ctx;
 

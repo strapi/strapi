@@ -1,8 +1,8 @@
 'use strict';
 
 module.exports = (ctx, next) => {
-  if (!ctx.state.isAuthenticatedAdmin) {
-    throw strapi.errors.forbidden();
+  if (!ctx.state.isAuthenticated) {
+    return ctx.unauthorized();
   }
 
   return next();

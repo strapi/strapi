@@ -5,7 +5,7 @@ const _ = require('lodash');
 module.exports = strapi => {
   return {
     initialize() {
-      strapi.app.use(async (ctx, next) => {
+      strapi.server.use(async (ctx, next) => {
         await next();
 
         const responseFn = strapi.config.get(['functions', 'responses', ctx.status]);

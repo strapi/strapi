@@ -22,6 +22,8 @@ module.exports = () => {
 
   const args = {
     entry,
+    cacheDir: __dirname,
+    pluginsPath: [path.resolve(__dirname, '../../..')],
     dest,
     env,
     options,

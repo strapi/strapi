@@ -227,15 +227,7 @@ describe('Content Type Builder - Content types', () => {
 
       // create data
       for (let i = 0; i < 2; i++) {
-        const res = await rq({
-          method: 'POST',
-          url: `/test-collections`,
-          body: {
-            title: 'Test',
-          },
-        });
-
-        expect(res.statusCode).toBe(200);
+        await strapi.query(uid).create({ data: { title: 'Test' } });
       }
 
       const updateRes = await rq({

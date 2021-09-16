@@ -5,7 +5,7 @@ const role = require('./role');
 const user = require('./user');
 
 module.exports = {
-  permission,
-  role,
-  user,
+  permission: { schema: permission },
+  role: { schema: role },
+  user: { schema: user },
 };

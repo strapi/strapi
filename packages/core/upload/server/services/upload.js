@@ -53,7 +53,7 @@ const combineFilters = params => {
 
 module.exports = ({ strapi }) => ({
   emitEvent(event, data) {
-    const modelDef = strapi.getModel('file', 'upload');
+    const modelDef = strapi.getModel('plugin::upload.file');
     strapi.eventHub.emit(event, { media: sanitizeEntity(data, { model: modelDef }) });
   },
 

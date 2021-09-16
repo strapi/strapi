@@ -30,7 +30,7 @@ module.exports = strapi => {
         keepHeadersOnError,
       } = Object.assign({}, defaults, strapi.config.get('middleware.settings.cors'));
 
-      strapi.app.use(
+      strapi.server.use(
         cors({
           origin: async function(ctx) {
             let originList;

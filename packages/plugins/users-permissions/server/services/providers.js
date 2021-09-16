@@ -6,15 +6,17 @@
 
 // Public node modules.
 const _ = require('lodash');
-const request = require('request');
-
-// Purest strategies.
-const purest = require('purest')({ request });
-const purestConfig = require('@purest/providers');
-const { getAbsoluteServerUrl } = require('@strapi/utils');
 const jwt = require('jsonwebtoken');
 
+const { getAbsoluteServerUrl } = require('@strapi/utils');
+
 module.exports = ({ strapi }) => {
+  // lazy load heavy dependencies
+  const request = require('request');
+  // Purest strategies.
+  const purest = require('purest')({ request });
+  const purestConfig = require('@purest/providers');
+
   /**
    * Helper to get profiles
    *

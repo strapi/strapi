@@ -27,9 +27,12 @@ describe('Session middleware', () => {
     );
 
     const mockStrapi = {
-      app: {
+      server: {
+        app: {
+          use: jest.fn(),
+          context: {},
+        },
         use: jest.fn(),
-        context: {},
       },
       config: {
         appPath: __dirname,
