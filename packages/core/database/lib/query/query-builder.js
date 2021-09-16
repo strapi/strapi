@@ -174,7 +174,10 @@ const createQueryBuilder = (uid, db) => {
         return columnName;
       }
 
-      if (columnName.indexOf('.') >= 0) return columnName;
+      if (columnName.indexOf('.') >= 0) {
+        return columnName;
+      }
+
       return this.alias + '.' + columnName;
     },
 
@@ -238,7 +241,7 @@ const createQueryBuilder = (uid, db) => {
           break;
         }
         case 'delete': {
-          qb.del();
+          qb.delete();
           break;
         }
         case 'truncate': {
