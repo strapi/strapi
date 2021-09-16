@@ -153,7 +153,7 @@ const AdvancedSettingsPage = () => {
                     disabled={!canUpdate}
                     startIcon={<CheckIcon />}
                   >
-                    Save
+                    {formatMessage({ id: getTrad('Form.save'), defaultMessage: 'Save' })}
                   </Button>
                 }
               />
