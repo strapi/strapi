@@ -38,19 +38,20 @@ const createSchemaProvider = db => {
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
     async sync() {
-      const DBSchema = await db.dialect.schemaInspector.getSchema();
-
-      // run migrations
+      // Run users migrations
       db.migration.up();
 
-      // diff schema
+      // Read schema from DB
+      const DBSchema = await db.dialect.schemaInspector.getSchema();
+
+      // Diff schema
       const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
 
       if (status === 'UNCHANGED') {
         return;
       }
 
-      // update schema
+      // Update schema
       await this.builder.updateSchema(diff);
     },
   };

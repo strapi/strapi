@@ -31,7 +31,6 @@ class Dialect {
   async startSchemaUpdate() {}
   async endSchemaUpdate() {}
 
-  // TODO: pass query info to display some more metadata
   transformErrors(error) {
     if (error instanceof Error) {
       throw error;
