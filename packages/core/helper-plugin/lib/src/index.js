@@ -106,13 +106,13 @@ export { default as AppInfosContext } from './contexts/AppInfosContext';
 export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
-export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
+
 export { default as RBACProviderContext } from './contexts/RBACProviderContext';
 export { default as TrackingContext } from './contexts/TrackingContext';
 
 // Hooks
 export { default as useAppInfos } from './hooks/useAppInfos';
-export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
+
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
@@ -152,8 +152,7 @@ export { default as validateInput } from './old/utils/inputsValidations';
 export { default as request } from './old/utils/request';
 export { default as storeData } from './old/utils/storeData';
 export { default as templateObject } from './old/utils/templateObject';
-export { getType };
-export { getOtherInfos };
+
 export { default as getYupInnerErrors } from './old/utils/getYupInnerErrors';
 export { default as generateFiltersFromSearch } from './old/utils/generateFiltersFromSearch';
 export { default as generateSearchFromFilters } from './old/utils/generateSearchFromFilters';
@@ -203,3 +202,9 @@ export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
 export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
+
+// content-manager
+export { default as ContentManagerEditViewDataManagerContext } from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
+export { default as useContentManagerEditViewDataManager } from './content-manager/hooks/useContentManagerEditViewDataManager';
+export { getType };
+export { getOtherInfos };
