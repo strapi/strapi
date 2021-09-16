@@ -58,13 +58,22 @@ describe('', () => {
         inset: 0;
         background: rgb(220,220,228,0.8);
         padding: 0 40px;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
       }
 
       .c3 {
-        max-width: 51.875rem;
-        margin: 0 auto;
-        overflow: hidden;
-        margin-top: 10%;
+        width: 51.875rem;
       }
 
       .c6 {

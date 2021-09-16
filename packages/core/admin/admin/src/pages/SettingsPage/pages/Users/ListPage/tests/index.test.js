@@ -503,6 +503,53 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         margin-top: 4px;
       }
 
+      .c47 {
+        position: relative;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        border-radius: 4px;
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .c47:focus-within {
+        border: 1px solid #4945ff;
+      }
+
+      .c52 {
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .c52 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c52 svg path {
+        fill: #666687;
+      }
+
+      .c53 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c53 svg {
+        width: 0.375rem;
+      }
+
+      .c43 {
+        -webkit-animation: gzYjWD 1s infinite linear;
+        animation: gzYjWD 1s infinite linear;
+      }
+
       .c35 {
         border: none;
       }
@@ -532,11 +579,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c16 > * + * {
         margin-left: 8px;
-      }
-
-      .c43 {
-        -webkit-animation: gzYjWD 1s infinite linear;
-        animation: gzYjWD 1s infinite linear;
       }
 
       .c0 {
@@ -598,48 +640,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
 
       .c48:focus {
         outline: none;
-      }
-
-      .c47 {
-        position: relative;
-        border: 1px solid #dcdce4;
-        padding-right: 12px;
-        border-radius: 4px;
-        background: #ffffff;
-        overflow: hidden;
-      }
-
-      .c47:focus-within {
-        border: 1px solid #4945ff;
-      }
-
-      .c52 {
-        background: transparent;
-        border: none;
-        position: relative;
-        z-index: 1;
-      }
-
-      .c52 svg {
-        height: 0.6875rem;
-        width: 0.6875rem;
-      }
-
-      .c52 svg path {
-        fill: #666687;
-      }
-
-      .c53 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        background: none;
-        border: none;
-      }
-
-      .c53 svg {
-        width: 0.375rem;
       }
 
       .c49 {
@@ -806,7 +806,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         tabindex="-1"
       >
         <div
-          class="c1 "
           style="height: 0px;"
         >
           <div

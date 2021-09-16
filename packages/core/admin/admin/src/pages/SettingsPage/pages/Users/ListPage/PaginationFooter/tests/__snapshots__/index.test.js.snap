@@ -128,6 +128,48 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
   margin-top: 4px;
 }
 
+.c5 {
+  position: relative;
+  border: 1px solid #dcdce4;
+  padding-right: 12px;
+  border-radius: 4px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.c5:focus-within {
+  border: 1px solid #4945ff;
+}
+
+.c12 {
+  background: transparent;
+  border: none;
+  position: relative;
+  z-index: 1;
+}
+
+.c12 svg {
+  height: 0.6875rem;
+  width: 0.6875rem;
+}
+
+.c12 svg path {
+  fill: #666687;
+}
+
+.c13 {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  background: none;
+  border: none;
+}
+
+.c13 svg {
+  width: 0.375rem;
+}
+
 .c14 > * + * {
   margin-left: 4px;
 }
@@ -216,48 +258,6 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
 
 .c6:focus {
   outline: none;
-}
-
-.c5 {
-  position: relative;
-  border: 1px solid #dcdce4;
-  padding-right: 12px;
-  border-radius: 4px;
-  background: #ffffff;
-  overflow: hidden;
-}
-
-.c5:focus-within {
-  border: 1px solid #4945ff;
-}
-
-.c12 {
-  background: transparent;
-  border: none;
-  position: relative;
-  z-index: 1;
-}
-
-.c12 svg {
-  height: 0.6875rem;
-  width: 0.6875rem;
-}
-
-.c12 svg path {
-  fill: #666687;
-}
-
-.c13 {
-  display: -webkit-box;
-  display: -webkit-flex;
-  display: -ms-flexbox;
-  display: flex;
-  background: none;
-  border: none;
-}
-
-.c13 svg {
-  width: 0.375rem;
 }
 
 .c8 {

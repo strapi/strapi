@@ -725,7 +725,6 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
           novalidate=""
         >
           <div
-            class=""
             style="height: 0px;"
           >
             <div
