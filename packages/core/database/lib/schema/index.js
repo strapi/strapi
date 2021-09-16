@@ -1,50 +1,21 @@
 'use strict';
 
 const createSchemaBuilder = require('./builder');
-const createSchemaStorage = require('./schema-storage');
 const createSchemaDiff = require('./schema-diff');
-const { metadataToSchema, createTable } = require('./schema');
-
-const addInternalTables = schema => {
-  schema.addTable(
-    createTable({
-      tableName: 'strapi_database_schema',
-      attributes: {
-        id: {
-          type: 'increments',
-        },
-        schema: {
-          type: 'json',
-        },
-        createdAt: {
-          type: 'datetime',
-        },
-      },
-    })
-  );
-};
+const { metadataToSchema } = require('./schema');
 
 const createSchemaProvider = db => {
-  const currentSchema = metadataToSchema(db.metadata);
-
-  // Add Internal tables to schema
-  addInternalTables(currentSchema);
+  const schema = metadataToSchema(db.metadata);
 
   return {
     builder: createSchemaBuilder(db),
-    schemaStorage: createSchemaStorage(db),
     schemaDiff: createSchemaDiff(db),
 
     /**
      * Drops the database schema
      */
     async drop() {
-      const DBSchema = await this.schemaStorage.read();
-
-      if (!DBSchema) {
-        return;
-      }
-
+      const DBSchema = await db.dialect.schemaInspector.getSchema();
       await this.builder.dropSchema(DBSchema);
     },
 
@@ -52,8 +23,7 @@ const createSchemaProvider = db => {
      * Creates the database schema
      */
     async create() {
-      await this.builder.createSchema(currentSchema);
-      await this.schemaStorage.create(currentSchema);
+      await this.builder.createSchema(schema);
     },
 
     /**
@@ -66,21 +36,15 @@ const createSchemaProvider = db => {
 
     // TODO: support options to migrate softly or forcefully
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
+    // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
     async sync() {
-      // load previous schema
-      const DBSchema = await this.schemaStorage.read();
-
-      if (!DBSchema) {
-        return this.create();
-      }
-
-      const schemaInspect = await db.dialect.schemaInspector.getSchema();
+      const DBSchema = await db.dialect.schemaInspector.getSchema();
 
       // run migrations
       db.migration.up();
 
       // diff schema
-      const { status, diff } = this.schemaDiff.diff(schemaInspect, currentSchema);
+      const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
 
       if (status === 'UNCHANGED') {
         return;
@@ -88,9 +52,6 @@ const createSchemaProvider = db => {
 
       // update schema
       await this.builder.updateSchema(diff);
-
-      // persist new schema
-      await this.schemaStorage.update(currentSchema);
     },
   };
 };
