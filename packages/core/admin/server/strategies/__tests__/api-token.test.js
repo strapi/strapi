@@ -111,7 +111,7 @@ describe('API Token Auth Strategy', () => {
 
       expect(
         apiTokenStrategy.verify(
-          { credentials: { readOnlyApiToken } },
+          { credentials: readOnlyApiToken },
           { scope: 'api::model.model.find' }
         )
       ).toBeUndefined();
@@ -124,7 +124,7 @@ describe('API Token Auth Strategy', () => {
 
       expect(
         apiTokenStrategy.verify(
-          { credentials: { fullAccessApiToken } },
+          { credentials: fullAccessApiToken },
           { scope: 'api::model.model.create' }
         )
       ).toBeUndefined();
