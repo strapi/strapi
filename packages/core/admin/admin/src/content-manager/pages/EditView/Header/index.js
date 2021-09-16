@@ -301,3 +301,4 @@ Header.propTypes = {
 const Memoized = memo(Header, isEqualFastCompare);
 
 export default connect(Memoized, select);
+export { Header };

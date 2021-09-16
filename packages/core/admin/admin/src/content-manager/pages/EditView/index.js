@@ -5,11 +5,11 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 // import get from 'lodash/get';
-import // BaselineAlignment,
+// import // BaselineAlignment,
 // LiLink,
 // CheckPermissions,
 // useTracking,
-'@strapi/helper-plugin';
+// '@strapi/helper-plugin';
 import { Main } from '@strapi/parts/Main';
 
 // import { Padded } from '@buffetjs/core';
@@ -130,7 +130,7 @@ const EditView = ({
             status={status}
             updateActionAllowedFields={updateActionAllowedFields}
           >
-            <Main>
+            <Main aria-busy={status !== 'resolved'}>
               <Header allowedActions={allowedActions} />
             </Main>
           </EditViewDataManagerProvider>
