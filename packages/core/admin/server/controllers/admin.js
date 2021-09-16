@@ -41,7 +41,7 @@ module.exports = {
   },
 
   async information() {
-    const currentEnvironment = strapi.app.env;
+    const currentEnvironment = strapi.config.get('environment');
     const autoReload = strapi.config.get('autoReload', false);
     const strapiVersion = strapi.config.get('info.strapi', null);
     const nodeVersion = process.version;

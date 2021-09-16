@@ -2,7 +2,7 @@
 
 // Helpers.
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
-const { createAuthRequest } = require('../../../../test/helpers/request');
+const { createContentAPIRequest } = require('../../../../test/helpers/request');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 
 const builder = createTestBuilder();
@@ -26,7 +26,8 @@ describe('Content Manager single types', () => {
     await builder.addContentType(model).build();
 
     strapi = await createStrapiInstance();
-    rq = await createAuthRequest({ strapi });
+
+    rq = await createContentAPIRequest({ strapi });
   });
 
   afterAll(async () => {

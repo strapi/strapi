@@ -62,7 +62,6 @@ module.exports = {
       data = sanitizeUser(data);
     }
 
-    // Send 200 `ok`
     ctx.body = data;
   },
 
@@ -86,21 +85,6 @@ module.exports = {
     ctx.send(sanitizeUser(data));
   },
 
-  async destroyAll(ctx) {
-    const {
-      request: { query },
-    } = ctx;
-
-    const toRemove = Object.values(_.omit(query, 'source'));
-
-    // FIXME: delete many
-    const finalQuery = { id: toRemove };
-
-    const data = await getService('user').removeAll(finalQuery);
-
-    ctx.send(data);
-  },
-
   /**
    * Retrieve authenticated user.
    * @return {Object|Array}
@@ -109,7 +93,7 @@ module.exports = {
     const user = ctx.state.user;
 
     if (!user) {
-      return ctx.badRequest(null, [{ messages: [{ id: 'No authorization header was found' }] }]);
+      return ctx.badRequest('Unauthenticated request');
     }
 
     ctx.body = sanitizeUser(user);

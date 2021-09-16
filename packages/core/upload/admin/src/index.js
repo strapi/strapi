@@ -23,6 +23,7 @@ export default {
   register(app) {
     // TODO update doc and guides
     app.addComponents({ name: 'media-library', Component: InputModalStepper });
+
     app.addMenuLink({
       to: `/plugins/${pluginId}`,
       icon,
@@ -32,23 +33,12 @@ export default {
       },
       permissions: pluginPermissions.main,
       Component: async () => {
-        const component = await import(/* webpackChunkName: "media-library-page" */ './pages/App');
+        const component = await import(/* webpackChunkName: "upload" */ './pages/App');
 
         return component;
       },
     });
-    // TODO
-    // app.addCorePluginMenuLink({
-    //   to: `/plugins/${pluginId}`,
-    //   icon,
-    //   intlLabel: {
-    //     id: `${pluginId}.plugin.name`,
-    //     defaultMessage: 'Media Library',
-    //   },
-    //   permissions: pluginPermissions.main,
-    // });
 
-    // TODO update guide
     app.addFields({ type: 'media', Component: InputMedia });
 
     app.addReducers(reducers);

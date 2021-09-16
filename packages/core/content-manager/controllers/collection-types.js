@@ -294,7 +294,7 @@ module.exports = {
     }
 
     const config = await contentTypeService.findConfiguration({ uid: model });
-    const mainField = prop(['metadatas', assoc.alias, 'edit', 'mainField'], config);
+    const mainField = prop(['metadatas', targetField, 'edit', 'mainField'], config);
 
     ctx.body = {
       pagination: relationList.pagination,
