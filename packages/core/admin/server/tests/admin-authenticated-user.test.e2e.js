@@ -44,7 +44,7 @@ describe('Authenticated User', () => {
         body: {},
       });
 
-      expect(res.statusCode).toBe(403);
+      expect(res.statusCode).toBe(401);
     });
   });
 
@@ -57,7 +57,7 @@ describe('Authenticated User', () => {
         body: {},
       });
 
-      expect(res.statusCode).toBe(403);
+      expect(res.statusCode).toBe(401);
     });
 
     test('Fails when trying to edit roles', async () => {

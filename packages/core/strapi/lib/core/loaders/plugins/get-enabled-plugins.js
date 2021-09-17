@@ -76,6 +76,7 @@ const getEnabledPlugins = async strapi => {
   const userPluginsConfig = existsSync(userPluginConfigPath)
     ? loadConfigFile(userPluginConfigPath)
     : {};
+
   _.forEach(userPluginsConfig, (declaration, pluginName) => {
     validatePluginName(pluginName);
     declaredPlugins[pluginName] = toDetailedDeclaration(declaration);
@@ -86,6 +87,7 @@ const getEnabledPlugins = async strapi => {
     p => !declaredPluginsResolves.includes(p.pathToPlugin),
     installedPlugins
   );
+
   const enabledPlugins = pipe(
     defaultsDeep(declaredPlugins),
     defaultsDeep(installedPluginsNotAlreadyUsed),

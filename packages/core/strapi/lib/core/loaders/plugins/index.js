@@ -87,6 +87,7 @@ const applyUserConfig = plugins => {
 
 const loadPlugins = async strapi => {
   const plugins = {};
+
   const enabledPlugins = await getEnabledPlugins(strapi);
 
   for (const pluginName in enabledPlugins) {
@@ -94,6 +95,7 @@ const loadPlugins = async strapi => {
     const pluginServer = loadConfigFile(join(enabledPlugin.pathToPlugin, 'strapi-server.js'));
     plugins[pluginName] = defaultsDeep(defaultPlugin, pluginServer);
   }
+
   // TODO: validate plugin format
   applyUserConfig(plugins);
   await applyUserExtension(plugins);

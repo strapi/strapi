@@ -2,7 +2,6 @@
 
 const path = require('path');
 const _ = require('lodash');
-const swaggerUi = require('swagger-ui-dist');
 const koaStatic = require('koa-static');
 
 const initialRoutes = [];
@@ -17,6 +16,8 @@ module.exports = {
     },
 
     initialize() {
+      const swaggerUi = require('swagger-ui-dist');
+
       // Find the plugins routes.
       strapi.plugins.documentation.routes = strapi.plugins.documentation.routes.map(
         (route, index) => {
@@ -40,14 +41,20 @@ module.exports = {
         }
       );
 
-      strapi.router.get('/plugins/documentation/*', async (ctx, next) => {
-        ctx.url = path.basename(ctx.url);
+      strapi.server.routes([
+        {
+          method: 'GET',
+          path: '/plugins/documentation/(.*)',
+          handler: async (ctx, next) => {
+            ctx.url = path.basename(ctx.url);
 
-        return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
-          maxage: strapi.config.middleware.settings.public.maxAge,
-          defer: true,
-        })(ctx, next);
-      });
+            return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
+              maxage: strapi.config.middleware.settings.public.maxAge,
+              defer: true,
+            })(ctx, next);
+          },
+        },
+      ]);
     },
   },
 };

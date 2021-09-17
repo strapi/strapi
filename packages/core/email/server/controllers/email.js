@@ -10,6 +10,7 @@ const { isNil, pick } = require('lodash/fp');
 module.exports = {
   async send(ctx) {
     let options = ctx.request.body;
+
     try {
       await strapi
         .plugin('email')

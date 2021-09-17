@@ -407,7 +407,6 @@ describe('<ListPage />', () => {
         tabindex="-1"
       >
         <div
-          class="c1 "
           style="height: 0px;"
         >
           <div

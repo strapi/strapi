@@ -7,6 +7,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
 import {
@@ -217,6 +218,7 @@ const useRoleActions = ({ getData, canCreate, canDelete, canUpdate }) => {
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
 
   const {
     isLoadingForPermissions,
@@ -245,7 +247,11 @@ const RoleListPage = () => {
   const colCount = 6;
 
   if (isLoadingForPermissions) {
-    return <LoadingIndicatorPage />;
+    return (
+      <Main aria-busy="true">
+        <LoadingIndicatorPage />
+      </Main>
+    );
   }
 
   const title = formatMessage({

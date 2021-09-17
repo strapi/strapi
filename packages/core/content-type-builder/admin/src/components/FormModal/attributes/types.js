@@ -254,7 +254,10 @@ const types = {
         }
 
         let schema = yup.string().test(isNameAllowed(reservedNames));
-        const initialForbiddenName = [...alreadyTakenTargetAttributes, modifiedData.name];
+        const initialForbiddenName = [
+          ...alreadyTakenTargetAttributes.map(({ name }) => name),
+          modifiedData.name,
+        ];
 
         let forbiddenTargetAttributeName = initialForbiddenName.filter(
           val => val !== initialData.targetAttribute

@@ -261,7 +261,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
       >
         <form>
           <div
-            class="c1 "
             style="height: 0px;"
           >
             <div
