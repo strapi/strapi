@@ -21,17 +21,17 @@ const authenticate = async ctx => {
       const user = await getService('user').fetchAuthenticatedUser(id);
 
       if (!user) {
-        return { authenticated: false };
+        return { error: 'Invalid credentials' };
       }
 
       const advancedSettings = await getAdvancedSettings();
 
       if (advancedSettings.email_confirmation && !user.confirmed) {
-        return { authenticated: false };
+        return { error: 'Invalid credentials' };
       }
 
       if (user.blocked) {
-        return { authenticated: false };
+        return { error: 'Invalid credentials' };
       }
 
       ctx.state.user = user;

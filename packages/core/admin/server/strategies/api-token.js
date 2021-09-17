@@ -39,17 +39,15 @@ const verify = (auth, config) => {
     throw new errors.UnauthorizedError();
   }
 
-  const isReadAction = config.scope.endsWith('find') || config.scope.endsWith('findOne');
-
-  /**
-   * If it's a "READ" action, then the type of token doesn't matter as
-   * both `full-access` and `read-only` allow you to get the data.
-   */
-  if (isReadAction) {
+  if (apiToken.type === constants.API_TOKEN_TYPE.FULL_ACCESS) {
     return;
   }
 
-  if (!isReadAction && apiToken.type === constants.API_TOKEN_TYPE.FULL_ACCESS) {
+  /**
+   * If you don't have `full-access` you can only access `find` and `findOne`
+   * scopes. If the route has no scope, then you can't get access to it.
+   */
+  if (config.scope && (config.scope.endsWith('find') || config.scope.endsWith('findOne'))) {
     return;
   }
 

@@ -160,5 +160,27 @@ describe('API Token Auth Strategy', () => {
         expect(err).toBeInstanceOf(Error);
       }
     });
+
+    test('A `full-access` token is needed when no scope is passed', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect(apiTokenStrategy.verify({ credentials: fullAccessApiToken }, {})).toBeUndefined();
+    });
+
+    test('Throws an error if no scope is passed with a `read-only` token', () => {
+      global.strapi = {
+        container,
+      };
+
+      expect.assertions(1);
+
+      try {
+        apiTokenStrategy.verify({ credentials: readOnlyApiToken }, {});
+      } catch (err) {
+        expect(err).toBeInstanceOf(Error);
+      }
+    });
   });
 });
