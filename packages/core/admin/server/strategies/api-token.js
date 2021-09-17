@@ -43,7 +43,7 @@ const verify = (auth, config) => {
 
   /**
    * If it's a "READ" action, then the type of token doesn't matter as
-   * both `full-access` and `read-only` allowa you to get the data.
+   * both `full-access` and `read-only` allow you to get the data.
    */
   if (isReadAction) {
     return;
