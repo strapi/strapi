@@ -11,7 +11,6 @@ const getAdvancedSettings = () => {
 const authenticate = async ctx => {
   if (ctx.request && ctx.request.header && ctx.request.header.authorization) {
     try {
-      console.log({ ctx });
       const { id } = await getService('jwt').getToken(ctx);
 
       if (id === undefined) {
