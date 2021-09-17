@@ -1,23 +1,20 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
-import { get } from 'lodash';
 import {
   SettingsPageTitle,
   useTracking,
-  getYupInnerErrors,
   useNotification,
   useOverlayBlocker,
   CheckPagePermissions,
   useRBAC,
-  LoadingIndicatorPage
+  useFocusWhenNavigate,
+  LoadingIndicatorPage,
 } from '@strapi/helper-plugin';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Main } from '@strapi/parts/Main';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import CheckIcon from '@strapi/icons/CheckIcon';
 import pluginPermissions from '../../permissions';
-// import { useForm } from '../../hooks';
 import { getTrad } from '../../utils';
 import { fetchData, putEmailTemplate } from './utils/api';
 import EmailTable from './components/EmailTable';
@@ -36,11 +33,12 @@ const EmailTemplatesPage = () => {
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
   const trackUsageRef = useRef(trackUsage);
+  const queryClient = useQueryClient();
+  useFocusWhenNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [templateToEdit, setTemplateToEdit] = useState(null);
-  // const buttonSubmitRef = useRef(null);
-  
+
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateEmailTemplates };
   }, []);
@@ -54,8 +52,8 @@ const EmailTemplatesPage = () => {
     onSuccess: () => {
       notifyStatus(
         formatMessage({
-          id: 'Form.advancedSettings.data.loaded',
-          defaultMessage: 'Advanced settings data has been loaded',
+          id: getTrad('Email.template.data.loaded'),
+          defaultMessage: 'Email templates has been loaded',
         })
       );
     },
@@ -70,92 +68,46 @@ const EmailTemplatesPage = () => {
   const isLoading = isLoadingForPermissions || isLoadingData !== 'success';
 
   const handleToggle = () => {
-    setIsModalOpen(prev => !prev)
+    setIsModalOpen(prev => !prev);
   };
 
-  const handleEditClick = (template) => {
-    setTemplateToEdit(data[template]);
+  const handleEditClick = template => {
+    setTemplateToEdit(template);
     handleToggle();
   };
 
+  const submitMutation = useMutation(body => putEmailTemplate({ 'email-templates': body }), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('email-templates');
+
+      toggleNotification({
+        type: 'success',
+        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+      });
+
+      trackUsageRef.current('didEditEmailTemplates');
+
+      unlockApp();
+      handleToggle();
+    },
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+      });
+      unlockApp();
+    },
+    refetchActive: true,
+  });
+  const { isLoading: isSubmittingForm } = submitMutation;
+
   const handleSubmit = body => {
-    console.log(body)
-  }
-  console.log(data)
-  // console.log(data);
+    lockApp();
+    trackUsageRef.current('willEditEmailTemplates');
 
-  // const emailTemplates = useMemo(() => {
-  //   return Object.keys(modifiedData).reduce((acc, current) => {
-  //     const { display, icon } = modifiedData[current];
-
-  //     acc.push({
-  //       id: current,
-  //       name: formatMessage({ id: getTrad(display) }),
-  //       icon: ['fas', icon],
-  //     });
-
-  //     return acc;
-  //   }, []);
-  // }, [modifiedData, formatMessage]);
-
-  // const handleSubmit = useCallback(
-  //   async e => {
-  //     e.preventDefault();
-
-  //     let errors = {};
-
-  //     try {
-  //       setIsSubmiting(true);
-  //       await schema.validate(modifiedData[templateToEdit.id], { abortEarly: false });
-
-  //       lockApp();
-
-  //       try {
-  //         trackUsageRef.current('willEditEmailTemplates');
-
-  //         await request(getRequestURL('email-templates'), {
-  //           method: 'PUT',
-  //           body: { 'email-templates': modifiedData },
-  //         });
-
-  //         trackUsageRef.current('didEditEmailTemplates');
-
-  //         toggleNotification({
-  //           type: 'success',
-  //           message: { id: getTrad('notification.success.submit') },
-  //         });
-
-  //         dispatchSubmitSucceeded();
-
-  //         handleToggle();
-  //       } catch (err) {
-  //         console.error(err);
-
-  //         toggleNotification({
-  //           type: 'warning',
-  //           message: { id: 'notification.error' },
-  //         });
-  //       }
-  //     } catch (err) {
-  //       errors = getYupInnerErrors(err);
-  //     } finally {
-  //       setIsSubmiting(false);
-  //       unlockApp();
-  //     }
-
-  //     dispatchSetFormErrors(errors);
-  //   },
-  //   [
-  //     dispatchSetFormErrors,
-  //     dispatchSubmitSucceeded,
-  //     modifiedData,
-  //     templateToEdit,
-  //     handleToggle,
-  //     toggleNotification,
-  //     lockApp,
-  //     unlockApp,
-  //   ]
-  // );
+    const editedTemplates = { ...data, [templateToEdit]: body };
+    submitMutation.mutate(editedTemplates);
+  };
 
   if (isLoading) {
     return (
@@ -180,7 +132,7 @@ const EmailTemplatesPage = () => {
   }
 
   return (
-    <Main aria-busy="true">
+    <Main aria-busy={isSubmittingForm}>
       <SettingsPageTitle
         name={formatMessage({
           id: getTrad('HeaderNav.link.emailTemplates'),
@@ -194,10 +146,14 @@ const EmailTemplatesPage = () => {
         })}
       />
       <ContentLayout>
-        <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate}/>
-        {isModalOpen &&
-          <EmailForm template={templateToEdit} onToggle={handleToggle} onSubmit={handleSubmit}/>
-        }
+        <EmailTable onEditClick={handleEditClick} canUpdate={canUpdate} />
+        {isModalOpen && (
+          <EmailForm
+            template={data[templateToEdit]}
+            onToggle={handleToggle}
+            onSubmit={handleSubmit}
+          />
+        )}
       </ContentLayout>
     </Main>
   );

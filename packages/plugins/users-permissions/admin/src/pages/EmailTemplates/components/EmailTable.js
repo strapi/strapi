@@ -17,54 +17,99 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
     <Table colCount={3} rowCount={3}>
       <Thead>
         <Tr>
-          <Th width='1%'>
+          <Th width="1%">
             <VisuallyHidden>
-              {formatMessage({ id: getTrad('Email.template.table.icon.label'), defaultMessage: 'icon' })}
+              {formatMessage({
+                id: getTrad('Email.template.table.icon.label'),
+                defaultMessage: 'icon',
+              })}
             </VisuallyHidden>
           </Th>
           <Th>
             <TableLabel>
-              {formatMessage({ id: getTrad('Email.template.table.name.label'), defaultMessage: 'name' })}
+              {formatMessage({
+                id: getTrad('Email.template.table.name.label'),
+                defaultMessage: 'name',
+              })}
             </TableLabel>
           </Th>
-          <Th width='1%'>
+          <Th width="1%">
             <VisuallyHidden>
-              {formatMessage({ id: getTrad('Email.template.table.action.label'), defaultMessage: 'action' })}
+              {formatMessage({
+                id: getTrad('Email.template.table.action.label'),
+                defaultMessage: 'action',
+              })}
             </VisuallyHidden>
           </Th>
         </Tr>
       </Thead>
       <Tbody>
         <Tr>
-          <Td><Reload /></Td>
+          <Td>
+            <Reload
+              aria-label={formatMessage({
+                id: getTrad('Email.template.reset_password'),
+                defaultMessage: 'Reset password',
+              })}
+            />
+          </Td>
           <Td>
             <Text>
-              {formatMessage({ id: getTrad('Email.template.reset_password'), defaultMessage: 'Reset password' })}
+              {formatMessage({
+                id: getTrad('Email.template.reset_password'),
+                defaultMessage: 'Reset password',
+              })}
             </Text>
           </Td>
           <Td>
-            <IconButton onClick={() => onEditClick('reset_password')} label="Edit" noBorder icon={canUpdate && <EditIcon />} />
+            <IconButton
+              onClick={() => onEditClick('reset_password')}
+              label={formatMessage({
+                id: getTrad('Email.template.form.edit.label'),
+                defaultMessage: 'Edit a template',
+              })}
+              noBorder
+              icon={canUpdate && <EditIcon />}
+            />
           </Td>
         </Tr>
         <Tr>
-          <Td><CheckIcon /></Td>
+          <Td>
+            <CheckIcon
+              aria-label={formatMessage({
+                id: getTrad('Email.template.email_confirmation'),
+                defaultMessage: 'Email address confirmation',
+              })}
+            />
+          </Td>
           <Td>
             <Text>
-              {formatMessage({ id: getTrad('Email.template.email_confirmation'), defaultMessage: 'Email address confirmation' })}
+              {formatMessage({
+                id: getTrad('Email.template.email_confirmation'),
+                defaultMessage: 'Email address confirmation',
+              })}
             </Text>
           </Td>
           <Td>
-            <IconButton onClick={() => onEditClick('email_confirmation')} label="Edit" noBorder icon={canUpdate && <EditIcon />} />
+            <IconButton
+              onClick={() => onEditClick('email_confirmation')}
+              label={formatMessage({
+                id: getTrad('Email.template.form.edit.label'),
+                defaultMessage: 'Edit a template',
+              })}
+              noBorder
+              icon={canUpdate && <EditIcon />}
+            />
           </Td>
         </Tr>
       </Tbody>
     </Table>
-  )
+  );
 };
 
 EmailTable.propTypes = {
   canUpdate: PropTypes.bool.isRequired,
-  onEditClick: PropTypes.func.isRequired
+  onEditClick: PropTypes.func.isRequired,
 };
 
 export default EmailTable;
