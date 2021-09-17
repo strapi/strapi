@@ -4921,15 +4921,15 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
-"@strapi/icons@0.0.1-alpha.32":
-  version "0.0.1-alpha.32"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.32.tgz#7df9b49ea853650eebb6767c989b9323d940233c"
-  integrity sha512-MUT5Kfw4X8edkBG+Li0VnqsyT5LREb4BuowQg84CxABxd82DuLDxf/mnBEI2LVFidxwP8OCBiRF/t9Bzeu7vfw==
+"@strapi/icons@0.0.1-alpha.33":
+  version "0.0.1-alpha.33"
+  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.33.tgz#42948b6c0f8b9e9053edb1258ee5d3b3b582e0be"
+  integrity sha512-b7n9yU4PQE/q66eJ1Gg8z2t04Q8ZZmtFSlFD52B9UkAt9YM5CpVBigyOOWUD0v9h3NMkp/bS+rrcZFOxOOZqnA==
 
-"@strapi/parts@0.0.1-alpha.32":
-  version "0.0.1-alpha.32"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.32.tgz#665c045b11175ce6362ae6f32896e987e6b46ffd"
-  integrity sha512-Kujz1W0qAT3W3qFhqFdcS/FHTtXMNULOsftvQKSiuSndPcT36VKJXEN9aenes0d0GaipRoIbJXkrIm+I3rT8Ww==
+"@strapi/parts@0.0.1-alpha.33":
+  version "0.0.1-alpha.33"
+  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.33.tgz#445d4ce2f27a39273e00bf1399deb522f4801d1c"
+  integrity sha512-BdFrdjwhnLxZ1vPhmyuT5PUh9YM25mjiEh9QiQckX548yXV08ZnHOuIN5RkjfcYrDhBq0JKhgO4XnZFvx9KkXg==
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"
