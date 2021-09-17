@@ -530,14 +530,14 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   </div>
                 </div>
                 <div
-                  class="c17"
+                  class="c0 c17"
                 >
                   <div
                     class="c18"
                   >
                     <div>
                       <div
-                        class="c19"
+                        class="c0 c19"
                       >
                         <div
                           class="c0 c12"
@@ -600,7 +600,7 @@ describe('ADMIN | PAGES | AUTH | ResetPassword', () => {
                   >
                     <div>
                       <div
-                        class="c19"
+                        class="c0 c19"
                       >
                         <div
                           class="c0 c12"

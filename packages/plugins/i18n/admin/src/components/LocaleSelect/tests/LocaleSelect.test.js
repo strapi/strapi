@@ -281,6 +281,7 @@ describe('LocaleSelect', () => {
                   aria-hidden="true"
                   class="c7 c13 c14"
                   tabindex="-1"
+                  type="button"
                 >
                   <svg
                     fill="none"
