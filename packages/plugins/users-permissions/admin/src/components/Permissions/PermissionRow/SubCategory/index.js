@@ -2,7 +2,7 @@ import React, { useCallback, useMemo } from 'react';
 import { get } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
+import { TableLabel, Box, Row, Checkbox, Grid, GridItem } from '@strapi/parts';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import CheckboxWrapper from '../CheckboxWrapper';
@@ -14,8 +14,7 @@ import PolicyWrapper from './PolicyWrapper';
 const Border = styled.div`
   flex: 1;
   align-self: center;
-  border-top: 1px solid #f6f6f6;
-  padding: 0px 10px;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 const SubCategory = ({ subCategory }) => {
@@ -55,6 +54,48 @@ const SubCategory = ({ subCategory }) => {
       return selectedAction === actionName;
     },
     [selectedAction]
+  );
+
+  return (
+    <Box>
+      <Row justifyContent="space-between" alignItems="center">
+        <Box paddingRight={4}>
+          <TableLabel textColor="neutral600">{subCategory.label}</TableLabel>
+        </Box>
+        <Border />
+        <Box paddingLeft={4}>
+          <Checkbox
+            name={subCategory.name}
+            value={hasAllActionsSelected}
+            onValueChange={
+              value => handleChangeSelectAll({target: { name: subCategory.name, value } })
+            }
+            indeterminate={hasSomeActionsSelected}
+          >
+            {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
+          </Checkbox>
+        </Box>
+      </Row>
+      <Row paddingTop={6} paddingBottom={6}>
+        <Grid gap={2} style={{ flex: 1 }}>
+          {subCategory.actions.map(action => {
+            const name = `${action.name}.enabled`;
+
+            return (
+              <GridItem col={6} key={action.name}>
+                <Checkbox
+                  value={get(modifiedData, name, false)}
+                  name={name}
+                  onValueChange={value => onChange({ target: { name, value } })}
+                >
+                  {action.label}
+                </Checkbox>
+              </GridItem>
+            );
+          })}
+        </Grid>
+      </Row>
+    </Box>
   );
 
   return (

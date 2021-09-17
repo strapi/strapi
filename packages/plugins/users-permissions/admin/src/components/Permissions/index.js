@@ -3,6 +3,7 @@ import { Accordion, AccordionToggle, AccordionContent, Box } from '@strapi/parts
 import { useIntl } from 'react-intl';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';
+import PermissionRow from './PermissionRow';
 import init from './init';
 import { initialState, reducer } from './reducer';
 
@@ -35,14 +36,12 @@ const Permissions = () => {
                 id: 'users-permissions.Plugin.permissions.plugins.description',
                 defaultMessage: 'Define all allowed actions for the {name} plugin.',
               },
-              { name: collapse.name }
+              { name: formatPluginName(collapse.name) }
             )}
             variant={index % 2 ? 'primary' : 'secondary'}
           />
           <AccordionContent>
-            <Box padding={6}>
-              <p>Accordion content</p>
-            </Box>
+            <PermissionRow permissions={modifiedData[collapse.name]} name={collapse.name} />
           </AccordionContent>
         </Accordion>
       ))}
