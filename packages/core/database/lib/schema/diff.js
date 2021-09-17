@@ -2,6 +2,8 @@
 
 const _ = require('lodash/fp');
 
+const RESERVED_TABLE_NAMES = ['strapi_migrations', 'strapi_database_schema'];
+
 const statuses = {
   CHANGED: 'CHANGED',
   UNCHANGED: 'UNCHANGED',
@@ -135,17 +137,17 @@ module.exports = db => {
   const diffColumns = (oldColumn, column) => {
     const changes = [];
 
-    // NOTE: we might want to move that to the schema generation instead
+    const isIgnoredType = ['increments', 'enum'].includes(column.type);
+
     // NOTE: enum aren't updated, they need to be dropped & recreated. Knex doesn't handle it
     const oldType = oldColumn.type;
     const type = db.dialect.getSqlType(column.type);
-    if (oldType !== type && !['increments', 'enum'].includes(type)) {
+
+    if (oldType !== type && !isIgnoredType) {
       changes.push('type');
     }
 
-    if (!_.isEqual(oldColumn.args, column.args) && !['increments', 'enum'].includes(column.type)) {
-      changes.push('args');
-    }
+    // NOTE: compare args at some point and split them into specific properties instead
 
     if (oldColumn.notNullable !== column.notNullable) {
       changes.push('notNullable');
@@ -345,7 +347,10 @@ module.exports = db => {
     }
 
     for (const srcTable of srcSchema.tables) {
-      if (!helpers.hasTable(destSchema, srcTable.name) && srcTable.name !== 'strapi_migrations') {
+      if (
+        !helpers.hasTable(destSchema, srcTable.name) &&
+        !RESERVED_TABLE_NAMES.includes(srcTable.name)
+      ) {
         removedTables.push(srcTable);
       }
     }

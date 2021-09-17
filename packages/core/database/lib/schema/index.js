@@ -1,7 +1,10 @@
 'use strict';
 
+const debug = require('debug')('strapi::database');
+
 const createSchemaBuilder = require('./builder');
-const createSchemaDiff = require('./schema-diff');
+const createSchemaDiff = require('./diff');
+const createSchemaStorage = require('./storage');
 const { metadataToSchema } = require('./schema');
 
 const createSchemaProvider = db => {
@@ -10,11 +13,14 @@ const createSchemaProvider = db => {
   return {
     builder: createSchemaBuilder(db),
     schemaDiff: createSchemaDiff(db),
+    schemaStorage: createSchemaStorage(db),
 
     /**
      * Drops the database schema
      */
     async drop() {
+      debug('Dropping database schema');
+
       const DBSchema = await db.dialect.schemaInspector.getSchema();
       await this.builder.dropSchema(DBSchema);
     },
@@ -23,6 +29,7 @@ const createSchemaProvider = db => {
      * Creates the database schema
      */
     async create() {
+      debug('Created database schema');
       await this.builder.createSchema(schema);
     },
 
@@ -30,29 +37,55 @@ const createSchemaProvider = db => {
      * Resets the database schema
      */
     async reset() {
+      debug('Resetting database schema');
       await this.drop();
       await this.create();
+    },
+
+    async syncSchema() {
+      debug('Synchronizing database schema');
+
+      const DBSchema = await db.dialect.schemaInspector.getSchema();
+
+      const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
+
+      console.log(diff.tables.updated.flatMap(t => t.columns.updated).map(x => x.object));
+
+      if (status === 'CHANGED') {
+        await this.builder.updateSchema(diff);
+      }
+
+      await this.schemaStorage.add(schema);
     },
 
     // TODO: support options to migrate softly or forcefully
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
     async sync() {
-      // Run users migrations
-      db.migration.up();
+      if (await db.migration.shouldRun()) {
+        debug('Found migrations to run');
+        await db.migration.up();
 
-      // Read schema from DB
-      const DBSchema = await db.dialect.schemaInspector.getSchema();
-
-      // Diff schema
-      const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
-
-      if (status === 'UNCHANGED') {
-        return;
+        return this.syncSchema();
       }
 
-      // Update schema
-      await this.builder.updateSchema(diff);
+      const oldSchema = await this.schemaStorage.read();
+
+      if (!oldSchema) {
+        debug('Schema not persisted yet');
+        return this.syncSchema();
+      }
+
+      const { hash: oldHash } = oldSchema;
+      const hash = await this.schemaStorage.hashSchema(schema);
+
+      if (oldHash !== hash) {
+        debug('Schema changed');
+        return this.syncSchema();
+      }
+
+      debug('Schema unchanged');
+      return;
     },
   };
 };

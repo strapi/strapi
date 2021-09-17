@@ -77,10 +77,6 @@ const toStrapiType = column => {
       return { type: 'boolean' };
     }
     case 'character': {
-      if (Number(column.character_maximum_length) === 255) {
-        return { type: 'string', args: [] };
-      }
-
       return { type: 'string', args: [column.character_maximum_length] };
     }
     case 'timestamp': {

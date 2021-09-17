@@ -72,6 +72,7 @@ const createMigrationProvider = db => {
           const sql = fse.readFileSync(path, 'utf8');
 
           return {
+            // TODO: check multiple commands in one sql statement
             up: knex => knex.raw(sql),
             down() {},
           };
@@ -86,26 +87,17 @@ const createMigrationProvider = db => {
   // TODO: add internal migrations for core & plugins
   // How do we intersperse them
 
-  // const internalMigrations = new Umzug({
-  //   storage: new CustomStorage({ db, tableName: 'strapi_internal_migrations' }),
-  //   migrations: {
-  //     path: path.join(__dirname, 'migrations'),
-  //     params: [db],
-  //     wrap: fn => db => {
-  //       return db.connection.transaction(trx => Promise.resolve(fn(trx)));
-  //     },
-  //   },
-  // });
-
   return {
+    async shouldRun() {
+      const pending = await migrations.pending();
+
+      return pending.length > 0;
+    },
     async up() {
-      // await migrations.down();
       await migrations.up();
-      // await internalMigrations.up();
     },
     async down() {
       await migrations.down();
-      // await internalMigrations.down();
     },
   };
 };

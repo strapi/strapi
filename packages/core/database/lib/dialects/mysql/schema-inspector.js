@@ -72,10 +72,6 @@ const toStrapiType = column => {
       return { type: 'text', args: ['longtext'] };
     }
     case 'varchar': {
-      if (Number(column.character_maximum_length) === 255) {
-        return { type: 'string', args: [] };
-      }
-
       return { type: 'string', args: [column.character_maximum_length] };
     }
     case 'datetime': {

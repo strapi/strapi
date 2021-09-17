@@ -21,11 +21,14 @@ const toStrapiType = column => {
 
       return { type: 'integer' };
     }
+    case 'float': {
+      return { type: 'float', args: [10, 2] };
+    }
+    case 'bigint': {
+      return { type: 'bigInteger' };
+    }
     case 'varchar': {
       const length = type.slice(8, type.length - 1);
-      if (Number(length) === 255) {
-        return { type: 'string', args: [] };
-      }
 
       return { type: 'string', args: [Number(length)] };
     }
@@ -46,12 +49,6 @@ const toStrapiType = column => {
     }
     case 'time': {
       return { type: 'time', args: [{ precision: 3 }] };
-    }
-    case 'float': {
-      return { type: 'float', args: [10, 2] };
-    }
-    case 'bigint': {
-      return { type: 'bigInteger' };
     }
     // TODO: enum
     default: {
