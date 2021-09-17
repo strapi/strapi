@@ -1,6 +1,6 @@
 'use strict';
 
-const { join, resolve } = require('path');
+const { join } = require('path');
 const { existsSync } = require('fs');
 const { defaultsDeep, getOr, get } = require('lodash/fp');
 const { env } = require('@strapi/utils');
@@ -25,7 +25,7 @@ const defaultPlugin = {
 };
 
 const applyUserExtension = async plugins => {
-  const extensionsDir = resolve(strapi.dir, 'src', 'extensions');
+  const extensionsDir = strapi.dirs.extensions;
   if (!existsSync(extensionsDir)) {
     return;
   }
@@ -62,7 +62,7 @@ const formatContentTypes = plugins => {
 };
 
 const applyUserConfig = plugins => {
-  const userPluginConfigPath = join(strapi.dir, 'config', 'plugins.js');
+  const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
   const userPluginsConfig = existsSync(userPluginConfigPath)
     ? loadConfigFile(userPluginConfigPath)
     : {};

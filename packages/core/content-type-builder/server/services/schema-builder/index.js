@@ -1,6 +1,6 @@
 'use strict';
 
-const path = require('path');
+const { join } = require('path');
 const _ = require('lodash');
 
 const createSchemaHandler = require('./schema-handler');
@@ -22,7 +22,7 @@ module.exports = function createBuilder() {
       plugin: compo.modelName,
       uid: compo.uid,
       filename: compo.__filename__,
-      dir: path.join(strapi.dir, 'src', 'components', compo.category),
+      dir: join(strapi.dirs.components, compo.category),
       schema: compo.__schema__,
     };
   });
@@ -31,15 +31,20 @@ module.exports = function createBuilder() {
     const contentType = strapi.contentTypes[key];
 
     const dir = contentType.plugin
-      ? `./src/extensions/${contentType.plugin}/content-types/${contentType.info.singularName}`
-      : `./src/api/${contentType.apiName}/content-types/${contentType.info.singularName}`;
+      ? join(
+          strapi.dirs.extensions,
+          contentType.plugin,
+          'content-types',
+          contentType.info.singularName
+        )
+      : join(strapi.dirs.api, contentType.apiName, 'content-types', contentType.info.singularName);
 
     return {
       modelName: contentType.modelName,
       plugin: contentType.plugin,
       uid: contentType.uid,
       filename: 'schema.json',
-      dir: path.join(strapi.dir, dir),
+      dir,
       schema: contentType.__schema__,
     };
   });

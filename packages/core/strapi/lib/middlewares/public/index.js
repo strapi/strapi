@@ -25,7 +25,7 @@ module.exports = strapi => {
 
     async initialize() {
       const { defaultIndex, maxAge, path: publicPath } = strapi.config.middleware.settings.public;
-      const staticDir = path.resolve(strapi.dir, publicPath || strapi.config.paths.static);
+      const staticDir = path.resolve(strapi.dirs.root, publicPath || strapi.config.paths.static);
 
       if (defaultIndex === true) {
         const index = fs.readFileSync(path.join(__dirname, 'index.html'), 'utf8');
@@ -98,7 +98,7 @@ module.exports = strapi => {
 
       if (!strapi.config.serveAdminPanel) return;
 
-      const buildDir = path.resolve(strapi.dir, 'build');
+      const buildDir = path.resolve(strapi.dirs.root, 'build');
       const serveAdmin = async (ctx, next) => {
         await next();
 

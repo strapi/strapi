@@ -5,7 +5,7 @@ const fse = require('fs-extra');
 
 // TODO:: allow folders with index.js inside for bigger policies
 module.exports = async function loadPolicies(strapi) {
-  const dir = join(strapi.dir, 'src', 'policies');
+  const dir = strapi.dirs.policies;
 
   if (!(await fse.pathExists(dir))) {
     return;

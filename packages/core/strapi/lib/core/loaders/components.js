@@ -6,19 +6,17 @@ const { pathExists } = require('fs-extra');
 const loadFiles = require('../../load/load-files');
 
 module.exports = async strapi => {
-  const componentsDir = join(strapi.dir, 'src', 'components');
-
-  if (!(await pathExists(componentsDir))) {
+  if (!(await pathExists(strapi.dirs.components))) {
     return {};
   }
 
-  const map = await loadFiles(componentsDir, '*/*.*(js|json)');
+  const map = await loadFiles(strapi.dirs.components, '*/*.*(js|json)');
 
   return Object.keys(map).reduce((acc, category) => {
     Object.keys(map[category]).forEach(key => {
       const schema = map[category][key];
 
-      const filePath = join(componentsDir, category, schema.__filename__);
+      const filePath = join(strapi.dirs.components, category, schema.__filename__);
 
       if (!schema.collectionName) {
         return strapi.stopWithError(

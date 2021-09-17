@@ -38,7 +38,7 @@ module.exports = function createComponentBuilder() {
       }
 
       const handler = createSchemaHandler({
-        dir: path.join(strapi.dir, 'src', 'components', nameToSlug(infos.category)),
+        dir: path.join(strapi.dirs.components, nameToSlug(infos.category)),
         filename: `${nameToSlug(infos.name)}.json`,
       });
 
@@ -87,7 +87,7 @@ module.exports = function createComponentBuilder() {
         throw new Error('component.edit.alreadyExists');
       }
 
-      const newDir = path.join(strapi.dir, 'src', 'components', newCategory);
+      const newDir = path.join(strapi.dirs.components, newCategory);
 
       const oldAttributes = component.schema.attributes;
 
