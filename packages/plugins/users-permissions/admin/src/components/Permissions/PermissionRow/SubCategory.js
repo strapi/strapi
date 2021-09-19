@@ -1,42 +1,17 @@
 import React, { useCallback, useMemo } from 'react';
 import { get } from 'lodash';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import PropTypes from 'prop-types';
 import { TableLabel, Box, Row, Checkbox, Grid, GridItem } from '@strapi/parts';
 import CogIcon from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
-import { useUsersPermissions } from '../../../../contexts/UsersPermissionsContext';
+import CheckboxWrapper from './CheckboxWrapper';
+import { useUsersPermissions } from '../../../contexts/UsersPermissionsContext';
 
 const Border = styled.div`
   flex: 1;
   align-self: center;
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
-`;
-
-const activeCheckboxWrapperStyles = css`
-  background: ${props => props.theme.colors.primary100};
-  svg {
-    opacity: 1;
-  }
-`;
-
-const CheckboxWrapper = styled(Box)`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-
-  svg {
-    opacity: 0;
-    path {
-      fill: ${props => props.theme.colors.primary600};
-    }
-  }
-
-  /* Show active style both on hover and when the action is selected */
-  ${props => props.isActive && activeCheckboxWrapperStyles}
-  &:hover {
-    ${activeCheckboxWrapperStyles}
-  }
 `;
 
 const SubCategory = ({ subCategory }) => {

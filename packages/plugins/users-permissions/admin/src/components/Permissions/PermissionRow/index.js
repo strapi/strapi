@@ -5,7 +5,6 @@ import { Box } from '@strapi/parts';
 import SubCategory from './SubCategory';
 
 const PermissionRow = ({ name, permissions }) => {
-
   const subCategories = useMemo(() => {
     return sortBy(
       Object.values(permissions.controllers).reduce((acc, curr, index) => {
