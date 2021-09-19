@@ -1,20 +1,42 @@
 import React, { useCallback, useMemo } from 'react';
 import { get } from 'lodash';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import PropTypes from 'prop-types';
 import { TableLabel, Box, Row, Checkbox, Grid, GridItem } from '@strapi/parts';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CogIcon from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
-import CheckboxWrapper from '../CheckboxWrapper';
-import BaselineAlignment from '../BaselineAlignment';
-import SubCategoryWrapper from './SubCategoryWrapper';
 import { useUsersPermissions } from '../../../../contexts/UsersPermissionsContext';
-import PolicyWrapper from './PolicyWrapper';
 
 const Border = styled.div`
   flex: 1;
   align-self: center;
   border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
+`;
+
+const activeCheckboxWrapperStyles = css`
+  background: ${props => props.theme.colors.primary100};
+  svg {
+    opacity: 1;
+  }
+`;
+
+const CheckboxWrapper = styled(Box)`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  svg {
+    opacity: 0;
+    path {
+      fill: ${props => props.theme.colors.primary600};
+    }
+  }
+
+  /* Show active style both on hover and when the action is selected */
+  ${props => props.isActive && activeCheckboxWrapperStyles}
+  &:hover {
+    ${activeCheckboxWrapperStyles}
+  }
 `;
 
 const SubCategory = ({ subCategory }) => {
@@ -67,9 +89,8 @@ const SubCategory = ({ subCategory }) => {
           <Checkbox
             name={subCategory.name}
             value={hasAllActionsSelected}
-            onValueChange={
-              value => handleChangeSelectAll({target: { name: subCategory.name, value } })
-            }
+            onValueChange={value =>
+              handleChangeSelectAll({ target: { name: subCategory.name, value } })}
             indeterminate={hasSomeActionsSelected}
           >
             {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
@@ -83,70 +104,28 @@ const SubCategory = ({ subCategory }) => {
 
             return (
               <GridItem col={6} key={action.name}>
-                <Checkbox
-                  value={get(modifiedData, name, false)}
-                  name={name}
-                  onValueChange={value => onChange({ target: { name, value } })}
-                >
-                  {action.label}
-                </Checkbox>
+                <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
+                  <Checkbox
+                    value={get(modifiedData, name, false)}
+                    name={name}
+                    onValueChange={value => onChange({ target: { name, value } })}
+                  >
+                    {action.label}
+                  </Checkbox>
+                  <button
+                    type="button"
+                    onClick={() => onSelectedAction(action.name)}
+                    style={{ display: 'inline-flex', alignItems: 'center' }}
+                  >
+                    <CogIcon />
+                  </button>
+                </CheckboxWrapper>
               </GridItem>
             );
           })}
         </Grid>
       </Row>
     </Box>
-  );
-
-  return (
-    <SubCategoryWrapper>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Padded right size="sm">
-          <Text
-            lineHeight="18px"
-            color="#919bae"
-            fontWeight="bold"
-            fontSize="xs"
-            textTransform="uppercase"
-          >
-            {subCategory.label}
-          </Text>
-        </Padded>
-        <Border />
-        <Padded left size="sm">
-          <BaselineAlignment />
-          <Checkbox
-            name={subCategory.name}
-            message={formatMessage({ id: 'app.utils.select-all' })}
-            onChange={handleChangeSelectAll}
-            someChecked={hasSomeActionsSelected}
-            value={hasAllActionsSelected}
-          />
-        </Padded>
-      </Flex>
-      <BaselineAlignment />
-      <Padded top size="xs">
-        <Flex flexWrap="wrap">
-          {subCategory.actions.map(action => {
-            const name = `${action.name}.enabled`;
-
-            return (
-              <CheckboxWrapper isActive={isActionSelected(action.name)} key={action.name}>
-                <Checkbox
-                  value={get(modifiedData, name, false)}
-                  name={name}
-                  message={action.label}
-                  onChange={onChange}
-                />
-                <PolicyWrapper onClick={() => onSelectedAction(action.name)}>
-                  <FontAwesomeIcon icon="cog" />
-                </PolicyWrapper>
-              </CheckboxWrapper>
-            );
-          })}
-        </Flex>
-      </Padded>
-    </SubCategoryWrapper>
   );
 };
 
