@@ -24,16 +24,16 @@ const THUMBNAIL_RESIZE_OPTIONS = {
 
 const DEFAULT_FORMAT_OPTIONS = {
   jpeg: {
-    quality: 85,
+    quality: 80,
   },
   png: {
     quality: 100,
   },
   tiff: {
-    quality: 85,
+    quality: 80,
   },
   webp: {
-    quality: 85,
+    quality: 80,
   },
 };
 
