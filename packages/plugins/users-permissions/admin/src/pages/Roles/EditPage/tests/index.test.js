@@ -966,4 +966,18 @@ describe('Admin | containers | RoleEditPage', () => {
     const errorMessages = await getAllByText(/invalid value/i);
     errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
   });
+
+  it('can toggle the permissions accordions', async () => {
+    // Create app and wait for loading
+    const { getByLabelText, queryByText, getByTestId, getByText } = makeAndRenderApp();
+    const loader = getByTestId('loader');
+    await waitForElementToBeRemoved(loader).catch(e => console.error(e));
+
+    // Open then close the collapse
+    const collapse = getByText(/define all allowed actions for the application plugin/i);
+    await userEvent.click(collapse);
+    expect(getByLabelText(/select all/i)).toBeInTheDocument();
+    await userEvent.click(collapse);
+    expect(queryByText(/select all/i)).not.toBeInTheDocument();
+  });
 });

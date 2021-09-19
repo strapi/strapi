@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useReducer } from 'react';
-import { Accordion, AccordionToggle, AccordionContent, Box } from '@strapi/parts';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts';
 import { useIntl } from 'react-intl';
 import { useUsersPermissions } from '../../contexts/UsersPermissionsContext';
 import formatPluginName from '../../utils/formatPluginName';
@@ -36,7 +36,7 @@ const Permissions = () => {
                 id: 'users-permissions.Plugin.permissions.plugins.description',
                 defaultMessage: 'Define all allowed actions for the {name} plugin.',
               },
-              { name: formatPluginName(collapse.name) }
+              { name: collapse.name }
             )}
             variant={index % 2 ? 'primary' : 'secondary'}
           />
