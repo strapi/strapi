@@ -22,12 +22,35 @@ const THUMBNAIL_RESIZE_OPTIONS = {
   fit: 'inside',
 };
 
-const resizeTo = (buffer, options) =>
-  sharp(buffer)
-    .withMetadata()
-    .resize(options)
-    .toBuffer()
-    .catch(() => null);
+const DEFAULT_FORMAT_OPTIONS = {
+  jpeg: {
+    quality: 85
+  },
+  png: {
+    quality: 100
+  },
+  tiff: {
+    quality: 85
+  },
+  webp: {
+    quality: 85
+  }
+};
+
+const getFormatOptions = () => strapi.config.get('plugins.upload.formatOptions', DEFAULT_FORMAT_OPTIONS);
+
+const resizeTo = (buffer, options) => {
+  const sharpInstance = sharp(buffer).withMetadata().resize(options);
+  const { format } = options;
+
+  if (formatsToProccess.includes(format)) {
+    const formatOptions = getFormatOptions();
+
+    sharpInstance[format](formatOptions[format])
+  }
+    
+  return sharpInstance.toBuffer().catch(() => null);;
+}
 
 const generateThumbnail = async file => {
   if (!(await canBeProccessed(file.buffer))) {
@@ -126,6 +149,7 @@ const generateBreakpoint = async (key, { file, breakpoint }) => {
     width: breakpoint,
     height: breakpoint,
     fit: 'inside',
+    format: file.mime.split('/')[1]
   });
 
   if (newBuff) {
