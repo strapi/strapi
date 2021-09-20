@@ -1,5 +1,6 @@
 'use strict';
 
+const { stringEquals } = require('@strapi/utils/lib');
 const { trim } = require('lodash/fp');
 const has = require('lodash/has');
 const { getService } = require('../utils');
@@ -100,7 +101,13 @@ module.exports = {
 
     if (has(attributes, 'name')) {
       const nameAlreadyTaken = await apiTokenService.getByName(attributes.name);
-      if (!!nameAlreadyTaken && nameAlreadyTaken.id !== id) {
+
+      /**
+       * We cast the ids as string as the one coming from the ctx isn't cast
+       * as a Number in case it is supposed to be an integer. It remains
+       * as a string. This way we avoid issues with integers in the db.
+       */
+      if (!!nameAlreadyTaken && !stringEquals(nameAlreadyTaken.id, id)) {
         return ctx.badRequest('Name already taken');
       }
     }
