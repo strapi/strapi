@@ -1,5 +1,5 @@
 import { Down, Up } from '@strapi/icons';
-import { Box, Checkbox, Row, Text } from '@strapi/parts';
+import { Box, Checkbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/Collapse/utils/constants';
 import { get, omit } from 'lodash';
 import PropTypes from 'prop-types';
@@ -21,10 +21,6 @@ const activeRowStyle = (theme, isActive, isClicked) => `
     background-color: ${theme.colors.primary100};
     color: ${theme.colors.primary600};
     border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
-  }
-  ${Text} {
-    color: ${theme.colors.primary600};
-    font-weight: bold;
   }
   ${Chevron} {
     display: block;
