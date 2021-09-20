@@ -59,23 +59,22 @@ export default {
           },
           permissions: pluginPermissions.readProviders,
         },
+        {
+          intlLabel: {
+            id: getTrad('HeaderNav.link.emailTemplates'),
+            defaultMessage: 'Email templates',
+          },
+          id: 'email-templates',
+          to: `/settings/${pluginId}/email-templates`,
+          Component: async () => {
+            const component = await import(
+              /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
+            );
 
-        // {
-        //   intlLabel: {
-        //     id: getTrad('HeaderNav.link.emailTemplates'),
-        //     defaultMessage: 'Email templates',
-        //   },
-        //   id: 'email-templates',
-        //   to: `/settings/${pluginId}/email-templates`,
-        //   Component: async () => {
-        //     const component = await import(
-        //       /* webpackChunkName: "users-email-settings-page" */ './pages/EmailTemplates'
-        //     );
-
-        //     return component;
-        //   },
-        //   permissions: pluginPermissions.readEmailTemplates,
-        // },
+            return component;
+          },
+          permissions: pluginPermissions.readEmailTemplates,
+        },
         {
           intlLabel: {
             id: getTrad('HeaderNav.link.advancedSettings'),
