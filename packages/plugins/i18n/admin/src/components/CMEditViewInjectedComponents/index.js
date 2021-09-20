@@ -5,7 +5,7 @@ import { useParams } from 'react-router-dom';
 import { useContentManagerEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
-import CMEditViewLocalePicker from '../CMEditViewLocalePicker';
+import CMEditViewLocalePicker from './CMEditViewLocalePicker';
 
 const CMEditViewInjectedComponents = () => {
   const { layout, modifiedData, slug, isSingleType } = useContentManagerEditViewDataManager();

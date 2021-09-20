@@ -15,7 +15,7 @@ import {
   useNotification,
   request,
 } from '@strapi/helper-plugin';
-import { getTrad } from '../../utils';
+import { getTrad } from '../../../utils';
 import { cleanData, generateOptions } from './utils';
 
 const CMEditViewCopyLocale = props => {

@@ -154,7 +154,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             <span
               class="c7"
             >
-              7 hours ago
+              now
             </span>
           </div>
           <div

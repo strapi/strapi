@@ -19,7 +19,7 @@ const Informations = () => {
   const updatedByLastname = initialData.updated_by?.lastname || '';
   const updatedByUsername = initialData.updated_by?.username;
   const updatedBy = updatedByUsername || `${updatedByFirstname} ${updatedByLastname}`;
-  const currentTime = useRef(new Date().getTime());
+  const currentTime = useRef(Date.now());
   const timestamp = initialData[updatedAt]
     ? new Date(initialData[updatedAt]).getTime()
     : Date.now();

@@ -14,7 +14,7 @@ import { useTheme } from 'styled-components';
 // import { DropdownIndicator, BaselineAlignment, selectStyles } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
-import { getTrad } from '../../utils';
+import { getTrad } from '../../../utils';
 import { addStatusColorToLocale, createLocalesOption } from './utils';
 // import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
 // import OptionComponent from './Option';
