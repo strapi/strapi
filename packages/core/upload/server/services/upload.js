@@ -44,10 +44,11 @@ const sendMediaMetrics = data => {
 };
 
 const combineFilters = params => {
-  // FIXME: until we support boolean operators for querying we need to make mime_ncontains use AND instead of OR
   if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-    params._where = params.mime_ncontains.map(val => ({ mime_ncontains: val }));
+    const mimeFilters = { $or: params.mime_ncontains.map(val => ({ mime_ncontains: val })) };
     delete params.mime_ncontains;
+
+    params.filters = params.filters ? { $and: [params.filters, mimeFilters] } : mimeFilters;
   }
 };
 
@@ -201,7 +202,7 @@ module.exports = ({ strapi }) => ({
       caption: _.isNil(caption) ? dbFile.caption : caption,
     };
 
-    return this.update({ id }, newInfos, { user });
+    return this.update(id, newInfos, { user });
   },
 
   async replace(id, { data, file }, { user } = {}) {
@@ -274,20 +275,20 @@ module.exports = ({ strapi }) => ({
       height,
     });
 
-    return this.update({ id }, fileData, { user });
+    return this.update(id, fileData, { user });
   },
 
-  async update(params, values, { user } = {}) {
+  async update(id, values, { user } = {}) {
     const fileValues = { ...values };
     if (user) {
       fileValues[UPDATED_BY_ATTRIBUTE] = user.id;
     }
     sendMediaMetrics(fileValues);
 
-    //
-    const res = await strapi
-      .query('plugin::upload.file')
-      .update({ where: params, data: fileValues });
+    // const res = await strapi
+    //   .query('plugin::upload.file')
+    //   .update({ where: params, data: fileValues });
+    const res = await strapi.entityService.update('plugin::upload.file', id, { data: fileValues });
 
     this.emitEvent(MEDIA_UPDATE, res);
 
@@ -309,18 +310,18 @@ module.exports = ({ strapi }) => ({
     return res;
   },
 
-  findOne(params, populate) {
-    return strapi.query('plugin::upload.file').findOne({ where: params, populate });
+  findOne(filters, populate) {
+    return strapi.entityService.findOne('plugin::upload.file', { params: { filters, populate } });
   },
 
-  fetchAll(params) {
-    combineFilters(params);
-    return strapi.query('plugin::upload.file').findMany({ ...params });
+  fetchAll(query) {
+    combineFilters(query);
+    return strapi.entityService.find('plugin::upload.file', { params: query });
   },
 
-  count(params) {
-    combineFilters(params);
-    return strapi.query('plugin::upload.file').count({ ...params });
+  count(query) {
+    combineFilters(query);
+    return strapi.entityService.count('plugin::upload.file', { params: query });
   },
 
   async remove(file) {
