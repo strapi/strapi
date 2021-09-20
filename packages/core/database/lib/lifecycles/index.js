@@ -2,22 +2,8 @@
 
 const assert = require('assert').strict;
 
-/**
- * @typedef Event
- * @property {string} action
- * @property {Model} model
- */
-
-/**
- * For each model try to run it's lifecycles function if any is defined
- * @param {Event} event
- */
-const modelLifecyclesSubscriber = async event => {
-  const { model } = event;
-  if (event.action in model.lifecycles) {
-    await model.lifecycles[event.action](event);
-  }
-};
+const timestampsLifecyclesSubscriber = require('./subscribers/timestamps');
+const modelLifecyclesSubscriber = require('./subscribers/models-lifecycles');
 
 const isValidSubscriber = subscriber => {
   return (
@@ -25,16 +11,23 @@ const isValidSubscriber = subscriber => {
   );
 };
 
-const createLifecyclesManager = db => {
-  let subscribers = [modelLifecyclesSubscriber];
+/**
+ * @type {import('.').createLifecyclesProvider}
+ */
+const createLifecyclesProvider = db => {
+  let subscribers = [timestampsLifecyclesSubscriber, modelLifecyclesSubscriber];
 
-  const lifecycleManager = {
+  return {
     subscribe(subscriber) {
       assert(isValidSubscriber(subscriber), 'Invalid subscriber. Expected function or object');
 
       subscribers.push(subscriber);
 
       return () => subscribers.splice(subscribers.indexOf(subscriber), 1);
+    },
+
+    clear() {
+      subscribers = [];
     },
 
     createEvent(action, uid, properties) {
@@ -65,15 +58,9 @@ const createLifecyclesManager = db => {
         }
       }
     },
-
-    clear() {
-      subscribers = [];
-    },
   };
-
-  return lifecycleManager;
 };
 
 module.exports = {
-  createLifecyclesManager,
+  createLifecyclesProvider,
 };

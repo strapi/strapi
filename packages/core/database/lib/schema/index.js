@@ -7,6 +7,9 @@ const createSchemaDiff = require('./diff');
 const createSchemaStorage = require('./storage');
 const { metadataToSchema } = require('./schema');
 
+/**
+ * @type {import('.').default}
+ */
 const createSchemaProvider = db => {
   const schema = metadataToSchema(db.metadata);
 
@@ -60,9 +63,9 @@ const createSchemaProvider = db => {
     // TODO: support option to disable auto migration & run a CLI command instead to avoid doing it at startup
     // TODO: Allow keeping extra indexes / extra tables / extra columns (globally or on a per table basis)
     async sync() {
-      if (await db.migration.shouldRun()) {
+      if (await db.migrations.shouldRun()) {
         debug('Found migrations to run');
-        await db.migration.up();
+        await db.migrations.up();
 
         return this.syncSchema();
       }

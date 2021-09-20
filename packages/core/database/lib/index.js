@@ -4,10 +4,10 @@ const knex = require('knex');
 
 const { getDialect } = require('./dialects');
 const createSchemaProvider = require('./schema');
-const createMigrationProvider = require('./migration');
 const createMetadata = require('./metadata');
 const { createEntityManager } = require('./entity-manager');
-const { createLifecyclesManager } = require('./lifecycles');
+const { createMigrationsProvider } = require('./migrations');
+const { createLifecyclesProvider } = require('./lifecycles');
 
 // TODO: move back into strapi
 const { transformContentTypes } = require('./utils/content-types');
@@ -26,9 +26,10 @@ class Database {
     this.dialect.initialize();
 
     this.schema = createSchemaProvider(this);
-    this.migration = createMigrationProvider(this);
 
-    this.lifecycles = createLifecyclesManager(this);
+    this.migrations = createMigrationsProvider(this);
+    this.lifecycles = createLifecyclesProvider(this);
+
     this.entityManager = createEntityManager(this);
   }
 
