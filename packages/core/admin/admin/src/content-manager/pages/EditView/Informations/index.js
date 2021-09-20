@@ -3,7 +3,7 @@ import { useIntl } from 'react-intl';
 import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
-import { Text } from '@strapi/parts/Text';
+import { TableLabel, Text } from '@strapi/parts/Text';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import { getTrad } from '../../../utils';
@@ -29,12 +29,12 @@ const Informations = () => {
 
   return (
     <Box>
-      <Text textColor="neutral600" bold small style={{ textTransform: 'uppercase' }}>
+      <TableLabel textColor="neutral600">
         {formatMessage({
           id: getTrad('containers.Edit.information'),
           defaultMessage: 'Information',
         })}
-      </Text>
+      </TableLabel>
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>

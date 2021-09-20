@@ -1,29 +1,27 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-// import { Label, Text, Padded } from '@buffetjs/core';
 import get from 'lodash/get';
-// import Select, { components } from 'react-select';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
 import { Select, Option } from '@strapi/parts/Select';
-import { Text } from '@strapi/parts/Text';
-// import { Row } from '@strapi/parts/Row';
+import { TableLabel } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
+import { Row } from '@strapi/parts/Row';
 import { useIntl } from 'react-intl';
 import { useTheme } from 'styled-components';
-// import { DropdownIndicator, BaselineAlignment, selectStyles } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
 import { getTrad } from '../../../utils';
 import { addStatusColorToLocale, createLocalesOption } from './utils';
-// import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
-// import OptionComponent from './Option';
-// import Wrapper from './Wrapper';
+import { statusMap } from './utils/addStatusColorToLocale';
+import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
+import Bullet from './Bullet';
 
 const CMEditViewLocalePicker = ({
   appLocales,
   createPermissions,
   currentEntityId,
+  currentLocaleStatus,
   hasDraftAndPublishEnabled,
   isSingleType,
   localizations,
@@ -32,7 +30,6 @@ const CMEditViewLocalePicker = ({
   setQuery,
   slug,
 }) => {
-  console.log(hasDraftAndPublishEnabled);
   const { formatMessage } = useIntl();
   const theme = useTheme();
   const currentLocale = get(query, 'plugins.i18n.locale', false);
@@ -100,92 +97,70 @@ const CMEditViewLocalePicker = ({
 
   return (
     <Box paddingTop={6}>
-      <Text textColor="neutral600" bold style={{ textTransform: 'uppercase' }} small>
+      <TableLabel textColor="neutral600">
         {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
-      </Text>
+      </TableLabel>
       <Box paddingTop={2} paddingBottom={6}>
         <Divider />
       </Box>
       <Stack size={2}>
-        <Select
-          label={formatMessage({
-            id: getTrad('Settings.locales.modal.locales.label'),
-          })}
-          onChange={handleChange}
-          value={value.value}
-        >
-          <Option value={value.value} disabled>
-            {value.label}
-          </Option>
-          {filteredOptions.map(option => {
-            return (
-              <Option key={option.value} value={option.value}>
-                {option.label}
-              </Option>
-            );
-          })}
-        </Select>
+        <Box>
+          <Select
+            label={formatMessage({
+              id: getTrad('Settings.locales.modal.locales.label'),
+            })}
+            onChange={handleChange}
+            value={value?.value}
+          >
+            <Option
+              value={value.value}
+              disabled
+              startIcon={hasDraftAndPublishEnabled ? 'todo' : null}
+            >
+              <Row>
+                {hasDraftAndPublishEnabled && (
+                  <Bullet
+                    $bulletColor={statusMap[currentLocaleStatus].backgroundColor}
+                    borderColor={statusMap[currentLocaleStatus].borderColor}
+                  />
+                )}
+                {value.label}
+              </Row>
+            </Option>
+            {filteredOptions.map(option => {
+              return (
+                <Option key={option.value} value={option.value}>
+                  <Row>
+                    {hasDraftAndPublishEnabled && (
+                      <Bullet
+                        $bulletColor={option.backgroundColor}
+                        borderColor={option.borderColor}
+                      />
+                    )}
+                    {option.label}
+                  </Row>
+                </Option>
+              );
+            })}
+          </Select>
+        </Box>
+        <Box>
+          <CMEditViewCopyLocale
+            appLocales={appLocales}
+            currentLocale={currentLocale}
+            localizations={localizations}
+            readPermissions={readPermissions}
+          />
+        </Box>
       </Stack>
     </Box>
   );
-  // return 'todo';
-
-  // const styles = selectStyles(theme);
-  // const Option = hasDraftAndPublishEnabled ? OptionComponent : components.Option;
-  // const paddingBottom = localizations.length ? '19px' : '29px';
-
-  // return (
-  //   <Wrapper paddingBottom={paddingBottom}>
-  //     <BaselineAlignment top size="18px" />
-  //     <Padded left right size="smd">
-  //       <Text fontWeight="bold">
-  //         {formatMessage({ id: getTrad('plugin.name'), defaultMessage: 'Internationalization' })}
-  //       </Text>
-  //       <BaselineAlignment top size="18px" />
-  //       <span id="select-locale">
-  //         <Label htmlFor="">
-  //           {formatMessage({
-  //             id: getTrad('Settings.locales.modal.locales.label'),
-  //           })}
-  //         </Label>
-  //       </span>
-  //       <BaselineAlignment top size="3px" />
-  //       <Select
-  //         aria-labelledby="select-locale"
-  //         components={{ DropdownIndicator, Option }}
-  //         isSearchable={false}
-  //         onChange={handleChange}
-  //         options={filteredOptions}
-  //         styles={{
-  //           ...styles,
-  //           control: (base, state) => ({ ...base, ...styles.control(base, state), height: '34px' }),
-  //           indicatorsContainer: (base, state) => ({
-  //             ...base,
-  //             ...styles.indicatorsContainer(base, state),
-  //             height: '32px',
-  //           }),
-  //           valueContainer: base => ({
-  //             ...base,
-  //             padding: '2px 0px 4px 10px',
-  //             lineHeight: '18px',
-  //           }),
-  //         }}
-  //         value={value}
-  //       />
-  //       <CMEditViewCopyLocale
-  //         appLocales={appLocales}
-  //         currentLocale={currentLocale}
-  //         localizations={localizations}
-  //         readPermissions={readPermissions}
-  //       />
-  //     </Padded>
-  //   </Wrapper>
-  // );
 };
 
 CMEditViewLocalePicker.defaultProps = {
   createPermissions: [],
   currentEntityId: null,
+  currentLocaleStatus: 'did-not-create-locale',
   isSingleType: false,
   localizations: [],
   query: {},
@@ -196,6 +171,7 @@ CMEditViewLocalePicker.propTypes = {
   appLocales: PropTypes.array.isRequired,
   createPermissions: PropTypes.array,
   currentEntityId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  currentLocaleStatus: PropTypes.string,
   hasDraftAndPublishEnabled: PropTypes.bool.isRequired,
   isSingleType: PropTypes.bool,
   localizations: PropTypes.array,

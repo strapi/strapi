@@ -577,14 +577,14 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
             </div>
             <div
-              class="c13"
+              class="c1 c13"
             >
               <div
                 class="c14"
               >
                 <div>
                   <div
-                    class="c15"
+                    class="c1 c15"
                   >
                     <div
                       class="c1 c4"
@@ -618,7 +618,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               >
                 <div>
                   <div
-                    class="c15"
+                    class="c1 c15"
                   >
                     <div
                       class="c1 c4"
@@ -671,7 +671,7 @@ describe('ADMIN | PAGES | AUTH | BaseLogin', () => {
               </div>
               <div>
                 <div
-                  class="c15"
+                  class="c1 c15"
                 >
                   <label
                     class="c10 c24 c25"

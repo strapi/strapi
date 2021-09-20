@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
-import { Duplicate } from '@buffetjs/icons';
-import { Label, Padded, Text } from '@buffetjs/core';
-import Select from 'react-select';
+import styled from 'styled-components';
 import { useDispatch } from 'react-redux';
-import { useTheme } from 'styled-components';
 import { useIntl } from 'react-intl';
-import {
-  BaselineAlignment,
-  DropdownIndicator,
-  ModalConfirm,
-  selectStyles,
-  useContentManagerEditViewDataManager,
-  useNotification,
-  request,
-} from '@strapi/helper-plugin';
-import { getTrad } from '../../../utils';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
+import { Select, Option } from '@strapi/parts/Select';
+import { Button } from '@strapi/parts/Button';
+import { Box } from '@strapi/parts/Box';
+import { Typography, Text } from '@strapi/parts/Text';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
+import Duplicate from '@strapi/icons/Duplicate';
+import { useContentManagerEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import { axiosInstance, getTrad } from '../../../utils';
 import { cleanData, generateOptions } from './utils';
+
+const StyledTypography = styled(Typography)`
+  svg {
+    margin-right: ${({ theme }) => theme.spaces[2]};
+    fill: none;
+    > g,
+    path {
+      fill: ${({ theme }) => theme.colors.primary600};
+    }
+  }
+`;
 
 const CMEditViewCopyLocale = props => {
   if (!props.localizations.length) {
@@ -35,8 +44,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
   const { allLayoutData, slug } = useContentManagerEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [value, setValue] = useState(options[0]);
-  const theme = useTheme();
+  const [value, setValue] = useState(options[0]?.value || '');
 
   const handleConfirmCopyLocale = async () => {
     if (!value) {
@@ -45,11 +53,13 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
       return;
     }
 
-    const requestURL = `/content-manager/collection-types/${slug}/${value.value}`;
+    const requestURL = `/content-manager/collection-types/${slug}/${value}`;
 
     try {
       setIsLoading(true);
-      const response = await request(requestURL, { method: 'GET' });
+
+      const { data: response } = await axiosInstance.get(requestURL);
+
       const cleanedData = cleanData(response, allLayoutData, localizations);
 
       dispatch({ type: 'ContentManager/CrudReducer/GET_DATA_SUCCEEDED', data: cleanedData });
@@ -85,83 +95,75 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
     setIsOpen(prev => !prev);
   };
 
-  const styles = selectStyles(theme);
-
   return (
     <>
-      <BaselineAlignment top size="12px" />
-      <Text
-        color="mediumBlue"
-        fontWeight="semiBold"
-        style={{ cursor: 'pointer' }}
+      <StyledTypography
+        fontSize={2}
+        textColor="primary600"
+        as="button"
+        type="button"
         onClick={handleToggle}
       >
-        <span style={{ marginRight: 10 }}>
-          <Duplicate fill="#007EFF" />
-        </span>
-        {formatMessage({
-          id: getTrad('CMEditViewCopyLocale.copy-text'),
-          defaultMessage: 'Fill in from another locale',
-        })}
-      </Text>
-      <ModalConfirm
-        showButtonLoader={isLoading}
-        confirmButtonLabel={{
-          id: getTrad('CMEditViewCopyLocale.submit-text'),
-          defaultMessage: 'Yes, fill in',
-        }}
-        content={{
-          id: getTrad('CMEditViewCopyLocale.ModalConfirm.content'),
-          defaultMessage:
-            'Your current content will be erased and filled by the content of the selected locale:',
-        }}
-        isOpen={isOpen}
-        onConfirm={handleConfirmCopyLocale}
-        title={{
-          id: getTrad('CMEditViewCopyLocale.ModalConfirm.title'),
-          defaultMessage: 'Select Locale',
-        }}
-        toggle={handleToggle}
-        type="success"
-      >
-        <Padded style={{ marginTop: -3 }} bottom size="sm">
-          <span id="select-locale" style={{ textAlign: 'left' }}>
-            <Label htmlFor="">
-              {formatMessage({
-                id: getTrad('Settings.locales.modal.locales.label'),
-              })}
-            </Label>
-            <BaselineAlignment top size="3px" />
-            <Select
-              aria-labelledby="select-locale"
-              components={{ DropdownIndicator }}
-              isSearchable={false}
-              defaultValue={options[0]}
-              onChange={handleChange}
-              options={options}
-              styles={{
-                ...styles,
-                control: (base, state) => ({
-                  ...base,
-                  ...styles.control(base, state),
-                  height: '34px',
-                }),
-                indicatorsContainer: (base, state) => ({
-                  ...base,
-                  ...styles.indicatorsContainer(base, state),
-                  height: '32px',
-                }),
-                valueContainer: base => ({
-                  ...base,
-                  padding: '2px 0px 4px 10px',
-                  lineHeight: '18px',
-                }),
-              }}
-              value={value}
-            />
-          </span>
-        </Padded>
-      </ModalConfirm>
+        <Row>
+          <Duplicate width="12px" height="12px" />
+          {formatMessage({
+            id: getTrad('CMEditViewCopyLocale.copy-text'),
+            defaultMessage: 'Fill in from another locale',
+          })}
+        </Row>
+      </StyledTypography>
+      {isOpen && (
+        <Dialog onClose={handleToggle} title="Confirmation" isOpen={isOpen}>
+          <DialogBody icon={<AlertWarningIcon />}>
+            <Stack size={2}>
+              <Row justifyContent="center">
+                <Text id="confirm-description" style={{ textAlign: 'center' }}>
+                  {formatMessage({
+                    id: getTrad('CMEditViewCopyLocale.ModalConfirm.content'),
+                    defaultMessage:
+                      'Your current content will be erased and filled by the content of the selected locale:',
+                  })}
+                </Text>
+              </Row>
+              <Box>
+                <Select
+                  label={formatMessage({
+                    id: getTrad('Settings.locales.modal.locales.label'),
+                  })}
+                  onChange={handleChange}
+                  value={value}
+                >
+                  {options.map(({ label, value }) => {
+                    return (
+                      <Option key={value} value={value}>
+                        {label}
+                      </Option>
+                    );
+                  })}
+                </Select>
+              </Box>
+            </Stack>
+          </DialogBody>
+          <DialogFooter
+            startAction={
+              <Button onClick={handleToggle} variant="tertiary">
+                {formatMessage({
+                  id: 'popUpWarning.button.cancel',
+                  defaultMessage: 'No, cancel',
+                })}
+              </Button>
+            }
+            endAction={
+              <Button variant="success" onClick={handleConfirmCopyLocale} loading={isLoading}>
+                {formatMessage({
+                  id: getTrad('CMEditViewCopyLocale.submit-text'),
+                  defaultMessage: 'Yes, fill in',
+                })}
+              </Button>
+            }
+          />
+        </Dialog>
+      )}
     </>
   );
 };
