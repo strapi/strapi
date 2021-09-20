@@ -194,7 +194,10 @@ const createQueryBuilder = (uid, db) => {
         this.select('*');
       }
 
-      if (['delete', 'update'].includes(state.type) && state.joins.length > 0) {
+      if (
+        ['delete', 'update'].includes(state.type) &&
+        (db.dialect.client === 'mysql' || state.joins.length > 0)
+      ) {
         this.select('id');
         const subQB = this.getKnexQuery();
 
