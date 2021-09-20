@@ -1,15 +1,10 @@
-import styled from 'styled-components';
-import { Row, BaseCheckbox, Text } from '@strapi/parts';
+import { Row, BaseCheckbox, Text, Box } from '@strapi/parts';
 import upperFirst from 'lodash/upperFirst';
 import PropTypes from 'prop-types';
 import React, { memo } from 'react';
 import { useIntl } from 'react-intl';
 import CollapseLabel from '../CollapseLabel';
 import { firstRowWidth } from '../Permissions/utils/constants';
-
-const CustomCheckbox = styled(BaseCheckbox)`
-  margin-right: ${({ theme }) => theme.spaces[2]};
-`;
 
 const RowLabelWithCheckbox = ({
   children,
@@ -27,27 +22,29 @@ const RowLabelWithCheckbox = ({
 
   return (
     <Row alignItems="center" paddingLeft={6} style={{ width: firstRowWidth, flexShrink: 0 }}>
-      <CustomCheckbox
-        name={checkboxName}
-        aria-label={formatMessage(
-          {
-            id: `Settings.permissions.select-all-by-permission`,
-            defaultMessage: 'Select all {label} permissions',
-          },
-          { label }
-        )}
-        disabled={isFormDisabled}
-        // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
-        onValueChange={value =>
-          onChange({
-            target: {
-              name: checkboxName,
-              value,
+      <Box paddingRight={2}>
+        <BaseCheckbox
+          name={checkboxName}
+          aria-label={formatMessage(
+            {
+              id: `Settings.permissions.select-all-by-permission`,
+              defaultMessage: 'Select all {label} permissions',
             },
-          })}
-        indeterminate={someChecked}
-        value={value}
-      />
+            { label }
+          )}
+          disabled={isFormDisabled}
+          // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
+          onValueChange={value =>
+            onChange({
+              target: {
+                name: checkboxName,
+                value,
+              },
+            })}
+          indeterminate={someChecked}
+          value={value}
+        />
+      </Box>
       <CollapseLabel
         title={label}
         alignItems="center"
