@@ -57,19 +57,20 @@ const WebhookForm = ({
                   variant="tertiary"
                   startIcon={<Publish />}
                   disabled={isCreating || isTriggering}
+                  size="L"
                 >
                   {formatMessage({
                     id: 'Settings.webhooks.trigger',
                     defaultMessage: 'Trigger',
                   })}
                 </Button>
-                <Button variant="secondary" onClick={handleReset}>
+                <Button variant="secondary" onClick={handleReset} size="L">
                   {formatMessage({
                     id: 'app.components.Button.reset',
                     defaultMessage: 'Reset',
                   })}
                 </Button>
-                <Button startIcon={<CheckIcon />} onClick={handleSubmit} type="submit">
+                <Button startIcon={<CheckIcon />} onClick={handleSubmit} type="submit" size="L">
                   {formatMessage({
                     id: 'app.components.Button.save',
                     defaultMessage: 'Save',

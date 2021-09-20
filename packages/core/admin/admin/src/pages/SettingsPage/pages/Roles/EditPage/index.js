@@ -111,6 +111,7 @@ const EditPage = () => {
                         handleReset();
                         permissionsRef.current.resetForm();
                       }}
+                      size="L"
                     >
                       {formatMessage({
                         id: 'app.components.Button.reset',
@@ -121,6 +122,7 @@ const EditPage = () => {
                       disabled={role.code === 'strapi-super-admin'}
                       onClick={handleSubmit}
                       loading={isSubmitting}
+                      size="L"
                     >
                       {formatMessage({
                         id: 'app.components.Button.save',
