@@ -872,13 +872,13 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c33 c41"
                                   id="accordion-label-accordion-3"
                                 >
-                                  Application
+                                  Address
                                 </span>
                                 <p
                                   class="c9 c35"
                                   id="accordion-desc-accordion-3"
                                 >
-                                  Define all allowed actions for the application plugin.
+                                  Define all allowed actions for the api::address plugin.
                                 </p>
                               </div>
                               <span
@@ -946,7 +946,7 @@ describe('Admin | containers | RoleEditPage', () => {
     expect(loader).toBeInTheDocument();
 
     // After loading, check other elements
-    await waitForElementToBeRemoved(loader).catch(e => console.error(e));
+    await waitForElementToBeRemoved(loader);
     const saveButton = getByRole('button', { name: /save/i });
     expect(saveButton).toBeInTheDocument();
     const nameField = getByLabelText(/name/i);
@@ -971,10 +971,10 @@ describe('Admin | containers | RoleEditPage', () => {
     // Create app and wait for loading
     const { getByLabelText, queryByText, getByTestId, getByText } = makeAndRenderApp();
     const loader = getByTestId('loader');
-    await waitForElementToBeRemoved(loader).catch(e => console.error(e));
+    await waitForElementToBeRemoved(loader);
 
     // Open then close the collapse
-    const collapse = getByText(/define all allowed actions for the application plugin/i);
+    const collapse = getByText(/define all allowed actions for the api::address plugin/i);
     await userEvent.click(collapse);
     expect(getByLabelText(/select all/i)).toBeInTheDocument();
     await userEvent.click(collapse);

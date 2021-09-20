@@ -16,7 +16,7 @@ const handlers = [
           created_at: '2021-09-08T16:26:18.061Z',
           updated_at: '2021-09-08T16:26:18.061Z',
           permissions: {
-            application: {
+            'api::address': {
               controllers: {
                 address: {
                   create: {
