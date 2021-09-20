@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { AssetType, AssetSource } from '../constants';
+import { typeFromMime } from './typeFromMime';
 
 export const urlsToAssets = async urls => {
   const assetPromises = urls.map(url =>
@@ -19,25 +20,13 @@ export const urlsToAssets = async urls => {
   const fullFilledAssets = assetsResults.filter(asset => asset.status === 'fulfilled');
   const rejectedAssets = assetsResults.filter(asset => asset.status === 'rejected');
 
-  const assets = fullFilledAssets.map(fullFilledAsset => {
-    let assetType;
-
-    if (fullFilledAsset.value.mime.includes(AssetType.Image)) {
-      assetType = AssetType.Image;
-    } else if (fullFilledAsset.value.mime.includes(AssetType.Video)) {
-      assetType = AssetType.Video;
-    } else {
-      assetType = AssetType.Document;
-    }
-
-    return {
-      source: AssetSource.Url,
-      type: assetType,
-      url: fullFilledAsset.value.url,
-      ext: fullFilledAsset.value.url.split('.').pop(),
-      mime: fullFilledAsset.value.mime,
-    };
-  });
+  const assets = fullFilledAssets.map(fullFilledAsset => ({
+    source: AssetSource.Url,
+    type: typeFromMime(fullFilledAsset.value.mime),
+    url: fullFilledAsset.value.url,
+    ext: fullFilledAsset.value.url.split('.').pop(),
+    mime: fullFilledAsset.value.mime,
+  }));
 
   const unknownAssets = rejectedAssets.map(unknownAsset => ({
     source: AssetSource.Url,
