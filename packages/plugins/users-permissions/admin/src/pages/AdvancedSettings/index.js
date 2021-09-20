@@ -56,7 +56,7 @@ const AdvancedSettingsPage = () => {
     onSuccess: () => {
       notifyStatus(
         formatMessage({
-          id: 'Form.advancedSettings.data.loaded',
+          id: getTrad('Form.advancedSettings.data.loaded'),
           defaultMessage: 'Advanced settings data has been loaded',
         })
       );
@@ -64,7 +64,7 @@ const AdvancedSettingsPage = () => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
       });
     },
   });
@@ -76,7 +76,7 @@ const AdvancedSettingsPage = () => {
       await queryClient.invalidateQueries('advanced');
       toggleNotification({
         type: 'success',
-        message: { id: 'notification.success.saved', defaultMessage: 'Saved' },
+        message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
       });
 
       unlockApp();
@@ -84,7 +84,7 @@ const AdvancedSettingsPage = () => {
     onError: () => {
       toggleNotification({
         type: 'warning',
-        message: { id: 'notification.error', defaultMessage: 'An error occured' },
+        message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
       });
       unlockApp();
     },
