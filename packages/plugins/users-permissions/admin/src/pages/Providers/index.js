@@ -8,6 +8,7 @@ import {
   useOverlayBlocker,
   CheckPagePermissions,
   useRBAC,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
@@ -18,6 +19,7 @@ import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
 import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { IconButton } from '@strapi/parts/IconButton';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import EditIcon from '@strapi/icons/EditIcon';
 import { useQuery, useMutation, useQueryClient } from 'react-query';
 import forms from './utils/forms';
@@ -37,6 +39,8 @@ export const ProvidersPage = () => {
   const [providerToEditName, setProviderToEditName] = useState(null);
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
+  const { notifyStatus } = useNotifyAT();
+  useFocusWhenNavigate();
 
   const updatePermissions = useMemo(() => {
     return { update: pluginPermissions.updateProviders };
@@ -50,7 +54,17 @@ export const ProvidersPage = () => {
   const { isLoading: isLoadingForData, data: modifiedData, isFetching } = useQuery(
     'get-providers',
     () => fetchData(toggleNotification),
-    { initialData: {} }
+    {
+      initialData: {},
+      onSuccess: () => {
+        notifyStatus(
+          formatMessage({
+            id: getTrad('Providers.data.loaded'),
+            defaultMessage: 'Providers have been loaded',
+          })
+        );
+      },
+    }
   );
 
   const isLoading = isLoadingForData || isFetching;

@@ -274,7 +274,6 @@ const ListView = () => {
                 />
                 <Button
                   startIcon={<AddIcon />}
-                  variant="primary"
                   onClick={() => {
                     const headerDisplayObject = {
                       header_label_1: currentDataName,

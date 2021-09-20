@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { useAppInfos, SettingsPageTitle } from '@strapi/helper-plugin';
+import { useAppInfos, SettingsPageTitle, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Box } from '@strapi/parts/Box';
@@ -15,6 +15,7 @@ const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
+  useFocusWhenNavigate();
 
   const currentPlan = appInfos.communityEdition
     ? 'app.components.UpgradePlanModal.text-ce'

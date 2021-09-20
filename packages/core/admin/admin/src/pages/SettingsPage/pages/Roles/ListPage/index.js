@@ -1,4 +1,9 @@
-import { SettingsPageTitle, useQuery, useTracking } from '@strapi/helper-plugin';
+import {
+  SettingsPageTitle,
+  useQuery,
+  useTracking,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, EditIcon, Duplicate } from '@strapi/icons';
 import {
   Button,
@@ -38,6 +43,7 @@ const useRoleActions = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { trackUsage } = useTracking();
   const { push } = useHistory();
+  useFocusWhenNavigate();
 
   const handleGoTo = useCallback(
     id => {
