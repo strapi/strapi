@@ -1,4 +1,4 @@
-import { Checkbox, Stack, TableLabel, Box } from '@strapi/parts';
+import { BaseCheckbox, Stack, TableLabel, Box } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/GlobalActions/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -30,7 +30,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
 
   return (
     <Box paddingBottom={4} paddingTop={6} style={{ paddingLeft: firstRowWidth }}>
-      <Stack horizontal>
+      <Stack horizontal size={0}>
         {displayedActions.map(({ label, actionId }) => {
           return (
             <CenteredStack key={actionId} size={3}>
@@ -40,7 +40,7 @@ const GlobalActions = ({ actions, isFormDisabled, kind }) => {
                   defaultMessage: label,
                 })}
               </TableLabel>
-              <Checkbox
+              <BaseCheckbox
                 disabled={isFormDisabled || IS_DISABLED}
                 onValueChange={value => {
                   onChangeCollectionTypeGlobalActionCheckbox(kind, actionId, value);
