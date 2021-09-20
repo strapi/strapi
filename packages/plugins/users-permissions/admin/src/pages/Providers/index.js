@@ -8,12 +8,14 @@ import {
   useOverlayBlocker,
   CheckPagePermissions,
   useRBAC,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Table, Thead, Tr, Th, Tbody, Td } from '@strapi/parts/Table';
 import { Text, TableLabel } from '@strapi/parts/Text';
 import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
@@ -29,6 +31,8 @@ import FormModal from '../../components/FormModal';
 
 export const ProvidersPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
+  const { notifyStatus } = useNotifyAT();
   const queryClient = useQueryClient();
   const { trackUsage } = useTracking();
   const trackUsageRef = useRef(trackUsage);
@@ -50,7 +54,17 @@ export const ProvidersPage = () => {
   const { isLoading: isLoadingForData, data: modifiedData, isFetching } = useQuery(
     'get-providers',
     () => fetchData(toggleNotification),
-    { initialData: {} }
+    {
+      onSuccess: () => {
+        notifyStatus(
+          formatMessage({
+            id: getTrad('Providers.data.loaded'),
+            defaultMessage: 'Providers have been loaded',
+          })
+        );
+      },
+      initialData: {},
+    }
   );
 
   const isLoading = isLoadingForData || isFetching;

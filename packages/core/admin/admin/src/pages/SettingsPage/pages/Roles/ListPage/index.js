@@ -1,4 +1,9 @@
-import { SettingsPageTitle, useQuery, useTracking } from '@strapi/helper-plugin';
+import {
+  SettingsPageTitle,
+  useQuery,
+  useTracking,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, EditIcon, Duplicate } from '@strapi/icons';
 import {
   Button,
@@ -86,6 +91,7 @@ const useRoleActions = () => {
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
 
   const { sortedRoles, isLoading } = useSortedRoles();
   const {
