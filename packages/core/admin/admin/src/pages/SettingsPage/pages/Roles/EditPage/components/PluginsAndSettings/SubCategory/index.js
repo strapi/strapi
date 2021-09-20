@@ -128,7 +128,6 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           <ConditionsButton
             hasConditions={doesButtonHasCondition}
             onClick={handleToggleModalIsOpen}
-            variant="tertiary"
           />
         </Row>
       </Box>
