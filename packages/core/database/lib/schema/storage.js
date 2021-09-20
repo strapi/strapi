@@ -36,7 +36,12 @@ module.exports = db => {
         return null;
       }
 
-      return typeof res.schema === 'object' ? res.schema : JSON.parse(res.schema);
+      const parsedSchema = typeof res.schema === 'object' ? res.schema : JSON.parse(res.schema);
+
+      return {
+        ...res,
+        schema: parsedSchema,
+      };
     },
 
     hashSchema(schema) {

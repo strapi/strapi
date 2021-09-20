@@ -1,6 +1,6 @@
 'use strict';
 
-const createSchemaDiff = require('../schema-diff');
+const createSchemaDiff = require('../diff');
 
 let diffSchemas;
 describe('diffSchemas', () => {

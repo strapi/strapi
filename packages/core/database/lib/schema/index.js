@@ -49,8 +49,6 @@ const createSchemaProvider = db => {
 
       const { status, diff } = this.schemaDiff.diff(DBSchema, schema);
 
-      console.log(diff.tables.updated.flatMap(t => t.columns.updated).map(x => x.object));
-
       if (status === 'CHANGED') {
         await this.builder.updateSchema(diff);
       }
@@ -81,6 +79,7 @@ const createSchemaProvider = db => {
 
       if (oldHash !== hash) {
         debug('Schema changed');
+
         return this.syncSchema();
       }
 
