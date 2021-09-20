@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { ModalFooter } from '@strapi/parts/ModalLayout';
@@ -8,12 +8,19 @@ import { Button } from '@strapi/parts/Button';
 import { Form } from '@strapi/helper-plugin';
 import { Formik } from 'formik';
 import { getTrad, urlSchema } from '../../../utils';
+import { urlsToAssets } from '../../../utils/urlsToAssets';
 
 export const FromUrlForm = ({ onClose, onAddAsset }) => {
+  const [loading, setLoading] = useState(false);
   const { formatMessage } = useIntl();
 
-  const handleSubmit = () => {
-    onAddAsset();
+  const handleSubmit = async ({ urls }) => {
+    setLoading(true);
+    const urlArray = urls.split(/\r?\n/);
+    const assets = await urlsToAssets(urlArray);
+
+    // no need to set the loading to false since the component unmounts
+    onAddAsset(assets);
   };
 
   return (
@@ -49,19 +56,16 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
 
           <ModalFooter
             startActions={
-              <Button onClick={onClose} variant="tertiary">
+              <Button onClick={onClose} variant="tertiary" loading={loading}>
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
               </Button>
             }
             endActions={
               <Button type="submit">
-                {formatMessage(
-                  {
-                    id: getTrad('modal.upload-list.footer.button.singular'),
-                    defaultMessage: 'Upload assets',
-                  },
-                  { number: 0 }
-                )}
+                {formatMessage({
+                  id: getTrad('button.next'),
+                  defaultMessage: 'Next',
+                })}
               </Button>
             }
           />

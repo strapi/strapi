@@ -5,7 +5,6 @@ import {
   Card,
   CardAction,
   CardAsset,
-  CardBadge,
   CardBody,
   CardCheckbox,
   CardContent,
@@ -15,6 +14,7 @@ import {
 } from '@strapi/parts/Card';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
+import EmptyStatePicture from '@strapi/icons/EmptyStatePicture';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 
@@ -22,7 +22,13 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) => {
+const IconWrapper = styled.span`
+  svg {
+    font-size: 3rem;
+  }
+`;
+
+export const UnknownAssetCard = ({ name, extension }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -35,33 +41,25 @@ export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) =>
             icon={<EditIcon />}
           />
         </CardAction>
-        <CardAsset src={thumbnail} />
+        <CardAsset>
+          <IconWrapper>
+            <EmptyStatePicture aria-label={name} />
+          </IconWrapper>
+        </CardAsset>
       </CardHeader>
       <CardBody>
         <CardContent>
           <CardTitle as="h2">{name}</CardTitle>
           <CardSubtitle>
             <Extension>{extension}</Extension>
-            {height && width && `- ${height}✕${width}`}
           </CardSubtitle>
         </CardContent>
-        <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.image.label'), defaultMessage: 'Image' })}
-        </CardBadge>
       </CardBody>
     </Card>
   );
 };
 
-ImageAssetCard.defaultProps = {
-  height: undefined,
-  width: undefined,
-};
-
-ImageAssetCard.propTypes = {
+UnknownAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
-  height: PropTypes.number,
   name: PropTypes.string.isRequired,
-  width: PropTypes.number,
-  thumbnail: PropTypes.string.isRequired,
 };

@@ -520,10 +520,7 @@ describe('MediaLibrary / ListView', () => {
                       >
                         png
                       </span>
-                       - 
-                      551
-                      ✕
-                      1066
+                      - 551✕1066
                     </div>
                   </div>
                   <div
