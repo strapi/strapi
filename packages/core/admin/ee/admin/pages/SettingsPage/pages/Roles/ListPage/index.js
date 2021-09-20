@@ -7,6 +7,7 @@ import {
   useNotification,
   useQueryParams,
   useRBAC,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, Duplicate, EditIcon } from '@strapi/icons';
 import {
@@ -36,6 +37,7 @@ import BaseRoleRow from '../../../../../../../admin/src/pages/SettingsPage/pages
 import reducer, { initialState } from './reducer';
 
 const useSortedRoles = () => {
+  useFocusWhenNavigate();
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canCreate, canDelete, canRead, canUpdate },
@@ -245,7 +247,11 @@ const RoleListPage = () => {
   const colCount = 6;
 
   if (isLoadingForPermissions) {
-    return <LoadingIndicatorPage />;
+    return (
+      <Main>
+        <LoadingIndicatorPage />
+      </Main>
+    );
   }
 
   const title = formatMessage({

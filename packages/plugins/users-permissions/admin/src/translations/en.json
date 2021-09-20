@@ -62,6 +62,7 @@
   "Settings.roles.deleted": "Role deleted",
   "Settings.roles.edited": "Role edited",
   "Settings.section-label": "Users & Permissions plugin",
+  "Providers.data.loaded": "Providers have been loaded",
   "Providers.name": "Name",
   "Providers.status": "Status",
   "Providers.enabled": "Enabled",
