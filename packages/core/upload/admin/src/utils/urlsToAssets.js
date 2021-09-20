@@ -1,12 +1,16 @@
+import axios from 'axios';
 import { AssetType, AssetSource } from '../constants';
 
 export const urlsToAssets = async urls => {
   const assetPromises = urls.map(url =>
-    fetch(url)
-      .then(res => ({ url: res.url, mime: res.headers.get('Content-Type') }))
-      .catch(() => {
-        throw url;
+    axios
+      .get(url, {
+        responseType: 'blob',
       })
+      .then(res => ({
+        url: res.config.url,
+        mime: res.headers['content-type'],
+      }))
   );
   // Retrieve the assets metadata
   const assetsResults = await Promise.allSettled(assetPromises);

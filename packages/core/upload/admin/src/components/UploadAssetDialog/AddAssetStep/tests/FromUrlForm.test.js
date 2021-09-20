@@ -3,7 +3,7 @@ import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { render as renderTL, screen, fireEvent, waitFor } from '@testing-library/react';
 import { FromUrlForm } from '../FromUrlForm';
 import en from '../../../../translations/en.json';
-import { mockAssets } from './server';
+import { server } from './server';
 
 jest.mock('../../../../utils', () => ({
   ...jest.requireActual('../../../../utils'),
@@ -15,7 +15,9 @@ jest.mock('react-intl', () => ({
 }));
 
 describe('FromUrlForm', () => {
-  beforeAll(mockAssets);
+  beforeAll(() => server.listen());
+  afterEach(() => server.resetHandlers());
+  afterAll(() => server.close());
 
   it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
     const onAddAssetSpy = jest.fn();
@@ -60,9 +62,9 @@ describe('FromUrlForm', () => {
       },
       {
         ext: 'lutin',
-        mime: undefined,
+        mime: 'application/json',
         source: 'url',
-        type: 'unknown',
+        type: 'doc',
         url: 'http://localhost:5000/not-working-like-cors.lutin',
       },
     ];

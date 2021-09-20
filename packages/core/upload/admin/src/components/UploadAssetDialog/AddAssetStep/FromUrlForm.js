@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box } from '@strapi/parts/Box';
 import { ModalFooter } from '@strapi/parts/ModalLayout';
@@ -11,12 +11,15 @@ import { getTrad, urlSchema } from '../../../utils';
 import { urlsToAssets } from '../../../utils/urlsToAssets';
 
 export const FromUrlForm = ({ onClose, onAddAsset }) => {
+  const [loading, setLoading] = useState(false);
   const { formatMessage } = useIntl();
 
   const handleSubmit = async ({ urls }) => {
+    setLoading(true);
     const urlArray = urls.split(/\r?\n/);
     const assets = await urlsToAssets(urlArray);
 
+    // no need to set the loading to false since the component unmounts
     onAddAsset(assets);
   };
 
@@ -53,7 +56,7 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
 
           <ModalFooter
             startActions={
-              <Button onClick={onClose} variant="tertiary">
+              <Button onClick={onClose} variant="tertiary" loading={loading}>
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
               </Button>
             }
