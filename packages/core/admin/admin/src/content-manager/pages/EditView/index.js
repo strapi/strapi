@@ -29,6 +29,7 @@ import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrappe
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
+import Informations from './Informations';
 import Header from './Header';
 import {
   // createAttributesLayout,
@@ -165,7 +166,7 @@ const EditView = ({
                         paddingRight={4}
                         paddingTop={6}
                       >
-                        infos + InjectionZone
+                        <Informations />
                       </Box>
                     </Stack>
                   </GridItem>
