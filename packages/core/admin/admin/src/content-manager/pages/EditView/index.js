@@ -17,7 +17,7 @@ import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
 
 // import { Padded } from '@buffetjs/core';
-// import { InjectionZone } from '../../../shared/components';
+import { InjectionZone } from '../../../shared/components';
 // import permissions from '../../../permissions';
 // import Container from '../../components/Container';
 // import DynamicZone from '../../components/DynamicZone';
@@ -167,6 +167,7 @@ const EditView = ({
                         paddingTop={6}
                       >
                         <Informations />
+                        <InjectionZone area="contentManager.editView.informations" />
                       </Box>
                     </Stack>
                   </GridItem>

@@ -2,14 +2,14 @@ const addStatusColorToLocale = (locales, theme) =>
   locales.map(({ status, ...rest }) => {
     const statusMap = {
       'did-not-create-locale': {
-        backgroundColor: theme.main.colors.white,
-        border: `1px solid ${theme.main.colors.grey}`,
+        backgroundColor: theme.colors.neutral0,
+        border: `1px solid ${theme.colors.neutral300}`,
       },
       draft: {
-        backgroundColor: theme.main.colors.mediumBlue,
+        backgroundColor: theme.colors.secondary700,
       },
       published: {
-        backgroundColor: theme.main.colors.green,
+        backgroundColor: theme.colors.success700,
       },
     };
     const props = statusMap[status];
