@@ -185,7 +185,7 @@
   "Settings.webhooks.list.all-entries.select": "Select all entries",
   "Settings.webhooks.list.button.add": "Add new webhook",
   "Settings.webhooks.list.description": "Get POST changes notifications.",
-  "Settings.webhooks.list.empty.description": "Add your first one to this list.",
+  "Settings.webhooks.list.empty.description": "Add your first webhook.",
   "Settings.webhooks.list.empty.link": "See our documentation",
   "Settings.webhooks.list.empty.title": "There are no webhooks yet",
   "Settings.webhooks.list.field.add": "Add another field to this collection type",

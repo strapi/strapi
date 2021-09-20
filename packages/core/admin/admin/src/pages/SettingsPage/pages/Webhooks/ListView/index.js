@@ -444,6 +444,7 @@ const ListView = () => {
                     })}
                     action={
                       <Button
+                        size="S"
                         variant="secondary"
                         startIcon={<AddIcon />}
                         onClick={() => (canCreate ? handleGoTo('create') : {})}
