@@ -20,6 +20,7 @@ const Border = styled.div`
 
 const CheckboxWrapper = styled.div`
   position: relative;
+  word-break: keep-all;
   ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
     `
