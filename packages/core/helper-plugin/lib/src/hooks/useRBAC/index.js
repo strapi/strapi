@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
-import hasPermissions from '../../old/utils/hasPermissions';
+import hasPermissions from '../../utils/hasPermissions';
 
 import generateResultsObject from './utils/generateResultsObject';
 import reducer from './reducer';

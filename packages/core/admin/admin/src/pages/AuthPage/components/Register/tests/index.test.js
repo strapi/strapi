@@ -658,7 +658,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   </div>
                 </div>
                 <div
-                  class="c21"
+                  class="c0 c21"
                 >
                   <div
                     class="c0 c22"
@@ -674,7 +674,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         >
                           <div>
                             <div
-                              class="c25"
+                              class="c0 c25"
                             >
                               <div
                                 class="c0 c12"
@@ -715,7 +715,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                         >
                           <div>
                             <div
-                              class="c25"
+                              class="c0 c25"
                             >
                               <div
                                 class="c0 c12"
@@ -751,7 +751,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   >
                     <div>
                       <div
-                        class="c25"
+                        class="c0 c25"
                       >
                         <div
                           class="c0 c12"
@@ -785,7 +785,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   >
                     <div>
                       <div
-                        class="c25"
+                        class="c0 c25"
                       >
                         <div
                           class="c0 c12"
@@ -848,7 +848,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   >
                     <div>
                       <div
-                        class="c25"
+                        class="c0 c25"
                       >
                         <div
                           class="c0 c12"
@@ -901,7 +901,7 @@ describe('ADMIN | PAGES | AUTH | Register', () => {
                   </div>
                   <div>
                     <div
-                      class="c25"
+                      class="c0 c25"
                     >
                       <label
                         class="c5 c6 c35"

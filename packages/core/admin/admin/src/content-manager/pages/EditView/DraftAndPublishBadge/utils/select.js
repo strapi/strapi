@@ -1,7 +1,7 @@
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect() {
-  const { initialData, hasDraftAndPublish } = useContentManagerEditViewDataManager();
+  const { initialData, hasDraftAndPublish } = useCMEditViewDataManager();
 
   const isPublished = initialData.published_at !== undefined && initialData.published_at !== null;
 

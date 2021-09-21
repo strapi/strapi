@@ -24,22 +24,6 @@ const HeadersInput = () => {
           name="headers"
           render={({ push, remove }) => (
             <Grid gap={4}>
-              <GridItem col={6}>
-                <FieldLabel>
-                  {formatMessage({
-                    id: 'Settings.webhooks.key',
-                    defaultMessage: 'Key',
-                  })}
-                </FieldLabel>
-              </GridItem>
-              <GridItem col={6}>
-                <FieldLabel>
-                  {formatMessage({
-                    id: 'Settings.webhooks.value',
-                    defaultMessage: 'Value',
-                  })}
-                </FieldLabel>
-              </GridItem>
               {values.headers?.map((header, i) => (
                 // eslint-disable-next-line
                 <React.Fragment key={i}>
@@ -48,6 +32,10 @@ const HeadersInput = () => {
                       as={TextInput}
                       name={`headers.${i}.key`}
                       aria-label={`row ${i + 1} key`}
+                      label={formatMessage({
+                        id: 'Settings.webhooks.key',
+                        defaultMessage: 'Key',
+                      })}
                       error={
                         errors.headers?.[i]?.key &&
                         formatMessage({
@@ -63,6 +51,10 @@ const HeadersInput = () => {
                         <Field
                           as={TextInput}
                           aria-label={`row ${i + 1} value`}
+                          label={formatMessage({
+                            id: 'Settings.webhooks.value',
+                            defaultMessage: 'Value',
+                          })}
                           name={`headers.${i}.value`}
                           error={
                             errors.headers?.[i]?.value &&

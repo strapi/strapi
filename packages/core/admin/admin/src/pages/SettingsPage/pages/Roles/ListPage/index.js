@@ -1,4 +1,9 @@
-import { SettingsPageTitle, useQuery, useTracking } from '@strapi/helper-plugin';
+import {
+  SettingsPageTitle,
+  useQuery,
+  useTracking,
+  useFocusWhenNavigate,
+} from '@strapi/helper-plugin';
 import { AddIcon, DeleteIcon, EditIcon, Duplicate } from '@strapi/icons';
 import {
   Button,
@@ -86,6 +91,7 @@ const useRoleActions = () => {
 
 const RoleListPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
 
   const { sortedRoles, isLoading } = useSortedRoles();
   const {
@@ -105,7 +111,7 @@ const RoleListPage = () => {
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
         primaryAction={
-          <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />}>
+          <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />} size="L">
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',

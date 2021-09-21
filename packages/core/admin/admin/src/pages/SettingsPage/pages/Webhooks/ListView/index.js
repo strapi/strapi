@@ -251,7 +251,12 @@ const ListView = () => {
             primaryAction={
               canCreate &&
               !loadingWebhooks && (
-                <LinkButton startIcon={<AddIcon />} variant="default" to={`${pathname}/create`}>
+                <LinkButton
+                  startIcon={<AddIcon />}
+                  variant="default"
+                  to={`${pathname}/create`}
+                  size="L"
+                >
                   {formatMessage({
                     id: 'Settings.webhooks.list.button.add',
                     defaultMessage: 'Add new webhook',
@@ -444,6 +449,7 @@ const ListView = () => {
                     })}
                     action={
                       <Button
+                        size="S"
                         variant="secondary"
                         startIcon={<AddIcon />}
                         onClick={() => (canCreate ? handleGoTo('create') : {})}

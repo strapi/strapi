@@ -15,7 +15,7 @@ import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
 
-export const PendingAssetStep = ({ onClose, assets }) => {
+export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -49,7 +49,7 @@ export const PendingAssetStep = ({ onClose, assets }) => {
                 })}
               </Text>
             </Stack>
-            <Button size="S">
+            <Button size="S" onClick={onClickAddAsset}>
               {formatMessage({
                 id: getTrad('header.actions.upload-new-asset'),
                 defaultMessage: 'Upload new asset',
@@ -142,4 +142,5 @@ PendingAssetStep.propTypes = {
     })
   ).isRequired,
   onClose: PropTypes.func.isRequired,
+  onClickAddAsset: PropTypes.func.isRequired,
 };

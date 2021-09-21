@@ -8,7 +8,7 @@ import styled from 'styled-components';
 import {
   LabelIconWrapper,
   LoadingIndicator,
-  useContentManagerEditViewDataManager,
+  useCMEditViewDataManager,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
@@ -52,7 +52,7 @@ const InputUID = ({
   editable,
   ...inputProps
 }) => {
-  const { modifiedData, initialData, layout } = useContentManagerEditViewDataManager();
+  const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
   const [isSuggestionOpen, setIsSuggestionOpen] = useState(true);

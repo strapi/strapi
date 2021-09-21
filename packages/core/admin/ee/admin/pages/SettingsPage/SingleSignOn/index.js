@@ -87,6 +87,7 @@ export const SingleSignOn = () => {
               loading={showHeaderButtonLoader}
               startIcon={<CheckIcon />}
               type="submit"
+              size="L"
             >
               {formatMessage({
                 id: 'app.components.Button.save',

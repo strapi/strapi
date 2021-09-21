@@ -2,7 +2,7 @@ import hasPermissions, {
   findMatchingPermissions,
   formatPermissionsForRequest,
   shouldCheckPermissions,
-} from '../hasPermissions';
+} from '../index';
 import hasPermissionsTestData from './hasPermissionsTestData';
 
 describe('STRAPI-HELPER_PLUGIN | utils ', () => {

@@ -42,7 +42,7 @@ const ConditionsButton = ({ onClick, className, hasConditions, variant }) => {
 ConditionsButton.defaultProps = {
   className: null,
   hasConditions: false,
-  variant: 'secondary',
+  variant: 'tertiary',
 };
 ConditionsButton.propTypes = {
   onClick: PropTypes.func.isRequired,

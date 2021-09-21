@@ -1,5 +1,5 @@
 import { isEmpty, pickBy, transform } from 'lodash';
-import request from './request';
+import request from '../../old/utils/request';
 
 const findMatchingPermissions = (userPermissions, permissions) => {
   return transform(
@@ -27,6 +27,12 @@ const formatPermissionsForRequest = permissions =>
 const shouldCheckPermissions = permissions =>
   !isEmpty(permissions) && permissions.every(perm => !isEmpty(perm.conditions));
 
+/**
+ *
+ * @param {Object[]} userPermissions array of the user's permissions
+ * @param {Object[]} permissions array of permissions that we want to find from the user's permissions
+ * @returns Boolean
+ */
 const hasPermissions = async (userPermissions, permissions, signal) => {
   if (!permissions || !permissions.length) {
     return true;

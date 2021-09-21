@@ -20,6 +20,7 @@ const Border = styled.div`
 
 const CheckboxWrapper = styled.div`
   position: relative;
+  word-break: keep-all;
   ${({ hasConditions, disabled, theme }) =>
     hasConditions &&
     `
@@ -128,7 +129,6 @@ const SubCategory = ({ categoryName, isFormDisabled, subCategoryName, actions, p
           <ConditionsButton
             hasConditions={doesButtonHasCondition}
             onClick={handleToggleModalIsOpen}
-            variant="tertiary"
           />
         </Row>
       </Box>
