@@ -121,7 +121,10 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
           <Stack size={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
-                aria-label="Select field"
+                aria-label={formatMessage({
+                  id: 'app.utils.select-field',
+                  defaultMessage: 'Select field',
+                })}
                 name="name"
                 size="L"
                 onChange={handleChangeFilterField}
@@ -138,6 +141,10 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
             </Box>
             <Box>
               <Select
+                aria-label={formatMessage({
+                  id: 'app.utils.select-filter',
+                  defaultMessage: 'Select filter',
+                })}
                 name="filter"
                 size="L"
                 value={modifiedData.filter}
