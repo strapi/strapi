@@ -156,7 +156,7 @@ const EditView = ({
                                   {grid.map(
                                     ({ fieldSchema, labelAction, metadatas, name, size }) => {
                                       return (
-                                        <GridItem col={size} key={name}>
+                                        <GridItem col={size} key={name} s={12} xs={12}>
                                           <Inputs
                                             fieldSchema={fieldSchema}
                                             keys={name}

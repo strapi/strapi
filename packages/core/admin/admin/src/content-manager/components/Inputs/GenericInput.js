@@ -1,19 +1,20 @@
 /**
  *
- * Input
+ * GenericInput
  * This is a temp file move it to the helper plugin when ready
  */
 
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
-import { ToggleInput } from '@strapi/parts/ToggleInput';
+import { NumberInput } from '@strapi/parts/NumberInput';
 import { Textarea } from '@strapi/parts/Textarea';
 import { TextInput } from '@strapi/parts/TextInput';
+import { ToggleInput } from '@strapi/parts/ToggleInput';
 import Hide from '@strapi/icons/Hide';
 import Show from '@strapi/icons/Show';
 import PropTypes from 'prop-types';
 
-const Input = ({
+const GenericInput = ({
   autoComplete,
   customInputs,
   description,
@@ -24,6 +25,7 @@ const Input = ({
   name,
   onChange,
   placeholder,
+  step,
   type,
   value,
   ...rest
@@ -95,6 +97,25 @@ const Input = ({
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
+        />
+      );
+    }
+    case 'number': {
+      return (
+        <NumberInput
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onValueChange={value => {
+            onChange({ target: { name, value, type } });
+          }}
+          placeholder={formattedPlaceholder}
+          step={step}
+          value={value || undefined}
         />
       );
     }
@@ -180,7 +201,7 @@ const Input = ({
   }
 };
 
-Input.defaultProps = {
+GenericInput.defaultProps = {
   autoComplete: undefined,
   customInputs: null,
   description: null,
@@ -188,10 +209,11 @@ Input.defaultProps = {
   error: '',
   labelAction: undefined,
   placeholder: null,
+  step: 1,
   value: '',
 };
 
-Input.propTypes = {
+GenericInput.propTypes = {
   autoComplete: PropTypes.string,
   customInputs: PropTypes.object,
   description: PropTypes.shape({
@@ -214,8 +236,9 @@ Input.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }),
+  step: PropTypes.number,
   type: PropTypes.string.isRequired,
   value: PropTypes.any,
 };
 
-export default Input;
+export default GenericInput;

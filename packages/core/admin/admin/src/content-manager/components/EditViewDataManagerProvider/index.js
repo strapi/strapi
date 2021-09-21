@@ -93,6 +93,7 @@ const EditViewDataManagerProvider = ({
     const errorsInForm = Object.keys(formErrors);
 
     // TODO check if working with DZ, components...
+    // TODO use querySelector querySelectorAll('[data-strapi-field-error]')
     if (errorsInForm.length > 0) {
       const firstError = errorsInForm[0];
       const el = document.getElementById(firstError);
