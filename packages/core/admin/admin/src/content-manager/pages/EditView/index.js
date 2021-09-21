@@ -156,6 +156,7 @@ const EditView = ({
                       <DraftAndPublishBadge />
                       <Box
                         as="aside"
+                        aria-labelledby="additional-informations"
                         background="neutral0"
                         borderColor="neutral150"
                         hasRadius
@@ -167,7 +168,7 @@ const EditView = ({
                         <Informations />
                         <InjectionZone area="contentManager.editView.informations" />
                       </Box>
-                      <Box as="aside">
+                      <Box as="aside" aria-labelledby="links">
                         <Stack size={2}>
                           {slug !== 'strapi::administrator' && (
                             <CheckPermissions permissions={ctbPermissions}>
