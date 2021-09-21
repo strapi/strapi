@@ -46,7 +46,7 @@ describe('ImageAssetCard', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c10 {
+      .c8 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
@@ -61,12 +61,6 @@ describe('ImageAssetCard', () => {
       }
 
       .c3 {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-      }
-
-      .c5 {
         position: absolute;
         top: 12px;
         right: 12px;
@@ -90,7 +84,7 @@ describe('ImageAssetCard', () => {
         align-items: center;
       }
 
-      .c11 {
+      .c9 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -98,20 +92,20 @@ describe('ImageAssetCard', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
       }
 
-      .c9 {
+      .c7 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c8 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -125,14 +119,14 @@ describe('ImageAssetCard', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c12 {
+      .c11 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c13 {
+      .c12 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -162,75 +156,16 @@ describe('ImageAssetCard', () => {
         display: inline-block;
       }
 
-      .c17 {
+      .c14 {
         margin-left: auto;
       }
 
-      .c4 {
-        margin: 0;
-        height: 18px;
-        min-width: 18px;
-        border-radius: 4px;
-        border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
-        background-color: #ffffff;
+      .c17 {
+        margin-left: 4px;
       }
 
-      .c4:checked {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c4:checked:after {
-        content: '';
-        display: block;
-        position: relative;
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c4:checked:disabled:after {
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
-      }
-
-      .c4:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c4:indeterminate {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c4:indeterminate:after {
-        content: '';
-        display: block;
-        position: relative;
-        color: white;
-        height: 2px;
-        width: 10px;
-        background-color: #ffffff;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c4:indeterminate:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c4:indeterminate:disabled:after {
-        background-color: #8e8ea9;
+      .c10 {
+        word-break: break-all;
       }
 
       .c2 {
@@ -238,7 +173,7 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c6 {
+      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -250,44 +185,44 @@ describe('ImageAssetCard', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c6 svg {
+      .c4 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c6 svg > g,
-      .c6 svg path {
+      .c4 svg > g,
+      .c4 svg path {
         fill: #ffffff;
       }
 
-      .c6[aria-disabled='true'] {
+      .c4[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c7 svg > g,
-      .c7 svg path {
+      .c5 svg > g,
+      .c5 svg path {
         fill: #8e8ea9;
       }
 
-      .c7:hover svg > g,
-      .c7:hover svg path {
+      .c5:hover svg > g,
+      .c5:hover svg path {
         fill: #666687;
       }
 
-      .c7:active svg > g,
-      .c7:active svg path {
+      .c5:active svg > g,
+      .c5:active svg path {
         fill: #a5a5ba;
       }
 
-      .c7[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c7[aria-disabled='true'] svg path {
+      .c5[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c14 {
+      .c13 {
         text-transform: uppercase;
       }
 
@@ -303,21 +238,11 @@ describe('ImageAssetCard', () => {
             <div
               class="c3"
             >
-              <input
-                aria-labelledby="card-1-title"
-                checked=""
-                class="c4"
-                type="checkbox"
-              />
-            </div>
-            <div
-              class="c5"
-            >
               <span>
                 <button
                   aria-disabled="false"
                   aria-labelledby="tooltip-1"
-                  class="c6 c7"
+                  class="c4 c5"
                   tabindex="0"
                   type="button"
                 >
@@ -339,35 +264,35 @@ describe('ImageAssetCard', () => {
               </span>
             </div>
             <div
-              class="c8"
+              class="c6"
             >
               <img
                 aria-hidden="true"
-                class="c9"
+                class="c7"
                 src="http://somewhere.com/hello.png"
               />
             </div>
           </div>
           <div
-            class="c10"
+            class="c8"
           >
             <div
-              class="c11"
+              class="c9"
             >
               <div
-                class=""
+                class="c10"
               >
                 <h2
-                  class="c12"
+                  class="c11"
                   id="card-1-title"
                 >
                   hello.png
                 </h2>
                 <div
-                  class="c13"
+                  class="c12"
                 >
                   <span
-                    class="c14"
+                    class="c13"
                   >
                     png
                   </span>
@@ -375,13 +300,17 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c15 c16 c17"
+                class="c14"
               >
-                <span
-                  class="c18 c19 c20"
+                <div
+                  class="c15 c16 c17"
                 >
-                  Image
-                </span>
+                  <span
+                    class="c18 c19 c20"
+                  >
+                    Image
+                  </span>
+                </div>
               </div>
             </div>
           </div>

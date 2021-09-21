@@ -111,7 +111,7 @@ const RoleListPage = () => {
       <SettingsPageTitle name="Roles" />
       <HeaderLayout
         primaryAction={
-          <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />}>
+          <Button onClick={handleToggleModalForCreatingRole} startIcon={<AddIcon />} size="L">
             {formatMessage({
               id: 'Settings.roles.list.button.add',
               defaultMessage: 'Add new role',

@@ -138,13 +138,14 @@ const CreatePage = () => {
                         handleReset();
                         permissionsRef.current.resetForm();
                       }}
+                      size="L"
                     >
                       {formatMessage({
                         id: 'app.components.Button.reset',
                         defaultMessage: 'Reset',
                       })}
                     </Button>
-                    <Button onClick={handleSubmit} loading={isSubmitting}>
+                    <Button onClick={handleSubmit} loading={isSubmitting} size="L">
                       {formatMessage({
                         id: 'app.components.Button.save',
                         defaultMessage: 'Save',

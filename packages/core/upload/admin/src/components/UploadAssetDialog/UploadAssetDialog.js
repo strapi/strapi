@@ -19,12 +19,18 @@ export const UploadAssetDialog = ({ onSuccess, onClose }) => {
     onSuccess();
   };
 
+  const moveToAddAsset = () => {
+    setStep(Steps.AddAsset);
+  };
+
   return (
     <ModalLayout onClose={onClose} labelledBy="title">
       {step === Steps.AddAsset && (
         <AddAssetStep onClose={onClose} onAddAsset={handleAddToPendingAssets} />
       )}
-      {step === Steps.PendingAsset && <PendingAssetStep onClose={onClose} assets={assets} />}
+      {step === Steps.PendingAsset && (
+        <PendingAssetStep onClose={onClose} assets={assets} onClickAddAsset={moveToAddAsset} />
+      )}
     </ModalLayout>
   );
 };

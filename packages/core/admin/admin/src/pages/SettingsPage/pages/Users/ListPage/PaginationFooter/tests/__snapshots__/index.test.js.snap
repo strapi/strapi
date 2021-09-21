@@ -321,6 +321,7 @@ exports[`DynamicTable renders and matches the snapshot 1`] = `
                     aria-hidden="true"
                     class="c11 c12 c13"
                     tabindex="-1"
+                    type="button"
                   >
                     <svg
                       fill="none"

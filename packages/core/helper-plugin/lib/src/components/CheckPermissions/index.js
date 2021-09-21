@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
 
-import hasPermissions from '../../old/utils/hasPermissions';
+import hasPermissions from '../../utils/hasPermissions';
 import useRBACProvider from '../../hooks/useRBACProvider';
 
 // NOTE: this component is very similar to the CheckPagePermissions

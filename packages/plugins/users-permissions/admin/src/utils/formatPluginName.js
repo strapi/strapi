@@ -4,22 +4,22 @@ function formatPluginName(pluginSlug) {
   switch (pluginSlug) {
     case 'application':
       return 'Application';
-    case 'content-manager':
+    case 'plugin::content-manager':
       return 'Content manager';
-    case 'content-type-builder':
+    case 'plugin::content-type-builder':
       return 'Content types builder';
-    case 'documentation':
+    case 'plugin::documentation':
       return 'Documentation';
-    case 'email':
+    case 'plugin::email':
       return 'Email';
-    case 'i18n':
+    case 'plugin::i18n':
       return 'i18n';
-    case 'upload':
+    case 'plugin::upload':
       return 'Upload';
-    case 'users-permissions':
+    case 'plugin::users-permissions':
       return 'Users-permissions';
     default:
-      return upperFirst(pluginSlug);
+      return upperFirst(pluginSlug.replace('api::', '').replace('plugin::', ''));
   }
 }
 
