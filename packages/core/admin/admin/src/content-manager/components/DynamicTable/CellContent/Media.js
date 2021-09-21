@@ -15,7 +15,6 @@ const FileWrapper = styled(Row)`
   height: 26px;
   border: 1px solid ${({ theme }) => theme.colors.neutral200};
   background: ${({ theme }) => theme.colors.neutral150};
-  //TO FIX - find a way to center text horizontally properly without it
   padding-left: 1px;
 
   span {
