@@ -29,13 +29,13 @@ const IconWrapper = styled.span`
   }
 `;
 
-export const DocAssetCard = ({ name, extension }) => {
+export const DocAssetCard = ({ name, extension, selected, onSelect }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Card>
       <CardHeader>
-        <CardCheckbox value />
+        {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         <CardAction position="end">
           <IconButton
             label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
@@ -63,7 +63,14 @@ export const DocAssetCard = ({ name, extension }) => {
   );
 };
 
+DocAssetCard.defaultProps = {
+  selected: false,
+  onSelect: undefined,
+};
+
 DocAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  onSelect: PropTypes.func,
+  selected: PropTypes.bool,
 };
