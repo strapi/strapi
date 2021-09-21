@@ -4,7 +4,7 @@ import React, {
   useMemo,
 } from 'react';
 import PropTypes from 'prop-types';
-// import get from 'lodash/get';
+import get from 'lodash/get';
 import { CheckPermissions, useTracking } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/parts/Layout';
@@ -21,7 +21,7 @@ import permissions from '../../../permissions';
 // import DynamicZone from '../../components/DynamicZone';
 // import FormWrapper from '../../components/FormWrapper';
 // import FieldComponent from '../../components/FieldComponent';
-// import Inputs from '../../components/Inputs';
+import Inputs from '../../components/Inputs';
 // import SelectWrapper from '../../components/SelectWrapper';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
@@ -30,16 +30,13 @@ import { getTrad } from '../../utils';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
 import Informations from './Informations';
 import Header from './Header';
-import {
-  // createAttributesLayout,
-  getFieldsActionMatchingPermissions,
-} from './utils';
+import { createAttributesLayout, getFieldsActionMatchingPermissions } from './utils';
 import DeleteLink from './DeleteLink';
 
 const cmPermissions = permissions.contentManager;
 const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
-// /* eslint-disable  react/no-array-index-key */
+/* eslint-disable  react/no-array-index-key */
 const EditView = ({
   allowedActions,
   isSingleType,
@@ -70,7 +67,7 @@ const EditView = ({
   const configurationsURL = `/content-manager/${
     isSingleType ? 'singleType' : 'collectionType'
   }/${slug}/configurations/edit`;
-  // const currentContentTypeLayoutData = get(layout, ['contentType'], {})
+  const currentContentTypeLayoutData = get(layout, ['contentType'], {});
 
   const DataManagementWrapper = useMemo(
     () => (isSingleType ? SingleTypeFormWrapper : CollectionTypeFormWrapper),
@@ -84,16 +81,16 @@ const EditView = ({
   //   });
   // }, []);
 
-  // const formattedContentTypeLayout = useMemo(() => {
-  //   if (!currentContentTypeLayoutData.layouts) {
-  //     return [];
-  //   }
+  const formattedContentTypeLayout = useMemo(() => {
+    if (!currentContentTypeLayoutData.layouts) {
+      return [];
+    }
 
-  //   return createAttributesLayout(
-  //     currentContentTypeLayoutData.layouts.edit,
-  //     currentContentTypeLayoutData.attributes
-  //   );
-  // }, [currentContentTypeLayoutData]);
+    return createAttributesLayout(
+      currentContentTypeLayoutData.layouts.edit,
+      currentContentTypeLayoutData.attributes
+    );
+  }, [currentContentTypeLayoutData]);
 
   return (
     <DataManagementWrapper allLayoutData={layout} slug={slug} id={id} origin={origin}>
@@ -148,7 +145,34 @@ const EditView = ({
                       paddingTop={6}
                       paddingBottom={6}
                     >
-                      inputs TODO
+                      {formattedContentTypeLayout.map((row, index) => {
+                        // TODO DZ
+
+                        return (
+                          <Stack size={6} key={index}>
+                            {row.map((grid, gridIndex) => {
+                              return (
+                                <Grid gap={4} key={gridIndex}>
+                                  {grid.map(
+                                    ({ fieldSchema, labelAction, metadatas, name, size }) => {
+                                      return (
+                                        <GridItem col={size} key={name}>
+                                          <Inputs
+                                            fieldSchema={fieldSchema}
+                                            keys={name}
+                                            labelAction={labelAction}
+                                            metadatas={metadatas}
+                                          />
+                                        </GridItem>
+                                      );
+                                    }
+                                  )}
+                                </Grid>
+                              );
+                            })}
+                          </Stack>
+                        );
+                      })}
                     </Box>
                   </GridItem>
                   <GridItem col={3} s={12}>
