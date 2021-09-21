@@ -26,7 +26,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             </VisuallyHidden>
           </Th>
           <Th>
-            <TableLabel>
+            <TableLabel textColor="neutral600">
               {formatMessage({
                 id: getTrad('Email.template.table.name.label'),
                 defaultMessage: 'name',
