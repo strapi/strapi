@@ -224,6 +224,7 @@ describe('<PageSizeURLQuery />', () => {
                     aria-hidden="true"
                     class="c9 c10 c11"
                     tabindex="-1"
+                    type="button"
                   >
                     <svg
                       fill="none"

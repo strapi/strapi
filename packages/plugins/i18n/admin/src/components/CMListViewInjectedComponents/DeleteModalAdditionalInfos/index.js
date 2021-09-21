@@ -1,8 +1,8 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
 import { Text } from '@strapi/parts/Text';
-import { getTrad } from '../../utils';
-import useHasI18n from '../../hooks/useHasI18n';
+import { getTrad } from '../../../utils';
+import useHasI18n from '../../../hooks/useHasI18n';
 
 const DeleteModalAdditionalInfos = () => {
   const hasI18nEnabled = useHasI18n();

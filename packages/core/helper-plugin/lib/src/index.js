@@ -1,4 +1,5 @@
 import { getType, getOtherInfos } from './content-manager/utils/getAttributeInfos';
+
 // Assets
 export { default as colors } from './old/assets/styles/colors';
 export { default as sizes } from './old/assets/styles/sizes';
@@ -106,13 +107,13 @@ export { default as AppInfosContext } from './contexts/AppInfosContext';
 export { default as AutoReloadOverlayBockerContext } from './contexts/AutoReloadOverlayBockerContext';
 export { default as NotificationsContext } from './contexts/NotificationsContext';
 export { default as OverlayBlockerContext } from './contexts/OverlayBlockerContext';
-export { default as ContentManagerEditViewDataManagerContext } from './contexts/ContentManagerEditViewDataManagerContext';
+
 export { default as RBACProviderContext } from './contexts/RBACProviderContext';
 export { default as TrackingContext } from './contexts/TrackingContext';
 
 // Hooks
 export { default as useAppInfos } from './hooks/useAppInfos';
-export { default as useContentManagerEditViewDataManager } from './hooks/useContentManagerEditViewDataManager';
+
 export { default as useQuery } from './hooks/useQuery';
 export { default as useLibrary } from './hooks/useLibrary';
 export { default as useNotification } from './hooks/useNotification';
@@ -134,39 +135,25 @@ export { default as NotificationsProvider } from './providers/NotificationsProvi
 export { default as StrapiAppProvider } from './providers/StrapiAppProvider';
 
 // Utils
-export { default as auth } from './old/utils/auth';
 export { default as cleanData } from './old/utils/cleanData';
 export { default as difference } from './old/utils/difference';
-export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
+
 export { default as dateFormats } from './old/utils/dateFormats';
 export { default as dateToUtcTime } from './old/utils/dateToUtcTime';
-export { default as formatComponentData } from './content-manager/utils/formatComponentData';
-export { default as hasPermissions } from './old/utils/hasPermissions';
-export { findMatchingPermissions } from './old/utils/hasPermissions';
-export { default as translatedErrors } from './old/utils/translatedErrors';
+
 export { darken } from './old/utils/colors';
-export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
+
 export { default as getFilterType } from './old/utils/getFilterType';
 export { default as getQueryParameters } from './old/utils/getQueryParameters';
 export { default as validateInput } from './old/utils/inputsValidations';
 export { default as request } from './old/utils/request';
 export { default as storeData } from './old/utils/storeData';
 export { default as templateObject } from './old/utils/templateObject';
-export { getType };
-export { getOtherInfos };
+
 export { default as getYupInnerErrors } from './old/utils/getYupInnerErrors';
 export { default as generateFiltersFromSearch } from './old/utils/generateFiltersFromSearch';
 export { default as generateSearchFromFilters } from './old/utils/generateSearchFromFilters';
 export { default as generateSearchFromObject } from './old/utils/generateSearchFromObject';
-export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
-export { default as prefixPluginTranslations } from './old/utils/prefixPluginTranslations';
-
-export { default as pxToRem } from './utils/pxToRem';
-export { default as to } from './utils/await-to-js';
-
-// NEW UTILS
-export { default as setHexOpacity } from './utils/setHexOpacity';
-export { default as customEllipsis } from './utils/customEllipsis';
 
 // SVGS
 export { default as LayoutIcon } from './old/svgs/Layout';
@@ -203,3 +190,24 @@ export { default as PageSizeURLQuery } from './components/PageSizeURLQuery';
 // New icons
 export { default as SortIcon } from './icons/SortIcon';
 export { default as RemoveRoundedButton } from './icons/RemoveRoundedButton';
+
+// content-manager
+export { default as ContentManagerEditViewDataManagerContext } from './content-manager/contexts/ContentManagerEditViewDataManagerContext';
+export { default as useCMEditViewDataManager } from './content-manager/hooks/useCMEditViewDataManager';
+export { getType };
+export { getOtherInfos };
+
+// Utils
+export { default as auth } from './utils/auth';
+export { default as hasPermissions } from './utils/hasPermissions';
+export { default as prefixFileUrlWithBackendUrl } from './utils/prefixFileUrlWithBackendUrl/prefixFileUrlWithBackendUrl';
+export { default as prefixPluginTranslations } from './utils/prefixPluginTranslations';
+export { default as pxToRem } from './utils/pxToRem';
+export { default as to } from './utils/await-to-js';
+export { default as setHexOpacity } from './utils/setHexOpacity';
+export { default as customEllipsis } from './utils/customEllipsis';
+export { default as translatedErrors } from './utils/translatedErrors';
+export { default as formatComponentData } from './content-manager/utils/formatComponentData';
+export { findMatchingPermissions } from './utils/hasPermissions';
+export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
+export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';

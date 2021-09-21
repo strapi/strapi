@@ -28,7 +28,7 @@ describe('ImageAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c21 {
+      .c23 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -53,7 +53,7 @@ describe('ImageAssetCard', () => {
         padding-left: 12px;
       }
 
-      .c15 {
+      .c17 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
@@ -98,10 +98,10 @@ describe('ImageAssetCard', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
       }
 
       .c9 {
@@ -125,45 +125,49 @@ describe('ImageAssetCard', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c12 {
+      .c13 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c13 {
+      .c14 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c18 {
+      .c20 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c19 {
+      .c21 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c20 {
+      .c22 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c16 {
+      .c18 {
         display: inline-block;
       }
 
-      .c17 {
+      .c16 {
         margin-left: auto;
+      }
+
+      .c19 {
+        margin-left: 4px;
       }
 
       .c4 {
@@ -233,6 +237,10 @@ describe('ImageAssetCard', () => {
         background-color: #8e8ea9;
       }
 
+      .c12 {
+        word-break: break-all;
+      }
+
       .c2 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
@@ -287,7 +295,7 @@ describe('ImageAssetCard', () => {
         fill: #666687;
       }
 
-      .c14 {
+      .c15 {
         text-transform: uppercase;
       }
 
@@ -355,19 +363,19 @@ describe('ImageAssetCard', () => {
               class="c11"
             >
               <div
-                class=""
+                class="c12"
               >
                 <h2
-                  class="c12"
+                  class="c13"
                   id="card-1-title"
                 >
                   hello.png
                 </h2>
                 <div
-                  class="c13"
+                  class="c14"
                 >
                   <span
-                    class="c14"
+                    class="c15"
                   >
                     png
                   </span>
@@ -375,19 +383,23 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c15 c16 c17"
+                class="c16"
               >
-                <span
-                  class="c18 c19 c20"
+                <div
+                  class="c17 c18 c19"
                 >
-                  Image
-                </span>
+                  <span
+                    class="c20 c21 c22"
+                  >
+                    Image
+                  </span>
+                </div>
               </div>
             </div>
           </div>
         </article>
         <div
-          class="c21"
+          class="c23"
         >
           <p
             aria-live="polite"

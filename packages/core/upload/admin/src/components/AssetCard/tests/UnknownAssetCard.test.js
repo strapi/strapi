@@ -22,7 +22,7 @@ describe('UnknownAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c15 {
+      .c17 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -91,6 +91,20 @@ describe('UnknownAssetCard', () => {
         align-items: center;
       }
 
+      .c12 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
       .c8 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -105,14 +119,14 @@ describe('UnknownAssetCard', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c12 {
+      .c14 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c13 {
+      .c15 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -186,6 +200,10 @@ describe('UnknownAssetCard', () => {
         background-color: #8e8ea9;
       }
 
+      .c13 {
+        word-break: break-all;
+      }
+
       .c2 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
@@ -240,7 +258,7 @@ describe('UnknownAssetCard', () => {
         fill: #666687;
       }
 
-      .c14 {
+      .c16 {
         text-transform: uppercase;
       }
 
@@ -392,22 +410,22 @@ describe('UnknownAssetCard', () => {
             class="c11"
           >
             <div
-              class="c9"
+              class="c12"
             >
               <div
-                class=""
+                class="c13"
               >
                 <h2
-                  class="c12"
+                  class="c14"
                   id="card-1-title"
                 >
                   hello.png
                 </h2>
                 <div
-                  class="c13"
+                  class="c15"
                 >
                   <span
-                    class="c14"
+                    class="c16"
                   >
                     png
                   </span>
@@ -417,7 +435,7 @@ describe('UnknownAssetCard', () => {
           </div>
         </article>
         <div
-          class="c15"
+          class="c17"
         >
           <p
             aria-live="polite"

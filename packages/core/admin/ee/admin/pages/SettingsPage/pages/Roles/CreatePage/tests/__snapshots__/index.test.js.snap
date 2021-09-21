@@ -585,7 +585,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
               </h1>
             </div>
             <div
-              class="c6"
+              class="c1 c6"
             >
               <button
                 aria-disabled="false"
@@ -622,13 +622,13 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
         class="c1 c15"
       >
         <div
-          class="c16"
+          class="c1 c16"
         >
           <div
             class="c1 c17"
           >
             <div
-              class="c18"
+              class="c1 c18"
             >
               <div
                 class="c1 c3"
@@ -675,7 +675,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                     >
                       <div>
                         <div
-                          class="c25"
+                          class="c1 c25"
                         >
                           <div
                             class="c1 c4"
@@ -715,7 +715,7 @@ exports[`<CreatePage /> renders and matches the snapshot 1`] = `
                     >
                       <div>
                         <div
-                          class="c25"
+                          class="c1 c25"
                         >
                           <div
                             class="c1 c4"

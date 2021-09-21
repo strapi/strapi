@@ -5,20 +5,18 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 // import get from 'lodash/get';
-// import // BaselineAlignment,
-// LiLink,
-// CheckPermissions,
-// useTracking,
-// '@strapi/helper-plugin';
+import { CheckPermissions, useTracking } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
 import { ContentLayout } from '@strapi/parts/Layout';
 import { Box } from '@strapi/parts/Box';
 import { Grid, GridItem } from '@strapi/parts/Grid';
+import { LinkButton } from '@strapi/parts/LinkButton';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
-
-// import { Padded } from '@buffetjs/core';
-// import { InjectionZone } from '../../../shared/components';
-// import permissions from '../../../permissions';
+import ConfigureIcon from '@strapi/icons/ConfigureIcon';
+import EditIcon from '@strapi/icons/EditIcon';
+import { InjectionZone } from '../../../shared/components';
+import permissions from '../../../permissions';
 // import Container from '../../components/Container';
 // import DynamicZone from '../../components/DynamicZone';
 // import FormWrapper from '../../components/FormWrapper';
@@ -28,19 +26,18 @@ import { Stack } from '@strapi/parts/Stack';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
 import EditViewDataManagerProvider from '../../components/EditViewDataManagerProvider';
 import SingleTypeFormWrapper from '../../components/SingleTypeFormWrapper';
+import { getTrad } from '../../utils';
 import DraftAndPublishBadge from './DraftAndPublishBadge';
+import Informations from './Informations';
 import Header from './Header';
 import {
   // createAttributesLayout,
   getFieldsActionMatchingPermissions,
 } from './utils';
-// import { LinkWrapper, SubWrapper } from './components';
-// import DeleteLink from './DeleteLink';
-// import InformationCard from './InformationCard';
-// import { getTrad } from '../../utils';
+import DeleteLink from './DeleteLink';
 
-// const cmPermissions = permissions.contentManager;
-// const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
+const cmPermissions = permissions.contentManager;
+const ctbPermissions = [{ action: 'plugin::content-type-builder.read', subject: null }];
 
 // /* eslint-disable  react/no-array-index-key */
 const EditView = ({
@@ -53,7 +50,8 @@ const EditView = ({
   origin,
   userPermissions,
 }) => {
-  // const { trackUsage } = useTracking();
+  const { trackUsage } = useTracking();
+  const { formatMessage } = useIntl();
   const {
     createActionAllowedFields,
     readActionAllowedFields,
@@ -61,16 +59,17 @@ const EditView = ({
   } = useMemo(() => {
     return getFieldsActionMatchingPermissions(userPermissions, slug);
   }, [userPermissions, slug]);
-  // const configurationPermissions = useMemo(() => {
-  //   return isSingleType
-  //     ? cmPermissions.singleTypesConfigurations
-  //     : cmPermissions.collectionTypesConfigurations;
-  // }, [isSingleType]);
+
+  const configurationPermissions = useMemo(() => {
+    return isSingleType
+      ? cmPermissions.singleTypesConfigurations
+      : cmPermissions.collectionTypesConfigurations;
+  }, [isSingleType]);
 
   // FIXME when changing the routing
-  // const configurationsURL = `/content-manager/${
-  //   isSingleType ? 'singleType' : 'collectionType'
-  // }/${slug}/configurations/edit`;
+  const configurationsURL = `/content-manager/${
+    isSingleType ? 'singleType' : 'collectionType'
+  }/${slug}/configurations/edit`;
   // const currentContentTypeLayoutData = get(layout, ['contentType'], {})
 
   const DataManagementWrapper = useMemo(
@@ -104,8 +103,8 @@ const EditView = ({
         data,
         isCreatingEntry,
         isLoadingForData,
-        // onDelete,
-        // onDeleteSucceeded,
+        onDelete,
+        onDeleteSucceeded,
         onPost,
         onPublish,
         onPut,
@@ -157,6 +156,7 @@ const EditView = ({
                       <DraftAndPublishBadge />
                       <Box
                         as="aside"
+                        aria-labelledby="additional-informations"
                         background="neutral0"
                         borderColor="neutral150"
                         hasRadius
@@ -165,7 +165,54 @@ const EditView = ({
                         paddingRight={4}
                         paddingTop={6}
                       >
-                        infos + InjectionZone
+                        <Informations />
+                        <InjectionZone area="contentManager.editView.informations" />
+                      </Box>
+                      <Box as="aside" aria-labelledby="links">
+                        <Stack size={2}>
+                          {slug !== 'strapi::administrator' && (
+                            <CheckPermissions permissions={ctbPermissions}>
+                              <LinkButton
+                                onClick={() => {
+                                  trackUsage('willEditEditLayout');
+                                }}
+                                size="S"
+                                startIcon={<EditIcon />}
+                                style={{ width: '100%' }}
+                                to={`/plugins/content-type-builder/content-types/${slug}`}
+                                variant="secondary"
+                              >
+                                {formatMessage({
+                                  id: getTrad('link-to-ctb'),
+                                  defaultMessage: 'Edit the model',
+                                })}
+                              </LinkButton>
+                            </CheckPermissions>
+                          )}
+
+                          <CheckPermissions permissions={configurationPermissions}>
+                            <LinkButton
+                              size="S"
+                              startIcon={<ConfigureIcon />}
+                              style={{ width: '100%' }}
+                              to={configurationsURL}
+                              variant="secondary"
+                            >
+                              {formatMessage({
+                                id: 'app.links.configure-view',
+                                defaultMessage: 'Configure the view',
+                              })}
+                            </LinkButton>
+                          </CheckPermissions>
+                          <InjectionZone area="contentManager.editView.right-links" slug={slug} />
+                          {allowedActions.canDelete && (
+                            <DeleteLink
+                              isCreatingEntry={isCreatingEntry}
+                              onDelete={onDelete}
+                              onDeleteSucceeded={onDeleteSucceeded}
+                            />
+                          )}
+                        </Stack>
                       </Box>
                     </Stack>
                   </GridItem>
@@ -319,27 +366,27 @@ const EditView = ({
   //                 )}
   //                 <LinkWrapper>
   //                   <ul>
-  //                     <CheckPermissions permissions={configurationPermissions}>
-  //                       <LiLink
-  //                         message={{
-  //                           id: 'app.links.configure-view',
-  //                         }}
-  //                         icon="layout"
-  //                         url={configurationsURL}
-  //                         onClick={() => {
-  //                           // trackUsage('willEditContentTypeLayoutFromEditView');
-  //                         }}
-  //                       />
-  //                     </CheckPermissions>
+  // <CheckPermissions permissions={configurationPermissions}>
+  //   <LiLink
+  //     message={{
+  //       id: 'app.links.configure-view',
+  //     }}
+  //     icon="layout"
+  //     url={configurationsURL}
+  //     onClick={() => {
+  //       // trackUsage('willEditContentTypeLayoutFromEditView');
+  //     }}
+  //   />
+  // </CheckPermissions>
   //                     {slug !== 'strapi::administrator' && (
   //                       <CheckPermissions permissions={ctbPermissions}>
   //                         <LiLink
   //                           message={{
   //                             id: getTrad('containers.Edit.Link.Fields'),
   //                           }}
-  //                           onClick={() => {
-  //                             trackUsage('willEditEditLayout');
-  //                           }}
+  // onClick={() => {
+  //   trackUsage('willEditEditLayout');
+  // }}
   //                           icon="fa-cog"
   //                           url={`/plugins/content-type-builder/content-types/${slug}`}
   //                         />
@@ -348,13 +395,13 @@ const EditView = ({
   //                     {/*  TODO add DOCUMENTATION */}
   //                     <InjectionZone area="contentManager.editView.right-links" slug={slug} />
 
-  //                     {allowedActions.canDelete && (
-  //                       <DeleteLink
-  //                         isCreatingEntry={isCreatingEntry}
-  //                         onDelete={onDelete}
-  //                         onDeleteSucceeded={onDeleteSucceeded}
-  //                       />
-  //                     )}
+  // {allowedActions.canDelete && (
+  //   <DeleteLink
+  //     isCreatingEntry={isCreatingEntry}
+  //     onDelete={onDelete}
+  //     onDeleteSucceeded={onDeleteSucceeded}
+  //   />
+  // )}
   //                   </ul>
   //                 </LinkWrapper>
   //               </div>

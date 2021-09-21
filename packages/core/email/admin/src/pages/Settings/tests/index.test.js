@@ -56,7 +56,7 @@ describe('Email | Pages | Settings', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c42 {
+      .c43 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
@@ -93,6 +93,10 @@ describe('Email | Pages | Settings', () => {
         pointer-events: none;
       }
 
+      .c41 {
+        height: 100%;
+      }
+
       .c38 {
         padding: 8px 16px;
         background: #4945ff;
@@ -112,7 +116,7 @@ describe('Email | Pages | Settings', () => {
         align-items: center;
       }
 
-      .c38 .c41 {
+      .c38 .c42 {
         color: #ffffff;
       }
 
@@ -121,7 +125,7 @@ describe('Email | Pages | Settings', () => {
         background: #eaeaef;
       }
 
-      .c38[aria-disabled='true'] .c41 {
+      .c38[aria-disabled='true'] .c42 {
         color: #666687;
       }
 
@@ -135,7 +139,7 @@ describe('Email | Pages | Settings', () => {
         background: #eaeaef;
       }
 
-      .c38[aria-disabled='true']:active .c41 {
+      .c38[aria-disabled='true']:active .c42 {
         color: #666687;
       }
 
@@ -789,6 +793,7 @@ describe('Email | Pages | Settings', () => {
                                     aria-hidden="true"
                                     class="c32 c33 c34"
                                     tabindex="-1"
+                                    type="button"
                                   >
                                     <svg
                                       fill="none"
@@ -883,7 +888,7 @@ describe('Email | Pages | Settings', () => {
                         >
                           <div
                             aria-hidden="true"
-                            class="c39 c40"
+                            class="c39 c40 c41"
                           >
                             <svg
                               fill="none"
@@ -899,7 +904,7 @@ describe('Email | Pages | Settings', () => {
                             </svg>
                           </div>
                           <span
-                            class="c41 c42"
+                            class="c42 c43"
                           >
                             Test email
                           </span>
