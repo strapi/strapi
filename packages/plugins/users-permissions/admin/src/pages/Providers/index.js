@@ -165,19 +165,19 @@ export const ProvidersPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       <VisuallyHidden>
                         {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
                       </VisuallyHidden>
                     </TableLabel>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({ id: getTrad('Providers.name'), defaultMessage: 'Name' })}
                     </TableLabel>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
                     </TableLabel>
                   </Th>

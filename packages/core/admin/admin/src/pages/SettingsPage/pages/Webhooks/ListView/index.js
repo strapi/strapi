@@ -330,7 +330,7 @@ const ListView = () => {
                           />
                         </Th>
                         <Th>
-                          <TableLabel>
+                          <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.form.name',
                               defaultMessage: 'Name',
@@ -338,7 +338,7 @@ const ListView = () => {
                           </TableLabel>
                         </Th>
                         <Th>
-                          <TableLabel>
+                          <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.form.url',
                               defaultMessage: 'URL',
@@ -346,7 +346,7 @@ const ListView = () => {
                           </TableLabel>
                         </Th>
                         <Th width="30%">
-                          <TableLabel>
+                          <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.list.th.status',
                               defaultMessage: 'Status',

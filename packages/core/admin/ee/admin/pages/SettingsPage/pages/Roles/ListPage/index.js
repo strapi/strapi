@@ -311,7 +311,7 @@ const RoleListPage = () => {
             <Thead>
               <Tr>
                 <Th>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.roles.list.header.name',
                       defaultMessage: 'Name',
@@ -319,7 +319,7 @@ const RoleListPage = () => {
                   </TableLabel>
                 </Th>
                 <Th>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.roles.list.header.description',
                       defaultMessage: 'Description',
@@ -327,7 +327,7 @@ const RoleListPage = () => {
                   </TableLabel>
                 </Th>
                 <Th>
-                  <TableLabel>
+                  <TableLabel textColor="neutral600">
                     {formatMessage({
                       id: 'Settings.roles.list.header.users',
                       defaultMessage: 'Users',
