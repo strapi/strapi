@@ -231,10 +231,11 @@ const createQueryBuilder = (uid, db) => {
             state.select = ['*'];
           }
 
-          if (state.joins.length > 0 && !state.groupBy) {
+          if (state.joins.length > 0 && _.isEmpty(state.groupBy)) {
             // add a discting when making joins and if we don't have a groupBy
             // TODO: make sure we return the right data
             qb.distinct(this.aliasColumn('id'));
+
             // TODO: add column if they aren't there already
             state.select.unshift(...state.orderBy.map(({ column }) => column));
           }
