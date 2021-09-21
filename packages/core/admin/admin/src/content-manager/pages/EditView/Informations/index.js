@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { useIntl } from 'react-intl';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { Box } from '@strapi/parts/Box';
 import { Divider } from '@strapi/parts/Divider';
 import { TableLabel, Text } from '@strapi/parts/Text';
@@ -11,7 +11,7 @@ import getUnits from './utils/getUnits';
 
 const Informations = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
-  const { initialData, isCreatingEntry } = useContentManagerEditViewDataManager();
+  const { initialData, isCreatingEntry } = useCMEditViewDataManager();
 
   // TODO if timestamps are still configurable in the V4
   const updatedAt = 'updated_at';

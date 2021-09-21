@@ -7,12 +7,12 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { IntlProvider } from 'react-intl';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import Theme from '../../../../../components/Theme';
 import Informations from '../index';
 
 jest.mock('@strapi/helper-plugin', () => ({
-  useContentManagerEditViewDataManager: jest.fn(),
+  useCMEditViewDataManager: jest.fn(),
 }));
 
 const makeApp = () => {
@@ -41,7 +41,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
   });
 
   it('renders and matches the snaphsot', () => {
-    useContentManagerEditViewDataManager.mockImplementationOnce(() => ({
+    useCMEditViewDataManager.mockImplementationOnce(() => ({
       initialData: {},
       isCreatingEntry: true,
     }));

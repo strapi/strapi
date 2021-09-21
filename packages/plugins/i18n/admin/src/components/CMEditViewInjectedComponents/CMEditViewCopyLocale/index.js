@@ -12,7 +12,7 @@ import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import Duplicate from '@strapi/icons/Duplicate';
-import { useContentManagerEditViewDataManager, useNotification } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, useNotification } from '@strapi/helper-plugin';
 import { axiosInstance, getTrad } from '../../../utils';
 import { cleanData, generateOptions } from './utils';
 
@@ -41,7 +41,7 @@ const Content = ({ appLocales, currentLocale, localizations, readPermissions }) 
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
   const dispatch = useDispatch();
-  const { allLayoutData, slug } = useContentManagerEditViewDataManager();
+  const { allLayoutData, slug } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState(options[0]?.value || '');

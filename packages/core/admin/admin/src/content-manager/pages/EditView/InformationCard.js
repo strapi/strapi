@@ -4,7 +4,7 @@ import { get, isEmpty } from 'lodash';
 import moment from 'moment';
 import styled from 'styled-components';
 import { useIntl } from 'react-intl';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { InjectionZone } from '../../../shared/components';
 import { SubWrapper, StatusWrapper } from './components';
 import { getTrad } from '../../utils';
@@ -14,7 +14,7 @@ const BaselineAlignment = styled.div`
 `;
 
 const InformationCard = () => {
-  const { initialData, hasDraftAndPublish, layout } = useContentManagerEditViewDataManager();
+  const { initialData, hasDraftAndPublish, layout } = useCMEditViewDataManager();
   const { formatMessage } = useIntl();
 
   const updatedAtName = useMemo(

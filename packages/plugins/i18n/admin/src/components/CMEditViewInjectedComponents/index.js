@@ -3,19 +3,13 @@ import get from 'lodash/get';
 import has from 'lodash/has';
 import { useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
-import { useContentManagerEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager, useQueryParams } from '@strapi/helper-plugin';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import CMEditViewLocalePicker from './CMEditViewLocalePicker';
 
 const CMEditViewInjectedComponents = () => {
-  const {
-    layout,
-    modifiedData,
-    initialData,
-    slug,
-    isSingleType,
-  } = useContentManagerEditViewDataManager();
+  const { layout, modifiedData, initialData, slug, isSingleType } = useCMEditViewDataManager();
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
   const locales = useSelector(selectI18NLocales);
   const params = useParams();
