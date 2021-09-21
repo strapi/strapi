@@ -45,10 +45,10 @@ module.exports = {
         {
           method: 'GET',
           path: '/plugins/documentation/(.*)',
-          handler: async (ctx, next) => {
+          async handler(ctx, next) {
             ctx.url = path.basename(ctx.url);
 
-            return await koaStatic(swaggerUi.getAbsoluteFSPath(), {
+            return koaStatic(swaggerUi.getAbsoluteFSPath(), {
               maxage: strapi.config.middleware.settings.public.maxAge,
               defer: true,
             })(ctx, next);

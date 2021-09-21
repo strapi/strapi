@@ -113,7 +113,7 @@ function trackUsage({ event, scope, error }) {
 
   try {
     return trackEvent(event, {
-      uuid: uuid,
+      uuid,
       deviceId: scope.deviceId,
       properties: addPackageJsonStrapiMetadata(properties, scope),
     });

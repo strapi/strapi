@@ -2,12 +2,12 @@
 
 module.exports = (/* strapi, config */) => {
   return {
-    bootstrap: () => {},
-    destroy: () => {},
+    bootstrap() {},
+    destroy() {},
     config: {},
     routes: [],
     controllers: {},
-    services: () => {},
+    services() {},
     policies: {},
     middlewares: {},
     contentTypes: {},

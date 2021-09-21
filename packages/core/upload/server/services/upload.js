@@ -142,9 +142,7 @@ module.exports = ({ strapi }) => ({
       return this.uploadFileAndPersist(fileData, { user });
     };
 
-    return await Promise.all(
-      fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {}))
-    );
+    return Promise.all(fileArray.map((file, idx) => doUpload(file, fileInfoArray[idx] || {})));
   },
 
   async uploadFileAndPersist(fileData, { user } = {}) {
@@ -372,13 +370,7 @@ module.exports = ({ strapi }) => ({
   },
 
   getSettings() {
-    return strapi
-      .store({
-        type: 'plugin',
-        name: 'upload',
-        key: 'settings',
-      })
-      .get();
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).get();
   },
 
   setSettings(value) {
@@ -388,12 +380,6 @@ module.exports = ({ strapi }) => ({
       strapi.telemetry.send('didDisableResponsiveDimensions');
     }
 
-    return strapi
-      .store({
-        type: 'plugin',
-        name: 'upload',
-        key: 'settings',
-      })
-      .set({ value });
+    return strapi.store({ type: 'plugin', name: 'upload', key: 'settings' }).set({ value });
   },
 });

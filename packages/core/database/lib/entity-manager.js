@@ -775,6 +775,7 @@ const createEntityManager = db => {
           continue;
         }
 
+        // do not need to delete links when using foreign keys
         if (db.dialect.usesForeignKeys()) {
           return;
         }
@@ -815,7 +816,7 @@ const createEntityManager = db => {
       const entry = await this.findOne(uid, {
         select: ['id'],
         where: { id: entity.id },
-        populate: populate,
+        populate,
       });
 
       return Object.assign({}, entity, entry);

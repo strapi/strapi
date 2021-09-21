@@ -21,7 +21,7 @@ const registerAdminConditions = () => {
 };
 
 const syncAuthSettings = async () => {
-  const adminStore = await strapi.store({ type: 'core', environment: '', name: 'admin' });
+  const adminStore = await strapi.store({ type: 'core', name: 'admin' });
   const adminAuthSettings = await adminStore.get({ key: 'auth' });
   const newAuthSettings = merge(defaultAdminAuthSettings, adminAuthSettings);
 

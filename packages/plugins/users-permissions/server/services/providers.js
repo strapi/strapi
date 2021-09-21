@@ -28,12 +28,7 @@ module.exports = ({ strapi }) => {
     const access_token = query.access_token || query.code || query.oauth_token;
 
     const grant = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'grant',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'grant' })
       .get();
 
     switch (provider) {
@@ -68,7 +63,7 @@ module.exports = ({ strapi }) => {
               // Combine username and discriminator because discord username is not unique
               var username = `${body.username}#${body.discriminator}`;
               callback(null, {
-                username: username,
+                username,
                 email: body.email,
               });
             }
@@ -535,12 +530,7 @@ module.exports = ({ strapi }) => {
           });
 
           const advanced = await strapi
-            .store({
-              environment: '',
-              type: 'plugin',
-              name: 'users-permissions',
-              key: 'advanced',
-            })
+            .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
             .get();
 
           const user = _.find(users, { provider });
@@ -575,7 +565,7 @@ module.exports = ({ strapi }) => {
 
           // Create the new user.
           const params = _.assign(profile, {
-            provider: provider,
+            provider,
             role: defaultRole.id,
             confirmed: true,
           });

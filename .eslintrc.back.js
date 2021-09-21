@@ -37,6 +37,8 @@ module.exports = {
     'require-atomic-updates': 'off',
     'no-process-exit': 'off',
     strict: ['error', 'global'],
+    'no-return-await': 'error',
+    'object-shorthand': ['error', 'always', { avoidExplicitReturnArrows: true }],
     'import/order': 'error',
     'import/no-cycle': 'error',
     'import/no-useless-path-segments': 'error',

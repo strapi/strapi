@@ -106,7 +106,7 @@ module.exports = plop => {
   // Model generator
   plop.setGenerator('model', {
     description: 'Generate a model for an API',
-    prompts: async inquirer => {
+    async prompts(inquirer) {
       const config = await promptConfigQuestions(plop, inquirer);
 
       if (!config.addAttributes) {
@@ -135,7 +135,7 @@ module.exports = plop => {
         attributes,
       };
     },
-    actions: answers => {
+    actions(answers) {
       const attributes = answers.attributes.reduce((object, answer) => {
         const val = { type: answer.attributeType };
 
@@ -162,7 +162,7 @@ module.exports = plop => {
         {
           type: 'modify',
           path: `${filePath}/content-types/{{id}}/schema.json`,
-          transform: template => {
+          transform(template) {
             const parsedTemplate = JSON.parse(template);
             parsedTemplate.attributes = attributes;
             return JSON.stringify(parsedTemplate, null, 2);

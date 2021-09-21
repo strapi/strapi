@@ -26,11 +26,11 @@ module.exports = function DynamicZoneScalar({ name, attribute, globalId, compone
   };
 
   return new GraphQLScalarType({
-    name: name,
+    name,
     description: `Input type for dynamic zone ${attribute} of ${globalId}`,
     serialize: value => value,
     parseValue: value => parseData(value),
-    parseLiteral: (ast, variables) => {
+    parseLiteral(ast, variables) {
       if (ast.kind !== Kind.OBJECT) return undefined;
 
       const value = valueFromASTUntyped(ast, variables);

@@ -5,18 +5,18 @@ const _ = require('lodash/fp');
 const types = require('../../types');
 const { createJoin } = require('./join');
 
-// TODO: convert field names to columns names
 const processOrderBy = (orderBy, ctx) => {
-  const { db, uid, qb, alias = qb.alias } = ctx;
+  const { db, uid, qb, alias } = ctx;
+  const { attributes } = db.metadata.get(uid);
 
   if (typeof orderBy === 'string') {
-    const attribute = db.metadata.get(uid).attributes[orderBy];
+    const attribute = attributes[orderBy];
 
     if (!attribute) {
       throw new Error(`Attribute ${orderBy} not found on model ${uid}`);
     }
 
-    return [{ column: `${alias}.${orderBy}` }];
+    return [{ column: qb.aliasColumn(orderBy, alias) }];
   }
 
   if (Array.isArray(orderBy)) {
@@ -26,15 +26,23 @@ const processOrderBy = (orderBy, ctx) => {
   if (_.isPlainObject(orderBy)) {
     return Object.entries(orderBy).flatMap(([key, direction]) => {
       const value = orderBy[key];
-      const attribute = db.metadata.get(uid).attributes[key];
+      const attribute = attributes[key];
 
       if (!attribute) {
         throw new Error(`Attribute ${key} not found on model ${uid}`);
       }
 
+      if (types.isScalar(attribute.type)) {
+        return { column: qb.aliasColumn(key, alias), order: direction };
+      }
+
       if (attribute.type === 'relation') {
-        // TODO: pass down some filters (e.g published at)
-        const subAlias = createJoin(ctx, { alias, uid, attributeName: key, attribute });
+        const subAlias = createJoin(ctx, {
+          alias: alias || qb.alias,
+          uid,
+          attributeName: key,
+          attribute,
+        });
 
         return processOrderBy(value, {
           db,
@@ -42,10 +50,6 @@ const processOrderBy = (orderBy, ctx) => {
           alias: subAlias,
           uid: attribute.target,
         });
-      }
-
-      if (types.isScalar(attribute.type)) {
-        return { column: `${alias}.${key}`, order: direction };
       }
 
       throw new Error(`You cannot order on ${attribute.type} types`);

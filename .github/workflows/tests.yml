@@ -73,7 +73,7 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 2
+      max-parallel: 3
     services:
       postgres:
         # Docker Hub image
@@ -109,10 +109,45 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 2
+      max-parallel: 3
     services:
       mysql:
         image: mysql
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+          -e MYSQL_ROOT_PASSWORD=strapi
+          -e MYSQL_ROOT_HOST="%"
+          -e MYSQL_USER=strapi
+          -e MYSQL_PASSWORD=strapi
+          -e MYSQL_DATABASE=strapi_test
+          --entrypoint sh mysql -c "exec docker-entrypoint.sh mysqld --default-authentication-plugin=mysql_native_password"
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 3306:3306
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2-beta
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: ./.github/actions/install-modules
+      - uses: ./.github/actions/run-e2e-tests
+        with:
+          dbOptions: '--dbclient=mysql --dbhost=localhost --dbport=3306 --dbname=strapi_test --dbusername=strapi --dbpassword=strapi'
+
+  e2e_ce_mysql_5:
+    runs-on: ubuntu-latest
+    needs: [lint, unit_back, unit_front]
+    name: '[CE] E2E (mysql:5 , node: ${{ matrix.node }})'
+    strategy:
+      matrix:
+        node: [12, 14, 16]
+      max-parallel: 3
+    services:
+      mysql:
+        image: mysql:5
         options: >-
           --health-cmd="mysqladmin ping"
           --health-interval=10s
@@ -144,7 +179,7 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 2
+      max-parallel: 3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta
@@ -166,7 +201,7 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 2
+      max-parallel: 3
     services:
       postgres:
         # Docker Hub image
@@ -206,7 +241,7 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 2
+      max-parallel: 3
     services:
       mysql:
         image: mysql
@@ -245,7 +280,7 @@ jobs:
     strategy:
       matrix:
         node: [12, 14, 16]
-      max-parallel: 2
+      max-parallel: 3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2-beta

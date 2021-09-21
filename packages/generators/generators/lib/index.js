@@ -25,9 +25,9 @@ const generate = async (generatorName, options, { dir = process.cwd() } = {}) =>
 
   const generator = plop.getGenerator(generatorName);
   await generator.runActions(options, {
-    onSuccess: () => {},
-    onFailure: () => {},
-    onComment: () => {},
+    onSuccess() {},
+    onFailure() {},
+    onComment() {},
   });
 };
 

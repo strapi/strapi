@@ -5,13 +5,7 @@ const { castArray, map } = require('lodash/fp');
 const { getService } = require('../utils');
 
 const getAdvancedSettings = () => {
-  return strapi
-    .store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-    })
-    .get({ key: 'advanced' });
+  return strapi.store({ type: 'plugin', name: 'users-permissions' }).get({ key: 'advanced' });
 };
 
 const authenticate = async ctx => {

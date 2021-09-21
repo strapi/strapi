@@ -9,12 +9,12 @@ const loadFiles = require('../../../load/load-files');
 const getEnabledPlugins = require('./get-enabled-plugins');
 
 const defaultPlugin = {
-  bootstrap: () => {},
-  destroy: () => {},
-  register: () => {},
+  bootstrap() {},
+  destroy() {},
+  register() {},
   config: {
     default: {},
-    validator: () => {},
+    validator() {},
   },
   routes: [],
   controllers: {},

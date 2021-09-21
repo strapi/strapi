@@ -1,78 +1,96 @@
 'use strict';
 
-const { after } = require('../content-type/enable');
-const { before } = require('../content-type/disable');
+const enable = require('../content-type/enable');
+const disable = require('../content-type/disable');
 const ctService = require('../../services/content-types')();
+
+const createQueryBuilderMock = () => {
+  const obj = {
+    delete: jest.fn(() => obj),
+    update: jest.fn(() => obj),
+    where: jest.fn(() => obj),
+    execute() {},
+  };
+
+  return jest.fn(() => obj);
+};
 
 describe('i18n - Migration - enable/disable localization on a CT', () => {
   beforeAll(() => {
     global.strapi = {
-      plugins: { i18n: { services: { 'content-types': ctService } } },
+      db: {},
+      plugins: {
+        i18n: {
+          services: {
+            'content-types': ctService,
+            locales: {
+              getDefaultLocale: jest.fn(() => 'default-locale'),
+            },
+          },
+        },
+      },
     };
   });
 
   describe('enable localization on a CT', () => {
     describe('Should not migrate', () => {
       test('non i18n => non i18n', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
+
         const previousDefinition = {};
         const definition = {};
 
-        await after({ definition, previousDefinition });
+        await enable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
+        });
+
+        expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
       test('i18n => non i18n', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
+
         const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
         const definition = {};
 
-        await after({ definition, previousDefinition });
+        await enable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
+        });
+
+        expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
       test('i18n => i18n', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
+
         const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await after({ definition, previousDefinition });
+        await enable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
+        });
+
+        expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
     });
+
     describe('Should migrate', () => {
-      describe('bookshelf', () => {
-        test('non i18n => i18n - default locale in core_store', async () => {
-          const model = { orm: 'bookshelf' };
-          const previousDefinition = {};
-          const definition = { pluginOptions: { i18n: { localized: true } } };
-          const defaultLocaleRows = [{ value: '"fr"' }];
-          const where = jest.fn().mockReturnValueOnce(Promise.resolve(defaultLocaleRows));
+      test('non i18n => i18n ', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
 
-          const knex = { where };
-          knex.select = () => knex;
-          knex.from = () => knex;
-          knex.update = jest.fn(() => knex);
+        const previousDefinition = {};
+        const definition = { pluginOptions: { i18n: { localized: true } } };
 
-          const ORM = { knex };
-
-          await after({ model, definition, previousDefinition, ORM });
-
-          expect(knex.update).toHaveBeenCalledWith({ locale: 'fr' });
+        await enable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
         });
 
-        test('non i18n => i18n - default locale not in core_store', async () => {
-          const model = { orm: 'bookshelf' };
-          const previousDefinition = {};
-          const definition = { pluginOptions: { i18n: { localized: true } } };
-          const defaultLocaleRows = [];
-          const where = jest.fn().mockReturnValueOnce(Promise.resolve(defaultLocaleRows));
-
-          const knex = { where };
-          knex.select = () => knex;
-          knex.from = () => knex;
-          knex.update = jest.fn(() => knex);
-
-          const ORM = { knex };
-
-          await after({ model, definition, previousDefinition, ORM });
-
-          expect(knex.update).toHaveBeenCalledWith({ locale: 'en' });
-        });
+        expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
+        expect(strapi.db.queryBuilder).toHaveBeenCalled();
       });
     });
   });
@@ -80,112 +98,59 @@ describe('i18n - Migration - enable/disable localization on a CT', () => {
   describe('disable localization on a CT', () => {
     describe('Should not migrate', () => {
       test('non i18n => non i18n', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
+
         const previousDefinition = {};
         const definition = {};
 
-        await before({ definition, previousDefinition });
+        await disable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
+        });
+        expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
       test('non i18n => i18n', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
+
         const previousDefinition = {};
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await before({ definition, previousDefinition });
+        await disable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
+        });
+        expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
 
       test('i18n => i18n', async () => {
+        strapi.db.queryBuilder = createQueryBuilderMock();
+
         const previousDefinition = { pluginOptions: { i18n: { localized: true } } };
         const definition = { pluginOptions: { i18n: { localized: true } } };
 
-        await before({ definition, previousDefinition });
+        await disable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
+        });
+        expect(strapi.db.queryBuilder).not.toHaveBeenCalled();
       });
     });
+
     describe('Should migrate', () => {
-      describe('bookshelf', () => {
-        test('i18n => non i18n - pg', async () => {
-          const previousDefinition = {
-            pluginOptions: { i18n: { localized: true } },
-            collectionName: 'countries',
-          };
-          const definition = { client: 'pg' };
-          const defaultLocaleRows = [{ value: '"fr"' }];
-          const deleteRelations = jest.fn();
-          const dropTableIfExists = jest.fn();
-          const table = jest.fn();
-          const model = { orm: 'bookshelf', deleteRelations };
-          const where = jest.fn(() => Promise.resolve(defaultLocaleRows));
-          const trx = {
-            limit: jest.fn(),
-            commit: jest.fn(),
-          };
-          trx.select = jest.fn(() => trx);
-          trx.del = jest.fn(() => trx);
-          trx.from = jest.fn(() => trx);
-          trx.whereNot = jest.fn().mockReturnValueOnce(trx);
-          trx.orderBy = jest.fn(() => trx);
-          trx.offset = jest.fn(() => trx);
-          trx.limit = jest.fn(() => Promise.resolve([{ id: 1 }, { id: 2 }]));
-          const transaction = jest.fn(() => Promise.resolve(trx));
-          const knex = { where, transaction, schema: { dropTableIfExists, table } };
-          knex.select = jest.fn(() => knex);
-          knex.from = jest.fn(() => knex);
-          const ORM = { knex };
+      test('i18n => non i18n - pg', async () => {
+        const previousDefinition = {
+          pluginOptions: { i18n: { localized: true } },
+        };
+        const definition = {};
 
-          await before({ model, definition, previousDefinition, ORM });
-
-          expect(deleteRelations).toHaveBeenCalledTimes(2);
-          expect(deleteRelations).toHaveBeenNthCalledWith(1, 1, { transacting: trx });
-          expect(deleteRelations).toHaveBeenNthCalledWith(2, 2, { transacting: trx });
-          expect(trx.del).toHaveBeenCalled();
-          expect(trx.whereNot).toHaveBeenNthCalledWith(2, 'locale', 'fr');
-          expect(transaction).toHaveBeenCalled();
-          expect(trx.commit).toHaveBeenCalled();
-          expect(table).toHaveBeenCalled();
-          expect(dropTableIfExists).toHaveBeenCalledWith('countries__localizations');
+        await disable({
+          oldContentTypes: { test: previousDefinition },
+          contentTypes: { test: definition },
         });
-        test('i18n => non i18n - sqlite', async () => {
-          const previousDefinition = {
-            pluginOptions: { i18n: { localized: true } },
-            collectionName: 'countries',
-          };
-          const definition = { client: 'sqlite3' };
-          const defaultLocaleRows = [{ value: '"fr"' }];
-          const deleteRelations = jest.fn();
-          const dropTableIfExists = jest.fn();
-          const table = jest.fn();
-          const model = { orm: 'bookshelf', deleteRelations };
-          const where = jest.fn(() => Promise.resolve(defaultLocaleRows));
-          const trx = {
-            limit: jest.fn(),
-            commit: jest.fn(),
-          };
-          trx.select = jest.fn(() => trx);
-          trx.del = jest.fn(() => trx);
-          trx.from = jest.fn(() => trx);
-          trx.whereNot = jest.fn().mockReturnValueOnce(trx);
-          trx.orderBy = jest.fn(() => trx);
-          trx.offset = jest.fn(() => trx);
-          trx.limit = jest.fn(() => Promise.resolve([{ id: 1 }, { id: 2 }]));
-          const transaction = jest.fn(() => Promise.resolve(trx));
-          const knex = { where, transaction, schema: { dropTableIfExists, table } };
-          knex.select = jest.fn(() => knex);
-          knex.from = jest.fn(() => knex);
-          const ORM = { knex };
 
-          const context = {};
-          await before({ model, definition, previousDefinition, ORM }, context);
-
-          expect(deleteRelations).toHaveBeenCalledTimes(2);
-          expect(deleteRelations).toHaveBeenNthCalledWith(1, 1, { transacting: trx });
-          expect(deleteRelations).toHaveBeenNthCalledWith(2, 2, { transacting: trx });
-          expect(trx.del).toHaveBeenCalled();
-          expect(trx.whereNot).toHaveBeenNthCalledWith(2, 'locale', 'fr');
-          expect(transaction).toHaveBeenCalled();
-          expect(trx.commit).toHaveBeenCalled();
-          expect(table).not.toHaveBeenCalled();
-          expect(context).toEqual({ recreateSqliteTable: true });
-          expect(dropTableIfExists).toHaveBeenCalledWith('countries__localizations');
-        });
+        expect(strapi.plugins.i18n.services.locales.getDefaultLocale).toHaveBeenCalled();
+        expect(strapi.db.queryBuilder).toHaveBeenCalled();
       });
     });
   });

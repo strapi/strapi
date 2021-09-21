@@ -1,16 +1,33 @@
 'use strict';
 
-const createLifecyclesManager = db => {
-  let subscribers = [];
+const assert = require('assert').strict;
 
-  const lifecycleManager = {
+const timestampsLifecyclesSubscriber = require('./subscribers/timestamps');
+const modelLifecyclesSubscriber = require('./subscribers/models-lifecycles');
+
+const isValidSubscriber = subscriber => {
+  return (
+    typeof subscriber === 'function' || (typeof subscriber === 'object' && subscriber !== null)
+  );
+};
+
+/**
+ * @type {import('.').createLifecyclesProvider}
+ */
+const createLifecyclesProvider = db => {
+  let subscribers = [timestampsLifecyclesSubscriber, modelLifecyclesSubscriber];
+
+  return {
     subscribe(subscriber) {
-      // TODO: verify subscriber
+      assert(isValidSubscriber(subscriber), 'Invalid subscriber. Expected function or object');
+
       subscribers.push(subscriber);
 
-      return () => {
-        subscribers.splice(subscribers.indexOf(subscriber), 1);
-      };
+      return () => subscribers.splice(subscribers.indexOf(subscriber), 1);
+    },
+
+    clear() {
+      subscribers = [];
     },
 
     createEvent(action, uid, properties) {
@@ -41,15 +58,9 @@ const createLifecyclesManager = db => {
         }
       }
     },
-
-    clear() {
-      subscribers = [];
-    },
   };
-
-  return lifecycleManager;
 };
 
 module.exports = {
-  createLifecyclesManager,
+  createLifecyclesProvider,
 };

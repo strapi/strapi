@@ -6,5 +6,5 @@ module.exports = {
     sendMetadata: true,
     init: {},
   },
-  validator: () => {},
+  validator() {},
 };
