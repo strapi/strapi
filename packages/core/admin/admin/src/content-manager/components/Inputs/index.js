@@ -5,14 +5,15 @@ import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
-import { Inputs as InputsIndex } from '@buffetjs/custom';
-import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+// import { Inputs as InputsIndex } from '@buffetjs/custom';
+// import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
-import InputJSONWithErrors from '../InputJSONWithErrors';
-import SelectWrapper from '../SelectWrapper';
-import WysiwygWithErrors from '../WysiwygWithErrors';
-import InputUID from '../InputUID';
+import GenericInput from './GenericInput';
+// import InputJSONWithErrors from '../InputJSONWithErrors';
+// import SelectWrapper from '../SelectWrapper';
+// import WysiwygWithErrors from '../WysiwygWithErrors';
+// import InputUID from '../InputUID';
 import {
   connect,
   generateOptions,
@@ -24,7 +25,6 @@ import {
 
 function Inputs({
   allowedFields,
-  autoFocus,
   fieldSchema,
   formErrors,
   isCreatingEntry,
@@ -35,10 +35,10 @@ function Inputs({
   onChange,
   readableFields,
   shouldNotRunValidations,
-  queryInfos,
+  // queryInfos,
   value,
 }) {
-  const { fields } = useLibrary();
+  // const { fields } = useLibrary();
 
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
   const { formatMessage } = useIntl();
@@ -53,8 +53,6 @@ function Inputs({
   const errorId = useMemo(() => {
     return get(formErrors, [keys, 'id'], null);
   }, [formErrors, keys]);
-
-  const errorMessage = errorId ? formatMessage({ id: errorId, defaultMessage: errorId }) : null;
 
   const fieldName = useMemo(() => {
     return getFieldName(keys);
@@ -174,55 +172,60 @@ function Inputs({
     isRequired,
   ]);
 
-  const { description, visible } = metadatas;
+  const { label, description, visible } = metadatas;
 
   if (visible === false) {
     return null;
   }
 
   if (!shouldDisplayNotAllowedInput) {
-    return (
-      <NotAllowedInput
-        label={metadatas.label}
-        labelIcon={labelIconformatted}
-        error={errorMessage}
-      />
-    );
+    return 'NOT ALLOWED INPUT';
+    // return (
+    //   <NotAllowedInput
+    //     label={metadatas.label}
+    //     labelIcon={labelIconformatted}
+    //     error={errorMessage}
+    //   />
+    // );
   }
 
   if (type === 'relation') {
-    return (
-      <div key={keys}>
-        <SelectWrapper
-          {...metadatas}
-          {...fieldSchema}
-          labelIcon={labelIcon}
-          isUserAllowedToEditField={isUserAllowedToEditField}
-          isUserAllowedToReadField={isUserAllowedToReadField}
-          name={keys}
-          queryInfos={queryInfos}
-          value={value}
-        />
-      </div>
-    );
+    return 'RELATION';
+    // return (
+    //   <div key={keys}>
+    //     <SelectWrapper
+    //       {...metadatas}
+    //       {...fieldSchema}
+    //       labelIcon={labelIcon}
+    //       isUserAllowedToEditField={isUserAllowedToEditField}
+    //       isUserAllowedToReadField={isUserAllowedToReadField}
+    //       name={keys}
+    //       queryInfos={queryInfos}
+    //       value={value}
+    //     />
+    //   </div>
+    // );
   }
 
   return (
-    <InputsIndex
-      {...metadatas}
+    <GenericInput
+      // {...metadatas}
       autoComplete="new-password"
-      autoFocus={autoFocus}
+      intlLabel={{ id: label, defaultMessage: label }}
+      // autoFocus={autoFocus}
+      description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
-      error={errorMessage}
-      inputDescription={description}
+      error={errorId}
+      // inputDescription={description}
       labelIcon={labelIconformatted}
-      description={description}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        json: InputJSONWithErrors,
-        wysiwyg: WysiwygWithErrors,
-        uid: InputUID,
-        ...fields,
+        // json: InputJSONWithErrors,
+        // wysiwyg: WysiwygWithErrors,
+        // uid: InputUID,
+        // ...fields,
+        media: () => <div>TODO media</div>,
+        uid: () => <div>TODO uid</div>,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
@@ -240,7 +243,6 @@ function Inputs({
 }
 
 Inputs.defaultProps = {
-  autoFocus: false,
   formErrors: {},
   labelIcon: null,
   onBlur: null,
@@ -250,7 +252,6 @@ Inputs.defaultProps = {
 
 Inputs.propTypes = {
   allowedFields: PropTypes.array.isRequired,
-  autoFocus: PropTypes.bool,
   fieldSchema: PropTypes.object.isRequired,
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
