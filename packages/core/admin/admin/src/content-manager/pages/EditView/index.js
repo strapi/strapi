@@ -153,18 +153,20 @@ const EditView = ({
                             {row.map((grid, gridIndex) => {
                               return (
                                 <Grid gap={4} key={gridIndex}>
-                                  {grid.map(({ fieldSchema, labelIcon, metadatas, name, size }) => {
-                                    return (
-                                      <GridItem col={size} key={name}>
-                                        <Inputs
-                                          fieldSchema={fieldSchema}
-                                          keys={name}
-                                          labelIcon={labelIcon}
-                                          metadatas={metadatas}
-                                        />
-                                      </GridItem>
-                                    );
-                                  })}
+                                  {grid.map(
+                                    ({ fieldSchema, labelAction, metadatas, name, size }) => {
+                                      return (
+                                        <GridItem col={size} key={name}>
+                                          <Inputs
+                                            fieldSchema={fieldSchema}
+                                            keys={name}
+                                            labelAction={labelAction}
+                                            metadatas={metadatas}
+                                          />
+                                        </GridItem>
+                                      );
+                                    }
+                                  )}
                                 </Grid>
                               );
                             })}

@@ -4,7 +4,6 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-import { useIntl } from 'react-intl';
 // import { Inputs as InputsIndex } from '@buffetjs/custom';
 // import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
@@ -29,7 +28,7 @@ function Inputs({
   formErrors,
   isCreatingEntry,
   keys,
-  labelIcon,
+  labelAction,
   metadatas,
   onBlur,
   onChange,
@@ -41,11 +40,6 @@ function Inputs({
   // const { fields } = useLibrary();
 
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
-  const { formatMessage } = useIntl();
-
-  const labelIconformatted = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : labelIcon;
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
   const type = fieldSchema.type;
@@ -183,7 +177,7 @@ function Inputs({
     // return (
     //   <NotAllowedInput
     //     label={metadatas.label}
-    //     labelIcon={labelIconformatted}
+    //     labelAction={labelAction}
     //     error={errorMessage}
     //   />
     // );
@@ -196,7 +190,7 @@ function Inputs({
     //     <SelectWrapper
     //       {...metadatas}
     //       {...fieldSchema}
-    //       labelIcon={labelIcon}
+    //       labelAction={labelAction}
     //       isUserAllowedToEditField={isUserAllowedToEditField}
     //       isUserAllowedToReadField={isUserAllowedToReadField}
     //       name={keys}
@@ -217,7 +211,7 @@ function Inputs({
       disabled={shouldDisableField}
       error={errorId}
       // inputDescription={description}
-      labelIcon={labelIconformatted}
+      labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
         // json: InputJSONWithErrors,
@@ -244,7 +238,7 @@ function Inputs({
 
 Inputs.defaultProps = {
   formErrors: {},
-  labelIcon: null,
+  labelAction: undefined,
   onBlur: null,
   queryInfos: {},
   value: null,
@@ -256,13 +250,7 @@ Inputs.propTypes = {
   formErrors: PropTypes.object,
   keys: PropTypes.string.isRequired,
   isCreatingEntry: PropTypes.bool.isRequired,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-  }),
+  labelAction: PropTypes.element,
   metadatas: PropTypes.object.isRequired,
   onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,

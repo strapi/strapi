@@ -15,6 +15,7 @@ const Input = ({
   description,
   disabled,
   intlLabel,
+  labelAction,
   error,
   name,
   onChange,
@@ -34,6 +35,7 @@ const Input = ({
         description={description}
         disabled={disabled}
         intlLabel={intlLabel}
+        labelAction={labelAction}
         error={error}
         name={name}
         onChange={onChange}
@@ -63,6 +65,7 @@ const Input = ({
         disabled={disabled}
         hint={hint}
         label={label}
+        labelAction={labelAction}
         name={name}
         offLabel={formatMessage({
           id: 'app.components.ToggleCheckbox.off-label',
@@ -93,6 +96,7 @@ const Input = ({
       disabled={disabled}
       error={errorMessage}
       label={label}
+      labelAction={labelAction}
       id={name}
       hint={hint}
       name={name}
@@ -109,6 +113,7 @@ Input.defaultProps = {
   description: null,
   disabled: false,
   error: '',
+  labelAction: undefined,
   placeholder: null,
   value: '',
 };
@@ -127,6 +132,7 @@ Input.propTypes = {
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.shape({
