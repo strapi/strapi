@@ -14,7 +14,6 @@ class SqliteDialect extends Dialect {
     this.schemaInspector = new SqliteSchmeaInspector(db);
   }
 
-  // TODO: use strapi.dir
   configure() {
     this.db.config.connection.connection.filename = path.resolve(
       this.db.config.connection.connection.filename
