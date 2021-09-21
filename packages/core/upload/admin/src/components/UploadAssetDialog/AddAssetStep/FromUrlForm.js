@@ -56,12 +56,12 @@ export const FromUrlForm = ({ onClose, onAddAsset }) => {
 
           <ModalFooter
             startActions={
-              <Button onClick={onClose} variant="tertiary" loading={loading}>
+              <Button onClick={onClose} variant="tertiary">
                 {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'cancel' })}
               </Button>
             }
             endActions={
-              <Button type="submit">
+              <Button type="submit" loading={loading}>
                 {formatMessage({
                   id: getTrad('button.next'),
                   defaultMessage: 'Next',

@@ -27,6 +27,7 @@
   "header.content.assets-single": "1 asset",
   "input.button.label": "Browse files",
   "input.label-bold": "Drag & drop",
+  "input.label": "Drag & Drop here or",
   "input.label-normal": "to upload or",
   "input.placeholder": "Click to select an asset or drag & drop a file in this area",
   "input.placeholder.icon": "Drop the asset in this zone",

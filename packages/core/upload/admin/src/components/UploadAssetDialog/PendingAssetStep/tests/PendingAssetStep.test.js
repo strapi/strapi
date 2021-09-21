@@ -47,7 +47,12 @@ describe('AddAssetTest', () => {
 
     const { container } = renderTL(
       <ThemeProvider theme={lightTheme}>
-        <PendingAssetStep assets={assets} onClose={jest.fn()} onAddAsset={jest.fn()} />
+        <PendingAssetStep
+          assets={assets}
+          onClose={jest.fn()}
+          onAddAsset={jest.fn()}
+          onClickAddAsset={jest.fn()}
+        />
       </ThemeProvider>
     );
 
