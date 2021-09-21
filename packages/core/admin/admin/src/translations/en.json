@@ -466,7 +466,7 @@
   "content-manager.components.uid.regenerate": "regenerate",
   "content-manager.components.uid.suggested": "suggested",
   "content-manager.components.uid.unavailable": "unavailable",
-  "content-manager.containers.Edit.Link.Fields": "Edit the fields",
+  "content-manager.link-to-ctb": "Edit the model",
   "content-manager.containers.Edit.Link.Layout": "Configure the layout",
   "content-manager.containers.Edit.Link.Model": "Edit the collection-type",
   "content-manager.containers.Edit.addAnItem": "Add an item...",
