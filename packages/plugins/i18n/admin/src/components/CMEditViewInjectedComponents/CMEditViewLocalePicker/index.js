@@ -6,14 +6,11 @@ import { Divider } from '@strapi/parts/Divider';
 import { Select, Option } from '@strapi/parts/Select';
 import { TableLabel } from '@strapi/parts/Text';
 import { Stack } from '@strapi/parts/Stack';
-import { Row } from '@strapi/parts/Row';
 import { useIntl } from 'react-intl';
-import { useTheme } from 'styled-components';
 import { useHistory } from 'react-router-dom';
 import { stringify } from 'qs';
 import { getTrad } from '../../../utils';
-import { addStatusColorToLocale, createLocalesOption } from './utils';
-import { statusMap } from './utils/addStatusColorToLocale';
+import { createLocalesOption } from './utils';
 import CMEditViewCopyLocale from '../CMEditViewCopyLocale';
 import Bullet from './Bullet';
 
@@ -31,7 +28,7 @@ const CMEditViewLocalePicker = ({
   slug,
 }) => {
   const { formatMessage } = useIntl();
-  const theme = useTheme();
+
   const currentLocale = get(query, 'plugins.i18n.locale', false);
   const { push } = useHistory();
 
@@ -78,10 +75,7 @@ const CMEditViewLocalePicker = ({
     });
   };
 
-  const options = addStatusColorToLocale(
-    createLocalesOption(appLocales, localizations),
-    theme
-  ).filter(({ status, value }) => {
+  const options = createLocalesOption(appLocales, localizations).filter(({ status, value }) => {
     if (status === 'did-not-create-locale') {
       return createPermissions.find(({ properties }) =>
         get(properties, 'locales', []).includes(value)
@@ -90,6 +84,7 @@ const CMEditViewLocalePicker = ({
 
     return readPermissions.find(({ properties }) => get(properties, 'locales', []).includes(value));
   });
+
   const filteredOptions = options.filter(({ value }) => value !== currentLocale);
   const value = options.find(({ value }) => {
     return value === currentLocale;
@@ -115,30 +110,18 @@ const CMEditViewLocalePicker = ({
             <Option
               value={value.value}
               disabled
-              startIcon={hasDraftAndPublishEnabled ? 'todo' : null}
+              startIcon={hasDraftAndPublishEnabled ? <Bullet status={currentLocaleStatus} /> : null}
             >
-              <Row>
-                {hasDraftAndPublishEnabled && (
-                  <Bullet
-                    $bulletColor={statusMap[currentLocaleStatus].backgroundColor}
-                    borderColor={statusMap[currentLocaleStatus].borderColor}
-                  />
-                )}
-                {value.label}
-              </Row>
+              {value.label}
             </Option>
             {filteredOptions.map(option => {
               return (
-                <Option key={option.value} value={option.value}>
-                  <Row>
-                    {hasDraftAndPublishEnabled && (
-                      <Bullet
-                        $bulletColor={option.backgroundColor}
-                        borderColor={option.borderColor}
-                      />
-                    )}
-                    {option.label}
-                  </Row>
+                <Option
+                  key={option.value}
+                  value={option.value}
+                  startIcon={hasDraftAndPublishEnabled ? <Bullet status={option.status} /> : null}
+                >
+                  {option.label}
                 </Option>
               );
             })}
