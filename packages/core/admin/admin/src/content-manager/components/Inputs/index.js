@@ -166,7 +166,7 @@ function Inputs({
     isRequired,
   ]);
 
-  const { label, description, visible } = metadatas;
+  const { label, description, placeholder, visible } = metadatas;
 
   if (visible === false) {
     return null;
@@ -227,6 +227,7 @@ function Inputs({
       onBlur={onBlur}
       onChange={onChange}
       options={options}
+      placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       step={step}
       type={inputType}
       validations={validations}

@@ -17,7 +17,7 @@
       "type": "string"
     },
     "long": {
-      "type": "string"
+      "type": "text"
     },
     "email": {
       "type": "email"
@@ -28,7 +28,7 @@
     "password": {
       "type": "password"
     },
-    "number": {
+    "number_int": {
       "type": "integer"
     },
     "enum": {
@@ -77,39 +77,14 @@
     "uid": {
       "type": "uid"
     },
-    "one_way": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::address.address"
+    "number_big": {
+      "type": "biginteger"
     },
-    "one_to_one": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::address.address",
-      "inversedBy": "temp_one_to_one"
+    "number_dec": {
+      "type": "decimal"
     },
-    "one_to_many": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::address.address",
-      "mappedBy": "temp"
-    },
-    "many_to_one": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::address.address",
-      "inversedBy": "temps"
-    },
-    "many_to_many": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::address.address",
-      "inversedBy": "many_to_many_temp"
-    },
-    "many_way": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::address.address"
+    "number_float": {
+      "type": "float"
     }
   }
 }
