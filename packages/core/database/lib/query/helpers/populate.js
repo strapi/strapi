@@ -33,7 +33,7 @@ const processPopulate = (populate, ctx) => {
 
   let populateMap = {};
 
-  if (populate === false) {
+  if (populate === false || _.isNil(populate)) {
     return null;
   }
 
