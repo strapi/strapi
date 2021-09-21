@@ -9,7 +9,7 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
   "pluginOptions": {},
   "attributes": {
@@ -85,6 +85,25 @@
     },
     "number_float": {
       "type": "float"
+    },
+    "enum_req_def": {
+      "type": "enumeration",
+      "enum": [
+        "un",
+        "deux",
+        "trois"
+      ],
+      "required": true,
+      "default": "un"
+    },
+    "enum_req": {
+      "type": "enumeration",
+      "enum": [
+        "un",
+        "deux",
+        "trois"
+      ],
+      "required": true
     }
   }
 }

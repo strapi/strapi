@@ -218,8 +218,10 @@ function Inputs({
         // wysiwyg: WysiwygWithErrors,
         // uid: InputUID,
         // ...fields,
+        json: () => <div>TODO json</div>,
         media: () => <div>TODO media</div>,
         uid: () => <div>TODO uid</div>,
+        wysiwyg: () => <div>TODO wysiwyg</div>,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
@@ -230,7 +232,7 @@ function Inputs({
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       step={step}
       type={inputType}
-      validations={validations}
+      // validations={validations}
       value={inputValue}
       withDefaultValue={false}
     />

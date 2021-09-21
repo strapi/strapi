@@ -1,19 +1,32 @@
-import React from 'react';
-import { FormattedMessage } from 'react-intl';
-
-const generateOptions = (options, isRequired = false) => [
-  <FormattedMessage id="components.InputSelect.option.placeholder" key="__enum_option_null">
-    {msg => (
-      <option disabled={isRequired} hidden={isRequired} value="">
-        {msg}
-      </option>
-    )}
-  </FormattedMessage>,
-  ...options.map(v => (
-    <option key={v} value={v}>
-      {v}
-    </option>
-  )),
-];
+const generateOptions = (options, isRequired = false) => {
+  return [
+    {
+      metadatas: {
+        intlLabel: {
+          id: 'components.InputSelect.option.placeholder',
+          defaultMessage: 'Choose here',
+        },
+        disabled: isRequired,
+        hidden: isRequired,
+      },
+      key: '__enum_option_null',
+      value: '',
+    },
+    ...options.map(option => {
+      return {
+        metadatas: {
+          intlLabel: {
+            id: option,
+            defaultMessage: option,
+          },
+          hidden: false,
+          disabled: false,
+        },
+        key: option,
+        value: option,
+      };
+    }),
+  ];
+};
 
 export default generateOptions;

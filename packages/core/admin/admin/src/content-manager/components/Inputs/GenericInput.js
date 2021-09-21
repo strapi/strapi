@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 import { useIntl } from 'react-intl';
 import { NumberInput } from '@strapi/parts/NumberInput';
+import { Select, Option } from '@strapi/parts/Select';
 import { Textarea } from '@strapi/parts/Textarea';
 import { TextInput } from '@strapi/parts/TextInput';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
@@ -24,6 +25,7 @@ const GenericInput = ({
   error,
   name,
   onChange,
+  options,
   placeholder,
   step,
   type,
@@ -176,6 +178,32 @@ const GenericInput = ({
         />
       );
     }
+    case 'select': {
+      return (
+        <Select
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={value => {
+            onChange({ target: { name, value: value === '' ? null : value, type: 'select' } });
+          }}
+          placeholder={formattedPlaceholder}
+          value={value || ''}
+        >
+          {options.map(({ metadatas: { intlLabel, disabled, hidden }, key, value }) => {
+            return (
+              <Option key={key} value={value} disabled={disabled} hidden={hidden}>
+                {formatMessage(intlLabel)}
+              </Option>
+            );
+          })}
+        </Select>
+      );
+    }
     case 'textarea': {
       return (
         <Textarea
@@ -209,6 +237,7 @@ GenericInput.defaultProps = {
   error: '',
   labelAction: undefined,
   placeholder: null,
+  options: [],
   step: 1,
   value: '',
 };
@@ -231,6 +260,20 @@ GenericInput.propTypes = {
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
+  options: PropTypes.arrayOf(
+    PropTypes.shape({
+      metadatas: PropTypes.shape({
+        intlLabel: PropTypes.shape({
+          id: PropTypes.string.isRequired,
+          defaultMessage: PropTypes.string.isRequired,
+        }).isRequired,
+        disabled: PropTypes.bool,
+        hidden: PropTypes.bool,
+      }).isRequired,
+      key: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+      value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    }).isRequired
+  ),
   placeholder: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
