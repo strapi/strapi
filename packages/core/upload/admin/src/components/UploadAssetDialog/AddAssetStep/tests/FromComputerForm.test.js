@@ -17,7 +17,7 @@ describe('FromComputerForm', () => {
   it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
     const { container } = renderTL(
       <ThemeProvider theme={lightTheme}>
-        <FromComputerForm onClose={jest.fn()} onAddAsset={jest.fn()} />
+        <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
       </ThemeProvider>
     );
 

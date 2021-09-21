@@ -32,7 +32,7 @@ const MediaBox = styled(Box)`
   border-style: dashed;
 `;
 
-export const FromComputerForm = ({ onClose, onAddAsset }) => {
+export const FromComputerForm = ({ onClose, onAddAssets }) => {
   const { formatMessage } = useIntl();
   const inputRef = useRef(null);
 
@@ -57,7 +57,7 @@ export const FromComputerForm = ({ onClose, onAddAsset }) => {
       });
     }
 
-    onAddAsset(assets);
+    onAddAssets(assets);
   };
 
   return (
@@ -126,5 +126,5 @@ export const FromComputerForm = ({ onClose, onAddAsset }) => {
 
 FromComputerForm.propTypes = {
   onClose: PropTypes.func.isRequired,
-  onAddAsset: PropTypes.func.isRequired,
+  onAddAssets: PropTypes.func.isRequired,
 };

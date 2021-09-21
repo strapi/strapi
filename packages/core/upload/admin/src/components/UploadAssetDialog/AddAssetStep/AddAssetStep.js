@@ -51,7 +51,7 @@ export const AddAssetStep = ({ onClose, onAddAsset }) => {
         </Box>
         <TabPanels>
           <TabPanel>
-            <FromComputerForm onClose={onClose} onAddAsset={onAddAsset} />
+            <FromComputerForm onClose={onClose} onAddAssets={onAddAsset} />
           </TabPanel>
           <TabPanel>
             <FromUrlForm onClose={onClose} onAddAsset={onAddAsset} />
