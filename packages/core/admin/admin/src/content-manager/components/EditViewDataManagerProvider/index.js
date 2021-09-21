@@ -447,6 +447,8 @@ const EditViewDataManagerProvider = ({
     return <Redirect to={from} />;
   }
 
+  console.log(isLoadingForData, modifiedData);
+
   return (
     <ContentManagerEditViewDataManagerContext.Provider
       value={{
@@ -485,7 +487,7 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        {isLoadingForData ? (
+        {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
           <Main aria-busy="true">
             <LoadingIndicatorPage />
           </Main>

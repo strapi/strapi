@@ -8,6 +8,7 @@ import isEqual from 'react-fast-compare';
 // import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
+import Wysiwyg from '../Wysiwyg';
 import GenericInput from './GenericInput';
 // import InputJSONWithErrors from '../InputJSONWithErrors';
 // import SelectWrapper from '../SelectWrapper';
@@ -201,6 +202,10 @@ function Inputs({
     // );
   }
 
+  if (type === 'richtext') {
+    console.log('w', inputValue);
+  }
+
   return (
     <GenericInput
       // {...metadatas}
@@ -221,7 +226,8 @@ function Inputs({
         json: () => <div>TODO json</div>,
         media: () => <div>TODO media</div>,
         uid: () => <div>TODO uid</div>,
-        wysiwyg: () => <div>TODO wysiwyg</div>,
+        // wysiwyg: () => <div>TODO wysiwyg</div>,
+        wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
