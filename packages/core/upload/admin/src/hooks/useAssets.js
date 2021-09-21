@@ -12,15 +12,17 @@ export const useAssets = ({ skipWhen }) => {
   const [{ rawQuery, query }, setQuery] = useQueryParams();
   const dataRequestURL = getRequestUrl('files');
 
-  const { data, error, isLoading } = useQuery(
-    'assets',
-    async () => {
-      const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
+  const getAssets = async () => {
+    const { data } = await axiosInstance.get(`${dataRequestURL}${rawQuery}`);
 
-      return data;
-    },
-    { enabled: !skipWhen }
-  );
+    return data;
+  };
+
+  const { data, error, isLoading } = useQuery(`assets`, getAssets, {
+    enabled: !skipWhen,
+    staleTime: 0,
+    cacheTime: 0,
+  });
 
   useEffect(() => {
     if (!query) {
