@@ -15,7 +15,6 @@ import { Box } from '@strapi/parts/Box';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Main } from '@strapi/parts/Main';
 import { Stack } from '@strapi/parts/Stack';
-
 // import { Padded } from '@buffetjs/core';
 import { InjectionZone } from '../../../shared/components';
 // import permissions from '../../../permissions';
