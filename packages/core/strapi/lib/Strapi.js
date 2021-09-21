@@ -46,8 +46,8 @@ const LIFECYCLES = {
 
 class Strapi {
   constructor(opts = {}) {
-    this.dir = opts.dir || process.cwd();
-    const appConfig = loadConfiguration(this.dir, opts);
+    this.dirs = utils.getDirs(opts.dir || process.cwd());
+    const appConfig = loadConfiguration(this.dirs.root, opts);
     this.container = createContainer(this);
     this.container.register('config', createConfigProvider(appConfig));
     this.container.register('content-types', contentTypesRegistry(this));
@@ -78,7 +78,7 @@ class Strapi {
   }
 
   get EE() {
-    return ee({ dir: this.dir, logger: this.log });
+    return ee({ dir: this.dirs.root, logger: this.log });
   }
 
   service(uid) {
