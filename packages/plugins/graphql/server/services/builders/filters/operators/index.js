@@ -2,26 +2,36 @@
 
 const { mapValues } = require('lodash/fp');
 
-const and = require('./and');
-const or = require('./or');
-const not = require('./not');
-const eq = require('./eq');
-const startsWith = require('./starts-with');
-const endsWith = require('./ends-with');
-const contains = require('./contains');
-const gt = require('./gt');
-const lt = require('./lt');
-
 const operators = {
-  and,
-  or,
-  not,
-  eq,
-  startsWith,
-  endsWith,
-  contains,
-  gt,
-  lt,
+  and: require('./and'),
+  or: require('./or'),
+  not: require('./not'),
+
+  eq: require('./eq'),
+  ne: require('./ne'),
+
+  startsWith: require('./starts-with'),
+  endsWith: require('./ends-with'),
+
+  contains: require('./contains'),
+  notContains: require('./not-contains'),
+
+  containsi: require('./containsi'),
+  notContainsi: require('./not-containsi'),
+
+  gt: require('./gt'),
+  gte: require('./gte'),
+
+  lt: require('./lt'),
+  lte: require('./lte'),
+
+  null: require('./null'),
+  notNull: require('./not-null'),
+
+  in: require('./in'),
+  notIn: require('./not-in'),
+
+  between: require('./between'),
 };
 
 // Instantiate every operator with the Strapi instance

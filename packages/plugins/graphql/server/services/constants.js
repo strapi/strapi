@@ -35,12 +35,14 @@ const STRAPI_SCALARS = [
   'uid',
   'email',
   'password',
+  'text',
 ];
 
 const SCALARS_ASSOCIATIONS = {
   uid: 'String',
   email: 'String',
   password: 'String',
+  text: 'String',
   boolean: 'Boolean',
   integer: 'Int',
   string: 'String',
@@ -74,23 +76,55 @@ const KINDS = {
   internal: 'internal',
 };
 
+const allOperators = [
+  'and',
+  'or',
+  'not',
+
+  'eq',
+  'ne',
+
+  'startsWith',
+  'endsWith',
+
+  'contains',
+  'notContains',
+
+  'containsi',
+  'notContainsi',
+
+  'gt',
+  'gte',
+
+  'lt',
+  'lte',
+
+  'null',
+  'notNull',
+
+  'in',
+  'notIn',
+
+  'between',
+];
+
 const GRAPHQL_SCALAR_OPERATORS = {
   // ID
-  ID: ['eq', 'not', 'gt', 'lt'],
+  ID: allOperators,
   // Booleans
-  Boolean: ['eq', 'not'],
+  Boolean: allOperators,
   // Strings
-  String: ['eq', 'not', 'gt', 'lt', 'contains', 'startsWith', 'endsWith'],
+  String: allOperators,
   // Numbers
-  Int: ['eq', 'not', 'gt', 'lt'],
-  Long: ['eq', 'not', 'gt', 'lt'],
-  Float: ['eq', 'not', 'gt', 'lt'],
+  Int: allOperators,
+  Long: allOperators,
+  Float: allOperators,
   // Dates
-  Date: ['eq', 'not', 'gt', 'lt'],
-  Time: ['eq', 'not', 'gt', 'lt'],
-  DateTime: ['eq', 'not', 'gt', 'lt'],
+  Date: allOperators,
+  Time: allOperators,
+  DateTime: allOperators,
   // Others
-  JSON: ['eq', 'not'],
+  JSON: allOperators,
 };
 
 const ERROR_CODES = {
