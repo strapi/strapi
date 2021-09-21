@@ -138,6 +138,7 @@ export const SettingsPage = () => {
               loading={isSubmiting}
               type="submit"
               startIcon={<CheckIcon />}
+              size="L"
             >
               {formatMessage({
                 id: 'app.components.Button.save',

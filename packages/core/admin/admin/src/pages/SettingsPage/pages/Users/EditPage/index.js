@@ -134,7 +134,7 @@ const EditPage = ({ canUpdate }) => {
         <SettingsPageTitle name="Users" />
         <HeaderLayout
           primaryAction={
-            <Button disabled startIcon={<CheckIcon />} type="button">
+            <Button disabled startIcon={<CheckIcon />} type="button" size="L">
               {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
             </Button>
           }
@@ -166,6 +166,7 @@ const EditPage = ({ canUpdate }) => {
                     startIcon={<CheckIcon />}
                     loading={isSubmitting}
                     type="submit"
+                    size="L"
                   >
                     {formatMessage({ id: 'form.button.save', defaultMessage: 'Save' })}
                   </Button>

@@ -265,7 +265,7 @@ const RoleListPage = () => {
       <HeaderLayout
         primaryAction={
           canCreate ? (
-            <Button onClick={handleNewRoleClick} startIcon={<AddIcon />}>
+            <Button onClick={handleNewRoleClick} startIcon={<AddIcon />} size="L">
               {formatMessage({
                 id: 'Settings.roles.list.button.add',
                 defaultMessage: 'Add new role',
