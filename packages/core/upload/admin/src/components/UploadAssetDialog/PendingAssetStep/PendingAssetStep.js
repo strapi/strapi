@@ -12,6 +12,7 @@ import { DocAssetCard } from '../../AssetCard/DocAssetCard';
 import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
 import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
+import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
 import { useUpload } from '../../../hooks/useUpload';
@@ -68,6 +69,17 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
             <Grid gap={4}>
               {assets.map((asset, idx) => {
                 const assetKey = `${asset.url}-${idx}`;
+
+                return (
+                  <GridItem col={4} key={assetKey}>
+                    <UploadingAssetCard
+                      id={assetKey}
+                      name={asset.name}
+                      extension={asset.ext}
+                      assetType={asset.type}
+                    />
+                  </GridItem>
+                );
 
                 if (asset.type === AssetType.Image) {
                   return (

@@ -52,7 +52,7 @@ export const VideoAssetCard = ({ name, extension, url, mime, selected, onSelect 
           </CardSubtitle>
         </CardContent>
         <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Doc' })}
+          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Video' })}
         </CardBadge>
       </CardBody>
     </Card>
