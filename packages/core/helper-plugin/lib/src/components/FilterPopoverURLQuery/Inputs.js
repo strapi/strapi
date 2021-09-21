@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DatePicker } from '@strapi/parts/DatePicker';
-import { Field, FieldInput, FieldLabel } from '@strapi/parts/Field';
+import { Field, FieldInput } from '@strapi/parts/Field';
 import { NumberInput } from '@strapi/parts/NumberInput';
 import { TimePicker } from '@strapi/parts/TimePicker';
 import { Select, Option } from '@strapi/parts/Select';
@@ -84,7 +84,6 @@ const Inputs = ({ label, onChange, options, type, value }) => {
 
   return (
     <Field>
-      <FieldLabel>Filter value</FieldLabel>
       <FieldInput // FIXME: stop errors in the console
         onChange={({ target: { value } }) => onChange(value)}
         value={value}
