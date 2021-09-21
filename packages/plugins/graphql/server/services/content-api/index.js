@@ -26,6 +26,7 @@ const {
 
 module.exports = ({ strapi }) => {
   const { service: getGraphQLService } = strapi.plugin('graphql');
+  const { config } = strapi.plugin('graphql');
 
   const { KINDS, GENERIC_MORPH_TYPENAME } = getGraphQLService('constants');
 
@@ -37,6 +38,8 @@ module.exports = ({ strapi }) => {
   const buildSchema = () => {
     const extensionService = getGraphQLService('extension');
 
+    const isShadowCRUDEnabled = !!config('shadowCRUD', true);
+
     // Create a new empty type registry
     registry = getGraphQLService('type-registry').new();
 
@@ -44,30 +47,12 @@ module.exports = ({ strapi }) => {
     // content-api, and link the new type registry
     builders = getGraphQLService('builders').new('content-api', registry);
 
-    // Get every content type & component defined in Strapi
-    const contentTypes = [
-      ...Object.values(strapi.components),
-      ...Object.values(strapi.contentTypes),
-    ];
-
-    // Disable Shadow CRUD for admin content types
-    contentTypes
-      .map(prop('uid'))
-      .filter(startsWith('admin::'))
-      .forEach(uid => extensionService.shadowCRUD(uid).disable());
-
-    const contentTypesWithShadowCRUD = contentTypes.filter(ct =>
-      extensionService.shadowCRUD(ct.uid).isEnabled()
-    );
-
     registerScalars({ registry, strapi });
     registerInternals({ registry, strapi });
 
-    // Generate and register definitions for every content type
-    registerAPITypes(contentTypesWithShadowCRUD);
-
-    // Generate and register polymorphic types' definitions
-    registerMorphTypes(contentTypesWithShadowCRUD);
+    if (isShadowCRUDEnabled) {
+      shadowCRUD();
+    }
 
     // Generate the extension configuration for the content API
     const extension = extensionService.generate({ typeRegistry: registry });
@@ -107,6 +92,32 @@ module.exports = ({ strapi }) => {
     const sdlSchemas = typeDefs.map(sdl => makeExecutableSchema({ typeDefs: sdl }));
 
     return [nexusSchema, ...sdlSchemas];
+  };
+
+  const shadowCRUD = () => {
+    const extensionService = getGraphQLService('extension');
+
+    // Get every content type & component defined in Strapi
+    const contentTypes = [
+      ...Object.values(strapi.components),
+      ...Object.values(strapi.contentTypes),
+    ];
+
+    // Disable Shadow CRUD for admin content types
+    contentTypes
+      .map(prop('uid'))
+      .filter(startsWith('admin::'))
+      .forEach(uid => extensionService.shadowCRUD(uid).disable());
+
+    const contentTypesWithShadowCRUD = contentTypes.filter(ct =>
+      extensionService.shadowCRUD(ct.uid).isEnabled()
+    );
+
+    // Generate and register definitions for every content type
+    registerAPITypes(contentTypesWithShadowCRUD);
+
+    // Generate and register polymorphic types' definitions
+    registerMorphTypes(contentTypesWithShadowCRUD);
   };
 
   /**

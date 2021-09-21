@@ -18,20 +18,19 @@ const createShadowCRUDManager = require('./shadow-crud-manager');
  * @typedef {function({ strapi: object, nexus: object, typeRegistry: object }): StrapiGraphQLExtensionConfiguration} StrapiGraphQLExtensionConfigurationFactory
  */
 
-const defaultState = {
+const getDefaultState = () => ({
   types: [],
   typeDefs: [],
   resolvers: {},
   resolversConfig: {},
   plugins: [],
-};
+});
 
 const createExtension = ({ strapi } = {}) => {
   const configs = [];
-  const shadowCRUDManager = createShadowCRUDManager();
 
   return {
-    shadowCRUD: shadowCRUDManager,
+    shadowCRUD: createShadowCRUDManager({ strapi }),
 
     /**
      * Register a new extension configuration
@@ -88,7 +87,7 @@ const createExtension = ({ strapi } = {}) => {
         }
 
         return acc;
-      }, defaultState);
+      }, getDefaultState());
     },
   };
 };

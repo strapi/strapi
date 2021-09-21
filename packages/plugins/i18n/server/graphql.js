@@ -2,7 +2,7 @@
 
 const { prop, propEq, identity } = require('lodash/fp');
 
-const LOCALE_SCALAR_TYPENAME = 'Locale';
+const LOCALE_SCALAR_TYPENAME = 'I18NLocaleCode';
 const LOCALE_ARG_PLUGIN_NAME = 'I18NLocaleArg';
 
 module.exports = ({ strapi }) => ({
@@ -10,16 +10,20 @@ module.exports = ({ strapi }) => ({
     const { service: getGraphQLService } = strapi.plugin('graphql');
     const { service: getI18NService } = strapi.plugin('i18n');
 
+    const extensionService = getGraphQLService('extension');
+
     const getCreateLocalizationMutationType = contentType => {
       const { getTypeName } = getGraphQLService('utils').naming;
 
       return `create${getTypeName(contentType)}Localization`;
     };
 
-    getGraphQLService('extension').use(({ nexus, typeRegistry }) => {
-      const i18nLocaleArgPlugin = createI18nLocaleArgPlugin({ nexus, typeRegistry });
-      const i18nLocaleScalar = createLocaleScalar({ nexus });
-      const createLocalizationMutations = createCreateLocalizationMutations({
+    extensionService.shadowCRUD('plugin::i18n.locale').disableMutations();
+
+    extensionService.use(({ nexus, typeRegistry }) => {
+      const i18nLocaleArgPlugin = getI18nLocaleArgPlugin({ nexus, typeRegistry });
+      const i18nLocaleScalar = getLocaleScalar({ nexus });
+      const createLocalizationMutations = getCreateLocalizationMutations({
         nexus,
         typeRegistry,
       });
@@ -30,7 +34,7 @@ module.exports = ({ strapi }) => ({
       };
     });
 
-    const createLocaleScalar = ({ nexus }) => {
+    const getLocaleScalar = ({ nexus }) => {
       const locales = getI18NService('iso-locales').getIsoLocales();
 
       return nexus.scalarType({
@@ -57,7 +61,7 @@ module.exports = ({ strapi }) => ({
       });
     };
 
-    const createCreateLocalizationMutations = ({ nexus, typeRegistry }) => {
+    const getCreateLocalizationMutations = ({ nexus, typeRegistry }) => {
       const { KINDS } = getGraphQLService('constants');
       const { isLocalizedContentType } = getI18NService('content-types');
 
@@ -67,10 +71,10 @@ module.exports = ({ strapi }) => ({
         )
         .map(prop('config.contentType'));
 
-      return localizedContentTypes.map(ct => createCreateLocalizationMutation(ct, { nexus }));
+      return localizedContentTypes.map(ct => getCreateLocalizationMutation(ct, { nexus }));
     };
 
-    const createCreateLocalizationMutation = (contentType, { nexus }) => {
+    const getCreateLocalizationMutation = (contentType, { nexus }) => {
       const { getEntityResponseName, getContentTypeInputName } = getGraphQLService('utils').naming;
       const { createCreateLocalizationHandler } = getI18NService('core-api');
 
@@ -102,7 +106,7 @@ module.exports = ({ strapi }) => ({
       });
     };
 
-    const createI18nLocaleArgPlugin = ({ nexus, typeRegistry }) => {
+    const getI18nLocaleArgPlugin = ({ nexus, typeRegistry }) => {
       const { isLocalizedContentType } = getI18NService('content-types');
 
       const addLocaleArg = config => {

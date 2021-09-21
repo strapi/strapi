@@ -110,11 +110,9 @@ const createContentType = (uid, definition) => {
     private: isPrivate,
   };
 
-  return {
-    ...schema,
-    actions: actions,
-    lifecycles: lifecycles,
-  };
+  Object.assign(schema, { actions, lifecycles });
+
+  return schema;
 };
 
 const getGlobalId = (model, modelName, prefix) => {
