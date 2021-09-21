@@ -26,7 +26,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
         <Text textColor="neutral800">{usersCountText}</Text>
       </Td>
       <Td>
-        <Row>
+        <Row justifyContent="flex-end">
           {icons.map((icon, i) =>
             icon ? (
               <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>

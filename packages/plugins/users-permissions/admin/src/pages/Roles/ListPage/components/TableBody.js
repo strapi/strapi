@@ -44,7 +44,7 @@ const TableBody = ({ sortedRoles, canDelete, permissions, setRoleToDelete, onDel
             </Text>
           </Td>
           <Td>
-            <Row>
+            <Row justifyContent="end">
               <CheckPermissions permissions={permissions.updateRole}>
                 <IconButton
                   onClick={() => handleClickEdit(role.id)}

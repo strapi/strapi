@@ -59,7 +59,7 @@ const TableRows = ({
 
             {withBulkActions && (
               <Td>
-                <Row>
+                <Row justifyContent="end">
                   <IconButton
                     onClick={() => push(`${pathname}/${data.id}`)}
                     label={formatMessage(
