@@ -3,7 +3,7 @@ import { Redirect } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import useNotification from '../../hooks/useNotification';
 import useRBACProvider from '../../hooks/useRBACProvider';
-import hasPermissions from '../../old/utils/hasPermissions';
+import hasPermissions from '../../utils/hasPermissions';
 import LoadingIndicatorPage from '../LoadingIndicatorPage';
 
 const CheckPagePermissions = ({ permissions, children }) => {
