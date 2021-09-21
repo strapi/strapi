@@ -3,27 +3,24 @@ import { rest } from 'msw';
 import pluginId from '../../../../pluginId';
 
 const handlers = [
-  // Mock get role route
-  rest.get(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
+  // Mock create role route
+  rest.post(`*/${pluginId}/roles`, (req, res, ctx) => {
+    return res(ctx.delay(100), ctx.status(200), ctx.json({ ok: true }));
+  }),
+
+  // Mock get permissions
+  rest.get(`*/${pluginId}/permissions`, (req, res, ctx) => {
     return res(
       ctx.delay(100),
       ctx.status(200),
       ctx.json({
-        role: {
-          id: req.params.roleId,
-          name: 'Authenticated',
-          description: 'Default role given to authenticated user.',
-          type: 'authenticated',
-          created_at: '2021-09-08T16:26:18.061Z',
-          updated_at: '2021-09-08T16:26:18.061Z',
-          permissions: {
-            'api::address': {
-              controllers: {
-                address: {
-                  create: {
-                    enabled: false,
-                    policy: '',
-                  },
+        permissions: {
+          'api::address': {
+            controllers: {
+              address: {
+                create: {
+                  enabled: false,
+                  policy: '',
                 },
               },
             },
@@ -31,11 +28,6 @@ const handlers = [
         },
       })
     );
-  }),
-
-  // Mock edit role route
-  rest.put(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
-    return res(ctx.delay(500), ctx.status(200), ctx.json({ ok: true }));
   }),
 
   // Mock get all routes route
@@ -91,28 +83,6 @@ const handlers = [
               },
             },
           ],
-        },
-      })
-    );
-  }),
-
-  // Mock permissions route
-  rest.get(`*/${pluginId}/permissions`, (req, res, ctx) => {
-    return res(
-      ctx.delay(100),
-      ctx.status(200),
-      ctx.json({
-        permissions: {
-          'api::address': {
-            controllers: {
-              address: {
-                create: {
-                  enabled: false,
-                  policy: '',
-                },
-              },
-            },
-          },
         },
       })
     );

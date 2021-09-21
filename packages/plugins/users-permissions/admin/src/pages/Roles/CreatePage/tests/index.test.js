@@ -1,12 +1,11 @@
 import React from 'react';
-import { render, waitFor, waitForElementToBeRemoved } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { render, waitFor } from '@testing-library/react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { Router, Switch, Route } from 'react-router-dom';
 import { IntlProvider } from 'react-intl';
 import { createMemoryHistory } from 'history';
 import pluginId from '../../../../pluginId';
-import RolesEditPage from '..';
+import RolesCreatePage from '..';
 import server from './server';
 
 jest.mock('@strapi/helper-plugin', () => {
@@ -30,19 +29,19 @@ function makeAndRenderApp() {
       <ThemeProvider theme={lightTheme}>
         <Router history={history}>
           <Switch>
-            <Route path={`/settings/${pluginId}/roles/:id`} component={RolesEditPage} />
+            <Route path={`/settings/${pluginId}/roles/new`} component={RolesCreatePage} />
           </Switch>
         </Router>
       </ThemeProvider>
     </IntlProvider>
   );
   const renderResult = render(app);
-  history.push(`/settings/${pluginId}/roles/1`);
+  history.push(`/settings/${pluginId}/roles/new`);
 
   return renderResult;
 }
 
-describe('Admin | containers | RoleEditPage', () => {
+describe('Admin | containers | RoleCreatePage', () => {
   beforeAll(() => server.listen());
 
   beforeEach(() => jest.clearAllMocks());
@@ -51,10 +50,16 @@ describe('Admin | containers | RoleEditPage', () => {
 
   afterAll(() => server.close());
 
-  it('renders users-permissions edit role and matches snapshot', async () => {
-    const { container, getByTestId, getByRole } = makeAndRenderApp();
-    await waitForElementToBeRemoved(() => getByTestId('loader'));
-    await waitFor(() => expect(getByRole('heading', { name: /permissions/i })).toBeInTheDocument());
+  it('renders users-permissions create role and matches snapshot', async () => {
+    const { container, getByText, getByRole } = makeAndRenderApp();
+    await waitFor(() =>
+      expect(getByRole('heading', { name: /create a role/i })).toBeInTheDocument()
+    );
+    await waitFor(() => {
+      expect(
+        getByText(/define all allowed actions for the api::address plugin/i)
+      ).toBeInTheDocument();
+    });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
       .c35 {
@@ -85,10 +90,6 @@ describe('Admin | containers | RoleEditPage', () => {
         color: #666687;
       }
 
-      .c8 {
-        padding-right: 8px;
-      }
-
       .c16 {
         background: #ffffff;
         padding-top: 24px;
@@ -97,6 +98,10 @@ describe('Admin | containers | RoleEditPage', () => {
         padding-left: 32px;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
+      }
+
+      .c8 {
+        padding-right: 8px;
       }
 
       .c29 {
@@ -688,7 +693,7 @@ describe('Admin | containers | RoleEditPage', () => {
                     class="c4"
                     id="main-content-title"
                   >
-                    Authenticated
+                    Create a role
                   </h1>
                 </div>
                 <button
@@ -723,7 +728,7 @@ describe('Admin | containers | RoleEditPage', () => {
               <p
                 class="c12 c13"
               >
-                Default role given to authenticated user.
+                Define the rights given to the role
               </p>
             </div>
           </div>
@@ -779,7 +784,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                   class="c26"
                                   id="textinput-1"
                                   name="name"
-                                  value="Authenticated"
+                                  value=""
                                 />
                               </div>
                             </div>
@@ -815,9 +820,7 @@ describe('Admin | containers | RoleEditPage', () => {
                                 class="c28"
                                 id="textarea-2"
                                 name="description"
-                              >
-                                Default role given to authenticated user.
-                              </textarea>
+                              />
                             </div>
                           </div>
                         </div>
@@ -859,9 +862,9 @@ describe('Admin | containers | RoleEditPage', () => {
                           class="c7 c39"
                         >
                           <button
-                            aria-controls="accordion-content-accordion-3"
+                            aria-controls="accordion-content-accordion-7"
                             aria-expanded="false"
-                            aria-labelledby="accordion-label-accordion-3"
+                            aria-labelledby="accordion-label-accordion-7"
                             class="c40"
                             data-strapi-accordion-toggle="true"
                             type="button"
@@ -874,13 +877,13 @@ describe('Admin | containers | RoleEditPage', () => {
                               >
                                 <span
                                   class="c34 c42"
-                                  id="accordion-label-accordion-3"
+                                  id="accordion-label-accordion-7"
                                 >
                                   Address
                                 </span>
                                 <p
                                   class="c10 c36"
-                                  id="accordion-desc-accordion-3"
+                                  id="accordion-desc-accordion-7"
                                 >
                                   Define all allowed actions for the api::address plugin.
                                 </p>
@@ -940,48 +943,5 @@ describe('Admin | containers | RoleEditPage', () => {
         </form>
       </main>
     `);
-  });
-
-  it("can edit a users-permissions role's name and description", async () => {
-    const { getByLabelText, getByRole, getByTestId, getAllByText } = makeAndRenderApp();
-
-    // Check loading screen
-    const loader = getByTestId('loader');
-    expect(loader).toBeInTheDocument();
-
-    // After loading, check other elements
-    await waitForElementToBeRemoved(loader);
-    const saveButton = getByRole('button', { name: /save/i });
-    expect(saveButton).toBeInTheDocument();
-    const nameField = getByLabelText(/name/i);
-    expect(nameField).toBeInTheDocument();
-    const descriptionField = getByLabelText(/description/i);
-    expect(descriptionField).toBeInTheDocument();
-
-    // Shows error when name is missing
-    await userEvent.clear(nameField);
-    expect(nameField).toHaveValue('');
-    await userEvent.clear(descriptionField);
-    expect(descriptionField).toHaveValue('');
-
-    // Show errors after form submit
-    await userEvent.click(saveButton);
-    await waitFor(() => expect(saveButton).not.toBeDisabled());
-    const errorMessages = await getAllByText(/invalid value/i);
-    errorMessages.forEach(errorMessage => expect(errorMessage).toBeInTheDocument());
-  });
-
-  it('can toggle the permissions accordions', async () => {
-    // Create app and wait for loading
-    const { getByLabelText, queryByText, getByTestId, getByText } = makeAndRenderApp();
-    const loader = getByTestId('loader');
-    await waitForElementToBeRemoved(loader);
-
-    // Open then close the collapse
-    const collapse = getByText(/define all allowed actions for the api::address plugin/i);
-    await userEvent.click(collapse);
-    expect(getByLabelText(/select all/i)).toBeInTheDocument();
-    await userEvent.click(collapse);
-    expect(queryByText(/select all/i)).not.toBeInTheDocument();
   });
 });
