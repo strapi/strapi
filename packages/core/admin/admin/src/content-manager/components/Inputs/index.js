@@ -166,7 +166,7 @@ function Inputs({
     isRequired,
   ]);
 
-  const { label, description, visible } = metadatas;
+  const { label, description, placeholder, visible } = metadatas;
 
   if (visible === false) {
     return null;
@@ -218,8 +218,10 @@ function Inputs({
         // wysiwyg: WysiwygWithErrors,
         // uid: InputUID,
         // ...fields,
+        json: () => <div>TODO json</div>,
         media: () => <div>TODO media</div>,
         uid: () => <div>TODO uid</div>,
+        wysiwyg: () => <div>TODO wysiwyg</div>,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
@@ -227,9 +229,10 @@ function Inputs({
       onBlur={onBlur}
       onChange={onChange}
       options={options}
+      placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       step={step}
       type={inputType}
-      validations={validations}
+      // validations={validations}
       value={inputValue}
       withDefaultValue={false}
     />

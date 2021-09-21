@@ -115,30 +115,6 @@
       "component": "blog.test-como",
       "required": false,
       "min": 2
-    },
-    "temp_one_to_one": {
-      "type": "relation",
-      "relation": "oneToOne",
-      "target": "api::temp.temp",
-      "inversedBy": "one_to_one"
-    },
-    "temp": {
-      "type": "relation",
-      "relation": "manyToOne",
-      "target": "api::temp.temp",
-      "inversedBy": "one_to_many"
-    },
-    "temps": {
-      "type": "relation",
-      "relation": "oneToMany",
-      "target": "api::temp.temp",
-      "mappedBy": "many_to_one"
-    },
-    "many_to_many_temp": {
-      "type": "relation",
-      "relation": "manyToMany",
-      "target": "api::temp.temp",
-      "inversedBy": "many_to_many"
     }
   }
 }

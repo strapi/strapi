@@ -7,7 +7,7 @@ import { TimePicker } from '@strapi/parts/TimePicker';
 import { Select, Option } from '@strapi/parts/Select';
 import { useIntl } from 'react-intl';
 import { formatISO } from 'date-fns';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
   const { formatMessage } = useIntl();
