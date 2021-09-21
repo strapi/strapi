@@ -72,20 +72,6 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c11 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
-        color: #32324d;
-      }
-
-      .c12 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c33 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -93,11 +79,25 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c13 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c23 {
+        font-weight: 500;
+        font-size: 0.75rem;
+        line-height: 1.33;
+        color: #32324d;
+      }
+
+      .c14 {
         font-size: 1rem;
         line-height: 1.5;
       }
 
-      .c34 {
+      .c12 {
         font-weight: 600;
         line-height: 1.14;
       }
@@ -121,28 +121,28 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         padding-right: 8px;
       }
 
-      .c14 {
+      .c15 {
         padding-right: 56px;
         padding-left: 56px;
       }
 
-      .c15 {
+      .c16 {
         padding-bottom: 16px;
       }
 
-      .c20 {
+      .c21 {
         padding: 4px;
       }
 
-      .c22 {
+      .c24 {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c23 {
+      .c25 {
         background: #ffffff;
       }
 
-      .c25 {
+      .c27 {
         padding-right: 24px;
         padding-left: 24px;
       }
@@ -197,7 +197,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c16 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -276,7 +276,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         pointer-events: none;
       }
 
-      .c31 {
+      .c33 {
         margin: 0;
         height: 18px;
         min-width: 18px;
@@ -286,12 +286,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         background-color: #ffffff;
       }
 
-      .c31:checked {
+      .c33:checked {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c31:checked:after {
+      .c33:checked:after {
         content: '';
         display: block;
         position: relative;
@@ -305,21 +305,21 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c31:checked:disabled:after {
+      .c33:checked:disabled:after {
         background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
       }
 
-      .c31:disabled {
+      .c33:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c31:indeterminate {
+      .c33:indeterminate {
         background-color: #4945ff;
         border: 1px solid #4945ff;
       }
 
-      .c31:indeterminate:after {
+      .c33:indeterminate:after {
         content: '';
         display: block;
         position: relative;
@@ -334,12 +334,12 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         transform: translateX(-50%) translateY(-50%);
       }
 
-      .c31:indeterminate:disabled {
+      .c33:indeterminate:disabled {
         background-color: #dcdce4;
         border: 1px solid #c0c0cf;
       }
 
-      .c31:indeterminate:disabled:after {
+      .c33:indeterminate:disabled:after {
         background-color: #8e8ea9;
       }
 
@@ -360,7 +360,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
       }
 
       .c7 {
-        padding: 8px 16px;
+        padding: 10px 16px;
         background: #4945ff;
         border: none;
         border: 1px solid #4945ff;
@@ -420,7 +420,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         background: #4945ff;
       }
 
-      .c21 {
+      .c22 {
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -428,7 +428,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         background: #ffffff;
       }
 
-      .c21 .c1 {
+      .c22 .c1 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -439,52 +439,52 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         align-items: center;
       }
 
-      .c21 .c10 {
+      .c22 .c10 {
         color: #ffffff;
       }
 
-      .c21[aria-disabled='true'] {
+      .c22[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c21[aria-disabled='true'] .c10 {
+      .c22[aria-disabled='true'] .c10 {
         color: #666687;
       }
 
-      .c21[aria-disabled='true'] svg > g,
-      .c21[aria-disabled='true'] svg path {
+      .c22[aria-disabled='true'] svg > g,
+      .c22[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c21[aria-disabled='true']:active {
+      .c22[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c21[aria-disabled='true']:active .c10 {
+      .c22[aria-disabled='true']:active .c10 {
         color: #666687;
       }
 
-      .c21[aria-disabled='true']:active svg > g,
-      .c21[aria-disabled='true']:active svg path {
+      .c22[aria-disabled='true']:active svg > g,
+      .c22[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c21:hover {
+      .c22:hover {
         background-color: #f6f6f9;
       }
 
-      .c21:active {
+      .c22:active {
         background-color: #eaeaef;
       }
 
-      .c21 .c10 {
+      .c22 .c10 {
         color: #32324d;
       }
 
-      .c21 svg > g,
-      .c21 svg path {
+      .c22 svg > g,
+      .c22 svg path {
         fill: #32324d;
       }
 
@@ -581,7 +581,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         fill: #666687;
       }
 
-      .c17 > * + * {
+      .c18 > * + * {
         margin-left: 8px;
       }
 
@@ -650,17 +650,17 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         min-height: 2.5rem;
       }
 
-      .c27 {
+      .c29 {
         width: 100%;
         white-space: nowrap;
       }
 
-      .c24 {
+      .c26 {
         position: relative;
         border-radius: 4px 4px 0 0;
       }
 
-      .c24:before {
+      .c26:before {
         background: linear-gradient(90deg,#000000 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -670,7 +670,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         left: 0;
       }
 
-      .c24:after {
+      .c26:after {
         background: linear-gradient(270deg,#000000 0%,rgba(0,0,0,0) 100%);
         opacity: 0.2;
         position: absolute;
@@ -681,44 +681,44 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         top: 0;
       }
 
-      .c26 {
+      .c28 {
         overflow-x: auto;
       }
 
-      .c28 {
+      .c30 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c29 {
+      .c31 {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c29 td,
-      .c29 th {
+      .c31 td,
+      .c31 th {
         padding: 16px;
       }
 
-      .c29 td:first-of-type,
-      .c29 th:first-of-type {
+      .c31 td:first-of-type,
+      .c31 th:first-of-type {
         padding: 0 4px;
       }
 
-      .c30 {
+      .c32 {
         vertical-align: middle;
         text-align: left;
         color: #666687;
         outline-offset: -4px;
       }
 
-      .c30 input {
+      .c32 input {
         vertical-align: sub;
       }
 
-      .c32 svg {
+      .c34 svg {
         height: 0.25rem;
       }
 
-      .c18 {
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -730,40 +730,40 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c18 svg {
+      .c19 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c18 svg > g,
-      .c18 svg path {
+      .c19 svg > g,
+      .c19 svg path {
         fill: #ffffff;
       }
 
-      .c18[aria-disabled='true'] {
+      .c19[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c19 svg > g,
-      .c19 svg path {
+      .c20 svg > g,
+      .c20 svg path {
         fill: #8e8ea9;
       }
 
-      .c19:hover svg > g,
-      .c19:hover svg path {
+      .c20:hover svg > g,
+      .c20:hover svg path {
         fill: #666687;
       }
 
-      .c19:active svg > g,
-      .c19:active svg path {
+      .c20:active svg > g,
+      .c20:active svg path {
         fill: #a5a5ba;
       }
 
-      .c19[aria-disabled='true'] {
+      .c20[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c19[aria-disabled='true'] svg path {
+      .c20[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -861,37 +861,37 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </svg>
                 </div>
                 <span
-                  class="c10 c11"
+                  class="c10 c11 c12"
                 >
                   Create new user
                 </span>
               </button>
             </div>
             <p
-              class="c10 c12 c13"
+              class="c10 c13 c14"
             >
               0 users found
             </p>
           </div>
         </div>
         <div
-          class="c1 c14"
+          class="c1 c15"
         >
           <div
-            class="c1 c15"
+            class="c1 c16"
           >
             <div
               class="c1 c3"
             >
               <div
-                class="c1 c16 c17"
+                class="c1 c17 c18"
                 wrap="wrap"
               >
                 <span>
                   <button
                     aria-disabled="false"
                     aria-labelledby="tooltip-1"
-                    class="c18 c19"
+                    class="c19 c20"
                     tabindex="0"
                     type="button"
                   >
@@ -912,11 +912,11 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                   </button>
                 </span>
                 <div
-                  class="c1 c20"
+                  class="c1 c21"
                 >
                   <button
                     aria-disabled="false"
-                    class="c6 c21"
+                    class="c6 c22"
                     type="button"
                   >
                     <div
@@ -939,7 +939,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </svg>
                     </div>
                     <span
-                      class="c10 c11"
+                      class="c10 c23"
                     >
                       Filters
                     </span>
@@ -950,50 +950,50 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
           </div>
         </div>
         <div
-          class="c1 c14"
+          class="c1 c15"
         >
           <div
-            class="c1 c22"
+            class="c1 c24"
           >
             <div
-              class="c1 c23 c24"
+              class="c1 c25 c26"
             >
               <div
-                class="c1 c25 c26"
+                class="c1 c27 c28"
               >
                 <table
                   aria-colcount="8"
                   aria-rowcount="1"
-                  class="c27"
+                  class="c29"
                 >
                   <thead
-                    class="c28"
+                    class="c30"
                   >
                     <tr
                       aria-rowindex="1"
-                      class="c29"
+                      class="c31"
                     >
                       <th
                         aria-colindex="1"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
                         >
                           <input
                             aria-label="Select all entries"
-                            class="c31"
+                            class="c33"
                             tabindex="0"
                             type="checkbox"
                           />
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="2"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
@@ -1001,7 +1001,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-1"
-                              class="c10 c33 c34 c35"
+                              class="c10 c11 c12 c35"
                               label="Firstname"
                               tabindex="-1"
                             >
@@ -1009,7 +1009,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c32"
+                            class="c34"
                           >
                             <span>
                               <button
@@ -1041,7 +1041,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                       </th>
                       <th
                         aria-colindex="3"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
@@ -1049,7 +1049,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-5"
-                              class="c10 c33 c34 c35"
+                              class="c10 c11 c12 c35"
                               label="Lastname"
                               tabindex="-1"
                             >
@@ -1057,13 +1057,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="4"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
@@ -1071,7 +1071,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-7"
-                              class="c10 c33 c34 c35"
+                              class="c10 c11 c12 c35"
                               label="Email"
                               tabindex="-1"
                             >
@@ -1079,13 +1079,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="5"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
@@ -1093,7 +1093,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-9"
-                              class="c10 c33 c34 c35"
+                              class="c10 c11 c12 c35"
                               label="Roles"
                               tabindex="-1"
                             >
@@ -1101,13 +1101,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="6"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
@@ -1115,7 +1115,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-11"
-                              class="c10 c33 c34 c35"
+                              class="c10 c11 c12 c35"
                               label="Username"
                               tabindex="-1"
                             >
@@ -1123,13 +1123,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </button>
                           </span>
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="7"
-                        class="c30"
+                        class="c32"
                       >
                         <div
                           class="c1 c4"
@@ -1137,7 +1137,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-13"
-                              class="c10 c33 c34 c35"
+                              class="c10 c11 c12 c35"
                               label="Active User"
                               tabindex="-1"
                             >
@@ -1145,13 +1145,13 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             </span>
                           </span>
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
                       <th
                         aria-colindex="8"
-                        class="c30"
+                        class="c32"
                         tabindex="-1"
                       >
                         <div
@@ -1163,7 +1163,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             Actions
                           </div>
                           <span
-                            class="c32"
+                            class="c34"
                           />
                         </div>
                       </th>
@@ -1226,7 +1226,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                     class="c1 c47"
                   >
                     <span
-                      class="c10 c11"
+                      class="c10 c23"
                       for="select-15"
                       id="select-15-label"
                     >
@@ -1254,7 +1254,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                             class="c1 c51"
                           >
                             <span
-                              class="c10 c33"
+                              class="c10 c11"
                               id="select-15-content"
                             >
                               10

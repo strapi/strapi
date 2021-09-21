@@ -100,7 +100,7 @@ const ListPage = () => {
     (status !== 'success' && status !== 'error') || (status === 'success' && isFetching);
 
   const createAction = canCreate ? (
-    <Button data-testid="create-user-button" onClick={handleToggle} startIcon={<Mail />}>
+    <Button data-testid="create-user-button" onClick={handleToggle} startIcon={<Mail />} size="L">
       {formatMessage({
         id: 'Settings.permissions.users.create',
         defaultMessage: 'Create new user',

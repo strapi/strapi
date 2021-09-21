@@ -127,7 +127,7 @@ describe('MediaLibrary / ListView', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c29 {
+      .c32 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -207,14 +207,14 @@ describe('MediaLibrary / ListView', () => {
         padding-left: 12px;
       }
 
-      .c16 {
+      .c18 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c23 {
+      .c26 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
@@ -259,6 +259,20 @@ describe('MediaLibrary / ListView', () => {
         -webkit-flex-direction: row;
         -ms-flex-direction: row;
         flex-direction: row;
+        -webkit-align-items: flex-start;
+        -webkit-box-align: flex-start;
+        -ms-flex-align: flex-start;
+        align-items: flex-start;
+      }
+
+      .c24 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
         -webkit-align-items: center;
         -webkit-box-align: center;
         -ms-flex-align: center;
@@ -286,52 +300,56 @@ describe('MediaLibrary / ListView', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c13 {
+      .c14 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c14 {
+      .c15 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c19 {
+      .c21 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c25 {
+      .c28 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c20 {
+      .c22 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c21 {
+      .c23 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c17 {
+      .c19 {
         display: inline-block;
       }
 
-      .c18 {
+      .c17 {
         margin-left: auto;
+      }
+
+      .c20 {
+        margin-left: 4px;
       }
 
       .c5 {
@@ -401,36 +419,40 @@ describe('MediaLibrary / ListView', () => {
         background-color: #8e8ea9;
       }
 
+      .c13 {
+        word-break: break-all;
+      }
+
       .c3 {
         position: relative;
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c24 {
+      .c27 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c15 {
+      .c16 {
         text-transform: uppercase;
       }
 
-      .c22 canvas {
+      .c25 canvas {
         display: block;
         max-width: 100%;
         max-height: 100%;
       }
 
-      .c26 {
+      .c29 {
         text-transform: uppercase;
       }
 
-      .c28 {
+      .c31 {
         text-transform: uppercase;
       }
 
-      .c27 svg {
+      .c30 svg {
         font-size: 3rem;
       }
 
@@ -504,36 +526,37 @@ describe('MediaLibrary / ListView', () => {
                   class="c12"
                 >
                   <div
-                    class=""
+                    class="c13"
                   >
                     <h2
-                      class="c13"
+                      class="c14"
                       id="card-1-title"
                     >
                       strapi-cover_1fabc982ce.png
                     </h2>
                     <div
-                      class="c14"
+                      class="c15"
                     >
                       <span
-                        class="c15"
+                        class="c16"
                       >
                         png
                       </span>
-                       - 
-                      551
-                      ✕
-                      1066
+                      - 551✕1066
                     </div>
                   </div>
                   <div
-                    class="c16 c17 c18"
+                    class="c17"
                   >
-                    <span
-                      class="c19 c20 c21"
+                    <div
+                      class="c18 c19 c20"
                     >
-                      Image
-                    </span>
+                      <span
+                        class="c21 c22 c23"
+                      >
+                        Image
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -588,10 +611,10 @@ describe('MediaLibrary / ListView', () => {
                   class="c9"
                 >
                   <div
-                    class="c12"
+                    class="c24"
                   >
                     <div
-                      class="c22"
+                      class="c25"
                     >
                       <video
                         src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
@@ -605,10 +628,10 @@ describe('MediaLibrary / ListView', () => {
                   </div>
                 </div>
                 <time
-                  class="c23 c24"
+                  class="c26 c27"
                 >
                   <span
-                    class="c25"
+                    class="c28"
                   >
                     ...
                   </span>
@@ -621,32 +644,36 @@ describe('MediaLibrary / ListView', () => {
                   class="c12"
                 >
                   <div
-                    class=""
+                    class="c13"
                   >
                     <h2
-                      class="c13"
+                      class="c14"
                       id="card-2-title"
                     >
                       mov_bbb.mp4
                     </h2>
                     <div
-                      class="c14"
+                      class="c15"
                     >
                       <span
-                        class="c26"
+                        class="c29"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c16 c17 c18"
+                    class="c17"
                   >
-                    <span
-                      class="c19 c20 c21"
+                    <div
+                      class="c18 c19 c20"
                     >
-                      Video
-                    </span>
+                      <span
+                        class="c21 c22 c23"
+                      >
+                        Video
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -701,10 +728,10 @@ describe('MediaLibrary / ListView', () => {
                   class="c9"
                 >
                   <div
-                    class="c12"
+                    class="c24"
                   >
                     <span
-                      class="c27"
+                      class="c30"
                     >
                       <svg
                         aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -730,32 +757,36 @@ describe('MediaLibrary / ListView', () => {
                   class="c12"
                 >
                   <div
-                    class=""
+                    class="c13"
                   >
                     <h2
-                      class="c13"
+                      class="c14"
                       id="card-3-title"
                     >
                       CARTE MARIAGE AVS - Printemps.pdf
                     </h2>
                     <div
-                      class="c14"
+                      class="c15"
                     >
                       <span
-                        class="c28"
+                        class="c31"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c16 c17 c18"
+                    class="c17"
                   >
-                    <span
-                      class="c19 c20 c21"
+                    <div
+                      class="c18 c19 c20"
                     >
-                      Doc
-                    </span>
+                      <span
+                        class="c21 c22 c23"
+                      >
+                        Doc
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -763,7 +794,7 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c29"
+          class="c32"
         >
           <p
             aria-live="polite"

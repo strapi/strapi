@@ -51,43 +51,55 @@ describe('CONTENT MANAGER | EditView | Header', () => {
     } = render(makeApp());
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c1 {
+      .c3 {
         padding-top: 8px;
         padding-bottom: 24px;
       }
 
-      .c2 {
+      .c4 {
         background: #eaeaef;
       }
 
-      .c3 {
+      .c5 {
         height: 1px;
         border: none;
         margin: 0;
       }
 
       .c0 {
-        font-weight: 500;
-        font-size: 0.75rem;
-        line-height: 1.33;
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
         color: #666687;
       }
 
-      .c6 {
+      .c8 {
         font-weight: 500;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c7 {
+      .c9 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c5 {
+      .c1 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c2 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -105,7 +117,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         align-items: center;
       }
 
-      .c4 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -115,12 +127,12 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         flex-direction: column;
       }
 
-      .c4 > * {
+      .c6 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c4 > * + * {
+      .c6 > * + * {
         margin-top: 16px;
       }
 
@@ -128,45 +140,44 @@ describe('CONTENT MANAGER | EditView | Header', () => {
         class=""
       >
         <span
-          class="c0"
-          style="text-transform: uppercase;"
+          class="c0 c1 c2"
         >
           Information
         </span>
         <div
-          class="c1"
+          class="c3"
         >
           <hr
-            class="c2 c3"
+            class="c4 c5"
           />
         </div>
         <div
-          class="c4"
+          class="c6"
         >
           <div
-            class="c5"
+            class="c7"
           >
             <span
-              class="c6"
+              class="c8"
             >
               content-manager.containers.Edit.information.lastUpdate
             </span>
             <span
-              class="c7"
+              class="c9"
             >
               now
             </span>
           </div>
           <div
-            class="c5"
+            class="c7"
           >
             <span
-              class="c6"
+              class="c8"
             >
               content-manager.containers.Edit.information.by
             </span>
             <span
-              class="c7"
+              class="c9"
             >
               -
             </span>

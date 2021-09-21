@@ -9,9 +9,13 @@ import { Stack } from '@strapi/parts/Stack';
 import { Grid, GridItem } from '@strapi/parts/Grid';
 import { KeyboardNavigable } from '@strapi/parts/KeyboardNavigable';
 import { DocAssetCard } from '../../AssetCard/DocAssetCard';
+import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
+import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
+import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
 import { getTrad } from '../../../utils';
+import { AssetType, AssetSource } from '../../../constants';
 
-export const PendingAssetStep = ({ onClose }) => {
+export const PendingAssetStep = ({ onClose, assets }) => {
   const { formatMessage } = useIntl();
 
   return (
@@ -54,14 +58,52 @@ export const PendingAssetStep = ({ onClose }) => {
           </Row>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
-              {Array(20)
-                .fill(null)
-                .map((_, idx) => (
-                  // eslint-disable-next-line react/no-array-index-key
-                  <GridItem col={3} key={`grid-item-${idx}`}>
-                    <DocAssetCard name="This is a test" extension="pdf" />
+              {assets.map((asset, idx) => {
+                const assetKey = `${asset.url}-${idx}`;
+
+                if (asset.type === AssetType.Image) {
+                  return (
+                    <GridItem col={4} key={assetKey}>
+                      <ImageAssetCard
+                        id={assetKey}
+                        name={asset.url}
+                        extension={asset.ext}
+                        height={asset.height}
+                        width={asset.width}
+                        thumbnail={asset.url}
+                      />
+                    </GridItem>
+                  );
+                }
+
+                if (asset.type === AssetType.Video) {
+                  return (
+                    <GridItem col={4} key={assetKey}>
+                      <VideoAssetCard
+                        id={assetKey}
+                        name={asset.url}
+                        extension={asset.ext}
+                        url={asset.url}
+                        mime={asset.mime}
+                      />
+                    </GridItem>
+                  );
+                }
+
+                if (asset.type === AssetType.Unknown) {
+                  return (
+                    <GridItem col={4} key={assetKey}>
+                      <UnknownAssetCard id={assetKey} name={asset.url} extension={asset.ext} />
+                    </GridItem>
+                  );
+                }
+
+                return (
+                  <GridItem col={4} key={assetKey}>
+                    <DocAssetCard name={asset.url} extension={asset.ext} />
                   </GridItem>
-                ))}
+                );
+              })}
             </Grid>
           </KeyboardNavigable>
         </Stack>
@@ -90,5 +132,14 @@ export const PendingAssetStep = ({ onClose }) => {
 };
 
 PendingAssetStep.propTypes = {
+  assets: PropTypes.arrayOf(
+    PropTypes.shape({
+      source: PropTypes.oneOf(Object.values(AssetSource)),
+      type: PropTypes.oneOf(Object.values(AssetType)),
+      url: PropTypes.string,
+      mime: PropTypes.string,
+      ext: PropTypes.string,
+    })
+  ).isRequired,
   onClose: PropTypes.func.isRequired,
 };

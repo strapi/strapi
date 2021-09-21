@@ -6,13 +6,14 @@ import { prefixFileUrlWithBackendUrl, getFileExtension } from '@strapi/helper-pl
 import { ImageAssetCard } from '../../../components/AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../../components/AssetCard/VideoAssetCard';
 import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
+import { AssetType } from '../../../constants';
 
 export const ListView = ({ assets }) => {
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout>
         {assets.map(asset => {
-          if (asset.mime.includes('video')) {
+          if (asset.mime.includes(AssetType.Video)) {
             return (
               <VideoAssetCard
                 id={asset.id}
@@ -25,7 +26,7 @@ export const ListView = ({ assets }) => {
             );
           }
 
-          if (asset.mime.includes('image')) {
+          if (asset.mime.includes(AssetType.Image)) {
             return (
               <ImageAssetCard
                 id={asset.id}

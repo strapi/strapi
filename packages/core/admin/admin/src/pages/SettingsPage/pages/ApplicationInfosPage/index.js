@@ -1,6 +1,6 @@
 import React from 'react';
 import { useIntl } from 'react-intl';
-import { useAppInfos, SettingsPageTitle } from '@strapi/helper-plugin';
+import { useAppInfos, SettingsPageTitle, useFocusWhenNavigate } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout } from '@strapi/parts/Layout';
 import { Main } from '@strapi/parts/Main';
 import { Box } from '@strapi/parts/Box';
@@ -13,6 +13,7 @@ import ExternalLink from '@strapi/icons/ExternalLink';
 
 const ApplicationInfosPage = () => {
   const { formatMessage } = useIntl();
+  useFocusWhenNavigate();
   const appInfos = useAppInfos();
   const { shouldUpdateStrapi, latestStrapiReleaseTag } = appInfos;
 
