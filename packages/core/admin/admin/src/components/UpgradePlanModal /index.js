@@ -75,11 +75,11 @@ const UpgradePlanModal = ({ onClose, isOpen }) => {
   return (
     <Portal>
       <UpgradeWrapper>
-        <FocusTrap onClose={onClose}>
+        <FocusTrap onEscape={onClose}>
           <UpgradeContainer aria-labelledby="upgrade-plan" background="neutral0" hasRadius>
             <img src={AirBalloon} alt="air-balloon" />
             <CloseButtonContainer>
-              <IconButton onClick={onClose} label="Close" icon={<CloseAlertIcon />} />
+              <IconButton onClick={onClose} aria-label="Close" icon={<CloseAlertIcon />} />
             </CloseButtonContainer>
             <StackFlexStart size={6}>
               <TextBold textColor="primary600">
