@@ -18,7 +18,7 @@ import { useUpload } from '../../../hooks/useUpload';
 
 export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
   const { formatMessage } = useIntl();
-  const { upload, isLoading, isError } = useUpload(assets, onClose);
+  const { upload, isLoading } = useUpload(assets, onClose);
 
   const handleSubmit = async e => {
     e.preventDefault();
