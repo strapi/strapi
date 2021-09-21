@@ -35,6 +35,7 @@ const App = () => {
   const { data, isLoading, error } = useAssets({
     skipWhen: !state.allowedActions.canMain,
   });
+
   const [showUploadAssetDialog, setShowUploadAssetDialog] = useState(false);
   const toggleUploadAssetDialog = () => setShowUploadAssetDialog(prev => !prev);
 

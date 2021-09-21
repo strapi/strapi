@@ -7,11 +7,19 @@ export const urlsToAssets = async urls => {
     axios
       .get(url, {
         responseType: 'blob',
+        timeout: 60000,
       })
-      .then(res => ({
-        url: res.config.url,
-        mime: res.headers['content-type'],
-      }))
+      .then(res => {
+        const loadedFile = new File([res.data], res.config.url, {
+          type: res.headers['content-type'],
+        });
+
+        return {
+          url: res.config.url,
+          mime: res.headers['content-type'],
+          rawFile: loadedFile,
+        };
+      })
   );
   // Retrieve the assets metadata
   const assetsResults = await Promise.allSettled(assetPromises);
@@ -26,6 +34,7 @@ export const urlsToAssets = async urls => {
     url: fullFilledAsset.value.url,
     ext: fullFilledAsset.value.url.split('.').pop(),
     mime: fullFilledAsset.value.mime,
+    rawFile: fullFilledAsset.value.rawFile,
   }));
 
   const unknownAssets = rejectedAssets.map(unknownAsset => ({

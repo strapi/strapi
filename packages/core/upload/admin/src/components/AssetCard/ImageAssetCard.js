@@ -22,13 +22,21 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) => {
+export const ImageAssetCard = ({
+  name,
+  extension,
+  height,
+  width,
+  thumbnail,
+  selected,
+  onSelect,
+}) => {
   const { formatMessage } = useIntl();
 
   return (
     <Card>
       <CardHeader>
-        <CardCheckbox value />
+        {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         <CardAction position="end">
           <IconButton
             label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
@@ -56,12 +64,16 @@ export const ImageAssetCard = ({ name, extension, height, width, thumbnail }) =>
 ImageAssetCard.defaultProps = {
   height: undefined,
   width: undefined,
+  selected: false,
+  onSelect: undefined,
 };
 
 ImageAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   height: PropTypes.number,
   name: PropTypes.string.isRequired,
+  onSelect: PropTypes.func,
   width: PropTypes.number,
   thumbnail: PropTypes.string.isRequired,
+  selected: PropTypes.bool,
 };

@@ -45,6 +45,7 @@ describe('FromUrlForm', () => {
         source: 'url',
         type: 'image',
         url: 'http://localhost:5000/an-image.png',
+        rawFile: new File([''], 'image/png'),
       },
       {
         ext: 'pdf',
@@ -52,6 +53,7 @@ describe('FromUrlForm', () => {
         source: 'url',
         type: 'doc',
         url: 'http://localhost:5000/a-pdf.pdf',
+        rawFile: new File([''], 'application/pdf'),
       },
       {
         ext: 'mp4',
@@ -59,6 +61,7 @@ describe('FromUrlForm', () => {
         source: 'url',
         type: 'video',
         url: 'http://localhost:5000/a-video.mp4',
+        rawFile: new File([''], 'video/mp4'),
       },
       {
         ext: 'lutin',
@@ -66,6 +69,7 @@ describe('FromUrlForm', () => {
         source: 'url',
         type: 'doc',
         url: 'http://localhost:5000/not-working-like-cors.lutin',
+        rawFile: new File([''], 'something/weird'),
       },
     ];
     await waitFor(() => expect(onAddAssetSpy).toHaveBeenCalledWith(expectedAssets));

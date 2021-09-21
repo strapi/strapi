@@ -90,6 +90,21 @@ const EditViewDataManagerProvider = ({
   }, [shouldCheckErrors]);
 
   useEffect(() => {
+    const errorsInForm = Object.keys(formErrors);
+
+    // TODO check if working with DZ, components...
+    // TODO use querySelector querySelectorAll('[data-strapi-field-error]')
+    if (errorsInForm.length > 0) {
+      const firstError = errorsInForm[0];
+      const el = document.getElementById(firstError);
+
+      if (el) {
+        el.focus();
+      }
+    }
+  }, [formErrors]);
+
+  useEffect(() => {
     if (shouldRedirectToHomepageWhenEditingEntry) {
       toggleNotification({
         type: 'info',

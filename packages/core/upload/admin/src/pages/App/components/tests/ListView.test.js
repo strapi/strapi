@@ -127,7 +127,7 @@ describe('MediaLibrary / ListView', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c32 {
+      .c30 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -145,7 +145,7 @@ describe('MediaLibrary / ListView', () => {
         grid-gap: 16px;
       }
 
-      .c7 {
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -157,40 +157,40 @@ describe('MediaLibrary / ListView', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c7 svg {
+      .c5 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c7 svg > g,
-      .c7 svg path {
+      .c5 svg > g,
+      .c5 svg path {
         fill: #ffffff;
       }
 
-      .c7[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c8 svg > g,
-      .c8 svg path {
+      .c6 svg > g,
+      .c6 svg path {
         fill: #8e8ea9;
       }
 
-      .c8:hover svg > g,
-      .c8:hover svg path {
+      .c6:hover svg > g,
+      .c6:hover svg path {
         fill: #666687;
       }
 
-      .c8:active svg > g,
-      .c8:active svg path {
+      .c6:active svg > g,
+      .c6:active svg path {
         fill: #a5a5ba;
       }
 
-      .c8[aria-disabled='true'] {
+      .c6[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c8[aria-disabled='true'] svg path {
+      .c6[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -200,21 +200,21 @@ describe('MediaLibrary / ListView', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c11 {
+      .c9 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c18 {
+      .c16 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c26 {
+      .c24 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
@@ -222,12 +222,6 @@ describe('MediaLibrary / ListView', () => {
       }
 
       .c4 {
-        position: absolute;
-        top: 12px;
-        left: 12px;
-      }
-
-      .c6 {
         position: absolute;
         top: 12px;
         right: 12px;
@@ -251,7 +245,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c12 {
+      .c10 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -265,7 +259,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: flex-start;
       }
 
-      .c24 {
+      .c22 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -279,14 +273,14 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c8 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c9 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -300,126 +294,59 @@ describe('MediaLibrary / ListView', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c14 {
+      .c12 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c15 {
+      .c13 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c21 {
+      .c19 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c28 {
+      .c26 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c22 {
+      .c20 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c23 {
+      .c21 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c19 {
+      .c17 {
         display: inline-block;
       }
 
-      .c17 {
+      .c15 {
         margin-left: auto;
       }
 
-      .c20 {
+      .c18 {
         margin-left: 4px;
       }
 
-      .c5 {
-        margin: 0;
-        height: 18px;
-        min-width: 18px;
-        border-radius: 4px;
-        border: 1px solid #c0c0cf;
-        -webkit-appearance: none;
-        background-color: #ffffff;
-      }
-
-      .c5:checked {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c5:checked:after {
-        content: '';
-        display: block;
-        position: relative;
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
-        width: 10px;
-        height: 10px;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c5:checked:disabled:after {
-        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
-      }
-
-      .c5:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c5:indeterminate {
-        background-color: #4945ff;
-        border: 1px solid #4945ff;
-      }
-
-      .c5:indeterminate:after {
-        content: '';
-        display: block;
-        position: relative;
-        color: white;
-        height: 2px;
-        width: 10px;
-        background-color: #ffffff;
-        left: 50%;
-        top: 50%;
-        -webkit-transform: translateX(-50%) translateY(-50%);
-        -ms-transform: translateX(-50%) translateY(-50%);
-        transform: translateX(-50%) translateY(-50%);
-      }
-
-      .c5:indeterminate:disabled {
-        background-color: #dcdce4;
-        border: 1px solid #c0c0cf;
-      }
-
-      .c5:indeterminate:disabled:after {
-        background-color: #8e8ea9;
-      }
-
-      .c13 {
+      .c11 {
         word-break: break-all;
       }
 
@@ -428,31 +355,31 @@ describe('MediaLibrary / ListView', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c27 {
+      .c25 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c16 {
+      .c14 {
         text-transform: uppercase;
       }
 
-      .c25 canvas {
+      .c23 canvas {
         display: block;
         max-width: 100%;
         max-height: 100%;
+      }
+
+      .c27 {
+        text-transform: uppercase;
       }
 
       .c29 {
         text-transform: uppercase;
       }
 
-      .c31 {
-        text-transform: uppercase;
-      }
-
-      .c30 svg {
+      .c28 svg {
         font-size: 3rem;
       }
 
@@ -474,21 +401,11 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
-                  <input
-                    aria-labelledby="card-1-title"
-                    checked=""
-                    class="c5"
-                    type="checkbox"
-                  />
-                </div>
-                <div
-                  class="c6"
-                >
                   <span>
                     <button
                       aria-disabled="false"
                       aria-labelledby="tooltip-1"
-                      class="c7 c8"
+                      class="c5 c6"
                       tabindex="0"
                       type="button"
                     >
@@ -510,35 +427,35 @@ describe('MediaLibrary / ListView', () => {
                   </span>
                 </div>
                 <div
-                  class="c9"
+                  class="c7"
                 >
                   <img
                     aria-hidden="true"
-                    class="c10"
+                    class="c8"
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
                   />
                 </div>
               </div>
               <div
-                class="c11"
+                class="c9"
               >
                 <div
-                  class="c12"
+                  class="c10"
                 >
                   <div
-                    class="c13"
+                    class="c11"
                   >
                     <h2
-                      class="c14"
+                      class="c12"
                       id="card-1-title"
                     >
                       strapi-cover_1fabc982ce.png
                     </h2>
                     <div
-                      class="c15"
+                      class="c13"
                     >
                       <span
-                        class="c16"
+                        class="c14"
                       >
                         png
                       </span>
@@ -546,13 +463,13 @@ describe('MediaLibrary / ListView', () => {
                     </div>
                   </div>
                   <div
-                    class="c17"
+                    class="c15"
                   >
                     <div
-                      class="c18 c19 c20"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c21 c22 c23"
+                        class="c19 c20 c21"
                       >
                         Image
                       </span>
@@ -572,21 +489,11 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
-                  <input
-                    aria-labelledby="card-2-title"
-                    checked=""
-                    class="c5"
-                    type="checkbox"
-                  />
-                </div>
-                <div
-                  class="c6"
-                >
                   <span>
                     <button
                       aria-disabled="false"
                       aria-labelledby="tooltip-3"
-                      class="c7 c8"
+                      class="c5 c6"
                       tabindex="0"
                       type="button"
                     >
@@ -608,13 +515,13 @@ describe('MediaLibrary / ListView', () => {
                   </span>
                 </div>
                 <div
-                  class="c9"
+                  class="c7"
                 >
                   <div
-                    class="c24"
+                    class="c22"
                   >
                     <div
-                      class="c25"
+                      class="c23"
                     >
                       <video
                         src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
@@ -628,48 +535,48 @@ describe('MediaLibrary / ListView', () => {
                   </div>
                 </div>
                 <time
-                  class="c26 c27"
+                  class="c24 c25"
                 >
                   <span
-                    class="c28"
+                    class="c26"
                   >
                     ...
                   </span>
                 </time>
               </div>
               <div
-                class="c11"
+                class="c9"
               >
                 <div
-                  class="c12"
+                  class="c10"
                 >
                   <div
-                    class="c13"
+                    class="c11"
                   >
                     <h2
-                      class="c14"
+                      class="c12"
                       id="card-2-title"
                     >
                       mov_bbb.mp4
                     </h2>
                     <div
-                      class="c15"
+                      class="c13"
                     >
                       <span
-                        class="c29"
+                        class="c27"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c17"
+                    class="c15"
                   >
                     <div
-                      class="c18 c19 c20"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c21 c22 c23"
+                        class="c19 c20 c21"
                       >
                         Video
                       </span>
@@ -689,21 +596,11 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
-                  <input
-                    aria-labelledby="card-3-title"
-                    checked=""
-                    class="c5"
-                    type="checkbox"
-                  />
-                </div>
-                <div
-                  class="c6"
-                >
                   <span>
                     <button
                       aria-disabled="false"
                       aria-labelledby="tooltip-5"
-                      class="c7 c8"
+                      class="c5 c6"
                       tabindex="0"
                       type="button"
                     >
@@ -725,13 +622,13 @@ describe('MediaLibrary / ListView', () => {
                   </span>
                 </div>
                 <div
-                  class="c9"
+                  class="c7"
                 >
                   <div
-                    class="c24"
+                    class="c22"
                   >
                     <span
-                      class="c30"
+                      class="c28"
                     >
                       <svg
                         aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -751,38 +648,38 @@ describe('MediaLibrary / ListView', () => {
                 </div>
               </div>
               <div
-                class="c11"
+                class="c9"
               >
                 <div
-                  class="c12"
+                  class="c10"
                 >
                   <div
-                    class="c13"
+                    class="c11"
                   >
                     <h2
-                      class="c14"
+                      class="c12"
                       id="card-3-title"
                     >
                       CARTE MARIAGE AVS - Printemps.pdf
                     </h2>
                     <div
-                      class="c15"
+                      class="c13"
                     >
                       <span
-                        class="c31"
+                        class="c29"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c17"
+                    class="c15"
                   >
                     <div
-                      class="c18 c19 c20"
+                      class="c16 c17 c18"
                     >
                       <span
-                        class="c21 c22 c23"
+                        class="c19 c20 c21"
                       >
                         Doc
                       </span>
@@ -794,7 +691,7 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c32"
+          class="c30"
         >
           <p
             aria-live="polite"

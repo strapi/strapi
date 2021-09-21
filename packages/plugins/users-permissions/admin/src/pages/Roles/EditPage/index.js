@@ -38,8 +38,9 @@ const EditPage = () => {
     lockApp();
     setIsSubmitting(true);
     try {
+      const permissions = permissionsRef.current.getPermissions();
       // Update role in Strapi
-      await axiosInstance.put(`/${pluginId}/roles/${id}`, { ...data, users: [] });
+      await axiosInstance.put(`/${pluginId}/roles/${id}`, { ...data, ...permissions, users: [] });
       // Notify success
       onSubmitSucceeded({ name: data.name, description: data.description });
       toggleNotification({

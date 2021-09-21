@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   MainNav,
   NavBrand,
@@ -17,6 +18,13 @@ import {
 import ContentIcon from '@strapi/icons/ContentIcon';
 import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
 import useConfigurations from '../../hooks/useConfigurations';
+
+// TODO: remove when font-awesome will be removed
+const IconWrapper = styled.span`
+  svg.svg-inline--fa.fa-w-20 {
+    width: 1rem;
+  }
+`;
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
   const { menuLogo } = useConfigurations();
@@ -43,7 +51,15 @@ const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
         {pluginsSectionLinks.length > 0 ? (
           <NavSection label="Plugins">
             {pluginsSectionLinks.map(link => (
-              <NavLink to={link.to} key={link.to} icon={<FontAwesomeIcon icon={link.icon} />}>
+              <NavLink
+                to={link.to}
+                key={link.to}
+                icon={
+                  <IconWrapper>
+                    <FontAwesomeIcon icon={link.icon} />
+                  </IconWrapper>
+                }
+              >
                 {formatMessage(link.intlLabel)}
               </NavLink>
             ))}
