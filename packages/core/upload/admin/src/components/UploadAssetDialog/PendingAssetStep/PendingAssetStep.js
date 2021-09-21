@@ -74,7 +74,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                     <GridItem col={4} key={assetKey}>
                       <ImageAssetCard
                         id={assetKey}
-                        name={asset.url}
+                        name={asset.name}
                         extension={asset.ext}
                         height={asset.height}
                         width={asset.width}
@@ -89,7 +89,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                     <GridItem col={4} key={assetKey}>
                       <VideoAssetCard
                         id={assetKey}
-                        name={asset.url}
+                        name={asset.name}
                         extension={asset.ext}
                         url={asset.url}
                         mime={asset.mime}
@@ -101,14 +101,14 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                 if (asset.type === AssetType.Unknown) {
                   return (
                     <GridItem col={4} key={assetKey}>
-                      <UnknownAssetCard id={assetKey} name={asset.url} extension={asset.ext} />
+                      <UnknownAssetCard id={assetKey} name={asset.name} extension={asset.ext} />
                     </GridItem>
                   );
                 }
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <DocAssetCard name={asset.url} extension={asset.ext} />
+                    <DocAssetCard name={asset.name} extension={asset.ext} />
                   </GridItem>
                 );
               })}
