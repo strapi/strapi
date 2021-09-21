@@ -4,29 +4,37 @@ import { FilterPopoverURLQuery } from '@strapi/helper-plugin';
 import FilterIcon from '@strapi/icons/FilterIcon';
 import { useIntl } from 'react-intl';
 
+const displayedFilters = [
+  {
+    name: 'created_at',
+    fieldSchema: {
+      type: 'date',
+    },
+    metadatas: { label: 'created_at' },
+  },
+  {
+    name: 'updated_at',
+    fieldSchema: {
+      type: 'date',
+    },
+    metadatas: { label: 'updated_at' },
+  },
+  {
+    name: 'type',
+    fieldSchema: {
+      type: 'enumeration',
+      options: ['image', 'video', 'file'],
+    },
+    metadatas: { label: 'type' },
+  },
+];
+
 export const Filters = () => {
   const buttonRef = useRef(null);
   const [isVisible, setVisible] = useState(false);
   const { formatMessage } = useIntl();
 
   const toggleFilter = () => setVisible(prev => !prev);
-
-  const displayedFilters = [
-    {
-      name: 'created_at',
-      fieldSchema: {
-        type: 'datetime',
-      },
-      metadatas: { label: 'created_at' },
-    },
-    {
-      name: 'updated_at',
-      fieldSchema: {
-        type: 'datetime',
-      },
-      metadatas: { label: 'updated_at' },
-    },
-  ];
 
   return (
     <>

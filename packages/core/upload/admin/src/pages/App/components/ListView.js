@@ -9,8 +9,6 @@ import { DocAssetCard } from '../../../components/AssetCard/DocAssetCard';
 import { AssetType } from '../../../constants';
 
 export const ListView = ({ assets }) => {
-  console.log('lol', assets);
-
   return (
     <KeyboardNavigable tagName="article">
       <GridLayout>
