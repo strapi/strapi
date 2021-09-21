@@ -4921,17 +4921,6 @@
     resolve-from "^5.0.0"
     store2 "^2.12.0"
 
-<<<<<<< HEAD
-"@strapi/icons@0.0.1-alpha.34":
-  version "0.0.1-alpha.34"
-  resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.34.tgz#4a4d3414f155580c2c3d0877ef0acb993c80c9f8"
-  integrity sha512-MFroflKEm39zsbO29v83zL5UWUoMbYAgcwID9wRhk5/9DySQ5KXpswSeNbK6OlUraTBJ0SJy2IjIcZMmQMsVuw==
-
-"@strapi/parts@0.0.1-alpha.34":
-  version "0.0.1-alpha.34"
-  resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.34.tgz#a622eddfb134502d29c74dc35bd6d8e783a1a774"
-  integrity sha512-vl4ITWDDoQ55qBAC1VfELSCQ83/WwcYvMMM9YSOp28w1QmTnZmHNjZMrq9VOsgGznfejdSlLw4pERpQpf7ffOg==
-=======
 "@strapi/icons@0.0.1-alpha.35":
   version "0.0.1-alpha.35"
   resolved "https://registry.yarnpkg.com/@strapi/icons/-/icons-0.0.1-alpha.35.tgz#703889868bd821cb0906adb949b785c6a552afdf"
@@ -4941,7 +4930,6 @@
   version "0.0.1-alpha.35"
   resolved "https://registry.yarnpkg.com/@strapi/parts/-/parts-0.0.1-alpha.35.tgz#8fe19b76c4ecddc04579fc6dbdf03247476f6368"
   integrity sha512-KJTMmbAmplKeivHKInxf0S9Fzy8MtAbRLLBqFbtLb722NjUZNCgP08Hxe1NbpywnA2R4DkC9eVEVQswN8kf9og==
->>>>>>> 7019b2df1 (Bump parts to alpha 35)
   dependencies:
     "@internationalized/number" "^3.0.2"
     compute-scroll-into-view "^1.0.17"
