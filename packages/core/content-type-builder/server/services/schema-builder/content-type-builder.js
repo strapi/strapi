@@ -80,7 +80,7 @@ module.exports = function createComponentBuilder() {
       const modelName = nameToSlug(infos.name);
       const contentType = createSchemaHandler({
         modelName: modelName,
-        dir: path.join(strapi.dir, 'api', modelName, 'content-types', modelName),
+        dir: path.join(strapi.dirs.api, modelName, 'content-types', modelName),
         filename: `schema.json`,
       });
 

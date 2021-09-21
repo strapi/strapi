@@ -21,7 +21,7 @@ module.exports = {
       strapi.config.paths.static
     );
 
-    const uploadDir = path.resolve(strapi.dir, configPublicPath);
+    const uploadDir = path.resolve(strapi.dirs.root, configPublicPath);
 
     return {
       upload(file) {
