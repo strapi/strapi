@@ -54,6 +54,7 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
         url: URL.createObjectURL(file),
         ext: file.name.split('.').pop(),
         mime: file.type,
+        rawFile: file,
       });
     }
 

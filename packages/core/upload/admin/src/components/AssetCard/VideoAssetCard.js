@@ -24,7 +24,7 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const VideoAssetCard = ({ name, extension, url, mime }) => {
+export const VideoAssetCard = ({ name, extension, url, mime, selected, onSelect }) => {
   const { formatMessage } = useIntl();
   const [duration, setDuration] = useState();
   const formattedDuration = duration ? formatDuration(duration) : undefined;
@@ -32,7 +32,7 @@ export const VideoAssetCard = ({ name, extension, url, mime }) => {
   return (
     <Card>
       <CardHeader>
-        <CardCheckbox value />
+        {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
         <CardAction position="end">
           <IconButton
             label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
@@ -59,9 +59,16 @@ export const VideoAssetCard = ({ name, extension, url, mime }) => {
   );
 };
 
+VideoAssetCard.defaultProps = {
+  onSelect: undefined,
+  selected: false,
+};
+
 VideoAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   mime: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  onSelect: PropTypes.func,
   url: PropTypes.string.isRequired,
+  selected: PropTypes.bool,
 };

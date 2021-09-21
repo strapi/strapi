@@ -14,7 +14,7 @@ jest.mock('react-intl', () => ({
 }));
 
 describe('FromComputerForm', () => {
-  it('snapshots the component with 4 URLs: 3 valid and one in failure', async () => {
+  it('snapshots the component', async () => {
     const { container } = renderTL(
       <ThemeProvider theme={lightTheme}>
         <FromComputerForm onClose={jest.fn()} onAddAssets={jest.fn()} />
