@@ -1,54 +1,42 @@
 import axios from 'axios';
+import { useCallback, useRef } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
 import { axiosInstance } from '../utils';
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-const uploadAssets = async cancellableAssets => {
-  const requests = cancellableAssets.map(({ rawFile, cancelToken }) => {
-    const formData = new FormData();
+const uploadAsset = (file, cancelToken) => {
+  console.log('lol', cancelToken);
+  const formData = new FormData();
 
-    formData.append('files', rawFile);
-    formData.append('fileInfo', JSON.stringify(rawFile));
+  formData.append('files', file);
+  formData.append('fileInfo', JSON.stringify(file));
 
-    return axiosInstance({
-      method: 'post',
-      url: endpoint,
-      cancelToken,
-      headers: {},
-      data: formData,
-    });
-  });
-
-  return Promise.allSettled(requests);
+  return axiosInstance({
+    method: 'post',
+    url: endpoint,
+    headers: {},
+    data: formData,
+    cancelToken: cancelToken.token,
+  }).then((res) => res.data);
 };
 
-export const useUpload = (assets, onSuccess) => {
+export const useUpload = () => {
   const queryClient = useQueryClient();
-  const cancellableAssets = assets.map(asset => ({
-    ...asset,
-    cancelToken: axios.CancelToken.source().token,
-  }));
+  const tokenRef = useRef(axios.CancelToken.source());
 
-  const mutation = useMutation(uploadAssets, {
-    onSuccess: res => {
-      const assets = res
-        .map(assetResponse => assetResponse.value.data)
-        .reduce((acc, curr) => acc.concat(curr), []);
+  const mutationRef = useRef(
+    useMutation((asset) => uploadAsset(asset, tokenRef.current), {
+      onSuccess: (assets) => {
+        // Coupled with the cache of useAssets
+        queryClient.setQueryData('assets', (cachedAssets) => cachedAssets.concat(assets));
+      },
+    })
+  );
 
-      // Coupled with the cache of useAssets
-      queryClient.setQueryData('assets', cachedAssets => cachedAssets.concat(assets));
+  const upload = useCallback((asset) => mutationRef.current.mutate(asset), []);
+  const cancel = useCallback(() => tokenRef.current.cancel(), []);
 
-      onSuccess();
-    },
-  });
-
-  const cancel = index => {
-    cancellableAssets[index].cancelToken.cancel('Operation canceled by the user.');
-  };
-
-  const upload = () => mutation.mutate(cancellableAssets);
-
-  return { upload, cancel, isError: mutation.isError, isLoading: mutation.isLoading };
+  return { upload, cancel, ...mutationRef.current };
 };

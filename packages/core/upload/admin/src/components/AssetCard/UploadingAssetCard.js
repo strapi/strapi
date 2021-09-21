@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import {
@@ -18,6 +18,7 @@ import { ProgressBar } from '@strapi/parts/ProgressBar';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 import { AssetType } from '../../constants';
+import { useUpload } from '../../hooks/useUpload';
 
 const Extension = styled.span`
   text-transform: uppercase;
@@ -25,7 +26,7 @@ const Extension = styled.span`
 
 const BoxWrapper = styled(Row)`
   // constant define in the DS, override for this specific case
-  height: 164px;
+  height: 88px;
   width: 100%;
   flex-direction: column;
 `;
@@ -46,7 +47,8 @@ const CancelButton = styled.button`
   }
 `;
 
-export const UploadingAssetCard = ({ name, extension, assetType }) => {
+export const UploadingAssetCard = ({ name, extension, assetType, file }) => {
+  const { upload, cancel } = useUpload();
   const { formatMessage } = useIntl();
 
   let badgeContent;
@@ -68,6 +70,10 @@ export const UploadingAssetCard = ({ name, extension, assetType }) => {
     });
   }
 
+  useEffect(() => {
+    upload(file);
+  }, [upload, file]);
+
   return (
     <Card>
       <CardHeader>
@@ -78,7 +84,7 @@ export const UploadingAssetCard = ({ name, extension, assetType }) => {
             </ProgressBar>
           </Box>
 
-          <CancelButton>
+          <CancelButton type="button" onClick={cancel}>
             <Text small as="span" textColor="neutral200">
               {formatMessage({ id: 'app.components.Button.cancel', defaultMessage: 'Cancel' })}
             </Text>
@@ -105,4 +111,5 @@ UploadingAssetCard.propTypes = {
   assetType: PropTypes.oneOf(Object.values(AssetType)).isRequired,
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  file: PropTypes.instanceOf(File).isRequired,
 };
