@@ -5,15 +5,19 @@
  */
 
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import cloneDeep from 'lodash/cloneDeep';
+import { formatISO } from 'date-fns';
+import { DatePicker } from '@strapi/parts/DatePicker';
 import { NumberInput } from '@strapi/parts/NumberInput';
 import { Select, Option } from '@strapi/parts/Select';
 import { Textarea } from '@strapi/parts/Textarea';
 import { TextInput } from '@strapi/parts/TextInput';
+import { TimePicker } from '@strapi/parts/TimePicker';
 import { ToggleInput } from '@strapi/parts/ToggleInput';
 import Hide from '@strapi/icons/Hide';
 import Show from '@strapi/icons/Show';
-import PropTypes from 'prop-types';
 
 const GenericInput = ({
   autoComplete,
@@ -99,6 +103,29 @@ const GenericInput = ({
           onChange={e => {
             onChange({ target: { name, value: e.target.checked } });
           }}
+        />
+      );
+    }
+    case 'date': {
+      return (
+        <DatePicker
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={date => {
+            const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
+
+            onChange({ target: { name, value: formattedDate, type } });
+          }}
+          onClear={() => onChange({ target: { name, value: '', type } })}
+          placeholder={formattedPlaceholder}
+          selectedDate={value ? new Date(value) : null}
+          selectedDateLabel={formattedDate => `Date picker, current is ${formattedDate}`}
         />
       );
     }
@@ -221,6 +248,39 @@ const GenericInput = ({
         >
           {value}
         </Textarea>
+      );
+    }
+    case 'time': {
+      let time = value;
+
+      // The backend send a value which has the following format: '00:45:00.000'
+      // or the time picker only supports hours & minutes so we need to mutate the value
+      if (value && value.split(':').length > 2) {
+        time = time.split(':');
+        time.pop();
+        time = time.join(':');
+      }
+
+      return (
+        <TimePicker
+          clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
+          disabled={disabled}
+          error={errorMessage}
+          label={label}
+          labelAction={labelAction}
+          id={name}
+          hint={hint}
+          name={name}
+          onChange={time => {
+            onChange({ target: { name, value: `${time}`, type } });
+          }}
+          onClear={() => {
+            onChange({ target: { name, value: null, type } });
+          }}
+          placeholder={formattedPlaceholder}
+          step={step}
+          value={time}
+        />
       );
     }
     default: {
