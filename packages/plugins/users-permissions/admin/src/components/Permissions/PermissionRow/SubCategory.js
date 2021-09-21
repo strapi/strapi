@@ -2,20 +2,16 @@ import React, { useCallback, useMemo } from 'react';
 import { get } from 'lodash';
 import styled from 'styled-components';
 import PropTypes from 'prop-types';
-import { Flex, Padded, Text, Checkbox } from '@buffetjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TableLabel, Box, Row, Checkbox, Grid, GridItem } from '@strapi/parts';
+import CogIcon from '@strapi/icons/Cog';
 import { useIntl } from 'react-intl';
-import CheckboxWrapper from '../CheckboxWrapper';
-import BaselineAlignment from '../BaselineAlignment';
-import SubCategoryWrapper from './SubCategoryWrapper';
-import { useUsersPermissions } from '../../../../contexts/UsersPermissionsContext';
-import PolicyWrapper from './PolicyWrapper';
+import CheckboxWrapper from './CheckboxWrapper';
+import { useUsersPermissions } from '../../../contexts/UsersPermissionsContext';
 
 const Border = styled.div`
   flex: 1;
   align-self: center;
-  border-top: 1px solid #f6f6f6;
-  padding: 0px 10px;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral150};
 `;
 
 const SubCategory = ({ subCategory }) => {
@@ -58,54 +54,53 @@ const SubCategory = ({ subCategory }) => {
   );
 
   return (
-    <SubCategoryWrapper>
-      <Flex justifyContent="space-between" alignItems="center">
-        <Padded right size="sm">
-          <Text
-            lineHeight="18px"
-            color="#919bae"
-            fontWeight="bold"
-            fontSize="xs"
-            textTransform="uppercase"
-          >
-            {subCategory.label}
-          </Text>
-        </Padded>
+    <Box>
+      <Row justifyContent="space-between" alignItems="center">
+        <Box paddingRight={4}>
+          <TableLabel textColor="neutral600">{subCategory.label}</TableLabel>
+        </Box>
         <Border />
-        <Padded left size="sm">
-          <BaselineAlignment />
+        <Box paddingLeft={4}>
           <Checkbox
             name={subCategory.name}
-            message={formatMessage({ id: 'app.utils.select-all' })}
-            onChange={handleChangeSelectAll}
-            someChecked={hasSomeActionsSelected}
             value={hasAllActionsSelected}
-          />
-        </Padded>
-      </Flex>
-      <BaselineAlignment />
-      <Padded top size="xs">
-        <Flex flexWrap="wrap">
+            onValueChange={value =>
+              handleChangeSelectAll({ target: { name: subCategory.name, value } })}
+            indeterminate={hasSomeActionsSelected}
+          >
+            {formatMessage({ id: 'app.utils.select-all', defaultMessage: 'Select all' })}
+          </Checkbox>
+        </Box>
+      </Row>
+      <Row paddingTop={6} paddingBottom={6}>
+        <Grid gap={2} style={{ flex: 1 }}>
           {subCategory.actions.map(action => {
             const name = `${action.name}.enabled`;
 
             return (
-              <CheckboxWrapper isActive={isActionSelected(action.name)} key={action.name}>
-                <Checkbox
-                  value={get(modifiedData, name, false)}
-                  name={name}
-                  message={action.label}
-                  onChange={onChange}
-                />
-                <PolicyWrapper onClick={() => onSelectedAction(action.name)}>
-                  <FontAwesomeIcon icon="cog" />
-                </PolicyWrapper>
-              </CheckboxWrapper>
+              <GridItem col={6} key={action.name}>
+                <CheckboxWrapper isActive={isActionSelected(action.name)} padding={2} hasRadius>
+                  <Checkbox
+                    value={get(modifiedData, name, false)}
+                    name={name}
+                    onValueChange={value => onChange({ target: { name, value } })}
+                  >
+                    {action.label}
+                  </Checkbox>
+                  <button
+                    type="button"
+                    onClick={() => onSelectedAction(action.name)}
+                    style={{ display: 'inline-flex', alignItems: 'center' }}
+                  >
+                    <CogIcon />
+                  </button>
+                </CheckboxWrapper>
+              </GridItem>
             );
           })}
-        </Flex>
-      </Padded>
-    </SubCategoryWrapper>
+        </Grid>
+      </Row>
+    </Box>
   );
 };
 
