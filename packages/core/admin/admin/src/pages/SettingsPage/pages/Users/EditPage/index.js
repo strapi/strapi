@@ -76,6 +76,11 @@ const EditPage = ({ canUpdate }) => {
     try {
       const data = await putUser(id, omit(body, 'confirmPassword'));
 
+      toggleNotification({
+        type: 'success',
+        message: formatMessage({ id: 'notification.success.saved', defaultMessage: 'Saved' }),
+      });
+
       const userInfos = auth.getUserInfo();
 
       // The user is updating himself
