@@ -28,10 +28,9 @@ const getDefaultState = () => ({
 
 const createExtension = ({ strapi } = {}) => {
   const configs = [];
-  const shadowCRUDManager = createShadowCRUDManager();
 
   return {
-    shadowCRUD: shadowCRUDManager,
+    shadowCRUD: createShadowCRUDManager({ strapi }),
 
     /**
      * Register a new extension configuration

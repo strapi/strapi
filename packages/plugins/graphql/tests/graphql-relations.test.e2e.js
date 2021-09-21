@@ -1,7 +1,7 @@
 'use strict';
 
 // Helpers.
-const _ = require('lodash');
+const { pick } = require('lodash/fp');
 const { createTestBuilder } = require('../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
@@ -11,8 +11,8 @@ let strapi;
 let rq;
 let graphqlQuery;
 
-// utils
-const selectFields = doc => _.pick(doc, ['id', 'name', 'color']);
+// Utils
+const selectFields = pick(['name', 'color']);
 
 const rgbColorComponent = {
   attributes: {
@@ -142,77 +142,10 @@ describe('Test Graphql Relations API End to End', () => {
     test.each(labelsPayload)('Create label %o', async label => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation createLabel($input: createLabelInput) {
-            createLabel(input: $input) {
-              label {
-                name
-                color {
-                  name
-                  red
-                  green
-                  blue
-                }
-              }
-            }
-          }
-        `,
-        variables: {
-          input: {
-            data: label,
-          },
-        },
-      });
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body).toEqual({
-        data: {
-          createLabel: {
-            label,
-          },
-        },
-      });
-    });
-
-    test('List labels', async () => {
-      const res = await graphqlQuery({
-        query: /* GraphQL */ `
-          {
-            labels {
-              id
-              name
-              color {
-                name
-                red
-                green
-                blue
-              }
-            }
-          }
-        `,
-      });
-
-      const { body } = res;
-
-      expect(res.statusCode).toBe(200);
-      expect(body).toMatchObject({
-        data: {
-          labels: labelsPayload,
-        },
-      });
-
-      // assign for later use
-      data.labels = data.labels.concat(res.body.data.labels);
-    });
-
-    test.each(documentsPayload)('Create document linked to every labels %o', async document => {
-      const res = await graphqlQuery({
-        query: /* GraphQL */ `
-          mutation createDocument($input: createDocumentInput) {
-            createDocument(input: $input) {
-              document {
-                name
-                labels {
-                  id
+          mutation createLabel($data: LabelInput!) {
+            createLabel(data: $data) {
+              data {
+                attributes {
                   name
                   color {
                     name
@@ -226,11 +159,91 @@ describe('Test Graphql Relations API End to End', () => {
           }
         `,
         variables: {
-          input: {
+          data: label,
+        },
+      });
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body).toEqual({
+        data: {
+          createLabel: {
             data: {
-              ...document,
-              labels: data.labels.map(t => t.id),
+              attributes: label,
             },
+          },
+        },
+      });
+    });
+
+    test('List labels', async () => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          {
+            labels {
+              data {
+                id
+                attributes {
+                  name
+                  color {
+                    name
+                    red
+                    green
+                    blue
+                  }
+                }
+              }
+            }
+          }
+        `,
+      });
+
+      const { body } = res;
+
+      expect(res.statusCode).toBe(200);
+      expect(body).toMatchObject({
+        data: {
+          labels: {
+            data: labelsPayload.map(label => ({ id: expect.any(String), attributes: label })),
+          },
+        },
+      });
+
+      // assign for later use
+      data.labels = data.labels.concat(res.body.data.labels.data);
+    });
+
+    test.each(documentsPayload)('Create document linked to every labels %o', async document => {
+      const res = await graphqlQuery({
+        query: /* GraphQL */ `
+          mutation createDocument($data: DocumentInput!) {
+            createDocument(data: $data) {
+              data {
+                id
+                attributes {
+                  name
+                  labels {
+                    data {
+                      id
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `,
+        variables: {
+          data: {
+            ...document,
+            labels: data.labels.map(t => t.id),
           },
         },
       });
@@ -242,13 +255,20 @@ describe('Test Graphql Relations API End to End', () => {
       expect(body).toMatchObject({
         data: {
           createDocument: {
-            document: {
-              ...selectFields(document),
-              labels: expect.arrayContaining(data.labels.map(selectFields)),
+            data: {
+              id: expect.any(String),
+              attributes: {
+                ...selectFields(document),
+                labels: {
+                  data: expect.arrayContaining(data.labels),
+                },
+              },
             },
           },
         },
       });
+
+      data.documents.push(body.data.createDocument.data);
     });
 
     test('List documents with labels', async () => {
@@ -256,16 +276,24 @@ describe('Test Graphql Relations API End to End', () => {
         query: /* GraphQL */ `
           {
             documents {
-              id
-              name
-              labels {
+              data {
                 id
-                name
-                color {
+                attributes {
                   name
-                  red
-                  green
-                  blue
+                  labels {
+                    data {
+                      id
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -278,17 +306,14 @@ describe('Test Graphql Relations API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          documents: expect.arrayContaining(
-            data.documents.map(document => ({
-              ...selectFields(document),
-              labels: expect.arrayContaining(data.labels.map(selectFields)),
-            }))
-          ),
+          documents: {
+            data: expect.arrayContaining(data.documents),
+          },
         },
       });
 
       // assign for later use
-      data.documents = res.body.data.documents;
+      data.documents = res.body.data.documents.data;
     });
 
     test('List Labels with documents', async () => {
@@ -296,17 +321,25 @@ describe('Test Graphql Relations API End to End', () => {
         query: /* GraphQL */ `
           {
             labels {
-              id
-              name
-              color {
-                name
-                red
-                green
-                blue
-              }
-              documents {
+              data {
                 id
-                name
+                attributes {
+                  name
+                  color {
+                    name
+                    red
+                    green
+                    blue
+                  }
+                  documents {
+                    data {
+                      id
+                      attributes {
+                        name
+                      }
+                    }
+                  }
+                }
               }
             }
           }
@@ -318,34 +351,54 @@ describe('Test Graphql Relations API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          labels: expect.arrayContaining(
-            data.labels.map(label => ({
-              ...selectFields(label),
-              documents: expect.arrayContaining(data.documents.map(selectFields)),
-            }))
-          ),
+          labels: {
+            data: expect.arrayContaining(
+              data.labels.map(label => ({
+                id: label.id,
+                attributes: {
+                  ...label.attributes,
+                  documents: {
+                    data: expect.arrayContaining(
+                      data.documents.map(document => ({
+                        id: document.id,
+                        attributes: selectFields(document.attributes),
+                      }))
+                    ),
+                  },
+                },
+              }))
+            ),
+          },
         },
       });
 
       // assign for later use
-      data.labels = res.body.data.labels;
+      data.labels = res.body.data.labels.data;
     });
 
     test('Deep query', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
-            documents(where: { labels: { name_contains: "label 1" } }) {
-              id
-              name
-              labels {
+            documents(filters: { labels: { name: { contains: "label 1" } } }) {
+              data {
                 id
-                name
-                color {
+                attributes {
                   name
-                  red
-                  green
-                  blue
+                  labels {
+                    data {
+                      id
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -356,28 +409,39 @@ describe('Test Graphql Relations API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         data: {
-          documents: expect.arrayContaining(data.documents),
+          documents: {
+            data: expect.arrayContaining(data.documents),
+          },
         },
       });
     });
 
     test('Update Document relations removes correctly a relation', async () => {
+      const document = data.documents[0];
+      const labels = [data.labels[0]];
+
       // if I remove a label from an document is it working
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation updateDocument($input: updateDocumentInput) {
-            updateDocument(input: $input) {
-              document {
+          mutation updateDocument($id: ID!, $data: DocumentInput!) {
+            updateDocument(id: $id, data: $data) {
+              data {
                 id
-                name
-                labels {
-                  id
+                attributes {
                   name
-                  color {
-                    name
-                    red
-                    green
-                    blue
+                  labels {
+                    data {
+                      id
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
                   }
                 }
               }
@@ -385,24 +449,30 @@ describe('Test Graphql Relations API End to End', () => {
           }
         `,
         variables: {
-          input: {
-            where: {
-              id: data.documents[0].id,
-            },
-            data: {
-              labels: [data.labels[0].id],
-            },
+          id: document.id,
+          data: {
+            labels: labels.map(label => label.id),
           },
         },
       });
 
-      expect(res.statusCode).toBe(200);
       expect(res.body).toMatchObject({
         data: {
           updateDocument: {
-            document: {
-              ...selectFields(data.documents[0]),
-              labels: [selectFields(data.labels[0])],
+            data: {
+              id: document.id,
+              attributes: {
+                ...selectFields(document.attributes),
+                labels: {
+                  data: labels.map(label => ({
+                    id: label.id,
+                    attributes: {
+                      ...selectFields(label.attributes),
+                      color: null,
+                    },
+                  })),
+                },
+              },
             },
           },
         },
@@ -413,27 +483,25 @@ describe('Test Graphql Relations API End to End', () => {
       for (let label of data.labels) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
-            mutation deleteLabel($input: deleteLabelInput) {
-              deleteLabel(input: $input) {
-                label {
+            mutation deleteLabel($id: ID!) {
+              deleteLabel(id: $id) {
+                data {
                   id
-                  name
-                  color {
+                  attributes {
                     name
-                    red
-                    green
-                    blue
+                    color {
+                      name
+                      red
+                      green
+                      blue
+                    }
                   }
                 }
               }
             }
           `,
           variables: {
-            input: {
-              where: {
-                id: label.id,
-              },
-            },
+            id: label.id,
           },
         });
 
@@ -441,8 +509,12 @@ describe('Test Graphql Relations API End to End', () => {
         expect(res.body).toMatchObject({
           data: {
             deleteLabel: {
-              label: {
+              data: {
                 id: label.id,
+                attributes: {
+                  ...selectFields(label.attributes),
+                  color: null,
+                },
               },
             },
           },
@@ -453,16 +525,24 @@ describe('Test Graphql Relations API End to End', () => {
         query: /* GraphQL */ `
           {
             documents {
-              id
-              name
-              labels {
+              data {
                 id
-                name
-                color {
+                attributes {
                   name
-                  red
-                  green
-                  blue
+                  labels {
+                    data {
+                      id
+                      attributes {
+                        name
+                        color {
+                          name
+                          red
+                          green
+                          blue
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -475,12 +555,17 @@ describe('Test Graphql Relations API End to End', () => {
       expect(res.statusCode).toBe(200);
       expect(body).toMatchObject({
         data: {
-          documents: expect.arrayContaining(
-            data.documents.map(document => ({
-              ...selectFields(document),
-              labels: [],
-            }))
-          ),
+          documents: {
+            data: expect.arrayContaining(
+              data.documents.map(document => ({
+                id: document.id,
+                attributes: {
+                  ...selectFields(document.attributes),
+                  labels: { data: [] },
+                },
+              }))
+            ),
+          },
         },
       });
     });
@@ -489,21 +574,32 @@ describe('Test Graphql Relations API End to End', () => {
       for (let document of data.documents) {
         const res = await graphqlQuery({
           query: /* GraphQL */ `
-            mutation deleteDocument($input: deleteDocumentInput) {
-              deleteDocument(input: $input) {
-                document {
+            mutation deleteDocument($id: ID!) {
+              deleteDocument(id: $id) {
+                data {
                   id
-                  name
+                  attributes {
+                    name
+                    labels {
+                      data {
+                        id
+                        attributes {
+                          name
+                          color {
+                            name
+                            red
+                            green
+                          }
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
           `,
           variables: {
-            input: {
-              where: {
-                id: document.id,
-              },
-            },
+            id: document.id,
           },
         });
 
@@ -511,8 +607,12 @@ describe('Test Graphql Relations API End to End', () => {
         expect(res.body).toMatchObject({
           data: {
             deleteDocument: {
-              document: {
+              data: {
                 id: document.id,
+                attributes: {
+                  ...selectFields(document.attributes),
+                  labels: { data: [] },
+                },
               },
             },
           },
@@ -525,21 +625,22 @@ describe('Test Graphql Relations API End to End', () => {
         name: 'Chuck Norris',
         privateName: 'Jean-Eude',
       };
+
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation createPerson($input: createPersonInput) {
-            createPerson(input: $input) {
-              person {
+          mutation createPerson($data: PersonInput!) {
+            createPerson(data: $data) {
+              data {
                 id
-                name
+                attributes {
+                  name
+                }
               }
             }
           }
         `,
         variables: {
-          input: {
-            data: person,
-          },
+          data: person,
         },
       });
 
@@ -547,14 +648,17 @@ describe('Test Graphql Relations API End to End', () => {
       expect(res.body).toEqual({
         data: {
           createPerson: {
-            person: {
+            data: {
               id: expect.anything(),
-              name: person.name,
+              attributes: {
+                name: person.name,
+              },
             },
           },
         },
       });
-      data.people.push(res.body.data.createPerson.person);
+
+      data.people.push(res.body.data.createPerson.data);
     });
 
     test("Can't list a private field", async () => {
@@ -562,8 +666,12 @@ describe('Test Graphql Relations API End to End', () => {
         query: /* GraphQL */ `
           {
             people {
-              name
-              privateName
+              data {
+                attributes {
+                  name
+                  privateName
+                }
+              }
             }
           }
         `,
@@ -584,27 +692,30 @@ describe('Test Graphql Relations API End to End', () => {
         name: 'Peugeot 508',
         person: data.people[0].id,
       };
+
       const res = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation createCar($input: createCarInput) {
-            createCar(input: $input) {
-              car {
+          mutation createCar($data: CarInput!) {
+            createCar(data: $data) {
+              data {
                 id
-                name
-                person {
-                  id
+                attributes {
                   name
+                  person {
+                    data {
+                      id
+                      attributes {
+                        name
+                      }
+                    }
+                  }
                 }
               }
             }
           }
         `,
         variables: {
-          input: {
-            data: {
-              ...car,
-            },
-          },
+          data: car,
         },
       });
 
@@ -612,16 +723,20 @@ describe('Test Graphql Relations API End to End', () => {
       expect(res.body).toMatchObject({
         data: {
           createCar: {
-            car: {
+            data: {
               id: expect.anything(),
-              name: car.name,
-              person: data.people[0],
+              attributes: {
+                name: car.name,
+                person: {
+                  data: data.people[0],
+                },
+              },
             },
           },
         },
       });
 
-      data.cars.push({ id: res.body.data.createCar.car.id });
+      data.cars.push({ id: res.body.data.createCar.data.id });
     });
 
     test("Can't list a private oneToMany relation", async () => {
@@ -629,8 +744,12 @@ describe('Test Graphql Relations API End to End', () => {
         query: /* GraphQL */ `
           {
             people {
-              name
-              privateCars
+              data {
+                attributes {
+                  name
+                  privateCars
+                }
+              }
             }
           }
         `,
@@ -654,33 +773,34 @@ describe('Test Graphql Relations API End to End', () => {
 
       const mutationRes = await graphqlQuery({
         query: /* GraphQL */ `
-          mutation updatePerson($input: updatePersonInput) {
-            updatePerson(input: $input) {
-              person {
+          mutation updatePerson($id: ID!, $data: PersonInput!) {
+            updatePerson(id: $id, data: $data) {
+              data {
                 id
               }
             }
           }
         `,
         variables: {
-          input: {
-            where: {
-              id: data.people[0].id,
-            },
-            data: {
-              ...newPerson,
-            },
-          },
+          id: data.people[0].id,
+          data: newPerson,
         },
       });
+
       expect(mutationRes.statusCode).toBe(200);
 
       const queryRes = await graphqlQuery({
         query: /* GraphQL */ `
           query($id: ID!) {
             car(id: $id) {
-              person {
-                id
+              data {
+                attributes {
+                  person {
+                    data {
+                      id
+                    }
+                  }
+                }
               }
             }
           }
@@ -689,11 +809,18 @@ describe('Test Graphql Relations API End to End', () => {
           id: data.cars[0].id,
         },
       });
+
       expect(queryRes.statusCode).toBe(200);
       expect(queryRes.body).toEqual({
         data: {
           car: {
-            person: null,
+            data: {
+              attributes: {
+                person: {
+                  data: null,
+                },
+              },
+            },
           },
         },
       });

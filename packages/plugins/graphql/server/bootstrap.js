@@ -71,10 +71,12 @@ module.exports = async strapi => {
   }
 
   // Link the Apollo server & the Strapi app
+  const path = config('endpoint', '/graphql');
+
   strapi.server.routes([
     {
       method: 'ALL',
-      path: config('endpoint', '/graphql'),
+      path,
       handler: [
         (ctx, next) => {
           ctx.state.route = {
@@ -88,7 +90,7 @@ module.exports = async strapi => {
         },
 
         // Apollo Server
-        server.getMiddleware({ path: config('endpoint', '/graphql') }),
+        server.getMiddleware({ path }),
       ],
       config: {
         auth: false,

@@ -124,7 +124,7 @@ module.exports = ({ strapi }) => {
       const extension = getService('extension');
 
       const registerAuthConfig = (action, auth) => {
-        return extension.use(() => ({ resolversConfig: { [action]: { auth } } }));
+        return extension.use({ resolversConfig: { [action]: { auth } } });
       };
 
       const isActionEnabled = action => {
