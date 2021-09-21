@@ -50,7 +50,6 @@ const toStrapiType = column => {
     case 'time': {
       return { type: 'time', args: [{ precision: 3 }] };
     }
-    // TODO: enum
     default: {
       return { type: 'specificType', args: [column.data_type] };
     }
@@ -107,18 +106,9 @@ class SqliteSchemaInspector {
   }
 
   async getIndexes(tableName) {
-    // const cols = await this.db.connection.raw(SQL_QUERIES.TABLE_INFO, [tableName]);
     const indexes = await this.db.connection.raw(SQL_QUERIES.INDEX_LIST, [tableName]);
 
     const ret = [];
-
-    // for (const col of cols.filter(c => c.pk)) {
-    //   ret.push({
-    //     columns: [col.name],
-    //     type: 'primary',
-    //   });
-    // }
-    // merge pk together
 
     for (const index of indexes.filter(index => !index.name.startsWith('sqlite_'))) {
       const res = await this.db.connection.raw(SQL_QUERIES.INDEX_INFO, [index.name]);
@@ -126,7 +116,6 @@ class SqliteSchemaInspector {
       ret.push({
         columns: res.map(row => row.name),
         name: index.name,
-        // TODO: find other index types
         type: index.unique ? 'unique' : null,
       });
     }
