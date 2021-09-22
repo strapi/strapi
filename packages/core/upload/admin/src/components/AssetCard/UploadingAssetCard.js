@@ -26,7 +26,6 @@ const Extension = styled.span`
 `;
 
 const BoxWrapper = styled(Row)`
-  // constant define in the DS, override for this specific case
   height: 88px;
   width: 100%;
   flex-direction: column;
