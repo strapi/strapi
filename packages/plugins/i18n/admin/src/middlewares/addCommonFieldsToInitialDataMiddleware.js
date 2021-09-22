@@ -55,8 +55,8 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
         'publishedAt',
         'id',
         '_id',
-        'updated_at',
-        'created_at',
+        'updatedAt',
+        'createdAt',
       ];
       const cleanedMerged = contentManagementUtilRemoveFieldsFromData(
         merged,

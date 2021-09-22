@@ -7,12 +7,12 @@ describe('ADMIN | utils | getAttributesToDisplay', () => {
         id: { type: 'number' },
         title: { type: 'string' },
         description: { type: 'string' },
-        created_at: { type: 'timestamp' },
-        updated_at: { type: 'timestamp' },
+        createdAt: { type: 'timestamp' },
+        updatedAt: { type: 'timestamp' },
         publishedAt: { type: 'timestamp' },
       },
       options: {
-        timestamps: ['created_at', 'updated_at'],
+        timestamps: ['createdAt', 'updatedAt'],
       },
     };
     const actual = getAttributesToDisplay(contentType);

@@ -7,7 +7,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         address: 'test',
         addresseses: [],
         common: 'common',
-        created_at: '2021-03-17T15:34:05.866Z',
+        createdAt: '2021-03-17T15:34:05.866Z',
         created_by: {
           blocked: null,
           email: 'cyril@strapi.io',
@@ -31,7 +31,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         ],
         name: 'name',
         publishedAt: null,
-        updated_at: '2021-03-17T15:34:18.958Z',
+        updatedAt: '2021-03-17T15:34:18.958Z',
         updated_by: {
           blocked: null,
           email: 'cyril@strapi.io',
@@ -50,10 +50,10 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           address: { type: 'relation' },
           addresseses: { type: 'relation' },
           common: { pluginOptions: { i18n: { localized: true } }, type: 'text' },
-          created_at: { type: 'timestamp' },
+          createdAt: { type: 'timestamp' },
           id: { type: 'integer' },
           name: { pluginOptions: { i18n: { localized: true } } },
-          updated_at: { type: 'timestamp' },
+          updatedAt: { type: 'timestamp' },
         },
       };
       const initLocalizations = [

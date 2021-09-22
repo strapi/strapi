@@ -18,7 +18,7 @@ describe('HELPER PLUGIN | utils | generateSearchFromFilters', () => {
           value: '1',
         },
         {
-          name: 'created_at',
+          name: 'createdAt',
           filter: '_lt',
           value: '2019-08-01T00:00:00Z',
         },
@@ -46,7 +46,7 @@ describe('HELPER PLUGIN | utils | generateSearchFromFilters', () => {
     };
 
     const expected =
-      '_limit=10&sort=id:ASC&_page=2&bool=true&big_number_ne=1&created_at_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
+      '_limit=10&sort=id:ASC&_page=2&bool=true&big_number_ne=1&createdAt_lt=2019-08-01T00:00:00Z&date_lte=2019-08-02T00:00:00Z&decimal_number_gt=2&enum_ne=noon&float_number_gte=3';
     const encoded = expected
       .split('&')
       .map(pair => {

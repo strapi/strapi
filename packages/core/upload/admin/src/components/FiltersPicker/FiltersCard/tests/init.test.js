@@ -3,16 +3,16 @@ import init from '../init';
 describe('UPLOAD | components | FiltersPicker | FilersCard | init', () => {
   it('should set the initialState correctly with the retrieved timestamps', () => {
     const state = {
-      name: 'created_at',
+      name: 'createdAt',
       filter: '=',
       value: 'test',
       filtersForm: {
-        created_at: {
+        createdAt: {
           type: 'datetime',
           defaultFilter: '=',
           defaultValue: 'test1',
         },
-        updated_at: {
+        updatedAt: {
           type: 'datetime',
           defaultFilter: '=',
           defaultValue: 'test2',

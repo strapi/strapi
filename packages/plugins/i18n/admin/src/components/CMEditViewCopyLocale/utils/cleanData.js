@@ -19,8 +19,8 @@ const cleanData = (data, { contentType, components }, initialLocalizations) => {
     'publishedAt',
     'id',
     '_id',
-    'updated_at',
-    'created_at',
+    'updatedAt',
+    'createdAt',
   ];
 
   const cleanedClonedData = contentManagementUtilRemoveFieldsFromData(

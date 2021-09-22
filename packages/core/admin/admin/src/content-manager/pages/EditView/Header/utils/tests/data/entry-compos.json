@@ -12,8 +12,8 @@
   "description": "test test test test ",
   "created_by": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
   "updated_by": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
-  "created_at": "2020-09-01T14:47:53.257Z",
-  "updated_at": "2020-09-01T14:47:53.627Z",
+  "createdAt": "2020-09-01T14:47:53.257Z",
+  "updatedAt": "2020-09-01T14:47:53.627Z",
   "closing_period": {
     "id": 1,
     "label": "closing labe",
@@ -88,8 +88,8 @@
         "provider_metadata": null,
         "created_by": 1,
         "updated_by": 1,
-        "created_at": "2020-09-01T14:35:21.346Z",
-        "updated_at": "2020-09-01T14:35:21.358Z"
+        "createdAt": "2020-09-01T14:35:21.346Z",
+        "updatedAt": "2020-09-01T14:35:21.358Z"
       },
       "categories": [
         {
@@ -98,8 +98,8 @@
           "publishedAt": null,
           "created_by": 1,
           "updated_by": 1,
-          "created_at": "2020-09-01T08:37:15.012Z",
-          "updated_at": "2020-09-01T12:37:33.249Z"
+          "createdAt": "2020-09-01T08:37:15.012Z",
+          "updatedAt": "2020-09-01T12:37:33.249Z"
         },
         {
           "id": 2,
@@ -107,8 +107,8 @@
           "publishedAt": "2020-09-01T13:07:04.235Z",
           "created_by": 1,
           "updated_by": 1,
-          "created_at": "2020-09-01T12:05:46.798Z",
-          "updated_at": "2020-09-01T13:07:04.253Z"
+          "createdAt": "2020-09-01T12:05:46.798Z",
+          "updatedAt": "2020-09-01T13:07:04.253Z"
         },
         {
           "id": 3,
@@ -116,8 +116,8 @@
           "publishedAt": null,
           "created_by": 1,
           "updated_by": 1,
-          "created_at": "2020-09-01T12:05:51.438Z",
-          "updated_at": "2020-09-01T12:05:51.444Z"
+          "createdAt": "2020-09-01T12:05:51.438Z",
+          "updatedAt": "2020-09-01T12:05:51.444Z"
         }
       ]
     },
@@ -184,8 +184,8 @@
       "provider_metadata": null,
       "created_by": 1,
       "updated_by": 1,
-      "created_at": "2020-09-01T14:35:38.706Z",
-      "updated_at": "2020-09-01T14:35:38.715Z"
+      "createdAt": "2020-09-01T14:35:38.706Z",
+      "updatedAt": "2020-09-01T14:35:38.715Z"
     }
   },
   "services": [
@@ -256,8 +256,8 @@
         "provider_metadata": null,
         "created_by": 1,
         "updated_by": 1,
-        "created_at": "2020-09-01T14:35:38.706Z",
-        "updated_at": "2020-09-01T14:35:38.715Z"
+        "createdAt": "2020-09-01T14:35:38.706Z",
+        "updatedAt": "2020-09-01T14:35:38.715Z"
       }
     },
     {
@@ -327,8 +327,8 @@
         "provider_metadata": null,
         "created_by": 1,
         "updated_by": 1,
-        "created_at": "2020-09-01T14:35:21.346Z",
-        "updated_at": "2020-09-01T14:35:21.358Z"
+        "createdAt": "2020-09-01T14:35:21.346Z",
+        "updatedAt": "2020-09-01T14:35:21.358Z"
       }
     }
   ],
@@ -352,8 +352,8 @@
               "publishedAt": "2020-09-01T13:07:04.235Z",
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 1,
@@ -361,8 +361,8 @@
               "publishedAt": null,
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 3,
@@ -370,8 +370,8 @@
               "publishedAt": null,
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         },
@@ -389,8 +389,8 @@
               "publishedAt": null,
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 2,
@@ -398,8 +398,8 @@
               "publishedAt": "2020-09-01T13:07:04.235Z",
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 3,
@@ -407,8 +407,8 @@
               "publishedAt": null,
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         }
@@ -433,8 +433,8 @@
               "publishedAt": null,
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 2,
@@ -442,8 +442,8 @@
               "publishedAt": "2020-09-01T13:07:04.235Z",
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 3,
@@ -451,8 +451,8 @@
               "publishedAt": null,
               "created_by": 1,
               "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         }

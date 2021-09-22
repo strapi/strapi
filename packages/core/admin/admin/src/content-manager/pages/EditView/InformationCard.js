@@ -18,7 +18,7 @@ const InformationCard = () => {
   const { formatMessage } = useIntl();
 
   const updatedAtName = useMemo(
-    () => get(layout, ['options', 'timestamps'], ['created_at', 'updated_at'])[1],
+    () => get(layout, ['options', 'timestamps'], ['createdAt', 'updatedAt'])[1],
     [layout]
   );
 

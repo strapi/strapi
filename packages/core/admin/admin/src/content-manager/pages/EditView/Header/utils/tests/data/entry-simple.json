@@ -13,8 +13,8 @@
     "publishedAt": "2020-08-31T13:29:02.118Z",
     "created_by": 1,
     "updated_by": 1,
-    "created_at": "2020-08-31T12:35:46.553Z",
-    "updated_at": "2020-08-31T13:29:02.136Z",
+    "createdAt": "2020-08-31T12:35:46.553Z",
+    "updatedAt": "2020-08-31T13:29:02.136Z",
     "cover": null,
     "images": []
   },
@@ -28,13 +28,13 @@
     "restaurant": 1,
     "created_by": 1,
     "updated_by": 1,
-    "created_at": "2020-09-01T14:47:10.654Z",
-    "updated_at": "2020-09-01T14:47:53.568Z"
+    "createdAt": "2020-09-01T14:47:10.654Z",
+    "updatedAt": "2020-09-01T14:47:53.568Z"
   },
   "created_by": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
   "updated_by": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
-  "created_at": "2020-09-01T14:47:53.257Z",
-  "updated_at": "2020-09-01T14:47:53.627Z",
+  "createdAt": "2020-09-01T14:47:53.257Z",
+  "updatedAt": "2020-09-01T14:47:53.627Z",
 
   "categories": [
     {
@@ -43,8 +43,8 @@
       "publishedAt": null,
       "created_by": 1,
       "updated_by": 1,
-      "created_at": "2020-09-01T12:05:51.438Z",
-      "updated_at": "2020-09-01T12:05:51.444Z"
+      "createdAt": "2020-09-01T12:05:51.438Z",
+      "updatedAt": "2020-09-01T12:05:51.444Z"
     },
     {
       "id": 1,
@@ -52,8 +52,8 @@
       "publishedAt": null,
       "created_by": 1,
       "updated_by": 1,
-      "created_at": "2020-09-01T08:37:15.012Z",
-      "updated_at": "2020-09-01T12:37:33.249Z"
+      "createdAt": "2020-09-01T08:37:15.012Z",
+      "updatedAt": "2020-09-01T12:37:33.249Z"
     },
     {
       "id": 2,
@@ -61,8 +61,8 @@
       "publishedAt": "2020-09-01T13:07:04.235Z",
       "created_by": 1,
       "updated_by": 1,
-      "created_at": "2020-09-01T12:05:46.798Z",
-      "updated_at": "2020-09-01T13:07:04.253Z"
+      "createdAt": "2020-09-01T12:05:46.798Z",
+      "updatedAt": "2020-09-01T13:07:04.253Z"
     }
   ]
 }
