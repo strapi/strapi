@@ -11,7 +11,7 @@ export const WysiwygWrapper = styled(Box)`
 // NAV BUTTONS
 export const CustomIconButton = styled(IconButton)`
   padding: ${({ theme }) => theme.spaces[2]};
-  // Trick to prevent the outline from overflowing because of the general outline-offset
+  /* Trick to prevent the outline from overflowing because of the general outline-offset */
   outline-offset: -2px !important;
 
   svg {

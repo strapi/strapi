@@ -1,12 +1,23 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import CodeMirror from 'codemirror';
+import 'codemirror/addon/display/placeholder';
 import PreviewWysiwyg from '../PreviewWysiwyg';
 import EditorWrapper from './EditorWrapper';
 import { EditorAndPreviewWrapper } from './WysiwygStyles';
 import newlineAndIndentContinueMarkdownList from './utils/continueList';
 
-const Editor = ({ name, onChange, textareaRef, editorRef, isPreviewMode, value, error }) => {
+const Editor = ({
+  disabled,
+  editorRef,
+  error,
+  isPreviewMode,
+  name,
+  onChange,
+  placeholder,
+  textareaRef,
+  value,
+}) => {
   const initialValueRef = useRef(value);
   const onChangeRef = useRef(onChange);
 
@@ -30,15 +41,15 @@ const Editor = ({ name, onChange, textareaRef, editorRef, isPreviewMode, value, 
     editorRef.current.on('change', doc =>
       onChangeRef.current({ target: { name, value: doc.getValue(), type: 'wysiwyg' } })
     );
-  }, [editorRef, textareaRef, editorRef]);
+  }, [editorRef, textareaRef, name]);
 
   useEffect(() => {
-    if (isPreviewMode) {
+    if (isPreviewMode || disabled) {
       editorRef.current.setOption('readOnly', 'nocursor');
     } else {
       editorRef.current.setOption('readOnly', false);
     }
-  }, [isPreviewMode, editorRef]);
+  }, [disabled, isPreviewMode, editorRef]);
 
   useEffect(() => {
     if (error) {
@@ -47,12 +58,12 @@ const Editor = ({ name, onChange, textareaRef, editorRef, isPreviewMode, value, 
       // to replace with translation
       editorRef.current.setOption('screenReaderLabel', 'Editor');
     }
-  }, [error]);
+  }, [editorRef, error]);
 
   return (
     <EditorAndPreviewWrapper>
-      <EditorWrapper>
-        <textarea ref={textareaRef}></textarea>
+      <EditorWrapper disabled={disabled || isPreviewMode}>
+        <textarea ref={textareaRef} placeholder={placeholder} />
       </EditorWrapper>
       {isPreviewMode && <PreviewWysiwyg data={value} />}
     </EditorAndPreviewWrapper>
@@ -60,19 +71,22 @@ const Editor = ({ name, onChange, textareaRef, editorRef, isPreviewMode, value, 
 };
 
 Editor.defaultProps = {
-  onChange: () => {},
-  isPreviewMode: false,
-  value: '',
+  disabled: false,
   error: undefined,
+  placeholder: '',
+  value: '',
 };
 
 Editor.propTypes = {
-  onChange: PropTypes.func,
-  textareaRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  disabled: PropTypes.bool,
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
-  isPreviewMode: PropTypes.bool,
-  value: PropTypes.string,
   error: PropTypes.string,
+  isPreviewMode: PropTypes.bool.isRequired,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.string,
+  textareaRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  value: PropTypes.string,
 };
 
 export default Editor;

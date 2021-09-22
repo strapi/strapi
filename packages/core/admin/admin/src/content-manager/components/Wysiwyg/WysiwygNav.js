@@ -1,5 +1,6 @@
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import {
   Option,
   Button,
@@ -26,15 +27,19 @@ import {
 import { MainButtons, CustomIconButton, MoreButton, IconButtonGroupMargin } from './WysiwygStyles';
 
 const WysiwygNav = ({
-  placeholder,
-  onActionClick,
-  visiblePopover,
-  onTogglePopover,
-  isPreviewMode,
-  onTogglePreviewMode,
-  onToggleMediaLib,
   editorRef,
+  isPreviewMode,
+  onActionClick,
+  onToggleMediaLib,
+  onTogglePopover,
+  onTogglePreviewMode,
+  visiblePopover,
 }) => {
+  const { formatMessage } = useIntl();
+  const selectPlaceholder = formatMessage({
+    id: 'components.Wysiwyg.selectOptions.title',
+    defaultMessage: 'Add a title',
+  });
   const buttonMoreRef = useRef();
   const handleEscapeMore = () => {
     onTogglePopover();
@@ -46,7 +51,7 @@ const WysiwygNav = ({
       <Box padding={2} background="neutral100">
         <Row justifyContent="space-between">
           <Row>
-            <Select disabled id="selectTitle" placeholder={placeholder} size="S">
+            <Select disabled id="selectTitle" placeholder={selectPlaceholder} size="S">
               <Option value="h1">h1</Option>
               <Option value="h2">h2</Option>
               <Option value="h3">h3</Option>
@@ -77,8 +82,10 @@ const WysiwygNav = ({
           </Row>
 
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
-            {/* to replace with format message */}
-            Markdown mode
+            {formatMessage({
+              id: 'components.Wysiwyg.ToggleMode.markdown-mode',
+              defaultMessage: 'Markdown mode',
+            })}
           </Button>
         </Row>
       </Box>
@@ -91,7 +98,7 @@ const WysiwygNav = ({
         <Row>
           <Select
             id="selectTitle"
-            placeholder={placeholder}
+            placeholder={selectPlaceholder}
             size="S"
             onChange={value => onActionClick(value, editorRef)}
           >
@@ -181,6 +188,7 @@ const WysiwygNav = ({
                       id="Link"
                       label="Link"
                       name="Link"
+                      // eslint-disable-next-line jsx-a11y/anchor-is-valid
                       icon={<Link />}
                     />
                     <CustomIconButton
@@ -199,8 +207,10 @@ const WysiwygNav = ({
 
         {onTogglePreviewMode && (
           <Button onClick={onTogglePreviewMode} variant="tertiary" size="L" id="preview">
-            {/* to replace with format message */}
-            Preview mode
+            {formatMessage({
+              id: 'components.Wysiwyg.ToggleMode.preview-mode',
+              defaultMessage: 'Preview mode',
+            })}
           </Button>
         )}
       </Row>
@@ -209,24 +219,22 @@ const WysiwygNav = ({
 };
 
 WysiwygNav.defaultProps = {
-  placeholder: '',
-  onActionClick: () => {},
-  visiblePopover: false,
-  onTogglePopover: () => {},
   isPreviewMode: false,
-  onTogglePreviewMode: () => {},
+  onActionClick: () => {},
   onToggleMediaLib: () => {},
+  onTogglePopover: () => {},
+  onTogglePreviewMode: () => {},
+  visiblePopover: false,
 };
 
 WysiwygNav.propTypes = {
-  placeholder: PropTypes.string,
-  onActionClick: PropTypes.func,
-  visiblePopover: PropTypes.bool,
-  onTogglePopover: PropTypes.func,
-  isPreviewMode: PropTypes.bool,
-  onTogglePreviewMode: PropTypes.func,
-  onToggleMediaLib: PropTypes.func,
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  isPreviewMode: PropTypes.bool,
+  onActionClick: PropTypes.func,
+  onToggleMediaLib: PropTypes.func,
+  onTogglePopover: PropTypes.func,
+  onTogglePreviewMode: PropTypes.func,
+  visiblePopover: PropTypes.bool,
 };
 
 export default WysiwygNav;

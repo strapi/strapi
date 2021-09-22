@@ -447,8 +447,6 @@ const EditViewDataManagerProvider = ({
     return <Redirect to={from} />;
   }
 
-  console.log(isLoadingForData, modifiedData);
-
   return (
     <ContentManagerEditViewDataManagerContext.Provider
       value={{

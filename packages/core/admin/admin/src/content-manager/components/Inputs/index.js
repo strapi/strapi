@@ -202,10 +202,6 @@ function Inputs({
     // );
   }
 
-  if (type === 'richtext') {
-    console.log('w', inputValue);
-  }
-
   return (
     <GenericInput
       // {...metadatas}

@@ -1,13 +1,15 @@
 import React, { useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
 import { ButtonText, P } from '@strapi/parts/Text';
 import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
 import Editor from './Editor';
 import WysiwygNav from './WysiwygNav';
 import WysiwygFooter from './WysiwygFooter';
 import WysiwygExpand from './WysiwygExpand';
 import MediaLibrary from './MediaLibrary';
-
 import { WysiwygWrapper } from './WysiwygStyles';
 import {
   markdownHandler,
@@ -17,7 +19,47 @@ import {
   quoteAndCodeHandler,
 } from './utils/utils';
 
-const Wysiwyg = ({ label, placeholder, name, onChange, value, error }) => {
+const LabelAction = styled(Box)`
+  svg path {
+    fill: ${({ theme }) => theme.colors.neutral500};
+  }
+`;
+
+const Wysiwyg = ({
+  // description,
+  disabled,
+  error,
+  intlLabel,
+  labelAction,
+  name,
+  onChange,
+  placeholder,
+  value,
+}) => {
+  const { formatMessage } = useIntl();
+  const label = intlLabel.id
+    ? formatMessage(
+        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+        { ...intlLabel.values }
+      )
+    : name;
+
+  // FIXME
+  // const hint = description
+  //   ? formatMessage(
+  //       { id: description.id, defaultMessage: description.defaultMessage },
+  //       { ...description.values }
+  //     )
+  //   : '';
+
+  const formattedPlaceholder = placeholder
+    ? formatMessage(
+        { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
+        { ...placeholder.values }
+      )
+    : '';
+
+  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
   const textareaRef = useRef(null);
   const editorRef = useRef(null);
   const editorRefExpanded = useRef(null);
@@ -65,8 +107,9 @@ const Wysiwyg = ({ label, placeholder, name, onChange, value, error }) => {
         titleHandler(currentEditorRef, value);
         break;
       }
-      default:
-        return;
+      default: {
+        // Nothing
+      }
     }
   };
 
@@ -86,54 +129,60 @@ const Wysiwyg = ({ label, placeholder, name, onChange, value, error }) => {
 
   return (
     <>
-      <ButtonText>{label}</ButtonText>
+      <Row cols="auto auto 1fr" gap={1}>
+        <ButtonText>{label}</ButtonText>
+        {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
+      </Row>
       <WysiwygWrapper paddingTop={1} hasRadius error={error}>
         <WysiwygNav
-          placeholder={placeholder}
-          onActionClick={handleActionClick}
-          visiblePopover={visiblePopover}
-          onTogglePopover={handleTogglePopover}
-          isPreviewMode={isPreviewMode}
-          onTogglePreviewMode={handleTogglePreviewMode}
-          onToggleMediaLib={handleToggleMediaLib}
           editorRef={editorRef}
+          isPreviewMode={isPreviewMode}
+          onActionClick={handleActionClick}
+          onToggleMediaLib={handleToggleMediaLib}
+          onTogglePopover={handleTogglePopover}
+          onTogglePreviewMode={handleTogglePreviewMode}
+          visiblePopover={visiblePopover}
         />
         <Editor
+          disabled={disabled}
+          editorRef={editorRef}
+          error={errorMessage}
+          isPreviewMode={isPreviewMode}
           name={name}
           onChange={onChange}
+          placeholder={formattedPlaceholder}
           textareaRef={textareaRef}
-          editorRef={editorRef}
-          isPreviewMode={isPreviewMode}
           value={value}
-          error={error}
         />
         <WysiwygFooter isPreviewMode={isPreviewMode} onToggleExpand={handleToggleExpand} />
       </WysiwygWrapper>
-      {error && (
+      {errorMessage && (
         <Box paddingTop={1}>
           <P small textColor="danger600" data-strapi-field-error>
-            {error}
+            {errorMessage}
           </P>
         </Box>
       )}
       {mediaLibVisible && (
         <MediaLibrary
           editorRef={editorRef}
+          onSubmitImage={handleSubmitImage}
           onToggleMediaLib={handleToggleMediaLib}
           onTogglePopover={handleTogglePopover}
-          onSubmitImage={handleSubmitImage}
         />
       )}
       {isExpandMode && (
         <WysiwygExpand
-          onToggleExpand={handleToggleExpand}
-          value={value}
-          placeholder={placeholder}
+          disabled={disabled}
+          editorRef={editorRefExpanded}
+          name={name}
           onActionClick={handleActionClick}
           onChange={onChange}
-          textareaRef={textareaRef}
-          editorRef={editorRefExpanded}
           onSubmitImage={handleSubmitImage}
+          onToggleExpand={handleToggleExpand}
+          placeholder={formattedPlaceholder}
+          textareaRef={textareaRef}
+          value={value}
         />
       )}
     </>
@@ -141,16 +190,35 @@ const Wysiwyg = ({ label, placeholder, name, onChange, value, error }) => {
 };
 
 Wysiwyg.defaultProps = {
-  label: '',
-  onChange: () => {},
-  placeholder: '',
+  description: null,
+  disabled: true,
+  error: '',
+  labelAction: undefined,
+  placeholder: null,
   value: '',
 };
 
 Wysiwyg.propTypes = {
-  label: PropTypes.string,
-  onChange: PropTypes.func,
-  placeholder: PropTypes.string,
+  description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
   value: PropTypes.string,
 };
 

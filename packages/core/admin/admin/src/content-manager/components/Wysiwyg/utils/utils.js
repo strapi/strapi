@@ -1,5 +1,3 @@
-//MARKDOWN FUNCTIONS
-
 export const replaceText = (markdownName, textToChange) => {
   let editedText;
 
@@ -28,13 +26,14 @@ export const replaceText = (markdownName, textToChange) => {
     default:
       editedText = textToChange;
   }
-  return editedText
+
+  return editedText;
 };
 
-export const insertText = (markdownName) => {
+export const insertText = markdownName => {
   let editedText;
-  //object to calculate text that will be selected after insert of markdown
-  let selection = {start: markdownName.length, end: 0}
+  // object to calculate text that will be selected after insert of markdown
+  let selection = { start: markdownName.length, end: 0 };
 
   switch (markdownName) {
     case 'Strikethrough':
@@ -72,71 +71,69 @@ export const insertText = (markdownName) => {
     default:
       editedText = '';
   }
-  return {editedText, selection}
+
+  return { editedText, selection };
 };
 
-export const insertListOrTitle = (markdown, lineContent) => {
+export const insertListOrTitle = markdown => {
   let textToInsert;
 
-  switch(markdown) {
-    case "BulletList":
+  switch (markdown) {
+    case 'BulletList':
       textToInsert = '- ';
       break;
-    case "NumberList":
+    case 'NumberList':
       textToInsert = '1. ';
       break;
-    case "h1":
+    case 'h1':
       textToInsert = '# ';
       break;
-    case "h2":
+    case 'h2':
       textToInsert = '## ';
       break;
-    case "h3":
+    case 'h3':
       textToInsert = '### ';
       break;
-    case "h4":
+    case 'h4':
       textToInsert = '#### ';
       break;
-    case "h5":
+    case 'h5':
       textToInsert = '##### ';
       break;
-    case "h6":
+    case 'h6':
       textToInsert = '###### ';
       break;
     default:
-      return;
+      return '';
   }
-  
+
   return textToInsert;
 };
 
-//EDITOR ACTIONS FUNCTIONS
+// EDITOR ACTIONS FUNCTIONS
 
 export const markdownHandler = (editor, markdownType) => {
   const textToEdit = editor.current.getSelection();
   let textToInsert;
+
   if (textToEdit) {
     const editedText = replaceText(markdownType, textToEdit);
     editor.current.replaceSelection(editedText);
     editor.current.focus();
   } else {
-  
     textToInsert = insertText(markdownType);
     editor.current.replaceSelection(textToInsert.editedText);
     editor.current.focus();
-    //set selection-focus to text to replace with content
+    // set selection-focus to text to replace with content
     const { line, ch } = editor.current.getCursor();
     const endSelection = ch - textToInsert.selection.end;
     const startSelection = ch - textToInsert.selection.end - textToInsert.selection.start;
-    editor.current.setSelection(
-      { line, ch: startSelection },
-      { line, ch: endSelection }
-    );
+    editor.current.setSelection({ line, ch: startSelection }, { line, ch: endSelection });
   }
 };
 
 export const listHandler = (editor, listType) => {
-  let {line : currentLine} = editor.current.getCursor();
+  let { line: currentLine } = editor.current.getCursor();
   const listToInsert = insertListOrTitle(listType);
   const lineContent = editor.current.getLine(currentLine);
 
@@ -150,7 +147,7 @@ export const listHandler = (editor, listType) => {
 };
 
 export const titleHandler = (editor, titleType) => {
-  let {line : currentLine} = editor.current.getCursor();
+  let { line: currentLine } = editor.current.getCursor();
   const titleToInsert = insertListOrTitle(titleType);
   const lineContent = editor.current.getLine(currentLine);
 
@@ -164,103 +161,111 @@ export const titleHandler = (editor, titleType) => {
   );
   editor.current.replaceSelection(textToInsert);
   setTimeout(() => editor.current.focus(), 0);
-}
+};
 
 export const insertImage = (editor, files) => {
-  let {line, ch} = editor.current.getCursor();
+  let { line, ch } = editor.current.getCursor();
 
   files.forEach((file, i) => {
     let contentLength = editor.current.getLine(line).length;
-    editor.current.setCursor({line, ch : contentLength});
-    //create a new line after first image markdown inserted
-    //or if there is content in current line
-    if(i > 0 || (i === 0 && ch !== 0)) {
+    editor.current.setCursor({ line, ch: contentLength });
+    // create a new line after first image markdown inserted
+    // or if there is content in current line
+
+    if (i > 0 || (i === 0 && ch !== 0)) {
       contentLength = editor.current.getLine(line).length;
-      editor.current.setCursor({line, ch : contentLength});
-      line++
+      editor.current.setCursor({ line, ch: contentLength });
+      line++;
       editor.current.replaceSelection('\n');
     }
     editor.current.replaceSelection(`[${file.alt}](${file.url})`);
   });
 
   setTimeout(() => editor.current.focus(), 0);
-}
+};
 
-
-//3 NEXT FUNCTIONS FOR QUOTE OR CODE MARKDOWN
+// NEXT FUNCTIONS FOR QUOTE OR CODE MARKDOWN
 
 const insertWithTextToEdit = (editor, markdownType, line, contentLength, textToEdit) => {
   const textToInsert = replaceText(markdownType, textToEdit);
 
-  //remove content after current line
-  const contentToMove = editor.current.getRange({line: line + 1, ch: 0}, {line: Infinity, ch: Infinity});
-  editor.current.replaceRange('', {line: line + 1, ch: 0}, {line: Infinity, ch: Infinity});
+  // remove content after current line
+  const contentToMove = editor.current.getRange(
+    { line: line + 1, ch: 0 },
+    { line: Infinity, ch: Infinity }
+  );
+  editor.current.replaceRange('', { line: line + 1, ch: 0 }, { line: Infinity, ch: Infinity });
 
-  //remove word that was selected
-  //set cursor end of line + move to next line
-  //add text to insert
+  // remove word that was selected
+  // set cursor end of line + move to next line
+  // add text to insert
   editor.current.replaceSelection('');
-  editor.current.setCursor({line, ch : contentLength});
+  editor.current.setCursor({ line, ch: contentLength });
   editor.current.replaceSelection('\n');
   editor.current.replaceSelection(textToInsert);
 
-  if(markdownType === 'Code') {
+  if (markdownType === 'Code') {
     let { line: newLine } = editor.current.getCursor();
-    editor.current.setCursor({line: newLine - 1, ch : textToEdit.length});
+    editor.current.setCursor({ line: newLine - 1, ch: textToEdit.length });
   }
 
-  //add content we had to remove earlier
-  editor.current.replaceRange(contentToMove, {line: line + 4, ch: 0}, {line: Infinity, ch: Infinity});
+  // add content we had to remove earlier
+  editor.current.replaceRange(
+    contentToMove,
+    { line: line + 4, ch: 0 },
+    { line: Infinity, ch: Infinity }
+  );
 
   editor.current.focus();
-}
-
+};
 
 const insertWithoutTextToEdit = (editor, markdownType, line, contentLength) => {
   const textToInsert = insertText(markdownType);
 
-  //remove content after current line
-  const contentToMove = editor.current.getRange({line: line + 1, ch: 0}, {line: Infinity, ch: Infinity});
-  editor.current.replaceRange('', {line: line + 1, ch: 0}, {line: Infinity, ch: Infinity});
+  // remove content after current line
+  const contentToMove = editor.current.getRange(
+    { line: line + 1, ch: 0 },
+    { line: Infinity, ch: Infinity }
+  );
+  editor.current.replaceRange('', { line: line + 1, ch: 0 }, { line: Infinity, ch: Infinity });
 
-  //place cursor to next line
-  editor.current.setCursor({line, ch : contentLength});
+  // replace cursor to next line
+  editor.current.setCursor({ line, ch: contentLength });
   editor.current.replaceSelection('\n');
   editor.current.replaceSelection(textToInsert.editedText);
 
-  //set selection on "Code" or "Quote" word
-  if(markdownType === 'Code') {
-    line = line + 2;
-    
-    editor.current.setSelection(
-      { line: line, ch: 0},
-      { line: line, ch: 4 }
-    );
+  // set selection on "Code" or "Quote" word
+
+  if (markdownType === 'Code') {
+    line += 2;
+
+    editor.current.setSelection({ line, ch: 0 }, { line, ch: 4 });
   } else {
-    line = line + 1;
+    line += 1;
 
     let { ch } = editor.current.getCursor();
     let endSelection = ch - textToInsert.selection.end;
     let startSelection = ch - textToInsert.selection.end - textToInsert.selection.start;
-    editor.current.setSelection(
-      { line, ch: startSelection },
-      { line, ch: endSelection }
-    );
+    editor.current.setSelection({ line, ch: startSelection }, { line, ch: endSelection });
   }
-  
-  //add content we had to remove earlier
-  editor.current.replaceRange(contentToMove, {line: line + 2, ch: 0}, {line: Infinity, ch: Infinity});
+
+  // add content we had to remove earlier
+  editor.current.replaceRange(
+    contentToMove,
+    { line: line + 2, ch: 0 },
+    { line: Infinity, ch: Infinity }
+  );
   editor.current.focus();
-}
+};
 
 export const quoteAndCodeHandler = (editor, markdownType) => {
   const textToEdit = editor.current.getSelection();
   let { line } = editor.current.getCursor();
   let contentLength = editor.current.getLine(line).length;
 
-  if(textToEdit) {
+  if (textToEdit) {
     insertWithTextToEdit(editor, markdownType, line, contentLength, textToEdit);
   } else {
     insertWithoutTextToEdit(editor, markdownType, line, contentLength);
   }
-}
+};

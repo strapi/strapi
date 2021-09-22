@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useIntl } from 'react-intl';
 import { Portal, Row, Text, FocusTrap } from '@strapi/parts';
 import { Collapse } from '@strapi/icons';
 import PreviewWysiwyg from '../PreviewWysiwyg';
@@ -17,15 +18,18 @@ import {
 } from './WysiwygStyles';
 
 const WysiwygExpand = ({
-  onToggleExpand,
-  value,
-  placeholder,
+  disabled,
+  editorRef,
+  name,
   onActionClick,
   onChange,
-  textareaRef,
-  editorRef,
   onSubmitImage,
+  onToggleExpand,
+  placeholder,
+  textareaRef,
+  value,
 }) => {
+  const { formatMessage } = useIntl();
   const [visiblePopover, setVisiblePopover] = useState(false);
   const [mediaLibVisible, setMediaLibVisible] = useState(false);
 
@@ -40,17 +44,19 @@ const WysiwygExpand = ({
             <ExpandContainer background="neutral0" hasRadius shadow="popupShadow">
               <WysiwygContainer>
                 <WysiwygNav
-                  placeholder={placeholder}
-                  onActionClick={onActionClick}
-                  visiblePopover={visiblePopover}
-                  onTogglePopover={handleTogglePopover}
-                  onToggleMediaLib={handleToggleMediaLib}
                   editorRef={editorRef}
+                  onActionClick={onActionClick}
+                  onToggleMediaLib={handleToggleMediaLib}
+                  onTogglePopover={handleTogglePopover}
+                  visiblePopover={visiblePopover}
                 />
                 <Editor
-                  onChange={onChange}
-                  textareaRef={textareaRef}
+                  disabled={disabled}
                   editorRef={editorRef}
+                  name={name}
+                  onChange={onChange}
+                  placeholder={placeholder}
+                  textareaRef={textareaRef}
                   value={value}
                 />
               </WysiwygContainer>
@@ -58,8 +64,12 @@ const WysiwygExpand = ({
                 <PreviewHeader padding={2} background="neutral100">
                   <Row justifyContent="flex-end" alignItems="flex-end">
                     <ExpandButton id="collapse" onClick={() => onToggleExpand('collapse')}>
-                      {/* to replace with format message */}
-                      <Text>Collapse</Text>
+                      <Text>
+                        {formatMessage({
+                          id: 'components.Wysiwyg.collapse',
+                          defaultMessage: 'Collapse',
+                        })}
+                      </Text>
                       <Collapse />
                     </ExpandButton>
                   </Row>
@@ -74,9 +84,9 @@ const WysiwygExpand = ({
       </Portal>
       {mediaLibVisible && (
         <MediaLibrary
-          onToggle={handleToggleMediaLib}
-          onSubmitImage={onSubmitImage}
           editorRef={editorRef}
+          onSubmitImage={onSubmitImage}
+          onToggle={handleToggleMediaLib}
           onToggleMediaLib={handleToggleMediaLib}
           onTogglePopover={handleTogglePopover}
         />
@@ -86,6 +96,7 @@ const WysiwygExpand = ({
 };
 
 WysiwygExpand.defaultProps = {
+  disabled: false,
   onChange: () => {},
   onToggleExpand: () => {},
   onActionClick: () => {},
@@ -95,6 +106,8 @@ WysiwygExpand.defaultProps = {
 };
 
 WysiwygExpand.propTypes = {
+  disabled: PropTypes.bool,
+  name: PropTypes.string.isRequired,
   onChange: PropTypes.func,
   onToggleExpand: PropTypes.func,
   onActionClick: PropTypes.func,

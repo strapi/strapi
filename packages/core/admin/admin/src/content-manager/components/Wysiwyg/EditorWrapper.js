@@ -1,6 +1,9 @@
 import styled from 'styled-components';
 
+/* eslint-disable */
+/* stylelint-disable */
 const EditorWrapper = styled.div`
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed !important' : 'auto')};
   /* BASICS */
 
   .CodeMirror {
@@ -330,11 +333,9 @@ const EditorWrapper = styled.div`
   div.CodeMirror-cursors {
     visibility: hidden;
     position: relative;
-    /* z-index: 3; */
-  }
-
-  div.CodeMirror-measure + div {
-    z-index: 0 !important;
+    + div {
+      z-index: 0 !important;
+    }
   }
 
   div.CodeMirror-dragcursors {
