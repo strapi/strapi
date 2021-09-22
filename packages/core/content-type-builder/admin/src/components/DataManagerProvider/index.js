@@ -5,17 +5,18 @@ import {
   request,
   LoadingIndicatorPage,
   useTracking,
-  PopUpWarning,
   useNotification,
   useStrapiApp,
   useAutoReloadOverlayBlocker,
   useAppInfos,
   useRBACProvider,
+  ConfirmDialog,
 } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { useHistory, useLocation, useRouteMatch, Redirect } from 'react-router-dom';
 import { connect, useDispatch } from 'react-redux';
 import { compose } from 'redux';
+import CheckIcon from '@strapi/icons/CheckIcon';
 import DataManagerContext from '../../contexts/DataManagerContext';
 import getTrad from '../../utils/getTrad';
 import makeUnique from '../../utils/makeUnique';
@@ -569,19 +570,30 @@ const DataManagerProvider = ({
           {isInDevelopmentMode && (
             <>
               <FormModal />
-              <PopUpWarning
-                isOpen={infoModals}
-                toggleModal={toggleModalCancel}
-                content={{
-                  message: getTrad(
+              {/* TO FIX - not sure didModifiedComponents return a valuable information */}
+              <ConfirmDialog
+                bodyText={{
+                  id: getTrad(
                     `popUpWarning.bodyMessage.cancel-modifications${
                       didModifiedComponents ? '.with-components' : ''
                     }`
                   ),
+                  defaultMessage: `Are you sure you want to cancel your modifications? ${didModifiedComponents &&
+                    'Some components have been created or modified...'}`,
                 }}
-                popUpWarningType="danger"
+                isOpen={infoModals}
+                onToggleDialog={toggleModalCancel}
                 onConfirm={() => {
                   cancelChanges();
+                }}
+                iconRightButton={<CheckIcon />}
+                title={{
+                  id: getTrad('app.components.ConfirmDialog.title'),
+                  defaultMessage: 'Confirmation',
+                }}
+                rightButtonText={{
+                  id: getTrad('app.components.Button.confirm'),
+                  defaultMessage: 'Confirm',
                 }}
               />
             </>
