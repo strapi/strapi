@@ -87,17 +87,6 @@ const handlers = [
       })
     );
   }),
-
-  // Mock policies route
-  rest.get(`*/${pluginId}/policies`, (req, res, ctx) => {
-    return res(
-      ctx.delay(100),
-      ctx.status(200),
-      ctx.json({
-        policies: ['isAuthenticated', 'rateLimit'],
-      })
-    );
-  }),
 ];
 
 const server = setupServer(...handlers);
