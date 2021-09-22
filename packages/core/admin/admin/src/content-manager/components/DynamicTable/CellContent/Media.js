@@ -2,6 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { Avatar } from '@strapi/parts/Avatar';
+import { Tooltip } from '@strapi/parts/Tooltip';
 import { TableLabel } from '@strapi/parts/Text';
 import { Row } from '@strapi/parts/Row';
 
@@ -34,11 +35,14 @@ const Media = ({ url, mime, alternativeText, name, ext, formats }) => {
   }
 
   const fileExtension = getFileExtension(ext);
+  const fileName = name.length > 100 ? `${name.substring(0, 100)}...` : name;
 
   return (
-    <FileWrapper justifyContent="center" alignItems="center">
-      <TableLabel textColor="neutral600">{fileExtension}</TableLabel>
-    </FileWrapper>
+    <Tooltip description={fileName}>
+      <FileWrapper justifyContent="center" alignItems="center">
+        <TableLabel textColor="neutral600">{fileExtension}</TableLabel>
+      </FileWrapper>
+    </Tooltip>
   );
 };
 
