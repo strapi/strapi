@@ -20,12 +20,7 @@ module.exports = {
    */
   async create(ctx) {
     const advanced = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
     const { email, username, password, role } = ctx.request.body;
@@ -97,12 +92,7 @@ module.exports = {
 
   async update(ctx) {
     const advancedConfigs = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
     const { id } = ctx.params;

@@ -236,7 +236,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'product',
+                $containsi: 'product',
               },
             },
           },
@@ -252,7 +252,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'PrOdUct',
+                $containsi: 'PrOdUct',
               },
             },
           },
@@ -268,7 +268,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'production',
+                $containsi: 'production',
               },
             },
           },
@@ -282,7 +282,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $contains: 'ProdUctIon',
+                $containsi: 'ProdUctIon',
               },
             },
           },
@@ -300,7 +300,7 @@ describe('Filtering API', () => {
           qs: {
             filters: {
               name: {
-                $notContains: 'production',
+                $notContainsi: 'production',
               },
             },
           },
@@ -315,7 +315,7 @@ describe('Filtering API', () => {
           url: '/products',
           qs: {
             filters: {
-              name: { $notContains: 'ProdUctIon' },
+              name: { $notContainsi: 'ProdUctIon' },
             },
           },
         });
@@ -329,7 +329,7 @@ describe('Filtering API', () => {
           url: '/products',
           qs: {
             filters: {
-              name: { $notContains: 'product' },
+              name: { $notContainsi: 'product' },
             },
           },
         });
@@ -341,7 +341,7 @@ describe('Filtering API', () => {
           url: '/products',
           qs: {
             filters: {
-              name: { $notContains: 'ProDuCt' },
+              name: { $notContainsi: 'ProDuCt' },
             },
           },
         });

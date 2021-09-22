@@ -1,15 +1,12 @@
 'use strict';
 
 module.exports = async (ctx, next) => {
-  const pluginStore = strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'documentation',
-  });
+  const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
+
   const config = await pluginStore.get({ key: 'config' });
 
   if (!config.restrictedAccess) {
-    return await next();
+    return next();
   }
 
   if (!ctx.session.documentation) {

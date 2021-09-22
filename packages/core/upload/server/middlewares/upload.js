@@ -12,7 +12,7 @@ module.exports = {
         'middleware.settings.public.path',
         strapi.config.paths.static
       );
-      const staticDir = resolve(strapi.dir, configPublicPath);
+      const staticDir = resolve(strapi.dirs.root, configPublicPath);
 
       strapi.server.app.on('error', err => {
         if (err.code === 'EPIPE') {

@@ -354,7 +354,7 @@ describe('User', () => {
       const count = jest.fn(() => Promise.resolve(1));
 
       global.strapi = {
-        query: () => {
+        query() {
           return { count };
         },
       };
@@ -368,7 +368,7 @@ describe('User', () => {
       const count = jest.fn(() => Promise.resolve(0));
 
       global.strapi = {
-        query: () => {
+        query() {
           return { count };
         },
       };
@@ -464,7 +464,7 @@ describe('User', () => {
       const findOne = jest.fn(() => Promise.resolve());
 
       global.strapi = {
-        query: () => {
+        query() {
           return { findOne };
         },
       };
@@ -485,7 +485,7 @@ describe('User', () => {
       const findOne = jest.fn(() => Promise.resolve(user));
 
       global.strapi = {
-        query: () => {
+        query() {
           return { findOne };
         },
       };

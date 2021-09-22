@@ -23,11 +23,11 @@ module.exports = {
   provider: 'nodemailer',
   name: 'Nodemailer',
 
-  init: (providerOptions = {}, settings = {}) => {
+  init(providerOptions = {}, settings = {}) {
     const transporter = nodemailer.createTransport(providerOptions);
 
     return {
-      send: options => {
+      send(options) {
         // Default values.
         const emailOptions = {
           ..._.pick(options, emailFields),

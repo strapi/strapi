@@ -45,7 +45,7 @@ const createLoaders = strapi => {
     loadMiddlewaresInDir(path.resolve(__dirname, '..', '..', 'middlewares'), middlewares);
 
   const loadLocalMiddlewares = (appPath, middlewares) =>
-    loadMiddlewaresInDir(path.resolve(appPath, 'middlewares'), middlewares);
+    loadMiddlewaresInDir(path.resolve(appPath, 'src', 'middlewares'), middlewares);
 
   const loadMiddlewareDependencies = async (packages, middlewares) => {
     for (let packageName of packages) {

@@ -51,12 +51,9 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
     return createPivotJoin(qb, joinTable, alias, tragetMeta);
   }
 
-  // TODO: polymorphic relations
-
   return alias;
 };
 
-// TODO: allow for more conditions
 const applyJoin = (qb, join) => {
   const {
     method = 'leftJoin',
@@ -64,7 +61,7 @@ const applyJoin = (qb, join) => {
     referencedTable,
     referencedColumn,
     rootColumn,
-    rootTable = this.alias,
+    rootTable = qb.alias,
     on,
     orderBy,
   } = join;

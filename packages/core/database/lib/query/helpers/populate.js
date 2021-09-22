@@ -33,7 +33,7 @@ const processPopulate = (populate, ctx) => {
 
   let populateMap = {};
 
-  if (populate === false) {
+  if (populate === false || _.isNil(populate)) {
     return null;
   }
 
@@ -181,7 +181,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinTable.inverseJoinColumn.name,
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -265,7 +265,7 @@ const applyPopulate = async (results, populate, ctx) => {
           const rows = await qb
             .init(populateValue)
             .join({
-              alias: alias,
+              alias,
               referencedTable: joinTable.name,
               referencedColumn: joinTable.inverseJoinColumn.name,
               rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -299,7 +299,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinTable.inverseJoinColumn.name,
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -344,7 +344,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinTable.inverseJoinColumn.name,
             rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -378,7 +378,7 @@ const applyPopulate = async (results, populate, ctx) => {
       const rows = await qb
         .init(populateValue)
         .join({
-          alias: alias,
+          alias,
           referencedTable: joinTable.name,
           referencedColumn: joinTable.inverseJoinColumn.name,
           rootColumn: joinTable.inverseJoinColumn.referencedColumn,
@@ -461,7 +461,7 @@ const applyPopulate = async (results, populate, ctx) => {
         const rows = await qb
           .init(populateValue)
           .join({
-            alias: alias,
+            alias,
             referencedTable: joinTable.name,
             referencedColumn: joinColumn.name,
             rootColumn: joinColumn.referencedColumn,

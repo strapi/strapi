@@ -32,7 +32,7 @@ const toDetailedDeclaration = declaration => {
     try {
       pathToPlugin = dirname(require.resolve(declaration.resolve));
     } catch (e) {
-      pathToPlugin = resolve(strapi.dir, declaration.resolve);
+      pathToPlugin = resolve(strapi.dirs.root, declaration.resolve);
 
       if (!existsSync(pathToPlugin) || !statSync(pathToPlugin).isDirectory()) {
         throw new Error(`${declaration.resolve} couldn't be resolved`);
@@ -72,7 +72,7 @@ const getEnabledPlugins = async strapi => {
   }
 
   const declaredPlugins = {};
-  const userPluginConfigPath = join(strapi.dir, 'config', 'plugins.js');
+  const userPluginConfigPath = join(strapi.dirs.config, 'plugins.js');
   const userPluginsConfig = existsSync(userPluginConfigPath)
     ? loadConfigFile(userPluginConfigPath)
     : {};

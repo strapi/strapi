@@ -4,11 +4,7 @@ const { convertToStrapiError } = require('../errors');
 
 module.exports = async () => {
   // set plugin store
-  const configurator = strapi.store({
-    type: 'plugin',
-    name: 'upload',
-    key: 'settings',
-  });
+  const configurator = strapi.store({ type: 'plugin', name: 'upload', key: 'settings' });
 
   strapi.plugin('upload').provider = createProvider(strapi.config.get('plugin.upload', {}));
 
@@ -30,7 +26,7 @@ module.exports = async () => {
 
 const wrapFunctionForErrors = fn => async (...args) => {
   try {
-    return await fn(...args);
+    return fn(...args);
   } catch (err) {
     throw convertToStrapiError(err);
   }

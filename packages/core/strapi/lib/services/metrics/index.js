@@ -88,7 +88,7 @@ const hashProject = strapi =>
 
 const hashDep = strapi => {
   const depStr = JSON.stringify(strapi.config.info.dependencies);
-  const readmePath = path.join(strapi.dir, 'README.md');
+  const readmePath = path.join(strapi.dirs.root, 'README.md');
 
   try {
     if (fs.existsSync(readmePath)) {
