@@ -226,7 +226,7 @@ const createQueryBuilder = (uid, db) => {
         });
         const orderByColumns = state.orderBy.map(({ column }) => column);
 
-        state.select = _.uniq([...state.select, ...orderByColumns, ...joinsOrderByColumns]);
+        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
       }
     },
 
