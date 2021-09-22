@@ -115,16 +115,18 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
   const operator = modifiedData.filter;
 
   return (
-    <Popover source={source} padding={3} spacingTop={1}>
+    <Popover source={source} padding={3} spacing={4}>
       <FocusTrap onEscape={onToggle}>
         <form onSubmit={handleSubmit}>
           <Stack size={1} style={{ minWidth: 184 }}>
             <Box>
               <Select
-                label="Select field"
-                aria-label="Select field"
+                aria-label={formatMessage({
+                  id: 'app.utils.select-field',
+                  defaultMessage: 'Select field',
+                })}
                 name="name"
-                size="S"
+                size="L"
                 onChange={handleChangeFilterField}
                 value={modifiedData.name}
               >
@@ -139,9 +141,12 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
             </Box>
             <Box>
               <Select
-                label="Select filter"
+                aria-label={formatMessage({
+                  id: 'app.utils.select-filter',
+                  defaultMessage: 'Select filter',
+                })}
                 name="filter"
-                size="S"
+                size="L"
                 value={modifiedData.filter}
                 onChange={handleChangeOperator}
               >
@@ -165,7 +170,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
               </Box>
             )}
             <Box>
-              <FullWidthButton variant="secondary" startIcon={<AddIcon />} type="submit">
+              <FullWidthButton size="L" variant="secondary" startIcon={<AddIcon />} type="submit">
                 {formatMessage({ id: 'app.utils.add-filter', defaultMessage: 'Add filter' })}
               </FullWidthButton>
             </Box>

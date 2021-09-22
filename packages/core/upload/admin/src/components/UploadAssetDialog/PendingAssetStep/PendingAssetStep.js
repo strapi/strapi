@@ -14,12 +14,20 @@ import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
 import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
+import { useUpload } from '../../../hooks/useUpload';
 
 export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
   const { formatMessage } = useIntl();
+  const { upload, isLoading } = useUpload(assets, onClose);
+
+  const handleSubmit = async e => {
+    e.preventDefault();
+
+    await upload();
+  };
 
   return (
-    <>
+    <form onSubmit={handleSubmit}>
       <ModalHeader>
         <ButtonText textColor="neutral800" as="h2" id="title">
           {formatMessage({
@@ -39,7 +47,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                     id: getTrad('list.assets.selected.plural'),
                     defaultMessage: '0 asset selected',
                   },
-                  { number: 0 }
+                  { number: assets.length }
                 )}
               </Text>
               <Text small textColor="neutral600">
@@ -116,18 +124,18 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
           </Button>
         }
         endActions={
-          <Button type="submit">
+          <Button type="submit" loading={isLoading}>
             {formatMessage(
               {
                 id: getTrad('modal.upload-list.footer.button.singular'),
                 defaultMessage: 'Upload assets',
               },
-              { number: 0 }
+              { number: assets.length }
             )}
           </Button>
         }
       />
-    </>
+    </form>
   );
 };
 

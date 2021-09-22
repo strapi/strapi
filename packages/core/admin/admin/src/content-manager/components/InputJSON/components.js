@@ -1,30 +1,35 @@
 import styled from 'styled-components';
+import { Box } from '@strapi/parts/Box';
 
-const Wrapper = styled.div`
-  position: relative;
-  margin-bottom: 3px;
-  line-height: 18px;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'initial')};
-
-  .CodeMirror {
-    font-size: 13px !important;
-  }
-
-  > div {
-    border-radius: 3px;
-
-    > div:last-of-type {
-      min-height: 315px;
-      max-height: 635px;
-      font-weight: 500;
-      font-size: 1.3rem !important;
-    }
-  }
+/* eslint-disable */
+/* stylelint-disable */
+const EditorWrapper = styled.div`
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed !important' : 'auto')};
+  /* BASICS */
 
   .colored {
     background-color: yellow;
     color: black !important;
   }
+
+  > div {
+    border-radius: 3px;
+    > div:last-of-type {
+      min-height: 253px;
+      max-height: 506px;
+    }
+  }
+
+  .CodeMirror {
+    /* Set height, width, borders, and global font properties here */
+    font-size: ${14 / 16}rem;
+    direction: ltr;
+  }
 `;
 
-export default Wrapper;
+const StyledBox = styled(Box)`
+  border-radius: ${({ theme }) => theme.borderRadius};
+  border: 1px solid ${({ theme, error }) => (error ? theme.colors.danger600 : 'transparent')};
+`;
+
+export { EditorWrapper, StyledBox };

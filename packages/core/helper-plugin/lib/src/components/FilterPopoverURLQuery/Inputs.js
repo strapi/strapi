@@ -1,13 +1,13 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { DatePicker } from '@strapi/parts/DatePicker';
-import { Field, FieldInput, FieldLabel } from '@strapi/parts/Field';
+import { Field, FieldInput } from '@strapi/parts/Field';
 import { NumberInput } from '@strapi/parts/NumberInput';
 import { TimePicker } from '@strapi/parts/TimePicker';
 import { Select, Option } from '@strapi/parts/Select';
 import { useIntl } from 'react-intl';
 import { formatISO } from 'date-fns';
-import { cloneDeep } from 'lodash';
+import cloneDeep from 'lodash/cloneDeep';
 
 const Inputs = ({ label, onChange, options, type, value }) => {
   const { formatMessage } = useIntl();
@@ -16,7 +16,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
     return (
       <Select
         // FIXME: stop errors in the console
-        label={label}
+        aria-label={label}
         onChange={onChange}
         value={value}
       >
@@ -30,7 +30,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
     return (
       <DatePicker
         clearLabel={formatMessage({ id: 'clearLabel', defaultMessage: 'Clear' })}
-        label={label}
+        aria-label={label}
         name="datepicker"
         onChange={date => {
           const formattedDate = formatISO(cloneDeep(date), { representation: 'date' });
@@ -49,7 +49,7 @@ const Inputs = ({ label, onChange, options, type, value }) => {
     return (
       <Select
         // FIXME: stop errors in the console
-        label={label}
+        aria-label={label}
         onChange={onChange}
         value={value}
       >
@@ -66,14 +66,19 @@ const Inputs = ({ label, onChange, options, type, value }) => {
 
   if (['float', 'integer', 'biginteger', 'decimal'].includes(type)) {
     return (
-      <NumberInput label={label} name="filter-value" onValueChange={onChange} value={value || 0} />
+      <NumberInput
+        aria-label={label}
+        name="filter-value"
+        onValueChange={onChange}
+        value={value || 0}
+      />
     );
   }
 
   if (type === 'time') {
     return (
       <TimePicker
-        label={label}
+        aria-label={label}
         onClear={() => onChange('')}
         onChange={onChange}
         value={value}
@@ -84,8 +89,8 @@ const Inputs = ({ label, onChange, options, type, value }) => {
 
   return (
     <Field>
-      <FieldLabel>Filter value</FieldLabel>
       <FieldInput // FIXME: stop errors in the console
+        aria-label={formatMessage({ id: 'app.utils.filter-value', defaultMessage: 'Filter value' })}
         onChange={({ target: { value } }) => onChange(value)}
         value={value}
         size="S"

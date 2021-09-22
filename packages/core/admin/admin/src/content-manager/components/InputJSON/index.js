@@ -7,14 +7,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import cm from 'codemirror';
-
-import { trimStart } from 'lodash';
+import trimStart from 'lodash/trimStart';
+import { Stack } from '@strapi/parts/Stack';
 import jsonlint from './jsonlint';
-import Wrapper from './components';
+import { EditorWrapper, StyledBox } from './components';
+import Hint from './Hint';
+import Label from './Label';
+import FieldError from './FieldError';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const DEFAULT_THEME = 'solarized dark';
+const DEFAULT_THEME = 'blackboard';
 
 const loadCss = async () => {
   await import(
@@ -31,7 +34,7 @@ const loadCss = async () => {
     /* webpackChunkName: "codemirror-addon-mark-selection" */ 'codemirror/addon/selection/mark-selection'
   );
   await import(/* webpackChunkName: "codemirror-css" */ 'codemirror/lib/codemirror.css');
-  await import(/* webpackChunkName: "codemirror-theme" */ 'codemirror/theme/solarized.css');
+  await import(/* webpackChunkName: "codemirror-theme" */ 'codemirror/theme/blackboard.css');
 };
 
 loadCss();
@@ -60,7 +63,6 @@ class InputJSON extends React.Component {
       fontSize: '13px',
     });
     this.codeMirror.on('change', this.handleChange);
-    this.codeMirror.on('blur', this.handleBlur);
 
     this.setSize();
     this.setInitValue();
@@ -112,21 +114,6 @@ class InputJSON extends React.Component {
     this.setState({ markedText });
   };
 
-  handleBlur = ({ target }) => {
-    const { name, onBlur } = this.props;
-
-    if (target === undefined) {
-      // codemirror catches multiple events
-      onBlur({
-        target: {
-          name,
-          type: 'json',
-          value: this.getValue(),
-        },
-      });
-    }
-  };
-
   handleChange = (doc, change) => {
     if (change.origin === 'setValue') {
       return;
@@ -172,24 +159,61 @@ class InputJSON extends React.Component {
     }
 
     return (
-      <Wrapper disabled={this.props.disabled}>
-        <textarea ref={this.editor} autoComplete="off" id={this.props.name} defaultValue="" />
-      </Wrapper>
+      <Stack size={1}>
+        <Label
+          intlLabel={this.props.intlLabel}
+          labelAction={this.props.labelAction}
+          name={this.props.name}
+        />
+        <StyledBox error={this.props.error}>
+          <EditorWrapper disabled={this.props.disabled}>
+            <textarea
+              ref={this.editor}
+              autoComplete="off"
+              id={this.props.id || this.props.name}
+              defaultValue=""
+            />
+          </EditorWrapper>
+        </StyledBox>
+        <Hint
+          description={this.props.description}
+          name={this.props.name}
+          id={this.props.id}
+          error={this.props.error}
+        />
+        <FieldError id={this.props.id} name={this.props.name} error={this.props.error} />
+      </Stack>
     );
   }
 }
 
 InputJSON.defaultProps = {
+  description: null,
   disabled: false,
-  onBlur: () => {},
+  id: undefined,
+  error: undefined,
+  intlLabel: undefined,
+  labelAction: undefined,
   onChange: () => {},
   value: null,
 };
 
 InputJSON.propTypes = {
+  description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
   disabled: PropTypes.bool,
+  error: PropTypes.string,
+  id: PropTypes.string,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
+  labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func,
   value: PropTypes.any,
 };

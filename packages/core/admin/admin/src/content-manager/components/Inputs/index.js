@@ -8,8 +8,9 @@ import isEqual from 'react-fast-compare';
 // import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
+import Wysiwyg from '../Wysiwyg';
 import GenericInput from './GenericInput';
-// import InputJSONWithErrors from '../InputJSONWithErrors';
+import InputJSON from '../InputJSON';
 // import SelectWrapper from '../SelectWrapper';
 // import WysiwygWithErrors from '../WysiwygWithErrors';
 // import InputUID from '../InputUID';
@@ -30,7 +31,7 @@ function Inputs({
   keys,
   labelAction,
   metadatas,
-  onBlur,
+
   onChange,
   readableFields,
   shouldNotRunValidations,
@@ -166,7 +167,7 @@ function Inputs({
     isRequired,
   ]);
 
-  const { label, description, visible } = metadatas;
+  const { label, description, placeholder, visible } = metadatas;
 
   if (visible === false) {
     return null;
@@ -206,30 +207,29 @@ function Inputs({
       // {...metadatas}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
-      // autoFocus={autoFocus}
       description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
       error={errorId}
-      // inputDescription={description}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        // json: InputJSONWithErrors,
-        // wysiwyg: WysiwygWithErrors,
         // uid: InputUID,
         // ...fields,
+        json: InputJSON,
         media: () => <div>TODO media</div>,
         uid: () => <div>TODO uid</div>,
+        // wysiwyg: () => <div>TODO wysiwyg</div>,
+        wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
       name={keys}
-      onBlur={onBlur}
       onChange={onChange}
       options={options}
+      placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
       step={step}
       type={inputType}
-      validations={validations}
+      // validations={validations}
       value={inputValue}
       withDefaultValue={false}
     />
@@ -239,7 +239,6 @@ function Inputs({
 Inputs.defaultProps = {
   formErrors: {},
   labelAction: undefined,
-  onBlur: null,
   queryInfos: {},
   value: null,
 };
@@ -252,7 +251,6 @@ Inputs.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   labelAction: PropTypes.element,
   metadatas: PropTypes.object.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
   shouldNotRunValidations: PropTypes.bool.isRequired,
