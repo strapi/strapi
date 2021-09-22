@@ -7,6 +7,7 @@ import { Text, TableLabel } from '@strapi/parts/Text';
 import { IconButton } from '@strapi/parts/IconButton';
 import EditIcon from '@strapi/icons/EditIcon';
 import Reload from '@strapi/icons/Reload';
+import { onRowClick, stopPropagation } from '@strapi/helper-plugin';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import { getTrad } from '../../../utils';
 
@@ -44,7 +45,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
         </Tr>
       </Thead>
       <Tbody>
-        <Tr>
+        <Tr {...onRowClick({ fn: () => onEditClick('reset_password') })}>
           <Td>
             <Reload
               aria-label={formatMessage({
@@ -61,7 +62,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               })}
             </Text>
           </Td>
-          <Td>
+          <Td {...stopPropagation}>
             <IconButton
               onClick={() => onEditClick('reset_password')}
               label={formatMessage({
@@ -73,7 +74,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
             />
           </Td>
         </Tr>
-        <Tr>
+        <Tr {...onRowClick({ fn: () => onEditClick('email_confirmation') })}>
           <Td>
             <CheckIcon
               aria-label={formatMessage({
@@ -90,7 +91,7 @@ const EmailTable = ({ canUpdate, onEditClick }) => {
               })}
             </Text>
           </Td>
-          <Td>
+          <Td {...stopPropagation}>
             <IconButton
               onClick={() => onEditClick('email_confirmation')}
               label={formatMessage({

@@ -16,6 +16,8 @@ import {
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { useIntl } from 'react-intl';
+import { stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick } from '@strapi/helper-plugin/lib/src';
 import { getTrad } from '../../utils';
 
 const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
@@ -47,7 +49,13 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
       </Thead>
       <Tbody>
         {locales.map(locale => (
-          <Tr key={locale.id}>
+          <Tr
+            key={locale.id}
+            {...onRowClick({
+              fn: () => onEditLocale(locale),
+              condition: onEditLocale,
+            })}
+          >
             <Td>
               <Text textColor="neutral800">{locale.id}</Text>
             </Td>
@@ -62,7 +70,12 @@ const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {
               </Text>
             </Td>
             <Td>
-              <Stack horizontal size={1}>
+              <Stack
+                horizontal
+                size={1}
+                style={{ justifyContent: 'flex-end' }}
+                {...stopPropagation}
+              >
                 {onEditLocale && (
                   <IconButton
                     onClick={() => onEditLocale(locale)}
