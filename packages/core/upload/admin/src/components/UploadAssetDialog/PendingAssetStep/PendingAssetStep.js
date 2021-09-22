@@ -16,7 +16,7 @@ import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
 
-export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
+export const PendingAssetStep = ({ onClose, assets, onClickAddAsset, onCancelUpload }) => {
   const { formatMessage } = useIntl();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -79,6 +79,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                         assetType={asset.type}
                         file={asset.rawFile}
                         size="S"
+                        onCancel={onCancelUpload}
                       />
                     </GridItem>
                   );
@@ -173,4 +174,5 @@ PendingAssetStep.propTypes = {
   ).isRequired,
   onClose: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
+  onCancelUpload: PropTypes.func.isRequired,
 };

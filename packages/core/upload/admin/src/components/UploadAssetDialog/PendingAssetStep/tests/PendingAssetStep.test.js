@@ -62,6 +62,7 @@ describe('PendingAssetStep', () => {
             onClose={jest.fn()}
             onAddAsset={jest.fn()}
             onClickAddAsset={jest.fn()}
+            onCancelUpload={jest.fn()}
           />
         </ThemeProvider>
       </QueryClientProvider>

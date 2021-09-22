@@ -23,13 +23,28 @@ export const UploadAssetDialog = ({ onSuccess, onClose }) => {
     setStep(Steps.AddAsset);
   };
 
+  const handleCancelUpload = file => {
+    const nextAssets = assets.filter(asset => asset.rawFile !== file);
+    setAssets(nextAssets);
+
+    // When there's no asset, transition to the AddAsset step
+    if (nextAssets.length === 0) {
+      moveToAddAsset();
+    }
+  };
+
   return (
     <ModalLayout onClose={onClose} labelledBy="title">
       {step === Steps.AddAsset && (
         <AddAssetStep onClose={onClose} onAddAsset={handleAddToPendingAssets} />
       )}
       {step === Steps.PendingAsset && (
-        <PendingAssetStep onClose={onClose} assets={assets} onClickAddAsset={moveToAddAsset} />
+        <PendingAssetStep
+          onClose={onClose}
+          assets={assets}
+          onClickAddAsset={moveToAddAsset}
+          onCancelUpload={handleCancelUpload}
+        />
       )}
     </ModalLayout>
   );
