@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { ButtonText, Text } from '@strapi/parts/Text';
@@ -16,6 +16,12 @@ import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
 
+const Status = {
+  Idle: 'IDLE',
+  Uploading: 'UPLOADING',
+  Intermediate: 'INTERMEDIATE',
+};
+
 export const PendingAssetStep = ({
   onClose,
   assets,
@@ -23,16 +29,29 @@ export const PendingAssetStep = ({
   onCancelUpload,
   onUploadSucceed,
 }) => {
+  const assetCountRef = useRef(0);
   const { formatMessage } = useIntl();
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploadStatus, setUploadStatus] = useState(Status.Idle);
 
   const handleSubmit = async e => {
     e.preventDefault();
 
-    setIsUploading(true);
+    setUploadStatus(Status.Uploading);
   };
 
   const handleStatusChange = (status, file) => {
+    if (status === 'success' || status === 'error') {
+      assetCountRef.current++;
+
+      // There's no "terminated" status. When all the files have called their
+      // onUploadSucceed callback, the parent component filters the asset list
+      // and closes the modal when the asset list is empty
+      if (assetCountRef.current === assets.length) {
+        assetCountRef.current = 0;
+        setUploadStatus(Status.Intermediate);
+      }
+    }
+
     if (status === 'success') {
       onUploadSucceed(file);
     }
@@ -81,7 +100,7 @@ export const PendingAssetStep = ({
               {assets.map(asset => {
                 const assetKey = asset.url;
 
-                if (isUploading) {
+                if (uploadStatus === Status.Uploading || uploadStatus === Status.Intermediate) {
                   return (
                     <GridItem col={4} key={assetKey}>
                       <UploadingAssetCard
@@ -160,7 +179,7 @@ export const PendingAssetStep = ({
           </Button>
         }
         endActions={
-          <Button type="submit" loading={isUploading}>
+          <Button type="submit" loading={uploadStatus === Status.Uploading}>
             {formatMessage(
               {
                 id: getTrad('modal.upload-list.footer.button.singular'),
