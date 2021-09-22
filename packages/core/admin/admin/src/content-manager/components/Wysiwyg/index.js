@@ -67,6 +67,7 @@ const Wysiwyg = ({
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [mediaLibVisible, setMediaLibVisible] = useState(false);
   const [isExpandMode, setIsExpandMode] = useState(false);
+  const [shouldSetValueAfterExpand, setShouldSetValueAfterExpand] = useState(false);
 
   const handleToggleMediaLib = () => setMediaLibVisible(prev => !prev);
   const handleTogglePopover = () => setVisiblePopover(prev => !prev);
@@ -121,9 +122,10 @@ const Wysiwyg = ({
 
   const handleToggleExpand = collapse => {
     setIsExpandMode(prev => !prev);
+    setShouldSetValueAfterExpand(false);
 
-    if (collapse === 'collapse' && value !== undefined) {
-      editorRef.current.setValue(value);
+    if (collapse === 'collapse' && value) {
+      setShouldSetValueAfterExpand(true);
     }
   };
 
@@ -151,6 +153,7 @@ const Wysiwyg = ({
           name={name}
           onChange={onChange}
           placeholder={formattedPlaceholder}
+          shouldSetValueAfterExpand={shouldSetValueAfterExpand}
           textareaRef={textareaRef}
           value={value}
         />

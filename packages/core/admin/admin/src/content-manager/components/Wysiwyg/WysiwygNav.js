@@ -51,7 +51,13 @@ const WysiwygNav = ({
       <Box padding={2} background="neutral100">
         <Row justifyContent="space-between">
           <Row>
-            <Select disabled id="selectTitle" placeholder={selectPlaceholder} size="S">
+            <Select
+              disabled
+              id="selectTitle"
+              placeholder={selectPlaceholder}
+              size="S"
+              aria-label={selectPlaceholder}
+            >
               <Option value="h1">h1</Option>
               <Option value="h2">h2</Option>
               <Option value="h3">h3</Option>

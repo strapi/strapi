@@ -43,6 +43,7 @@ const Informations = () => {
           <Text bold>
             {formatMessage({
               id: getTrad('containers.Edit.information.lastUpdate'),
+              defaultMessage: 'Last update',
             })}
           </Text>
           <Text>{formatRelativeTime(value, unit, { numeric: 'auto' })}</Text>
@@ -51,6 +52,7 @@ const Informations = () => {
           <Text bold>
             {formatMessage({
               id: getTrad('containers.Edit.information.by'),
+              defaultMessage: 'By',
             })}
           </Text>
           <Text>{isCreatingEntry ? '-' : updatedBy}</Text>

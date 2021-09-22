@@ -15,6 +15,7 @@ const Editor = ({
   name,
   onChange,
   placeholder,
+  shouldSetValueAfterExpand,
   textareaRef,
   value,
 }) => {
@@ -34,14 +35,19 @@ const Editor = ({
 
     if (initialValueRef.current) {
       editorRef.current.setValue(initialValueRef.current);
-      // initialValueRef.current = value;
     }
 
     CodeMirror.commands.newlineAndIndentContinueMarkdownList = newlineAndIndentContinueMarkdownList;
-    editorRef.current.on('change', doc =>
-      onChangeRef.current({ target: { name, value: doc.getValue(), type: 'wysiwyg' } })
-    );
+    editorRef.current.on('change', doc => {
+      onChangeRef.current({ target: { name, value: doc.getValue(), type: 'wysiwyg' } });
+    });
   }, [editorRef, textareaRef, name]);
+
+  useEffect(() => {
+    if (shouldSetValueAfterExpand && value) {
+      editorRef.current.setValue(value);
+    }
+  }, [editorRef, shouldSetValueAfterExpand, value]);
 
   useEffect(() => {
     if (isPreviewMode || disabled) {
@@ -75,6 +81,7 @@ Editor.defaultProps = {
   error: undefined,
   isPreviewMode: false,
   placeholder: '',
+  shouldSetValueAfterExpand: false,
   value: '',
 };
 
@@ -86,6 +93,7 @@ Editor.propTypes = {
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
+  shouldSetValueAfterExpand: PropTypes.bool,
   textareaRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   value: PropTypes.string,
 };
