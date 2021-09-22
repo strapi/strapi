@@ -333,6 +333,23 @@ describe('Plugin | Users and Permissions | RoleListPage', () => {
         pointer-events: none;
       }
 
+      .c22 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+      }
+
       .c22 svg > g,
       .c22 svg path {
         fill: #8e8ea9;
