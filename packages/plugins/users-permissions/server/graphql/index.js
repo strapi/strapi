@@ -5,7 +5,14 @@ const getQueries = require('./queries');
 const getMutations = require('./mutations');
 
 module.exports = ({ strapi }) => {
+  const { config: graphQLConfig } = strapi.plugin('graphql');
   const extensionService = strapi.plugin('graphql').service('extension');
+
+  const isShadowCRUDEnabled = graphQLConfig('shadowCRUD', true);
+
+  if (!isShadowCRUDEnabled) {
+    return;
+  }
 
   // Disable Permissions queries & mutations but allow the
   // type to be used/selected in filters or nested resolvers

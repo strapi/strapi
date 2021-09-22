@@ -11,8 +11,14 @@ const DELETE_FILE_MUTATION_NAME = 'removeFile';
 const FILE_INFO_INPUT_TYPE_NAME = 'FileInfoInput';
 
 module.exports = ({ strapi }) => {
-  const { service: getGraphQLService } = strapi.plugin('graphql');
+  const { service: getGraphQLService, config: graphQLConfig } = strapi.plugin('graphql');
   const { service: getUploadService } = strapi.plugin('upload');
+
+  const isShadowCRUDEnabled = graphQLConfig('shadowCRUD', true);
+
+  if (!isShadowCRUDEnabled) {
+    return;
+  }
 
   const { getTypeName, getEntityResponseName } = getGraphQLService('utils').naming;
   const { toEntityResponse } = getGraphQLService('format').returnTypes;
