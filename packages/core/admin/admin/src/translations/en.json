@@ -123,6 +123,7 @@
   "Settings.permissions.users.form.sso.description": "When enabled (ON), users can login via SSO",
   "Settings.permissions.users.listview.header.subtitle": "{number, plural, =0 {# users} one {# user } other {# users}} found",
   "Settings.permissions.users.listview.header.title": "Users",
+  "Settings.permissions.users.tabs.label": "Tabs Permissions",
   "Settings.permissions.select-all-by-permission": "Select all {label} permissions",
   "Settings.permissions.select-by-permission": "Select {label} permission",
   "Settings.profile.form.section.experience.interfaceLanguage": "Interface language",

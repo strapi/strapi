@@ -108,7 +108,13 @@ const Permissions = forwardRef(({ layout, isFormDisabled, permissions }, ref) =>
         onChangeCollectionTypeGlobalActionCheckbox: handleChangeCollectionTypeGlobalActionCheckbox,
       }}
     >
-      <TabGroup id="tabs">
+      <TabGroup
+        id="tabs"
+        label={formatMessage({
+          id: 'Settings.permissions.users.tabs.label',
+          defaultMessage: 'Tabs Permissions',
+        })}
+      >
         <Tabs>
           {TAB_LABELS.map(tabLabel => (
             <Tab key={tabLabel.id}>
