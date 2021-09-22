@@ -30,6 +30,8 @@ export const ImageAssetCard = ({
   thumbnail,
   selected,
   onSelect,
+  onEdit,
+  size,
 }) => {
   const { formatMessage } = useIntl();
 
@@ -37,13 +39,15 @@ export const ImageAssetCard = ({
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        <CardAction position="end">
-          <IconButton
-            label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-            icon={<EditIcon />}
-          />
-        </CardAction>
-        <CardAsset src={thumbnail} />
+        {onEdit && (
+          <CardAction position="end">
+            <IconButton
+              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+              icon={<EditIcon />}
+            />
+          </CardAction>
+        )}
+        <CardAsset src={thumbnail} size={size} />
       </CardHeader>
       <CardBody>
         <CardContent>
@@ -65,15 +69,19 @@ ImageAssetCard.defaultProps = {
   height: undefined,
   width: undefined,
   selected: false,
+  onEdit: undefined,
   onSelect: undefined,
+  size: 'M',
 };
 
 ImageAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   height: PropTypes.number,
   name: PropTypes.string.isRequired,
+  onEdit: PropTypes.func,
   onSelect: PropTypes.func,
   width: PropTypes.number,
   thumbnail: PropTypes.string.isRequired,
   selected: PropTypes.bool,
+  size: PropTypes.oneOf(['S', 'M']),
 };

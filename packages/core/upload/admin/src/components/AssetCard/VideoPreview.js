@@ -7,11 +7,11 @@ const VideoPreviewWrapper = styled.div`
   canvas {
     display: block;
     max-width: 100%;
-    max-height: 100%;
+    max-height: ${({ size }) => (size === 'M' ? 164 / 16 : 88 / 16)}rem;
   }
 `;
 
-export const VideoPreview = ({ url, mime, onLoadDuration }) => {
+export const VideoPreview = ({ url, mime, onLoadDuration, size }) => {
   const [loaded, setLoaded] = useState(false);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -29,7 +29,7 @@ export const VideoPreview = ({ url, mime, onLoadDuration }) => {
   };
 
   return (
-    <VideoPreviewWrapper>
+    <VideoPreviewWrapper size={size}>
       {!loaded && (
         <video ref={videoRef} onLoadedData={handleThumbnailVisibility} src={url}>
           <source type={mime} />
@@ -41,8 +41,13 @@ export const VideoPreview = ({ url, mime, onLoadDuration }) => {
   );
 };
 
+VideoPreview.defaultProps = {
+  size: 'M',
+};
+
 VideoPreview.propTypes = {
   url: PropTypes.string.isRequired,
   mime: PropTypes.string.isRequired,
   onLoadDuration: PropTypes.func.isRequired,
+  size: PropTypes.oneOf(['S', 'M']),
 };

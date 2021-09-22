@@ -20,7 +20,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
   const { formatMessage } = useIntl();
   const [isUploading, setIsUploading] = useState(false);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
 
     setIsUploading(true);
@@ -78,6 +78,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                         extension={asset.ext}
                         assetType={asset.type}
                         file={asset.rawFile}
+                        size="S"
                       />
                     </GridItem>
                   );
@@ -93,6 +94,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                         height={asset.height}
                         width={asset.width}
                         thumbnail={asset.url}
+                        size="S"
                       />
                     </GridItem>
                   );
@@ -107,6 +109,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                         extension={asset.ext}
                         url={asset.url}
                         mime={asset.mime}
+                        size="S"
                       />
                     </GridItem>
                   );
@@ -115,14 +118,19 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                 if (asset.type === AssetType.Unknown) {
                   return (
                     <GridItem col={4} key={assetKey}>
-                      <UnknownAssetCard id={assetKey} name={asset.name} extension={asset.ext} />
+                      <UnknownAssetCard
+                        id={assetKey}
+                        name={asset.name}
+                        extension={asset.ext}
+                        size="S"
+                      />
                     </GridItem>
                   );
                 }
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <DocAssetCard name={asset.name} extension={asset.ext} />
+                    <DocAssetCard name={asset.name} extension={asset.ext} size="S" />
                   </GridItem>
                 );
               })}

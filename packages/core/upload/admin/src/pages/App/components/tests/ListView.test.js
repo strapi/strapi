@@ -127,7 +127,7 @@ describe('MediaLibrary / ListView', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c30 {
+      .c27 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -145,86 +145,31 @@ describe('MediaLibrary / ListView', () => {
         grid-gap: 16px;
       }
 
-      .c5 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c5 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #ffffff;
-      }
-
-      .c5[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c6 svg > g,
-      .c6 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c6:hover svg > g,
-      .c6:hover svg path {
-        fill: #666687;
-      }
-
-      .c6:active svg > g,
-      .c6:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c6[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c6[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
       .c1 {
         background: #ffffff;
         border-radius: 4px;
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c6 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c16 {
+      .c13 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c24 {
+      .c21 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
         border-radius: 4px;
-      }
-
-      .c4 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
       }
 
       .c2 {
@@ -245,7 +190,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -259,7 +204,7 @@ describe('MediaLibrary / ListView', () => {
         align-items: flex-start;
       }
 
-      .c22 {
+      .c19 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -273,14 +218,14 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c8 {
+      .c5 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c7 {
+      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -294,59 +239,59 @@ describe('MediaLibrary / ListView', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c12 {
+      .c9 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c13 {
+      .c10 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c19 {
+      .c16 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c26 {
+      .c23 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c20 {
+      .c17 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c21 {
+      .c18 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c17 {
+      .c14 {
         display: inline-block;
       }
 
-      .c15 {
+      .c12 {
         margin-left: auto;
       }
 
-      .c18 {
+      .c15 {
         margin-left: 4px;
       }
 
-      .c11 {
+      .c8 {
         word-break: break-all;
       }
 
@@ -355,31 +300,31 @@ describe('MediaLibrary / ListView', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c25 {
+      .c22 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c14 {
+      .c11 {
         text-transform: uppercase;
       }
 
-      .c23 canvas {
+      .c20 canvas {
         display: block;
         max-width: 100%;
-        max-height: 100%;
+        max-height: 10.25rem;
       }
 
-      .c27 {
+      .c24 {
         text-transform: uppercase;
       }
 
-      .c29 {
+      .c26 {
         text-transform: uppercase;
       }
 
-      .c28 svg {
+      .c25 svg {
         font-size: 3rem;
       }
 
@@ -401,61 +346,33 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
-                  <span>
-                    <button
-                      aria-disabled="false"
-                      aria-labelledby="tooltip-1"
-                      class="c5 c6"
-                      tabindex="0"
-                      type="button"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div
-                  class="c7"
-                >
                   <img
                     aria-hidden="true"
-                    class="c8"
+                    class="c5"
                     src="http://localhost:1337/uploads/thumbnail_strapi_cover_1fabc982ce_5b43615ed5.png"
                   />
                 </div>
               </div>
               <div
-                class="c9"
+                class="c6"
               >
                 <div
-                  class="c10"
+                  class="c7"
                 >
                   <div
-                    class="c11"
+                    class="c8"
                   >
                     <h2
-                      class="c12"
+                      class="c9"
                       id="card-1-title"
                     >
                       strapi-cover_1fabc982ce.png
                     </h2>
                     <div
-                      class="c13"
+                      class="c10"
                     >
                       <span
-                        class="c14"
+                        class="c11"
                       >
                         png
                       </span>
@@ -463,13 +380,13 @@ describe('MediaLibrary / ListView', () => {
                     </div>
                   </div>
                   <div
-                    class="c15"
+                    class="c12"
                   >
                     <div
-                      class="c16 c17 c18"
+                      class="c13 c14 c15"
                     >
                       <span
-                        class="c19 c20 c21"
+                        class="c16 c17 c18"
                       >
                         Image
                       </span>
@@ -489,39 +406,11 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
-                  <span>
-                    <button
-                      aria-disabled="false"
-                      aria-labelledby="tooltip-3"
-                      class="c5 c6"
-                      tabindex="0"
-                      type="button"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div
-                  class="c7"
-                >
                   <div
-                    class="c22"
+                    class="c19"
                   >
                     <div
-                      class="c23"
+                      class="c20"
                     >
                       <video
                         src="http://localhost:1337/uploads/mov_bbb_2f3907f7aa.mp4"
@@ -535,48 +424,48 @@ describe('MediaLibrary / ListView', () => {
                   </div>
                 </div>
                 <time
-                  class="c24 c25"
+                  class="c21 c22"
                 >
                   <span
-                    class="c26"
+                    class="c23"
                   >
                     ...
                   </span>
                 </time>
               </div>
               <div
-                class="c9"
+                class="c6"
               >
                 <div
-                  class="c10"
+                  class="c7"
                 >
                   <div
-                    class="c11"
+                    class="c8"
                   >
                     <h2
-                      class="c12"
+                      class="c9"
                       id="card-2-title"
                     >
                       mov_bbb.mp4
                     </h2>
                     <div
-                      class="c13"
+                      class="c10"
                     >
                       <span
-                        class="c27"
+                        class="c24"
                       >
                         mp4
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c15"
+                    class="c12"
                   >
                     <div
-                      class="c16 c17 c18"
+                      class="c13 c14 c15"
                     >
                       <span
-                        class="c19 c20 c21"
+                        class="c16 c17 c18"
                       >
                         Video
                       </span>
@@ -596,39 +485,11 @@ describe('MediaLibrary / ListView', () => {
                 <div
                   class="c4"
                 >
-                  <span>
-                    <button
-                      aria-disabled="false"
-                      aria-labelledby="tooltip-5"
-                      class="c5 c6"
-                      tabindex="0"
-                      type="button"
-                    >
-                      <svg
-                        fill="none"
-                        height="1em"
-                        viewBox="0 0 24 24"
-                        width="1em"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          clip-rule="evenodd"
-                          d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                          fill="#212134"
-                          fill-rule="evenodd"
-                        />
-                      </svg>
-                    </button>
-                  </span>
-                </div>
-                <div
-                  class="c7"
-                >
                   <div
-                    class="c22"
+                    class="c19"
                   >
                     <span
-                      class="c28"
+                      class="c25"
                     >
                       <svg
                         aria-label="CARTE MARIAGE AVS - Printemps.pdf"
@@ -648,38 +509,38 @@ describe('MediaLibrary / ListView', () => {
                 </div>
               </div>
               <div
-                class="c9"
+                class="c6"
               >
                 <div
-                  class="c10"
+                  class="c7"
                 >
                   <div
-                    class="c11"
+                    class="c8"
                   >
                     <h2
-                      class="c12"
+                      class="c9"
                       id="card-3-title"
                     >
                       CARTE MARIAGE AVS - Printemps.pdf
                     </h2>
                     <div
-                      class="c13"
+                      class="c10"
                     >
                       <span
-                        class="c29"
+                        class="c26"
                       >
                         pdf
                       </span>
                     </div>
                   </div>
                   <div
-                    class="c15"
+                    class="c12"
                   >
                     <div
-                      class="c16 c17 c18"
+                      class="c13 c14 c15"
                     >
                       <span
-                        class="c19 c20 c21"
+                        class="c16 c17 c18"
                       >
                         Doc
                       </span>
@@ -691,7 +552,7 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c30"
+          class="c27"
         >
           <p
             aria-live="polite"
