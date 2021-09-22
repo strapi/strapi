@@ -73,6 +73,7 @@ const Editor = ({
 Editor.defaultProps = {
   disabled: false,
   error: undefined,
+  isPreviewMode: false,
   placeholder: '',
   value: '',
 };
@@ -81,7 +82,7 @@ Editor.propTypes = {
   disabled: PropTypes.bool,
   editorRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   error: PropTypes.string,
-  isPreviewMode: PropTypes.bool.isRequired,
+  isPreviewMode: PropTypes.bool,
   name: PropTypes.string.isRequired,
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,

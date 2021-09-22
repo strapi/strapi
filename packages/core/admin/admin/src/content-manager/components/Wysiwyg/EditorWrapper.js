@@ -84,33 +84,6 @@ const EditorWrapper = styled.div`
     animation: blink 1.06s steps(1) infinite;
     background-color: #7e7;
   }
-  @-moz-keyframes blink {
-    0% {
-    }
-    50% {
-      background-color: transparent;
-    }
-    100% {
-    }
-  }
-  @-webkit-keyframes blink {
-    0% {
-    }
-    50% {
-      background-color: transparent;
-    }
-    100% {
-    }
-  }
-  @keyframes blink {
-    0% {
-    }
-    50% {
-      background-color: transparent;
-    }
-    100% {
-    }
-  }
 
   /* Can style cursor different in overwrite (non-insert) mode */
   .CodeMirror-overwrite .CodeMirror-cursor {
