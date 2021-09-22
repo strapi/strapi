@@ -485,7 +485,7 @@ const EditViewDataManagerProvider = ({
       }}
     >
       <>
-        {isLoadingForData ? (
+        {isLoadingForData || (!isCreatingEntry && !initialData.id) ? (
           <Main aria-busy="true">
             <LoadingIndicatorPage />
           </Main>
