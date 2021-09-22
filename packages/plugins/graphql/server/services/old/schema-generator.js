@@ -118,7 +118,7 @@ const getFederatedSchema = (schema, resolvers) =>
 const filterDisabledResolvers = (schema, extraResolvers) =>
   filterSchema({
     schema,
-    rootFieldFilter: (operationName, fieldName) => {
+    rootFieldFilter(operationName, fieldName) {
       const resolver = _.get(extraResolvers[operationName], fieldName, true);
 
       // resolvers set to false are filtered from the schema

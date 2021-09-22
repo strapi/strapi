@@ -120,11 +120,7 @@ module.exports = ({ strapi }) => ({
 
   async sendConfirmationEmail(user) {
     const userPermissionService = getService('users-permissions');
-    const pluginStore = await strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'users-permissions',
-    });
+    const pluginStore = await strapi.store({ type: 'plugin', name: 'users-permissions' });
 
     const settings = await pluginStore
       .get({ key: 'email' })

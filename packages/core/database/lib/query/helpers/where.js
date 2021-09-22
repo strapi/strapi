@@ -19,8 +19,6 @@ const OPERATORS = [
   '$null',
   '$notNull',
   '$between',
-  // '$like',
-  // '$regexp',
   '$startsWith',
   '$endsWith',
   '$contains',
@@ -41,8 +39,12 @@ const isOperator = key => OPERATORS.includes(key);
  * @returns {Object}
  */
 const processWhere = (where, ctx, depth = 0) => {
-  if (depth === 0 && !_.isPlainObject(where)) {
-    throw new Error('Where must be an object');
+  if (!_.isArray(where) && !_.isPlainObject(where)) {
+    throw new Error('Where must be an array or an object');
+  }
+
+  if (_.isArray(where)) {
+    return where.map(sub => processWhere(sub, ctx));
   }
 
   const processNested = (where, ctx) => {
@@ -53,7 +55,7 @@ const processWhere = (where, ctx, depth = 0) => {
     return processWhere(where, ctx, depth + 1);
   };
 
-  const { db, uid, qb, alias = qb.alias } = ctx;
+  const { db, uid, qb, alias } = ctx;
 
   const filters = {};
 
@@ -91,7 +93,7 @@ const processWhere = (where, ctx, depth = 0) => {
       if (key.indexOf('.') >= 0) {
         filters[key] = processNested(value, ctx);
       } else {
-        filters[`${alias || qb.alias}.${key}`] = processNested(value, ctx);
+        filters[qb.aliasColumn(key, alias)] = processNested(value, ctx);
       }
       continue;
 
@@ -103,7 +105,12 @@ const processWhere = (where, ctx, depth = 0) => {
       // TODO: pass down some filters (e.g published at)
 
       // attribute
-      const subAlias = createJoin(ctx, { alias, uid, attributeName: key, attribute });
+      const subAlias = createJoin(ctx, {
+        alias: alias || qb.alias,
+        uid,
+        attributeName: key,
+        attribute,
+      });
 
       let nestedWhere = processNested(value, {
         db,
@@ -113,7 +120,7 @@ const processWhere = (where, ctx, depth = 0) => {
       });
 
       if (!_.isPlainObject(nestedWhere) || isOperator(_.keys(nestedWhere)[0])) {
-        nestedWhere = { [`${subAlias}.id`]: nestedWhere };
+        nestedWhere = { [qb.aliasColumn('id', subAlias)]: nestedWhere };
       }
 
       // TODO: use a better merge logic (push to $and when collisions)
@@ -125,7 +132,7 @@ const processWhere = (where, ctx, depth = 0) => {
     if (types.isScalar(attribute.type)) {
       // TODO: convert attribute name to column name
       // TODO: cast to DB type
-      filters[`${alias || qb.alias}.${key}`] = processNested(value, ctx);
+      filters[qb.aliasColumn(key, alias)] = processNested(value, ctx);
       continue;
     }
 
@@ -214,17 +221,6 @@ const applyOperator = (qb, column, operator, value) => {
       qb.whereBetween(column, value);
       break;
     }
-    // case '$regexp': {
-    //   // TODO:
-    //
-    // break;
-    // }
-    // // string
-    // // TODO: use $case to make it case insensitive
-    // case '$like': {
-    //   qb.where(column, 'like', value);
-    // break;
-    // }
 
     // TODO: add casting logic
     case '$startsWith': {
@@ -283,12 +279,12 @@ const applyWhereToColumn = (qb, column, columnWhere) => {
 };
 
 const applyWhere = (qb, where) => {
-  if (Array.isArray(where)) {
-    return qb.where(subQB => where.forEach(subWhere => applyWhere(subQB, subWhere)));
+  if (!_.isArray(where) && !_.isPlainObject(where)) {
+    throw new Error('Where must be an array or an object');
   }
 
-  if (!_.isPlainObject(where)) {
-    throw new Error('Where must be an object');
+  if (_.isArray(where)) {
+    return qb.where(subQB => where.forEach(subWhere => applyWhere(subQB, subWhere)));
   }
 
   Object.keys(where).forEach(key => {
@@ -316,9 +312,10 @@ const applyWhere = (qb, where) => {
 
 const fieldLowerFn = qb => {
   // Postgres requires string to be passed
-  if (qb.client.config.client === 'pg') {
+  if (qb.client.config.client === 'postgres') {
     return 'LOWER(CAST(?? AS VARCHAR))';
   }
+
   return 'LOWER(??)';
 };
 

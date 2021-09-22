@@ -1,34 +1,33 @@
 'use strict';
 
 const { getService } = require('../../../utils');
-const { getDefaultLocale } = require('../utils');
+const { DEFAULT_LOCALE } = require('../../../constants');
 
-// FIXME:
-const updateLocale = (model, ORM, locale) => {
-  if (model.orm === 'bookshelf') {
-    return ORM.knex
-      .update({ locale })
-      .from(model.collectionName)
-      .where({ locale: null });
-  }
-};
-
-// Enable i18n on CT -> Add default locale to all existing entities
-const after = async ({ model, definition, previousDefinition, ORM }) => {
+// if i18N enabled set default locale
+module.exports = async ({ oldContentTypes, contentTypes }) => {
   const { isLocalizedContentType } = getService('content-types');
+  const { getDefaultLocale } = getService('locales');
 
-  if (!isLocalizedContentType(definition) || isLocalizedContentType(previousDefinition)) {
+  if (!oldContentTypes) {
     return;
   }
 
-  const defaultLocale = await getDefaultLocale(model, ORM);
+  for (const uid in contentTypes) {
+    if (!oldContentTypes[uid]) {
+      continue;
+    }
 
-  await updateLocale(model, ORM, defaultLocale);
-};
+    const oldContentType = oldContentTypes[uid];
+    const contentType = contentTypes[uid];
 
-const before = () => {};
+    if (!isLocalizedContentType(oldContentType) && isLocalizedContentType(contentType)) {
+      const defaultLocale = (await getDefaultLocale()) || DEFAULT_LOCALE.code;
 
-module.exports = {
-  before,
-  after,
+      await strapi.db
+        .queryBuilder(uid)
+        .update({ locale: defaultLocale })
+        .where({ locale: null })
+        .execute();
+    }
+  }
 };

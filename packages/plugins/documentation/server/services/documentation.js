@@ -31,18 +31,18 @@ const customComparator = (value1, value2) => {
 };
 
 module.exports = ({ strapi }) => ({
-  areObjectsEquals: function(obj1, obj2) {
+  areObjectsEquals(obj1, obj2) {
     // stringify to remove nested empty objects
     return customIsEqual(this.cleanObject(obj1), this.cleanObject(obj2));
   },
 
   cleanObject: obj => JSON.parse(JSON.stringify(obj)),
 
-  arrayCustomizer: (objValue, srcValue) => {
+  arrayCustomizer(objValue, srcValue) {
     if (_.isArray(objValue)) return objValue.concat(srcValue);
   },
 
-  checkIfAPIDocNeedsUpdate: function(apiName) {
+  checkIfAPIDocNeedsUpdate(apiName) {
     const prevDocumentation = this.createDocObject(this.retrieveDocumentation(apiName));
     const currentDocumentation = this.createDocObject(this.createDocumentationFile(apiName, false));
 
@@ -53,7 +53,7 @@ module.exports = ({ strapi }) => ({
    * Check if the documentation folder with its related version of an API exists
    * @param {String} apiName
    */
-  checkIfDocumentationFolderExists: function(apiName) {
+  checkIfDocumentationFolderExists(apiName) {
     try {
       fs.accessSync(this.getDocumentationPath(apiName));
       return true;
@@ -62,7 +62,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  checkIfPluginDocumentationFolderExists: function(pluginName) {
+  checkIfPluginDocumentationFolderExists(pluginName) {
     try {
       fs.accessSync(this.getPluginDocumentationPath(pluginName));
       return true;
@@ -71,7 +71,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  checkIfPluginDocNeedsUpdate: function(pluginName) {
+  checkIfPluginDocNeedsUpdate(pluginName) {
     const prevDocumentation = this.createDocObject(this.retrieveDocumentation(pluginName, true));
     const currentDocumentation = this.createDocObject(
       this.createPluginDocumentationFile(pluginName, false)
@@ -80,7 +80,7 @@ module.exports = ({ strapi }) => ({
     return !this.areObjectsEquals(prevDocumentation, currentDocumentation);
   },
 
-  checkIfApiDefaultDocumentationFileExist: function(apiName, docName) {
+  checkIfApiDefaultDocumentationFileExist(apiName, docName) {
     try {
       fs.accessSync(this.getAPIOverrideDocumentationPath(apiName, docName));
       return true;
@@ -89,7 +89,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  checkIfPluginDefaultDocumentFileExists: function(pluginName, docName) {
+  checkIfPluginDefaultDocumentFileExists(pluginName, docName) {
     try {
       fs.accessSync(this.getPluginOverrideDocumentationPath(pluginName, docName));
       return true;
@@ -102,7 +102,7 @@ module.exports = ({ strapi }) => ({
    * Check if the documentation folder exists in the documentation plugin
    * @returns {Boolean}
    */
-  checkIfMergedDocumentationFolderExists: function() {
+  checkIfMergedDocumentationFolderExists() {
     try {
       fs.accessSync(this.getMergedDocumentationPath());
       return true;
@@ -116,7 +116,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} targetDir
    *
    */
-  createDocumentationDirectory: function(targetDir) {
+  createDocumentationDirectory(targetDir) {
     const sep = path.sep;
     const initDir = path.isAbsolute(targetDir) ? sep : '';
     const baseDir = '.';
@@ -155,7 +155,7 @@ module.exports = ({ strapi }) => ({
    * Create the apiName.json and unclassified.json files inside an api's documentation/version folder
    * @param {String} apiName
    */
-  createDocumentationFile: function(apiName, writeFile = true) {
+  createDocumentationFile(apiName, writeFile = true) {
     // Retrieve all the routes from an API
     const apiRoutes = this.getApiRoutes(apiName);
     const apiDocumentation = this.generateApiDocumentation(apiName, apiRoutes);
@@ -180,7 +180,7 @@ module.exports = ({ strapi }) => ({
     }, []);
   },
 
-  createPluginDocumentationFile: function(pluginName, writeFile = true) {
+  createPluginDocumentationFile(pluginName, writeFile = true) {
     const pluginRoutes = this.getPluginRoutesWithDescription(pluginName);
     const pluginDocumentation = this.generatePluginDocumentation(pluginName, pluginRoutes);
 
@@ -213,12 +213,12 @@ module.exports = ({ strapi }) => ({
     }, []);
   },
 
-  createDocObject: function(array) {
+  createDocObject(array) {
     // use custom merge for arrays
     return array.reduce((acc, curr) => _.mergeWith(acc, curr, this.arrayCustomizer), {});
   },
 
-  deleteDocumentation: async function(version = this.getDocumentationVersion()) {
+  async deleteDocumentation(version = this.getDocumentationVersion()) {
     const recursiveDeleteFiles = async (folderPath, removeCompleteFolder = true) => {
       // Check if folderExist
       try {
@@ -296,7 +296,7 @@ module.exports = ({ strapi }) => ({
     );
     arrayOfPromises.push(recursiveDeleteFiles(fullDocPath));
 
-    return await Promise.all(arrayOfPromises);
+    return Promise.all(arrayOfPromises);
   },
 
   /**
@@ -305,7 +305,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} endPoint
    * @returns {String} (/products/{id})
    */
-  formatApiEndPoint: endPoint => {
+  formatApiEndPoint(endPoint) {
     return pathToRegexp
       .parse(endPoint)
       .map(token => {
@@ -325,7 +325,7 @@ module.exports = ({ strapi }) => ({
    * @param {Boolean} withoutSpace
    * @return {String}
    */
-  formatTag: (plugin, name, withoutSpace = false) => {
+  formatTag(plugin, name, withoutSpace = false) {
     const formattedPluginName = plugin
       .split('-')
       .map(i => _.upperFirst(i))
@@ -339,7 +339,7 @@ module.exports = ({ strapi }) => ({
     return `${formattedPluginName} - ${formattedName}`;
   },
 
-  generateAssociationSchema: function(attributes, getter) {
+  generateAssociationSchema(attributes, getter) {
     return Object.keys(attributes).reduce(
       (acc, curr) => {
         const attribute = attributes[curr];
@@ -388,7 +388,7 @@ module.exports = ({ strapi }) => ({
    * @param {Array} routes
    * @returns {Object}
    */
-  generateApiDocumentation: function(apiName, routes) {
+  generateApiDocumentation(apiName, routes) {
     return routes.reduce((acc, current) => {
       const [controllerName, controllerMethod] = current.handler.split('.');
       // Retrieve the tag key in the config object
@@ -504,7 +504,7 @@ module.exports = ({ strapi }) => ({
     }, {});
   },
 
-  generateFullDoc: function(version = this.getDocumentationVersion()) {
+  generateFullDoc(version = this.getDocumentationVersion()) {
     const apisDoc = this.retrieveDocumentationFiles(false, version);
     const pluginsDoc = this.retrieveDocumentationFiles(true, version);
     const appDoc = [...apisDoc, ...pluginsDoc];
@@ -538,7 +538,7 @@ module.exports = ({ strapi }) => ({
    * @param {Array} associations
    * @returns {Object}
    */
-  generateMainComponent: function(attributes, associations) {
+  generateMainComponent(attributes, associations) {
     return Object.keys(attributes).reduce(
       (acc, current) => {
         const attribute = attributes[current];
@@ -661,7 +661,7 @@ module.exports = ({ strapi }) => ({
     );
   },
 
-  generatePluginDocumentation: function(pluginName, routes) {
+  generatePluginDocumentation(pluginName, routes) {
     return routes.reduce((acc, current) => {
       const {
         config: { description, prefix },
@@ -776,7 +776,7 @@ module.exports = ({ strapi }) => ({
     }, {});
   },
 
-  generatePluginResponseSchema: function(tag) {
+  generatePluginResponseSchema(tag) {
     const { actionType, name, plugin } = _.isObject(tag) ? tag : { tag };
     const getter = plugin ? ['plugins', plugin, 'models', name.toLowerCase()] : ['models', name];
     const isModelRelated =
@@ -829,7 +829,7 @@ module.exports = ({ strapi }) => ({
     };
   },
 
-  generatePluginVerbResponses: function(routeObject) {
+  generatePluginVerbResponses(routeObject) {
     const {
       config: { tag },
     } = routeObject;
@@ -904,7 +904,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} tag
    * @returns {Object}
    */
-  generateResponses: function(verb, routeObject, tag) {
+  generateResponses(verb, routeObject, tag) {
     const endPoint = routeObject.path.split('/')[1];
     const description = this.generateResponseDescription(verb, tag, endPoint);
     const schema = this.generateResponseSchema(verb, routeObject, tag, endPoint);
@@ -962,7 +962,7 @@ module.exports = ({ strapi }) => ({
    * Retrieve all privates attributes from a model
    * @param {Object} attributes
    */
-  getPrivateAttributes: function(attributes) {
+  getPrivateAttributes(attributes) {
     const privateAttributes = Object.keys(attributes).reduce((acc, current) => {
       if (attributes[current].private === true) {
         acc.push(current);
@@ -979,7 +979,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} tag
    * @returns {Object}
    */
-  generateResponseComponent: function(tag, pluginName = '', isPlugin = false) {
+  generateResponseComponent(tag, pluginName = '', isPlugin = false) {
     // The component's name have to be capitalised
     const [plugin, name] = isPlugin ? this.getModelAndNameForPlugin(tag, pluginName) : [null, null];
     const upperFirstTag = isPlugin ? this.formatTag(plugin, name, true) : _.upperFirst(tag);
@@ -1079,7 +1079,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} endPoint
    * @returns {String}
    */
-  generateResponseDescription: function(verb, tag, endPoint) {
+  generateResponseDescription(verb, tag, endPoint) {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
 
     if (Array.isArray(verb)) {
@@ -1107,7 +1107,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} endPoint
    * @returns {Object}
    */
-  generateResponseSchema: function(verb, routeObject, tag) {
+  generateResponseSchema(verb, routeObject, tag) {
     const { handler } = routeObject;
     let [controller, handlerMethod] = handler.split('.');
     let upperFirstTag = _.upperFirst(tag);
@@ -1207,7 +1207,7 @@ module.exports = ({ strapi }) => ({
     };
   },
 
-  generateTags: function(name, docName, tag = '', isPlugin = false) {
+  generateTags(name, docName, tag = '', isPlugin = false) {
     return [
       {
         name: isPlugin ? tag : _.upperFirst(docName),
@@ -1224,7 +1224,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} endPoint
    * @returns {String}
    */
-  generateVerbDescription: (verb, handler, tag, endPoint, description) => {
+  generateVerbDescription(verb, handler, tag, endPoint, description) {
     const isModelRelated = strapi.models[tag] !== undefined && tag === endPoint;
 
     if (description) {
@@ -1289,7 +1289,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} controllerMethod
    * @param {String} endPoint
    */
-  generateVerbParameters: function(verb, controllerMethod, endPoint) {
+  generateVerbParameters(verb, controllerMethod, endPoint) {
     const params = pathToRegexp
       .parse(endPoint)
       .filter(token => _.isObject(token))
@@ -1319,11 +1319,11 @@ module.exports = ({ strapi }) => ({
    * Retrieve the apis in /api
    * @returns {Array}
    */
-  getApis: () => {
+  getApis() {
     return Object.keys(strapi.api || {});
   },
 
-  getAPIOverrideComponentsDocumentation: function(apiName, docName) {
+  getAPIOverrideComponentsDocumentation(apiName, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getAPIOverrideDocumentationPath(apiName, docName), 'utf8')
@@ -1335,7 +1335,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getAPIDefaultTagsDocumentation: function(name, docName) {
+  getAPIDefaultTagsDocumentation(name, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getAPIOverrideDocumentationPath(name, docName), 'utf8')
@@ -1347,7 +1347,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getAPIDefaultVerbDocumentation: function(apiName, docName, routePath, verb) {
+  getAPIDefaultVerbDocumentation(apiName, docName, routePath, verb) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getAPIOverrideDocumentationPath(apiName, docName), 'utf8')
@@ -1359,7 +1359,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getAPIOverrideDocumentationPath: function(apiName, docName) {
+  getAPIOverrideDocumentationPath(apiName, docName) {
     return path.join(
       strapi.config.appPath,
       'api',
@@ -1376,11 +1376,11 @@ module.exports = ({ strapi }) => ({
    * @param {String}
    * @returns {Array}
    */
-  getApiRoutes: apiName => {
+  getApiRoutes(apiName) {
     return _.get(strapi, ['api', apiName, 'config', 'routes'], []);
   },
 
-  getDocumentationOverridesPath: function(apiName) {
+  getDocumentationOverridesPath(apiName) {
     return path.join(
       strapi.config.appPath,
       'api',
@@ -1396,7 +1396,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} apiName
    * @returns {Path}
    */
-  getDocumentationPath: function(apiName) {
+  getDocumentationPath(apiName) {
     return path.join(
       strapi.config.appPath,
       'api',
@@ -1406,14 +1406,14 @@ module.exports = ({ strapi }) => ({
     );
   },
 
-  getFullDocumentationPath: () => {
+  getFullDocumentationPath() {
     return path.join(strapi.config.appPath, 'extensions', 'documentation', 'documentation');
   },
 
   /**
    * Retrieve the plugin's configuration version
    */
-  getDocumentationVersion: () => {
+  getDocumentationVersion() {
     const version = strapi.config.get('plugin.documentation.info.version');
 
     return version;
@@ -1422,7 +1422,7 @@ module.exports = ({ strapi }) => ({
   /**
    * Retrieve the documentation plugin documentation directory
    */
-  getMergedDocumentationPath: function(version = this.getDocumentationVersion()) {
+  getMergedDocumentationPath(version = this.getDocumentationVersion()) {
     return path.join(
       strapi.config.appPath,
       'extensions',
@@ -1437,7 +1437,7 @@ module.exports = ({ strapi }) => ({
    * @param {Objet} modelAttributes
    * @returns {Object} { associations: [{ name: 'foo', getter: [], tag: 'foos' }], attributes }
    */
-  getModelAttributes: function(modelAttributes) {
+  getModelAttributes(modelAttributes) {
     const associations = [];
     const attributes = Object.keys(modelAttributes)
       .map(attr => {
@@ -1469,7 +1469,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} type
    * @returns {String}
    */
-  getType: type => {
+  getType(type) {
     switch (type) {
       case 'string':
       case 'byte':
@@ -1503,7 +1503,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} type
    * @returns {String}
    */
-  getFormat: type => {
+  getFormat(type) {
     switch (type) {
       case 'date':
         return 'date';
@@ -1516,7 +1516,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getPluginDefaultVerbDocumentation: function(pluginName, docName, routePath, verb) {
+  getPluginDefaultVerbDocumentation(pluginName, docName, routePath, verb) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8')
@@ -1528,7 +1528,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getPluginDefaultTagsDocumentation: function(pluginName, docName) {
+  getPluginDefaultTagsDocumentation(pluginName, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8')
@@ -1540,7 +1540,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getPluginOverrideComponents: function(pluginName, docName) {
+  getPluginOverrideComponents(pluginName, docName) {
     try {
       const documentation = JSON.parse(
         fs.readFileSync(this.getPluginOverrideDocumentationPath(pluginName, docName), 'utf8')
@@ -1552,7 +1552,7 @@ module.exports = ({ strapi }) => ({
     }
   },
 
-  getPluginOverrideDocumentationPath: function(pluginName, docName) {
+  getPluginOverrideDocumentationPath(pluginName, docName) {
     const defaultPath = path.join(
       strapi.config.appPath,
       'extensions',
@@ -1572,7 +1572,7 @@ module.exports = ({ strapi }) => ({
   /**
    * Given a plugin retrieve its documentation version
    */
-  getPluginDocumentationPath: function(pluginName) {
+  getPluginDocumentationPath(pluginName) {
     return path.join(
       strapi.config.appPath,
       'extensions',
@@ -1586,7 +1586,7 @@ module.exports = ({ strapi }) => ({
    * Retrieve all plugins that have a description inside one of its route
    * @return {Arrray}
    */
-  getPluginsWithDocumentationNeeded: function() {
+  getPluginsWithDocumentationNeeded() {
     return Object.keys(strapi.plugins).reduce((acc, current) => {
       const isDocumentationNeeded = this.isPluginDocumentationNeeded(current);
 
@@ -1603,7 +1603,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} pluginName
    * @returns {Array}
    */
-  getPluginRoutesWithDescription: function(pluginName) {
+  getPluginRoutesWithDescription(pluginName) {
     return _.get(strapi, ['plugins', pluginName, 'config', 'routes'], []).filter(
       route => _.get(route, ['config', 'description']) !== undefined
     );
@@ -1615,7 +1615,7 @@ module.exports = ({ strapi }) => ({
    * @param {Sting} pluginName
    * @returns {Array}
    */
-  getModelAndNameForPlugin: (string, pluginName) => {
+  getModelAndNameForPlugin(string, pluginName) {
     return _.replace(string, `${pluginName}-`, `${pluginName}.`).split('.');
   },
 
@@ -1625,7 +1625,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} plugin
    * @returns {Array}
    */
-  getModelForPlugin: function(string, pluginName) {
+  getModelForPlugin(string, pluginName) {
     const [plugin, model] = this.getModelAndNameForPlugin(string, pluginName);
 
     return ['plugins', plugin, 'models', _.lowerCase(model)];
@@ -1636,7 +1636,7 @@ module.exports = ({ strapi }) => ({
    * @param {String} pluginName
    * @returns {Boolean}
    */
-  isPluginDocumentationNeeded: function(pluginName) {
+  isPluginDocumentationNeeded(pluginName) {
     const { pluginsForWhichToGenerateDoc } = strapi.config.get(
       'plugins.documentation.x-strapi-config'
     );
@@ -1656,7 +1656,7 @@ module.exports = ({ strapi }) => ({
    * @param {Object} srcObj
    * @returns {Object}
    */
-  mergeComponents: (initObj, srcObj) => {
+  mergeComponents(initObj, srcObj) {
     const cleanedObj = Object.keys(_.get(initObj, 'schemas', {})).reduce((acc, current) => {
       const targetObj = _.has(_.get(srcObj, ['schemas'], {}), current) ? srcObj : initObj;
 
@@ -1668,7 +1668,7 @@ module.exports = ({ strapi }) => ({
     return _.merge(cleanedObj, srcObj);
   },
 
-  mergePaths: function(initObj, srcObj) {
+  mergePaths(initObj, srcObj) {
     return Object.keys(initObj.paths).reduce((acc, current) => {
       if (_.has(_.get(srcObj, ['paths'], {}), current)) {
         const verbs = Object.keys(initObj.paths[current]).reduce((acc1, curr) => {
@@ -1689,7 +1689,7 @@ module.exports = ({ strapi }) => ({
     }, {});
   },
 
-  mergeTags: (initObj, srcObj) => {
+  mergeTags(initObj, srcObj) {
     return _.get(srcObj, 'tags', _.get(initObj, 'tags', []));
   },
 
@@ -1699,7 +1699,7 @@ module.exports = ({ strapi }) => ({
    * @param {Object} srcObj
    * @returns {Object}
    */
-  mergeVerbObject: function(initObj, srcObj) {
+  mergeVerbObject(initObj, srcObj) {
     return _.mergeWith(initObj, srcObj, (objValue, srcValue) => {
       if (_.isPlainObject(objValue)) {
         return Object.assign(objValue, srcValue);
@@ -1709,7 +1709,7 @@ module.exports = ({ strapi }) => ({
     });
   },
 
-  retrieveDocumentation: function(name, isPlugin = false) {
+  retrieveDocumentation(name, isPlugin = false) {
     const documentationPath = isPlugin
       ? [strapi.config.appPath, 'extensions', name, 'documentation', this.getDocumentationVersion()]
       : [strapi.config.appPath, 'api', name, 'documentation', this.getDocumentationVersion()];
@@ -1741,7 +1741,7 @@ module.exports = ({ strapi }) => ({
    * @param {Boolean} isPlugin
    * @returns {Array}
    */
-  retrieveDocumentationFiles: function(isPlugin = false, version = this.getDocumentationVersion()) {
+  retrieveDocumentationFiles(isPlugin = false, version = this.getDocumentationVersion()) {
     const array = isPlugin ? this.getPluginsWithDocumentationNeeded() : this.getApis();
 
     return array.reduce((acc, current) => {
@@ -1826,7 +1826,7 @@ module.exports = ({ strapi }) => ({
     }, []);
   },
 
-  retrieveDocumentationVersions: function() {
+  retrieveDocumentationVersions() {
     return fs
       .readdirSync(this.getFullDocumentationPath())
       .map(version => {
@@ -1846,15 +1846,11 @@ module.exports = ({ strapi }) => ({
       .filter(x => x);
   },
 
-  retrieveFrontForm: async function() {
+  async retrieveFrontForm() {
     const config = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'documentation',
-        key: 'config',
-      })
+      .store({ type: 'plugin', name: 'documentation', key: 'config' })
       .get();
+
     const forms = JSON.parse(JSON.stringify(form));
 
     _.set(forms, [0, 0, 'value'], config.restrictedAccess);

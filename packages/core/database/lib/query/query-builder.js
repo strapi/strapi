@@ -32,19 +32,13 @@ const createQueryBuilder = (uid, db) => {
 
     select(args) {
       state.type = 'select';
-      state.select = _.uniq(_.castArray(args)).map(col => this.aliasColumn(col));
+      state.select = _.uniq(_.castArray(args));
 
       return this;
     },
 
     addSelect(args) {
-      _.uniq(_.castArray(args))
-        .map(col => this.aliasColumn(col))
-        .forEach(toSelect => {
-          if (!state.select.includes(toSelect)) {
-            state.select.push(toSelect);
-          }
-        });
+      state.select = _.uniq([...state.select, ..._.castArray(args)]);
 
       return this;
     },
@@ -62,6 +56,10 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
+    ref(name) {
+      return db.connection.ref(name);
+    },
+
     update(data) {
       state.type = 'update';
       state.data = data;
@@ -77,9 +75,11 @@ const createQueryBuilder = (uid, db) => {
     },
 
     where(where = {}) {
-      const processedWhere = helpers.processWhere(where, { qb: this, uid, db });
+      if (!_.isPlainObject(where)) {
+        throw new Error('Where must be an object');
+      }
 
-      state.where.push(processedWhere);
+      state.where.push(where);
 
       return this;
     },
@@ -95,7 +95,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     orderBy(orderBy) {
-      state.orderBy = helpers.processOrderBy(orderBy, { qb: this, uid, db });
+      state.orderBy = orderBy;
       return this;
     },
 
@@ -105,7 +105,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     populate(populate) {
-      state.populate = helpers.processPopulate(populate, { qb: this, uid, db });
+      state.populate = populate;
       return this;
     },
 
@@ -166,43 +166,83 @@ const createQueryBuilder = (uid, db) => {
       return this;
     },
 
-    aliasColumn(columnName) {
+    mustUseAlias() {
+      return ['select', 'count'].includes(state.type);
+    },
+
+    aliasColumn(columnName, alias) {
       if (typeof columnName !== 'string') {
         return columnName;
       }
 
-      if (columnName.indexOf('.') >= 0) return columnName;
-      return this.alias + '.' + columnName;
+      if (columnName.indexOf('.') >= 0) {
+        return columnName;
+      }
+
+      if (!_.isNil(alias)) {
+        return `${alias}.${columnName}`;
+      }
+
+      return this.mustUseAlias() ? `${this.alias}.${columnName}` : columnName;
     },
 
     raw(...args) {
       return db.connection.raw(...args);
     },
 
+    shouldUseSubQuery() {
+      return ['delete', 'update'].includes(state.type) && state.joins.length > 0;
+    },
+
+    runSubQuery() {
+      this.select('id');
+      const subQB = this.getKnexQuery();
+
+      const nestedSubQuery = db.connection.select('id').from(subQB.as('subQuery'));
+
+      return db
+        .connection(tableName)
+        [state.type]()
+        .whereIn('id', nestedSubQuery);
+    },
+
+    processState() {
+      state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
+      state.where = helpers.processWhere(state.where, { qb: this, uid, db });
+      state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
+    },
+
     getKnexQuery() {
-      const aliasedTableName = state.type === 'insert' ? tableName : { [this.alias]: tableName };
-
-      const qb = db.connection(aliasedTableName);
-
       if (!state.type) {
         this.select('*');
       }
 
+      const aliasedTableName = this.mustUseAlias() ? { [this.alias]: tableName } : tableName;
+
+      const qb = db.connection(aliasedTableName);
+
+      if (this.shouldUseSubQuery()) {
+        return this.runSubQuery();
+      }
+
+      this.processState();
+
       switch (state.type) {
         case 'select': {
           if (state.select.length === 0) {
-            state.select = [this.aliasColumn('*')];
+            state.select = ['*'];
           }
 
-          if (state.joins.length > 0 && !state.groupBy) {
+          if (state.joins.length > 0 && _.isEmpty(state.groupBy)) {
             // add a discting when making joins and if we don't have a groupBy
             // TODO: make sure we return the right data
-            qb.distinct(`${this.alias}.id`);
+            qb.distinct(this.aliasColumn('id'));
+
             // TODO: add column if they aren't there already
             state.select.unshift(...state.orderBy.map(({ column }) => column));
           }
 
-          qb.select(state.select);
+          qb.select(state.select.map(column => this.aliasColumn(column)));
           break;
         }
         case 'count': {
@@ -220,12 +260,15 @@ const createQueryBuilder = (uid, db) => {
         }
         case 'update': {
           qb.update(state.data);
-
           break;
         }
         case 'delete': {
-          qb.del();
+          qb.delete();
 
+          break;
+        }
+        case 'truncate': {
+          db.truncate();
           break;
         }
       }
@@ -250,10 +293,12 @@ const createQueryBuilder = (uid, db) => {
         qb.groupBy(state.groupBy);
       }
 
+      // if there are joins and it is a delete or update use a sub query
       if (state.where) {
         helpers.applyWhere(qb, state.where);
       }
 
+      // if there are joins and it is a delete or update use a sub query
       if (state.search) {
         qb.where(subQb => {
           helpers.applySearch(subQb, state.search, { alias: this.alias, db, uid });

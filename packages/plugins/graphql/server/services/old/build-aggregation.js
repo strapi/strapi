@@ -216,7 +216,7 @@ const preProcessGroupByData = function({ result, fieldKey, filters }) {
   return _.map(_result, value => {
     return {
       key: value._id.toString(),
-      connection: () => {
+      connection() {
         // filter by the grouped by value in next connection
 
         return {
@@ -288,7 +288,7 @@ const createGroupByFieldsResolver = function(model, fields) {
             .map(v => '' + v); // convert to string
           return values.map(v => ({
             key: v,
-            connection: () => {
+            connection() {
               return {
                 ..._.omit(filters, ['limit']), // we shouldn't carry limit to sub-field
                 where: {

@@ -14,11 +14,7 @@ const { getService } = require('../utils');
 const usersPermissionsActions = require('./users-permissions-actions');
 
 module.exports = async () => {
-  const pluginStore = strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'users-permissions',
-  });
+  const pluginStore = strapi.store({ type: 'plugin', name: 'users-permissions' });
 
   await initGrant(pluginStore);
   await initEmails(pluginStore);

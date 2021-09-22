@@ -35,7 +35,7 @@ module.exports = function(strapi) {
      * Initialize the hook
      */
 
-    initialize: () => {
+    initialize() {
       if (
         _.isEmpty(strapi.models) ||
         !_.pickBy(strapi.config.connections, {
@@ -97,7 +97,7 @@ module.exports = function(strapi) {
                 .replace(strapi.config.appPath, '')}`
             );
 
-            return await cb();
+            return cb();
           }
 
           let cache = await redis.get(serial);

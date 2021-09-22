@@ -7,11 +7,7 @@ const keys = {
 };
 
 const getStore = () => {
-  return strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'content_manager',
-  });
+  return strapi.store({ type: 'plugin', name: 'content_manager' });
 };
 
 /** Model configuration */

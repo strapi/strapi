@@ -18,7 +18,7 @@ const {
 const maxLengthIsGreaterThanOrEqualToMinLength = {
   name: 'isGreaterThanMin',
   message: 'maxLength must be greater or equal to minLength',
-  test: function(value) {
+  test(value) {
     const { minLength } = this.parent;
     if (!_.isUndefined(minLength) && !_.isUndefined(value) && value < minLength) {
       return false;
@@ -237,7 +237,7 @@ const getTypeShape = (attribute, { modelType, attributes } = {}) => {
           .string()
           .test({
             name: 'Check max component nesting is 1 lvl',
-            test: function(compoUID) {
+            test(compoUID) {
               const targetCompo = strapi.components[compoUID];
               if (!targetCompo) return true; // ignore this error as it will fail beforehand
 

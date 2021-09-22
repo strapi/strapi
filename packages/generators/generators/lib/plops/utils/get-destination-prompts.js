@@ -22,7 +22,7 @@ module.exports = (action, basePath) => {
       type: 'list',
       message: 'Which API is this for?',
       name: 'api',
-      choices: async () => {
+      async choices() {
         const apiPath = join(basePath, 'api');
         const exists = await fs.pathExists(apiPath);
 
@@ -45,7 +45,7 @@ module.exports = (action, basePath) => {
       type: 'list',
       message: 'Which plugin is this for?',
       name: 'plugin',
-      choices: async () => {
+      async choices() {
         const pluginsPath = join(basePath, 'plugins');
         const exists = await fs.pathExists(pluginsPath);
 

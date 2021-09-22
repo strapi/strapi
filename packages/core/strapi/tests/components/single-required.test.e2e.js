@@ -228,7 +228,12 @@ describe('Non repeatable and required component', () => {
       });
 
       expect(updateRes.statusCode).toBe(200);
-      expect(updateRes.body.data).toMatchObject(res.body.data);
+      expect(updateRes.body.data).toMatchObject({
+        id: res.body.data.id,
+        attributes: {
+          field: res.body.data.attributes.field,
+        },
+      });
 
       const getRes = await rq.get(`/${res.body.data.id}`, {
         qs: {
@@ -237,7 +242,12 @@ describe('Non repeatable and required component', () => {
       });
 
       expect(getRes.statusCode).toBe(200);
-      expect(getRes.body.data).toMatchObject(res.body.data);
+      expect(getRes.body.data).toMatchObject({
+        id: res.body.data.id,
+        attributes: {
+          field: res.body.data.attributes.field,
+        },
+      });
     });
 
     test('Throws if component is null', async () => {
