@@ -1032,7 +1032,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-1"
-                              class="c10 c11 c12 c35"
+                              class="c10 c13 c12 c35"
                               label="Firstname"
                               tabindex="-1"
                             >
@@ -1080,7 +1080,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-5"
-                              class="c10 c11 c12 c35"
+                              class="c10 c13 c12 c35"
                               label="Lastname"
                               tabindex="-1"
                             >
@@ -1102,7 +1102,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-7"
-                              class="c10 c11 c12 c35"
+                              class="c10 c13 c12 c35"
                               label="Email"
                               tabindex="-1"
                             >
@@ -1124,7 +1124,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-9"
-                              class="c10 c11 c12 c35"
+                              class="c10 c13 c12 c35"
                               label="Roles"
                               tabindex="-1"
                             >
@@ -1146,7 +1146,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <button
                               aria-labelledby="tooltip-11"
-                              class="c10 c11 c12 c35"
+                              class="c10 c13 c12 c35"
                               label="Username"
                               tabindex="-1"
                             >
@@ -1168,7 +1168,7 @@ describe('ADMIN | Pages | USERS | ListPage', () => {
                           <span>
                             <span
                               aria-labelledby="tooltip-13"
-                              class="c10 c11 c12 c35"
+                              class="c10 c13 c12 c35"
                               label="Active User"
                               tabindex="-1"
                             >
