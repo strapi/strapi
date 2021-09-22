@@ -17,17 +17,17 @@ const { PUBLISHED_AT_ATTRIBUTE } = contentTypesUtils.constants;
 
 // TODO: to remove once the front is migrated
 const convertOldQuery = params => {
-  const obj = {};
+  const query = {};
 
   Object.keys(params).forEach(key => {
     if (key.startsWith('_')) {
-      obj[key.slice(1)] = params[key];
+      query[key.slice(1)] = params[key];
     } else {
-      obj[key] = params[key];
+      query[key] = params[key];
     }
   });
 
-  return obj;
+  return query;
 };
 
 const transformCommonParams = (params = {}) => {
