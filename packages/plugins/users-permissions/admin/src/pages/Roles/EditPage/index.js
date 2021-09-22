@@ -13,7 +13,6 @@ import {
   Form,
   useNotification,
 } from '@strapi/helper-plugin';
-
 import UsersPermissions from '../../../components/UsersPermissions';
 import getTrad from '../../../utils/getTrad';
 import pluginId from '../../../pluginId';
@@ -33,7 +32,7 @@ const EditPage = () => {
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
 
-  const handleCreateRoleSubmit = async data => {
+  const handleEditRoleSubmit = async data => {
     // Set loading state
     lockApp();
     setIsSubmitting(true);
@@ -75,7 +74,7 @@ const EditPage = () => {
       <Formik
         enableReinitialize
         initialValues={{ name: role.name, description: role.description }}
-        onSubmit={handleCreateRoleSubmit}
+        onSubmit={handleEditRoleSubmit}
         validationSchema={schema}
       >
         {({ handleSubmit, values, handleChange, errors }) => (
