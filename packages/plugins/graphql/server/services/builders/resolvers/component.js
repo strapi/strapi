@@ -1,7 +1,7 @@
 'use strict';
 
 module.exports = ({ strapi }) => ({
-  buildComponentResolver: ({ contentTypeUID, attributeName }) => {
+  buildComponentResolver({ contentTypeUID, attributeName }) {
     const { transformArgs } = strapi.plugin('graphql').service('builders').utils;
 
     return async (parent, args = {}) => {

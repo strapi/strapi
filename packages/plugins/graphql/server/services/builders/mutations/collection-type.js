@@ -7,6 +7,7 @@ module.exports = ({ strapi }) => {
 
   const { naming } = getService('utils');
   const { transformArgs } = getService('builders').utils;
+  const { toEntityResponse } = getService('format').returnTypes;
 
   const {
     getCreateMutationTypeName,
@@ -39,7 +40,7 @@ module.exports = ({ strapi }) => {
 
         const value = await create(parent, transformedArgs);
 
-        return { value, info: { args: transformedArgs, resourceUID: uid } };
+        return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
     });
   };
@@ -76,7 +77,7 @@ module.exports = ({ strapi }) => {
 
         const value = await update(parent, transformedArgs);
 
-        return { value, info: { args: transformedArgs, resourceUID: uid } };
+        return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
     });
   };
@@ -110,7 +111,7 @@ module.exports = ({ strapi }) => {
 
         const value = await deleteResolver(parent, args);
 
-        return { value, info: { args: transformedArgs, resourceUID: uid } };
+        return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
     });
   };

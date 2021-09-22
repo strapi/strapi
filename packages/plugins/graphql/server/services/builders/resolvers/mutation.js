@@ -5,7 +5,7 @@ const { pick } = require('lodash/fp');
 const pickCreateArgs = pick(['params', 'data', 'files']);
 
 module.exports = ({ strapi }) => ({
-  buildMutationsResolvers: ({ contentType }) => {
+  buildMutationsResolvers({ contentType }) {
     const { uid } = contentType;
 
     return {

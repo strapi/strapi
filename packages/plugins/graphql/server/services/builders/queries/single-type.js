@@ -7,6 +7,7 @@ module.exports = ({ strapi }) => {
 
   const { naming } = getService('utils');
   const { transformArgs, getContentTypeArgs } = getService('builders').utils;
+  const { toEntityResponse } = getService('format').returnTypes;
 
   const { getFindOneQueryName, getEntityResponseName } = naming;
 
@@ -60,7 +61,7 @@ module.exports = ({ strapi }) => {
 
         const value = queriesResolvers.find(parent, transformedArgs);
 
-        return { value, info: { args: transformedArgs, resourceUID: uid } };
+        return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
     });
   };

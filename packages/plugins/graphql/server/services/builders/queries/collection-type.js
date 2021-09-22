@@ -7,6 +7,7 @@ module.exports = ({ strapi }) => {
 
   const { naming } = getService('utils');
   const { transformArgs, getContentTypeArgs } = getService('builders').utils;
+  const { toEntityResponse, toEntityResponseCollection } = getService('format').returnTypes;
 
   const {
     getFindOneQueryName,
@@ -80,7 +81,7 @@ module.exports = ({ strapi }) => {
 
         const value = findOne(parent, transformedArgs);
 
-        return { value, info: { args: transformedArgs, resourceUID: uid } };
+        return toEntityResponse(value, { args: transformedArgs, resourceUID: uid });
       },
     });
   };
@@ -110,7 +111,7 @@ module.exports = ({ strapi }) => {
 
         const nodes = await find(parent, transformedArgs);
 
-        return { nodes, info: { args: transformedArgs, resourceUID: uid } };
+        return toEntityResponseCollection(nodes, { args: transformedArgs, resourceUID: uid });
       },
     });
   };

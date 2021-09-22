@@ -3,7 +3,7 @@
 const { omit } = require('lodash/fp');
 
 module.exports = ({ strapi }) => ({
-  buildQueriesResolvers: ({ contentType }) => {
+  buildQueriesResolvers({ contentType }) {
     const { uid } = contentType;
 
     return {
