@@ -14,7 +14,7 @@ import { Stack } from '@strapi/parts/Stack';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTrad } from '../../utils';
 import ComponentInitializer from './ComponentInitializer';
-// import NonRepeatableComponent from '../NonRepeatableComponent';
+import NonRepeatableComponent from '../NonRepeatableComponent';
 // import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
 import select from './utils/select';
@@ -79,6 +79,13 @@ const FieldComponent = ({
         {!isRepeatable && !isInitialized && (
           <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
         )}
+        {!isRepeatable && isInitialized && (
+          <NonRepeatableComponent
+            componentUid={componentUid}
+            isFromDynamicZone={isFromDynamicZone}
+            name={name}
+          />
+        )}
       </Stack>
     </Box>
   );
@@ -123,11 +130,11 @@ const FieldComponent = ({
   //     )}
 
   //     {!isRepeatable && isInitialized && (
-  //       <NonRepeatableComponent
-  //         componentUid={componentUid}
-  //         isFromDynamicZone={isFromDynamicZone}
-  //         name={name}
-  //       />
+  // <NonRepeatableComponent
+  //   componentUid={componentUid}
+  //   isFromDynamicZone={isFromDynamicZone}
+  //   name={name}
+  // />
   //     )}
   //     {isRepeatable && (
   //       <RepeatableComponent

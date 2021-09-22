@@ -140,8 +140,8 @@ const EditView = ({
                       hasRadius
                       background="neutral0"
                       shadow="tableShadow"
-                      paddingLeft={8}
-                      paddingRight={8}
+                      paddingLeft={6}
+                      paddingRight={6}
                       paddingTop={6}
                       paddingBottom={6}
                     >

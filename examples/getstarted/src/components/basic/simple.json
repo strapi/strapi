@@ -2,12 +2,21 @@
   "collectionName": "components_basic_simples",
   "info": {
     "name": "simple",
-    "icon": "address-card"
+    "icon": "address-card",
+    "description": ""
   },
   "options": {},
   "attributes": {
     "name": {
       "type": "string"
+    },
+    "test": {
+      "type": "string"
+    },
+    "nestedd": {
+      "type": "component",
+      "repeatable": false,
+      "component": "default.dish"
     }
   }
 }
