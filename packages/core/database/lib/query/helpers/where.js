@@ -4,6 +4,7 @@ const _ = require('lodash/fp');
 
 const types = require('../../types');
 const { createJoin } = require('./join');
+const { toColumnName } = require('./transform');
 
 const GROUP_OPERATORS = ['$and', '$or'];
 const OPERATORS = [
@@ -56,13 +57,14 @@ const processWhere = (where, ctx, depth = 0) => {
   };
 
   const { db, uid, qb, alias } = ctx;
+  const meta = db.metadata.get(uid);
 
   const filters = {};
 
   // for each key in where
   for (const key in where) {
     const value = where[key];
-    const attribute = db.metadata.get(uid).attributes[key];
+    const attribute = meta.attributes[key];
 
     // if operator $and $or then loop over them
     if (GROUP_OPERATORS.includes(key)) {
@@ -87,14 +89,8 @@ const processWhere = (where, ctx, depth = 0) => {
     }
 
     if (!attribute) {
-      // TODO: if targeting a column name instead of an attribute
+      filters[qb.aliasColumn(key, alias)] = processNested(value, ctx);
 
-      // if key as an alias don't add one
-      if (key.indexOf('.') >= 0) {
-        filters[key] = processNested(value, ctx);
-      } else {
-        filters[qb.aliasColumn(key, alias)] = processNested(value, ctx);
-      }
       continue;
 
       // throw new Error(`Attribute ${key} not found on model ${uid}`);
@@ -130,9 +126,10 @@ const processWhere = (where, ctx, depth = 0) => {
     }
 
     if (types.isScalar(attribute.type)) {
-      // TODO: convert attribute name to column name
+      const columnName = toColumnName(meta, key);
+
       // TODO: cast to DB type
-      filters[qb.aliasColumn(key, alias)] = processNested(value, ctx);
+      filters[qb.aliasColumn(columnName, alias)] = processNested(value, ctx);
       continue;
     }
 

@@ -94,7 +94,7 @@ const Header = ({
     }
 
     if (hasDraftAndPublish && canPublish) {
-      const isPublished = !isEmpty(initialData.published_at);
+      const isPublished = !isEmpty(initialData.publishedAt);
       const isLoading = isPublished ? status === 'unpublish-pending' : status === 'publish-pending';
       const labelID = isPublished ? 'app.utils.unpublish' : 'app.utils.publish';
       /* eslint-disable indent */

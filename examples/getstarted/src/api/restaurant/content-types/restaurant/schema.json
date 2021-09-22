@@ -34,7 +34,7 @@
       "targetField": "name",
       "pluginOptions": {}
     },
-    "price_range": {
+    "priceRange": {
       "enum": [
         "very_cheap",
         "cheap",
@@ -49,7 +49,7 @@
         }
       }
     },
-    "closing_period": {
+    "closingPeriod": {
       "component": "default.closingperiod",
       "type": "component",
       "pluginOptions": {
@@ -58,7 +58,7 @@
         }
       }
     },
-    "contact_email": {
+    "contactEmail": {
       "type": "email",
       "pluginOptions": {
         "i18n": {
@@ -115,7 +115,7 @@
         }
       }
     },
-    "short_description": {
+    "shortDescription": {
       "type": "text",
       "pluginOptions": {
         "i18n": {
@@ -163,7 +163,7 @@
       "target": "api::menu.menu",
       "inversedBy": "restaurant"
     },
-    "opening_times": {
+    "openingTimes": {
       "component": "default.openingtimes",
       "type": "component",
       "repeatable": true,

@@ -6,7 +6,7 @@ const { createTestBuilder } = require('../../../../test/helpers/builder');
 const { createStrapiInstance } = require('../../../../test/helpers/strapi');
 const { createAuthRequest } = require('../../../../test/helpers/request');
 
-const CREATOR_FIELDS = ['updated_by', 'created_by'];
+const CREATOR_FIELDS = ['updatedBy', 'createdBy'];
 
 const builder = createTestBuilder();
 let strapi;

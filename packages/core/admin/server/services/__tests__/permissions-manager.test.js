@@ -263,7 +263,7 @@ describe('Permissions Manager', () => {
       [
         'Literal nested property with removable op',
         {
-          'created_by.roles': {
+          'createdBy.roles': {
             $elemMatch: {
               id: {
                 $in: [1, 2, 3],
@@ -272,7 +272,7 @@ describe('Permissions Manager', () => {
           },
         },
         {
-          'created_by.roles.id_in': [1, 2, 3],
+          'createdBy.roles.id_in': [1, 2, 3],
         },
       ],
     ];

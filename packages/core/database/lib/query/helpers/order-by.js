@@ -4,10 +4,12 @@ const _ = require('lodash/fp');
 
 const types = require('../../types');
 const { createJoin } = require('./join');
+const { toColumnName } = require('./transform');
 
 const processOrderBy = (orderBy, ctx) => {
   const { db, uid, qb, alias } = ctx;
-  const { attributes } = db.metadata.get(uid);
+  const meta = db.metadata.get(uid);
+  const { attributes } = meta;
 
   if (typeof orderBy === 'string') {
     const attribute = attributes[orderBy];
@@ -16,7 +18,9 @@ const processOrderBy = (orderBy, ctx) => {
       throw new Error(`Attribute ${orderBy} not found on model ${uid}`);
     }
 
-    return [{ column: qb.aliasColumn(orderBy, alias) }];
+    const columnName = toColumnName(meta, orderBy);
+
+    return [{ column: qb.aliasColumn(columnName, alias) }];
   }
 
   if (Array.isArray(orderBy)) {
@@ -33,7 +37,9 @@ const processOrderBy = (orderBy, ctx) => {
       }
 
       if (types.isScalar(attribute.type)) {
-        return { column: qb.aliasColumn(key, alias), order: direction };
+        const columnName = toColumnName(meta, key);
+
+        return { column: qb.aliasColumn(columnName, alias), order: direction };
       }
 
       if (attribute.type === 'relation') {

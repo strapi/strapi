@@ -36,7 +36,7 @@ const CustomTable = ({
         ...displayedHeaders,
         {
           key: '__published_at_temp_key__',
-          name: 'published_at',
+          name: 'publishedAt',
           fieldSchema: {
             type: 'custom',
           },
@@ -46,7 +46,7 @@ const CustomTable = ({
             sortable: true,
           },
           cellFormatter: cellData => {
-            const isPublished = !isEmpty(cellData.published_at);
+            const isPublished = !isEmpty(cellData.publishedAt);
 
             return <State isPublished={isPublished} />;
           },

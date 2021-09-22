@@ -182,7 +182,7 @@ describe('Test Graphql API End to End', () => {
       });
     });
 
-    test.skip('List posts with `created_by` and `updated_by`', async () => {
+    test.skip('List posts with `createdBy` and `updatedBy`', async () => {
       const res = await graphqlQuery({
         query: /* GraphQL */ `
           {
@@ -191,10 +191,10 @@ describe('Test Graphql API End to End', () => {
               name
               bigint
               nullable
-              created_by {
+              createdBy {
                 username
               }
-              updated_by {
+              updatedBy {
                 username
               }
             }
@@ -208,7 +208,7 @@ describe('Test Graphql API End to End', () => {
       expect(res.body.error).toBeUndefined();
 
       // since the posts are created without AdminUser, it should return null
-      expect(res.body.data.posts[0].created_by).toBeNull();
+      expect(res.body.data.posts[0].createdBy).toBeNull();
     });
 
     test.each([

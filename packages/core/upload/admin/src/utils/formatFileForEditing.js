@@ -8,7 +8,7 @@ const formatFileForEditing = file => {
     id: file.id,
     file: {
       ...pick(file, ['size', 'ext', 'width', 'height', 'mime', 'name', 'url']),
-      created_at: file.created_at || file.createdAt,
+      createdAt: file.createdAt,
     },
     fileInfo: pick(file, ['alternativeText', 'caption', 'name']),
     hasError: false,

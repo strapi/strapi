@@ -7,8 +7,8 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         address: 'test',
         addresseses: [],
         common: 'common',
-        created_at: '2021-03-17T15:34:05.866Z',
-        created_by: {
+        createdAt: '2021-03-17T15:34:05.866Z',
+        createdBy: {
           blocked: null,
           email: 'cyril@strapi.io',
           firstname: 'cyril',
@@ -26,13 +26,13 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           {
             id: 13,
             locale: 'en',
-            published_at: null,
+            publishedAt: null,
           },
         ],
         name: 'name',
-        published_at: null,
-        updated_at: '2021-03-17T15:34:18.958Z',
-        updated_by: {
+        publishedAt: null,
+        updatedAt: '2021-03-17T15:34:18.958Z',
+        updatedBy: {
           blocked: null,
           email: 'cyril@strapi.io',
           firstname: 'cyril',
@@ -50,17 +50,17 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           address: { type: 'relation' },
           addresseses: { type: 'relation' },
           common: { pluginOptions: { i18n: { localized: true } }, type: 'text' },
-          created_at: { type: 'timestamp' },
+          createdAt: { type: 'timestamp' },
           id: { type: 'integer' },
           name: { pluginOptions: { i18n: { localized: true } } },
-          updated_at: { type: 'timestamp' },
+          updatedAt: { type: 'timestamp' },
         },
       };
       const initLocalizations = [
         {
           id: 14,
           locale: 'fr-FR',
-          published_at: null,
+          publishedAt: null,
         },
       ];
 
@@ -71,7 +71,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           {
             id: 14,
             locale: 'fr-FR',
-            published_at: null,
+            publishedAt: null,
           },
         ],
         name: 'name',

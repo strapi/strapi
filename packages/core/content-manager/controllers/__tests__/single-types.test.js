@@ -172,8 +172,8 @@ describe('Single Types', () => {
     expect(createFn).toHaveBeenCalledWith(
       expect.objectContaining({
         title: 'test',
-        created_by: 1,
-        updated_by: 1,
+        createdBy: 1,
+        updatedBy: 1,
       }),
       modelUid,
       { params: {} }

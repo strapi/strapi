@@ -94,7 +94,7 @@ describe('Core API - Basic + compo', () => {
       attributes: product,
     });
 
-    expect(body.data.attributes.published_at).toBeUndefined();
+    expect(body.data.attributes.publishedAt).toBeUndefined();
     data.productsWithCompo.push(body.data);
   });
 
@@ -113,7 +113,7 @@ describe('Core API - Basic + compo', () => {
     expect(body.data[0]).toMatchObject(data.productsWithCompo[0]);
 
     body.data.forEach(p => {
-      expect(p.attributes.published_at).toBeUndefined();
+      expect(p.attributes.publishedAt).toBeUndefined();
     });
   });
 
@@ -147,8 +147,8 @@ describe('Core API - Basic + compo', () => {
       attributes: product,
     });
 
-    expect(body.data.attributes.published_at).toBeUndefined();
-    expect(body.data.published_at).toBeUndefined();
+    expect(body.data.attributes.publishedAt).toBeUndefined();
+    expect(body.data.publishedAt).toBeUndefined();
 
     data.productsWithCompo[0] = body.data;
   });
@@ -165,7 +165,7 @@ describe('Core API - Basic + compo', () => {
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject(data.productsWithCompo[0]);
 
-    expect(body.data.attributes.published_at).toBeUndefined();
+    expect(body.data.attributes.publishedAt).toBeUndefined();
     data.productsWithCompo.shift();
   });
 

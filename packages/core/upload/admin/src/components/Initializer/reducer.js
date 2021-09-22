@@ -3,7 +3,7 @@ import { SET_FILE_MODE_TIMESTAMPS } from './constants';
 
 const initialState = {
   // TODO: rename to camelCase
-  fileModelTimestamps: ['created_at', 'updated_at'],
+  fileModelTimestamps: ['createdAt', 'updatedAt'],
 };
 
 const reducer = (state = initialState, action) =>

@@ -8,8 +8,8 @@ import { getDisplayedValue } from '../../utils';
 
 const SingleValue = props => {
   const Component = components.SingleValue;
-  const hasDraftAndPublish = has(get(props, 'data.value'), 'published_at');
-  const isDraft = isEmpty(get(props, 'data.value.published_at'));
+  const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
+  const isDraft = isEmpty(get(props, 'data.value.publishedAt'));
   const mainField = get(props, ['selectProps', 'mainField'], {});
   const value = getDisplayedValue(mainField.schema.type, props.data.label, mainField.name);
 

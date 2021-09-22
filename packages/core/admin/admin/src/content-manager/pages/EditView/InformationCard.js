@@ -18,13 +18,13 @@ const InformationCard = () => {
   const { formatMessage } = useIntl();
 
   const updatedAtName = useMemo(
-    () => get(layout, ['options', 'timestamps'], ['created_at', 'updated_at'])[1],
+    () => get(layout, ['options', 'timestamps'], ['createdAt', 'updatedAt'])[1],
     [layout]
   );
 
   const updatedBy = useMemo(() => {
-    const firstname = get(initialData, ['updated_by', 'firstname'], '');
-    const lastname = get(initialData, ['updated_by', 'lastname'], '');
+    const firstname = get(initialData, ['updatedBy', 'firstname'], '');
+    const lastname = get(initialData, ['updatedBy', 'lastname'], '');
 
     return `${firstname} ${lastname}`;
   }, [initialData]);
@@ -68,7 +68,7 @@ const InformationCard = () => {
       </SubWrapper>
       <Padded top size="sm" />
       {hasDraftAndPublish && (
-        <StatusWrapper isGreen={initialData.published_at}>
+        <StatusWrapper isGreen={initialData.publishedAt}>
           <Text fontSize="sm" lineHeight="18px">
             •
           </Text>
@@ -83,7 +83,7 @@ const InformationCard = () => {
             <Text lineHeight="18px" fontWeight="bold">
               {formatMessage({
                 id: getTrad(
-                  initialData.published_at
+                  initialData.publishedAt
                     ? 'containers.Edit.information.publishedVersion'
                     : 'containers.Edit.information.draftVersion'
                 ),

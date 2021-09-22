@@ -21,7 +21,7 @@ function ListItem({
 }) {
   const to = `/content-manager/collectionType/${targetModel}/${data.id}`;
 
-  const hasDraftAndPublish = has(data, 'published_at');
+  const hasDraftAndPublish = has(data, 'publishedAt');
 
   const originalIndex = findRelation(data.id).index;
   const [{ isDragging }, drag, preview] = useDrag({

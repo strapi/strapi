@@ -57,7 +57,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     ref(name) {
-      return db.connection.ref(name);
+      return db.connection.ref(helpers.toColumnName(meta, name));
     },
 
     update(data) {
@@ -168,20 +168,20 @@ const createQueryBuilder = (uid, db) => {
       return ['select', 'count'].includes(state.type);
     },
 
-    aliasColumn(columnName, alias) {
-      if (typeof columnName !== 'string') {
-        return columnName;
+    aliasColumn(key, alias) {
+      if (typeof key !== 'string') {
+        return key;
       }
 
-      if (columnName.indexOf('.') >= 0) {
-        return columnName;
+      if (key.indexOf('.') >= 0) {
+        return key;
       }
 
       if (!_.isNil(alias)) {
-        return `${alias}.${columnName}`;
+        return `${alias}.${key}`;
       }
 
-      return this.mustUseAlias() ? `${this.alias}.${columnName}` : columnName;
+      return this.mustUseAlias() ? `${this.alias}.${key}` : key;
     },
 
     raw(...args) {
@@ -205,9 +205,11 @@ const createQueryBuilder = (uid, db) => {
     },
 
     processState() {
+      state.select = state.select.map(field => helpers.toColumnName(meta, field));
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
+      state.data = helpers.toRow(meta, state.data);
     },
 
     getKnexQuery() {
@@ -299,7 +301,7 @@ const createQueryBuilder = (uid, db) => {
       // if there are joins and it is a delete or update use a sub query
       if (state.search) {
         qb.where(subQb => {
-          helpers.applySearch(subQb, state.search, { alias: this.alias, db, uid });
+          helpers.applySearch(subQb, state.search, { qb: this, db, uid });
         });
       }
 

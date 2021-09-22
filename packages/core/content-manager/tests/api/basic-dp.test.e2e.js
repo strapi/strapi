@@ -75,15 +75,15 @@ describe('CM API - Basic + draftAndPublish', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeNull();
+    expect(res.body.publishedAt).toBeNull();
     data.productsWithDP.push(res.body);
   });
 
-  test('Create a product + cannot overwrite published_at', async () => {
+  test('Create a product + cannot overwrite publishedAt', async () => {
     const product = {
       name: 'Product 2',
       description: 'Product description',
-      published_at: '2020-08-20T10:27:55.866Z',
+      publishedAt: '2020-08-20T10:27:55.866Z',
     };
     const res = await rq({
       method: 'POST',
@@ -92,8 +92,8 @@ describe('CM API - Basic + draftAndPublish', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, 'published_at'));
-    expect(res.body.published_at).toBeNull();
+    expect(res.body).toMatchObject(_.omit(product, 'publishedAt'));
+    expect(res.body.publishedAt).toBeNull();
     data.productsWithDP.push(res.body);
   });
 
@@ -115,7 +115,7 @@ describe('CM API - Basic + draftAndPublish', () => {
       ])
     );
     res.body.results.forEach(p => {
-      expect(p.published_at).toBeNull();
+      expect(p.publishedAt).toBeNull();
     });
   });
 
@@ -131,17 +131,17 @@ describe('CM API - Basic + draftAndPublish', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, 'published_at'));
+    expect(res.body).toMatchObject(_.omit(product, 'publishedAt'));
     expect(res.body.id).toEqual(data.productsWithDP[0].id);
-    expect(res.body.published_at).toBeNull();
+    expect(res.body.publishedAt).toBeNull();
     data.productsWithDP[0] = res.body;
   });
 
-  test('Update product + cannot overwrite published_at', async () => {
+  test('Update product + cannot overwrite publishedAt', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      published_at: '2020-08-27T09:50:50.465Z',
+      publishedAt: '2020-08-27T09:50:50.465Z',
     };
     const res = await rq({
       method: 'PUT',
@@ -150,13 +150,13 @@ describe('CM API - Basic + draftAndPublish', () => {
     });
 
     expect(res.statusCode).toBe(200);
-    expect(res.body).toMatchObject(_.omit(product, ['published_at']));
-    expect(res.body.published_at).toBeNull();
+    expect(res.body).toMatchObject(_.omit(product, ['publishedAt']));
+    expect(res.body.publishedAt).toBeNull();
     expect(res.body.id).toEqual(data.productsWithDP[0].id);
     data.productsWithDP[0] = res.body;
   });
 
-  test('Publish a product, expect published_at to be defined', async () => {
+  test('Publish a product, expect publishedAt to be defined', async () => {
     const entry = data.productsWithDP[0];
 
     let { body } = await rq({
@@ -166,7 +166,7 @@ describe('CM API - Basic + draftAndPublish', () => {
 
     data.productsWithDP[0] = body;
 
-    expect(body.published_at).toBeISODate();
+    expect(body.publishedAt).toBeISODate();
   });
 
   test('Publish article1, expect article1 to be already published', async () => {
@@ -191,7 +191,7 @@ describe('CM API - Basic + draftAndPublish', () => {
 
     data.productsWithDP[0] = body;
 
-    expect(body.published_at).toBeNull();
+    expect(body.publishedAt).toBeNull();
   });
 
   test('Unpublish article1, expect article1 to already be a draft', async () => {
@@ -215,7 +215,7 @@ describe('CM API - Basic + draftAndPublish', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithDP[0]);
     expect(res.body.id).toEqual(data.productsWithDP[0].id);
-    expect(res.body.published_at).toBeNull();
+    expect(res.body.publishedAt).toBeNull();
     data.productsWithDP.shift();
   });
 
