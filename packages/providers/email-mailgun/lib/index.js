@@ -4,14 +4,14 @@ const mailgunFactory = require('mailgun-js');
 const { removeUndefined } = require('@strapi/utils');
 
 module.exports = {
-  init: (providerOptions = {}, settings = {}) => {
+  init(providerOptions = {}, settings = {}) {
     const mailgun = mailgunFactory({
       mute: false,
       ...providerOptions,
     });
 
     return {
-      send: options => {
+      send(options) {
         return new Promise((resolve, reject) => {
           const { from, to, cc, bcc, replyTo, subject, text, html, ...rest } = options;
 

@@ -70,12 +70,7 @@ module.exports = {
     const sanitizedBody = pm.pickPermittedFieldsOf(body, { subject: userModel });
 
     const advanced = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
     if (!email) return ctx.badRequest('missing.email');
@@ -147,12 +142,7 @@ module.exports = {
 
   async update(ctx) {
     const advancedConfigs = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'users-permissions',
-        key: 'advanced',
-      })
+      .store({ type: 'plugin', name: 'users-permissions', key: 'advanced' })
       .get();
 
     const {

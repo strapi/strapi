@@ -101,7 +101,7 @@ module.exports = strapi => {
       const serverParams = {
         schema,
         uploads: false,
-        context: ({ ctx }) => {
+        context({ ctx }) {
           // Initiliase loaders for this request.
           // TODO: set loaders in the context not globally
 
@@ -111,7 +111,7 @@ module.exports = strapi => {
             context: ctx,
           };
         },
-        formatError: err => {
+        formatError(err) {
           const formatError = _.get(config, 'formatError', null);
 
           return typeof formatError === 'function' ? formatError(err) : err;

@@ -81,7 +81,7 @@ const createAuthentication = () => {
       }
 
       if (typeof auth.strategy.verify === 'function') {
-        return await auth.strategy.verify(auth, config);
+        return auth.strategy.verify(auth, config);
       }
 
       return;

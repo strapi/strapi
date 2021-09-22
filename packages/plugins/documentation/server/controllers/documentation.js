@@ -15,7 +15,7 @@ const _ = require('lodash');
 const koaStatic = require('koa-static');
 
 module.exports = {
-  getInfos: async ctx => {
+  async getInfos(ctx) {
     try {
       const service = strapi.plugins.documentation.services.documentation;
       const docVersions = service.retrieveDocumentationVersions();
@@ -84,7 +84,7 @@ module.exports = {
               'documentation',
               'public'
             );
-            return await koaStatic(staticFolder)(ctx, next);
+            return koaStatic(staticFolder)(ctx, next);
           } catch (e) {
             strapi.log.error(e);
           }
@@ -136,7 +136,7 @@ module.exports = {
             'documentation',
             'public'
           );
-          return await koaStatic(staticFolder)(ctx, next);
+          return koaStatic(staticFolder)(ctx, next);
         } catch (e) {
           strapi.log.error(e);
         }
@@ -154,12 +154,7 @@ module.exports = {
     } = ctx.request;
 
     const { password: storedPassword } = await strapi
-      .store({
-        environment: '',
-        type: 'plugin',
-        name: 'documentation',
-        key: 'config',
-      })
+      .store({ type: 'plugin', name: 'documentation', key: 'config' })
       .get();
 
     const isValid = await strapi.plugins['users-permissions'].services.user.validatePassword(
@@ -180,7 +175,7 @@ module.exports = {
     );
   },
 
-  regenerateDoc: async ctx => {
+  async regenerateDoc(ctx) {
     const service = strapi.plugins.documentation.services.documentation;
     const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
     const {
@@ -224,7 +219,7 @@ module.exports = {
     }
   },
 
-  deleteDoc: async ctx => {
+  async deleteDoc(ctx) {
     strapi.reload.isWatching = false;
     const service = strapi.plugins.documentation.services.documentation;
     const documentationVersions = service.retrieveDocumentationVersions().map(el => el.version);
@@ -260,17 +255,16 @@ module.exports = {
     }
   },
 
-  updateSettings: async ctx => {
+  async updateSettings(ctx) {
     const {
       admin,
       body: { restrictedAccess, password },
     } = ctx.request;
+
     const usersPermService = strapi.plugins['users-permissions'].services;
-    const pluginStore = strapi.store({
-      environment: '',
-      type: 'plugin',
-      name: 'documentation',
-    });
+
+    const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
+
     const prevConfig = await pluginStore.get({ key: 'config' });
 
     if (restrictedAccess && _.isEmpty(password)) {

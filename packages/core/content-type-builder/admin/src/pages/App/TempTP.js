@@ -1,5 +1,6 @@
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
+import 'bootstrap/dist/css/bootstrap.css';
 
 const theme = {
   main: {

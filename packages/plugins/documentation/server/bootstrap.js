@@ -41,11 +41,8 @@ module.exports = async () => {
     );
   }
 
-  const pluginStore = strapi.store({
-    environment: '',
-    type: 'plugin',
-    name: 'documentation',
-  });
+  const pluginStore = strapi.store({ type: 'plugin', name: 'documentation' });
+
   const restrictedAccess = await pluginStore.get({ key: 'config' });
 
   if (!restrictedAccess) {

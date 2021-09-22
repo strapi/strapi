@@ -22,21 +22,37 @@ const coreStoreModel = {
   },
 };
 
-const createCoreStore = ({ environment: defaultEnv, db }) => {
-  return (source = {}) => {
-    async function get(params = {}) {
-      const { key, environment = defaultEnv, type = 'core', name = '', tag = '' } = Object.assign(
-        {},
-        source,
-        params
-      );
+const createCoreStore = ({ db }) => {
+  const mergeParams = (defaultParams, params) => {
+    return {
+      ...defaultParams,
+      ...params,
+    };
+  };
+
+  const store = function(defaultParams = {}) {
+    return {
+      get: params => store.get(mergeParams(defaultParams, params)),
+      set: params => store.set(mergeParams(defaultParams, params)),
+      delete: params => store.delete(mergeParams(defaultParams, params)),
+    };
+  };
+
+  Object.assign(store, {
+    /**
+     * Get value from the core store
+     * @param {Object} params
+     * @returns {*}
+     */
+    async get(params = {}) {
+      const { key, type = 'core', environment, name, tag } = params;
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
       const where = {
         key: `${prefix}_${key}`,
-        environment,
-        tag,
+        environment: environment || null,
+        tag: tag || null,
       };
 
       const data = await db.query('strapi::core-store').findOne({ where });
@@ -57,71 +73,70 @@ const createCoreStore = ({ environment: defaultEnv, db }) => {
           return new Date(data.value);
         }
       } else if (data.type === 'number') {
-        return parseFloat(data.value);
+        return Number(data.value);
       } else {
         return null;
       }
-    }
+    },
 
-    async function set(params = {}) {
-      const { key, value, environment = defaultEnv, type, name, tag = '' } = Object.assign(
-        {},
-        source,
-        params
-      );
+    /**
+     * Set value in the core store
+     * @param {Object} params
+     * @returns {*}
+     */
+    async set(params = {}) {
+      const { key, value, type, environment, name, tag } = params;
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
       const where = {
         key: `${prefix}_${key}`,
-        environment,
-        tag,
+        environment: environment || null,
+        tag: tag || null,
       };
 
       const data = await db.query('strapi::core-store').findOne({ where });
 
       if (data) {
-        Object.assign(data, {
-          value: JSON.stringify(value) || value.toString(),
-          type: (typeof value).toString(),
+        return db.query('strapi::core-store').update({
+          where: { id: data.id },
+          data: {
+            value: JSON.stringify(value) || value.toString(),
+            type: typeof value,
+          },
         });
-
-        await db.query('strapi::core-store').update({ where: { id: data.id }, data });
-      } else {
-        const data = Object.assign({}, where, {
-          value: JSON.stringify(value) || value.toString(),
-          type: (typeof value).toString(),
-          tag,
-        });
-
-        await db.query('strapi::core-store').create({ data });
       }
-    }
 
-    async function deleteFn(params = {}) {
-      const { key, environment = defaultEnv, type, name, tag = '' } = Object.assign(
-        {},
-        source,
-        params
-      );
+      return db.query('strapi::core-store').create({
+        data: {
+          ...where,
+          value: JSON.stringify(value) || value.toString(),
+          type: typeof value,
+        },
+      });
+    },
+
+    /**
+     * Deletes a value from the core store
+     * @param {Object} params
+     * @returns {*}
+     */
+    async delete(params = {}) {
+      const { key, environment, type, name, tag } = params;
 
       const prefix = `${type}${name ? `_${name}` : ''}`;
 
       const where = {
         key: `${prefix}_${key}`,
-        environment,
-        tag,
+        environment: environment || null,
+        tag: tag || null,
       };
 
-      await db.query('strapi::core-store').delete({ where });
-    }
+      return db.query('strapi::core-store').delete({ where });
+    },
+  });
 
-    return {
-      get,
-      set,
-      delete: deleteFn,
-    };
-  };
+  return store;
 };
 
 module.exports = {

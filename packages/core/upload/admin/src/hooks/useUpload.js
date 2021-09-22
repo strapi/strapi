@@ -1,54 +1,48 @@
 import axios from 'axios';
+import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from 'react-query';
-import { axiosInstance } from '../utils';
+import { useIntl } from 'react-intl';
+import { axiosInstance, getTrad } from '../utils';
 import pluginId from '../pluginId';
 
 const endpoint = `/${pluginId}`;
 
-const uploadAssets = async cancellableAssets => {
-  const requests = cancellableAssets.map(({ rawFile, cancelToken }) => {
-    const formData = new FormData();
+const uploadAsset = (file, cancelToken, onProgress) => {
+  const formData = new FormData();
 
-    formData.append('files', rawFile);
-    formData.append('fileInfo', JSON.stringify(rawFile));
+  formData.append('files', file);
+  formData.append('fileInfo', JSON.stringify(file));
 
-    return axiosInstance({
-      method: 'post',
-      url: endpoint,
-      cancelToken,
-      headers: {},
-      data: formData,
-    });
-  });
-
-  return Promise.allSettled(requests);
+  return axiosInstance({
+    method: 'post',
+    url: endpoint,
+    headers: {},
+    data: formData,
+    cancelToken: cancelToken.token,
+    onUploadProgress({ total, loaded }) {
+      onProgress((loaded / total) * 100);
+    },
+  }).then(res => res.data);
 };
 
-export const useUpload = (assets, onSuccess) => {
+export const useUpload = () => {
+  const [progress, setProgress] = useState(0);
+  const { formatMessage } = useIntl();
   const queryClient = useQueryClient();
-  const cancellableAssets = assets.map(asset => ({
-    ...asset,
-    cancelToken: axios.CancelToken.source().token,
-  }));
+  const tokenRef = useRef(axios.CancelToken.source());
 
-  const mutation = useMutation(uploadAssets, {
-    onSuccess: res => {
-      const assets = res
-        .map(assetResponse => assetResponse.value.data)
-        .reduce((acc, curr) => acc.concat(curr), []);
-
+  const mutation = useMutation(asset => uploadAsset(asset, tokenRef.current, setProgress), {
+    onSuccess: assets => {
       // Coupled with the cache of useAssets
       queryClient.setQueryData('assets', cachedAssets => cachedAssets.concat(assets));
-
-      onSuccess();
     },
   });
 
-  const cancel = index => {
-    cancellableAssets[index].cancelToken.cancel('Operation canceled by the user.');
-  };
+  const upload = asset => mutation.mutate(asset);
+  const cancel = () =>
+    tokenRef.current.cancel(
+      formatMessage({ id: getTrad('modal.upload.cancelled'), defaultMessage: '' })
+    );
 
-  const upload = () => mutation.mutate(cancellableAssets);
-
-  return { upload, cancel, isError: mutation.isError, isLoading: mutation.isLoading };
+  return { upload, cancel, error: mutation.error, progress };
 };

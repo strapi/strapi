@@ -23,12 +23,15 @@ describe('ImageAssetCard', () => {
           height={40}
           width={40}
           thumbnail="http://somewhere.com/hello.png"
+          selected={false}
+          onSelect={jest.fn()}
+          onEdit={jest.fn()}
         />
       </ThemeProvider>
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c21 {
+      .c23 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -46,14 +49,14 @@ describe('ImageAssetCard', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c8 {
+      .c10 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c15 {
+      .c17 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
@@ -61,6 +64,12 @@ describe('ImageAssetCard', () => {
       }
 
       .c3 {
+        position: absolute;
+        top: 12px;
+        left: 12px;
+      }
+
+      .c5 {
         position: absolute;
         top: 12px;
         right: 12px;
@@ -84,7 +93,7 @@ describe('ImageAssetCard', () => {
         align-items: center;
       }
 
-      .c9 {
+      .c11 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -98,14 +107,14 @@ describe('ImageAssetCard', () => {
         align-items: flex-start;
       }
 
-      .c7 {
+      .c9 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c6 {
+      .c8 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -119,52 +128,119 @@ describe('ImageAssetCard', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c11 {
+      .c13 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c12 {
+      .c14 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c18 {
+      .c20 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c19 {
+      .c21 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c20 {
+      .c22 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c16 {
+      .c18 {
         display: inline-block;
       }
 
-      .c14 {
+      .c16 {
         margin-left: auto;
       }
 
-      .c17 {
+      .c19 {
         margin-left: 4px;
       }
 
-      .c10 {
+      .c4 {
+        margin: 0;
+        height: 18px;
+        min-width: 18px;
+        border-radius: 4px;
+        border: 1px solid #c0c0cf;
+        -webkit-appearance: none;
+        background-color: #ffffff;
+      }
+
+      .c4:checked {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c4:checked:after {
+        content: '';
+        display: block;
+        position: relative;
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSJ3aGl0ZSIKICAvPgo8L3N2Zz4=) no-repeat no-repeat center center;
+        width: 10px;
+        height: 10px;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c4:checked:disabled:after {
+        background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAiIGhlaWdodD0iOCIgdmlld0JveD0iMCAwIDEwIDgiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CiAgPHBhdGgKICAgIGQ9Ik04LjU1MzIzIDAuMzk2OTczQzguNjMxMzUgMC4zMTYzNTUgOC43NjA1MSAwLjMxNTgxMSA4LjgzOTMxIDAuMzk1NzY4TDkuODYyNTYgMS40MzQwN0M5LjkzODkzIDEuNTExNTcgOS45MzkzNSAxLjYzNTkgOS44NjM0OSAxLjcxMzlMNC4wNjQwMSA3LjY3NzI0QzMuOTg1OSA3Ljc1NzU1IDMuODU3MDcgNy43NTgwNSAzLjc3ODM0IDcuNjc4MzRMMC4xMzg2NiAzLjk5MzMzQzAuMDYxNzc5OCAzLjkxNTQ5IDAuMDYxNzEwMiAzLjc5MDMyIDAuMTM4NTA0IDMuNzEyNEwxLjE2MjEzIDIuNjczNzJDMS4yNDAzOCAyLjU5NDMyIDEuMzY4NDMgMi41OTQyMiAxLjQ0NjggMi42NzM0OEwzLjkyMTc0IDUuMTc2NDdMOC41NTMyMyAwLjM5Njk3M1oiCiAgICBmaWxsPSIjOEU4RUE5IgogIC8+Cjwvc3ZnPg==) no-repeat no-repeat center center;
+      }
+
+      .c4:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c4:indeterminate {
+        background-color: #4945ff;
+        border: 1px solid #4945ff;
+      }
+
+      .c4:indeterminate:after {
+        content: '';
+        display: block;
+        position: relative;
+        color: white;
+        height: 2px;
+        width: 10px;
+        background-color: #ffffff;
+        left: 50%;
+        top: 50%;
+        -webkit-transform: translateX(-50%) translateY(-50%);
+        -ms-transform: translateX(-50%) translateY(-50%);
+        transform: translateX(-50%) translateY(-50%);
+      }
+
+      .c4:indeterminate:disabled {
+        background-color: #dcdce4;
+        border: 1px solid #c0c0cf;
+      }
+
+      .c4:indeterminate:disabled:after {
+        background-color: #8e8ea9;
+      }
+
+      .c12 {
         word-break: break-all;
       }
 
@@ -173,7 +249,7 @@ describe('ImageAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c4 {
+      .c6 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -185,44 +261,44 @@ describe('ImageAssetCard', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c4 svg {
+      .c6 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c4 svg > g,
-      .c4 svg path {
+      .c6 svg > g,
+      .c6 svg path {
         fill: #ffffff;
       }
 
-      .c4[aria-disabled='true'] {
+      .c6[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c5 svg > g,
-      .c5 svg path {
+      .c7 svg > g,
+      .c7 svg path {
         fill: #8e8ea9;
       }
 
-      .c5:hover svg > g,
-      .c5:hover svg path {
+      .c7:hover svg > g,
+      .c7:hover svg path {
         fill: #666687;
       }
 
-      .c5:active svg > g,
-      .c5:active svg path {
+      .c7:active svg > g,
+      .c7:active svg path {
         fill: #a5a5ba;
       }
 
-      .c5[aria-disabled='true'] {
+      .c7[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c5[aria-disabled='true'] svg path {
+      .c7[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c13 {
+      .c15 {
         text-transform: uppercase;
       }
 
@@ -238,11 +314,20 @@ describe('ImageAssetCard', () => {
             <div
               class="c3"
             >
+              <input
+                aria-labelledby="card-1-title"
+                class="c4"
+                type="checkbox"
+              />
+            </div>
+            <div
+              class="c5"
+            >
               <span>
                 <button
                   aria-disabled="false"
                   aria-labelledby="tooltip-1"
-                  class="c4 c5"
+                  class="c6 c7"
                   tabindex="0"
                   type="button"
                 >
@@ -264,35 +349,35 @@ describe('ImageAssetCard', () => {
               </span>
             </div>
             <div
-              class="c6"
+              class="c8"
             >
               <img
                 aria-hidden="true"
-                class="c7"
+                class="c9"
                 src="http://somewhere.com/hello.png"
               />
             </div>
           </div>
           <div
-            class="c8"
+            class="c10"
           >
             <div
-              class="c9"
+              class="c11"
             >
               <div
-                class="c10"
+                class="c12"
               >
                 <h2
-                  class="c11"
+                  class="c13"
                   id="card-1-title"
                 >
                   hello.png
                 </h2>
                 <div
-                  class="c12"
+                  class="c14"
                 >
                   <span
-                    class="c13"
+                    class="c15"
                   >
                     png
                   </span>
@@ -300,13 +385,13 @@ describe('ImageAssetCard', () => {
                 </div>
               </div>
               <div
-                class="c14"
+                class="c16"
               >
                 <div
-                  class="c15 c16 c17"
+                  class="c17 c18 c19"
                 >
                   <span
-                    class="c18 c19 c20"
+                    class="c20 c21 c22"
                   >
                     Image
                   </span>
@@ -316,7 +401,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c21"
+          class="c23"
         >
           <p
             aria-live="polite"

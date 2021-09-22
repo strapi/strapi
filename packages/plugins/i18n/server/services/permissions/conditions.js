@@ -5,7 +5,7 @@ const conditions = [
     displayName: 'Has Locale Access',
     name: 'has-locale-access',
     plugin: 'i18n',
-    handler: (user, options) => {
+    handler(user, options) {
       const { locales } = options.permission.properties || {};
       const { superAdminCode } = strapi.admin.services.role.constants;
 

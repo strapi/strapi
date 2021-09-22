@@ -32,7 +32,7 @@ module.exports = async (ctx, next) => {
     const [controller, action] = actionConfig.split('.');
 
     if (controller && action) {
-      return await target.controllers[controller.toLowerCase()][action](ctx);
+      return target.controllers[controller.toLowerCase()][action](ctx);
     }
   }
 

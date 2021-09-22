@@ -1,5 +1,5 @@
 import { Down, Up } from '@strapi/icons';
-import { Box, Checkbox, Row } from '@strapi/parts';
+import { Box, BaseCheckbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/Collapse/utils/constants';
 import { get, omit } from 'lodash';
 import PropTypes from 'prop-types';
@@ -176,7 +176,7 @@ const Collapse = ({
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
                     {hasConditions && <TinyDot />}
-                    <Checkbox
+                    <BaseCheckbox
                       disabled={isFormDisabled || IS_DISABLED}
                       name={checkboxName}
                       aria-label={formatMessage(
@@ -205,7 +205,7 @@ const Collapse = ({
               return (
                 <Cell key={actionId} justifyContent="center" alignItems="center">
                   {hasConditions && <TinyDot />}
-                  <Checkbox
+                  <BaseCheckbox
                     disabled={isFormDisabled || IS_DISABLED}
                     indeterminate={hasConditions}
                     name={checkboxName}

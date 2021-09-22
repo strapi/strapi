@@ -4,12 +4,15 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-// import { Inputs as InputsIndex } from '@buffetjs/custom';
-// import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import {
+  NotAllowedInput,
+  // useLibrary
+} from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
+import Wysiwyg from '../Wysiwyg';
+import InputJSON from '../InputJSON';
 import GenericInput from './GenericInput';
-// import InputJSONWithErrors from '../InputJSONWithErrors';
 // import SelectWrapper from '../SelectWrapper';
 // import WysiwygWithErrors from '../WysiwygWithErrors';
 // import InputUID from '../InputUID';
@@ -30,7 +33,7 @@ function Inputs({
   keys,
   labelAction,
   metadatas,
-  onBlur,
+
   onChange,
   readableFields,
   shouldNotRunValidations,
@@ -173,14 +176,15 @@ function Inputs({
   }
 
   if (!shouldDisplayNotAllowedInput) {
-    return 'NOT ALLOWED INPUT';
-    // return (
-    //   <NotAllowedInput
-    //     label={metadatas.label}
-    //     labelAction={labelAction}
-    //     error={errorMessage}
-    //   />
-    // );
+    return (
+      <NotAllowedInput
+        description={description ? { id: description, defaultMessage: description } : null}
+        intlLabel={{ id: label, defaultMessage: label }}
+        labelAction={labelAction}
+        error={errorId}
+        name={keys}
+      />
+    );
   }
 
   if (type === 'relation') {
@@ -206,27 +210,23 @@ function Inputs({
       // {...metadatas}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
-      // autoFocus={autoFocus}
       description={description ? { id: description, defaultMessage: description } : null}
       disabled={shouldDisableField}
       error={errorId}
-      // inputDescription={description}
       labelAction={labelAction}
       contentTypeUID={currentContentTypeLayout.uid}
       customInputs={{
-        // json: InputJSONWithErrors,
-        // wysiwyg: WysiwygWithErrors,
         // uid: InputUID,
         // ...fields,
-        json: () => <div>TODO json</div>,
+        json: InputJSON,
         media: () => <div>TODO media</div>,
         uid: () => <div>TODO uid</div>,
-        wysiwyg: () => <div>TODO wysiwyg</div>,
+        // wysiwyg: () => <div>TODO wysiwyg</div>,
+        wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
       attribute={fieldSchema}
       name={keys}
-      onBlur={onBlur}
       onChange={onChange}
       options={options}
       placeholder={placeholder ? { id: placeholder, defaultMessage: placeholder } : null}
@@ -242,7 +242,6 @@ function Inputs({
 Inputs.defaultProps = {
   formErrors: {},
   labelAction: undefined,
-  onBlur: null,
   queryInfos: {},
   value: null,
 };
@@ -255,7 +254,6 @@ Inputs.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   labelAction: PropTypes.element,
   metadatas: PropTypes.object.isRequired,
-  onBlur: PropTypes.func,
   onChange: PropTypes.func.isRequired,
   readableFields: PropTypes.array.isRequired,
   shouldNotRunValidations: PropTypes.bool.isRequired,

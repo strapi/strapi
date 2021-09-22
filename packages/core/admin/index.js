@@ -12,7 +12,7 @@ const getWebpackConfig = require('./webpack.config');
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
-  const adminConfigPath = path.join(dir, 'admin', 'webpack.config.js');
+  const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
 
   let webpackConfig = getWebpackConfig(config);
 
@@ -162,7 +162,7 @@ async function createCacheDir({ dir, plugins }) {
   await copyAdmin(cacheDir);
 
   // Copy app.js
-  const customAdminConfigFilePath = path.join(dir, 'admin', 'app.js');
+  const customAdminConfigFilePath = path.join(dir, 'src', 'admin', 'app.js');
 
   if (fs.existsSync(customAdminConfigFilePath)) {
     await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));

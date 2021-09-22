@@ -1,9 +1,10 @@
 import { setupServer } from 'msw/node';
 import { rest } from 'msw';
+import pluginId from '../../../../pluginId';
 
 const handlers = [
   // Mock get role route
-  rest.get('*/users-permissions/roles/:roleId', (req, res, ctx) => {
+  rest.get(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
     return res(
       ctx.delay(100),
       ctx.status(200),
@@ -33,12 +34,12 @@ const handlers = [
   }),
 
   // Mock edit role route
-  rest.put('*/users-permissions/roles/:roleId', (req, res, ctx) => {
+  rest.put(`*/${pluginId}/roles/:roleId`, (req, res, ctx) => {
     return res(ctx.delay(500), ctx.status(200), ctx.json({ ok: true }));
   }),
 
   // Mock get all routes route
-  rest.get('*/users-permissions/routes', (req, res, ctx) => {
+  rest.get(`*/${pluginId}/routes`, (req, res, ctx) => {
     return res(
       ctx.status(200),
       ctx.json({
@@ -96,39 +97,29 @@ const handlers = [
   }),
 
   // Mock permissions route
-  rest.get('*/users-permissions/permissions', (req, res, ctx) => {
+  rest.get(`*/${pluginId}/permissions`, (req, res, ctx) => {
     return res(
       ctx.delay(100),
       ctx.status(200),
       ctx.json({
-        data: [
-          {
-            id: 113,
-            action: 'plugin::content-manager.explorer.create',
-            subject: 'plugin::users-permissions.user',
-            properties: {
-              fields: [
-                'username',
-                'email',
-                'provider',
-                'password',
-                'resetPasswordToken',
-                'confirmationToken',
-                'confirmed',
-                'blocked',
-                'role',
-                'picture',
-              ],
+        permissions: {
+          'api::address': {
+            controllers: {
+              address: {
+                create: {
+                  enabled: false,
+                  policy: '',
+                },
+              },
             },
-            conditions: [],
           },
-        ],
+        },
       })
     );
   }),
 
   // Mock policies route
-  rest.get('*/users-permissions/policies', (req, res, ctx) => {
+  rest.get(`*/${pluginId}/policies`, (req, res, ctx) => {
     return res(
       ctx.delay(100),
       ctx.status(200),

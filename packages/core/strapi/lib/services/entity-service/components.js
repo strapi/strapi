@@ -293,7 +293,7 @@ const createComponent = async (uid, data) => {
 
   const componentData = await createComponents(uid, data);
 
-  return await strapi.query(uid).create({
+  return strapi.query(uid).create({
     data: Object.assign(omitComponentData(model, data), componentData),
   });
 };
@@ -304,7 +304,7 @@ const updateComponent = async (uid, componentToUpdate, data) => {
 
   const componentData = await updateComponents(uid, componentToUpdate, data);
 
-  return await strapi.query(uid).update({
+  return strapi.query(uid).update({
     where: {
       id: componentToUpdate.id,
     },

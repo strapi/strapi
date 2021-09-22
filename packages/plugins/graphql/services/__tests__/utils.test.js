@@ -32,7 +32,7 @@ describe('Utils', () => {
     test('merges resolvers', () => {
       const resolvers = {
         Post: {
-          id: () => {},
+          id() {},
         },
       };
 

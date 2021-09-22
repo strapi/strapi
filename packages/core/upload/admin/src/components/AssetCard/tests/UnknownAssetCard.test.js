@@ -22,7 +22,7 @@ describe('UnknownAssetCard', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c15 {
+      .c12 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -40,17 +40,11 @@ describe('UnknownAssetCard', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c9 {
+      .c6 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
-      }
-
-      .c3 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
       }
 
       .c1 {
@@ -71,7 +65,7 @@ describe('UnknownAssetCard', () => {
         align-items: center;
       }
 
-      .c7 {
+      .c4 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -85,7 +79,7 @@ describe('UnknownAssetCard', () => {
         align-items: center;
       }
 
-      .c10 {
+      .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -99,7 +93,7 @@ describe('UnknownAssetCard', () => {
         align-items: flex-start;
       }
 
-      .c6 {
+      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -113,21 +107,21 @@ describe('UnknownAssetCard', () => {
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c12 {
+      .c9 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c13 {
+      .c10 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c11 {
+      .c8 {
         word-break: break-all;
       }
 
@@ -136,60 +130,11 @@ describe('UnknownAssetCard', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c4 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c4 svg > g,
-      .c4 svg path {
-        fill: #ffffff;
-      }
-
-      .c4[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c5 svg > g,
-      .c5 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c5:hover svg > g,
-      .c5:hover svg path {
-        fill: #666687;
-      }
-
-      .c5:active svg > g,
-      .c5:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c5[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c5[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c14 {
+      .c11 {
         text-transform: uppercase;
       }
 
-      .c8 svg {
+      .c5 svg {
         font-size: 3rem;
       }
 
@@ -205,39 +150,11 @@ describe('UnknownAssetCard', () => {
             <div
               class="c3"
             >
-              <span>
-                <button
-                  aria-disabled="false"
-                  aria-labelledby="tooltip-1"
-                  class="c4 c5"
-                  tabindex="0"
-                  type="button"
-                >
-                  <svg
-                    fill="none"
-                    height="1em"
-                    viewBox="0 0 24 24"
-                    width="1em"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      clip-rule="evenodd"
-                      d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                      fill="#212134"
-                      fill-rule="evenodd"
-                    />
-                  </svg>
-                </button>
-              </span>
-            </div>
-            <div
-              class="c6"
-            >
               <div
-                class="c7"
+                class="c4"
               >
                 <span
-                  class="c8"
+                  class="c5"
                 >
                   <svg
                     aria-label="hello.png"
@@ -324,25 +241,25 @@ describe('UnknownAssetCard', () => {
             </div>
           </div>
           <div
-            class="c9"
+            class="c6"
           >
             <div
-              class="c10"
+              class="c7"
             >
               <div
-                class="c11"
+                class="c8"
               >
                 <h2
-                  class="c12"
+                  class="c9"
                   id="card-1-title"
                 >
                   hello.png
                 </h2>
                 <div
-                  class="c13"
+                  class="c10"
                 >
                   <span
-                    class="c14"
+                    class="c11"
                   >
                     png
                   </span>
@@ -352,7 +269,7 @@ describe('UnknownAssetCard', () => {
           </div>
         </article>
         <div
-          class="c15"
+          class="c12"
         >
           <p
             aria-live="polite"

@@ -39,7 +39,10 @@ const usePlugins = (shouldFetchData = true) => {
         routes,
         policies: [
           {
-            label: formatMessage({ id: getTrad('Policies.InputSelect.empty') }),
+            label: formatMessage({
+              id: getTrad('Policies.InputSelect.empty'),
+              defaultMessage: 'None',
+            }),
             value: 'empty__string_value',
           },
           ...formatPolicies(policies),

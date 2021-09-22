@@ -1,7 +1,4 @@
-/* eslint-disable no-unused-vars */
 'use strict';
-
-// const permissionsFieldsToPropertiesMigration = require('../migrations/permissions-fields-to-properties');
 
 const adminAuthStrategy = {
   name: 'admin',
@@ -40,7 +37,6 @@ const adminAuthStrategy = {
 
     return { error: 'Invalid credentials' };
   },
-  // async verify() {},
 };
 
 module.exports = () => {
@@ -48,7 +44,4 @@ module.exports = () => {
 
   strapi.server.api('admin').use(passportMiddleware);
   strapi.container.get('auth').register('admin', adminAuthStrategy);
-
-  // FIXME: to implement
-  // strapi.db.migrations.register(permissionsFieldsToPropertiesMigration);
 };

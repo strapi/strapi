@@ -1,4 +1,4 @@
-import { Box, Checkbox, Row, Text } from '@strapi/parts';
+import { Box, BaseCheckbox, Row, Text } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/SubActionRow/utils/constants';
 import { get, upperFirst } from 'lodash';
 import PropTypes from 'prop-types';
@@ -151,7 +151,7 @@ const SubActionRow = ({
                       if (!subChildrenForm) {
                         return (
                           <Cell key={propertyLabel} justifyContent="center" alignItems="center">
-                            <Checkbox
+                            <BaseCheckbox
                               disabled={isFormDisabled || IS_DISABLED}
                               name={checkboxName.join('..')}
                               aria-label={formatMessage(
@@ -182,7 +182,7 @@ const SubActionRow = ({
 
                       return (
                         <Cell key={propertyLabel} justifyContent="center" alignItems="center">
-                          <Checkbox
+                          <BaseCheckbox
                             key={propertyLabel}
                             disabled={isFormDisabled || IS_DISABLED}
                             name={checkboxName.join('..')}

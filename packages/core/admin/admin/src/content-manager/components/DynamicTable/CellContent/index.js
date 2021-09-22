@@ -1,10 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import styled from 'styled-components';
 import { Text } from '@strapi/parts/Text';
 import Media from './Media';
 import MultipleMedias from './MultipleMedias';
 import Relation from './Relation';
 import CellValue from './CellValue';
+
+const TextMaxWidth = styled(Text)`
+  max-width: 300px;
+`;
 
 const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId }) => {
   if (content === null || content === undefined) {
@@ -33,9 +38,9 @@ const CellContent = ({ content, fieldSchema, metadatas, name, queryInfos, rowId 
   }
 
   return (
-    <Text textColor="neutral800">
+    <TextMaxWidth ellipsis textColor="neutral800">
       <CellValue type={fieldSchema.type} value={content} />
-    </Text>
+    </TextMaxWidth>
   );
 };
 

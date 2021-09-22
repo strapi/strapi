@@ -76,7 +76,7 @@ module.exports = {
       },
       role: {
         resolverOf: 'plugin::users-permissions.users-permissions.getRole',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = { ...context.params, ...options.input };
 
           await strapi
@@ -90,7 +90,7 @@ module.exports = {
       roles: {
         description: `Retrieve all the existing roles. You can't apply filters on this query.`,
         resolverOf: 'plugin::users-permissions.users-permissions.getRoles', // Apply the `getRoles` permissions on the resolver.
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = { ...context.params, ...options.input };
 
           await strapi
@@ -106,7 +106,7 @@ module.exports = {
       createRole: {
         description: 'Create a new role',
         resolverOf: 'plugin::users-permissions.users-permissions.createRole',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           await strapi
             .plugin('users-permissions')
             .controller('users-permissions')
@@ -118,7 +118,7 @@ module.exports = {
       updateRole: {
         description: 'Update an existing role',
         resolverOf: 'plugin::users-permissions.users-permissions.updateRole',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = { ...context.params, ...options.input };
           context.params.role = context.params.id;
 
@@ -133,7 +133,7 @@ module.exports = {
       deleteRole: {
         description: 'Delete an existing role',
         resolverOf: 'plugin::users-permissions.users-permissions.deleteRole',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = { ...context.params, ...options.input };
           context.params.role = context.params.id;
 
@@ -148,7 +148,7 @@ module.exports = {
       createUser: {
         description: 'Create a new user',
         resolverOf: 'plugin::users-permissions.user.create',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
@@ -165,7 +165,7 @@ module.exports = {
       updateUser: {
         description: 'Update an existing user',
         resolverOf: 'plugin::users-permissions.user.update',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
 
@@ -182,7 +182,7 @@ module.exports = {
       deleteUser: {
         description: 'Delete an existing user',
         resolverOf: 'plugin::users-permissions.user.destroy',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           // Set parameters to context.
           context.params = _.toPlainObject(options.input.where);
           context.request.body = _.toPlainObject(options.input.data);
@@ -210,7 +210,7 @@ module.exports = {
       register: {
         description: 'Register a user',
         resolverOf: 'plugin::users-permissions.auth.register',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.request.body = _.toPlainObject(options.input);
 
           await strapi
@@ -229,7 +229,7 @@ module.exports = {
       },
       login: {
         resolverOf: 'plugin::users-permissions.auth.callback',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.params = {
             ...context.params,
             provider: options.input.provider,
@@ -253,7 +253,7 @@ module.exports = {
       forgotPassword: {
         description: 'Request a reset password token',
         resolverOf: 'plugin::users-permissions.auth.forgotPassword',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.request.body = _.toPlainObject(options);
 
           await strapi
@@ -273,7 +273,7 @@ module.exports = {
       resetPassword: {
         description: 'Reset user password. Confirm with a code (resetToken from forgotPassword)',
         resolverOf: 'plugin::users-permissions.auth.resetPassword',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.request.body = _.toPlainObject(options);
 
           await strapi
@@ -294,7 +294,7 @@ module.exports = {
       emailConfirmation: {
         description: 'Confirm an email users email address',
         resolverOf: 'plugin::users-permissions.auth.emailConfirmation',
-        resolver: async (obj, options, { context }) => {
+        async resolver(obj, options, { context }) {
           context.query = _.toPlainObject(options);
 
           await strapi

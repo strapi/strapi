@@ -11,7 +11,6 @@ const createBuilder = require('./schema-builder');
  * @param {Object} infos new category data
  */
 const editCategory = async (name, infos) => {
-  const componentsDir = join(strapi.dir, 'components');
   const newName = nameToSlug(infos.name);
 
   // don't do anything the name doesn't change
@@ -34,7 +33,7 @@ const editCategory = async (name, infos) => {
     // only edit the components in this specific category
     if (component.category !== name) return;
 
-    component.setUID(newUID).setDir(join(componentsDir, newName));
+    component.setUID(newUID).setDir(join(strapi.dirs.components, newName));
 
     builder.components.forEach(compo => {
       compo.updateComponent(oldUID, newUID);
