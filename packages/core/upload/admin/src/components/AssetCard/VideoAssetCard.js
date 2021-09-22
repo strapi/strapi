@@ -24,7 +24,16 @@ const Extension = styled.span`
   text-transform: uppercase;
 `;
 
-export const VideoAssetCard = ({ name, extension, url, mime, selected, onSelect }) => {
+export const VideoAssetCard = ({
+  name,
+  extension,
+  url,
+  mime,
+  selected,
+  onSelect,
+  onEdit,
+  size,
+}) => {
   const { formatMessage } = useIntl();
   const [duration, setDuration] = useState();
   const formattedDuration = duration ? formatDuration(duration) : undefined;
@@ -33,14 +42,16 @@ export const VideoAssetCard = ({ name, extension, url, mime, selected, onSelect 
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        <CardAction position="end">
-          <IconButton
-            label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-            icon={<EditIcon />}
-          />
-        </CardAction>
-        <CardAsset>
-          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} />
+        {onEdit && (
+          <CardAction position="end">
+            <IconButton
+              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+              icon={<EditIcon />}
+            />
+          </CardAction>
+        )}
+        <CardAsset size={size}>
+          <VideoPreview url={url} mime={mime} onLoadDuration={setDuration} size={size} />
         </CardAsset>
         <CardTimer>{formattedDuration || '...'}</CardTimer>
       </CardHeader>
@@ -52,7 +63,7 @@ export const VideoAssetCard = ({ name, extension, url, mime, selected, onSelect 
           </CardSubtitle>
         </CardContent>
         <CardBadge>
-          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Doc' })}
+          {formatMessage({ id: getTrad('settings.section.video.label'), defaultMessage: 'Video' })}
         </CardBadge>
       </CardBody>
     </Card>
@@ -61,7 +72,9 @@ export const VideoAssetCard = ({ name, extension, url, mime, selected, onSelect 
 
 VideoAssetCard.defaultProps = {
   onSelect: undefined,
+  onEdit: undefined,
   selected: false,
+  size: 'M',
 };
 
 VideoAssetCard.propTypes = {
@@ -69,6 +82,8 @@ VideoAssetCard.propTypes = {
   mime: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   onSelect: PropTypes.func,
+  onEdit: PropTypes.func,
   url: PropTypes.string.isRequired,
   selected: PropTypes.bool,
+  size: PropTypes.oneOf(['S', 'M']),
 };

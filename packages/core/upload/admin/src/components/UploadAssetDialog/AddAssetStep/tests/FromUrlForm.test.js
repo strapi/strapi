@@ -40,6 +40,7 @@ describe('FromUrlForm', () => {
 
     const expectedAssets = [
       {
+        name: 'http://localhost:5000/an-image.png',
         ext: 'png',
         mime: 'image/png',
         source: 'url',
@@ -48,6 +49,7 @@ describe('FromUrlForm', () => {
         rawFile: new File([''], 'image/png'),
       },
       {
+        name: 'http://localhost:5000/a-pdf.pdf',
         ext: 'pdf',
         mime: 'application/pdf',
         source: 'url',
@@ -56,6 +58,7 @@ describe('FromUrlForm', () => {
         rawFile: new File([''], 'application/pdf'),
       },
       {
+        name: 'http://localhost:5000/a-video.mp4',
         ext: 'mp4',
         mime: 'video/mp4',
         source: 'url',
@@ -64,6 +67,7 @@ describe('FromUrlForm', () => {
         rawFile: new File([''], 'video/mp4'),
       },
       {
+        name: 'http://localhost:5000/not-working-like-cors.lutin',
         ext: 'lutin',
         mime: 'application/json',
         source: 'url',

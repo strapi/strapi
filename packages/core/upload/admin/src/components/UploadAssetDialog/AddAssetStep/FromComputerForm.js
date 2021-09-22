@@ -49,6 +49,7 @@ export const FromComputerForm = ({ onClose, onAddAssets }) => {
       const file = files.item(i);
 
       assets.push({
+        name: file.name,
         source: AssetSource.Computer,
         type: typeFromMime(file.type),
         url: URL.createObjectURL(file),

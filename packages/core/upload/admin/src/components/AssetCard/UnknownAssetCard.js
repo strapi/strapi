@@ -28,20 +28,22 @@ const IconWrapper = styled.span`
   }
 `;
 
-export const UnknownAssetCard = ({ name, extension, selected, onSelect }) => {
+export const UnknownAssetCard = ({ name, extension, selected, onSelect, onEdit, size }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Card>
       <CardHeader>
         {onSelect && <CardCheckbox value={selected} onValueChange={onSelect} />}
-        <CardAction position="end">
-          <IconButton
-            label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
-            icon={<EditIcon />}
-          />
-        </CardAction>
-        <CardAsset>
+        {onEdit && (
+          <CardAction position="end">
+            <IconButton
+              label={formatMessage({ id: getTrad('control-card.edit'), defaultMessage: 'Edit' })}
+              icon={<EditIcon />}
+            />
+          </CardAction>
+        )}
+        <CardAsset size={size}>
           <IconWrapper>
             <EmptyStatePicture aria-label={name} />
           </IconWrapper>
@@ -61,12 +63,16 @@ export const UnknownAssetCard = ({ name, extension, selected, onSelect }) => {
 
 UnknownAssetCard.defaultProps = {
   selected: false,
+  onEdit: undefined,
   onSelect: undefined,
+  size: 'M',
 };
 
 UnknownAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
+  onEdit: PropTypes.func,
   onSelect: PropTypes.func,
   selected: PropTypes.bool,
+  size: PropTypes.oneOf(['S', 'M']),
 };
