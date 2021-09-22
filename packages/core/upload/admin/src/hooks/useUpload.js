@@ -44,5 +44,11 @@ export const useUpload = () => {
       formatMessage({ id: getTrad('modal.upload.cancelled'), defaultMessage: '' })
     );
 
-  return { upload, cancel, error: mutation.error, progress };
+  return {
+    upload,
+    cancel,
+    error: mutation.error,
+    progress,
+    status: mutation.status,
+  };
 };

@@ -33,6 +33,15 @@ export const UploadAssetDialog = ({ onSuccess, onClose }) => {
     }
   };
 
+  const handleUploadSuccess = file => {
+    const nextAssets = assets.filter(asset => asset.rawFile !== file);
+    setAssets(nextAssets);
+
+    if (nextAssets.length === 0) {
+      onClose();
+    }
+  };
+
   return (
     <ModalLayout onClose={onClose} labelledBy="title">
       {step === Steps.AddAsset && (
@@ -44,6 +53,7 @@ export const UploadAssetDialog = ({ onSuccess, onClose }) => {
           assets={assets}
           onClickAddAsset={moveToAddAsset}
           onCancelUpload={handleCancelUpload}
+          onUploadSucceed={handleUploadSuccess}
         />
       )}
     </ModalLayout>

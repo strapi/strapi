@@ -16,7 +16,13 @@ import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
 
-export const PendingAssetStep = ({ onClose, assets, onClickAddAsset, onCancelUpload }) => {
+export const PendingAssetStep = ({
+  onClose,
+  assets,
+  onClickAddAsset,
+  onCancelUpload,
+  onUploadSucceed,
+}) => {
   const { formatMessage } = useIntl();
   const [isUploading, setIsUploading] = useState(false);
 
@@ -24,6 +30,12 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset, onCancelUpl
     e.preventDefault();
 
     setIsUploading(true);
+  };
+
+  const handleStatusChange = (status, file) => {
+    if (status === 'success') {
+      onUploadSucceed(file);
+    }
   };
 
   return (
@@ -66,8 +78,8 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset, onCancelUpl
           </Row>
           <KeyboardNavigable tagName="article">
             <Grid gap={4}>
-              {assets.map((asset, idx) => {
-                const assetKey = `${asset.url}-${idx}`;
+              {assets.map(asset => {
+                const assetKey = asset.url;
 
                 if (isUploading) {
                   return (
@@ -80,6 +92,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset, onCancelUpl
                         file={asset.rawFile}
                         size="S"
                         onCancel={onCancelUpload}
+                        onStatusChange={status => handleStatusChange(status, asset.rawFile)}
                       />
                     </GridItem>
                   );
@@ -174,5 +187,6 @@ PendingAssetStep.propTypes = {
   ).isRequired,
   onClose: PropTypes.func.isRequired,
   onClickAddAsset: PropTypes.func.isRequired,
+  onUploadSucceed: PropTypes.func.isRequired,
   onCancelUpload: PropTypes.func.isRequired,
 };

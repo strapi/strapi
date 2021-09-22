@@ -53,8 +53,15 @@ const CancelButton = styled.button`
   }
 `;
 
-export const UploadingAssetCard = ({ name, extension, assetType, file, onCancel }) => {
-  const { upload, cancel, error, progress } = useUpload();
+export const UploadingAssetCard = ({
+  name,
+  extension,
+  assetType,
+  file,
+  onCancel,
+  onStatusChange,
+}) => {
+  const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
   let badgeContent;
@@ -78,14 +85,15 @@ export const UploadingAssetCard = ({ name, extension, assetType, file, onCancel 
 
   useEffect(() => {
     upload(file);
-
-    return () => {
-      cancel();
-    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    onStatusChange(status);
+  }, [status, onStatusChange]);
+
   const handleCancel = () => {
+    cancel();
     onCancel(file);
   };
 
@@ -151,4 +159,5 @@ UploadingAssetCard.propTypes = {
   name: PropTypes.string.isRequired,
   file: PropTypes.instanceOf(File).isRequired,
   onCancel: PropTypes.func.isRequired,
+  onStatusChange: PropTypes.func.isRequired,
 };
