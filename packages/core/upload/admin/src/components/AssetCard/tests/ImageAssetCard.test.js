@@ -167,6 +167,9 @@ describe('ImageAssetCard', () => {
 
       .c16 {
         margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
       }
 
       .c19 {
@@ -273,6 +276,23 @@ describe('ImageAssetCard', () => {
 
       .c6[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c7 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
       }
 
       .c7 svg > g,

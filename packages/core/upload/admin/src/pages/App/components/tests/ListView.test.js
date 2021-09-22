@@ -285,6 +285,9 @@ describe('MediaLibrary / ListView', () => {
 
       .c12 {
         margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
       }
 
       .c15 {
