@@ -1,4 +1,4 @@
-import { Checkbox, Row } from '@strapi/parts';
+import { BaseCheckbox, Row } from '@strapi/parts';
 import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { get } from 'lodash';
 import PropTypes from 'prop-types';
@@ -132,7 +132,7 @@ const ActionRow = ({
 
                 return (
                   <Cell key={actionId} justifyContent="center" alignItems="center">
-                    <Checkbox
+                    <BaseCheckbox
                       disabled={isFormDisabled || IS_DISABLED}
                       name={checkboxName.join('..')}
                       aria-label={formatMessage(
@@ -163,7 +163,7 @@ const ActionRow = ({
 
               return (
                 <Cell key={label} justifyContent="center" alignItems="center">
-                  <Checkbox
+                  <BaseCheckbox
                     disabled={isFormDisabled || IS_DISABLED}
                     name={checkboxName.join('..')}
                     // Keep same signature as packages/core/admin/admin/src/components/Roles/Permissions/index.js l.91
