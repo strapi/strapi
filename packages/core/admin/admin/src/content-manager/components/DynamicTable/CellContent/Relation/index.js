@@ -7,7 +7,7 @@ import { Box } from '@strapi/parts/Box';
 import { Badge } from '@strapi/parts/Badge';
 import { Row } from '@strapi/parts/Row';
 import { Popover } from '@strapi/parts/Popover';
-import { SortIcon } from '@strapi/helper-plugin';
+import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import styled from 'styled-components';
 import PopoverContent from './PopoverContent';
 import CellValue from '../CellValue';
@@ -43,7 +43,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
   const handleTogglePopover = () => setVisible(prev => !prev);
 
   return (
-    <Row>
+    <Row {...stopPropagation}>
       <RelationCountBadge>{value.count}</RelationCountBadge>
       <Box paddingLeft={2}>
         <Text textColor="neutral800">

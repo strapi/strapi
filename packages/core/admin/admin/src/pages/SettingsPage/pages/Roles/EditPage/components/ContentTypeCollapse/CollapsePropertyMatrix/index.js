@@ -7,25 +7,14 @@ import Header from './Header';
 import ActionRow from './ActionRow';
 
 const Wrapper = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.primary600};
-  border-top: none;
-  border-bottom: ${({ isLast, theme }) => {
-    if (isLast) {
-      return `1px solid ${theme.colors.primary600}`;
-    }
-
-    return `none`;
-  }};
+  display: inline-flex;
+  flex-direction: column;
+  min-width: 0;
 `;
-
-Wrapper.defaultProps = {
-  isLast: true,
-};
 
 const CollapsePropertyMatrix = ({
   availableActions,
   childrenForm,
-  isLast,
   isFormDisabled,
   label,
   pathToData,
@@ -37,7 +26,7 @@ const CollapsePropertyMatrix = ({
   );
 
   return (
-    <Wrapper isLast={isLast}>
+    <Wrapper>
       <Header label={label} headers={propertyActions} />
       <Box>
         {childrenForm.map(({ children: childrenForm, label, value, required }, i) => (
@@ -62,7 +51,6 @@ const CollapsePropertyMatrix = ({
 CollapsePropertyMatrix.propTypes = {
   childrenForm: PropTypes.array.isRequired,
   availableActions: PropTypes.array.isRequired,
-  isLast: PropTypes.bool.isRequired,
   isFormDisabled: PropTypes.bool.isRequired,
   label: PropTypes.string.isRequired,
   pathToData: PropTypes.string.isRequired,

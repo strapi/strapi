@@ -5,6 +5,7 @@ import upperFirst from 'lodash/upperFirst';
 import { useIntl } from 'react-intl';
 import { IconButton, Stack, Text, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
+import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useDataManager from '../../hooks/useDataManager';
 import getAttributeDisplayedType from '../../utils/getAttributeDisplayedType';
@@ -201,7 +202,13 @@ function ListRow({
   }
 
   return (
-    <BoxWrapper as="tr">
+    <BoxWrapper
+      as="tr"
+      {...onRowClick({
+        fn: handleClick,
+        condition: isInDevelopmentMode && configurable && !isMorph,
+      })}
+    >
       <td style={{ position: 'relative' }}>
         {loopNumber !== 0 && <Curve color={isFromDynamicZone ? 'primary200' : 'neutral150'} />}
         <Stack paddingLeft={2} size={4} horizontal>
@@ -246,7 +253,7 @@ function ListRow({
       </td>
       <td>
         {isInDevelopmentMode && (
-          <Row justifyContent="flex-end">
+          <Row justifyContent="flex-end" {...stopPropagation}>
             {configurable ? (
               <Stack horizontal size={1}>
                 {!isMorph && (

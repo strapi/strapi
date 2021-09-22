@@ -65,7 +65,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
     });
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c24 {
+      .c25 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -77,21 +77,21 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c24 svg {
+      .c25 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c24 svg > g,
-      .c24 svg path {
+      .c25 svg > g,
+      .c25 svg path {
         fill: #ffffff;
       }
 
-      .c24[aria-disabled='true'] {
+      .c25[aria-disabled='true'] {
         pointer-events: none;
       }
 
-      .c25 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -109,26 +109,26 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
         border: none;
       }
 
-      .c25 svg > g,
-      .c25 svg path {
+      .c26 svg > g,
+      .c26 svg path {
         fill: #8e8ea9;
       }
 
-      .c25:hover svg > g,
-      .c25:hover svg path {
+      .c26:hover svg > g,
+      .c26:hover svg path {
         fill: #666687;
       }
 
-      .c25:active svg > g,
-      .c25:active svg path {
+      .c26:active svg > g,
+      .c26:active svg path {
         fill: #a5a5ba;
       }
 
-      .c25[aria-disabled='true'] {
+      .c26[aria-disabled='true'] {
         background-color: #eaeaef;
       }
 
-      .c25[aria-disabled='true'] svg path {
+      .c26[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
@@ -232,6 +232,13 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
       }
 
       .c20 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c24 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
@@ -451,6 +458,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     <tr
                       aria-rowindex="2"
                       class="c15"
+                      style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
@@ -479,20 +487,22 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c20"
+                          class="c24"
                         >
                           Reset password
                         </span>
                       </td>
                       <td
                         aria-colindex="3"
+                        aria-hidden="true"
                         class="c16"
+                        role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-1"
-                            class="c24 c25"
+                            class="c25 c26"
                             tabindex="-1"
                             type="button"
                           >
@@ -517,6 +527,7 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                     <tr
                       aria-rowindex="3"
                       class="c15"
+                      style="cursor: pointer;"
                     >
                       <td
                         aria-colindex="1"
@@ -543,20 +554,22 @@ describe('ADMIN | Pages | Settings | Advanced Settings', () => {
                         tabindex="-1"
                       >
                         <span
-                          class="c20"
+                          class="c24"
                         >
                           Email address confirmation
                         </span>
                       </td>
                       <td
                         aria-colindex="3"
+                        aria-hidden="true"
                         class="c16"
+                        role="button"
                       >
                         <span>
                           <button
                             aria-disabled="false"
                             aria-labelledby="tooltip-3"
-                            class="c24 c25"
+                            class="c25 c26"
                             tabindex="-1"
                             type="button"
                           >

@@ -83,6 +83,7 @@ const TableHead = ({
             >
               <Tooltip label={isSortable ? sortLabel : intlLabel}>
                 <TableLabel
+                  textColor="neutral600"
                   as={!isSorted && isSortable ? 'button' : 'span'}
                   label={intlLabel}
                   onClick={() => handleClickSort(!isSorted)}

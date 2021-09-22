@@ -15,6 +15,8 @@ import {
   useFocusWhenNavigate,
   SettingsPageTitle,
   ConfirmDialog,
+  onRowClick,
+  stopPropagation,
 } from '@strapi/helper-plugin';
 import { HeaderLayout, Layout, ContentLayout, ActionLayout } from '@strapi/parts/Layout';
 import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
@@ -330,7 +332,7 @@ const ListView = () => {
                           />
                         </Th>
                         <Th>
-                          <TableLabel>
+                          <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.form.name',
                               defaultMessage: 'Name',
@@ -338,7 +340,7 @@ const ListView = () => {
                           </TableLabel>
                         </Th>
                         <Th>
-                          <TableLabel>
+                          <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.form.url',
                               defaultMessage: 'URL',
@@ -346,7 +348,7 @@ const ListView = () => {
                           </TableLabel>
                         </Th>
                         <Th width="30%">
-                          <TableLabel>
+                          <TableLabel textColor="neutral600">
                             {formatMessage({
                               id: 'Settings.webhooks.list.th.status',
                               defaultMessage: 'Status',
@@ -365,8 +367,14 @@ const ListView = () => {
                     </Thead>
                     <Tbody>
                       {webhooks.map(webhook => (
-                        <Tr key={webhook.id}>
-                          <Td>
+                        <Tr
+                          key={webhook.id}
+                          {...onRowClick({
+                            fn: () => handleGoTo(webhook.id),
+                            condition: canUpdate,
+                          })}
+                        >
+                          <Td {...stopPropagation}>
                             <BaseCheckbox
                               aria-label={`${formatMessage({
                                 id: 'Settings.webhooks.list.select',
@@ -387,7 +395,7 @@ const ListView = () => {
                             <Text textColor="neutral800">{webhook.url}</Text>
                           </Td>
                           <Td>
-                            <Row>
+                            <Row {...stopPropagation}>
                               <Switch
                                 onLabel={formatMessage({
                                   id: 'Settings.webhooks.enabled',
@@ -408,7 +416,7 @@ const ListView = () => {
                             </Row>
                           </Td>
                           <Td>
-                            <Stack horizontal size={1}>
+                            <Stack horizontal size={1} {...stopPropagation}>
                               {canUpdate && (
                                 <IconButton
                                   onClick={() => {

@@ -1,3 +1,5 @@
+import { stopPropagation } from '@strapi/helper-plugin';
+import { onRowClick } from '@strapi/helper-plugin/lib/src';
 import { Box, Row, Td, Text, Tr, IconButton } from '@strapi/parts';
 import PropTypes from 'prop-types';
 import React from 'react';
@@ -15,7 +17,12 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
   );
 
   return (
-    <Tr key={id}>
+    <Tr
+      key={id}
+      {...onRowClick({
+        fn: icons[1].onClick,
+      })}
+    >
       <Td>
         <Text textColor="neutral800">{name}</Text>
       </Td>
@@ -26,7 +33,7 @@ const RoleRow = ({ id, name, description, usersCount, icons }) => {
         <Text textColor="neutral800">{usersCountText}</Text>
       </Td>
       <Td>
-        <Row>
+        <Row justifyContent="flex-end" {...stopPropagation}>
           {icons.map((icon, i) =>
             icon ? (
               <Box key={icon.label} paddingLeft={i === 0 ? 0 : 1}>

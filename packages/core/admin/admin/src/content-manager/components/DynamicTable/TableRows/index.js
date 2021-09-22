@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { BaseCheckbox, Box, IconButton, Tbody, Td, Tr, Row } from '@strapi/parts';
 import { EditIcon, DeleteIcon, Duplicate } from '@strapi/icons';
-import { useTracking } from '@strapi/helper-plugin';
+import { useTracking, stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { usePluginsQueryParams } from '../../../hooks';
@@ -41,9 +41,22 @@ const TableRows = ({
         );
 
         return (
-          <Tr key={data.id}>
+          <Tr
+            key={data.id}
+            {...onRowClick({
+              fn: () => {
+                trackUsage('willEditEntryFromButton');
+                push({
+                  pathname: `${pathname}/${data.id}`,
+                  state: { from: pathname },
+                  search: pluginsQueryParams,
+                });
+              },
+              condition: withBulkActions,
+            })}
+          >
             {withMainAction && (
-              <Td>
+              <Td {...stopPropagation}>
                 <BaseCheckbox
                   aria-label={formatMessage(
                     {
@@ -73,7 +86,7 @@ const TableRows = ({
 
             {withBulkActions && (
               <Td>
-                <Row justifyContent="end">
+                <Row justifyContent="end" {...stopPropagation}>
                   <IconButton
                     onClick={() => {
                       trackUsage('willEditEntryFromButton');
