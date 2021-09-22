@@ -15,9 +15,8 @@ import RowLabelWithCheckbox from '../../RowLabelWithCheckbox';
 import { getCheckboxState } from '../../utils';
 import generateCheckboxesActions from './utils/generateCheckboxesActions';
 
-const activeRowStyle = (theme, isActive, isClicked) => `
+const activeRowStyle = (theme, isActive) => `
   ${Wrapper} {
-    ${isClicked ? `border: 1px solid ${theme.colors.primary600}; border-bottom: none;` : ''}
     background-color: ${theme.colors.primary100};
     color: ${theme.colors.primary600};
     border-radius: ${isActive ? '2px 2px 0 0' : '2px'};
@@ -47,7 +46,7 @@ const BoxWrapper = styled.div`
   ${ConditionsButton} {
     display: none;
   }
-  ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive, true)}
+  ${({ isActive, theme }) => isActive && activeRowStyle(theme, isActive)}
   &:hover {
     ${({ theme, isActive }) => activeRowStyle(theme, isActive)}
   }

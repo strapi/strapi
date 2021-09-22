@@ -1,8 +1,16 @@
 import PropTypes from 'prop-types';
 import React, { useCallback, useMemo } from 'react';
+import styled from 'styled-components';
 import Collapse from './Collapse';
 import CollapsePropertyMatrix from './CollapsePropertyMatrix';
 import { getAvailableActions } from './utils';
+
+const Wrapper = styled.div`
+  flex-direction: column;
+  display: inline-flex;
+  min-width: 100%;
+  ${({ theme, isActive }) => isActive && `border: 1px solid ${theme.colors.primary600};`}
+`;
 
 const ContentTypeCollapse = ({
   allActions,
@@ -24,7 +32,7 @@ const ContentTypeCollapse = ({
   }, [allActions, contentTypeName]);
 
   return (
-    <>
+    <Wrapper isActive={isActive}>
       <Collapse
         availableActions={availableActions}
         isActive={isActive}
@@ -35,7 +43,7 @@ const ContentTypeCollapse = ({
         pathToData={pathToData}
       />
       {isActive &&
-        properties.map(({ label: propertyLabel, value, children: childrenForm }, i) => {
+        properties.map(({ label: propertyLabel, value, children: childrenForm }) => {
           return (
             <CollapsePropertyMatrix
               availableActions={availableActions}
@@ -45,11 +53,10 @@ const ContentTypeCollapse = ({
               pathToData={pathToData}
               propertyName={value}
               key={value}
-              isLast={i === properties.length - 1}
             />
           );
         })}
-    </>
+    </Wrapper>
   );
 };
 
