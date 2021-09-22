@@ -8,7 +8,7 @@ import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Text } from '@strapi/parts/Text';
 import { Popover } from '@strapi/parts/Popover';
-import { SortIcon } from '@strapi/helper-plugin';
+import { SortIcon, stopPropagation } from '@strapi/helper-plugin';
 import get from 'lodash/get';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 
@@ -66,7 +66,7 @@ const LocaleListCell = ({ localizations, locale: currentLocaleCode, id }) => {
   const localesNames = localesArray.join(', ');
 
   return (
-    <Row>
+    <Row {...stopPropagation}>
       <Text
         style={{ maxWidth: '252px', cursor: 'pointer' }}
         data-for={elId}
