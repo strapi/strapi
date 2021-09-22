@@ -125,7 +125,7 @@ const Wysiwyg = ({
 
   return (
     <>
-      <Row cols="auto auto 1fr" gap={1}>
+      <Row>
         <ButtonText>{label}</ButtonText>
         {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
       </Row>
