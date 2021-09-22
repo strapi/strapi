@@ -1,6 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { render as renderTL } from '@testing-library/react';
+import { MemoryRouter } from 'react-router';
 import { ListView } from '../ListView';
 import en from '../../../../translations/en.json';
 
@@ -121,13 +122,85 @@ const data = [
 describe('MediaLibrary / ListView', () => {
   it('snapshots the listview', () => {
     const { container } = renderTL(
-      <ThemeProvider theme={lightTheme}>
-        <ListView assets={data} />
-      </ThemeProvider>
+      <MemoryRouter>
+        <ThemeProvider theme={lightTheme}>
+          <ListView assets={data} />
+        </ThemeProvider>
+      </MemoryRouter>
     );
 
     expect(container).toMatchInlineSnapshot(`
+      .c36 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
       .c27 {
+        padding-top: 24px;
+      }
+
+      .c35 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c37 {
+        padding-left: 12px;
+      }
+
+      .c28 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: flex-end;
+        -webkit-box-align: flex-end;
+        -ms-flex-align: flex-end;
+        align-items: flex-end;
+      }
+
+      .c29 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c33 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c43 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -137,6 +210,128 @@ describe('MediaLibrary / ListView', () => {
         padding: 0;
         position: absolute;
         width: 1px;
+      }
+
+      .c30 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
+      }
+
+      .c30 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c30 > * + * {
+        margin-top: 0px;
+      }
+
+      .c31 {
+        position: relative;
+        border: 1px solid #dcdce4;
+        padding-right: 12px;
+        border-radius: 4px;
+        background: #ffffff;
+        overflow: hidden;
+      }
+
+      .c31:focus-within {
+        border: 1px solid #4945ff;
+      }
+
+      .c38 {
+        background: transparent;
+        border: none;
+        position: relative;
+        z-index: 1;
+      }
+
+      .c38 svg {
+        height: 0.6875rem;
+        width: 0.6875rem;
+      }
+
+      .c38 svg path {
+        fill: #666687;
+      }
+
+      .c39 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        background: none;
+        border: none;
+      }
+
+      .c39 svg {
+        width: 0.375rem;
+      }
+
+      .c40 > * + * {
+        margin-left: 4px;
+      }
+
+      .c41 {
+        padding: 12px;
+        border-radius: 4px;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c42 {
+        font-size: 0.7rem;
+        pointer-events: none;
+      }
+
+      .c42 svg path {
+        fill: #c0c0cf;
+      }
+
+      .c42:focus svg path,
+      .c42:hover svg path {
+        fill: #c0c0cf;
+      }
+
+      .c44 {
+        font-size: 0.7rem;
+      }
+
+      .c44 svg path {
+        fill: #666687;
+      }
+
+      .c44:focus svg path,
+      .c44:hover svg path {
+        fill: #4a4a6a;
+      }
+
+      .c32 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c32:focus {
+        outline: none;
+      }
+
+      .c34 {
+        min-height: 2.5rem;
       }
 
       .c0 {
@@ -285,6 +480,9 @@ describe('MediaLibrary / ListView', () => {
 
       .c12 {
         margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
       }
 
       .c15 {
@@ -553,6 +751,140 @@ describe('MediaLibrary / ListView', () => {
         </div>
         <div
           class="c27"
+        >
+          <div
+            class="c28"
+          >
+            <div
+              class="c29"
+            >
+              <div>
+                <div
+                  class="c30"
+                >
+                  <div
+                    class="c31"
+                  >
+                    <button
+                      aria-disabled="false"
+                      aria-expanded="false"
+                      aria-haspopup="listbox"
+                      aria-labelledby="select-1-label select-1-content"
+                      class="c32"
+                      id="select-1"
+                      type="button"
+                    />
+                    <div
+                      class="c33 c34"
+                    >
+                      <div
+                        class="c29"
+                      >
+                        <div
+                          class="c35"
+                        >
+                          <span
+                            class="c36"
+                            id="select-1-content"
+                          >
+                            10
+                          </span>
+                        </div>
+                      </div>
+                      <div
+                        class="c29"
+                      >
+                        <button
+                          aria-hidden="true"
+                          class="c37 c38 c39"
+                          tabindex="-1"
+                          type="button"
+                        >
+                          <svg
+                            fill="none"
+                            height="1em"
+                            viewBox="0 0 14 8"
+                            width="1em"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              clip-rule="evenodd"
+                              d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                              fill="#32324D"
+                              fill-rule="evenodd"
+                            />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <nav
+              aria-label="pagination"
+              class=""
+            >
+              <ul
+                class="c29 c40"
+              >
+                <li>
+                  <a
+                    aria-current="page"
+                    aria-disabled="true"
+                    class="c41 c42 active"
+                    href="/"
+                    tabindex="-1"
+                  >
+                    <div
+                      class="c43"
+                    />
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 10 16"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M9.88 14.12L3.773 8 9.88 1.88 8 0 0 8l8 8 1.88-1.88z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                  </a>
+                </li>
+                <li>
+                  <a
+                    aria-current="page"
+                    aria-disabled="false"
+                    class="c41 c44 active"
+                    href="/?page=1"
+                  >
+                    <div
+                      class="c43"
+                    />
+                    <svg
+                      aria-hidden="true"
+                      fill="none"
+                      height="1em"
+                      viewBox="0 0 10 16"
+                      width="1em"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M0 1.88L6.107 8 0 14.12 1.88 16l8-8-8-8L0 1.88z"
+                        fill="#32324D"
+                      />
+                    </svg>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <div
+          class="c43"
         >
           <p
             aria-live="polite"

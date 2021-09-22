@@ -53,7 +53,11 @@ const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) =
         return (
           <Box as="li" key={entry.id} padding={3}>
             <Text>
-              {value ? <CellValue type={fieldSchema.type} value={entry[fieldSchema.name]} /> : '-'}
+              {value ? (
+                <CellValue type={fieldSchema.schema.type} value={entry[fieldSchema.name]} />
+              ) : (
+                '-'
+              )}
             </Text>
           </Box>
         );
@@ -68,7 +72,10 @@ const PopoverContent = ({ fieldSchema, name, rowId, targetModel, queryInfos }) =
 };
 
 PopoverContent.propTypes = {
-  fieldSchema: PropTypes.shape({ name: PropTypes.string, type: PropTypes.string }).isRequired,
+  fieldSchema: PropTypes.shape({
+    name: PropTypes.string,
+    schema: PropTypes.shape({ type: PropTypes.string }).isRequired,
+  }).isRequired,
   name: PropTypes.string.isRequired,
   rowId: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   targetModel: PropTypes.string.isRequired,

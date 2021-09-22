@@ -62,6 +62,8 @@ describe('PendingAssetStep', () => {
             onClose={jest.fn()}
             onAddAsset={jest.fn()}
             onClickAddAsset={jest.fn()}
+            onCancelUpload={jest.fn()}
+            onUploadSucceed={jest.fn()}
           />
         </ThemeProvider>
       </QueryClientProvider>
@@ -151,6 +153,23 @@ describe('PendingAssetStep', () => {
 
       .c5[aria-disabled='true'] {
         pointer-events: none;
+      }
+
+      .c6 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
       }
 
       .c6 svg > g,
@@ -566,6 +585,9 @@ describe('PendingAssetStep', () => {
 
       .c31 {
         margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
       }
 
       .c34 {

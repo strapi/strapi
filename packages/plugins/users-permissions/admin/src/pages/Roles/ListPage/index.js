@@ -166,12 +166,12 @@ const RoleListPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({ id: getTrad('Roles.name'), defaultMessage: 'Name' })}
                     </TableLabel>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({
                         id: getTrad('Roles.description'),
                         defaultMessage: 'Description',
@@ -179,7 +179,7 @@ const RoleListPage = () => {
                     </TableLabel>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({
                         id: getTrad('Roles.users'),
                         defaultMessage: 'Users',

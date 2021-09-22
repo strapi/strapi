@@ -9,6 +9,8 @@ import {
   CheckPagePermissions,
   useRBAC,
   useFocusWhenNavigate,
+  onRowClick,
+  stopPropagation,
 } from '@strapi/helper-plugin';
 import has from 'lodash/has';
 import upperFirst from 'lodash/upperFirst';
@@ -165,19 +167,19 @@ export const ProvidersPage = () => {
               <Thead>
                 <Tr>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       <VisuallyHidden>
                         {formatMessage({ id: getTrad('Providers.image'), defaultMessage: 'Image' })}
                       </VisuallyHidden>
                     </TableLabel>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({ id: getTrad('Providers.name'), defaultMessage: 'Name' })}
                     </TableLabel>
                   </Th>
                   <Th>
-                    <TableLabel>
+                    <TableLabel textColor="neutral600">
                       {formatMessage({ id: getTrad('Providers.status'), defaultMessage: 'Status' })}
                     </TableLabel>
                   </Th>
@@ -195,7 +197,13 @@ export const ProvidersPage = () => {
               </Thead>
               <Tbody>
                 {providers.map(provider => (
-                  <Tr key={provider.name}>
+                  <Tr
+                    key={provider.name}
+                    {...onRowClick({
+                      fn: () => handleClickEdit(provider),
+                      condition: canUpdate,
+                    })}
+                  >
                     <Td width="">
                       <FontAwesomeIcon icon={provider.icon} />
                     </Td>
@@ -220,7 +228,7 @@ export const ProvidersPage = () => {
                             })}
                       </Text>
                     </Td>
-                    <Td>
+                    <Td {...stopPropagation}>
                       {canUpdate && (
                         <IconButton
                           onClick={() => handleClickEdit(provider)}

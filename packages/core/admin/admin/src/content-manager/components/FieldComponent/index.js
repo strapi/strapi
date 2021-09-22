@@ -1,34 +1,41 @@
 /* eslint-disable  import/no-cycle */
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { size } from 'lodash';
-import { FormattedMessage, useIntl } from 'react-intl';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
-import { NotAllowedInput, LabelIconWrapper } from '@strapi/helper-plugin';
+import { useIntl } from 'react-intl';
+import { NotAllowedInput } from '@strapi/helper-plugin';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import { Box } from '@strapi/parts/Box';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+// import { FormattedMessage, useIntl } from 'react-intl';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTrad } from '../../utils';
-import ComponentInitializer from '../ComponentInitializer';
+import ComponentInitializer from './ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
-import RepeatableComponent from '../RepeatableComponent';
+// import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
 import select from './utils/select';
-import ComponentIcon from './ComponentIcon';
+// import ComponentIcon from './ComponentIcon';
 import Label from './Label';
-import Reset from './ResetComponent';
-import Wrapper from './Wrapper';
+// import Wrapper from './Wrapper';
 
 const FieldComponent = ({
-  componentFriendlyName,
+  // componentFriendlyName,
   componentUid,
-  icon,
+  // icon,
+  // TODO add error state
+  // formErrors,
+  intlLabel,
   isCreatingEntry,
   isFromDynamicZone,
   isRepeatable,
-  isNested,
-  label,
-  labelIcon,
-  max,
-  min,
+  // isNested,
+  labelAction,
+  // max,
+  // min,
   name,
   // Passed thanks to the connect function
   hasChildrenAllowedFields,
@@ -38,130 +45,148 @@ const FieldComponent = ({
   removeComponentFromField,
 }) => {
   const { formatMessage } = useIntl();
-  const componentValueLength = size(componentValue);
+  // const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
 
-  const formattedLabelIcon = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : null;
-
   if (!hasChildrenAllowedFields && isCreatingEntry) {
-    return (
-      <div className="col-12">
-        <NotAllowedInput label={label} labelIcon={formattedLabelIcon} />
-      </div>
-    );
+    return <NotAllowedInput labelAction={labelAction} intlLabel={intlLabel} name={name} />;
   }
 
   if (!hasChildrenAllowedFields && !isCreatingEntry && !hasChildrenReadableFields) {
-    return (
-      <div className="col-12">
-        <NotAllowedInput label={label} labelIcon={formattedLabelIcon} />
-      </div>
-    );
+    return <NotAllowedInput labelAction={labelAction} intlLabel={intlLabel} name={name} />;
   }
 
   return (
-    <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
-      {isFromDynamicZone && (
-        <ComponentIcon title={componentFriendlyName}>
-          <div className="component_name">
-            <div className="component_icon">
-              <FontAwesomeIcon icon={icon} title={componentFriendlyName} />
-            </div>
-            <p>{componentFriendlyName}</p>
-          </div>
-        </ComponentIcon>
-      )}
-      <Label>
-        <span>
-          {label}&nbsp;
-          {isRepeatable && `(${componentValueLength})`}
-        </span>
-        {formattedLabelIcon && (
-          <LabelIconWrapper title={formattedLabelIcon.title}>
-            {formattedLabelIcon.icon}
-          </LabelIconWrapper>
+    <Box>
+      <Stack size={1}>
+        <Row justifyContent="space-between">
+          <Label intlLabel={intlLabel} labelAction={labelAction} name={name} />
+          {showResetComponent && (
+            <IconButton
+              label={formatMessage({
+                id: getTrad('components.reset-entry'),
+                defaultMessage: 'Reset Entry',
+              })}
+              icon={<DeleteIcon />}
+              onClick={() => {
+                removeComponentFromField(name, componentUid);
+              }}
+            />
+          )}
+        </Row>
+        {!isRepeatable && !isInitialized && (
+          <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
         )}
-      </Label>
-      {showResetComponent && (
-        <Reset
-          onClick={e => {
-            e.preventDefault();
-            e.stopPropagation();
-            removeComponentFromField(name, componentUid);
-          }}
-        >
-          <FormattedMessage id={getTrad('components.reset-entry')} />
-          <div />
-        </Reset>
-      )}
-      {!isRepeatable && !isInitialized && (
-        <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
-      )}
-
-      {!isRepeatable && isInitialized && (
-        <NonRepeatableComponent
-          componentUid={componentUid}
-          isFromDynamicZone={isFromDynamicZone}
-          name={name}
-        />
-      )}
-      {isRepeatable && (
-        <RepeatableComponent
-          componentValue={componentValue}
-          componentValueLength={componentValueLength}
-          componentUid={componentUid}
-          isNested={isNested}
-          isReadOnly={isReadOnly}
-          max={max}
-          min={min}
-          name={name}
-        />
-      )}
-    </Wrapper>
+        {!isRepeatable && isInitialized && (
+          <NonRepeatableComponent
+            componentUid={componentUid}
+            isFromDynamicZone={isFromDynamicZone}
+            name={name}
+          />
+        )}
+      </Stack>
+    </Box>
   );
+
+  // return (
+  //   <Wrapper className="col-12" isFromDynamicZone={isFromDynamicZone}>
+  //     {isFromDynamicZone && (
+  //       <ComponentIcon title={componentFriendlyName}>
+  //         <div className="component_name">
+  //           <div className="component_icon">
+  //             <FontAwesomeIcon icon={icon} title={componentFriendlyName} />
+  //           </div>
+  //           <p>{componentFriendlyName}</p>
+  //         </div>
+  //       </ComponentIcon>
+  //     )}
+  //     <Label>
+  //       <span>
+  //         {label}&nbsp;
+  //         {isRepeatable && `(${componentValueLength})`}
+  //       </span>
+  //       {formattedLabelIcon && (
+  //         <LabelIconWrapper title={formattedLabelIcon.title}>
+  //           {formattedLabelIcon.icon}
+  //         </LabelIconWrapper>
+  //       )}
+  //     </Label>
+  //     {showResetComponent && (
+  //       <Reset
+  //         onClick={e => {
+  //           e.preventDefault();
+  //           e.stopPropagation();
+  //           removeComponentFromField(name, componentUid);
+  //         }}
+  //       >
+  //         <FormattedMessage id={getTrad('components.reset-entry')} />
+  //         <div />
+  //       </Reset>
+  //     )}
+  //     {!isRepeatable && !isInitialized && (
+  //       <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
+  //     )}
+
+  //     {!isRepeatable && isInitialized && (
+  // <NonRepeatableComponent
+  //   componentUid={componentUid}
+  //   isFromDynamicZone={isFromDynamicZone}
+  //   name={name}
+  // />
+  //     )}
+  //     {isRepeatable && (
+  //       <RepeatableComponent
+  //         componentValue={componentValue}
+  //         componentValueLength={componentValueLength}
+  //         componentUid={componentUid}
+  //         isNested={isNested}
+  //         isReadOnly={isReadOnly}
+  //         max={max}
+  //         min={min}
+  //         name={name}
+  //       />
+  //     )}
+  //   </Wrapper>
+  // );
 };
 
 FieldComponent.defaultProps = {
   componentValue: null,
-  componentFriendlyName: null,
+  // componentFriendlyName: null,
   hasChildrenAllowedFields: false,
   hasChildrenReadableFields: false,
-  icon: 'smile',
+  // icon: 'smile',
   isFromDynamicZone: false,
   isReadOnly: false,
   isRepeatable: false,
-  isNested: false,
-  labelIcon: null,
-  max: Infinity,
-  min: -Infinity,
+  // isNested: false,
+  labelAction: undefined,
+  // max: Infinity,
+  // min: -Infinity,
 };
 
 FieldComponent.propTypes = {
-  componentFriendlyName: PropTypes.string,
+  // componentFriendlyName: PropTypes.string,
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
   hasChildrenAllowedFields: PropTypes.bool,
   hasChildrenReadableFields: PropTypes.bool,
-  icon: PropTypes.string,
+  // icon: PropTypes.string,
   isCreatingEntry: PropTypes.bool.isRequired,
   isFromDynamicZone: PropTypes.bool,
   isReadOnly: PropTypes.bool,
   isRepeatable: PropTypes.bool,
-  isNested: PropTypes.bool,
-  label: PropTypes.string.isRequired,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }),
-  }),
-  max: PropTypes.number,
-  min: PropTypes.number,
+  // isNested: PropTypes.bool,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
+  // max: PropTypes.number,
+  // min: PropTypes.number,
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
 };

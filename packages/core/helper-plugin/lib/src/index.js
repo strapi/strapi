@@ -211,3 +211,4 @@ export { default as formatComponentData } from './content-manager/utils/formatCo
 export { findMatchingPermissions } from './utils/hasPermissions';
 export { default as contentManagementUtilRemoveFieldsFromData } from './content-manager/utils/contentManagementUtilRemoveFieldsFromData';
 export { default as getFileExtension } from './utils/getFileExtension/getFileExtension';
+export * from './utils/stopPropagation';

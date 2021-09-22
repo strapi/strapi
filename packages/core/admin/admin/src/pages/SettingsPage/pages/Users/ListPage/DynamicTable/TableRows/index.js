@@ -4,6 +4,7 @@ import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';
+import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 
 const TableRows = ({
   canDelete,
@@ -27,9 +28,15 @@ const TableRows = ({
         const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
 
         return (
-          <Tr key={data.id}>
+          <Tr
+            key={data.id}
+            {...onRowClick({
+              fn: () => push(`${pathname}/${data.id}`),
+              condition: withBulkActions,
+            })}
+          >
             {withMainAction && (
-              <Td>
+              <Td {...stopPropagation}>
                 <BaseCheckbox
                   aria-label={formatMessage(
                     {
@@ -59,7 +66,7 @@ const TableRows = ({
 
             {withBulkActions && (
               <Td>
-                <Row>
+                <Row justifyContent="end">
                   <IconButton
                     onClick={() => push(`${pathname}/${data.id}`)}
                     label={formatMessage(
@@ -71,7 +78,7 @@ const TableRows = ({
                   />
 
                   {canDelete && (
-                    <Box paddingLeft={1}>
+                    <Box paddingLeft={1} {...stopPropagation}>
                       <IconButton
                         onClick={() => onClickDelete(data.id)}
                         label={formatMessage(
