@@ -69,7 +69,7 @@ const Relation = ({ fieldSchema, metadatas, queryInfos, name, rowId, value }) =>
             icon={<SortIcon isUp={visible} />}
           />
           {visible && (
-            <Popover source={buttonRef} spacingTop={4} centered>
+            <Popover source={buttonRef} spacing={16} centered>
               <PopoverContent
                 queryInfos={queryInfos}
                 name={name}
