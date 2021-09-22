@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { ModalHeader, ModalBody, ModalFooter } from '@strapi/parts/ModalLayout';
 import { ButtonText, Text } from '@strapi/parts/Text';
@@ -12,18 +12,18 @@ import { DocAssetCard } from '../../AssetCard/DocAssetCard';
 import { ImageAssetCard } from '../../AssetCard/ImageAssetCard';
 import { VideoAssetCard } from '../../AssetCard/VideoAssetCard';
 import { UnknownAssetCard } from '../../AssetCard/UnknownAssetCard';
+import { UploadingAssetCard } from '../../AssetCard/UploadingAssetCard';
 import { getTrad } from '../../../utils';
 import { AssetType, AssetSource } from '../../../constants';
-import { useUpload } from '../../../hooks/useUpload';
 
 export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
   const { formatMessage } = useIntl();
-  const { upload, isLoading } = useUpload(assets, onClose);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleSubmit = async e => {
     e.preventDefault();
 
-    await upload();
+    setIsUploading(true);
   };
 
   return (
@@ -69,16 +69,32 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
               {assets.map((asset, idx) => {
                 const assetKey = `${asset.url}-${idx}`;
 
+                if (isUploading) {
+                  return (
+                    <GridItem col={4} key={assetKey}>
+                      <UploadingAssetCard
+                        id={assetKey}
+                        name={asset.name}
+                        extension={asset.ext}
+                        assetType={asset.type}
+                        file={asset.rawFile}
+                        size="S"
+                      />
+                    </GridItem>
+                  );
+                }
+
                 if (asset.type === AssetType.Image) {
                   return (
                     <GridItem col={4} key={assetKey}>
                       <ImageAssetCard
                         id={assetKey}
-                        name={asset.url}
+                        name={asset.name}
                         extension={asset.ext}
                         height={asset.height}
                         width={asset.width}
                         thumbnail={asset.url}
+                        size="S"
                       />
                     </GridItem>
                   );
@@ -89,10 +105,11 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                     <GridItem col={4} key={assetKey}>
                       <VideoAssetCard
                         id={assetKey}
-                        name={asset.url}
+                        name={asset.name}
                         extension={asset.ext}
                         url={asset.url}
                         mime={asset.mime}
+                        size="S"
                       />
                     </GridItem>
                   );
@@ -101,14 +118,19 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
                 if (asset.type === AssetType.Unknown) {
                   return (
                     <GridItem col={4} key={assetKey}>
-                      <UnknownAssetCard id={assetKey} name={asset.url} extension={asset.ext} />
+                      <UnknownAssetCard
+                        id={assetKey}
+                        name={asset.name}
+                        extension={asset.ext}
+                        size="S"
+                      />
                     </GridItem>
                   );
                 }
 
                 return (
                   <GridItem col={4} key={assetKey}>
-                    <DocAssetCard name={asset.url} extension={asset.ext} />
+                    <DocAssetCard name={asset.name} extension={asset.ext} size="S" />
                   </GridItem>
                 );
               })}
@@ -124,7 +146,7 @@ export const PendingAssetStep = ({ onClose, assets, onClickAddAsset }) => {
           </Button>
         }
         endActions={
-          <Button type="submit" loading={isLoading}>
+          <Button type="submit" loading={isUploading}>
             {formatMessage(
               {
                 id: getTrad('modal.upload-list.footer.button.singular'),

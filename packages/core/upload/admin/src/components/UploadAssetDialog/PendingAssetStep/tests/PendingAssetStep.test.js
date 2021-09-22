@@ -68,7 +68,7 @@ describe('PendingAssetStep', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c55 {
+      .c52 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -113,7 +113,7 @@ describe('PendingAssetStep', () => {
         align-items: center;
       }
 
-      .c52 {
+      .c49 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -153,6 +153,23 @@ describe('PendingAssetStep', () => {
         pointer-events: none;
       }
 
+      .c6 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        -webkit-box-pack: center;
+        -webkit-justify-content: center;
+        -ms-flex-pack: center;
+        justify-content: center;
+        height: 2rem;
+        width: 2rem;
+      }
+
       .c6 svg > g,
       .c6 svg path {
         fill: #8e8ea9;
@@ -180,11 +197,11 @@ describe('PendingAssetStep', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c51 {
+      .c48 {
         border-top: 1px solid #eaeaef;
       }
 
-      .c53 > * + * {
+      .c50 > * + * {
         margin-left: 8px;
       }
 
@@ -302,7 +319,7 @@ describe('PendingAssetStep', () => {
         background: #4945ff;
       }
 
-      .c54 {
+      .c51 {
         padding: 8px 16px;
         background: #4945ff;
         border: none;
@@ -310,52 +327,52 @@ describe('PendingAssetStep', () => {
         background: #ffffff;
       }
 
-      .c54 .c16 {
+      .c51 .c16 {
         color: #ffffff;
       }
 
-      .c54[aria-disabled='true'] {
+      .c51[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c54[aria-disabled='true'] .c16 {
+      .c51[aria-disabled='true'] .c16 {
         color: #666687;
       }
 
-      .c54[aria-disabled='true'] svg > g,
-      .c54[aria-disabled='true'] svg path {
+      .c51[aria-disabled='true'] svg > g,
+      .c51[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c54[aria-disabled='true']:active {
+      .c51[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c54[aria-disabled='true']:active .c16 {
+      .c51[aria-disabled='true']:active .c16 {
         color: #666687;
       }
 
-      .c54[aria-disabled='true']:active svg > g,
-      .c54[aria-disabled='true']:active svg path {
+      .c51[aria-disabled='true']:active svg > g,
+      .c51[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c54:hover {
+      .c51:hover {
         background-color: #f6f6f9;
       }
 
-      .c54:active {
+      .c51:active {
         background-color: #eaeaef;
       }
 
-      .c54 .c16 {
+      .c51 .c16 {
         color: #32324d;
       }
 
-      .c54 svg > g,
-      .c54 svg path {
+      .c51 svg > g,
+      .c51 svg path {
         fill: #32324d;
       }
 
@@ -432,31 +449,25 @@ describe('PendingAssetStep', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c28 {
+      .c25 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c35 {
+      .c32 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
         border-radius: 4px;
       }
 
-      .c45 {
+      .c42 {
         background: #32324d;
         color: #ffffff;
         padding: 4px;
         border-radius: 4px;
-      }
-
-      .c23 {
-        position: absolute;
-        top: 12px;
-        right: 12px;
       }
 
       .c21 {
@@ -477,7 +488,7 @@ describe('PendingAssetStep', () => {
         align-items: center;
       }
 
-      .c29 {
+      .c26 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -491,7 +502,7 @@ describe('PendingAssetStep', () => {
         align-items: flex-start;
       }
 
-      .c41 {
+      .c38 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -505,14 +516,14 @@ describe('PendingAssetStep', () => {
         align-items: center;
       }
 
-      .c27 {
+      .c24 {
         margin: 0;
         padding: 0;
         max-height: 100%;
         max-width: 100%;
       }
 
-      .c26 {
+      .c23 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -521,64 +532,67 @@ describe('PendingAssetStep', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        height: 10.25rem;
+        height: 5.5rem;
         width: 100%;
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c31 {
+      .c28 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c32 {
+      .c29 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c38 {
+      .c35 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c47 {
+      .c44 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #ffffff;
       }
 
-      .c39 {
+      .c36 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c40 {
+      .c37 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c36 {
+      .c33 {
         display: inline-block;
       }
 
-      .c34 {
+      .c31 {
         margin-left: auto;
+        -webkit-flex-shrink: 0;
+        -ms-flex-negative: 0;
+        flex-shrink: 0;
       }
 
-      .c37 {
+      .c34 {
         margin-left: 4px;
       }
 
-      .c30 {
+      .c27 {
         word-break: break-all;
       }
 
@@ -587,88 +601,39 @@ describe('PendingAssetStep', () => {
         border-bottom: 1px solid #eaeaef;
       }
 
-      .c46 {
+      .c43 {
         position: absolute;
         bottom: 4px;
         right: 4px;
       }
 
-      .c24 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        cursor: pointer;
-        padding: 8px;
-        border-radius: 4px;
-        background: #ffffff;
-        border: 1px solid #dcdce4;
-      }
-
-      .c24 svg {
-        height: 12px;
-        width: 12px;
-      }
-
-      .c24 svg > g,
-      .c24 svg path {
-        fill: #ffffff;
-      }
-
-      .c24[aria-disabled='true'] {
-        pointer-events: none;
-      }
-
-      .c25 svg > g,
-      .c25 svg path {
-        fill: #8e8ea9;
-      }
-
-      .c25:hover svg > g,
-      .c25:hover svg path {
-        fill: #666687;
-      }
-
-      .c25:active svg > g,
-      .c25:active svg path {
-        fill: #a5a5ba;
-      }
-
-      .c25[aria-disabled='true'] {
-        background-color: #eaeaef;
-      }
-
-      .c25[aria-disabled='true'] svg path {
-        fill: #666687;
-      }
-
-      .c43 {
+      .c40 {
         text-transform: uppercase;
       }
 
-      .c42 svg {
+      .c39 svg {
         font-size: 3rem;
       }
 
-      .c33 {
+      .c30 {
         text-transform: uppercase;
       }
 
-      .c44 canvas {
+      .c41 canvas {
         display: block;
         max-width: 100%;
-        max-height: 100%;
+        max-height: 5.5rem;
       }
 
-      .c48 {
+      .c45 {
         text-transform: uppercase;
       }
 
-      .c50 {
+      .c47 {
         text-transform: uppercase;
       }
 
-      .c49 svg {
+      .c46 svg {
         font-size: 3rem;
       }
 
@@ -777,74 +742,44 @@ describe('PendingAssetStep', () => {
                           <div
                             class="c23"
                           >
-                            <span>
-                              <button
-                                aria-disabled="false"
-                                aria-labelledby="tooltip-1"
-                                class="c24 c25"
-                                tabindex="0"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                    fill="#212134"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
-                          </div>
-                          <div
-                            class="c26"
-                          >
                             <img
                               aria-hidden="true"
-                              class="c27"
+                              class="c24"
                               src="http://localhost:5000/CPAM.jpg"
                             />
                           </div>
                         </div>
                         <div
-                          class="c28"
+                          class="c25"
                         >
                           <div
-                            class="c29"
+                            class="c26"
                           >
                             <div
-                              class="c30"
+                              class="c27"
                             >
                               <h2
-                                class="c31"
+                                class="c28"
                                 id="card-1-title"
-                              >
-                                http://localhost:5000/CPAM.jpg
-                              </h2>
+                              />
                               <div
-                                class="c32"
+                                class="c29"
                               >
                                 <span
-                                  class="c33"
+                                  class="c30"
                                 >
                                   jpg
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c34"
+                              class="c31"
                             >
                               <div
-                                class="c35 c36 c37"
+                                class="c32 c33 c34"
                               >
                                 <span
-                                  class="c38 c39 c40"
+                                  class="c35 c36 c37"
                                 >
                                   Image
                                 </span>
@@ -872,42 +807,13 @@ describe('PendingAssetStep', () => {
                           <div
                             class="c23"
                           >
-                            <span>
-                              <button
-                                aria-disabled="false"
-                                aria-labelledby="tooltip-3"
-                                class="c24 c25"
-                                tabindex="0"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                    fill="#212134"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
-                          </div>
-                          <div
-                            class="c26"
-                          >
                             <div
-                              class="c41"
+                              class="c38"
                             >
                               <span
-                                class="c42"
+                                class="c39"
                               >
                                 <svg
-                                  aria-label="http://localhost:5000/MARIAGE%20FRACHET%204.pdf"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 24 24"
@@ -924,38 +830,36 @@ describe('PendingAssetStep', () => {
                           </div>
                         </div>
                         <div
-                          class="c28"
+                          class="c25"
                         >
                           <div
-                            class="c29"
+                            class="c26"
                           >
                             <div
-                              class="c30"
+                              class="c27"
                             >
                               <h2
-                                class="c31"
+                                class="c28"
                                 id="card-2-title"
-                              >
-                                http://localhost:5000/MARIAGE%20FRACHET%204.pdf
-                              </h2>
+                              />
                               <div
-                                class="c32"
+                                class="c29"
                               >
                                 <span
-                                  class="c43"
+                                  class="c40"
                                 >
                                   pdf
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c34"
+                              class="c31"
                             >
                               <div
-                                class="c35 c36 c37"
+                                class="c32 c33 c34"
                               >
                                 <span
-                                  class="c38 c39 c40"
+                                  class="c35 c36 c37"
                                 >
                                   Doc
                                 </span>
@@ -983,39 +887,11 @@ describe('PendingAssetStep', () => {
                           <div
                             class="c23"
                           >
-                            <span>
-                              <button
-                                aria-disabled="false"
-                                aria-labelledby="tooltip-5"
-                                class="c24 c25"
-                                tabindex="0"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                    fill="#212134"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
-                          </div>
-                          <div
-                            class="c26"
-                          >
                             <div
-                              class="c41"
+                              class="c38"
                             >
                               <div
-                                class="c44"
+                                class="c41"
                               >
                                 <video
                                   src="http://localhost:5000/mov_bbb.mp4"
@@ -1029,48 +905,46 @@ describe('PendingAssetStep', () => {
                             </div>
                           </div>
                           <time
-                            class="c45 c46"
+                            class="c42 c43"
                           >
                             <span
-                              class="c47"
+                              class="c44"
                             >
                               ...
                             </span>
                           </time>
                         </div>
                         <div
-                          class="c28"
+                          class="c25"
                         >
                           <div
-                            class="c29"
+                            class="c26"
                           >
                             <div
-                              class="c30"
+                              class="c27"
                             >
                               <h2
-                                class="c31"
+                                class="c28"
                                 id="card-3-title"
-                              >
-                                http://localhost:5000/mov_bbb.mp4
-                              </h2>
+                              />
                               <div
-                                class="c32"
+                                class="c29"
                               >
                                 <span
-                                  class="c48"
+                                  class="c45"
                                 >
                                   mp4
                                 </span>
                               </div>
                             </div>
                             <div
-                              class="c34"
+                              class="c31"
                             >
                               <div
-                                class="c35 c36 c37"
+                                class="c32 c33 c34"
                               >
                                 <span
-                                  class="c38 c39 c40"
+                                  class="c35 c36 c37"
                                 >
                                   Video
                                 </span>
@@ -1098,42 +972,13 @@ describe('PendingAssetStep', () => {
                           <div
                             class="c23"
                           >
-                            <span>
-                              <button
-                                aria-disabled="false"
-                                aria-labelledby="tooltip-7"
-                                class="c24 c25"
-                                tabindex="0"
-                                type="button"
-                              >
-                                <svg
-                                  fill="none"
-                                  height="1em"
-                                  viewBox="0 0 24 24"
-                                  width="1em"
-                                  xmlns="http://www.w3.org/2000/svg"
-                                >
-                                  <path
-                                    clip-rule="evenodd"
-                                    d="M23.604 3.514c.528.528.528 1.36 0 1.887l-2.622 2.607-4.99-4.99L18.6.396a1.322 1.322 0 011.887 0l3.118 3.118zM0 24v-4.99l14.2-14.2 4.99 4.99L4.99 24H0z"
-                                    fill="#212134"
-                                    fill-rule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </span>
-                          </div>
-                          <div
-                            class="c26"
-                          >
                             <div
-                              class="c41"
+                              class="c38"
                             >
                               <span
-                                class="c49"
+                                class="c46"
                               >
                                 <svg
-                                  aria-label="https://www.w3schools.com/html/mov_bbb.mp4"
                                   fill="none"
                                   height="1em"
                                   viewBox="0 0 216 120"
@@ -1217,25 +1062,23 @@ describe('PendingAssetStep', () => {
                           </div>
                         </div>
                         <div
-                          class="c28"
+                          class="c25"
                         >
                           <div
-                            class="c29"
+                            class="c26"
                           >
                             <div
-                              class="c30"
+                              class="c27"
                             >
                               <h2
-                                class="c31"
+                                class="c28"
                                 id="card-4-title"
-                              >
-                                https://www.w3schools.com/html/mov_bbb.mp4
-                              </h2>
+                              />
                               <div
-                                class="c32"
+                                class="c29"
                               >
                                 <span
-                                  class="c50"
+                                  class="c47"
                                 >
                                   mp4
                                 </span>
@@ -1251,17 +1094,17 @@ describe('PendingAssetStep', () => {
             </div>
           </div>
           <div
-            class="c0 c51"
+            class="c0 c48"
           >
             <div
               class="c2"
             >
               <div
-                class="c52 c53"
+                class="c49 c50"
               >
                 <button
                   aria-disabled="false"
-                  class="c14 c54"
+                  class="c14 c51"
                   type="button"
                 >
                   <span
@@ -1270,7 +1113,7 @@ describe('PendingAssetStep', () => {
                 </button>
               </div>
               <div
-                class="c52 c53"
+                class="c49 c50"
               >
                 <button
                   aria-disabled="false"
@@ -1288,7 +1131,7 @@ describe('PendingAssetStep', () => {
           </div>
         </form>
         <div
-          class="c55"
+          class="c52"
         >
           <p
             aria-live="polite"

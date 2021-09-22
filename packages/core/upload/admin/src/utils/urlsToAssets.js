@@ -15,6 +15,7 @@ export const urlsToAssets = async urls => {
         });
 
         return {
+          name: loadedFile.name,
           url: res.config.url,
           mime: res.headers['content-type'],
           rawFile: loadedFile,
@@ -30,6 +31,7 @@ export const urlsToAssets = async urls => {
 
   const assets = fullFilledAssets.map(fullFilledAsset => ({
     source: AssetSource.Url,
+    name: fullFilledAsset.value.name,
     type: typeFromMime(fullFilledAsset.value.mime),
     url: fullFilledAsset.value.url,
     ext: fullFilledAsset.value.url.split('.').pop(),
@@ -39,6 +41,7 @@ export const urlsToAssets = async urls => {
 
   const unknownAssets = rejectedAssets.map(unknownAsset => ({
     source: AssetSource.Url,
+    name: unknownAsset.reason,
     type: AssetType.Unknown,
     url: unknownAsset.reason,
     ext: unknownAsset.reason.split('.').pop(),

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ThemeProvider, lightTheme } from '@strapi/parts';
 import { render as renderTL } from '@testing-library/react';
-import { ImageAssetCard } from '../ImageAssetCard';
+import { DocAssetCard } from '../DocAssetCard';
 import en from '../../../translations/en.json';
 
 jest.mock('../../../utils', () => ({
@@ -13,25 +13,23 @@ jest.mock('react-intl', () => ({
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => en[id]) }),
 }));
 
-describe('ImageAssetCard', () => {
+describe('DocAssetCard', () => {
   it('snapshots the component', () => {
     const { container } = renderTL(
       <ThemeProvider theme={lightTheme}>
-        <ImageAssetCard
+        <DocAssetCard
           name="hello.png"
           extension="png"
-          height={40}
-          width={40}
-          thumbnail="http://somewhere.com/hello.png"
           selected={false}
           onSelect={jest.fn()}
           onEdit={jest.fn()}
+          size="S"
         />
       </ThemeProvider>
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c23 {
+      .c24 {
         border: 0;
         -webkit-clip: rect(0 0 0 0);
         clip: rect(0 0 0 0);
@@ -49,14 +47,14 @@ describe('ImageAssetCard', () => {
         box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
       }
 
-      .c10 {
+      .c11 {
         padding-top: 8px;
         padding-right: 12px;
         padding-bottom: 8px;
         padding-left: 12px;
       }
 
-      .c17 {
+      .c18 {
         background: #f6f6f9;
         color: #666687;
         padding: 4px;
@@ -93,7 +91,21 @@ describe('ImageAssetCard', () => {
         align-items: center;
       }
 
-      .c11 {
+      .c9 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c12 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -107,13 +119,6 @@ describe('ImageAssetCard', () => {
         align-items: flex-start;
       }
 
-      .c9 {
-        margin: 0;
-        padding: 0;
-        max-height: 100%;
-        max-width: 100%;
-      }
-
       .c8 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -123,56 +128,56 @@ describe('ImageAssetCard', () => {
         -webkit-justify-content: center;
         -ms-flex-pack: center;
         justify-content: center;
-        height: 10.25rem;
+        height: 5.5rem;
         width: 100%;
         background: repeating-conic-gradient(#f6f6f9 0% 25%,transparent 0% 50%) 50% / 20px 20px;
       }
 
-      .c13 {
+      .c14 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c14 {
+      .c15 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c20 {
+      .c21 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c21 {
+      .c22 {
         font-weight: 600;
         line-height: 1.14;
       }
 
-      .c22 {
+      .c23 {
         font-weight: 600;
         font-size: 0.6875rem;
         line-height: 1.45;
         text-transform: uppercase;
       }
 
-      .c18 {
+      .c19 {
         display: inline-block;
       }
 
-      .c16 {
+      .c17 {
         margin-left: auto;
         -webkit-flex-shrink: 0;
         -ms-flex-negative: 0;
         flex-shrink: 0;
       }
 
-      .c19 {
+      .c20 {
         margin-left: 4px;
       }
 
@@ -243,7 +248,7 @@ describe('ImageAssetCard', () => {
         background-color: #8e8ea9;
       }
 
-      .c12 {
+      .c13 {
         word-break: break-all;
       }
 
@@ -318,8 +323,12 @@ describe('ImageAssetCard', () => {
         fill: #666687;
       }
 
-      .c15 {
+      .c16 {
         text-transform: uppercase;
+      }
+
+      .c10 svg {
+        font-size: 3rem;
       }
 
       <div>
@@ -371,49 +380,64 @@ describe('ImageAssetCard', () => {
             <div
               class="c8"
             >
-              <img
-                aria-hidden="true"
+              <div
                 class="c9"
-                src="http://somewhere.com/hello.png"
-              />
+              >
+                <span
+                  class="c10"
+                >
+                  <svg
+                    aria-label="hello.png"
+                    fill="none"
+                    height="1em"
+                    viewBox="0 0 24 24"
+                    width="1em"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M20 22H6.5A3.5 3.5 0 013 18.5V5a3 3 0 013-3h14a1 1 0 011 1v18a1 1 0 01-1 1zm-1-2v-3H6.5a1.5 1.5 0 100 3H19z"
+                      fill="#8E8EA9"
+                    />
+                  </svg>
+                </span>
+              </div>
             </div>
           </div>
           <div
-            class="c10"
+            class="c11"
           >
             <div
-              class="c11"
+              class="c12"
             >
               <div
-                class="c12"
+                class="c13"
               >
                 <h2
-                  class="c13"
+                  class="c14"
                   id="card-1-title"
                 >
                   hello.png
                 </h2>
                 <div
-                  class="c14"
+                  class="c15"
                 >
                   <span
-                    class="c15"
+                    class="c16"
                   >
                     png
                   </span>
-                  - 40✕40
                 </div>
               </div>
               <div
-                class="c16"
+                class="c17"
               >
                 <div
-                  class="c17 c18 c19"
+                  class="c18 c19 c20"
                 >
                   <span
-                    class="c20 c21 c22"
+                    class="c21 c22 c23"
                   >
-                    Image
+                    Doc
                   </span>
                 </div>
               </div>
@@ -421,7 +445,7 @@ describe('ImageAssetCard', () => {
           </div>
         </article>
         <div
-          class="c23"
+          class="c24"
         >
           <p
             aria-live="polite"

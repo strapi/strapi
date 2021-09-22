@@ -22,6 +22,7 @@ import { ListView } from './components/ListView';
 import { useAssets } from '../../hooks/useAssets';
 import { getTrad } from '../../utils';
 import pluginPermissions from '../../permissions';
+import { Filters } from './components/Filters';
 
 const BoxWithHeight = styled(Box)`
   height: ${32 / 16}rem;
@@ -94,7 +95,7 @@ const App = () => {
                   })}
                 />
               </BoxWithHeight>
-              <Button variant="tertiary">Filter</Button>
+              <Filters />
             </>
           }
           endActions={
