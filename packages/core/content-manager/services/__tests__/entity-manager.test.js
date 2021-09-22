@@ -35,7 +35,7 @@ describe('Content-Manager', () => {
       await entityManager.publish(entity, uid);
 
       expect(strapi.entityService.update).toBeCalledWith(uid, entity.id, {
-        data: { published_At: expect.any(Date) },
+        data: { publishedAt: expect.any(Date) },
         populate: {},
       });
     });
@@ -63,7 +63,7 @@ describe('Content-Manager', () => {
       await entityManager.unpublish(entity, uid);
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(uid, entity.id, {
-        data: { published_At: null },
+        data: { publishedAt: null },
         populate: {},
       });
     });
