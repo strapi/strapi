@@ -16,7 +16,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
     async find(ctx) {
       const { query } = ctx;
 
-      const { results, pagination } = await service.find({ params: query });
+      const { results, pagination } = await service.find(query);
 
       return transformResponse(sanitize(results), { pagination });
     },
@@ -30,7 +30,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
       const { id } = ctx.params;
       const { query } = ctx;
 
-      const entity = await service.findOne(id, { params: query });
+      const entity = await service.findOne(id, query);
 
       return transformResponse(sanitize(entity));
     },
@@ -45,7 +45,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
 
       const { data, files } = parseBody(ctx);
 
-      const entity = await service.create({ params: query, data, files });
+      const entity = await service.create({ ...query, data, files });
 
       return transformResponse(sanitize(entity));
     },
@@ -61,7 +61,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
 
       const { data, files } = parseBody(ctx);
 
-      const entity = await service.update(id, { params: query, data, files });
+      const entity = await service.update(id, { ...query, data, files });
 
       return transformResponse(sanitize(entity));
     },
@@ -75,7 +75,7 @@ const createCollectionTypeController = ({ service, sanitize, transformResponse }
       const { id } = ctx.params;
       const { query } = ctx;
 
-      const entity = await service.delete(id, { params: query });
+      const entity = await service.delete(id, query);
       return transformResponse(sanitize(entity));
     },
   };
