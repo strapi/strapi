@@ -160,7 +160,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             <span
               class="c8"
             >
-              content-manager.containers.Edit.information.lastUpdate
+              Last update
             </span>
             <span
               class="c9"
@@ -174,7 +174,7 @@ describe('CONTENT MANAGER | EditView | Header', () => {
             <span
               class="c8"
             >
-              content-manager.containers.Edit.information.by
+              By
             </span>
             <span
               class="c9"
