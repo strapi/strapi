@@ -17,7 +17,7 @@ import FieldError from './FieldError';
 
 const WAIT = 600;
 const stringify = JSON.stringify;
-const DEFAULT_THEME = 'solarized dark';
+const DEFAULT_THEME = 'blackboard';
 
 const loadCss = async () => {
   await import(
@@ -34,7 +34,7 @@ const loadCss = async () => {
     /* webpackChunkName: "codemirror-addon-mark-selection" */ 'codemirror/addon/selection/mark-selection'
   );
   await import(/* webpackChunkName: "codemirror-css" */ 'codemirror/lib/codemirror.css');
-  await import(/* webpackChunkName: "codemirror-theme" */ 'codemirror/theme/solarized.css');
+  await import(/* webpackChunkName: "codemirror-theme" */ 'codemirror/theme/blackboard.css');
 };
 
 loadCss();
