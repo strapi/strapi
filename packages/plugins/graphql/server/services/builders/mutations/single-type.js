@@ -45,7 +45,7 @@ module.exports = ({ strapi }) => {
           .buildMutationsResolvers({ contentType });
 
         const findParams = omit(['data', 'files'], transformedArgs);
-        const entity = await strapi.entityService.find(uid, { params: findParams });
+        const entity = await strapi.entityService.findMany(uid, { params: findParams });
 
         // Create or update
         const value = isNil(entity)
@@ -78,7 +78,7 @@ module.exports = ({ strapi }) => {
           .buildMutationsResolvers({ contentType });
 
         const params = omit(['data', 'files'], transformedArgs);
-        const entity = await strapi.entityService.find(uid, { params });
+        const entity = await strapi.entityService.findMany(uid, { params });
 
         if (!entity) {
           throw new Error('Entity not found');

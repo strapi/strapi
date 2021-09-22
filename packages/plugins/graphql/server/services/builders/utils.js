@@ -68,7 +68,7 @@ module.exports = ({ strapi }) => {
      * @param {object} attributes
      * @return {Object<string, object>}
      */
-    getUniqueScalarAttributes: attributes => {
+    getUniqueScalarAttributes(attributes) {
       const { isStrapiScalar } = getService('utils').attributes;
 
       const uniqueAttributes = entries(attributes).filter(

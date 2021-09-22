@@ -8,11 +8,11 @@ module.exports = ({ strapi }) => ({
 
     return {
       async find(parent, args) {
-        return strapi.entityService.find(uid, { params: args });
+        return strapi.entityService.findMany(uid, args);
       },
 
       async findOne(parent, args) {
-        return strapi.entityService.findOne(uid, args.id, { params: omit('id', args) });
+        return strapi.entityService.findOne(uid, args.id, omit('id', args));
       },
     };
   },
