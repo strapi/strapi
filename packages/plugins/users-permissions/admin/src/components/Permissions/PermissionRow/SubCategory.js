@@ -89,6 +89,7 @@ const SubCategory = ({ subCategory }) => {
                   </Checkbox>
                   <button
                     type="button"
+                    data-testid="action-cog"
                     onClick={() => onSelectedAction(action.name)}
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >

@@ -44,50 +44,20 @@ const handlers = [
       ctx.status(200),
       ctx.json({
         routes: {
-          application: [],
-          'content-manager': [
-            {
-              method: 'GET',
-              path:
-                '/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-manager/content-types',
-              handler: 'content-types.findContentTypes',
-              config: {
-                policies: ['plugin::users-permissions.permissions'],
-              },
-            },
-          ],
-          'content-type-builder': [
-            {
-              method: 'DELETE',
-              path:
-                '/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/content-type-builder/component-categories/:name',
-              handler: 'component-categories.deleteCategory',
-              config: {
-                policies: [
-                  'plugin::users-permissions.permissions',
-                  {
-                    name: 'admin::hasPermissions',
-                    options: {
-                      actions: ['plugin::content-type-builder.read'],
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-          email: [
+          'api::address': [
             {
               method: 'POST',
-              path:
-                '/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/email/',
-              handler: 'Email.send',
+              path: '/addresses',
+              handler: 'address.create',
               config: {
-                policies: ['plugin::users-permissions.permissions'],
-                description: 'Send an email',
-                tag: {
-                  plugin: 'email',
-                  name: 'Email',
+                policies: [],
+                auth: {
+                  scope: 'api::address.address.create',
                 },
+              },
+              info: {
+                apiName: 'address',
+                type: 'content-api',
               },
             },
           ],
