@@ -13,7 +13,7 @@ import { Stack } from '@strapi/parts/Stack';
 // import { FormattedMessage, useIntl } from 'react-intl';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTrad } from '../../utils';
-// import ComponentInitializer from '../ComponentInitializer';
+import ComponentInitializer from './ComponentInitializer';
 // import NonRepeatableComponent from '../NonRepeatableComponent';
 // import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
@@ -26,6 +26,8 @@ const FieldComponent = ({
   // componentFriendlyName,
   componentUid,
   // icon,
+  // TODO add error state
+  // formErrors,
   intlLabel,
   isCreatingEntry,
   isFromDynamicZone,
@@ -38,7 +40,7 @@ const FieldComponent = ({
   // Passed thanks to the connect function
   hasChildrenAllowedFields,
   hasChildrenReadableFields,
-  // isReadOnly,
+  isReadOnly,
   componentValue,
   removeComponentFromField,
 }) => {
@@ -74,6 +76,9 @@ const FieldComponent = ({
             />
           )}
         </Row>
+        {!isRepeatable && !isInitialized && (
+          <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
+        )}
       </Stack>
     </Box>
   );
@@ -147,7 +152,7 @@ FieldComponent.defaultProps = {
   hasChildrenReadableFields: false,
   // icon: 'smile',
   isFromDynamicZone: false,
-  // isReadOnly: false,
+  isReadOnly: false,
   isRepeatable: false,
   // isNested: false,
   labelAction: undefined,
@@ -164,7 +169,7 @@ FieldComponent.propTypes = {
   // icon: PropTypes.string,
   isCreatingEntry: PropTypes.bool.isRequired,
   isFromDynamicZone: PropTypes.bool,
-  // isReadOnly: PropTypes.bool,
+  isReadOnly: PropTypes.bool,
   isRepeatable: PropTypes.bool,
   // isNested: PropTypes.bool,
   intlLabel: PropTypes.shape({

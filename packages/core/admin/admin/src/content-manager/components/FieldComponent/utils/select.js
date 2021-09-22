@@ -13,6 +13,7 @@ function useSelect({ isFromDynamicZone, name }) {
     removeComponentFromField,
     readActionAllowedFields,
     updateActionAllowedFields,
+    formErrors,
   } = useCMEditViewDataManager();
   const { contentType } = useContentTypeLayout();
 
@@ -111,6 +112,7 @@ function useSelect({ isFromDynamicZone, name }) {
   }, [hasChildrenAllowedFields, hasChildrenReadableFields, isCreatingEntry]);
 
   return {
+    formErrors,
     hasChildrenAllowedFields,
     hasChildrenReadableFields,
     isCreatingEntry,
