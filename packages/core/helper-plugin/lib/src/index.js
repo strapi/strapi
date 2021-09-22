@@ -75,7 +75,6 @@ export { default as ModalHeader } from './old/components/ModalHeader';
 export { default as ModalFooter } from './old/components/FooterModal';
 export { default as ModalForm } from './old/components/FormModal';
 export { default as ModalSection } from './old/components/ModalSection';
-export { default as NotAllowedInput } from './old/components/NotAllowedInput';
 export { default as NotFound } from './old/components/NotFound';
 
 export { default as PageFooter } from './old/components/PageFooter';
@@ -178,6 +177,7 @@ export { default as EmptyBodyTable } from './components/EmptyBodyTable';
 export { default as GenericInput } from './components/GenericInput';
 export * from './components/InjectionZone';
 export { default as LoadingIndicatorPage } from './components/LoadingIndicatorPage';
+export { default as NotAllowedInput } from './components/NotAllowedInput';
 export { default as SettingsPageTitle } from './components/SettingsPageTitle';
 export { default as Search } from './components/Search';
 export { default as Status } from './components/Status';

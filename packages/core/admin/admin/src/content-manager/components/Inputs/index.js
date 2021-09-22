@@ -4,13 +4,15 @@ import get from 'lodash/get';
 import omit from 'lodash/omit';
 import take from 'lodash/take';
 import isEqual from 'react-fast-compare';
-// import { Inputs as InputsIndex } from '@buffetjs/custom';
-// import { NotAllowedInput, useLibrary } from '@strapi/helper-plugin';
+import {
+  NotAllowedInput,
+  // useLibrary
+} from '@strapi/helper-plugin';
 import { useContentTypeLayout } from '../../hooks';
 import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
-import GenericInput from './GenericInput';
 import InputJSON from '../InputJSON';
+import GenericInput from './GenericInput';
 // import SelectWrapper from '../SelectWrapper';
 // import WysiwygWithErrors from '../WysiwygWithErrors';
 // import InputUID from '../InputUID';
@@ -174,14 +176,15 @@ function Inputs({
   }
 
   if (!shouldDisplayNotAllowedInput) {
-    return 'NOT ALLOWED INPUT';
-    // return (
-    //   <NotAllowedInput
-    //     label={metadatas.label}
-    //     labelAction={labelAction}
-    //     error={errorMessage}
-    //   />
-    // );
+    return (
+      <NotAllowedInput
+        description={description ? { id: description, defaultMessage: description } : null}
+        intlLabel={{ id: label, defaultMessage: label }}
+        labelAction={labelAction}
+        error={errorId}
+        name={keys}
+      />
+    );
   }
 
   if (type === 'relation') {

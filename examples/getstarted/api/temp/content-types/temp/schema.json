@@ -31,7 +31,8 @@
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "required": true
     },
     "email": {
       "type": "email",
@@ -48,7 +49,7 @@
           "localized": true
         }
       },
-      "required": true
+      "required": false
     },
     "password": {
       "type": "password",
@@ -198,7 +199,7 @@
         "deux",
         "trois"
       ],
-      "required": true,
+      "required": false,
       "pluginOptions": {
         "i18n": {
           "localized": true
