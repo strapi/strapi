@@ -205,11 +205,29 @@ const createQueryBuilder = (uid, db) => {
     },
 
     processState() {
-      state.select = state.select.map(field => helpers.toColumnName(meta, field));
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
       state.data = helpers.toRow(meta, state.data);
+
+      this.processSelect();
+    },
+
+    shouldUseDistinct() {
+      return state.joins.length > 0 && _.isEmpty(state.groupBy);
+    },
+
+    processSelect() {
+      state.select = state.select.map(field => helpers.toColumnName(meta, field));
+
+      if (this.shouldUseDistinct()) {
+        const joinsOrderByColumns = state.joins.flatMap(join => {
+          return _.keys(join.orderBy).map(key => this.aliasColumn(key, join.alias));
+        });
+        const orderByColumns = state.orderBy.map(({ column }) => column);
+
+        state.select = _.uniq([...state.select, ...orderByColumns, ...joinsOrderByColumns]);
+      }
     },
 
     getKnexQuery() {
@@ -229,20 +247,12 @@ const createQueryBuilder = (uid, db) => {
 
       switch (state.type) {
         case 'select': {
-          if (state.select.length === 0) {
-            state.select = ['*'];
-          }
-
-          if (state.joins.length > 0 && _.isEmpty(state.groupBy)) {
-            // add a discting when making joins and if we don't have a groupBy
-            // TODO: make sure we return the right data
-            qb.distinct(this.aliasColumn('id'));
-
-            // TODO: add column if they aren't there already
-            state.select.unshift(...state.orderBy.map(({ column }) => column));
-          }
-
           qb.select(state.select.map(column => this.aliasColumn(column)));
+
+          if (this.shouldUseDistinct()) {
+            qb.distinct();
+          }
+
           break;
         }
         case 'count': {
