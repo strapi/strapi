@@ -27,8 +27,6 @@
   "Plugin.permissions.plugins.description": "Tentukan semua tindakan yang diizinkan untuk plugin {name}.",
   "Plugins.header.description": "Hanya tindakan yang terikat oleh rute yang dicantumkan di bawah.",
   "Plugins.header.title": "Izin",
-  "Policies.InputSelect.empty": "Tidak ada",
-  "Policies.InputSelect.label": "Izinkan untuk melakukan tindakan ini untuk:",
   "Policies.header.hint": "Pilih tindakan aplikasi atau tindakan plugin dan klik ikon roda gigi untuk menampilkan rute terikat",
   "Policies.header.title": "Pengaturan lanjutan",
   "PopUpForm.Email.email_templates.inputDescription": "Jika Anda tidak yakin bagaimana menggunakan variabel, {link}",

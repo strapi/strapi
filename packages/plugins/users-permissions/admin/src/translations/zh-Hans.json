@@ -33,8 +33,6 @@
   "Plugin.permissions.plugins.description": "定义 {name} 插件所有允许的操作。",
   "Plugins.header.description": "下面只列出路由绑定的操作。",
   "Plugins.header.title": "权限",
-  "Policies.InputSelect.empty": "没有",
-  "Policies.InputSelect.label": "允许执行以下操作：",
   "Policies.header.hint": "选择应用程序或插件的操作，然后点击 COG 图标显示绑定的路由",
   "Policies.header.title": "高级设置",
   "PopUpForm.Email.email_templates.inputDescription": "如果你不确定如何使用变量， {link}",
