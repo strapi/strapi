@@ -1,0 +1,50 @@
+{
+  "kind": "collectionType",
+  "collectionName": "temps",
+  "info": {
+    "singularName": "temp",
+    "pluralName": "temps",
+    "displayName": "temp",
+    "name": "temp",
+    "description": ""
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
+  "attributes": {
+    "name": {
+      "type": "string",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "temp": {
+      "type": "component",
+      "repeatable": false,
+      "component": "default.temp",
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "temp_req": {
+      "type": "component",
+      "repeatable": false,
+      "component": "default.temp",
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    }
+  }
+}
