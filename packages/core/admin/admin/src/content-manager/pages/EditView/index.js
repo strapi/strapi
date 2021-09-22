@@ -20,7 +20,7 @@ import permissions from '../../../permissions';
 // import Container from '../../components/Container';
 // import DynamicZone from '../../components/DynamicZone';
 // import FormWrapper from '../../components/FormWrapper';
-// import FieldComponent from '../../components/FieldComponent';
+import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
 // import SelectWrapper from '../../components/SelectWrapper';
 import CollectionTypeFormWrapper from '../../components/CollectionTypeFormWrapper';
@@ -140,8 +140,8 @@ const EditView = ({
                       hasRadius
                       background="neutral0"
                       shadow="tableShadow"
-                      paddingLeft={8}
-                      paddingRight={8}
+                      paddingLeft={6}
+                      paddingRight={6}
                       paddingTop={6}
                       paddingBottom={6}
                     >
@@ -155,6 +155,34 @@ const EditView = ({
                                 <Grid gap={4} key={gridIndex}>
                                   {grid.map(
                                     ({ fieldSchema, labelAction, metadatas, name, size }) => {
+                                      const isComponent = fieldSchema.type === 'component';
+
+                                      if (isComponent) {
+                                        const {
+                                          component,
+                                          max,
+                                          min,
+                                          repeatable = false,
+                                        } = fieldSchema;
+
+                                        return (
+                                          <GridItem col={size} s={12} xs={12} key={component}>
+                                            <FieldComponent
+                                              componentUid={component}
+                                              labelAction={labelAction}
+                                              isRepeatable={repeatable}
+                                              intlLabel={{
+                                                id: metadatas.label,
+                                                defaultMessage: metadatas.label,
+                                              }}
+                                              max={max}
+                                              min={min}
+                                              name={name}
+                                            />
+                                          </GridItem>
+                                        );
+                                      }
+
                                       return (
                                         <GridItem col={size} key={name} s={12} xs={12}>
                                           <Inputs
