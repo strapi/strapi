@@ -52,7 +52,7 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
       const fieldsToRemove = [
         'created_by',
         'updated_by',
-        'published_at',
+        'publishedAt',
         'id',
         '_id',
         'updated_at',

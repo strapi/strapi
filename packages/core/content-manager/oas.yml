@@ -273,7 +273,7 @@ paths:
                     '[mainField]':
                       type: string
                       description: Value of the mainField of the entry
-                    published_at:
+                    publishedAt:
                       type: date
   # Collection type
   /content-manager/collection-types/{model}:
@@ -400,7 +400,7 @@ paths:
                   - $ref: '#/components/schemas/entity'
                   - type: object
                     properties:
-                      published_at:
+                      publishedAt:
                         type: datetime
   /content-manager/collection-types/{model}/{id}/actions/unpublish:
     post:
@@ -419,7 +419,7 @@ paths:
                   - $ref: '#/components/schemas/entity'
                   - type: object
                     properties:
-                      published_at:
+                      publishedAt:
                         type: datetime
   # Single type
   /content-manager/single-types/{model}:
@@ -480,7 +480,7 @@ paths:
                   - $ref: '#/components/schemas/entity'
                   - type: object
                     properties:
-                      published_at:
+                      publishedAt:
                         type: datetime
   /content-manager/single-types/{model}/actions/unpublish:
     post:
@@ -498,7 +498,7 @@ paths:
                   - $ref: '#/components/schemas/entity'
                   - type: object
                     properties:
-                      published_at:
+                      publishedAt:
                         type: datetime
                         nullable: true
 

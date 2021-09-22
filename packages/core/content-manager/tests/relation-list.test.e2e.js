@@ -66,12 +66,12 @@ const products = ({ withPublished = false }) => ({ shop }) => {
     {
       name: 'tomato',
       shops,
-      published_at: new Date(),
+      publishedAt: new Date(),
     },
     {
       name: 'apple',
       shops,
-      published_at: null,
+      publishedAt: null,
     },
   ];
 
@@ -79,7 +79,7 @@ const products = ({ withPublished = false }) => ({ shop }) => {
     return entries;
   }
 
-  return entries.map(omit('published_at'));
+  return entries.map(omit('publishedAt'));
 };
 
 describe('Relation-list route', () => {
@@ -165,10 +165,10 @@ describe('Relation-list route', () => {
       const appleProductRes = res.body.find(p => p.name === 'apple');
 
       expect(tomatoProductRes).toMatchObject(pick(['_id', 'id', 'name'], data.products[0]));
-      expect(tomatoProductRes.published_at).toBeISODate();
+      expect(tomatoProductRes.publishedAt).toBeISODate();
       expect(appleProductRes).toStrictEqual({
         ...pick(['_id', 'id', 'name'], data.products[1]),
-        published_at: null,
+        publishedAt: null,
       });
     });
 

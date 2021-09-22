@@ -49,7 +49,7 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
   it('should remove the specified key in a given object', () => {
     const data = {
       id: 1,
-      published_at: null,
+      publishedAt: null,
       created_by: null,
       __temp_key__: 0,
       updated_by: {
@@ -84,7 +84,7 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
             developments: [
               {
                 id: 1,
-                published_at: '2020-10-30T08:55:49.686Z',
+                publishedAt: '2020-10-30T08:55:49.686Z',
                 created_by: null,
                 updated_by: null,
                 created_at: '2020-10-30T08:55:49.694Z',
@@ -112,7 +112,7 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
 
     const expected = {
       id: 1,
-      published_at: null,
+      publishedAt: null,
       created_by: null,
       updated_by: {
         id: 1,
@@ -144,7 +144,7 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
             developments: [
               {
                 id: 1,
-                published_at: '2020-10-30T08:55:49.686Z',
+                publishedAt: '2020-10-30T08:55:49.686Z',
                 created_by: null,
                 updated_by: null,
                 created_at: '2020-10-30T08:55:49.694Z',

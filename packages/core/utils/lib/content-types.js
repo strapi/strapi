@@ -6,7 +6,7 @@ const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
-const PUBLISHED_AT_ATTRIBUTE = 'published_at';
+const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
 const CREATED_BY_ATTRIBUTE = 'created_by';
 const UPDATED_BY_ATTRIBUTE = 'updated_by';
 

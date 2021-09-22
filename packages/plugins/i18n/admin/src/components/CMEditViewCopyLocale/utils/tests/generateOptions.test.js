@@ -19,9 +19,9 @@ describe('I18n | Components | CMEditViewCopyLocale | utils', () => {
       ];
       const currentLocale = 'en';
       const localizations = [
-        { published_at: 'test', locale: 'en', id: 1 },
-        { published_at: 'test', locale: 'fr', id: 2 },
-        { published_at: 'test', locale: 'it', id: 3 },
+        { publishedAt: 'test', locale: 'en', id: 1 },
+        { publishedAt: 'test', locale: 'fr', id: 2 },
+        { publishedAt: 'test', locale: 'it', id: 3 },
       ];
 
       const expected = [
@@ -40,8 +40,8 @@ describe('I18n | Components | CMEditViewCopyLocale | utils', () => {
         { properties: { locales: ['en', 'fr', 'it'] } },
       ];
       const localizations = [
-        { published_at: 'test', locale: 'en', id: 1 },
-        { published_at: 'test', locale: 'fr', id: 2 },
+        { publishedAt: 'test', locale: 'en', id: 1 },
+        { publishedAt: 'test', locale: 'fr', id: 2 },
       ];
 
       const expected = [
@@ -61,9 +61,9 @@ describe('I18n | Components | CMEditViewCopyLocale | utils', () => {
       ];
       const currentLocale = 'test';
       const localizations = [
-        { published_at: 'test', locale: 'en', id: 1 },
-        { published_at: 'test', locale: 'fr', id: 2 },
-        { published_at: 'test', locale: 'it', id: 3 },
+        { publishedAt: 'test', locale: 'en', id: 1 },
+        { publishedAt: 'test', locale: 'fr', id: 2 },
+        { publishedAt: 'test', locale: 'it', id: 3 },
       ];
 
       const expected = [

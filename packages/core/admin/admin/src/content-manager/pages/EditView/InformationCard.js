@@ -68,7 +68,7 @@ const InformationCard = () => {
       </SubWrapper>
       <Padded top size="sm" />
       {hasDraftAndPublish && (
-        <StatusWrapper isGreen={initialData.published_at}>
+        <StatusWrapper isGreen={initialData.publishedAt}>
           <Text fontSize="sm" lineHeight="18px">
             •
           </Text>
@@ -83,7 +83,7 @@ const InformationCard = () => {
             <Text lineHeight="18px" fontWeight="bold">
               {formatMessage({
                 id: getTrad(
-                  initialData.published_at
+                  initialData.publishedAt
                     ? 'containers.Edit.information.publishedVersion'
                     : 'containers.Edit.information.draftVersion'
                 ),

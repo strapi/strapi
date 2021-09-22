@@ -26,11 +26,11 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           {
             id: 13,
             locale: 'en',
-            published_at: null,
+            publishedAt: null,
           },
         ],
         name: 'name',
-        published_at: null,
+        publishedAt: null,
         updated_at: '2021-03-17T15:34:18.958Z',
         updated_by: {
           blocked: null,
@@ -60,7 +60,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         {
           id: 14,
           locale: 'fr-FR',
-          published_at: null,
+          publishedAt: null,
         },
       ];
 
@@ -71,7 +71,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
           {
             id: 14,
             locale: 'fr-FR',
-            published_at: null,
+            publishedAt: null,
           },
         ],
         name: 'name',
