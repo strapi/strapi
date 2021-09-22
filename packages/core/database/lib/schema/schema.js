@@ -14,17 +14,11 @@ const createColumn = (name, attribute) => {
     unsigned: false,
     ...opts,
     ...(attribute.column || {}),
-    // TODO: allow passing custom params to the DB from the model definition
   };
-};
-
-const shouldCreateColumn = attribute => {
-  return types.isScalar(attribute.type);
 };
 
 const createTable = meta => {
   const table = {
-    // TODO: allow passing custom params to the DB from the model definition
     name: meta.tableName,
     indexes: meta.indexes || [],
     foreignKeys: meta.foreignKeys || [],
@@ -76,8 +70,8 @@ const createTable = meta => {
           columns: [columnName],
         });
       }
-    } else if (shouldCreateColumn(attribute)) {
-      const column = createColumn(key, meta.attributes[key]);
+    } else if (types.isScalar(attribute.type)) {
+      const column = createColumn(attribute.columnName || key, attribute);
 
       if (column.unique) {
         table.indexes.push({

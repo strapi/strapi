@@ -20,7 +20,7 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }) => {
     if (!hasDraftAndPublish(oldContentType) && hasDraftAndPublish(contentType)) {
       const qb = strapi.db.queryBuilder(uid);
       await qb
-        .update({ published_at: qb.ref('created_at') })
+        .update({ published_at: qb.ref('createdAt') })
         .where({ published_at: null })
         .execute();
     }
