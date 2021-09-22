@@ -23,8 +23,8 @@ const InformationCard = () => {
   );
 
   const updatedBy = useMemo(() => {
-    const firstname = get(initialData, ['updated_by', 'firstname'], '');
-    const lastname = get(initialData, ['updated_by', 'lastname'], '');
+    const firstname = get(initialData, ['updatedBy', 'firstname'], '');
+    const lastname = get(initialData, ['updatedBy', 'lastname'], '');
 
     return `${firstname} ${lastname}`;
   }, [initialData]);

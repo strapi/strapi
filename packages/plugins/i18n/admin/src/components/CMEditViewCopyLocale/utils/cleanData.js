@@ -14,8 +14,8 @@ const cleanData = (data, { contentType, components }, initialLocalizations) => {
   dataWithoutPasswordsAndRelations.localizations = initialLocalizations;
 
   const fieldsToRemove = [
-    'created_by',
-    'updated_by',
+    'createdBy',
+    'updatedBy',
     'publishedAt',
     'id',
     '_id',

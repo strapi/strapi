@@ -7,8 +7,8 @@ const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
 const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
-const CREATED_BY_ATTRIBUTE = 'created_by';
-const UPDATED_BY_ATTRIBUTE = 'updated_by';
+const CREATED_BY_ATTRIBUTE = 'createdBy';
+const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 
 const CREATED_AT_ATTRIBUTE = 'createdAt';
 const UPDATED_AT_ATTRIBUTE = 'updatedAt';

@@ -8,7 +8,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         addresseses: [],
         common: 'common',
         createdAt: '2021-03-17T15:34:05.866Z',
-        created_by: {
+        createdBy: {
           blocked: null,
           email: 'cyril@strapi.io',
           firstname: 'cyril',
@@ -32,7 +32,7 @@ describe('i18n | Components | CMEditViewCopyLocale | utils', () => {
         name: 'name',
         publishedAt: null,
         updatedAt: '2021-03-17T15:34:18.958Z',
-        updated_by: {
+        updatedBy: {
           blocked: null,
           email: 'cyril@strapi.io',
           firstname: 'cyril',

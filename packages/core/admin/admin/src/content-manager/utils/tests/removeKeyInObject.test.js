@@ -50,9 +50,9 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
     const data = {
       id: 1,
       publishedAt: null,
-      created_by: null,
+      createdBy: null,
       __temp_key__: 0,
-      updated_by: {
+      updatedBy: {
         id: 1,
         firstname: 'cyril',
         lastname: 'lopez',
@@ -85,8 +85,8 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
               {
                 id: 1,
                 publishedAt: '2020-10-30T08:55:49.686Z',
-                created_by: null,
-                updated_by: null,
+                createdBy: null,
+                updatedBy: null,
                 createdAt: '2020-10-30T08:55:49.694Z',
                 updatedAt: '2020-10-30T08:55:49.694Z',
               },
@@ -113,8 +113,8 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
     const expected = {
       id: 1,
       publishedAt: null,
-      created_by: null,
-      updated_by: {
+      createdBy: null,
+      updatedBy: {
         id: 1,
         firstname: 'cyril',
         lastname: 'lopez',
@@ -145,8 +145,8 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
               {
                 id: 1,
                 publishedAt: '2020-10-30T08:55:49.686Z',
-                created_by: null,
-                updated_by: null,
+                createdBy: null,
+                updatedBy: null,
                 createdAt: '2020-10-30T08:55:49.694Z',
                 updatedAt: '2020-10-30T08:55:49.694Z',
               },

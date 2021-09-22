@@ -525,14 +525,14 @@ components:
       type: object
       required:
         - id
-        - created_by
-        - updated_by
+        - createdBy
+        - updatedBy
       properties:
         id:
           $ref: '#/components/schemas/id'
-        created_by:
+        createdBy:
           $ref: '#/components/schemas/user'
-        updated_by:
+        updatedBy:
           $ref: '#/components/schemas/user'
       additionalProperties:
         type: any
