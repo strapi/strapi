@@ -21,6 +21,8 @@ module.exports = context => {
 
   const getGraphQLService = strapi.plugin('graphql').service;
 
+  const extension = getGraphQLService('extension');
+
   /**
    * Add a scalar attribute to the type definition
    *
@@ -232,14 +234,15 @@ module.exports = context => {
     builder.field(attributeName, { type, resolve, args });
   };
 
-  /**
-   * Bind a content type on an attribute privacy checker
-   *
-   * @param {object} contentType
-   * @return {function(string): boolean}
-   */
   const isNotPrivate = contentType => attributeName => {
     return !contentTypes.isPrivateAttribute(contentType, attributeName);
+  };
+
+  const isNotDisabled = contentType => attributeName => {
+    return extension
+      .shadowCRUD(contentType.uid)
+      .field(attributeName)
+      .hasOutputEnabled();
   };
 
   return {
@@ -303,6 +306,8 @@ module.exports = context => {
           attributesKey
             // Ignore private attributes
             .filter(isNotPrivate(contentType))
+            // Ignore disabled fields (from extension service)
+            .filter(isNotDisabled(contentType))
             // Add each attribute to the type definition
             .forEach(attributeName => {
               const attribute = attributes[attributeName];

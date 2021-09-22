@@ -38,7 +38,14 @@ module.exports = context => {
         name,
 
         definition(t) {
-          for (const [attributeName, attribute] of Object.entries(attributes)) {
+          const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
+            extension
+              .shadowCRUD(contentType.uid)
+              .field(attributeName)
+              .hasInputEnabled()
+          );
+
+          for (const [attributeName, attribute] of validAttributes) {
             // Scalars
             if (isStrapiScalar(attribute)) {
               const gqlScalar = mappers.strapiScalarToGraphQLScalar(attribute.type);

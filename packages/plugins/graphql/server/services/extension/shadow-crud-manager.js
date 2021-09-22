@@ -1,12 +1,22 @@
 'use strict';
 
-const getDefaultConfig = () => ({
+const getDefaultContentTypeConfig = () => ({
   enabled: true,
 
   mutations: true,
   queries: true,
 
   disabledActions: [],
+  fields: new Map(),
+});
+
+const getDefaultFieldConfig = () => ({
+  enabled: true,
+
+  input: true,
+  output: true,
+
+  filters: true,
 });
 
 const ALL_ACTIONS = '*';
@@ -16,7 +26,7 @@ module.exports = () => {
 
   return uid => {
     if (!configs.has(uid)) {
-      configs.set(uid, getDefaultConfig());
+      configs.set(uid, getDefaultContentTypeConfig());
     }
 
     return {
@@ -86,6 +96,63 @@ module.exports = () => {
         actions.forEach(action => this.disableAction(action));
 
         return this;
+      },
+
+      field(fieldName) {
+        const { fields } = configs.get(uid);
+
+        if (!fields.has(fieldName)) {
+          fields.set(fieldName, getDefaultFieldConfig());
+        }
+
+        return {
+          isEnabled() {
+            return fields.get(fieldName).enabled;
+          },
+
+          hasInputEnabled() {
+            return fields.get(fieldName).input;
+          },
+
+          hasOutputEnabled() {
+            return fields.get(fieldName).output;
+          },
+
+          hasFiltersEnabeld() {
+            return fields.get(fieldName).filters;
+          },
+
+          disable() {
+            fields.set(fieldName, {
+              enabled: false,
+
+              output: false,
+              input: false,
+
+              filters: false,
+            });
+
+            return this;
+          },
+
+          disableOutput() {
+            fields.get(fieldName).output = false;
+
+            return this;
+          },
+
+          disableInput() {
+            fields.get(fieldName).input = false;
+
+            return this;
+          },
+
+          disableFilters() {
+            fields.get(fieldName).filters = false;
+
+            return this;
+          },
+        };
       },
     };
   };

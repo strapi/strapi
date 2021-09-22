@@ -11,6 +11,7 @@ module.exports = ({ strapi }) => {
 
   const buildContentTypeFilters = contentType => {
     const utils = strapi.plugin('graphql').service('utils');
+    const extension = strapi.plugin('graphql').service('extension');
 
     const { getFiltersInputTypeName } = utils.naming;
     const { isStrapiScalar, isMedia, isRelation } = utils.attributes;
@@ -23,8 +24,15 @@ module.exports = ({ strapi }) => {
       name: filtersTypeName,
 
       definition(t) {
+        const validAttributes = Object.entries(attributes).filter(([attributeName]) =>
+          extension
+            .shadowCRUD(contentType.uid)
+            .field(attributeName)
+            .hasFiltersEnabeld()
+        );
+
         // Add every defined attribute
-        for (const [attributeName, attribute] of Object.entries(attributes)) {
+        for (const [attributeName, attribute] of validAttributes) {
           // Handle scalars
           if (isStrapiScalar(attribute)) {
             addScalarAttribute(t, attributeName, attribute);
