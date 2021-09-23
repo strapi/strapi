@@ -60,7 +60,8 @@ async function getTemplateQuestion() {
  *
  * @returns Array of prompt question objects
  */
-async function getPromptQuestions(projectName, template) {
+// TODO: re-enabled once the template have been migrated to V4
+async function getPromptQuestions(projectName /*, template */) {
   return [
     {
       type: 'input',
@@ -84,13 +85,14 @@ async function getPromptQuestions(projectName, template) {
         },
       ],
     },
-    {
-      type: 'confirm',
-      name: 'useTemplate',
-      when: !template,
-      message:
-        'Would you like to use a template? (Templates are Strapi configurations designed for a specific use case)',
-    },
+    // TODO: re-enabled once the template have been migrated to V4
+    // {
+    //   type: 'confirm',
+    //   name: 'useTemplate',
+    //   when: !template,
+    //   message:
+    //     'Would you like to use a template? (Templates are Strapi configurations designed for a specific use case)',
+    // },
   ];
 }
 
