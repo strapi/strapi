@@ -6,18 +6,18 @@ import { useIntl } from 'react-intl';
 
 const displayedFilters = [
   {
-    name: 'created_at',
+    name: 'createdAt',
     fieldSchema: {
       type: 'date',
     },
-    metadatas: { label: 'created_at' },
+    metadatas: { label: 'createdAt' },
   },
   {
-    name: 'updated_at',
+    name: 'updatedAt',
     fieldSchema: {
       type: 'date',
     },
-    metadatas: { label: 'updated_at' },
+    metadatas: { label: 'updatedAt' },
   },
   {
     name: 'type',

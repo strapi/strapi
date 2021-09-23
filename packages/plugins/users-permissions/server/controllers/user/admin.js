@@ -207,7 +207,7 @@ module.exports = {
     }
 
     const sanitizedData = pm.pickPermittedFieldsOf(body, { subject: pm.toSubject(user) });
-    const updateData = _.omit({ ...sanitizedData, updated_by: admin.id }, 'created_by');
+    const updateData = _.omit({ ...sanitizedData, updatedBy: admin.id }, 'createdBy');
 
     if (_.has(body, 'password') && password === user.password) {
       delete updateData.password;

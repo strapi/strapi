@@ -14,18 +14,18 @@ const _ = require('lodash');
  */
 const timestampsLifecyclesSubscriber = {
   /**
-   * Init created_at & updated_at before create
+   * Init createdAt & updatedAt before create
    * @param {Event} event
    */
   beforeCreate(event) {
     const { data } = event.params;
 
     const now = new Date();
-    _.defaults(data, { created_at: now, updated_at: now });
+    _.defaults(data, { createdAt: now, updatedAt: now });
   },
 
   /**
-   * Init created_at & updated_at before create
+   * Init createdAt & updatedAt before create
    * @param {Event} event
    */
   beforeCreateMany(event) {
@@ -33,23 +33,23 @@ const timestampsLifecyclesSubscriber = {
 
     const now = new Date();
     if (_.isArray(data)) {
-      data.forEach(data => _.defaults(data, { created_at: now, updated_at: now }));
+      data.forEach(data => _.defaults(data, { createdAt: now, updatedAt: now }));
     }
   },
 
   /**
-   * Update updated_at before update
+   * Update updatedAt before update
    * @param {Event} event
    */
   beforeUpdate(event) {
     const { data } = event.params;
 
     const now = new Date();
-    _.assign(data, { updated_at: now });
+    _.assign(data, { updatedAt: now });
   },
 
   /**
-   * Update updated_at before update
+   * Update updatedAt before update
    * @param {Event} event
    */
   beforeUpdateMany(event) {
@@ -57,7 +57,7 @@ const timestampsLifecyclesSubscriber = {
 
     const now = new Date();
     if (_.isArray(data)) {
-      data.forEach(data => _.assign(data, { updated_at: now }));
+      data.forEach(data => _.assign(data, { updatedAt: now }));
     }
   },
 };

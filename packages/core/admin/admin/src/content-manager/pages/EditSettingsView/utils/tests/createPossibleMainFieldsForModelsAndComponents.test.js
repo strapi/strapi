@@ -25,8 +25,8 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
             cover: { type: 'media', multiple: false, required: false },
             images: { type: 'media', multiple: true, required: false },
             full_name: { type: 'string', required: true },
-            created_at: { type: 'timestamp' },
-            updated_at: { type: 'timestamp' },
+            createdAt: { type: 'timestamp' },
+            updatedAt: { type: 'timestamp' },
           },
         },
 
@@ -47,8 +47,8 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
               targetModel: 'api::menu.menu',
               relationType: 'manyToOne',
             },
-            created_at: { type: 'timestamp' },
-            updated_at: { type: 'timestamp' },
+            createdAt: { type: 'timestamp' },
+            updatedAt: { type: 'timestamp' },
           },
         },
       ];
@@ -59,10 +59,10 @@ describe('CONTENT MANAGER | containers | Main | utils', () => {
           'city',
           'postal_coder',
           'full_name',
-          'created_at',
-          'updated_at',
+          'createdAt',
+          'updatedAt',
         ],
-        'api::menusection.menusection': ['id', 'name', 'created_at', 'updated_at'],
+        'api::menusection.menusection': ['id', 'name', 'createdAt', 'updatedAt'],
       };
 
       expect(createPossibleMainFieldsForModelsAndComponents(models)).toEqual(expected);

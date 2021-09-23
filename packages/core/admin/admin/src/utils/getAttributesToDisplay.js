@@ -6,7 +6,7 @@ const getAttributesToDisplay = contentType => {
   // Sometimes timestamps is false
   let timestampsArray = Array.isArray(timestamps) ? timestamps : [];
   const idsAttributes = ['id', '_id']; // For both SQL and mongo
-  const unwritableAttributes = [...idsAttributes, ...timestampsArray, 'published_at'];
+  const unwritableAttributes = [...idsAttributes, ...timestampsArray, 'publishedAt'];
   const schemaAttributes = get(contentType, ['attributes'], {});
 
   return Object.keys(schemaAttributes).reduce((acc, current) => {

@@ -35,7 +35,7 @@ const Relation = ({
     return 'pointer';
   }, [displayNavigationLink, isDisabled]);
   const { pathname } = useLocation();
-  const isDraft = isEmpty(data.published_at);
+  const isDraft = isEmpty(data.publishedAt);
   const titleLabelID = isDraft
     ? 'components.Select.draft-info-title'
     : 'components.Select.publish-info-title';

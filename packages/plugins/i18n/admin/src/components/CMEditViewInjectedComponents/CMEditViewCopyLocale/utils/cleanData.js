@@ -14,13 +14,13 @@ const cleanData = (data, { contentType, components }, initialLocalizations) => {
   dataWithoutPasswordsAndRelations.localizations = initialLocalizations;
 
   const fieldsToRemove = [
-    'created_by',
-    'updated_by',
-    'published_at',
+    'createdBy',
+    'updatedBy',
+    'publishedAt',
     'id',
     '_id',
-    'updated_at',
-    'created_at',
+    'updatedAt',
+    'createdAt',
   ];
 
   const cleanedClonedData = contentManagementUtilRemoveFieldsFromData(

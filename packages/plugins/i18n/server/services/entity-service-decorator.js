@@ -91,23 +91,18 @@ const decorator = service => ({
    * @param {object} ctx - Query context
    * @param {object} ctx.model - Model that is being used
    */
-  async wrapOptions(opts = {}, ctx = {}) {
-    const wrappedOptions = await service.wrapOptions.call(this, opts, ctx);
+  async wrapParams(params = {}, ctx = {}) {
+    const wrappedParams = await service.wrapParams.call(this, params, ctx);
 
     const model = strapi.getModel(ctx.uid);
 
     const { isLocalizedContentType } = getService('content-types');
 
     if (!isLocalizedContentType(model)) {
-      return wrappedOptions;
+      return wrappedParams;
     }
 
-    const { params } = opts;
-
-    return {
-      ...wrappedOptions,
-      params: await wrapParams(params, ctx),
-    };
+    return wrapParams(params, ctx);
   },
 
   /**

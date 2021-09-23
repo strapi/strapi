@@ -50,13 +50,13 @@ const addCommonFieldsToInitialDataMiddleware = () => ({ getState, dispatch }) =>
       const merged = merge(defaultDataStructure, nonLocalizedFields);
 
       const fieldsToRemove = [
-        'created_by',
-        'updated_by',
-        'published_at',
+        'createdBy',
+        'updatedBy',
+        'publishedAt',
         'id',
         '_id',
-        'updated_at',
-        'created_at',
+        'updatedAt',
+        'createdAt',
       ];
       const cleanedMerged = contentManagementUtilRemoveFieldsFromData(
         merged,

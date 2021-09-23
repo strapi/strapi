@@ -41,8 +41,8 @@ const CMEditViewInjectedComponents = () => {
   const localizations = get(modifiedData, 'localizations', []);
   let currentLocaleStatus = 'did-not-create-locale';
 
-  if (has(initialData, 'published_at')) {
-    currentLocaleStatus = initialData.published_at ? 'published' : 'draft';
+  if (has(initialData, 'publishedAt')) {
+    currentLocaleStatus = initialData.publishedAt ? 'published' : 'draft';
   }
 
   return (

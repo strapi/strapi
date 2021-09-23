@@ -10,7 +10,7 @@ const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
-const emitEvent = (event, fn) => async (entity, model) => {
+const wrapWithEmitEvent = (event, fn) => async (entity, model) => {
   const result = await fn(entity, model);
 
   const modelDef = strapi.getModel(model);
@@ -92,6 +92,9 @@ const getBasePopulate = (uid, populate) => {
   });
 };
 
+/**
+ * @type {import('./entity-manager').default}
+ */
 module.exports = ({ strapi }) => ({
   async assocCreatorRoles(entity) {
     if (!entity) {
@@ -105,31 +108,31 @@ module.exports = ({ strapi }) => ({
   find(opts, uid, populate) {
     const params = { ...opts, populate: getDeepPopulate(uid, populate) };
 
-    return strapi.entityService.find(uid, { params });
+    return strapi.entityService.findMany(uid, params);
   },
 
   findPage(opts, uid, populate) {
     const params = { ...opts, populate: getBasePopulate(uid, populate) };
 
-    return strapi.entityService.findPage(uid, { params });
+    return strapi.entityService.findPage(uid, params);
   },
 
   findWithRelationCounts(opts, uid, populate) {
     const params = { ...opts, populate: getBasePopulate(uid, populate) };
 
-    return strapi.entityService.findWithRelationCounts(uid, { params });
+    return strapi.entityService.findWithRelationCounts(uid, params);
   },
 
   count(opts, uid) {
     const params = { ...opts };
 
-    return strapi.entityService.count(uid, { params });
+    return strapi.entityService.count(uid, params);
   },
 
   async findOne(id, uid, populate) {
     const params = { populate: getDeepPopulate(uid, populate) };
 
-    return strapi.entityService.findOne(uid, id, { params });
+    return strapi.entityService.findOne(uid, id, params);
   },
 
   async findOneWithCreatorRoles(id, uid, populate) {
@@ -150,33 +153,33 @@ module.exports = ({ strapi }) => ({
       publishData[PUBLISHED_AT_ATTRIBUTE] = null;
     }
 
-    const params = { populate: getDeepPopulate(uid) };
+    const params = { data: publishData, populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.create(uid, { params, data: publishData });
+    return strapi.entityService.create(uid, params);
   },
 
   update(entity, body, uid) {
     const publishData = omitPublishedAtField(body);
 
-    const params = { populate: getDeepPopulate(uid) };
+    const params = { data: publishData, populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.update(uid, entity.id, { params, data: publishData });
+    return strapi.entityService.update(uid, entity.id, params);
   },
 
   delete(entity, uid) {
     const params = { populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.delete(uid, entity.id, { params });
+    return strapi.entityService.delete(uid, entity.id, params);
   },
 
   // FIXME: handle relations
   deleteMany(opts, uid) {
     const params = { ...opts };
 
-    return strapi.entityService.deleteMany(uid, { params });
+    return strapi.entityService.deleteMany(uid, params);
   },
 
-  publish: emitEvent(ENTRY_PUBLISH, async (entity, uid) => {
+  publish: wrapWithEmitEvent(ENTRY_PUBLISH, async (entity, uid) => {
     if (entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw strapi.errors.badRequest('already.published');
     }
@@ -186,20 +189,20 @@ module.exports = ({ strapi }) => ({
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: new Date() };
 
-    const params = { populate: getDeepPopulate(uid) };
+    const params = { data, populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.update(uid, entity.id, { params, data });
+    return strapi.entityService.update(uid, entity.id, params);
   }),
 
-  unpublish: emitEvent(ENTRY_UNPUBLISH, (entity, uid) => {
+  unpublish: wrapWithEmitEvent(ENTRY_UNPUBLISH, (entity, uid) => {
     if (!entity[PUBLISHED_AT_ATTRIBUTE]) {
       throw strapi.errors.badRequest('already.draft');
     }
 
     const data = { [PUBLISHED_AT_ATTRIBUTE]: null };
 
-    const params = { populate: getDeepPopulate(uid) };
+    const params = { data, populate: getDeepPopulate(uid) };
 
-    return strapi.entityService.update(uid, entity.id, { params, data });
+    return strapi.entityService.update(uid, entity.id, params);
   }),
 });

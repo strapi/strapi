@@ -31,14 +31,12 @@ describe('Content-Manager', () => {
 
     test('Publish a content-type', async () => {
       const uid = 'api::test.test';
-      const entity = { id: 1, published_at: null };
+      const entity = { id: 1, publishedAt: null };
       await entityManager.publish(entity, uid);
 
       expect(strapi.entityService.update).toBeCalledWith(uid, entity.id, {
-        data: { published_at: expect.any(Date) },
-        params: {
-          populate: {},
-        },
+        data: { publishedAt: expect.any(Date) },
+        populate: {},
       });
     });
   });
@@ -61,14 +59,12 @@ describe('Content-Manager', () => {
 
     test('Unpublish a content-type', async () => {
       const uid = 'api::test.test';
-      const entity = { id: 1, published_at: new Date() };
+      const entity = { id: 1, publishedAt: new Date() };
       await entityManager.unpublish(entity, uid);
 
       expect(strapi.entityService.update).toHaveBeenCalledWith(uid, entity.id, {
-        data: { published_at: null },
-        params: {
-          populate: {},
-        },
+        data: { publishedAt: null },
+        populate: {},
       });
     });
   });

@@ -76,8 +76,8 @@ const data = [
     previewUrl: null,
     provider: 'local',
     provider_metadata: null,
-    created_at: '2021-09-14T07:32:50.816Z',
-    updated_at: '2021-09-14T07:32:50.816Z',
+    createdAt: '2021-09-14T07:32:50.816Z',
+    updatedAt: '2021-09-14T07:32:50.816Z',
   },
   {
     id: 5,
@@ -95,8 +95,8 @@ const data = [
     previewUrl: null,
     provider: 'local',
     provider_metadata: null,
-    created_at: '2021-09-14T07:48:30.882Z',
-    updated_at: '2021-09-14T07:48:30.882Z',
+    createdAt: '2021-09-14T07:48:30.882Z',
+    updatedAt: '2021-09-14T07:48:30.882Z',
   },
   {
     id: 6,
@@ -114,8 +114,8 @@ const data = [
     previewUrl: null,
     provider: 'local',
     provider_metadata: null,
-    created_at: '2021-09-14T07:51:59.845Z',
-    updated_at: '2021-09-14T07:51:59.845Z',
+    createdAt: '2021-09-14T07:51:59.845Z',
+    updatedAt: '2021-09-14T07:51:59.845Z',
   },
 ];
 

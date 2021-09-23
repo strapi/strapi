@@ -1,7 +1,7 @@
 import { get } from 'lodash';
 import { getType, getOtherInfos } from './getAttributeInfos';
 
-const defaultFields = ['created_by', 'updated_by', 'published_at', 'id', '_id'];
+const defaultFields = ['createdBy', 'updatedBy', 'publishedAt', 'id', '_id'];
 
 const contentManagementUtilRemoveFieldsFromData = (
   data,

@@ -83,7 +83,7 @@ describe('CM API - Basic + compo', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
     data.productsWithCompo.push(res.body);
   });
 
@@ -95,7 +95,7 @@ describe('CM API - Basic + compo', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithCompo[0]);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
   });
 
   test('Update product with compo', async () => {
@@ -118,7 +118,7 @@ describe('CM API - Basic + compo', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
     expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
     data.productsWithCompo[0] = res.body;
   });
 
@@ -131,7 +131,7 @@ describe('CM API - Basic + compo', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithCompo[0]);
     expect(res.body.id).toEqual(data.productsWithCompo[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
     data.productsWithCompo.shift();
   });
 

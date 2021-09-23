@@ -42,7 +42,7 @@ const DynamicTable = ({
       ...headers.displayedHeaders,
       {
         key: '__published_at_temp_key__',
-        name: 'published_at',
+        name: 'publishedAt',
         fieldSchema: {
           type: 'custom',
         },
@@ -52,7 +52,7 @@ const DynamicTable = ({
           sortable: true,
         },
         cellFormatter: cellData => {
-          const isPublished = !isEmpty(cellData.published_at);
+          const isPublished = !isEmpty(cellData.publishedAt);
 
           return <State isPublished={isPublished} />;
         },

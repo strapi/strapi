@@ -14,8 +14,8 @@ const handlers = [
           name: 'Authenticated',
           description: 'Default role given to authenticated user.',
           type: 'authenticated',
-          created_at: '2021-09-08T16:26:18.061Z',
-          updated_at: '2021-09-08T16:26:18.061Z',
+          createdAt: '2021-09-08T16:26:18.061Z',
+          updatedAt: '2021-09-08T16:26:18.061Z',
           permissions: {
             'api::address': {
               controllers: {

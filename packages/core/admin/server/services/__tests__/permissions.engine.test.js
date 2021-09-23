@@ -96,7 +96,7 @@ describe('Permissions Engine', () => {
         plugin: 'test',
         name: 'isCreatedBy',
         category: 'default',
-        handler: user => ({ created_by: user.firstname }),
+        handler: user => ({ createdBy: user.firstname }),
       },
       {
         plugin: 'test',
@@ -339,7 +339,7 @@ describe('Permissions Engine', () => {
         condition: {
           $and: [
             {
-              $or: [{ created_by: user.firstname }],
+              $or: [{ createdBy: user.firstname }],
             },
           ],
         },
@@ -364,7 +364,7 @@ describe('Permissions Engine', () => {
     await engine.evaluate({ permission, user, registerFn });
 
     expect(can).toHaveBeenCalledWith('read', 'all', undefined, {
-      $and: [{ $or: [{ created_by: user.firstname }] }],
+      $and: [{ $or: [{ createdBy: user.firstname }] }],
     });
   });
 
@@ -389,11 +389,11 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: 'article',
         fields: '*',
-        condition: { created_by: 1 },
+        condition: { createdBy: 1 },
       });
 
       expect(can).toHaveBeenCalledTimes(1);
-      expect(can).toHaveBeenCalledWith('read', 'article', '*', { created_by: 1 });
+      expect(can).toHaveBeenCalledWith('read', 'article', '*', { createdBy: 1 });
     });
 
     test(`It should use 'all' as a subject if it's Nil`, async () => {
@@ -401,11 +401,11 @@ describe('Permissions Engine', () => {
         action: 'read',
         subject: null,
         fields: null,
-        condition: { created_by: 1 },
+        condition: { createdBy: 1 },
       });
 
       expect(can).toHaveBeenCalledTimes(1);
-      expect(can).toHaveBeenCalledWith('read', 'all', null, { created_by: 1 });
+      expect(can).toHaveBeenCalledWith('read', 'all', null, { createdBy: 1 });
     });
   });
 
