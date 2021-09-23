@@ -169,7 +169,7 @@ async function createCacheDir({ dir, plugins }) {
   }
 
   // Copy admin extensions folder
-  const adminExtensionFolder = path.join(dir, 'admin', 'extensions');
+  const adminExtensionFolder = path.join(dir, 'src', 'admin', 'extensions');
 
   if (fs.existsSync(adminExtensionFolder)) {
     await fs.copy(adminExtensionFolder, path.resolve(cacheDir, 'admin', 'src', 'extensions'));
