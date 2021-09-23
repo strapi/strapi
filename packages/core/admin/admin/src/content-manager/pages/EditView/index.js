@@ -1,8 +1,4 @@
-import React, {
-  memo,
-  // useCallback,
-  useMemo,
-} from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import { CheckPermissions, useTracking } from '@strapi/helper-plugin';
@@ -75,11 +71,11 @@ const EditView = ({
   );
 
   // Check if a block is a dynamic zone
-  // const isDynamicZone = useCallback(block => {
-  //   return block.every(subBlock => {
-  //     return subBlock.every(obj => obj.fieldSchema.type === 'dynamiczone');
-  //   });
-  // }, []);
+  const isDynamicZone = useCallback(block => {
+    return block.every(subBlock => {
+      return subBlock.every(obj => obj.fieldSchema.type === 'dynamiczone');
+    });
+  }, []);
 
   const formattedContentTypeLayout = useMemo(() => {
     if (!currentContentTypeLayoutData.layouts) {
@@ -136,20 +132,27 @@ const EditView = ({
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    <Box
-                      hasRadius
-                      background="neutral0"
-                      shadow="tableShadow"
-                      paddingLeft={6}
-                      paddingRight={6}
-                      paddingTop={6}
-                      paddingBottom={6}
-                    >
-                      {formattedContentTypeLayout.map((row, index) => {
-                        // TODO DZ
-
+                    {formattedContentTypeLayout.map((row, index) => {
+                      if (isDynamicZone(row)) {
                         return (
-                          <Stack size={6} key={index}>
+                          <Box key={index} paddingTop={6}>
+                            TODO DZ
+                          </Box>
+                        );
+                      }
+
+                      return (
+                        <Box
+                          key={index}
+                          hasRadius
+                          background="neutral0"
+                          shadow="tableShadow"
+                          paddingLeft={6}
+                          paddingRight={6}
+                          paddingTop={6}
+                          paddingBottom={6}
+                        >
+                          <Stack size={6}>
                             {row.map((grid, gridIndex) => {
                               return (
                                 <Grid gap={4} key={gridIndex}>
@@ -199,9 +202,9 @@ const EditView = ({
                               );
                             })}
                           </Stack>
-                        );
-                      })}
-                    </Box>
+                        </Box>
+                      );
+                    })}
                   </GridItem>
                   <GridItem col={3} s={12}>
                     <Stack size={2}>

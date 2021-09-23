@@ -59,7 +59,6 @@ const NonRepeatableComponent = ({
                       keys={keys}
                       fieldSchema={fieldSchema}
                       metadatas={metadatas}
-                      componentUid={componentUid}
                       queryInfos={queryInfos}
                     />
                   </GridItem>

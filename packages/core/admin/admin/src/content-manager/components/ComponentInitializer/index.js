@@ -7,8 +7,8 @@ import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Row } from '@strapi/parts/Row';
 import { Text } from '@strapi/parts/Text';
-import { useCMEditViewDataManager, pxToRem } from '@strapi/helper-plugin';
-import { getTrad } from '../../../utils';
+import { pxToRem } from '@strapi/helper-plugin';
+import { getTrad } from '../../utils';
 
 const IconButton = styled.button`
   border: none;
@@ -27,12 +27,8 @@ const IconButton = styled.button`
   }
 `;
 
-const ComponentInitializer = ({ componentUid, isReadOnly, name }) => {
+const ComponentInitializer = ({ isReadOnly, onClick }) => {
   const { formatMessage } = useIntl();
-  const { addNonRepeatableComponentToField } = useCMEditViewDataManager();
-  const handleClick = () => {
-    addNonRepeatableComponentToField(name, componentUid);
-  };
 
   return (
     <Box
@@ -44,7 +40,7 @@ const ComponentInitializer = ({ componentUid, isReadOnly, name }) => {
     >
       <Stack size={2}>
         <Row justifyContent="center">
-          <IconButton disabled={isReadOnly} onClick={handleClick}>
+          <IconButton disabled={isReadOnly} onClick={onClick}>
             <AddIcon />
           </IconButton>
         </Row>
@@ -63,13 +59,11 @@ const ComponentInitializer = ({ componentUid, isReadOnly, name }) => {
 
 ComponentInitializer.defaultProps = {
   isReadOnly: false,
-  name: '',
 };
 
 ComponentInitializer.propTypes = {
-  componentUid: PropTypes.string.isRequired,
   isReadOnly: PropTypes.bool,
-  name: PropTypes.string,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default ComponentInitializer;

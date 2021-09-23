@@ -12,7 +12,7 @@ const LabelAction = styled(Box)`
   }
 `;
 
-const Label = ({ intlLabel, id, labelAction, name }) => {
+const Label = ({ intlLabel, id, labelAction, name, numberOfEntries, showNumberOfEntries }) => {
   const { formatMessage } = useIntl();
   const label = intlLabel?.id ? formatMessage(intlLabel) : '';
 
@@ -20,6 +20,7 @@ const Label = ({ intlLabel, id, labelAction, name }) => {
     <Row>
       <Text textColor="neutral800" htmlFor={id || name} small bold as="label">
         {label}
+        {showNumberOfEntries && <>&nbsp;({numberOfEntries})</>}
       </Text>
       {labelAction && <LabelAction paddingLeft={1}>{labelAction}</LabelAction>}
     </Row>
@@ -29,6 +30,8 @@ const Label = ({ intlLabel, id, labelAction, name }) => {
 Label.defaultProps = {
   id: undefined,
   labelAction: undefined,
+  numberOfEntries: 0,
+  showNumberOfEntries: false,
 };
 
 Label.propTypes = {
@@ -40,6 +43,8 @@ Label.propTypes = {
   }).isRequired,
   labelAction: PropTypes.element,
   name: PropTypes.string.isRequired,
+  numberOfEntries: PropTypes.number,
+  showNumberOfEntries: PropTypes.bool,
 };
 
 export default Label;

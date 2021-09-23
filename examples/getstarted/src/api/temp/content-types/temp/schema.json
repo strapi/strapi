@@ -27,7 +27,7 @@
     },
     "temp": {
       "type": "component",
-      "repeatable": false,
+      "repeatable": true,
       "component": "default.temp",
       "pluginOptions": {
         "i18n": {
@@ -37,23 +37,9 @@
     },
     "temp_req": {
       "type": "component",
-      "repeatable": false,
+      "repeatable": true,
       "component": "default.temp",
       "required": true,
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
-    },
-    "multiple": {
-      "allowedTypes": [
-        "images",
-        "files",
-        "videos"
-      ],
-      "type": "media",
-      "multiple": true,
       "pluginOptions": {
         "i18n": {
           "localized": true
