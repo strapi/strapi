@@ -6,12 +6,12 @@ const SINGLE_TYPE = 'singleType';
 const COLLECTION_TYPE = 'collectionType';
 
 const ID_ATTRIBUTE = 'id';
-const PUBLISHED_AT_ATTRIBUTE = 'published_at';
-const CREATED_BY_ATTRIBUTE = 'created_by';
-const UPDATED_BY_ATTRIBUTE = 'updated_by';
+const PUBLISHED_AT_ATTRIBUTE = 'publishedAt';
+const CREATED_BY_ATTRIBUTE = 'createdBy';
+const UPDATED_BY_ATTRIBUTE = 'updatedBy';
 
-const CREATED_AT_ATTRIBUTE = 'created_at';
-const UPDATED_AT_ATTRIBUTE = 'updated_at';
+const CREATED_AT_ATTRIBUTE = 'createdAt';
+const UPDATED_AT_ATTRIBUTE = 'updatedAt';
 
 const DP_PUB_STATE_LIVE = 'live';
 const DP_PUB_STATE_PREVIEW = 'preview';

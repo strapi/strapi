@@ -54,6 +54,7 @@ const createJoin = (ctx, { alias, attributeName, attribute }) => {
   return alias;
 };
 
+// TODO: toColumnName for orderBy & on
 const applyJoin = (qb, join) => {
   const {
     method = 'leftJoin',

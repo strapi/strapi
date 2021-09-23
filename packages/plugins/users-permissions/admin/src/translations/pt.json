@@ -23,8 +23,6 @@
   "Plugin.permissions.plugins.description": "Defina todas as ações permitidas para o plugin {name}.",
   "Plugins.header.description": "Todas as ações associadas a uma rota estão listadas abaixo.",
   "Plugins.header.title": "Permissões",
-  "Policies.InputSelect.empty": "Nenhum(a)",
-  "Policies.InputSelect.label": "Permitir executar esta ação para:",
   "Policies.header.hint": "Selecione as ações da aplicação ou dos plugins e clique no ícone para mostrar as rotas associadas",
   "Policies.header.title": "Configurações avançadas",
   "PopUpForm.Email.email_templates.inputDescription": "Se não tem a certeza de como usar as variáveis, {link}",

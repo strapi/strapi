@@ -82,7 +82,7 @@ const Header = ({
 
   if (!isCreatingEntry && canUpdate) {
     const shouldShowPublishButton = hasDraftAndPublish && canPublish;
-    const isPublished = !isEmpty(initialData.published_at);
+    const isPublished = !isEmpty(initialData.publishedAt);
     const isPublishButtonLoading = isPublished
       ? status === 'unpublish-pending'
       : status === 'publish-pending';

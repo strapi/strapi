@@ -14,30 +14,30 @@ const fixtures = {
       name: 'Bamboo Desk',
       categories: ['Home'],
       comp: { countries: ['France'] },
-      published_at: null,
+      publishedAt: null,
     },
     {
       name: 'Computer',
       categories: ['Home', 'Tech'],
       comp: { countries: ['France', 'Italy', 'Spain'] },
-      published_at: new Date(),
+      publishedAt: new Date(),
     },
     {
       name: 'Burger Drone',
       categories: ['Tech', 'Food'],
       comp: { countries: ['Italy', 'Spain'] },
-      published_at: new Date(),
+      publishedAt: new Date(),
     },
   ],
   category: [
-    { name: 'Home', published_at: null },
-    { name: 'Food', published_at: new Date() },
-    { name: 'Tech', published_at: new Date() },
+    { name: 'Home', publishedAt: null },
+    { name: 'Food', publishedAt: new Date() },
+    { name: 'Tech', publishedAt: new Date() },
   ],
   country: [
-    { name: 'France', published_at: new Date() },
-    { name: 'Italy', published_at: null },
-    { name: 'Spain', published_at: new Date() },
+    { name: 'France', publishedAt: new Date() },
+    { name: 'Italy', publishedAt: null },
+    { name: 'Spain', publishedAt: new Date() },
   ],
 };
 
@@ -111,7 +111,7 @@ const components = {
 const filterBy = (name, { mode = 'live' } = {}) => {
   return fixtures[name].filter(item => {
     if (['live', 'default'].includes(mode)) {
-      return item.published_at instanceof Date;
+      return item.publishedAt instanceof Date;
     }
     return true;
   });
@@ -146,7 +146,7 @@ describe('Publication State', () => {
               name => f.country.find(country => country.name === name).id
             ),
           },
-          published_at: product.published_at,
+          publishedAt: product.publishedAt,
         }))
       )
       .build();
@@ -201,28 +201,28 @@ describe('Publication State', () => {
 
       test('Root level', () => {
         products.forEach(product => {
-          expect(product.published_at).toBeISODate();
+          expect(product.publishedAt).toBeISODate();
         });
       });
 
       test('First level (categories)', () => {
         products.forEach(({ id, categories }) => {
-          const length = getApiRef(id).categories.filter(c => c.published_at !== null).length;
+          const length = getApiRef(id).categories.filter(c => c.publishedAt !== null).length;
           expect(categories).toHaveLength(length);
 
           categories.forEach(category => {
-            expect(category.published_at).toBeISODate();
+            expect(category.publishedAt).toBeISODate();
           });
         });
       });
 
       test('Second level through component (countries)', () => {
         products.forEach(({ id, comp: { countries } }) => {
-          const length = getApiRef(id).comp.countries.filter(c => c.published_at !== null).length;
+          const length = getApiRef(id).comp.countries.filter(c => c.publishedAt !== null).length;
           expect(countries).toHaveLength(length);
 
           countries.forEach(country => {
-            expect(country.published_at).toBeISODate();
+            expect(country.publishedAt).toBeISODate();
           });
         });
       });

@@ -163,7 +163,7 @@ function ListView({
 
         if (hasDraftAndPublish) {
           const dataToDelete = data.find(obj => obj.id.toString() === idToDelete.toString());
-          const isDraftEntry = isEmpty(dataToDelete.published_at);
+          const isDraftEntry = isEmpty(dataToDelete.publishedAt);
           const status = isDraftEntry ? 'draft' : 'published';
 
           trackerProperty = { status };

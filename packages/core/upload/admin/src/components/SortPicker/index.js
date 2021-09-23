@@ -9,14 +9,14 @@ import { useSelectTimestamps } from '../../hooks';
 import SortList from '../SortList';
 
 const SortPicker = ({ onChange, value }) => {
-  const [created_at, updated_at] = useSelectTimestamps();
+  const [createdAt, updatedAt] = useSelectTimestamps();
   const orders = {
-    created_at_desc: `${created_at}:DESC`,
-    created_at_asc: `${created_at}:ASC`,
+    created_at_desc: `${createdAt}:DESC`,
+    created_at_asc: `${createdAt}:ASC`,
     name_asc: 'name:ASC',
     name_desc: 'name:DESC',
-    updated_at_desc: `${updated_at}:DESC`,
-    updated_at_asc: `${updated_at}:ASC`,
+    updated_at_desc: `${updatedAt}:DESC`,
+    updated_at_asc: `${updatedAt}:ASC`,
   };
 
   return (

@@ -57,7 +57,7 @@ const createQueryBuilder = (uid, db) => {
     },
 
     ref(name) {
-      return db.connection.ref(name);
+      return db.connection.ref(helpers.toColumnName(meta, name));
     },
 
     update(data) {
@@ -168,20 +168,20 @@ const createQueryBuilder = (uid, db) => {
       return ['select', 'count'].includes(state.type);
     },
 
-    aliasColumn(columnName, alias) {
-      if (typeof columnName !== 'string') {
-        return columnName;
+    aliasColumn(key, alias) {
+      if (typeof key !== 'string') {
+        return key;
       }
 
-      if (columnName.indexOf('.') >= 0) {
-        return columnName;
+      if (key.indexOf('.') >= 0) {
+        return key;
       }
 
       if (!_.isNil(alias)) {
-        return `${alias}.${columnName}`;
+        return `${alias}.${key}`;
       }
 
-      return this.mustUseAlias() ? `${this.alias}.${columnName}` : columnName;
+      return this.mustUseAlias() ? `${this.alias}.${key}` : key;
     },
 
     raw(...args) {
@@ -208,6 +208,26 @@ const createQueryBuilder = (uid, db) => {
       state.orderBy = helpers.processOrderBy(state.orderBy, { qb: this, uid, db });
       state.where = helpers.processWhere(state.where, { qb: this, uid, db });
       state.populate = helpers.processPopulate(state.populate, { qb: this, uid, db });
+      state.data = helpers.toRow(meta, state.data);
+
+      this.processSelect();
+    },
+
+    shouldUseDistinct() {
+      return state.joins.length > 0 && _.isEmpty(state.groupBy);
+    },
+
+    processSelect() {
+      state.select = state.select.map(field => helpers.toColumnName(meta, field));
+
+      if (this.shouldUseDistinct()) {
+        const joinsOrderByColumns = state.joins.flatMap(join => {
+          return _.keys(join.orderBy).map(key => this.aliasColumn(key, join.alias));
+        });
+        const orderByColumns = state.orderBy.map(({ column }) => column);
+
+        state.select = _.uniq([...joinsOrderByColumns, ...orderByColumns, ...state.select]);
+      }
     },
 
     getKnexQuery() {
@@ -227,20 +247,12 @@ const createQueryBuilder = (uid, db) => {
 
       switch (state.type) {
         case 'select': {
-          if (state.select.length === 0) {
-            state.select = ['*'];
-          }
-
-          if (state.joins.length > 0 && _.isEmpty(state.groupBy)) {
-            // add a discting when making joins and if we don't have a groupBy
-            // TODO: make sure we return the right data
-            qb.distinct(this.aliasColumn('id'));
-
-            // TODO: add column if they aren't there already
-            state.select.unshift(...state.orderBy.map(({ column }) => column));
-          }
-
           qb.select(state.select.map(column => this.aliasColumn(column)));
+
+          if (this.shouldUseDistinct()) {
+            qb.distinct();
+          }
+
           break;
         }
         case 'count': {
@@ -299,7 +311,7 @@ const createQueryBuilder = (uid, db) => {
       // if there are joins and it is a delete or update use a sub query
       if (state.search) {
         qb.where(subQb => {
-          helpers.applySearch(subQb, state.search, { alias: this.alias, db, uid });
+          helpers.applySearch(subQb, state.search, { qb: this, db, uid });
         });
       }
 

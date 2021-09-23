@@ -2,12 +2,12 @@ import { dateToUtcTime } from '@strapi/helper-plugin';
 import moment from 'moment';
 
 const filtersForm = {
-  created_at: {
+  createdAt: {
     type: 'datetime',
     defaultFilter: '=',
     defaultValue: dateToUtcTime(moment()),
   },
-  updated_at: {
+  updatedAt: {
     type: 'datetime',
     defaultFilter: '=',
     defaultValue: dateToUtcTime(moment()),

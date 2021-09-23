@@ -13,11 +13,10 @@ const Informations = () => {
   const { formatMessage, formatRelativeTime } = useIntl();
   const { initialData, isCreatingEntry } = useCMEditViewDataManager();
 
-  // TODO if timestamps are still configurable in the V4
-  const updatedAt = 'updated_at';
-  const updatedByFirstname = initialData.updated_by?.firstname || '';
-  const updatedByLastname = initialData.updated_by?.lastname || '';
-  const updatedByUsername = initialData.updated_by?.username;
+  const updatedAt = 'updatedAt';
+  const updatedByFirstname = initialData.updatedBy?.firstname || '';
+  const updatedByLastname = initialData.updatedBy?.lastname || '';
+  const updatedByUsername = initialData.updatedBy?.username;
   const updatedBy = updatedByUsername || `${updatedByFirstname} ${updatedByLastname}`;
   const currentTime = useRef(Date.now());
   const timestamp = initialData[updatedAt]

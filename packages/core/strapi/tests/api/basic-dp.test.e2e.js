@@ -82,16 +82,16 @@ describe('Core API - Basic + draftAndPublish', () => {
       attributes: product,
     });
 
-    expect(body.data.attributes.published_at).toBeISODate();
+    expect(body.data.attributes.publishedAt).toBeISODate();
 
     data.products.push(body.data);
   });
 
-  test('Create a product + can overwrite published_at', async () => {
+  test('Create a product + can overwrite publishedAt', async () => {
     const product = {
       name: 'Product 2',
       description: 'Product description',
-      published_at: '2020-08-20T10:27:55.000Z',
+      publishedAt: '2020-08-20T10:27:55.000Z',
     };
 
     const { statusCode, body } = await rq({
@@ -108,7 +108,7 @@ describe('Core API - Basic + draftAndPublish', () => {
       attributes: product,
     });
 
-    expect(body.data.attributes.published_at).toBeISODate();
+    expect(body.data.attributes.publishedAt).toBeISODate();
 
     data.products.push(body.data);
   });
@@ -135,7 +135,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     );
 
     body.data.forEach(p => {
-      expect(p.attributes.published_at).toBeISODate();
+      expect(p.attributes.publishedAt).toBeISODate();
     });
   });
 
@@ -159,16 +159,16 @@ describe('Core API - Basic + draftAndPublish', () => {
       attributes: product,
     });
 
-    expect(body.data.attributes.published_at).toBeISODate();
+    expect(body.data.attributes.publishedAt).toBeISODate();
 
     data.products[0] = body.data;
   });
 
-  test('Update product + can overwrite published_at', async () => {
+  test('Update product + can overwrite publishedAt', async () => {
     const product = {
       name: 'Product 1 updated',
       description: 'Updated Product description',
-      published_at: '2020-08-27T09:50:50.000Z',
+      publishedAt: '2020-08-27T09:50:50.000Z',
     };
 
     const { statusCode, body } = await rq({
@@ -186,8 +186,8 @@ describe('Core API - Basic + draftAndPublish', () => {
       attributes: _.pick(data.products[0], ['name', 'description']),
     });
 
-    expect(body.data.attributes.published_at).toBeISODate();
-    expect(body.data.attributes.published_at).toBe(product.published_at);
+    expect(body.data.attributes.publishedAt).toBeISODate();
+    expect(body.data.attributes.publishedAt).toBe(product.publishedAt);
     data.products[0] = body.data;
   });
 
@@ -200,7 +200,7 @@ describe('Core API - Basic + draftAndPublish', () => {
     expect(statusCode).toBe(200);
     expect(body.data).toMatchObject(data.products[0]);
     expect(body.data.id).toEqual(data.products[0].id);
-    expect(body.data.attributes.published_at).toBeISODate();
+    expect(body.data.attributes.publishedAt).toBeISODate();
     data.products.shift();
   });
 

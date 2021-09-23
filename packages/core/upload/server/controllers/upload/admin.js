@@ -200,7 +200,7 @@ const findEntityAndCheckPermissions = async (ability, action, model, id) => {
     'roles',
   ]);
 
-  const fileWithRoles = _.set(_.cloneDeep(file), 'created_by', author);
+  const fileWithRoles = _.set(_.cloneDeep(file), 'createdBy', author);
 
   if (pm.ability.cannot(pm.action, pm.toSubject(fileWithRoles))) {
     throw strapi.errors.forbidden();

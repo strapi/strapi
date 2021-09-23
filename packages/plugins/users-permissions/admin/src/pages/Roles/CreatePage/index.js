@@ -26,7 +26,7 @@ const EditPage = () => {
   const toggleNotification = useNotification();
   const { goBack } = useHistory();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const { isLoading: isLoadingPlugins, permissions, routes, policies } = usePlugins();
+  const { isLoading: isLoadingPlugins, permissions, routes } = usePlugins();
   const { trackUsage } = useTracking();
   const permissionsRef = useRef();
 
@@ -157,7 +157,6 @@ const EditPage = () => {
                     ref={permissionsRef}
                     permissions={permissions}
                     routes={routes}
-                    policies={policies}
                   />
                 )}
               </Stack>

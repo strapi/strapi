@@ -1,8 +1,8 @@
 'use strict';
 
 const { EventEmitter } = require('events');
-const createEntityService = require('../entity-service');
-const entityValidator = require('../entity-validator');
+const createEntityService = require('../');
+const entityValidator = require('../../entity-validator');
 
 describe('Entity service', () => {
   global.strapi = {
@@ -15,7 +15,7 @@ describe('Entity service', () => {
   };
 
   describe('Decorator', () => {
-    test.each(['create', 'update', 'find', 'findOne', 'delete', 'count', 'findPage'])(
+    test.each(['create', 'update', 'findMany', 'findOne', 'delete', 'count', 'findPage'])(
       'Can decorate',
       async method => {
         const instance = createEntityService({
@@ -65,7 +65,7 @@ describe('Entity service', () => {
         eventHub: new EventEmitter(),
       });
 
-      const result = await instance.find('test-model');
+      const result = await instance.findMany('test-model');
 
       expect(fakeStrapi.getModel).toHaveBeenCalledTimes(1);
       expect(fakeStrapi.getModel).toHaveBeenCalledWith('test-model');

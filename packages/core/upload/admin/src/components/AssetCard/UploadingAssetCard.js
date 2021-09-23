@@ -53,8 +53,15 @@ const CancelButton = styled.button`
   }
 `;
 
-export const UploadingAssetCard = ({ name, extension, assetType, file }) => {
-  const { upload, cancel, error, progress } = useUpload();
+export const UploadingAssetCard = ({
+  name,
+  extension,
+  assetType,
+  file,
+  onCancel,
+  onStatusChange,
+}) => {
+  const { upload, cancel, error, progress, status } = useUpload();
   const { formatMessage } = useIntl();
 
   let badgeContent;
@@ -81,6 +88,15 @@ export const UploadingAssetCard = ({ name, extension, assetType, file }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    onStatusChange(status);
+  }, [status, onStatusChange]);
+
+  const handleCancel = () => {
+    cancel();
+    onCancel(file);
+  };
+
   return (
     <Stack size={1}>
       <Card borderColor={error ? 'danger600' : undefined}>
@@ -97,11 +113,11 @@ export const UploadingAssetCard = ({ name, extension, assetType, file }) => {
               <>
                 <Box paddingBottom={2}>
                   <ProgressBar value={progress} size="S">
-                    {progress}/100%
+                    {`${progress}/100%`}
                   </ProgressBar>
                 </Box>
 
-                <CancelButton type="button" onClick={cancel}>
+                <CancelButton type="button" onClick={handleCancel}>
                   <Text small as="span" textColor="neutral200">
                     {formatMessage({
                       id: 'app.components.Button.cancel',
@@ -142,4 +158,6 @@ UploadingAssetCard.propTypes = {
   extension: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
   file: PropTypes.instanceOf(File).isRequired,
+  onCancel: PropTypes.func.isRequired,
+  onStatusChange: PropTypes.func.isRequired,
 };

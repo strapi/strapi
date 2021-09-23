@@ -49,10 +49,10 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
   it('should remove the specified key in a given object', () => {
     const data = {
       id: 1,
-      published_at: null,
-      created_by: null,
+      publishedAt: null,
+      createdBy: null,
       __temp_key__: 0,
-      updated_by: {
+      updatedBy: {
         id: 1,
         firstname: 'cyril',
         lastname: 'lopez',
@@ -64,8 +64,8 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
         blocked: null,
         __temp_key__: 0,
       },
-      created_at: '2020-10-30T08:55:49.824Z',
-      updated_at: '2020-10-30T11:07:33.910Z',
+      createdAt: '2020-10-30T08:55:49.824Z',
+      updatedAt: '2020-10-30T11:07:33.910Z',
       featured_portfolio: {
         id: 1,
         title: 'Portfolio',
@@ -84,11 +84,11 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
             developments: [
               {
                 id: 1,
-                published_at: '2020-10-30T08:55:49.686Z',
-                created_by: null,
-                updated_by: null,
-                created_at: '2020-10-30T08:55:49.694Z',
-                updated_at: '2020-10-30T08:55:49.694Z',
+                publishedAt: '2020-10-30T08:55:49.686Z',
+                createdBy: null,
+                updatedBy: null,
+                createdAt: '2020-10-30T08:55:49.694Z',
+                updatedAt: '2020-10-30T08:55:49.694Z',
               },
             ],
           },
@@ -112,9 +112,9 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
 
     const expected = {
       id: 1,
-      published_at: null,
-      created_by: null,
-      updated_by: {
+      publishedAt: null,
+      createdBy: null,
+      updatedBy: {
         id: 1,
         firstname: 'cyril',
         lastname: 'lopez',
@@ -125,8 +125,8 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
         isActive: true,
         blocked: null,
       },
-      created_at: '2020-10-30T08:55:49.824Z',
-      updated_at: '2020-10-30T11:07:33.910Z',
+      createdAt: '2020-10-30T08:55:49.824Z',
+      updatedAt: '2020-10-30T11:07:33.910Z',
       featured_portfolio: {
         id: 1,
         title: 'Portfolio',
@@ -144,11 +144,11 @@ describe('CONTENT MANAGER | utils | removeKeyInObject', () => {
             developments: [
               {
                 id: 1,
-                published_at: '2020-10-30T08:55:49.686Z',
-                created_by: null,
-                updated_by: null,
-                created_at: '2020-10-30T08:55:49.694Z',
-                updated_at: '2020-10-30T08:55:49.694Z',
+                publishedAt: '2020-10-30T08:55:49.686Z',
+                createdBy: null,
+                updatedBy: null,
+                createdAt: '2020-10-30T08:55:49.694Z',
+                updatedAt: '2020-10-30T08:55:49.694Z',
               },
             ],
           },

@@ -136,7 +136,7 @@ describe('<ListPage />', () => {
           description: 'Super Admins can access and manage all features and settings.',
           id: 1,
           name: 'Super Admin',
-          updated_at: '2021-08-24T14:37:20.384Z',
+          updatedAt: '2021-08-24T14:37:20.384Z',
           usersCount: 1,
         },
       ],

@@ -16,12 +16,12 @@ const enableDraftAndPublish = async ({ oldContentTypes, contentTypes }) => {
     const oldContentType = oldContentTypes[uid];
     const contentType = contentTypes[uid];
 
-    // if d&p was enabled set published_at to eq created_at
+    // if d&p was enabled set publishedAt to eq createdAt
     if (!hasDraftAndPublish(oldContentType) && hasDraftAndPublish(contentType)) {
       const qb = strapi.db.queryBuilder(uid);
       await qb
-        .update({ published_at: qb.ref('created_at') })
-        .where({ published_at: null })
+        .update({ publishedAt: qb.ref('createdAt') })
+        .where({ publishedAt: null })
         .execute();
     }
   }
@@ -45,7 +45,7 @@ const disableDraftAndPublish = async ({ oldContentTypes, contentTypes }) => {
       await strapi.db
         .queryBuilder(uid)
         .delete()
-        .where({ published_at: null })
+        .where({ publishedAt: null })
         .execute();
     }
   }
