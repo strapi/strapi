@@ -17,6 +17,7 @@ const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
+const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
@@ -33,7 +34,6 @@ const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
-const cronRegistry = require('./core/registries/cron');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 
@@ -61,7 +61,6 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
-    this.container.register('cron', cronRegistry(this));
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -168,7 +167,7 @@ class Strapi {
     }
 
     this.telemetry.destroy();
-    this.container.get('cron').cancelAll();
+    this.cron.destroy();
 
     delete global.strapi;
   }
@@ -334,6 +333,10 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
+    this.cron = createCronService();
+    const cronTasks = this.config.get('server.cron.tasks', {});
+    this.cron.add(cronTasks);
+
     this.telemetry = createTelemetry(this);
 
     let oldContentTypes;
@@ -371,8 +374,7 @@ class Strapi {
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
-    const cronTasks = this.config.get('server.cron.tasks');
-    this.container.get('cron').add(cronTasks);
+    this.cron.start();
 
     this.isLoaded = true;
 
@@ -431,7 +433,7 @@ class Strapi {
     // user
     const lifecycleFunction = this.srcIndex[lifecycleName];
     if (lifecycleFunction) {
-      lifecycleFunction({ strapi: this });
+      await lifecycleFunction({ strapi: this });
     }
 
     // admin
