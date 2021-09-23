@@ -449,7 +449,6 @@ class Strapi {
   /**
    * Binds queries with a specific model
    * @param {string} uid
-   * @returns {*}
    */
   query(uid) {
     return this.db.query(uid);

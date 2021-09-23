@@ -123,16 +123,23 @@ const transformPublicationStateParams = uid => (params = {}) => {
   return { ...convertOldQuery(query), ...query };
 };
 
-const chainParamsTransformations = (params, transformFunctions = []) => {
-  return pipe(...transformFunctions)(params);
-};
-
 const pickSelectionParams = pick(['fields', 'populate']);
+
+const transformParamsToQuery = (uid, params) => {
+  return pipe(
+    // _q, _where, filters, etc...
+    transformCommonParams,
+    // page, pageSize, start, limit
+    transformPaginationParams,
+    // publicationState
+    transformPublicationStateParams(uid)
+  )(params);
+};
 
 module.exports = {
   transformCommonParams,
   transformPublicationStateParams,
   transformPaginationParams,
-  chainParamsTransformations,
+  transformParamsToQuery,
   pickSelectionParams,
 };

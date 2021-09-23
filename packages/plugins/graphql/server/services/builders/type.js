@@ -99,7 +99,6 @@ module.exports = context => {
         buildDynamicZoneResolver({
           contentTypeUID: contentType.uid,
           attributeName,
-          strapi,
         });
 
     builder.list.field(attributeName, { type, resolve });

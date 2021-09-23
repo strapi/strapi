@@ -1,6 +1,5 @@
 'use strict';
 
-const old = require('./old');
 const contentAPI = require('./content-api');
 const typeRegistry = require('./type-registry');
 const utils = require('./utils');
@@ -19,6 +18,4 @@ module.exports = {
   internals,
   'type-registry': typeRegistry,
   utils,
-  ////////////////////
-  old,
 };

@@ -1,8 +1,7 @@
 'use strict';
 
 const { camelCase, upperFirst, lowerFirst, pipe, get } = require('lodash/fp');
-
-const { toSingular } = require('../old/naming');
+const { singular } = require('pluralize');
 
 module.exports = ({ strapi }) => {
   /**
@@ -36,7 +35,7 @@ module.exports = ({ strapi }) => {
         : get('info.pluralName', contentType);
 
     const transformedPlugin = upperFirst(camelCase(plugin));
-    const transformedModelName = upperFirst(camelCase(name || toSingular(modelName)));
+    const transformedModelName = upperFirst(camelCase(name || singular(modelName)));
 
     return `${transformedPlugin}${transformedModelName}`;
   };

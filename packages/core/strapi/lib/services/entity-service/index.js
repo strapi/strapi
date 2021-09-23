@@ -1,6 +1,8 @@
 'use strict';
 
 const delegate = require('delegates');
+const { pipe } = require('lodash/fp');
+
 const {
   sanitizeEntity,
   webhook: webhookUtils,
@@ -16,23 +18,11 @@ const {
   deleteComponents,
 } = require('./components');
 const {
-  chainParamsTransformations,
   transformCommonParams,
   transformPaginationParams,
-  transformPublicationStateParams,
+  transformParamsToQuery,
   pickSelectionParams,
 } = require('./params');
-
-const transformParamsToQuery = (uid, params) => {
-  return chainParamsTransformations(params, [
-    // _q, _where, filters, etc...
-    transformCommonParams,
-    // page, pageSize, start, limit
-    transformPaginationParams,
-    // publicationState
-    transformPublicationStateParams(uid),
-  ]);
-};
 
 const { MANY_RELATIONS } = relationsUtils.constants;
 
@@ -269,7 +259,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const loadParams =
       attribute.type === 'relation'
         ? transformParamsToQuery(attribute.target, params)
-        : chainParamsTransformations(params, [transformCommonParams, transformPaginationParams]);
+        : pipe(transformCommonParams, transformPaginationParams)(params);
 
     return db.query(uid).load(entity, field, loadParams);
   },
