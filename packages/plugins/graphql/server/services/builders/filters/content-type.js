@@ -39,7 +39,7 @@ module.exports = ({ strapi }) => {
           }
 
           // Handle relations
-          else if (isRelation(attribute) || isMedia(attribute)) {
+          else if (isRelation(attribute)) {
             addRelationalAttribute(t, attributeName, attribute);
           }
         }
