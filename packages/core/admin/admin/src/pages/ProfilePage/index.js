@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import styled from 'styled-components';
 import {
   Form,
   GenericInput,
@@ -24,12 +25,28 @@ import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Stack } from '@strapi/parts/Stack';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Select, Option } from '@strapi/parts/Select';
+import { FieldAction } from '@strapi/parts/Field';
+import { TextInput } from '@strapi/parts/TextInput';
+import Show from '@strapi/icons/Show';
+import Hide from '@strapi/icons/Hide';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { fetchUser, putUser } from './utils/api';
 import { schema, layout } from './utils';
 
+const FieldActionWrapper = styled(FieldAction)`
+  svg {
+    height: 1rem;
+    width: 1rem;
+    path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
+`;
+
 const ProfilePage = () => {
+  const [passwordShown, setPasswordShown] = useState(false);
+  const [passwordConfirmShown, setPasswordConfirmShown] = useState(false);
   const { changeLocale, localeNames } = useLocalesProvider();
   const { setUserDisplayName } = useAppInfos();
   const queryClient = useQueryClient();
@@ -164,7 +181,7 @@ const ProfilePage = () => {
                         })}
                       </H3>
                       <Grid gap={5}>
-                        {layout[0].map(input => {
+                        {layout.map(input => {
                           return (
                             <GridItem key={input.name} {...input.size}>
                               <GenericInput
@@ -196,18 +213,88 @@ const ProfilePage = () => {
                         })}
                       </H3>
                       <Grid gap={5}>
-                        {layout[1].map(input => {
-                          return (
-                            <GridItem key={input.name} {...input.size}>
-                              <GenericInput
-                                {...input}
-                                error={errors[input.name]}
-                                onChange={handleChange}
-                                value={values[input.name] || ''}
-                              />
-                            </GridItem>
-                          );
-                        })}
+                        <GridItem s={6} col={12}>
+                          <TextInput
+                            error={
+                              errors.password
+                                ? formatMessage({
+                                    id: errors.password,
+                                    defaultMessage: 'This value is required.',
+                                  })
+                                : ''
+                            }
+                            onChange={handleChange}
+                            value={values.password || ''}
+                            label={formatMessage({
+                              id: 'Auth.form.password.label',
+                              defaultMessage: 'Password',
+                            })}
+                            name="password"
+                            type={passwordShown ? 'text' : 'password'}
+                            endAction={
+                              <FieldActionWrapper
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setPasswordShown(prev => !prev);
+                                }}
+                                label={formatMessage(
+                                  passwordShown
+                                    ? {
+                                        id: 'Auth.form.password.show-password',
+                                        defaultMessage: 'Show password',
+                                      }
+                                    : {
+                                        id: 'Auth.form.password.hide-password',
+                                        defaultMessage: 'Hide password',
+                                      }
+                                )}
+                              >
+                                {passwordShown ? <Show /> : <Hide />}
+                              </FieldActionWrapper>
+                            }
+                          />
+                        </GridItem>
+                        <GridItem s={6} col={12}>
+                          <TextInput
+                            error={
+                              errors.password
+                                ? formatMessage({
+                                    id: errors.password,
+                                    defaultMessage: 'This value is required.',
+                                  })
+                                : ''
+                            }
+                            onChange={handleChange}
+                            value={values.confirmPassword || ''}
+                            label={formatMessage({
+                              id: 'Auth.form.confirmPassword.label',
+                              defaultMessage: 'Password confirmation',
+                            })}
+                            name="confirmPassword"
+                            type={passwordConfirmShown ? 'text' : 'password'}
+                            endAction={
+                              <FieldActionWrapper
+                                onClick={e => {
+                                  e.stopPropagation();
+                                  setPasswordConfirmShown(prev => !prev);
+                                }}
+                                label={formatMessage(
+                                  passwordConfirmShown
+                                    ? {
+                                        id: 'Auth.form.password.show-password',
+                                        defaultMessage: 'Show password',
+                                      }
+                                    : {
+                                        id: 'Auth.form.password.hide-password',
+                                        defaultMessage: 'Hide password',
+                                      }
+                                )}
+                              >
+                                {passwordConfirmShown ? <Show /> : <Hide />}
+                              </FieldActionWrapper>
+                            }
+                          />
+                        </GridItem>
                       </Grid>
                     </Stack>
                   </Box>
@@ -227,40 +314,44 @@ const ProfilePage = () => {
                           defaultMessage: 'Experience',
                         })}
                       </H3>
-                      <Select
-                        label={formatMessage({
-                          id: 'Settings.profile.form.section.experience.interfaceLanguage',
-                          defaultMessage: 'Interface language',
-                        })}
-                        placeholder={formatMessage({
-                          id: 'components.Select.placeholder',
-                          defaultMessage: 'Select',
-                        })}
-                        hint={formatMessage({
-                          id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
-                          defaultMessage:
-                            'This will only display your own interface in the chosen language.',
-                        })}
-                        onClear={() =>
-                          handleChange({ target: { name: 'preferedLanguage', value: null } })}
-                        clearLabel={formatMessage({
-                          id: 'Settings.profile.form.section.experience.clear.select',
-                          defaultMessage: 'Clear the interface language selected',
-                        })}
-                        value={values.preferedLanguage}
-                        onChange={e =>
-                          handleChange({ target: { name: 'preferedLanguage', value: e } })}
-                      >
-                        {Object.keys(localeNames).map(language => {
-                          const langName = localeNames[language];
+                      <Grid gap={5}>
+                        <GridItem s={6} col={12}>
+                          <Select
+                            label={formatMessage({
+                              id: 'Settings.profile.form.section.experience.interfaceLanguage',
+                              defaultMessage: 'Interface language',
+                            })}
+                            placeholder={formatMessage({
+                              id: 'components.Select.placeholder',
+                              defaultMessage: 'Select',
+                            })}
+                            hint={formatMessage({
+                              id: 'Settings.profile.form.section.experience.interfaceLanguage.hint',
+                              defaultMessage:
+                                'This will only display your own interface in the chosen language.',
+                            })}
+                            onClear={() =>
+                              handleChange({ target: { name: 'preferedLanguage', value: null } })}
+                            clearLabel={formatMessage({
+                              id: 'Settings.profile.form.section.experience.clear.select',
+                              defaultMessage: 'Clear the interface language selected',
+                            })}
+                            value={values.preferedLanguage}
+                            onChange={e =>
+                              handleChange({ target: { name: 'preferedLanguage', value: e } })}
+                          >
+                            {Object.keys(localeNames).map(language => {
+                              const langName = localeNames[language];
 
-                          return (
-                            <Option value={language} key={language}>
-                              {langName}
-                            </Option>
-                          );
-                        })}
-                      </Select>
+                              return (
+                                <Option value={language} key={language}>
+                                  {langName}
+                                </Option>
+                              );
+                            })}
+                          </Select>
+                        </GridItem>
+                      </Grid>
                     </Stack>
                   </Box>
                 </Stack>

@@ -174,6 +174,22 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       .c31 {
+        border: none;
+        background: transparent;
+        font-size: 1.6rem;
+        width: auto;
+        padding: 0;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c36 {
         position: absolute;
         left: 0;
         right: 0;
@@ -184,41 +200,41 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c31:focus {
+      .c36:focus {
         outline: none;
       }
 
-      .c29 {
+      .c34 {
         font-weight: 500;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
       }
 
-      .c36 {
+      .c41 {
         font-weight: 400;
         font-size: 0.875rem;
         line-height: 1.43;
         color: #32324d;
       }
 
-      .c40 {
+      .c45 {
         font-weight: 400;
         font-size: 0.75rem;
         line-height: 1.33;
         color: #666687;
       }
 
-      .c35 {
+      .c40 {
         padding-right: 16px;
         padding-left: 16px;
       }
 
-      .c38 {
+      .c43 {
         padding-left: 12px;
       }
 
-      .c32 {
+      .c37 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -236,7 +252,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c34 {
+      .c39 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -250,7 +266,7 @@ describe('ADMIN | Pages | Profile page', () => {
         align-items: center;
       }
 
-      .c28 {
+      .c33 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -260,16 +276,16 @@ describe('ADMIN | Pages | Profile page', () => {
         flex-direction: column;
       }
 
-      .c28 > * {
+      .c33 > * {
         margin-top: 0;
         margin-bottom: 0;
       }
 
-      .c28 > * + * {
+      .c33 > * + * {
         margin-top: 4px;
       }
 
-      .c30 {
+      .c35 {
         position: relative;
         border: 1px solid #dcdce4;
         padding-right: 12px;
@@ -278,27 +294,27 @@ describe('ADMIN | Pages | Profile page', () => {
         overflow: hidden;
       }
 
-      .c30:focus-within {
+      .c35:focus-within {
         border: 1px solid #4945ff;
       }
 
-      .c37 {
+      .c42 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c37 svg {
+      .c42 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c37 svg path {
+      .c42 svg path {
         fill: #666687;
       }
 
-      .c39 {
+      .c44 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -307,11 +323,11 @@ describe('ADMIN | Pages | Profile page', () => {
         border: none;
       }
 
-      .c39 svg {
+      .c44 svg {
         width: 0.375rem;
       }
 
-      .c33 {
+      .c38 {
         min-height: 2.5rem;
       }
 
@@ -365,6 +381,11 @@ describe('ADMIN | Pages | Profile page', () => {
         font-size: 0.75rem;
         line-height: 1.33;
         color: #32324d;
+      }
+
+      .c30 {
+        padding-right: 12px;
+        padding-left: 8px;
       }
 
       .c23 {
@@ -433,6 +454,44 @@ describe('ADMIN | Pages | Profile page', () => {
       }
 
       .c27[aria-disabled='true'] {
+        background: inherit;
+        color: inherit;
+      }
+
+      .c29 {
+        border: none;
+        border-radius: 4px;
+        padding-left: 16px;
+        padding-right: 0;
+        color: #32324d;
+        font-weight: 400;
+        font-size: 0.875rem;
+        display: block;
+        width: 100%;
+        height: 2.5rem;
+      }
+
+      .c29::-webkit-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29::-moz-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29:-ms-input-placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29::placeholder {
+        color: #8e8ea9;
+        opacity: 1;
+      }
+
+      .c29[aria-disabled='true'] {
         background: inherit;
         color: inherit;
       }
@@ -545,6 +604,20 @@ describe('ADMIN | Pages | Profile page', () => {
         word-break: break-all;
       }
 
+      .c28 {
+        grid-column: span 12;
+        word-break: break-all;
+      }
+
+      .c32 svg {
+        height: 1rem;
+        width: 1rem;
+      }
+
+      .c32 svg path {
+        fill: #666687;
+      }
+
       @media (max-width:68.75rem) {
         .c20 {
           grid-column: span;
@@ -554,6 +627,18 @@ describe('ADMIN | Pages | Profile page', () => {
       @media (max-width:34.375rem) {
         .c20 {
           grid-column: span 12;
+        }
+      }
+
+      @media (max-width:68.75rem) {
+        .c28 {
+          grid-column: span 6;
+        }
+      }
+
+      @media (max-width:34.375rem) {
+        .c28 {
+          grid-column: span;
         }
       }
 
@@ -828,7 +913,7 @@ describe('ADMIN | Pages | Profile page', () => {
                     class="c19"
                   >
                     <div
-                      class="c20"
+                      class="c28"
                     >
                       <div
                         class=""
@@ -856,13 +941,34 @@ describe('ADMIN | Pages | Profile page', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
-                                  class="c27"
+                                  class="c29"
                                   id="textinput-5"
                                   name="password"
-                                  placeholder=""
                                   type="password"
                                   value=""
                                 />
+                                <div
+                                  class="c30"
+                                >
+                                  <button
+                                    aria-label="Hide password"
+                                    class="c31 c32"
+                                    type="button"
+                                  >
+                                    <svg
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                                        fill="#212134"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -870,7 +976,7 @@ describe('ADMIN | Pages | Profile page', () => {
                       </div>
                     </div>
                     <div
-                      class="c20"
+                      class="c28"
                     >
                       <div
                         class=""
@@ -898,13 +1004,34 @@ describe('ADMIN | Pages | Profile page', () => {
                                 <input
                                   aria-disabled="false"
                                   aria-invalid="false"
-                                  class="c27"
+                                  class="c29"
                                   id="textinput-6"
                                   name="confirmPassword"
-                                  placeholder=""
                                   type="password"
                                   value=""
                                 />
+                                <div
+                                  class="c30"
+                                >
+                                  <button
+                                    aria-label="Hide password"
+                                    class="c31 c32"
+                                    type="button"
+                                  >
+                                    <svg
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M4.048 6.875L2.103 4.93a1 1 0 111.414-1.415l16.966 16.966a1 1 0 11-1.414 1.415l-2.686-2.686a12.247 12.247 0 01-4.383.788c-3.573 0-6.559-1.425-8.962-3.783a15.842 15.842 0 01-2.116-2.568 11.096 11.096 0 01-.711-1.211 1.145 1.145 0 010-.875c.124-.258.36-.68.711-1.211.58-.876 1.283-1.75 2.116-2.569.326-.32.663-.622 1.01-.906zm10.539 10.539l-1.551-1.551a4.005 4.005 0 01-4.9-4.9L6.584 9.411a6 6 0 008.002 8.002zM7.617 4.787A12.248 12.248 0 0112 3.998c3.572 0 6.559 1.426 8.961 3.783a15.845 15.845 0 012.117 2.569c.351.532.587.954.711 1.211.116.242.115.636 0 .875-.124.257-.36.68-.711 1.211-.58.876-1.283 1.75-2.117 2.568-.325.32-.662.623-1.01.907l-2.536-2.537a6 6 0 00-8.002-8.002L7.617 4.787zm3.347 3.347A4.005 4.005 0 0116 11.998c0 .359-.047.706-.136 1.037l-4.9-4.901z"
+                                        fill="#212134"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -925,98 +1052,110 @@ describe('ADMIN | Pages | Profile page', () => {
                   >
                     Experience
                   </h2>
-                  <div>
+                  <div
+                    class="c19"
+                  >
                     <div
                       class="c28"
                     >
-                      <span
-                        class="c29"
-                        for="select-1"
-                        id="select-1-label"
-                      >
-                        Interface language
-                      </span>
                       <div
-                        class="c30"
+                        class=""
                       >
-                        <button
-                          aria-describedby="select-1-hint"
-                          aria-disabled="false"
-                          aria-expanded="false"
-                          aria-haspopup="listbox"
-                          aria-labelledby="select-1-label select-1-content"
-                          class="c31"
-                          id="select-1"
-                          type="button"
-                        />
-                        <div
-                          class="c32 c33"
-                        >
+                        <div>
                           <div
-                            class="c34"
+                            class="c33"
                           >
+                            <span
+                              class="c34"
+                              for="select-1"
+                              id="select-1-label"
+                            >
+                              Interface language
+                            </span>
                             <div
                               class="c35"
                             >
-                              <span
+                              <button
+                                aria-describedby="select-1-hint"
+                                aria-disabled="false"
+                                aria-expanded="false"
+                                aria-haspopup="listbox"
+                                aria-labelledby="select-1-label select-1-content"
                                 class="c36"
-                                id="select-1-content"
+                                id="select-1"
+                                type="button"
+                              />
+                              <div
+                                class="c37 c38"
                               >
-                                Select
-                              </span>
+                                <div
+                                  class="c39"
+                                >
+                                  <div
+                                    class="c40"
+                                  >
+                                    <span
+                                      class="c41"
+                                      id="select-1-content"
+                                    >
+                                      Select
+                                    </span>
+                                  </div>
+                                </div>
+                                <div
+                                  class="c39"
+                                >
+                                  <button
+                                    aria-disabled="false"
+                                    aria-label="Clear the interface language selected"
+                                    class="c42"
+                                  >
+                                    <svg
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 24 24"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
+                                        fill="#212134"
+                                      />
+                                    </svg>
+                                  </button>
+                                  <button
+                                    aria-hidden="true"
+                                    class="c43 c42 c44"
+                                    tabindex="-1"
+                                    type="button"
+                                  >
+                                    <svg
+                                      fill="none"
+                                      height="1em"
+                                      viewBox="0 0 14 8"
+                                      width="1em"
+                                      xmlns="http://www.w3.org/2000/svg"
+                                    >
+                                      <path
+                                        clip-rule="evenodd"
+                                        d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
+                                        fill="#32324D"
+                                        fill-rule="evenodd"
+                                      />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
                             </div>
-                          </div>
-                          <div
-                            class="c34"
-                          >
-                            <button
-                              aria-disabled="false"
-                              aria-label="Clear the interface language selected"
-                              class="c37"
+                            <p
+                              class="c45"
+                              id="select-1-hint"
                             >
-                              <svg
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 24 24"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  d="M24 2.417L21.583 0 12 9.583 2.417 0 0 2.417 9.583 12 0 21.583 2.417 24 12 14.417 21.583 24 24 21.583 14.417 12 24 2.417z"
-                                  fill="#212134"
-                                />
-                              </svg>
-                            </button>
-                            <button
-                              aria-hidden="true"
-                              class="c38 c37 c39"
-                              tabindex="-1"
-                              type="button"
-                            >
-                              <svg
-                                fill="none"
-                                height="1em"
-                                viewBox="0 0 14 8"
-                                width="1em"
-                                xmlns="http://www.w3.org/2000/svg"
-                              >
-                                <path
-                                  clip-rule="evenodd"
-                                  d="M14 .889a.86.86 0 01-.26.625L7.615 7.736A.834.834 0 017 8a.834.834 0 01-.615-.264L.26 1.514A.861.861 0 010 .889c0-.24.087-.45.26-.625A.834.834 0 01.875 0h12.25c.237 0 .442.088.615.264a.86.86 0 01.26.625z"
-                                  fill="#32324D"
-                                  fill-rule="evenodd"
-                                />
-                              </svg>
-                            </button>
+                              This will only display your own interface in the chosen language.
+                            </p>
                           </div>
                         </div>
                       </div>
-                      <p
-                        class="c40"
-                        id="select-1-hint"
-                      >
-                        This will only display your own interface in the chosen language.
-                      </p>
                     </div>
                   </div>
                 </div>
