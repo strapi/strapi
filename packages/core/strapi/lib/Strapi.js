@@ -33,6 +33,7 @@ const modulesRegistry = require('./core/registries/modules');
 const pluginsRegistry = require('./core/registries/plugins');
 const createConfigProvider = require('./core/registries/config');
 const apisRegistry = require('./core/registries/apis');
+const cronRegistry = require('./core/registries/cron');
 const bootstrap = require('./core/bootstrap');
 const loaders = require('./core/loaders');
 
@@ -60,6 +61,7 @@ class Strapi {
     this.container.register('plugins', pluginsRegistry(this));
     this.container.register('apis', apisRegistry(this));
     this.container.register('auth', createAuth(this));
+    this.container.register('cron', cronRegistry(this));
 
     this.isLoaded = false;
     this.reload = this.reload();
@@ -69,6 +71,7 @@ class Strapi {
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
+    this.srcIndex = loaders.loadSrcIndex(this);
 
     createUpdateNotifier(this).notify();
   }
@@ -165,6 +168,7 @@ class Strapi {
     }
 
     this.telemetry.destroy();
+    this.container.get('cron').cancelAll();
 
     delete global.strapi;
   }
@@ -367,6 +371,9 @@ class Strapi {
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
 
+    const cronTasks = this.config.get('server.cron.tasks');
+    this.container.get('cron').add(cronTasks);
+
     this.isLoaded = true;
 
     return this;
@@ -418,21 +425,14 @@ class Strapi {
   }
 
   async runLifecyclesFunctions(lifecycleName) {
-    const execLifecycle = async fn => {
-      if (!fn) {
-        return;
-      }
-
-      return fn({ strapi: this });
-    };
-
-    const configPath = `functions.${lifecycleName}`;
-
     // plugins
     await this.container.get('modules')[lifecycleName]();
 
     // user
-    await execLifecycle(this.config.get(configPath));
+    const lifecycleFunction = this.srcIndex[lifecycleName];
+    if (lifecycleFunction) {
+      lifecycleFunction({ strapi: this });
+    }
 
     // admin
     await this.admin[lifecycleName](this);

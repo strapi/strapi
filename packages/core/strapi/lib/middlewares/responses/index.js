@@ -8,7 +8,8 @@ module.exports = strapi => {
       strapi.server.use(async (ctx, next) => {
         await next();
 
-        const responseFn = strapi.config.get(['functions', 'responses', ctx.status]);
+        const status = ctx.status;
+        const responseFn = strapi.config.get(`middleware.settings.responses.handlers.${status}`);
         if (_.isFunction(responseFn)) {
           await responseFn(ctx);
         }
