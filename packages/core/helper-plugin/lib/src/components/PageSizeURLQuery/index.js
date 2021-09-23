@@ -5,8 +5,11 @@
  */
 
 import React from 'react';
-import { Row, Select, Option } from '@strapi/parts';
 import { useIntl } from 'react-intl';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Select, Option } from '@strapi/parts/Select';
+import { Text } from '@strapi/parts/Text';
 import PropTypes from 'prop-types';
 import useQueryParams from '../../hooks/useQueryParams';
 import useTracking from '../../hooks/useTracking';
@@ -31,7 +34,7 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
   return (
     <Row>
       <Select
-        label={formatMessage({
+        aria-label={formatMessage({
           id: 'components.PageFooter.select',
           defaultMessage: 'Entries per page',
         })}
@@ -43,14 +46,14 @@ const PageSizeURLQuery = ({ trackedEvent }) => {
         <Option value="50">50</Option>
         <Option value="100">100</Option>
       </Select>
-      {/* <Box paddingLeft={2}>
-         <Text textColor="neutral600" as="label" htmlFor="page-size">
-           {formatMessage({
-             id: 'components.PageFooter.select',
-             defaultMessage: 'Entries per page',
-           })}
-         </Text>
-       </Box> */}
+      <Box paddingLeft={2}>
+        <Text textColor="neutral600" as="label" htmlFor="page-size">
+          {formatMessage({
+            id: 'components.PageFooter.select',
+            defaultMessage: 'Entries per page',
+          })}
+        </Text>
+      </Box>
     </Row>
   );
 };
