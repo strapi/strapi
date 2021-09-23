@@ -14,7 +14,7 @@ module.exports = ({ strapi }) => {
     const extension = strapi.plugin('graphql').service('extension');
 
     const { getFiltersInputTypeName } = utils.naming;
-    const { isStrapiScalar, isMedia, isRelation } = utils.attributes;
+    const { isStrapiScalar, isRelation } = utils.attributes;
 
     const { attributes } = contentType;
 
