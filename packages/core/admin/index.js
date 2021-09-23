@@ -241,8 +241,8 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
  */
 async function watchFiles(dir) {
   const cacheDir = path.join(dir, '.cache');
-  const appExtensionFile = path.join(dir, 'admin', 'app.js');
-  const extensionsPath = path.join(dir, 'admin', 'extensions');
+  const appExtensionFile = path.join(dir, 'src', 'admin', 'app.js');
+  const extensionsPath = path.join(dir, 'src', 'admin', 'extensions');
 
   // Only watch the admin/app.js file and the files that are in the ./admin/extensions/folder
   const filesToWatch = [appExtensionFile, extensionsPath];
