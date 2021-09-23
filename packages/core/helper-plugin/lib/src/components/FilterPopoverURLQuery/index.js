@@ -126,7 +126,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
                   defaultMessage: 'Select field',
                 })}
                 name="name"
-                size="L"
+                size="M"
                 onChange={handleChangeFilterField}
                 value={modifiedData.name}
               >
@@ -146,7 +146,7 @@ const FilterPopoverURLQuery = ({ displayedFilters, isVisible, onToggle, source }
                   defaultMessage: 'Select filter',
                 })}
                 name="filter"
-                size="L"
+                size="M"
                 value={modifiedData.filter}
                 onChange={handleChangeOperator}
               >

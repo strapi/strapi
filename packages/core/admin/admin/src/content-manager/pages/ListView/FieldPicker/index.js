@@ -44,7 +44,7 @@ const FieldPicker = ({ layout }) => {
 
   return (
     <Select
-      label="change displayed fields"
+      aria-label="change displayed fields"
       value={values}
       onChange={handleChange}
       customizeContent={values => `${values.length} currently selected`}

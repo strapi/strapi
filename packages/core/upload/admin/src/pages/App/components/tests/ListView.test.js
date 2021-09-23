@@ -130,24 +130,8 @@ describe('MediaLibrary / ListView', () => {
     );
 
     expect(container).toMatchInlineSnapshot(`
-      .c36 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
       .c27 {
         padding-top: 24px;
-      }
-
-      .c35 {
-        padding-right: 16px;
-        padding-left: 16px;
-      }
-
-      .c37 {
-        padding-left: 12px;
       }
 
       .c28 {
@@ -168,6 +152,84 @@ describe('MediaLibrary / ListView', () => {
         align-items: flex-end;
       }
 
+      .c43 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c47 {
+        border: 0;
+        -webkit-clip: rect(0 0 0 0);
+        clip: rect(0 0 0 0);
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        padding: 0;
+        position: absolute;
+        width: 1px;
+      }
+
+      .c44 > * + * {
+        margin-left: 4px;
+      }
+
+      .c45 {
+        padding: 12px;
+        border-radius: 4px;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+      }
+
+      .c46 {
+        font-size: 0.7rem;
+        pointer-events: none;
+      }
+
+      .c46 svg path {
+        fill: #c0c0cf;
+      }
+
+      .c46:focus svg path,
+      .c46:hover svg path {
+        fill: #c0c0cf;
+      }
+
+      .c48 {
+        font-size: 0.7rem;
+      }
+
+      .c48 svg path {
+        fill: #666687;
+      }
+
+      .c48:focus svg path,
+      .c48:hover svg path {
+        fill: #4a4a6a;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+        grid-gap: 16px;
+      }
+
+      .c41 {
+        padding-left: 8px;
+      }
+
       .c29 {
         display: -webkit-box;
         display: -webkit-flex;
@@ -180,6 +242,37 @@ describe('MediaLibrary / ListView', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c32 {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        top: 0;
+        width: 100%;
+        background: transparent;
+        border: none;
+      }
+
+      .c32:focus {
+        outline: none;
+      }
+
+      .c37 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c36 {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      .c38 {
+        padding-left: 12px;
       }
 
       .c33 {
@@ -200,16 +293,18 @@ describe('MediaLibrary / ListView', () => {
         align-items: center;
       }
 
-      .c43 {
-        border: 0;
-        -webkit-clip: rect(0 0 0 0);
-        clip: rect(0 0 0 0);
-        height: 1px;
-        margin: -1px;
-        overflow: hidden;
-        padding: 0;
-        position: absolute;
-        width: 1px;
+      .c35 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
       .c30 {
@@ -244,23 +339,23 @@ describe('MediaLibrary / ListView', () => {
         border: 1px solid #4945ff;
       }
 
-      .c38 {
+      .c39 {
         background: transparent;
         border: none;
         position: relative;
         z-index: 1;
       }
 
-      .c38 svg {
+      .c39 svg {
         height: 0.6875rem;
         width: 0.6875rem;
       }
 
-      .c38 svg path {
+      .c39 svg path {
         fill: #666687;
       }
 
-      .c39 {
+      .c40 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -269,75 +364,19 @@ describe('MediaLibrary / ListView', () => {
         border: none;
       }
 
-      .c39 svg {
+      .c40 svg {
         width: 0.375rem;
-      }
-
-      .c40 > * + * {
-        margin-left: 4px;
-      }
-
-      .c41 {
-        padding: 12px;
-        border-radius: 4px;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-      }
-
-      .c42 {
-        font-size: 0.7rem;
-        pointer-events: none;
-      }
-
-      .c42 svg path {
-        fill: #c0c0cf;
-      }
-
-      .c42:focus svg path,
-      .c42:hover svg path {
-        fill: #c0c0cf;
-      }
-
-      .c44 {
-        font-size: 0.7rem;
-      }
-
-      .c44 svg path {
-        fill: #666687;
-      }
-
-      .c44:focus svg path,
-      .c44:hover svg path {
-        fill: #4a4a6a;
-      }
-
-      .c32 {
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        top: 0;
-        width: 100%;
-        background: transparent;
-        border: none;
-      }
-
-      .c32:focus {
-        outline: none;
       }
 
       .c34 {
         min-height: 2.5rem;
       }
 
-      .c0 {
-        display: grid;
-        grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
-        grid-gap: 16px;
+      .c42 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
       }
 
       .c1 {
@@ -778,13 +817,13 @@ describe('MediaLibrary / ListView', () => {
                       class="c33 c34"
                     >
                       <div
-                        class="c29"
+                        class="c35"
                       >
                         <div
-                          class="c35"
+                          class="c36"
                         >
                           <span
-                            class="c36"
+                            class="c37"
                             id="select-1-content"
                           >
                             10
@@ -792,11 +831,11 @@ describe('MediaLibrary / ListView', () => {
                         </div>
                       </div>
                       <div
-                        class="c29"
+                        class="c35"
                       >
                         <button
                           aria-hidden="true"
-                          class="c37 c38 c39"
+                          class="c38 c39 c40"
                           tabindex="-1"
                           type="button"
                         >
@@ -820,24 +859,32 @@ describe('MediaLibrary / ListView', () => {
                   </div>
                 </div>
               </div>
+              <div
+                class="c41"
+              >
+                <label
+                  class="c42"
+                  for="page-size"
+                />
+              </div>
             </div>
             <nav
               aria-label="pagination"
               class=""
             >
               <ul
-                class="c29 c40"
+                class="c43 c44"
               >
                 <li>
                   <a
                     aria-current="page"
                     aria-disabled="true"
-                    class="c41 c42 active"
+                    class="c45 c46 active"
                     href="/"
                     tabindex="-1"
                   >
                     <div
-                      class="c43"
+                      class="c47"
                     />
                     <svg
                       aria-hidden="true"
@@ -858,11 +905,11 @@ describe('MediaLibrary / ListView', () => {
                   <a
                     aria-current="page"
                     aria-disabled="false"
-                    class="c41 c44 active"
+                    class="c45 c48 active"
                     href="/?page=1"
                   >
                     <div
-                      class="c43"
+                      class="c47"
                     />
                     <svg
                       aria-hidden="true"
@@ -884,7 +931,7 @@ describe('MediaLibrary / ListView', () => {
           </div>
         </div>
         <div
-          class="c43"
+          class="c47"
         >
           <p
             aria-live="polite"

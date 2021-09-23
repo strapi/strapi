@@ -1,27 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import styled from 'styled-components';
 import { Avatar } from '@strapi/parts/Avatar';
-import { TableLabel } from '@strapi/parts/Text';
-import { Row } from '@strapi/parts/Row';
-
+import { Tooltip } from '@strapi/parts/Tooltip';
 import { getFileExtension, prefixFileUrlWithBackendUrl } from '@strapi/helper-plugin';
-
-// TODO: this is very temporary until we get a design
-const FileWrapper = styled(Row)`
-  position: relative;
-  border-radius: 50%;
-  width: 26px;
-  height: 26px;
-  border: 1px solid ${({ theme }) => theme.colors.neutral200};
-  background: ${({ theme }) => theme.colors.neutral150};
-  padding-left: 1px;
-
-  span {
-    line-height: 0.6rem;
-    font-size: 0.6rem;
-  }
-`;
+import FileWrapper from './FileWrapper';
 
 const Media = ({ url, mime, alternativeText, name, ext, formats }) => {
   const fileURL = prefixFileUrlWithBackendUrl(url);
@@ -34,11 +16,12 @@ const Media = ({ url, mime, alternativeText, name, ext, formats }) => {
   }
 
   const fileExtension = getFileExtension(ext);
+  const fileName = name.length > 100 ? `${name.substring(0, 100)}...` : name;
 
   return (
-    <FileWrapper justifyContent="center" alignItems="center">
-      <TableLabel textColor="neutral600">{fileExtension}</TableLabel>
-    </FileWrapper>
+    <Tooltip description={fileName}>
+      <FileWrapper>{fileExtension}</FileWrapper>
+    </Tooltip>
   );
 };
 
