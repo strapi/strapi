@@ -1,3 +1,3 @@
 'use strict';
 
-require('./admin/src');
+module.exports = require('./admin/src').default;

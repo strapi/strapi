@@ -94,7 +94,7 @@ async function createPluginsJs(plugins, dest) {
     const shortName = _.camelCase(name);
     return {
       name,
-      pathToPlugin: path.relative(path.resolve(dest, 'strapi-admin'), pathToPlugin),
+      pathToPlugin: path.relative(path.resolve(dest, 'admin/src'), pathToPlugin),
       shortName,
     };
   });
@@ -102,7 +102,7 @@ async function createPluginsJs(plugins, dest) {
   const content = `
 ${pluginsArray
   .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}/strapi-admin'`;
+    const req = `'${pathToPlugin}/strapi-admin.js'`;
 
     return `import ${shortName} from ${req};`;
   })
