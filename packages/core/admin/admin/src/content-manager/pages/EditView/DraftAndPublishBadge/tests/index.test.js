@@ -32,6 +32,7 @@ describe('<DraftAndPublishBadge />', () => {
       .c0 {
         background: #eafbe7;
         padding-top: 16px;
+        padding-right: 20px;
         padding-bottom: 16px;
         padding-left: 20px;
         border-radius: 4px;
@@ -127,6 +128,7 @@ describe('<DraftAndPublishBadge />', () => {
       .c0 {
         background: #eaf5ff;
         padding-top: 16px;
+        padding-right: 20px;
         padding-bottom: 16px;
         padding-left: 20px;
         border-radius: 4px;
