@@ -4,19 +4,18 @@ import { useDrop } from 'react-dnd';
 import PropTypes from 'prop-types';
 import get from 'lodash/get';
 import take from 'lodash/take';
-import { FormattedMessage } from 'react-intl';
+// import { FormattedMessage } from 'react-intl';
 import { useNotification } from '@strapi/helper-plugin';
-// import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
 import { Box } from '@strapi/parts/Box';
-import { ErrorMessage } from '@buffetjs/styles';
+// import { ErrorMessage } from '@buffetjs/styles';
 import { getMaxTempKey, getTrad } from '../../utils';
 import { useContentTypeLayout } from '../../hooks';
 import ItemTypes from '../../utils/ItemTypes';
+import ComponentInitializer from '../ComponentInitializer';
 import connect from './utils/connect';
 import select from './utils/select';
 import Button from './AddFieldButton';
 import DraggedItem from './DraggedItem';
-import EmptyComponent from './EmptyComponent';
 
 const RepeatableComponent = ({
   addRepeatableComponentToField,
@@ -27,7 +26,7 @@ const RepeatableComponent = ({
   isNested,
   isReadOnly,
   max,
-  min,
+  // min,
   name,
 }) => {
   const toggleNotification = useNotification();
@@ -57,7 +56,8 @@ const RepeatableComponent = ({
   const toggleCollapses = () => {
     setCollapseToOpen('');
   };
-  const missingComponentsValue = min - componentValueLength;
+  // TODO
+  // const missingComponentsValue = min - componentValueLength;
   const errorsArray = componentErrorKeys.map(key => get(formErrors, [key, 'id'], ''));
 
   const hasMinError = get(errorsArray, [0], '').includes('min');
@@ -89,9 +89,51 @@ const RepeatableComponent = ({
     toggleNotification,
   ]);
 
+  if (componentValueLength === 0) {
+    return <ComponentInitializer isReadOnly={isReadOnly} onClick={handleClick} />;
+  }
+
   return (
     <Box hasRadius borderColor="neutral200">
-      {componentValueLength === 0 && <EmptyComponent />}
+      <Box ref={drop}>
+        {componentValueLength > 0 &&
+          componentValue.map((data, index) => {
+            const key = data.__temp_key__;
+            const isOpen = collapseToOpen === key;
+            const componentFieldName = `${name}.${index}`;
+            const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
+            const doesPreviousFieldContainErrorsAndIsOpen =
+              componentErrorKeys.includes(`${name}.${index - 1}`) &&
+              index !== 0 &&
+              collapseToOpen === previousComponentTempKey;
+
+            const hasErrors = componentErrorKeys.includes(componentFieldName);
+
+            return (
+              <DraggedItem
+                componentFieldName={componentFieldName}
+                componentUid={componentUid}
+                doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
+                hasErrors={hasErrors}
+                hasMinError={hasMinError}
+                isFirst={index === 0}
+                isReadOnly={isReadOnly}
+                isOpen={isOpen}
+                key={key}
+                onClickToggle={() => {
+                  if (isOpen) {
+                    setCollapseToOpen('');
+                  } else {
+                    setCollapseToOpen(key);
+                  }
+                }}
+                parentName={name}
+                schema={componentLayoutData}
+                toggleCollapses={toggleCollapses}
+              />
+            );
+          })}
+      </Box>
       <Button
         // TODO
         // hasMinError={hasMinError}
@@ -192,7 +234,7 @@ RepeatableComponent.defaultProps = {
   formErrors: {},
   isNested: false,
   max: Infinity,
-  min: -Infinity,
+  // min: -Infinity,
 };
 
 RepeatableComponent.propTypes = {
@@ -204,7 +246,7 @@ RepeatableComponent.propTypes = {
   isNested: PropTypes.bool,
   isReadOnly: PropTypes.bool.isRequired,
   max: PropTypes.number,
-  min: PropTypes.number,
+  // min: PropTypes.number,
   name: PropTypes.string.isRequired,
 };
 

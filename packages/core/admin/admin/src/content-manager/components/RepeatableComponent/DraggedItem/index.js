@@ -1,15 +1,23 @@
 /* eslint-disable import/no-cycle */
 import React, { memo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
-import { Collapse } from 'reactstrap';
 import { useDrag, useDrop } from 'react-dnd';
 import { getEmptyImage } from 'react-dnd-html5-backend';
+import { Accordion, AccordionToggle, AccordionContent } from '@strapi/parts/Accordion';
+import { Box } from '@strapi/parts/Box';
+import { Collapse } from 'reactstrap';
 import ItemTypes from '../../../utils/ItemTypes';
 import Inputs from '../../Inputs';
 import FieldComponent from '../../FieldComponent';
 import Banner from '../Banner';
 import FormWrapper from '../FormWrapper';
 import { connect, select } from './utils';
+import styled from 'styled-components';
+
+const C = styled(AccordionToggle)`
+  padding-top: 8px;
+  padding-bottom: 8px;
+`;
 
 /* eslint-disable react/no-array-index-key */
 
@@ -137,6 +145,17 @@ const DraggedItem = ({
     dragRef: drag(dragRef),
     dropRef: drop(dropRef),
   };
+
+  console.log({ componentFieldName });
+
+  return (
+    <Accordion expanded={isOpen} toggle={onClickToggle} id={componentFieldName}>
+      <C title="User informations" />
+      <AccordionContent>
+        <Box padding={3}>My name is John Duff</Box>
+      </AccordionContent>
+    </Accordion>
+  );
 
   return (
     <>

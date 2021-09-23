@@ -10,10 +10,9 @@ import { Box } from '@strapi/parts/Box';
 import { IconButton } from '@strapi/parts/IconButton';
 import { Row } from '@strapi/parts/Row';
 import { Stack } from '@strapi/parts/Stack';
-// import { FormattedMessage, useIntl } from 'react-intl';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTrad } from '../../utils';
-import ComponentInitializer from './ComponentInitializer';
+import ComponentInitializer from '../ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
 import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
@@ -23,6 +22,7 @@ import Label from './Label';
 // import Wrapper from './Wrapper';
 
 const FieldComponent = ({
+  addNonRepeatableComponentToField,
   // componentFriendlyName,
   componentUid,
   // icon,
@@ -58,6 +58,10 @@ const FieldComponent = ({
     return <NotAllowedInput labelAction={labelAction} intlLabel={intlLabel} name={name} />;
   }
 
+  const handleClickAddNonRepeatableComponentToField = () => {
+    addNonRepeatableComponentToField(name, componentUid);
+  };
+
   return (
     <Box>
       <Stack size={1}>
@@ -83,7 +87,10 @@ const FieldComponent = ({
           )}
         </Row>
         {!isRepeatable && !isInitialized && (
-          <ComponentInitializer componentUid={componentUid} name={name} isReadOnly={isReadOnly} />
+          <ComponentInitializer
+            isReadOnly={isReadOnly}
+            onClick={handleClickAddNonRepeatableComponentToField}
+          />
         )}
         {!isRepeatable && isInitialized && (
           <NonRepeatableComponent
@@ -186,6 +193,7 @@ FieldComponent.defaultProps = {
 };
 
 FieldComponent.propTypes = {
+  addNonRepeatableComponentToField: PropTypes.func.isRequired,
   // componentFriendlyName: PropTypes.string,
   componentUid: PropTypes.string.isRequired,
   componentValue: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
