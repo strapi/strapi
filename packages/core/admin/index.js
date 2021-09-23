@@ -94,7 +94,7 @@ async function createPluginsJs(plugins, dest) {
     const shortName = _.camelCase(name);
     return {
       name,
-      pathToPlugin: path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin),
+      pathToPlugin: path.relative(path.resolve(dest, 'strapi-admin'), pathToPlugin),
       shortName,
     };
   });
@@ -102,7 +102,7 @@ async function createPluginsJs(plugins, dest) {
   const content = `
 ${pluginsArray
   .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}/admin/src'`;
+    const req = `'${pathToPlugin}/strapi-admin'`;
 
     return `import ${shortName} from ${req};`;
   })
@@ -150,8 +150,7 @@ async function createCacheDir({ dir, plugins }) {
   const pluginsWithFront = Object.keys(plugins)
     .filter(pluginName => {
       const pluginInfo = plugins[pluginName];
-      // TODO: use strapi-admin
-      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'admin', 'src', 'index.js'));
+      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
     })
     .map(name => ({ name, ...plugins[name] }));
 
