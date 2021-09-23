@@ -1,10 +1,12 @@
 import React, { Children, cloneElement, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Box, Row, Button, Table as TableCompo, Subtitle } from '@strapi/parts';
-import { ConfirmDialog, EmptyBodyTable, useQueryParams } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import { DeleteIcon } from '@strapi/icons';
 import styled from 'styled-components';
+import useQueryParams from '../../hooks/useQueryParams';
+import ConfirmDialog from '../ConfirmDialog';
+import EmptyBodyTable from '../EmptyBodyTable';
 import TableHead from './TableHead';
 
 const BlockActions = styled(Row)`
