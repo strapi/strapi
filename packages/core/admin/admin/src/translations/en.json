@@ -476,6 +476,7 @@
   "content-manager.containers.Edit.addAnItem": "Add an item...",
   "content-manager.containers.Edit.clickToJump": "Click to jump to the entry",
   "content-manager.containers.Edit.delete": "Delete",
+  "content-manager.components.DragHandle-label": "Drag",
   "content-manager.containers.Edit.delete-entry": "Delete this entry",
   "content-manager.containers.Edit.editing": "Editing...",
   "content-manager.containers.Edit.information": "Information",

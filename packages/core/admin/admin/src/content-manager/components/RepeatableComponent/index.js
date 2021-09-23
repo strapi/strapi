@@ -96,43 +96,44 @@ const RepeatableComponent = ({
   return (
     <Box hasRadius borderColor="neutral200">
       <Box ref={drop}>
-        {componentValueLength > 0 &&
-          componentValue.map((data, index) => {
-            const key = data.__temp_key__;
-            const isOpen = collapseToOpen === key;
-            const componentFieldName = `${name}.${index}`;
-            const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
-            const doesPreviousFieldContainErrorsAndIsOpen =
-              componentErrorKeys.includes(`${name}.${index - 1}`) &&
-              index !== 0 &&
-              collapseToOpen === previousComponentTempKey;
+        {componentValue.map((data, index) => {
+          const key = data.__temp_key__;
+          const isOpen = collapseToOpen === key;
+          const componentFieldName = `${name}.${index}`;
+          const previousComponentTempKey = get(componentValue, [index - 1, '__temp_key__']);
+          const doesPreviousFieldContainErrorsAndIsOpen =
+            componentErrorKeys.includes(`${name}.${index - 1}`) &&
+            index !== 0 &&
+            collapseToOpen === previousComponentTempKey;
 
-            const hasErrors = componentErrorKeys.includes(componentFieldName);
+          const hasErrors = componentErrorKeys.includes(componentFieldName);
 
-            return (
-              <DraggedItem
-                componentFieldName={componentFieldName}
-                componentUid={componentUid}
-                doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
-                hasErrors={hasErrors}
-                hasMinError={hasMinError}
-                isFirst={index === 0}
-                isReadOnly={isReadOnly}
-                isOpen={isOpen}
-                key={key}
-                onClickToggle={() => {
-                  if (isOpen) {
-                    setCollapseToOpen('');
-                  } else {
-                    setCollapseToOpen(key);
-                  }
-                }}
-                parentName={name}
-                schema={componentLayoutData}
-                toggleCollapses={toggleCollapses}
-              />
-            );
-          })}
+          return (
+            <DraggedItem
+              componentFieldName={componentFieldName}
+              componentUid={componentUid}
+              // TODO
+              doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
+              hasErrors={hasErrors}
+              hasMinError={hasMinError}
+              isFirst={index === 0}
+              isOdd={index % 2 === 1}
+              isOpen={isOpen}
+              isReadOnly={isReadOnly}
+              key={key}
+              onClickToggle={() => {
+                if (isOpen) {
+                  setCollapseToOpen('');
+                } else {
+                  setCollapseToOpen(key);
+                }
+              }}
+              parentName={name}
+              schema={componentLayoutData}
+              toggleCollapses={toggleCollapses}
+            />
+          );
+        })}
       </Box>
       <Button
         // TODO
