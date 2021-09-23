@@ -65,7 +65,7 @@ module.exports = ({ strapi }) => {
 
       parseValue: value => parseData(value),
 
-      parseLiteral: (ast, variables) => {
+      parseLiteral(ast, variables) {
         if (ast.kind !== Kind.OBJECT) {
           return undefined;
         }

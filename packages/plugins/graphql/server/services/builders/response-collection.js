@@ -13,7 +13,7 @@ module.exports = ({ strapi }) => {
      * @param {object} contentType The content type which will be used to build its content API response definition
      * @return {NexusObjectTypeDef}
      */
-    buildResponseCollectionDefinition: contentType => {
+    buildResponseCollectionDefinition(contentType) {
       const name = naming.getEntityResponseCollectionName(contentType);
       const entityName = naming.getEntityName(contentType);
 
