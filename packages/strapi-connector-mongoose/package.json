@@ -1,6 +1,6 @@
 {
   "name": "strapi-connector-mongoose",
-  "version": "3.6.8",
+  "version": "3.6.9",
   "description": "Mongoose hook for the Strapi framework",
   "homepage": "https://strapi.io",
   "keywords": [
@@ -16,7 +16,7 @@
   "main": "./lib",
   "dependencies": {
     "lodash": "4.17.21",
-    "mongoose": "5.10.8",
+    "mongoose": "5.13.7",
     "mongoose-float": "^1.0.4",
     "mongoose-long": "^0.3.2",
     "p-map": "4.0.0",

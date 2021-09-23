@@ -20,7 +20,7 @@
     "strapi": "3.6.8",
     "strapi-admin": "3.6.8",
     "strapi-connector-bookshelf": "3.6.8",
-    "strapi-connector-mongoose": "3.6.8",
+    "strapi-connector-mongoose": "3.6.9",
     "strapi-middleware-views": "3.6.8",
     "strapi-plugin-content-manager": "3.6.8",
     "strapi-plugin-content-type-builder": "3.6.8",
