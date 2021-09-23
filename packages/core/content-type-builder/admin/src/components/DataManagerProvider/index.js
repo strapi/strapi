@@ -570,7 +570,6 @@ const DataManagerProvider = ({
           {isInDevelopmentMode && (
             <>
               <FormModal />
-              {/* TO FIX - not sure didModifiedComponents return a valuable information */}
               <ConfirmDialog
                 bodyText={{
                   id: getTrad(
@@ -578,8 +577,9 @@ const DataManagerProvider = ({
                       didModifiedComponents ? '.with-components' : ''
                     }`
                   ),
-                  defaultMessage: `Are you sure you want to cancel your modifications? ${didModifiedComponents &&
-                    'Some components have been created or modified...'}`,
+                  defaultMessage: `Are you sure you want to cancel your modifications? ${
+                    didModifiedComponents ? 'Some components have been created or modified...' : ''
+                  }`,
                 }}
                 isOpen={infoModals}
                 onToggleDialog={toggleModalCancel}
@@ -588,11 +588,11 @@ const DataManagerProvider = ({
                 }}
                 iconRightButton={<CheckIcon />}
                 title={{
-                  id: getTrad('app.components.ConfirmDialog.title'),
+                  id: 'app.components.ConfirmDialog.title',
                   defaultMessage: 'Confirmation',
                 }}
                 rightButtonText={{
-                  id: getTrad('app.components.Button.confirm'),
+                  id: 'app.components.Button.confirm',
                   defaultMessage: 'Confirm',
                 }}
               />

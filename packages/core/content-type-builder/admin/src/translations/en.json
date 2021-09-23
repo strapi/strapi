@@ -1,7 +1,4 @@
 {
-  "app.components.ConfirmDialog.title": "Confirmation",
-  "app.components.Button.confirm": "Confirm",
-  "app.components.Button.cancel": "Cancel",
   "attribute.boolean": "Boolean",
   "attribute.boolean.description": "Yes or no, 1 or 0, true or false",
   "attribute.component": "Component",
