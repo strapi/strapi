@@ -27,8 +27,6 @@
   "Plugin.permissions.plugins.description": "กำหนดการดำเนินการที่อนุญาตทั้งหมดสำหรับปลั๊กอิน {name}",
   "Plugins.header.description": "เฉพาะการดำเนินการที่โยงโดยเราต์จะถูกแสดงด้านล่าง",
   "Plugins.header.title": "สิทธิการใช้งาน",
-  "Policies.InputSelect.empty": "ไม่มี",
-  "Policies.InputSelect.label": "อนุญาตให้ดำเนินการแอ็คชันนี้สำหรับ:",
   "Policies.header.hint": "เลือกแอ็คชันของแอปพลิเคชันหรือแอ็คชันของปลั๊กอินและคลิกบนไอคอนฟันเฟือง เพื่อแสดงเส้นทางที่โยงไว้",
   "Policies.header.title": "การตั้งค่าขั้นสูง",
   "PopUpForm.Email.email_templates.inputDescription": "ถ้าคุณไม่แน่ใจว่าจะใช้ตัวแปรอย่างไร {link}",

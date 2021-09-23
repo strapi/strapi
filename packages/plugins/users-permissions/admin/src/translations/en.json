@@ -32,8 +32,6 @@
   "Plugin.permissions.plugins.description": "Define all allowed actions for the {name} plugin.",
   "Plugins.header.description": "Only actions bound by a route are listed below.",
   "Plugins.header.title": "Permissions",
-  "Policies.InputSelect.empty": "None",
-  "Policies.InputSelect.label": "Allow to perform this action for:",
   "Policies.header.hint": "Select the application's actions or the plugin's actions and click on the cog icon to display the bound route",
   "Policies.header.title": "Advanced settings",
   "PopUpForm.Email.email_templates.inputDescription": "If you're unsure how to use variables, {link}",

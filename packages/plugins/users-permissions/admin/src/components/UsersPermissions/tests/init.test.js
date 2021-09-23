@@ -7,7 +7,6 @@ describe('USERS PERMISSIONS | COMPONENTS | UserPermissions | init', () => {
       modifiedData: {},
       routes: {},
       selectedAction: '',
-      policies: [],
     };
     const permissions = {
       application: {
@@ -36,16 +35,13 @@ describe('USERS PERMISSIONS | COMPONENTS | UserPermissions | init', () => {
       application: [{ method: 'GET', path: '/addresses' }],
     };
 
-    const policies = ['isAuthenticated', 'rateLimit', 'customPolicy'];
-
     const expected = {
       initialData: permissions,
       modifiedData: permissions,
       routes,
       selectedAction: '',
-      policies,
     };
 
-    expect(init(initialState, permissions, routes, policies)).toEqual(expected);
+    expect(init(initialState, permissions, routes)).toEqual(expected);
   });
 });

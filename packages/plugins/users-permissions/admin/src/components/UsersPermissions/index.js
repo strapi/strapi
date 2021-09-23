@@ -9,10 +9,10 @@ import reducer, { initialState } from './reducer';
 import { UsersPermissionsProvider } from '../../contexts/UsersPermissionsContext';
 import init from './init';
 
-const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => {
+const UsersPermissions = forwardRef(({ permissions, routes }, ref) => {
   const { formatMessage } = useIntl();
   const [state, dispatch] = useReducer(reducer, initialState, state =>
-    init(state, permissions, routes, policies)
+    init(state, permissions, routes)
   );
 
   useImperativeHandle(ref, () => ({
@@ -90,7 +90,6 @@ const UsersPermissions = forwardRef(({ permissions, routes, policies }, ref) => 
 UsersPermissions.propTypes = {
   permissions: PropTypes.object.isRequired,
   routes: PropTypes.object.isRequired,
-  policies: PropTypes.array.isRequired,
 };
 
 export default memo(UsersPermissions);

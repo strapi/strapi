@@ -28,7 +28,7 @@ const EditPage = () => {
   const {
     params: { id },
   } = useRouteMatch(`/settings/${pluginId}/roles/:id`);
-  const { isLoading: isLoadingPlugins, routes, policies } = usePlugins();
+  const { isLoading: isLoadingPlugins, routes } = usePlugins();
   const { role, onSubmitSucceeded, isLoading: isLoadingRole } = useFetchRole(id);
   const permissionsRef = useRef();
 
@@ -160,7 +160,6 @@ const EditPage = () => {
                     ref={permissionsRef}
                     permissions={role.permissions}
                     routes={routes}
-                    policies={policies}
                   />
                 )}
               </Stack>
