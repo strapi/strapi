@@ -22,6 +22,7 @@ import { Main } from '@strapi/parts/Main';
 import { ActionLayout, ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { useNotifyAT } from '@strapi/parts/LiveRegions';
 import { Button } from '@strapi/parts/Button';
+import { Row } from '@strapi/parts/Row';
 import Add from '@strapi/icons/Add';
 import axios from 'axios';
 import { axiosInstance } from '../../../core/utils';
@@ -265,10 +266,10 @@ function ListView({
       {canRead && (isSearchable || isFilterable) && (
         <ActionLayout
           endActions={
-            <>
+            <Row style={{ flexShrink: 0 }}>
               <InjectionZone area="contentManager.listView.actions" />
               <FieldPicker layout={layout} />
-            </>
+            </Row>
           }
           startActions={
             <>
