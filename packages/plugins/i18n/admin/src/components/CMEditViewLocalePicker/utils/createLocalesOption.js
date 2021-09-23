@@ -5,7 +5,7 @@ const createLocalesOption = (localesToDisplay, localesFromData) => {
     let status = 'did-not-create-locale';
 
     if (matchingLocaleInData) {
-      status = matchingLocaleInData.published_at === null ? 'draft' : 'published';
+      status = matchingLocaleInData.publishedAt === null ? 'draft' : 'published';
     }
 
     return {

@@ -49,8 +49,8 @@ const EditViewDataManagerProvider = ({
   }, [currentContentTypeLayout]);
 
   const shouldNotRunValidations = useMemo(() => {
-    return hasDraftAndPublish && !initialData.published_at;
-  }, [hasDraftAndPublish, initialData.published_at]);
+    return hasDraftAndPublish && !initialData.publishedAt;
+  }, [hasDraftAndPublish, initialData.publishedAt]);
 
   const { trackUsage } = useTracking();
   const { formatMessage } = useIntl();

@@ -187,9 +187,9 @@ describe('AttributeFilter', () => {
           city
         </option>
         <option
-          value="created_at"
+          value="createdAt"
         >
-          created_at
+          createdAt
         </option>
         <option
           value="id"
@@ -212,9 +212,9 @@ describe('AttributeFilter', () => {
           slug
         </option>
         <option
-          value="updated_at"
+          value="updatedAt"
         >
-          updated_at
+          updatedAt
         </option>
       </select>
     `);
@@ -316,7 +316,7 @@ describe('AttributeFilter', () => {
   it('changes the input component when selecting an attribute with a different type', () => {
     const { container } = renderComponent();
 
-    fireEvent.change(container.querySelector('#ct-filter'), { target: { value: 'updated_at' } });
+    fireEvent.change(container.querySelector('#ct-filter'), { target: { value: 'updatedAt' } });
 
     expect(container.querySelector('#date')).toMatchInlineSnapshot(`
       .c0 {

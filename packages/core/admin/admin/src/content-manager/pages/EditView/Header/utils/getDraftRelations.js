@@ -37,14 +37,14 @@ const getDraftRelations = (data, ctSchema, components) => {
 
       if (type === 'relation' && !isMorph) {
         if (oneWayTypes.includes(relationType)) {
-          const hasDraftAndPublish = has(currentData, 'published_at');
+          const hasDraftAndPublish = has(currentData, 'publishedAt');
 
-          if (hasDraftAndPublish && isEmpty(currentData.published_at)) {
+          if (hasDraftAndPublish && isEmpty(currentData.publishedAt)) {
             acc += 1;
           }
         } else {
           currentData.forEach(value => {
-            if (has(value, 'published_at') && isEmpty(value.published_at)) {
+            if (has(value, 'publishedAt') && isEmpty(value.publishedAt)) {
               acc += 1;
             }
           });

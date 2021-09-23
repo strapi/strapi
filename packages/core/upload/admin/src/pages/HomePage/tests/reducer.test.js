@@ -51,8 +51,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -61,8 +61,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
 
@@ -96,8 +96,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -106,8 +106,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
 
@@ -128,8 +128,8 @@ describe('Upload | pages | HomePage | reducer', () => {
             mime: 'image/jpeg',
             size: 140.64,
             url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-            created_at: '2020-03-04T14:16:35.148Z',
-            updated_at: '2020-03-04T14:16:35.148Z',
+            createdAt: '2020-03-04T14:16:35.148Z',
+            updatedAt: '2020-03-04T14:16:35.148Z',
           },
         ],
       };
@@ -146,8 +146,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -156,8 +156,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
       const dataToDelete = [
@@ -168,8 +168,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -178,8 +178,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
 
@@ -200,8 +200,8 @@ describe('Upload | pages | HomePage | reducer', () => {
             mime: 'image/png',
             size: 146.25,
             url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-            created_at: '2020-03-04T09:45:32.444Z',
-            updated_at: '2020-03-04T09:45:32.444Z',
+            createdAt: '2020-03-04T09:45:32.444Z',
+            updatedAt: '2020-03-04T09:45:32.444Z',
           },
         ],
       };
@@ -220,8 +220,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -230,8 +230,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
       const dataToDelete = [
@@ -242,8 +242,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -252,8 +252,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
 
@@ -277,8 +277,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/png',
           size: 146.25,
           url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-          created_at: '2020-03-04T09:45:32.444Z',
-          updated_at: '2020-03-04T09:45:32.444Z',
+          createdAt: '2020-03-04T09:45:32.444Z',
+          updatedAt: '2020-03-04T09:45:32.444Z',
         },
         {
           id: 2,
@@ -287,8 +287,8 @@ describe('Upload | pages | HomePage | reducer', () => {
           mime: 'image/jpeg',
           size: 140.64,
           url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-          created_at: '2020-03-04T14:16:35.148Z',
-          updated_at: '2020-03-04T14:16:35.148Z',
+          createdAt: '2020-03-04T14:16:35.148Z',
+          updatedAt: '2020-03-04T14:16:35.148Z',
         },
       ];
       const dataToDelete = [];
@@ -309,8 +309,8 @@ describe('Upload | pages | HomePage | reducer', () => {
             mime: 'image/png',
             size: 146.25,
             url: '/uploads/ba0c3352c4b14132aed3fcf3110b481c.png',
-            created_at: '2020-03-04T09:45:32.444Z',
-            updated_at: '2020-03-04T09:45:32.444Z',
+            createdAt: '2020-03-04T09:45:32.444Z',
+            updatedAt: '2020-03-04T09:45:32.444Z',
           },
           {
             id: 2,
@@ -319,8 +319,8 @@ describe('Upload | pages | HomePage | reducer', () => {
             mime: 'image/jpeg',
             size: 140.64,
             url: '/uploads/1d2ac677ea194b48bbe55ecec1b452d6.jpeg',
-            created_at: '2020-03-04T14:16:35.148Z',
-            updated_at: '2020-03-04T14:16:35.148Z',
+            createdAt: '2020-03-04T14:16:35.148Z',
+            updatedAt: '2020-03-04T14:16:35.148Z',
           },
         ],
       };

@@ -24,7 +24,7 @@ const HomePageSettings = ({
     allowedActions: { canUpdate },
   } = useAppContext();
   const { formatMessage } = useIntl();
-  const [, updated_at] = useSelectTimestamps();
+  const [, updatedAt] = useSelectTimestamps();
   const query = useQuery();
   const [searchValue, setSearchValue] = useState(query.get('_q') || '');
   const debouncedSearch = useDebounce(searchValue, 300);
@@ -72,7 +72,7 @@ const HomePageSettings = ({
               <Padded right />
             </>
           )}
-          <SortPicker onChange={onChange} value={query.get('sort') || `${updated_at}:DESC`} />
+          <SortPicker onChange={onChange} value={query.get('sort') || `${updatedAt}:DESC`} />
           <Padded right />
           <Filters onChange={onChange} filters={filters} onClick={onFilterDelete} />
         </ControlsWrapper>

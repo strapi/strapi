@@ -79,7 +79,7 @@ class WebhookRunner {
       method: 'post',
       body: JSON.stringify({
         event,
-        created_at: new Date(),
+        createdAt: new Date(),
         ...info,
       }),
       headers: {

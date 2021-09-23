@@ -10,11 +10,11 @@
     "id": 9,
     "postal_coder": "rzerz",
     "city": "rzzerze",
-    "published_at": "2020-08-31T13:29:02.118Z",
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-08-31T12:35:46.553Z",
-    "updated_at": "2020-08-31T13:29:02.136Z",
+    "publishedAt": "2020-08-31T13:29:02.118Z",
+    "createdBy": 1,
+    "updatedBy": 1,
+    "createdAt": "2020-08-31T12:35:46.553Z",
+    "updatedAt": "2020-08-31T13:29:02.136Z",
     "cover": null,
     "images": []
   },
@@ -26,15 +26,15 @@
     "id": 1,
     "description": "menu1",
     "restaurant": 1,
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-09-01T14:47:10.654Z",
-    "updated_at": "2020-09-01T14:47:53.568Z"
+    "createdBy": 1,
+    "updatedBy": 1,
+    "createdAt": "2020-09-01T14:47:10.654Z",
+    "updatedAt": "2020-09-01T14:47:53.568Z"
   },
-  "created_by": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
-  "updated_by": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
-  "created_at": "2020-09-01T14:47:53.257Z",
-  "updated_at": "2020-09-01T14:47:53.627Z",
+  "createdBy": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
+  "updatedBy": { "id": 1, "firstname": "cyril", "lastname": "lopez", "username": null },
+  "createdAt": "2020-09-01T14:47:53.257Z",
+  "updatedAt": "2020-09-01T14:47:53.627Z",
   "closing_period": {
     "id": 1,
     "label": "closing labe",
@@ -107,38 +107,38 @@
         "previewUrl": null,
         "provider": "local",
         "provider_metadata": null,
-        "created_by": 1,
-        "updated_by": 1,
-        "created_at": "2020-09-01T14:35:21.346Z",
-        "updated_at": "2020-09-01T14:35:21.358Z"
+        "createdBy": 1,
+        "updatedBy": 1,
+        "createdAt": "2020-09-01T14:35:21.346Z",
+        "updatedAt": "2020-09-01T14:35:21.358Z"
       },
       "categories": [
         {
           "id": 1,
           "name": "cat1",
-          "published_at": null,
-          "created_by": 1,
-          "updated_by": 1,
-          "created_at": "2020-09-01T08:37:15.012Z",
-          "updated_at": "2020-09-01T12:37:33.249Z"
+          "publishedAt": null,
+          "createdBy": 1,
+          "updatedBy": 1,
+          "createdAt": "2020-09-01T08:37:15.012Z",
+          "updatedAt": "2020-09-01T12:37:33.249Z"
         },
         {
           "id": 2,
           "name": "cat2",
-          "published_at": "2020-09-01T13:07:04.235Z",
-          "created_by": 1,
-          "updated_by": 1,
-          "created_at": "2020-09-01T12:05:46.798Z",
-          "updated_at": "2020-09-01T13:07:04.253Z"
+          "publishedAt": "2020-09-01T13:07:04.235Z",
+          "createdBy": 1,
+          "updatedBy": 1,
+          "createdAt": "2020-09-01T12:05:46.798Z",
+          "updatedAt": "2020-09-01T13:07:04.253Z"
         },
         {
           "id": 3,
           "name": "cat3",
-          "published_at": null,
-          "created_by": 1,
-          "updated_by": 1,
-          "created_at": "2020-09-01T12:05:51.438Z",
-          "updated_at": "2020-09-01T12:05:51.444Z"
+          "publishedAt": null,
+          "createdBy": 1,
+          "updatedBy": 1,
+          "createdAt": "2020-09-01T12:05:51.438Z",
+          "updatedAt": "2020-09-01T12:05:51.444Z"
         }
       ]
     },
@@ -203,10 +203,10 @@
       "previewUrl": null,
       "provider": "local",
       "provider_metadata": null,
-      "created_by": 1,
-      "updated_by": 1,
-      "created_at": "2020-09-01T14:35:38.706Z",
-      "updated_at": "2020-09-01T14:35:38.715Z"
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T14:35:38.706Z",
+      "updatedAt": "2020-09-01T14:35:38.715Z"
     }
   },
   "services": [
@@ -275,10 +275,10 @@
         "previewUrl": null,
         "provider": "local",
         "provider_metadata": null,
-        "created_by": 1,
-        "updated_by": 1,
-        "created_at": "2020-09-01T14:35:38.706Z",
-        "updated_at": "2020-09-01T14:35:38.715Z"
+        "createdBy": 1,
+        "updatedBy": 1,
+        "createdAt": "2020-09-01T14:35:38.706Z",
+        "updatedAt": "2020-09-01T14:35:38.715Z"
       }
     },
     {
@@ -346,10 +346,10 @@
         "previewUrl": null,
         "provider": "local",
         "provider_metadata": null,
-        "created_by": 1,
-        "updated_by": 1,
-        "created_at": "2020-09-01T14:35:21.346Z",
-        "updated_at": "2020-09-01T14:35:21.358Z"
+        "createdBy": 1,
+        "updatedBy": 1,
+        "createdAt": "2020-09-01T14:35:21.346Z",
+        "updatedAt": "2020-09-01T14:35:21.358Z"
       }
     }
   ],
@@ -370,29 +370,29 @@
             {
               "id": 2,
               "name": "cat2",
-              "published_at": "2020-09-01T13:07:04.235Z",
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "publishedAt": "2020-09-01T13:07:04.235Z",
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 1,
               "name": "cat1",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 3,
               "name": "cat3",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         },
@@ -407,29 +407,29 @@
             {
               "id": 1,
               "name": "cat1",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 2,
               "name": "cat2",
-              "published_at": "2020-09-01T13:07:04.235Z",
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "publishedAt": "2020-09-01T13:07:04.235Z",
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 3,
               "name": "cat3",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         }
@@ -451,29 +451,29 @@
             {
               "id": 1,
               "name": "cat1",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 2,
               "name": "cat2",
-              "published_at": "2020-09-01T13:07:04.235Z",
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "publishedAt": "2020-09-01T13:07:04.235Z",
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 3,
               "name": "cat3",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         }
@@ -498,29 +498,29 @@
             {
               "id": 1,
               "name": "cat1",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             },
             {
               "id": 2,
               "name": "cat2",
-              "published_at": "2020-09-01T13:07:04.235Z",
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:46.798Z",
-              "updated_at": "2020-09-01T13:07:04.253Z"
+              "publishedAt": "2020-09-01T13:07:04.235Z",
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:46.798Z",
+              "updatedAt": "2020-09-01T13:07:04.253Z"
             },
             {
               "id": 3,
               "name": "cat3",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             }
           ]
         },
@@ -535,20 +535,20 @@
             {
               "id": 3,
               "name": "cat3",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T12:05:51.438Z",
-              "updated_at": "2020-09-01T12:05:51.444Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T12:05:51.438Z",
+              "updatedAt": "2020-09-01T12:05:51.444Z"
             },
             {
               "id": 1,
               "name": "cat1",
-              "published_at": null,
-              "created_by": 1,
-              "updated_by": 1,
-              "created_at": "2020-09-01T08:37:15.012Z",
-              "updated_at": "2020-09-01T12:37:33.249Z"
+              "publishedAt": null,
+              "createdBy": 1,
+              "updatedBy": 1,
+              "createdAt": "2020-09-01T08:37:15.012Z",
+              "updatedAt": "2020-09-01T12:37:33.249Z"
             }
           ]
         }
@@ -566,29 +566,29 @@
         {
           "id": 2,
           "name": "cat2",
-          "published_at": "2020-09-01T13:07:04.235Z",
-          "created_by": 1,
-          "updated_by": 1,
-          "created_at": "2020-09-01T12:05:46.798Z",
-          "updated_at": "2020-09-01T13:07:04.253Z"
+          "publishedAt": "2020-09-01T13:07:04.235Z",
+          "createdBy": 1,
+          "updatedBy": 1,
+          "createdAt": "2020-09-01T12:05:46.798Z",
+          "updatedAt": "2020-09-01T13:07:04.253Z"
         },
         {
           "id": 1,
           "name": "cat1",
-          "published_at": null,
-          "created_by": 1,
-          "updated_by": 1,
-          "created_at": "2020-09-01T08:37:15.012Z",
-          "updated_at": "2020-09-01T12:37:33.249Z"
+          "publishedAt": null,
+          "createdBy": 1,
+          "updatedBy": 1,
+          "createdAt": "2020-09-01T08:37:15.012Z",
+          "updatedAt": "2020-09-01T12:37:33.249Z"
         },
         {
           "id": 3,
           "name": "cat3",
-          "published_at": null,
-          "created_by": 1,
-          "updated_by": 1,
-          "created_at": "2020-09-01T12:05:51.438Z",
-          "updated_at": "2020-09-01T12:05:51.444Z"
+          "publishedAt": null,
+          "createdBy": 1,
+          "updatedBy": 1,
+          "createdAt": "2020-09-01T12:05:51.438Z",
+          "updatedAt": "2020-09-01T12:05:51.444Z"
         }
       ]
     }
@@ -654,10 +654,10 @@
     "previewUrl": null,
     "provider": "local",
     "provider_metadata": null,
-    "created_by": 1,
-    "updated_by": 1,
-    "created_at": "2020-09-01T14:35:21.346Z",
-    "updated_at": "2020-09-01T14:35:21.358Z"
+    "createdBy": 1,
+    "updatedBy": 1,
+    "createdAt": "2020-09-01T14:35:21.346Z",
+    "updatedAt": "2020-09-01T14:35:21.358Z"
   },
   "images": [
     {
@@ -721,10 +721,10 @@
       "previewUrl": null,
       "provider": "local",
       "provider_metadata": null,
-      "created_by": 1,
-      "updated_by": 1,
-      "created_at": "2020-09-01T14:35:38.706Z",
-      "updated_at": "2020-09-01T14:35:38.715Z"
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T14:35:38.706Z",
+      "updatedAt": "2020-09-01T14:35:38.715Z"
     },
     {
       "id": 1,
@@ -787,39 +787,39 @@
       "previewUrl": null,
       "provider": "local",
       "provider_metadata": null,
-      "created_by": 1,
-      "updated_by": 1,
-      "created_at": "2020-09-01T14:35:21.346Z",
-      "updated_at": "2020-09-01T14:35:21.358Z"
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T14:35:21.346Z",
+      "updatedAt": "2020-09-01T14:35:21.358Z"
     }
   ],
   "categories": [
     {
       "id": 3,
       "name": "cat3",
-      "published_at": null,
-      "created_by": 1,
-      "updated_by": 1,
-      "created_at": "2020-09-01T12:05:51.438Z",
-      "updated_at": "2020-09-01T12:05:51.444Z"
+      "publishedAt": null,
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T12:05:51.438Z",
+      "updatedAt": "2020-09-01T12:05:51.444Z"
     },
     {
       "id": 1,
       "name": "cat1",
-      "published_at": null,
-      "created_by": 1,
-      "updated_by": 1,
-      "created_at": "2020-09-01T08:37:15.012Z",
-      "updated_at": "2020-09-01T12:37:33.249Z"
+      "publishedAt": null,
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T08:37:15.012Z",
+      "updatedAt": "2020-09-01T12:37:33.249Z"
     },
     {
       "id": 2,
       "name": "cat2",
-      "published_at": "2020-09-01T13:07:04.235Z",
-      "created_by": 1,
-      "updated_by": 1,
-      "created_at": "2020-09-01T12:05:46.798Z",
-      "updated_at": "2020-09-01T13:07:04.253Z"
+      "publishedAt": "2020-09-01T13:07:04.235Z",
+      "createdBy": 1,
+      "updatedBy": 1,
+      "createdAt": "2020-09-01T12:05:46.798Z",
+      "updatedAt": "2020-09-01T13:07:04.253Z"
     }
   ]
 }

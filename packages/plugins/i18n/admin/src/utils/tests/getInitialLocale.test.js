@@ -16,16 +16,16 @@ describe('getInitialLocale', () => {
         id: 1,
         name: 'English',
         code: 'en',
-        created_at: '2021-03-09T14:57:03.016Z',
-        updated_at: '2021-03-09T14:57:03.016Z',
+        createdAt: '2021-03-09T14:57:03.016Z',
+        updatedAt: '2021-03-09T14:57:03.016Z',
         isDefault: true,
       },
       {
         id: 2,
         name: 'French (France) (fr-FR)',
         code: 'fr-FR',
-        created_at: '2021-03-09T15:03:06.992Z',
-        updated_at: '2021-03-09T15:03:06.996Z',
+        createdAt: '2021-03-09T15:03:06.992Z',
+        updatedAt: '2021-03-09T15:03:06.996Z',
         isDefault: false,
       },
     ];
@@ -34,8 +34,8 @@ describe('getInitialLocale', () => {
       id: 2,
       name: 'French (France) (fr-FR)',
       code: 'fr-FR',
-      created_at: '2021-03-09T15:03:06.992Z',
-      updated_at: '2021-03-09T15:03:06.996Z',
+      createdAt: '2021-03-09T15:03:06.992Z',
+      updatedAt: '2021-03-09T15:03:06.996Z',
       isDefault: false,
     };
     const actual = getInitialLocale(query, locales);
@@ -58,16 +58,16 @@ describe('getInitialLocale', () => {
         id: 2,
         name: 'French (France) (fr-FR)',
         code: 'fr-FR',
-        created_at: '2021-03-09T15:03:06.992Z',
-        updated_at: '2021-03-09T15:03:06.996Z',
+        createdAt: '2021-03-09T15:03:06.992Z',
+        updatedAt: '2021-03-09T15:03:06.996Z',
         isDefault: false,
       },
       {
         id: 1,
         name: 'English',
         code: 'en',
-        created_at: '2021-03-09T14:57:03.016Z',
-        updated_at: '2021-03-09T14:57:03.016Z',
+        createdAt: '2021-03-09T14:57:03.016Z',
+        updatedAt: '2021-03-09T14:57:03.016Z',
         isDefault: true,
       },
     ];
@@ -76,8 +76,8 @@ describe('getInitialLocale', () => {
       id: 1,
       name: 'English',
       code: 'en',
-      created_at: '2021-03-09T14:57:03.016Z',
-      updated_at: '2021-03-09T14:57:03.016Z',
+      createdAt: '2021-03-09T14:57:03.016Z',
+      updatedAt: '2021-03-09T14:57:03.016Z',
       isDefault: true,
     };
 

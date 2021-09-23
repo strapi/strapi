@@ -7,7 +7,7 @@ function useSelect() {
   let trackerProperty = {};
 
   if (hasDraftAndPublish) {
-    const isDraft = isEmpty(modifiedData.published_at);
+    const isDraft = isEmpty(modifiedData.publishedAt);
 
     trackerProperty = isDraft ? { status: 'draft' } : { status: 'published' };
   }

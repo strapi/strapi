@@ -5,12 +5,14 @@
     "displayName": "Category",
     "singularName": "category",
     "pluralName": "categories",
-    "description": ""
+    "description": "",
+    "name": "Category"
   },
   "options": {
     "draftAndPublish": true,
     "comment": ""
   },
+  "pluginOptions": {},
   "attributes": {
     "name": {
       "type": "string"

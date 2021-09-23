@@ -31,6 +31,7 @@ const adminAuthStrategy = {
 
       ctx.state.userAbility = userAbility;
       ctx.state.user = user;
+      ctx.state.isAuthenticatedAdmin = true;
 
       return { authenticated: true, credentials: user };
     }

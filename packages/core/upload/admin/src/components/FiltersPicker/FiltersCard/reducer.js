@@ -7,7 +7,7 @@ import moment from 'moment';
 import filtersForm from './utils/filtersForm';
 
 const initialState = {
-  name: 'created_at',
+  name: 'createdAt',
   filter: '=',
   value: dateToUtcTime(moment()),
   filtersForm,
