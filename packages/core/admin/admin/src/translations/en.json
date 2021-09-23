@@ -491,7 +491,7 @@
   "content-manager.containers.Edit.submit": "Save",
   "content-manager.popover.display-relations.label": "Display relations",
   "content-manager.containers.EditSettingsView.modal-form.edit-field": "Edit the field",
-  "content-manager.containers.EditView.add.new": "ADD NEW ENTRY",
+  "content-manager.containers.EditView.add.new-entry": "Add an entry",
   "content-manager.containers.EditView.components.missing.plural": "There is {count} missing components",
   "content-manager.containers.EditView.components.missing.singular": "There is {count} missing component",
   "content-manager.containers.EditView.notification.errors": "The form contains some errors",

@@ -1,7 +1,7 @@
 /* eslint-disable  import/no-cycle */
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-// import size from 'lodash/size';
+import size from 'lodash/size';
 import isEqual from 'react-fast-compare';
 import { useIntl } from 'react-intl';
 import { NotAllowedInput } from '@strapi/helper-plugin';
@@ -15,7 +15,7 @@ import { Stack } from '@strapi/parts/Stack';
 import { getTrad } from '../../utils';
 import ComponentInitializer from './ComponentInitializer';
 import NonRepeatableComponent from '../NonRepeatableComponent';
-// import RepeatableComponent from '../RepeatableComponent';
+import RepeatableComponent from '../RepeatableComponent';
 import connect from './utils/connect';
 import select from './utils/select';
 // import ComponentIcon from './ComponentIcon';
@@ -32,10 +32,10 @@ const FieldComponent = ({
   isCreatingEntry,
   isFromDynamicZone,
   isRepeatable,
-  // isNested,
+  isNested,
   labelAction,
-  // max,
-  // min,
+  max,
+  min,
   name,
   // Passed thanks to the connect function
   hasChildrenAllowedFields,
@@ -45,7 +45,7 @@ const FieldComponent = ({
   removeComponentFromField,
 }) => {
   const { formatMessage } = useIntl();
-  // const componentValueLength = size(componentValue);
+  const componentValueLength = size(componentValue);
   const isInitialized = componentValue !== null || isFromDynamicZone;
   const showResetComponent =
     !isRepeatable && isInitialized && !isFromDynamicZone && hasChildrenAllowedFields;
@@ -62,7 +62,13 @@ const FieldComponent = ({
     <Box>
       <Stack size={1}>
         <Row justifyContent="space-between">
-          <Label intlLabel={intlLabel} labelAction={labelAction} name={name} />
+          <Label
+            intlLabel={intlLabel}
+            labelAction={labelAction}
+            name={name}
+            numberOfEntries={componentValueLength}
+            showNumberOfEntries={isRepeatable}
+          />
           {showResetComponent && (
             <IconButton
               label={formatMessage({
@@ -83,6 +89,18 @@ const FieldComponent = ({
           <NonRepeatableComponent
             componentUid={componentUid}
             isFromDynamicZone={isFromDynamicZone}
+            name={name}
+          />
+        )}
+        {isRepeatable && (
+          <RepeatableComponent
+            componentValue={componentValue}
+            componentValueLength={componentValueLength}
+            componentUid={componentUid}
+            isNested={isNested}
+            isReadOnly={isReadOnly}
+            max={max}
+            min={min}
             name={name}
           />
         )}
@@ -136,18 +154,18 @@ const FieldComponent = ({
   //   name={name}
   // />
   //     )}
-  //     {isRepeatable && (
-  //       <RepeatableComponent
-  //         componentValue={componentValue}
-  //         componentValueLength={componentValueLength}
-  //         componentUid={componentUid}
-  //         isNested={isNested}
-  //         isReadOnly={isReadOnly}
-  //         max={max}
-  //         min={min}
-  //         name={name}
-  //       />
-  //     )}
+  // {isRepeatable && (
+  //   <RepeatableComponent
+  //     componentValue={componentValue}
+  //     componentValueLength={componentValueLength}
+  //     componentUid={componentUid}
+  //     isNested={isNested}
+  //     isReadOnly={isReadOnly}
+  //     max={max}
+  //     min={min}
+  //     name={name}
+  //   />
+  // )}
   //   </Wrapper>
   // );
 };
@@ -161,10 +179,10 @@ FieldComponent.defaultProps = {
   isFromDynamicZone: false,
   isReadOnly: false,
   isRepeatable: false,
-  // isNested: false,
+  isNested: false,
   labelAction: undefined,
-  // max: Infinity,
-  // min: -Infinity,
+  max: Infinity,
+  min: -Infinity,
 };
 
 FieldComponent.propTypes = {
@@ -178,15 +196,15 @@ FieldComponent.propTypes = {
   isFromDynamicZone: PropTypes.bool,
   isReadOnly: PropTypes.bool,
   isRepeatable: PropTypes.bool,
-  // isNested: PropTypes.bool,
+  isNested: PropTypes.bool,
   intlLabel: PropTypes.shape({
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
   }).isRequired,
   labelAction: PropTypes.element,
-  // max: PropTypes.number,
-  // min: PropTypes.number,
+  max: PropTypes.number,
+  min: PropTypes.number,
   name: PropTypes.string.isRequired,
   removeComponentFromField: PropTypes.func.isRequired,
 };

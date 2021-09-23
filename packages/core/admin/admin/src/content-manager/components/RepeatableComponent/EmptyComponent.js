@@ -1,27 +1,25 @@
-import styled from 'styled-components';
+import React from 'react';
+import { useIntl } from 'react-intl';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import { getTrad } from '../../utils';
 
-/* eslint-disable indent */
-const EmptyComponent = styled.div`
-  height: 71px;
-  border: 1px solid rgba(227, 233, 243, 0.75);
-  border-top-left-radius: 2px;
-  border-top-right-radius: 2px;
-  border-bottom: 0;
-  line-height: 66px;
-  text-align: center;
-  background-color: #fff;
+const EmptyComponent = () => {
+  const { formatMessage } = useIntl();
 
-  ${({ hasMinError }) =>
-    hasMinError &&
-    `
-    border-color: #FAA684;
-  `}
-
-  > p {
-    color: #9ea7b8;
-    font-size: 13px;
-    font-weight: 500;
-  }
-`;
+  return (
+    <Box paddingTop={7} paddingBottom={7}>
+      <Row justifyContent="center">
+        <Text textColor="primary600" small bold>
+          {formatMessage({
+            id: getTrad('components.empty-repeatable'),
+            defaultMessage: 'No entry yet. Click on the button below to add one.',
+          })}
+        </Text>
+      </Row>
+    </Box>
+  );
+};
 
 export default EmptyComponent;

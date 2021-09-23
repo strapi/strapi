@@ -10,15 +10,8 @@
     "name": {
       "type": "string"
     },
-    "nested": {
-      "type": "component",
-      "repeatable": false,
-      "component": "basic.simple"
-    },
-    "nestedd": {
-      "type": "component",
-      "repeatable": false,
-      "component": "basic.simple"
+    "url": {
+      "type": "string"
     }
   }
 }
