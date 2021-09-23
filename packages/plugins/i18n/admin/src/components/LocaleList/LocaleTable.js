@@ -16,8 +16,8 @@ import {
 import EditIcon from '@strapi/icons/EditIcon';
 import DeleteIcon from '@strapi/icons/DeleteIcon';
 import { useIntl } from 'react-intl';
-import { stopPropagation } from '@strapi/helper-plugin';
-import { onRowClick } from '@strapi/helper-plugin/lib/src';
+import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
+
 import { getTrad } from '../../utils';
 
 const LocaleTable = ({ locales, onDeleteLocale, onEditLocale }) => {

@@ -1,3 +1,5 @@
+import React from 'react';
+
 export const stopPropagation = {
   onClick: e => e.stopPropagation(),
   role: 'button',
