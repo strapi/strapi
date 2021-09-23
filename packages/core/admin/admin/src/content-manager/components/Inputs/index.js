@@ -13,9 +13,10 @@ import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import GenericInput from './GenericInput';
+import InputUID from '../InputUID';
 // import SelectWrapper from '../SelectWrapper';
 // import WysiwygWithErrors from '../WysiwygWithErrors';
-// import InputUID from '../InputUID';
+
 import {
   connect,
   generateOptions,
@@ -41,7 +42,6 @@ function Inputs({
   value,
 }) {
   // const { fields } = useLibrary();
-
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -54,7 +54,7 @@ function Inputs({
   const fieldName = useMemo(() => {
     return getFieldName(keys);
   }, [keys]);
-
+  
   const validations = useMemo(() => {
     const inputValidations = omit(
       fieldSchema,
@@ -204,7 +204,7 @@ function Inputs({
     //   </div>
     // );
   }
-
+  
   return (
     <GenericInput
       // {...metadatas}
@@ -220,7 +220,7 @@ function Inputs({
         // ...fields,
         json: InputJSON,
         media: () => <div>TODO media</div>,
-        uid: () => <div>TODO uid</div>,
+        uid: InputUID,
         // wysiwyg: () => <div>TODO wysiwyg</div>,
         wysiwyg: Wysiwyg,
       }}
