@@ -70,7 +70,7 @@ class Strapi {
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
-    this.srcIndex = loaders.loadSrcIndex(this);
+    this.cron = createCronService();
 
     createUpdateNotifier(this).notify();
   }
@@ -279,6 +279,10 @@ class Strapi {
     this.middleware = await loaders.loadMiddlewares(this);
   }
 
+  async loadApp() {
+    this.app = await loaders.loadSrcIndex(this);
+  }
+
   registerInternalHooks() {
     this.hooks.set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.hooks.set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -289,6 +293,7 @@ class Strapi {
 
   async load() {
     await Promise.all([
+      this.loadApp(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),
@@ -333,7 +338,6 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
-    this.cron = createCronService();
     const cronTasks = this.config.get('server.cron.tasks', {});
     this.cron.add(cronTasks);
 
@@ -431,7 +435,7 @@ class Strapi {
     await this.container.get('modules')[lifecycleName]();
 
     // user
-    const lifecycleFunction = this.srcIndex[lifecycleName];
+    const lifecycleFunction = this.app[lifecycleName];
     if (lifecycleFunction) {
       await lifecycleFunction({ strapi: this });
     }

@@ -1,48 +1,52 @@
 'use strict';
 
-const cron = require('node-schedule');
-const { isFunction, getOr } = require('lodash/fp');
+const { Job } = require('node-schedule');
+const { isFunction } = require('lodash/fp');
 
 const createCronService = () => {
-  const groupsOfTasks = [];
-  let jobs = [];
+  let jobsSpecs = [];
 
   return {
-    add(newTasks = {}) {
+    add(tasks = {}) {
+      for (const taskExpression in tasks) {
+        const taskValue = tasks[taskExpression];
+
+        let fn;
+        let options;
+        if (isFunction(taskValue)) {
+          fn = taskValue.bind(tasks);
+          options = taskExpression;
+        } else if (isFunction(taskValue.task)) {
+          fn = taskValue.task.bind(taskValue);
+          options = taskValue.options;
+        } else {
+          throw new Error(
+            `Could not schedule a cron job for "${taskExpression}": no function found.`
+          );
+        }
+
+        const fnWithStrapi = (...args) => fn({ strapi }, ...args);
+
+        const job = new Job(null, fnWithStrapi);
+        jobsSpecs.push({ job, options });
+      }
+      return this;
+    },
+    start() {
       if (!strapi.config.get('server.cron.enabled')) {
         return;
       }
-
-      groupsOfTasks.push(newTasks);
-    },
-    start() {
-      for (const tasks of groupsOfTasks) {
-        for (const taskExpression in tasks) {
-          const taskValue = tasks[taskExpression];
-
-          if (isFunction(taskValue)) {
-            const instanciatedTask = taskValue(strapi);
-            return cron.scheduleJob(taskExpression, instanciatedTask);
-          }
-
-          const options = getOr({}, 'options', taskValue);
-          const job = cron.scheduleJob(
-            {
-              rule: taskExpression,
-              ...options,
-            },
-            taskValue.task(strapi)
-          );
-
-          jobs.push(job);
-        }
-      }
+      jobsSpecs.forEach(({ job, options }) => job.schedule(options));
+      return this;
     },
     stop() {
-      jobs.forEach(job => job.cancel());
+      jobsSpecs.forEach(({ job }) => job.cancel());
+      return this;
     },
     destroy() {
       this.stop();
+      jobsSpecs = [];
+      return this;
     },
   };
 };

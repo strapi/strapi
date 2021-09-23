@@ -16,7 +16,7 @@ const validateSrcIndex = srcIndex => {
   return srcSchema.validateSync(srcIndex, { strict: true, abortEarly: false });
 };
 
-module.exports = async strapi => {
+module.exports = strapi => {
   if (!existsSync(strapi.dirs.src)) {
     throw new Error('Missing src folder. Please create one at `./src`');
   }
