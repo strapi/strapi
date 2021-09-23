@@ -17,10 +17,10 @@
 import React from 'react';
 import { NextLink, Pagination, PreviousLink, Dots, PageLink } from '@strapi/parts';
 import PropTypes from 'prop-types';
-import { useQueryParams } from '@strapi/helper-plugin';
 import { useLocation } from 'react-router-dom';
 import { useIntl } from 'react-intl';
 import { stringify } from 'qs';
+import useQueryParams from '../../hooks/useQueryParams';
 
 const PaginationURLQuery = ({ pagination: { pageCount } }) => {
   const [{ query }] = useQueryParams();

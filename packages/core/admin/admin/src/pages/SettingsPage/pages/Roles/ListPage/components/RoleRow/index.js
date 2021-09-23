@@ -1,8 +1,7 @@
-import { stopPropagation } from '@strapi/helper-plugin';
-import { onRowClick } from '@strapi/helper-plugin/lib/src';
-import { Box, Row, Td, Text, Tr, IconButton } from '@strapi/parts';
-import PropTypes from 'prop-types';
 import React from 'react';
+import PropTypes from 'prop-types';
+import { Box, Row, Td, Text, Tr, IconButton } from '@strapi/parts';
+import { stopPropagation, onRowClick } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 
 const RoleRow = ({ id, name, description, usersCount, icons }) => {
