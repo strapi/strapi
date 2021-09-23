@@ -25,8 +25,6 @@
   "Plugin.permissions.plugins.description": "Zvoľte akcie, ktoré majú byť povolené pre plugin {name}.",
   "Plugins.header.description": "Zobrazujú sa iba akcie naviazané na URL endpoint.",
   "Plugins.header.title": "Oprávnenia",
-  "Policies.InputSelect.empty": "Žiadne",
-  "Policies.InputSelect.label": "Povoliť túto akciu pre:",
   "Policies.header.hint": "Vyberte akciu a kliknite na ikonku nastavení pre zobrazenie naviazanej URL",
   "Policies.header.title": "Pokročilé nastavenia",
   "PopUpForm.Email.email_templates.inputDescription": "Ak si nie ste istý ako používať premenné, {link}",

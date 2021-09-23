@@ -1,5 +1,5 @@
-import RolesCreatePage from 'ee_else_ce/pages/Roles/CreatePage';
-import ProtectedRolesListPage from 'ee_else_ce/pages/Roles/ProtectedListPage';
+import RolesCreatePage from 'ee_else_ce/pages/SettingsPage/pages/Roles/CreatePage';
+import ProtectedRolesListPage from 'ee_else_ce/pages/SettingsPage/pages/Roles/ProtectedListPage';
 
 const defaultRoutes = [
   {
@@ -27,7 +27,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "admin-edit-roles-page" */ '../../Roles/ProtectedEditPage'
+        /* webpackChunkName: "admin-edit-roles-page" */ '../pages/Roles/ProtectedEditPage'
       );
 
       return component;
@@ -38,7 +38,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "admin-users" */ '../../Users/ProtectedListPage'
+        /* webpackChunkName: "admin-users" */ '../pages/Users/ProtectedListPage'
       );
 
       return component;
@@ -49,7 +49,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "admin-edit-users" */ '../../Users/ProtectedEditPage'
+        /* webpackChunkName: "admin-edit-users" */ '../pages/Users/ProtectedEditPage'
       );
 
       return component;
@@ -60,7 +60,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ '../../Webhooks/ProtectedCreateView'
+        /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedCreateView'
       );
 
       return component;
@@ -71,7 +71,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-edit-page" */ '../../Webhooks/ProtectedEditView'
+        /* webpackChunkName: "webhook-edit-page" */ '../pages/Webhooks/ProtectedEditView'
       );
 
       return component;
@@ -82,7 +82,7 @@ const defaultRoutes = [
   {
     Component: async () => {
       const component = await import(
-        /* webpackChunkName: "webhook-list-page" */ '../../Webhooks/ProtectedListView'
+        /* webpackChunkName: "webhook-list-page" */ '../pages/Webhooks/ProtectedListView'
       );
 
       return component;

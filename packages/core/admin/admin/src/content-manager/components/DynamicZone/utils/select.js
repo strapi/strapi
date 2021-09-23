@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { get } from 'lodash';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect(name) {
   const {
@@ -14,7 +14,7 @@ function useSelect(name) {
     removeComponentFromDynamicZone,
     readActionAllowedFields,
     updateActionAllowedFields,
-  } = useContentManagerEditViewDataManager();
+  } = useCMEditViewDataManager();
 
   const dynamicDisplayedComponents = useMemo(
     () => get(modifiedData, [name], []).map(data => data.__component),

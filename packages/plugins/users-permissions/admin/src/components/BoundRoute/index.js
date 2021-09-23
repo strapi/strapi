@@ -1,39 +1,56 @@
-/**
- *
- * BoundRoute
- *
- */
-
 import React from 'react';
-import { get, includes, map, tail, toLower } from 'lodash';
-import { FormattedMessage } from 'react-intl';
+import { Stack, H3, Text, Box } from '@strapi/parts';
+import { map, tail } from 'lodash';
+import { useIntl } from 'react-intl';
 import PropTypes from 'prop-types';
-import { Header, Path, Verb, Wrapper } from './Components';
+import getMethodColor from './getMethodColor';
 
 function BoundRoute({ route }) {
-  const title = get(route, 'handler');
-  const formattedRoute = get(route, 'path') ? tail(get(route, 'path').split('/')) : [];
+  const { formatMessage } = useIntl();
+
+  const { method, handler: title, path } = route;
+  const formattedRoute = path ? tail(path.split('/')) : [];
   const [controller = '', action = ''] = title ? title.split('.') : [];
+  const colors = getMethodColor(route.method);
 
   return (
-    <div className="col-md-12">
-      <Header>
-        <FormattedMessage id="users-permissions.BoundRoute.title" />
+    <Stack size={2}>
+      <H3>
+        {formatMessage({
+          id: 'users-permissions.BoundRoute.title',
+          defaultMessage: 'Bound route to',
+        })}
         &nbsp;
         <span>{controller}</span>
-        <span>.{action} </span>
-      </Header>
-      <Wrapper>
-        <Verb className={toLower(get(route, 'method'))}>{get(route, 'method')}</Verb>
-        <Path>
+        <Text style={{ fontSize: 'inherit', fontWeight: 'inherit' }} textColor="primary600">
+          .{action}
+        </Text>
+      </H3>
+      <Box hasRadius background="neutral0" borderColor="neutral200">
+        <Box
+          color={colors.text}
+          background={colors.background}
+          borderColor={colors.border}
+          padding={2}
+          hasRadius
+          style={{
+            display: 'inline-block',
+            margin: '-1px',
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+          }}
+        >
+          <Text bold>{method}</Text>
+        </Box>
+        <Box style={{ display: 'inline-block' }} paddingLeft={2} paddingRight={2}>
           {map(formattedRoute, value => (
-            <span key={value} style={includes(value, ':') ? { color: '#787E8F' } : {}}>
+            <Text key={value} textColor={value.includes(':') ? 'neutral600' : 'neutral900'}>
               /{value}
-            </span>
+            </Text>
           ))}
-        </Path>
-      </Wrapper>
-    </div>
+        </Box>
+      </Box>
+    </Stack>
   );
 }
 

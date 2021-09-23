@@ -5,10 +5,7 @@ import reducer, { initialState } from './reducer';
 
 const useUserForm = (endPoint, permissions) => {
   const { isLoading: isLoadingForPermissions, allowedActions } = useRBAC(permissions);
-  const [{ formErrors, initialData, isLoading, modifiedData }, dispatch] = useReducer(
-    reducer,
-    initialState
-  );
+  const [{ isLoading, modifiedData }, dispatch] = useReducer(reducer, initialState);
   const toggleNotification = useNotification();
   const isMounted = useRef(true);
 
@@ -54,39 +51,16 @@ const useUserForm = (endPoint, permissions) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoadingForPermissions, endPoint]);
 
-  const handleChange = useCallback(({ target: { name, value } }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: name,
-      value,
-    });
-  }, []);
-
-  const dispatchResetForm = useCallback(() => {
-    dispatch({
-      type: 'RESET_FORM',
-    });
-  }, []);
-
-  const dispatchSetFormErrors = useCallback(errors => {
-    dispatch({ type: 'SET_ERRORS', errors });
-  }, []);
-
-  const dispatchSubmitSucceeded = useCallback(() => {
+  const dispatchSubmitSucceeded = useCallback(data => {
     dispatch({
       type: 'ON_SUBMIT_SUCCEEDED',
+      data,
     });
   }, []);
 
   return {
     allowedActions,
-    dispatch,
-    dispatchResetForm,
-    dispatchSetFormErrors,
     dispatchSubmitSucceeded,
-    formErrors,
-    handleChange,
-    initialData,
     isLoading,
     isLoadingForPermissions,
     modifiedData,

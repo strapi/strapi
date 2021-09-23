@@ -1,8 +1,8 @@
 import { isEmpty } from 'lodash';
-import { useContentManagerEditViewDataManager } from '@strapi/helper-plugin';
+import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 
 function useSelect() {
-  const { hasDraftAndPublish, modifiedData } = useContentManagerEditViewDataManager();
+  const { hasDraftAndPublish, modifiedData } = useCMEditViewDataManager();
 
   let trackerProperty = {};
 

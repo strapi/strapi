@@ -25,8 +25,6 @@
   "Plugin.permissions.plugins.description": "Określ dozwolone działania w wtyczce {name}.",
   "Plugins.header.description": "Jedynie akcje związane z wywoływaniami wymienionymi poniżej.",
   "Plugins.header.title": "Uprawnienia",
-  "Policies.InputSelect.empty": "Nikogo",
-  "Policies.InputSelect.label": "Zezwól na wykonanie tej akcji dla:",
   "Policies.header.hint": "Wybierz działania aplikacji lub działania wtyczki i kliknij ikonę koła zębatego, aby wyświetlić wywoływania",
   "Policies.header.title": "Zaawansowane",
   "PopUpForm.Email.email_templates.inputDescription": "Nie wiesz jak skonfigurować zmienne? {link}",

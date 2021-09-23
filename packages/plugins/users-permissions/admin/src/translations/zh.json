@@ -23,8 +23,6 @@
   "Plugin.permissions.plugins.description": "為 {name} 擴充功能定義所有可用的操作",
   "Plugins.header.description": "只有綁定路徑的操作會顯示在下方",
   "Plugins.header.title": "權限",
-  "Policies.InputSelect.empty": "無",
-  "Policies.InputSelect.label": "限制此操作：",
   "Policies.header.hint": "選取應用程式或擴充功能的操作然後點擊齒輪圖示以顯示綁定路徑",
   "Policies.header.title": "進階設定",
   "PopUpForm.Email.email_templates.inputDescription": "如果您不確定要怎麼使用變數，請 {link}",

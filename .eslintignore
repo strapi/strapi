@@ -8,7 +8,7 @@ cypress/**
 packages/generators/generators/lib/files/
 packages/generators/app/lib/resources/files/
 packages/core/helper-plugin/build/**
-packages/core/helper-plugin/lib/src/components/**
+packages/core/helper-plugin/lib/src/old/components/**
 packages/core/helper-plugin/lib/src/testUtils/**
 packages/core/helper-plugin/lib/src/utils/**
 .eslintrc.js

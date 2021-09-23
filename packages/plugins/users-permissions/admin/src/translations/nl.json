@@ -23,8 +23,6 @@
   "Plugin.permissions.plugins.description": "Voer alle toegestane acties in voor extensie {name}.",
   "Plugins.header.description": "Alleen acties gekoppeld aan een route worden hieronder weergegeven.",
   "Plugins.header.title": "Permissies",
-  "Policies.InputSelect.empty": "Geen",
-  "Policies.InputSelect.label": "Deze actie toestaan voor:",
   "Policies.header.hint": "Selecteer de actie van de applicatie of de acties van de extensie en klik op het tandwiel icoontje om de gekoppelde route weer te geven",
   "Policies.header.title": "Geavanceerde instellingen",
   "PopUpForm.Email.email_templates.inputDescription": "Als je niet zeker weet hoe je variabelen moet gebruiken, {link}",

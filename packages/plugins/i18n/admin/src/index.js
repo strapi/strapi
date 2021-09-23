@@ -14,7 +14,7 @@ import { getTrad } from './utils';
 import mutateCTBContentTypeSchema from './utils/mutateCTBContentTypeSchema';
 import LOCALIZED_FIELDS from './utils/localizedFields';
 import i18nReducers from './hooks/reducers';
-import DeleteModalAdditionalInfos from './components/DeleteModalAdditionalInfos';
+import DeleteModalAdditionalInfos from './components/CMListViewInjectedComponents/DeleteModalAdditionalInfos';
 import addLocaleToCollectionTypesLinksHook from './contentManagerHooks/addLocaleToCollectionTypesLinks';
 import addLocaleToSingleTypesLinksHook from './contentManagerHooks/addLocaleToSingleTypesLinks';
 import addColumnToTableHook from './contentManagerHooks/addColumnToTable';

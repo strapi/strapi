@@ -1,0 +1,54 @@
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="components/InjectionZone" />
+
+# InjectionZone
+
+This component is used in order to define an injection zone that other plugins can use to add components in a dedicated area.
+
+## Usage
+
+```
+// Use the injection zone in a view
+import { InjectionZone } from '@strapi/helper-plugin';
+
+const HomePage = () => {
+  return (
+    <main>
+      <h1>This is the homepage</h1>
+    </main>
+    <InjectionZone area="my-plugin.homePage.right" />
+  );
+};
+
+
+// Define this injection zone
+// path: 'my-plugin/admin/src/index.js
+
+export default {
+  register() {
+    app.registerPlugin({
+      // ...
+      injectionZones: {
+        homepage: {
+          right: []
+        }
+      }
+    });
+  },
+}
+
+// Inject from a plugin
+// path: 'my-other-plugin/admin/src/index.js'
+export default {
+  register() {
+    // ...
+  },
+  bootstrap(app) {
+    app.getPlugin('my-plugin').injectComponent('homePage', 'right', {
+      name: 'my-other-plugin-component',
+      Component: () => 'This component is injected',
+    });
+  }
+};
+```

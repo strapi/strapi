@@ -1,91 +1,65 @@
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Label } from '@buffetjs/core';
-import { Inputs } from '@buffetjs/custom';
-import Select from 'react-select';
-import { Col, Row } from 'reactstrap';
 import { useIntl } from 'react-intl';
-import { useTheme } from 'styled-components';
-import { BaselineAlignment, selectStyles, DropdownIndicator } from '@strapi/helper-plugin';
+import PropTypes from 'prop-types';
 import { useFormikContext } from 'formik';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Select, Option } from '@strapi/parts/Select';
 import { getTrad } from '../../utils';
 
-const BaseForm = ({ options, defaultOption }) => {
+const BaseForm = ({ locale }) => {
   const { formatMessage } = useIntl();
-  const { values, handleChange } = useFormikContext();
-  const theme = useTheme();
-  const styles = selectStyles(theme);
+  const { values, handleChange, errors } = useFormikContext();
 
   return (
-    <Row>
-      <Col>
-        <span id="locale-code">
-          <Label htmlFor="">
-            {formatMessage({
-              id: getTrad('Settings.locales.modal.edit.locales.label'),
-            })}
-          </Label>
-        </span>
-
-        <BaselineAlignment top size="5px" />
-
+    <Grid gap={4}>
+      <GridItem col={6}>
         <Select
-          aria-labelledby="locale-code"
-          options={options}
-          defaultValue={defaultOption}
-          isDisabled
-          components={{ DropdownIndicator }}
-          styles={{
-            ...styles,
-            control: (base, state) => ({ ...base, ...styles.control(base, state), height: '34px' }),
-            indicatorsContainer: (base, state) => ({
-              ...base,
-              ...styles.indicatorsContainer(base, state),
-              height: '32px',
-            }),
-          }}
-        />
-      </Col>
-      <Col>
-        <BaselineAlignment top size="2px" />
+          label={formatMessage({
+            id: getTrad('Settings.locales.modal.locales.label'),
+            defaultMessage: 'Locales',
+          })}
+          value={locale.code}
+          disabled
+        >
+          <Option value={locale.code}>{locale.name}</Option>
+        </Select>
+      </GridItem>
 
-        <Inputs
+      <GridItem col={6}>
+        <TextInput
+          name="displayName"
           label={formatMessage({
             id: getTrad('Settings.locales.modal.locales.displayName'),
+            defaultMessage: 'Locale display name',
           })}
-          name="displayName"
-          description={formatMessage({
+          hint={formatMessage({
             id: getTrad('Settings.locales.modal.locales.displayName.description'),
+            defaultMessage: 'Locale will be displayed under that name in the administration panel',
           })}
-          type="text"
+          error={
+            errors.displayName
+              ? formatMessage({
+                  id: getTrad('Settings.locales.modal.locales.displayName.error'),
+                  defaultMessage: 'The locale display name can only be less than 50 characters.',
+                })
+              : undefined
+          }
           value={values.displayName}
           onChange={handleChange}
-          validations={{
-            max: 50,
-          }}
-          translatedErrors={{
-            max: formatMessage({
-              id: getTrad('Settings.locales.modal.locales.displayName.error'),
-            }),
-          }}
         />
-      </Col>
-    </Row>
+      </GridItem>
+    </Grid>
   );
 };
 
-BaseForm.defaultProps = {
-  defaultOption: undefined,
-};
+export default BaseForm;
 
 BaseForm.propTypes = {
-  options: PropTypes.arrayOf(
-    PropTypes.exact({ value: PropTypes.number.isRequired, label: PropTypes.string.isRequired })
-  ).isRequired,
-  defaultOption: PropTypes.exact({
-    value: PropTypes.number.isRequired,
-    label: PropTypes.string.isRequired,
-  }),
+  locale: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    name: PropTypes.string.isRequired,
+    code: PropTypes.string.isRequired,
+    isDefault: PropTypes.bool.isRequired,
+  }).isRequired,
 };
-
-export default BaseForm;

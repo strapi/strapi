@@ -72,7 +72,7 @@ const DataManagerProvider = ({
   const { getPlugin } = useStrapiApp();
 
   const { apis } = getPlugin(pluginId);
-  const [infoModals, toggleInfoModal] = useState({ cancel: false });
+  const [infoModals, toggleInfoModal] = useState(false);
   const { autoReload } = useAppInfos();
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
@@ -510,7 +510,7 @@ const DataManagerProvider = ({
 
   // Open the modal warning cancel changes
   const toggleModalCancel = () => {
-    toggleInfoModal(prev => ({ ...prev, cancel: !prev.cancel }));
+    toggleInfoModal(prev => !prev);
   };
 
   const updatePermissions = async () => {
@@ -570,7 +570,7 @@ const DataManagerProvider = ({
             <>
               <FormModal />
               <PopUpWarning
-                isOpen={infoModals.cancel}
+                isOpen={infoModals}
                 toggleModal={toggleModalCancel}
                 content={{
                   message: getTrad(

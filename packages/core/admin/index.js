@@ -12,7 +12,7 @@ const getWebpackConfig = require('./webpack.config');
 const getPkgPath = name => path.dirname(require.resolve(`${name}/package.json`));
 
 function getCustomWebpackConfig(dir, config) {
-  const adminConfigPath = path.join(dir, 'admin', 'webpack.config.js');
+  const adminConfigPath = path.join(dir, 'src', 'admin', 'webpack.config.js');
 
   let webpackConfig = getWebpackConfig(config);
 
@@ -94,7 +94,7 @@ async function createPluginsJs(plugins, dest) {
     const shortName = _.camelCase(name);
     return {
       name,
-      pathToPlugin: path.relative(path.resolve(dest, 'admin', 'src'), pathToPlugin),
+      pathToPlugin: path.relative(path.resolve(dest, 'admin/src'), pathToPlugin),
       shortName,
     };
   });
@@ -102,7 +102,7 @@ async function createPluginsJs(plugins, dest) {
   const content = `
 ${pluginsArray
   .map(({ pathToPlugin, shortName }) => {
-    const req = `'${pathToPlugin}/admin/src'`;
+    const req = `'${pathToPlugin}/strapi-admin.js'`;
 
     return `import ${shortName} from ${req};`;
   })
@@ -150,8 +150,7 @@ async function createCacheDir({ dir, plugins }) {
   const pluginsWithFront = Object.keys(plugins)
     .filter(pluginName => {
       const pluginInfo = plugins[pluginName];
-      // TODO: use strapi-admin
-      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'admin', 'src', 'index.js'));
+      return fs.existsSync(path.resolve(pluginInfo.pathToPlugin, 'strapi-admin.js'));
     })
     .map(name => ({ name, ...plugins[name] }));
 
@@ -162,14 +161,14 @@ async function createCacheDir({ dir, plugins }) {
   await copyAdmin(cacheDir);
 
   // Copy app.js
-  const customAdminConfigFilePath = path.join(dir, 'admin', 'app.js');
+  const customAdminConfigFilePath = path.join(dir, 'src', 'admin', 'app.js');
 
   if (fs.existsSync(customAdminConfigFilePath)) {
     await fs.copy(customAdminConfigFilePath, path.resolve(cacheDir, 'admin', 'src', 'app.js'));
   }
 
   // Copy admin extensions folder
-  const adminExtensionFolder = path.join(dir, 'admin', 'extensions');
+  const adminExtensionFolder = path.join(dir, 'src', 'admin', 'extensions');
 
   if (fs.existsSync(adminExtensionFolder)) {
     await fs.copy(adminExtensionFolder, path.resolve(cacheDir, 'admin', 'src', 'extensions'));
@@ -242,8 +241,8 @@ async function watchAdmin({ plugins, dir, host, port, browser, options }) {
  */
 async function watchFiles(dir) {
   const cacheDir = path.join(dir, '.cache');
-  const appExtensionFile = path.join(dir, 'admin', 'app.js');
-  const extensionsPath = path.join(dir, 'admin', 'extensions');
+  const appExtensionFile = path.join(dir, 'src', 'admin', 'app.js');
+  const extensionsPath = path.join(dir, 'src', 'admin', 'extensions');
 
   // Only watch the admin/app.js file and the files that are in the ./admin/extensions/folder
   const filesToWatch = [appExtensionFile, extensionsPath];

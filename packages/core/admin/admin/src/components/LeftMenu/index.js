@@ -1,58 +1,115 @@
-import React, { memo } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import { BaselineAlignment } from '@strapi/helper-plugin';
-import { Footer, Header, LinksContainer, LinksSection, SectionTitle } from './compos';
-import LeftMenuLink from './compos/Link';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useIntl } from 'react-intl';
+import { useHistory } from 'react-router-dom';
+import styled from 'styled-components';
+import {
+  MainNav,
+  NavBrand,
+  NavSections,
+  NavLink,
+  NavSection,
+  NavUser,
+  NavCondense,
+  Divider,
+  Button,
+} from '@strapi/parts';
+import ContentIcon from '@strapi/icons/ContentIcon';
+import { auth, usePersistentState, useAppInfos } from '@strapi/helper-plugin';
+import useConfigurations from '../../hooks/useConfigurations';
 
-import Wrapper from './Wrapper';
+// TODO: remove when font-awesome will be removed
+const IconWrapper = styled.span`
+  svg.svg-inline--fa.fa-w-20 {
+    width: 1rem;
+  }
+`;
 
 const LeftMenu = ({ generalSectionLinks, pluginsSectionLinks }) => {
+  const { menuLogo } = useConfigurations();
+  const { push } = useHistory();
+  const [condensed, setCondensed] = usePersistentState('navbar-condensed', false);
+  const { userDisplayName } = useAppInfos();
+  const { formatMessage } = useIntl();
+
   return (
-    <Wrapper>
-      <Header />
+    <MainNav condensed={condensed}>
+      <NavBrand
+        workplace="Workplace"
+        title="Strapi Dashboard"
+        icon={<img src={menuLogo} alt="" />}
+      />
 
-      <LinksContainer>
-        <BaselineAlignment top size="16px" />
-        <LeftMenuLink
-          to="/content-manager"
-          icon="book-open"
-          intlLabel={{
-            id: `content-manager.plugin.name`,
-            defaultMessage: 'Content manager',
-          }}
-        />
-        <BaselineAlignment bottom size="2px" />
+      <Divider />
 
-        {pluginsSectionLinks.length > 0 && (
-          <>
-            <SectionTitle>
-              <FormattedMessage
-                id="app.components.LeftMenuLinkContainer.listPlugins"
-                defaultMessage="Plugins"
-              />
-            </SectionTitle>
-            <LinksSection
-              links={pluginsSectionLinks}
-              searchable={false}
-              emptyLinksListMessage="app.components.LeftMenuLinkContainer.noPluginsInstalled"
-            />
-          </>
-        )}
-        {generalSectionLinks.length > 0 && (
-          <>
-            <SectionTitle>
-              <FormattedMessage
-                id="app.components.LeftMenuLinkContainer.general"
-                defaultMessage="General"
-              />
-            </SectionTitle>
-            <LinksSection links={generalSectionLinks} searchable={false} />
-          </>
-        )}
-      </LinksContainer>
-      <Footer key="footer" />
-    </Wrapper>
+      <NavSections>
+        <NavLink to="/content-manager" icon={<ContentIcon />}>
+          {formatMessage({ id: 'content-manager.plugin.name', defaultMessage: 'Content manager' })}
+        </NavLink>
+
+        {pluginsSectionLinks.length > 0 ? (
+          <NavSection label="Plugins">
+            {pluginsSectionLinks.map(link => (
+              <NavLink
+                to={link.to}
+                key={link.to}
+                icon={
+                  <IconWrapper>
+                    <FontAwesomeIcon icon={link.icon} />
+                  </IconWrapper>
+                }
+              >
+                {formatMessage(link.intlLabel)}
+              </NavLink>
+            ))}
+          </NavSection>
+        ) : null}
+
+        {generalSectionLinks.length > 0 ? (
+          <NavSection label="General">
+            {generalSectionLinks.map(link => (
+              <NavLink
+                badgeContent={
+                  (link.notificationsCount > 0 && link.notificationsCount.toString()) || undefined
+                }
+                to={link.to}
+                key={link.to}
+                icon={<FontAwesomeIcon icon={link.icon} />}
+              >
+                {formatMessage(link.intlLabel)}
+              </NavLink>
+            ))}
+            {/* This is temporary */}
+            <Button
+              type="button"
+              onClick={() => {
+                auth.clearAppStorage();
+                push('/auth/login');
+              }}
+            >
+              Logout
+            </Button>
+          </NavSection>
+        ) : null}
+      </NavSections>
+
+      <NavUser src="https://avatars.githubusercontent.com/u/3874873?v=4" to="/me">
+        {userDisplayName}
+      </NavUser>
+
+      <NavCondense onClick={() => setCondensed(s => !s)}>
+        {condensed
+          ? formatMessage({
+              id: 'app.components.LeftMenu.expand',
+              defaultMessage: 'Expand the navbar',
+            })
+          : formatMessage({
+              id: 'app.components.LeftMenu.collapse',
+              defaultMessage: 'Collapse the navbar',
+            })}
+      </NavCondense>
+    </MainNav>
   );
 };
 
@@ -61,4 +118,4 @@ LeftMenu.propTypes = {
   pluginsSectionLinks: PropTypes.array.isRequired,
 };
 
-export default memo(LeftMenu);
+export default LeftMenu;

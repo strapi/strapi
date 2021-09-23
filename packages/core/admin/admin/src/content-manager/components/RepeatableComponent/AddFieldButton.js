@@ -1,64 +1,58 @@
-import styled, { css } from 'styled-components';
+import React from 'react';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import { useIntl } from 'react-intl';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import AddIcon from '@strapi/icons/AddIcon';
+import { pxToRem } from '@strapi/helper-plugin';
+import { getTrad } from '../../utils';
 
-/* eslint-disable indent */
-const Button = styled.button`
+const StyledButton = styled(Box)`
   width: 100%;
-  height: 37px;
-  margin-bottom: 25px;
-  padding: 0 0 3px 0;
-  text-align: center;
-  border: 1px solid rgba(227, 233, 243, 0.75);
-  border-top: 1px solid
-    ${({ doesPreviousFieldContainErrorsAndIsClosed }) =>
-      doesPreviousFieldContainErrorsAndIsClosed ? '#FFA784' : 'rgba(227, 233, 243, 0.75)'};
-
-  border-bottom-left-radius: 2px;
-  border-bottom-right-radius: 2px;
-  ${({ withBorderRadius }) => {
-    if (withBorderRadius) {
-      return css`
-        border-radius: 2px;
-      `;
-    }
-
-    return '';
-  }}
-
-  ${({ hasMinError }) => {
-    if (hasMinError) {
-      return `
-        border-color: #FAA684;
-        border-top-color: rgba(227, 233, 243, 0.75);
-      `;
-    }
-
-    return '';
-  }}
-
-  color: ${({ disabled }) => (disabled ? '#9EA7B8' : ' #007eff')};
-  font-size: 12px;
-  font-weight: 700;
-  -webkit-font-smoothing: antialiased;
-  line-height: normal;
+  border-top: 1px solid ${({ theme }) => theme.colors.neutral200};
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  background-color: #fff;
-  &:focus {
-    outline: 0;
-  }
-  > i,
-  svg {
-    margin-right: 10px;
-  }
-  & + p {
-    margin-bottom: 17px;
-    margin-top: -18px;
+`;
+
+const StyledIcon = styled(AddIcon)`
+  width: ${pxToRem(10)};
+  height: ${pxToRem(10)};
+  margin-right: ${({ theme }) => theme.spaces[2]};
+
+  > path {
+    fill: ${({ theme }) => theme.colors.primary600};
   }
 `;
 
-Button.defaultProps = {
-  disabled: false,
+const Button = ({ disabled, onClick }) => {
+  const { formatMessage } = useIntl();
+
+  return (
+    <StyledButton
+      as="button"
+      disabled={disabled}
+      type="button"
+      paddingTop={2}
+      paddingBottom={2}
+      onClick={onClick}
+    >
+      <Row justifyContent="center">
+        <Text textColor="primary600" bold>
+          <StyledIcon />
+          {formatMessage({
+            id: getTrad('containers.EditView.add.new-entry'),
+            defaultMessage: 'Add an entry',
+          })}
+        </Text>
+      </Row>
+    </StyledButton>
+  );
+};
+
+Button.propTypes = {
+  disabled: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default Button;

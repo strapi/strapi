@@ -1,73 +1,83 @@
-import React, { memo, useMemo, useRef } from 'react';
-import PropTypes from 'prop-types';
-import { Flex, Padded, Text } from '@buffetjs/core';
-import { useIntl } from 'react-intl';
-import EyeSlashed from '../../svgs/EyeSlashed';
-import BaselineAlignment from '../BaselineAlignment';
-import LabelIconWrapper from '../LabelIconWrapper';
-import Field from './Field';
+/**
+ *
+ * NotAllowedInput
+ *
+ */
 
-const NotAllowedInput = ({ label, labelIcon, description, error, spacerHeight }) => {
+import React from 'react';
+import { useIntl } from 'react-intl';
+import { TextInput } from '@strapi/parts/TextInput';
+import PropTypes from 'prop-types';
+import styled from 'styled-components';
+import Hide from '@strapi/icons/Hide';
+
+const StyledIcon = styled(Hide)`
+  > path {
+    fill: ${({ theme }) => theme.colors.neutral600};
+  }
+`;
+
+const NotAllowedInput = ({ description, intlLabel, labelAction, error, name }) => {
   const { formatMessage } = useIntl();
-  const formatMessageRef = useRef(formatMessage);
-  const text = useMemo(
-    () => formatMessageRef.current({ id: 'components.NotAllowedInput.text' }),
-    []
-  );
+  const label = intlLabel.id
+    ? formatMessage(
+        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+        { ...intlLabel.values }
+      )
+    : name;
+
+  const hint = description
+    ? formatMessage(
+        { id: description.id, defaultMessage: description.defaultMessage },
+        { ...description.values }
+      )
+    : '';
+
+  const placeholder = formatMessage({
+    id: 'components.NotAllowedInput.text',
+    defaultMessage: 'No permissions to see this field',
+  });
+
+  const errorMessage = error ? formatMessage({ id: error, defaultMessage: error }) : '';
 
   return (
-    <BaselineAlignment bottom size="18px">
-      <Flex style={{ lineHeight: '18px' }}>
-        <Text fontWeight="semiBold" lineHeight="18px">
-          <span>{label}</span>
-        </Text>
-        {labelIcon && <LabelIconWrapper title={labelIcon.title}>{labelIcon.icon}</LabelIconWrapper>}
-      </Flex>
-      <Field error={error}>
-        <Padded left right size="sm">
-          <Flex>
-            <Padded right size="sm">
-              <EyeSlashed />
-            </Padded>
-
-            <Text fontSize="md" color="grey" as="div" lineHeight="18px" ellipsis>
-              {text}
-            </Text>
-          </Flex>
-        </Padded>
-      </Field>
-      {!error && description && (
-        <BaselineAlignment top size="9px">
-          <Text fontSize="md" color="grey" lineHeight="18px" ellipsis>
-            {description}
-          </Text>
-        </BaselineAlignment>
-      )}
-      {error && (
-        <BaselineAlignment top size="9px">
-          <Text fontSize="md" color="lightOrange" lineHeight="18px" ellipsis>
-            {error}
-          </Text>
-        </BaselineAlignment>
-      )}
-      {!error && !description && <BaselineAlignment top size={spacerHeight} />}
-    </BaselineAlignment>
+    <TextInput
+      disabled
+      error={errorMessage}
+      label={label}
+      labelAction={labelAction}
+      id={name}
+      hint={hint}
+      name={name}
+      onChange={() => {}}
+      placeholder={placeholder}
+      startAction={<StyledIcon />}
+      type="text"
+      value=""
+    />
   );
 };
 
 NotAllowedInput.defaultProps = {
   description: null,
-  label: '',
-  spacerHeight: '9px',
+  error: '',
+  labelAction: undefined,
 };
 
 NotAllowedInput.propTypes = {
-  description: PropTypes.string,
-  label: PropTypes.string,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.any,
-    title: PropTypes.string,
+  description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
   }),
+  error: PropTypes.string,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
+  name: PropTypes.string.isRequired,
 };
 
-export default memo(NotAllowedInput);
+export default NotAllowedInput;

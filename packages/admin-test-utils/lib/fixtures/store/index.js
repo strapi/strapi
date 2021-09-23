@@ -13,12 +13,7 @@ const reducers = {
   })),
   'content-manager_listView': jest.fn(() => ({
     data: [],
-    didDeleteData: false,
-    entriesToDelete: [],
     isLoading: true,
-    showModalConfirmButtonLoading: false,
-    showWarningDelete: false,
-    showWarningDeleteAll: false,
     contentType: {},
     initialDisplayedHeaders: [],
     displayedHeaders: [],

@@ -1,4 +1,4 @@
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 
 const generateResultsObject = array =>
   array.reduce((acc, current) => {

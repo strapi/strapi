@@ -22,7 +22,7 @@ describe('USERS PERMISSIONS | COMPONENTS | Permissions | init', () => {
 
     const expected = {
       collapses: [
-        { name: 'app', isOpen: true },
+        { name: 'app', isOpen: false },
         { name: 'graphql', isOpen: false },
         { name: 'zgraphql', isOpen: false },
       ],

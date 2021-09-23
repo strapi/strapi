@@ -7,7 +7,7 @@ import {
   DropdownIndicator,
   LabelIconWrapper,
   NotAllowedInput,
-  useContentManagerEditViewDataManager,
+  useCMEditViewDataManager,
   useQueryParams,
 } from '@strapi/helper-plugin';
 import { Flex, Text, Padded } from '@buffetjs/core';
@@ -69,7 +69,7 @@ function SelectWrapper({
     moveRelation,
     onChange,
     onRemoveRelation,
-  } = useContentManagerEditViewDataManager();
+  } = useCMEditViewDataManager();
   const { pathname } = useLocation();
 
   const value = get(modifiedData, name, null);

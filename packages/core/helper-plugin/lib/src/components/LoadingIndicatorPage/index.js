@@ -1,41 +1,29 @@
-/**
- *
- * LoadingIndicatorPage
- *
- */
-
 import React from 'react';
+import { Loader } from '@strapi/parts/Loader';
+import { Row } from '@strapi/parts/Row';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from 'react-intl';
-import Loader from './Loader';
+import styled from 'styled-components';
 
-const LoadingIndicatorPage = props => {
-  if (props.error) {
-    return (
-      <div style={{ padding: 40 }}>
-        <h2>
-          <FormattedMessage id="components.ErrorBoundary.title" />
-        </h2>
-        <p>{props.error && props.error.toString()}</p>
-        <br />
-        <details style={{ whiteSpace: 'pre-wrap' }}>{props.error.stack}</details>
-      </div>
-    );
-  }
+const Wrapper = styled(Row)`
+  height: 100vh;
+`;
 
+const LoadingIndicatorPage = ({ 'data-testid': dataTestId, children }) => {
   return (
-    <Loader>
-      <div />
-    </Loader>
+    <Wrapper justifyContent="space-around" data-testid={dataTestId}>
+      <Loader>{children}</Loader>
+    </Wrapper>
   );
 };
 
 LoadingIndicatorPage.defaultProps = {
-  error: null,
+  'data-testid': 'loader',
+  children: 'Loading content.',
 };
 
 LoadingIndicatorPage.propTypes = {
-  error: PropTypes.object,
+  'data-testid': PropTypes.string,
+  children: PropTypes.string,
 };
 
 export default LoadingIndicatorPage;

@@ -27,8 +27,6 @@
   "Plugin.permissions.plugins.description": "Definisce tutte le azioni consentite per il plugin {name}.",
   "Plugins.header.description": "Di seguito sono elencate solo le azioni vincolate da una route.",
   "Plugins.header.title": "Permessi",
-  "Policies.InputSelect.empty": "Nessuno",
-  "Policies.InputSelect.label": "Consenti di eseguire questa azione per:",
   "Policies.header.hint": "Seleziona le azioni dell'applicazione o del plugin e clicca sull'ingranaggio per mostrare il percorso corrispondente",
   "Policies.header.title": "Impostazioni avanzate",
   "PopUpForm.Email.email_templates.inputDescription": "Se non sai bene come usare le variabili, {link}",

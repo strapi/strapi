@@ -1,19 +1,16 @@
 import { useCallback, useEffect, useReducer } from 'react';
-import { request, useNotification } from '@strapi/helper-plugin';
-import { useIntl } from 'react-intl';
+import { useNotification } from '@strapi/helper-plugin';
 import { get } from 'lodash';
 import init from './init';
 import pluginId from '../../pluginId';
-import { cleanPermissions, formatPolicies, getTrad } from '../../utils';
+import { cleanPermissions } from '../../utils';
+import axiosInstance from '../../utils/axiosInstance';
 import reducer, { initialState } from './reducer';
 
 const usePlugins = (shouldFetchData = true) => {
-  const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
-  const [{ permissions, routes, policies, isLoading }, dispatch] = useReducer(
-    reducer,
-    initialState,
-    () => init(initialState, shouldFetchData)
+  const [{ permissions, routes, isLoading }, dispatch] = useReducer(reducer, initialState, () =>
+    init(initialState, shouldFetchData)
   );
 
   const fetchPlugins = useCallback(async () => {
@@ -22,23 +19,18 @@ const usePlugins = (shouldFetchData = true) => {
         type: 'GET_DATA',
       });
 
-      const [{ permissions }, { routes }, { policies }] = await Promise.all(
-        [`/${pluginId}/permissions`, `/${pluginId}/routes`, `/${pluginId}/policies`].map(endpoint =>
-          request(endpoint, { method: 'GET' })
-        )
+      const [{ permissions }, { routes }] = await Promise.all(
+        [`/${pluginId}/permissions`, `/${pluginId}/routes`].map(async endpoint => {
+          const res = await axiosInstance.get(endpoint);
+
+          return res.data;
+        })
       );
 
       dispatch({
         type: 'GET_DATA_SUCCEEDED',
         permissions: cleanPermissions(permissions),
         routes,
-        policies: [
-          {
-            label: formatMessage({ id: getTrad('Policies.InputSelect.empty') }),
-            value: 'empty__string_value',
-          },
-          ...formatPolicies(policies),
-        ],
       });
     } catch (err) {
       const message = get(err, ['response', 'payload', 'message'], 'An error occured');
@@ -54,7 +46,7 @@ const usePlugins = (shouldFetchData = true) => {
         });
       }
     }
-  }, [formatMessage, toggleNotification]);
+  }, [toggleNotification]);
 
   useEffect(() => {
     if (shouldFetchData) {
@@ -65,7 +57,6 @@ const usePlugins = (shouldFetchData = true) => {
   return {
     permissions,
     routes,
-    policies,
     getData: fetchPlugins,
     isLoading,
   };

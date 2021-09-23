@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import Select from 'react-select';
 import { useIntl } from 'react-intl';
-import { upperFirst } from 'lodash';
+import upperFirst from 'lodash/upperFirst';
 import MenuList from './MenuList';
 import getTrad from '../../utils/getTrad';
 

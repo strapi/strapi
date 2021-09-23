@@ -5,7 +5,7 @@ import { getType } from '../../utils';
 
 import BrokenFile from '../../icons/BrokenFile';
 import FileIcon from '../FileIcon';
-import VideoPreview from '../VideoPreview';
+import { VideoPreview } from '../AssetCard/VideoPreview';
 import Wrapper from './Wrapper';
 import Image from './Image';
 

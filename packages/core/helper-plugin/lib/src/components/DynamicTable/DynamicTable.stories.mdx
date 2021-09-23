@@ -1,0 +1,397 @@
+<!--- DynamicTable.stories.mdx --->
+
+import { useEffect } from 'react';
+import { Meta, ArgsTable, Canvas, Story } from '@storybook/addon-docs';
+import { Main } from '@strapi/parts/Main';
+import { Button } from '@strapi/parts/Button';
+import { Box } from '@strapi/parts/Box';
+import { Row } from '@strapi/parts/Row';
+import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { Dialog, DialogBody, DialogFooter } from '@strapi/parts/Dialog';
+import { Tbody, Td, Tr } from '@strapi/parts/Table';
+import { Text } from '@strapi/parts/Text';
+import { IconButton } from '@strapi/parts/IconButton';
+import { AddIcon, EditIcon, DeleteIcon } from '@strapi/icons';
+import useQueryParams from '../../hooks/useQueryParams';
+import DynamicTable from './index';
+
+<Meta title="components/DynamicTable" />
+
+# DynamicTable
+
+TODO...
+
+## Imports
+
+```js
+import { DynamicTable } from '@strapi/helper-plugin';
+```
+
+## Usage Loading
+
+<Canvas>
+  <Story name="loading">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable headers={headers} contentType="users" isLoading />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage No content
+
+<Canvas>
+  <Story name="no-content">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable headers={headers} contentType="users" />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage No content with filters
+
+<Canvas>
+  <Story name="no-content-with-filters">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const [{ query }, setQuery] = useQueryParams();
+      useEffect(() => {
+        setQuery({ filters: { $and: [{ firstname: { $eq: 'soupette' } }] } });
+      }, []);
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable headers={headers} contentType="users" />
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage with delete action
+
+<Canvas>
+  <Story name="delete">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const rows = [
+        { id: 1, firstname: 'soup', lastname: 'soup', email: 'soup@strapi.io' },
+        { id: 2, firstname: 'm', lastname: 'frachet', email: 'm@strapi.io' },
+        { id: 3, firstname: 'hicham', lastname: 'ELBSI', email: 'helbsi@strapi.io' },
+      ];
+      const TableRows = ({
+        headers,
+        entriesToDelete,
+        onClickDelete,
+        onSelectRow,
+        rows,
+        withMainAction,
+        withBulkActions,
+      }) => {
+        return (
+          <Tbody>
+            {rows.map(data => {
+              const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+              return (
+                <Tr key={data.id}>
+                  {withMainAction && (
+                    <Td>
+                      <BaseCheckbox
+                        aria-label={`Select ${data.firstname} ${data.lastname}`}
+                        checked={isChecked}
+                        onChange={() => {
+                          onSelectRow({ name: data.id, value: !isChecked });
+                        }}
+                      />
+                    </Td>
+                  )}
+                  {headers.map(({ key, cellFormatter, name, ...rest }) => {
+                    return (
+                      <Td key={key}>
+                        <Text textColor="neutral800">{data[name] || '-'}</Text>
+                      </Td>
+                    );
+                  })}
+                  {withBulkActions && (
+                    <Td>
+                      <Row justifyContent="end">
+                        <IconButton
+                          onClick={() => console.log(`${pathname}/${data.id}`)}
+                          label={`Edit ${data.firstname} ${data.lastname}`}
+                          noBorder
+                          icon={<EditIcon />}
+                        />
+                        <Box paddingLeft={1}>
+                          <IconButton
+                            onClick={() => onClickDelete(data.id)}
+                            label={`Delete ${data.firstname} ${data.lastname}`}
+                            noBorder
+                            icon={<DeleteIcon />}
+                          />
+                        </Box>
+                      </Row>
+                    </Td>
+                  )}
+                </Tr>
+              );
+            })}
+          </Tbody>
+        );
+      };
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable
+              headers={headers}
+              contentType="users"
+              onConfirmDeleteAll={ids => {
+                alert(`Delete ${ids.join(' ')}`);
+              }}
+              onConfirmDelete={id => {
+                alert(`Delete ${id}`);
+              }}
+              rows={rows}
+              withMainAction
+              withBulkActions
+            >
+              <TableRows />
+            </DynamicTable>
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+## Usage with delete action with custom modal
+
+<Canvas>
+  <Story name="delete-custom-components">
+    {() => {
+      const headers = [
+        {
+          name: 'firstname',
+          metadatas: { label: 'Firstname', sortable: false },
+          key: '__firstname_key__',
+        },
+        {
+          name: 'lastname',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__lastname_key__',
+        },
+        {
+          name: 'email',
+          metadatas: { label: 'Email', sortable: false },
+          key: '__email_key__',
+        },
+      ];
+      const rows = [
+        { id: 1, firstname: 'soup', lastname: 'soup', email: 'soup@strapi.io' },
+        { id: 2, firstname: 'm', lastname: 'frachet', email: 'm@strapi.io' },
+        { id: 3, firstname: 'hicham', lastname: 'ELBSI', email: 'helbsi@strapi.io' },
+      ];
+      const TableRows = ({
+        headers,
+        entriesToDelete,
+        onClickDelete,
+        onSelectRow,
+        rows,
+        withMainAction,
+        withBulkActions,
+      }) => {
+        return (
+          <Tbody>
+            {rows.map(data => {
+              const isChecked = entriesToDelete.findIndex(id => id === data.id) !== -1;
+              return (
+                <Tr key={data.id}>
+                  {withMainAction && (
+                    <Td>
+                      <BaseCheckbox
+                        aria-label={`Select ${data.firstname} ${data.lastname}`}
+                        checked={isChecked}
+                        onChange={() => {
+                          onSelectRow({ name: data.id, value: !isChecked });
+                        }}
+                      />
+                    </Td>
+                  )}
+                  {headers.map(({ key, cellFormatter, name, ...rest }) => {
+                    return (
+                      <Td key={key}>
+                        <Text textColor="neutral800">{data[name] || '-'}</Text>
+                      </Td>
+                    );
+                  })}
+                  {withBulkActions && (
+                    <Td>
+                      <Row justifyContent="end">
+                        <IconButton
+                          onClick={() => console.log(`${pathname}/${data.id}`)}
+                          label={`Edit ${data.firstname} ${data.lastname}`}
+                          noBorder
+                          icon={<EditIcon />}
+                        />
+                        <Box paddingLeft={1}>
+                          <IconButton
+                            onClick={() => onClickDelete(data.id)}
+                            label={`Delete ${data.firstname} ${data.lastname}`}
+                            noBorder
+                            icon={<DeleteIcon />}
+                          />
+                        </Box>
+                      </Row>
+                    </Td>
+                  )}
+                </Tr>
+              );
+            })}
+          </Tbody>
+        );
+      };
+      return (
+        <Main>
+          <Box paddingTop={6}>
+            <DynamicTable
+              headers={headers}
+              contentType="users"
+              // custom modals
+              components={{
+                ConfirmDialogDeleteAll: ({
+                  isConfirmButtonLoading,
+                  onConfirm,
+                  onToggleDialog,
+                  isOpen,
+                }) => {
+                  return (
+                    <Dialog
+                      onClose={onToggleDialog}
+                      title="Confirm"
+                      labelledBy="confirmation"
+                      describedBy="confirm-description"
+                      isOpen={isOpen}
+                    >
+                      <DialogBody>
+                        <Row justifyContent="center">Are you sure?</Row>
+                      </DialogBody>
+                      <DialogFooter
+                        startAction={
+                          <Button onClick={onToggleDialog} variant="tertiary">
+                            Cancel
+                          </Button>
+                        }
+                        endAction={
+                          <Button
+                            onClick={onConfirm}
+                            variant="danger-light"
+                            id="confirm-delete"
+                            loading={isConfirmButtonLoading}
+                          >
+                            confirm
+                          </Button>
+                        }
+                      />
+                    </Dialog>
+                  );
+                },
+              }}
+              onConfirmDeleteAll={ids => {
+                alert(`Delete ${ids.join(' ')}`);
+              }}
+              onConfirmDelete={id => {
+                alert(`Delete ${id}`);
+              }}
+              rows={rows}
+              withMainAction
+              withBulkActions
+            >
+              <TableRows />
+            </DynamicTable>
+          </Box>
+        </Main>
+      );
+    }}
+  </Story>
+</Canvas>
+
+### Props
+
+<ArgsTable of={DynamicTable} />

@@ -1,24 +1,30 @@
-/* eslint-disable react/jsx-wrap-multilines */
-import React, { useState, useEffect, useRef } from 'react';
-import { useIntl, FormattedMessage } from 'react-intl';
+import React, { useState, useEffect } from 'react';
+import { useIntl } from 'react-intl';
 import { get } from 'lodash';
-import { Header } from '@buffetjs/custom';
-import { Envelope } from '@buffetjs/icons';
-import { colors } from '@buffetjs/styles';
 import {
-  FormBloc,
-  request,
-  SettingsPageTitle,
-  SizedInput,
   getYupInnerErrors,
-  BaselineAlignment,
   CheckPagePermissions,
   useNotification,
+  LoadingIndicatorPage,
+  useOverlayBlocker,
+  useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import getTrad from '../../utils/getTrad';
-import { AlignedButton, Text } from './components';
+import { Main } from '@strapi/parts/Main';
+import { ContentLayout } from '@strapi/parts/Layout';
+import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/parts/Box';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { H3 } from '@strapi/parts/Text';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Button } from '@strapi/parts/Button';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import Configuration from './components/Configuration';
 import schema from '../../utils/schema';
 import pluginPermissions from '../../permissions';
+import { fetchEmailSettings, postEmailTest } from './utils/api';
+import EmailHeader from './components/EmailHeader';
+import getTrad from '../../utils/getTrad';
 
 const ProtectedSettingsPage = () => (
   <CheckPagePermissions permissions={pluginPermissions.settings}>
@@ -29,185 +35,186 @@ const ProtectedSettingsPage = () => (
 const SettingsPage = () => {
   const toggleNotification = useNotification();
   const { formatMessage } = useIntl();
+  const { lockApp, unlockApp } = useOverlayBlocker();
+  const { notifyStatus } = useNotifyAT();
+  useFocusWhenNavigate();
+
   const [formErrors, setFormErrors] = useState({});
-  const [isTestButtonLoading, setIsTestButtonLoading] = useState(false);
-  const [showLoader, setShowLoader] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [testAddress, setTestAddress] = useState('');
   const [config, setConfig] = useState({
     provider: '',
     settings: { defaultFrom: '', defaultReplyTo: '', testAddress: '' },
   });
-  const [providers, setProviders] = useState([]);
-  const [testAddress, setTestAddress] = useState();
-  const [testSuccess, setTestSuccess] = useState(false);
-  const isMounted = useRef(true);
 
-  const title = formatMessage({ id: getTrad('Settings.title') });
+  useEffect(() => {
+    setIsLoading(true);
+
+    fetchEmailSettings()
+      .then(config => {
+        notifyStatus(
+          formatMessage({
+            id: getTrad('Settings.email.plugin.notification.data.loaded'),
+            defaultMessage: 'Email settings data has been loaded',
+          })
+        );
+
+        setConfig(config);
+
+        const testAddressFound = get(config, 'settings.testAddress');
+
+        if (testAddressFound) {
+          setTestAddress(testAddressFound);
+        }
+      })
+      .catch(() =>
+        toggleNotification({
+          type: 'warning',
+          message: formatMessage({
+            id: getTrad('Settings.email.plugin.notification.config.error'),
+            defaultMessage: 'Failed to retrieve the email config',
+          }),
+        })
+      )
+      .finally(() => setIsLoading(false));
+  }, [formatMessage, toggleNotification, notifyStatus]);
+
+  useEffect(() => {
+    if (formErrors.email) {
+      const input = document.querySelector('#test-address-input');
+      input.focus();
+    }
+  }, [formErrors]);
+
+  const handleChange = e => {
+    setTestAddress(() => e.target.value);
+  };
 
   const handleSubmit = async event => {
     event.preventDefault();
-    let errors = {};
 
     try {
       await schema.validate({ email: testAddress }, { abortEarly: false });
 
-      try {
-        setIsTestButtonLoading(true);
+      setIsSubmitting(true);
+      lockApp();
 
-        await request('/email/test', {
-          method: 'POST',
-          body: { to: testAddress },
+      postEmailTest({ to: testAddress })
+        .then(() => {
+          toggleNotification({
+            type: 'success',
+            message: formatMessage(
+              {
+                id: getTrad('Settings.email.plugin.notification.test.success'),
+                defaultMessage: 'Email test succeeded, check the {to} mailbox',
+              },
+              { to: testAddress }
+            ),
+          });
+        })
+        .catch(() => {
+          toggleNotification({
+            type: 'warning',
+            message: formatMessage(
+              {
+                id: getTrad('Settings.email.plugin.notification.test.error'),
+                defaultMessage: 'Failed to send a test mail to {to}',
+              },
+              { to: testAddress }
+            ),
+          });
+        })
+        .finally(() => {
+          setIsSubmitting(false);
+          unlockApp();
         });
-
-        setTestSuccess(true);
-        const message = formatMessage(
-          { id: getTrad('Settings.notification.test.success') },
-          { to: testAddress }
-        );
-        toggleNotification({ type: 'success', message });
-      } catch (err) {
-        const message = formatMessage(
-          { id: getTrad('Settings.notification.test.error') },
-          { to: testAddress }
-        );
-        toggleNotification({ type: 'warning', message });
-      } finally {
-        if (isMounted.current) {
-          setIsTestButtonLoading(false);
-        }
-      }
     } catch (error) {
-      errors = getYupInnerErrors(error);
-      setFormErrors(errors);
-      console.log(errors);
+      setFormErrors(getYupInnerErrors(error));
     }
   };
 
-  useEffect(() => {
-    const fetchEmailSettings = () => {
-      setShowLoader(true);
-
-      request('/email/settings', {
-        method: 'GET',
-      })
-        .then(data => {
-          setConfig(data.config);
-          setProviders([data.config.provider]);
-          setTestAddress(get(data, 'config.settings.testAddress'));
-        })
-        .catch(() =>
-          toggleNotification({
-            type: 'warning',
-            message: { id: getTrad('Settings.notification.config.error') },
-          })
-        )
-        .finally(() => setShowLoader(false));
-    };
-
-    fetchEmailSettings();
-  }, [formatMessage, toggleNotification]);
-
-  useEffect(() => {
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  if (isLoading) {
+    return (
+      <Main labelledBy="title" aria-busy="true">
+        <EmailHeader />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
+      </Main>
+    );
+  }
 
   return (
-    <>
-      <CheckPagePermissions permissions={pluginPermissions.settings}>
-        <SettingsPageTitle name={title} />
-        <div>
-          <form onSubmit={handleSubmit}>
-            <Header
-              title={{ label: title }}
-              content={formatMessage({ id: getTrad('Settings.subTitle') })}
-              isLoading={showLoader}
-            />
-            <BaselineAlignment top size="3px" />
-            <FormBloc
-              title={formatMessage({ id: getTrad('Settings.form.title.config') })}
-              isLoading={showLoader}
+    <Main labelledBy="title" aria-busy={isSubmitting}>
+      <EmailHeader />
+      <ContentLayout>
+        <form onSubmit={handleSubmit}>
+          <Stack size={7}>
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="filterShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
             >
-              <Text fontSize="md" lineHeight="18px">
-                <FormattedMessage
-                  id={getTrad('Settings.form.text.configuration')}
-                  values={{
-                    file: <code>./config/plugins.js</code>,
-                    link: (
-                      <a
-                        href="https://strapi.io/documentation/developer-docs/latest/development/plugins/email.html#configure-the-plugin"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        link
-                      </a>
-                    ),
-                  }}
-                />
-              </Text>
-              <SizedInput
-                disabled
-                label={getTrad('Settings.form.label.defaultFrom')}
-                name="default-from"
-                placeholder={getTrad('Settings.form.placeholder.defaultFrom')}
-                size={{ xs: 6 }}
-                type="email"
-                value={config.settings.defaultFrom}
-              />
-              <SizedInput
-                disabled
-                label={getTrad('Settings.form.label.defaultReplyTo')}
-                name="default-reply-to"
-                placeholder={getTrad('Settings.form.placeholder.defaultReplyTo')}
-                size={{ xs: 6 }}
-                type="email"
-                value={config.settings.defaultReplyTo}
-              />
-              <SizedInput
-                disabled
-                label={getTrad('Settings.form.label.provider')}
-                name="provider"
-                options={providers}
-                size={{ xs: 6 }}
-                type="select"
-                value={`@strapi/provider-email-${config.provider}`}
-              />
-            </FormBloc>
-            <BaselineAlignment top size="32px" />
-            <FormBloc
-              title={formatMessage({ id: getTrad('Settings.form.title.test') })}
-              isLoading={showLoader}
+              <Configuration config={config} />
+            </Box>
+            <Box
+              background="neutral0"
+              hasRadius
+              shadow="filterShadow"
+              paddingTop={6}
+              paddingBottom={6}
+              paddingLeft={7}
+              paddingRight={7}
             >
-              <SizedInput
-                label={getTrad('Settings.form.label.testAddress')}
-                name="test-address"
-                placeholder={getTrad('Settings.form.placeholder.testAddress')}
-                onChange={event => setTestAddress(event.target.value)}
-                size={{ xs: 6 }}
-                type="email"
-                value={testAddress}
-                error={formErrors.email}
-              />
-              <AlignedButton
-                color="success"
-                disabled={testSuccess}
-                icon={
-                  <Envelope
-                    fill={testSuccess ? colors.button.disabled.color : null}
-                    style={{ verticalAlign: 'middle', marginRight: '10px' }}
-                  />
-                }
-                isLoading={isTestButtonLoading}
-                style={{ fontWeight: 600 }}
-                type="submit"
-              >
-                {formatMessage({ id: getTrad('Settings.button.test-email') })}
-              </AlignedButton>
-            </FormBloc>
-          </form>
-        </div>
-      </CheckPagePermissions>
-    </>
+              <Stack size={4}>
+                <H3 as="h2">
+                  {formatMessage({
+                    id: getTrad('Settings.email.plugin.title.test'),
+                    defaultMessage: 'Send a test mail',
+                  })}
+                </H3>
+                <Grid gap={5} alignItems="end">
+                  <GridItem col={6} s={12}>
+                    <TextInput
+                      id="test-address-input"
+                      name="test-address"
+                      onChange={handleChange}
+                      label={formatMessage({
+                        id: getTrad('Settings.email.plugin.label.testAddress'),
+                        defaultMessage: 'Test delivery email address',
+                      })}
+                      value={testAddress}
+                      error={
+                        formErrors.email?.id &&
+                        formatMessage({
+                          id: getTrad(`${formErrors.email?.id}`),
+                          defaultMessage: 'This is an invalid email',
+                        })
+                      }
+                      placeholder={formatMessage({
+                        id: 'Settings.email.plugin.placeholder.testAddress',
+                        defaultMessage: 'ex: developer@example.com',
+                      })}
+                    />
+                  </GridItem>
+                  <GridItem col={7} s={12}>
+                    {/* to replace with envelope icon */}
+                    <Button loading={isSubmitting} type="submit" startIcon={<CheckIcon />}>
+                      Test email
+                    </Button>
+                  </GridItem>
+                </Grid>
+              </Stack>
+            </Box>
+          </Stack>
+        </form>
+      </ContentLayout>
+    </Main>
   );
 };
 

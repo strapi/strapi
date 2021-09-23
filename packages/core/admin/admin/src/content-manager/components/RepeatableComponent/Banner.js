@@ -6,7 +6,9 @@ import { Carret, Grab } from '@buffetjs/icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { getTrad } from '../../utils';
 import PreviewCarret from '../PreviewCarret';
-import BannerWrapper from './BannerWrapper';
+// import BannerWrapper from './BannerWrapper';
+
+const BannerWrapper = () => null;
 
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 

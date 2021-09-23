@@ -1,14 +1,12 @@
 import React from 'react';
 import { Router, Route } from 'react-router-dom';
-import { ThemeProvider } from 'styled-components';
 import { StrapiAppProvider, AppInfosContext } from '@strapi/helper-plugin';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
+import Theme from '../../../components/Theme';
 import { SettingsPage } from '..';
-
 import { useSettingsMenu } from '../../../hooks';
-import theme from '../../../themes';
 
 jest.mock('../../../hooks', () => ({
   useSettingsMenu: jest.fn(() => ({ isLoading: false, menu: [] })),
@@ -23,10 +21,10 @@ jest.mock('react-intl', () => ({
   FormattedMessage: ({ id }) => id,
   useIntl: () => ({ formatMessage: jest.fn(({ id }) => id) }),
 }));
-jest.mock('../../ApplicationInfosPage', () => () => <h1>App infos</h1>);
+jest.mock('../pages/ApplicationInfosPage', () => () => <h1>App infos</h1>);
 
 const makeApp = (history, settings) => (
-  <ThemeProvider theme={theme}>
+  <Theme>
     <AppInfosContext.Provider value={{ shouldUpdateStrapi: false }}>
       <StrapiAppProvider
         settings={settings}
@@ -35,6 +33,7 @@ const makeApp = (history, settings) => (
         runHookParallel={jest.fn()}
         runHookWaterfall={jest.fn()}
         runHookSeries={jest.fn()}
+        menu={[]}
       >
         <Router history={history}>
           <Route path="/settings/:settingId" component={SettingsPage} />
@@ -42,7 +41,7 @@ const makeApp = (history, settings) => (
         </Router>
       </StrapiAppProvider>
     </AppInfosContext.Provider>
-  </ThemeProvider>
+  </Theme>
 );
 
 describe('ADMIN | pages | SettingsPage', () => {
@@ -64,163 +63,147 @@ describe('ADMIN | pages | SettingsPage', () => {
     const { container } = render(App);
 
     expect(container.firstChild).toMatchInlineSnapshot(`
+      .c11 {
+        padding-bottom: 56px;
+      }
+
+      .c0 {
+        display: grid;
+        grid-template-columns: auto 1fr;
+      }
+
+      .c12 {
+        overflow-x: hidden;
+      }
+
+      .c2 {
+        padding-top: 24px;
+        padding-right: 16px;
+        padding-bottom: 8px;
+        padding-left: 24px;
+      }
+
       .c5 {
-        margin: 0;
-        line-height: 34px;
-        color: #292b2c;
-        font-size: 13px;
-        font-weight: 400;
-        text-transform: none;
-      }
-
-      .c1 {
-        position: fixed;
-        top: 0;
-        height: 6rem;
-        width: 6.5rem;
-        line-height: 6rem;
-        z-index: 1050;
-        text-align: center;
-        background-color: #ffffff;
-        color: #81848a;
-        border-top: 1px solid #f3f4f4;
-        border-right: 1px solid #f3f4f4;
-        border-left: 1px solid #f3f4f4;
-        cursor: pointer;
-      }
-
-      .c1:before {
-        content: '\\f053';
-        font-family: 'FontAwesome';
-        font-size: 1.8rem;
-        font-weight: bolder;
-      }
-
-      .c1:hover {
-        background-color: #f3f4f4;
+        padding-top: 16px;
       }
 
       .c6 {
-        width: 100%;
-        height: calc(100vh - 6rem);
-        min-height: 100%;
-        background-color: #f2f3f4;
-        padding-top: 3.4rem;
-        padding-left: 2rem;
-        padding-right: 2rem;
+        background: #eaeaef;
       }
 
-      .c6 > div {
-        margin-bottom: 29px;
+      .c9 {
+        padding-top: 8px;
+        padding-bottom: 16px;
       }
 
-      .c4 {
+      .c1 {
+        width: 14.5rem;
+        background: #f6f6f9;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid #dcdce4;
+        z-index: 1;
+      }
+
+      .c3 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
         display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
         -webkit-box-pack: justify;
         -webkit-justify-content: space-between;
         -ms-flex-pack: justify;
         justify-content: space-between;
-        position: relative;
-        padding-left: 30px;
-        height: 34px;
-        border-radius: 2px;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
       }
 
-      .c4.active {
-        background-color: #e9eaeb;
-      }
-
-      .c4.active > p {
+      .c4 {
         font-weight: 600;
-      }
-
-      .c4.active > svg {
-        color: #2d3138;
-      }
-
-      .c4:hover {
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c3 {
-        position: relative;
-        margin-bottom: -5px;
-        padding: 25px 20px 0 20px;
-      }
-
-      .c2 {
-        background-color: #f2f3f4;
-        min-height: 100%;
-        height: calc(100vh - 6rem);
+        font-size: 1.125rem;
+        line-height: 1.22;
+        color: #32324d;
       }
 
       .c7 {
-        min-height: unset;
-        height: unset;
+        height: 1px;
+        border: none;
+        margin: 0;
       }
 
-      .c7 > div {
-        margin-bottom: 27px;
+      .c8 {
+        width: 1.5rem;
+        background-color: #dcdce4;
       }
 
-      .c0 > .row {
-        padding-left: 0;
-        padding-right: 30px;
+      .c10 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: column;
+        -ms-flex-direction: column;
+        flex-direction: column;
       }
 
-      .c0 > .row .col-md-9 {
-        padding-top: 18px;
+      .c10 > * {
+        margin-top: 0;
+        margin-bottom: 0;
+      }
+
+      .c10 > * + * {
+        margin-top: 8px;
       }
 
       <div
         class="c0"
       >
-        <div
+        <nav
+          aria-label="app.components.LeftMenuLinkContainer.settings"
           class="c1"
-        />
-        <div
-          class="row"
         >
           <div
-            class="col-md-3"
+            class="c2"
           >
             <div
-              class="c2"
+              class="c3"
             >
-              <div
-                class="c3"
+              <h2
+                class="c4"
               >
-                <a
-                  aria-current="page"
-                  class="c4 active"
-                  href="/settings/application-infos"
-                >
-                  <p
-                    class="c5"
-                    color="greyDark"
-                    font-size="md"
-                    font-weight="regular"
-                  >
-                    Settings.application.title
-                  </p>
-                </a>
-              </div>
-              <div
-                class="c6 c7"
+                app.components.LeftMenuLinkContainer.settings
+              </h2>
+            </div>
+            <div
+              class="c5"
+            >
+              <hr
+                class="c6 c7 c8"
               />
             </div>
           </div>
           <div
-            class="col-md-9"
+            class="c9"
           >
-            <h1>
-              App infos
-            </h1>
+            <ul
+              class="c10"
+            />
           </div>
+        </nav>
+        <div
+          class="c11 c12"
+        >
+          <h1>
+            App infos
+          </h1>
         </div>
       </div>
     `);

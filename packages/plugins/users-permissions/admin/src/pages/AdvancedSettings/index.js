@@ -1,23 +1,33 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import { useIntl } from 'react-intl';
-import { Header } from '@buffetjs/custom';
-import { isEqual } from 'lodash';
+import { Formik } from 'formik';
 import {
-  FormBloc,
-  PopUpWarning,
+  CheckPagePermissions,
+  Form,
+  GenericInput,
+  LoadingIndicatorPage,
   SettingsPageTitle,
-  SizedInput,
-  useRBAC,
-  request,
+  useFocusWhenNavigate,
   useNotification,
   useOverlayBlocker,
-  CheckPagePermissions,
+  useRBAC,
 } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { Main } from '@strapi/parts/Main';
+import { HeaderLayout, ContentLayout } from '@strapi/parts/Layout';
+import { Button } from '@strapi/parts/Button';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Select, Option } from '@strapi/parts/Select';
+import { H3 } from '@strapi/parts/Text';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import CheckIcon from '@strapi/icons/CheckIcon';
 import pluginPermissions from '../../permissions';
-import { getTrad, getRequestURL } from '../../utils';
-import ListBaselineAlignment from '../../components/ListBaselineAlignment';
-import form from './utils/form';
-import reducer, { initialState } from './reducer';
+import { getTrad } from '../../utils';
+import layout from './utils/layout';
+import schema from './utils/schema';
+import { fetchData, putAdvancedSettings } from './utils/api';
 
 const ProtectedAdvancedSettingsPage = () => (
   <CheckPagePermissions permissions={pluginPermissions.readAdvancedSettings}>
@@ -29,198 +39,198 @@ const AdvancedSettingsPage = () => {
   const { formatMessage } = useIntl();
   const toggleNotification = useNotification();
   const { lockApp, unlockApp } = useOverlayBlocker();
-  const [showModalWarning, setShowModalWarning] = useState(false);
-  const pageTitle = formatMessage({ id: getTrad('HeaderNav.link.advancedSettings') });
-  const formTitle = formatMessage({
-    id: getTrad('Form.title.advancedSettings'),
-    defaultMessage: 'Settings',
-  });
+  const { notifyStatus } = useNotifyAT();
+  const queryClient = useQueryClient();
+  useFocusWhenNavigate();
 
-  const updatePermissions = useMemo(() => {
-    return { update: pluginPermissions.updateAdvancedSettings };
-  }, []);
+  const updatePermissions = useMemo(
+    () => ({ update: pluginPermissions.updateAdvancedSettings }),
+    []
+  );
   const {
     isLoading: isLoadingForPermissions,
     allowedActions: { canUpdate },
   } = useRBAC(updatePermissions);
-  const [
-    { initialData, isConfirmButtonLoading, isLoading, modifiedData, roles },
-    dispatch,
-  ] = useReducer(reducer, initialState);
-  const isMounted = useRef(true);
-  const abortController = new AbortController();
-  const { signal } = abortController;
 
-  useEffect(() => {
-    const getData = async () => {
-      try {
-        dispatch({
-          type: 'GET_DATA',
-        });
+  const { status: isLoadingData, data } = useQuery('advanced', () => fetchData(), {
+    onSuccess: () => {
+      notifyStatus(
+        formatMessage({
+          id: getTrad('Form.advancedSettings.data.loaded'),
+          defaultMessage: 'Advanced settings data has been loaded',
+        })
+      );
+    },
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+      });
+    },
+  });
 
-        const data = await request(getRequestURL('advanced'), { method: 'GET', signal });
+  const isLoading = isLoadingForPermissions || isLoadingData !== 'success';
 
-        dispatch({
-          type: 'GET_DATA_SUCCEEDED',
-          data,
-        });
-      } catch (err) {
-        if (isMounted.current) {
-          dispatch({
-            type: 'GET_DATA_ERROR',
-          });
-          console.error(err);
-          toggleNotification({
-            type: 'warning',
-            message: { id: 'notification.error' },
-          });
-        }
-      }
-    };
-
-    if (!isLoadingForPermissions) {
-      getData();
-    }
-
-    return () => {
-      abortController.abort();
-      isMounted.current = false;
-    };
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingForPermissions]);
-
-  const handleChange = useCallback(({ target }) => {
-    dispatch({
-      type: 'ON_CHANGE',
-      keys: target.name,
-      value: target.value,
-    });
-  }, []);
-
-  const handleSubmit = useCallback(
-    async e => {
-      e.preventDefault();
-
-      try {
-        dispatch({
-          type: 'ON_SUBMIT',
-        });
-
-        lockApp();
-        await request(getRequestURL('advanced'), { method: 'PUT', body: modifiedData });
-
-        dispatch({
-          type: 'ON_SUBMIT_SUCCEEDED',
-        });
-
-        toggleNotification({
-          type: 'success',
-          message: { id: getTrad('notification.success.submit') },
-        });
-      } catch (err) {
-        dispatch({
-          type: 'ON_SUBMIT_ERROR',
-        });
-        console.error(err);
-        toggleNotification({
-          type: 'warning',
-          message: { id: 'notification.error' },
-        });
-      }
+  const submitMutation = useMutation(body => putAdvancedSettings(body), {
+    onSuccess: async () => {
+      await queryClient.invalidateQueries('advanced');
+      toggleNotification({
+        type: 'success',
+        message: { id: getTrad('notification.success.saved'), defaultMessage: 'Saved' },
+      });
 
       unlockApp();
     },
-    [lockApp, modifiedData, toggleNotification, unlockApp]
-  );
+    onError: () => {
+      toggleNotification({
+        type: 'warning',
+        message: { id: getTrad('notification.error'), defaultMessage: 'An error occured' },
+      });
+      unlockApp();
+    },
+    refetchActive: true,
+  });
 
-  const handleConfirmReset = useCallback(() => {
-    dispatch({
-      type: 'ON_RESET',
-    });
+  const { isLoading: isSubmittingForm } = submitMutation;
 
-    setShowModalWarning(false);
-  }, []);
+  const handleSubmit = async body => {
+    lockApp();
 
-  const handleToggleModal = useCallback(() => {
-    setShowModalWarning(prev => !prev);
-  }, []);
+    const urlConfirmation = body.email_confirmation ? body.email_confirmation_redirection : '';
 
-  const headerActions = useMemo(() => {
-    const isDisabled = isEqual(initialData, modifiedData);
+    await submitMutation.mutateAsync({ ...body, email_confirmation_redirection: urlConfirmation });
+  };
 
-    return [
-      {
-        disabled: isDisabled,
-        onClick: () => {
-          handleToggleModal();
-        },
-        color: 'cancel',
-        label: formatMessage({
-          id: 'app.components.Button.reset',
-        }),
-
-        type: 'button',
-        style: {
-          paddingLeft: 15,
-          paddingRight: 15,
-          fontWeight: 600,
-        },
-      },
-      {
-        disabled: isDisabled,
-        color: 'success',
-        label: formatMessage({
-          id: 'app.components.Button.save',
-        }),
-        isLoading: isConfirmButtonLoading,
-        type: 'submit',
-        style: {
-          minWidth: 150,
-          fontWeight: 600,
-        },
-      },
-    ];
-  }, [initialData, isConfirmButtonLoading, modifiedData, formatMessage, handleToggleModal]);
-
-  const showLoader = isLoadingForPermissions || isLoading;
+  if (isLoading) {
+    return (
+      <Main aria-busy="true">
+        <SettingsPageTitle
+          name={formatMessage({
+            id: getTrad('HeaderNav.link.advancedSettings'),
+            defaultMessage: 'Advanced Settings',
+          })}
+        />
+        <HeaderLayout
+          title={formatMessage({
+            id: getTrad('HeaderNav.link.advancedSettings'),
+            defaultMessage: 'Advanced Settings',
+          })}
+        />
+        <ContentLayout>
+          <LoadingIndicatorPage />
+        </ContentLayout>
+      </Main>
+    );
+  }
 
   return (
-    <>
-      <SettingsPageTitle name={pageTitle} />
-      <div>
-        <form onSubmit={handleSubmit}>
-          <Header actions={headerActions} title={{ label: pageTitle }} isLoading={showLoader} />
-          <ListBaselineAlignment />
-          <FormBloc title={formTitle} isLoading={showLoader}>
-            {form.map(input => {
-              return (
-                <SizedInput
-                  key={input.name}
-                  {...input}
-                  disabled={!canUpdate}
-                  onChange={handleChange}
-                  options={roles}
-                  value={modifiedData[input.name]}
-                />
-              );
-            })}
-          </FormBloc>
-        </form>
-      </div>
-      <PopUpWarning
-        isOpen={showModalWarning}
-        toggleModal={handleToggleModal}
-        content={{
-          title: getTrad('popUpWarning.title'),
-          message: getTrad('popUpWarning.warning.cancel'),
-          cancel: getTrad('popUpWarning.button.cancel'),
-          confirm: getTrad('popUpWarning.button.confirm'),
-        }}
-        popUpWarningType="danger"
-        onConfirm={handleConfirmReset}
+    <Main aria-busy={isSubmittingForm}>
+      <SettingsPageTitle
+        name={formatMessage({
+          id: getTrad('HeaderNav.link.advancedSettings'),
+          defaultMessage: 'Advanced Settings',
+        })}
       />
-    </>
+      <Formik
+        onSubmit={handleSubmit}
+        initialValues={data.settings}
+        validateOnChange={false}
+        validationSchema={schema}
+        enableReinitialize
+      >
+        {({ errors, values, handleChange, isSubmitting }) => {
+          return (
+            <Form>
+              <HeaderLayout
+                title={formatMessage({
+                  id: getTrad('HeaderNav.link.advancedSettings'),
+                  defaultMessage: 'Advanced Settings',
+                })}
+                primaryAction={
+                  <Button
+                    loading={isSubmitting}
+                    type="submit"
+                    disabled={!canUpdate}
+                    startIcon={<CheckIcon />}
+                    size="L"
+                  >
+                    {formatMessage({ id: getTrad('Form.save'), defaultMessage: 'Save' })}
+                  </Button>
+                }
+              />
+              <ContentLayout>
+                <Box
+                  background="neutral0"
+                  hasRadius
+                  shadow="filterShadow"
+                  paddingTop={6}
+                  paddingBottom={6}
+                  paddingLeft={7}
+                  paddingRight={7}
+                >
+                  <Stack size={4}>
+                    <H3>
+                      {formatMessage({
+                        id: getTrad('Form.title.advancedSettings'),
+                        defaultMessage: 'Settings',
+                      })}
+                    </H3>
+                    <Grid gap={6}>
+                      <GridItem col={6} s={12}>
+                        <Select
+                          label={formatMessage({
+                            id: getTrad('EditForm.inputSelect.label.role'),
+                            defaultMessage: 'Default role for authenticated users',
+                          })}
+                          value={values.default_role}
+                          hint={formatMessage({
+                            id: getTrad('EditForm.inputSelect.description.role'),
+                            defaultMessage:
+                              'It will attach the new authenticated user to the selected role.',
+                          })}
+                          onChange={e =>
+                            handleChange({ target: { name: 'default_role', value: e } })}
+                        >
+                          {data.roles.map(role => {
+                            return (
+                              <Option key={role.type} value={role.type}>
+                                {role.name}
+                              </Option>
+                            );
+                          })}
+                        </Select>
+                      </GridItem>
+                      {layout.map(input => {
+                        let value = values[input.name];
+
+                        if (!value) {
+                          value = input.type === 'bool' ? false : '';
+                        }
+
+                        return (
+                          <GridItem key={input.name} {...input.size}>
+                            <GenericInput
+                              {...input}
+                              value={value}
+                              error={errors[input.name]}
+                              disabled={
+                                input.name === 'email_confirmation_redirection' &&
+                                values.email_confirmation === false
+                              }
+                              onChange={handleChange}
+                            />
+                          </GridItem>
+                        );
+                      })}
+                    </Grid>
+                  </Stack>
+                </Box>
+              </ContentLayout>
+            </Form>
+          );
+        }}
+      </Formik>
+    </Main>
   );
 };
 

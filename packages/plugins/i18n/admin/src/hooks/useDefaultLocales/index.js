@@ -1,5 +1,8 @@
 import { useQuery } from 'react-query';
 import { request, useNotification } from '@strapi/helper-plugin';
+import { useNotifyAT } from '@strapi/parts/LiveRegions';
+import { useIntl } from 'react-intl';
+import { getTrad } from '../../utils';
 
 const fetchDefaultLocalesList = async toggleNotification => {
   try {
@@ -19,9 +22,20 @@ const fetchDefaultLocalesList = async toggleNotification => {
 };
 
 const useDefaultLocales = () => {
+  const { formatMessage } = useIntl();
+  const { notifyStatus } = useNotifyAT();
   const toggleNotification = useNotification();
   const { isLoading, data } = useQuery('default-locales', () =>
-    fetchDefaultLocalesList(toggleNotification)
+    fetchDefaultLocalesList(toggleNotification).then(data => {
+      notifyStatus(
+        formatMessage({
+          id: getTrad('Settings.locales.modal.locales.loaded'),
+          defaultMessage: 'The locales have been successfully loaded.',
+        })
+      );
+
+      return data;
+    })
   );
 
   return { defaultLocales: data, isLoading };

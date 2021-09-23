@@ -1,0 +1,21 @@
+<!--- getFileExtension.stories.mdx --->
+
+import { Meta } from '@storybook/addon-docs';
+
+<Meta title="utils/getFileExtension" />
+
+# getFileExtension
+
+This hook is used to create URL aware of the backend. Practical to resolve assets.
+
+## Usage
+
+```js
+import { getFileExtension } from '@strapi/helper-plugin';
+
+const Compo = () => {
+  const ext = getFileExtension('.png');
+
+  return <div>{ext}</div>;
+};
+```
