@@ -3,8 +3,7 @@ import { useDragLayer } from 'react-dnd';
 import LayoutDndProvider from '../LayoutDndProvider';
 
 import ItemTypes from '../../utils/ItemTypes';
-
-import ComponentBanner from '../RepeatableComponent/Banner';
+import RepeatableComponentPreview from '../RepeatableComponent/DragPreview';
 import RelationItem from '../SelectMany/Relation';
 import { Li } from '../SelectMany/components';
 import DraggedField from '../DraggedField';
@@ -51,18 +50,7 @@ const CustomDragLayer = () => {
       case ItemTypes.FIELD:
         return <DraggedField name={item.id} selectedItem={item.name} />;
       case ItemTypes.COMPONENT:
-        return (
-          <ComponentBanner
-            {...item}
-            isOpen
-            isReadOnly={false}
-            style={{
-              width: '40vw',
-              border: '1px solid #AED4FB',
-              borderRadius: 2,
-            }}
-          />
-        );
+        return <RepeatableComponentPreview displayedValue={item.displayedValue} />;
       case ItemTypes.RELATION:
         return (
           <Li>
