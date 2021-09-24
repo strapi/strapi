@@ -20,4 +20,17 @@ instance.interceptors.request.use(
   }
 );
 
+instance.interceptors.response.use(
+  response => response,
+  error => {
+    // whatever you want to do with the error
+    if (error.response.status === 401) {
+      auth.clearAppStorage();
+      window.location.reload();
+    }
+
+    throw error;
+  }
+);
+
 export default instance;
