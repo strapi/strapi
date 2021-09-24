@@ -2,12 +2,14 @@
   "collectionName": "components_default_apples",
   "info": {
     "name": "apple",
-    "icon": "apple-alt"
+    "icon": "apple-alt",
+    "description": ""
   },
   "options": {},
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     }
   }
 }

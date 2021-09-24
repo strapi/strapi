@@ -12,7 +12,7 @@ import AddIcon from '@strapi/icons/AddIconCircle';
 import { BaseButton } from '@strapi/parts/BaseButton';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
-import { Text, ButtonText } from '@strapi/parts/Text';
+import { Text, ButtonText, P } from '@strapi/parts/Text';
 import { getTrad } from '../../../../utils';
 
 const StyledAddIcon = styled(AddIcon)`
@@ -29,7 +29,7 @@ const StyledButton = styled(BaseButton)`
   border-radius: 26px;
   background: ${({ theme }) => theme.colors.neutral0};
   padding: ${({ theme }) => theme.spaces[3]};
-  border: 0;
+  border: ${({ hasError, theme }) => (hasError ? `1px solid ${theme.colors.danger600}` : '0')};
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 
   svg {
@@ -73,7 +73,36 @@ const BoxFullHeight = styled(Box)`
   height: 100%;
 `;
 
-const AddComponentButton = ({ isDisabled, isOpen, label, name, onClick }) => {
+const FieldError = ({ children, name }) => (
+  <Box paddingTop={1}>
+    <P
+      small
+      id={`${name}-error`}
+      textColor="danger600"
+      data-strapi-field-error
+      style={{ textAlign: 'center' }}
+    >
+      {children}
+    </P>
+  </Box>
+);
+
+FieldError.propTypes = {
+  children: PropTypes.string.isRequired,
+  name: PropTypes.string.isRequired,
+};
+
+const AddComponentButton = ({
+  hasError,
+  hasMaxError,
+  hasMinError,
+  isDisabled,
+  isOpen,
+  label,
+  missingComponentNumber,
+  name,
+  onClick,
+}) => {
   const { formatMessage } = useIntl();
   const addLabel = formatMessage(
     {
@@ -85,35 +114,60 @@ const AddComponentButton = ({ isDisabled, isOpen, label, name, onClick }) => {
   const closeLabel = formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
 
   return (
-    <Row justifyContent="center">
-      <Box
-        paddingTop={6}
-        paddingBottom={6}
-        style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
-      >
-        <StyledButton type="button" onClick={onClick} disabled={isDisabled}>
-          <Row>
-            <BoxFullHeight aria-hidden paddingRight={2}>
-              <StyledAddIcon $isopen={isOpen} />
-            </BoxFullHeight>
-            <ButtonText textColor="neutral500" small>
-              {isOpen ? closeLabel : addLabel}
-            </ButtonText>
-          </Row>
-        </StyledButton>
-      </Box>
-    </Row>
+    <>
+      <Row justifyContent="center">
+        <Box
+          paddingTop={6}
+          paddingBottom={6}
+          style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+        >
+          <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
+            <Row>
+              <BoxFullHeight aria-hidden paddingRight={2}>
+                <StyledAddIcon $isopen={isOpen} />
+              </BoxFullHeight>
+              <ButtonText textColor="neutral500" small>
+                {isOpen ? closeLabel : addLabel}
+              </ButtonText>
+            </Row>
+          </StyledButton>
+
+          {hasMaxError && !isOpen && (
+            <FieldError name={name}>
+              {formatMessage({ id: 'components.Input.error.validation.max' })}
+            </FieldError>
+          )}
+          {hasMinError && !isOpen && (
+            <FieldError name={name}>
+              {formatMessage(
+                {
+                  id: getTrad(`components.DynamicZone.missing-components`),
+                  defaultMessage:
+                    'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
+                },
+                { number: missingComponentNumber }
+              )}
+            </FieldError>
+          )}
+        </Box>
+      </Row>
+    </>
   );
 };
 
 AddComponentButton.defaultProps = {
   label: '',
+  missingComponentNumber: 0,
 };
 
 AddComponentButton.propTypes = {
   label: PropTypes.string,
+  hasError: PropTypes.bool.isRequired,
+  hasMaxError: PropTypes.bool.isRequired,
+  hasMinError: PropTypes.bool.isRequired,
   isDisabled: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
+  missingComponentNumber: PropTypes.number,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
 };

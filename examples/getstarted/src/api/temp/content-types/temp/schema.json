@@ -9,22 +9,38 @@
     "description": ""
   },
   "options": {
-    "draftAndPublish": true
+    "draftAndPublish": false
   },
-  "pluginOptions": {},
+  "pluginOptions": {
+    "i18n": {
+      "localized": true
+    }
+  },
   "attributes": {
     "name": {
       "type": "string",
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "temp": {
       "type": "component",
       "repeatable": true,
       "component": "default.temp",
-      "pluginOptions": {}
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     },
     "dz": {
-      "pluginOptions": {},
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      },
       "type": "dynamiczone",
       "components": [
         "basic.simple",
@@ -36,7 +52,50 @@
         "default.temp",
         "default.apple",
         "default.car"
-      ]
+      ],
+      "required": true,
+      "min": 2
+    },
+    "dz_req": {
+      "type": "dynamiczone",
+      "components": [
+        "default.apple",
+        "default.car",
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice",
+        "default.temp"
+      ],
+      "required": true,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "dz_simple": {
+      "type": "dynamiczone",
+      "components": [
+        "basic.simple"
+      ],
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
+    },
+    "dz_max": {
+      "type": "dynamiczone",
+      "components": [
+        "basic.simple"
+      ],
+      "max": 2,
+      "pluginOptions": {
+        "i18n": {
+          "localized": true
+        }
+      }
     }
   }
 }
