@@ -207,6 +207,7 @@ function Inputs({
   return (
     <GenericInput
       // {...metadatas}
+      attribute={fieldSchema}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
       description={description ? { id: description, defaultMessage: description } : null}
@@ -224,7 +225,6 @@ function Inputs({
         wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
-      attribute={fieldSchema}
       name={keys}
       onChange={onChange}
       options={options}

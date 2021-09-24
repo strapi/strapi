@@ -35,21 +35,18 @@ import {
 // editable,
 // ...inputProps
 // }
-const InputUID = props => {
-  const {
-    attribute,
-    contentTypeUID,
-    description,
-    disabled,
-    error,
-    intlLabel,
-    labelAction,
-    name,
-    onChange,
-    value,
-    ...rest
-  } = props;
-
+const InputUID = ({
+  attribute,
+  contentTypeUID,
+  description,
+  disabled,
+  error,
+  intlLabel,
+  labelAction,
+  name,
+  onChange,
+  value,
+}) => {
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
@@ -180,12 +177,10 @@ const InputUID = props => {
     onChange(e);
   };
 
+  const formattedError = error ? formatMessage({ id: error, defaultMessage: error }) : undefined;
+
   return (
     <TextInput
-      label={label}
-      name={name}
-      onChange={handleChange}
-      value={value || ''}
       disabled={disabled}
       endAction={
         <EndActionWrapper>
@@ -228,7 +223,12 @@ const InputUID = props => {
           </FieldActionWrapper>
         </EndActionWrapper>
       }
+      label={label}
       labelAction={labelAction}
+      error={formattedError}
+      name={name}
+      onChange={handleChange}
+      value={value || ''}
     />
     // <Error
     //   name={name}
