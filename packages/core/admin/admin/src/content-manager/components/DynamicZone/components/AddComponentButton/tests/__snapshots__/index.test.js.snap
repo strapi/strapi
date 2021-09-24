@@ -111,6 +111,7 @@ exports[`<AddComponentButton /> displays the name of the dz when the label is em
   background: #ffffff;
   padding: 12px;
   border: 0;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c3 svg {
@@ -338,6 +339,7 @@ exports[`<AddComponentButton /> renders and matches the snapshot 1`] = `
   background: #ffffff;
   padding: 12px;
   border: 0;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c3 svg {
@@ -565,6 +567,7 @@ exports[`<AddComponentButton /> renders and matches the snapshot when the isOpen
   background: #ffffff;
   padding: 12px;
   border: 0;
+  box-shadow: 0px 1px 4px rgba(33,33,52,0.1);
 }
 
 .c3 svg {

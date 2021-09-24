@@ -66,7 +66,7 @@ const ComponentPicker = ({ components, isOpen, onClickAddComponent }) => {
         paddingLeft={5}
         paddingRight={5}
         background="neutral0"
-        shadox="tableShadow"
+        shadow="tableShadow"
         borderColor="neutral150"
         hasRadius
       >

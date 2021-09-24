@@ -30,6 +30,7 @@ const StyledButton = styled(BaseButton)`
   background: ${({ theme }) => theme.colors.neutral0};
   padding: ${({ theme }) => theme.spaces[3]};
   border: 0;
+  box-shadow: ${({ theme }) => theme.shadows.filterShadow};
   svg {
     height: ${({ theme }) => theme.spaces[6]};
     width: ${({ theme }) => theme.spaces[6]};

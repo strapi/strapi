@@ -66,13 +66,16 @@ const FieldComponent = ({
     <Box>
       <Stack size={1}>
         <Row justifyContent="space-between">
-          <Label
-            intlLabel={intlLabel}
-            labelAction={labelAction}
-            name={name}
-            numberOfEntries={componentValueLength}
-            showNumberOfEntries={isRepeatable}
-          />
+          {intlLabel && (
+            <Label
+              intlLabel={intlLabel}
+              labelAction={labelAction}
+              name={name}
+              numberOfEntries={componentValueLength}
+              showNumberOfEntries={isRepeatable}
+            />
+          )}
+
           {showResetComponent && (
             <IconButton
               label={formatMessage({
@@ -183,6 +186,7 @@ FieldComponent.defaultProps = {
   hasChildrenAllowedFields: false,
   hasChildrenReadableFields: false,
   // icon: 'smile',
+  intlLabel: undefined,
   isFromDynamicZone: false,
   isReadOnly: false,
   isRepeatable: false,
@@ -209,7 +213,7 @@ FieldComponent.propTypes = {
     id: PropTypes.string.isRequired,
     defaultMessage: PropTypes.string.isRequired,
     values: PropTypes.object,
-  }).isRequired,
+  }),
   labelAction: PropTypes.element,
   max: PropTypes.number,
   min: PropTypes.number,

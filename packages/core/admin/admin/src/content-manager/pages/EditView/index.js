@@ -166,6 +166,7 @@ const EditView = ({
                           paddingRight={6}
                           paddingTop={6}
                           paddingBottom={6}
+                          borderColor="neutral150"
                         >
                           <Stack size={6}>
                             {row.map((grid, gridIndex) => {
