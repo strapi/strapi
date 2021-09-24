@@ -29,38 +29,29 @@ describe('hasDraftAndPublish policy', () => {
 
   test('It should succeed when the model has draft & publish enabled', () => {
     const ctx = { params: { model: 'foo' } };
-    const next = jest.fn(() => 'next');
+    const res = hasDraftAndPublish({ ctx, strapi: global.strapi });
 
-    const res = hasDraftAndPublish(ctx, next);
-
-    expect(next).toHaveBeenCalled();
-    expect(res).toBe('next');
+    expect(res).toBe(true);
   });
 
   test(`It should fail when the model has draft & publish disabled`, () => {
     const ctx = { params: { model: 'bar' } };
-    const next = jest.fn(() => 'next');
 
-    expect(() => hasDraftAndPublish(ctx, next)).toThrowError('forbidden');
+    expect(() => hasDraftAndPublish({ ctx, strapi: global.strapi })).toThrowError('forbidden');
     expect(strapi.errors.forbidden).toHaveBeenCalled();
-    expect(next).not.toHaveBeenCalled();
   });
 
   test(`It should fail when the model doesn't exists`, () => {
     const ctx = { params: { model: 'foobar' } };
-    const next = jest.fn(() => 'next');
 
-    expect(() => hasDraftAndPublish(ctx, next)).toThrowError('forbidden');
+    expect(() => hasDraftAndPublish({ ctx, strapi: global.strapi })).toThrowError('forbidden');
     expect(strapi.errors.forbidden).toHaveBeenCalled();
-    expect(next).not.toHaveBeenCalled();
   });
 
   test(`It should fail when params.model isn't provided`, () => {
     const ctx = { params: {} };
-    const next = jest.fn(() => 'next');
 
-    expect(() => hasDraftAndPublish(ctx, next)).toThrowError('forbidden');
+    expect(() => hasDraftAndPublish({ ctx, strapi: global.strapi })).toThrowError('forbidden');
     expect(strapi.errors.forbidden).toHaveBeenCalled();
-    expect(next).not.toHaveBeenCalled();
   });
 });

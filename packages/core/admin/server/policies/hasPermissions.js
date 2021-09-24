@@ -30,11 +30,11 @@ module.exports = createPolicyFactory(
       inputModifiers.find(modifier => modifier.check(action)).transform(action)
     );
 
-    return (ctx, next) => {
+    return ({ ctx, strapi }) => {
       const { userAbility: ability, isAuthenticated } = ctx.state;
 
       if (!isAuthenticated || !ability) {
-        return next();
+        return true;
       }
 
       const isAuthorized = permissions.every(({ action, subject }) => ability.can(action, subject));
@@ -43,7 +43,7 @@ module.exports = createPolicyFactory(
         throw strapi.errors.forbidden();
       }
 
-      return next();
+      return true;
     };
   },
   {

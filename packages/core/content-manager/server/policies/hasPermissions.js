@@ -6,14 +6,14 @@ const {
 const { validateHasPermissionsInput } = require('../validation/policies/hasPermissions');
 
 module.exports = createPolicyFactory(
-  ({ actions = [], hasAtLeastOne = false } = {}) => (ctx, next) => {
+  ({ actions = [], hasAtLeastOne = false } = {}) => ({ ctx, strapi }) => {
     const {
       state: { userAbility, isAuthenticatedAdmin },
       params: { model },
     } = ctx;
 
     if (!isAuthenticatedAdmin || !userAbility) {
-      return next();
+      return true;
     }
 
     const isAuthorized = hasAtLeastOne
@@ -24,7 +24,7 @@ module.exports = createPolicyFactory(
       throw strapi.errors.forbidden();
     }
 
-    return next();
+    return true;
   },
   {
     validator: validateHasPermissionsInput,
