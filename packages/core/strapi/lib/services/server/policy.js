@@ -16,7 +16,7 @@ const resolvePolicies = route => {
 
     for (const policyName of policiesConfig) {
       const resolvedPolicy = await policy.get(policyName, { pluginName, apiName });
-      const result = resolvedPolicy({ ctx: context, strapi });
+      const result = await resolvedPolicy({ ctx: context, strapi });
 
       if (!result) {
         throw new Error('Policies failed.');
