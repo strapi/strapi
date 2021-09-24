@@ -294,6 +294,30 @@ describe('Role CRUD End to End', () => {
             ],
             "settings": Array [
               Object {
+                "action": "admin::api-tokens.create",
+                "category": "api tokens",
+                "displayName": "Create (generate)",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "admin::api-tokens.delete",
+                "category": "api tokens",
+                "displayName": "Delete (revoke)",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "admin::api-tokens.read",
+                "category": "api tokens",
+                "displayName": "Read",
+                "subCategory": "general",
+              },
+              Object {
+                "action": "admin::api-tokens.update",
+                "category": "api tokens",
+                "displayName": "Update",
+                "subCategory": "general",
+              },
+              Object {
                 "action": "admin::marketplace.plugins.install",
                 "category": "plugins and marketplace",
                 "displayName": "Install (only for dev env)",
@@ -743,6 +767,30 @@ describe('Role CRUD End to End', () => {
               ],
               "settings": Array [
                 Object {
+                  "action": "admin::api-tokens.create",
+                  "category": "api tokens",
+                  "displayName": "Create (generate)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.delete",
+                  "category": "api tokens",
+                  "displayName": "Delete (revoke)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.read",
+                  "category": "api tokens",
+                  "displayName": "Read",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.update",
+                  "category": "api tokens",
+                  "displayName": "Update",
+                  "subCategory": "general",
+                },
+                Object {
                   "action": "admin::marketplace.plugins.install",
                   "category": "plugins and marketplace",
                   "displayName": "Install (only for dev env)",
@@ -1126,6 +1174,30 @@ describe('Role CRUD End to End', () => {
                 },
               ],
               "settings": Array [
+                Object {
+                  "action": "admin::api-tokens.create",
+                  "category": "api tokens",
+                  "displayName": "Create (generate)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.delete",
+                  "category": "api tokens",
+                  "displayName": "Delete (revoke)",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.read",
+                  "category": "api tokens",
+                  "displayName": "Read",
+                  "subCategory": "general",
+                },
+                Object {
+                  "action": "admin::api-tokens.update",
+                  "category": "api tokens",
+                  "displayName": "Update",
+                  "subCategory": "general",
+                },
                 Object {
                   "action": "admin::marketplace.plugins.install",
                   "category": "plugins and marketplace",

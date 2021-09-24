@@ -14,7 +14,7 @@ const authenticate = async ctx => {
       const { id } = await getService('jwt').getToken(ctx);
 
       if (id === undefined) {
-        return { error: 'Invalid token: Token did not contain required fields' };
+        return { authenticated: false };
       }
 
       // fetch authenticated user
@@ -41,7 +41,7 @@ const authenticate = async ctx => {
         credentials: user,
       };
     } catch (err) {
-      return { error: 'Invalid credentials' };
+      return { authenticated: false };
     }
   }
 
