@@ -1,7 +1,7 @@
 'use strict';
 
 const { objectType } = require('nexus');
-const { prop, identity } = require('lodash/fp');
+const { prop, identity, isEmpty } = require('lodash/fp');
 
 module.exports = ({ strapi }) => {
   const { naming } = strapi.plugin('graphql').service('utils');
@@ -13,6 +13,8 @@ module.exports = ({ strapi }) => {
      * @return {NexusObjectTypeDef}
      */
     buildEntityDefinition(contentType) {
+      const { attributes } = contentType;
+
       const name = naming.getEntityName(contentType);
       const typeName = naming.getTypeName(contentType);
 
@@ -23,11 +25,14 @@ module.exports = ({ strapi }) => {
           // Keep the ID attribute at the top level
           t.id('id', { resolve: prop('id') });
 
-          // Keep the fetched object into a dedicated `attributes` field
-          t.field('attributes', {
-            type: typeName,
-            resolve: identity,
-          });
+          if (!isEmpty(attributes)) {
+            // Keep the fetched object into a dedicated `attributes` field
+            // TODO: [v4] precise why we keep the ID
+            t.field('attributes', {
+              type: typeName,
+              resolve: identity,
+            });
+          }
 
           // todo[v4]: add the meta field to the entity when there will be data in it (can't add an empty type for now)
           // t.field('meta', { type: utils.getEntityMetaName(contentType) });

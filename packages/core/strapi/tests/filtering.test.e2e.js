@@ -1278,7 +1278,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          limit: 1,
+          pagination: {
+            limit: 1,
+          },
           sort: 'rank:asc',
         },
       });
@@ -1291,7 +1293,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          limit: 1,
+          pagination: {
+            limit: 1,
+          },
           sort: 'rank:desc',
         },
       });
@@ -1306,7 +1310,9 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          start: 1,
+          pagination: {
+            start: 1,
+          },
           sort: 'rank:asc',
         },
       });
@@ -1319,8 +1325,10 @@ describe('Filtering API', () => {
         method: 'GET',
         url: '/products',
         qs: {
-          limit: 1,
-          start: 1,
+          pagination: {
+            limit: 1,
+            start: 1,
+          },
           sort: 'rank:asc',
         },
       });
