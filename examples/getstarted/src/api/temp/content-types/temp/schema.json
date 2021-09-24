@@ -35,16 +35,22 @@
         }
       }
     },
-    "temp_req": {
-      "type": "component",
-      "repeatable": true,
-      "component": "default.temp",
-      "required": true,
+    "dz": {
       "pluginOptions": {
         "i18n": {
           "localized": true
         }
-      }
+      },
+      "type": "dynamiczone",
+      "components": [
+        "basic.simple",
+        "blog.test-como",
+        "default.closingperiod",
+        "default.dish",
+        "default.openingtimes",
+        "default.restaurantservice",
+        "default.temp"
+      ]
     }
   }
 }

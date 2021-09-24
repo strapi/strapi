@@ -3,11 +3,14 @@ import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage, useIntl } from 'react-intl';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
 import { Flex } from '@buffetjs/core';
 import { LabelIconWrapper, NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
 import connect from './utils/connect';
 import select from './utils/select';
+import AddComponentButton from './components/AddComponentButton';
 import BaselineAlignement from './BaselineAlignement';
 import Button from './Button';
 import Component from './Component';
@@ -27,7 +30,7 @@ const DynamicZone = ({
   isCreatingEntry,
   isFieldAllowed,
   isFieldReadable,
-  labelIcon,
+  labelAction,
   moveComponentUp,
   moveComponentDown,
   removeComponentFromDynamicZone,
@@ -79,33 +82,44 @@ const DynamicZone = ({
     }
   };
 
-  const formattedLabelIcon = labelIcon
-    ? { icon: labelIcon.icon, title: formatMessage(labelIcon.title) }
-    : null;
-
   if (!isFieldAllowed && isCreatingEntry) {
     return (
-      <BaselineAlignement>
-        <NotAllowedInput
-          label={metadatas.label}
-          spacerHeight="5px"
-          labelIcon={formattedLabelIcon}
-        />
-      </BaselineAlignement>
+      <NotAllowedInput
+        description={
+          metadatas.description
+            ? { id: metadatas.description, defaultMessage: metadatas.description }
+            : null
+        }
+        intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
+        labelAction={labelAction}
+        name={name}
+      />
     );
   }
 
   if (!isFieldAllowed && !isFieldReadable && !isCreatingEntry) {
     return (
-      <BaselineAlignement>
-        <NotAllowedInput
-          label={metadatas.label}
-          spacerHeight="5px"
-          labelIcon={formattedLabelIcon}
-        />
-      </BaselineAlignement>
+      <NotAllowedInput
+        description={
+          metadatas.description
+            ? { id: metadatas.description, defaultMessage: metadatas.description }
+            : null
+        }
+        intlLabel={{ id: metadatas.label, defaultMessage: metadatas.label }}
+        labelAction={labelAction}
+        name={name}
+      />
     );
   }
+
+  return (
+    <Box>
+      {dynamicDisplayedComponentsLength > 0 && <div>todo</div>}
+      {isFieldAllowed && (
+        <AddComponentButton label={metadatas.label} name={name} onClick={handleClickOpenPicker} />
+      )}
+    </Box>
+  );
 
   return (
     <DynamicZoneWrapper>
@@ -205,7 +219,7 @@ DynamicZone.defaultProps = {
     max: Infinity,
     min: -Infinity,
   },
-  labelIcon: null,
+  labelAction: null,
 };
 
 DynamicZone.propTypes = {
@@ -220,13 +234,7 @@ DynamicZone.propTypes = {
   isCreatingEntry: PropTypes.bool.isRequired,
   isFieldAllowed: PropTypes.bool.isRequired,
   isFieldReadable: PropTypes.bool.isRequired,
-  labelIcon: PropTypes.shape({
-    icon: PropTypes.node.isRequired,
-    title: PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      defaultMessage: PropTypes.string.isRequired,
-    }).isRequired,
-  }),
+  labelAction: PropTypes.element,
   metadatas: PropTypes.shape({
     description: PropTypes.string,
     label: PropTypes.string,
