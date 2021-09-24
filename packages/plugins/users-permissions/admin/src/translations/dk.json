@@ -27,8 +27,6 @@
   "Plugin.permissions.plugins.description": "Definér alle tilladte handlinger for {name} plugin.",
   "Plugins.header.description": "Kunne handlinger tilknyttet en rute er vist nedenfor.",
   "Plugins.header.title": "Rettigheder",
-  "Policies.InputSelect.empty": "Ingen",
-  "Policies.InputSelect.label": "Tillad denne handling for:",
   "Policies.header.hint": "Vælg applikationens handlinger eller plugin handlinger og klik på tandhjulet for at vise den bunde rute",
   "Policies.header.title": "Advancerede indstillinger",
   "PopUpForm.Email.email_templates.inputDescription": "Hvis du er usikker på brugen af variabler, {link}",

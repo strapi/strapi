@@ -19,7 +19,7 @@ const FileDetailsBox = ({ file }) => {
         { label: 'modal.file-details.size', value: formatBytes(fileSize, 0) },
         {
           label: 'modal.file-details.date',
-          value: file.created_at ? dateToUtcTime(file.created_at).format(dateFormats.date) : '-',
+          value: file.createdAt ? dateToUtcTime(file.createdAt).format(dateFormats.date) : '-',
         },
       ],
     },
@@ -84,7 +84,7 @@ FileDetailsBox.defaultProps = {
 FileDetailsBox.propTypes = {
   file: PropTypes.shape({
     mime: PropTypes.string,
-    created_at: PropTypes.string,
+    createdAt: PropTypes.string,
     ext: PropTypes.string,
     height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
     size: PropTypes.number,

@@ -45,10 +45,13 @@ module.exports = ctx => {
   return service;
 };
 
+/**
+ * @type {import('.').default}
+ */
 const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) => ({
   uploadFiles,
 
-  async wrapOptions(options = {}) {
+  async wrapParams(options = {}) {
     return options;
   },
 
@@ -61,13 +64,12 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     });
   },
 
-  // TODO: rename to findMany
-  async find(uid, opts) {
+  async findMany(uid, opts) {
     const { kind } = strapi.getModel(uid);
 
-    const { params } = await this.wrapOptions(opts, { uid, action: 'find' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findMany' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = transformParamsToQuery(uid, wrappedParams);
 
     if (kind === 'singleType') {
       return db.query(uid).findOne(query);
@@ -77,9 +79,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async findPage(uid, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'findPage' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findPage' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = transformParamsToQuery(uid, wrappedParams);
 
     return db.query(uid).findPage(query);
   },
@@ -88,9 +90,9 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   async findWithRelationCounts(uid, opts) {
     const model = strapi.getModel(uid);
 
-    const { params } = await this.wrapOptions(opts, { uid, action: 'findWithRelationCounts' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findWithRelationCounts' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = transformParamsToQuery(uid, wrappedParams);
 
     const { attributes } = model;
 
@@ -121,23 +123,24 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async findOne(uid, entityId, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'findOne' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'findOne' });
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     return db.query(uid).findOne({ ...query, where: { id: entityId } });
   },
 
   async count(uid, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'count' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'count' });
 
-    const query = transformParamsToQuery(uid, params);
+    const query = transformParamsToQuery(uid, wrappedParams);
 
     return db.query(uid).count(query);
   },
 
   async create(uid, opts) {
-    const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'create' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'create' });
+    const { data, files } = wrappedParams;
 
     const model = strapi.getModel(uid);
 
@@ -145,7 +148,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const validData = await entityValidator.validateEntityCreation(model, data, { isDraft });
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap into transaction
     const componentData = await createComponents(uid, validData);
@@ -159,7 +162,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // FIXME: upload in components
     if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(uid, entity, files);
-      entity = await this.findOne(uid, entity.id, { params });
+      entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
     this.emitEvent(uid, ENTRY_CREATE, entity);
@@ -168,7 +171,8 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async update(uid, entityId, opts) {
-    const { params, data, files } = await this.wrapOptions(opts, { uid, action: 'update' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'update' });
+    const { data, files } = wrappedParams;
 
     const model = strapi.getModel(uid);
 
@@ -184,7 +188,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
       isDraft,
     });
 
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     // TODO: wrap in transaction
     const componentData = await updateComponents(uid, entityToUpdate, validData);
@@ -199,7 +203,7 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     // FIXME: upload in components
     if (files && Object.keys(files).length > 0) {
       await this.uploadFiles(uid, entity, files);
-      entity = await this.findOne(uid, entity.id, { params });
+      entity = await this.findOne(uid, entity.id, wrappedParams);
     }
 
     this.emitEvent(uid, ENTRY_UPDATE, entity);
@@ -208,10 +212,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
   },
 
   async delete(uid, entityId, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(uid, pickSelectionParams(params));
+    const query = transformParamsToQuery(uid, pickSelectionParams(wrappedParams));
 
     const entityToDelete = await db.query(uid).findOne({
       ...query,
@@ -232,10 +236,10 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
 
   // FIXME: used only for the CM to be removed
   async deleteMany(uid, opts) {
-    const { params } = await this.wrapOptions(opts, { uid, action: 'delete' });
+    const wrappedParams = await this.wrapParams(opts, { uid, action: 'delete' });
 
     // select / populate
-    const query = transformParamsToQuery(uid, params);
+    const query = transformParamsToQuery(uid, wrappedParams);
 
     return db.query(uid).deleteMany(query);
   },

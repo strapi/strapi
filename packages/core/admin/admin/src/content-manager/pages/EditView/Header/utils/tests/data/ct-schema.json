@@ -8,7 +8,7 @@
   "options": {
     "draftAndPublish": false,
     "increments": true,
-    "timestamps": ["created_at", "updated_at"],
+    "timestamps": ["createdAt", "updatedAt"],
     "comment": ""
   },
   "attributes": {
@@ -72,7 +72,7 @@
         "default.dish"
       ]
     },
-    "created_at": { "type": "timestamp" },
-    "updated_at": { "type": "timestamp" }
+    "createdAt": { "type": "timestamp" },
+    "updatedAt": { "type": "timestamp" }
   }
 }

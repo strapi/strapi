@@ -16,7 +16,6 @@ describe('USERS PERMISSIONS | HOOKS | usePlugins | reducer', () => {
       const state = {
         permissions: { ok: true },
         routes: { ok: true },
-        policies: ['test'],
         isLoading: false,
       };
 
@@ -27,7 +26,6 @@ describe('USERS PERMISSIONS | HOOKS | usePlugins | reducer', () => {
       const expected = {
         permissions: {},
         routes: {},
-        policies: [],
         isLoading: true,
       };
 

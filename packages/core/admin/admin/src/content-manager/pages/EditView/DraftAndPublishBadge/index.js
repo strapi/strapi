@@ -46,7 +46,15 @@ const DraftAndPublishBadge = ({ hasDraftAndPublish, isPublished }) => {
   const colorProps = isPublished ? colors.published : colors.draft;
 
   return (
-    <Box hasRadius as="aside" paddingTop={4} paddingBottom={4} paddingLeft={5} {...colorProps.box}>
+    <Box
+      hasRadius
+      as="aside"
+      paddingTop={4}
+      paddingBottom={4}
+      paddingLeft={5}
+      paddingRight={5}
+      {...colorProps.box}
+    >
       <Box as={Row}>
         <CustomBullet $bulletColor={colorProps.bulletColor} />
         <Box paddingLeft={3}>

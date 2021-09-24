@@ -17,6 +17,7 @@ const createWebhookRunner = require('./services/webhook-runner');
 const { webhookModel, createWebhookStore } = require('./services/webhook-store');
 const { createCoreStore, coreStoreModel } = require('./services/core-store');
 const createEntityService = require('./services/entity-service');
+const createCronService = require('./services/cron');
 const entityValidator = require('./services/entity-validator');
 const createTelemetry = require('./services/metrics');
 const createAuth = require('./services/auth');
@@ -69,6 +70,7 @@ class Strapi {
     this.eventHub = createEventHub();
     this.startupLogger = createStartupLogger(this);
     this.log = createLogger(this.config.get('logger', {}));
+    this.cron = createCronService();
 
     createUpdateNotifier(this).notify();
   }
@@ -165,6 +167,7 @@ class Strapi {
     }
 
     this.telemetry.destroy();
+    this.cron.destroy();
 
     delete global.strapi;
   }
@@ -276,6 +279,10 @@ class Strapi {
     this.middleware = await loaders.loadMiddlewares(this);
   }
 
+  async loadApp() {
+    this.app = await loaders.loadSrcIndex(this);
+  }
+
   registerInternalHooks() {
     this.hooks.set('strapi::content-types.beforeSync', createAsyncParallelHook());
     this.hooks.set('strapi::content-types.afterSync', createAsyncParallelHook());
@@ -286,6 +293,7 @@ class Strapi {
 
   async load() {
     await Promise.all([
+      this.loadApp(),
       this.loadPlugins(),
       this.loadAdmin(),
       this.loadAPIs(),
@@ -330,6 +338,9 @@ class Strapi {
       entityValidator: this.entityValidator,
     });
 
+    const cronTasks = this.config.get('server.cron.tasks', {});
+    this.cron.add(cronTasks);
+
     this.telemetry = createTelemetry(this);
 
     let oldContentTypes;
@@ -366,6 +377,8 @@ class Strapi {
     await initializeMiddlewares(this);
 
     await this.runLifecyclesFunctions(LIFECYCLES.BOOTSTRAP);
+
+    this.cron.start();
 
     this.isLoaded = true;
 
@@ -418,21 +431,14 @@ class Strapi {
   }
 
   async runLifecyclesFunctions(lifecycleName) {
-    const execLifecycle = async fn => {
-      if (!fn) {
-        return;
-      }
-
-      return fn({ strapi: this });
-    };
-
-    const configPath = `functions.${lifecycleName}`;
-
     // plugins
     await this.container.get('modules')[lifecycleName]();
 
     // user
-    await execLifecycle(this.config.get(configPath));
+    const lifecycleFunction = this.app[lifecycleName];
+    if (lifecycleFunction) {
+      await lifecycleFunction({ strapi: this });
+    }
 
     // admin
     await this.admin[lifecycleName](this);

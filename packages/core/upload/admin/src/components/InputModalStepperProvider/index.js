@@ -46,7 +46,7 @@ const InputModalStepperProvider = ({
 
   const { formatMessage } = useIntl();
   const { trackUsage } = useTracking();
-  const [, updated_at] = useSelectTimestamps();
+  const [, updatedAt] = useSelectTimestamps();
   const [reducerState, dispatch] = useReducer(reducer, initialState, state =>
     init({
       ...state,
@@ -64,7 +64,7 @@ const InputModalStepperProvider = ({
         : [],
       params: {
         ...state.params,
-        sort: `${updated_at}:DESC`,
+        sort: `${updatedAt}:DESC`,
       },
     })
   );
@@ -227,7 +227,7 @@ const InputModalStepperProvider = ({
 
     dispatch({
       type: 'RESET_PROPS',
-      defaultSort: `${updated_at}:DESC`,
+      defaultSort: `${updatedAt}:DESC`,
     });
     onClosed();
   };

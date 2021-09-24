@@ -22,8 +22,8 @@ const transformParamsToQuery = (uid, params = {}) => {
   const query = {};
 
   const {
-    start,
     page,
+    start,
     pageSize,
     limit,
     sort,

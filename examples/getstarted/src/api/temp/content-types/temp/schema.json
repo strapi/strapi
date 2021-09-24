@@ -27,7 +27,7 @@
     },
     "temp": {
       "type": "component",
-      "repeatable": false,
+      "repeatable": true,
       "component": "default.temp",
       "pluginOptions": {
         "i18n": {
@@ -37,7 +37,7 @@
     },
     "temp_req": {
       "type": "component",
-      "repeatable": false,
+      "repeatable": true,
       "component": "default.temp",
       "required": true,
       "pluginOptions": {

@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { useIntl } from 'react-intl';
 import { Select, Option } from '@strapi/parts/Select';
+import { Box } from '@strapi/parts/Box';
 import { useTracking } from '@strapi/helper-plugin';
 import { onChangeListHeaders } from '../actions';
 import { selectDisplayedHeaders } from '../selectors';
@@ -43,25 +44,27 @@ const FieldPicker = ({ layout }) => {
   };
 
   return (
-    <Select
-      label="change displayed fields"
-      value={values}
-      onChange={handleChange}
-      customizeContent={values => `${values.length} currently selected`}
-      multi
-      size="S"
-    >
-      {allAllowedHeaders.map(header => {
-        return (
-          <Option key={header.name} value={header.name}>
-            {formatMessage({
-              id: header.intlLabel.id || header.name,
-              defaultMessage: header.intlLabel.defaultMessage || header.name,
-            })}
-          </Option>
-        );
-      })}
-    </Select>
+    <Box paddingLeft={3}>
+      <Select
+        aria-label="change displayed fields"
+        value={values}
+        onChange={handleChange}
+        customizeContent={values => `${values.length} currently selected`}
+        multi
+        size="S"
+      >
+        {allAllowedHeaders.map(header => {
+          return (
+            <Option key={header.name} value={header.name}>
+              {formatMessage({
+                id: header.intlLabel.id || header.name,
+                defaultMessage: header.intlLabel.defaultMessage || header.name,
+              })}
+            </Option>
+          );
+        })}
+      </Select>
+    </Box>
   );
 };
 

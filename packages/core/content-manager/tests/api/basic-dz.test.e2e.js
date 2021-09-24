@@ -83,7 +83,7 @@ describe('Core API - Basic + dz', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
     data.productsWithDz.push(res.body);
   });
 
@@ -95,7 +95,7 @@ describe('Core API - Basic + dz', () => {
 
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithDz[0]);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
   });
 
   test('Update product with compo', async () => {
@@ -119,7 +119,7 @@ describe('Core API - Basic + dz', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(product);
     expect(res.body.id).toEqual(data.productsWithDz[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
     data.productsWithDz[0] = res.body;
   });
 
@@ -132,7 +132,7 @@ describe('Core API - Basic + dz', () => {
     expect(res.statusCode).toBe(200);
     expect(res.body).toMatchObject(data.productsWithDz[0]);
     expect(res.body.id).toEqual(data.productsWithDz[0].id);
-    expect(res.body.published_at).toBeUndefined();
+    expect(res.body.publishedAt).toBeUndefined();
     data.productsWithDz.shift();
   });
 

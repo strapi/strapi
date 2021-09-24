@@ -27,7 +27,7 @@ const HomePage = () => {
   const { allowedActions } = useAppContext();
   const { canRead } = allowedActions;
   const { formatMessage } = useIntl();
-  const [, updated_at] = useSelectTimestamps();
+  const [, updatedAt] = useSelectTimestamps();
   const [
     { data, dataCount, dataToDelete, isLoading, shouldRefetchData, showModalConfirmButtonLoading },
     dispatch,
@@ -77,7 +77,7 @@ const HomePage = () => {
 
     const paramsToSend = params.includes('sort')
       ? params
-      : params.concat(`&sort=${updated_at}:DESC`);
+      : params.concat(`&sort=${updatedAt}:DESC`);
 
     try {
       const data = await request(`${dataRequestURL}?${paramsToSend}`, {

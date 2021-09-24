@@ -88,11 +88,11 @@ const addressMetaData = {
     },
     list: { label: 'Repeat_req_min', searchable: false, sortable: false },
   },
-  created_at: {
+  createdAt: {
     edit: { label: 'Created_at', description: '', placeholder: '', visible: false, editable: true },
     list: { label: 'Created_at', searchable: true, sortable: true },
   },
-  updated_at: {
+  updatedAt: {
     edit: { label: 'Updated_at', description: '', placeholder: '', visible: false, editable: true },
     list: { label: 'Updated_at', searchable: true, sortable: true },
   },

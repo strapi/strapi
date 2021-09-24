@@ -15,8 +15,8 @@ const TextGrow = styled(Text)`
 const Option = props => {
   const { formatMessage } = useIntl();
   const Component = components.Option;
-  const hasDraftAndPublish = has(get(props, 'data.value'), 'published_at');
-  const isDraft = isEmpty(get(props, 'data.value.published_at'));
+  const hasDraftAndPublish = has(get(props, 'data.value'), 'publishedAt');
+  const isDraft = isEmpty(get(props, 'data.value.publishedAt'));
   const titleLabelID = isDraft
     ? 'components.Select.draft-info-title'
     : 'components.Select.publish-info-title';

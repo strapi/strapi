@@ -4,13 +4,13 @@ describe('UPLOAD | components | FiltersList | utils', () => {
   describe('formatFilter', () => {
     it('should format value to readable date if value is a date', () => {
       const filter = {
-        name: 'created_at',
+        name: 'createdAt',
         filter: '=',
         value: '2020-03-20T22:33:57+01:00',
       };
 
       const expected = {
-        name: 'created_at',
+        name: 'createdAt',
         filter: '=',
         value: 'Friday, March 20th 2020 21:33',
       };

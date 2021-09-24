@@ -12,11 +12,6 @@
     },
     "test": {
       "type": "string"
-    },
-    "nestedd": {
-      "type": "component",
-      "repeatable": false,
-      "component": "default.dish"
     }
   }
 }
