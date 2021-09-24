@@ -15,6 +15,12 @@ export const FieldActionWrapper = styled(FieldAction)`
       fill: ${({ theme }) => theme.colors.neutral400};
     }
   }
+
+  svg:hover {
+    path {
+      fill: ${({ theme }) => theme.colors.primary600};
+    }
+  }
 `;
 
 export const TextValidation = styled(Row)`
@@ -28,7 +34,8 @@ export const TextValidation = styled(Row)`
     height: ${12 / 16}rem;
     width: ${12 / 16}rem;
     path {
-      fill: ${({ theme, notAvailable }) => !notAvailable ? theme.colors.success600 : theme.colors.danger600};
+      fill: ${({ theme, notAvailable }) =>
+        !notAvailable ? theme.colors.success600 : theme.colors.danger600};
     }
   }
 `;

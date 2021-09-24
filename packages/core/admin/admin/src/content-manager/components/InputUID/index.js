@@ -31,7 +31,7 @@ const InputUID = ({
   name,
   onChange,
   value,
-  placeholder
+  placeholder,
 }) => {
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
@@ -54,18 +54,18 @@ const InputUID = ({
     : name;
 
   const hint = description
-  ? formatMessage(
-      { id: description.id, defaultMessage: description.defaultMessage },
-      { ...description.values }
-    )
-  : '';
+    ? formatMessage(
+        { id: description.id, defaultMessage: description.defaultMessage },
+        { ...description.values }
+      )
+    : '';
 
   const formattedPlaceholder = placeholder
-  ? formatMessage(
-      { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
-      { ...placeholder.values }
-    )
-  : '';
+    ? formatMessage(
+        { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
+        { ...placeholder.values }
+      )
+    : '';
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -169,7 +169,7 @@ const InputUID = ({
     setRegenerateLabel(null);
   };
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     if (e.target.value && isCreation) {
       setIsCustomized(true);
     }
@@ -315,7 +315,7 @@ const InputUID = ({
 InputUID.propTypes = {
   attribute: PropTypes.shape({
     targetField: PropTypes.string,
-    required: PropTypes.bool
+    required: PropTypes.bool,
   }).isRequired,
   contentTypeUID: PropTypes.string.isRequired,
   description: PropTypes.shape({
@@ -347,7 +347,7 @@ InputUID.defaultProps = {
   error: undefined,
   labelAction: undefined,
   placeholder: undefined,
-  value: ''
+  value: '',
 };
 
 // export default memo(InputUID, isEqual);
