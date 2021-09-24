@@ -2,6 +2,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import get from 'lodash/get';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
+import { Stack } from '@strapi/parts/Stack';
 import { Box } from '@strapi/parts/Box';
 import { NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
@@ -166,9 +167,9 @@ const DynamicZone = ({
   }
 
   return (
-    <Box>
+    <Stack size={6}>
       {dynamicDisplayedComponentsLength > 0 && (
-        <>
+        <Box>
           <DzLabel
             label={metadatas.label}
             labelAction={labelAction}
@@ -200,7 +201,7 @@ const DynamicZone = ({
               />
             );
           })}
-        </>
+        </Box>
       )}
 
       <AddComponentButton
@@ -219,7 +220,7 @@ const DynamicZone = ({
         components={dynamicZoneAvailableComponents}
         onClickAddComponent={handleAddComponent}
       />
-    </Box>
+    </Stack>
   );
 };
 

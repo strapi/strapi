@@ -132,95 +132,97 @@ const EditView = ({
               <ContentLayout>
                 <Grid gap={4}>
                   <GridItem col={9} s={12}>
-                    {formattedContentTypeLayout.map((row, index) => {
-                      if (isDynamicZone(row)) {
-                        const {
-                          0: {
-                            0: { name, fieldSchema, metadatas, labelAction },
-                          },
-                        } = row;
+                    <Stack size={6}>
+                      {formattedContentTypeLayout.map((row, index) => {
+                        if (isDynamicZone(row)) {
+                          const {
+                            0: {
+                              0: { name, fieldSchema, metadatas, labelAction },
+                            },
+                          } = row;
+
+                          return (
+                            <Box key={index}>
+                              <Grid gap={4}>
+                                <GridItem col={12} s={12} xs={12}>
+                                  <DynamicZone
+                                    name={name}
+                                    fieldSchema={fieldSchema}
+                                    labelAction={labelAction}
+                                    metadatas={metadatas}
+                                  />
+                                </GridItem>
+                              </Grid>
+                            </Box>
+                          );
+                        }
 
                         return (
-                          <Box key={index}>
-                            <Grid gap={4}>
-                              <GridItem col={12} s={12} xs={12}>
-                                <DynamicZone
-                                  name={name}
-                                  fieldSchema={fieldSchema}
-                                  labelAction={labelAction}
-                                  metadatas={metadatas}
-                                />
-                              </GridItem>
-                            </Grid>
-                          </Box>
-                        );
-                      }
+                          <Box
+                            key={index}
+                            hasRadius
+                            background="neutral0"
+                            shadow="tableShadow"
+                            paddingLeft={6}
+                            paddingRight={6}
+                            paddingTop={6}
+                            paddingBottom={6}
+                            borderColor="neutral150"
+                          >
+                            <Stack size={6}>
+                              {row.map((grid, gridIndex) => {
+                                return (
+                                  <Grid gap={4} key={gridIndex}>
+                                    {grid.map(
+                                      ({ fieldSchema, labelAction, metadatas, name, size }) => {
+                                        const isComponent = fieldSchema.type === 'component';
 
-                      return (
-                        <Box
-                          key={index}
-                          hasRadius
-                          background="neutral0"
-                          shadow="tableShadow"
-                          paddingLeft={6}
-                          paddingRight={6}
-                          paddingTop={6}
-                          paddingBottom={6}
-                          borderColor="neutral150"
-                        >
-                          <Stack size={6}>
-                            {row.map((grid, gridIndex) => {
-                              return (
-                                <Grid gap={4} key={gridIndex}>
-                                  {grid.map(
-                                    ({ fieldSchema, labelAction, metadatas, name, size }) => {
-                                      const isComponent = fieldSchema.type === 'component';
+                                        if (isComponent) {
+                                          const {
+                                            component,
+                                            max,
+                                            min,
+                                            repeatable = false,
+                                          } = fieldSchema;
 
-                                      if (isComponent) {
-                                        const {
-                                          component,
-                                          max,
-                                          min,
-                                          repeatable = false,
-                                        } = fieldSchema;
+                                          return (
+                                            <GridItem col={size} s={12} xs={12} key={component}>
+                                              <FieldComponent
+                                                componentUid={component}
+                                                labelAction={labelAction}
+                                                isRepeatable={repeatable}
+                                                intlLabel={{
+                                                  id: metadatas.label,
+                                                  defaultMessage: metadatas.label,
+                                                }}
+                                                max={max}
+                                                min={min}
+                                                name={name}
+                                              />
+                                            </GridItem>
+                                          );
+                                        }
 
                                         return (
-                                          <GridItem col={size} s={12} xs={12} key={component}>
-                                            <FieldComponent
-                                              componentUid={component}
+                                          <GridItem col={size} key={name} s={12} xs={12}>
+                                            <Inputs
+                                              fieldSchema={fieldSchema}
+                                              keys={name}
                                               labelAction={labelAction}
-                                              isRepeatable={repeatable}
-                                              intlLabel={{
-                                                id: metadatas.label,
-                                                defaultMessage: metadatas.label,
-                                              }}
-                                              max={max}
-                                              min={min}
-                                              name={name}
+                                              metadatas={metadatas}
                                             />
                                           </GridItem>
                                         );
                                       }
-
-                                      return (
-                                        <GridItem col={size} key={name} s={12} xs={12}>
-                                          <Inputs
-                                            fieldSchema={fieldSchema}
-                                            keys={name}
-                                            labelAction={labelAction}
-                                            metadatas={metadatas}
-                                          />
-                                        </GridItem>
-                                      );
-                                    }
-                                  )}
-                                </Grid>
-                              );
-                            })}
-                          </Stack>
-                        </Box>
-                      );
-                    })}
+                                    )}
+                                  </Grid>
+                                );
+                              })}
+                            </Stack>
+                          </Box>
+                        );
+                      })}
+                    </Stack>
                   </GridItem>
                   <GridItem col={3} s={12}>
                     <Stack size={2}>

@@ -23,7 +23,7 @@ const DzLabel = ({ label, labelAction, name, numberOfComponents }) => {
 
   return (
     <Row justifyContent="center">
-      <Box paddingTop={6}>
+      <Box>
         <StyledBox padding={3} background="neutral0" shadow="filterShadow" color="neutral500">
           <Row>
             <Typography fontSize={0} lineHeight={0} textColor="neutral600" fontWeight="bold">
