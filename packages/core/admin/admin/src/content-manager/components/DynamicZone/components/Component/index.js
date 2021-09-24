@@ -61,8 +61,6 @@ const Component = ({
     { name: friendlyName }
   );
 
-  // TODO foc
-
   return (
     <Box>
       <Rectangle />

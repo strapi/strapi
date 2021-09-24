@@ -15,7 +15,15 @@ describe('<AddComponentButton />', () => {
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="test" isOpen={false} name="name" onClick={jest.fn()} />
+          <AddComponentButton
+            label="test"
+            isOpen={false}
+            name="name"
+            onClick={jest.fn()}
+            hasError={false}
+            hasMaxError={false}
+            hasMinError={false}
+          />
         </IntlProvider>
       </ThemeProvider>
     );
@@ -27,7 +35,15 @@ describe('<AddComponentButton />', () => {
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="test" isOpen name="name" onClick={jest.fn()} />
+          <AddComponentButton
+            label="test"
+            isOpen
+            name="name"
+            onClick={jest.fn()}
+            hasError={false}
+            hasMaxError={false}
+            hasMinError={false}
+          />
         </IntlProvider>
       </ThemeProvider>
     );
@@ -39,7 +55,15 @@ describe('<AddComponentButton />', () => {
     const { container } = render(
       <ThemeProvider theme={lightTheme}>
         <IntlProvider locale="en" messages={{}} defaultLocale="en">
-          <AddComponentButton label="" isOpen={false} name="name" onClick={jest.fn()} />
+          <AddComponentButton
+            label=""
+            isOpen={false}
+            name="name"
+            onClick={jest.fn()}
+            hasError={false}
+            hasMaxError={false}
+            hasMinError={false}
+          />
         </IntlProvider>
       </ThemeProvider>
     );
