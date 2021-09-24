@@ -4,7 +4,7 @@ const {
   contentTypes: { hasDraftAndPublish },
 } = require('@strapi/utils');
 
-module.exports = (ctx, next) => {
+module.exports = ({ ctx, strapi }) => {
   const {
     params: { model: modelUid },
   } = ctx;
@@ -15,5 +15,5 @@ module.exports = (ctx, next) => {
     throw strapi.errors.forbidden();
   }
 
-  return next();
+  return true;
 };
