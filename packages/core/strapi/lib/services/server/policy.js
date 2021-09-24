@@ -18,7 +18,7 @@ const resolvePolicies = route => {
       const resolvedPolicy = await policy.get(policyName, { pluginName, apiName });
       const result = await resolvedPolicy({ ctx: context, strapi });
 
-      if (!result) {
+      if (![true, undefined].includes(result)) {
         throw new Error('Policies failed.');
       }
     }
