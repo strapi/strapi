@@ -32,7 +32,7 @@ import Hide from '@strapi/icons/Hide';
 import CheckIcon from '@strapi/icons/CheckIcon';
 import useLocalesProvider from '../../components/LocalesProvider/useLocalesProvider';
 import { fetchUser, putUser } from './utils/api';
-import { schema, layout } from './utils';
+import schema from './utils/schema';
 
 const FieldActionWrapper = styled(FieldAction)`
   svg {
@@ -182,18 +182,55 @@ const ProfilePage = () => {
                           })}
                         </H3>
                         <Grid gap={5}>
-                          {layout.map(input => {
-                            return (
-                              <GridItem key={input.name} {...input.size}>
-                                <GenericInput
-                                  {...input}
-                                  error={errors[input.name]}
-                                  onChange={handleChange}
-                                  value={values[input.name] || ''}
-                                />
-                              </GridItem>
-                            );
-                          })}
+                          <GridItem s={12} col={6}>
+                            <GenericInput
+                              intlLabel={{
+                                id: 'Auth.form.firstname.label',
+                                defaultMessage: 'First name',
+                              }}
+                              error={errors.firstname}
+                              onChange={handleChange}
+                              value={values.firstname || ''}
+                              type="text"
+                              name="firstname"
+                            />
+                          </GridItem>
+                          <GridItem s={12} col={6}>
+                            <GenericInput
+                              intlLabel={{
+                                id: 'Auth.form.lastname.label',
+                                defaultMessage: 'Last name',
+                              }}
+                              error={errors.lastname}
+                              onChange={handleChange}
+                              value={values.lastname || ''}
+                              type="text"
+                              name="lastname"
+                            />
+                          </GridItem>
+                          <GridItem s={12} col={6}>
+                            <GenericInput
+                              intlLabel={{ id: 'Auth.form.email.label', defaultMessage: 'Email' }}
+                              error={errors.email}
+                              onChange={handleChange}
+                              value={values.email || ''}
+                              type="email"
+                              name="email"
+                            />
+                          </GridItem>
+                          <GridItem s={12} col={6}>
+                            <GenericInput
+                              intlLabel={{
+                                id: 'Auth.form.username.label',
+                                defaultMessage: 'Username',
+                              }}
+                              error={errors.username}
+                              onChange={handleChange}
+                              value={values.username || ''}
+                              type="text"
+                              name="username"
+                            />
+                          </GridItem>
                         </Grid>
                       </Stack>
                     </Box>
