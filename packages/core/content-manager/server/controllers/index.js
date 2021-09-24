@@ -1,11 +1,11 @@
 'use strict';
 
-const collectionTypes = require('../../controllers/collection-types');
-const components = require('../../controllers/components');
-const contentTypes = require('../../controllers/content-types');
-const relations = require('../../controllers/relations');
-const singleTypes = require('../../controllers/single-types');
-const uid = require('../../controllers/uid');
+const collectionTypes = require('./collection-types');
+const components = require('./components');
+const contentTypes = require('./content-types');
+const relations = require('./relations');
+const singleTypes = require('./single-types');
+const uid = require('./uid');
 
 module.exports = {
   'collection-types': collectionTypes,
