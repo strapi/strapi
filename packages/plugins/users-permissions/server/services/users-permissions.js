@@ -101,7 +101,10 @@ module.exports = ({ strapi }) => ({
         return;
       }
 
-      routesMap[`api::${apiName}`] = routes;
+      routesMap[`api::${apiName}`] = routes.map(route => ({
+        ...route,
+        path: `/api${route.path}`,
+      }));
     });
 
     _.forEach(strapi.plugins, (plugin, pluginName) => {
@@ -119,7 +122,10 @@ module.exports = ({ strapi }) => ({
         return;
       }
 
-      routesMap[`plugin::${pluginName}`] = routes;
+      routesMap[`plugin::${pluginName}`] = routes.map(route => ({
+        ...route,
+        path: `/api${route.path}`,
+      }));
     });
 
     return routesMap;
