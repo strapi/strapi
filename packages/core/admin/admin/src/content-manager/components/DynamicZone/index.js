@@ -2,7 +2,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { get } from 'lodash';
 import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
-import { FormattedMessage, useIntl } from 'react-intl';
+import { FormattedMessage } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
 import { Stack } from '@strapi/parts/Stack';
 import { Flex } from '@buffetjs/core';
@@ -11,6 +11,7 @@ import { getTrad } from '../../utils';
 import connect from './utils/connect';
 import select from './utils/select';
 import AddComponentButton from './components/AddComponentButton';
+import DzLabel from './components/DzLabel';
 import BaselineAlignement from './BaselineAlignement';
 import Button from './Button';
 import Component from './Component';
@@ -40,7 +41,7 @@ const DynamicZone = ({
 }) => {
   const toggleNotification = useNotification();
   const [isOpen, setIsOpen] = useState(false);
-  const { formatMessage } = useIntl();
+  // const { formatMessage } = useIntl();
   // We cannot use the default props here
   const { max = Infinity, min = -Infinity } = fieldSchema;
   const dynamicZoneErrors = useMemo(() => {
@@ -114,7 +115,14 @@ const DynamicZone = ({
 
   return (
     <Box>
-      {dynamicDisplayedComponentsLength > 0 && <div>todo</div>}
+      {dynamicDisplayedComponentsLength > 0 && (
+        <DzLabel
+          label={metadatas.label}
+          labelAction={labelAction}
+          name={name}
+          numberOfComponents={dynamicDisplayedComponentsLength}
+        />
+      )}
       {isFieldAllowed && (
         <AddComponentButton label={metadatas.label} name={name} onClick={handleClickOpenPicker} />
       )}
