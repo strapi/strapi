@@ -19,7 +19,7 @@ import ComponentWrapper from './ComponentWrapper';
 import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Label from './Label';
 import Wrapper from './Wrapper';
-import Picker from './Picker';
+import Picker from './components/Picker';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -124,7 +124,14 @@ const DynamicZone = ({
         />
       )}
       {isFieldAllowed && (
-        <AddComponentButton label={metadatas.label} name={name} onClick={handleClickOpenPicker} />
+        <>
+          <AddComponentButton
+            label={metadatas.label}
+            isOpen={isOpen}
+            name={name}
+            onClick={handleClickOpenPicker}
+          />
+        </>
       )}
     </Box>
   );

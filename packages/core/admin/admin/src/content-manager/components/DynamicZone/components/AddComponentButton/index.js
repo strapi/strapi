@@ -15,7 +15,8 @@ import { Row } from '@strapi/parts/Row';
 import { Text, ButtonText } from '@strapi/parts/Text';
 import { getTrad } from '../../../../utils';
 
-const Icon = styled(AddIcon)`
+const StyledAddIcon = styled(AddIcon)`
+  transform: ${({ $isopen }) => ($isopen ? 'rotate(45deg)' : 'rotate(0deg)')};
   > circle {
     fill: ${({ theme }) => theme.colors.neutral150};
   }
@@ -29,13 +30,20 @@ const StyledButton = styled(BaseButton)`
   background: ${({ theme }) => theme.colors.neutral0};
   padding: ${({ theme }) => theme.spaces[3]};
   border: 0;
+  svg {
+    height: ${({ theme }) => theme.spaces[6]};
+    width: ${({ theme }) => theme.spaces[6]};
+    > path {
+      fill: ${({ theme }) => theme.colors.neutral600};
+    }
+  }
   &:hover {
     color: ${({ theme }) => theme.colors.primary600} !important;
     ${Text} {
       color: ${({ theme }) => theme.colors.primary600} !important;
     }
 
-    ${Icon} {
+    ${StyledAddIcon} {
       > circle {
         fill: ${({ theme }) => theme.colors.primary600};
       }
@@ -48,7 +56,7 @@ const StyledButton = styled(BaseButton)`
     ${Text} {
       color: ${({ theme }) => theme.colors.primary600};
     }
-    ${Icon} {
+    ${StyledAddIcon} {
       > circle {
         fill: ${({ theme }) => theme.colors.primary600};
       }
@@ -57,38 +65,37 @@ const StyledButton = styled(BaseButton)`
       }
     }
   }
-  svg {
-    height: ${({ theme }) => theme.spaces[6]};
-    width: ${({ theme }) => theme.spaces[6]};
-  }
 `;
 
 const BoxFullHeight = styled(Box)`
   height: 100%;
 `;
 
-const AddComponentButton = ({ label, name, onClick }) => {
+const AddComponentButton = ({ isOpen, label, name, onClick }) => {
   const { formatMessage } = useIntl();
-  const intlLabel = formatMessage(
+  const addLabel = formatMessage(
     {
       id: getTrad('components.DynamicZone.add-component'),
       defaultMessage: 'Add a component to {componentName}',
     },
     { componentName: label || name }
   );
+  const closeLabel = formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
 
   return (
     <Row justifyContent="center">
-      <StyledButton type="button" onClick={onClick}>
-        <Row>
-          <BoxFullHeight aria-hidden paddingRight={2}>
-            <Icon />
-          </BoxFullHeight>
-          <ButtonText textColor="neutral500" small>
-            {intlLabel}
-          </ButtonText>
-        </Row>
-      </StyledButton>
+      <Box paddingTop={6} paddingBottom={6}>
+        <StyledButton type="button" onClick={onClick}>
+          <Row>
+            <BoxFullHeight aria-hidden paddingRight={2}>
+              <StyledAddIcon $isopen={isOpen} />
+            </BoxFullHeight>
+            <ButtonText textColor="neutral500" small>
+              {isOpen ? closeLabel : addLabel}
+            </ButtonText>
+          </Row>
+        </StyledButton>
+      </Box>
     </Row>
   );
 };
@@ -99,6 +106,7 @@ AddComponentButton.defaultProps = {
 
 AddComponentButton.propTypes = {
   label: PropTypes.string,
+  isOpen: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,
 };

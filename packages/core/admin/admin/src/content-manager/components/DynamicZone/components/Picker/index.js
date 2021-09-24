@@ -3,8 +3,8 @@ import { groupBy } from 'lodash';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
 import { FormattedMessage } from 'react-intl';
-import { getTrad } from '../../../utils';
-import { useContentTypeLayout } from '../../../hooks';
+import { getTrad } from '../../../../utils';
+import { useContentTypeLayout } from '../../../../hooks';
 import Category from './Category';
 import Wrapper from './Wrapper';
 

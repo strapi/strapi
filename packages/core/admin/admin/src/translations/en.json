@@ -629,5 +629,6 @@
   "skipToContent": "Skip to content",
   "clearLabel": "Clear",
   "submit": "Submit",
-  "anErrorOccurred": "Woops! Something went wrong. Please, try again."
+  "anErrorOccurred": "Woops! Something went wrong. Please, try again.",
+  "app.utils.close-label": "Close"
 }

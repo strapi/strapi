@@ -1,7 +1,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Collapse } from 'reactstrap';
-import DynamicComponentCard from '../../../DynamicComponentCard';
+import DynamicComponentCard from '../../../../DynamicComponentCard';
 import Banner from './Banner';
 
 const Category = ({ category, components, isFirst, isOpen, onAddComponent, onToggle }) => {

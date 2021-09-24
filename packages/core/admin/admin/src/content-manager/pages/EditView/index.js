@@ -141,7 +141,7 @@ const EditView = ({
                         } = row;
 
                         return (
-                          <Box key={index} paddingTop={6}>
+                          <Box key={index}>
                             <Grid gap={4}>
                               <GridItem col={12} s={12} xs={12}>
                                 <DynamicZone
