@@ -7,7 +7,8 @@
   },
   "attributes": {
     "label": {
-      "type": "string"
+      "type": "string",
+      "default": "toto"
     },
     "start_date": {
       "type": "date",
@@ -19,11 +20,15 @@
     },
     "media": {
       "type": "media",
+      "multiple": false,
       "required": false
     },
     "dish": {
       "component": "default.dish",
-      "type": "component"
+      "type": "component",
+      "repeatable": true,
+      "required": true,
+      "min": 2
     }
   }
 }

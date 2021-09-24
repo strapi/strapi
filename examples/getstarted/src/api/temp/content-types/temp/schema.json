@@ -11,91 +11,41 @@
   "options": {
     "draftAndPublish": false
   },
-  "pluginOptions": {
-    "i18n": {
-      "localized": true
-    }
-  },
+  "pluginOptions": {},
   "attributes": {
     "name": {
       "type": "string",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+      "pluginOptions": {}
     },
-    "temp": {
-      "type": "component",
-      "repeatable": true,
-      "component": "default.temp",
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+    "simple": {
+      "pluginOptions": {},
+      "type": "uid"
     },
-    "dz": {
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      },
-      "type": "dynamiczone",
-      "components": [
-        "basic.simple",
-        "blog.test-como",
-        "default.closingperiod",
-        "default.dish",
-        "default.openingtimes",
-        "default.restaurantservice",
-        "default.temp",
-        "default.apple",
-        "default.car"
-      ],
-      "required": true,
-      "min": 2
+    "attached": {
+      "pluginOptions": {},
+      "type": "uid",
+      "targetField": "name"
     },
-    "dz_req": {
-      "type": "dynamiczone",
-      "components": [
-        "default.apple",
-        "default.car",
-        "default.closingperiod",
-        "default.dish",
-        "default.openingtimes",
-        "default.restaurantservice",
-        "default.temp"
-      ],
-      "required": true,
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+    "attached_req": {
+      "pluginOptions": {},
+      "type": "uid",
+      "targetField": "name",
+      "required": true
     },
-    "dz_simple": {
-      "type": "dynamiczone",
-      "components": [
-        "basic.simple"
-      ],
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+    "req": {
+      "pluginOptions": {},
+      "type": "uid",
+      "required": true
     },
-    "dz_max": {
-      "type": "dynamiczone",
-      "components": [
-        "basic.simple"
-      ],
-      "max": 2,
-      "pluginOptions": {
-        "i18n": {
-          "localized": true
-        }
-      }
+    "default_val": {
+      "pluginOptions": {},
+      "type": "uid",
+      "default": "to",
+      "minLength": 4
+    },
+    "date": {
+      "type": "date",
+      "required": true
     }
   }
 }

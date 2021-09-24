@@ -13,9 +13,9 @@ import { getFieldName } from '../../utils';
 import Wysiwyg from '../Wysiwyg';
 import InputJSON from '../InputJSON';
 import GenericInput from './GenericInput';
+import InputUID from '../InputUID';
 // import SelectWrapper from '../SelectWrapper';
-// import WysiwygWithErrors from '../WysiwygWithErrors';
-// import InputUID from '../InputUID';
+
 import {
   connect,
   generateOptions,
@@ -41,7 +41,6 @@ function Inputs({
   value,
 }) {
   // const { fields } = useLibrary();
-
   const { contentType: currentContentTypeLayout } = useContentTypeLayout();
 
   const disabled = useMemo(() => !get(metadatas, 'editable', true), [metadatas]);
@@ -208,6 +207,7 @@ function Inputs({
   return (
     <GenericInput
       // {...metadatas}
+      attribute={fieldSchema}
       autoComplete="new-password"
       intlLabel={{ id: label, defaultMessage: label }}
       description={description ? { id: description, defaultMessage: description } : null}
@@ -220,12 +220,11 @@ function Inputs({
         // ...fields,
         json: InputJSON,
         media: () => <div>TODO media</div>,
-        uid: () => <div>TODO uid</div>,
+        uid: InputUID,
         // wysiwyg: () => <div>TODO wysiwyg</div>,
         wysiwyg: Wysiwyg,
       }}
       multiple={fieldSchema.multiple || false}
-      attribute={fieldSchema}
       name={keys}
       onChange={onChange}
       options={options}
