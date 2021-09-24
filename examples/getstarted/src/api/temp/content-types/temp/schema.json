@@ -49,7 +49,9 @@
         "default.dish",
         "default.openingtimes",
         "default.restaurantservice",
-        "default.temp"
+        "default.temp",
+        "default.apple",
+        "default.car"
       ]
     }
   }

@@ -4,7 +4,6 @@ import isEqual from 'react-fast-compare';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from 'react-intl';
 import { Box } from '@strapi/parts/Box';
-import { Stack } from '@strapi/parts/Stack';
 import { Flex } from '@buffetjs/core';
 import { LabelIconWrapper, NotAllowedInput, useNotification } from '@strapi/helper-plugin';
 import { getTrad } from '../../utils';
@@ -19,7 +18,7 @@ import ComponentWrapper from './ComponentWrapper';
 import DynamicZoneWrapper from './DynamicZoneWrapper';
 import Label from './Label';
 import Wrapper from './Wrapper';
-import Picker from './components/Picker';
+import ComponentPicker from './components/ComponentPicker';
 
 /* eslint-disable react/no-array-index-key */
 
@@ -131,6 +130,11 @@ const DynamicZone = ({
             name={name}
             onClick={handleClickOpenPicker}
           />
+          <ComponentPicker
+            isOpen={isOpen}
+            components={dynamicZoneAvailableComponents}
+            onClickAddComponent={handleAddComponent}
+          />
         </>
       )}
     </Box>
@@ -215,7 +219,7 @@ const DynamicZone = ({
               values={{ componentName: metadatas.label }}
             />
           </div>
-          <Picker
+          <ComponentPicker
             isOpen={isOpen}
             components={dynamicZoneAvailableComponents}
             onClickAddComponent={handleAddComponent}

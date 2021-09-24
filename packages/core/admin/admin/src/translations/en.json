@@ -630,5 +630,6 @@
   "clearLabel": "Clear",
   "submit": "Submit",
   "anErrorOccurred": "Woops! Something went wrong. Please, try again.",
-  "app.utils.close-label": "Close"
+  "app.utils.close-label": "Close",
+  "content-manager.components.DynamicZone.ComponentPicker-label": "Pick one component"
 }
