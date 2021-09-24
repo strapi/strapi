@@ -14,7 +14,7 @@ import EditIcon from '@strapi/icons/EditIcon';
 import { InjectionZone } from '../../../shared/components';
 import permissions from '../../../permissions';
 // import Container from '../../components/Container';
-// import DynamicZone from '../../components/DynamicZone';
+import DynamicZone from '../../components/DynamicZone';
 // import FormWrapper from '../../components/FormWrapper';
 import FieldComponent from '../../components/FieldComponent';
 import Inputs from '../../components/Inputs';
@@ -134,9 +134,24 @@ const EditView = ({
                   <GridItem col={9} s={12}>
                     {formattedContentTypeLayout.map((row, index) => {
                       if (isDynamicZone(row)) {
+                        const {
+                          0: {
+                            0: { name, fieldSchema, metadatas, labelAction },
+                          },
+                        } = row;
+
                         return (
-                          <Box key={index} paddingTop={6}>
-                            TODO DZ
+                          <Box key={index}>
+                            <Grid gap={4}>
+                              <GridItem col={12} s={12} xs={12}>
+                                <DynamicZone
+                                  name={name}
+                                  fieldSchema={fieldSchema}
+                                  labelAction={labelAction}
+                                  metadatas={metadatas}
+                                />
+                              </GridItem>
+                            </Grid>
                           </Box>
                         );
                       }
@@ -151,6 +166,7 @@ const EditView = ({
                           paddingRight={6}
                           paddingTop={6}
                           paddingBottom={6}
+                          borderColor="neutral150"
                         >
                           <Stack size={6}>
                             {row.map((grid, gridIndex) => {
@@ -334,12 +350,12 @@ const EditView = ({
 
   //                     return (
   //                       <BaselineAlignment key={blockIndex} top size={baselineAlignementSize}>
-  //                         <DynamicZone
-  //                           name={name}
-  //                           fieldSchema={fieldSchema}
-  //                           labelIcon={labelIcon}
-  //                           metadatas={metadatas}
-  //                         />
+  // <DynamicZone
+  //   name={name}
+  //   fieldSchema={fieldSchema}
+  //   labelIcon={labelIcon}
+  //   metadatas={metadatas}
+  // />
   //                       </BaselineAlignment>
   //                     );
   //                   }

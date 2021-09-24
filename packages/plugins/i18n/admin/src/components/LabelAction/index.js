@@ -1,24 +1,31 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
+import styled from 'styled-components';
 import { Tooltip } from '@strapi/parts/Tooltip';
+
+const Button = styled.button`
+  border: none;
+  padding: 0;
+  background: transparent;
+  svg {
+    width: 12px;
+    height: 12px;
+    fill: ${({ theme }) => theme.colors.neutral500};
+    path {
+      fill: ${({ theme }) => theme.colors.neutral500};
+    }
+  }
+`;
 
 const LabelAction = ({ title, icon }) => {
   const { formatMessage } = useIntl();
 
   return (
     <Tooltip description={formatMessage(title)}>
-      <button
-        aria-label={formatMessage(title)}
-        style={{
-          border: 'none',
-          padding: 0,
-          background: 'transparent',
-        }}
-        type="button"
-      >
+      <Button aria-label={formatMessage(title)} type="button">
         {icon}
-      </button>
+      </Button>
     </Tooltip>
   );
 };

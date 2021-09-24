@@ -10,12 +10,7 @@ import { useContentTypeLayout } from '../../hooks';
 import FieldComponent from '../FieldComponent';
 import Inputs from '../Inputs';
 
-const NonRepeatableComponent = ({
-  componentUid,
-  // TODO
-  // isFromDynamicZone,
-  name,
-}) => {
+const NonRepeatableComponent = ({ componentUid, name }) => {
   const { getComponentLayout } = useContentTypeLayout();
   const componentLayoutData = useMemo(() => getComponentLayout(componentUid), [
     componentUid,
@@ -70,58 +65,10 @@ const NonRepeatableComponent = ({
       </Stack>
     </Box>
   );
-
-  // return (
-  //   <NonRepeatableWrapper isFromDynamicZone={isFromDynamicZone}>
-  //     {fields.map((fieldRow, key) => {
-  //       return (
-  //         <div className="row" key={key}>
-  //           {fieldRow.map(({ name: fieldName, size, metadatas, fieldSchema, queryInfos }) => {
-  //             const isComponent = fieldSchema.type === 'component';
-  //             const keys = `${name}.${fieldName}`;
-
-  //             if (isComponent) {
-  //               const compoUid = fieldSchema.component;
-
-  //               return (
-  //                 <FieldComponent
-  //                   key={fieldName}
-  //                   componentUid={compoUid}
-  //                   isRepeatable={fieldSchema.repeatable}
-  //                   label={metadatas.label}
-  //                   max={fieldSchema.max}
-  //                   min={fieldSchema.min}
-  //                   name={keys}
-  //                 />
-  //               );
-  //             }
-
-  //             return (
-  //               <div key={fieldName} className={`col-${size}`}>
-  //                 <Inputs
-  //                   keys={keys}
-  //                   fieldSchema={fieldSchema}
-  //                   metadatas={metadatas}
-  //                   componentUid={componentUid}
-  //                   queryInfos={queryInfos}
-  //                 />
-  //               </div>
-  //             );
-  //           })}
-  //         </div>
-  //       );
-  //     })}
-  //   </NonRepeatableWrapper>
-  // );
-};
-
-NonRepeatableComponent.defaultProps = {
-  // isFromDynamicZone: false,
 };
 
 NonRepeatableComponent.propTypes = {
   componentUid: PropTypes.string.isRequired,
-  // isFromDynamicZone: PropTypes.bool,
   name: PropTypes.string.isRequired,
 };
 

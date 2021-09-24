@@ -4,9 +4,9 @@ import LayoutDndProvider from '../LayoutDndProvider';
 
 import ItemTypes from '../../utils/ItemTypes';
 import RepeatableComponentPreview from '../RepeatableComponent/DragPreview';
-import RelationItem from '../SelectMany/Relation';
-import { Li } from '../SelectMany/components';
-import DraggedField from '../DraggedField';
+// import RelationItem from '../SelectMany/Relation';
+// import { Li } from '../SelectMany/components';
+// import DraggedField from '../DraggedField';
 
 const layerStyles = {
   position: 'fixed',
@@ -47,26 +47,26 @@ const CustomDragLayer = () => {
 
   function renderItem() {
     switch (itemType) {
-      case ItemTypes.FIELD:
-        return <DraggedField name={item.id} selectedItem={item.name} />;
+      // case ItemTypes.FIELD:
+      //   return <DraggedField name={item.id} selectedItem={item.name} />;
       case ItemTypes.COMPONENT:
         return <RepeatableComponentPreview displayedValue={item.displayedValue} />;
-      case ItemTypes.RELATION:
-        return (
-          <Li>
-            <RelationItem
-              data={item.data}
-              displayNavigationLink={false}
-              mainField={item.mainField}
-              isDisabled={false}
-              isDragging
-              hasDraftAndPublish={item.hasDraftAndPublish}
-            />
-          </Li>
-        );
-      case ItemTypes.EDIT_FIELD:
-      case ItemTypes.EDIT_RELATION:
-        return <DraggedField name={item.name} size={12} selectedItem={item.name} />;
+      // case ItemTypes.RELATION:
+      //   return (
+      //     <Li>
+      //       <RelationItem
+      //         data={item.data}
+      //         displayNavigationLink={false}
+      //         mainField={item.mainField}
+      //         isDisabled={false}
+      //         isDragging
+      //         hasDraftAndPublish={item.hasDraftAndPublish}
+      //       />
+      //     </Li>
+      //   );
+      // case ItemTypes.EDIT_FIELD:
+      // case ItemTypes.EDIT_RELATION:
+      //   return <DraggedField name={item.name} size={12} selectedItem={item.name} />;
       default:
         return null;
     }

@@ -1,8 +1,8 @@
 {
-  "collectionName": "components_basic_simples",
+  "collectionName": "components_default_apples",
   "info": {
-    "name": "simple",
-    "icon": "address-card",
+    "name": "apple",
+    "icon": "apple-alt",
     "description": ""
   },
   "options": {},
@@ -10,9 +10,6 @@
     "name": {
       "type": "string",
       "required": true
-    },
-    "test": {
-      "type": "string"
     }
   }
 }
