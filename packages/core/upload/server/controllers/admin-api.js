@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { contentTypes: contentTypesUtils, sanitizeEntity } = require('@strapi/utils');
+const { contentTypes: contentTypesUtils } = require('@strapi/utils');
 const { getService } = require('../utils');
 const validateSettings = require('./validation/settings');
 const validateUploadBody = require('./validation/upload');
@@ -204,18 +204,6 @@ module.exports = {
     }
 
     await (id ? this.replaceFile : this.uploadFiles)(ctx);
-  },
-
-  async search(ctx) {
-    const { id } = ctx.params;
-    const model = strapi.getModel('plugin::upload.file');
-    const entries = await strapi.query('plugin::upload.file').findMany({
-      where: {
-        $or: [{ hash: { $contains: id } }, { name: { $contains: id } }],
-      },
-    });
-
-    ctx.body = sanitizeEntity(entries, { model });
   },
 };
 

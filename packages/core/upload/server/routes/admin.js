@@ -92,14 +92,6 @@ module.exports = {
       },
     },
     {
-      method: 'GET',
-      path: '/search/:id',
-      handler: 'admin-api.search',
-      config: {
-        policies: ['admin::isAuthenticatedAdmin'],
-      },
-    },
-    {
       method: 'DELETE',
       path: '/files/:id',
       handler: 'admin-api.destroy',
