@@ -1,112 +1,114 @@
-/* eslint-disable jsx-a11y/click-events-have-key-events */
-import React, { forwardRef } from 'react';
-import { FormattedMessage } from 'react-intl';
-import PropTypes from 'prop-types';
-import { Carret, Grab } from '@buffetjs/icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { getTrad } from '../../utils';
-import PreviewCarret from '../PreviewCarret';
-import BannerWrapper from './BannerWrapper';
+// /* eslint-disable jsx-a11y/click-events-have-key-events */
+// import React, { forwardRef } from 'react';
+// import { FormattedMessage } from 'react-intl';
+// import PropTypes from 'prop-types';
+// import { Carret, Grab } from '@buffetjs/icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { getTrad } from '../../utils';
+// import PreviewCarret from '../PreviewCarret';
+// // import BannerWrapper from './BannerWrapper';
 
-/* eslint-disable jsx-a11y/no-static-element-interactions */
+// const BannerWrapper = () => null;
 
-const Banner = forwardRef(
-  (
-    {
-      displayedValue,
-      doesPreviousFieldContainErrorsAndIsOpen,
-      hasErrors,
-      hasMinError,
-      isFirst,
-      isReadOnly,
-      isDragging,
-      isOpen,
-      onClickToggle,
-      onClickRemove,
-      style,
-    },
-    refs
-  ) => {
-    const display = isDragging ? 'none' : '';
+// /* eslint-disable jsx-a11y/no-static-element-interactions */
 
-    return (
-      <BannerWrapper
-        doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
-        type="button"
-        hasMinError={hasMinError}
-        hasErrors={hasErrors}
-        isFirst={isFirst}
-        isOpen={isOpen}
-        isReadOnly={isReadOnly}
-        onClick={onClickToggle}
-        ref={refs ? refs.dropRef : null}
-        style={style}
-      >
-        {isDragging && <PreviewCarret isComponent />}
-        <>
-          <div className="img-wrapper" style={{ display }}>
-            <Carret />
-          </div>
+// const Banner = forwardRef(
+//   (
+//     {
+//       displayedValue,
+//       doesPreviousFieldContainErrorsAndIsOpen,
+//       hasErrors,
+//       hasMinError,
+//       isFirst,
+//       isReadOnly,
+//       isDragging,
+//       isOpen,
+//       onClickToggle,
+//       onClickRemove,
+//       style,
+//     },
+//     refs
+//   ) => {
+//     const display = isDragging ? 'none' : '';
 
-          <FormattedMessage id={getTrad('containers.Edit.pluginHeader.title.new')}>
-            {msg => {
-              // The displayed value may be "falsey" when the main field is a number or boolean
-              return <div style={{ display }}>{displayedValue ?? msg}</div>;
-            }}
-          </FormattedMessage>
-          <div className="cta-wrapper" style={{ display }}>
-            {!isReadOnly && (
-              <>
-                <div
-                  className="trash-icon"
-                  style={{ marginRight: 10, padding: '0 5px' }}
-                  onClick={e => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onClickRemove();
-                  }}
-                >
-                  <FontAwesomeIcon icon="trash-alt" />
-                </div>
-                <div className="grab" ref={refs ? refs.dragRef : null}>
-                  <Grab />
-                </div>
-              </>
-            )}
-          </div>
-        </>
-      </BannerWrapper>
-    );
-  }
-);
+//     return (
+//       <BannerWrapper
+//         doesPreviousFieldContainErrorsAndIsOpen={doesPreviousFieldContainErrorsAndIsOpen}
+//         type="button"
+//         hasMinError={hasMinError}
+//         hasErrors={hasErrors}
+//         isFirst={isFirst}
+//         isOpen={isOpen}
+//         isReadOnly={isReadOnly}
+//         onClick={onClickToggle}
+//         ref={refs ? refs.dropRef : null}
+//         style={style}
+//       >
+//         {isDragging && <PreviewCarret isComponent />}
+//         <>
+//           <div className="img-wrapper" style={{ display }}>
+//             <Carret />
+//           </div>
 
-Banner.defaultProps = {
-  displayedValue: null,
-  doesPreviousFieldContainErrorsAndIsOpen: false,
-  hasErrors: false,
-  hasMinError: false,
-  isDragging: false,
-  isFirst: false,
-  isOpen: false,
-  onClickRemove: () => {},
-  onClickToggle: () => {},
-  style: {},
-};
+//           <FormattedMessage id={getTrad('containers.Edit.pluginHeader.title.new')}>
+//             {msg => {
+//               // The displayed value may be "falsey" when the main field is a number or boolean
+//               return <div style={{ display }}>{displayedValue ?? msg}</div>;
+//             }}
+//           </FormattedMessage>
+//           <div className="cta-wrapper" style={{ display }}>
+//             {!isReadOnly && (
+//               <>
+//                 <div
+//                   className="trash-icon"
+//                   style={{ marginRight: 10, padding: '0 5px' }}
+//                   onClick={e => {
+//                     e.preventDefault();
+//                     e.stopPropagation();
+//                     onClickRemove();
+//                   }}
+//                 >
+//                   <FontAwesomeIcon icon="trash-alt" />
+//                 </div>
+//                 <div className="grab" ref={refs ? refs.dragRef : null}>
+//                   <Grab />
+//                 </div>
+//               </>
+//             )}
+//           </div>
+//         </>
+//       </BannerWrapper>
+//     );
+//   }
+// );
 
-Banner.propTypes = {
-  displayedValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]),
-  doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
-  hasErrors: PropTypes.bool,
-  hasMinError: PropTypes.bool,
-  isDragging: PropTypes.bool,
-  isFirst: PropTypes.bool,
-  isOpen: PropTypes.bool,
-  isReadOnly: PropTypes.bool.isRequired,
-  onClickToggle: PropTypes.func,
-  onClickRemove: PropTypes.func,
-  style: PropTypes.object,
-};
+// Banner.defaultProps = {
+//   displayedValue: null,
+//   doesPreviousFieldContainErrorsAndIsOpen: false,
+//   hasErrors: false,
+//   hasMinError: false,
+//   isDragging: false,
+//   isFirst: false,
+//   isOpen: false,
+//   onClickRemove: () => {},
+//   onClickToggle: () => {},
+//   style: {},
+// };
 
-Banner.displayName = 'Banner';
+// Banner.propTypes = {
+//   displayedValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number, PropTypes.object]),
+//   doesPreviousFieldContainErrorsAndIsOpen: PropTypes.bool,
+//   hasErrors: PropTypes.bool,
+//   hasMinError: PropTypes.bool,
+//   isDragging: PropTypes.bool,
+//   isFirst: PropTypes.bool,
+//   isOpen: PropTypes.bool,
+//   isReadOnly: PropTypes.bool.isRequired,
+//   onClickToggle: PropTypes.func,
+//   onClickRemove: PropTypes.func,
+//   style: PropTypes.object,
+// };
 
-export default Banner;
+// Banner.displayName = 'Banner';
+
+// export default Banner;

@@ -169,14 +169,14 @@ const createYupSchema = (
             dynamicZoneSchema = dynamicZoneSchema
               .test('min', errorsTrads.min, value => {
                 if (options.isCreatingEntry) {
-                  return value && value.length > 0;
+                  return value && value.length >= min;
                 }
 
                 if (value === undefined) {
                   return true;
                 }
 
-                return value !== null && value.length > 0;
+                return value !== null && value.length >= min;
               })
               .test('required', errorsTrads.required, value => {
                 if (options.isCreatingEntry) {

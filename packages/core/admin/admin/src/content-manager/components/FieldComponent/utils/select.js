@@ -7,6 +7,7 @@ import { useContentTypeLayout } from '../../../hooks';
 
 function useSelect({ isFromDynamicZone, name }) {
   const {
+    addNonRepeatableComponentToField,
     createActionAllowedFields,
     isCreatingEntry,
     modifiedData,
@@ -112,6 +113,7 @@ function useSelect({ isFromDynamicZone, name }) {
   }, [hasChildrenAllowedFields, hasChildrenReadableFields, isCreatingEntry]);
 
   return {
+    addNonRepeatableComponentToField,
     formErrors,
     hasChildrenAllowedFields,
     hasChildrenReadableFields,

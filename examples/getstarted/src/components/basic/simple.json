@@ -8,15 +8,11 @@
   "options": {},
   "attributes": {
     "name": {
-      "type": "string"
+      "type": "string",
+      "required": true
     },
     "test": {
       "type": "string"
-    },
-    "nestedd": {
-      "type": "component",
-      "repeatable": false,
-      "component": "default.dish"
     }
   }
 }
