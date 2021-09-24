@@ -93,7 +93,6 @@ const Component = ({
             <FocusTrap onEscape={() => onToggle(index)}>
               <FieldComponent
                 componentUid={componentUid}
-                componentFriendlyName={friendlyName}
                 icon={icon}
                 name={`${name}.${index}`}
                 isFromDynamicZone

@@ -161,6 +161,7 @@ exports[`<AddComponentButton /> displays the name of the dz when the label is em
   >
     <div
       class="c1"
+      style="cursor: pointer;"
     >
       <button
         aria-disabled="false"
@@ -389,6 +390,7 @@ exports[`<AddComponentButton /> renders and matches the snapshot 1`] = `
   >
     <div
       class="c1"
+      style="cursor: pointer;"
     >
       <button
         aria-disabled="false"
@@ -617,6 +619,7 @@ exports[`<AddComponentButton /> renders and matches the snapshot when the isOpen
   >
     <div
       class="c1"
+      style="cursor: pointer;"
     >
       <button
         aria-disabled="false"

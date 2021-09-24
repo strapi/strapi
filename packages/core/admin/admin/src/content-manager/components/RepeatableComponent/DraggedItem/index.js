@@ -30,6 +30,7 @@ import { connect, select } from './utils';
 
 const DraggedItem = ({
   componentFieldName,
+  // FIXME: errors
   // doesPreviousFieldContainErrorsAndIsOpen,
   // hasErrors,
   // hasMinError,

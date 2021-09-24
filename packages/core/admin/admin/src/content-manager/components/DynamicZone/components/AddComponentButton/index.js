@@ -31,6 +31,7 @@ const StyledButton = styled(BaseButton)`
   padding: ${({ theme }) => theme.spaces[3]};
   border: 0;
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
+
   svg {
     height: ${({ theme }) => theme.spaces[6]};
     width: ${({ theme }) => theme.spaces[6]};
@@ -72,7 +73,7 @@ const BoxFullHeight = styled(Box)`
   height: 100%;
 `;
 
-const AddComponentButton = ({ isOpen, label, name, onClick }) => {
+const AddComponentButton = ({ isDisabled, isOpen, label, name, onClick }) => {
   const { formatMessage } = useIntl();
   const addLabel = formatMessage(
     {
@@ -85,8 +86,12 @@ const AddComponentButton = ({ isOpen, label, name, onClick }) => {
 
   return (
     <Row justifyContent="center">
-      <Box paddingTop={6} paddingBottom={6}>
-        <StyledButton type="button" onClick={onClick}>
+      <Box
+        paddingTop={6}
+        paddingBottom={6}
+        style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
+      >
+        <StyledButton type="button" onClick={onClick} disabled={isDisabled}>
           <Row>
             <BoxFullHeight aria-hidden paddingRight={2}>
               <StyledAddIcon $isopen={isOpen} />
@@ -107,6 +112,7 @@ AddComponentButton.defaultProps = {
 
 AddComponentButton.propTypes = {
   label: PropTypes.string,
+  isDisabled: PropTypes.bool.isRequired,
   isOpen: PropTypes.bool.isRequired,
   name: PropTypes.string.isRequired,
   onClick: PropTypes.func.isRequired,

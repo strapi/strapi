@@ -206,21 +206,19 @@ const DynamicZone = ({
           })}
         </>
       )}
-      {isFieldAllowed && (
-        <>
-          <AddComponentButton
-            label={metadatas.label}
-            isOpen={isOpen}
-            name={name}
-            onClick={handleClickOpenPicker}
-          />
-          <ComponentPicker
-            isOpen={isOpen}
-            components={dynamicZoneAvailableComponents}
-            onClickAddComponent={handleAddComponent}
-          />
-        </>
-      )}
+
+      <AddComponentButton
+        isDisabled={!isFieldAllowed}
+        label={metadatas.label}
+        isOpen={isOpen}
+        name={name}
+        onClick={handleClickOpenPicker}
+      />
+      <ComponentPicker
+        isOpen={isOpen}
+        components={dynamicZoneAvailableComponents}
+        onClickAddComponent={handleAddComponent}
+      />
     </Box>
   );
 

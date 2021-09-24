@@ -40,7 +40,7 @@ const ComponentInitializer = ({ isReadOnly, onClick }) => {
       paddingBottom={9}
     >
       <Stack size={2}>
-        <Row justifyContent="center">
+        <Row justifyContent="center" style={{ cursor: isReadOnly ? 'not-allowed' : 'inherit' }}>
           <IconButton disabled={isReadOnly} onClick={onClick}>
             <AddIcon />
           </IconButton>
