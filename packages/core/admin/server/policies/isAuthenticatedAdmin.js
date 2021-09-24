@@ -1,5 +1,5 @@
 'use strict';
 
 module.exports = ({ ctx }) => {
-  return ctx.state.isAuthenticated;
+  return Boolean(ctx.state.isAuthenticated);
 };
