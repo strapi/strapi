@@ -1,18 +1,18 @@
-import React, { useEffect, useState, useRef, memo } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
 import get from 'lodash/get';
-import { axiosInstance } from '../../../core/utils';
-import { getRequestUrl, getTrad } from '../../utils';
-import UID_REGEX from './regex';
 import { TextInput } from '@strapi/parts/TextInput';
 import { Text } from '@strapi/parts/Text';
 import Reload from '@strapi/icons/Reload';
 import AlertSucessIcon from '@strapi/icons/AlertSucessIcon';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
+import { axiosInstance } from '../../../core/utils';
+import { getRequestUrl } from '../../utils';
 import useDebounce from './useDebounce';
+import UID_REGEX from './regex';
 import {
   EndActionWrapper,
   FieldActionWrapper,
@@ -20,21 +20,6 @@ import {
   LoadingWrapper,
 } from './endActionStyle';
 
-// {
-
-// attribute,
-// contentTypeUID,
-// description,
-// error: inputError,
-// label: inputLabel,
-// labelIcon,
-// name,
-// onChange,
-// validations,
-// value,
-// editable,
-// ...inputProps
-// }
 const InputUID = ({
   attribute,
   contentTypeUID,
@@ -46,6 +31,7 @@ const InputUID = ({
   name,
   onChange,
   value,
+  placeholder
 }) => {
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
@@ -66,6 +52,20 @@ const InputUID = ({
         { ...intlLabel.values }
       )
     : name;
+
+  const hint = description
+  ? formatMessage(
+      { id: description.id, defaultMessage: description.defaultMessage },
+      { ...description.values }
+    )
+  : '';
+
+  const formattedPlaceholder = placeholder
+  ? formatMessage(
+      { id: placeholder.id, defaultMessage: placeholder.defaultMessage },
+      { ...placeholder.values }
+    )
+  : '';
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -169,7 +169,7 @@ const InputUID = ({
     setRegenerateLabel(null);
   };
 
-  const handleChange = (e, canCheck, dispatch) => {
+  const handleChange = (e) => {
     if (e.target.value && isCreation) {
       setIsCustomized(true);
     }
@@ -182,6 +182,7 @@ const InputUID = ({
   return (
     <TextInput
       disabled={disabled}
+      error={formattedError}
       endAction={
         <EndActionWrapper>
           {availability && availability.isAvailable && !regenerateLabel && (
@@ -223,11 +224,12 @@ const InputUID = ({
           </FieldActionWrapper>
         </EndActionWrapper>
       }
+      hint={hint}
       label={label}
       labelAction={labelAction}
-      error={formattedError}
       name={name}
       onChange={handleChange}
+      placeholder={formattedPlaceholder}
       value={value || ''}
     />
     // <Error
@@ -310,31 +312,43 @@ const InputUID = ({
   );
 };
 
-// InputUID.propTypes = {
-//   attribute: PropTypes.object.isRequired,
-//   contentTypeUID: PropTypes.string.isRequired,
-//   description: PropTypes.string,
-//   editable: PropTypes.bool,
-//   error: PropTypes.string,
-//   label: PropTypes.string.isRequired,
-//   labelIcon: PropTypes.shape({
-//     icon: PropTypes.node.isRequired,
-//     title: PropTypes.string,
-//   }),
-//   name: PropTypes.string.isRequired,
-//   onChange: PropTypes.func.isRequired,
-//   validations: PropTypes.object,
-//   value: PropTypes.string,
-// };
+InputUID.propTypes = {
+  attribute: PropTypes.shape({
+    targetField: PropTypes.string,
+    required: PropTypes.bool
+  }).isRequired,
+  contentTypeUID: PropTypes.string.isRequired,
+  description: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
+  disabled: PropTypes.bool,
+  error: PropTypes.string,
+  intlLabel: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }).isRequired,
+  labelAction: PropTypes.element,
+  name: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  value: PropTypes.string,
+  placeholder: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    defaultMessage: PropTypes.string.isRequired,
+    values: PropTypes.object,
+  }),
+};
 
-// InputUID.defaultProps = {
-//   description: '',
-//   editable: false,
-//   error: null,
-//   labelIcon: null,
-//   validations: {},
-//   value: '',
-// };
+InputUID.defaultProps = {
+  description: undefined,
+  disabled: false,
+  error: undefined,
+  labelAction: undefined,
+  placeholder: undefined,
+  value: ''
+};
 
 // export default memo(InputUID, isEqual);
 export default InputUID;
