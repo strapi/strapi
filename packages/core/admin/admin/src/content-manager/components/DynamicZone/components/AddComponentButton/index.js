@@ -12,16 +12,18 @@ import AddIcon from '@strapi/icons/AddIconCircle';
 import { BaseButton } from '@strapi/parts/BaseButton';
 import { Box } from '@strapi/parts/Box';
 import { Row } from '@strapi/parts/Row';
-import { Text, ButtonText, P } from '@strapi/parts/Text';
+import { Text, ButtonText } from '@strapi/parts/Text';
 import { getTrad } from '../../../../utils';
 
 const StyledAddIcon = styled(AddIcon)`
-  transform: ${({ $isopen }) => ($isopen ? 'rotate(45deg)' : 'rotate(0deg)')};
+  transform: ${({ $isOpen }) => ($isOpen ? 'rotate(45deg)' : 'rotate(0deg)')};
   > circle {
-    fill: ${({ theme }) => theme.colors.neutral150};
+    fill: ${({ theme, $hasError }) =>
+      $hasError ? theme.colors.danger200 : theme.colors.neutral150};
   }
   > path {
-    fill: ${({ theme }) => theme.colors.neutral600};
+    fill: ${({ theme, $hasError }) =>
+      $hasError ? theme.colors.danger600 : theme.colors.neutral600};
   }
 `;
 
@@ -29,7 +31,7 @@ const StyledButton = styled(BaseButton)`
   border-radius: 26px;
   background: ${({ theme }) => theme.colors.neutral0};
   padding: ${({ theme }) => theme.spaces[3]};
-  border: ${({ hasError, theme }) => (hasError ? `1px solid ${theme.colors.danger600}` : '0')};
+
   box-shadow: ${({ theme }) => theme.shadows.filterShadow};
 
   svg {
@@ -73,25 +75,6 @@ const BoxFullHeight = styled(Box)`
   height: 100%;
 `;
 
-const FieldError = ({ children, name }) => (
-  <Box paddingTop={1}>
-    <P
-      small
-      id={`${name}-error`}
-      textColor="danger600"
-      data-strapi-field-error
-      style={{ textAlign: 'center' }}
-    >
-      {children}
-    </P>
-  </Box>
-);
-
-FieldError.propTypes = {
-  children: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
-};
-
 const AddComponentButton = ({
   hasError,
   hasMaxError,
@@ -112,6 +95,25 @@ const AddComponentButton = ({
     { componentName: label || name }
   );
   const closeLabel = formatMessage({ id: 'app.utils.close-label', defaultMessage: 'Close' });
+  let buttonLabel = isOpen ? closeLabel : addLabel;
+
+  if (hasMaxError && !isOpen) {
+    buttonLabel = formatMessage({
+      id: 'components.Input.error.validation.max',
+      defaultMessage: 'The value is too high.',
+    });
+  }
+
+  if (hasMinError && !isOpen) {
+    buttonLabel = formatMessage(
+      {
+        id: getTrad(`components.DynamicZone.missing-components`),
+        defaultMessage:
+          'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
+      },
+      { number: missingComponentNumber }
+    );
+  }
 
   return (
     <>
@@ -124,31 +126,13 @@ const AddComponentButton = ({
           <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
             <Row>
               <BoxFullHeight aria-hidden paddingRight={2}>
-                <StyledAddIcon $isopen={isOpen} />
+                <StyledAddIcon $isOpen={isOpen} $hasError={hasError && !isOpen} />
               </BoxFullHeight>
-              <ButtonText textColor="neutral500" small>
-                {isOpen ? closeLabel : addLabel}
+              <ButtonText textColor={hasError && !isOpen ? 'danger600' : 'neutral500'} small>
+                {buttonLabel}
               </ButtonText>
             </Row>
           </StyledButton>
-
-          {hasMaxError && !isOpen && (
-            <FieldError name={name}>
-              {formatMessage({ id: 'components.Input.error.validation.max' })}
-            </FieldError>
-          )}
-          {hasMinError && !isOpen && (
-            <FieldError name={name}>
-              {formatMessage(
-                {
-                  id: getTrad(`components.DynamicZone.missing-components`),
-                  defaultMessage:
-                    'There {number, plural, =0 {are # missing components} one {is # missing component} other {are # missing components}}',
-                },
-                { number: missingComponentNumber }
-              )}
-            </FieldError>
-          )}
         </Box>
       </Row>
     </>
