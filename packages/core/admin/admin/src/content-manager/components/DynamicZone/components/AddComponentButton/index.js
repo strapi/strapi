@@ -118,11 +118,7 @@ const AddComponentButton = ({
   return (
     <>
       <Row justifyContent="center">
-        <Box
-          paddingTop={6}
-          paddingBottom={6}
-          style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}
-        >
+        <Box style={{ cursor: isDisabled ? 'not-allowed' : 'pointer' }}>
           <StyledButton type="button" onClick={onClick} disabled={isDisabled} hasError={hasError}>
             <Row>
               <BoxFullHeight aria-hidden paddingRight={2}>
