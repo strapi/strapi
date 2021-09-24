@@ -219,23 +219,33 @@ describe('Permissions Manager', () => {
     const tests = [
       ['No transform', { foo: 'bar' }, { foo: 'bar' }],
       ['Simple op', { foo: { $eq: 'bar' } }, { foo: { $eq: 'bar' } }],
-      ['Nested property', { foo: { nested: 'bar' } }, { foo: { nested: 'bar' } }],
+      ['Nested property', { 'foo.nested': 'bar' }, { foo: { nested: 'bar' } }],
+      [
+        'Nested property + $eq',
+        { 'foo.nested': { $eq: 'bar' } },
+        { foo: { nested: { $eq: 'bar' } } },
+      ],
+      [
+        'Nested property + $elementMatch',
+        { 'foo.nested': { $elemMatch: 'bar' } },
+        { foo: { nested: 'bar' } },
+      ],
       [
         'Deeply nested property',
-        { foo: { nested: { again: 'bar' } } },
+        { 'foo.nested.again': 'bar' },
         { foo: { nested: { again: 'bar' } } },
       ],
       ['Op with array', { foo: { $in: ['bar', 'rab'] } }, { foo: { $in: ['bar', 'rab'] } }],
-      ['Removable op', { foo: { $elemMatch: { a: 'b' } } }, { foo: { $and: [{ a: 'b' }] } }],
+      ['Removable op', { foo: { $elemMatch: { a: 'b' } } }, { foo: { a: 'b' } }],
       [
         'Combination of removable and basic ops',
         { foo: { $elemMatch: { a: { $in: [1, 2, 3] } } } },
-        { foo: { $and: [{ a: { $in: [1, 2, 3] } }] } },
+        { foo: { a: { $in: [1, 2, 3] } } },
       ],
       [
         'Decoupling of nested properties with/without op',
         { foo: { $elemMatch: { a: { $in: [1, 2, 3] }, b: 'c' } } },
-        { foo: { $and: [{ a: { $in: [1, 2, 3] }, b: 'c' }] } },
+        { foo: { a: { $in: [1, 2, 3] }, b: 'c' } },
       ],
       [
         'OR op and properties decoupling',
@@ -278,13 +288,9 @@ describe('Permissions Manager', () => {
         {
           created_by: {
             roles: {
-              $and: [
-                {
-                  id: {
-                    $in: [1, 2, 3],
-                  },
-                },
-              ],
+              id: {
+                $in: [1, 2, 3],
+              },
             },
           },
         },

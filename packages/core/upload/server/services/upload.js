@@ -43,15 +43,6 @@ const sendMediaMetrics = data => {
   }
 };
 
-const combineFilters = params => {
-  if (_.has(params, 'mime_ncontains') && Array.isArray(params.mime_ncontains)) {
-    const mimeFilters = { $or: params.mime_ncontains.map(val => ({ mime_ncontains: val })) };
-    delete params.mime_ncontains;
-
-    params.filters = params.filters ? { $and: [params.filters, mimeFilters] } : mimeFilters;
-  }
-};
-
 module.exports = ({ strapi }) => ({
   emitEvent(event, data) {
     const modelDef = strapi.getModel('plugin::upload.file');
@@ -190,7 +181,7 @@ module.exports = ({ strapi }) => ({
   },
 
   async updateFileInfo(id, { name, alternativeText, caption }, { user } = {}) {
-    const dbFile = await this.findOne({ id });
+    const dbFile = await this.findOne(id);
 
     if (!dbFile) {
       throw strapi.errors.notFound('file not found');
@@ -212,7 +203,7 @@ module.exports = ({ strapi }) => ({
       'image-manipulation'
     );
 
-    const dbFile = await this.findOne({ id });
+    const dbFile = await this.findOne(id);
 
     if (!dbFile) {
       throw strapi.errors.notFound('file not found');
@@ -285,9 +276,6 @@ module.exports = ({ strapi }) => ({
     }
     sendMediaMetrics(fileValues);
 
-    // const res = await strapi
-    //   .query('plugin::upload.file')
-    //   .update({ where: params, data: fileValues });
     const res = await strapi.entityService.update('plugin::upload.file', id, { data: fileValues });
 
     this.emitEvent(MEDIA_UPDATE, res);
@@ -310,18 +298,16 @@ module.exports = ({ strapi }) => ({
     return res;
   },
 
-  findOne(filters, populate) {
-    return strapi.entityService.findOne('plugin::upload.file', { params: { filters, populate } });
+  findOne(id, populate) {
+    return strapi.entityService.findOne('plugin::upload.file', id, { populate });
   },
 
   fetchAll(query) {
-    combineFilters(query);
-    return strapi.entityService.find('plugin::upload.file', { params: query });
+    return strapi.entityService.findMany('plugin::upload.file', query);
   },
 
   count(query) {
-    combineFilters(query);
-    return strapi.entityService.count('plugin::upload.file', { params: query });
+    return strapi.entityService.count('plugin::upload.file', query);
   },
 
   async remove(file) {

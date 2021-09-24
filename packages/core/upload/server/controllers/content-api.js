@@ -25,7 +25,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await getService('upload').findOne({ id });
+    const file = await getService('upload').findOne(id);
 
     if (!file) {
       return ctx.notFound('file.notFound');
@@ -43,7 +43,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await getService('upload').findOne({ id });
+    const file = await getService('upload').findOne(id);
 
     if (!file) {
       return ctx.notFound('file.notFound');

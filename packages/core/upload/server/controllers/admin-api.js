@@ -220,7 +220,7 @@ module.exports = {
 };
 
 const findEntityAndCheckPermissions = async (ability, action, model, id) => {
-  const file = await getService('upload').findOne({ id }, [CREATED_BY_ATTRIBUTE]);
+  const file = await getService('upload').findOne(id, [CREATED_BY_ATTRIBUTE]);
 
   if (_.isNil(file)) {
     throw strapi.errors.notFound();

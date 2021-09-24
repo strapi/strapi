@@ -206,21 +206,25 @@ const convertFieldsQueryParams = (fields, depth = 0) => {
 // NOTE: We could validate the parameters are on existing / non private attributes
 const convertFiltersQueryParams = filters => filters;
 
-// TODO: migrate
 const VALID_REST_OPERATORS = [
+  'not',
+  'in',
+  'notIn',
   'eq',
   'ne',
-  'in',
-  'nin',
-  'contains',
-  'ncontains',
-  'containss',
-  'ncontainss',
-  'lt',
-  'lte',
   'gt',
   'gte',
+  'lt',
+  'lte',
   'null',
+  'notNull',
+  'between',
+  'startsWith',
+  'endsWith',
+  'contains',
+  'notContains',
+  'containsi',
+  'notContainsi',
 ];
 
 module.exports = {
