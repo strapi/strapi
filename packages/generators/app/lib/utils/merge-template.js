@@ -9,19 +9,22 @@ const chalk = require('chalk');
 const { getRepoInfo, downloadGitHubRepo } = require('./fetch-github');
 
 // Specify all the files and directories a template can have
-const allowChildren = '*';
+const allowFile = Symbol();
+const allowChildren = Symbol();
 const allowedTemplateContents = {
-  'README.md': true,
-  '.env.example': true,
+  'README.md': allowFile,
+  '.env.example': allowFile,
+  'package.json': allowFile,
   src: {
+    admin: allowChildren,
     api: allowChildren,
     components: allowChildren,
+    middlewares: allowChildren,
+    policies: allowChildren,
     plugins: allowChildren,
   },
-  config: {
-    functions: allowChildren,
-  },
   data: allowChildren,
+  database: allowChildren,
   public: allowChildren,
   scripts: allowChildren,
 };
@@ -135,7 +138,7 @@ async function checkTemplateContentsStructure(templateContentsPath) {
         );
       }
 
-      if (matchingTreeValue === true) {
+      if (matchingTreeValue === allowFile) {
         if (!isDirectory) {
           // All good, the file is allowed
           return;
