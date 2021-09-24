@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, memo } from 'react';
 import PropTypes from 'prop-types';
 import { useCMEditViewDataManager } from '@strapi/helper-plugin';
 import { useIntl } from 'react-intl';
@@ -7,42 +7,49 @@ import { axiosInstance } from '../../../core/utils';
 import { getRequestUrl, getTrad } from '../../utils';
 import UID_REGEX from './regex';
 import { TextInput } from '@strapi/parts/TextInput';
-import { Text } from '@strapi/parts/Text'; 
+import { Text } from '@strapi/parts/Text';
 import Reload from '@strapi/icons/Reload';
 import AlertSucessIcon from '@strapi/icons/AlertSucessIcon';
 import AlertWarningIcon from '@strapi/icons/AlertWarningIcon';
 import LoadingIcon from '@strapi/icons/LoadingIcon';
 import useDebounce from './useDebounce';
-import { EndActionWrapper, FieldActionWrapper, TextValidation, LoadingWrapper } from './endActionStyle';
+import {
+  EndActionWrapper,
+  FieldActionWrapper,
+  TextValidation,
+  LoadingWrapper,
+} from './endActionStyle';
 
 // {
-  
-  // attribute,
-  // contentTypeUID,
-  // description,
-  // error: inputError,
-  // label: inputLabel,
-  // labelIcon,
-  // name,
-  // onChange,
-  // validations,
-  // value,
-  // editable,
-  // ...inputProps
+
+// attribute,
+// contentTypeUID,
+// description,
+// error: inputError,
+// label: inputLabel,
+// labelIcon,
+// name,
+// onChange,
+// validations,
+// value,
+// editable,
+// ...inputProps
 // }
-const InputUID = ({ 
-  attribute, 
-  contentTypeUID,
-  description,
-  disabled,
-  error,
-  intlLabel, 
-  labelAction,
-  name, 
-  onChange,
-  value,
-  ...rest
-}) => {
+const InputUID = props => {
+  const {
+    attribute,
+    contentTypeUID,
+    description,
+    disabled,
+    error,
+    intlLabel,
+    labelAction,
+    name,
+    onChange,
+    value,
+    ...rest
+  } = props;
+
   const { modifiedData, initialData, layout } = useCMEditViewDataManager();
   const [isLoading, setIsLoading] = useState(false);
   const [availability, setAvailability] = useState(null);
@@ -57,11 +64,11 @@ const InputUID = ({
   const [regenerateLabel, setRegenerateLabel] = useState(null);
 
   const label = intlLabel.id
-  ? formatMessage(
-      { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
-      { ...intlLabel.values }
-    )
-  : name;
+    ? formatMessage(
+        { id: intlLabel.id, defaultMessage: intlLabel.defaultMessage },
+        { ...intlLabel.values }
+      )
+    : name;
 
   generateUid.current = async (shouldSetInitialValue = false) => {
     setIsLoading(true);
@@ -172,36 +179,42 @@ const InputUID = ({
 
     onChange(e);
   };
-  
+
   return (
-    <TextInput 
-      label={label} 
-      name={name} 
+    <TextInput
+      label={label}
+      name={name}
       onChange={handleChange}
       value={value || ''}
       disabled={disabled}
       endAction={
         <EndActionWrapper>
-          {availability && availability.isAvailable && !regenerateLabel &&
-            <TextValidation alignItems='center' justifyContent='flex-end'>
+          {availability && availability.isAvailable && !regenerateLabel && (
+            <TextValidation alignItems="center" justifyContent="flex-end">
               <AlertSucessIcon />
-              <Text textColor='success600' small>Available</Text>
-            </TextValidation>            
-          }
-          {availability && !availability.isAvailable && !regenerateLabel &&
-            <TextValidation notAvailable alignItems='center' justifyContent='flex-end'>
+              <Text textColor="success600" small>
+                Available
+              </Text>
+            </TextValidation>
+          )}
+          {availability && !availability.isAvailable && !regenerateLabel && (
+            <TextValidation notAvailable alignItems="center" justifyContent="flex-end">
               <AlertWarningIcon />
-              <Text textColor='danger600' small>Unavailable</Text>
-            </TextValidation>            
-          }
-          {regenerateLabel &&
-            <TextValidation alignItems='center' justifyContent='flex-end'>
-              <Text textColor='primary600' small>{regenerateLabel}</Text>
-            </TextValidation>   
-          }
-          <FieldActionWrapper 
-            onClick={() => generateUid.current()} 
-            label='regenerate'
+              <Text textColor="danger600" small>
+                Unavailable
+              </Text>
+            </TextValidation>
+          )}
+          {regenerateLabel && (
+            <TextValidation alignItems="center" justifyContent="flex-end">
+              <Text textColor="primary600" small>
+                {regenerateLabel}
+              </Text>
+            </TextValidation>
+          )}
+          <FieldActionWrapper
+            onClick={() => generateUid.current()}
+            label="regenerate"
             onMouseEnter={handleGenerateMouseEnter}
             onMouseLeave={handleGenerateMouseLeave}
           >
@@ -209,9 +222,9 @@ const InputUID = ({
               <LoadingWrapper>
                 <LoadingIcon />
               </LoadingWrapper>
-            ) : 
+            ) : (
               <Reload />
-            }
+            )}
           </FieldActionWrapper>
         </EndActionWrapper>
       }
@@ -323,4 +336,5 @@ const InputUID = ({
 //   value: '',
 // };
 
+// export default memo(InputUID, isEqual);
 export default InputUID;

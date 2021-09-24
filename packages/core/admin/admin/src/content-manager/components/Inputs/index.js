@@ -15,7 +15,6 @@ import InputJSON from '../InputJSON';
 import GenericInput from './GenericInput';
 import InputUID from '../InputUID';
 // import SelectWrapper from '../SelectWrapper';
-// import WysiwygWithErrors from '../WysiwygWithErrors';
 
 import {
   connect,
@@ -54,7 +53,7 @@ function Inputs({
   const fieldName = useMemo(() => {
     return getFieldName(keys);
   }, [keys]);
-  
+
   const validations = useMemo(() => {
     const inputValidations = omit(
       fieldSchema,
@@ -204,7 +203,7 @@ function Inputs({
     //   </div>
     // );
   }
-  
+
   return (
     <GenericInput
       // {...metadatas}
