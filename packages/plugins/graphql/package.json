@@ -33,8 +33,7 @@
   },
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "koa": "^2.13.1",
-    "rimraf": "3.0.2"
+    "koa": "^2.13.1"
   },
   "author": {
     "name": "A Strapi developer",

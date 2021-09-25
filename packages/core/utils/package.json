@@ -5,9 +5,7 @@
   "homepage": "https://strapi.io",
   "keywords": [
     "strapi",
-    "utilities",
-    "utils",
-    "winston"
+    "utils"
   ],
   "directories": {
     "lib": "./lib"
@@ -15,11 +13,9 @@
   "main": "./lib",
   "dependencies": {
     "@sindresorhus/slugify": "1.1.0",
-    "date-fns": "^2.19.0",
+    "date-fns": "2.24.0",
     "lodash": "4.17.21",
-    "pino": "^4.7.1",
-    "pluralize": "^8.0.0",
-    "yup": "^0.32.9"
+    "yup": "0.32.9"
   },
   "author": {
     "email": "hi@strapi.io",
@@ -44,6 +40,5 @@
     "node": ">=12.x.x <=16.x.x",
     "npm": ">=6.0.0"
   },
-  "license": "SEE LICENSE IN LICENSE",
-  "gitHead": "231263a3535658bab1e9492c6aaaed8692d62a53"
+  "license": "SEE LICENSE IN LICENSE"
 }

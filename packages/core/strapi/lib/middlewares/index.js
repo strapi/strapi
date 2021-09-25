@@ -7,7 +7,7 @@ const requiredMiddlewares = [
   'responses',
   'router',
   'logger',
-  'boom',
+  'error',
   'cors',
   'cron',
   'xframe',
