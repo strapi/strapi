@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const { cloneDeep, isObject, set, isArray } = require('lodash/fp');
+const { cloneDeep, isPlainObject } = require('lodash/fp');
 const { subject: asSubject } = require('@casl/ability');
 const { permittedFieldsOf } = require('@casl/ability/extra');
 const {
@@ -35,22 +35,15 @@ module.exports = ({ ability, action, model }) => ({
     return buildStrapiQuery(buildCaslQuery(ability, queryAction, model));
   },
 
-  // FIXME:
-  queryFrom(query = {}, action) {
+  addPermissionsQueryTo(query = {}, action) {
+    const newQuery = cloneDeep(query);
     const permissionQuery = this.getQuery(action);
 
-    const newQuery = cloneDeep(query);
-    const { _where } = query;
+    newQuery.filters = isPlainObject(query.filters)
+      ? { $and: [query.filters, permissionQuery] }
+      : permissionQuery;
 
-    if (isObject(_where) && !isArray(_where)) {
-      Object.assign(newQuery, { _where: [_where] });
-    }
-
-    if (!_where) {
-      Object.assign(newQuery, { _where: [] });
-    }
-
-    return set('_where', newQuery._where.concat(permissionQuery), newQuery);
+    return newQuery;
   },
 
   sanitize(data, options = {}) {

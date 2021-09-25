@@ -1,9 +1,10 @@
 'use strict';
 
+const _ = require('lodash');
 const { sanitizeEntity } = require('@strapi/utils');
-const validateSettings = require('../validation/settings');
-const validateUploadBody = require('../validation/upload');
-const { getService } = require('../../utils');
+const { getService } = require('../utils');
+const validateSettings = require('./validation/settings');
+const validateUploadBody = require('./validation/upload');
 
 const sanitize = (data, options = {}) => {
   return sanitizeEntity(data, {
@@ -24,7 +25,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await getService('upload').findOne({ id });
+    const file = await getService('upload').findOne(id);
 
     if (!file) {
       return ctx.notFound('file.notFound');
@@ -42,7 +43,7 @@ module.exports = {
       params: { id },
     } = ctx;
 
-    const file = await getService('upload').findOne({ id });
+    const file = await getService('upload').findOne(id);
 
     if (!file) {
       return ctx.notFound('file.notFound');
@@ -117,5 +118,36 @@ module.exports = {
     });
 
     ctx.body = sanitize(uploadedFiles);
+  },
+
+  async upload(ctx) {
+    const {
+      query: { id },
+      request: { files: { files } = {} },
+    } = ctx;
+
+    if (id && (_.isEmpty(files) || files.size === 0)) {
+      return this.updateFileInfo(ctx);
+    }
+
+    if (_.isEmpty(files) || files.size === 0) {
+      throw strapi.errors.badRequest(null, {
+        errors: [{ id: 'Upload.status.empty', message: 'Files are empty' }],
+      });
+    }
+
+    await (id ? this.replaceFile : this.uploadFiles)(ctx);
+  },
+
+  async search(ctx) {
+    const { id } = ctx.params;
+    const model = strapi.getModel('plugin::upload.file');
+    const entries = await strapi.query('plugin::upload.file').findMany({
+      where: {
+        $or: [{ hash: { $contains: id } }, { name: { $contains: id } }],
+      },
+    });
+
+    ctx.body = sanitizeEntity(entries, { model });
   },
 };

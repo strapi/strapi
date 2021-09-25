@@ -1,7 +1,9 @@
 'use strict';
 
-const upload = require('./upload');
+const adminApi = require('./admin-api');
+const contentApi = require('./content-api');
 
 module.exports = {
-  upload,
+  'admin-api': adminApi,
+  'content-api': contentApi,
 };

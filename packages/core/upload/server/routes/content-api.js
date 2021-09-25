@@ -6,27 +6,27 @@ module.exports = {
     {
       method: 'POST',
       path: '/',
-      handler: 'upload.upload',
+      handler: 'content-api.upload',
     },
     {
       method: 'GET',
       path: '/files/count',
-      handler: 'upload.count',
+      handler: 'content-api.count',
     },
     {
       method: 'GET',
       path: '/files',
-      handler: 'upload.find',
+      handler: 'content-api.find',
     },
     {
       method: 'GET',
       path: '/files/:id',
-      handler: 'upload.findOne',
+      handler: 'content-api.findOne',
     },
     {
       method: 'DELETE',
       path: '/files/:id',
-      handler: 'upload.destroy',
+      handler: 'content-api.destroy',
     },
   ],
 };

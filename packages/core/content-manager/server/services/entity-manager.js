@@ -7,6 +7,7 @@ const { sanitizeEntity } = strapiUtils;
 const { hasDraftAndPublish } = strapiUtils.contentTypes;
 const { PUBLISHED_AT_ATTRIBUTE, CREATED_BY_ATTRIBUTE } = strapiUtils.contentTypes.constants;
 const { ENTRY_PUBLISH, ENTRY_UNPUBLISH } = strapiUtils.webhook.webhookEvents;
+const { MANY_RELATIONS } = strapiUtils.relations.constants;
 
 const omitPublishedAtField = omit(PUBLISHED_AT_ATTRIBUTE);
 
@@ -92,6 +93,33 @@ const getBasePopulate = (uid, populate) => {
   });
 };
 
+const getCounterPopulate = (uid, populate) => {
+  const basePopulate = getBasePopulate(uid, populate);
+
+  const { attributes } = strapi.getModel(uid);
+
+  return basePopulate.reduce((populate, attributeName) => {
+    const attribute = attributes[attributeName];
+
+    if (MANY_RELATIONS.includes(attribute.relation)) {
+      populate[attributeName] = { count: true };
+    } else {
+      populate[attributeName] = true;
+    }
+
+    return populate;
+  }, {});
+};
+
+const addCreatedByRolesPopulate = populate => {
+  return {
+    ...populate,
+    createdBy: {
+      populate: ['roles'],
+    },
+  };
+};
+
 /**
  * @type {import('./entity-manager').default}
  */
@@ -118,15 +146,10 @@ module.exports = ({ strapi }) => ({
   },
 
   findWithRelationCounts(opts, uid, populate) {
-    const params = { ...opts, populate: getBasePopulate(uid, populate) };
+    const counterPopulate = addCreatedByRolesPopulate(getCounterPopulate(uid, populate));
+    const params = { ...opts, populate: counterPopulate };
 
     return strapi.entityService.findWithRelationCounts(uid, params);
-  },
-
-  count(opts, uid) {
-    const params = { ...opts };
-
-    return strapi.entityService.count(uid, params);
   },
 
   async findOne(id, uid, populate) {
