@@ -6,18 +6,18 @@ const { addNamespace, hasNamespace } = require('../utils');
 
 const servicesRegistry = strapi => {
   const services = {};
-  const instanciatedServices = {};
+  const instantiatedServices = {};
 
   return {
     get(uid) {
-      if (instanciatedServices[uid]) {
-        return instanciatedServices[uid];
+      if (instantiatedServices[uid]) {
+        return instantiatedServices[uid];
       }
 
       const service = services[uid];
       if (service) {
-        instanciatedServices[uid] = service({ strapi });
-        return instanciatedServices[uid];
+        instantiatedServices[uid] = service({ strapi });
+        return instantiatedServices[uid];
       }
 
       return undefined;
@@ -28,7 +28,7 @@ const servicesRegistry = strapi => {
       return _.mapValues(filteredServices, (service, serviceUID) => this.get(serviceUID));
     },
     set(uid, value) {
-      instanciatedServices[uid] = value;
+      instantiatedServices[uid] = value;
       return this;
     },
     add(namespace, newServices) {
@@ -50,7 +50,7 @@ const servicesRegistry = strapi => {
         throw new Error(`Service ${serviceUID} doesn't exist`);
       }
       const newService = extendFn(currentService);
-      instanciatedServices[serviceUID] = newService;
+      instantiatedServices[serviceUID] = newService;
     },
   };
 };

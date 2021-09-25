@@ -1,6 +1,8 @@
 'use strict';
 
 const delegate = require('delegates');
+const { pipe } = require('lodash/fp');
+
 const {
   sanitizeEntity,
   webhook: webhookUtils,
@@ -15,7 +17,12 @@ const {
   updateComponents,
   deleteComponents,
 } = require('./components');
-const { transformParamsToQuery, pickSelectionParams } = require('./params');
+const {
+  transformCommonParams,
+  transformPaginationParams,
+  transformParamsToQuery,
+  pickSelectionParams,
+} = require('./params');
 
 const { MANY_RELATIONS } = relationsUtils.constants;
 
@@ -242,5 +249,18 @@ const createDefaultImplementation = ({ strapi, db, eventHub, entityValidator }) 
     const query = transformParamsToQuery(uid, wrappedParams);
 
     return db.query(uid).deleteMany(query);
+  },
+
+  load(uid, entity, field, params) {
+    const { attributes } = strapi.getModel(uid);
+
+    const attribute = attributes[field];
+
+    const loadParams =
+      attribute.type === 'relation'
+        ? transformParamsToQuery(attribute.target, params)
+        : pipe(transformCommonParams, transformPaginationParams)(params);
+
+    return db.query(uid).load(entity, field, loadParams);
   },
 });

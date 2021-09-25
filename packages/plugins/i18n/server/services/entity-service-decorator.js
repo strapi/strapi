@@ -17,6 +17,7 @@ const paramsContain = (key, params) => {
 /**
  * Adds default locale or replaces locale by locale in query params
  * @param {object} params - query params
+ * @param {object} ctx
  */
 // TODO: remove _locale
 const wrapParams = async (params = {}, ctx = {}) => {
@@ -106,10 +107,9 @@ const decorator = service => ({
   },
 
   /**
-   * Creates an entry & make links between it and its related localizaionts
+   * Creates an entry & make links between it and its related localizations
+   * @param {string} uid - Model uid
    * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
    */
   async create(uid, opts) {
     const model = strapi.getModel(uid);
@@ -133,9 +133,9 @@ const decorator = service => ({
 
   /**
    * Updates an entry & update related localizations fields
+   * @param {string} uid
+   * @param {string} entityId
    * @param {object} opts - Query options object (params, data, files, populate)
-   * @param {object} ctx - Query context
-   * @param {object} ctx.model - Model that is being used
    */
   async update(uid, entityId, opts) {
     const model = strapi.getModel(uid);
