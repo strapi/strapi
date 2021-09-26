@@ -9,9 +9,6 @@
     "description": "documentation.plugin.description",
     "kind": "plugin"
   },
-  "scripts": {
-    "test": "echo \"no tests yet\""
-  },
   "dependencies": {
     "@strapi/helper-plugin": "3.6.8",
     "cheerio": "^1.0.0-rc.5",

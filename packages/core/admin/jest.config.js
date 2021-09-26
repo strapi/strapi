@@ -1,5 +1,10 @@
 'use strict';
 
+const baseConfig = require('../../../jest.base-config');
+const pkg = require('./package');
+
 module.exports = {
-  testPathIgnorePatterns: ['<rootDir>/'],
+  ...baseConfig,
+  displayName: (pkg.strapi && pkg.strapi.name) || pkg.name,
+  roots: ['<rootDir>/packages/core/admin'],
 };

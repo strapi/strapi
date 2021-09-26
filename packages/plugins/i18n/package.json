@@ -10,6 +10,9 @@
     "required": false,
     "kind": "plugin"
   },
+  "scripts": {
+    "test:front": "jest --config jest.config.front.js"
+  },
   "dependencies": {
     "lodash": "4.17.20",
     "p-map": "4.0.0",
