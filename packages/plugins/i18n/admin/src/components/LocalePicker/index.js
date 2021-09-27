@@ -3,15 +3,16 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useQueryParams } from '@strapi/helper-plugin';
 import { useRouteMatch } from 'react-router-dom';
 import get from 'lodash/get';
-import { Box } from '@strapi/parts/Box';
-import { SimpleMenu, MenuItem } from '@strapi/parts/SimpleMenu';
-import { ButtonText } from '@strapi/parts/Text';
+import { Select, Option } from '@strapi/parts/Select.development';
+import { useIntl } from 'react-intl';
 import useContentTypePermissions from '../../hooks/useContentTypePermissions';
 import useHasI18n from '../../hooks/useHasI18n';
 import selectI18NLocales from '../../selectors/selectI18nLocales';
 import getInitialLocale from '../../utils/getInitialLocale';
+import getTrad from '../../utils/getTrad';
 
 const LocalePicker = () => {
+  const { formatMessage } = useIntl();
   const dispatch = useDispatch();
   const locales = useSelector(selectI18NLocales);
   const [{ query }, setQuery] = useQueryParams();
@@ -22,7 +23,7 @@ const LocalePicker = () => {
   const { createPermissions, readPermissions } = useContentTypePermissions(slug);
 
   const initialLocale = getInitialLocale(query, locales);
-  const [selected, setSelected] = useState(initialLocale);
+  const [selected, setSelected] = useState(initialLocale?.code || '');
 
   if (!isFieldLocalized) {
     return null;
@@ -43,61 +44,29 @@ const LocalePicker = () => {
     return canCreate || canRead;
   });
 
-  const hasMultipleLocales = displayedLocales.length > 1;
-
-  const handleClick = locale => {
+  const handleClick = code => {
     dispatch({ type: 'ContentManager/RBACManager/RESET_PERMISSIONS' });
-    setSelected(locale);
+
+    setSelected(code);
 
     setQuery({
-      plugins: { ...query.plugins, i18n: { locale: locale.code } },
+      plugins: { ...query.plugins, i18n: { locale: code } },
     });
   };
 
-  if (!hasMultipleLocales) {
-    return (
-      <Box
-        background="neutral0"
-        shadow="filterShadow"
-        paddingTop={2}
-        paddingBottom={2}
-        paddingLeft={4}
-        paddingRight={4}
-        hasRadius
-      >
-        <ButtonText>{selected.name}</ButtonText>
-      </Box>
-    );
-  }
-
   return (
-    <Box
-      background="neutral0"
-      shadow="filterShadow"
-      paddingTop={2}
-      paddingBottom={2}
-      paddingLeft={4}
-      paddingRight={4}
-      hasRadius
+    <Select
+      size="S"
+      aria-label={formatMessage({ id: getTrad('actions.select-locale'), defaultMessage: '' })}
+      value={selected}
+      onChange={handleClick}
     >
-      <SimpleMenu id="label" label={selected.name}>
-        {displayedLocales.map(locale => {
-          if (locale.id === selected.id) {
-            return null;
-          }
-
-          return (
-            <MenuItem
-              key={locale.id}
-              id={`menu-item${locale.name || locale.code}`}
-              onClick={() => handleClick(locale)}
-            >
-              {locale.name || locale.code}
-            </MenuItem>
-          );
-        })}
-      </SimpleMenu>
-    </Box>
+      {displayedLocales.map(locale => (
+        <Option key={locale.id} id={`menu-item${locale.name || locale.code}`} value={locale.code}>
+          {locale.name}
+        </Option>
+      ))}
+    </Select>
   );
 };
 
