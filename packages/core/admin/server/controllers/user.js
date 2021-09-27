@@ -59,7 +59,7 @@ module.exports = {
   async findOne(ctx) {
     const { id } = ctx.params;
 
-    const user = await getService('user').findOne({ id });
+    const user = await getService('user').findOne(id);
 
     if (!user) {
       return ctx.notFound('User does not exist');

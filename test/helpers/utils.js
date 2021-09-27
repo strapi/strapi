@@ -5,7 +5,7 @@ const _ = require('lodash');
 const createUtils = strapi => {
   const login = async userInfo => {
     const sanitizedUserInfo = _.pick(userInfo, ['email', 'id']);
-    const user = await strapi.admin.services.user.findOne(sanitizedUserInfo);
+    const user = await strapi.query('admin::user').findOne({ where: sanitizedUserInfo });
     if (!user) {
       throw new Error('User not found');
     }
