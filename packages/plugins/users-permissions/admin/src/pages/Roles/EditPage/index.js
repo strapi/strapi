@@ -1,8 +1,14 @@
 import React, { useState, useRef } from 'react';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
-import { Main, Button, Stack, Box, GridItem, Grid, TextInput, Textarea } from '@strapi/parts';
+import { Main } from '@strapi/parts/Main';
+import { Button } from '@strapi/parts/Button';
+import { Stack } from '@strapi/parts/Stack';
+import { Box } from '@strapi/parts/Box';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Textarea } from '@strapi/parts/Textarea';
 import { H3 } from '@strapi/parts/Text';
-import { CheckIcon } from '@strapi/icons';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import { GridItem, Grid } from '@strapi/parts/Grid';
 import { Formik } from 'formik';
 import { useIntl } from 'react-intl';
 import { useRouteMatch } from 'react-router-dom';

@@ -1,3 +1,5 @@
+import React, { useRef, useState } from 'react';
+import moment from 'moment';
 import {
   CheckPagePermissions,
   Form,
@@ -8,24 +10,19 @@ import {
   useOverlayBlocker,
   useTracking,
 } from '@strapi/helper-plugin';
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Main,
-  Row,
-  Stack,
-  Text,
-  Textarea,
-  TextInput,
-} from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+import { Text } from '@strapi/parts/Text';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Textarea } from '@strapi/parts/Textarea';
 import { Formik } from 'formik';
-import { get, isEmpty } from 'lodash';
-import moment from 'moment';
-import React, { useRef, useState } from 'react';
+import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import { useIntl } from 'react-intl';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';

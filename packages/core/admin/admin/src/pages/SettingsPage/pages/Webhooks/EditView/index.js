@@ -12,7 +12,7 @@ import {
   useNotification,
   useOverlayBlocker,
 } from '@strapi/helper-plugin';
-import { Main } from '@strapi/parts';
+import { Main } from '@strapi/parts/Main';
 import { useMutation, useQuery, useQueryClient } from 'react-query';
 import { useHistory, useRouteMatch } from 'react-router-dom';
 import WebhookForm from './components/WebhookForm';

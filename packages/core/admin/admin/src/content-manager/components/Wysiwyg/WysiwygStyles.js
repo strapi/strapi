@@ -1,6 +1,7 @@
 import styled from 'styled-components';
-
-import { IconButton, Box, BaseButton, IconButtonGroup } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { IconButtonGroup, IconButton } from '@strapi/parts/IconButton';
+import { BaseButton } from '@strapi/parts/BaseButton';
 
 export const WysiwygWrapper = styled(Box)`
   border: 1px solid

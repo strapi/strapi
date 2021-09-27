@@ -27,46 +27,9 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
     );
 
     expect(container.firstChild).toMatchInlineSnapshot(`
-      .c14 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
-      .c4 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #32324d;
-      }
-
-      .c18 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #4945ff;
-      }
-
-      .c5 {
-        font-weight: 600;
-        line-height: 1.14;
-      }
-
-      .c19 {
-        font-weight: 600;
-        font-size: 0.6875rem;
-        line-height: 1.45;
-        text-transform: uppercase;
-      }
-
       .c1 {
         padding-top: 24px;
         padding-right: 40px;
-      }
-
-      .c3 {
-        padding-right: 4px;
       }
 
       .c6 {
@@ -89,7 +52,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         padding-bottom: 32px;
       }
 
-      .c15 {
+      .c16 {
         padding-top: 16px;
       }
 
@@ -125,7 +88,7 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         align-items: center;
       }
 
-      .c16 {
+      .c17 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -141,6 +104,81 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
         -webkit-box-align: center;
         -ms-flex-align: center;
         align-items: center;
+      }
+
+      .c14 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c15 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c7 {
+        outline: none;
+      }
+
+      .c19 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #4945ff;
+      }
+
+      .c20 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c21 {
+        font-weight: 600;
+        font-size: 0.6875rem;
+        line-height: 1.45;
+        text-transform: uppercase;
+      }
+
+      .c18 {
+        display: -webkit-inline-box;
+        display: -webkit-inline-flex;
+        display: -ms-inline-flexbox;
+        display: inline-flex;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+        text-transform: uppercase;
+        -webkit-text-decoration: none;
+        text-decoration: none;
+      }
+
+      .c18 svg path {
+        fill: #4945ff;
+      }
+
+      .c18 svg {
+        font-size: 0.625rem;
+      }
+
+      .c4 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #32324d;
+      }
+
+      .c5 {
+        font-weight: 600;
+        line-height: 1.14;
+      }
+
+      .c3 {
+        padding-right: 4px;
       }
 
       .c2 {
@@ -163,32 +201,6 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
 
       .c2 svg path {
         fill: #8e8ea9;
-      }
-
-      .c17 {
-        display: -webkit-inline-box;
-        display: -webkit-inline-flex;
-        display: -ms-inline-flexbox;
-        display: inline-flex;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-        text-transform: uppercase;
-        -webkit-text-decoration: none;
-        text-decoration: none;
-      }
-
-      .c17 svg path {
-        fill: #4945ff;
-      }
-
-      .c17 svg {
-        font-size: 0.625rem;
-      }
-
-      .c7 {
-        outline: none;
       }
 
       .c9 {
@@ -278,15 +290,15 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
                   </h1>
                 </div>
                 <span
-                  class="c4"
+                  class="c15"
                 >
                   Your account has been suspended.
                 </span>
                 <div
-                  class="c15"
+                  class="c16"
                 >
                   <span
-                    class="c4"
+                    class="c15"
                   >
                     If this is a mistake, please contact your administrator.
                   </span>
@@ -294,20 +306,20 @@ describe('ADMIN | PAGES | AUTH | Oops', () => {
               </div>
             </div>
             <div
-              class="c16"
+              class="c17"
             >
               <div
-                class="c15"
+                class="c16"
               >
                 <a
-                  class="c17"
+                  class="c18"
                   href="/auth/login"
                 >
                   <span
-                    class="c18 c5 c19"
+                    class="c19 c20 c21"
                   >
                     <span
-                      class="c4"
+                      class="c15"
                     >
                       Sign in
                     </span>

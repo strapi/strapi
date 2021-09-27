@@ -1,6 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { BaseCheckbox, Box, IconButton, Tbody, Td, Text, Tr, Row } from '@strapi/parts';
+import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { Box } from '@strapi/parts/Box';
+import { IconButton } from '@strapi/parts/IconButton';
+import { Row } from '@strapi/parts/Row';
+import { Text } from '@strapi/parts/Text';
+import { Tbody, Td, Tr } from '@strapi/parts/Table';
 import { EditIcon, DeleteIcon } from '@strapi/icons';
 import { useHistory } from 'react-router-dom';
 import { useIntl } from 'react-intl';

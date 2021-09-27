@@ -48,13 +48,6 @@ describe('Admin | ee | SettingsPage | SSO', () => {
     } = render(App);
 
     expect(firstChild).toMatchInlineSnapshot(`
-      .c5 {
-        font-weight: 600;
-        font-size: 2rem;
-        line-height: 1.25;
-        color: #32324d;
-      }
-
       .c11 {
         font-weight: 400;
         font-size: 0.875rem;
@@ -62,73 +55,16 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         color: #32324d;
       }
 
-      .c13 {
-        font-weight: 400;
-        font-size: 0.875rem;
-        line-height: 1.43;
-        color: #666687;
-      }
-
-      .c14 {
-        font-size: 1rem;
-        line-height: 1.5;
-      }
-
       .c12 {
         font-weight: 600;
         line-height: 1.14;
-      }
-
-      .c2 {
-        background: #f6f6f9;
-        padding-top: 56px;
-        padding-right: 56px;
-        padding-bottom: 56px;
-        padding-left: 56px;
       }
 
       .c8 {
         padding-right: 8px;
       }
 
-      .c15 {
-        padding-right: 56px;
-        padding-left: 56px;
-      }
-
-      .c3 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-box-pack: justify;
-        -webkit-justify-content: space-between;
-        -ms-flex-pack: justify;
-        justify-content: space-between;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c4 {
-        display: -webkit-box;
-        display: -webkit-flex;
-        display: -ms-flexbox;
-        display: flex;
-        -webkit-flex-direction: row;
-        -ms-flex-direction: row;
-        flex-direction: row;
-        -webkit-align-items: center;
-        -webkit-box-align: center;
-        -ms-flex-align: center;
-        align-items: center;
-      }
-
-      .c6 {
+      .c5 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -140,17 +76,17 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         border: 1px solid #dcdce4;
       }
 
-      .c6 svg {
+      .c5 svg {
         height: 12px;
         width: 12px;
       }
 
-      .c6 svg > g,
-      .c6 svg path {
+      .c5 svg > g,
+      .c5 svg path {
         fill: #ffffff;
       }
 
-      .c6[aria-disabled='true'] {
+      .c5[aria-disabled='true'] {
         pointer-events: none;
       }
 
@@ -158,7 +94,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         height: 100%;
       }
 
-      .c7 {
+      .c6 {
         padding: 10px 16px;
         background: #4945ff;
         border: none;
@@ -166,7 +102,7 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         background: #4945ff;
       }
 
-      .c7 .c1 {
+      .c6 .c7 {
         display: -webkit-box;
         display: -webkit-flex;
         display: -ms-flexbox;
@@ -177,50 +113,46 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         align-items: center;
       }
 
-      .c7 .c10 {
+      .c6 .c10 {
         color: #ffffff;
       }
 
-      .c7[aria-disabled='true'] {
+      .c6[aria-disabled='true'] {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c7[aria-disabled='true'] .c10 {
+      .c6[aria-disabled='true'] .c10 {
         color: #666687;
       }
 
-      .c7[aria-disabled='true'] svg > g,
-      .c7[aria-disabled='true'] svg path {
+      .c6[aria-disabled='true'] svg > g,
+      .c6[aria-disabled='true'] svg path {
         fill: #666687;
       }
 
-      .c7[aria-disabled='true']:active {
+      .c6[aria-disabled='true']:active {
         border: 1px solid #dcdce4;
         background: #eaeaef;
       }
 
-      .c7[aria-disabled='true']:active .c10 {
+      .c6[aria-disabled='true']:active .c10 {
         color: #666687;
       }
 
-      .c7[aria-disabled='true']:active svg > g,
-      .c7[aria-disabled='true']:active svg path {
+      .c6[aria-disabled='true']:active svg > g,
+      .c6[aria-disabled='true']:active svg path {
         fill: #666687;
       }
 
-      .c7:hover {
+      .c6:hover {
         border: 1px solid #7b79ff;
         background: #7b79ff;
       }
 
-      .c7:active {
+      .c6:active {
         border: 1px solid #4945ff;
         background: #4945ff;
-      }
-
-      .c0 {
-        outline: none;
       }
 
       .c18 {
@@ -262,6 +194,74 @@ describe('Admin | ee | SettingsPage | SSO', () => {
         height: 100vh;
       }
 
+      .c1 {
+        background: #f6f6f9;
+        padding-top: 56px;
+        padding-right: 56px;
+        padding-bottom: 56px;
+        padding-left: 56px;
+      }
+
+      .c15 {
+        padding-right: 56px;
+        padding-left: 56px;
+      }
+
+      .c2 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-box-pack: justify;
+        -webkit-justify-content: space-between;
+        -ms-flex-pack: justify;
+        justify-content: space-between;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c3 {
+        display: -webkit-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: flex;
+        -webkit-flex-direction: row;
+        -ms-flex-direction: row;
+        flex-direction: row;
+        -webkit-align-items: center;
+        -webkit-box-align: center;
+        -ms-flex-align: center;
+        align-items: center;
+      }
+
+      .c4 {
+        font-weight: 600;
+        font-size: 2rem;
+        line-height: 1.25;
+        color: #32324d;
+      }
+
+      .c13 {
+        font-weight: 400;
+        font-size: 0.875rem;
+        line-height: 1.43;
+        color: #666687;
+      }
+
+      .c14 {
+        font-size: 1rem;
+        line-height: 1.5;
+      }
+
+      .c0 {
+        outline: none;
+      }
+
       <main
         aria-labelledby="main-content-title"
         class="c0"
@@ -273,17 +273,17 @@ describe('Admin | ee | SettingsPage | SSO', () => {
             style="height: 0px;"
           >
             <div
-              class="c1 c2"
+              class="c1"
               data-strapi-header="true"
             >
               <div
-                class="c1 c3"
+                class="c2"
               >
                 <div
-                  class="c1 c4"
+                  class="c3"
                 >
                   <h1
-                    class="c5"
+                    class="c4"
                     id="main-content-title"
                   >
                     Single Sign-On
@@ -291,14 +291,14 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                 </div>
                 <button
                   aria-disabled="true"
-                  class="c6 c7"
+                  class="c5 c6"
                   data-testid="save-button"
                   disabled=""
                   type="submit"
                 >
                   <div
                     aria-hidden="true"
-                    class="c1 c8 c9"
+                    class="c7 c8 c9"
                   >
                     <svg
                       fill="none"
@@ -321,14 +321,14 @@ describe('Admin | ee | SettingsPage | SSO', () => {
                 </button>
               </div>
               <p
-                class="c10 c13 c14"
+                class="c13 c14"
               >
                 Configure the settings for the Single Sign-On feature.
               </p>
             </div>
           </div>
           <div
-            class="c1 c15"
+            class="c15"
           >
             <div
               class="c16 c17"

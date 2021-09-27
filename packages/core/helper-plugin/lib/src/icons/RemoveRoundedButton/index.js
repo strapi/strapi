@@ -1,6 +1,6 @@
 import React from 'react';
-import { IconButton } from '@strapi/parts';
-import { Autoselect } from '@strapi/icons';
+import { IconButton } from '@strapi/parts/IconButton';
+import Autoselect from '@strapi/icons/Autoselect';
 import styled from 'styled-components';
 import pxToRem from '../../utils/pxToRem';
 

@@ -3,21 +3,18 @@ import { useIntl } from 'react-intl';
 import styled from 'styled-components';
 import get from 'lodash/get';
 import omit from 'lodash/omit';
-import { Show, Hide } from '@strapi/icons';
-import {
-  Main,
-  Box,
-  H1,
-  Subtitle,
-  Stack,
-  TextInput,
-  Grid,
-  GridItem,
-  Checkbox,
-  Link,
-  Row,
-  Button,
-} from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
+import { Stack } from '@strapi/parts/Stack';
+import { Main } from '@strapi/parts/Main';
+import { Row } from '@strapi/parts/Row';
+import { Link } from '@strapi/parts/Link';
+import { Button } from '@strapi/parts/Button';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Checkbox } from '@strapi/parts/Checkbox';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { H1, Subtitle } from '@strapi/parts/Text';
+import Hide from '@strapi/icons/Hide';
+import Show from '@strapi/icons/Show';
 import { Form, useQuery, useNotification } from '@strapi/helper-plugin';
 import { useHistory } from 'react-router-dom';
 import PropTypes from 'prop-types';

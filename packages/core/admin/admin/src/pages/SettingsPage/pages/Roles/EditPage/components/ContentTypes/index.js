@@ -1,6 +1,6 @@
 import React, { memo } from 'react';
 import PropTypes from 'prop-types';
-import { Box } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
 import styled from 'styled-components';
 import ContentTypeCollapses from '../ContentTypeCollapses';
 import GlobalActions from '../GlobalActions';

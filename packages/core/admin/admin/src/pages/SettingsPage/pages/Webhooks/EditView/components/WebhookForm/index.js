@@ -1,16 +1,12 @@
 import { Form } from '@strapi/helper-plugin';
 import { BackIcon, CheckIcon, Publish } from '@strapi/icons';
-import {
-  Box,
-  Button,
-  ContentLayout,
-  Grid,
-  GridItem,
-  HeaderLayout,
-  Link,
-  Stack,
-  TextInput,
-} from '@strapi/parts';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { Link } from '@strapi/parts/Link';
+import { Stack } from '@strapi/parts/Stack';
+import { TextInput } from '@strapi/parts/TextInput';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { Field, Formik } from 'formik';
 import PropTypes from 'prop-types';
 import React from 'react';

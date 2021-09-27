@@ -1,9 +1,14 @@
+import React from 'react';
 import { RemoveRoundedButton } from '@strapi/helper-plugin';
-import { AddIcon } from '@strapi/icons';
-import { Box, FieldLabel, Grid, GridItem, Row, Stack, TextInput } from '@strapi/parts';
+import AddIcon from '@strapi/icons/AddIcon';
+import { Box } from '@strapi/parts/Box';
+import { FieldLabel } from '@strapi/parts/Field';
+import { Grid, GridItem } from '@strapi/parts/Grid';
+import { Row } from '@strapi/parts/Row';
+import { Stack } from '@strapi/parts/Stack';
+import { TextInput } from '@strapi/parts/TextInput';
 import { TextButton } from '@strapi/parts/TextButton';
 import { Field, FieldArray, useFormikContext } from 'formik';
-import React from 'react';
 import { useIntl } from 'react-intl';
 
 const HeadersInput = () => {

@@ -5,7 +5,7 @@
  */
 
 import styled from 'styled-components';
-import { Box } from '@strapi/parts';
+import { Box } from '@strapi/parts/Box';
 
 const BoxWrapper = styled(Box)`
   position: relative;

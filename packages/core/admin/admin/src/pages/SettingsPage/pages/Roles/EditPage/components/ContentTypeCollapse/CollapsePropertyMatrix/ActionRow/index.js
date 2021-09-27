@@ -1,10 +1,11 @@
-import { BaseCheckbox, Row } from '@strapi/parts';
-import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
-import { get } from 'lodash';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { BaseCheckbox } from '@strapi/parts/BaseCheckbox';
+import { Row } from '@strapi/parts/Row';
+import get from 'lodash/get';
+import IS_DISABLED from 'ee_else_ce/pages/SettingsPage/pages/Roles/EditPage/components/ContentTypeCollapse/CollapsePropertyMatrix/ActionRow/utils/constants';
 import { usePermissionsDataManager } from '../../../../../../../../../hooks';
 import HiddenAction from '../../../HiddenAction';
 import { cellWidth, rowHeight } from '../../../Permissions/utils/constants';

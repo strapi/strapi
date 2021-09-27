@@ -6,21 +6,15 @@ import {
   LoadingIndicatorPage,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { CheckIcon } from '@strapi/icons';
-import {
-  ContentLayout,
-  Box,
-  Button,
-  Main,
-  HeaderLayout,
-  Stack,
-  Grid,
-  GridItem,
-  Layout,
-  ToggleInput,
-  Select,
-  Option,
-} from '@strapi/parts';
+import CheckIcon from '@strapi/icons/CheckIcon';
+import { ContentLayout, HeaderLayout, Layout } from '@strapi/parts/Layout';
+import { Box } from '@strapi/parts/Box';
+import { Button } from '@strapi/parts/Button';
+import { Main } from '@strapi/parts/Main';
+import { Stack } from '@strapi/parts/Stack';
+import { ToggleInput } from '@strapi/parts/ToggleInput';
+import { Select, Option } from '@strapi/parts/Select';
+import { Grid, GridItem } from '@strapi/parts/Grid';
 import { useIntl } from 'react-intl';
 import isEqual from 'lodash/isEqual';
 import { getRequestUrl } from '../../../../../admin/src/utils';

@@ -1,5 +1,5 @@
 import { Settings } from '@strapi/icons';
-import { Button } from '@strapi/parts';
+import { Button } from '@strapi/parts/Button';
 import PropTypes from 'prop-types';
 import React from 'react';
 import { useIntl } from 'react-intl';

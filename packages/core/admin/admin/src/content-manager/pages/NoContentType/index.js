@@ -1,10 +1,11 @@
 import React from 'react';
 import { useFocusWhenNavigate } from '@strapi/helper-plugin';
-import { Main } from '@strapi/parts';
+import { Main } from '@strapi/parts/Main';
 import { LinkButton } from '@strapi/parts/LinkButton';
 import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
 import { EmptyStateLayout } from '@strapi/parts/EmptyStateLayout';
-import { AddIcon, EmptyStateDocument } from '@strapi/icons';
+import AddIcon from '@strapi/icons/AddIcon';
+import EmptyStateDocument from '@strapi/icons/EmptyStateDocument';
 import { useIntl } from 'react-intl';
 import { getTrad } from '../../utils';
 

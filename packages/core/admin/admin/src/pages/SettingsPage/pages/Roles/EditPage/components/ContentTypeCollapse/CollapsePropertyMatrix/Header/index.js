@@ -1,8 +1,9 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useIntl } from 'react-intl';
-import { Row, TableLabel } from '@strapi/parts';
 import styled from 'styled-components';
+import { Row } from '@strapi/parts/Row';
+import { TableLabel } from '@strapi/parts/Text';
 import { cellWidth, firstRowWidth, rowHeight } from '../../../Permissions/utils/constants';
 
 const HeaderLabel = styled(Row)`

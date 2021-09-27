@@ -1,26 +1,21 @@
+import React, { useCallback, useState } from 'react';
+import matchSorter from 'match-sorter';
 import {
   SettingsPageTitle,
   useQuery,
   useTracking,
   useFocusWhenNavigate,
 } from '@strapi/helper-plugin';
-import { AddIcon, DeleteIcon, EditIcon, Duplicate } from '@strapi/icons';
-import {
-  Button,
-  ContentLayout,
-  HeaderLayout,
-  Table,
-  TableLabel,
-  Tbody,
-  TFooter,
-  Th,
-  Thead,
-  Tr,
-  VisuallyHidden,
-  Main,
-} from '@strapi/parts';
-import matchSorter from 'match-sorter';
-import React, { useCallback, useState } from 'react';
+import AddIcon from '@strapi/icons/AddIcon';
+import DeleteIcon from '@strapi/icons/DeleteIcon';
+import EditIcon from '@strapi/icons/EditIcon';
+import Duplicate from '@strapi/icons/Duplicate';
+import { Button } from '@strapi/parts/Button';
+import { ContentLayout, HeaderLayout } from '@strapi/parts/Layout';
+import { Table, Tbody, Th, Thead, Tr, TFooter } from '@strapi/parts/Table';
+import { TableLabel } from '@strapi/parts/Text';
+import { Main } from '@strapi/parts/Main';
+import { VisuallyHidden } from '@strapi/parts/VisuallyHidden';
 import { useIntl } from 'react-intl';
 import { useHistory } from 'react-router';
 import RoleRow from './components/RoleRow';
