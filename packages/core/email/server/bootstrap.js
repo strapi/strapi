@@ -5,13 +5,22 @@ const _ = require('lodash');
 const createProvider = emailConfig => {
   const providerName = _.toLower(emailConfig.provider);
   let provider;
+
+  let modulePath;
   try {
-    provider = require(`@strapi/provider-email-${providerName}`);
-  } catch (err) {
-    throw new Error(
-      `The provider package isn't installed. Please run \`npm install @strap/provider-email-${providerName}\` --save`
-    );
+    modulePath = require.resolve(`@strapi/provider-email-${providerName}`);
+  } catch (error) {
+    if (error.code === 'MODULE_NOT_FOUND') {
+      modulePath = providerName;
+    }
   }
+
+  try {
+    provider = require(modulePath);
+  } catch (err) {
+    throw new Error(`Could not load email provider "${providerName}".`);
+  }
+
   return provider.init(emailConfig.providerOptions, emailConfig.settings);
 };
 
